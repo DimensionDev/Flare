@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridScope
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.shape.CircleShape
@@ -39,6 +40,7 @@ import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.placeholder
 import dev.dimension.flare.ui.component.platform.PlatformLinearProgressIndicator
 import dev.dimension.flare.ui.component.platform.PlatformText
+import dev.dimension.flare.ui.component.platform.isCompatScreen
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.theme.PlatformTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
@@ -66,13 +68,12 @@ public fun LazyStaggeredGridScope.status(
                 if (mode == TimelineDisplayMode.Gallery) {
                     GalleryTimelineItem(item = item)
                 } else {
-                    AdaptiveCard(
+                    TimelineAdaptiveCard(
 //                    modifier =
 //                        Modifier
 //                            .animateItem(),
                         index = index,
                         totalCount = itemCount,
-                        respectTimelineMode = true,
                         content = {
                             StatusItem(
                                 item,
@@ -139,13 +140,37 @@ public fun LazyStaggeredGridScope.status(
 public fun LazyStaggeredGridScope.statusLoadingPlaceholders() {
     val placeholderCount = 10
     items(placeholderCount) { index ->
-        AdaptiveCard(
+        TimelineAdaptiveCard(
             index = index,
             totalCount = placeholderCount,
-            respectTimelineMode = true,
             content = {
                 OnLoading()
             },
+        )
+    }
+}
+
+@Composable
+private fun TimelineAdaptiveCard(
+    index: Int,
+    totalCount: Int,
+    content: @Composable () -> Unit,
+) {
+    Box(
+        modifier = Modifier.fillMaxWidth(),
+        contentAlignment = Alignment.TopCenter,
+    ) {
+        AdaptiveCard(
+            modifier =
+                if (isCompatScreen()) {
+                    Modifier.widthIn(max = 480.dp).fillMaxWidth()
+                } else {
+                    Modifier.fillMaxWidth()
+                },
+            index = index,
+            totalCount = totalCount,
+            respectTimelineMode = true,
+            content = content,
         )
     }
 }

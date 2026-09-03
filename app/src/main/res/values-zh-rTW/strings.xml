@@ -303,6 +303,11 @@
     <string name="settings_appearance_show_bottom_bar_labels_description">在底部導覽和側邊導覽中顯示文字標籤</string>
     <string name="settings_appearance_deck_mode">多欄模式</string>
     <string name="settings_appearance_deck_mode_description">為支援的時間軸使用多欄佈局</string>
+    <string name="settings_appearance_large_screen_layout">大螢幕佈局</string>
+    <string name="settings_appearance_large_screen_layout_description">選擇 Flare 在大螢幕上如何使用空間</string>
+    <string name="settings_appearance_large_screen_layout_auto">自動</string>
+    <string name="settings_appearance_large_screen_layout_deck">多欄模式</string>
+    <string name="settings_appearance_large_screen_layout_single_column">單欄</string>
     <string name="settings_appearance_in_app_browser">內建瀏覽器</string>
     <string name="settings_appearance_in_app_browser_description">在 Flare 內部開啟外部連結</string>
     <string name="settings_appearance_full_width_post">全寬貼文</string>

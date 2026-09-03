@@ -9,8 +9,9 @@ import kotlinx.collections.immutable.toImmutableList
 
 internal class TopLevelBackStack(
     private val startKey: Route,
-    private val topLevelRoutes: List<Route>,
+    topLevelRoutes: List<Route>,
 ) {
+    private val topLevelRoutes = topLevelRoutes.toMutableSet()
     private val _stack =
         mutableStateListOf(
             startKey,
@@ -25,18 +26,28 @@ internal class TopLevelBackStack(
         private set
 
     fun push(route: Route) {
-        if (currentRoute == route) {
+        if (route in topLevelRoutes) {
+            pushTopLevel(route)
             return
         }
-        if (route in topLevelRoutes) {
-            val entry = stack.find { it == route }
-            if (entry != null) {
-                // remove rest of the stack and set the entry as current
-                _stack.removeAll { it !in topLevelRoutes || it == entry }
-                _stack.add(entry)
-            } else {
-                _stack.add(route)
-            }
+        if (currentRoute == route) return
+
+        _stack.add(route)
+        updateEntry()
+    }
+
+    fun pushTopLevel(route: Route) {
+        topLevelRoutes.add(route)
+        if (currentRoute == route) {
+            updateEntry()
+            return
+        }
+
+        val entry = stack.find { it == route }
+        if (entry != null) {
+            // remove rest of the stack and set the entry as current
+            _stack.removeAll { it !in topLevelRoutes || it == entry }
+            _stack.add(entry)
         } else {
             _stack.add(route)
         }

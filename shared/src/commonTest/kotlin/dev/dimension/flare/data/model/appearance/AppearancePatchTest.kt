@@ -68,7 +68,7 @@ class AppearancePatchTest {
             GlobalAppearance(
                 theme = Theme.DARK,
                 showBottomBarLabels = false,
-                deckMode = true,
+                largeScreenLayoutMode = LargeScreenLayoutMode.Deck,
             ),
             patch.toGlobalAppearance(),
         )
@@ -195,6 +195,7 @@ class AppearancePatchTest {
             setOf(
                 AppearanceKeys.ShowBottomBarLabels,
                 AppearanceKeys.DeckMode,
+                AppearanceKeys.LargeScreenLayout,
                 AppearanceKeys.ExpandContentWarning,
                 AppearanceKeys.MediaLayout,
                 AppearanceKeys.LimitMediaGridToNine,
@@ -254,6 +255,7 @@ class AppearancePatchTest {
                 .set(AppearanceKeys.Theme, Theme.LIGHT)
                 .set(AppearanceKeys.ShowBottomBarLabels, false)
                 .set(AppearanceKeys.DeckMode, true)
+                .set(AppearanceKeys.LargeScreenLayout, LargeScreenLayoutMode.SingleColumn)
                 .set(AppearanceKeys.ShowMedia, false)
                 .set(AppearanceKeys.ExpandContentWarning, true)
                 .set(AppearanceKeys.LimitMediaGridToNine, false)
@@ -272,6 +274,29 @@ class AppearancePatchTest {
                 )
 
         assertEquals(patch, patch.toBag().toPatch())
+    }
+
+    @Test
+    fun legacyDeckModeMapsToLargeScreenLayoutMode() {
+        assertEquals(
+            LargeScreenLayoutMode.Deck,
+            AppearancePatch.EMPTY
+                .set(AppearanceKeys.DeckMode, true)
+                .toGlobalAppearance()
+                .largeScreenLayoutMode,
+        )
+    }
+
+    @Test
+    fun explicitLargeScreenLayoutModeOverridesLegacyDeckMode() {
+        val appearance =
+            AppearancePatch.EMPTY
+                .set(AppearanceKeys.DeckMode, true)
+                .set(AppearanceKeys.LargeScreenLayout, LargeScreenLayoutMode.SingleColumn)
+                .toGlobalAppearance()
+
+        assertEquals(LargeScreenLayoutMode.SingleColumn, appearance.largeScreenLayoutMode)
+        assertFalse(appearance.deckMode)
     }
 
     @Test

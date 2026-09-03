@@ -340,6 +340,11 @@
     <string name="settings_appearance_show_bottom_bar_labels_description">Show text labels in bottom navigation and the side rail</string>
     <string name="settings_appearance_deck_mode">Deck mode</string>
     <string name="settings_appearance_deck_mode_description">Use a deck layout for supported timelines</string>
+    <string name="settings_appearance_large_screen_layout">Large-screen layout</string>
+    <string name="settings_appearance_large_screen_layout_description">Choose how Flare uses space on larger screens</string>
+    <string name="settings_appearance_large_screen_layout_auto">Auto</string>
+    <string name="settings_appearance_large_screen_layout_deck">Deck mode</string>
+    <string name="settings_appearance_large_screen_layout_single_column">Single column</string>
     <string name="settings_appearance_show_actions">Show actions</string>
     <string name="settings_appearance_show_actions_description">Show action buttons below each post</string>
     <string name="settings_appearance_show_media">Show media</string>

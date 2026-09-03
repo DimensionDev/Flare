@@ -351,6 +351,11 @@
     <string name="settings_appearance_show_bottom_bar_labels_description">在底部导航和侧边栏显示文字标签</string>
     <string name="settings_appearance_deck_mode">分栏模式 (Deck)</string>
     <string name="settings_appearance_deck_mode_description">在支持的时间轴上使用分栏布局</string>
+    <string name="settings_appearance_large_screen_layout">大屏幕布局</string>
+    <string name="settings_appearance_large_screen_layout_description">选择 Flare 在大屏幕上如何使用空间</string>
+    <string name="settings_appearance_large_screen_layout_auto">自动</string>
+    <string name="settings_appearance_large_screen_layout_deck">多栏模式</string>
+    <string name="settings_appearance_large_screen_layout_single_column">单栏</string>
     <string name="settings_appearance_in_app_browser">应用内浏览器</string>
     <string name="settings_appearance_in_app_browser_description">在 Flare 内部打开外部链接</string>
     <string name="settings_appearance_full_width_post">全宽动态</string>

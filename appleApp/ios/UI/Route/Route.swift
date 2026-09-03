@@ -54,14 +54,15 @@ enum Route: Hashable, Identifiable {
     @ViewBuilder
     func view(
         onNavigate: @escaping (Route) -> Void,
-        goBack: @escaping () -> Void
+        goBack: @escaping () -> Void,
+        showsSecondaryMenu: Bool = true
     ) -> some View {
         switch self {
         case .home: HomeTimelineScreen(
             toServiceSelect: { onNavigate(.serviceSelect) },
             toCompose: { onNavigate(.composeNew) },
             toTabSetting: { onNavigate(.tabSettings) },
-            toSecondaryMenu: { onNavigate(.secondaryMenu) },
+            toSecondaryMenu: showsSecondaryMenu ? { onNavigate(.secondaryMenu) } : nil,
             onNavigate: onNavigate
         )
         case .timeline(let item):

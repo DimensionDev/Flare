@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -31,11 +32,9 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.movableContentOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -54,15 +53,15 @@ import compose.icons.fontawesomeicons.solid.House
 import compose.icons.fontawesomeicons.solid.MagnifyingGlass
 import compose.icons.fontawesomeicons.solid.Pen
 import compose.icons.fontawesomeicons.solid.UserPlus
+import dev.dimension.flare.data.model.appearance.LargeScreenLayoutMode
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScrollBar
 import dev.dimension.flare.ui.component.InAppNotificationComponent
 import dev.dimension.flare.ui.component.LocalGlobalAppearance
-import dev.dimension.flare.ui.component.RichText
-import dev.dimension.flare.ui.component.toImageVector
-import dev.dimension.flare.ui.model.asText
+import dev.dimension.flare.ui.component.platform.LocalWindowSizeClass
+import dev.dimension.flare.ui.component.platform.WindowSizeClass
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
@@ -77,6 +76,7 @@ import dev.dimension.flare.ui.presenter.home.LoggedInState
 import dev.dimension.flare.ui.presenter.home.SecondaryTabsPresenter
 import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.invoke
+import dev.dimension.flare.ui.presenter.settings.AiAgentEnabledPresenter
 import dev.dimension.flare.ui.route.Route
 import dev.dimension.flare.ui.route.Router
 import dev.dimension.flare.ui.route.TopLevelBackStack
@@ -84,8 +84,6 @@ import io.github.composefluent.FluentTheme
 import io.github.composefluent.background.Layer
 import io.github.composefluent.component.Badge
 import io.github.composefluent.component.Button
-import io.github.composefluent.component.CardExpanderItem
-import io.github.composefluent.component.Expander
 import io.github.composefluent.component.FlyoutContainer
 import io.github.composefluent.component.FlyoutPlacement
 import io.github.composefluent.component.Icon
@@ -114,179 +112,128 @@ internal fun WindowScope.FlareApp(backButtonState: NavigationBackButtonState) {
             }
         }
         val currentRoute = state.topLevelBackStack.takeSuccess()?.currentRoute
-        val showNavigationLabels = LocalGlobalAppearance.current.showBottomBarLabels
+        val globalAppearance = LocalGlobalAppearance.current
+        val showNavigationLabels = globalAppearance.showBottomBarLabels
 
-        Row {
-            Column(
-                modifier =
-                    Modifier
-                        .background(
-                            FluentTheme.colors.background.mica.base,
-                        ).fillMaxHeight()
-                        .width(72.dp)
-                        .verticalScroll(rememberScrollState())
-                        .padding(top = LocalWindowPadding.current.calculateTopPadding()),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                state.isLoggedIn
-                    .onSuccess { loggedIn ->
-                        if (!loggedIn) {
-                            Button(
-                                onClick = {
-                                    state.navigate(Route.ServiceSelect)
-                                },
-                                modifier =
-                                    Modifier
-                                        .padding(vertical = 4.dp)
-                                        .fillMaxWidth(),
-                            ) {
-                                Column(
-                                    modifier =
-                                        Modifier
-                                            .padding(vertical = 4.dp),
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    verticalArrangement = Arrangement.spacedBy(4.dp),
-                                ) {
-                                    Icon(
-                                        FontAwesomeIcons.Solid.UserPlus,
-                                        contentDescription = stringResource(Res.string.home_login),
-                                        modifier = Modifier.size(16.dp),
-                                    )
-                                    Text(stringResource(Res.string.home_login), maxLines = 1)
-                                }
-                            }
-                        } else {
-                            FlyoutContainer(
-                                flyout = {
-                                    val scrollableState = rememberScrollState()
-                                    FlareScrollBar(
-                                        state = scrollableState,
+        BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+            val singleColumn = globalAppearance.largeScreenLayoutMode == LargeScreenLayoutMode.SingleColumn
+            val showRightSidebar = singleColumn && maxWidth >= 904.dp
+            Row(modifier = Modifier.fillMaxSize()) {
+                Column(
+                    modifier =
+                        Modifier
+                            .background(
+                                FluentTheme.colors.background.mica.base,
+                            ).fillMaxHeight()
+                            .width(72.dp)
+                            .verticalScroll(rememberScrollState())
+                            .padding(top = LocalWindowPadding.current.calculateTopPadding()),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    if (!showRightSidebar) {
+                        state.isLoggedIn
+                            .onSuccess { loggedIn ->
+                                if (!loggedIn) {
+                                    Button(
+                                        onClick = {
+                                            state.navigate(Route.ServiceSelect)
+                                        },
+                                        modifier =
+                                            Modifier
+                                                .padding(vertical = 4.dp)
+                                                .fillMaxWidth(),
                                     ) {
                                         Column(
                                             modifier =
                                                 Modifier
-                                                    .widthIn(
-                                                        max = 320.dp,
-                                                    ).heightIn(
-                                                        max = 600.dp,
-                                                    ).verticalScroll(scrollableState),
+                                                    .padding(vertical = 4.dp),
+                                            horizontalAlignment = Alignment.CenterHorizontally,
+                                            verticalArrangement = Arrangement.spacedBy(4.dp),
                                         ) {
-                                            state.items.onSuccess { items ->
-                                                items.forEach { item ->
-                                                    item.user.onSuccess { user ->
-                                                        var isSubMenuExpanded by remember {
-                                                            mutableStateOf(
-                                                                false,
-                                                            )
-                                                        }
-                                                        Expander(
-                                                            expanded = isSubMenuExpanded,
-                                                            onExpandedChanged = {
-                                                                isSubMenuExpanded = it
-                                                            },
-                                                            heading = {
-                                                                RichText(
-                                                                    text = user.name,
-                                                                    maxLines = 1,
-                                                                )
-                                                            },
-                                                            caption = {
-                                                                Text(
-                                                                    text = user.handle.canonical,
-                                                                    maxLines = 1,
-                                                                )
-                                                            },
-                                                            icon = {
-                                                                AvatarComponent(
-                                                                    data = user.avatar,
-                                                                    modifier =
-                                                                        Modifier
-                                                                            .aspectRatio(1f),
-                                                                    size = 24.dp,
-                                                                )
-                                                            },
-                                                        ) {
-                                                            item.tabs.forEach { shortcut ->
-                                                                CardExpanderItem(
-                                                                    onClick = {
-                                                                        state.navigate(shortcut)
-                                                                        isFlyoutVisible = false
-                                                                    },
-                                                                    heading = {
-                                                                        dev.dimension.flare.ui.component.Text(
-                                                                            shortcut.title.asText(),
-                                                                        )
-                                                                    },
-                                                                    icon = {
-                                                                        FAIcon(
-                                                                            imageVector = shortcut.icon.toImageVector(),
-                                                                            contentDescription = null,
-                                                                            modifier =
-                                                                                Modifier.size(
-                                                                                    16.dp,
-                                                                                ),
-                                                                        )
-                                                                    },
-                                                                )
-                                                            }
+                                            Icon(
+                                                FontAwesomeIcons.Solid.UserPlus,
+                                                contentDescription = stringResource(Res.string.home_login),
+                                                modifier = Modifier.size(16.dp),
+                                            )
+                                            Text(stringResource(Res.string.home_login), maxLines = 1)
+                                        }
+                                    }
+                                } else {
+                                    FlyoutContainer(
+                                        flyout = {
+                                            val scrollableState = rememberScrollState()
+                                            FlareScrollBar(
+                                                state = scrollableState,
+                                            ) {
+                                                Column(
+                                                    modifier =
+                                                        Modifier
+                                                            .widthIn(
+                                                                max = 320.dp,
+                                                            ).heightIn(
+                                                                max = 600.dp,
+                                                            ).verticalScroll(scrollableState),
+                                                ) {
+                                                    state.items.onSuccess { items ->
+                                                        AccountShortcutList(items) { route ->
+                                                            state.navigate(route)
+                                                            isFlyoutVisible = false
                                                         }
                                                     }
                                                 }
                                             }
-                                        }
-                                    }
-                                },
-                                placement = FlyoutPlacement.EndAlignedTop,
-                                adaptivePlacement = true,
-                            ) {
-                                state.user
-                                    .onSuccess {
-                                        Box(
-                                            modifier =
-                                                Modifier
-                                                    .fillMaxWidth(),
-                                            contentAlignment = Alignment.Center,
-                                        ) {
-                                            AvatarComponent(
-                                                data = it.avatar,
-                                                modifier =
-                                                    Modifier
-                                                        .clickable {
-                                                            isFlyoutVisible = !isFlyoutVisible
-                                                        }.aspectRatio(1f),
-                                            )
-                                        }
-                                    }.onLoading {
-                                        SubtleButton(
-                                            onClick = {
-                                                isFlyoutVisible = !isFlyoutVisible
-                                            },
-                                            modifier = Modifier.fillMaxWidth(),
-                                        ) {
-                                            FAIcon(
-                                                imageVector = FontAwesomeIcons.Solid.Bars,
-                                                contentDescription = stringResource(Res.string.home_settings),
+                                        },
+                                        placement = FlyoutPlacement.EndAlignedTop,
+                                        adaptivePlacement = true,
+                                    ) {
+                                        state.user
+                                            .onSuccess {
+                                                Box(
+                                                    modifier =
+                                                        Modifier
+                                                            .fillMaxWidth(),
+                                                    contentAlignment = Alignment.Center,
+                                                ) {
+                                                    AvatarComponent(
+                                                        data = it.avatar,
+                                                        modifier =
+                                                            Modifier
+                                                                .clickable {
+                                                                    isFlyoutVisible = !isFlyoutVisible
+                                                                }.aspectRatio(1f),
+                                                    )
+                                                }
+                                            }.onLoading {
+                                                SubtleButton(
+                                                    onClick = {
+                                                        isFlyoutVisible = !isFlyoutVisible
+                                                    },
+                                                    modifier = Modifier.fillMaxWidth(),
+                                                ) {
+                                                    FAIcon(
+                                                        imageVector = FontAwesomeIcons.Solid.Bars,
+                                                        contentDescription = stringResource(Res.string.home_settings),
 //                                        modifier = Modifier.size(16.dp),
-                                            )
-                                        }
-                                    }.onError {
-                                        SubtleButton(
-                                            onClick = {
-                                                isFlyoutVisible = !isFlyoutVisible
-                                            },
-                                            modifier = Modifier.fillMaxWidth(),
-                                        ) {
-                                            FAIcon(
-                                                imageVector = FontAwesomeIcons.Solid.Bars,
-                                                contentDescription = stringResource(Res.string.home_settings),
+                                                    )
+                                                }
+                                            }.onError {
+                                                SubtleButton(
+                                                    onClick = {
+                                                        isFlyoutVisible = !isFlyoutVisible
+                                                    },
+                                                    modifier = Modifier.fillMaxWidth(),
+                                                ) {
+                                                    FAIcon(
+                                                        imageVector = FontAwesomeIcons.Solid.Bars,
+                                                        contentDescription = stringResource(Res.string.home_settings),
 //                                        modifier = Modifier.size(16.dp),
-                                            )
-                                        }
+                                                    )
+                                                }
+                                            }
                                     }
-                            }
 
-                            Spacer(modifier = Modifier.height(8.dp))
-                        }
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                }
 //                        SubtleButton(
 //                            onClick = {
 // //                                state.navigate(Route.MeRoute(AccountType.Specific(user.key)))
@@ -345,11 +292,69 @@ internal fun WindowScope.FlareApp(backButtonState: NavigationBackButtonState) {
 //                                modifier = Modifier.size(16.dp),
 //                            )
 //                        }
+                            }
                     }
 
-                @Composable
-                fun buildMenuItem(tab: HomeTabsPresenter.State.HomeTabs) {
-                    val selected = currentRoute == getRoute(tab)
+                    @Composable
+                    fun buildMenuItem(tab: HomeTabsPresenter.State.HomeTabs) {
+                        val selected = currentRoute == getRoute(tab)
+                        val color by animateColorAsState(
+                            targetValue =
+                                if (selected) {
+                                    FluentTheme.colors.fillAccent.secondary
+                                } else {
+                                    FluentTheme.colors.system.neutral
+                                },
+                        )
+                        NavigationItem(
+                            onClick = {
+                                if (selected) {
+                                    state.scrollToTopRegistry.scrollToTop()
+                                } else {
+                                    state.navigate(getRoute(tab))
+                                }
+                            },
+                            icon = {
+                                FAIcon(
+                                    imageVector = tab.icon,
+                                    contentDescription = stringResource(tab.title),
+                                    tint = color,
+                                    modifier =
+                                        Modifier
+                                            .size(24.dp),
+                                )
+                            },
+                            text =
+                                if (showNavigationLabels) {
+                                    {
+                                        Text(
+                                            stringResource(tab.title),
+                                            maxLines = 1,
+                                            color = color,
+                                            style = FluentTheme.typography.caption,
+                                        )
+                                    }
+                                } else {
+                                    null
+                                },
+                            badge =
+                                if (tab == HomeTabsPresenter.State.HomeTabs.Notifications) {
+                                    if (state.notificationState.count > 0) {
+                                        {
+                                            Text(state.notificationState.count.toString())
+                                        }
+                                    } else {
+                                        null
+                                    }
+                                } else {
+                                    null
+                                },
+                        )
+                    }
+                    tabs.forEach { tab ->
+                        buildMenuItem(tab)
+                    }
+                    val selected = currentRoute == Route.Settings
                     val color by animateColorAsState(
                         targetValue =
                             if (selected) {
@@ -358,161 +363,149 @@ internal fun WindowScope.FlareApp(backButtonState: NavigationBackButtonState) {
                                 FluentTheme.colors.system.neutral
                             },
                     )
-                    NavigationItem(
-                        onClick = {
-                            if (selected) {
-                                state.scrollToTopRegistry.scrollToTop()
-                            } else {
-                                state.navigate(getRoute(tab))
-                            }
-                        },
-                        icon = {
-                            FAIcon(
-                                imageVector = tab.icon,
-                                contentDescription = stringResource(tab.title),
-                                tint = color,
-                                modifier =
-                                    Modifier
-                                        .size(24.dp),
+                    if (state.canComposeState.takeSuccess() == true) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Box(
+                            modifier =
+                                Modifier
+                                    .shadow(4.dp, CircleShape)
+                                    .background(
+                                        FluentTheme.colors.fillAccent.secondary,
+                                        CircleShape,
+                                    ).fillMaxWidth(0.66f)
+                                    .aspectRatio(1f)
+                                    .clip(CircleShape)
+                                    .clickable {
+                                        state.navigate(
+                                            Route.Compose.New,
+                                        )
+                                    },
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Icon(
+                                FontAwesomeIcons.Solid.Pen,
+                                contentDescription = stringResource(Res.string.home_compose),
+                                modifier = Modifier.size(16.dp),
+                                tint = FluentTheme.colors.text.onAccent.primary,
                             )
-                        },
-                        text =
-                            if (showNavigationLabels) {
-                                {
-                                    Text(
-                                        stringResource(tab.title),
-                                        maxLines = 1,
-                                        color = color,
-                                        style = FluentTheme.typography.caption,
-                                    )
-                                }
-                            } else {
-                                null
+                        }
+                    }
+                    Spacer(modifier = Modifier.weight(1f))
+                    if (!showRightSidebar) {
+                        NavigationItem(
+                            icon = {
+                                Icon(
+                                    FontAwesomeIcons.Solid.Gear,
+                                    contentDescription = stringResource(Res.string.home_settings),
+                                    modifier = Modifier.size(24.dp),
+                                    tint = color,
+                                )
                             },
-                        badge =
-                            if (tab == HomeTabsPresenter.State.HomeTabs.Notifications) {
-                                if (state.notificationState.count > 0) {
+                            text =
+                                if (showNavigationLabels) {
                                     {
-                                        Text(state.notificationState.count.toString())
+                                        Text(
+                                            stringResource(Res.string.home_settings),
+                                            maxLines = 1,
+                                            style = FluentTheme.typography.caption,
+                                            color = color,
+                                        )
                                     }
                                 } else {
                                     null
-                                }
-                            } else {
-                                null
-                            },
-                    )
-                }
-                tabs.forEach { tab ->
-                    buildMenuItem(tab)
-                }
-                val selected = currentRoute == Route.Settings
-                val color by animateColorAsState(
-                    targetValue =
-                        if (selected) {
-                            FluentTheme.colors.fillAccent.secondary
-                        } else {
-                            FluentTheme.colors.system.neutral
-                        },
-                )
-                if (state.canComposeState.takeSuccess() == true) {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Box(
-                        modifier =
-                            Modifier
-                                .shadow(4.dp, CircleShape)
-                                .background(
-                                    FluentTheme.colors.fillAccent.secondary,
-                                    CircleShape,
-                                ).fillMaxWidth(0.66f)
-                                .aspectRatio(1f)
-                                .clip(CircleShape)
-                                .clickable {
-                                    state.navigate(
-                                        Route.Compose.New,
-                                    )
                                 },
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Icon(
-                            FontAwesomeIcons.Solid.Pen,
-                            contentDescription = stringResource(Res.string.home_compose),
-                            modifier = Modifier.size(16.dp),
-                            tint = FluentTheme.colors.text.onAccent.primary,
+                            onClick = {
+                                state.navigate(Route.Settings)
+                            },
                         )
                     }
                 }
-                Spacer(modifier = Modifier.weight(1f))
-                NavigationItem(
-                    icon = {
-                        Icon(
-                            FontAwesomeIcons.Solid.Gear,
-                            contentDescription = stringResource(Res.string.home_settings),
-                            modifier = Modifier.size(24.dp),
-                            tint = color,
-                        )
-                    },
-                    text =
-                        if (showNavigationLabels) {
-                            {
-                                Text(
-                                    stringResource(Res.string.home_settings),
-                                    maxLines = 1,
-                                    style = FluentTheme.typography.caption,
-                                    color = color,
+//            CommandBarSeparator()
+                CompositionLocalProvider(
+                    LocalUriHandler provides
+                        remember {
+                            object : UriHandler {
+                                override fun openUri(uri: String) {
+                                    state.deeplinkPresenter.handle(uri)
+                                }
+                            }
+                        },
+                    LocalScrollToTopRegistry provides state.scrollToTopRegistry,
+                ) {
+                    Layer(
+                        modifier = Modifier.fillMaxSize(),
+                        color = FluentTheme.colors.background.mica.base,
+                        shape = RoundedCornerShape(0),
+                        border = null,
+                    ) {
+                        Box {
+                            val backStack =
+                                state.topLevelBackStack.takeSuccess()?.stack
+                                    ?: persistentListOf()
+                            if (singleColumn) {
+                                Row(modifier = Modifier.fillMaxSize()) {
+                                    Box(
+                                        modifier =
+                                            Modifier
+                                                .weight(1f)
+                                                .fillMaxHeight(),
+                                        contentAlignment = Alignment.TopCenter,
+                                    ) {
+                                        CompositionLocalProvider(
+                                            LocalWindowSizeClass provides WindowSizeClass.Compact,
+                                        ) {
+                                            Router(
+                                                backStack = backStack,
+                                                navigate = state::navigate,
+                                                replace = state::replace,
+                                                onBack = state::goBack,
+                                                modifier = Modifier.fillMaxSize(),
+                                                singlePane = true,
+                                            )
+                                        }
+                                    }
+                                    if (showRightSidebar) {
+                                        Spacer(
+                                            modifier =
+                                                Modifier
+                                                    .fillMaxHeight()
+                                                    .width(1.dp)
+                                                    .background(FluentTheme.colors.stroke.divider.default),
+                                        )
+                                        HomeSecondarySidebar(
+                                            secondaryTabs = state.items,
+                                            isLoggedIn = state.isLoggedIn.takeSuccess(),
+                                            aiAgentEnabled = state.aiAgentEnabled,
+                                            navigate = state::navigateTopLevel,
+                                            modifier = Modifier.width(336.dp),
+                                        )
+                                    }
+                                }
+                            } else {
+                                Router(
+                                    backStack = backStack,
+                                    navigate = state::navigate,
+                                    replace = state::replace,
+                                    onBack = state::goBack,
                                 )
                             }
-                        } else {
-                            null
-                        },
-                    onClick = {
-                        state.navigate(Route.Settings)
-                    },
-                )
-            }
-//            CommandBarSeparator()
-            CompositionLocalProvider(
-                LocalUriHandler provides
-                    remember {
-                        object : UriHandler {
-                            override fun openUri(uri: String) {
-                                state.deeplinkPresenter.handle(uri)
-                            }
+                            Spacer(
+                                modifier =
+                                    Modifier
+                                        .fillMaxHeight()
+                                        .width(1.dp)
+                                        .background(FluentTheme.colors.stroke.divider.default)
+                                        .align(Alignment.CenterStart),
+                            )
+                            InAppNotificationComponent(
+                                modifier =
+                                    Modifier
+                                        .align(Alignment.TopCenter),
+                                onRelogin = {
+                                    state.navigate(Route.Relogin(it))
+                                },
+                            )
                         }
-                    },
-                LocalScrollToTopRegistry provides state.scrollToTopRegistry,
-            ) {
-                Layer(
-                    modifier = Modifier.fillMaxSize(),
-                    color = FluentTheme.colors.background.mica.base,
-                    shape = RoundedCornerShape(0),
-                    border = null,
-                ) {
-                    Box {
-                        Router(
-                            backStack =
-                                state.topLevelBackStack.takeSuccess()?.stack
-                                    ?: persistentListOf(),
-                            navigate = { route -> state.navigate(route) },
-                            replace = { route -> state.replace(route) },
-                            onBack = { state.goBack() },
-                        )
-                        Spacer(
-                            modifier =
-                                Modifier
-                                    .fillMaxHeight()
-                                    .width(1.dp)
-                                    .background(FluentTheme.colors.stroke.divider.default)
-                                    .align(Alignment.CenterStart),
-                        )
-                        InAppNotificationComponent(
-                            modifier =
-                                Modifier
-                                    .align(Alignment.TopCenter),
-                            onRelogin = {
-                                state.navigate(Route.Relogin(it))
-                            },
-                        )
                     }
                 }
             }
@@ -520,7 +513,7 @@ internal fun WindowScope.FlareApp(backButtonState: NavigationBackButtonState) {
     }
 }
 
-private fun getDirection(data: SecondaryTabsPresenter.Tab): Route? =
+internal fun getDirection(data: SecondaryTabsPresenter.Tab): Route? =
     when (val target = data.destination) {
         is SecondaryTabsPresenter.Destination.Route -> Route.from(target.route)
         is SecondaryTabsPresenter.Destination.Timeline -> Route.Timeline(target.tabItem)
@@ -623,6 +616,7 @@ private fun presenter(uriHandler: UriHandler) =
         val canComposeState = remember { CanComposePresenter() }.invoke()
         val tabState = remember { HomeTabsPresenter() }.invoke()
         val allNotificationState = remember { AllNotificationBadgePresenter() }.invoke()
+        val aiAgentEnabledState = remember { AiAgentEnabledPresenter() }.invoke()
         val scrollToTopRegistry =
             remember {
                 ScrollToTopRegistry()
@@ -669,6 +663,7 @@ private fun presenter(uriHandler: UriHandler) =
             val scrollToTopRegistry = scrollToTopRegistry
             val deeplinkPresenter = deeplinkPresenter
             val topLevelBackStack = topLevelBackStack
+            val aiAgentEnabled = aiAgentEnabledState.enabled
 
             fun navigate(route: Route) {
                 when (route) {
@@ -686,6 +681,13 @@ private fun presenter(uriHandler: UriHandler) =
                 val route = getDirection(shortcut)
                 if (route != null) {
                     navigate(route)
+                }
+            }
+
+            fun navigateTopLevel(route: Route) {
+                when (route) {
+                    is Route.UrlRoute -> uriHandler.openUri(route.url)
+                    else -> topLevelBackStack.takeSuccess()?.pushTopLevel(route)
                 }
             }
 

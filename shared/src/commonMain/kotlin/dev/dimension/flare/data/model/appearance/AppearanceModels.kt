@@ -10,6 +10,15 @@ import dev.dimension.flare.data.model.Theme
 import dev.dimension.flare.data.model.TimelineDisplayMode
 import dev.dimension.flare.data.model.TimelineMediaLayout
 import dev.dimension.flare.data.model.VideoAutoplay
+import dev.dimension.flare.web.shared.WebIgnore
+import kotlinx.serialization.Serializable
+
+@Serializable
+public enum class LargeScreenLayoutMode {
+    Auto,
+    Deck,
+    SingleColumn,
+}
 
 @Immutable
 public data class GlobalAppearance(
@@ -24,8 +33,12 @@ public data class GlobalAppearance(
     val inAppBrowser: Boolean = AppearanceKeys.InAppBrowser.default,
     val showComposeInHomeTimeline: Boolean = AppearanceKeys.ShowComposeInHomeTimeline.default,
     val showBottomBarLabels: Boolean = AppearanceKeys.ShowBottomBarLabels.default,
-    val deckMode: Boolean = AppearanceKeys.DeckMode.default,
+    @WebIgnore
+    val largeScreenLayoutMode: LargeScreenLayoutMode = AppearanceKeys.LargeScreenLayout.default,
 ) {
+    public val deckMode: Boolean
+        get() = largeScreenLayoutMode == LargeScreenLayoutMode.Deck
+
     public companion object {
         public val Default: GlobalAppearance = GlobalAppearance()
     }
@@ -81,7 +94,14 @@ public fun AppearancePatch.toGlobalAppearance(): GlobalAppearance =
         inAppBrowser = get(AppearanceKeys.InAppBrowser),
         showComposeInHomeTimeline = get(AppearanceKeys.ShowComposeInHomeTimeline),
         showBottomBarLabels = get(AppearanceKeys.ShowBottomBarLabels),
-        deckMode = get(AppearanceKeys.DeckMode),
+        largeScreenLayoutMode =
+            if (contains(AppearanceKeys.LargeScreenLayout)) {
+                get(AppearanceKeys.LargeScreenLayout)
+            } else if (get(AppearanceKeys.DeckMode)) {
+                LargeScreenLayoutMode.Deck
+            } else {
+                LargeScreenLayoutMode.Auto
+            },
     )
 
 public fun AppearancePatch.toTimelineAppearance(): TimelineAppearance = toTimelineAppearance(override = null)

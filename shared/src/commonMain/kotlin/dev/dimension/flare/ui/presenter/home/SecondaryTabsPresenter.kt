@@ -41,6 +41,8 @@ public class SecondaryTabsPresenter : PresenterBase<SecondaryTabsPresenter.State
 
     @Immutable
     public class Item(
+        @WebIgnore
+        public val accountType: AccountType,
         public val user: UiState<UiProfile>,
         public val tabs: ImmutableList<Tab>,
     )
@@ -93,6 +95,7 @@ public class SecondaryTabsPresenter : PresenterBase<SecondaryTabsPresenter.State
                                 }.map { userState ->
                                     userState.takeSuccess()?.let { user ->
                                         Item(
+                                            accountType = AccountType.Specific(service.accountKey),
                                             user = userState,
                                             tabs =
                                                 (

@@ -8,6 +8,7 @@ import AVFoundation
 
 enum TimelineUIKitLayoutMetrics {
     static let horizontalInset: CGFloat = 16
+    static let maximumTimelineItemWidth: CGFloat = 480
     static let columnSpacing: CGFloat = 8
     static let rowSpacing: CGFloat = 2
     static let timelinePlaceholderCount = 5
@@ -494,11 +495,22 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     }
 
     private func makeSingleColumnLayout() -> UICollectionViewLayout {
-        return UICollectionViewCompositionalLayout { sectionIndex, _ in
+        return UICollectionViewCompositionalLayout { sectionIndex, environment in
             let isAccessorySection = !self.accessoryItems.isEmpty && sectionIndex == 0
-            let horizontalInset = isAccessorySection || self.appearance.isPlainTimelineDisplayMode
+            let mainSectionIndex = self.accessoryItems.isEmpty ? 0 : 1
+            let isMainTimelineSection = self.contentKind == .timeline &&
+                sectionIndex == mainSectionIndex &&
+                !self.mainSectionUsesFullWidth
+            var horizontalInset = isAccessorySection || self.appearance.isPlainTimelineDisplayMode
                 ? 0
                 : TimelineUIKitLayoutMetrics.horizontalInset
+            if isMainTimelineSection {
+                horizontalInset = max(
+                    horizontalInset,
+                    (environment.container.effectiveContentSize.width -
+                        TimelineUIKitLayoutMetrics.maximumTimelineItemWidth) / 2
+                )
+            }
             let itemSize = NSCollectionLayoutSize(
                 widthDimension: .fractionalWidth(1),
                 heightDimension: .estimated(180)

@@ -15,6 +15,7 @@ import dev.dimension.flare.data.model.VideoAutoplay
 import dev.dimension.flare.data.model.appearance.AppearanceKey
 import dev.dimension.flare.data.model.appearance.AppearanceKeys
 import dev.dimension.flare.data.model.appearance.AppearancePatch
+import dev.dimension.flare.data.model.appearance.LargeScreenLayoutMode
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.ui.model.UiState
@@ -98,7 +99,21 @@ public class SettingsPresenter : PresenterBase<SettingsPresenter.State>() {
 
             override fun updateShowBottomBarLabels(value: Boolean) = update(AppearanceKeys.ShowBottomBarLabels, value)
 
-            override fun updateDeckMode(value: Boolean) = update(AppearanceKeys.DeckMode, value)
+            override fun updateDeckMode(value: Boolean) =
+                updateLargeScreenLayoutMode(
+                    if (value) LargeScreenLayoutMode.Deck else LargeScreenLayoutMode.Auto,
+                )
+
+            override fun updateLargeScreenLayoutMode(value: LargeScreenLayoutMode) {
+                scope.launch {
+                    withContext(Dispatchers.Main) {
+                        repository.updateAppearance {
+                            set(AppearanceKeys.LargeScreenLayout, value)
+                                .set(AppearanceKeys.DeckMode, value == LargeScreenLayoutMode.Deck)
+                        }
+                    }
+                }
+            }
 
             override fun updateVideoAutoplay(value: VideoAutoplay) = update(AppearanceKeys.VideoAutoplay, value)
 
@@ -185,6 +200,9 @@ public class SettingsPresenter : PresenterBase<SettingsPresenter.State>() {
         public fun updateShowBottomBarLabels(value: Boolean)
 
         public fun updateDeckMode(value: Boolean)
+
+        @WebIgnore
+        public fun updateLargeScreenLayoutMode(value: LargeScreenLayoutMode)
 
         public fun updateVideoAutoplay(value: VideoAutoplay)
 

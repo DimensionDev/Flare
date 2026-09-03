@@ -28,6 +28,7 @@ import dev.dimension.flare.data.model.BottomBarStyle
 import dev.dimension.flare.data.model.PostActionStyle
 import dev.dimension.flare.data.model.TimelineDisplayMode
 import dev.dimension.flare.data.model.appearance.AppearanceKeys
+import dev.dimension.flare.data.model.appearance.LargeScreenLayoutMode
 import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FlareLargeFlexibleTopAppBar
 import dev.dimension.flare.ui.component.FlareScaffold
@@ -131,25 +132,25 @@ internal fun AppearanceLayoutScreen(
                         )
                     },
                 )
-                SegmentedListItem(
-                    onClick = {
-                        state.update(AppearanceKeys.DeckMode, !globalAppearance.deckMode)
+                SingleChoiceSettingsItem(
+                    headline = { Text(text = stringResource(id = R.string.settings_appearance_large_screen_layout)) },
+                    supporting = {
+                        Text(text = stringResource(id = R.string.settings_appearance_large_screen_layout_description))
+                    },
+                    items =
+                        persistentMapOf(
+                            LargeScreenLayoutMode.Auto to
+                                stringResource(id = R.string.settings_appearance_large_screen_layout_auto),
+                            LargeScreenLayoutMode.Deck to
+                                stringResource(id = R.string.settings_appearance_large_screen_layout_deck),
+                            LargeScreenLayoutMode.SingleColumn to
+                                stringResource(id = R.string.settings_appearance_large_screen_layout_single_column),
+                        ),
+                    selected = globalAppearance.largeScreenLayoutMode,
+                    onSelected = {
+                        state.update(AppearanceKeys.LargeScreenLayout, it)
                     },
                     shapes = ListItemDefaults.item(),
-                    content = {
-                        Text(text = stringResource(id = R.string.settings_appearance_deck_mode))
-                    },
-                    supportingContent = {
-                        Text(text = stringResource(id = R.string.settings_appearance_deck_mode_description))
-                    },
-                    trailingContent = {
-                        Switch(
-                            checked = globalAppearance.deckMode,
-                            onCheckedChange = {
-                                state.update(AppearanceKeys.DeckMode, it)
-                            },
-                        )
-                    },
                 )
                 SingleChoiceSettingsItem(
                     headline = { Text(text = stringResource(id = R.string.settings_appearance_timeline_display_mode)) },

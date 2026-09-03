@@ -4,10 +4,14 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.material3.Badge
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -18,6 +22,7 @@ import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.material3.WideNavigationRailState
 import androidx.compose.material3.WideNavigationRailValue
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
@@ -44,6 +49,7 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
@@ -58,16 +64,20 @@ import compose.icons.fontawesomeicons.solid.PenToSquare
 import compose.icons.fontawesomeicons.solid.Robot
 import compose.icons.fontawesomeicons.solid.SquareRss
 import dev.dimension.flare.R
+import dev.dimension.flare.data.model.appearance.LargeScreenLayoutMode
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.common.OnNewIntent
 import dev.dimension.flare.ui.common.isLoginCallbackDeepLink
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.InAppNotificationComponent
+import dev.dimension.flare.ui.component.LocalGlobalAppearance
 import dev.dimension.flare.ui.component.NavigationSuiteScaffold2
 import dev.dimension.flare.ui.component.RichText
 import dev.dimension.flare.ui.component.TabIcon
 import dev.dimension.flare.ui.component.TopLevelBackStack
+import dev.dimension.flare.ui.component.platform.LocalWindowSizeClass
+import dev.dimension.flare.ui.component.platform.WindowSizeClass
 import dev.dimension.flare.ui.model.asText
 import dev.dimension.flare.ui.model.asType
 import dev.dimension.flare.ui.model.map
@@ -104,6 +114,7 @@ internal fun HomeScreen(afterInit: () -> Unit) {
         state.updateUriHandler(uriHandler)
     }
     val hapticFeedback = LocalHapticFeedback.current
+    val globalAppearance = LocalGlobalAppearance.current
     state.tabs
         .onSuccess { tabs ->
             val currentRoute =
@@ -127,7 +138,21 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                 NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(
                     currentWindowAdaptiveInfoV2(),
                 )
-            Box {
+            BoxWithConstraints {
+                val singleColumn =
+                    globalAppearance.largeScreenLayoutMode == LargeScreenLayoutMode.SingleColumn &&
+                        layoutType != NavigationSuiteType.NavigationBar
+                val hasRightSidebar = usesFixedSecondarySidebar(singleColumn, maxWidth)
+                val openDrawer = {
+                    if (!hasRightSidebar) {
+                        state.openDrawer()
+                    }
+                }
+                LaunchedEffect(hasRightSidebar) {
+                    if (hasRightSidebar) {
+                        state.wideNavigationRailState.collapse()
+                    }
+                }
                 NavigationSuiteScaffold2(
                     wideNavigationRailState = state.wideNavigationRailState,
                     modifier = Modifier.fillMaxSize(),
@@ -144,25 +169,23 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                         ),
                     railHeader = {
                         if (layoutType == NavigationSuiteType.NavigationRail) {
-                            IconButton(
-                                onClick = {
-                                    state.openDrawer()
-                                },
-                                modifier =
-                                    Modifier
-                                        .padding(
-                                            horizontal = 24.dp,
-                                        ).padding(top = 12.dp, bottom = 4.dp),
-                            ) {
-                                FAIcon(
-                                    imageVector = FontAwesomeIcons.Solid.Bars,
-                                    contentDescription = null,
-                                )
+                            if (!hasRightSidebar) {
+                                IconButton(
+                                    onClick = openDrawer,
+                                    modifier =
+                                        Modifier
+                                            .padding(
+                                                horizontal = 24.dp,
+                                            ).padding(top = 12.dp, bottom = 4.dp),
+                                ) {
+                                    FAIcon(
+                                        imageVector = FontAwesomeIcons.Solid.Bars,
+                                        contentDescription = null,
+                                    )
+                                }
                             }
 
-                            if (layoutType == NavigationSuiteType.NavigationRail &&
-                                state.canComposeState.takeSuccess() == true
-                            ) {
+                            if (state.canComposeState.takeSuccess() == true) {
                                 SharedTransitionLayout {
                                     AnimatedContent(
                                         state.wideNavigationRailState.currentValue,
@@ -277,7 +300,7 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                         }
                     },
                     secondaryItems = {
-                        if (layoutType != NavigationSuiteType.NavigationBar) {
+                        if (layoutType != NavigationSuiteType.NavigationBar && !hasRightSidebar) {
                             item(
                                 selected = currentRoute is Route.DraftBox,
                                 onClick = {
@@ -341,50 +364,51 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                                 )
                             }
                         }
-                        state.secondaryTabsState.onSuccess { secondaryTabs ->
-                            secondaryTabs.forEach { item ->
-                                expandableItem(
-                                    icon = {
-                                        item.user.onSuccess {
-                                            AvatarComponent(it.avatar)
-                                        }
-                                    },
-                                    label = {
-                                        Column {
+                        if (!hasRightSidebar) {
+                            state.secondaryTabsState.onSuccess { secondaryTabs ->
+                                secondaryTabs.forEach { item ->
+                                    expandableItem(
+                                        icon = {
                                             item.user.onSuccess {
-                                                RichText(it.name)
-                                                Text(
-                                                    it.handle.canonical,
-                                                    style = MaterialTheme.typography.bodySmall,
-                                                )
+                                                AvatarComponent(it.avatar)
                                             }
-                                        }
-                                    },
-                                    children = {
-                                        item.tabs.forEach {
-                                            val direction = getDirection(it)
-                                            if (direction != null) {
-                                                item(
-                                                    selected = currentRoute == direction,
-                                                    onClick = {
-                                                        if (currentRoute == direction) {
-                                                            state.scrollToTopRegistry.scrollToTop()
-                                                        } else {
-                                                            state.navigate(direction)
-                                                        }
-                                                    },
-                                                    icon = {
-                                                        TabIcon(
-                                                            icon = it.icon.asType(),
-                                                            title = it.title.asText(),
-                                                            iconOnly = true,
-                                                        )
-                                                    },
-                                                    label = {
-                                                        dev.dimension.flare.ui.component.Text(
-                                                            text = it.title.asText(),
-                                                        )
-                                                    },
+                                        },
+                                        label = {
+                                            Column {
+                                                item.user.onSuccess {
+                                                    RichText(it.name)
+                                                    Text(
+                                                        it.handle.canonical,
+                                                        style = MaterialTheme.typography.bodySmall,
+                                                    )
+                                                }
+                                            }
+                                        },
+                                        children = {
+                                            item.tabs.forEach {
+                                                val direction = getDirection(it)
+                                                if (direction != null) {
+                                                    item(
+                                                        selected = currentRoute == direction,
+                                                        onClick = {
+                                                            if (currentRoute == direction) {
+                                                                state.scrollToTopRegistry.scrollToTop()
+                                                            } else {
+                                                                state.navigate(direction)
+                                                            }
+                                                        },
+                                                        icon = {
+                                                            TabIcon(
+                                                                icon = it.icon.asType(),
+                                                                title = it.title.asText(),
+                                                                iconOnly = true,
+                                                            )
+                                                        },
+                                                        label = {
+                                                            dev.dimension.flare.ui.component.Text(
+                                                                text = it.title.asText(),
+                                                            )
+                                                        },
 //                                                badge =
 //                                                    if (it is AllNotificationTabItem) {
 //                                                        {
@@ -397,11 +421,12 @@ internal fun HomeScreen(afterInit: () -> Unit) {
 //                                                    } else {
 //                                                        null
 //                                                    },
-                                                )
+                                                    )
+                                                }
                                             }
-                                        }
-                                    },
-                                )
+                                        },
+                                    )
+                                }
                             }
                         }
                     },
@@ -470,21 +495,23 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                                 )
                             }
                         }
-                        item(
-                            selected = currentRoute is Route.Settings.Main,
-                            onClick = {
-                                state.navigate(Route.Settings.Main)
-                            },
-                            icon = {
-                                FAIcon(
-                                    imageVector = FontAwesomeIcons.Solid.Gear,
-                                    contentDescription = stringResource(id = R.string.settings_title),
-                                )
-                            },
-                            label = {
-                                Text(text = stringResource(id = R.string.settings_title))
-                            },
-                        )
+                        if (!hasRightSidebar) {
+                            item(
+                                selected = currentRoute is Route.Settings.Main,
+                                onClick = {
+                                    state.navigate(Route.Settings.Main)
+                                },
+                                icon = {
+                                    FAIcon(
+                                        imageVector = FontAwesomeIcons.Solid.Gear,
+                                        contentDescription = stringResource(id = R.string.settings_title),
+                                    )
+                                },
+                                label = {
+                                    Text(text = stringResource(id = R.string.settings_title))
+                                },
+                            )
+                        }
                     },
                 ) {
                     CompositionLocalProvider(
@@ -498,20 +525,59 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                             },
                         LocalScrollToTopRegistry provides state.scrollToTopRegistry,
                     ) {
-                        Router(
-                            backStack =
-                                state.topLevelBackStack.takeSuccess()?.backStack
-                                    ?: remember {
-                                        androidx.compose.runtime.mutableStateListOf(
-                                            currentRoute,
+                        val backStack =
+                            state.topLevelBackStack.takeSuccess()?.backStack
+                                ?: remember {
+                                    androidx.compose.runtime.mutableStateListOf(
+                                        currentRoute,
+                                    )
+                                }
+                        if (singleColumn) {
+                            Row(
+                                modifier = Modifier.fillMaxSize(),
+                            ) {
+                                Box(
+                                    modifier =
+                                        Modifier
+                                            .weight(1f)
+                                            .fillMaxHeight(),
+                                    contentAlignment = Alignment.TopCenter,
+                                ) {
+                                    CompositionLocalProvider(
+                                        LocalWindowSizeClass provides WindowSizeClass.Compact,
+                                    ) {
+                                        Router(
+                                            backStack = backStack,
+                                            openDrawer = openDrawer,
+                                            navigate = state::navigate,
+                                            onBack = state::goBack,
+                                            modifier = Modifier.fillMaxSize(),
+                                            singlePane = true,
                                         )
-                                    },
-                            openDrawer = {
-                                state.openDrawer()
-                            },
-                            navigate = state::navigate,
-                            onBack = state::goBack,
-                        )
+                                    }
+                                }
+                                if (hasRightSidebar) {
+                                    VerticalDivider()
+                                    HomeSecondarySidebar(
+                                        secondaryTabs = state.secondaryTabsState,
+                                        isLoggedIn = state.loggedInState.takeSuccess(),
+                                        aiAgentEnabled = state.aiAgentEnabled,
+                                        currentRoute =
+                                            state.topLevelBackStack.takeSuccess()?.topLevelKey
+                                                ?: currentRoute,
+                                        navigate = state::navigateTopLevel,
+                                        modifier = Modifier.width(336.dp),
+                                    )
+                                }
+                            }
+                        } else {
+                            Router(
+                                backStack = backStack,
+                                openDrawer = openDrawer,
+                                navigate = state::navigate,
+                                onBack = state::goBack,
+                            )
+                        }
                     }
                 }
                 InAppNotificationComponent(
@@ -526,7 +592,12 @@ internal fun HomeScreen(afterInit: () -> Unit) {
         }
 }
 
-private fun getDirection(data: SecondaryTabsPresenter.Tab): Route? =
+internal fun usesFixedSecondarySidebar(
+    singleColumn: Boolean,
+    availableWidth: Dp,
+): Boolean = singleColumn && availableWidth >= 1024.dp
+
+internal fun getDirection(data: SecondaryTabsPresenter.Tab): Route? =
     when (val target = data.destination) {
         is SecondaryTabsPresenter.Destination.Route -> {
             Route.from(target.route)
@@ -660,6 +731,13 @@ private fun presenter(uriHandler: UriHandler) =
                     wideNavigationRailState = wideNavigationRailState,
                     scope = scope,
                 )
+            }
+
+            fun navigateTopLevel(route: Route) {
+                topLevelBackStack.takeSuccess()?.addTopLevel(route)
+                scope.launch {
+                    wideNavigationRailState.collapse()
+                }
             }
 
             fun goBack() {

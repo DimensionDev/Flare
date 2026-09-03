@@ -78,6 +78,7 @@ internal fun Router(
     onBack: () -> Unit,
     openDrawer: () -> Unit,
     modifier: Modifier = Modifier,
+    singlePane: Boolean = false,
 ) {
     val listDetailStrategy = rememberListDetailSceneStrategy<NavKey>()
     val isBigScreen = isBigScreen()
@@ -162,12 +163,14 @@ internal fun Router(
             entryProvider = navEntryProvider,
         )
     val sceneStrategies =
-        remember(listDetailStrategy) {
-            listOf(
-                DialogSceneStrategy(),
-                BottomSheetSceneStrategy(),
-                listDetailStrategy,
-            )
+        remember(listDetailStrategy, singlePane) {
+            buildList {
+                add(DialogSceneStrategy())
+                add(BottomSheetSceneStrategy())
+                if (!singlePane) {
+                    add(listDetailStrategy)
+                }
+            }
         }
     val predictiveBackSceneDecorator =
         rememberAndroidPredictiveBackSceneDecorator<NavKey>(predictiveBackMotionState)

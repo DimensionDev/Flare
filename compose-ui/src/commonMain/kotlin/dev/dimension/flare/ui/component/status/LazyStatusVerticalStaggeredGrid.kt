@@ -28,6 +28,7 @@ import dev.dimension.flare.data.model.TimelineDisplayMode
 import dev.dimension.flare.ui.common.plus
 import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.platform.isBigScreen
+import dev.dimension.flare.ui.component.platform.isCompatScreen
 import dev.dimension.flare.ui.theme.PlatformTheme
 import dev.dimension.flare.ui.theme.isLightTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
@@ -40,7 +41,7 @@ import kotlinx.coroutines.flow.map
 @Composable
 public fun LazyStatusVerticalStaggeredGrid(
     modifier: Modifier = Modifier,
-    columns: StaggeredGridCells = StaggeredGridCells.Adaptive(320.dp),
+    columns: StaggeredGridCells? = null,
     state: LazyStaggeredGridState = rememberLazyStaggeredGridState(),
     contentPadding: PaddingValues = PaddingValues(0.dp),
     reverseLayout: Boolean = false,
@@ -56,10 +57,12 @@ public fun LazyStatusVerticalStaggeredGrid(
     allowGalleryMode: Boolean = false,
     content: LazyStaggeredGridScope.() -> Unit,
 ) {
+    val bigScreenLayout = isBigScreen()
+    val compactLayout = isCompatScreen()
     val displayMode = LocalTimelineAppearance.current.timelineDisplayMode
     val effectiveMode =
         when {
-            displayMode == TimelineDisplayMode.Plain && isBigScreen() -> {
+            displayMode == TimelineDisplayMode.Plain && bigScreenLayout -> {
                 TimelineDisplayMode.Card
             }
 
@@ -94,10 +97,22 @@ public fun LazyStatusVerticalStaggeredGrid(
     }.collectAsState(0)
     val isWideViewport = with(density) { viewportWidthPx.toDp() } >= 600.dp
     val effectiveColumns =
-        if (effectiveMode == TimelineDisplayMode.Gallery) {
-            StaggeredGridCells.Adaptive(if (isWideViewport) 240.dp else 160.dp)
-        } else {
-            columns
+        when {
+            effectiveMode == TimelineDisplayMode.Gallery -> {
+                StaggeredGridCells.Adaptive(if (isWideViewport) 240.dp else 160.dp)
+            }
+
+            columns != null -> {
+                columns
+            }
+
+            compactLayout -> {
+                StaggeredGridCells.Fixed(1)
+            }
+
+            else -> {
+                StaggeredGridCells.Adaptive(320.dp)
+            }
         }
     val columnCount by remember(state, effectiveColumns) {
         snapshotFlow { state.layoutInfo.viewportSize.width }

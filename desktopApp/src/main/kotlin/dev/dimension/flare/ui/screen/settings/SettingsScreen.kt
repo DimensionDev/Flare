@@ -67,6 +67,7 @@ import dev.dimension.flare.data.model.TimelineMediaLayout
 import dev.dimension.flare.data.model.VideoAutoplay
 import dev.dimension.flare.data.model.appearance.AppearanceKey
 import dev.dimension.flare.data.model.appearance.AppearanceKeys
+import dev.dimension.flare.data.model.appearance.LargeScreenLayoutMode
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.deeplink_account_selection_browser
 import dev.dimension.flare.delete
@@ -147,8 +148,6 @@ import dev.dimension.flare.settings_appearance_avatar_shape_round
 import dev.dimension.flare.settings_appearance_avatar_shape_square
 import dev.dimension.flare.settings_appearance_compat_link_previews
 import dev.dimension.flare.settings_appearance_compat_link_previews_description
-import dev.dimension.flare.settings_appearance_deck_mode
-import dev.dimension.flare.settings_appearance_deck_mode_description
 import dev.dimension.flare.settings_appearance_display_group_subtitle
 import dev.dimension.flare.settings_appearance_display_group_title
 import dev.dimension.flare.settings_appearance_expand_content_warning
@@ -157,6 +156,11 @@ import dev.dimension.flare.settings_appearance_expand_media
 import dev.dimension.flare.settings_appearance_expand_media_description
 import dev.dimension.flare.settings_appearance_full_width_post
 import dev.dimension.flare.settings_appearance_full_width_post_description
+import dev.dimension.flare.settings_appearance_large_screen_layout
+import dev.dimension.flare.settings_appearance_large_screen_layout_auto
+import dev.dimension.flare.settings_appearance_large_screen_layout_deck
+import dev.dimension.flare.settings_appearance_large_screen_layout_description
+import dev.dimension.flare.settings_appearance_large_screen_layout_single_column
 import dev.dimension.flare.settings_appearance_layout_group_subtitle
 import dev.dimension.flare.settings_appearance_layout_group_title
 import dev.dimension.flare.settings_appearance_limit_media_grid_to_nine
@@ -829,18 +833,47 @@ internal fun SettingsScreen(
                 ExpanderItemSeparator()
                 ExpanderItem(
                     heading = {
-                        Text(stringResource(Res.string.settings_appearance_deck_mode))
+                        Text(stringResource(Res.string.settings_appearance_large_screen_layout))
                     },
                     caption = {
-                        Text(stringResource(Res.string.settings_appearance_deck_mode_description))
+                        Text(stringResource(Res.string.settings_appearance_large_screen_layout_description))
                     },
                     trailing = {
-                        Switcher(
-                            checked = LocalGlobalAppearance.current.deckMode,
-                            {
-                                state.appearanceState.update(AppearanceKeys.DeckMode, it)
+                        val items =
+                            remember {
+                                persistentMapOf(
+                                    LargeScreenLayoutMode.Auto to
+                                        Res.string.settings_appearance_large_screen_layout_auto,
+                                    LargeScreenLayoutMode.Deck to
+                                        Res.string.settings_appearance_large_screen_layout_deck,
+                                    LargeScreenLayoutMode.SingleColumn to
+                                        Res.string.settings_appearance_large_screen_layout_single_column,
+                                )
+                            }
+                        MenuFlyoutContainer(
+                            flyout = {
+                                items.forEach { (mode, label) ->
+                                    MenuFlyoutItem(
+                                        onClick = {
+                                            state.appearanceState.update(AppearanceKeys.LargeScreenLayout, mode)
+                                            isFlyoutVisible = false
+                                        },
+                                        text = { Text(stringResource(label)) },
+                                    )
+                                }
                             },
-                            textBefore = true,
+                            content = {
+                                DropDownButton(
+                                    onClick = { isFlyoutVisible = !isFlyoutVisible },
+                                    content = {
+                                        items[LocalGlobalAppearance.current.largeScreenLayoutMode]?.let { label ->
+                                            Text(stringResource(label))
+                                        }
+                                    },
+                                )
+                            },
+                            adaptivePlacement = true,
+                            placement = FlyoutPlacement.BottomAlignedEnd,
                         )
                     },
                 )

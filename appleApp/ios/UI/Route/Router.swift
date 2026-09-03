@@ -1,22 +1,30 @@
 import SwiftUI
+import Combine
 import KotlinSharedUI
 import LazyPager
-import Combine
 import FlareAppleCore
 import FlareAppleUI
 
 struct Router<Root: View>: View {
     @Environment(\.openURL) private var openURL
     @ViewBuilder let root: (@escaping (Route) -> Void) -> Root
-    @State private var backStack: [Route] = []
+    @State private var ownedBackStack: [Route] = []
+    private let externalBackStack: Binding<[Route]>?
+    private let routeRequest: Binding<Route?>?
     @State private var sheet: Route? = nil
     @State private var cover: Route? = nil
     @State private var alertRoute: Route? = nil
     @StateObject private var deepLinkPresenter: KotlinPresenter<DeepLinkPresenterState>
     @StateObject private var deepLinkHandler = DeepLinkHandler()
     
-    init(@ViewBuilder root: @escaping (@escaping (Route) -> Void) -> Root) {
+    init(
+        backStack: Binding<[Route]>? = nil,
+        routeRequest: Binding<Route?>? = nil,
+        @ViewBuilder root: @escaping (@escaping (Route) -> Void) -> Root
+    ) {
         self.root = root
+        self.externalBackStack = backStack
+        self.routeRequest = routeRequest
         let handler = DeepLinkHandler()
         self._deepLinkHandler = .init(wrappedValue: handler)
         self._deepLinkPresenter = .init(wrappedValue: .init(presenter: DeepLinkPresenter(onRoute: { [weak handler] deeplinkRoute in
@@ -27,16 +35,20 @@ struct Router<Root: View>: View {
             handler?.onLink?(link)
         })))
     }
-    
+
+    private var backStack: Binding<[Route]> {
+        externalBackStack ?? $ownedBackStack
+    }
+
     var body: some View {
-        NavigationStack(path: $backStack) {
+        NavigationStack(path: backStack) {
             root({ route in
                 navigate(route: route)
             })
             .navigationDestination(for: Route.self) { route in
                 route.view(
                     onNavigate: { route in navigate(route: route) },
-                    goBack: { backStack.removeLast() }
+                    goBack: pop
                 )
             }
         }
@@ -46,14 +58,14 @@ struct Router<Root: View>: View {
                 NavigationStack {
                     route.view(
                         onNavigate: { route in navigate(route: route) },
-                        goBack: { backStack.removeLast() }
+                        goBack: pop
                     )
                 }
             } else {
                 NavigationStack {
                     route.view(
                         onNavigate: { route in navigate(route: route) },
-                        goBack: { backStack.removeLast() }
+                        goBack: pop
                     )
                     .navigationDestination(for: Route.self) { destination in
                         destination.view(
@@ -68,7 +80,7 @@ struct Router<Root: View>: View {
             NavigationStack {
                 route.view(
                     onNavigate: { route in navigate(route: route) },
-                    goBack: { backStack.removeLast() }
+                    goBack: pop
                 )
             }
             .background(ClearFullScreenBackground())
@@ -86,6 +98,11 @@ struct Router<Root: View>: View {
         .onOpenURL { url in
             let targetURL = url.openInFlareTargetURL ?? url
             deepLinkPresenter.state.handle(url: targetURL.absoluteString)
+        }
+        .onChange(of: routeRequest?.wrappedValue) { _, route in
+            guard let route else { return }
+            navigate(route: route)
+            routeRequest?.wrappedValue = nil
         }
         .onAppear {
             deepLinkHandler.onRoute = { route in
@@ -106,10 +123,16 @@ struct Router<Root: View>: View {
             sheet = route
         } else if isFullScreenCover(route: route) {
             cover = route
-        } else if backStack.last != route {
-            backStack.append(route)
+        } else if backStack.wrappedValue.last != route {
+            backStack.wrappedValue.append(route)
             sheet = nil
             cover = nil
+        }
+    }
+
+    private func pop() {
+        if !backStack.wrappedValue.isEmpty {
+            backStack.wrappedValue.removeLast()
         }
     }
     

@@ -281,11 +281,7 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
     }
 
     private func pagingIsRefreshing(_ data: PagingState<UiTimelineV2>) -> Bool {
-        switch onEnum(of: data) {
-        case .loading: return true
-        case .success(let success): return success.isRefreshing
-        default: return false
-        }
+        data.isRefreshing_
     }
 
     // MARK: - State

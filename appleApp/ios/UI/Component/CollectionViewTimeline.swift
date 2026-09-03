@@ -1023,14 +1023,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     }
 
     private func pagingIsRefreshing<Item: AnyObject>(_ data: PagingState<Item>) -> Bool {
-        switch onEnum(of: data) {
-        case .loading:
-            return true
-        case .success(let success):
-            return success.isRefreshing
-        default:
-            return false
-        }
+        data.isRefreshing_
     }
 
     private var currentPagingIsRefreshing: Bool {

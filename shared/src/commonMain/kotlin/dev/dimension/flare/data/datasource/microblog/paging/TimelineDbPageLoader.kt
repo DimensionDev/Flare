@@ -5,6 +5,7 @@ import dev.dimension.flare.common.PlatformDispatchers
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.dao.DbTimelinePageIdentity
 import dev.dimension.flare.data.database.cache.dao.PagingTimelineDao
+import dev.dimension.flare.data.database.cache.dao.getTimelinePageInCurrentTransaction
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
@@ -89,7 +90,7 @@ internal class TimelineDbPageCache {
                     // ponytail: Split disjoint ranges only if a trace shows this span is too broad.
                     val lastDirty = reused.indexOfLast { it == null }
                     val fetchedData =
-                        dao.getTimelinePage(
+                        dao.getTimelinePageInCurrentTransaction(
                             pagingKey = pagingKey,
                             offset = firstDirty,
                             limit = lastDirty - firstDirty + 1,
@@ -113,7 +114,7 @@ internal class TimelineDbPageCache {
         }
 
         val data =
-            dao.getTimelinePage(
+            dao.getTimelinePageInCurrentTransaction(
                 pagingKey = pagingKey,
                 offset = offset,
                 limit = limit,

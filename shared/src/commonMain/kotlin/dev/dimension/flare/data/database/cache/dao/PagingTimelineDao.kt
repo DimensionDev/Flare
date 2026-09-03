@@ -83,6 +83,66 @@ private fun DbStatus.withTranslations(translationsByStatusId: Map<String, List<D
         translations = translationsByStatusId[id].orEmpty(),
     )
 
+internal suspend fun PagingTimelineDao.getTimelinePageInCurrentTransaction(
+    pagingKey: String,
+    offset: Int,
+    limit: Int,
+): List<DbPagingTimelineWithStatus> {
+    val roots = getTimelineRootRows(pagingKey, offset, limit)
+    if (roots.isEmpty()) {
+        return emptyList()
+    }
+    val rootIds = roots.map { it.status.id }
+    val semanticReferences =
+        rootIds.chunked(QUERY_BATCH_SIZE).flatMap { getPageStatusReferences(it) }
+    val presentationReferences =
+        rootIds.chunked(QUERY_BATCH_SIZE).flatMap { getPagePresentationReferences(pagingKey, it) }
+    val rootStatuses = roots.associate { it.status.id to it.status }
+    val referencedStatusIds =
+        buildSet {
+            semanticReferences.mapTo(this) { it.referenceStatusId }
+            presentationReferences.mapTo(this) { it.referenceStatusId }
+        } - rootStatuses.keys
+    val statusById =
+        rootStatuses +
+            referencedStatusIds
+                .chunked(QUERY_BATCH_SIZE)
+                .flatMap { getPageStatuses(it) }
+                .associateBy { it.id }
+    val translationsByStatusId =
+        statusById.keys
+            .chunked(QUERY_BATCH_SIZE)
+            .flatMap { getPageTranslations(it) }
+            .groupBy { it.entityKey }
+    val hydratedStatusById =
+        statusById.mapValues { (_, status) -> status.withTranslations(translationsByStatusId) }
+    val semanticByRoot = semanticReferences.groupBy { it.statusId }
+    val presentationByRoot = presentationReferences.groupBy { it.statusId }
+    return roots.map { root ->
+        DbPagingTimelineWithStatus(
+            timeline = root.timeline,
+            status =
+                DbStatusWithReference(
+                    status = hydratedStatusById.getValue(root.status.id),
+                    references =
+                        semanticByRoot[root.status.id].orEmpty().map { reference ->
+                            DbStatusReferenceWithStatus(
+                                reference = reference,
+                                status = hydratedStatusById[reference.referenceStatusId],
+                            )
+                        },
+                ),
+            presentationReferences =
+                presentationByRoot[root.status.id].orEmpty().map { reference ->
+                    DbTimelineItemPresentationReferenceWithStatus(
+                        reference = reference,
+                        status = hydratedStatusById[reference.referenceStatusId],
+                    )
+                },
+        )
+    }
+}
+
 @Dao
 @DaoReturnTypeConverters(PagingSourceDaoReturnTypeConverter::class)
 internal interface PagingTimelineDao {
@@ -151,61 +211,7 @@ internal interface PagingTimelineDao {
         pagingKey: String,
         offset: Int,
         limit: Int,
-    ): List<DbPagingTimelineWithStatus> {
-        val roots = getTimelineRootRows(pagingKey, offset, limit)
-        if (roots.isEmpty()) {
-            return emptyList()
-        }
-        val rootIds = roots.map { it.status.id }
-        val semanticReferences =
-            rootIds.chunked(QUERY_BATCH_SIZE).flatMap { getPageStatusReferences(it) }
-        val presentationReferences =
-            rootIds.chunked(QUERY_BATCH_SIZE).flatMap { getPagePresentationReferences(pagingKey, it) }
-        val rootStatuses = roots.associate { it.status.id to it.status }
-        val referencedStatusIds =
-            buildSet {
-                semanticReferences.mapTo(this) { it.referenceStatusId }
-                presentationReferences.mapTo(this) { it.referenceStatusId }
-            } - rootStatuses.keys
-        val statusById =
-            rootStatuses +
-                referencedStatusIds
-                    .chunked(QUERY_BATCH_SIZE)
-                    .flatMap { getPageStatuses(it) }
-                    .associateBy { it.id }
-        val translationsByStatusId =
-            statusById.keys
-                .chunked(QUERY_BATCH_SIZE)
-                .flatMap { getPageTranslations(it) }
-                .groupBy { it.entityKey }
-        val hydratedStatusById =
-            statusById.mapValues { (_, status) -> status.withTranslations(translationsByStatusId) }
-        val semanticByRoot = semanticReferences.groupBy { it.statusId }
-        val presentationByRoot = presentationReferences.groupBy { it.statusId }
-        return roots.map { root ->
-            DbPagingTimelineWithStatus(
-                timeline = root.timeline,
-                status =
-                    DbStatusWithReference(
-                        status = hydratedStatusById.getValue(root.status.id),
-                        references =
-                            semanticByRoot[root.status.id].orEmpty().map { reference ->
-                                DbStatusReferenceWithStatus(
-                                    reference = reference,
-                                    status = hydratedStatusById[reference.referenceStatusId],
-                                )
-                            },
-                    ),
-                presentationReferences =
-                    presentationByRoot[root.status.id].orEmpty().map { reference ->
-                        DbTimelineItemPresentationReferenceWithStatus(
-                            reference = reference,
-                            status = hydratedStatusById[reference.referenceStatusId],
-                        )
-                    },
-            )
-        }
-    }
+    ): List<DbPagingTimelineWithStatus> = getTimelinePageInCurrentTransaction(pagingKey, offset, limit)
 
     @Query(
         "SELECT " +

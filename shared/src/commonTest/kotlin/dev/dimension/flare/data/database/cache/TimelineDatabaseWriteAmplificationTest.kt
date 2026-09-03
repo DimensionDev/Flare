@@ -12,6 +12,7 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.ReferenceType
 import dev.dimension.flare.ui.model.ClickEvent
+import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.UiTranslatableText
 import dev.dimension.flare.ui.render.toUi
@@ -105,6 +106,64 @@ class TimelineDatabaseWriteAmplificationTest : RobolectricTest() {
         }
 
     @Test
+    fun savingMessageClickEventUpdatesTimeline() =
+        runTest {
+            val database =
+                Room
+                    .memoryDatabaseBuilder<CacheDatabase>()
+                    .setDriver(createDatabaseDriver())
+                    .setQueryCoroutineContext(PlatformDispatchers.IO)
+                    .build()
+            try {
+                val originalMessage =
+                    UiTimelineV2.Message(
+                        statusKey = MicroBlogKey(id = "message", host = "benchmark.invalid"),
+                        icon = UiIcon.Retweet,
+                        type = UiTimelineV2.Message.Type.Raw("reposted"),
+                        createdAt = Instant.fromEpochMilliseconds(1_700_000_000_000).toUi(),
+                        clickEvent = ClickEvent.Noop,
+                        accountType = AccountType.Guest,
+                    )
+                val original =
+                    createTimeline().let {
+                        it.copy(presentation = it.presentation.copy(message = originalMessage))
+                    }
+                database.connect {
+                    saveToDatabase(
+                        database,
+                        listOf(TimelinePagingMapper.toDb(original, PAGING_KEY, sortId = 0)),
+                    )
+                }
+
+                val updatedClickEvent = ClickEvent.Deeplink("https://updated.invalid")
+                val updated =
+                    original.copy(
+                        presentation =
+                            original.presentation.copy(
+                                message = originalMessage.copy(clickEvent = updatedClickEvent),
+                            ),
+                    )
+                database.connect {
+                    saveToDatabase(
+                        database,
+                        listOf(TimelinePagingMapper.toDb(updated, PAGING_KEY, sortId = 0)),
+                    )
+                }
+
+                val storedMessage =
+                    database
+                        .pagingTimelineDao()
+                        .getTimelinePage(PAGING_KEY, offset = 0, limit = 1)
+                        .single()
+                        .timeline
+                        .message
+                assertEquals(updatedClickEvent, storedMessage?.clickEvent)
+            } finally {
+                database.close()
+            }
+        }
+
+    @Test
     fun updatingSharedQuoteInvalidatesAndHydratesEveryTimelineOccurrence() =
         runTest {
             val database =
@@ -165,6 +224,73 @@ class TimelineDatabaseWriteAmplificationTest : RobolectricTest() {
                     assertEquals(updatedQuote, semanticQuote)
                     assertEquals(updatedQuote, presentationQuote)
                 }
+            } finally {
+                database.close()
+            }
+        }
+
+    @Test
+    fun insertingPreviouslyMissingReferenceStatusInvalidatesTimeline() =
+        runTest {
+            val database =
+                Room
+                    .memoryDatabaseBuilder<CacheDatabase>()
+                    .setDriver(createDatabaseDriver())
+                    .setQueryCoroutineContext(PlatformDispatchers.IO)
+                    .build()
+            try {
+                val quote = createPost("late-quote")
+                val mapped =
+                    TimelinePagingMapper.toDb(
+                        createTimelineWithQuote("late-root", quote),
+                        PAGING_KEY,
+                        sortId = 0,
+                    )
+                val missingReferenceStatus =
+                    mapped.copy(
+                        references = mapped.references.map { it.copy(status = null) },
+                        presentationReferences =
+                            mapped.presentationReferences.map { it.copy(status = null) },
+                    )
+                database.connect { saveToDatabase(database, listOf(missingReferenceStatus)) }
+                val revisionBefore =
+                    database
+                        .pagingTimelineDao()
+                        .getTimelinePageIdentities(PAGING_KEY, offset = 0, limit = 1)
+                        .single()
+                        .contentRevision
+
+                database.connect {
+                    saveToDatabase(
+                        database,
+                        listOf(TimelinePagingMapper.toDb(quote, "late-reference-source", sortId = 0)),
+                    )
+                }
+
+                val revisionAfter =
+                    database
+                        .pagingTimelineDao()
+                        .getTimelinePageIdentities(PAGING_KEY, offset = 0, limit = 1)
+                        .single()
+                        .contentRevision
+                assertTrue(revisionAfter > revisionBefore)
+                val hydrated = database.pagingTimelineDao().getTimelinePage(PAGING_KEY, offset = 0, limit = 1).single()
+                assertEquals(
+                    quote,
+                    hydrated.status.references
+                        .single()
+                        .status
+                        ?.data
+                        ?.content,
+                )
+                assertEquals(
+                    quote,
+                    hydrated.presentationReferences
+                        .single()
+                        .status
+                        ?.data
+                        ?.content,
+                )
             } finally {
                 database.close()
             }

@@ -64,24 +64,6 @@ internal interface StatusDao {
     suspend fun getVersions(ids: List<String>): List<DbStatusVersion>
 
     @Query(
-        "UPDATE DbPagingTimeline SET contentRevision = contentRevision + 1 " +
-            "WHERE _id IN (" +
-            "SELECT timeline._id FROM DbPagingTimeline AS timeline " +
-            "WHERE timeline.statusId IN (:statusIds) " +
-            "UNION " +
-            "SELECT timeline._id FROM status_reference AS reference " +
-            "INNER JOIN DbPagingTimeline AS timeline ON timeline.statusId = reference.statusId " +
-            "WHERE reference.referenceStatusId IN (:statusIds) " +
-            "UNION " +
-            "SELECT timeline._id FROM timeline_item_presentation_reference AS reference " +
-            "INNER JOIN DbPagingTimeline AS timeline " +
-            "ON timeline.pagingKey = reference.pagingKey AND timeline.statusId = reference.statusId " +
-            "WHERE reference.referenceStatusId IN (:statusIds)" +
-            ")",
-    )
-    suspend fun bumpTimelineDependencies(statusIds: List<String>)
-
-    @Query(
         "UPDATE DbStatus SET content = :content, contentFingerprint = :contentFingerprint, " +
             "renderHash = :renderHash, text = :text " +
             "WHERE statusKey = :statusKey AND accountType = :accountType",

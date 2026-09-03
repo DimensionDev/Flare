@@ -123,21 +123,6 @@ internal class TimelineRemoteMediator(
         request: PagingRequest,
         data: List<DbPagingTimelineWithStatus>,
     ) {
-        if (request is PagingRequest.Refresh) {
-            data
-                .groupBy { it.timeline.pagingKey }
-                .keys
-                .plus(loader.pagingKey)
-                .distinct()
-                .forEach { key ->
-                    database
-                        .pagingTimelineDao()
-                        .deletePresentationReferences(pagingKey = key)
-                    database
-                        .pagingTimelineDao()
-                        .delete(pagingKey = key)
-                }
-        }
         val dataToSave =
             if (request is PagingRequest.Prepend && loader.supportPrepend && data.isNotEmpty()) {
                 val minimumSortId = database.pagingTimelineDao().getMinSortId(pagingKey)
@@ -161,7 +146,33 @@ internal class TimelineRemoteMediator(
             } else {
                 data
             }
+        val staleTimeline =
+            if (request is PagingRequest.Refresh) {
+                val retainedStatusIds =
+                    dataToSave
+                        .groupBy { it.timeline.pagingKey }
+                        .mapValues { (_, rows) -> rows.mapTo(mutableSetOf()) { it.timeline.statusId } }
+                (retainedStatusIds.keys + loader.pagingKey).flatMap { key ->
+                    database
+                        .pagingTimelineDao()
+                        .getByPagingKey(key)
+                        .filter { it.statusId !in retainedStatusIds[key].orEmpty() }
+                }
+            } else {
+                emptyList()
+            }
         saveToDatabase(database, dataToSave)
+        staleTimeline.groupBy { it.pagingKey }.forEach { (pagingKey, rows) ->
+            database
+                .pagingTimelineDao()
+                .deletePresentationReferences(
+                    pagingKey = pagingKey,
+                    statusIds = rows.map { it.statusId },
+                )
+        }
+        if (staleTimeline.isNotEmpty()) {
+            database.pagingTimelineDao().delete(staleTimeline)
+        }
         preTranslationService.enqueueStatuses(
             dataToSave
                 .flatMap { item ->

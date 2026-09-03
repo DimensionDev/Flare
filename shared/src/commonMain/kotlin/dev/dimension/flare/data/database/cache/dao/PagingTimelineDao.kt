@@ -56,6 +56,26 @@ internal data class DbTimelineRootRow(
 )
 
 private const val QUERY_BATCH_SIZE = 500
+private const val TIMELINE_WITH_STATUS_QUERY =
+    "SELECT " +
+        "DbPagingTimeline.pagingKey AS pagingKey, " +
+        "DbPagingTimeline.statusId AS statusId, " +
+        "DbPagingTimeline.sortId AS sortId, " +
+        "DbPagingTimeline.message AS message, " +
+        "DbPagingTimeline.messageRenderHash AS messageRenderHash, " +
+        "DbPagingTimeline.semanticReferenceSignature AS semanticReferenceSignature, " +
+        "DbPagingTimeline.presentationReferenceSignature AS presentationReferenceSignature, " +
+        "DbPagingTimeline.contentRevision AS contentRevision, " +
+        "DbPagingTimeline._id AS _id, " +
+        "DbStatus.statusKey AS status_statusKey, " +
+        "DbStatus.accountType AS status_accountType, " +
+        "DbStatus.content AS status_content, " +
+        "DbStatus.contentFingerprint AS status_contentFingerprint, " +
+        "DbStatus.renderHash AS status_renderHash, " +
+        "DbStatus.text AS status_text, " +
+        "DbStatus.id AS status_id " +
+        "FROM DbPagingTimeline " +
+        "INNER JOIN DbStatus ON DbStatus.id = DbPagingTimeline.statusId "
 
 private fun DbStatus.withTranslations(translationsByStatusId: Map<String, List<DbTranslation>>) =
     DbStatusWithUser(
@@ -68,25 +88,7 @@ private fun DbStatus.withTranslations(translationsByStatusId: Map<String, List<D
 internal interface PagingTimelineDao {
     @Transaction
     @Query(
-        "SELECT " +
-            "DbPagingTimeline.pagingKey AS pagingKey, " +
-            "DbPagingTimeline.statusId AS statusId, " +
-            "DbPagingTimeline.sortId AS sortId, " +
-            "DbPagingTimeline.message AS message, " +
-            "DbPagingTimeline.messageRenderHash AS messageRenderHash, " +
-            "DbPagingTimeline.semanticReferenceSignature AS semanticReferenceSignature, " +
-            "DbPagingTimeline.presentationReferenceSignature AS presentationReferenceSignature, " +
-            "DbPagingTimeline.contentRevision AS contentRevision, " +
-            "DbPagingTimeline._id AS _id, " +
-            "DbStatus.statusKey AS status_statusKey, " +
-            "DbStatus.accountType AS status_accountType, " +
-            "DbStatus.content AS status_content, " +
-            "DbStatus.contentFingerprint AS status_contentFingerprint, " +
-            "DbStatus.renderHash AS status_renderHash, " +
-            "DbStatus.text AS status_text, " +
-            "DbStatus.id AS status_id " +
-            "FROM DbPagingTimeline " +
-            "INNER JOIN DbStatus ON DbStatus.id = DbPagingTimeline.statusId " +
+        TIMELINE_WITH_STATUS_QUERY +
             "WHERE DbPagingTimeline.pagingKey = :pagingKey AND DbStatus.accountType = :accountType " +
             "ORDER BY DbPagingTimeline.sortId",
     )
@@ -97,50 +99,14 @@ internal interface PagingTimelineDao {
 
     @Transaction
     @Query(
-        "SELECT " +
-            "DbPagingTimeline.pagingKey AS pagingKey, " +
-            "DbPagingTimeline.statusId AS statusId, " +
-            "DbPagingTimeline.sortId AS sortId, " +
-            "DbPagingTimeline.message AS message, " +
-            "DbPagingTimeline.messageRenderHash AS messageRenderHash, " +
-            "DbPagingTimeline.semanticReferenceSignature AS semanticReferenceSignature, " +
-            "DbPagingTimeline.presentationReferenceSignature AS presentationReferenceSignature, " +
-            "DbPagingTimeline.contentRevision AS contentRevision, " +
-            "DbPagingTimeline._id AS _id, " +
-            "DbStatus.statusKey AS status_statusKey, " +
-            "DbStatus.accountType AS status_accountType, " +
-            "DbStatus.content AS status_content, " +
-            "DbStatus.contentFingerprint AS status_contentFingerprint, " +
-            "DbStatus.renderHash AS status_renderHash, " +
-            "DbStatus.text AS status_text, " +
-            "DbStatus.id AS status_id " +
-            "FROM DbPagingTimeline " +
-            "INNER JOIN DbStatus ON DbStatus.id = DbPagingTimeline.statusId " +
+        TIMELINE_WITH_STATUS_QUERY +
             "WHERE DbPagingTimeline.pagingKey = :pagingKey " +
             "ORDER BY DbPagingTimeline.sortId",
     )
     fun getPagingSource(pagingKey: String): PagingSource<Int, DbPagingTimelineWithStatus>
 
     @Query(
-        "SELECT " +
-            "DbPagingTimeline.pagingKey AS pagingKey, " +
-            "DbPagingTimeline.statusId AS statusId, " +
-            "DbPagingTimeline.sortId AS sortId, " +
-            "DbPagingTimeline.message AS message, " +
-            "DbPagingTimeline.messageRenderHash AS messageRenderHash, " +
-            "DbPagingTimeline.semanticReferenceSignature AS semanticReferenceSignature, " +
-            "DbPagingTimeline.presentationReferenceSignature AS presentationReferenceSignature, " +
-            "DbPagingTimeline.contentRevision AS contentRevision, " +
-            "DbPagingTimeline._id AS _id, " +
-            "DbStatus.statusKey AS status_statusKey, " +
-            "DbStatus.accountType AS status_accountType, " +
-            "DbStatus.content AS status_content, " +
-            "DbStatus.contentFingerprint AS status_contentFingerprint, " +
-            "DbStatus.renderHash AS status_renderHash, " +
-            "DbStatus.text AS status_text, " +
-            "DbStatus.id AS status_id " +
-            "FROM DbPagingTimeline " +
-            "INNER JOIN DbStatus ON DbStatus.id = DbPagingTimeline.statusId " +
+        TIMELINE_WITH_STATUS_QUERY +
             "WHERE DbPagingTimeline.pagingKey = :pagingKey " +
             "ORDER BY DbPagingTimeline.sortId " +
             "LIMIT :limit OFFSET :offset",
@@ -281,25 +247,7 @@ internal interface PagingTimelineDao {
 
     @Transaction
     @Query(
-        "SELECT " +
-            "DbPagingTimeline.pagingKey AS pagingKey, " +
-            "DbPagingTimeline.statusId AS statusId, " +
-            "DbPagingTimeline.sortId AS sortId, " +
-            "DbPagingTimeline.message AS message, " +
-            "DbPagingTimeline.messageRenderHash AS messageRenderHash, " +
-            "DbPagingTimeline.semanticReferenceSignature AS semanticReferenceSignature, " +
-            "DbPagingTimeline.presentationReferenceSignature AS presentationReferenceSignature, " +
-            "DbPagingTimeline.contentRevision AS contentRevision, " +
-            "DbPagingTimeline._id AS _id, " +
-            "DbStatus.statusKey AS status_statusKey, " +
-            "DbStatus.accountType AS status_accountType, " +
-            "DbStatus.content AS status_content, " +
-            "DbStatus.contentFingerprint AS status_contentFingerprint, " +
-            "DbStatus.renderHash AS status_renderHash, " +
-            "DbStatus.text AS status_text, " +
-            "DbStatus.id AS status_id " +
-            "FROM DbPagingTimeline " +
-            "INNER JOIN DbStatus ON DbStatus.id = DbPagingTimeline.statusId " +
+        TIMELINE_WITH_STATUS_QUERY +
             "WHERE DbPagingTimeline.pagingKey = :pagingKey " +
             "AND DbStatus.accountType = :accountType " +
             "LIMIT 1",
@@ -311,25 +259,7 @@ internal interface PagingTimelineDao {
 
     @Transaction
     @Query(
-        "SELECT " +
-            "DbPagingTimeline.pagingKey AS pagingKey, " +
-            "DbPagingTimeline.statusId AS statusId, " +
-            "DbPagingTimeline.sortId AS sortId, " +
-            "DbPagingTimeline.message AS message, " +
-            "DbPagingTimeline.messageRenderHash AS messageRenderHash, " +
-            "DbPagingTimeline.semanticReferenceSignature AS semanticReferenceSignature, " +
-            "DbPagingTimeline.presentationReferenceSignature AS presentationReferenceSignature, " +
-            "DbPagingTimeline.contentRevision AS contentRevision, " +
-            "DbPagingTimeline._id AS _id, " +
-            "DbStatus.statusKey AS status_statusKey, " +
-            "DbStatus.accountType AS status_accountType, " +
-            "DbStatus.content AS status_content, " +
-            "DbStatus.contentFingerprint AS status_contentFingerprint, " +
-            "DbStatus.renderHash AS status_renderHash, " +
-            "DbStatus.text AS status_text, " +
-            "DbStatus.id AS status_id " +
-            "FROM DbPagingTimeline " +
-            "INNER JOIN DbStatus ON DbStatus.id = DbPagingTimeline.statusId " +
+        TIMELINE_WITH_STATUS_QUERY +
             "WHERE DbPagingTimeline.pagingKey = :pagingKey " +
             "ORDER BY DbPagingTimeline.sortId DESC",
     )
@@ -337,25 +267,7 @@ internal interface PagingTimelineDao {
 
     @Transaction
     @Query(
-        "SELECT " +
-            "DbPagingTimeline.pagingKey AS pagingKey, " +
-            "DbPagingTimeline.statusId AS statusId, " +
-            "DbPagingTimeline.sortId AS sortId, " +
-            "DbPagingTimeline.message AS message, " +
-            "DbPagingTimeline.messageRenderHash AS messageRenderHash, " +
-            "DbPagingTimeline.semanticReferenceSignature AS semanticReferenceSignature, " +
-            "DbPagingTimeline.presentationReferenceSignature AS presentationReferenceSignature, " +
-            "DbPagingTimeline.contentRevision AS contentRevision, " +
-            "DbPagingTimeline._id AS _id, " +
-            "DbStatus.statusKey AS status_statusKey, " +
-            "DbStatus.accountType AS status_accountType, " +
-            "DbStatus.content AS status_content, " +
-            "DbStatus.contentFingerprint AS status_contentFingerprint, " +
-            "DbStatus.renderHash AS status_renderHash, " +
-            "DbStatus.text AS status_text, " +
-            "DbStatus.id AS status_id " +
-            "FROM DbPagingTimeline " +
-            "INNER JOIN DbStatus ON DbStatus.id = DbPagingTimeline.statusId " +
+        TIMELINE_WITH_STATUS_QUERY +
             "WHERE DbPagingTimeline.pagingKey = :pagingKey " +
             "ORDER BY DbPagingTimeline.sortId DESC " +
             "LIMIT :limit",
@@ -437,25 +349,7 @@ internal interface PagingTimelineDao {
 
     @Transaction
     @Query(
-        "SELECT " +
-            "DbPagingTimeline.pagingKey AS pagingKey, " +
-            "DbPagingTimeline.statusId AS statusId, " +
-            "DbPagingTimeline.sortId AS sortId, " +
-            "DbPagingTimeline.message AS message, " +
-            "DbPagingTimeline.messageRenderHash AS messageRenderHash, " +
-            "DbPagingTimeline.semanticReferenceSignature AS semanticReferenceSignature, " +
-            "DbPagingTimeline.presentationReferenceSignature AS presentationReferenceSignature, " +
-            "DbPagingTimeline.contentRevision AS contentRevision, " +
-            "DbPagingTimeline._id AS _id, " +
-            "DbStatus.statusKey AS status_statusKey, " +
-            "DbStatus.accountType AS status_accountType, " +
-            "DbStatus.content AS status_content, " +
-            "DbStatus.contentFingerprint AS status_contentFingerprint, " +
-            "DbStatus.renderHash AS status_renderHash, " +
-            "DbStatus.text AS status_text, " +
-            "DbStatus.id AS status_id " +
-            "FROM DbPagingTimeline " +
-            "INNER JOIN DbStatus ON DbStatus.id = DbPagingTimeline.statusId " +
+        TIMELINE_WITH_STATUS_QUERY +
             "WHERE DbStatus.accountType = :accountType " +
             "AND (:afterId IS NULL OR DbPagingTimeline._id > :afterId) " +
             "ORDER BY DbPagingTimeline._id " +

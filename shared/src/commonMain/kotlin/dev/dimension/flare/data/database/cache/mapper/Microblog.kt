@@ -1,6 +1,7 @@
 package dev.dimension.flare.data.database.cache.mapper
 
 import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.database.cache.connect
 import dev.dimension.flare.data.database.cache.dao.DbPagingTimelineVersion
 import dev.dimension.flare.data.database.cache.model.DbPagingTimeline
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
@@ -15,6 +16,13 @@ import dev.dimension.flare.ui.model.UiTimelineV2
 internal suspend fun saveToDatabase(
     database: CacheDatabase,
     items: List<DbPagingTimelineWithStatus>,
+) = database.connect {
+    saveToDatabaseInTransaction(database, items)
+}
+
+private suspend fun saveToDatabaseInTransaction(
+    database: CacheDatabase,
+    items: List<DbPagingTimelineWithStatus>,
 ) {
     val statuses = collectStatuses(items)
     val users = statuses.flatMap { it.content.usersInContent() }.distinctBy { it.key }
@@ -22,10 +30,6 @@ internal suspend fun saveToDatabase(
     val statusChanges = loadChangedStatuses(database, statuses)
     if (statusChanges.inserted.isNotEmpty()) {
         database.statusDao().insertNew(statusChanges.inserted)
-        statusChanges.inserted
-            .map { it.id }
-            .chunked(DEPENDENCY_REVISION_BATCH_SIZE)
-            .forEach { database.statusDao().bumpTimelineDependencies(it) }
     }
     if (statusChanges.updated.isNotEmpty()) {
         database.statusDao().updateExisting(statusChanges.updated)
@@ -75,7 +79,6 @@ internal suspend fun saveToDatabase(
 }
 
 private const val SQL_IN_BATCH_SIZE = 500
-private const val DEPENDENCY_REVISION_BATCH_SIZE = 300
 
 private data class DbChanges<T>(
     val inserted: List<T>,
@@ -109,6 +112,28 @@ private val DbTimelineItemPresentationReference.key: PresentationReferenceKey
             presentationType = presentationType,
             referenceStatusId = referenceStatusId,
         )
+
+private suspend fun <T, K> syncByKey(
+    incoming: List<T>,
+    existing: List<T>,
+    key: (T) -> K,
+    delete: suspend (List<T>) -> Unit,
+    insert: suspend (List<T>) -> Unit,
+    update: suspend (List<T>) -> Unit,
+) {
+    val incomingByKey = incoming.associateBy(key)
+    val existingByKey = existing.associateBy(key)
+    val removed = existingByKey.filterKeys { it !in incomingByKey }.values.toList()
+    val inserted = incomingByKey.filterKeys { it !in existingByKey }.values.toList()
+    val updated =
+        incomingByKey
+            .filter { (itemKey, item) -> existingByKey[itemKey]?.let { it != item } == true }
+            .values
+            .toList()
+    if (removed.isNotEmpty()) delete(removed)
+    if (inserted.isNotEmpty()) insert(inserted)
+    if (updated.isNotEmpty()) update(updated)
+}
 
 private fun collectStatuses(items: List<DbPagingTimelineWithStatus>): List<DbStatus> =
     buildList {
@@ -150,28 +175,18 @@ private suspend fun syncStatusReferences(
     if (rootStatusIds.isEmpty()) {
         return
     }
-    val incomingByKey = incoming.associateBy { it.key }
-    val existingByKey =
+    val existing =
         rootStatusIds
             .chunked(SQL_IN_BATCH_SIZE)
             .flatMap { database.statusReferenceDao().getByStatusIds(it) }
-            .associateBy { it.key }
-    val removed = existingByKey.filterKeys { it !in incomingByKey }.values.toList()
-    val inserted = incomingByKey.filterKeys { it !in existingByKey }.values.toList()
-    val updated =
-        incomingByKey
-            .filter { (key, item) -> existingByKey[key]?.let { it != item } == true }
-            .values
-            .toList()
-    if (removed.isNotEmpty()) {
-        database.statusReferenceDao().deleteItems(removed)
-    }
-    if (inserted.isNotEmpty()) {
-        database.statusReferenceDao().insertNew(inserted)
-    }
-    if (updated.isNotEmpty()) {
-        database.statusReferenceDao().updateExisting(updated)
-    }
+    syncByKey(
+        incoming = incoming,
+        existing = existing,
+        key = { it.key },
+        delete = { database.statusReferenceDao().deleteItems(it) },
+        insert = { database.statusReferenceDao().insertNew(it) },
+        update = { database.statusReferenceDao().updateExisting(it) },
+    )
 }
 
 private suspend fun syncPresentationReferences(
@@ -185,28 +200,18 @@ private suspend fun syncPresentationReferences(
             .groupBy { it.pagingKey }
     items.groupBy { it.timeline.pagingKey }.forEach { (pagingKey, rows) ->
         val rootStatusIds = rows.map { it.timeline.statusId }.distinct()
-        val incomingByKey = incomingByPagingKey[pagingKey].orEmpty().associateBy { it.key }
-        val existingByKey =
+        val existing =
             rootStatusIds
                 .chunked(SQL_IN_BATCH_SIZE)
                 .flatMap { database.pagingTimelineDao().getPresentationReferences(pagingKey, it) }
-                .associateBy { it.key }
-        val removed = existingByKey.filterKeys { it !in incomingByKey }.values.toList()
-        val inserted = incomingByKey.filterKeys { it !in existingByKey }.values.toList()
-        val updated =
-            incomingByKey
-                .filter { (key, item) -> existingByKey[key]?.let { it != item } == true }
-                .values
-                .toList()
-        if (removed.isNotEmpty()) {
-            database.pagingTimelineDao().deletePresentationReferences(removed)
-        }
-        if (inserted.isNotEmpty()) {
-            database.pagingTimelineDao().insertNewPresentationReferences(inserted)
-        }
-        if (updated.isNotEmpty()) {
-            database.pagingTimelineDao().updateExistingPresentationReferences(updated)
-        }
+        syncByKey(
+            incoming = incomingByPagingKey[pagingKey].orEmpty(),
+            existing = existing,
+            key = { it.key },
+            delete = { database.pagingTimelineDao().deletePresentationReferences(it) },
+            insert = { database.pagingTimelineDao().insertNewPresentationReferences(it) },
+            update = { database.pagingTimelineDao().updateExistingPresentationReferences(it) },
+        )
     }
 }
 
@@ -260,9 +265,7 @@ private suspend fun loadTimelineVersions(
         }.associateBy { it.pagingKey to it.statusId }
 
 private fun DbPagingTimelineVersion.matches(timeline: DbPagingTimeline): Boolean =
-    pagingKey == timeline.pagingKey &&
-        statusId == timeline.statusId &&
-        sortId == timeline.sortId &&
+    sortId == timeline.sortId &&
         messageRenderHash == timeline.messageRenderHash &&
         semanticReferenceSignature == timeline.semanticReferenceSignature &&
         presentationReferenceSignature == timeline.presentationReferenceSignature &&

@@ -87,7 +87,7 @@ internal abstract class BasePagingRemoteMediator<Key : Any, T : Any, R : Any>(
                     nextKey = result.nextKey,
                 )
             }
-            // Keep paging cache writes under one transaction. Callers must not open another one here.
+            // Keep paging-key and cache writes under one outer transaction.
             onSaveCache(request, result.data)
         }
         return MediatorResult.Success(

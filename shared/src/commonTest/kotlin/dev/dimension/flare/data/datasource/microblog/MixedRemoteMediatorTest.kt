@@ -27,6 +27,9 @@ import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoade
 import dev.dimension.flare.data.datasource.microblog.paging.OffsetFromStartPagingKey
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
+import dev.dimension.flare.data.datasource.microblog.paging.SortIdProvider
+import dev.dimension.flare.data.datasource.microblog.paging.TimelineDbPageCache
+import dev.dimension.flare.data.datasource.microblog.paging.TimelineDbPageLoader
 import dev.dimension.flare.data.datasource.microblog.paging.TimelinePagingMapper
 import dev.dimension.flare.data.datasource.microblog.paging.TimelineRemoteMediator
 import dev.dimension.flare.data.datastore.AppDataStore
@@ -669,6 +672,74 @@ class MixedRemoteMediatorTest : RobolectricTest() {
                 page.data.mapNotNull {
                     (it.status.status.data.content as? UiTimelineV2.Feed)?.url
                 },
+            )
+        }
+
+    @OptIn(ExperimentalPagingApi::class)
+    @Test
+    fun refreshWithStableSortIdUpdatesCachedRowAndDeletesStaleRows() =
+        runTest {
+            var remoteItems =
+                listOf(
+                    feed("https://example.com/retained", 1000L),
+                    feed("https://example.com/stale", 2000L),
+                )
+            val remoteLoader =
+                object : CacheableRemoteLoader<UiTimelineV2>, SortIdProvider {
+                    override val pagingKey: String = "stable-refresh"
+
+                    override suspend fun load(
+                        pageSize: Int,
+                        request: PagingRequest,
+                    ): PagingResult<UiTimelineV2> = PagingResult(data = remoteItems)
+
+                    override suspend fun sortId(data: UiTimelineV2): Long = data.createdAt.value.toEpochMilliseconds()
+                }
+            val mediator = TimelineRemoteMediator(loader = remoteLoader, database = db, allowLongText = false)
+            val state =
+                PagingState<OffsetFromStartPagingKey, DbPagingTimelineWithStatus>(
+                    pages = emptyList(),
+                    anchorPosition = null,
+                    config = PagingConfig(pageSize = 20),
+                    leadingPlaceholderCount = 0,
+                )
+
+            assertTrue(
+                mediator.load(loadType = LoadType.REFRESH, state = state) is
+                    androidx.paging.RemoteMediator.MediatorResult.Success,
+            )
+            val pageLoader = TimelineDbPageLoader(db, mediator.pagingKey, TimelineDbPageCache())
+            val initial = pageLoader.load(offset = 0, limit = 20)
+            val revisionBefore =
+                db
+                    .pagingTimelineDao()
+                    .getTimelinePageIdentities(mediator.pagingKey, offset = 0, limit = 1)
+                    .single()
+                    .contentRevision
+
+            remoteItems = listOf(remoteItems.first().copy(title = "updated"))
+            assertTrue(
+                mediator.load(loadType = LoadType.REFRESH, state = state) is
+                    androidx.paging.RemoteMediator.MediatorResult.Success,
+            )
+
+            val refreshed = pageLoader.load(offset = 0, limit = 20)
+            val revisionAfter =
+                db
+                    .pagingTimelineDao()
+                    .getTimelinePageIdentities(mediator.pagingKey, offset = 0, limit = 1)
+                    .single()
+                    .contentRevision
+            assertTrue(revisionAfter > revisionBefore)
+            assertEquals(2, initial.size)
+            assertEquals(1, refreshed.size)
+            assertEquals(
+                "updated",
+                (
+                    refreshed
+                        .single()
+                        .status.status.data.content as UiTimelineV2.Feed
+                ).title,
             )
         }
 

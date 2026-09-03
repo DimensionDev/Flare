@@ -3,8 +3,6 @@ package dev.dimension.flare
 import androidx.room3.Room
 import androidx.room3.RoomDatabase
 import androidx.test.platform.app.InstrumentationRegistry
-import dev.dimension.flare.data.database.cache.CacheDatabase
-import dev.dimension.flare.data.database.cache.TimelineRevisionCallback
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.reflect.KClass
@@ -15,11 +13,7 @@ internal actual fun <T : RoomDatabase> Room.memoryDatabaseBuilder(databaseClass:
         .inMemoryDatabaseBuilder(
             InstrumentationRegistry.getInstrumentation().context,
             databaseClass.java,
-        ).apply {
-            if (databaseClass == CacheDatabase::class) {
-                addCallback(TimelineRevisionCallback)
-            }
-        }
+        )
 
 @RunWith(RobolectricTestRunner::class)
 @Ignore

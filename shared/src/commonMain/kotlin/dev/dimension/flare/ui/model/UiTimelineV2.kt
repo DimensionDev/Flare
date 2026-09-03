@@ -68,6 +68,7 @@ public sealed class UiTimelineV2 {
                 .add(icon)
                 .add(type.renderSummaryHash())
                 .add(createdAt.value.toEpochMilliseconds())
+                .add(clickEvent)
                 .add(accountType)
                 .build()
         }

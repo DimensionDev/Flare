@@ -1,5 +1,6 @@
 package dev.dimension.flare.data.datasource.microblog.paging
 
+import androidx.room3.withReadTransaction
 import dev.dimension.flare.common.PlatformDispatchers
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.dao.DbTimelinePageIdentity
@@ -37,87 +38,97 @@ internal class TimelineDbPageCache {
         }
 
     suspend fun load(
-        dao: PagingTimelineDao,
+        database: CacheDatabase,
         pagingKey: String,
         offset: Int,
         limit: Int,
     ): List<DbPagingTimelineWithStatus> =
         mutex.withLock {
-            val identityRows =
-                dao.getTimelinePageIdentities(
-                    pagingKey = pagingKey,
-                    offset = offset,
-                    limit = limit + 1,
-                )
-            val pageIdentities = identityRows.take(limit)
-            if (pageIdentities.isEmpty()) {
-                if (offset == 0) {
-                    val nextIdentity = identityRows.firstOrNull()
-                    snapshot =
-                        Snapshot(
-                            loaded = true,
-                            nextIdentity = nextIdentity,
-                        )
-                }
-                return@withLock emptyList()
-            }
-
-            if (offset == 0) {
-                val cachedByIdentity =
-                    buildMap(snapshot.data.size) {
-                        repeat(minOf(snapshot.identities.size, snapshot.data.size)) { index ->
-                            put(snapshot.identities[index], snapshot.data[index])
-                        }
-                    }
-                val reused = pageIdentities.map { cachedByIdentity[it] }
-                val firstDirty = reused.indexOfFirst { it == null }
-                val data =
-                    if (firstDirty < 0) {
-                        reused.filterNotNull()
-                    } else {
-                        // ponytail: Split disjoint ranges only if a trace shows this span is too broad.
-                        val lastDirty = reused.indexOfLast { it == null }
-                        val fetchedData =
-                            dao.getTimelinePage(
-                                pagingKey = pagingKey,
-                                offset = firstDirty,
-                                limit = lastDirty - firstDirty + 1,
-                            )
-                        reused.mapIndexed { index, cached ->
-                            if (index in firstDirty..lastDirty) {
-                                fetchedData[index - firstDirty]
-                            } else {
-                                checkNotNull(cached)
-                            }
-                        }
-                    }
-                snapshot =
-                    Snapshot(
-                        loaded = true,
-                        identities = pageIdentities.take(data.size),
-                        data = data,
-                        nextIdentity = identityRows.getOrNull(data.size),
-                    )
-                return@withLock data
-            }
-
-            val data =
-                dao.getTimelinePage(
+            database.withReadTransaction {
+                loadPage(
+                    dao = database.pagingTimelineDao(),
                     pagingKey = pagingKey,
                     offset = offset,
                     limit = limit,
                 )
-            if (snapshot.data.size == offset && data.size == pageIdentities.size) {
+            }
+        }
+
+    private suspend fun loadPage(
+        dao: PagingTimelineDao,
+        pagingKey: String,
+        offset: Int,
+        limit: Int,
+    ): List<DbPagingTimelineWithStatus> {
+        val identityRows =
+            dao.getTimelinePageIdentities(
+                pagingKey = pagingKey,
+                offset = offset,
+                limit = limit + 1,
+            )
+        val pageIdentities = identityRows.take(limit)
+        if (pageIdentities.isEmpty()) {
+            if (offset == 0) {
                 snapshot =
                     Snapshot(
                         loaded = true,
-                        identities = snapshot.identities + pageIdentities,
-                        data = snapshot.data + data,
-                        nextIdentity = identityRows.getOrNull(pageIdentities.size),
+                        nextIdentity = identityRows.firstOrNull(),
                     )
             }
-            data
+            return emptyList()
         }
+
+        if (offset == 0) {
+            val cachedByIdentity = snapshot.identities.zip(snapshot.data).toMap()
+            val reused = pageIdentities.map { cachedByIdentity[it] }
+            val firstDirty = reused.indexOfFirst { it == null }
+            val data =
+                if (firstDirty < 0) {
+                    reused.filterNotNull()
+                } else {
+                    // ponytail: Split disjoint ranges only if a trace shows this span is too broad.
+                    val lastDirty = reused.indexOfLast { it == null }
+                    val fetchedData =
+                        dao.getTimelinePage(
+                            pagingKey = pagingKey,
+                            offset = firstDirty,
+                            limit = lastDirty - firstDirty + 1,
+                        )
+                    reused.mapIndexed { index, cached ->
+                        if (index in firstDirty..lastDirty) {
+                            fetchedData[index - firstDirty]
+                        } else {
+                            checkNotNull(cached)
+                        }
+                    }
+                }
+            snapshot =
+                Snapshot(
+                    loaded = true,
+                    identities = pageIdentities.take(data.size),
+                    data = data,
+                    nextIdentity = identityRows.getOrNull(data.size),
+                )
+            return data
+        }
+
+        val data =
+            dao.getTimelinePage(
+                pagingKey = pagingKey,
+                offset = offset,
+                limit = limit,
+            )
+        if (snapshot.data.size == offset && data.size == pageIdentities.size) {
+            snapshot =
+                Snapshot(
+                    loaded = true,
+                    identities = snapshot.identities + pageIdentities,
+                    data = snapshot.data + data,
+                    nextIdentity = identityRows.getOrNull(pageIdentities.size),
+                )
+        }
+        return data
+    }
 
     private data class Snapshot(
         val loaded: Boolean = false,
@@ -137,7 +148,7 @@ internal class TimelineDbPageLoader(
         limit: Int,
     ): List<DbPagingTimelineWithStatus> =
         pageCache.load(
-            dao = database.pagingTimelineDao(),
+            database = database,
             pagingKey = pagingKey,
             offset = offset,
             limit = limit,

@@ -8,7 +8,7 @@ import androidx.room3.RoomDatabaseConstructor
 import androidx.room3.immediateTransaction
 import androidx.room3.useWriterConnection
 
-internal const val CACHE_DATABASE_VERSION = 46
+internal const val CACHE_DATABASE_VERSION = 49
 
 @Database(
     entities = [
@@ -38,6 +38,7 @@ internal const val CACHE_DATABASE_VERSION = 46
     dev.dimension.flare.data.database.adapter.MicroBlogKeyConverter::class,
     dev.dimension.flare.data.database.adapter.AccountTypeConverter::class,
     dev.dimension.flare.data.database.cache.model.EmojiContentConverter::class,
+    dev.dimension.flare.data.database.cache.model.DbTimelineContentConverter::class,
     dev.dimension.flare.data.database.cache.model.StatusConverter::class,
     dev.dimension.flare.data.database.cache.model.ListContentConverters::class,
     dev.dimension.flare.data.database.cache.model.TranslationConverters::class,
@@ -53,6 +54,8 @@ internal abstract class CacheDatabase : RoomDatabase() {
     abstract fun userDao(): dev.dimension.flare.data.database.cache.dao.UserDao
 
     abstract fun pagingTimelineDao(): dev.dimension.flare.data.database.cache.dao.PagingTimelineDao
+
+    abstract fun timelinePageDao(): dev.dimension.flare.data.database.cache.dao.TimelinePageDao
 
     abstract fun messageDao(): dev.dimension.flare.data.database.cache.dao.MessageDao
 

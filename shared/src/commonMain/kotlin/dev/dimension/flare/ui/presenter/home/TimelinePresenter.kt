@@ -30,8 +30,8 @@ import dev.dimension.flare.data.datasource.microblog.paging.OffsetFromStartPagin
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.TimelineDbPageCache
 import dev.dimension.flare.data.datasource.microblog.paging.TimelineDbPageLoader
-import dev.dimension.flare.data.datasource.microblog.paging.TimelinePagingMapper
 import dev.dimension.flare.data.datasource.microblog.paging.TimelineRemoteMediator
+import dev.dimension.flare.data.datasource.microblog.paging.TimelineUiMapperCache
 import dev.dimension.flare.data.datasource.microblog.paging.notSupported
 import dev.dimension.flare.data.datasource.microblog.paging.toPagingSource
 import dev.dimension.flare.data.datasource.microblog.pagingConfig
@@ -141,6 +141,7 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
                     }
 
                     is CacheableRemoteLoader<UiTimelineV2> -> {
+                        val uiMapperCache = TimelineUiMapperCache()
                         cachePager(
                             loader = remoteLoader,
                         ).cachedIn(scope).flatMapLatest { pagingData ->
@@ -148,7 +149,7 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
                                 .map { translationDisplayOptions ->
                                     withContext(PlatformDispatchers.IO) {
                                         pagingData.map { item ->
-                                            TimelinePagingMapper.toUi(
+                                            uiMapperCache.toUi(
                                                 item = item,
                                                 pagingKey = remoteLoader.pagingKey,
                                                 translationDisplayOptions = translationDisplayOptions,

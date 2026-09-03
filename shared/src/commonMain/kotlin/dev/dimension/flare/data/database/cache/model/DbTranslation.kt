@@ -33,6 +33,18 @@ internal data class DbTranslation(
     val statusReason: String? = null,
     val attemptCount: Int = 0,
     val updatedAt: Long,
+    /** Numeric payload revision used by the timeline cache's lightweight identity scan. */
+    val revision: Long =
+        stableDatabaseHash(
+            "translation-revision",
+            sourceHash,
+            status.name,
+            displayMode.name,
+            payload?.hashCode()?.toString().orEmpty(),
+            statusReason.orEmpty(),
+            attemptCount.toString(),
+            updatedAt.toString(),
+        ),
     @PrimaryKey
     val id: String = "${entityType.name}:$entityKey:$targetLanguage",
 )

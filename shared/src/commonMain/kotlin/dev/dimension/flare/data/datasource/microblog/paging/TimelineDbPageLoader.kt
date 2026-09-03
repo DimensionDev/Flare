@@ -3,8 +3,17 @@ package dev.dimension.flare.data.datasource.microblog.paging
 import dev.dimension.flare.common.PlatformDispatchers
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.dao.DbTimelinePageIdentity
-import dev.dimension.flare.data.database.cache.dao.PagingTimelineDao
+import dev.dimension.flare.data.database.cache.dao.DbTimelinePageIdentityRoot
+import dev.dimension.flare.data.database.cache.loadTimelineItems
+import dev.dimension.flare.data.database.cache.loadTimelinePageIdentities
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
+import dev.dimension.flare.data.database.cache.model.DbStatus
+import kotlinx.collections.immutable.PersistentList
+import kotlinx.collections.immutable.PersistentMap
+import kotlinx.collections.immutable.persistentHashMapOf
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toPersistentList
+import kotlinx.collections.immutable.toPersistentMap
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
@@ -13,112 +22,283 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
+/**
+ * Keeps the logical prefix already exposed to Paging loaded across invalidations.
+ *
+ * A smaller refresh request cannot evict its tail, and rows inserted above the prefix extend it
+ * through the previously loaded last row. Database deletions can still make the prefix shorter.
+ */
 internal class TimelineDbPageCache {
     private val mutex = Mutex()
     private var snapshot = Snapshot()
+    private var generation = 0L
 
     suspend fun hasCurrentWindowChanged(
-        dao: PagingTimelineDao,
+        database: CacheDatabase,
         pagingKey: String,
-    ): Boolean =
-        mutex.withLock {
-            if (!snapshot.loaded) {
-                return@withLock true
+        changedTables: Set<String>? = null,
+    ): Boolean {
+        val state =
+            mutex.withLock {
+                if (!snapshot.loaded) {
+                    return true
+                }
+                CacheState(
+                    generation = generation,
+                    snapshot = snapshot,
+                )
             }
-            val identities =
-                dao.getTimelinePageIdentities(
+        val dependencyTablesChanged =
+            changedTables == null ||
+                changedTables.any { table -> !table.equals(TIMELINE_TABLE, ignoreCase = true) }
+        val identities =
+            if (dependencyTablesChanged) {
+                database.loadTimelinePageIdentities(
                     pagingKey = pagingKey,
                     offset = 0,
-                    limit = snapshot.identities.size + 1,
+                    limit = state.snapshot.identities.size + 1,
                 )
-            val currentWindow = identities.take(snapshot.identities.size)
-            val nextIdentity = identities.getOrNull(snapshot.identities.size)
-            currentWindow != snapshot.identities || nextIdentity != snapshot.nextIdentity
+            } else {
+                null
+            }
+        val roots =
+            if (identities == null) {
+                database
+                    .pagingTimelineDao()
+                    .getTimelinePageIdentityRoots(
+                        pagingKey = pagingKey,
+                        offset = 0,
+                        limit = state.snapshot.identities.size + 1,
+                    )
+            } else {
+                null
+            }
+        return mutex.withLock {
+            if (generation != state.generation) {
+                return@withLock true
+            }
+            if (identities != null) {
+                val currentWindow = identities.take(state.snapshot.identities.size)
+                val nextIdentity = identities.getOrNull(state.snapshot.identities.size)
+                currentWindow != state.snapshot.identities || nextIdentity != state.snapshot.nextIdentity
+            } else {
+                checkNotNull(roots)
+                val currentWindow = roots.take(state.snapshot.identities.size)
+                val nextRoot = roots.getOrNull(state.snapshot.identities.size)
+                currentWindow.size != state.snapshot.identities.size ||
+                    currentWindow.indices.any { index ->
+                        !currentWindow[index].hasSameStructureAs(state.snapshot.identities[index])
+                    } ||
+                    !nextRoot.hasSameStructureAs(state.snapshot.nextIdentity)
+            }
         }
+    }
 
     suspend fun load(
-        dao: PagingTimelineDao,
+        database: CacheDatabase,
         pagingKey: String,
         offset: Int,
         limit: Int,
-    ): List<DbPagingTimelineWithStatus> =
-        mutex.withLock {
-            val identityRows =
-                dao.getTimelinePageIdentities(
-                    pagingKey = pagingKey,
-                    offset = offset,
-                    limit = limit + 1,
-                )
-            val pageIdentities = identityRows.take(limit)
-            if (pageIdentities.isEmpty()) {
-                if (offset == 0) {
-                    val nextIdentity = identityRows.firstOrNull()
-                    snapshot =
-                        Snapshot(
-                            loaded = true,
-                            nextIdentity = nextIdentity,
-                        )
+    ): List<DbPagingTimelineWithStatus> {
+        while (true) {
+            val state =
+                mutex.withLock {
+                    CacheState(
+                        generation = generation,
+                        snapshot = snapshot,
+                    )
                 }
-                return@withLock emptyList()
-            }
-
-            if (offset == 0) {
-                val reusablePrefix = snapshot.reusablePrefix(pageIdentities)
-                val fetchedLimit = pageIdentities.size - reusablePrefix
-                val fetchedData =
-                    if (fetchedLimit > 0) {
-                        dao.getTimelinePage(
-                            pagingKey = pagingKey,
-                            offset = reusablePrefix,
-                            limit = fetchedLimit,
-                        )
-                    } else {
-                        emptyList()
-                    }
-                val data = snapshot.data.take(reusablePrefix) + fetchedData
-                snapshot =
-                    Snapshot(
-                        loaded = true,
-                        identities = pageIdentities.take(data.size),
-                        data = data,
-                        nextIdentity = identityRows.getOrNull(data.size),
-                    )
-                return@withLock data
-            }
-
-            val data =
-                dao.getTimelinePage(
+            val retainedPrefixLimit =
+                if (offset == 0) {
+                    state.snapshot.identities.lastOrNull()?.let { lastIdentity ->
+                        database
+                            .pagingTimelineDao()
+                            .getTimelinePrefixLengthThroughStatus(
+                                pagingKey = pagingKey,
+                                statusId = lastIdentity.statusId,
+                            )
+                    } ?: 0
+                } else {
+                    0
+                }
+            val requestedLimit =
+                if (offset == 0) {
+                    maxOf(limit, state.snapshot.data.size, retainedPrefixLimit)
+                } else {
+                    limit
+                }
+            val identityRows =
+                database.loadTimelinePageIdentities(
                     pagingKey = pagingKey,
                     offset = offset,
-                    limit = limit,
+                    limit = requestedLimit + 1,
                 )
-            if (snapshot.data.size == offset && data.size == pageIdentities.size) {
-                snapshot =
-                    Snapshot(
-                        loaded = true,
-                        identities = snapshot.identities + pageIdentities,
-                        data = snapshot.data + data,
-                        nextIdentity = identityRows.getOrNull(pageIdentities.size),
-                    )
+            val pageIdentities = identityRows.take(requestedLimit)
+            val unchangedData =
+                if (offset == 0 && pageIdentities == state.snapshot.identities &&
+                    identityRows.getOrNull(pageIdentities.size) == state.snapshot.nextIdentity
+                ) {
+                    mutex.withLock {
+                        state.snapshot.data.takeIf { generation == state.generation }
+                    }
+                } else {
+                    null
+                }
+            if (unchangedData != null) {
+                return unchangedData
             }
-            data
+            val resolved =
+                resolve(
+                    database = database,
+                    pagingKey = pagingKey,
+                    previous = state.snapshot.entries,
+                    reusableStatuses = state.snapshot.statuses,
+                    identities = pageIdentities,
+                )
+            val committed =
+                mutex.withLock {
+                    if (generation != state.generation) {
+                        return@withLock null
+                    }
+                    val data = resolved.map { it.data }.toPersistentList()
+                    if (offset == 0) {
+                        snapshot =
+                            Snapshot(
+                                loaded = true,
+                                identities = resolved.map { it.identity }.toPersistentList(),
+                                data = data,
+                                entries = resolved.associateBy { it.identity.statusId }.toPersistentMap(),
+                                statuses = resolved.collectStatuses().toPersistentMap(),
+                                nextIdentity = identityRows.getOrNull(pageIdentities.size),
+                            )
+                    } else if (
+                        snapshot.data.size == offset &&
+                        resolved.size == pageIdentities.size
+                    ) {
+                        snapshot =
+                            snapshot.copy(
+                                loaded = true,
+                                identities = snapshot.identities.addingAll(resolved.map { it.identity }),
+                                data = snapshot.data.addingAll(data),
+                                entries = snapshot.entries.puttingAll(resolved.associateBy { it.identity.statusId }),
+                                statuses = snapshot.statuses.puttingAll(resolved.collectStatuses()),
+                                nextIdentity = identityRows.getOrNull(pageIdentities.size),
+                            )
+                    }
+                    generation++
+                    data
+                }
+            if (committed != null) {
+                return committed
+            }
+        }
+    }
+
+    private suspend fun resolve(
+        database: CacheDatabase,
+        pagingKey: String,
+        previous: PersistentMap<String, CachedEntry>,
+        reusableStatuses: PersistentMap<String, DbStatus>,
+        identities: List<DbTimelinePageIdentity>,
+    ): List<CachedEntry> {
+        if (identities.isEmpty()) {
+            return emptyList()
+        }
+        val missingStatusIds =
+            identities.mapNotNull { identity ->
+                if (previous[identity.statusId]?.identity?.hasSamePayloadAs(identity) == true) {
+                    null
+                } else {
+                    identity.statusId
+                }
+            }
+        val fetchedById =
+            database
+                .loadTimelineItems(
+                    pagingKey = pagingKey,
+                    statusIds = missingStatusIds,
+                    reusableStatuses = reusableStatuses,
+                ).associateBy { it.timeline.statusId }
+        return identities.mapNotNull { identity ->
+            val cached = previous[identity.statusId]
+            val data =
+                if (cached != null && cached.identity.hasSamePayloadAs(identity)) {
+                    cached.data.withSortId(identity.sortId)
+                } else {
+                    fetchedById[identity.statusId]
+                }
+            data?.let { CachedEntry(identity = identity, data = it) }
+        }
+    }
+
+    private fun DbPagingTimelineWithStatus.withSortId(sortId: Long): DbPagingTimelineWithStatus =
+        if (timeline.sortId == sortId) {
+            this
+        } else {
+            copy(timeline = timeline.copy(sortId = sortId))
+        }
+
+    private fun List<CachedEntry>.collectStatuses(): Map<String, DbStatus> {
+        val result = LinkedHashMap<String, DbStatus>(size * 2)
+        forEach { entry ->
+            val item = entry.data
+            result[item.statusData.id] = item.statusData
+            item.references.forEach { reference ->
+                reference.status?.data?.let { result[it.id] = it }
+            }
+            item.presentationReferences.forEach { reference ->
+                reference.status?.data?.let { result[it.id] = it }
+            }
+        }
+        return result
+    }
+
+    private fun DbTimelinePageIdentity.hasSamePayloadAs(other: DbTimelinePageIdentity): Boolean =
+        statusId == other.statusId &&
+            rootContentHash == other.rootContentHash &&
+            messageRenderHash == other.messageRenderHash &&
+            statusReferenceHash == other.statusReferenceHash &&
+            presentationReferenceHash == other.presentationReferenceHash &&
+            dependencyCount == other.dependencyCount &&
+            dependencyRevision == other.dependencyRevision
+
+    private fun DbTimelinePageIdentityRoot?.hasSameStructureAs(other: DbTimelinePageIdentity?): Boolean =
+        when {
+            this == null || other == null -> {
+                this == null && other == null
+            }
+
+            else -> {
+                statusId == other.statusId &&
+                    sortId == other.sortId &&
+                    rootContentHash == other.rootContentHash &&
+                    messageRenderHash == other.messageRenderHash &&
+                    statusReferenceHash == other.statusReferenceHash &&
+                    presentationReferenceHash == other.presentationReferenceHash
+            }
         }
 
     private data class Snapshot(
         val loaded: Boolean = false,
-        val identities: List<DbTimelinePageIdentity> = emptyList(),
-        val data: List<DbPagingTimelineWithStatus> = emptyList(),
+        val identities: PersistentList<DbTimelinePageIdentity> = persistentListOf(),
+        val data: PersistentList<DbPagingTimelineWithStatus> = persistentListOf(),
+        val entries: PersistentMap<String, CachedEntry> = persistentHashMapOf(),
+        val statuses: PersistentMap<String, DbStatus> = persistentHashMapOf(),
         val nextIdentity: DbTimelinePageIdentity? = null,
-    ) {
-        fun reusablePrefix(newIdentities: List<DbTimelinePageIdentity>): Int {
-            val max = minOf(identities.size, data.size, newIdentities.size)
-            for (index in 0 until max) {
-                if (identities[index] != newIdentities[index]) {
-                    return index
-                }
-            }
-            return max
-        }
+    )
+
+    private data class CachedEntry(
+        val identity: DbTimelinePageIdentity,
+        val data: DbPagingTimelineWithStatus,
+    )
+
+    private data class CacheState(
+        val generation: Long,
+        val snapshot: Snapshot,
+    )
+
+    private companion object {
+        const val TIMELINE_TABLE = "DbPagingTimeline"
     }
 }
 
@@ -132,7 +312,7 @@ internal class TimelineDbPageLoader(
         limit: Int,
     ): List<DbPagingTimelineWithStatus> =
         pageCache.load(
-            dao = database.pagingTimelineDao(),
+            database = database,
             pagingKey = pagingKey,
             offset = offset,
             limit = limit,
@@ -142,7 +322,6 @@ internal class TimelineDbPageLoader(
         val ready = CompletableDeferred<Unit>()
         val job =
             CoroutineScope(PlatformDispatchers.IO).launch(start = CoroutineStart.UNDISPATCHED) {
-                val dao = database.pagingTimelineDao()
                 database
                     .invalidationTracker
                     .createFlow(
@@ -152,14 +331,15 @@ internal class TimelineDbPageLoader(
                         "timeline_item_presentation_reference",
                         "DbTranslation",
                         emitInitialState = true,
-                    ).collect {
+                    ).collect { changedTables ->
                         if (ready.complete(Unit)) {
                             return@collect
                         }
                         val currentWindowChanged =
                             pageCache.hasCurrentWindowChanged(
-                                dao = dao,
+                                database = database,
                                 pagingKey = pagingKey,
+                                changedTables = changedTables,
                             )
                         if (!currentWindowChanged) {
                             return@collect

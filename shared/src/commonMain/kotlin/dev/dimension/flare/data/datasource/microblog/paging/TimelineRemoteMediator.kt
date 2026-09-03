@@ -86,14 +86,14 @@ internal class TimelineRemoteMediator(
                 pageSize = pageSize,
                 request = request,
             )
+        val sortIdProvider = loader as? SortIdProvider
+        val sortIds = result.data.map { sortIdProvider?.sortId(it) }
         val data =
-            result.data.map {
-                TimelinePagingMapper.toDb(
-                    data = it,
-                    pagingKey = pagingKey,
-                    sortId = (loader as? SortIdProvider)?.sortId(it),
-                )
-            }
+            TimelinePagingMapper.toDb(
+                data = result.data,
+                pagingKey = pagingKey,
+                sortIds = sortIds,
+            )
         return PagingResult(
             data = data,
             nextKey = result.nextKey,

@@ -15,6 +15,7 @@ import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.createTestFileSystem
 import dev.dimension.flare.createTestRootPath
 import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.database.cache.loadTimelinePage
 import dev.dimension.flare.data.database.cache.mapper.saveToDatabase
 import dev.dimension.flare.data.database.cache.model.DbPagingKey
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
@@ -599,8 +600,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
                     "https://example.com/b_2000",
                 ),
                 db
-                    .pagingTimelineDao()
-                    .getTimelinePage(refreshMediator.pagingKey, offset = 0, limit = 20)
+                    .loadTimelinePage(refreshMediator.pagingKey, offset = 0, limit = 20)
                     .mapNotNull { (it.status.status.data.content as? UiTimelineV2.Feed)?.url },
             )
             assertEquals(listOf<PagingRequest>(PagingRequest.Refresh, PagingRequest.Append("a_next")), first.requests)
@@ -727,7 +727,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
             assertTrue(appendResult is androidx.paging.RemoteMediator.MediatorResult.Success)
 
             val page =
-                db.pagingTimelineDao().getTimelinePage(
+                db.loadTimelinePage(
                     pagingKey = appendMediator.pagingKey,
                     offset = 0,
                     limit = 20,
@@ -804,7 +804,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
                 loader.requests,
             )
             val page =
-                db.pagingTimelineDao().getTimelinePage(
+                db.loadTimelinePage(
                     pagingKey = loader.pagingKey,
                     offset = 0,
                     limit = 20,

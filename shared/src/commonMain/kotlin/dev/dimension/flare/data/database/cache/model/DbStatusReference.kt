@@ -21,6 +21,7 @@ import dev.dimension.flare.model.ReferenceType
             ],
             unique = true,
         ),
+        Index(value = ["referenceStatusId"]),
     ],
 )
 internal data class DbStatusReference(
@@ -33,4 +34,18 @@ internal data class DbStatusReference(
     val statusId: String,
     val referenceStatusId: String,
     val referenceOrder: Int = 0,
-)
+) {
+    companion object {
+        fun createId(
+            referenceType: ReferenceType,
+            statusId: String,
+            referenceStatusId: String,
+        ): String =
+            stableDatabaseId(
+                "status-reference",
+                statusId,
+                referenceType.name,
+                referenceStatusId,
+            )
+    }
+}

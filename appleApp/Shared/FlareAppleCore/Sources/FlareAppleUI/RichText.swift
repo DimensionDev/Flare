@@ -15,6 +15,7 @@ private typealias PlatformImage = NSImage
 
 public struct RichText: View {
     private let text: UiRichText
+    private let contents: [PlatformTextContent]
     @State private var images: [String: Image] = [:]
     @ScaledMetric(relativeTo: .body) private var imageSize = 17
     @ScaledMetric(relativeTo: .body) private var quoteBarWidth = 3
@@ -22,6 +23,7 @@ public struct RichText: View {
 
     public init(text: UiRichText) {
         self.text = text
+        self.contents = text.platformText.compactMap { $0 as? PlatformTextContent }
     }
 
     public var body: some View {
@@ -65,10 +67,6 @@ public struct RichText: View {
                 }
             }
         }
-    }
-
-    private var contents: [PlatformTextContent] {
-        text.platformText.compactMap { $0 as? PlatformTextContent }
     }
 
     @ViewBuilder

@@ -3,6 +3,7 @@ package dev.dimension.flare.data.datasource.microblog
 import androidx.paging.ExperimentalPagingApi
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.connect
+import dev.dimension.flare.data.database.cache.loadTimelinePage
 import dev.dimension.flare.data.database.cache.mapper.saveToDatabase
 import dev.dimension.flare.data.database.cache.model.DbPagingKey
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
@@ -165,13 +166,11 @@ internal class MixedRemoteMediator(
                                             PagingResult(endOfPaginationReached = true)
                                         }
                                     val stagedItems =
-                                        result.data.map { item ->
-                                            TimelinePagingMapper.toDb(
-                                                data = item,
-                                                pagingKey = state.source.stagingKey,
-                                                sortId = timeSortId(item),
-                                            )
-                                        }
+                                        TimelinePagingMapper.toDb(
+                                            data = result.data,
+                                            pagingKey = state.source.stagingKey,
+                                            sortIds = result.data.map { timeSortId(it) },
+                                        )
                                     TimeSubResponse(state, result, stagedItems)
                                 }
                             }.awaitAll()
@@ -233,7 +232,7 @@ internal class MixedRemoteMediator(
                 source = source,
                 pending =
                     ArrayDeque(
-                        database.pagingTimelineDao().getTimelinePage(
+                        database.loadTimelinePage(
                             pagingKey = source.stagingKey,
                             offset = 0,
                             limit = Int.MAX_VALUE,

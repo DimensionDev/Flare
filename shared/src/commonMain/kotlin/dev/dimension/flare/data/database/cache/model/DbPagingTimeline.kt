@@ -12,7 +12,6 @@ import dev.dimension.flare.common.encodeProtobuf
 import dev.dimension.flare.model.ReferenceType
 import dev.dimension.flare.ui.model.UiTimelineV2
 import kotlin.time.Instant
-import kotlin.uuid.Uuid
 
 @Entity(
     indices = [
@@ -32,9 +31,25 @@ internal data class DbPagingTimeline(
     @ColumnInfo(typeAffinity = ColumnInfo.BLOB)
     val message: UiTimelineV2.Message? = null,
     val messageRenderHash: Int? = message?.renderHash,
+    val statusReferenceHash: Long = stableDatabaseHash("status-reference-set"),
+    val presentationReferenceHash: Long = stableDatabaseHash("presentation-reference-set"),
+    /**
+     * Monotonic cache revision bumped when this row's status, references, or translations change.
+     *
+     * Keeping the revision on the timeline row lets stable-prefix refreshes detect dependency
+     * changes without materializing every dependency row across the SQLite/Kotlin boundary.
+     */
+    val dependencyRevision: Long = 0,
     @PrimaryKey
-    val _id: String = Uuid.random().toString(),
-)
+    val _id: String = createId(pagingKey = pagingKey, statusId = statusId),
+) {
+    companion object {
+        fun createId(
+            pagingKey: String,
+            statusId: String,
+        ): String = stableDatabaseId("timeline", pagingKey, statusId)
+    }
+}
 
 @Entity(
     tableName = "timeline_item_presentation_reference",
@@ -51,6 +66,7 @@ internal data class DbPagingTimeline(
             ],
             unique = true,
         ),
+        Index(value = ["referenceStatusId"]),
     ],
 )
 internal data class DbTimelineItemPresentationReference(
@@ -61,7 +77,23 @@ internal data class DbTimelineItemPresentationReference(
     val referenceStatusId: String,
     val presentationType: DbTimelineItemPresentationType,
     val referenceOrder: Int = 0,
-)
+) {
+    companion object {
+        fun createId(
+            pagingKey: String,
+            statusId: String,
+            referenceStatusId: String,
+            presentationType: DbTimelineItemPresentationType,
+        ): String =
+            stableDatabaseId(
+                "presentation-reference",
+                pagingKey,
+                statusId,
+                presentationType.name,
+                referenceStatusId,
+            )
+    }
+}
 
 internal enum class DbTimelineItemPresentationType {
     InlineParent,
@@ -194,3 +226,48 @@ internal class StatusConverter {
     @ColumnTypeConverter
     fun toTimestamp(value: Long): Instant = Instant.fromEpochMilliseconds(value)
 }
+
+internal fun stableDatabaseId(
+    type: String,
+    vararg parts: String,
+): String =
+    buildString {
+        append(type)
+        parts.forEach { part ->
+            append('|')
+            append(part.length)
+            append(':')
+            append(part)
+        }
+    }
+
+internal fun stableDatabaseHash(
+    type: String,
+    vararg parts: String,
+): Long = stableDatabaseHash(type, parts.asIterable())
+
+/** Folds the stable id format directly, avoiding a temporary combined String. */
+internal fun stableDatabaseHash(
+    type: String,
+    parts: Iterable<String>,
+): Long {
+    var hash = FNV_1A_64_OFFSET_BASIS
+
+    fun add(value: String) {
+        value.forEach { character ->
+            hash = (hash xor character.code.toLong()) * FNV_1A_64_PRIME
+        }
+    }
+
+    add(type)
+    parts.forEach { part ->
+        add("|")
+        add(part.length.toString())
+        add(":")
+        add(part)
+    }
+    return hash
+}
+
+private const val FNV_1A_64_OFFSET_BASIS = -3750763034362895579L
+private const val FNV_1A_64_PRIME = 1099511628211L

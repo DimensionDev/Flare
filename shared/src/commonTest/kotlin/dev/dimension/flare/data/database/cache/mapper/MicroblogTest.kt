@@ -8,6 +8,7 @@ import dev.dimension.flare.RobolectricTest
 import dev.dimension.flare.common.Locale
 import dev.dimension.flare.common.TestFormatter
 import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.database.cache.loadTimelinePage
 import dev.dimension.flare.data.database.cache.model.DbPagingTimeline
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.database.cache.model.DbStatus
@@ -28,6 +29,7 @@ import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.paging.TimelineDbPageCache
 import dev.dimension.flare.data.datasource.microblog.paging.TimelineDbPageLoader
 import dev.dimension.flare.data.datasource.microblog.paging.TimelinePagingMapper
+import dev.dimension.flare.data.datasource.microblog.paging.TimelineUiMapperCache
 import dev.dimension.flare.data.datastore.model.AppSettings
 import dev.dimension.flare.data.translation.PreTranslationStoreSupport
 import dev.dimension.flare.data.translation.cacheKey
@@ -63,6 +65,8 @@ import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
+import kotlin.test.assertNotSame
+import kotlin.test.assertSame
 import kotlin.test.assertTrue
 import kotlin.time.Clock
 
@@ -182,6 +186,9 @@ class MicroblogTest : RobolectricTest() {
             val savedUser = db.userDao().findByKey(userKey).first()
             assertNotNull(savedUser)
             assertEquals("New Name", savedUser.content.name.raw)
+            val savedStatus = db.statusDao().get(statusKey, AccountType.Specific(accountKey)).first()
+            assertNotNull(savedStatus)
+            assertEquals("New Name", rootPostOf(savedStatus.content).user?.name?.raw)
         }
 
     @Test
@@ -498,6 +505,384 @@ class MicroblogTest : RobolectricTest() {
                 emptyList(),
                 loader.load(offset = 2, limit = 1).map { it.status.status.data.id },
             )
+        }
+
+    @Test
+    fun timelineStorageIdsAreStableForEquivalentMappings() =
+        runTest {
+            val accountKey = MicroBlogKey(id = "account-stable-id", host = "test.com")
+            val user = createUser(MicroBlogKey(id = "user-stable-id", host = "test.com"), "User")
+            val quote =
+                createPost(
+                    accountKey = accountKey,
+                    user = user,
+                    statusKey = MicroBlogKey(id = "quote-stable-id", host = "test.com"),
+                    text = "quote",
+                )
+            val item =
+                timelinePostItem(
+                    post =
+                        createPost(
+                            accountKey = accountKey,
+                            user = user,
+                            statusKey = MicroBlogKey(id = "root-stable-id", host = "test.com"),
+                            text = "root",
+                        ),
+                    quotes = listOf(quote),
+                )
+
+            val first = TimelinePagingMapper.toDb(item, pagingKey = "home", sortId = 10)
+            val second = TimelinePagingMapper.toDb(item, pagingKey = "home", sortId = 10)
+
+            assertEquals(first.timeline._id, second.timeline._id)
+            assertEquals(
+                first.status.references.map { it.reference._id },
+                second.status.references.map { it.reference._id },
+            )
+            assertEquals(
+                first.presentationReferences.map { it.reference._id },
+                second.presentationReferences.map { it.reference._id },
+            )
+        }
+
+    @Test
+    fun timelineUiMapperCacheReusesOnlyUnchangedDatabaseItemsAndDisplayOptions() =
+        runTest {
+            val accountKey = MicroBlogKey(id = "account-ui-cache", host = "test.com")
+            val user = createUser(MicroBlogKey(id = "user-ui-cache", host = "test.com"), "User")
+            val mapped =
+                TimelinePagingMapper.toDb(
+                    createPost(
+                        accountKey = accountKey,
+                        user = user,
+                        statusKey = MicroBlogKey(id = "status-ui-cache", host = "test.com"),
+                        text = "cached",
+                    ),
+                    pagingKey = "home",
+                    sortId = 1,
+                )
+            val options = translationDisplayOptions()
+            val cache = TimelineUiMapperCache(maxSize = 2)
+
+            val first = cache.toUi(mapped, "home", options)
+            assertSame(first, cache.toUi(mapped, "home", options))
+            assertNotSame(
+                first,
+                cache.toUi(mapped, "home", options.copy(autoDisplayEnabled = false)),
+            )
+            assertNotSame(
+                first,
+                cache.toUi(mapped.copy(timeline = mapped.timeline.copy(sortId = 2)), "home", options),
+            )
+        }
+
+    @Test
+    fun batchTimelineMappingMatchesSingleMappingAndInternsSharedReferenceStatuses() =
+        runTest {
+            val accountKey = MicroBlogKey(id = "account-batch-map", host = "test.com")
+            val user = createUser(MicroBlogKey(id = "user-batch-map", host = "test.com"), "User")
+            val sharedQuote =
+                createPost(
+                    accountKey = accountKey,
+                    user = user,
+                    statusKey = MicroBlogKey(id = "shared-quote-batch-map", host = "test.com"),
+                    text = "shared quote",
+                )
+            val items =
+                listOf("first", "second").map { id ->
+                    timelinePostItem(
+                        post =
+                            createPost(
+                                accountKey = accountKey,
+                                user = user,
+                                statusKey = MicroBlogKey(id = "$id-batch-map", host = "test.com"),
+                                text = id,
+                            ),
+                        quotes = listOf(sharedQuote),
+                    )
+                }
+            val individual =
+                items.mapIndexed { index, item ->
+                    TimelinePagingMapper.toDb(item, pagingKey = "home", sortId = index.toLong())
+                }
+
+            val batch =
+                TimelinePagingMapper.toDb(
+                    data = items,
+                    pagingKey = "home",
+                    sortIds = listOf(0L, 1L),
+                )
+
+            assertEquals(individual, batch)
+            assertSame(
+                batch[0].presentationReferences.single().status,
+                batch[1].presentationReferences.single().status,
+            )
+        }
+
+    @Test
+    fun explicitTimelineHydrationSharesReferencedStatusesAndFiltersTranslationType() =
+        runTest {
+            val accountKey = MicroBlogKey(id = "account-hydration", host = "test.com")
+            val user = createUser(MicroBlogKey(id = "user-hydration", host = "test.com"), "User")
+            val quote =
+                createPost(
+                    accountKey = accountKey,
+                    user = user,
+                    statusKey = MicroBlogKey(id = "quote-hydration", host = "test.com"),
+                    text = "quote",
+                )
+            val mapped =
+                TimelinePagingMapper.toDb(
+                    data =
+                        timelinePostItem(
+                            post =
+                                createPost(
+                                    accountKey = accountKey,
+                                    user = user,
+                                    statusKey = MicroBlogKey(id = "root-hydration", host = "test.com"),
+                                    text = "root",
+                                ),
+                            quotes = listOf(quote),
+                        ),
+                    pagingKey = "home",
+                    sortId = 10,
+                )
+            saveToDatabase(db, listOf(mapped))
+            val rootStatusId = mapped.status.status.data.id
+            db.translationDao().insertAll(
+                listOf(
+                    DbTranslation(
+                        entityType = TranslationEntityType.Status,
+                        entityKey = rootStatusId,
+                        targetLanguage = "zh-CN",
+                        sourceHash = "status-source",
+                        status = TranslationStatus.Completed,
+                        updatedAt = 1,
+                    ),
+                    DbTranslation(
+                        entityType = TranslationEntityType.Profile,
+                        entityKey = rootStatusId,
+                        targetLanguage = "zh-CN",
+                        sourceHash = "profile-source",
+                        status = TranslationStatus.Completed,
+                        updatedAt = 1,
+                    ),
+                ),
+            )
+
+            val loaded = db.loadTimelinePage(pagingKey = "home", offset = 0, limit = 20).single()
+            val semanticQuote =
+                loaded.status.references.single { it.reference.referenceType == ReferenceType.Quote }
+            val presentationQuote =
+                loaded.presentationReferences.single {
+                    it.reference.presentationType.name == "Quote"
+                }
+
+            assertSame(semanticQuote.status, presentationQuote.status)
+            assertEquals(listOf(TranslationEntityType.Status), loaded.statusTranslations.map { it.entityType })
+        }
+
+    @Test
+    fun timelinePageCacheKeepsHighWaterMarkAndReusesUnchangedItemsByStatusId() =
+        runTest {
+            val accountKey = MicroBlogKey(id = "account-cache", host = "test.com")
+            val user = createUser(MicroBlogKey(id = "user-cache", host = "test.com"), "User")
+
+            suspend fun mapped(
+                id: String,
+                text: String,
+                sortId: Long,
+            ) = TimelinePagingMapper.toDb(
+                data =
+                    createPost(
+                        accountKey = accountKey,
+                        user = user,
+                        statusKey = MicroBlogKey(id = id, host = "test.com"),
+                        text = text,
+                    ),
+                pagingKey = "home",
+                sortId = sortId,
+            )
+
+            val first = mapped(id = "first-cache", text = "first", sortId = 10)
+            val second = mapped(id = "second-cache", text = "second", sortId = 20)
+            val third = mapped(id = "third-cache", text = "third", sortId = 30)
+            saveToDatabase(db, listOf(first, second, third))
+
+            val loader = TimelineDbPageLoader(db, "home", TimelineDbPageCache())
+            val firstPage = loader.load(offset = 0, limit = 2)
+            val appendedPage = loader.load(offset = 2, limit = 1)
+            val refreshedPrefix = loader.load(offset = 0, limit = 1)
+
+            assertEquals(listOf(first.timeline.statusId, second.timeline.statusId), firstPage.map { it.timeline.statusId })
+            assertEquals(listOf(third.timeline.statusId), appendedPage.map { it.timeline.statusId })
+            assertEquals(
+                listOf(first.timeline.statusId, second.timeline.statusId, third.timeline.statusId),
+                refreshedPrefix.map { it.timeline.statusId },
+            )
+            assertSame(firstPage[0], refreshedPrefix[0])
+            assertSame(firstPage[1], refreshedPrefix[1])
+            assertSame(appendedPage[0], refreshedPrefix[2])
+
+            val inserted = mapped(id = "inserted-cache", text = "inserted", sortId = 5)
+            saveToDatabase(db, listOf(inserted))
+            val afterInsert = loader.load(offset = 0, limit = 1)
+
+            assertEquals(
+                listOf(
+                    inserted.timeline.statusId,
+                    first.timeline.statusId,
+                    second.timeline.statusId,
+                    third.timeline.statusId,
+                ),
+                afterInsert.map { it.timeline.statusId },
+            )
+            assertSame(refreshedPrefix[0], afterInsert[1])
+            assertSame(refreshedPrefix[1], afterInsert[2])
+            assertSame(refreshedPrefix[2], afterInsert[3])
+
+            val changedSecond = mapped(id = "second-cache", text = "second changed", sortId = 20)
+            saveToDatabase(db, listOf(changedSecond))
+            val afterChange = loader.load(offset = 0, limit = 4)
+
+            assertSame(afterInsert[0], afterChange[0])
+            assertSame(afterInsert[1], afterChange[1])
+            assertNotSame(afterInsert[2], afterChange[2])
+            assertSame(afterInsert[3], afterChange[3])
+            assertEquals(
+                "second changed",
+                rootPostOf(
+                    afterChange[2]
+                        .status.status.data.content,
+                ).content.original.raw,
+            )
+        }
+
+    @Test
+    fun timelinePageCacheRefreshesReferencedContentAndTranslationWithoutReplacingUnchangedRoots() =
+        runTest {
+            val accountKey = MicroBlogKey(id = "account-cache-dependency", host = "test.com")
+            val user = createUser(MicroBlogKey(id = "user-cache-dependency", host = "test.com"), "User")
+            val quote =
+                createPost(
+                    accountKey = accountKey,
+                    user = user,
+                    statusKey = MicroBlogKey(id = "quote-cache-dependency", host = "test.com"),
+                    text = "quote original",
+                )
+            val firstRoot =
+                createPost(
+                    accountKey = accountKey,
+                    user = user,
+                    statusKey = MicroBlogKey(id = "first-cache-dependency", host = "test.com"),
+                    text = "first root",
+                )
+            val secondRoot =
+                createPost(
+                    accountKey = accountKey,
+                    user = user,
+                    statusKey = MicroBlogKey(id = "second-cache-dependency", host = "test.com"),
+                    text = "second root",
+                )
+            val first = TimelinePagingMapper.toDb(timelinePostItem(firstRoot, quotes = listOf(quote)), "home", sortId = 10)
+            val second = TimelinePagingMapper.toDb(secondRoot, "home", sortId = 20)
+            saveToDatabase(db, listOf(first, second))
+
+            val loader = TimelineDbPageLoader(db, "home", TimelineDbPageCache())
+            val initial = loader.load(offset = 0, limit = 2)
+
+            val updatedQuote = quote.copy(content = UiTranslatableText("quote changed".toUiPlainText()))
+            val changedFirst =
+                TimelinePagingMapper.toDb(
+                    timelinePostItem(firstRoot, quotes = listOf(updatedQuote)),
+                    "home",
+                    sortId = 10,
+                )
+            saveToDatabase(db, listOf(changedFirst))
+            val afterContentChange = loader.load(offset = 0, limit = 2)
+
+            assertNotSame(initial[0], afterContentChange[0])
+            assertSame(initial[1], afterContentChange[1])
+            val changedUi =
+                assertIs<UiTimelineV2.TimelinePostItem>(
+                    TimelinePagingMapper.toUi(afterContentChange[0], "home", translationDisplayOptions()),
+                )
+            assertEquals(
+                "quote changed",
+                changedUi.presentation.quotes
+                    .single()
+                    .content.original.raw,
+            )
+
+            val quoteStatusId =
+                changedFirst.presentationReferences
+                    .single()
+                    .reference.referenceStatusId
+            val sourcePayload = checkNotNull(updatedQuote.translationPayload())
+            db.translationDao().insert(
+                DbTranslation(
+                    entityType = TranslationEntityType.Status,
+                    entityKey = quoteStatusId,
+                    targetLanguage = Locale.language,
+                    sourceHash = sourcePayload.sourceHash(googleTranslationProviderCacheKey),
+                    status = TranslationStatus.Completed,
+                    payload = TranslationPayload(content = "quote translated".toUiPlainText()),
+                    updatedAt = 1,
+                ),
+            )
+            val afterTranslation = loader.load(offset = 0, limit = 2)
+
+            assertNotSame(afterContentChange[0], afterTranslation[0])
+            assertSame(afterContentChange[1], afterTranslation[1])
+            val translatedUi =
+                assertIs<UiTimelineV2.TimelinePostItem>(
+                    TimelinePagingMapper.toUi(afterTranslation[0], "home", translationDisplayOptions()),
+                )
+            assertEquals(
+                "quote translated",
+                translatedUi.presentation.quotes
+                    .single()
+                    .content.translation
+                    ?.raw,
+            )
+
+            db.statusDao().delete(
+                statusKey = updatedQuote.statusKey,
+                accountType = AccountType.Specific(accountKey),
+            )
+            val afterReferencedStatusDelete = loader.load(offset = 0, limit = 2)
+            assertNotSame(afterTranslation[0], afterReferencedStatusDelete[0])
+            assertSame(afterTranslation[1], afterReferencedStatusDelete[1])
+            val withoutReferencedStatus =
+                assertIs<UiTimelineV2.TimelinePostItem>(
+                    TimelinePagingMapper.toUi(afterReferencedStatusDelete[0], "home", translationDisplayOptions()),
+                )
+            assertTrue(withoutReferencedStatus.presentation.quotes.isEmpty())
+
+            saveToDatabase(db, listOf(changedFirst))
+            val afterReferencedStatusRestore = loader.load(offset = 0, limit = 2)
+            assertNotSame(afterReferencedStatusDelete[0], afterReferencedStatusRestore[0])
+            assertSame(afterReferencedStatusDelete[1], afterReferencedStatusRestore[1])
+            val restoredReference =
+                assertIs<UiTimelineV2.TimelinePostItem>(
+                    TimelinePagingMapper.toUi(afterReferencedStatusRestore[0], "home", translationDisplayOptions()),
+                )
+            assertEquals(1, restoredReference.presentation.quotes.size)
+
+            saveToDatabase(
+                db,
+                listOf(TimelinePagingMapper.toDb(firstRoot, "home", sortId = 10)),
+            )
+            val afterReferenceRemoval = loader.load(offset = 0, limit = 2)
+
+            assertNotSame(afterReferencedStatusRestore[0], afterReferenceRemoval[0])
+            assertSame(afterReferencedStatusRestore[1], afterReferenceRemoval[1])
+            val withoutQuoteUi =
+                assertIs<UiTimelineV2.TimelinePostItem>(
+                    TimelinePagingMapper.toUi(afterReferenceRemoval[0], "home", translationDisplayOptions()),
+                )
+            assertTrue(withoutQuoteUi.presentation.quotes.isEmpty())
         }
 
     @Test

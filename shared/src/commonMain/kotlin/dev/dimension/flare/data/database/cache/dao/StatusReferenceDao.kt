@@ -1,6 +1,7 @@
 package dev.dimension.flare.data.database.cache.dao
 
 import androidx.room3.Dao
+import androidx.room3.Delete
 import androidx.room3.Insert
 import androidx.room3.OnConflictStrategy
 import androidx.room3.Query
@@ -26,4 +27,10 @@ internal interface StatusReferenceDao {
 
     @Query("SELECT * FROM status_reference WHERE statusId = :statusId")
     suspend fun getByStatusId(statusId: String): List<DbStatusReference>
+
+    @Query("SELECT * FROM status_reference WHERE statusId in (:statusIds)")
+    suspend fun getByStatusIds(statusIds: List<String>): List<DbStatusReference>
+
+    @Delete
+    suspend fun deleteItems(items: List<DbStatusReference>)
 }

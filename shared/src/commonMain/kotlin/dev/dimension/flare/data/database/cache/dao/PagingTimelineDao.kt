@@ -23,11 +23,22 @@ import kotlinx.coroutines.flow.Flow
 internal data class DbTimelinePageIdentity(
     val statusId: String,
     val sortId: Long,
-    val rootRenderHash: Int,
+    val rootContentHash: Long,
     val messageRenderHash: Int?,
-    val rootTranslationSignature: String,
-    val referenceCount: Long,
-    val referenceSignature: String,
+    val statusReferenceHash: Long,
+    val presentationReferenceHash: Long,
+    val dependencyCount: Int,
+    val dependencyRevision: Long,
+)
+
+internal data class DbTimelinePageIdentityRoot(
+    val statusId: String,
+    val sortId: Long,
+    val rootContentHash: Long,
+    val messageRenderHash: Int?,
+    val statusReferenceHash: Long,
+    val presentationReferenceHash: Long,
+    val dependencyRevision: Long,
 )
 
 @Dao
@@ -41,10 +52,14 @@ internal interface PagingTimelineDao {
             "DbPagingTimeline.sortId AS sortId, " +
             "DbPagingTimeline.message AS message, " +
             "DbPagingTimeline.messageRenderHash AS messageRenderHash, " +
+            "DbPagingTimeline.statusReferenceHash AS statusReferenceHash, " +
+            "DbPagingTimeline.presentationReferenceHash AS presentationReferenceHash, " +
+            "DbPagingTimeline.dependencyRevision AS dependencyRevision, " +
             "DbPagingTimeline._id AS _id, " +
             "DbStatus.statusKey AS status_statusKey, " +
             "DbStatus.accountType AS status_accountType, " +
             "DbStatus.content AS status_content, " +
+            "DbStatus.contentHash AS status_contentHash, " +
             "DbStatus.renderHash AS status_renderHash, " +
             "DbStatus.text AS status_text, " +
             "DbStatus.id AS status_id " +
@@ -66,10 +81,14 @@ internal interface PagingTimelineDao {
             "DbPagingTimeline.sortId AS sortId, " +
             "DbPagingTimeline.message AS message, " +
             "DbPagingTimeline.messageRenderHash AS messageRenderHash, " +
+            "DbPagingTimeline.statusReferenceHash AS statusReferenceHash, " +
+            "DbPagingTimeline.presentationReferenceHash AS presentationReferenceHash, " +
+            "DbPagingTimeline.dependencyRevision AS dependencyRevision, " +
             "DbPagingTimeline._id AS _id, " +
             "DbStatus.statusKey AS status_statusKey, " +
             "DbStatus.accountType AS status_accountType, " +
             "DbStatus.content AS status_content, " +
+            "DbStatus.contentHash AS status_contentHash, " +
             "DbStatus.renderHash AS status_renderHash, " +
             "DbStatus.text AS status_text, " +
             "DbStatus.id AS status_id " +
@@ -80,121 +99,43 @@ internal interface PagingTimelineDao {
     )
     fun getPagingSource(pagingKey: String): PagingSource<Int, DbPagingTimelineWithStatus>
 
-    @Transaction
     @Query(
         "SELECT " +
-            "DbPagingTimeline.pagingKey AS pagingKey, " +
             "DbPagingTimeline.statusId AS statusId, " +
             "DbPagingTimeline.sortId AS sortId, " +
-            "DbPagingTimeline.message AS message, " +
+            "DbStatus.contentHash AS rootContentHash, " +
             "DbPagingTimeline.messageRenderHash AS messageRenderHash, " +
-            "DbPagingTimeline._id AS _id, " +
-            "DbStatus.statusKey AS status_statusKey, " +
-            "DbStatus.accountType AS status_accountType, " +
-            "DbStatus.content AS status_content, " +
-            "DbStatus.renderHash AS status_renderHash, " +
-            "DbStatus.text AS status_text, " +
-            "DbStatus.id AS status_id " +
+            "DbPagingTimeline.statusReferenceHash AS statusReferenceHash, " +
+            "DbPagingTimeline.presentationReferenceHash AS presentationReferenceHash, " +
+            "DbPagingTimeline.dependencyRevision AS dependencyRevision " +
             "FROM DbPagingTimeline " +
             "INNER JOIN DbStatus ON DbStatus.id = DbPagingTimeline.statusId " +
             "WHERE DbPagingTimeline.pagingKey = :pagingKey " +
             "ORDER BY DbPagingTimeline.sortId " +
             "LIMIT :limit OFFSET :offset",
     )
-    suspend fun getTimelinePage(
+    suspend fun getTimelinePageIdentityRoots(
         pagingKey: String,
         offset: Int,
         limit: Int,
-    ): List<DbPagingTimelineWithStatus>
+    ): List<DbTimelinePageIdentityRoot>
 
     @Query(
-        "WITH page AS (" +
-            "SELECT " +
-            "DbStatus.id AS statusId, " +
-            "DbPagingTimeline.sortId AS sortId, " +
-            "DbPagingTimeline.messageRenderHash AS messageRenderHash, " +
-            "DbStatus.renderHash AS rootRenderHash " +
-            "FROM DbStatus " +
-            "INNER JOIN DbPagingTimeline ON DbStatus.id = DbPagingTimeline.statusId " +
-            "WHERE DbPagingTimeline.pagingKey = :pagingKey " +
-            "ORDER BY DbPagingTimeline.sortId " +
-            "LIMIT :limit OFFSET :offset" +
-            "), translation_rows AS (" +
-            "SELECT " +
-            "DbTranslation.entityKey AS statusId, " +
-            "DbTranslation.id || ':' || DbTranslation.status || ':' || DbTranslation.displayMode || ':' || " +
-            "DbTranslation.updatedAt || ':' || DbTranslation.sourceHash AS signature " +
-            "FROM DbTranslation " +
-            "WHERE DbTranslation.entityType = 'Status' " +
-            "AND DbTranslation.entityKey IN (" +
-            "SELECT statusId FROM page " +
-            "UNION " +
-            "SELECT status_reference.referenceStatusId FROM status_reference " +
-            "WHERE status_reference.statusId IN (SELECT statusId FROM page) " +
-            "UNION " +
-            "SELECT timeline_item_presentation_reference.referenceStatusId " +
-            "FROM timeline_item_presentation_reference " +
-            "WHERE timeline_item_presentation_reference.pagingKey = :pagingKey " +
-            "AND timeline_item_presentation_reference.statusId IN (SELECT statusId FROM page)" +
+        "WITH boundary AS (" +
+            "SELECT sortId FROM DbPagingTimeline " +
+            "WHERE pagingKey = :pagingKey AND statusId = :statusId " +
+            "LIMIT 1" +
             ") " +
-            "ORDER BY DbTranslation.id" +
-            "), translation_stats AS (" +
-            "SELECT " +
-            "statusId AS statusId, " +
-            "COALESCE(GROUP_CONCAT(signature, '|'), '') AS signature " +
-            "FROM translation_rows " +
-            "GROUP BY statusId" +
-            "), reference_rows AS (" +
-            "SELECT " +
-            "status_reference.statusId AS statusId, " +
-            "'semantic:' || status_reference.referenceOrder || ':' || status_reference.referenceType || ':' || " +
-            "status_reference.referenceStatusId || ':' || ReferenceStatus.renderHash || ':' || " +
-            "COALESCE(translation_stats.signature, '') AS signature " +
-            "FROM status_reference " +
-            "INNER JOIN DbStatus AS ReferenceStatus ON status_reference.referenceStatusId = ReferenceStatus.id " +
-            "LEFT JOIN translation_stats ON status_reference.referenceStatusId = translation_stats.statusId " +
-            "WHERE status_reference.statusId IN (SELECT statusId FROM page) " +
-            "UNION ALL " +
-            "SELECT " +
-            "timeline_item_presentation_reference.statusId AS statusId, " +
-            "'presentation:' || timeline_item_presentation_reference.referenceOrder || ':' || " +
-            "timeline_item_presentation_reference.presentationType || ':' || " +
-            "timeline_item_presentation_reference.referenceStatusId || ':' || PresentationStatus.renderHash || ':' || " +
-            "COALESCE(presentation_translation_stats.signature, '') AS signature " +
-            "FROM timeline_item_presentation_reference " +
-            "INNER JOIN DbStatus AS PresentationStatus " +
-            "ON timeline_item_presentation_reference.referenceStatusId = PresentationStatus.id " +
-            "LEFT JOIN translation_stats AS presentation_translation_stats " +
-            "ON timeline_item_presentation_reference.referenceStatusId = presentation_translation_stats.statusId " +
-            "WHERE timeline_item_presentation_reference.pagingKey = :pagingKey " +
-            "AND timeline_item_presentation_reference.statusId IN (SELECT statusId FROM page) " +
-            "ORDER BY statusId, signature" +
-            "), reference_stats AS (" +
-            "SELECT " +
-            "reference_rows.statusId AS statusId, " +
-            "COUNT(*) AS referenceCount, " +
-            "COALESCE(GROUP_CONCAT(reference_rows.signature, '|'), '') AS referenceSignature " +
-            "FROM reference_rows " +
-            "GROUP BY reference_rows.statusId" +
-            ") " +
-            "SELECT " +
-            "page.statusId AS statusId, " +
-            "page.sortId AS sortId, " +
-            "page.rootRenderHash AS rootRenderHash, " +
-            "page.messageRenderHash AS messageRenderHash, " +
-            "COALESCE(root_translation_stats.signature, '') AS rootTranslationSignature, " +
-            "COALESCE(reference_stats.referenceCount, 0) AS referenceCount, " +
-            "COALESCE(reference_stats.referenceSignature, '') AS referenceSignature " +
-            "FROM page " +
-            "LEFT JOIN reference_stats ON page.statusId = reference_stats.statusId " +
-            "LEFT JOIN translation_stats AS root_translation_stats ON page.statusId = root_translation_stats.statusId " +
-            "ORDER BY page.sortId",
+            "SELECT COUNT(*) FROM DbPagingTimeline AS candidate " +
+            "INNER JOIN DbStatus ON DbStatus.id = candidate.statusId " +
+            "CROSS JOIN boundary " +
+            "WHERE candidate.pagingKey = :pagingKey " +
+            "AND candidate.sortId <= boundary.sortId",
     )
-    suspend fun getTimelinePageIdentities(
+    suspend fun getTimelinePrefixLengthThroughStatus(
         pagingKey: String,
-        offset: Int,
-        limit: Int,
-    ): List<DbTimelinePageIdentity>
+        statusId: String,
+    ): Int
 
     @Transaction
     @RewriteQueriesToDropUnusedColumns
@@ -224,10 +165,14 @@ internal interface PagingTimelineDao {
             "DbPagingTimeline.sortId AS sortId, " +
             "DbPagingTimeline.message AS message, " +
             "DbPagingTimeline.messageRenderHash AS messageRenderHash, " +
+            "DbPagingTimeline.statusReferenceHash AS statusReferenceHash, " +
+            "DbPagingTimeline.presentationReferenceHash AS presentationReferenceHash, " +
+            "DbPagingTimeline.dependencyRevision AS dependencyRevision, " +
             "DbPagingTimeline._id AS _id, " +
             "DbStatus.statusKey AS status_statusKey, " +
             "DbStatus.accountType AS status_accountType, " +
             "DbStatus.content AS status_content, " +
+            "DbStatus.contentHash AS status_contentHash, " +
             "DbStatus.renderHash AS status_renderHash, " +
             "DbStatus.text AS status_text, " +
             "DbStatus.id AS status_id " +
@@ -250,10 +195,14 @@ internal interface PagingTimelineDao {
             "DbPagingTimeline.sortId AS sortId, " +
             "DbPagingTimeline.message AS message, " +
             "DbPagingTimeline.messageRenderHash AS messageRenderHash, " +
+            "DbPagingTimeline.statusReferenceHash AS statusReferenceHash, " +
+            "DbPagingTimeline.presentationReferenceHash AS presentationReferenceHash, " +
+            "DbPagingTimeline.dependencyRevision AS dependencyRevision, " +
             "DbPagingTimeline._id AS _id, " +
             "DbStatus.statusKey AS status_statusKey, " +
             "DbStatus.accountType AS status_accountType, " +
             "DbStatus.content AS status_content, " +
+            "DbStatus.contentHash AS status_contentHash, " +
             "DbStatus.renderHash AS status_renderHash, " +
             "DbStatus.text AS status_text, " +
             "DbStatus.id AS status_id " +
@@ -272,10 +221,14 @@ internal interface PagingTimelineDao {
             "DbPagingTimeline.sortId AS sortId, " +
             "DbPagingTimeline.message AS message, " +
             "DbPagingTimeline.messageRenderHash AS messageRenderHash, " +
+            "DbPagingTimeline.statusReferenceHash AS statusReferenceHash, " +
+            "DbPagingTimeline.presentationReferenceHash AS presentationReferenceHash, " +
+            "DbPagingTimeline.dependencyRevision AS dependencyRevision, " +
             "DbPagingTimeline._id AS _id, " +
             "DbStatus.statusKey AS status_statusKey, " +
             "DbStatus.accountType AS status_accountType, " +
             "DbStatus.content AS status_content, " +
+            "DbStatus.contentHash AS status_contentHash, " +
             "DbStatus.renderHash AS status_renderHash, " +
             "DbStatus.text AS status_text, " +
             "DbStatus.id AS status_id " +
@@ -309,6 +262,18 @@ internal interface PagingTimelineDao {
     suspend fun deletePresentationReferences(pagingKey: String)
 
     @Query(
+        "SELECT * FROM timeline_item_presentation_reference " +
+            "WHERE pagingKey = :pagingKey AND statusId IN (:statusIds)",
+    )
+    suspend fun getPresentationReferences(
+        pagingKey: String,
+        statusIds: List<String>,
+    ): List<DbTimelineItemPresentationReference>
+
+    @Delete
+    suspend fun deletePresentationReferenceItems(items: List<DbTimelineItemPresentationReference>)
+
+    @Query(
         "SELECT * FROM DbPagingTimeline " +
             "WHERE pagingKey = :pagingKey AND statusId IN (:statusIds)",
     )
@@ -331,10 +296,14 @@ internal interface PagingTimelineDao {
             "DbPagingTimeline.sortId AS sortId, " +
             "DbPagingTimeline.message AS message, " +
             "DbPagingTimeline.messageRenderHash AS messageRenderHash, " +
+            "DbPagingTimeline.statusReferenceHash AS statusReferenceHash, " +
+            "DbPagingTimeline.presentationReferenceHash AS presentationReferenceHash, " +
+            "DbPagingTimeline.dependencyRevision AS dependencyRevision, " +
             "DbPagingTimeline._id AS _id, " +
             "DbStatus.statusKey AS status_statusKey, " +
             "DbStatus.accountType AS status_accountType, " +
             "DbStatus.content AS status_content, " +
+            "DbStatus.contentHash AS status_contentHash, " +
             "DbStatus.renderHash AS status_renderHash, " +
             "DbStatus.text AS status_text, " +
             "DbStatus.id AS status_id " +

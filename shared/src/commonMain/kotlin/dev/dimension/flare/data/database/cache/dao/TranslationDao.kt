@@ -59,6 +59,7 @@ internal interface TranslationDao {
             "payload = :payload, " +
             "statusReason = :statusReason, " +
             "attemptCount = :attemptCount, " +
+            "revision = revision + 1, " +
             "updatedAt = :updatedAt " +
             "WHERE entityType = :entityType AND entityKey = :entityKey AND targetLanguage = :targetLanguage",
     )
@@ -78,6 +79,7 @@ internal interface TranslationDao {
     @Query(
         "UPDATE DbTranslation SET " +
             "displayMode = :displayMode, " +
+            "revision = revision + 1, " +
             "updatedAt = :updatedAt " +
             "WHERE entityType = :entityType AND entityKey = :entityKey AND targetLanguage = :targetLanguage",
     )
@@ -94,6 +96,7 @@ internal interface TranslationDao {
             "status = :failedStatus, " +
             "payload = NULL, " +
             "statusReason = :statusReason, " +
+            "revision = revision + 1, " +
             "updatedAt = :updatedAt " +
             "WHERE (status = :pendingStatus OR status = :translatingStatus) AND updatedAt < :staleBefore",
     )

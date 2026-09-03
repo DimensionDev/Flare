@@ -5,6 +5,7 @@ import dev.dimension.flare.RobolectricTest
 import dev.dimension.flare.common.SerializableImmutableList
 import dev.dimension.flare.common.TestFormatter
 import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.database.cache.loadTimelinePageIdentities
 import dev.dimension.flare.data.database.cache.model.DbPagingTimeline
 import dev.dimension.flare.data.database.cache.model.DbStatus
 import dev.dimension.flare.data.database.createDatabaseDriver
@@ -123,8 +124,7 @@ class PostEventHandlerTest : RobolectricTest() {
             )
             val beforeIdentity =
                 db
-                    .pagingTimelineDao()
-                    .getTimelinePageIdentities(pagingKey = "home", offset = 0, limit = 1)
+                    .loadTimelinePageIdentities(pagingKey = "home", offset = 0, limit = 1)
                     .single()
 
             handler = PostEventHandler(accountType = AccountType.Specific(accountKey), handler = fakeRemoteHandler)
@@ -136,12 +136,11 @@ class PostEventHandlerTest : RobolectricTest() {
             val updatedPost = saved.content as UiTimelineV2.Post
             val afterIdentity =
                 db
-                    .pagingTimelineDao()
-                    .getTimelinePageIdentities(pagingKey = "home", offset = 0, limit = 1)
+                    .loadTimelinePageIdentities(pagingKey = "home", offset = 0, limit = 1)
                     .single()
-            assertNotEquals(beforeIdentity.rootRenderHash, afterIdentity.rootRenderHash)
+            assertNotEquals(beforeIdentity.rootContentHash, afterIdentity.rootContentHash)
             assertEquals(updatedPost.renderHash, saved.renderHash)
-            assertEquals(saved.renderHash, afterIdentity.rootRenderHash)
+            assertEquals(saved.contentHash, afterIdentity.rootContentHash)
         }
 
     @Test

@@ -22,7 +22,7 @@ public typealias SerializableImmutableList<T> =
 
 @HiddenFromObjC
 public class ImmutableListSerializer<T>(
-    private val dataSerializer: KSerializer<T>,
+    dataSerializer: KSerializer<T>,
 ) : KSerializer<ImmutableList<T>> {
     @OptIn(SealedSerializationApi::class)
     private class PersistentListDescriptor : SerialDescriptor by serialDescriptor<List<String>>() {
@@ -30,13 +30,14 @@ public class ImmutableListSerializer<T>(
     }
 
     override val descriptor: SerialDescriptor = PersistentListDescriptor()
+    private val delegate = ListSerializer(dataSerializer)
 
     override fun serialize(
         encoder: Encoder,
         value: ImmutableList<T>,
-    ): Unit = ListSerializer(dataSerializer).serialize(encoder, value.toList())
+    ): Unit = delegate.serialize(encoder, value)
 
-    override fun deserialize(decoder: Decoder): ImmutableList<T> = ListSerializer(dataSerializer).deserialize(decoder).toPersistentList()
+    override fun deserialize(decoder: Decoder): ImmutableList<T> = delegate.deserialize(decoder).toPersistentList()
 }
 
 internal typealias SerializableImmutableMap<K, V> =
@@ -44,8 +45,8 @@ internal typealias SerializableImmutableMap<K, V> =
     ImmutableMap<K, V>
 
 internal class ImmutableMapSerializer<K, V>(
-    private val keySerializer: KSerializer<K>,
-    private val valueSerializer: KSerializer<V>,
+    keySerializer: KSerializer<K>,
+    valueSerializer: KSerializer<V>,
 ) : KSerializer<ImmutableMap<K, V>> {
     @OptIn(SealedSerializationApi::class)
     private class PersistentMapDescriptor : SerialDescriptor by serialDescriptor<Map<String, String>>() {
@@ -53,12 +54,12 @@ internal class ImmutableMapSerializer<K, V>(
     }
 
     override val descriptor: SerialDescriptor = PersistentMapDescriptor()
+    private val delegate = MapSerializer(keySerializer, valueSerializer)
 
     override fun serialize(
         encoder: Encoder,
         value: ImmutableMap<K, V>,
-    ) = MapSerializer(keySerializer, valueSerializer).serialize(encoder, value.toMap())
+    ) = delegate.serialize(encoder, value)
 
-    override fun deserialize(decoder: Decoder): ImmutableMap<K, V> =
-        MapSerializer(keySerializer, valueSerializer).deserialize(decoder).toPersistentMap()
+    override fun deserialize(decoder: Decoder): ImmutableMap<K, V> = delegate.deserialize(decoder).toPersistentMap()
 }

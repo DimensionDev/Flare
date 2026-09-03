@@ -3,6 +3,7 @@ package dev.dimension.flare.data.database
 import dev.dimension.flare.common.PlatformDispatchers
 import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.database.cache.TimelineDependencyRevisionCallback
 import org.koin.core.annotation.Single
 
 @Single
@@ -24,6 +25,7 @@ internal const val CACHE_DATABASE_NAME = "cache.db"
 internal fun provideCacheDatabase(driverFactory: DriverFactory): CacheDatabase =
     driverFactory
         .createBuilder<CacheDatabase>(CACHE_DATABASE_NAME, isCache = true)
+        .addCallback(TimelineDependencyRevisionCallback)
         .fallbackToDestructiveMigration(dropAllTables = true)
         .setDriver(createDatabaseDriver())
         .setQueryCoroutineContext(PlatformDispatchers.IO)

@@ -1,11 +1,15 @@
 package dev.dimension.flare.data.database.cache
 
+import androidx.paging.ItemSnapshotList
 import androidx.paging.PagingSource
 import androidx.room3.Room
 import dev.dimension.flare.RobolectricTest
 import dev.dimension.flare.benchmark.benchmarkPlatform
 import dev.dimension.flare.benchmark.collectLiveHeapBytes
 import dev.dimension.flare.common.Locale
+import dev.dimension.flare.common.PagingPresentationItem
+import dev.dimension.flare.common.PagingPresentationMapper
+import dev.dimension.flare.common.PagingPresentationTracker
 import dev.dimension.flare.common.PlatformDispatchers
 import dev.dimension.flare.data.database.cache.mapper.saveToDatabase
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
@@ -36,6 +40,7 @@ import dev.dimension.flare.ui.model.UiTranslatableText
 import dev.dimension.flare.ui.render.toUi
 import dev.dimension.flare.ui.render.toUiPlainText
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -203,6 +208,7 @@ class TimelineDatabaseBenchmarkTest : RobolectricTest() {
                         checksum = checksum * 31 + retainedUi.renderChecksum()
                     }
                 val heapAfterLifecycle = collectLiveHeapBytes()
+                val presentationBridge = benchmarkPresentationBridge(retainedUi)
 
                 println("TIMELINE_LIFECYCLE_BENCHMARK version=$LIFECYCLE_BENCHMARK_VERSION platform=$benchmarkPlatform")
                 println(
@@ -224,6 +230,16 @@ class TimelineDatabaseBenchmarkTest : RobolectricTest() {
                     "top_insert_full_chain",
                     BenchmarkSamples(longArrayOf(topInsertElapsed.inWholeNanoseconds), checksum),
                     "retained_rows=${LIFECYCLE_ROWS + 1}",
+                )
+                printMetric(
+                    "presentation_full_state_scan_proxy",
+                    presentationBridge.fullStateScan,
+                    "retained_rows=${retainedUi.size} repeats=$PRESENTATION_BRIDGE_REPEATS",
+                )
+                printMetric(
+                    "presentation_append_change_read",
+                    presentationBridge.appendChangeRead,
+                    "retained_rows=${retainedUi.size} inserted_rows=$PAGE_SIZE repeats=$PRESENTATION_BRIDGE_REPEATS",
                 )
                 printHeap("lifecycle_stable_prefix", heapWithStablePrefix)
                 printHeap("lifecycle_complete", heapAfterLifecycle)
@@ -458,6 +474,66 @@ class TimelineDatabaseBenchmarkTest : RobolectricTest() {
             }
         return StablePrefixBenchmarkResult(samples = samples, retainedRows = retainedRows)
     }
+
+    /**
+     * Cross-platform algorithmic proxy for the UIKit bridge. It deliberately excludes Swift/K/N
+     * interop overhead, so Instruments remains the authority for absolute iOS cost.
+     */
+    private suspend fun benchmarkPresentationBridge(items: List<UiTimelineV2>): PresentationBridgeBenchmarkResult {
+        val mapper = PagingPresentationMapper<UiTimelineV2> { it.toPresentationItem() }
+        val presentedItems = items.map(mapper::map).toPersistentList()
+        val appendStart = presentedItems.size - PAGE_SIZE
+        val tracker = PagingPresentationTracker(initialItems = presentedItems.subList(0, appendStart).toPersistentList())
+        val appended = presentedItems.subList(appendStart, presentedItems.size)
+        val appendChange =
+            requireNotNull(
+                tracker
+                    .appendOrRefresh(
+                        startIndex = appendStart,
+                        inserted = appended,
+                        newItems = ItemSnapshotList(0, 0, items),
+                        mapper = mapper,
+                        hasPlaceholders = false,
+                    ).change,
+            )
+        assertEquals(PAGE_SIZE, appendChange.replacement?.insertedCount)
+
+        val fullStateScan =
+            measureSamples {
+                var result = 0L
+                repeat(PRESENTATION_BRIDGE_REPEATS) {
+                    items.forEach { item ->
+                        result = result * 31 + item.itemKey.hashCode() + item.renderHash
+                    }
+                }
+                result
+            }
+        val appendChangeRead =
+            measureSamples {
+                var result = 0L
+                repeat(PRESENTATION_BRIDGE_REPEATS) {
+                    val replacement = requireNotNull(appendChange.replacement)
+                    repeat(replacement.insertedCount) { index ->
+                        val item = requireNotNull(replacement.insertedItemAt(index))
+                        result = result * 31 + item.key.hashCode() + item.renderHash
+                    }
+                }
+                result
+            }
+        return PresentationBridgeBenchmarkResult(
+            fullStateScan = fullStateScan,
+            appendChangeRead = appendChangeRead,
+        )
+    }
+
+    private fun UiTimelineV2.toPresentationItem(): PagingPresentationItem =
+        PagingPresentationItem(
+            key =
+                itemKey
+                    ?.takeIf { it.isNotEmpty() }
+                    ?: listOf(itemType, accountType.toString(), statusKey.toString()).joinToString(":"),
+            renderHash = renderHash,
+        )
 
     private suspend fun createTimelineItems(
         pagingKey: String,
@@ -764,9 +840,14 @@ class TimelineDatabaseBenchmarkTest : RobolectricTest() {
         val retainedRows: List<DbPagingTimelineWithStatus>,
     )
 
+    private data class PresentationBridgeBenchmarkResult(
+        val fullStateScan: BenchmarkSamples,
+        val appendChangeRead: BenchmarkSamples,
+    )
+
     private companion object {
         const val BENCHMARK_VERSION = 2
-        const val LIFECYCLE_BENCHMARK_VERSION = 2
+        const val LIFECYCLE_BENCHMARK_VERSION = 3
         const val BENCHMARK_PAGING_KEY = "timeline-database-benchmark"
         const val WARMUP_PAGING_KEY = "timeline-database-benchmark-warmup"
         const val LIFECYCLE_PAGING_KEY = "timeline-lifecycle-benchmark"
@@ -787,6 +868,7 @@ class TimelineDatabaseBenchmarkTest : RobolectricTest() {
         const val MEASURE_ITERATIONS = 7
         const val REWRITE_ITERATIONS = 3
         const val WINDOW_MEASURE_ITERATIONS = 3
+        const val PRESENTATION_BRIDGE_REPEATS = 100
 
         val PAGE_OFFSETS = listOf(0, 240, 480)
         val PAGE_WINDOW_LIMITS = listOf(20, 100, 500)

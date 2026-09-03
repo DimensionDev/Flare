@@ -44,6 +44,9 @@ public sealed class PagingState<T> {
         public abstract val isRefreshing: Boolean
         public abstract val appendState: LoadState
 
+        /** Optional lightweight, versioned list metadata for event-aware platform renderers. */
+        public open val pagingPresentation: PagingPresentationSnapshot? = null
+
         public abstract operator fun get(index: Int): T?
 
         public abstract fun peek(index: Int): T?
@@ -119,6 +122,46 @@ public sealed class PagingState<T> {
             override fun itemKey(key: ((item: T) -> Any)?): (index: Int) -> Any = data.itemKey(key)
 
             override fun itemContentType(contentType: ((item: T) -> Any?)?): (index: Int) -> Any? = data.itemContentType(contentType)
+        }
+
+        @Immutable
+        internal data class EventAwarePagingSuccess<T : Any>(
+            private val data: EventAwarePagingItems<T>,
+            private val itemState: EventAwarePagingItemState<T>,
+            override val isRefreshing: Boolean,
+            override val appendState: LoadState,
+            override val pagingPresentation: PagingPresentationSnapshot,
+        ) : Success<T>() {
+            override val itemCount: Int = itemState.items.size
+
+            override fun get(index: Int): T? =
+                if (index !in 0 until itemCount) {
+                    null
+                } else {
+                    data.access(index)
+                    itemState.items[index]
+                }
+
+            override fun peek(index: Int): T? = itemState.items.getOrNull(index)
+
+            override suspend fun refreshSuspend() {
+                data.refreshSuspend()
+            }
+
+            override fun retry() {
+                data.retry()
+            }
+
+            override fun itemKey(key: ((item: T) -> Any)?): (index: Int) -> Any =
+                { index ->
+                    val item = itemState.items.getOrNull(index)
+                    item?.let { key?.invoke(it) }
+                        ?: pagingPresentation.itemAt(index)?.key
+                        ?: index
+                }
+
+            override fun itemContentType(contentType: ((item: T) -> Any?)?): (index: Int) -> Any? =
+                { index -> itemState.items.getOrNull(index)?.let { contentType?.invoke(it) } }
         }
     }
 }
@@ -294,6 +337,46 @@ internal fun <T : Any> LazyPagingItems<T>.snapshot(): PagingSnapshot =
         source = loadState.source,
         mediator = loadState.mediator,
     )
+
+internal fun <T : Any> EventAwarePagingItems<T>.toPagingState(): PagingState<T> {
+    val currentItems = itemState
+    val currentLoadState = loadState
+    val snapshot =
+        PagingSnapshot(
+            itemCount = currentItems.items.size,
+            refresh = currentLoadState.refresh,
+            prepend = currentLoadState.prepend,
+            append = currentLoadState.append,
+            source = currentLoadState.source,
+            mediator = currentLoadState.mediator,
+        )
+    return when {
+        currentItems.items.isNotEmpty() -> {
+            PagingState.Success.EventAwarePagingSuccess(
+                data = this,
+                itemState = currentItems,
+                isRefreshing = currentLoadState.refresh is LoadState.Loading,
+                appendState = currentLoadState.append,
+                pagingPresentation = currentItems.presentation,
+            )
+        }
+
+        snapshot.initialErrorOrNull() != null -> {
+            PagingState.Error(
+                error = checkNotNull(snapshot.initialErrorOrNull()),
+                onRetry = ::retry,
+            )
+        }
+
+        !snapshot.isResolvedEmpty() -> {
+            PagingState.Loading()
+        }
+
+        else -> {
+            PagingState.Empty(::refresh)
+        }
+    }
+}
 
 internal fun <T : Any> UiState<PagingState<T>>.flatten(): PagingState<T> =
     when (this) {

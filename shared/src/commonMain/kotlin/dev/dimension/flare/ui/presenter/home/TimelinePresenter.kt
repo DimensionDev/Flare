@@ -8,13 +8,15 @@ import androidx.paging.ExperimentalPagingApi
 import androidx.paging.Pager
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
-import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.filter
 import androidx.paging.map
 import dev.dimension.flare.common.InAppNotification
 import dev.dimension.flare.common.Message
+import dev.dimension.flare.common.PagingPresentationItem
+import dev.dimension.flare.common.PagingPresentationMapper
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.PlatformDispatchers
+import dev.dimension.flare.common.collectAsEventAwarePagingItems
 import dev.dimension.flare.common.emptyFlow
 import dev.dimension.flare.common.onEmpty
 import dev.dimension.flare.common.onError
@@ -237,7 +239,7 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
         val listState =
             remember {
                 createPager(scope)
-            }.collectAsLazyPagingItems()
+            }.collectAsEventAwarePagingItems(TimelinePresentationMapper)
                 .toPagingState()
         return object : TimelineState {
             override val listState = listState
@@ -260,6 +262,21 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
             }
         }
     }
+}
+
+private object TimelinePresentationMapper : PagingPresentationMapper<UiTimelineV2> {
+    override fun map(item: UiTimelineV2): PagingPresentationItem =
+        PagingPresentationItem(
+            key =
+                item.itemKey
+                    ?.takeIf { it.isNotEmpty() }
+                    ?: listOf(
+                        item.itemType,
+                        item.accountType.toString(),
+                        item.statusKey.toString(),
+                    ).joinToString(":"),
+            renderHash = item.renderHash,
+        )
 }
 
 internal suspend fun shouldRefreshTimelineOnInitialize(

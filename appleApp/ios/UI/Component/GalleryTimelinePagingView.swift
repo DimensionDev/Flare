@@ -83,6 +83,7 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
     private var lastAppliedSignature: SnapshotSignature?
     private var lastRenderHashMap: [String: Int32] = [:]
     private var lastLoadedItemIDs: Set<String> = []
+    private var lastPagingPresentation: PagingUIKitPresentationState?
     private var lastProcessedDataRef: AnyObject?
     private var lastProcessedUpdateSignature: UpdateSignature?
 
@@ -136,6 +137,11 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
         case loading
         case error
         case empty
+        case pagingPresentation(
+            revision: Int64,
+            isRefreshing: Bool,
+            footerIDs: [String]
+        )
         case success(
             itemIDs: [String],
             renderHashMap: [String: Int32],
@@ -331,6 +337,13 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
         case .empty:
             return .empty
         case .success(let success):
+            if let presentation = success.pagingPresentation {
+                return .pagingPresentation(
+                    revision: presentation.revision,
+                    isRefreshing: success.isRefreshing,
+                    footerIDs: footerItemIDs(for: success)
+                )
+            }
             let itemState = makeItemSnapshotState(for: success)
             return .success(
                 itemIDs: itemState.itemIDs,
@@ -381,6 +394,17 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
             indexMap: indexMap,
             renderHashMap: renderHashMap,
             loadedItemIDs: loadedItemIDs
+        )
+    }
+
+    private func makeItemSnapshotState(
+        for presentation: PagingUIKitPresentationState
+    ) -> ItemSnapshotState {
+        ItemSnapshotState(
+            itemIDs: presentation.itemIDs,
+            indexMap: presentation.indexMap,
+            renderHashMap: presentation.renderHashMap,
+            loadedItemIDs: presentation.loadedItemIDs
         )
     }
 
@@ -499,24 +523,49 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
         var newLoadedItemIDs = Set<String>()
         var itemIDs: [String] = []
         var footerIDs: [String] = []
+        var knownChangedItemIDs: [String]?
 
         switch onEnum(of: data) {
         case .loading:
+            lastPagingPresentation = nil
             snapshot.appendSections([Self.sectionMain])
             let items = (0..<8).map { "\(Self.placeholderPrefix)\($0)" }
             itemIDs = items
             snapshot.appendItems(itemIDs, toSection: Self.sectionMain)
         case .error:
+            lastPagingPresentation = nil
             snapshot.appendSections([Self.sectionMain])
             itemIDs = [Self.errorID]
             snapshot.appendItems(itemIDs, toSection: Self.sectionMain)
         case .empty:
+            lastPagingPresentation = nil
             snapshot.appendSections([Self.sectionMain])
             itemIDs = [Self.emptyID]
             snapshot.appendItems(itemIDs, toSection: Self.sectionMain)
         case .success(let success):
             snapshot.appendSections([Self.sectionMain])
-            let itemState = makeItemSnapshotState(for: success)
+            let itemState: ItemSnapshotState
+            if let presentation = success.pagingPresentation,
+               let transition = lastPagingPresentation?.transition(
+                   to: presentation,
+                   itemPrefix: Self.itemPrefix,
+                   placeholderPrefix: Self.placeholderPrefix
+               ) {
+                lastPagingPresentation = transition.state
+                knownChangedItemIDs = transition.reconfiguredItemIDs
+                itemState = makeItemSnapshotState(for: transition.state)
+            } else if let presentation = success.pagingPresentation,
+                      let presentationState = PagingUIKitPresentationState(
+                          snapshot: presentation,
+                          itemPrefix: Self.itemPrefix,
+                          placeholderPrefix: Self.placeholderPrefix
+                      ) {
+                lastPagingPresentation = presentationState
+                itemState = makeItemSnapshotState(for: presentationState)
+            } else {
+                lastPagingPresentation = nil
+                itemState = makeItemSnapshotState(for: success)
+            }
             itemIDs = itemState.itemIDs
             newIndexMap = itemState.indexMap
             newRenderHashMap = itemState.renderHashMap
@@ -543,7 +592,7 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
         pruneHeightCache(keepingItemIDs: Set(newIndexMap.keys))
 
         if previousSignature == newSignature {
-            let changedIDs = changedItemIDs(
+            let changedIDs = knownChangedItemIDs ?? changedItemIDs(
                 in: itemIDs,
                 newRenderHashMap: newRenderHashMap,
                 newLoadedItemIDs: newLoadedItemIDs
@@ -555,7 +604,7 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
         }
 
         if previousSignature?.itemIDs == newSignature.itemIDs {
-            let changedIDs = changedItemIDs(
+            let changedIDs = knownChangedItemIDs ?? changedItemIDs(
                 in: itemIDs,
                 newRenderHashMap: newRenderHashMap,
                 newLoadedItemIDs: newLoadedItemIDs
@@ -569,13 +618,14 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
 
         let existing = dataSource.snapshot().itemIdentifiers
         let newSet = Set(snapshot.itemIdentifiers)
-        let toReconfigure = existing.filter {
-            newSet.contains($0) && itemNeedsReconfigure(
-                $0,
-                newRenderHashMap: newRenderHashMap,
-                newLoadedItemIDs: newLoadedItemIDs
-            )
-        }
+        let toReconfigure = knownChangedItemIDs?.filter { newSet.contains($0) } ??
+            existing.filter {
+                newSet.contains($0) && itemNeedsReconfigure(
+                    $0,
+                    newRenderHashMap: newRenderHashMap,
+                    newLoadedItemIDs: newLoadedItemIDs
+                )
+            }
         if !toReconfigure.isEmpty {
             snapshot.reconfigureItems(toReconfigure)
         }

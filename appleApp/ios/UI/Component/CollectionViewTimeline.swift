@@ -6,6 +6,180 @@ import CHTCollectionViewWaterfallLayout
 import GSPlayer
 import AVFoundation
 
+/// Swift-owned mirror of Kotlin's lightweight paging metadata.
+/// Incremental transitions only cross the Kotlin/Native boundary for changed items.
+struct PagingUIKitPresentationState: Sendable {
+    let revision: Int64
+    let itemIDs: [String]
+    let indexMap: [String: Int]
+    let renderHashMap: [String: Int32]
+    let loadedItemIDs: Set<String>
+
+    init?(
+        snapshot: PagingPresentationSnapshot,
+        itemPrefix: String,
+        placeholderPrefix: String
+    ) {
+        let count = Int(snapshot.itemCount)
+        var itemIDs: [String] = []
+        var indexMap: [String: Int] = [:]
+        var renderHashMap: [String: Int32] = [:]
+        var loadedItemIDs = Set<String>()
+        itemIDs.reserveCapacity(count)
+
+        for index in 0..<count {
+            guard let item = snapshot.itemAt(index: Int32(index)) else { return nil }
+            let resolved = Self.resolveItem(
+                item,
+                index: index,
+                itemPrefix: itemPrefix,
+                placeholderPrefix: placeholderPrefix
+            )
+            guard indexMap[resolved.id] == nil else { return nil }
+            itemIDs.append(resolved.id)
+            indexMap[resolved.id] = index
+            if resolved.isLoaded {
+                renderHashMap[resolved.id] = item.renderHash
+                loadedItemIDs.insert(resolved.id)
+            }
+        }
+
+        self.revision = snapshot.revision
+        self.itemIDs = itemIDs
+        self.indexMap = indexMap
+        self.renderHashMap = renderHashMap
+        self.loadedItemIDs = loadedItemIDs
+    }
+
+    func transition(
+        to snapshot: PagingPresentationSnapshot,
+        itemPrefix: String,
+        placeholderPrefix: String
+    ) -> PagingUIKitPresentationTransition? {
+        guard snapshot.revision != revision else {
+            return PagingUIKitPresentationTransition(
+                state: self,
+                structureChanged: false,
+                reconfiguredItemIDs: []
+            )
+        }
+        guard let change = snapshot.change,
+              change.baseRevision == revision,
+              change.revision == snapshot.revision else {
+            return nil
+        }
+
+        var nextItemIDs = itemIDs
+        var nextRenderHashMap = renderHashMap
+        var nextLoadedItemIDs = loadedItemIDs
+        var structureChanged = false
+
+        if let replacement = change.replacement {
+            // Placeholder identities are position-based. Rebuild if a structural change could
+            // shift them; timeline paging currently disables placeholders, so this is a fallback.
+            guard !itemIDs.contains(where: { $0.hasPrefix(placeholderPrefix) }) else { return nil }
+            let start = Int(replacement.startIndex)
+            let removeCount = Int(replacement.removeCount)
+            guard start >= 0,
+                  removeCount >= 0,
+                  start <= nextItemIDs.count,
+                  start + removeCount <= nextItemIDs.count else {
+                return nil
+            }
+
+            var insertedIDs: [String] = []
+            var insertedHashes: [String: Int32] = [:]
+            insertedIDs.reserveCapacity(Int(replacement.insertedCount))
+            for offset in 0..<Int(replacement.insertedCount) {
+                guard let item = replacement.insertedItemAt(index: Int32(offset)) else { return nil }
+                let resolved = Self.resolveItem(
+                    item,
+                    index: start + offset,
+                    itemPrefix: itemPrefix,
+                    placeholderPrefix: placeholderPrefix
+                )
+                guard resolved.isLoaded else { return nil }
+                insertedIDs.append(resolved.id)
+                insertedHashes[resolved.id] = item.renderHash
+            }
+
+            let removedIDs = Array(nextItemIDs[start..<(start + removeCount)])
+            nextItemIDs.replaceSubrange(start..<(start + removeCount), with: insertedIDs)
+            guard Set(nextItemIDs).count == nextItemIDs.count else { return nil }
+            removedIDs.forEach {
+                nextRenderHashMap.removeValue(forKey: $0)
+                nextLoadedItemIDs.remove($0)
+            }
+            insertedIDs.forEach {
+                nextRenderHashMap[$0] = insertedHashes[$0]
+                nextLoadedItemIDs.insert($0)
+            }
+            structureChanged = true
+        }
+
+        guard nextItemIDs.count == Int(snapshot.itemCount) else { return nil }
+        let nextIndexMap = Dictionary(uniqueKeysWithValues: nextItemIDs.enumerated().map { ($1, $0) })
+        var reconfiguredItemIDs: [String] = []
+        reconfiguredItemIDs.reserveCapacity(Int(change.reloadedCount))
+        for offset in 0..<Int(change.reloadedCount) {
+            guard let item = change.reloadedItemAt(index: Int32(offset)),
+                  let key = item.key,
+                  !key.isEmpty else {
+                continue
+            }
+            let id = "\(itemPrefix)\(key)"
+            guard nextIndexMap[id] != nil else { return nil }
+            nextRenderHashMap[id] = item.renderHash
+            nextLoadedItemIDs.insert(id)
+            reconfiguredItemIDs.append(id)
+        }
+
+        return PagingUIKitPresentationTransition(
+            state: PagingUIKitPresentationState(
+                revision: snapshot.revision,
+                itemIDs: nextItemIDs,
+                indexMap: nextIndexMap,
+                renderHashMap: nextRenderHashMap,
+                loadedItemIDs: nextLoadedItemIDs
+            ),
+            structureChanged: structureChanged,
+            reconfiguredItemIDs: reconfiguredItemIDs
+        )
+    }
+
+    private init(
+        revision: Int64,
+        itemIDs: [String],
+        indexMap: [String: Int],
+        renderHashMap: [String: Int32],
+        loadedItemIDs: Set<String>
+    ) {
+        self.revision = revision
+        self.itemIDs = itemIDs
+        self.indexMap = indexMap
+        self.renderHashMap = renderHashMap
+        self.loadedItemIDs = loadedItemIDs
+    }
+
+    private static func resolveItem(
+        _ item: PagingPresentationItem,
+        index: Int,
+        itemPrefix: String,
+        placeholderPrefix: String
+    ) -> (id: String, isLoaded: Bool) {
+        if let key = item.key, !key.isEmpty {
+            return ("\(itemPrefix)\(key)", true)
+        }
+        return ("\(placeholderPrefix)\(index)", false)
+    }
+}
+
+struct PagingUIKitPresentationTransition: Sendable {
+    let state: PagingUIKitPresentationState
+    let structureChanged: Bool
+    let reconfiguredItemIDs: [String]
+}
+
 enum TimelineUIKitLayoutMetrics {
     static let horizontalInset: CGFloat = 16
     static let columnSpacing: CGFloat = 8
@@ -320,6 +494,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     private var lastAppliedSignature: SnapshotSignature?
     private var lastRenderHashMap: [String: Int32] = [:]
     private var lastLoadedItemIDs: Set<String> = []
+    private var lastPagingPresentation: PagingUIKitPresentationState?
     private let autoplayPlayerView = VideoPlayerView()
     private var autoplayPlayerObservation: NSKeyValueObservation?
     private var autoplaySelectionTask: Task<Void, Never>?
@@ -358,6 +533,8 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         let loadedItemIDs: Set<String>
         let isRefreshing: Bool
         let isInitialLoading: Bool
+        let pagingPresentation: PagingUIKitPresentationState?
+        let knownChangedItemIDs: [String]?
     }
 
     private struct ScrollAnchor {
@@ -1149,6 +1326,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         currentSuccess = nil
         currentProfileMediaData = nil
         currentProfileMediaSuccess = nil
+        lastPagingPresentation = nil
         pendingScrollAnchor = nil
         lastProfileMediaScrollAnchor = nil
         profileMediaGeometryTransition = nil
@@ -1370,6 +1548,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
             lastAppliedSignature = plan.signature
             lastRenderHashMap = plan.renderHashMap
             lastLoadedItemIDs = plan.loadedItemIDs
+            lastPagingPresentation = plan.pagingPresentation
             CATransaction.commit()
         }
     }
@@ -1388,11 +1567,66 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     }
 
     private func applySnapshot(data: PagingState<UiTimelineV2>) {
+        if applyPagingPresentationUpdate(data: data) {
+            return
+        }
         applySnapshot(plan: makeSnapshotPlan(data: data, columnCount: columnCount))
     }
 
     private func applySnapshot(profileMediaData data: PagingState<ProfileMedia>) {
         applySnapshot(plan: makeSnapshotPlan(profileMediaData: data, columnCount: columnCount))
+    }
+
+    private func applyPagingPresentationUpdate(data: PagingState<UiTimelineV2>) -> Bool {
+        guard contentKind == .timeline,
+              case .success(let success) = onEnum(of: data),
+              let snapshot = success.pagingPresentation,
+              let previousPresentation = lastPagingPresentation,
+              let previousSignature = lastAppliedSignature else {
+            return false
+        }
+        let accessoryIDs = accessoryItems.map { "\(Self.accessoryPrefix)\($0.id)" }
+        guard previousSignature.accessoryIDs == accessoryIDs,
+              let transition = previousPresentation.transition(
+                  to: snapshot,
+                  itemPrefix: Self.timelinePrefix,
+                  placeholderPrefix: Self.placeholderPrefix
+              ) else {
+            return false
+        }
+
+        let plan = makeSnapshotPlan(
+            data: data,
+            success: success,
+            presentation: transition.state,
+            knownChangedItemIDs: transition.reconfiguredItemIDs
+        )
+        guard !transition.structureChanged,
+              previousSignature.itemIDs == plan.itemIDs else {
+            applySnapshot(plan: plan)
+            return true
+        }
+
+        // Content and load-state-only changes do not need a rebuilt diffable snapshot.
+        snapshotPreparationGeneration += 1
+        itemIndexMap = plan.indexMap
+        lastRenderHashMap = plan.renderHashMap
+        lastLoadedItemIDs = plan.loadedItemIDs
+        lastPagingPresentation = plan.pagingPresentation
+        if previousSignature.footerIDs != plan.footerIDs {
+            applyFooterSnapshot(
+                footerIDs: plan.footerIDs,
+                reconfigureIDs: transition.reconfiguredItemIDs,
+                isRefreshing: plan.isRefreshing
+            )
+        } else {
+            reconfigureItems(transition.reconfiguredItemIDs)
+        }
+        lastAppliedSignature = plan.signature
+        restorePendingContentOffsetIfNeeded(finalize: true)
+        validateCurrentAutoplayVisibility()
+        scheduleAutoplaySelection()
+        return true
     }
 
     private func applySnapshot(plan: SnapshotPlan) {
@@ -1411,7 +1645,21 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         data: PagingState<UiTimelineV2>,
         columnCount: Int
     ) -> SnapshotPlan {
-        makeSnapshotPlan(
+        if case .success(let success) = onEnum(of: data),
+           let presentation = success.pagingPresentation,
+           let presentationState = PagingUIKitPresentationState(
+               snapshot: presentation,
+               itemPrefix: Self.timelinePrefix,
+               placeholderPrefix: Self.placeholderPrefix
+           ) {
+            return makeSnapshotPlan(
+                data: data,
+                success: success,
+                presentation: presentationState,
+                knownChangedItemIDs: nil
+            )
+        }
+        return makeSnapshotPlan(
             data: data,
             loadingItemCount: loadingPlaceholderCount(
                 minimum: TimelineUIKitLayoutMetrics.timelinePlaceholderCount,
@@ -1506,7 +1754,36 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
             renderHashMap: newRenderHashMap,
             loadedItemIDs: newLoadedItemIDs,
             isRefreshing: pagingIsRefreshing(data),
-            isInitialLoading: isInitialLoading
+            isInitialLoading: isInitialLoading,
+            pagingPresentation: nil,
+            knownChangedItemIDs: nil
+        )
+    }
+
+    private func makeSnapshotPlan(
+        data: PagingState<UiTimelineV2>,
+        success: PagingStateSuccess<UiTimelineV2>,
+        presentation: PagingUIKitPresentationState,
+        knownChangedItemIDs: [String]?
+    ) -> SnapshotPlan {
+        let accessoryIDs = accessoryItems.map { "\(Self.accessoryPrefix)\($0.id)" }
+        let footerIDs = footerItemIDs(for: success)
+        return SnapshotPlan(
+            signature: SnapshotSignature(
+                accessoryIDs: accessoryIDs,
+                itemIDs: presentation.itemIDs,
+                footerIDs: footerIDs
+            ),
+            accessoryIDs: accessoryIDs,
+            itemIDs: presentation.itemIDs,
+            footerIDs: footerIDs,
+            indexMap: presentation.indexMap,
+            renderHashMap: presentation.renderHashMap,
+            loadedItemIDs: presentation.loadedItemIDs,
+            isRefreshing: pagingIsRefreshing(data),
+            isInitialLoading: false,
+            pagingPresentation: presentation,
+            knownChangedItemIDs: knownChangedItemIDs
         )
     }
 
@@ -1573,13 +1850,14 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         if previousSignature?.accessoryIDs == newSignature.accessoryIDs,
            previousSignature?.itemIDs == newSignature.itemIDs,
            previousSignature?.footerIDs == newSignature.footerIDs {
-            let changedIDs = changedItemIDs(
+            let changedIDs = plan.knownChangedItemIDs ?? changedItemIDs(
                 in: plan.itemIDs,
                 newRenderHashMap: plan.renderHashMap,
                 newLoadedItemIDs: plan.loadedItemIDs
             )
             lastRenderHashMap = plan.renderHashMap
             lastLoadedItemIDs = plan.loadedItemIDs
+            lastPagingPresentation = plan.pagingPresentation
             reconfigureItems(changedIDs)
             restorePendingContentOffsetIfNeeded(finalize: !plan.isInitialLoading)
             validateCurrentAutoplayVisibility()
@@ -1589,7 +1867,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
 
         if previousSignature?.accessoryIDs == newSignature.accessoryIDs,
            previousSignature?.itemIDs == newSignature.itemIDs {
-            let changedIDs = changedItemIDs(
+            let changedIDs = plan.knownChangedItemIDs ?? changedItemIDs(
                 in: plan.itemIDs,
                 newRenderHashMap: plan.renderHashMap,
                 newLoadedItemIDs: plan.loadedItemIDs
@@ -1599,6 +1877,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
             lastAppliedSignature = newSignature
             lastRenderHashMap = plan.renderHashMap
             lastLoadedItemIDs = plan.loadedItemIDs
+            lastPagingPresentation = plan.pagingPresentation
             validateCurrentAutoplayVisibility()
             scheduleAutoplaySelection()
             return
@@ -1606,13 +1885,15 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
 
         // Reconfigure only existing timeline items whose render payload or loaded state changed.
         let existing = Set(dataSource.snapshot().itemIdentifiers)
-        let toReconfigure = plan.itemIDs.filter {
-            existing.contains($0) && itemNeedsReconfigure(
-                $0,
-                newRenderHashMap: plan.renderHashMap,
-                newLoadedItemIDs: plan.loadedItemIDs
-            )
-        }
+        let toReconfigure =
+            plan.knownChangedItemIDs?.filter(existing.contains) ??
+            plan.itemIDs.filter {
+                existing.contains($0) && itemNeedsReconfigure(
+                    $0,
+                    newRenderHashMap: plan.renderHashMap,
+                    newLoadedItemIDs: plan.loadedItemIDs
+                )
+            }
         if !toReconfigure.isEmpty {
             snapshot.reconfigureItems(toReconfigure)
         }
@@ -1653,6 +1934,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         lastAppliedSignature = newSignature
         lastRenderHashMap = plan.renderHashMap
         lastLoadedItemIDs = plan.loadedItemIDs
+        lastPagingPresentation = plan.pagingPresentation
     }
 
     private func changedItemIDs(

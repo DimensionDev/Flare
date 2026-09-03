@@ -19,18 +19,68 @@ import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.asTimelinePostItem
 import dev.dimension.flare.ui.model.withItemKey
 import kotlinx.collections.immutable.toImmutableList
-import kotlin.uuid.Uuid
 
 internal object TimelinePagingMapper {
     suspend fun toDb(
         data: UiTimelineV2,
         pagingKey: String,
         sortId: Long? = null,
+    ): DbPagingTimelineWithStatus =
+        toDb(
+            data = data,
+            root = data.rootTimelineForDatabase(),
+            pagingKey = pagingKey,
+            sortId = sortId,
+            context = MappingContext(),
+        )
+
+    suspend fun toDb(
+        data: List<UiTimelineV2>,
+        pagingKey: String,
+        sortIds: List<Long?> = emptyList(),
+    ): List<DbPagingTimelineWithStatus> {
+        require(sortIds.isEmpty() || sortIds.size == data.size)
+        val context = MappingContext()
+        val roots = data.map { it.rootTimelineForDatabase() }
+        roots.forEach(context::status)
+        return data.mapIndexed { index, item ->
+            toDb(
+                data = item,
+                root = roots[index],
+                pagingKey = pagingKey,
+                sortId = sortIds.getOrNull(index),
+                context = context,
+            )
+        }
+    }
+
+    private suspend fun toDb(
+        data: UiTimelineV2,
+        root: UiTimelineV2,
+        pagingKey: String,
+        sortId: Long?,
+        context: MappingContext,
     ): DbPagingTimelineWithStatus {
-        val root = data.rootTimelineForDatabase()
         val timelineItem = data.asTimelinePostItem()
         val presentation = timelineItem?.presentation
-        val rootStatus = uiTimelineToDbStatusWithUser(root)
+        val rootStatus = context.status(root)
+        val semanticReferences =
+            when (root) {
+                is UiTimelineV2.Post -> collectPostReferences(root, presentation, rootStatus.data.id, context)
+                is UiTimelineV2.UserList -> collectUserListReferences(root, rootStatus.data.id, context)
+                else -> emptyList()
+            }
+        val presentationReferences =
+            if (root is UiTimelineV2.Post && presentation != null) {
+                collectPresentationReferences(
+                    pagingKey = pagingKey,
+                    rootStatusId = rootStatus.data.id,
+                    presentation = presentation,
+                    context = context,
+                )
+            } else {
+                emptyList()
+            }
         return DbPagingTimelineWithStatus(
             timeline =
                 DbPagingTimeline(
@@ -38,32 +88,53 @@ internal object TimelinePagingMapper {
                     statusId = rootStatus.data.id,
                     sortId = sortId ?: SnowflakeIdGenerator.nextId(),
                     message = presentation?.message,
+                    semanticReferenceSignature =
+                        semanticReferenceSignature(semanticReferences.map { it.reference }),
+                    presentationReferenceSignature =
+                        presentationReferenceSignature(presentationReferences.map { it.reference }),
                 ),
             status =
                 DbStatusWithReference(
                     status = rootStatus,
-                    references =
-                        when (root) {
-                            is UiTimelineV2.Post -> collectPostReferences(root, presentation, rootStatus.data.id)
-                            is UiTimelineV2.UserList -> collectUserListReferences(root, rootStatus.data.id)
-                            else -> emptyList()
-                        },
+                    references = semanticReferences,
                 ),
-            presentationReferences =
-                when {
-                    root is UiTimelineV2.Post && presentation != null -> {
-                        collectPresentationReferences(
-                            pagingKey = pagingKey,
-                            rootStatusId = rootStatus.data.id,
-                            presentation = presentation,
-                        )
-                    }
-
-                    else -> {
-                        emptyList()
-                    }
-                },
+            presentationReferences = presentationReferences,
         )
+    }
+
+    private fun semanticReferenceSignature(references: List<DbStatusReference>): String =
+        buildString {
+            references
+                .sortedWith(compareBy(DbStatusReference::referenceType, DbStatusReference::referenceStatusId))
+                .forEach { reference ->
+                    appendSignatureValue(reference.referenceType.name)
+                    appendSignatureValue(reference.referenceStatusId)
+                    append(reference.referenceOrder)
+                    append(';')
+                }
+        }
+
+    private fun presentationReferenceSignature(references: List<DbTimelineItemPresentationReference>): String =
+        buildString {
+            references
+                .sortedWith(
+                    compareBy(
+                        DbTimelineItemPresentationReference::presentationType,
+                        DbTimelineItemPresentationReference::referenceStatusId,
+                    ),
+                ).forEach { reference ->
+                    appendSignatureValue(reference.presentationType.name)
+                    appendSignatureValue(reference.referenceStatusId)
+                    append(reference.referenceOrder)
+                    append(';')
+                }
+        }
+
+    private fun StringBuilder.appendSignatureValue(value: String) {
+        append(value.length)
+        append(':')
+        append(value)
+        append(':')
     }
 
     fun toUi(
@@ -185,6 +256,7 @@ internal object TimelinePagingMapper {
     private fun collectUserListReferences(
         data: UiTimelineV2.UserList,
         rootStatusId: String,
+        context: MappingContext,
     ): List<DbStatusReferenceWithStatus> =
         data.post
             ?.let {
@@ -194,6 +266,7 @@ internal object TimelinePagingMapper {
                         referenceType = ReferenceType.Quote,
                         rootStatusId = rootStatusId,
                         referenceOrder = 0,
+                        context = context,
                     ),
                 )
             }.orEmpty()
@@ -202,6 +275,7 @@ internal object TimelinePagingMapper {
         root: UiTimelineV2.Post,
         presentation: UiTimelineV2.PostPresentation?,
         rootStatusId: String,
+        context: MappingContext,
     ): List<DbStatusReferenceWithStatus> {
         val presentationPosts =
             buildMap {
@@ -231,6 +305,7 @@ internal object TimelinePagingMapper {
                         referenceType = reference.type,
                         rootStatusId = rootStatusId,
                         referenceOrder = index,
+                        context = context,
                     )
                 } else {
                     dbStatusReferenceWithStatus(
@@ -249,17 +324,45 @@ internal object TimelinePagingMapper {
         pagingKey: String,
         rootStatusId: String,
         presentation: UiTimelineV2.PostPresentation,
+        context: MappingContext,
     ): List<DbTimelineItemPresentationReferenceWithStatus> {
         var order = 0
         return buildList {
             presentation.inlineParents.forEach { post ->
-                add(presentationReferenceWithStatus(pagingKey, rootStatusId, post, DbTimelineItemPresentationType.InlineParent, order++))
+                add(
+                    presentationReferenceWithStatus(
+                        pagingKey,
+                        rootStatusId,
+                        post,
+                        DbTimelineItemPresentationType.InlineParent,
+                        order++,
+                        context,
+                    ),
+                )
             }
             presentation.quotes.forEach { post ->
-                add(presentationReferenceWithStatus(pagingKey, rootStatusId, post, DbTimelineItemPresentationType.Quote, order++))
+                add(
+                    presentationReferenceWithStatus(
+                        pagingKey,
+                        rootStatusId,
+                        post,
+                        DbTimelineItemPresentationType.Quote,
+                        order++,
+                        context,
+                    ),
+                )
             }
             presentation.repost?.let { post ->
-                add(presentationReferenceWithStatus(pagingKey, rootStatusId, post, DbTimelineItemPresentationType.Repost, order++))
+                add(
+                    presentationReferenceWithStatus(
+                        pagingKey,
+                        rootStatusId,
+                        post,
+                        DbTimelineItemPresentationType.Repost,
+                        order++,
+                        context,
+                    ),
+                )
             }
         }.distinctBy {
             it.reference.presentationType to it.reference.referenceStatusId
@@ -271,6 +374,7 @@ internal object TimelinePagingMapper {
         referenceType: ReferenceType,
         rootStatusId: String,
         referenceOrder: Int,
+        context: MappingContext,
     ) = DbStatusReferenceWithStatus(
         reference =
             DbStatusReference(
@@ -278,9 +382,8 @@ internal object TimelinePagingMapper {
                 statusId = rootStatusId,
                 referenceStatusId = DbStatus.createId(post.accountType as DbAccountType, post.statusKey),
                 referenceOrder = referenceOrder,
-                _id = Uuid.random().toString(),
             ),
-        status = uiTimelineToDbStatusWithUser(post.normalizedPost()),
+        status = context.status(post.normalizedPost()),
     )
 
     private fun dbStatusReferenceWithStatus(
@@ -295,7 +398,6 @@ internal object TimelinePagingMapper {
                 statusId = rootStatusId,
                 referenceStatusId = DbStatus.createId(accountType, reference.statusKey),
                 referenceOrder = referenceOrder,
-                _id = Uuid.random().toString(),
             ),
         status = null,
     )
@@ -306,6 +408,7 @@ internal object TimelinePagingMapper {
         post: UiTimelineV2.Post,
         type: DbTimelineItemPresentationType,
         referenceOrder: Int,
+        context: MappingContext,
     ) = DbTimelineItemPresentationReferenceWithStatus(
         reference =
             DbTimelineItemPresentationReference(
@@ -314,9 +417,8 @@ internal object TimelinePagingMapper {
                 referenceStatusId = DbStatus.createId(post.accountType as DbAccountType, post.statusKey),
                 presentationType = type,
                 referenceOrder = referenceOrder,
-                _id = Uuid.random().toString(),
             ),
-        status = uiTimelineToDbStatusWithUser(post.normalizedPost()),
+        status = context.status(post.normalizedPost()),
     )
 
     private fun uiTimelineToDbStatusWithUser(data: UiTimelineV2): DbStatusWithUser =
@@ -330,6 +432,15 @@ internal object TimelinePagingMapper {
                     text = data.searchText,
                 ),
         )
+
+    private class MappingContext {
+        private val statusById = mutableMapOf<String, DbStatusWithUser>()
+
+        fun status(data: UiTimelineV2): DbStatusWithUser {
+            val id = DbStatus.createId(data.accountType as DbAccountType, data.statusKey)
+            return statusById.getOrPut(id) { uiTimelineToDbStatusWithUser(data) }
+        }
+    }
 
     private fun dbStatusWithUserToUiTimeline(
         data: DbStatusWithUser,

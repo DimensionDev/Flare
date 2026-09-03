@@ -796,6 +796,11 @@ class MixedRemoteMediatorTest : RobolectricTest() {
 
             val refreshResult = mediator.load(loadType = LoadType.REFRESH, state = state)
             assertTrue(refreshResult is androidx.paging.RemoteMediator.MediatorResult.Success)
+            val existingSortIds =
+                db
+                    .pagingTimelineDao()
+                    .getByPagingKey(loader.pagingKey)
+                    .associate { it.statusId to it.sortId }
             val prependResult = mediator.load(loadType = LoadType.PREPEND, state = state)
             assertTrue(prependResult is androidx.paging.RemoteMediator.MediatorResult.Success)
 
@@ -823,6 +828,13 @@ class MixedRemoteMediatorTest : RobolectricTest() {
                 urls,
             )
             assertEquals(urls.size, urls.toSet().size)
+            val rowsAfterPrepend = db.pagingTimelineDao().getByPagingKey(loader.pagingKey)
+            assertEquals(
+                existingSortIds,
+                rowsAfterPrepend
+                    .filter { it.statusId in existingSortIds }
+                    .associate { it.statusId to it.sortId },
+            )
         }
 
     @OptIn(ExperimentalPagingApi::class)

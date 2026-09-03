@@ -35,6 +35,9 @@ internal interface UserDao {
     @Query("SELECT * FROM DbUser WHERE userKey IN (:userKeys)")
     fun findByKeys(userKeys: List<MicroBlogKey>): Flow<List<DbUser>>
 
+    @Query("SELECT * FROM DbUser WHERE userKey IN (:userKeys)")
+    suspend fun getByKeys(userKeys: List<MicroBlogKey>): List<DbUser>
+
     @Query("SELECT * FROM DbUser WHERE userKey = :userKey")
     fun findByKey(userKey: MicroBlogKey): Flow<DbUser?>
 

@@ -63,6 +63,8 @@ import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
+import kotlin.test.assertNotSame
+import kotlin.test.assertSame
 import kotlin.test.assertTrue
 import kotlin.time.Clock
 
@@ -498,6 +500,71 @@ class MicroblogTest : RobolectricTest() {
                 emptyList(),
                 loader.load(offset = 2, limit = 1).map { it.status.status.data.id },
             )
+        }
+
+    @Test
+    fun timelinePageCacheReusesUnchangedRowsAcrossSparseChanges() =
+        runTest {
+            val accountKey = MicroBlogKey(id = "cache-account", host = "test.com")
+            val user = createUser(MicroBlogKey(id = "cache-user", host = "test.com"), "Cache User")
+
+            suspend fun item(
+                index: Int,
+                text: String = "post-$index",
+                sortId: Long = (index + 1) * 10L,
+            ) = TimelinePagingMapper.toDb(
+                createPost(
+                    accountKey = accountKey,
+                    user = user,
+                    statusKey = MicroBlogKey(id = "cache-status-$index", host = "test.com"),
+                    text = text,
+                ),
+                pagingKey = "home",
+                sortId = sortId,
+            )
+
+            saveToDatabase(db, List(4) { item(it) })
+            val loader = TimelineDbPageLoader(db, "home", TimelineDbPageCache())
+            val initial = loader.load(offset = 0, limit = 4)
+
+            saveToDatabase(db, listOf(item(index = 1, text = "updated")))
+            val afterStatusUpdate = loader.load(offset = 0, limit = 4)
+
+            assertSame(initial[0], afterStatusUpdate[0])
+            assertNotSame(initial[1], afterStatusUpdate[1])
+            assertSame(initial[2], afterStatusUpdate[2])
+            assertSame(initial[3], afterStatusUpdate[3])
+
+            db.translationDao().insert(
+                DbTranslation(
+                    entityType = TranslationEntityType.Status,
+                    entityKey = afterStatusUpdate[2].statusData.id,
+                    targetLanguage = Locale.language,
+                    sourceHash = "cache-reuse",
+                    status = TranslationStatus.Completed,
+                    payload = TranslationPayload(content = "translated".toUiPlainText()),
+                    updatedAt = 1L,
+                ),
+            )
+            val afterTranslation = loader.load(offset = 0, limit = 4)
+
+            assertSame(afterStatusUpdate[0], afterTranslation[0])
+            assertSame(afterStatusUpdate[1], afterTranslation[1])
+            assertNotSame(afterStatusUpdate[2], afterTranslation[2])
+            assertSame(afterStatusUpdate[3], afterTranslation[3])
+
+            saveToDatabase(db, listOf(item(index = -1, sortId = 5L)))
+            val afterTopInsert = loader.load(offset = 0, limit = 5)
+
+            assertEquals(
+                "cache-status--1",
+                afterTopInsert
+                    .first()
+                    .status.status.data.statusKey.id,
+            )
+            afterTranslation.indices.forEach { index ->
+                assertSame(afterTranslation[index], afterTopInsert[index + 1])
+            }
         }
 
     @Test

@@ -3,7 +3,6 @@ package dev.dimension.flare.data.database.cache.mapper
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.model.DbUser
 import dev.dimension.flare.ui.model.UiProfile
-import kotlinx.coroutines.flow.firstOrNull
 
 internal fun UiProfile.toDbUser(host: String = this.host ?: key.host) =
     DbUser(
@@ -24,10 +23,10 @@ internal suspend fun CacheDatabase.upsertUsers(users: List<DbUser>) {
     }
     val distinctUsers = users.distinctBy { it.userKey }
     val existingUsers =
-        userDao()
-            .findByKeys(distinctUsers.map { it.userKey })
-            .firstOrNull()
-            .orEmpty()
+        distinctUsers
+            .map { it.userKey }
+            .chunked(USER_QUERY_BATCH_SIZE)
+            .flatMap { userDao().getByKeys(it) }
             .associateBy { it.userKey }
     val changedUsers =
         distinctUsers.mapNotNull { user ->
@@ -44,6 +43,8 @@ internal suspend fun CacheDatabase.upsertUsers(users: List<DbUser>) {
     }
     userDao().insertAll(changedUsers)
 }
+
+private const val USER_QUERY_BATCH_SIZE = 500
 
 private fun DbUser.mergeWith(existing: DbUser): DbUser =
     copy(

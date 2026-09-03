@@ -77,7 +77,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
-import kotlin.uuid.Uuid
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class PostHandlerTest : RobolectricTest() {
@@ -638,7 +637,6 @@ class PostHandlerTest : RobolectricTest() {
             db.statusReferenceDao().insertAll(
                 listOf(
                     DbStatusReference(
-                        _id = Uuid.random().toString(),
                         referenceType = dev.dimension.flare.model.ReferenceType.Reply,
                         statusId = DbStatus.createId(accountType, postKey),
                         referenceStatusId = DbStatus.createId(accountType, MicroBlogKey("ref-1", postKey.host)),

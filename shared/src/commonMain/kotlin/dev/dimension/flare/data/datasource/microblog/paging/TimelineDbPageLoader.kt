@@ -63,19 +63,34 @@ internal class TimelineDbPageCache {
             }
 
             if (offset == 0) {
-                val reusablePrefix = snapshot.reusablePrefix(pageIdentities)
-                val fetchedLimit = pageIdentities.size - reusablePrefix
-                val fetchedData =
-                    if (fetchedLimit > 0) {
-                        dao.getTimelinePage(
-                            pagingKey = pagingKey,
-                            offset = reusablePrefix,
-                            limit = fetchedLimit,
-                        )
-                    } else {
-                        emptyList()
+                val cachedByIdentity =
+                    buildMap(snapshot.data.size) {
+                        repeat(minOf(snapshot.identities.size, snapshot.data.size)) { index ->
+                            put(snapshot.identities[index], snapshot.data[index])
+                        }
                     }
-                val data = snapshot.data.take(reusablePrefix) + fetchedData
+                val reused = pageIdentities.map { cachedByIdentity[it] }
+                val firstDirty = reused.indexOfFirst { it == null }
+                val data =
+                    if (firstDirty < 0) {
+                        reused.filterNotNull()
+                    } else {
+                        // ponytail: Split disjoint ranges only if a trace shows this span is too broad.
+                        val lastDirty = reused.indexOfLast { it == null }
+                        val fetchedData =
+                            dao.getTimelinePage(
+                                pagingKey = pagingKey,
+                                offset = firstDirty,
+                                limit = lastDirty - firstDirty + 1,
+                            )
+                        reused.mapIndexed { index, cached ->
+                            if (index in firstDirty..lastDirty) {
+                                fetchedData[index - firstDirty]
+                            } else {
+                                checkNotNull(cached)
+                            }
+                        }
+                    }
                 snapshot =
                     Snapshot(
                         loaded = true,
@@ -109,17 +124,7 @@ internal class TimelineDbPageCache {
         val identities: List<DbTimelinePageIdentity> = emptyList(),
         val data: List<DbPagingTimelineWithStatus> = emptyList(),
         val nextIdentity: DbTimelinePageIdentity? = null,
-    ) {
-        fun reusablePrefix(newIdentities: List<DbTimelinePageIdentity>): Int {
-            val max = minOf(identities.size, data.size, newIdentities.size)
-            for (index in 0 until max) {
-                if (identities[index] != newIdentities[index]) {
-                    return index
-                }
-            }
-            return max
-        }
-    }
+    )
 }
 
 internal class TimelineDbPageLoader(

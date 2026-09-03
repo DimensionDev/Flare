@@ -86,14 +86,13 @@ internal class TimelineRemoteMediator(
                 pageSize = pageSize,
                 request = request,
             )
+        val sortIdProvider = loader as? SortIdProvider
         val data =
-            result.data.map {
-                TimelinePagingMapper.toDb(
-                    data = it,
-                    pagingKey = pagingKey,
-                    sortId = (loader as? SortIdProvider)?.sortId(it),
-                )
-            }
+            TimelinePagingMapper.toDb(
+                data = result.data,
+                pagingKey = pagingKey,
+                sortIds = result.data.map { sortIdProvider?.sortId(it) },
+            )
         return PagingResult(
             data = data,
             nextKey = result.nextKey,
@@ -139,24 +138,32 @@ internal class TimelineRemoteMediator(
                         .delete(pagingKey = key)
                 }
         }
-        if (request is PagingRequest.Prepend && loader.supportPrepend) {
-            // load current timeline caches
-            val currentCaches =
-                database
-                    .pagingTimelineDao()
-                    .getByPagingKey(pagingKey)
-                    .map {
-                        it.copy(
-                            sortId = SnowflakeIdGenerator.nextId(),
-                        )
+        val dataToSave =
+            if (request is PagingRequest.Prepend && loader.supportPrepend && data.isNotEmpty()) {
+                val minimumSortId = database.pagingTimelineDao().getMinSortId(pagingKey)
+                if (minimumSortId != null && minimumSortId >= Long.MIN_VALUE + data.size) {
+                    val firstSortId = minimumSortId - data.size
+                    data
+                        .sortedBy { it.timeline.sortId }
+                        .mapIndexed { index, item ->
+                            item.copy(timeline = item.timeline.copy(sortId = firstSortId + index))
+                        }
+                } else {
+                    if (minimumSortId != null) {
+                        val rebasedRows =
+                            database.pagingTimelineDao().getByPagingKey(pagingKey).map { row ->
+                                row.copy(sortId = SnowflakeIdGenerator.nextId())
+                            }
+                        database.pagingTimelineDao().insertAll(rebasedRows)
                     }
-            database.pagingTimelineDao().insertAll(
-                currentCaches,
-            )
-        }
-        saveToDatabase(database, data)
+                    data
+                }
+            } else {
+                data
+            }
+        saveToDatabase(database, dataToSave)
         preTranslationService.enqueueStatuses(
-            data
+            dataToSave
                 .flatMap { item ->
                     listOfNotNull(item.status.status.data) +
                         item.status.references.mapNotNull { it.status?.data } +

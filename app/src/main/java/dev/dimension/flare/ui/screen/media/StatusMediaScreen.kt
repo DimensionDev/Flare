@@ -3,6 +3,7 @@ package dev.dimension.flare.ui.screen.media
 import android.Manifest
 import android.content.ClipData
 import android.content.Context
+import android.content.Intent
 import android.os.Build
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
@@ -53,6 +54,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -81,6 +83,7 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import androidx.media3.common.C
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
@@ -108,6 +111,7 @@ import compose.icons.fontawesomeicons.solid.GaugeHigh
 import compose.icons.fontawesomeicons.solid.Pause
 import compose.icons.fontawesomeicons.solid.Play
 import compose.icons.fontawesomeicons.solid.ShareNodes
+import compose.icons.fontawesomeicons.solid.UpRightFromSquare
 import compose.icons.fontawesomeicons.solid.Xmark
 import dev.dimension.flare.R
 import dev.dimension.flare.common.AndroidDownloadManager
@@ -117,6 +121,7 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.Glassify
+import dev.dimension.flare.ui.component.LocalGlobalAppearance
 import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.SurfaceBindingManager
 import dev.dimension.flare.ui.component.VideoPlayer
@@ -263,6 +268,32 @@ internal fun MediaViewerScreen(
             context = context,
         )
     }
+    val openExternal: (UiMedia) -> Unit = { media ->
+        val mimeType =
+            when (media) {
+                is UiMedia.Video -> "video/*"
+                is UiMedia.Audio -> "audio/*"
+                is UiMedia.Gif ->
+                    if (media.url.contains(".mp4", ignoreCase = true) ||
+                        media.url.contains(".webm", ignoreCase = true)
+                    ) {
+                        "video/*"
+                    } else {
+                        "image/*"
+                    }
+
+                is UiMedia.Image -> "image/*"
+            }
+        val intent =
+            Intent(Intent.ACTION_VIEW).apply {
+                setDataAndType(media.url.toUri(), mimeType)
+            }
+        try {
+            context.startActivity(Intent.createChooser(intent, null))
+        } catch (e: Exception) {
+            Toast.makeText(context, e.message, Toast.LENGTH_SHORT).show()
+        }
+    }
     val pagerState =
         rememberPagerState(
             initialPage = initialIndex,
@@ -274,16 +305,22 @@ internal fun MediaViewerScreen(
                 }
             },
         )
-    var playbackSpeed by remember { mutableFloatStateOf(NORMAL_PLAYBACK_SPEED) }
+    val defaultPlaybackSpeed =
+        LocalGlobalAppearance.current.mediaPlaybackSpeed.coerceIn(
+            NORMAL_PLAYBACK_SPEED,
+            MAX_PLAYBACK_SPEED,
+        )
+    var playbackSpeed by remember { mutableFloatStateOf(defaultPlaybackSpeed) }
+    var isFastPlayback by remember { mutableStateOf(false) }
     MediaLandscapeEffect(
         enabled = state.isLandscapeViewing,
         originalOrientation = state.originalOrientation,
         setOriginalOrientation = state::setOriginalOrientation,
     )
-    LaunchedEffect(pagerState.currentPage) {
+    LaunchedEffect(pagerState.currentPage, defaultPlaybackSpeed) {
         state.setCurrentPage(pagerState.currentPage)
-        playbackSpeed = NORMAL_PLAYBACK_SPEED
-        surfaceBindingManager.player.setPlaybackSpeed(NORMAL_PLAYBACK_SPEED)
+        playbackSpeed = defaultPlaybackSpeed
+        surfaceBindingManager.player.setPlaybackSpeed(defaultPlaybackSpeed)
     }
     FlareTheme(darkTheme = true) {
         val swiperState =
@@ -414,6 +451,10 @@ internal fun MediaViewerScreen(
                                                         onPlaybackSpeedChanged = {
                                                             playbackSpeed = it
                                                         },
+                                                        onFastPlaybackChanged = {
+                                                            isFastPlayback = it
+                                                        },
+                                                        baseSpeed = playbackSpeed,
                                                         modifier = Modifier.fillMaxSize(),
                                                     )
                                                 }
@@ -571,6 +612,19 @@ internal fun MediaViewerScreen(
                                             )
                                         }
                                     }
+                                    Glassify(
+                                        onClick = {
+                                            openExternal(current)
+                                        },
+                                        color = MaterialTheme.colorScheme.secondaryContainer,
+                                        modifier = Modifier.size(40.dp),
+                                        shape = CircleShape,
+                                    ) {
+                                        FAIcon(
+                                            FontAwesomeIcons.Solid.UpRightFromSquare,
+                                            contentDescription = stringResource(id = R.string.media_menu_open_external),
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -581,11 +635,11 @@ internal fun MediaViewerScreen(
                             when {
                                 state.isLandscapeViewing -> {
                                     isCurrentVideo &&
-                                        (state.showUi || playbackSpeed > NORMAL_PLAYBACK_SPEED)
+                                        (state.showUi || isFastPlayback)
                                 }
 
                                 isCurrentVideo -> {
-                                    state.showUi || playbackSpeed > NORMAL_PLAYBACK_SPEED
+                                    state.showUi || isFastPlayback
                                 }
 
                                 else -> {
@@ -705,6 +759,10 @@ internal fun MediaViewerScreen(
                                             PlayerControl(
                                                 surfaceBindingManager.player,
                                                 playbackSpeed = playbackSpeed,
+                                                isFastPlayback = isFastPlayback,
+                                                onPlaybackSpeedChanged = {
+                                                    playbackSpeed = it
+                                                },
                                                 modifier =
                                                     Modifier
                                                         .widthIn(max = 480.dp),
@@ -898,6 +956,29 @@ internal fun MediaViewerScreen(
                         modifier =
                             Modifier
                                 .clickable {
+                                    openExternal(current)
+                                    state.setShowSheet(false)
+                                },
+                        leadingContent = {
+                            FAIcon(
+                                FontAwesomeIcons.Solid.UpRightFromSquare,
+                                contentDescription = null,
+                                modifier = Modifier.size(24.dp),
+                            )
+                        },
+                        colors =
+                            ListItemDefaults.colors(
+                                containerColor = Color.Transparent,
+                            ),
+                        elevation = ListItemDefaults.elevation(),
+                        content = {
+                            Text(stringResource(id = R.string.media_menu_open_external))
+                        },
+                    )
+                    ListItem(
+                        modifier =
+                            Modifier
+                                .clickable {
                                     scope.launch {
                                         val url = current.url
                                         clipboard.setClipEntry(
@@ -996,9 +1077,12 @@ private fun PlayerControl(
     player: ExoPlayer,
     modifier: Modifier = Modifier,
     playbackSpeed: Float = NORMAL_PLAYBACK_SPEED,
+    isFastPlayback: Boolean = false,
+    onPlaybackSpeedChanged: (Float) -> Unit = {},
 ) {
     val playPauseButtonState = rememberPlayPauseButtonState(player)
     var isLoaded by remember { mutableStateOf(false) }
+    var showSpeedSelector by remember { mutableStateOf(false) }
     LaunchedEffect(player) {
         while (!isLoaded) {
             isLoaded = player.isPlaying
@@ -1011,7 +1095,7 @@ private fun PlayerControl(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         AnimatedVisibility(
-            visible = playbackSpeed > NORMAL_PLAYBACK_SPEED,
+            visible = isFastPlayback,
             enter = fadeIn(),
             exit = fadeOut(),
         ) {
@@ -1105,7 +1189,45 @@ private fun PlayerControl(
                     modifier = Modifier.weight(1f),
                 )
                 Text(time)
+                TextButton(
+                    onClick = {
+                        showSpeedSelector = !showSpeedSelector
+                    },
+                ) {
+                    Text("${playbackSpeed.formatSpeed()}x")
+                }
                 Spacer(Modifier.width(screenHorizontalPadding))
+            }
+        }
+        AnimatedVisibility(
+            visible = showSpeedSelector && isLoaded,
+            enter = fadeIn(),
+            exit = fadeOut(),
+        ) {
+            Row(
+                modifier = Modifier.padding(horizontal = screenHorizontalPadding),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                FAIcon(
+                    FontAwesomeIcons.Solid.GaugeHigh,
+                    contentDescription = stringResource(id = R.string.media_playback_speed),
+                    modifier = Modifier.size(16.dp),
+                )
+                Slider(
+                    value = playbackSpeed,
+                    onValueChange = {
+                        val speed = (it * 10).roundToInt() / 10f
+                        if (speed != playbackSpeed) {
+                            player.setPlaybackSpeed(speed)
+                            onPlaybackSpeedChanged(speed)
+                        }
+                    },
+                    valueRange = NORMAL_PLAYBACK_SPEED..MAX_PLAYBACK_SPEED,
+                    steps = 29,
+                    modifier = Modifier.weight(1f),
+                )
+                Text("${playbackSpeed.formatSpeed()}x")
             }
         }
     }
@@ -1123,14 +1245,19 @@ private fun VideoGestureOverlay(
     player: ExoPlayer,
     onClick: () -> Unit,
     onPlaybackSpeedChanged: (Float) -> Unit,
+    onFastPlaybackChanged: (Boolean) -> Unit,
+    baseSpeed: Float,
     modifier: Modifier = Modifier,
 ) {
     val currentOnClick by rememberUpdatedState(onClick)
     val currentOnPlaybackSpeedChanged by rememberUpdatedState(onPlaybackSpeedChanged)
+    val currentOnFastPlaybackChanged by rememberUpdatedState(onFastPlaybackChanged)
+    val currentBaseSpeed by rememberUpdatedState(baseSpeed)
     var seekFeedback by remember { mutableStateOf<SeekFeedback?>(null) }
     var seekFeedbackVersion by remember { mutableIntStateOf(0) }
     var fastPlaybackWasPlaying by remember { mutableStateOf(false) }
     var isFastPlayback by remember { mutableStateOf(false) }
+    var speedBeforeFastPlayback by remember { mutableFloatStateOf(NORMAL_PLAYBACK_SPEED) }
 
     fun showSeekFeedback(feedback: SeekFeedback) {
         seekFeedback = feedback
@@ -1140,22 +1267,26 @@ private fun VideoGestureOverlay(
     fun beginFastPlayback() {
         if (isFastPlayback) return
         fastPlaybackWasPlaying = player.isPlaying
-        player.setPlaybackSpeed(FAST_PLAYBACK_SPEED)
+        speedBeforeFastPlayback = currentBaseSpeed
+        val fastSpeed = maxOf(FAST_PLAYBACK_SPEED, currentBaseSpeed)
+        player.setPlaybackSpeed(fastSpeed)
         if (!player.isPlaying) {
             player.play()
         }
         isFastPlayback = true
-        currentOnPlaybackSpeedChanged(FAST_PLAYBACK_SPEED)
+        currentOnPlaybackSpeedChanged(fastSpeed)
+        currentOnFastPlaybackChanged(true)
     }
 
     fun endFastPlayback() {
         if (!isFastPlayback) return
-        player.setPlaybackSpeed(NORMAL_PLAYBACK_SPEED)
+        player.setPlaybackSpeed(speedBeforeFastPlayback)
         if (!fastPlaybackWasPlaying) {
             player.pause()
         }
         isFastPlayback = false
-        currentOnPlaybackSpeedChanged(NORMAL_PLAYBACK_SPEED)
+        currentOnPlaybackSpeedChanged(speedBeforeFastPlayback)
+        currentOnFastPlaybackChanged(false)
     }
 
     LaunchedEffect(seekFeedbackVersion) {
@@ -1168,8 +1299,9 @@ private fun VideoGestureOverlay(
     androidx.compose.runtime.DisposableEffect(player) {
         onDispose {
             if (isFastPlayback) {
-                player.setPlaybackSpeed(NORMAL_PLAYBACK_SPEED)
-                currentOnPlaybackSpeedChanged(NORMAL_PLAYBACK_SPEED)
+                player.setPlaybackSpeed(speedBeforeFastPlayback)
+                currentOnPlaybackSpeedChanged(speedBeforeFastPlayback)
+                currentOnFastPlaybackChanged(false)
             }
         }
     }
@@ -1297,6 +1429,7 @@ private const val LONG_PRESS_DELAY_MS = 350L
 private const val SEEK_FEEDBACK_VISIBLE_MS = 450L
 private const val NORMAL_PLAYBACK_SPEED = 1f
 private const val FAST_PLAYBACK_SPEED = 2f
+private const val MAX_PLAYBACK_SPEED = 4f
 private const val MEDIA_VIEWER_PRESENTER_KEY = "media_viewer"
 
 @OptIn(ExperimentalTelephotoApi::class)

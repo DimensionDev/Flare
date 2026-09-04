@@ -53,6 +53,8 @@ public object AppearanceKeys {
 
     public object DeckMode : Global<Boolean>("app.deck_mode", false, Boolean.serializer())
 
+    public object MediaPlaybackSpeed : Global<Float>("app.media_playback_speed", 1f, Float.serializer())
+
     public object ShowMedia : PerTimeline<Boolean>("timeline.show_media", true, Boolean.serializer())
 
     public object ShowSensitiveContent : PerTimeline<Boolean>("timeline.show_sensitive_content", false, Boolean.serializer())
@@ -132,6 +134,7 @@ public object AppearanceKeys {
             ShowComposeInHomeTimeline,
             ShowBottomBarLabels,
             DeckMode,
+            MediaPlaybackSpeed,
             ShowMedia,
             ShowSensitiveContent,
             ExpandContentWarning,

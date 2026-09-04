@@ -25,6 +25,7 @@ public data class GlobalAppearance(
     val showComposeInHomeTimeline: Boolean = AppearanceKeys.ShowComposeInHomeTimeline.default,
     val showBottomBarLabels: Boolean = AppearanceKeys.ShowBottomBarLabels.default,
     val deckMode: Boolean = AppearanceKeys.DeckMode.default,
+    val mediaPlaybackSpeed: Float = AppearanceKeys.MediaPlaybackSpeed.default,
 ) {
     public companion object {
         public val Default: GlobalAppearance = GlobalAppearance()
@@ -82,6 +83,7 @@ public fun AppearancePatch.toGlobalAppearance(): GlobalAppearance =
         showComposeInHomeTimeline = get(AppearanceKeys.ShowComposeInHomeTimeline),
         showBottomBarLabels = get(AppearanceKeys.ShowBottomBarLabels),
         deckMode = get(AppearanceKeys.DeckMode),
+        mediaPlaybackSpeed = get(AppearanceKeys.MediaPlaybackSpeed),
     )
 
 public fun AppearancePatch.toTimelineAppearance(): TimelineAppearance = toTimelineAppearance(override = null)

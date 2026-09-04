@@ -9,8 +9,11 @@ import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
 import io.ktor.util.reflect.serializer
 import io.ktor.utils.io.InternalAPI
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.ListSerializer
 
+// Ktorfit reads T at runtime; serialization's consumer rule retains its signature under R8.
+@Serializable
 internal class MastodonPaging<T>(
     private val data: List<T>,
     val next: String? = null,

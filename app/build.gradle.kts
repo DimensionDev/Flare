@@ -77,12 +77,14 @@ android {
             optimization {
                 enable = true
             }
+            // START Non-FOSS component
             if (project.file("google-services.json").exists()) {
                 configure<CrashlyticsExtension> {
                     // Crashlytics 3.0.8 still detects the legacy minify flag.
                     mappingFileUploadEnabled = true
                 }
             }
+            // END Non-FOSS component
             if (hasSigningProps) {
                 signingConfig = signingConfigs.getByName("flare")
             } else {

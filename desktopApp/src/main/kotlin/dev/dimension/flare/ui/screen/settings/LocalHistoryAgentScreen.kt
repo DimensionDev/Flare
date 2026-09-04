@@ -21,6 +21,7 @@ import dev.dimension.flare.agent_chat_send
 import dev.dimension.flare.agent_chat_thinking
 import dev.dimension.flare.feature.agent.localhistory.LocalHistoryAgentTarget
 import dev.dimension.flare.feature.agent.presenter.history.LocalHistoryAgentPresenter
+import dev.dimension.flare.navigate_back
 import dev.dimension.flare.settings_local_history_title
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.agent.AgentChatScaffold
@@ -65,7 +66,7 @@ internal fun LocalHistoryAgentScreen(
             ) {
                 FAIcon(
                     imageVector = FontAwesomeIcons.Solid.ArrowLeft,
-                    contentDescription = null,
+                    contentDescription = stringResource(Res.string.navigate_back),
                 )
             }
             FAIcon(

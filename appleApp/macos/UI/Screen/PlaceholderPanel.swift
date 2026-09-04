@@ -40,6 +40,7 @@ struct PlaceholderPanel: View {
                     Image(fontAwesome: .arrowsRotate)
                 }
                 .help(String(localized: "Refresh", defaultValue: "Refresh", bundle: .main))
+                .accessibilityLabel(Text("Refresh"))
             }
         }
     }

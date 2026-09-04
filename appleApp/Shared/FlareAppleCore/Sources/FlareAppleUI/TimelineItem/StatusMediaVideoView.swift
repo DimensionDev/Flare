@@ -80,6 +80,12 @@ public struct VideoControlView: View {
                         .contentTransition(.symbolEffect(.replace))
                 }
                 .contentShape(Rectangle())
+                .accessibilityLabel(
+                    Text(
+                        isPlaying ? "media_pause" : "media_play",
+                        bundle: FlareAppleUILocalization.bundle
+                    )
+                )
                 .backport
                 .glassButtonStyle(fallbackStyle: .plain)
 
@@ -101,6 +107,9 @@ public struct VideoControlView: View {
                         }
                     }
                 }
+                .accessibilityLabel(
+                    Text("media_playback_position", bundle: FlareAppleUILocalization.bundle)
+                )
 
                 Text(formatTime(duration))
                     .font(.caption)

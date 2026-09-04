@@ -61,6 +61,7 @@ struct TabSettingsScreen: View {
                             Image(fontAwesome: .pen)
                         }
                         .buttonStyle(.plain)
+                        .accessibilityLabel(Text("edit"))
                         Image(systemName: "line.3.horizontal")
                             .foregroundColor(.secondary)
                     }
@@ -111,6 +112,7 @@ struct TabSettingsScreen: View {
                 } label: {
                     Image(fontAwesome: .xmark)
                 }
+                .accessibilityLabel(Text("Cancel"))
             }
             ToolbarItem(placement: .primaryAction) {
                 Menu {
@@ -127,6 +129,7 @@ struct TabSettingsScreen: View {
                 } label: {
                     Image(fontAwesome: .plus)
                 }
+                .accessibilityLabel(Text("add"))
             }
             ToolbarItem(placement: .confirmationAction) {
                 Button(
@@ -137,6 +140,7 @@ struct TabSettingsScreen: View {
                 } label: {
                     Image(fontAwesome: .check)
                 }
+                .accessibilityLabel(Text("done"))
             }
         }
         .sheet(isPresented: $showAddTabSheet) {
@@ -491,6 +495,7 @@ struct AccountTabListView: View {
                                     .foregroundColor(.red)
                             }
                             .buttonStyle(.plain)
+                            .accessibilityLabel(Text("tab_settings_remove"))
                         } else {
                             Button {
                                 onAdd(item)
@@ -499,6 +504,7 @@ struct AccountTabListView: View {
                                     .foregroundColor(.accentColor)
                             }
                             .buttonStyle(.plain)
+                            .accessibilityLabel(Text("tab_settings_add"))
                         }
                     }
                 } loadingContent: {
@@ -550,6 +556,7 @@ private struct AddTabRow: View {
                         .foregroundColor(.red)
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel(Text("tab_settings_remove"))
             } else {
                 Button {
                     onAdd(tabItem)
@@ -558,6 +565,7 @@ private struct AddTabRow: View {
                         .foregroundColor(.accentColor)
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel(Text("tab_settings_add"))
             }
         }
     }

@@ -39,6 +39,9 @@ public struct RichText: View {
                             .scaledToFit()
                             .clipShape(RoundedRectangle(cornerRadius: 12))
                             .contentShape(Rectangle())
+                            .accessibilityLabel(
+                                Text("media_image_no_alt", bundle: FlareAppleUILocalization.bundle)
+                            )
                             .onTapGesture {
                                 if let href = imageContent.href, let link = URL(string: href) {
                                     openURL(link)

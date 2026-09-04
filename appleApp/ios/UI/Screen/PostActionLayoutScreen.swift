@@ -121,6 +121,7 @@ struct PostActionLayoutScreen: View {
             }
             .buttonStyle(.borderless)
             .foregroundStyle(.secondary)
+            .accessibilityLabel(Text("more"))
         }
     }
 

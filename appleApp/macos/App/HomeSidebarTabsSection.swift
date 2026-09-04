@@ -131,6 +131,7 @@ struct HomeSidebarTabsSection: View {
                 }
                 .buttonStyle(.plain)
                 .help(String(localized: "tab_settings_add_tab", bundle: .main))
+                .accessibilityLabel(Text("tab_settings_add_tab"))
                 .popover(item: $addPopover, arrowEdge: .trailing) { popover in
                     switch popover {
                     case .tab:
@@ -158,6 +159,7 @@ struct HomeSidebarTabsSection: View {
                 }
                 .buttonStyle(.plain)
                 .help(String(localized: "done", bundle: .main))
+                .accessibilityLabel(Text("done"))
             } else {
                 Button {
                     editableTabs = liveTabs
@@ -168,6 +170,7 @@ struct HomeSidebarTabsSection: View {
                 }
                 .buttonStyle(.plain)
                 .help(String(localized: "tab_settings_customize", bundle: .main))
+                .accessibilityLabel(Text("tab_settings_customize"))
             }
         }
     }
@@ -290,6 +293,7 @@ private struct HomeSidebarEditableGroupRow: View {
             }
             .buttonStyle(.borderless)
             .help(String(localized: "edit", bundle: .main))
+            .accessibilityLabel(Text("edit"))
         } else {
             Image(fontAwesome: .pen)
                 .hidden()
@@ -305,6 +309,7 @@ private struct HomeSidebarEditableGroupRow: View {
             }
             .buttonStyle(.borderless)
             .help(String(localized: "delete", bundle: .main))
+            .accessibilityLabel(Text("delete"))
         } else {
             Image(fontAwesome: .trash)
                 .hidden()
@@ -388,6 +393,7 @@ private struct HomeSidebarEditableTabRow: View {
             }
             .buttonStyle(.borderless)
             .help(String(localized: "edit", bundle: .main))
+            .accessibilityLabel(Text("edit"))
         } else {
             Image(fontAwesome: .pen)
                 .hidden()
@@ -403,6 +409,7 @@ private struct HomeSidebarEditableTabRow: View {
             }
             .buttonStyle(.borderless)
             .help(String(localized: "delete", bundle: .main))
+            .accessibilityLabel(Text("delete"))
         } else {
             Image(fontAwesome: .trash)
                 .hidden()
@@ -678,5 +685,8 @@ private struct HomeSidebarAddTabRow: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        .accessibilityValue(
+            Text(isSelected ? String(localized: "selected") : String(localized: "not_selected"))
+        )
     }
 }

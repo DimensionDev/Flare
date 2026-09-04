@@ -11,14 +11,21 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.CirclePause
 import compose.icons.fontawesomeicons.solid.CirclePlay
+import dev.dimension.flare.compose.ui.Res
+import dev.dimension.flare.compose.ui.media_audio_playback_position
+import dev.dimension.flare.compose.ui.media_pause_audio
+import dev.dimension.flare.compose.ui.media_play_audio
 import dev.dimension.flare.ui.component.platform.PlatformCircularProgressIndicator
 import dev.dimension.flare.ui.component.platform.PlatformIconButton
 import dev.dimension.flare.ui.component.platform.PlatformSlider
+import org.jetbrains.compose.resources.stringResource
 import kotlin.math.roundToLong
 
 @Immutable
@@ -78,8 +85,14 @@ internal fun AudioPlayer(
 //        }
 //    }
     val state = rememberPlayerState(uri)
+    val playLabel = stringResource(Res.string.media_play_audio)
+    val pauseLabel = stringResource(Res.string.media_pause_audio)
+    val playbackPositionLabel = stringResource(Res.string.media_audio_playback_position)
     Row(
-        modifier = modifier,
+        modifier =
+            modifier.semantics {
+                contentDescription?.let { this.contentDescription = it }
+            },
         verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
     ) {
         if (previewUri != null) {
@@ -117,7 +130,7 @@ internal fun AudioPlayer(
                         } else {
                             FontAwesomeIcons.Solid.CirclePlay
                         },
-                        contentDescription = null,
+                        contentDescription = if (state.playing) pauseLabel else playLabel,
                     )
                 }
             }
@@ -132,6 +145,10 @@ internal fun AudioPlayer(
                         state.seekTo((progress * state.duration).roundToLong())
                     },
                     enabled = !state.loading,
+                    modifier =
+                        Modifier.semantics {
+                            this.contentDescription = playbackPositionLabel
+                        },
                 )
             }
         }

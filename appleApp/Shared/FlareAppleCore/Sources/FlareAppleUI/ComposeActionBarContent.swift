@@ -75,6 +75,12 @@ public struct ComposeActionBarContent<MediaControl: View>: View {
                                 Image(fontAwesome: .squarePollHorizontal)
                             }
                         }
+                        .accessibilityLabel(
+                            Text(
+                                isPollEnabled ? "compose_disable_poll" : "compose_enable_poll",
+                                bundle: FlareAppleUILocalization.bundle
+                            )
+                        )
                     }
 
                     if let visibility, !allVisibilities.isEmpty {
@@ -162,6 +168,12 @@ public struct ComposeVisibilityMenu: View {
         } label: {
             StatusVisibilityView(data: visibility)
         }
+        .accessibilityLabel(
+            Text(
+                LocalizedStringKey(visibility.composeAccessibilityTitleKey),
+                bundle: FlareAppleUILocalization.bundle
+            )
+        )
     }
 }
 
@@ -251,6 +263,14 @@ private struct ComposeLanguageMenu: View {
                     Image(systemName: "globe")
                 }
             }
+            .accessibilityLabel(Text("compose_language", bundle: FlareAppleUILocalization.bundle))
+            .accessibilityValue(
+                Text(
+                    selectedLanguages.wrappedValue
+                        .compactMap { Locale.current.localizedString(forLanguageCode: $0) }
+                        .joined(separator: ", ")
+                )
+            )
         }
     }
 
@@ -283,6 +303,10 @@ private extension UiTimelineV2.PostVisibility {
         case .channel:
             "status_visibility_public"
         }
+    }
+
+    var composeAccessibilityTitleKey: String {
+        self == .channel ? "channel_title" : composeTitleKey
     }
 
     var composeDescriptionKey: String {

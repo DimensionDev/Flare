@@ -156,7 +156,7 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                             ) {
                                 FAIcon(
                                     imageVector = FontAwesomeIcons.Solid.Bars,
-                                    contentDescription = null,
+                                    contentDescription = stringResource(R.string.open_navigation_menu),
                                 )
                             }
 

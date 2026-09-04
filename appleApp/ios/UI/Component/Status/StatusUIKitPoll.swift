@@ -202,6 +202,7 @@ private final class PollOptionButton: UIControl, ManualLayoutMeasurable, Timelin
         addSubview(titleLabel)
         addSubview(checkmark)
 
+        isAccessibilityElement = true
         setSelected(false)
         addTarget(self, action: #selector(onTapped), for: .touchUpInside)
     }
@@ -210,6 +211,7 @@ private final class PollOptionButton: UIControl, ManualLayoutMeasurable, Timelin
     func configure(index: Int, title: String) {
         self.index = index
         titleLabel.text = title
+        accessibilityLabel = title
         setSelected(false)
         invalidateIntrinsicContentSize()
         setNeedsLayout()
@@ -217,6 +219,9 @@ private final class PollOptionButton: UIControl, ManualLayoutMeasurable, Timelin
 
     func setSelected(_ selected: Bool) {
         checkmark.isHidden = !selected
+        accessibilityValue = selected
+            ? String(localized: "selected", defaultValue: "Selected")
+            : String(localized: "not_selected", defaultValue: "Not selected")
         bg.backgroundColor = selected
             ? UIColor.tintColor.withAlphaComponent(0.2)
             : .systemGroupedBackground
@@ -304,6 +309,7 @@ private final class PollOptionResultView: UIView, ManualLayoutMeasurable, Timeli
         addSubview(check)
         addSubview(pct)
         addSubview(progress)
+        isAccessibilityElement = true
     }
     required init?(coder: NSCoder) { fatalError("init(coder:) not supported") }
 
@@ -312,6 +318,10 @@ private final class PollOptionResultView: UIView, ManualLayoutMeasurable, Timeli
         pct.text = humanizedPercentage
         progress.progress = percentage
         check.isHidden = !isOwnVote
+        accessibilityLabel = title
+        accessibilityValue = isOwnVote
+            ? "\(humanizedPercentage), \(String(localized: "poll_your_vote", defaultValue: "Your vote"))"
+            : humanizedPercentage
         invalidateIntrinsicContentSize()
         setNeedsLayout()
     }

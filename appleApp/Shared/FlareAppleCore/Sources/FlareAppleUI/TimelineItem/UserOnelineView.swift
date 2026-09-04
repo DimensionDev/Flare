@@ -1,5 +1,6 @@
 import SwiftUI
 import KotlinSharedUI
+import FlareAppleCore
 
 public struct UserOnelineView<TrailingContent: View>: View {
     private let data: UiProfile
@@ -24,6 +25,9 @@ public struct UserOnelineView<TrailingContent: View>: View {
             if showAvatar {
                 AvatarView(data: data.avatar?.url, customHeader: data.avatar?.customHeaders)
                     .frame(width: 20, height: 20)
+                    .accessibilityLabel(
+                        Text(verbatim: openProfileAccessibilityLabel(handle: data.handle.canonical))
+                    )
                     .onTapGesture {
                         onClicked?()
                     }

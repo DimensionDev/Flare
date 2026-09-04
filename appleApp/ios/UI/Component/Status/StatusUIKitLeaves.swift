@@ -121,18 +121,31 @@ final class StatusVisibilityImageView: UIImageView {
         setContentHuggingPriority(.required, for: .horizontal)
         setContentCompressionResistancePriority(.required, for: .horizontal)
         tintColor = .secondaryLabel
+        isAccessibilityElement = true
     }
     required init(coder: NSCoder) { fatalError("init(coder:) not supported") }
 
     func set(visibility: UiTimelineV2.PostVisibility) {
         let icon: FontAwesomeIcon
         switch visibility {
-        case .public:    icon = .globe
-        case .home:      icon = .lockOpen
-        case .followers: icon = .lock
-        case .specified: icon = .at
-        case .channel:   icon = .tv
-        default:         icon = .globe
+        case .public:
+            icon = .globe
+            accessibilityLabel = String(localized: "status_visibility_public")
+        case .home:
+            icon = .lockOpen
+            accessibilityLabel = String(localized: "home_tab_home_title")
+        case .followers:
+            icon = .lock
+            accessibilityLabel = String(localized: "matrix_followers")
+        case .specified:
+            icon = .at
+            accessibilityLabel = String(localized: "status_visibility_specified")
+        case .channel:
+            icon = .tv
+            accessibilityLabel = String(localized: "channel_title")
+        default:
+            icon = .globe
+            accessibilityLabel = String(localized: "status_visibility_public")
         }
         image = UIImage(fontAwesome: icon)
     }
@@ -153,21 +166,34 @@ final class TranslateStatusStateView: UIView, ManualLayoutMeasurable, TimelineHe
         addSubview(langIcon)
         addSubview(stateIcon)
         addSubview(spinner)
+        isAccessibilityElement = true
     }
     required init(coder: NSCoder) { fatalError("init(coder:) not supported") }
 
     func set(state: TranslationDisplayState) {
         switch state {
         case .failed:
+            accessibilityLabel = String(
+                localized: "translation_failed",
+                defaultValue: "Translation failed"
+            )
             stateIcon.image = UIImage(fontAwesome: .circleExclamation)
             stateIcon.isHidden = false
             spinner.stopAnimating()
             spinner.isHidden = true
         case .translating:
+            accessibilityLabel = String(
+                localized: "translation_in_progress",
+                defaultValue: "Translation in progress"
+            )
             stateIcon.isHidden = true
             spinner.isHidden = false
             spinner.startAnimating()
         default:
+            accessibilityLabel = String(
+                localized: "translation_available",
+                defaultValue: "Translation available"
+            )
             stateIcon.isHidden = true
             spinner.stopAnimating()
             spinner.isHidden = true
@@ -306,6 +332,8 @@ final class UserOnelineUIView: UIView, ManualLayoutMeasurable, TimelineHeightPro
             trailing.setContentCompressionResistancePriority(.required, for: .horizontal)
         }
         onTapped = onClicked
+        avatar.isAccessibilityElement = showsAvatar && onClicked != nil
+        avatar.accessibilityLabel = openProfileAccessibilityLabel(handle: data.handle.canonical)
         invalidateIntrinsicContentSize()
         setNeedsLayout()
     }
@@ -454,6 +482,8 @@ final class UserCompatUIView: UIStackView {
             trailingContainer.flareSyncArrangedSubviews([])
         }
         onTapped = onClicked
+        avatar.isAccessibilityElement = onClicked != nil
+        avatar.accessibilityLabel = openProfileAccessibilityLabel(handle: data.handle.canonical)
     }
 
     @objc private func onTapFired() { onTapped?() }
@@ -578,8 +608,15 @@ final class StatusTopEndView: UIView, ManualLayoutMeasurable, TimelineHeightProv
         if showPlatformLogo {
             platformLogo.isHidden = false
             platformLogo.image = UIImage(fontAwesome: post.platformIcon.fontAwesomeIcon)
+            platformLogo.isAccessibilityElement = true
+            platformLogo.accessibilityLabel = String(
+                format: String(localized: "status_platform", defaultValue: "Platform: %@"),
+                post.platformId
+            )
         } else {
             platformLogo.isHidden = true
+            platformLogo.isAccessibilityElement = false
+            platformLogo.accessibilityLabel = nil
         }
 
         if isDetail {

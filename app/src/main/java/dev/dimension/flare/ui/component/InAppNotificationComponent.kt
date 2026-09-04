@@ -102,13 +102,13 @@ internal fun InAppNotificationComponent(
                             if (it.success) {
                                 FAIcon(
                                     FontAwesomeIcons.Solid.CircleCheck,
-                                    contentDescription = null,
+                                    contentDescription = stringResource(R.string.notification_success),
                                     tint = MaterialTheme.colorScheme.primary,
                                 )
                             } else {
                                 FAIcon(
                                     FontAwesomeIcons.Solid.CircleExclamation,
-                                    contentDescription = null,
+                                    contentDescription = stringResource(R.string.notification_error),
                                     tint = MaterialTheme.colorScheme.error,
                                 )
                             }

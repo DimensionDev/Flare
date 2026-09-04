@@ -166,7 +166,14 @@ internal fun EmojiPicker(
                                         } else {
                                             FontAwesomeIcons.Solid.CaretDown
                                         },
-                                        contentDescription = null,
+                                        contentDescription =
+                                            stringResource(
+                                                if (expandedCategory.contains(category)) {
+                                                    R.string.expanded
+                                                } else {
+                                                    R.string.collapsed
+                                                },
+                                            ),
                                     )
                                 },
                             )

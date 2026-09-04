@@ -299,6 +299,14 @@ struct ComposeScreen: View {
             ) {
                 Image(fontAwesome: .image)
             }
+            .accessibilityLabel(
+                Text(
+                    String(
+                        localized: "compose_add_media",
+                        defaultValue: "Add image or video"
+                    )
+                )
+            )
         }
     }
 
@@ -328,6 +336,14 @@ struct ComposeScreen: View {
                     .clipShape(Capsule())
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel(
+                    Text(
+                        String(
+                            localized: "compose_select_accounts",
+                            defaultValue: "Select posting accounts"
+                        )
+                    )
+                )
                 .popover(isPresented: $showAccountPicker, arrowEdge: .top) {
                     accountPickerPopover(selected: selected, accounts: accounts)
                 }
@@ -380,6 +396,9 @@ struct ComposeScreen: View {
             .contentShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
         }
         .buttonStyle(.plain)
+        .accessibilityValue(
+            Text(isSelected ? String(localized: "selected") : String(localized: "not_selected"))
+        )
     }
 
     private func successProfiles<T>(from state: UiState<T>) -> [UiProfile] {
@@ -824,6 +843,24 @@ struct ComposeMediaItemView: View {
                 .sheet(isPresented: $showAltTextEditor) {
                     AltTextEditSheet(item: item, maxLength: mediaViewModel.altTextMaxLength)
                 }
+                .accessibilityLabel(Text(verbatim: mediaDescription))
         }
+    }
+
+    private var mediaDescription: String {
+        let trimmedAltText = item.altText.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !trimmedAltText.isEmpty {
+            return trimmedAltText
+        }
+        if item.type == .video {
+            return String(
+                localized: "media_video_no_alt",
+                defaultValue: "Video, no alternative text provided"
+            )
+        }
+        return String(
+            localized: "media_image_no_alt",
+            defaultValue: "Image, no alternative text provided"
+        )
     }
 }

@@ -36,6 +36,8 @@ import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
@@ -48,10 +50,14 @@ import compose.icons.fontawesomeicons.solid.EyeSlash
 import compose.icons.fontawesomeicons.solid.ShareNodes
 import dev.dimension.flare.common.SystemUtils
 import dev.dimension.flare.compose.ui.Res
+import dev.dimension.flare.compose.ui.hide_sensitive_media
 import dev.dimension.flare.compose.ui.media_menu_copy_link
 import dev.dimension.flare.compose.ui.media_menu_download
 import dev.dimension.flare.compose.ui.media_menu_download_all
 import dev.dimension.flare.compose.ui.media_menu_share_image
+import dev.dimension.flare.compose.ui.media_play_video
+import dev.dimension.flare.compose.ui.media_view_alt_text
+import dev.dimension.flare.compose.ui.show_sensitive_media
 import dev.dimension.flare.compose.ui.status_sensitive_media
 import dev.dimension.flare.data.model.TimelineMediaLayout
 import dev.dimension.flare.data.model.VideoAutoplay
@@ -60,6 +66,7 @@ import dev.dimension.flare.ui.component.AudioPlayer
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.NetworkImage
+import dev.dimension.flare.ui.component.accessibleDescription
 import dev.dimension.flare.ui.component.platform.LocalWifiState
 import dev.dimension.flare.ui.component.platform.PlatformCircularProgressIndicator
 import dev.dimension.flare.ui.component.platform.PlatformDropdownMenu
@@ -109,6 +116,8 @@ internal fun StatusMediaComponent(
                 it
             }
         }
+    val showSensitiveMediaLabel = stringResource(Res.string.show_sensitive_media)
+    val hideSensitiveMediaLabel = stringResource(Res.string.hide_sensitive_media)
     Box(
         modifier =
             if (usesCarousel) {
@@ -219,9 +228,12 @@ internal fun StatusMediaComponent(
                             }
                         }.let {
                             if (hideSensitive) {
-                                it.clickable {
-                                    hideSensitive = false
-                                }
+                                it
+                                    .clickable {
+                                        hideSensitive = false
+                                    }.semantics {
+                                        contentDescription = showSensitiveMediaLabel
+                                    }
                             } else {
                                 it
                             }
@@ -262,7 +274,7 @@ internal fun StatusMediaComponent(
                             ) {
                                 FAIcon(
                                     imageVector = FontAwesomeIcons.Solid.EyeSlash,
-                                    contentDescription = null,
+                                    contentDescription = hideSensitiveMediaLabel,
                                 )
                             }
                         }
@@ -329,6 +341,7 @@ private fun StatusMediaItem(
     fillContainer: Boolean = false,
 ) {
     val uriHandler = LocalUriHandler.current
+    val viewAltTextLabel = stringResource(Res.string.media_view_alt_text)
     val appearanceSettings = LocalTimelineAppearance.current
     val mediaActionConfig = LocalTimelineMediaActionConfig.current
     var isMenuExpanded by remember(media.url) {
@@ -420,6 +433,8 @@ private fun StatusMediaItem(
                                             uriHandler.openUri(DeeplinkRoute.Status.AltText(it).toUri())
                                         }
                                     }
+                                }.semantics {
+                                    contentDescription = viewAltTextLabel
                                 },
                         color = Color.White,
                     )
@@ -534,11 +549,12 @@ public fun MediaItem(
     contentScale: ContentScale = ContentScale.Crop,
 ) {
     val appearanceSettings = LocalTimelineAppearance.current
+    val accessibleDescription = media.accessibleDescription()
     when (media) {
         is UiMedia.Image -> {
             NetworkImage(
                 model = media.previewUrl,
-                contentDescription = media.description,
+                contentDescription = accessibleDescription,
                 contentScale = contentScale,
                 customHeaders = media.customHeaders,
                 modifier =
@@ -571,7 +587,7 @@ public fun MediaItem(
                     customHeaders = media.customHeaders,
                     muted = true,
                     previewUri = media.thumbnailUrl,
-                    contentDescription = media.description,
+                    contentDescription = accessibleDescription,
                     modifier =
                         modifier
                             .fillMaxWidth()
@@ -596,7 +612,7 @@ public fun MediaItem(
                                 contentScale = contentScale,
                                 model = media.thumbnailUrl,
                                 customHeaders = media.customHeaders,
-                                contentDescription = media.description,
+                                contentDescription = accessibleDescription,
                                 modifier =
                                     Modifier
                                         .fillMaxWidth(),
@@ -633,7 +649,7 @@ public fun MediaItem(
                                 contentScale = contentScale,
                                 model = media.thumbnailUrl,
                                 customHeaders = media.customHeaders,
-                                contentDescription = media.description,
+                                contentDescription = accessibleDescription,
                                 modifier =
                                     Modifier
                                         .fillMaxWidth(),
@@ -652,7 +668,7 @@ public fun MediaItem(
                         ) {
                             FAIcon(
                                 FontAwesomeIcons.Solid.CirclePlay,
-                                contentDescription = null,
+                                contentDescription = stringResource(Res.string.media_play_video),
                                 modifier =
                                     Modifier
                                         .size(16.dp),
@@ -696,7 +712,7 @@ public fun MediaItem(
                         contentScale = contentScale,
                         model = media.thumbnailUrl,
                         customHeaders = media.customHeaders,
-                        contentDescription = media.description,
+                        contentDescription = accessibleDescription,
                         modifier =
                             Modifier
                                 .fillMaxWidth()
@@ -724,7 +740,7 @@ public fun MediaItem(
                     ) {
                         FAIcon(
                             FontAwesomeIcons.Solid.CirclePlay,
-                            contentDescription = null,
+                            contentDescription = stringResource(Res.string.media_play_video),
                             modifier =
                                 Modifier
                                     .size(16.dp),
@@ -739,7 +755,7 @@ public fun MediaItem(
             AudioPlayer(
                 uri = media.url,
                 previewUri = media.previewUrl,
-                contentDescription = media.description,
+                contentDescription = accessibleDescription,
                 modifier = modifier,
             )
         }
@@ -747,7 +763,7 @@ public fun MediaItem(
         is UiMedia.Gif -> {
             NetworkImage(
                 model = media.url,
-                contentDescription = media.description,
+                contentDescription = accessibleDescription,
                 contentScale = contentScale,
                 customHeaders = media.customHeaders,
                 modifier =

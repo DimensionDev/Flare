@@ -96,6 +96,11 @@ internal fun SearchScreen(
                                         ) {
                                             AvatarComponent(
                                                 data = account.avatar,
+                                                contentDescription =
+                                                    stringResource(
+                                                        R.string.select_account_current,
+                                                        account.handle.canonical,
+                                                    ),
                                             )
                                         }
                                         FlareDropdownMenu(

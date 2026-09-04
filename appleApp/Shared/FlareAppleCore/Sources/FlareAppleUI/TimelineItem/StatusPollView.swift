@@ -51,6 +51,13 @@ public struct StatusPollView: View {
                         )
                     }
                     .buttonStyle(.plain)
+                    .accessibilityValue(
+                        Text(
+                            selectedOption.contains(index)
+                                ? String(localized: "selected", defaultValue: "Selected")
+                                : String(localized: "not_selected", defaultValue: "Not selected")
+                        )
+                    )
                 } else {
                     VStack {
                         HStack {
@@ -72,6 +79,14 @@ public struct StatusPollView: View {
                             .tint(.accentColor)
                     }
                     .frame(maxWidth: .infinity)
+                    .accessibilityLabel(Text(verbatim: option.title))
+                    .accessibilityValue(
+                        Text(
+                            verbatim: data.ownVotes.contains(KotlinInt(value: Int32(index)))
+                                ? "\(option.humanizedPercentage), \(String(localized: "poll_your_vote", defaultValue: "Your vote"))"
+                                : option.humanizedPercentage
+                        )
+                    )
                 }
             }
             

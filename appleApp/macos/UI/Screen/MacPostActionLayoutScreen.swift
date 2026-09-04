@@ -193,6 +193,7 @@ struct MacPostActionLayoutScreen: View {
                 .buttonStyle(.borderless)
                 .disabled(index == 0)
                 .help(Text("macos_action_move_up"))
+                .accessibilityLabel(Text("macos_action_move_up"))
 
                 Button {
                     move(family: family, offset: 1)
@@ -203,6 +204,7 @@ struct MacPostActionLayoutScreen: View {
                 .buttonStyle(.borderless)
                 .disabled(index >= totalCount - 1)
                 .help(Text("macos_action_move_down"))
+                .accessibilityLabel(Text("macos_action_move_down"))
             }
         }
         .padding(.vertical, 7)

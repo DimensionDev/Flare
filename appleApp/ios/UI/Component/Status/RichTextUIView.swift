@@ -1507,6 +1507,12 @@ private final class RichTextBlockImageView: UIView, RichTextFittingPreparing {
             imageView.bottomAnchor.constraint(equalTo: bottomAnchor),
         ])
 
+        isAccessibilityElement = true
+        accessibilityLabel = String(
+            localized: "media_image_no_alt",
+            defaultValue: "Image, no alternative text provided"
+        )
+
         if href?.isEmpty == false {
             isUserInteractionEnabled = true
             addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(onTapped)))

@@ -108,6 +108,7 @@ struct MediaViewerScreen<SupplementaryOverlay: View>: View {
                     ZStack(alignment: .bottom) {
                         LazyPager(data: medias, page: pagerSelectedIndex) { media in
                             mediaContent(media)
+                                .accessibilityLabel(Text(verbatim: media.accessibleDescription))
                                 .contextMenu {
                                     MediaViewerContextMenu(
                                         media: media,
@@ -278,6 +279,9 @@ struct MediaViewerScreen<SupplementaryOverlay: View>: View {
                         } label: {
                             Image(fontAwesome: .download)
                         }
+                        .accessibilityLabel(
+                            Text("media_menu_download", bundle: .main)
+                        )
 
                         topOverlayButton {
                             shareSelectedImage(selectedMedia)
@@ -292,6 +296,9 @@ struct MediaViewerScreen<SupplementaryOverlay: View>: View {
                         } label: {
                             Image(fontAwesome: .download)
                         }
+                        .accessibilityLabel(
+                            Text("media_menu_download", bundle: .main)
+                        )
                     }
                 }
                 .padding(.horizontal, 4)
@@ -946,6 +953,10 @@ private struct MediaPageSlider: View {
                 in: 0...Double(maxPage),
                 step: 1
             )
+            .accessibilityLabel(
+                Text("media_page_position", bundle: .main)
+            )
+            .accessibilityValue(Text(verbatim: "\(displayedPage + 1) of \(count)"))
 
             Text(verbatim: "\(count)")
                 .frame(minWidth: 24, alignment: .leading)

@@ -25,6 +25,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
@@ -44,6 +46,10 @@ import dev.dimension.flare.mastodon_local_timeline
 import dev.dimension.flare.mastodon_trending_statuses
 import dev.dimension.flare.ok
 import dev.dimension.flare.opml_import
+import dev.dimension.flare.rss_source_checking
+import dev.dimension.flare.rss_source_invalid
+import dev.dimension.flare.rss_source_options_available
+import dev.dimension.flare.rss_source_valid
 import dev.dimension.flare.rss_sources_description_only
 import dev.dimension.flare.rss_sources_discovered_rss_sources
 import dev.dimension.flare.rss_sources_display_mode
@@ -59,11 +65,10 @@ import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.listCard
 import dev.dimension.flare.ui.model.UiRssSource
+import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.model.isSuccess
 import dev.dimension.flare.ui.model.map
-import dev.dimension.flare.ui.model.onError
-import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.presenter.home.rss.CheckRssSourcePresenter
@@ -224,53 +229,9 @@ fun EditRssSourceScreen(
                     lineLimits = TextFieldLineLimits.SingleLine,
                     placeholder = { Text(text = stringResource(Res.string.subscription_url_hint)) },
                     trailing = {
-                        state.checkState
-                            .onSuccess {
-                                when (it) {
-                                    is CheckRssSourcePresenter.State.RssState.RssFeed -> {
-                                        FAIcon(
-                                            FontAwesomeIcons.Solid.CircleCheck,
-                                            contentDescription = null,
-                                            modifier = Modifier.size(24.dp),
-                                        )
-                                    }
-
-                                    CheckRssSourcePresenter.State.RssState.RssHub -> {
-                                        FAIcon(
-                                            FontAwesomeIcons.Solid.CircleChevronDown,
-                                            contentDescription = null,
-                                            modifier = Modifier.size(24.dp),
-                                        )
-                                    }
-
-                                    is CheckRssSourcePresenter.State.RssState.RssSources -> {
-                                        FAIcon(
-                                            FontAwesomeIcons.Solid.CircleChevronDown,
-                                            contentDescription = null,
-                                            modifier = Modifier.size(24.dp),
-                                        )
-                                    }
-
-                                    is CheckRssSourcePresenter.State.RssState.SubscriptionInstance -> {
-                                        FAIcon(
-                                            FontAwesomeIcons.Solid.CircleCheck,
-                                            contentDescription = null,
-                                            modifier = Modifier.size(24.dp),
-                                        )
-                                    }
-                                }
-                            }.onError {
-                                FAIcon(
-                                    FontAwesomeIcons.Solid.CircleXmark,
-                                    contentDescription = null,
-                                    tint = FluentTheme.colors.system.critical,
-                                    modifier = Modifier.size(24.dp),
-                                )
-                            }.onLoading {
-                                ProgressRing(
-                                    modifier = Modifier.size(24.dp),
-                                )
-                            }
+                        RssCheckStateIndicator(state.checkState) { modifier ->
+                            ProgressRing(modifier = modifier)
+                        }
                     },
                 )
 
@@ -318,60 +279,11 @@ fun EditRssSourceScreen(
                                 trailing = {
                                     state.inputState.onSuccess {
                                         if (it is EditRssSourcePresenter.State.RssInputState.RssHub) {
-                                            it.checkState
-                                                .onSuccess {
-                                                    when (it) {
-                                                        is CheckRssSourcePresenter.State.RssState.RssFeed -> {
-                                                            FAIcon(
-                                                                FontAwesomeIcons.Solid.CircleCheck,
-                                                                contentDescription = null,
-                                                                modifier = Modifier.size(24.dp),
-                                                            )
-                                                        }
-
-                                                        CheckRssSourcePresenter.State.RssState.RssHub -> {
-                                                            FAIcon(
-                                                                FontAwesomeIcons.Solid.CircleChevronDown,
-                                                                contentDescription = null,
-                                                                modifier = Modifier.size(24.dp),
-                                                            )
-                                                        }
-
-                                                        is CheckRssSourcePresenter.State.RssState.RssSources -> {
-                                                            FAIcon(
-                                                                FontAwesomeIcons.Solid.CircleChevronDown,
-                                                                contentDescription = null,
-                                                                modifier = Modifier.size(24.dp),
-                                                            )
-                                                        }
-
-                                                        is CheckRssSourcePresenter.State.RssState.SubscriptionInstance -> {
-                                                            FAIcon(
-                                                                FontAwesomeIcons.Solid.CircleCheck,
-                                                                contentDescription = null,
-                                                                modifier = Modifier.size(24.dp),
-                                                            )
-                                                        }
-                                                    }
-                                                }.onError {
-                                                    FAIcon(
-                                                        FontAwesomeIcons.Solid.CircleXmark,
-                                                        contentDescription = null,
-                                                        tint = FluentTheme.colors.system.critical,
-                                                        modifier = Modifier.size(24.dp),
-                                                    )
-                                                }.onLoading {
-                                                    CircularProgressIndicator(
-                                                        modifier = Modifier.size(24.dp),
-                                                    )
-                                                }
+                                            RssCheckStateIndicator(it.checkState) { modifier ->
+                                                CircularProgressIndicator(modifier = modifier)
+                                            }
                                         } else {
-                                            FAIcon(
-                                                FontAwesomeIcons.Solid.CircleXmark,
-                                                contentDescription = null,
-                                                tint = FluentTheme.colors.system.critical,
-                                                modifier = Modifier.size(24.dp),
-                                            )
+                                            RssInvalidIndicator()
                                         }
                                     }
                                 },
@@ -577,6 +489,57 @@ fun EditRssSourceScreen(
                 }
             }
         },
+    )
+}
+
+@Composable
+private fun RssCheckStateIndicator(
+    state: UiState<CheckRssSourcePresenter.State.RssState>,
+    loadingIndicator: @Composable (Modifier) -> Unit,
+) {
+    val checkingDescription = stringResource(Res.string.rss_source_checking)
+    when (state) {
+        is UiState.Success -> {
+            val (icon, description) =
+                when (state.data) {
+                    is CheckRssSourcePresenter.State.RssState.RssFeed,
+                    is CheckRssSourcePresenter.State.RssState.SubscriptionInstance,
+                    -> FontAwesomeIcons.Solid.CircleCheck to Res.string.rss_source_valid
+
+                    CheckRssSourcePresenter.State.RssState.RssHub,
+                    is CheckRssSourcePresenter.State.RssState.RssSources,
+                    -> FontAwesomeIcons.Solid.CircleChevronDown to Res.string.rss_source_options_available
+                }
+            FAIcon(
+                icon,
+                contentDescription = stringResource(description),
+                modifier = Modifier.size(24.dp),
+            )
+        }
+
+        is UiState.Error -> {
+            RssInvalidIndicator()
+        }
+
+        is UiState.Loading -> {
+            loadingIndicator(
+                Modifier
+                    .size(24.dp)
+                    .semantics {
+                        contentDescription = checkingDescription
+                    },
+            )
+        }
+    }
+}
+
+@Composable
+private fun RssInvalidIndicator() {
+    FAIcon(
+        FontAwesomeIcons.Solid.CircleXmark,
+        contentDescription = stringResource(Res.string.rss_source_invalid),
+        tint = FluentTheme.colors.system.critical,
+        modifier = Modifier.size(24.dp),
     )
 }
 

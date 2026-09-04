@@ -11,11 +11,21 @@ public struct StatusVisibilityView: View {
 
     public var body: some View {
         switch data {
-        case .public:    Image(fontAwesome: .globe)
-        case .home:      Image(fontAwesome: .lockOpen)
-        case .followers: Image(fontAwesome: .lock)
-        case .specified: Image(fontAwesome: .at)
-        case .channel:   Image(fontAwesome: .tv)
+        case .public:
+            Image(fontAwesome: .globe)
+                .accessibilityLabel(Text("status_visibility_public", bundle: FlareAppleUILocalization.bundle))
+        case .home:
+            Image(fontAwesome: .lockOpen)
+                .accessibilityLabel(Text("home_tab_home_title", bundle: FlareAppleUILocalization.bundle))
+        case .followers:
+            Image(fontAwesome: .lock)
+                .accessibilityLabel(Text("matrix_followers", bundle: FlareAppleUILocalization.bundle))
+        case .specified:
+            Image(fontAwesome: .at)
+                .accessibilityLabel(Text("status_visibility_specified", bundle: FlareAppleUILocalization.bundle))
+        case .channel:
+            Image(fontAwesome: .tv)
+                .accessibilityLabel(Text("channel_title", bundle: FlareAppleUILocalization.bundle))
         }
     }
 }

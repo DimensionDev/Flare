@@ -23,6 +23,9 @@ public struct UserCompatView<TrailingContent: View>: View {
                 .frame(width: 44, height: 44)
                 .if(onClicked != nil) { view in
                     view
+                        .accessibilityLabel(
+                            Text(verbatim: openProfileAccessibilityLabel(handle: data.handle.canonical))
+                        )
                         .onTapGesture {
                             onClicked?()
                         }
@@ -38,6 +41,9 @@ public struct UserCompatView<TrailingContent: View>: View {
             }
             .if(onClicked != nil) { view in
                 view
+                    .accessibilityLabel(
+                        Text(verbatim: openProfileAccessibilityLabel(handle: data.handle.canonical))
+                    )
                     .onTapGesture {
                         onClicked?()
                     }

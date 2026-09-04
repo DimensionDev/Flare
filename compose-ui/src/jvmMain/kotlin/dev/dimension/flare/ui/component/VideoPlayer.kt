@@ -29,15 +29,20 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onLayoutRectChanged
 import androidx.compose.ui.layout.onVisibilityChanged
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.CirclePlay
+import dev.dimension.flare.compose.ui.Res
+import dev.dimension.flare.compose.ui.media_play_video
 import dev.dimension.flare.ui.component.status.LocalIsScrollingInProgress
 import dev.dimension.flare.ui.theme.PlatformTheme
 import io.github.composefluent.component.ProgressRing
 import io.github.kdroidfilter.composemediaplayer.VideoPlayerState
 import io.github.kdroidfilter.composemediaplayer.VideoPlayerSurface
+import org.jetbrains.compose.resources.stringResource
 import org.koin.core.annotation.Single
 import kotlin.math.roundToLong
 
@@ -129,7 +134,7 @@ public fun VideoPlayer(
                 ) {
                     FAIcon(
                         FontAwesomeIcons.Solid.CirclePlay,
-                        contentDescription = null,
+                        contentDescription = stringResource(Res.string.media_play_video),
                         modifier =
                             Modifier
                                 .size(16.dp),
@@ -189,7 +194,9 @@ public fun VideoPlayer(
                     val playerModifier =
                         Modifier
                             .clipToBounds()
-                            .let {
+                            .semantics {
+                                contentDescription?.let { this.contentDescription = it }
+                            }.let {
                                 if (onClick != null) {
                                     it.combinedClickable(
                                         onClick = onClick,

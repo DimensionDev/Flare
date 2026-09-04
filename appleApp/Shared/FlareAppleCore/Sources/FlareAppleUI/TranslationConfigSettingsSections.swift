@@ -345,6 +345,7 @@ private struct TranslationConfigEditSheet: View {
                     } label: {
                         Image(fontAwesome: .xmark)
                     }
+                    .accessibilityLabel(Text("Cancel", bundle: FlareAppleUILocalization.bundle))
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button {
@@ -353,6 +354,7 @@ private struct TranslationConfigEditSheet: View {
                     } label: {
                         Image(fontAwesome: .check)
                     }
+                    .accessibilityLabel(Text("done", bundle: FlareAppleUILocalization.bundle))
                 }
             }
         }
@@ -380,6 +382,7 @@ private struct TranslationExcludedLanguagesSheet: View {
                     } label: {
                         Image(fontAwesome: .xmark)
                     }
+                    .accessibilityLabel(Text("Cancel", bundle: FlareAppleUILocalization.bundle))
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button {
@@ -387,6 +390,7 @@ private struct TranslationExcludedLanguagesSheet: View {
                     } label: {
                         Image(fontAwesome: .check)
                     }
+                    .accessibilityLabel(Text("done", bundle: FlareAppleUILocalization.bundle))
                 }
             }
         }

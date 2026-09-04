@@ -372,6 +372,7 @@ internal fun HomeTimelineScreen(
                                         AvatarComponent(
                                             it.avatar,
                                             size = 24.dp,
+                                            contentDescription = stringResource(R.string.open_navigation_menu),
                                         )
                                     }
                                 }.onError {
@@ -382,7 +383,7 @@ internal fun HomeTimelineScreen(
                                     ) {
                                         FAIcon(
                                             imageVector = FontAwesomeIcons.Solid.Bars,
-                                            contentDescription = null,
+                                            contentDescription = stringResource(R.string.open_navigation_menu),
                                             modifier = Modifier.size(24.dp),
                                         )
                                     }
@@ -394,7 +395,7 @@ internal fun HomeTimelineScreen(
                                     ) {
                                         FAIcon(
                                             imageVector = FontAwesomeIcons.Solid.Bars,
-                                            contentDescription = null,
+                                            contentDescription = stringResource(R.string.open_navigation_menu),
                                             modifier = Modifier.size(24.dp),
                                         )
                                     }
@@ -515,7 +516,7 @@ private fun HomeTabDropdown(
                             {
                                 FAIcon(
                                     imageVector = FontAwesomeIcons.Solid.Check,
-                                    contentDescription = null,
+                                    contentDescription = stringResource(R.string.selected),
                                     modifier = Modifier.size(16.dp),
                                 )
                             }

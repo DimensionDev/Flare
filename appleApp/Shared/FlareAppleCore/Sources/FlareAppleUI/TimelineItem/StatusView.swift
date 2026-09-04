@@ -198,6 +198,11 @@ public struct StatusView: View {
                 if showAsFullWidth, let user {
                     AvatarView(data: user.avatar?.url, customHeader: user.avatar?.customHeaders)
                         .frame(width: 44, height: 44)
+                        .accessibilityLabel(
+                            Text(
+                                verbatim: openProfileAccessibilityLabel(handle: user.handle.canonical)
+                            )
+                        )
                         .onTapGesture {
                             user.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
                         }
@@ -218,6 +223,7 @@ public struct StatusView: View {
                                             visibility: visibility,
                                             translationDisplayState: translationDisplayState,
                                             platformIcon: data.platformIcon,
+                                            platformId: data.platformId,
                                             createdAt: createdAt,
                                             accountType: accountType,
                                             statusKey: statusKey
@@ -231,6 +237,7 @@ public struct StatusView: View {
                                             visibility: visibility,
                                             translationDisplayState: translationDisplayState,
                                             platformIcon: data.platformIcon,
+                                            platformId: data.platformId,
                                             createdAt: createdAt,
                                             accountType: accountType,
                                             statusKey: statusKey
@@ -244,6 +251,7 @@ public struct StatusView: View {
                                             visibility: visibility,
                                             translationDisplayState: translationDisplayState,
                                             platformIcon: data.platformIcon,
+                                            platformId: data.platformId,
                                             createdAt: createdAt,
                                             accountType: accountType,
                                             statusKey: statusKey
@@ -512,6 +520,7 @@ public struct StatusView: View {
         visibility: UiTimelineV2.PostVisibility?,
         translationDisplayState: TranslationDisplayState,
         platformIcon: UiIcon,
+        platformId: String,
         createdAt: UiDateTime,
         accountType: AccountType,
         statusKey: MicroBlogKey
@@ -531,6 +540,17 @@ public struct StatusView: View {
                 Image(fontAwesome: platformIcon.fontAwesomeIcon)
                     .font(.caption)
                     .foregroundStyle(.secondary)
+                    .accessibilityLabel(
+                        Text(
+                            verbatim: String(
+                                format: FlareAppleUILocalization.string(
+                                    "status_platform",
+                                    fallback: "Platform: %@"
+                                ),
+                                platformId
+                            )
+                        )
+                    )
             }
             if !isDetail {
                 DateTimeText(data: createdAt)

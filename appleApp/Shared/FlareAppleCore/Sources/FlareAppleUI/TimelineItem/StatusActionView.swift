@@ -171,6 +171,15 @@ public struct StatusActionView: View {
                 }
                 .optionalForegroundStyle(group.displayItem.color?.swiftColor)
                 .buttonStyle(.plain)
+                .accessibilityLabel(
+                    Text(
+                        verbatim: group.displayItem.text?.resolvedString
+                            ?? FlareAppleUILocalization.string("more", fallback: "More")
+                    )
+                )
+                .accessibilityValue(
+                    Text(verbatim: showNumbers ? (group.displayItem.count?.humanized ?? "") : "")
+                )
                 .macOSStatusActionHoverStyle(isEnabled: true)
                 .statusActionFixedWidthSlot(
                     icon: group.displayItem.icon,
@@ -235,6 +244,15 @@ public struct StatusActionItemView: View {
         actionControl
             .optionalForegroundStyle(data.color?.swiftColor)
             .buttonStyle(.plain)
+            .accessibilityLabel(
+                Text(
+                    verbatim: data.text?.resolvedString
+                        ?? FlareAppleUILocalization.string("more", fallback: "More")
+                )
+            )
+            .accessibilityValue(
+                Text(verbatim: showNumbers ? (data.count?.humanized ?? "") : "")
+            )
             .macOSStatusActionHoverStyle(isEnabled: !useText)
             .statusActionFixedWidthSlot(
                 icon: data.icon,

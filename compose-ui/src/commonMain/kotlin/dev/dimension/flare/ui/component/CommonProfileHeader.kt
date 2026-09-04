@@ -23,6 +23,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
+import dev.dimension.flare.compose.ui.Res
+import dev.dimension.flare.compose.ui.profile_banner
+import dev.dimension.flare.compose.ui.profile_picture
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.component.platform.isBigScreen
@@ -31,6 +34,7 @@ import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.render.UiRichText
 import dev.dimension.flare.ui.theme.PlatformTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 internal fun CommonProfileHeader(
@@ -47,6 +51,7 @@ internal fun CommonProfileHeader(
     content: @Composable ColumnScope.() -> Unit = {},
 ) {
     val isBigScreen = isBigScreen()
+    val profileName = displayName.raw.ifBlank { handle.canonical }
     val statusBarHeight =
         with(LocalDensity.current) {
             WindowInsets.statusBars.getTop(this).toDp()
@@ -77,7 +82,7 @@ internal fun CommonProfileHeader(
         banner?.let {
             NetworkImage(
                 model = it.url,
-                contentDescription = null,
+                contentDescription = stringResource(Res.string.profile_banner, profileName),
                 customHeaders = it.customHeaders,
                 modifier =
                     Modifier
@@ -129,6 +134,7 @@ internal fun CommonProfileHeader(
                     AvatarComponent(
                         data = avatar,
                         size = ProfileHeaderConstants.AVATAR_SIZE.dp,
+                        contentDescription = stringResource(Res.string.profile_picture, profileName),
 //                        beforeModifier =
 //                            Modifier
 //                                .sharedElement(

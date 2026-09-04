@@ -11,6 +11,8 @@ import compose.icons.fontawesomeicons.solid.Thumbtack
 import compose.icons.fontawesomeicons.solid.ThumbtackSlash
 import compose.icons.fontawesomeicons.solid.Trash
 import dev.dimension.flare.compose.ui.Res
+import dev.dimension.flare.compose.ui.feed_subscribe
+import dev.dimension.flare.compose.ui.feed_unsubscribe
 import dev.dimension.flare.compose.ui.tab_settings_add
 import dev.dimension.flare.compose.ui.tab_settings_remove
 import dev.dimension.flare.ui.common.itemsIndexed
@@ -53,12 +55,12 @@ public fun LazyListScope.myBlueskyFeedWithTabs(
                         if (it) {
                             FAIcon(
                                 imageVector = FontAwesomeIcons.Solid.ThumbtackSlash,
-                                contentDescription = stringResource(Res.string.tab_settings_add),
+                                contentDescription = stringResource(Res.string.tab_settings_remove),
                             )
                         } else {
                             FAIcon(
                                 imageVector = FontAwesomeIcons.Solid.Thumbtack,
-                                contentDescription = stringResource(Res.string.tab_settings_remove),
+                                contentDescription = stringResource(Res.string.tab_settings_add),
                             )
                         }
                     }
@@ -106,12 +108,12 @@ public fun LazyListScope.popularBlueskyFeedWithTabs(
                     if (subscribed) {
                         FAIcon(
                             imageVector = FontAwesomeIcons.Solid.Trash,
-                            contentDescription = null,
+                            contentDescription = stringResource(Res.string.feed_unsubscribe),
                         )
                     } else {
                         FAIcon(
                             imageVector = FontAwesomeIcons.Solid.Plus,
-                            contentDescription = null,
+                            contentDescription = stringResource(Res.string.feed_subscribe),
                         )
                     }
                 }

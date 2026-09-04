@@ -32,6 +32,7 @@ struct AppLogScreen: View {
                 } label: {
                     Image(fontAwesome: .trash)
                 }
+                .accessibilityLabel(Text("clear_log"))
             }
             ToolbarItem {
                 Button {
@@ -39,6 +40,7 @@ struct AppLogScreen: View {
                 } label: {
                     Image(fontAwesome: .floppyDisk)
                 }
+                .accessibilityLabel(Text("save_log"))
             }
         }
         .fileExporter(
@@ -70,6 +72,7 @@ struct AppLogScreen: View {
                         } label: {
                             Image(fontAwesome: .xmark)
                         }
+                        .accessibilityLabel(Text("Close"))
                     }
                 }
             }

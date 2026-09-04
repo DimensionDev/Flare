@@ -180,6 +180,7 @@ private struct DraftBoxContentRow: View {
                         .frame(width: rowMode == .compact ? 24 : 28, height: rowMode == .compact ? 24 : 28)
                 }
                 .modifier(DraftBoxMenuButtonStyle())
+                .accessibilityLabel(Text("more", bundle: FlareAppleUILocalization.bundle))
             }
         }
         .padding(.vertical, 8)
@@ -248,12 +249,14 @@ private struct DraftAccountsStrip: View {
                     NetworkImage(data: avatar.url, customHeader: avatar.customHeaders)
                         .frame(width: 22, height: 22)
                         .clipShape(Circle())
+                        .accessibilityLabel(Text(verbatim: postingAccountDescription(account)))
                 } else {
                     Image(systemName: "person.crop.circle.fill")
                         .resizable()
                         .scaledToFit()
                         .foregroundStyle(.secondary)
                         .frame(width: 22, height: 22)
+                        .accessibilityLabel(Text(verbatim: postingAccountDescription(account)))
                 }
             }
 
@@ -276,6 +279,7 @@ private struct DraftStatusIcon: View {
         Image(systemName: status.symbolName)
             .foregroundStyle(status.tint)
             .frame(width: 18, height: 18)
+            .accessibilityLabel(Text(FlareAppleUILocalization.string(status.titleKey)))
     }
 }
 
@@ -305,6 +309,7 @@ private struct DraftMediaThumbnail: View {
         }
         .frame(width: 60, height: 60)
         .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+        .accessibilityLabel(Text(verbatim: media.accessibleDescription))
     }
 
     @ViewBuilder
@@ -375,6 +380,16 @@ private func attachmentCountText(_ count: Int) -> String {
     )
 }
 
+private func postingAccountDescription(_ account: UiDraftAccount) -> String {
+    String(
+        format: FlareAppleUILocalization.string(
+            "draft_box_posting_account",
+            fallback: "Posting account: %@"
+        ),
+        "\(account.account.accountKey)"
+    )
+}
+
 private extension UiDraft {
     var previewText: String {
         if let content = data.content.nonEmpty {
@@ -421,6 +436,32 @@ private extension UiDraftStatus {
             .red
         default:
             .secondary
+        }
+    }
+}
+
+private extension UiDraftMedia {
+    var accessibleDescription: String {
+        if let altText = altText?.nonEmpty {
+            return altText
+        }
+        switch type {
+        case .image:
+            return FlareAppleUILocalization.string(
+                "media_image_no_alt",
+                fallback: "Image, no alternative text provided"
+            )
+        case .video:
+            return FlareAppleUILocalization.string(
+                "media_video_no_alt",
+                fallback: "Video, no alternative text provided"
+            )
+        default:
+            return fileName?.nonEmpty
+                ?? FlareAppleUILocalization.string(
+                    "draft_box_attachment_no_description",
+                    fallback: "Attachment, no description provided"
+                )
         }
     }
 }

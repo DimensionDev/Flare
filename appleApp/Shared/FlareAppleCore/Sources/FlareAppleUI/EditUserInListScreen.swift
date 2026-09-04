@@ -24,12 +24,14 @@ public struct EditUserInListScreen: View {
                             } label: {
                                 Image(fontAwesome: .trash)
                             }
+                            .accessibilityLabel(Text("remove_from_list", bundle: FlareAppleUILocalization.bundle))
                         } else {
                             Button {
                                 presenter.state.addList(list: item)
                             } label: {
                                 Image(fontAwesome: .plus)
                             }
+                            .accessibilityLabel(Text("add_to_list", bundle: FlareAppleUILocalization.bundle))
                         }
                     } loadingContent: {
                         ProgressView()
@@ -49,6 +51,7 @@ public struct EditUserInListScreen: View {
                 } label: {
                     Image(fontAwesome: .xmark)
                 }
+                .accessibilityLabel(Text("Cancel", bundle: FlareAppleUILocalization.bundle))
             }
         }
     }

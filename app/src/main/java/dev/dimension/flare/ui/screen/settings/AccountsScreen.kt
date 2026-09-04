@@ -124,7 +124,10 @@ internal fun AccountsScreen(
                             toLogin.invoke()
                         },
                     ) {
-                        FAIcon(FontAwesomeIcons.Solid.Plus, contentDescription = null)
+                        FAIcon(
+                            FontAwesomeIcons.Solid.Plus,
+                            contentDescription = stringResource(R.string.quick_menu_add_account),
+                        )
                     }
                 },
                 scrollBehavior = topAppBarScrollBehavior,

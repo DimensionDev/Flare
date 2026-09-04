@@ -1,5 +1,6 @@
 package dev.dimension.flare.ui.theme
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.IndicationNodeFactory
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
@@ -9,6 +10,8 @@ import androidx.compose.foundation.interaction.InteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.text.LocalTextContextMenu
+import androidx.compose.foundation.text.TextContextMenu
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -65,7 +68,7 @@ internal val LocalComposeWindow =
         error("No ComposeWindow provided")
     }
 
-@OptIn(ExperimentalFluentApi::class, ExperimentalMediaQueryApi::class)
+@OptIn(ExperimentalFluentApi::class, ExperimentalFoundationApi::class, ExperimentalMediaQueryApi::class)
 @Composable
 internal fun FlareTheme(
     isDarkTheme: Boolean = isDarkTheme(),
@@ -92,6 +95,9 @@ internal fun FlareTheme(
                 calculateWindowSizeClass(size.width)
             }
         CompositionLocalProvider(
+            // TODO: Remove when compose-fluent is built against the Compose 1.11+ text-menu API.
+            // Its old Function0 actions crash when selected text is right-clicked on Compose 1.12.
+            LocalTextContextMenu provides TextContextMenu.HideDisabledMenuItems,
             LocalIndication provides
                 FluentIndication(
                     hover = Color.Transparent,

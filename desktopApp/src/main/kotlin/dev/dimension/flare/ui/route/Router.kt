@@ -770,6 +770,9 @@ internal fun Router(
                                 Route.TabSetting,
                             )
                         },
+                        onEditDraft = { groupId ->
+                            navigate(Route.Compose.Draft(draftGroupId = groupId))
+                        },
                     )
                 }
 
@@ -778,6 +781,9 @@ internal fun Router(
                         id = args.id,
                         toTabSettings = {
                             navigate(Route.TabSetting)
+                        },
+                        onEditDraft = { groupId ->
+                            navigate(Route.Compose.Draft(draftGroupId = groupId))
                         },
                     )
                 }

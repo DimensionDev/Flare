@@ -108,6 +108,7 @@ import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.component.platform.isCompatScreen
 import dev.dimension.flare.ui.component.status.AdaptiveCard
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
+import dev.dimension.flare.ui.component.status.outboxItems
 import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onError
@@ -136,6 +137,7 @@ internal fun HomeTimelineScreen(
     toLogin: () -> Unit,
     toTabSettings: () -> Unit,
     uriHandler: UriHandler,
+    onEditDraft: (String) -> Unit,
 ) {
     val state by producePresenter(key = "home_timeline") {
         timelinePresenter()
@@ -459,6 +461,7 @@ internal fun HomeTimelineScreen(
                                     isCurrentlyVisible = pagerState.currentPage == index,
                                     autoRefreshInterval =
                                         LocalAppSettings.current.homeTimelineAutoRefreshInterval,
+                                    onEditDraft = onEditDraft,
                                 )
                             }
                         }
@@ -544,6 +547,7 @@ internal fun TimelineItemContent(
     isCurrentlyVisible: Boolean = true,
     autoRefreshInterval: TimelineAutoRefreshInterval = TimelineAutoRefreshInterval.DISABLED,
     lazyStaggeredGridState: LazyStaggeredGridState = rememberLazyStaggeredGridState(),
+    onEditDraft: (String) -> Unit = {},
 ) {
     val isBigScreen = isBigScreen()
     val layoutDirection = LocalLayoutDirection.current
@@ -650,6 +654,12 @@ internal fun TimelineItemContent(
                     }
                 }
 
+                outboxItems(
+                    posts = state.outboxItems,
+                    onRetry = state::retryOutbox,
+                    onEdit = onEditDraft,
+                    onDelete = state::deleteOutbox,
+                )
                 status(state.listState)
             }
             state.listState.onSuccess {

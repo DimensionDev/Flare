@@ -13,6 +13,7 @@ import dev.dimension.flare.data.database.app.model.DraftReferenceType
 import dev.dimension.flare.data.database.app.model.DraftTargetStatus
 import dev.dimension.flare.data.database.createDatabaseDriver
 import dev.dimension.flare.data.datasource.microblog.ComposeData
+import dev.dimension.flare.data.datasource.microblog.ComposeResult
 import dev.dimension.flare.data.io.OkioFileStorage
 import dev.dimension.flare.data.repository.ComposeDraftBundle
 import dev.dimension.flare.data.repository.DraftMediaStore
@@ -72,14 +73,22 @@ class SendDraftUseCaseTest : RobolectricTest() {
     }
 
     @Test
-    fun sendBundleSuccessDeletesDraftAfterAllTargetsSucceed() =
+    fun sendBundleSuccessKeepsSentTargetUntilTimelineRefresh() =
         runTest {
             val account = mastodonAccount("alice", "mastodon.social")
             val sent = mutableListOf<SentCompose>()
             val progresses = mutableListOf<ComposeProgressState>()
+            var persistedProgressDuringSend: Int? = null
             val useCase =
                 testUseCase(sent = sent) { _, _, progress ->
                     progress()
+                    persistedProgressDuringSend =
+                        repository
+                            .draft("send-success")
+                            .first()
+                            ?.targets
+                            ?.single()
+                            ?.progressCurrent
                 }
             val bundle =
                 ComposeDraftBundle(
@@ -98,7 +107,12 @@ class SendDraftUseCaseTest : RobolectricTest() {
             assertEquals(1, sent.size)
             assertEquals(account.accountKey, sent.single().account.accountKey)
             assertEquals("hello", sent.single().data.content)
-            assertNull(repository.draft("send-success").first())
+            val draft = assertNotNull(repository.draft("send-success").first())
+            assertEquals(DraftTargetStatus.SENT, draft.targets.single().status)
+            assertEquals(MicroBlogKey("remote-alice", "mastodon.social"), draft.targets.single().remotePostKey)
+            assertEquals(2, draft.targets.single().progressCurrent)
+            assertEquals(2, draft.targets.single().progressMax)
+            assertEquals(1, persistedProgressDuringSend)
             assertEquals(ComposeProgressState.Progress(0, 2), progresses.first())
             assertEquals(ComposeProgressState.Progress(1, 2), progresses[1])
             assertEquals(ComposeProgressState.Progress(2, 2), progresses[2])
@@ -106,7 +120,7 @@ class SendDraftUseCaseTest : RobolectricTest() {
         }
 
     @Test
-    fun sendBundleAllTargetsSuccessDeletesDraft() =
+    fun sendBundleAllTargetsSuccessKeepsSentTargets() =
         runTest {
             val accountA = mastodonAccount("alice", "mastodon.social")
             val accountB = mastodonAccount("bob", "mastodon.social")
@@ -126,7 +140,16 @@ class SendDraftUseCaseTest : RobolectricTest() {
             advanceUntilIdle()
 
             assertEquals(listOf(accountA.accountKey, accountB.accountKey), sent.map { it.account.accountKey })
-            assertNull(repository.draft("send-all-success").first())
+            val draft = assertNotNull(repository.draft("send-all-success").first())
+            assertEquals(2, draft.targets.size)
+            assertTrue(draft.targets.all { it.status == DraftTargetStatus.SENT })
+            assertEquals(
+                setOf(
+                    MicroBlogKey("remote-alice", "mastodon.social"),
+                    MicroBlogKey("remote-bob", "mastodon.social"),
+                ),
+                draft.targets.mapNotNull { it.remotePostKey }.toSet(),
+            )
         }
 
     @Test
@@ -157,10 +180,13 @@ class SendDraftUseCaseTest : RobolectricTest() {
             advanceUntilIdle()
 
             val draft = assertNotNull(repository.draft("send-partial-failure").first())
-            assertEquals(1, draft.targets.size)
-            assertEquals(accountB.accountKey, draft.targets.single().accountKey)
-            assertEquals(DraftTargetStatus.FAILED, draft.targets.single().status)
-            assertEquals("account-b failed", draft.targets.single().errorMessage)
+            assertEquals(2, draft.targets.size)
+            val successfulTarget = draft.targets.single { it.accountKey == accountA.accountKey }
+            val failedTarget = draft.targets.single { it.accountKey == accountB.accountKey }
+            assertEquals(DraftTargetStatus.SENT, successfulTarget.status)
+            assertEquals(MicroBlogKey("remote-alice", "mastodon.social"), successfulTarget.remotePostKey)
+            assertEquals(DraftTargetStatus.FAILED, failedTarget.status)
+            assertEquals("account-b failed", failedTarget.errorMessage)
             assertEquals(listOf(accountA.accountKey, accountB.accountKey), sent.map { it.account.accountKey })
             val error = assertIs<ComposeProgressState.Error>(progresses.last())
             assertIs<ComposeDraftFailedException>(error.throwable)
@@ -250,7 +276,9 @@ class SendDraftUseCaseTest : RobolectricTest() {
                     .data.medias
                     .isEmpty(),
             )
-            assertNull(repository.draft("send-no-media").first())
+            val draft = assertNotNull(repository.draft("send-no-media").first())
+            assertEquals(DraftTargetStatus.SENT, draft.targets.single().status)
+            assertEquals(1, draft.targets.single().progressCurrent)
         }
 
     @Test
@@ -295,7 +323,9 @@ class SendDraftUseCaseTest : RobolectricTest() {
                 listOf("a", "b"),
                 sentMedias.map { it.altText },
             )
-            assertNull(repository.draft("send-multi-media").first())
+            val draft = assertNotNull(repository.draft("send-multi-media").first())
+            assertEquals(DraftTargetStatus.SENT, draft.targets.single().status)
+            assertEquals(3, draft.targets.single().progressMax)
         }
 
     @Test
@@ -473,7 +503,10 @@ class SendDraftUseCaseTest : RobolectricTest() {
                             else -> null
                         }
                     },
-                    composeDraft = { account, data, _ -> sent += SentCompose(account = account, data = data) },
+                    composeDraft = { account, data, _ ->
+                        sent += SentCompose(account = account, data = data)
+                        ComposeResult(MicroBlogKey("remote-${account.accountKey.id}", account.accountKey.host))
+                    },
                 )
 
             useCase("resend-group") {}
@@ -516,9 +549,15 @@ class SendDraftUseCaseTest : RobolectricTest() {
             )
 
             val remainingDraft = assertNotNull(repository.draft("resend-group").first())
-            assertEquals(1, remainingDraft.targets.size)
-            assertEquals(sendingAccount.accountKey, remainingDraft.targets.single().accountKey)
-            assertEquals(DraftTargetStatus.SENDING, remainingDraft.targets.single().status)
+            assertEquals(2, remainingDraft.targets.size)
+            assertEquals(
+                DraftTargetStatus.SENT,
+                remainingDraft.targets.single { it.accountKey == failedAccount.accountKey }.status,
+            )
+            assertEquals(
+                DraftTargetStatus.SENDING,
+                remainingDraft.targets.single { it.accountKey == sendingAccount.accountKey }.status,
+            )
         }
 
     @Test
@@ -698,7 +737,7 @@ class SendDraftUseCaseTest : RobolectricTest() {
                     draftRepository = repository,
                     draftMediaStore = blockedStore,
                     findAccount = { null },
-                    composeDraft = { _, _, _ -> },
+                    composeDraft = { _, _, _ -> ComposeResult() },
                 )
 
             assertFailsWith<Throwable> {
@@ -752,7 +791,7 @@ class SendDraftUseCaseTest : RobolectricTest() {
     private fun testUseCase(
         sent: MutableList<SentCompose> = mutableListOf(),
         findAccount: suspend (MicroBlogKey) -> UiAccount? = { null },
-        composeDraft: suspend (UiAccount, ComposeData, () -> Unit) -> Unit = { _, _, _ -> },
+        composeDraft: suspend (UiAccount, ComposeData, suspend () -> Unit) -> Unit = { _, _, _ -> },
     ): SendDraftUseCase =
         SendDraftUseCase(
             draftRepository = repository,
@@ -761,6 +800,7 @@ class SendDraftUseCaseTest : RobolectricTest() {
             composeDraft = { account, data, progress ->
                 sent += SentCompose(account = account, data = data)
                 composeDraft(account, data, progress)
+                ComposeResult(MicroBlogKey("remote-${account.accountKey.id}", account.accountKey.host))
             },
         )
 

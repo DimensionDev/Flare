@@ -61,6 +61,9 @@ internal enum class DraftTargetStatus {
     @SerialName("sending")
     SENDING,
 
+    @SerialName("sent")
+    SENT,
+
     @SerialName("failed")
     FAILED,
 }
@@ -115,6 +118,9 @@ internal data class DbDraftTarget(
     val error_message: String? = null,
     val attempt_count: Int = 0,
     val last_attempt_at: Long? = null,
+    val progress_current: Int = 0,
+    val progress_max: Int = 1,
+    val remote_post_key: MicroBlogKey? = null,
     val created_at: Long,
     val updated_at: Long,
     @PrimaryKey

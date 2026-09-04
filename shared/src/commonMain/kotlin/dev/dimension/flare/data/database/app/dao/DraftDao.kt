@@ -96,6 +96,20 @@ internal interface DraftDao {
     )
     fun sendingDraftGroups(): Flow<List<DbDraftGroupWithRelations>>
 
+    @Transaction
+    @Query(
+        """
+        SELECT * FROM DbDraftGroup
+        WHERE EXISTS (
+            SELECT 1 FROM DbDraftTarget
+            WHERE DbDraftTarget.group_id = DbDraftGroup.group_id
+              AND DbDraftTarget.status IN ('SENDING', 'SENT', 'FAILED')
+        )
+        ORDER BY updated_at DESC
+        """,
+    )
+    fun outboxDraftGroups(): Flow<List<DbDraftGroupWithRelations>>
+
     @Query(
         """
         UPDATE DbDraftTarget
@@ -113,6 +127,59 @@ internal interface DraftDao {
         errorMessage: String?,
         attemptCount: Int,
         lastAttemptAt: Long?,
+        updatedAt: Long,
+    )
+
+    @Query(
+        """
+        UPDATE DbDraftTarget
+        SET status = 'SENDING',
+            error_message = NULL,
+            attempt_count = :attemptCount,
+            last_attempt_at = :lastAttemptAt,
+            progress_current = 0,
+            progress_max = :progressMax,
+            remote_post_key = NULL,
+            updated_at = :updatedAt
+        WHERE target_id = :targetId
+        """,
+    )
+    suspend fun prepareTargetForSending(
+        targetId: String,
+        attemptCount: Int,
+        lastAttemptAt: Long,
+        progressMax: Int,
+        updatedAt: Long,
+    )
+
+    @Query(
+        """
+        UPDATE DbDraftTarget
+        SET progress_current = :progressCurrent,
+            updated_at = :updatedAt
+        WHERE target_id = :targetId
+        """,
+    )
+    suspend fun updateTargetProgress(
+        targetId: String,
+        progressCurrent: Int,
+        updatedAt: Long,
+    )
+
+    @Query(
+        """
+        UPDATE DbDraftTarget
+        SET status = 'SENT',
+            error_message = NULL,
+            progress_current = progress_max,
+            remote_post_key = :remotePostKey,
+            updated_at = :updatedAt
+        WHERE target_id = :targetId
+        """,
+    )
+    suspend fun markTargetSent(
+        targetId: String,
+        remotePostKey: dev.dimension.flare.model.MicroBlogKey?,
         updatedAt: Long,
     )
 

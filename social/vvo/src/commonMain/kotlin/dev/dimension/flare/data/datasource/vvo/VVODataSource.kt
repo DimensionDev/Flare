@@ -10,6 +10,7 @@ import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataS
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.datasource.microblog.ComposeDataSource
+import dev.dimension.flare.data.datasource.microblog.ComposeResult
 import dev.dimension.flare.data.datasource.microblog.ComposeType
 import dev.dimension.flare.data.datasource.microblog.DatabaseUpdater
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
@@ -384,8 +385,8 @@ internal class VVODataSource(
 
     override suspend fun compose(
         data: ComposeData,
-        progress: () -> Unit,
-    ) {
+        progress: suspend () -> Unit,
+    ): ComposeResult {
         val st = ensureLogin()
 
         val mediaIds =
@@ -397,37 +398,49 @@ internal class VVODataSource(
         val mediaId = mediaIds.joinToString(",")
         val referenceStatus = data.referenceStatus
         val composeStatus = referenceStatus?.composeStatus
-        if (composeStatus is ComposeStatus.VVOComment) {
-            service.replyComment(
-                cid = composeStatus.statusKey.id,
-                reply = composeStatus.statusKey.id,
-                id = composeStatus.rootId,
-                mid = composeStatus.rootId,
-                content = data.content,
-                st = st,
-                picId = mediaId,
-            )
-        } else if (composeStatus is ComposeStatus.Reply) {
-            service.commentStatus(
-                id = composeStatus.statusKey.id,
-                content = data.content,
-                st = st,
-                picId = mediaId,
-            )
-        } else if (composeStatus is ComposeStatus.Quote) {
-            service.repostStatus(
-                id = composeStatus.statusKey.id,
-                content = data.content,
-                st = st,
-                picId = mediaId,
-            )
-        } else {
-            service.updateStatus(
-                content = data.content,
-                st = st,
-                picId = mediaId,
-            )
-        }
+        val remoteId =
+            if (composeStatus is ComposeStatus.VVOComment) {
+                service
+                    .replyComment(
+                        cid = composeStatus.statusKey.id,
+                        reply = composeStatus.statusKey.id,
+                        id = composeStatus.rootId,
+                        mid = composeStatus.rootId,
+                        content = data.content,
+                        st = st,
+                        picId = mediaId,
+                    ).data
+                    ?.id
+            } else if (composeStatus is ComposeStatus.Reply) {
+                service
+                    .commentStatus(
+                        id = composeStatus.statusKey.id,
+                        content = data.content,
+                        st = st,
+                        picId = mediaId,
+                    ).data
+                    ?.id
+            } else if (composeStatus is ComposeStatus.Quote) {
+                service
+                    .repostStatus(
+                        id = composeStatus.statusKey.id,
+                        content = data.content,
+                        st = st,
+                        picId = mediaId,
+                    ).data
+                    ?.id
+            } else {
+                service
+                    .updateStatus(
+                        content = data.content,
+                        st = st,
+                        picId = mediaId,
+                    ).data
+                    ?.id
+            }
+        return ComposeResult(
+            remotePostKey = remoteId?.let { MicroBlogKey(it, accountKey.host) },
+        )
     }
 
     override fun composeConfig(type: ComposeType): ComposeConfig =

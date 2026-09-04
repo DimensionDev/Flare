@@ -9,6 +9,7 @@ import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataS
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.datasource.microblog.ComposeDataSource
+import dev.dimension.flare.data.datasource.microblog.ComposeResult
 import dev.dimension.flare.data.datasource.microblog.ComposeType
 import dev.dimension.flare.data.datasource.microblog.DatabaseUpdater
 import dev.dimension.flare.data.datasource.microblog.DirectMessageDataSource
@@ -532,8 +533,8 @@ internal class XQTDataSource(
 
     override suspend fun compose(
         data: ComposeData,
-        progress: () -> Unit,
-    ) {
+        progress: suspend () -> Unit,
+    ): ComposeResult {
         val inReplyToID =
             data.referenceStatus
                 ?.composeStatus
@@ -599,37 +600,49 @@ internal class XQTDataSource(
                     progress()
                 }
             }
-        service.postCreateTweet(
-            postCreateTweetRequest =
-                PostCreateTweetRequest(
-                    features = PostCreateTweetRequestFeatures(),
-                    variables =
-                        PostCreateTweetRequestVariables(
-                            media =
-                                PostCreateTweetRequestVariablesMedia(
-                                    mediaEntities =
-                                        mediaIds.map {
-                                            PostCreateTweetRequestVariablesMediaMediaEntitiesInner(
-                                                mediaId = it,
-                                                taggedUsers = emptyList(),
-                                            )
-                                        },
-                                ),
-                            tweetText = data.content,
-                            reply =
-                                inReplyToID?.let {
-                                    PostCreateTweetRequestVariablesReply(
-                                        inReplyToTweetId = it,
-                                        excludeReplyUserIds = emptyList(),
-                                    )
-                                },
-                            semanticAnnotationIds = emptyList(),
-                            attachmentUrl =
-                                quoteId?.let {
-                                    "https://${accountKey.host}/$quoteUserName/status/${it.id}"
-                                },
-                        ),
-                ),
+        val response =
+            service.postCreateTweet(
+                postCreateTweetRequest =
+                    PostCreateTweetRequest(
+                        features = PostCreateTweetRequestFeatures(),
+                        variables =
+                            PostCreateTweetRequestVariables(
+                                media =
+                                    PostCreateTweetRequestVariablesMedia(
+                                        mediaEntities =
+                                            mediaIds.map {
+                                                PostCreateTweetRequestVariablesMediaMediaEntitiesInner(
+                                                    mediaId = it,
+                                                    taggedUsers = emptyList(),
+                                                )
+                                            },
+                                    ),
+                                tweetText = data.content,
+                                reply =
+                                    inReplyToID?.let {
+                                        PostCreateTweetRequestVariablesReply(
+                                            inReplyToTweetId = it,
+                                            excludeReplyUserIds = emptyList(),
+                                        )
+                                    },
+                                semanticAnnotationIds = emptyList(),
+                                attachmentUrl =
+                                    quoteId?.let {
+                                        "https://${accountKey.host}/$quoteUserName/status/${it.id}"
+                                    },
+                            ),
+                    ),
+            )
+        return ComposeResult(
+            remotePostKey =
+                response
+                    .body()
+                    ?.data
+                    ?.createTweet
+                    ?.tweetResults
+                    ?.result
+                    ?.restId
+                    ?.let { MicroBlogKey(it, accountKey.host) },
         )
     }
 

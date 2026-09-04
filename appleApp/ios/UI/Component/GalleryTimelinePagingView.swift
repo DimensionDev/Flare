@@ -10,6 +10,7 @@ import FlareAppleCore
 
 struct UIGalleryTimelinePagingView: UIViewControllerRepresentable {
     let data: PagingState<UiTimelineV2>
+    var accessoryItems: [UITimelineCollectionViewAccessoryItem] = []
     var onIsAtTopChanged: (Bool) -> Void = { _ in }
     @Environment(\.timelineAppearance) private var timelineAppearance
     @Environment(\.translateConfig) private var translateConfig
@@ -29,6 +30,7 @@ struct UIGalleryTimelinePagingView: UIViewControllerRepresentable {
         }
         controller.openURL = { url in openURL.callAsFunction(url) }
         controller.onIsAtTopChanged = onIsAtTopChanged
+        controller.accessoryItems = accessoryItems
         // Apply data before appearance so the appearance setter's reconfigure
         // sees a coherent itemIndexMap / currentSuccess pair.
         controller.update(data: data)
@@ -48,6 +50,7 @@ struct UIGalleryTimelinePagingView: UIViewControllerRepresentable {
         )
         controller.openURL = { url in openURL.callAsFunction(url) }
         controller.onIsAtTopChanged = onIsAtTopChanged
+        controller.accessoryItems = accessoryItems
     }
 }
 
@@ -55,9 +58,11 @@ struct UIGalleryTimelinePagingView: UIViewControllerRepresentable {
 
 final class UIGalleryTimelineController: UIViewController, UICollectionViewDelegate, CHTCollectionViewDelegateWaterfallLayout {
 
-    private static let sectionMain = 0
-    private static let sectionFooter = 1
+    private static let sectionAccessories = 0
+    private static let sectionMain = 1
+    private static let sectionFooter = 2
 
+    private static let accessoryPrefix = "ga:"
     private static let itemPrefix = "g:"
     private static let placeholderPrefix = "gp:"
     private static let emptyID = "__g_empty__"
@@ -85,10 +90,25 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
     private var lastLoadedItemIDs: Set<String> = []
     private var lastProcessedDataRef: AnyObject?
     private var lastProcessedUpdateSignature: UpdateSignature?
+    private var accessoryItemMap: [String: UITimelineCollectionViewAccessoryItem] = [:]
 
     var refreshCallback: (() async -> Void)?
     var openURL: ((URL) -> Void)?
     var onIsAtTopChanged: ((Bool) -> Void)?
+    var accessoryItems: [UITimelineCollectionViewAccessoryItem] = [] {
+        didSet {
+            let oldIDs = oldValue.map { "\(Self.accessoryPrefix)\($0.id)" }
+            let newIDs = accessoryItems.map { "\(Self.accessoryPrefix)\($0.id)" }
+            accessoryItemMap = Dictionary(uniqueKeysWithValues: zip(newIDs, accessoryItems))
+            guard isViewLoaded else { return }
+            if oldIDs == newIDs {
+                collectionView.collectionViewLayout.invalidateLayout()
+                reconfigureItems(newIDs)
+            } else if let currentData {
+                applySnapshot(data: currentData)
+            }
+        }
+    }
     var appearance = GalleryUIKitAppearance(timeline: TimelineAppearance.companion.Default) {
         didSet {
             guard isViewLoaded else { return }
@@ -116,6 +136,7 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
     private var lastReportedIsAtTop: Bool?
 
     private struct SnapshotSignature: Equatable {
+        let accessoryIDs: [String]
         let itemIDs: [String]
         let footerIDs: [String]
     }
@@ -222,7 +243,9 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
     // MARK: - Cell configuration
 
     private func configureCell(_ cell: GalleryTimelineCollectionViewCell, itemID: String) {
-        if itemID.hasPrefix(Self.itemPrefix) {
+        if let accessory = accessoryItemMap[itemID] {
+            cell.setHostedView(accessory.view)
+        } else if itemID.hasPrefix(Self.itemPrefix) {
             if let index = itemIndexMap[itemID],
                let success = currentSuccess,
                index >= 0,
@@ -495,6 +518,11 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
         var newLoadedItemIDs = Set<String>()
         var itemIDs: [String] = []
         var footerIDs: [String] = []
+        let accessoryIDs = accessoryItems.map { "\(Self.accessoryPrefix)\($0.id)" }
+        if !accessoryIDs.isEmpty {
+            snapshot.appendSections([Self.sectionAccessories])
+            snapshot.appendItems(accessoryIDs, toSection: Self.sectionAccessories)
+        }
 
         switch onEnum(of: data) {
         case .loading:
@@ -527,10 +555,15 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
             }
         }
 
-        let newSignature = SnapshotSignature(itemIDs: itemIDs, footerIDs: footerIDs)
+        let newSignature = SnapshotSignature(
+            accessoryIDs: accessoryIDs,
+            itemIDs: itemIDs,
+            footerIDs: footerIDs
+        )
         let previousSignature = lastAppliedSignature
         let scrollAnchor = previousSignature != nil &&
-            previousSignature?.itemIDs != newSignature.itemIDs &&
+            (previousSignature?.accessoryIDs != newSignature.accessoryIDs ||
+                previousSignature?.itemIDs != newSignature.itemIDs) &&
             allowsScrollAnchorRestoration
             ? captureScrollAnchor()
             : nil
@@ -550,7 +583,8 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
             return
         }
 
-        if previousSignature?.itemIDs == newSignature.itemIDs {
+        if previousSignature?.accessoryIDs == newSignature.accessoryIDs,
+           previousSignature?.itemIDs == newSignature.itemIDs {
             let changedIDs = changedItemIDs(
                 in: itemIDs,
                 newRenderHashMap: newRenderHashMap,
@@ -683,8 +717,10 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
         guard let layout = collectionViewLayout as? CHTCollectionViewWaterfallLayout else {
             return CGSize(width: collectionView.bounds.width, height: 200)
         }
-        let section = indexPath.section
-        let columns = section == Self.sectionFooter ? 1 : max(layout.columnCount, 1)
+        let section = sectionIdentifier(at: indexPath.section)
+        let columns = section == Self.sectionAccessories || section == Self.sectionFooter
+            ? 1
+            : max(layout.columnCount, 1)
         let insets = layout.sectionInset
         let available = collectionView.bounds.width - insets.left - insets.right
         let totalSpacing = CGFloat(columns - 1) * layout.minimumColumnSpacing
@@ -700,6 +736,15 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
         case Self.footerLoadingID, Self.footerErrorID, Self.footerEndID:
             return CGSize(width: width, height: 60)
         default: break
+        }
+
+        if let accessory = accessoryItemMap[itemID] {
+            let height = accessory.view.systemLayoutSizeFitting(
+                CGSize(width: width, height: UIView.layoutFittingCompressedSize.height),
+                withHorizontalFittingPriority: .required,
+                verticalFittingPriority: .fittingSizeLevel
+            ).height
+            return CGSize(width: width, height: max(ceil(height), 1))
         }
 
         if itemID.hasPrefix(Self.placeholderPrefix) {
@@ -724,7 +769,15 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
         columnCountFor section: Int
     ) -> Int {
         guard let layout = collectionViewLayout as? CHTCollectionViewWaterfallLayout else { return 2 }
-        return section == Self.sectionFooter ? 1 : max(layout.columnCount, 1)
+        let sectionID = sectionIdentifier(at: section)
+        return sectionID == Self.sectionAccessories || sectionID == Self.sectionFooter
+            ? 1
+            : max(layout.columnCount, 1)
+    }
+
+    private func sectionIdentifier(at index: Int) -> Int? {
+        let sections = dataSource.snapshot().sectionIdentifiers
+        return sections.indices.contains(index) ? sections[index] : nil
     }
 
     private func estimatedHeight(for item: UiTimelineV2, itemID: String, width: CGFloat) -> CGFloat {

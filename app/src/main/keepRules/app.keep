@@ -1,0 +1,22 @@
+# Temporary compatibility workaround for Ktorfit 2.7.5.
+# ktorfit-lib-light-android omits the rule bundled in the JVM artifact, which
+# allows R8 to break the generic type data consumed by response converters.
+# Re-evaluate after upgrading to an Android artifact that bundles the rule.
+-keep class de.jensklingenberg.ktorfit.** { *; }
+
+# Temporary compatibility workaround for nostr-sdk-kmp 0.44.8.
+# Its published Android consumer rule targets rust.nostr.*, while the generated
+# UniFFI/JNA bindings are in rust.nostr.sdk. Re-evaluate after upgrading it or
+# validating that the narrower JNA boundary rules are sufficient in release.
+-keep class rust.nostr.sdk.** { *; }
+
+# Optional JVM management APIs are not available on Android. Keep these
+# suppressions until a clean optimized release succeeds without them.
+-dontwarn java.lang.management.**
+-dontwarn javax.management.**
+
+# Intentional optimizer assumption: force link-buffer composer on in release.
+# Remove this rule if the project should follow Compose runtime's default.
+-assumevalues public class androidx.compose.runtime.ComposeRuntimeFlags {
+    static boolean isLinkBufferComposerEnabled return true;
+}

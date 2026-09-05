@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="changelog_title">Добро дошли назад!</string>
+    <string name="changelog_message">Направили смо неке измене од ваше последње пријаве. Ево детаља:</string>
     <string name="changelog_current"><![CDATA[
             <span>Верзија %1$s:</span>
             <ul>
@@ -9,6 +11,4 @@
                 <li>Побољшана је поузданост пријаве на Bluesky, враћено је учитавање FANBOX садржаја, а детаљи Misskey објава сада приказују цео разговор.</li>
             </ul>
         ]]></string>
-    <string name="changelog_title">Добро дошли назад!</string>
-    <string name="changelog_message">Направили смо неке измене од ваше последње пријаве. Ево детаља:</string>
 </resources>

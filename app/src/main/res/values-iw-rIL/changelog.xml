@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="changelog_title">ברוך שובך!</string>
+    <string name="changelog_message">ביצענו כמה שינויים מאז ההתחברות האחרונה שלך. הנה הפרטים:</string>
     <string name="changelog_current"><![CDATA[
             <span>גרסה %1$s:</span>
             <ul>
@@ -9,6 +11,4 @@
                 <li>שופרה אמינות ההתחברות ל-Bluesky, שוחזרה טעינת תוכן FANBOX, ופרטי פוסטים ב-Misskey מציגים כעת את השיחה המלאה.</li>
             </ul>
         ]]></string>
-    <string name="changelog_title">ברוך שובך!</string>
-    <string name="changelog_message">ביצענו כמה שינויים מאז ההתחברות האחרונה שלך. הנה הפרטים:</string>
 </resources>

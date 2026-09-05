@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="changelog_title">다시 오신 것을 환영합니다!</string>
+    <string name="changelog_message">마지막 로그인 이후 몇 가지 변경 사항이 있습니다. 자세한 내용은 다음과 같습니다:</string>
     <string name="changelog_current"><![CDATA[
             <span>버전 %1$s:</span>
             <ul>
@@ -9,6 +11,4 @@
                 <li>Bluesky 로그인 안정성을 개선하고 FANBOX 콘텐츠 로딩을 복구했으며, Misskey 게시물 상세 화면에서 전체 대화를 표시하도록 확장했습니다.</li>
             </ul>
         ]]></string>
-    <string name="changelog_title">다시 오신 것을 환영합니다!</string>
-    <string name="changelog_message">마지막 로그인 이후 몇 가지 변경 사항이 있습니다. 자세한 내용은 다음과 같습니다:</string>
 </resources>

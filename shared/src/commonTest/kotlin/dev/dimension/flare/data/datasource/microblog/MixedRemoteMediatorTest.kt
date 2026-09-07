@@ -2,9 +2,11 @@ package dev.dimension.flare.data.datasource.microblog
 
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
+import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
+import androidx.paging.testing.asSnapshot
 import androidx.room3.Room
 import dev.dimension.flare.RobolectricTest
 import dev.dimension.flare.common.Locale
@@ -25,6 +27,7 @@ import dev.dimension.flare.data.database.cache.model.TranslationStatus
 import dev.dimension.flare.data.database.createDatabaseDriver
 import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.OffsetFromStartPagingKey
+import dev.dimension.flare.data.datasource.microblog.paging.OffsetFromStartPagingSource
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.datasource.microblog.paging.SortIdProvider
@@ -675,6 +678,106 @@ class MixedRemoteMediatorTest : RobolectricTest() {
                 },
             )
         }
+
+    @Test
+    fun timeMergePolicyDoesNotReplayTwoPostThreadOnInitialLoad() =
+        runTest {
+            assertThreadIsNotReplayedOnInitialLoad(threadSize = 2)
+        }
+
+    @Test
+    fun timeMergePolicyDoesNotReplayNinePostThreadOnInitialLoad() =
+        runTest {
+            assertThreadIsNotReplayedOnInitialLoad(threadSize = 9)
+        }
+
+    @OptIn(ExperimentalPagingApi::class)
+    private suspend fun assertThreadIsNotReplayedOnInitialLoad(threadSize: Int) {
+        val blueskyAccount = AccountType.Specific(MicroBlogKey("viewer", "bsky.social"))
+        val blueskyAuthor = profile(MicroBlogKey("author", "bsky.social"), "Thread author")
+        val mastodonAccount = AccountType.Specific(MicroBlogKey("viewer", "mastodon.example"))
+        val mastodonAuthor = profile(MicroBlogKey("author", "mastodon.example"), "Other author")
+        val thread =
+            (1..threadSize).map { index ->
+                createPost(
+                    accountType = blueskyAccount,
+                    user = blueskyAuthor,
+                    statusKey = MicroBlogKey("thread_$index", "bsky.social"),
+                    text = "$index/$threadSize",
+                ).copy(
+                    platformId = "Bluesky",
+                    createdAt = Instant.fromEpochMilliseconds(10_000L + index).toUi(),
+                )
+            }
+        val threadItems =
+            thread.mapIndexed { index, post ->
+                UiTimelineV2.TimelinePostItem(
+                    post = post,
+                    presentation =
+                        UiTimelineV2.PostPresentation(
+                            inlineParents = listOfNotNull(thread.getOrNull(index - 1)).toPersistentList(),
+                        ),
+                )
+            }
+        val otherBlueskyPosts =
+            (1..(20 - threadSize)).map { index ->
+                createPost(
+                    accountType = blueskyAccount,
+                    user = blueskyAuthor,
+                    statusKey = MicroBlogKey("other_$index", "bsky.social"),
+                    text = "Other Bluesky post $index",
+                ).copy(createdAt = Instant.fromEpochMilliseconds(2_000L + index).toUi())
+            }
+        val mastodonPosts =
+            (1..20).map { index ->
+                createPost(
+                    accountType = mastodonAccount,
+                    user = mastodonAuthor,
+                    statusKey = MicroBlogKey("other_$index", "mastodon.example"),
+                    text = "Mastodon post $index",
+                ).copy(createdAt = Instant.fromEpochMilliseconds(1_000L + index).toUi())
+            }
+        val bluesky =
+            FakeLoader("bluesky_home") { request ->
+                assertEquals(PagingRequest.Refresh, request)
+                PagingResult(data = threadItems.reversed() + otherBlueskyPosts)
+            }
+        val mastodon =
+            FakeLoader("mastodon_home") { request ->
+                assertEquals(PagingRequest.Refresh, request)
+                PagingResult(data = mastodonPosts)
+            }
+        val mixed = MixedRemoteMediator(db, listOf(bluesky, mastodon), TimelineMergePolicy.Time)
+        val pageCache = TimelineDbPageCache()
+        val snapshot =
+            Pager(
+                config = offsetPagingConfig,
+                remoteMediator = TimelineRemoteMediator(mixed, db, allowLongText = false),
+                pagingSourceFactory = {
+                    OffsetFromStartPagingSource(TimelineDbPageLoader(db, mixed.pagingKey, pageCache))
+                },
+            ).flow.asSnapshot()
+
+        val threadKeys = thread.map { it.statusKey }
+        val displayedThread =
+            snapshot.flatMap { item ->
+                val post = assertIs<UiTimelineV2.TimelinePostItem>(item.baseItem)
+                (post.presentation.inlineParents + post.displayPost)
+                    .map { it.statusKey }
+                    .filter { it in threadKeys }
+            }
+        assertEquals(threadKeys, displayedThread)
+        assertEquals(listOf<PagingRequest>(PagingRequest.Refresh), bluesky.requests)
+        assertEquals(listOf<PagingRequest>(PagingRequest.Refresh), mastodon.requests)
+        assertEquals(
+            (listOf(thread.last()) + otherBlueskyPosts + mastodonPosts).map { it.statusKey }.toSet(),
+            db
+                .pagingTimelineDao()
+                .getTimelinePage(mixed.pagingKey, offset = 0, limit = 40)
+                .map { it.statusData.statusKey }
+                .toSet(),
+        )
+    }
 
     @OptIn(ExperimentalPagingApi::class)
     @Test

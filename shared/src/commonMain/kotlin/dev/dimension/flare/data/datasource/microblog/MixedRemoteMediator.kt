@@ -109,10 +109,11 @@ internal class MixedRemoteMediator(
 
             val seenStatusIds =
                 if (request is PagingRequest.Append) {
+                    // Collapsed parents have already been displayed, even without their own timeline row.
                     database
                         .pagingTimelineDao()
-                        .getByPagingKey(pagingKey)
-                        .mapTo(mutableSetOf()) { it.statusId }
+                        .getStatusIdsWithInlineParents(pagingKey)
+                        .toMutableSet()
                 } else {
                     mutableSetOf()
                 }

@@ -397,6 +397,16 @@ internal interface PagingTimelineDao {
     )
     suspend fun getByPagingKey(pagingKey: String): List<DbPagingTimeline>
 
+    @Query(
+        "SELECT statusId FROM DbPagingTimeline WHERE pagingKey = :pagingKey " +
+            "UNION " +
+            "SELECT presentation.referenceStatusId FROM timeline_item_presentation_reference AS presentation " +
+            "INNER JOIN DbPagingTimeline AS timeline " +
+            "ON timeline.pagingKey = presentation.pagingKey AND timeline.statusId = presentation.statusId " +
+            "WHERE timeline.pagingKey = :pagingKey AND presentation.presentationType = 'InlineParent'",
+    )
+    suspend fun getStatusIdsWithInlineParents(pagingKey: String): List<String>
+
     @Query("SELECT MIN(sortId) FROM DbPagingTimeline WHERE pagingKey = :pagingKey")
     suspend fun getMinSortId(pagingKey: String): Long?
 

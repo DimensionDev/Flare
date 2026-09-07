@@ -34,6 +34,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.disabled
 import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.ui.component.AnimatedNumber
 import dev.dimension.flare.ui.component.FAIcon
@@ -72,21 +73,24 @@ public fun StatusActionButton(
         ).joinToString(separator = ", ")
     val accessibilityModifier =
         if (actionDescription != null) {
-            Modifier.clearAndSetSemantics {
-                this.contentDescription = accessibilityDescription
-                role = Role.Button
-                if (!enabled) {
-                    disabled()
-                }
-                onClick {
-                    if (enabled) {
-                        onClicked.invoke()
-                        true
-                    } else {
-                        false
+            Modifier
+                // Keep the action separate from the clickable post that contains it.
+                .semantics(mergeDescendants = true) {}
+                .clearAndSetSemantics {
+                    this.contentDescription = accessibilityDescription
+                    role = Role.Button
+                    if (!enabled) {
+                        disabled()
+                    }
+                    onClick {
+                        if (enabled) {
+                            onClicked.invoke()
+                            true
+                        } else {
+                            false
+                        }
                     }
                 }
-            }
         } else {
             Modifier
         }

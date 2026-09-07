@@ -278,17 +278,6 @@ private struct GalleryMetadataRow: View {
     }
 }
 
-private func galleryMetricName(_ icon: UiIcon) -> String {
-    switch icon {
-    case .eye:
-        String(localized: "gallery_views")
-    case .heart:
-        String(localized: "gallery_bookmarks")
-    default:
-        String(localized: "gallery_engagement")
-    }
-}
-
 private struct GalleryCommentsPreview: View {
     let comments: PagingState<UiTimelineV2>
     let limit: Int?

@@ -306,7 +306,14 @@ private extension UiTimelineV2.PostVisibility {
     }
 
     var composeAccessibilityTitleKey: String {
-        self == .channel ? "channel_title" : composeTitleKey
+        switch self {
+        case .home:
+            "status_visibility_unlisted"
+        case .channel:
+            "channel_title"
+        default:
+            composeTitleKey
+        }
     }
 
     var composeDescriptionKey: String {

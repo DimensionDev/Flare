@@ -16,7 +16,7 @@ public struct StatusVisibilityView: View {
                 .accessibilityLabel(Text("status_visibility_public", bundle: FlareAppleUILocalization.bundle))
         case .home:
             Image(fontAwesome: .lockOpen)
-                .accessibilityLabel(Text("home_tab_home_title", bundle: FlareAppleUILocalization.bundle))
+                .accessibilityLabel(Text("status_visibility_unlisted", bundle: FlareAppleUILocalization.bundle))
         case .followers:
             Image(fontAwesome: .lock)
                 .accessibilityLabel(Text("matrix_followers", bundle: FlareAppleUILocalization.bundle))

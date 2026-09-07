@@ -33,6 +33,8 @@ public struct TranslateStatusComponent: View {
             String(localized: "translation_failed", defaultValue: "Translation failed")
         case .translating:
             String(localized: "translation_in_progress", defaultValue: "Translation in progress")
+        case .translated:
+            String(localized: "translation_translated", defaultValue: "Translated")
         default:
             String(localized: "translation_available", defaultValue: "Translation available")
         }

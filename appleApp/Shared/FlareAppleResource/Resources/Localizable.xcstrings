@@ -69591,6 +69591,26 @@
         }
       }
     },
+    "status_visibility_unlisted" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unlisted"
+          }
+        }
+      }
+    },
+    "translation_translated" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Translated"
+          }
+        }
+      }
+    },
     "translation_available" : {
       "localizations" : {
         "en" : {

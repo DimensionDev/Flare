@@ -133,7 +133,7 @@ final class StatusVisibilityImageView: UIImageView {
             accessibilityLabel = String(localized: "status_visibility_public")
         case .home:
             icon = .lockOpen
-            accessibilityLabel = String(localized: "home_tab_home_title")
+            accessibilityLabel = String(localized: "status_visibility_unlisted")
         case .followers:
             icon = .lock
             accessibilityLabel = String(localized: "matrix_followers")
@@ -189,6 +189,14 @@ final class TranslateStatusStateView: UIView, ManualLayoutMeasurable, TimelineHe
             stateIcon.isHidden = true
             spinner.isHidden = false
             spinner.startAnimating()
+        case .translated:
+            accessibilityLabel = String(
+                localized: "translation_translated",
+                defaultValue: "Translated"
+            )
+            stateIcon.isHidden = true
+            spinner.stopAnimating()
+            spinner.isHidden = true
         default:
             accessibilityLabel = String(
                 localized: "translation_available",

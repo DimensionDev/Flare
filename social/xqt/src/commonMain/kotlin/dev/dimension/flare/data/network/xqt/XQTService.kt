@@ -1,6 +1,5 @@
 package dev.dimension.flare.data.network.xqt
 
-import dev.dimension.flare.common.JSON_WITH_ENCODE_DEFAULT
 import dev.dimension.flare.common.Locale
 import dev.dimension.flare.data.network.ktorClient
 import dev.dimension.flare.data.network.ktorfit
@@ -71,7 +70,7 @@ private fun config(
     url: String = baseUrl,
     accountKey: MicroBlogKey? = null,
     chocolateFlow: Flow<String>? = null,
-) = ktorfit(url, json = JSON_WITH_ENCODE_DEFAULT) {
+) = ktorfit(url, json = XQT_JSON) {
     expectSuccess = false
     install(XQTHeaderPlugin) {
         this.chocolateFlow = chocolateFlow

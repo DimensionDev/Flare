@@ -109,6 +109,54 @@ class PostActionLayoutConfigTest {
         assertFalse(result.any { it is ActionMenu.Group })
     }
 
+    @Test
+    fun standaloneQuoteUsesRepostPositionWithoutCreatingMoreMenu() {
+        val quote = action(PostActionFamily.Quote, UiIcon.Quote)
+        val like = action(PostActionFamily.Like, UiIcon.Like)
+        val actions = persistentListOf<ActionMenu>(quote, like)
+        val config =
+            PostActionLayoutConfig(
+                enabled = true,
+                primary = persistentListOf(PostActionFamily.Like, PostActionFamily.Repost),
+                overflow = persistentListOf(),
+            )
+
+        assertEquals(listOf<ActionMenu>(like, quote), actions.applyPostActionLayout(config))
+    }
+
+    @Test
+    fun standaloneQuoteUsesRepostPositionInMoreMenu() {
+        val quote = action(PostActionFamily.Quote, UiIcon.Quote)
+        val share = action(PostActionFamily.Share, UiIcon.Share)
+        val actions = persistentListOf<ActionMenu>(quote, share)
+        val config =
+            PostActionLayoutConfig(
+                enabled = true,
+                primary = persistentListOf(),
+                overflow = persistentListOf(PostActionFamily.Repost, PostActionFamily.Share),
+            )
+
+        val more = assertIs<ActionMenu.Group>(actions.applyPostActionLayout(config).single())
+        assertEquals(moreItem(), more.displayItem)
+        assertEquals(listOf<ActionMenu>(quote, share), more.actions)
+    }
+
+    @Test
+    fun hidingRepostHidesStandaloneQuote() {
+        val quote = action(PostActionFamily.Quote, UiIcon.Quote)
+        val like = action(PostActionFamily.Like, UiIcon.Like)
+        val actions = persistentListOf<ActionMenu>(quote, like)
+        val config =
+            PostActionLayoutConfig(
+                enabled = true,
+                primary = persistentListOf(PostActionFamily.Like),
+                overflow = persistentListOf(),
+                hidden = persistentListOf(PostActionFamily.Repost),
+            )
+
+        assertEquals(listOf<ActionMenu>(like), actions.applyPostActionLayout(config))
+    }
+
     private fun action(
         family: PostActionFamily,
         icon: UiIcon,

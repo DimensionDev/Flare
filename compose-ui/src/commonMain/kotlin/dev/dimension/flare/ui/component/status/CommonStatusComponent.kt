@@ -1050,6 +1050,7 @@ internal fun StatusActions(
                         contentDescription =
                             action.text?.asString()
                                 ?: stringResource(Res.string.more),
+                        enabled = action.enabled,
                         withTextMinWidth =
                             appearanceSettings.postActionFixedWidth &&
                                 action.count != null &&
@@ -1173,6 +1174,7 @@ private fun PlatformDropdownMenuScope.StatusActionItemMenu(
 ) {
     val color = subActions.color?.toComposeColor() ?: PlatformContentColor.current
     PlatformDropdownMenuItem(
+        enabled = subActions.enabled,
         leadingIcon = {
             subActions.icon?.let {
                 FAIcon(

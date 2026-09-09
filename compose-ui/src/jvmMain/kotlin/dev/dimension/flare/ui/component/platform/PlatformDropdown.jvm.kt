@@ -31,6 +31,7 @@ internal actual fun PlatformDropdownMenuScope.PlatformDropdownMenuItem(
     modifier: Modifier,
     leadingIcon: @Composable (() -> Unit)?,
     trailingIcon: @Composable (() -> Unit)?,
+    enabled: Boolean,
 ) {
     MenuFlyoutItem(
         onClick = onClick,
@@ -38,6 +39,7 @@ internal actual fun PlatformDropdownMenuScope.PlatformDropdownMenuItem(
         icon = leadingIcon,
         trailing = trailingIcon,
         modifier = modifier,
+        enabled = enabled,
     )
 }
 

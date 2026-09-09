@@ -1,16 +1,80 @@
 package dev.dimension.flare.data.database.cache.model
 
 import dev.dimension.flare.common.Locale
+import dev.dimension.flare.data.datasource.microblog.ActionMenu
+import dev.dimension.flare.data.datasource.microblog.PostActionFamily
+import dev.dimension.flare.data.datasource.microblog.PostActionLayoutConfig
+import dev.dimension.flare.data.datasource.microblog.applyPostActionLayout
+import dev.dimension.flare.data.translation.PreTranslationStoreSupport
+import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.TranslationDisplayState
+import dev.dimension.flare.ui.model.UiIcon
+import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.UiTranslatableText
 import dev.dimension.flare.ui.model.createSampleStatus
 import dev.dimension.flare.ui.model.createSampleUser
 import dev.dimension.flare.ui.render.toUiPlainText
+import kotlinx.collections.immutable.persistentListOf
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertIs
 import kotlin.test.assertNull
 
 class TranslationDisplayTest {
+    @Test
+    fun skippedEmptyPostKeepsTranslateSlotInButtonRow() {
+        val post =
+            createSampleStatus(createSampleUser()).copy(
+                content = UiTranslatableText("".toUiPlainText()),
+                actions =
+                    persistentListOf(
+                        ActionMenu.Group(
+                            displayItem =
+                                ActionMenu.Item(
+                                    icon = UiIcon.More,
+                                    text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.More),
+                                ),
+                            actions = persistentListOf(ActionMenu.Item(icon = UiIcon.Share, actionFamily = PostActionFamily.Share)),
+                        ),
+                    ),
+            )
+        val translation =
+            DbTranslation(
+                entityType = TranslationEntityType.Status,
+                entityKey = "post",
+                targetLanguage = Locale.language,
+                sourceHash = requireNotNull(post.translationPayload()).sourceHash("ai"),
+                status = TranslationStatus.Skipped,
+                statusReason = PreTranslationStoreSupport.SKIPPED_EMPTY_REASON,
+                updatedAt = 1,
+            )
+        val displayed =
+            post.applyTranslation(
+                TranslationDisplayOptions(
+                    translationEnabled = true,
+                    autoDisplayEnabled = true,
+                    providerCacheKey = "ai",
+                ),
+                listOf(translation),
+            ) as UiTimelineV2.Post
+
+        val actions =
+            displayed.actions.applyPostActionLayout(
+                PostActionLayoutConfig(
+                    enabled = true,
+                    primary = persistentListOf(PostActionFamily.Translate),
+                ),
+            )
+
+        val translate = assertIs<ActionMenu.Item>(actions.first())
+        assertEquals(PostActionFamily.Translate, translate.actionFamily)
+        assertEquals(UiIcon.Translate, translate.icon)
+        assertEquals(ClickEvent.Noop, translate.clickEvent)
+        assertFalse(translate.enabled)
+        assertEquals(post.actions, displayed.actions)
+    }
+
     @Test
     fun selectedTranslationPopulatesWrapperWithoutChangingOriginal() {
         val post =

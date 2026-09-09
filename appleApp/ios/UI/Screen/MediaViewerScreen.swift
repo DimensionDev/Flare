@@ -301,7 +301,7 @@ struct MediaViewerScreen<SupplementaryOverlay: View>: View {
         }
         .buttonStyle(.plain)
         .foregroundStyle(.white)
-        .padding(.horizontal)
+        .safeAreaPadding([.top, .horizontal])
     }
 
     private func topOverlayButton<Label: View>(

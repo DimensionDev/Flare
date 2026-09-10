@@ -215,6 +215,7 @@ public struct EditRssSheet: View {
             }
         }
         .navigationTitle(id == nil ? "add_rss_title" : "edit_rss_title")
+        .modifier(ScrollMinimizingNavigationBar(enabled: false))
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
                 Button(role: .cancel) {

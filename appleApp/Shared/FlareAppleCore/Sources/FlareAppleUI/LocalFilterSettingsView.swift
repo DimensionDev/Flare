@@ -48,6 +48,7 @@ public struct LocalFilterSettingsView: View {
                         )
                     )
                 }
+                .modifier(ScrollMinimizingNavigationBar(enabled: false))
             }
         }
         #if os(iOS)

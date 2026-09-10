@@ -56,6 +56,39 @@ enum Route: Hashable, Identifiable {
         onNavigate: @escaping (Route) -> Void,
         goBack: @escaping () -> Void
     ) -> some View {
+        if case .home = self {
+            // Home chooses its behavior separately for timeline and Deck layouts.
+            content(onNavigate: onNavigate, goBack: goBack)
+        } else {
+            content(onNavigate: onNavigate, goBack: goBack)
+                .modifier(ScrollMinimizingNavigationBar(enabled: allowsNavigationBarMinimization))
+        }
+    }
+
+    private var allowsNavigationBarMinimization: Bool {
+        switch self {
+        case .composeNew, .composeCrossPost, .composeDraft,
+             .composeQuote, .composeReply, .composeVVOReplyComment,
+             .serviceSelect, .relogin,
+             .tabSettings, .editUserList, .deepLinkAccountPicker,
+             .statusBlueskyReport, .statusMisskeyReport,
+             .statusAddReaction, .statusShareSheet,
+             .profileUser, .profileUserNameWithHost,
+             .agentChat, .localHistoryAgent, .statusInsight, .profileInsight,
+             .dmConversation, .userDirectMessages,
+             .mediaImage, .mediaRaw, .mediaStatusMedia:
+            false
+        default:
+            true
+        }
+    }
+
+    @MainActor
+    @ViewBuilder
+    private func content(
+        onNavigate: @escaping (Route) -> Void,
+        goBack: @escaping () -> Void
+    ) -> some View {
         switch self {
         case .home: HomeTimelineScreen(
             toServiceSelect: { onNavigate(.serviceSelect) },

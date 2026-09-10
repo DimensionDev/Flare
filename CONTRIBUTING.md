@@ -23,7 +23,7 @@ For those able & willing to help fix issues and/or implement features ...
 
 Make sure you have
  - JDK 25
- - Xcode 26 if you're building for iOS
+ - Xcode 27 if you're building for iOS
 
 ### Code guidelines
 Flare uses [ktlint](https://github.com/pinterest/ktlint) to check the code style for Kotlin, so make sure run `./gradlew ktlintFormat` and fix the errors before you submit any PR.
@@ -36,7 +36,7 @@ Flare uses [ktlint](https://github.com/pinterest/ktlint) to check the code style
 
 ### iOS/macOS
  - Make sure you have JDK 25 installed
- - Make sure you have a Mac with Xcode 26 installed
+ - Make sure you have a Mac with Xcode 27 installed
  - run `xcodegen generate --spec ./appleApp/project.yml`
  - open `appleApp/Flare.xcodeproj` in Xcode
  - Build and run the app

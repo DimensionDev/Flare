@@ -191,7 +191,12 @@ public fun ImmutableList<ActionMenu>.applyPostActionLayout(config: PostActionLay
         when (action) {
             is ActionMenu.Item -> {
                 if (!action.isDisplayOnlyPostActionContainer()) {
-                    entries += PostActionEntry(nextIndex++, action, action.actionFamily)
+                    val family =
+                        when (action.actionFamily) {
+                            PostActionFamily.Quote -> PostActionFamily.Repost
+                            else -> action.actionFamily
+                        }
+                    entries += PostActionEntry(nextIndex++, action, family)
                 }
             }
 

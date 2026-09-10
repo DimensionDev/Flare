@@ -2,6 +2,12 @@ package dev.dimension.flare.ui.model.mapper
 
 import dev.dimension.flare.common.JSON
 import dev.dimension.flare.common.TestFormatter
+import dev.dimension.flare.data.datasource.microblog.ActionMenu
+import dev.dimension.flare.data.datasource.microblog.PostActionFamily
+import dev.dimension.flare.data.datasource.microblog.PostActionLayoutConfig
+import dev.dimension.flare.data.datasource.microblog.PostActionLayoutHelpers
+import dev.dimension.flare.data.datasource.microblog.PostActionPlacement
+import dev.dimension.flare.data.datasource.microblog.applyPostActionLayout
 import dev.dimension.flare.data.network.vvo.model.Large
 import dev.dimension.flare.data.network.vvo.model.Status
 import dev.dimension.flare.data.network.vvo.model.StatusPic
@@ -23,6 +29,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
+import kotlin.test.assertTrue
 import kotlin.time.Instant
 
 class VVORenderTest {
@@ -119,6 +126,37 @@ class VVORenderTest {
             rendered.presentation.quotes
                 .first()
                 .content.original.innerText,
+        )
+    }
+
+    @Test
+    fun quoteFollowsRepostLayoutAfterClearingMoreMenu() {
+        val status =
+            createStatus(
+                id = "status-actions",
+                user = createUser(1L, "actions-user"),
+                text = "post with quote action",
+            )
+        val post = assertIs<UiTimelineV2.Post>(status.render(accountKey))
+        val quote = post.actions.filterIsInstance<ActionMenu.Item>().single { it.actionFamily == PostActionFamily.Quote }
+        var config = PostActionLayoutHelpers.withEnabled(PostActionLayoutConfig.Default, true)
+        for (family in config.overflow.toList()) {
+            config = PostActionLayoutHelpers.moveTo(config, family, PostActionPlacement.Hidden)
+        }
+        assertTrue(config.overflow.isEmpty())
+
+        val actions = post.actions.applyPostActionLayout(config)
+
+        assertEquals(
+            listOf(PostActionFamily.Comment, PostActionFamily.Quote, PostActionFamily.Like),
+            actions.map { assertIs<ActionMenu.Item>(it).actionFamily },
+        )
+        assertEquals(quote, actions[1])
+
+        val hiddenConfig = PostActionLayoutHelpers.moveTo(config, PostActionFamily.Repost, PostActionPlacement.Hidden)
+        assertEquals(
+            actions.filterNot { it == quote },
+            post.actions.applyPostActionLayout(hiddenConfig),
         )
     }
 

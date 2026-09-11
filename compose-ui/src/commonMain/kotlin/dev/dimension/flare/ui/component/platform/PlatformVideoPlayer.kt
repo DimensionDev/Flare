@@ -12,9 +12,12 @@ import androidx.compose.ui.layout.ContentScale
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.FaceFrown
+import dev.dimension.flare.compose.ui.Res
+import dev.dimension.flare.compose.ui.media_video_error
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.NetworkImage
 import kotlinx.collections.immutable.ImmutableMap
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 internal expect fun PlatformVideoPlayer(
@@ -42,7 +45,7 @@ internal expect fun PlatformVideoPlayer(
             ) {
                 FAIcon(
                     FontAwesomeIcons.Solid.FaceFrown,
-                    contentDescription = null,
+                    contentDescription = stringResource(Res.string.media_video_error),
                 )
             }
         }

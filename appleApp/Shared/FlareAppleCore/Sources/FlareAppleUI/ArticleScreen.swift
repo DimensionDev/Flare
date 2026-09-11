@@ -403,7 +403,7 @@ private struct ArticleImageBlockView: View {
             }
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(Text(media.description_ ?? FlareAppleUILocalization.string("Image", fallback: "Image")))
+        .accessibilityLabel(Text(verbatim: media.accessibleDescription))
     }
 }
 
@@ -423,6 +423,7 @@ private struct ArticleVideoBlockView: View {
                         onOpenMedia(media)
                     }
             }
+            .accessibilityLabel(Text(verbatim: media.accessibleDescription))
     }
 }
 

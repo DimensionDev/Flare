@@ -68,6 +68,7 @@ struct MacMediaViewerScreen: View {
                         Image(systemName: "chevron.left")
                     }
                     .disabled(!canGoToPreviousMedia)
+                    .accessibilityLabel(Text(verbatim: "Previous media"))
                     .help(Text(verbatim: "Previous media"))
 
                     Button {
@@ -76,6 +77,7 @@ struct MacMediaViewerScreen: View {
                         Image(systemName: "chevron.right")
                     }
                     .disabled(!canGoToNextMedia)
+                    .accessibilityLabel(Text(verbatim: "Next media"))
                     .help(Text(verbatim: "Next media"))
                 }
             }
@@ -93,6 +95,7 @@ struct MacMediaViewerScreen: View {
                         }
                     }
                     .disabled(isSavingSelectedMedia)
+                    .accessibilityLabel(Text(verbatim: "Save As"))
                     .help(Text(verbatim: "Save As"))
 
                     if selectedExportSource.supportsSharing {
@@ -108,6 +111,7 @@ struct MacMediaViewerScreen: View {
                         }
                         .background(MacSharePickerAnchorView(anchor: sharePickerAnchor))
                         .disabled(isSharingSelectedMedia)
+                        .accessibilityLabel(Text(verbatim: "Share"))
                         .help(Text(verbatim: "fx_share"))
                     }
                 }
@@ -119,6 +123,7 @@ struct MacMediaViewerScreen: View {
                         Image(systemName: "arrow.down.right.and.arrow.up.left")
                     }
                     .disabled(selectedZoomScale <= macMediaMinimumZoomScale + 0.01)
+                    .accessibilityLabel(Text(verbatim: "Actual size"))
                     .help(Text(verbatim: "Actual size"))
 
                     Button {
@@ -127,6 +132,7 @@ struct MacMediaViewerScreen: View {
                         Image(systemName: "minus.magnifyingglass")
                     }
                     .disabled(selectedZoomScale <= macMediaMinimumZoomScale + 0.01)
+                    .accessibilityLabel(Text(verbatim: "Zoom out"))
                     .help(Text(verbatim: "Zoom out"))
 
                     Button {
@@ -135,6 +141,7 @@ struct MacMediaViewerScreen: View {
                         Image(systemName: "plus.magnifyingglass")
                     }
                     .disabled(selectedZoomScale >= macMediaMaximumZoomScale - 0.01)
+                    .accessibilityLabel(Text(verbatim: "Zoom in"))
                     .help(Text(verbatim: "Zoom in"))
                 }
             }
@@ -553,6 +560,7 @@ private struct MacMediaViewerPage: View {
             mediaContent
         }
         .contentShape(Rectangle())
+        .accessibilityLabel(Text(verbatim: media.accessibleDescription))
         .overlay(alignment: .bottomLeading) {
             imageLoadingProgressView
         }

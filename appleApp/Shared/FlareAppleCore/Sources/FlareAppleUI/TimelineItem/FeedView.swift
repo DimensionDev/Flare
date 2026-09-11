@@ -56,6 +56,7 @@ struct FeedView: View {
                             NetworkImage(data: image.url, customHeader: image.customHeaders)
                                 .frame(width: 80, height: 80)
                                 .clipShape(RoundedRectangle(cornerRadius: 8))
+                                .accessibilityLabel(Text(verbatim: image.accessibleDescription))
                         } else {
                             Color.clear
                                 .aspectRatio(16.0 / 9.0, contentMode: .fit)
@@ -65,6 +66,7 @@ struct FeedView: View {
                                         .allowsHitTesting(false)
                                 }
                                 .clipShape(RoundedRectangle(cornerRadius: 8))
+                                .accessibilityLabel(Text(verbatim: image.accessibleDescription))
                         }
                     }
                 }

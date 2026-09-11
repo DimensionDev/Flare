@@ -237,6 +237,7 @@ private struct RssArticleContentView: View {
                     ) {
                         Image(fontAwesome: .shareNodes)
                     }
+                    .accessibilityLabel(Text("fx_share"))
                 }
             }
             ToolbarItem {
@@ -246,6 +247,7 @@ private struct RssArticleContentView: View {
                     } label: {
                         Image(fontAwesome: .language)
                     }
+                    .accessibilityLabel(Text("status_translate"))
                 }
             }
             ToolbarItem {

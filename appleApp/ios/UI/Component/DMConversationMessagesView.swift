@@ -594,6 +594,10 @@ private final class DMMessageUIView: UIView, TimelineHeightProviding {
         retryButton.isHidden = true
         retryButton.tintColor = .systemRed
         retryButton.setImage(UIImage(fontAwesome: .circleExclamation), for: .normal)
+        retryButton.accessibilityLabel = String(
+            localized: "dm_retry_message",
+            defaultValue: "Retry sending message"
+        )
         retryButton.addTarget(self, action: #selector(retryTapped), for: .touchUpInside)
 
         senderNameView.lineLimit = 1

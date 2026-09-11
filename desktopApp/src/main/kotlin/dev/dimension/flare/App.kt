@@ -249,9 +249,16 @@ internal fun WindowScope.FlareApp(backButtonState: NavigationBackButtonState) {
                                         ) {
                                             AvatarComponent(
                                                 data = it.avatar,
+                                                contentDescription =
+                                                    stringResource(Res.string.home_open_account_menu),
                                                 modifier =
                                                     Modifier
-                                                        .clickable {
+                                                        .clickable(
+                                                            onClickLabel =
+                                                                stringResource(
+                                                                    Res.string.home_open_account_menu,
+                                                                ),
+                                                        ) {
                                                             isFlyoutVisible = !isFlyoutVisible
                                                         }.aspectRatio(1f),
                                             )
@@ -427,7 +434,7 @@ internal fun WindowScope.FlareApp(backButtonState: NavigationBackButtonState) {
                                 ).fillMaxWidth(0.66f)
                                 .aspectRatio(1f)
                                 .clip(CircleShape)
-                                .clickable {
+                                .clickable(onClickLabel = stringResource(Res.string.home_compose)) {
                                     state.navigate(
                                         Route.Compose.New,
                                     )

@@ -24,6 +24,7 @@ struct RssScreen: View {
                         } label: {
                             Image(fontAwesome: .pen)
                         }
+                        .accessibilityLabel(Text("edit_rss_title"))
                         .buttonStyle(.plain)
                     }
                 }
@@ -51,6 +52,7 @@ struct RssScreen: View {
                     } label: {
                         Image(fontAwesome: .fileExport)
                     }
+                    .accessibilityLabel(Text("export_opml"))
                     .fileExporter(
                         isPresented: Binding(
                             get: { exportedOPMLContent != nil },
@@ -74,6 +76,7 @@ struct RssScreen: View {
                 } label: {
                     Image(fontAwesome: .plus)
                 }
+                .accessibilityLabel(Text("add_rss_title"))
             }
         }
         .sheet(isPresented: $showAddSheet) {

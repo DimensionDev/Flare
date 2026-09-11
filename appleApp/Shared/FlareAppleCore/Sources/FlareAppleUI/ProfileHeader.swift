@@ -75,6 +75,17 @@ public struct CommonProfileHeader: View {
                                 openURL.callAsFunction(url)
                             }
                         }
+                        .accessibilityLabel(
+                            Text(
+                                verbatim: String(
+                                    format: FlareAppleUILocalization.string(
+                                        "profile_banner",
+                                        fallback: "Profile banner for %@"
+                                    ),
+                                    user.name.raw
+                                )
+                            )
+                        )
                 }
                 .frame(height: CommonProfileHeaderConstants.headerHeight)
                 .clipped()
@@ -106,6 +117,17 @@ public struct CommonProfileHeader: View {
                                     openURL.callAsFunction(url)
                                 }
                             }
+                            .accessibilityLabel(
+                                Text(
+                                    verbatim: String(
+                                        format: FlareAppleUILocalization.string(
+                                            "profile_picture",
+                                            fallback: "Profile picture for %@"
+                                        ),
+                                        user.name.raw
+                                    )
+                                )
+                            )
                     }
                     Spacer()
                     VStack {
@@ -205,10 +227,18 @@ public struct CommonProfileHeader: View {
                 ForEach(0..<user.mark.count, id: \.self) { index in
                     let mark = user.mark[index]
                     switch mark {
-                    case .cat: Image(fontAwesome: .cat)
-                    case .verified: Image(fontAwesome: .circleCheck)
-                    case .locked: Image(fontAwesome: .lock)
-                    case .bot: Image(fontAwesome: .robot)
+                    case .cat:
+                        Image(fontAwesome: .cat)
+                            .accessibilityLabel(Text("profile_mark_cat", bundle: FlareAppleUILocalization.bundle))
+                    case .verified:
+                        Image(fontAwesome: .circleCheck)
+                            .accessibilityLabel(Text("profile_mark_verified", bundle: FlareAppleUILocalization.bundle))
+                    case .locked:
+                        Image(fontAwesome: .lock)
+                            .accessibilityLabel(Text("profile_mark_locked", bundle: FlareAppleUILocalization.bundle))
+                    case .bot:
+                        Image(fontAwesome: .robot)
+                            .accessibilityLabel(Text("profile_mark_bot", bundle: FlareAppleUILocalization.bundle))
                     }
                 }
                 if user.translationDisplayState != .hidden {
@@ -401,9 +431,15 @@ public struct IconFieldView: View {
                     },
                     icon: {
                         switch key {
-                        case .location: Image(fontAwesome: .locationDot)
-                        case .url: Image(fontAwesome: .globe)
-                        case .verify: Image(fontAwesome: .circleCheck)
+                        case .location:
+                            Image(fontAwesome: .locationDot)
+                                .accessibilityLabel(Text("profile_field_location", bundle: FlareAppleUILocalization.bundle))
+                        case .url:
+                            Image(fontAwesome: .globe)
+                                .accessibilityLabel(Text("profile_field_website", bundle: FlareAppleUILocalization.bundle))
+                        case .verify:
+                            Image(fontAwesome: .circleCheck)
+                                .accessibilityLabel(Text("profile_field_verified_link", bundle: FlareAppleUILocalization.bundle))
                         }
                     }
                 )

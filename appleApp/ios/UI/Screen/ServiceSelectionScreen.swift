@@ -121,14 +121,24 @@ struct ServiceSelectionScreen: View {
                     .resizable()
                     .scaledToFit()
                     .transition(ServiceSelectionAnimation.inline)
+                    .accessibilityLabel(
+                        Text(
+                            verbatim: String(
+                                format: String(localized: "service_select_detected_platform"),
+                                success.data.platformId
+                            )
+                        )
+                    )
             case .loading:
                 ProgressView()
                     .controlSize(.small)
                     .transition(ServiceSelectionAnimation.inline)
+                    .accessibilityLabel(Text("service_select_detecting_platform"))
             case .error:
                 Image(systemName: "questionmark.circle")
                     .foregroundStyle(.secondary)
                     .transition(ServiceSelectionAnimation.inline)
+                    .accessibilityLabel(Text("service_select_unknown_platform"))
             }
         }
         .animation(ServiceSelectionAnimation.standard, value: platformIndicatorKey(state: state))

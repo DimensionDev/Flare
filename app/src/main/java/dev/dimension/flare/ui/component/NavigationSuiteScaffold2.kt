@@ -856,7 +856,10 @@ private fun ColumnScope.NavigationSuiteSegmentedExpandableItem(
                         } else {
                             FontAwesomeIcons.Solid.CaretDown
                         },
-                    contentDescription = null,
+                    contentDescription =
+                        stringResource(
+                            if (expanded) R.string.expanded else R.string.collapsed,
+                        ),
                 )
             }
         },

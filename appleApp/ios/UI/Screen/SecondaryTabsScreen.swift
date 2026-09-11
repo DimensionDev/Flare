@@ -26,6 +26,7 @@ struct SecondaryTabsScreen: View {
                 } label: {
                     Image(fontAwesome: .xmark)
                 }
+                .accessibilityLabel(Text("Close"))
             }
         }
     }

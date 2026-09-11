@@ -648,6 +648,7 @@ private struct RssArticleContentView: View {
                         Image(fontAwesome: .shareNodes)
                     }
                     .help("fx_share")
+                    .accessibilityLabel(Text("fx_share"))
                 }
             }
 
@@ -659,6 +660,7 @@ private struct RssArticleContentView: View {
                         Image(fontAwesome: .language)
                     }
                     .help("Translate")
+                    .accessibilityLabel(Text("status_translate"))
                 }
             }
 

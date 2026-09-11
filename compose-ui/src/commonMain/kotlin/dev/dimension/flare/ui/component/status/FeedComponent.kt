@@ -13,14 +13,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
+import dev.dimension.flare.compose.ui.Res
+import dev.dimension.flare.compose.ui.feed_open_article
 import dev.dimension.flare.ui.component.DateTimeText
 import dev.dimension.flare.ui.component.NetworkImage
+import dev.dimension.flare.ui.component.accessibleDescription
 import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.model.ClickContext
 import dev.dimension.flare.ui.model.TranslationDisplayState
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.theme.PlatformTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 internal fun FeedComponent(
@@ -28,10 +32,11 @@ internal fun FeedComponent(
     modifier: Modifier = Modifier,
 ) {
     val uriHandler = LocalUriHandler.current
+    val openArticleLabel = stringResource(Res.string.feed_open_article)
     Column(
         modifier =
             Modifier
-                .clickable {
+                .clickable(onClickLabel = openArticleLabel) {
                     data.onClicked.invoke(
                         ClickContext(uriHandler::openUri),
                     )
@@ -99,7 +104,7 @@ internal fun FeedComponent(
             data.media?.let {
                 NetworkImage(
                     model = it.url,
-                    contentDescription = data.title,
+                    contentDescription = it.accessibleDescription(),
                     modifier =
                         Modifier
                             .let {

@@ -307,7 +307,10 @@ final class StatusActionsUIView: UIView, ManualLayoutMeasurable, TimelineHeightP
             iconSize: actionIconSize,
             minimumTextWidth: isFixedWidth && showNumbers && item.count != nil ? fontSize * 2.5 : nil,
             minimumIconOnlySize: nil,
-            usesExpandedHitArea: !useText
+            usesExpandedHitArea: !useText,
+            accessibilityLabel: item.text?.resolvedString
+                ?? String(localized: "more", defaultValue: "More"),
+            accessibilityValue: showNumbers ? item.count?.humanized : nil
         ) { [weak self] in
             guard let self = self else { return }
             let gen = UIImpactFeedbackGenerator(style: .medium)
@@ -337,7 +340,10 @@ final class StatusActionsUIView: UIView, ManualLayoutMeasurable, TimelineHeightP
             iconSize: actionIconSize,
             minimumTextWidth: isFixedWidth && showNumbers && group.displayItem.count != nil ? fontSize * 2.5 : nil,
             minimumIconOnlySize: title == nil ? fontSize + 2 : nil,
-            usesExpandedHitArea: !useText
+            usesExpandedHitArea: !useText,
+            accessibilityLabel: group.displayItem.text?.resolvedString
+                ?? String(localized: "more", defaultValue: "More"),
+            accessibilityValue: showNumbers ? group.displayItem.count?.humanized : nil
         )
         control.showsMenuAsPrimaryAction = true
         control.menu = UIMenu(children: [
@@ -580,6 +586,8 @@ private final class ActionItemControl: UIButton, ManualLayoutMeasurable, Timelin
         minimumTextWidth: CGFloat?,
         minimumIconOnlySize: CGFloat?,
         usesExpandedHitArea: Bool,
+        accessibilityLabel: String? = nil,
+        accessibilityValue: String? = nil,
         onTap: (() -> Void)? = nil
     ) {
         self.minimumIconOnlySize = minimumIconOnlySize
@@ -590,6 +598,8 @@ private final class ActionItemControl: UIButton, ManualLayoutMeasurable, Timelin
         self.currentSpacing = title != nil || minimumTextWidth != nil ? 2 : 0
         self.horizontalInset = usesExpandedHitArea ? 4 : 0
         self.verticalInset = usesExpandedHitArea ? 4 : 0
+        self.accessibilityLabel = accessibilityLabel
+        self.accessibilityValue = accessibilityValue
         menu = nil
         showsMenuAsPrimaryAction = false
 
@@ -618,6 +628,8 @@ private final class ActionItemControl: UIButton, ManualLayoutMeasurable, Timelin
         minimumIconOnlySize = nil
         horizontalInset = 0
         verticalInset = 0
+        accessibilityLabel = nil
+        accessibilityValue = nil
     }
 
     @objc private func onTapped() {

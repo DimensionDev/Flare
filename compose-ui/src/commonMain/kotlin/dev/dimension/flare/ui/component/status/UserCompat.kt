@@ -9,6 +9,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import dev.dimension.flare.compose.ui.Res
+import dev.dimension.flare.compose.ui.profile_open_user
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.AvatarComponentDefaults
@@ -16,6 +18,7 @@ import dev.dimension.flare.ui.component.RichText
 import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.theme.PlatformTheme
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 public fun UserCompat(
@@ -26,6 +29,11 @@ public fun UserCompat(
         AvatarComponent(
             data = user.avatar,
             size = AvatarComponentDefaults.compatSize,
+            contentDescription =
+                stringResource(
+                    Res.string.profile_open_user,
+                    user.handle.canonical,
+                ),
             modifier =
                 Modifier.clickable {
                     onUserClick.invoke(user.key)

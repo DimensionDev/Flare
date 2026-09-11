@@ -271,6 +271,15 @@ struct MacComposeScreen: View {
             }
             .buttonStyle(.plain)
             .help(selected.isEmpty ? String(localized: "deep_link_account_picker_title") : selected.map { $0.handle.canonical }.joined(separator: ", "))
+            .accessibilityLabel(
+                Text(
+                    String(
+                        localized: "compose_select_accounts",
+                        defaultValue: "Select posting accounts"
+                    )
+                )
+            )
+            .accessibilityValue(Text(selected.map { $0.handle.canonical }.joined(separator: ", ")))
             .popover(isPresented: $showAccountPopover, arrowEdge: .top) {
                 MacComposeAccountPopover(
                     accounts: accounts,
@@ -754,6 +763,7 @@ private struct MacComposeMediaTile: View {
                 .padding(8)
             }
         }
+        .accessibilityLabel(Text(verbatim: mediaDescription))
         .aspectRatio(1, contentMode: .fit)
         .contextMenu {
             Button {
@@ -788,6 +798,26 @@ private struct MacComposeMediaTile: View {
             .frame(minWidth: 300)
             .textFieldStyle(.roundedBorder)
         }
+    }
+
+    private var mediaDescription: String {
+        let trimmedAltText = item.altText.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !trimmedAltText.isEmpty {
+            return trimmedAltText
+        }
+        if item.type == .video {
+            return String(
+                localized: "media_video_no_alt",
+                defaultValue: "Video, no alternative text provided"
+            )
+        }
+        if item.type == .image {
+            return String(
+                localized: "media_image_no_alt",
+                defaultValue: "Image, no alternative text provided"
+            )
+        }
+        return item.fileName
     }
 }
 

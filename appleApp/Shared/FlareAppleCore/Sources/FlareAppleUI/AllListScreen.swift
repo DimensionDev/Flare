@@ -145,6 +145,7 @@ public struct AllListScreen<Destination: Hashable>: View {
                     } label: {
                         Image(fontAwesome: .plus)
                     }
+                    .accessibilityLabel(Text("list.create.title", bundle: FlareAppleUILocalization.bundle))
                 }
             }
         }

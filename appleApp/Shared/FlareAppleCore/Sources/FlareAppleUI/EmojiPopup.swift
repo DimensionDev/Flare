@@ -122,6 +122,7 @@ private struct EmojiGrid: View {
                     .onTapGesture {
                         onItemClicked(item)
                     }
+                    .accessibilityLabel(Text(verbatim: item.shortcode))
             }
         }
     }

@@ -87,6 +87,7 @@ struct CreateListScreen: View {
                 } label: {
                     Image(fontAwesome: .check)
                 }
+                .accessibilityLabel(Text("done"))
                 .disabled(listName.isEmpty)
             }
             ToolbarItem(placement: .cancellationAction) {
@@ -95,6 +96,7 @@ struct CreateListScreen: View {
                 } label: {
                     Image(fontAwesome: .xmark)
                 }
+                .accessibilityLabel(Text("Cancel"))
             }
         }
         .disabled(loading)

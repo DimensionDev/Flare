@@ -190,6 +190,7 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
     private func setupAvatar(_ avatarView: AvatarUIView) {
         guard avatarView.gestureRecognizers?.isEmpty ?? true else { return }
         avatarView.isUserInteractionEnabled = true
+        avatarView.isAccessibilityElement = true
         let tap = UITapGestureRecognizer(target: self, action: #selector(onAvatarTapped))
         avatarView.addGestureRecognizer(tap)
     }
@@ -473,6 +474,7 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
         currentHeaderView?.removeFromSuperview()
         currentHeaderView = nil
         avatarViewStorage?.removeFromSuperview()
+        avatarViewStorage?.accessibilityLabel = nil
         wantsAvatar = false
 
         for parent in activeParents { parent.removeFromSuperview() }
@@ -671,6 +673,7 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
             let avatarView = resolvedAvatarView()
             avatarView.avatarShape = appearance.avatarShape
             avatarView.set(url: user.avatar?.url, customHeaders: user.avatar?.customHeaders)
+            avatarView.accessibilityLabel = openProfileAccessibilityLabel(handle: user.handle.canonical)
             if avatarView.superview !== self { addSubview(avatarView) }
         } else if avatarViewStorage?.superview === self {
             avatarViewStorage?.removeFromSuperview()

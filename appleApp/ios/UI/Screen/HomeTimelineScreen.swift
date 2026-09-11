@@ -67,6 +67,7 @@ struct HomeTimelineScreen: View {
                                     .onTapGesture {
                                         toSecondaryMenu()
                                     }
+                                    .accessibilityLabel(Text("open_navigation_menu"))
                             }
                             ToolbarItem(placement: .primaryAction) {
                                 Button {
@@ -74,6 +75,7 @@ struct HomeTimelineScreen: View {
                                 } label: {
                                     Image(fontAwesome: .plus)
                                 }
+                                .accessibilityLabel(Text("tab_settings_add_tab"))
                             }
                         }
                 } else {
@@ -94,6 +96,7 @@ struct HomeTimelineScreen: View {
                                 } label: {
                                     Image(fontAwesome: .sliders)
                                 }
+                                .accessibilityLabel(Text("tab_settings_customize"))
                                 composeToolbarButton
                             }
                         }
@@ -215,6 +218,7 @@ struct HomeTimelineScreen: View {
                                     } label: {
                                         Image(fontAwesome: .sliders)
                                     }
+                                    .accessibilityLabel(Text("tab_settings_customize"))
                                 }
                             }
                             ToolbarItem(placement: .primaryAction) {
@@ -269,6 +273,7 @@ struct HomeTimelineScreen: View {
             }.onTapGesture {
                 toSecondaryMenu()
             }
+            .accessibilityLabel(Text("open_navigation_menu"))
         }
     }
 
@@ -287,6 +292,7 @@ struct HomeTimelineScreen: View {
                 Image(fontAwesome: .penToSquare)
                     .font(.title2)
             }
+            .accessibilityLabel(Text("compose_title_new"))
         }
     }
 }

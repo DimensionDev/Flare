@@ -51,6 +51,8 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.times
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.roundToIntSize
@@ -75,12 +77,16 @@ import dev.dimension.flare.common.FlareHardwareShortcutDetector
 import dev.dimension.flare.common.FlareHardwareShortcutsElement
 import dev.dimension.flare.common.MediaFileNamePolicy
 import dev.dimension.flare.data.model.VideoAutoplay
+import dev.dimension.flare.media_pause
+import dev.dimension.flare.media_play
+import dev.dimension.flare.media_playback_position
 import dev.dimension.flare.media_save
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.NetworkImage
+import dev.dimension.flare.ui.component.accessibleDescription
 import dev.dimension.flare.ui.component.status.MediaItem
 import dev.dimension.flare.ui.humanizer.humanize
 import dev.dimension.flare.ui.model.UiMedia
@@ -204,7 +210,7 @@ internal fun StatusMediaScreen(
                             url = media.url,
                             previewUrl = media.previewUrl,
                             customHeaders = media.customHeaders,
-                            description = media.description,
+                            description = media.accessibleDescription(),
                             isFocused = pagerState.currentPage == it,
                             setLockPager = state::setLockPager,
                         )
@@ -215,7 +221,7 @@ internal fun StatusMediaScreen(
                             VideoItem(
                                 url = media.url,
                                 thumbnailUrl = media.thumbnailUrl,
-                                description = media.description,
+                                description = media.accessibleDescription(),
                                 modifier =
                                     Modifier
                                         .fillMaxSize(),
@@ -226,7 +232,7 @@ internal fun StatusMediaScreen(
                                 url = media.thumbnailUrl,
                                 previewUrl = media.thumbnailUrl,
                                 customHeaders = media.customHeaders,
-                                description = media.description,
+                                description = media.accessibleDescription(),
                                 isFocused = pagerState.currentPage == it,
                                 setLockPager = state::setLockPager,
                             )
@@ -286,7 +292,7 @@ internal fun StatusMediaScreen(
                                         is UiMedia.Image -> media.previewUrl
                                         is UiMedia.Video -> media.thumbnailUrl
                                     },
-                                contentDescription = null,
+                                contentDescription = media.accessibleDescription(),
                                 modifier =
                                     Modifier
                                         .aspectRatio(1f),
@@ -341,9 +347,12 @@ internal fun VideoItem(
                 fadeIn() togetherWith fadeOut()
             },
             modifier =
-                Modifier.clickable {
-                    showControls = !showControls
-                },
+                Modifier
+                    .clickable {
+                        showControls = !showControls
+                    }.semantics {
+                        description?.let { contentDescription = it }
+                    },
         ) { isLoading ->
             if (!isLoading) {
                 VideoPlayerSurface(
@@ -384,6 +393,7 @@ private fun PlayerControl(
     state: VideoPlayerState,
     modifier: Modifier = Modifier,
 ) {
+    val playbackPositionLabel = stringResource(Res.string.media_playback_position)
     val playerState by rememberUpdatedState(state)
     Row(
         modifier = modifier,
@@ -414,7 +424,14 @@ private fun PlayerControl(
                     } else {
                         FontAwesomeIcons.Solid.Pause
                     },
-                    contentDescription = null,
+                    contentDescription =
+                        stringResource(
+                            if (playerState.isPlaying) {
+                                Res.string.media_pause
+                            } else {
+                                Res.string.media_play
+                            },
+                        ),
                     modifier = Modifier.size(16.dp),
                 )
             }
@@ -429,8 +446,13 @@ private fun PlayerControl(
                         playerState.userDragging = false
                         playerState.seekTo(playerState.sliderPos)
                     },
+                    modifier =
+                        Modifier
+                            .weight(1f)
+                            .semantics {
+                                contentDescription = playbackPositionLabel
+                            },
                     valueRange = 0f..1000f,
-                    modifier = Modifier.weight(1f),
                     tooltipContent = {
                         val duration = state.metadata.duration
                         if (duration != null) {

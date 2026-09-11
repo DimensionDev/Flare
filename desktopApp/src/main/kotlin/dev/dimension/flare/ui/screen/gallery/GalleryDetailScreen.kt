@@ -42,6 +42,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import dev.dimension.flare.LocalWindowPadding
+import dev.dimension.flare.Res
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.isRefreshing
 import dev.dimension.flare.common.onEmpty
@@ -51,6 +52,9 @@ import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.data.datasource.microblog.datasource.GalleryDetail
 import dev.dimension.flare.data.datasource.microblog.datasource.GalleryOrientation
 import dev.dimension.flare.data.model.TimelineDisplayMode
+import dev.dimension.flare.gallery_bookmarks
+import dev.dimension.flare.gallery_engagement
+import dev.dimension.flare.gallery_views
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.AvatarComponent
@@ -90,6 +94,7 @@ import io.github.composefluent.component.ProgressBar
 import io.github.composefluent.component.SubtleButton
 import io.github.composefluent.component.Text
 import moe.tlaster.precompose.molecule.producePresenter
+import org.jetbrains.compose.resources.stringResource
 
 private val GalleryGridSpacing = 8.dp
 private val CompactTimelineSpacing = 2.dp
@@ -697,7 +702,14 @@ private fun GalleryMetadataItem(
     ) {
         FAIcon(
             imageVector = matrix.icon.toImageVector(),
-            contentDescription = null,
+            contentDescription =
+                stringResource(
+                    when (matrix.icon) {
+                        UiIcon.Eye -> Res.string.gallery_views
+                        UiIcon.Heart -> Res.string.gallery_bookmarks
+                        else -> Res.string.gallery_engagement
+                    },
+                ),
             tint = color,
             modifier = Modifier.size(FluentTheme.typography.caption.fontSize.value.dp + 2.dp),
         )

@@ -125,6 +125,7 @@ private struct GalleryImagesView: View {
                         .onTapGesture {
                             openMedia(image)
                         }
+                        .accessibilityLabel(Text(verbatim: image.accessibleDescription))
                 }
             }
         }
@@ -138,6 +139,7 @@ private struct GalleryImagesView: View {
             .onTapGesture {
                 openMedia(image)
             }
+            .accessibilityLabel(Text(verbatim: image.accessibleDescription))
     }
 }
 
@@ -213,6 +215,13 @@ private struct GalleryAuthorCard: View {
             } label: {
                 Image(fontAwesome: detail.isBookmarked ? .heartFill : .heart)
             }
+            .accessibilityLabel(
+                Text(
+                    detail.isBookmarked
+                        ? String(localized: "bookmark_remove")
+                        : String(localized: "bookmark_add")
+                )
+            )
             .foregroundStyle(detail.isBookmarked ? Color.red : Color.secondary)
             .buttonStyle(.plain)
         }
@@ -256,6 +265,13 @@ private struct GalleryMetadataRow: View {
                 }
                 .font(.caption)
                 .foregroundStyle(.secondary)
+                .accessibilityLabel(
+                    Text(
+                        verbatim: item.humanizedCount.isEmpty
+                            ? galleryMetricName(item.icon)
+                            : "\(galleryMetricName(item.icon)): \(item.humanizedCount)"
+                    )
+                )
             }
             Spacer(minLength: 0)
         }

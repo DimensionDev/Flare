@@ -133,6 +133,7 @@ struct DMConversationScreen: View {
                     .backport
                     .glassProminentButtonStyle()
                     .disabled(inputText.isEmpty)
+                    .accessibilityLabel(Text("agent_chat_send"))
                 }
                 .padding([.horizontal, .bottom])
                 .backport

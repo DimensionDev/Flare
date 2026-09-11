@@ -3,6 +3,19 @@
 
     <string name="login_button">Log in</string>
     <string name="navigate_back">Go back</string>
+    <string name="open_navigation_menu">Open navigation menu</string>
+    <string name="clear_search">Clear search</string>
+    <string name="select_account_current">Select account. Current: %1$s</string>
+    <string name="expanded">Expanded</string>
+    <string name="collapsed">Collapsed</string>
+    <string name="notification_success">Success</string>
+    <string name="notification_error">Error</string>
+    <string name="seek_backward_5_seconds">Rewind 5 seconds</string>
+    <string name="seek_forward_5_seconds">Forward 5 seconds</string>
+    <string name="gallery_views">Views</string>
+    <string name="gallery_bookmarks">Bookmarks</string>
+    <string name="gallery_engagement">Engagement</string>
+    <string name="selected">Selected</string>
 
     <string name="home_tab_home_title">Home</string>
     <string name="home_tab_notifications_title">Notifications</string>
@@ -38,6 +51,23 @@
     <string name="compose_poll_expiration_7_days">7 days</string>
     <string name="compose_content_warning_hint">Content warning</string>
     <string name="compose_media_sensitive">Mark media as sensitive</string>
+    <string name="compose_send">Send post</string>
+    <string name="compose_select_accounts">Select posting accounts</string>
+    <string name="compose_select_accounts_current">Select posting accounts. Selected: %1$s</string>
+    <string name="compose_add_media">Add image or video</string>
+    <string name="compose_enable_poll">Add poll</string>
+    <string name="compose_disable_poll">Remove poll</string>
+    <string name="compose_add_poll_option">Add poll option</string>
+    <string name="compose_remove_poll_option">Remove poll option %1$d</string>
+    <string name="compose_change_visibility">Change post visibility. Current: %1$s</string>
+    <string name="compose_enable_content_warning">Add content warning</string>
+    <string name="compose_disable_content_warning">Remove content warning</string>
+    <string name="compose_show_emoji_picker">Show emoji picker</string>
+    <string name="compose_hide_emoji_picker">Hide emoji picker</string>
+    <string name="compose_edit_alt_text">Edit alternative text</string>
+    <string name="compose_remove_media">Remove media</string>
+    <string name="compose_image_no_alt">Image, no alternative text provided</string>
+    <string name="compose_video_no_alt">Video, no alternative text provided</string>
     <string name="compose_notification_title">Sending post</string>
     <string name="compose_notification_progress">Sending post</string>
     <string name="compose_notification_success">Post sent</string>
@@ -104,6 +134,8 @@
     <string name="draft_box_edit">Edit</string>
     <string name="draft_box_retry">Retry</string>
     <string name="draft_box_send">Send</string>
+    <string name="draft_box_posting_account">Posting account: %1$s</string>
+    <string name="draft_box_attachment_no_description">Attachment, no description provided</string>
     <string name="settings_draft_box_description">View, edit, and resend saved drafts</string>
 
     <string name="settings_title">Settings</string>
@@ -458,6 +490,11 @@
     <string name="media_download_started">Download started.</string>
     <string name="media_prepare_started">Preparing media…</string>
     <string name="media_alt_text">Alt text</string>
+    <string name="media_play">Play</string>
+    <string name="media_pause">Pause</string>
+    <string name="media_playback_position">Playback position</string>
+    <string name="media_page_position">Media position</string>
+    <string name="media_page_of">%1$d of %2$d</string>
     <string name="media_is_downloading">Media is still downloading. Try again in a moment.</string>
 
     <string name="settings_side_panel_empty">By default, the side panel follows the current account\'s platform.</string>
@@ -532,6 +569,7 @@
     <string name="edit_list_member_remove">Remove</string>
     <string name="list_create_description">List description</string>
     <string name="list_create_description_hint">List description</string>
+    <string name="list_choose_image">Choose list image</string>
 
     <string name="edit_account_list_title">Edit account list</string>
 
@@ -594,6 +632,10 @@
 
     <string name="rss_sources_title_label">Title</string>
     <string name="rss_sources_url_label">URL</string>
+    <string name="rss_source_valid">RSS source valid</string>
+    <string name="rss_source_options_available">RSS source options available</string>
+    <string name="rss_source_invalid">RSS source invalid</string>
+    <string name="rss_source_checking">Checking RSS source</string>
     <string name="rss_title">Subscriptions</string>
     <string name="empty_rss_sources">No subscriptions</string>
     <string name="rss_sources_rss_hub_host_label">RSSHub Host</string>

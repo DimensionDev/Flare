@@ -154,7 +154,7 @@ private fun DraftBoxItem(
                 UiDraftStatus.FAILED -> {
                     FAIcon(
                         imageVector = FontAwesomeIcons.Solid.TriangleExclamation,
-                        contentDescription = null,
+                        contentDescription = stringResource(R.string.compose_notification_error),
                         tint = MaterialTheme.colorScheme.error,
                     )
                 }
@@ -162,7 +162,7 @@ private fun DraftBoxItem(
                 UiDraftStatus.SENDING -> {
                     FAIcon(
                         imageVector = FontAwesomeIcons.Solid.Upload,
-                        contentDescription = null,
+                        contentDescription = stringResource(R.string.compose_notification_progress),
                         tint = MaterialTheme.colorScheme.primary,
                     )
                 }
@@ -178,6 +178,11 @@ private fun DraftBoxItem(
                     AvatarComponent(
                         data = account.avatar,
                         size = 22.dp,
+                        contentDescription =
+                            stringResource(
+                                R.string.draft_box_posting_account,
+                                account.account.accountKey.toString(),
+                            ),
                     )
                 }
             }
@@ -217,11 +222,29 @@ private fun DraftBoxItem(
                 if (item.medias.isNotEmpty()) {
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         item.medias.take(4).forEach { media ->
+                            val mediaDescription =
+                                media.altText
+                                    ?.takeIf { it.isNotBlank() }
+                                    ?: when (media.type) {
+                                        UiDraftMediaType.IMAGE -> {
+                                            stringResource(R.string.compose_image_no_alt)
+                                        }
+
+                                        UiDraftMediaType.VIDEO -> {
+                                            stringResource(R.string.compose_video_no_alt)
+                                        }
+
+                                        UiDraftMediaType.OTHER -> {
+                                            media.fileName
+                                                ?.takeIf { it.isNotBlank() }
+                                                ?: stringResource(R.string.draft_box_attachment_no_description)
+                                        }
+                                    }
                             when (media.type) {
                                 UiDraftMediaType.IMAGE -> {
                                     NetworkImage(
                                         model = media.cachePath,
-                                        contentDescription = null,
+                                        contentDescription = mediaDescription,
                                         modifier = Modifier.size(60.dp),
                                         contentScale = ContentScale.Crop,
                                     )
@@ -241,7 +264,7 @@ private fun DraftBoxItem(
                                                 } else {
                                                     FontAwesomeIcons.Solid.Pen
                                                 },
-                                            contentDescription = null,
+                                            contentDescription = mediaDescription,
                                         )
                                     }
                                 }
@@ -262,7 +285,7 @@ private fun DraftBoxItem(
                     ) {
                         FAIcon(
                             imageVector = FontAwesomeIcons.Solid.EllipsisVertical,
-                            contentDescription = null,
+                            contentDescription = stringResource(R.string.more),
                         )
                     }
                     FlareDropdownMenu(

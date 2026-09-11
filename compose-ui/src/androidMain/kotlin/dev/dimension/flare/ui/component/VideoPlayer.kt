@@ -38,6 +38,8 @@ import androidx.compose.ui.keepScreenOn
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onLayoutRectChanged
 import androidx.compose.ui.layout.onVisibilityChanged
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.dp
 import androidx.core.content.getSystemService
@@ -54,10 +56,13 @@ import androidx.media3.ui.compose.state.rememberPresentationState
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.CirclePlay
+import dev.dimension.flare.compose.ui.Res
+import dev.dimension.flare.compose.ui.media_play_video
 import dev.dimension.flare.ui.component.status.LocalIsScrollingInProgress
 import dev.dimension.flare.ui.theme.PlatformTheme
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.coroutines.android.awaitFrame
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.core.annotation.Provided
 import org.koin.core.annotation.Single
@@ -161,7 +166,7 @@ public fun VideoPlayer(
                 ) {
                     FAIcon(
                         FontAwesomeIcons.Solid.CirclePlay,
-                        contentDescription = null,
+                        contentDescription = stringResource(Res.string.media_play_video),
                         modifier =
                             Modifier
                                 .size(16.dp),
@@ -244,7 +249,9 @@ public fun VideoPlayer(
                     val playerModifier =
                         Modifier
                             .clipToBounds()
-                            .resizeWithContentScale(
+                            .semantics {
+                                contentDescription?.let { this.contentDescription = it }
+                            }.resizeWithContentScale(
                                 contentScale = contentScale,
                                 sourceSizeDp = playerState.videoSizeDp,
                             ).let {

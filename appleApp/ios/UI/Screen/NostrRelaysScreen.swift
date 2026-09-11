@@ -57,6 +57,7 @@ struct NostrRelaysScreen: View {
                 } label: {
                     Image(fontAwesome: .plus)
                 }
+                .accessibilityLabel(Text("Add relay"))
             }
         }
         .alert("Add relay", isPresented: $showAddAlert) {

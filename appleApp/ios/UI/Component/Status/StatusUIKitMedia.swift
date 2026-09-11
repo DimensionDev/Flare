@@ -117,6 +117,7 @@ final class MediaUIView: UIView {
     override init(frame: CGRect) {
         super.init(frame: frame)
         clipsToBounds = true
+        isAccessibilityElement = true
         addSubview(background)
         addSubview(imageView)
         addSubview(playBadgeBg)
@@ -151,6 +152,7 @@ final class MediaUIView: UIView {
     required init?(coder: NSCoder) { fatalError("init(coder:) not supported") }
 
     func set(media: UiMedia, cornerRadius: CGFloat) {
+        accessibilityLabel = media.accessibleDescription
         let signature = MediaItemSignature(media: media)
         if lastMediaSignature == signature {
             if lastCornerRadius != cornerRadius {
@@ -180,6 +182,7 @@ final class MediaUIView: UIView {
     }
 
     func prepareForPoolRemoval() {
+        accessibilityLabel = nil
         imageView.kf.cancelDownloadTask()
         imageView.image = nil
         lastMediaSignature = nil
@@ -908,6 +911,10 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding, UICollectionView
             cfg.imagePlacement = .leading
             cfg.baseForegroundColor = .white
             toggleButton.configuration = cfg
+            toggleButton.accessibilityLabel = String(
+                localized: "show_sensitive_media",
+                defaultValue: "Show sensitive media"
+            )
             // Center over blurred content.
             toggleButtonPositionConstraints = [
                 toggleButton.centerXAnchor.constraint(equalTo: centerXAnchor),
@@ -917,6 +924,10 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding, UICollectionView
             cfg.title = nil
             cfg.image = UIImage(fontAwesome: .eyeSlash)
             toggleButton.configuration = cfg
+            toggleButton.accessibilityLabel = String(
+                localized: "hide_sensitive_media",
+                defaultValue: "Hide sensitive media"
+            )
             toggleButtonPositionConstraints = [
                 toggleButton.topAnchor.constraint(equalTo: topAnchor, constant: 12),
                 toggleButton.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 12),
@@ -1153,6 +1164,10 @@ private final class AltTextButton: UIButton {
         cfg.title = "ALT"
         cfg.cornerStyle = .medium
         configuration = cfg
+        accessibilityLabel = String(
+            localized: "media_view_alt_text",
+            defaultValue: "View alternative text"
+        )
         addTarget(self, action: #selector(showAlt), for: .touchUpInside)
     }
     required init?(coder: NSCoder) { fatalError("init(coder:) not supported") }

@@ -67,6 +67,7 @@ import dev.dimension.flare.ui.component.FavIcon
 import dev.dimension.flare.ui.component.FlareScrollBar
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.RichText
+import dev.dimension.flare.ui.component.accessibleDescription
 import dev.dimension.flare.ui.component.listCard
 import dev.dimension.flare.ui.component.placeholder
 import dev.dimension.flare.ui.component.status.AdaptiveCard
@@ -614,7 +615,7 @@ private fun ArticleImageBlock(
 ) {
     NetworkImage(
         model = media.url,
-        contentDescription = media.description,
+        contentDescription = media.accessibleDescription(),
         customHeaders = media.customHeaders,
         modifier =
             Modifier
@@ -642,7 +643,7 @@ private fun ArticleVideoBlock(media: UiMedia.Video) {
             VideoItem(
                 url = media.url,
                 thumbnailUrl = media.thumbnailUrl,
-                description = media.description,
+                description = media.accessibleDescription(),
                 modifier = Modifier.fillMaxSize(),
             )
         }

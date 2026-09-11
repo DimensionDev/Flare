@@ -72,6 +72,9 @@ struct StatusMediaView: View {
                     }
                     .backport
                     .glassProminentButtonStyle()
+                    .accessibilityLabel(
+                        Text("show_sensitive_media", bundle: FlareAppleUILocalization.bundle)
+                    )
                     .padding()
                 } else {
                     Button {
@@ -83,6 +86,9 @@ struct StatusMediaView: View {
                     }
                     .backport
                     .glassButtonStyle(fallbackStyle: .bordered)
+                    .accessibilityLabel(
+                        Text("hide_sensitive_media", bundle: FlareAppleUILocalization.bundle)
+                    )
                     .padding()
                 }
             } else {
@@ -373,6 +379,9 @@ struct AltTextOverlay: View {
         .padding()
         .backport
         .glassButtonStyle(fallbackStyle: .bordered)
+        .accessibilityLabel(
+            Text("media_view_alt_text", bundle: FlareAppleUILocalization.bundle)
+        )
         .popover(isPresented: $showAltText) {
             Text(altText)
                 .padding()
@@ -383,6 +392,30 @@ struct AltTextOverlay: View {
 }
 
 public extension UiMedia {
+    var accessibleDescription: String {
+        if let description = description_?.trimmingCharacters(in: .whitespacesAndNewlines),
+           !description.isEmpty {
+            return description
+        }
+        switch onEnum(of: self) {
+        case .image, .gif:
+            return FlareAppleUILocalization.string(
+                "media_image_no_alt",
+                fallback: "Image, no alternative text provided"
+            )
+        case .video:
+            return FlareAppleUILocalization.string(
+                "media_video_no_alt",
+                fallback: "Video, no alternative text provided"
+            )
+        case .audio:
+            return FlareAppleUILocalization.string(
+                "media_audio_no_description",
+                fallback: "Audio, no description provided"
+            )
+        }
+    }
+
     var aspectRatio: CGFloat? {
         switch onEnum(of: self) {
         case .image(let image): return CGFloat(image.aspectRatio)

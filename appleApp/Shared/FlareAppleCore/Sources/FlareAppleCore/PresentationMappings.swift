@@ -10,6 +10,25 @@ public func localizedPresentationString(
     FlareAppleCoreLocalization.string(key, fallback: fallback, arguments: arguments)
 }
 
+public func openProfileAccessibilityLabel(handle: String) -> String {
+    localizedPresentationString(
+        "profile_open_user",
+        fallback: "Open profile for %@",
+        arguments: [handle]
+    )
+}
+
+public func galleryMetricName(_ icon: UiIcon) -> String {
+    switch icon {
+    case .eye:
+        localizedPresentationString("gallery_views", fallback: "Views")
+    case .heart:
+        localizedPresentationString("gallery_bookmarks", fallback: "Bookmarks")
+    default:
+        localizedPresentationString("gallery_engagement", fallback: "Engagement")
+    }
+}
+
 public extension UiTimelineV2 {
     var timelineContentPost: UiTimelineV2.Post? {
         switch onEnum(of: self) {

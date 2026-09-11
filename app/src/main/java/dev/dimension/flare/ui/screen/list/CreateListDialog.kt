@@ -115,7 +115,7 @@ internal fun CreateListDialog(
                                 if (state.uri != null) {
                                     NetworkImage(
                                         model = state.uri.toString(),
-                                        contentDescription = null,
+                                        contentDescription = stringResource(R.string.list_choose_image),
                                         modifier =
                                             Modifier
                                                 .size(AvatarComponentDefaults.size)
@@ -124,7 +124,7 @@ internal fun CreateListDialog(
                                 } else {
                                     FAIcon(
                                         imageVector = FontAwesomeIcons.Solid.Rss,
-                                        contentDescription = null,
+                                        contentDescription = stringResource(R.string.list_choose_image),
                                         modifier =
                                             Modifier
                                                 .size(AvatarComponentDefaults.size)

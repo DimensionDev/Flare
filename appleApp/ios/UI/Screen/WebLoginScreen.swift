@@ -1,6 +1,7 @@
 import SwiftUI
 import WebKit
 import Combine
+import FlareAppleUI
 
 @available(iOS 26.0, *)
 struct WebLoginScreen: View {
@@ -18,6 +19,7 @@ struct WebLoginScreen: View {
         NavigationStack {
             if viewModel.canShowWebView {
                 WebView(viewModel.page)
+                    .modifier(ScrollMinimizingNavigationBar(enabled: false))
                     .onAppear {
                         if let requestURL = URL(string: url) {
                             viewModel.page.load(requestURL)

@@ -20,7 +20,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   build:
-    runs-on: [macos-26]
+    runs-on: [xcode-27]
 
     steps:
       - name: Checkout
@@ -38,7 +38,7 @@ jobs:
       - name: Setup Xcode
         uses: maxim-lobanov/setup-xcode@v1
         with:
-          xcode-version: latest-stable
+          xcode-version: latest
       - name: Install iOS
         run: xcodebuild -downloadPlatform iOS
       - name: Install XcodeGen

@@ -1,6 +1,7 @@
 import SwiftUI
 import KotlinSharedUI
 import FlareAppleCore
+import FlareAppleUI
 
 struct AppLogScreen: View {
     @StateObject private var presenter = KotlinPresenter(presenter: DevModePresenter())
@@ -63,6 +64,7 @@ struct AppLogScreen: View {
                         .padding()
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
+                .modifier(ScrollMinimizingNavigationBar())
                 .toolbar {
                     ToolbarItem(placement: .cancellationAction) {
                         Button {

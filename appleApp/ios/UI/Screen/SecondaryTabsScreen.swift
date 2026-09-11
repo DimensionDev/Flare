@@ -13,6 +13,7 @@ struct SecondaryTabsScreen: View {
             if #available(iOS 18.0, *) {
                 Router { _ in
                     content
+                        .modifier(ScrollMinimizingNavigationBar())
                 }
             } else {
                 content

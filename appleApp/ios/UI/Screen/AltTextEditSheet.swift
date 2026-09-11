@@ -1,5 +1,6 @@
 import SwiftUI
 import PhotosUI
+import FlareAppleUI
 
 struct AltTextEditSheet: View {
     @Environment(\.dismiss) var dismiss
@@ -41,6 +42,7 @@ struct AltTextEditSheet: View {
             }
             .padding()
             .navigationTitle("Edit Description")
+            .modifier(ScrollMinimizingNavigationBar(enabled: false))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {

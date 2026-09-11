@@ -85,6 +85,7 @@ struct HomeTimelineScreen: View {
                             toTabSetting: toTabSetting,
                             onGlobalRoute: onNavigate
                         )
+                        .modifier(ScrollMinimizingNavigationBar(enabled: false))
                         .toolbar {
                             leadingToolbarContent
                             ToolbarItemGroup(placement: .topBarTrailing) {
@@ -221,6 +222,7 @@ struct HomeTimelineScreen: View {
                             }
                         }
                         .navigationBarTitleDisplayMode(.inline)
+                        .modifier(ScrollMinimizingNavigationBar())
                     }
                 }
             }

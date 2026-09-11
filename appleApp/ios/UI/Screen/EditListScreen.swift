@@ -130,6 +130,7 @@ struct EditListScreen: View {
         .sheet(isPresented: $showEditMember, content: {
             NavigationStack {
                 EditListMemberScreen(accountType: accountType, listId: listId)
+                    .modifier(ScrollMinimizingNavigationBar(enabled: false))
             }
         })
         .toolbar {

@@ -38,6 +38,7 @@ struct ImportOPMLScreen: View {
             }
         }
         .navigationTitle("opml_import")
+        .modifier(ScrollMinimizingNavigationBar(enabled: false))
         .toolbar {
             ToolbarItem(placement: .confirmationAction) {
                 Button("done") {

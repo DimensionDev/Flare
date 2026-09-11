@@ -99,6 +99,7 @@ public struct AllListScreen<Destination: Hashable>: View {
             if let id = editListId, let editListContent {
                 NavigationStack {
                     editListContent(id)
+                        .modifier(ScrollMinimizingNavigationBar(enabled: false))
                 }
             } else {
                 EmptyView()
@@ -130,6 +131,7 @@ public struct AllListScreen<Destination: Hashable>: View {
             if let createListContent {
                 NavigationStack {
                     createListContent()
+                        .modifier(ScrollMinimizingNavigationBar(enabled: false))
                 }
             } else {
                 EmptyView()

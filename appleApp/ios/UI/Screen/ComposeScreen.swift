@@ -597,6 +597,7 @@ struct ComposeScreen: View {
                 presenter.state.loadDraft(groupId: groupId)
                 showDraftSheet = false
             }
+            .modifier(ScrollMinimizingNavigationBar(enabled: false))
         }
         .presentationDetents([.medium, .large])
     }

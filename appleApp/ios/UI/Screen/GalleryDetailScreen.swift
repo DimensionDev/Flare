@@ -142,6 +142,7 @@ struct GalleryDetailScreen: View {
                 }
                 .navigationTitle("Info")
                 .navigationBarTitleDisplayMode(.inline)
+                .modifier(ScrollMinimizingNavigationBar())
             }
             .presentationDetents([.medium, .large])
         }

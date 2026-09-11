@@ -97,7 +97,8 @@ struct ProfileScreen: View {
                     StatusActionsView(
                         data: presenter.state.actions,
                         useText: false,
-                        allowSpacer: false
+                        allowSpacer: false,
+                        applyPostActionLayout: false
                     )
                     .buttonStyle(.plain)
                 }

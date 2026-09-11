@@ -299,6 +299,7 @@ final class StatusActionsUIView: UIView, ManualLayoutMeasurable, TimelineHeightP
         }
         let control = itemButtonPool[itemButtonCursor]
         itemButtonCursor += 1
+        control.isEnabled = item.enabled
         control.configure(
             image: item.icon.flatMap { UIImage(fontAwesome: $0.fontAwesomeIcon) },
             title: title,
@@ -332,6 +333,7 @@ final class StatusActionsUIView: UIView, ManualLayoutMeasurable, TimelineHeightP
         }
         let control = groupButtonPool[groupButtonCursor]
         groupButtonCursor += 1
+        control.isEnabled = group.displayItem.enabled
         control.configure(
             image: group.displayItem.icon.flatMap { UIImage(fontAwesome: $0.fontAwesomeIcon) },
             title: title,
@@ -395,10 +397,14 @@ final class StatusActionsUIView: UIView, ManualLayoutMeasurable, TimelineHeightP
                     title = ""
                 }
                 let image = item.icon.flatMap { UIImage(fontAwesome: $0.fontAwesomeIcon) }
+                var attributes: UIMenuElement.Attributes = item.color == .red ? .destructive : []
+                if !item.enabled {
+                    attributes.insert(.disabled)
+                }
                 let uiAction = UIAction(
                     title: title,
                     image: image,
-                    attributes: item.color == .red ? .destructive : []
+                    attributes: attributes
                 ) { [weak self] _ in
                     guard let self = self else { return }
                     let gen = UIImpactFeedbackGenerator(style: .medium)
@@ -722,7 +728,11 @@ private final class ActionItemControl: UIButton, ManualLayoutMeasurable, Timelin
     }
 
     override var isHighlighted: Bool {
-        didSet { alpha = isHighlighted ? 0.55 : 1 }
+        didSet { alpha = isEnabled ? (isHighlighted ? 0.55 : 1) : 0.4 }
+    }
+
+    override var isEnabled: Bool {
+        didSet { alpha = isEnabled ? 1 : 0.4 }
     }
 }
 

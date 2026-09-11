@@ -17,6 +17,7 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedListItem
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -24,6 +25,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -54,6 +56,7 @@ import dev.dimension.flare.ui.theme.single
 import kotlinx.collections.immutable.persistentMapOf
 import moe.tlaster.precompose.molecule.producePresenter
 import org.koin.compose.koinInject
+import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -261,6 +264,35 @@ internal fun AppearanceMediaScreen(onBack: () -> Unit) {
                     shapes = ListItemDefaults.item(),
                 )
             }
+            var playbackSpeedValue by remember(globalAppearance.mediaPlaybackSpeed) {
+                mutableFloatStateOf(globalAppearance.mediaPlaybackSpeed)
+            }
+            SegmentedListItem(
+                onClick = {},
+                shapes = ListItemDefaults.item(),
+                content = {
+                    Text(text = stringResource(id = R.string.settings_media_playback_speed))
+                },
+                supportingContent = {
+                    Column {
+                        Text(text = stringResource(id = R.string.settings_media_playback_speed_description))
+                        Slider(
+                            value = playbackSpeedValue,
+                            onValueChange = {
+                                playbackSpeedValue = (it * 10).roundToInt() / 10f
+                            },
+                            onValueChangeFinished = {
+                                state.update(AppearanceKeys.MediaPlaybackSpeed, playbackSpeedValue)
+                            },
+                            valueRange = 1f..4f,
+                            steps = 29,
+                        )
+                    }
+                },
+                trailingContent = {
+                    Text(text = "%.1fx".format(playbackSpeedValue))
+                },
+            )
             val mediaSaveLocationText =
                 when (mediaSaveLocation.mode) {
                     MediaSaveLocationMode.DefaultDownloads -> {

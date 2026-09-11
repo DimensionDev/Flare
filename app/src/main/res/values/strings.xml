@@ -451,6 +451,10 @@
     <string name="media_menu_share_image">Share image</string>
     <string name="media_menu_copy_link">Copy link</string>
     <string name="media_menu_media_link">Media link</string>
+    <string name="media_menu_open_external">Open in external app</string>
+    <string name="media_playback_speed">Playback speed</string>
+    <string name="settings_media_playback_speed">Default playback speed</string>
+    <string name="settings_media_playback_speed_description">Speed used when playing videos in the media viewer</string>
     <string name="status_menu_share_via_fxembed">Share via FxEmbed</string>
     <string name="status_menu_share_via_fixvx">Share via Fixvx</string>
     <string name="media_save_success">Saved</string>

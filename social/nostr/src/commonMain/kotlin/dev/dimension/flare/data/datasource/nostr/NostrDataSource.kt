@@ -7,6 +7,7 @@ import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataS
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.datasource.microblog.ComposeDataSource
+import dev.dimension.flare.data.datasource.microblog.ComposeResult
 import dev.dimension.flare.data.datasource.microblog.ComposeType
 import dev.dimension.flare.data.datasource.microblog.DatabaseUpdater
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
@@ -472,8 +473,8 @@ internal class NostrDataSource(
 
     override suspend fun compose(
         data: ComposeData,
-        progress: () -> Unit,
-    ) {
+        progress: suspend () -> Unit,
+    ): ComposeResult {
         val credential = credentialFlow.first()
         val medias =
             data.medias.map { media ->
@@ -494,39 +495,43 @@ internal class NostrDataSource(
                         progress()
                     }
             }
-        when (val composeStatus = data.referenceStatus?.composeStatus) {
-            is ComposeStatus.Quote -> {
-                serviceManager.withService {
-                    it.composeQuote(
-                        statusKey = composeStatus.statusKey,
-                        content = data.content,
-                        media = medias,
-                        contentWarning = data.spoilerText,
-                    )
+        val eventId =
+            when (val composeStatus = data.referenceStatus?.composeStatus) {
+                is ComposeStatus.Quote -> {
+                    serviceManager.withService {
+                        it.composeQuote(
+                            statusKey = composeStatus.statusKey,
+                            content = data.content,
+                            media = medias,
+                            contentWarning = data.spoilerText,
+                        )
+                    }
                 }
-            }
 
-            is ComposeStatus.Reply -> {
-                serviceManager.withService {
-                    it.composeReply(
-                        statusKey = composeStatus.statusKey,
-                        content = data.content,
-                        media = medias,
-                        contentWarning = data.spoilerText,
-                    )
+                is ComposeStatus.Reply -> {
+                    serviceManager.withService {
+                        it.composeReply(
+                            statusKey = composeStatus.statusKey,
+                            content = data.content,
+                            media = medias,
+                            contentWarning = data.spoilerText,
+                        )
+                    }
                 }
-            }
 
-            null -> {
-                serviceManager.withService {
-                    it.composeNote(
-                        content = data.content,
-                        media = medias,
-                        contentWarning = data.spoilerText,
-                    )
+                null -> {
+                    serviceManager.withService {
+                        it.composeNote(
+                            content = data.content,
+                            media = medias,
+                            contentWarning = data.spoilerText,
+                        )
+                    }
                 }
             }
-        }
+        return ComposeResult(
+            remotePostKey = MicroBlogKey(eventId, NostrService.NOSTR_HOST),
+        )
     }
 
     override fun composeConfig(type: ComposeType): ComposeConfig =

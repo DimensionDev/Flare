@@ -31,6 +31,7 @@ import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataS
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.datasource.microblog.ComposeDataSource
+import dev.dimension.flare.data.datasource.microblog.ComposeResult
 import dev.dimension.flare.data.datasource.microblog.ComposeType
 import dev.dimension.flare.data.datasource.microblog.DatabaseUpdater
 import dev.dimension.flare.data.datasource.microblog.DirectMessageDataSource
@@ -289,8 +290,8 @@ internal class BlueskyDataSource(
 
     override suspend fun compose(
         data: ComposeData,
-        progress: () -> Unit,
-    ) {
+        progress: suspend () -> Unit,
+    ): ComposeResult {
         require(data.medias.size <= BLUESKY_GALLERY_AUTHOR_LIMIT) {
             "Bluesky supports at most $BLUESKY_GALLERY_AUTHOR_LIMIT images when authoring a post"
         }
@@ -434,14 +435,18 @@ internal class BlueskyDataSource(
                         Language(it)
                     },
             )
-        service
-            .createRecord(
-                CreateRecordRequest(
-                    repo = Did(did = accountKey.id),
-                    collection = Nsid("app.bsky.feed.post"),
-                    record = post.bskyJson(),
-                ),
-            ).requireResponse()
+        val response =
+            service
+                .createRecord(
+                    CreateRecordRequest(
+                        repo = Did(did = accountKey.id),
+                        collection = Nsid("app.bsky.feed.post"),
+                        record = post.bskyJson(),
+                    ),
+                ).requireResponse()
+        return ComposeResult(
+            remotePostKey = MicroBlogKey(response.uri.atUri, accountKey.host),
+        )
     }
 
     private suspend fun createExternalEmbed(

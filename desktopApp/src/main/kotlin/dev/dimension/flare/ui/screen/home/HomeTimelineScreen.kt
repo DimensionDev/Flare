@@ -95,6 +95,7 @@ import dev.dimension.flare.ui.component.Text as UiText
 internal fun HomeTimelineScreen(
     accountType: AccountType,
     onAddTab: () -> Unit,
+    onEditDraft: (String) -> Unit,
 ) {
     val uriHandler = LocalUriHandler.current
     val state by producePresenter(key = "home_timeline_$accountType") {
@@ -266,6 +267,7 @@ internal fun HomeTimelineScreen(
                             onScrollToTop = {
                                 state.setTopBarExpanded(true)
                             },
+                            onEditDraft = onEditDraft,
                             header =
                                 if (LocalGlobalAppearance.current.showComposeInHomeTimeline &&
                                     canComposeState.canCompose.takeSuccess() == true

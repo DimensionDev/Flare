@@ -4,8 +4,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import dev.dimension.flare.common.InAppNotification
-import dev.dimension.flare.common.Message
 import dev.dimension.flare.data.database.app.model.DraftMediaType
 import dev.dimension.flare.data.repository.DraftRepository
 import dev.dimension.flare.di.koinInject
@@ -26,8 +24,7 @@ import kotlin.time.Instant
 
 public class DraftBoxPresenter : PresenterBase<DraftBoxState>() {
     private val draftRepository: DraftRepository by koinInject()
-    private val sendDraftUseCase: SendDraftUseCase by koinInject()
-    private val inAppNotification: InAppNotification by koinInject()
+    private val composeUseCase: ComposeUseCase by koinInject()
     private val coroutineScope: CoroutineScope by koinInject()
 
     @Composable
@@ -63,14 +60,16 @@ public class DraftBoxPresenter : PresenterBase<DraftBoxState>() {
                             .thenByDescending { it.updatedAt },
                     ).mapNotNull { draft ->
                         val accounts =
-                            draft.targets.mapNotNull { target ->
-                                accountMap[target.accountKey]?.let { account ->
-                                    UiDraftAccount(
-                                        account = account,
-                                        avatar = avatarMap[target.accountKey],
-                                    )
+                            draft.targets
+                                .filter { it.status != dev.dimension.flare.data.database.app.model.DraftTargetStatus.SENT }
+                                .mapNotNull { target ->
+                                    accountMap[target.accountKey]?.let { account ->
+                                        UiDraftAccount(
+                                            account = account,
+                                            avatar = avatarMap[target.accountKey],
+                                        )
+                                    }
                                 }
-                            }
                         if (accounts.isEmpty()) {
                             return@mapNotNull null
                         }
@@ -117,29 +116,7 @@ public class DraftBoxPresenter : PresenterBase<DraftBoxState>() {
             }
 
             private fun sendDraft(groupId: String) {
-                coroutineScope.launch {
-                    sendDraftUseCase(groupId) {
-                        when (it) {
-                            is ComposeProgressState.Error -> {
-                                inAppNotification.onError(Message.Compose, it.throwable)
-                            }
-
-                            is ComposeProgressState.Progress -> {
-                                if (it.max > 0) {
-                                    inAppNotification.onProgress(
-                                        Message.Compose,
-                                        it.current,
-                                        it.max,
-                                    )
-                                }
-                            }
-
-                            ComposeProgressState.Success -> {
-                                inAppNotification.onSuccess(Message.Compose)
-                            }
-                        }
-                    }
-                }
+                composeUseCase.sendDraft(groupId)
             }
         }
     }

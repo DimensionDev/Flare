@@ -6,6 +6,7 @@ import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.datasource.microblog.ComposeDataSource
+import dev.dimension.flare.data.datasource.microblog.ComposeResult
 import dev.dimension.flare.data.datasource.microblog.ComposeType
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
@@ -1640,10 +1641,11 @@ private class StubComposeDataSource(
 
     override suspend fun compose(
         data: ComposeData,
-        progress: () -> Unit,
-    ) {
+        progress: suspend () -> Unit,
+    ): ComposeResult {
         composed = true
         lastData = data
+        return ComposeResult(MicroBlogKey("remote", accountKey.host))
     }
 
     override fun composeConfig(type: ComposeType): ComposeConfig =

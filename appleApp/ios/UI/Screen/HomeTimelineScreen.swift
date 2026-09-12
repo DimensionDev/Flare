@@ -113,7 +113,8 @@ struct HomeTimelineScreen: View {
                                 isHomeTimeline: true,
                                 accessoryItems: resolvedTimelineAppearance.timelineDisplayMode == .gallery
                                     ? []
-                                    : changeLogAccessoryItems
+                                    : changeLogAccessoryItems,
+                                onEditDraft: { onNavigate(.composeDraft($0)) }
                             )
                                 .environment(\.timelineAppearance, resolvedTimelineAppearance)
                                 .id(tab.id)
@@ -424,7 +425,8 @@ private struct DeckTimelineLayout: View {
                     DeckTimelineColumnRoot(
                         tabItem: tab,
                         baseTimelineAppearance: baseTimelineAppearance,
-                        toTabSetting: toTabSetting
+                        toTabSetting: toTabSetting,
+                        onGlobalRoute: onGlobalRoute
                     )
                     .environment(\.horizontalSizeClass, .compact)
                     .ignoresSafeArea()
@@ -445,9 +447,15 @@ private struct DeckTimelineColumnRoot: View {
     let tabItem: UiTimelineTabItem
     let baseTimelineAppearance: TimelineAppearance
     let toTabSetting: () -> Void
+    let onGlobalRoute: (Route) -> Void
 
     var body: some View {
-        TimelineScreen(tabItem: tabItem, allowGalleryMode: true)
+        TimelineScreen(
+            tabItem: tabItem,
+            allowGalleryMode: true,
+            isHomeTimeline: true,
+            onEditDraft: { onGlobalRoute(.composeDraft($0)) }
+        )
             .safeAreaInset(edge: .bottom) {
                 Label {
                     TimelineTabTitle(title: tabItem.title)

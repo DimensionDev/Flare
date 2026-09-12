@@ -7,6 +7,7 @@ import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataS
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.datasource.microblog.ComposeDataSource
+import dev.dimension.flare.data.datasource.microblog.ComposeResult
 import dev.dimension.flare.data.datasource.microblog.ComposeType
 import dev.dimension.flare.data.datasource.microblog.DatabaseUpdater
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
@@ -279,8 +280,8 @@ internal open class MastodonDataSource(
 
     override suspend fun compose(
         data: ComposeData,
-        progress: () -> Unit,
-    ) {
+        progress: suspend () -> Unit,
+    ): ComposeResult {
         val inReplyToID =
             data.referenceStatus
                 ?.composeStatus
@@ -323,46 +324,49 @@ internal open class MastodonDataSource(
                 }.mapNotNull {
                     it.id
                 }
-        service.post(
-            Uuid.random().toString(),
-            PostStatus(
-                status = data.content,
-                visibility =
-                    when (data.visibility) {
-                        UiTimelineV2.Post.Visibility.Public -> Visibility.Public
-                        UiTimelineV2.Post.Visibility.Home -> Visibility.Unlisted
-                        UiTimelineV2.Post.Visibility.Followers -> Visibility.Private
-                        UiTimelineV2.Post.Visibility.Specified -> Visibility.Direct
-                        UiTimelineV2.Post.Visibility.Channel -> Visibility.Public
-                    },
-                inReplyToID = inReplyToID,
-                mediaIDS = mediaIds.takeIf { it.isNotEmpty() },
-                sensitive = data.sensitive.takeIf { mediaIds.isNotEmpty() },
-                spoilerText = data.spoilerText.takeIf { it?.isNotEmpty() == true && it.isNotBlank() },
-                poll =
-                    data.poll?.let { poll ->
-                        PostPoll(
-                            options = poll.options,
-                            expiresIn = poll.expiredAfter,
-                            multiple = poll.multiple,
-                        )
-                    },
-                quoteID =
-                    if (this is PleromaDataSource) {
-                        quoteID
-                    } else {
-                        null
-                    },
-                quotedStatusID =
-                    if (this !is PleromaDataSource) {
-                        quoteID
-                    } else {
-                        null
-                    },
-                language = data.language.firstOrNull(),
-            ),
+        val status =
+            service.post(
+                Uuid.random().toString(),
+                PostStatus(
+                    status = data.content,
+                    visibility =
+                        when (data.visibility) {
+                            UiTimelineV2.Post.Visibility.Public -> Visibility.Public
+                            UiTimelineV2.Post.Visibility.Home -> Visibility.Unlisted
+                            UiTimelineV2.Post.Visibility.Followers -> Visibility.Private
+                            UiTimelineV2.Post.Visibility.Specified -> Visibility.Direct
+                            UiTimelineV2.Post.Visibility.Channel -> Visibility.Public
+                        },
+                    inReplyToID = inReplyToID,
+                    mediaIDS = mediaIds.takeIf { it.isNotEmpty() },
+                    sensitive = data.sensitive.takeIf { mediaIds.isNotEmpty() },
+                    spoilerText = data.spoilerText.takeIf { it?.isNotEmpty() == true && it.isNotBlank() },
+                    poll =
+                        data.poll?.let { poll ->
+                            PostPoll(
+                                options = poll.options,
+                                expiresIn = poll.expiredAfter,
+                                multiple = poll.multiple,
+                            )
+                        },
+                    quoteID =
+                        if (this is PleromaDataSource) {
+                            quoteID
+                        } else {
+                            null
+                        },
+                    quotedStatusID =
+                        if (this !is PleromaDataSource) {
+                            quoteID
+                        } else {
+                            null
+                        },
+                    language = data.language.firstOrNull(),
+                ),
+            )
+        return ComposeResult(
+            remotePostKey = status.id?.let { MicroBlogKey(it, accountKey.host) },
         )
-//        progress(ComposeProgress(maxProgress, maxProgress))
     }
 
     suspend fun like(

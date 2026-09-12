@@ -48,6 +48,7 @@ internal fun DeckTimelineScreen(
     toQuickMenu: () -> Unit,
     toLogin: () -> Unit,
     toTabSettings: () -> Unit,
+    onEditDraft: (String) -> Unit,
 ) {
     val state by producePresenter("deck_timeline_$id") {
         val loginState = remember { LoggedInPresenter() }.invoke()
@@ -121,6 +122,8 @@ internal fun DeckTimelineScreen(
                     item = tabItem,
                     contentPadding = contentPadding,
                     modifier = Modifier.fillMaxSize(),
+                    isHomeTimeline = true,
+                    onEditDraft = onEditDraft,
                 )
             }
         }

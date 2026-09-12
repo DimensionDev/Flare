@@ -23,11 +23,13 @@ public class RestoreDraftUseCase internal constructor(
     public suspend operator fun invoke(groupId: String): UiDraft? {
         val draft = draftRepository.draft(groupId).firstOrNull() ?: return null
         val accounts =
-            draft.targets.mapNotNull { target ->
-                accountRepository.find(target.accountKey)?.let {
-                    UiDraftAccount(account = it)
+            draft.targets
+                .filter { it.status != dev.dimension.flare.data.database.app.model.DraftTargetStatus.SENT }
+                .mapNotNull { target ->
+                    accountRepository.find(target.accountKey)?.let {
+                        UiDraftAccount(account = it)
+                    }
                 }
-            }
         return UiDraft(
             groupId = draft.groupId,
             status = draft.toUiDraftStatus(),

@@ -36,26 +36,8 @@ internal class ComposeUseCase(
             data = data,
             groupId = groupId,
             onPrepared = onPrepared,
-        ) {
-            if (it is ComposeProgressState.Error) {
-                DebugRepository.error(it.throwable)
-            }
-            withContext(Dispatchers.Main) {
-                when (it) {
-                    is ComposeProgressState.Error -> {
-                        inAppNotification.onError(Message.Compose, it.throwable)
-                    }
-
-                    is ComposeProgressState.Progress -> {
-                        inAppNotification.onProgress(Message.Compose, it.current, it.max)
-                    }
-
-                    ComposeProgressState.Success -> {
-                        inAppNotification.onSuccess(Message.Compose)
-                    }
-                }
-            }
-        }
+            progress = ::notifyProgress,
+        )
     }
 
     operator fun invoke(
@@ -98,6 +80,37 @@ internal class ComposeUseCase(
             tryRun {
                 saveDraftUseCase(data.toComposeDraftBundle(accounts = accounts, groupId = groupId))
                 onSaved()
+            }
+        }
+    }
+
+    fun sendDraft(groupId: String) {
+        scope.launch {
+            tryRun {
+                sendDraftUseCase(groupId = groupId, progress = ::notifyProgress)
+            }
+        }
+    }
+
+    private suspend fun notifyProgress(state: ComposeProgressState) {
+        if (state is ComposeProgressState.Error) {
+            DebugRepository.error(state.throwable)
+        }
+        withContext(Dispatchers.Main) {
+            when (state) {
+                is ComposeProgressState.Error -> {
+                    inAppNotification.onError(Message.Compose, state.throwable)
+                }
+
+                is ComposeProgressState.Progress -> {
+                    if (state.max > 0) {
+                        inAppNotification.onProgress(Message.Compose, state.current, state.max)
+                    }
+                }
+
+                ComposeProgressState.Success -> {
+                    inAppNotification.onSuccess(Message.Compose)
+                }
             }
         }
     }

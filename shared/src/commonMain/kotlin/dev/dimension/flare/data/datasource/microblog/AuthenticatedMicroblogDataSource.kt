@@ -21,8 +21,8 @@ public interface NotificationTimelineDataSource : AuthenticatedMicroblogDataSour
 public interface ComposeDataSource : AuthenticatedMicroblogDataSource {
     public suspend fun compose(
         data: ComposeData,
-        progress: () -> Unit,
-    )
+        progress: suspend () -> Unit,
+    ): ComposeResult
 
     public fun composeConfig(type: ComposeType): ComposeConfig
 }

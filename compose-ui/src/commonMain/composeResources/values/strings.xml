@@ -1,6 +1,11 @@
 <resources>
     <string name="app_name" translatable="false">Flare</string>
     <string name="delete">Delete</string>
+    <string name="outbox_status_sending">Sending</string>
+    <string name="outbox_status_failed">Failed</string>
+    <string name="outbox_status_sent">Sent</string>
+    <string name="outbox_progress">Step %1$d of %2$d</string>
+    <string name="outbox_edit">Edit</string>
     <string name="done">Done</string>
     <string name="cancel">Cancel</string>
     <string name="ok">OK</string>

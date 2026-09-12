@@ -10,6 +10,7 @@ import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataS
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.datasource.microblog.ComposeDataSource
+import dev.dimension.flare.data.datasource.microblog.ComposeResult
 import dev.dimension.flare.data.datasource.microblog.ComposeType
 import dev.dimension.flare.data.datasource.microblog.DatabaseUpdater
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
@@ -437,8 +438,8 @@ internal class MisskeyDataSource(
 
     override suspend fun compose(
         data: ComposeData,
-        progress: () -> Unit,
-    ) {
+        progress: suspend () -> Unit,
+    ): ComposeResult {
         val renoteId =
             data.referenceStatus
                 ?.composeStatus
@@ -481,33 +482,36 @@ internal class MisskeyDataSource(
                 }.mapNotNull {
                     it?.id
                 }
-        service.notesCreate(
-            NotesCreateRequest(
-                text = data.content.takeIf { it.isNotEmpty() && it.isNotBlank() },
-                visibility =
-                    when (data.visibility) {
-                        UiTimelineV2.Post.Visibility.Public -> "public"
-                        UiTimelineV2.Post.Visibility.Home -> "home"
-                        UiTimelineV2.Post.Visibility.Followers -> "followers"
-                        UiTimelineV2.Post.Visibility.Specified -> "specified"
-                        UiTimelineV2.Post.Visibility.Channel -> "public"
-                    },
-                renoteId = renoteId,
-                replyId = inReplyToID,
-                fileIds = mediaIds.takeIf { it.isNotEmpty() },
-                cw = data.spoilerText.takeIf { it?.isNotEmpty() == true && it.isNotBlank() },
-                poll =
-                    data.poll?.let { poll ->
-                        NotesCreateRequestPoll(
-                            choices = poll.options.toSet(),
-                            expiredAfter = poll.expiredAfter.toInt(),
-                            multiple = poll.multiple,
-                        )
-                    },
-                localOnly = data.localOnly,
-            ),
+        val response =
+            service.notesCreate(
+                NotesCreateRequest(
+                    text = data.content.takeIf { it.isNotEmpty() && it.isNotBlank() },
+                    visibility =
+                        when (data.visibility) {
+                            UiTimelineV2.Post.Visibility.Public -> "public"
+                            UiTimelineV2.Post.Visibility.Home -> "home"
+                            UiTimelineV2.Post.Visibility.Followers -> "followers"
+                            UiTimelineV2.Post.Visibility.Specified -> "specified"
+                            UiTimelineV2.Post.Visibility.Channel -> "public"
+                        },
+                    renoteId = renoteId,
+                    replyId = inReplyToID,
+                    fileIds = mediaIds.takeIf { it.isNotEmpty() },
+                    cw = data.spoilerText.takeIf { it?.isNotEmpty() == true && it.isNotBlank() },
+                    poll =
+                        data.poll?.let { poll ->
+                            NotesCreateRequestPoll(
+                                choices = poll.options.toSet(),
+                                expiredAfter = poll.expiredAfter.toInt(),
+                                multiple = poll.multiple,
+                            )
+                        },
+                    localOnly = data.localOnly,
+                ),
+            )
+        return ComposeResult(
+            remotePostKey = MicroBlogKey(response.createdNote.id, accountKey.host),
         )
-//        progress(ComposeProgress(maxProgress, maxProgress))
     }
 
     suspend fun report(

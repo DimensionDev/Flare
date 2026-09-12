@@ -38,7 +38,11 @@ struct UITimelinePagingView: View {
 
     var body: some View {
         if allowGalleryMode && timelineDisplayMode == .gallery {
-            UIGalleryTimelinePagingView(data: data, onIsAtTopChanged: onIsAtTopChanged)
+            UIGalleryTimelinePagingView(
+                data: data,
+                accessoryItems: accessoryItems,
+                onIsAtTopChanged: onIsAtTopChanged
+            )
                 .ignoresSafeArea(edges: .vertical)
         } else if UIDevice.current.userInterfaceIdiom == .phone ||
             horizontalSizeClass == .compact {

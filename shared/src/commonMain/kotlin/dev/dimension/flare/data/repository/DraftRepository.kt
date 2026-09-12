@@ -35,6 +35,12 @@ internal class DraftRepository(
             .sendingDraftGroups()
             .map { drafts -> drafts.map { it.toModel() } }
 
+    val outboxDrafts: Flow<List<DraftGroup>> =
+        database
+            .draftDao()
+            .outboxDraftGroups()
+            .map { drafts -> drafts.map { it.toModel() } }
+
     fun draft(groupId: String): Flow<DraftGroup?> =
         database
             .draftDao()
@@ -66,6 +72,9 @@ internal class DraftRepository(
                             error_message = target.errorMessage,
                             attempt_count = target.attemptCount,
                             last_attempt_at = target.lastAttemptAt,
+                            progress_current = target.progressCurrent,
+                            progress_max = target.progressMax,
+                            remote_post_key = target.remotePostKey,
                             created_at = target.createdAt ?: now,
                             updated_at = now,
                         )
@@ -130,6 +139,63 @@ internal class DraftRepository(
                     updatedAt = Clock.System.now().toEpochMilliseconds(),
                 )
             }
+        }
+    }
+
+    suspend fun updateTargetProgress(
+        groupId: String,
+        accountKey: MicroBlogKey,
+        current: Int,
+    ) {
+        val now = Clock.System.now().toEpochMilliseconds()
+        database.connect {
+            database.draftDao().updateTargetProgress(
+                targetId = targetId(groupId, accountKey),
+                progressCurrent = current,
+                updatedAt = now,
+            )
+            database.draftDao().touchGroup(groupId = groupId, updatedAt = now)
+        }
+    }
+
+    suspend fun prepareTargetForSending(
+        groupId: String,
+        accountKey: MicroBlogKey,
+        progressMax: Int,
+        attemptCount: Int = 1,
+    ) {
+        val now = Clock.System.now().toEpochMilliseconds()
+        database.connect {
+            database.draftDao().prepareTargetForSending(
+                targetId = targetId(groupId, accountKey),
+                attemptCount = attemptCount,
+                lastAttemptAt = now,
+                progressMax = progressMax.coerceAtLeast(1),
+                updatedAt = now,
+            )
+            database.draftDao().touchGroup(groupId = groupId, updatedAt = now)
+        }
+    }
+
+    suspend fun markTargetSent(
+        groupId: String,
+        accountKey: MicroBlogKey,
+        remotePostKey: MicroBlogKey?,
+    ) {
+        val now = Clock.System.now().toEpochMilliseconds()
+        database.connect {
+            database.draftDao().markTargetSent(
+                targetId = targetId(groupId, accountKey),
+                remotePostKey = remotePostKey,
+                updatedAt = now,
+            )
+            database.draftDao().touchGroup(groupId = groupId, updatedAt = now)
+        }
+    }
+
+    suspend fun deleteTargets(targets: Collection<DraftTargetKey>) {
+        targets.distinct().forEach { target ->
+            deleteTarget(target.groupId, target.accountKey)
         }
     }
 
@@ -202,6 +268,9 @@ internal data class SaveDraftTarget(
     val errorMessage: String? = null,
     val attemptCount: Int = 0,
     val lastAttemptAt: Long? = null,
+    val progressCurrent: Int = 0,
+    val progressMax: Int = 1,
+    val remotePostKey: MicroBlogKey? = null,
     val createdAt: Long? = null,
 )
 
@@ -230,8 +299,16 @@ internal data class DraftTarget(
     val errorMessage: String?,
     val attemptCount: Int,
     val lastAttemptAt: Long?,
+    val progressCurrent: Int,
+    val progressMax: Int,
+    val remotePostKey: MicroBlogKey?,
     val createdAt: Long,
     val updatedAt: Long,
+)
+
+internal data class DraftTargetKey(
+    val groupId: String,
+    val accountKey: MicroBlogKey,
 )
 
 internal data class DraftMedia(
@@ -275,6 +352,9 @@ private fun DbDraftGroupWithRelations.toModel(): DraftGroup =
                         errorMessage = it.error_message,
                         attemptCount = it.attempt_count,
                         lastAttemptAt = it.last_attempt_at,
+                        progressCurrent = it.progress_current,
+                        progressMax = it.progress_max,
+                        remotePostKey = it.remote_post_key,
                         createdAt = it.created_at,
                         updatedAt = it.updated_at,
                     )

@@ -3,6 +3,7 @@ package dev.dimension.flare.ui.presenter.compose
 import dev.dimension.flare.data.database.app.model.DraftTargetStatus
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.datasource.microblog.ComposeDataSource
+import dev.dimension.flare.data.datasource.microblog.ComposeResult
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.ComposeDraftBundle
 import dev.dimension.flare.data.repository.DraftMediaStore
@@ -18,7 +19,7 @@ internal class SendDraftUseCase(
     private val draftRepository: DraftRepository,
     private val draftMediaStore: DraftMediaStore,
     private val findAccount: suspend (MicroBlogKey) -> UiAccount?,
-    private val composeDraft: suspend (UiAccount, ComposeData, () -> Unit) -> Unit,
+    private val composeDraft: suspend (UiAccount, ComposeData, suspend () -> Unit) -> ComposeResult,
 ) {
     constructor(
         draftRepository: DraftRepository,
@@ -55,6 +56,7 @@ internal class SendDraftUseCase(
                                     status = DraftTargetStatus.SENDING,
                                     attemptCount = 1,
                                     lastAttemptAt = Clock.System.now().toEpochMilliseconds(),
+                                    progressMax = bundle.template.medias.size + 1,
                                 )
                             },
                         medias = persistedMedia,
@@ -83,7 +85,7 @@ internal class SendDraftUseCase(
         val medias = draftMediaStore.restore(draft.medias)
         val datas =
             draft.targets
-                .filter { it.status != DraftTargetStatus.SENDING }
+                .filter { it.status == DraftTargetStatus.DRAFT || it.status == DraftTargetStatus.FAILED }
                 .mapNotNull { target ->
                     findAccount(target.accountKey)?.let { account ->
                         ComposeTargetData(
@@ -108,30 +110,32 @@ internal class SendDraftUseCase(
         progress(progressTracker.state())
         val failures = mutableListOf<Throwable>()
         targets.forEach { target ->
-            draftRepository.updateTargetStatus(
+            draftRepository.prepareTargetForSending(
                 groupId = groupId,
                 accountKey = target.account.accountKey,
-                status = DraftTargetStatus.SENDING,
+                progressMax = target.data.medias.size + 1,
                 attemptCount = 1,
-                lastAttemptAt = Clock.System.now().toEpochMilliseconds(),
             )
-            var pendingProgressTicks = 0
             try {
-                composeDraft(target.account, target.data) {
-                    pendingProgressTicks++
-                }
-                repeat(pendingProgressTicks) {
-                    progressTracker.onComposeProgress(target.account.accountKey)
-                    progress(progressTracker.state())
-                }
+                val result =
+                    composeDraft(target.account, target.data) {
+                        if (progressTracker.onComposeProgress(target.account.accountKey)) {
+                            draftRepository.updateTargetProgress(
+                                groupId = groupId,
+                                accountKey = target.account.accountKey,
+                                current = progressTracker.accountCurrent(target.account.accountKey),
+                            )
+                            progress(progressTracker.state())
+                        }
+                    }
                 progressTracker.onComposeSuccess(target.account.accountKey)
+                draftRepository.markTargetSent(
+                    groupId = groupId,
+                    accountKey = target.account.accountKey,
+                    remotePostKey = result.remotePostKey,
+                )
                 progress(progressTracker.state())
-                draftRepository.deleteTarget(groupId, target.account.accountKey)
             } catch (throwable: Exception) {
-                repeat(pendingProgressTicks) {
-                    progressTracker.onComposeProgress(target.account.accountKey)
-                    progress(progressTracker.state())
-                }
                 draftRepository.updateTargetStatus(
                     groupId = groupId,
                     accountKey = target.account.accountKey,
@@ -161,15 +165,18 @@ private class ComposeProgressTracker(
     private val maxSteps = targets.sumOf { it.data.medias.size + 1 }
     private var completedSteps = 0
 
-    fun onComposeProgress(accountKey: MicroBlogKey) {
+    fun onComposeProgress(accountKey: MicroBlogKey): Boolean {
         val mediaLimit = mediaStepLimitsByAccount.getValue(accountKey)
         val currentMediaSteps = completedMediaStepsByAccount[accountKey] ?: 0
         if (currentMediaSteps >= mediaLimit) {
-            return
+            return false
         }
         completedMediaStepsByAccount[accountKey] = currentMediaSteps + 1
         completedSteps++
+        return true
     }
+
+    fun accountCurrent(accountKey: MicroBlogKey): Int = completedMediaStepsByAccount[accountKey] ?: 0
 
     fun onComposeSuccess(accountKey: MicroBlogKey) {
         if (completedSendAccounts.add(accountKey)) {

@@ -3,6 +3,12 @@ package dev.dimension.flare.buildlogic
 import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryTarget
 import com.android.build.api.withAndroid
+import java.io.File
+import java.nio.file.Files
+import java.nio.file.StandardCopyOption
+import java.util.zip.ZipEntry
+import java.util.zip.ZipFile
+import java.util.zip.ZipOutputStream
 import org.gradle.api.JavaVersion
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -125,6 +131,8 @@ class FlareAndroidApplicationSpec internal constructor(
             }
             configure()
         }
+
+        project.stripKotlinModuleMetadataFromR8Outputs()
     }
 }
 
@@ -275,6 +283,46 @@ private fun Project.intVersion(name: String): Int {
 }
 
 private fun Project.versionCatalog() = extensions.getByType<VersionCatalogsExtension>().named("libs")
+
+private fun Project.stripKotlinModuleMetadataFromR8Outputs() {
+    // R8 re-emits compile-time-only Kotlin metadata after AGP applies its default packaging
+    // excludes. AGP 9.4 then rejects module names containing ':' while writing the bundle.
+    tasks
+        .matching { task -> task.name.startsWith("minify") && task.name.endsWith("WithR8") }
+        .configureEach {
+            doLast {
+                outputs.files.files
+                    .filter { output -> output.isFile && output.extension == "jar" }
+                    .forEach(File::stripKotlinModuleMetadata)
+            }
+        }
+}
+
+private fun File.stripKotlinModuleMetadata() {
+    val filteredJar = File.createTempFile("filtered-", ".jar", parentFile)
+    try {
+        ZipFile(this).use { input ->
+            ZipOutputStream(filteredJar.outputStream().buffered()).use { output ->
+                input.entries().asSequence().forEach { entry ->
+                    if (!entry.name.endsWith(".kotlin_module")) {
+                        output.putNextEntry(
+                            ZipEntry(entry.name).apply {
+                                comment = entry.comment
+                                extra = entry.extra
+                                time = entry.time
+                            },
+                        )
+                        input.getInputStream(entry).use { it.copyTo(output) }
+                        output.closeEntry()
+                    }
+                }
+            }
+        }
+        Files.move(filteredJar.toPath(), toPath(), StandardCopyOption.REPLACE_EXISTING)
+    } finally {
+        filteredJar.delete()
+    }
+}
 
 private fun KotlinMultiplatformExtension.hasTarget(name: String): Boolean {
     return targets.names.contains(name)

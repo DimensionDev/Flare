@@ -309,7 +309,9 @@ internal fun UiTimelineV2.TimelinePostItem.traits(): TimelinePostTraits {
             val hasParentFromOtherUser =
                 currentUserKey != null &&
                     presentation.inlineParents.any { parent ->
-                        parent.user?.key?.let { it != currentUserKey } == true
+                        parent.displayPost.user
+                            ?.key
+                            ?.let { it != currentUserKey } == true
                     }
             if (hasParentFromOtherUser) {
                 add(TimelinePostKind.Reply)

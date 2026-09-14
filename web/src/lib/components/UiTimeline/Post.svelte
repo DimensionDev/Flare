@@ -4,7 +4,7 @@
     import { useDeepLink } from "$lib/deeplink/deepLink.svelte";
     import { useEnvironmentSettings } from "$lib/environment/environmentSettings.svelte";
     import { m } from "$lib/paraglide/messages.js";
-    import type { UiTimelineV2Message, UiTimelineV2Post } from "@flare/web-presenters/timeline.svelte";
+    import type { UiTimelineV2Message, UiTimelineV2Post, UiTimelineV2TimelinePostItem } from "@flare/web-presenters/timeline.svelte";
     import PostActions from "./post/PostActions.svelte";
     import PostAvatar from "./post/PostAvatar.svelte";
     import PostCard from "./post/PostCard.svelte";
@@ -41,7 +41,7 @@
         forceHideActions?: boolean;
         showParents?: boolean;
         message?: UiTimelineV2Message | null;
-        inlineParents?: UiTimelineV2Post[];
+        inlineParents?: UiTimelineV2TimelinePostItem[];
         quotes?: UiTimelineV2Post[];
         withLeadingPadding?: boolean;
         isParent?: boolean;
@@ -224,10 +224,11 @@
 
     {#if showParents && !isQuote && inlineParents.length > 0}
         <div class="parent-stack">
-            {#each inlineParents as parent (postKey(parent))}
+            {#each inlineParents as parent (postKey(parent.post))}
                 <div class="parent-container">
                     <UiTimelinePost
-                        post={parent}
+                        post={parent.presentation.repost ?? parent.post}
+                        quotes={parent.presentation.quotes}
                         withLeadingPadding={true}
                         isParent={true}
                     />

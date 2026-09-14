@@ -778,7 +778,7 @@ private fun FeedViewPost.render(accountKey: MicroBlogKey): UiTimelineV2 {
             else -> {
                 null
             }
-        }?.render(accountKey)
+        }?.renderTimelineItem(accountKey)?.asTimelinePostItem()
     val quote = findQuote(accountKey, post)
     val inlineParents = listOfNotNull(reply).toImmutableList()
     val quotes = listOfNotNull(quote).toImmutableList()

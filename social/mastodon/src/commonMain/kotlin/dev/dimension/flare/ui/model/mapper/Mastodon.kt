@@ -236,14 +236,13 @@ internal fun renderStatusContext(
                 it
                     .render(host = accountKey.host, accountKey = accountKey)
                     .asTimelinePostItem()
-                    ?.displayPost
             }
-    val chains = mutableListOf<MutableList<UiTimelineV2.Post>>()
-    val chainByStatusKey = mutableMapOf<MicroBlogKey, MutableList<UiTimelineV2.Post>>()
+    val chains = mutableListOf<MutableList<UiTimelineV2.TimelinePostItem>>()
+    val chainByStatusKey = mutableMapOf<MicroBlogKey, MutableList<UiTimelineV2.TimelinePostItem>>()
 
     descendantPosts.forEach { post ->
         val parentKey =
-            post.references
+            post.displayPost.references
                 .firstOrNull { it.type == ReferenceType.Reply }
                 ?.statusKey
         val parentChain = parentKey?.let { chainByStatusKey[it] }
@@ -251,7 +250,7 @@ internal fun renderStatusContext(
             if (parentChain != null && parentChain.lastOrNull()?.statusKey == parentKey) {
                 parentChain
             } else {
-                mutableListOf<UiTimelineV2.Post>().also {
+                mutableListOf<UiTimelineV2.TimelinePostItem>().also {
                     chains += it
                 }
             }
@@ -266,10 +265,9 @@ internal fun renderStatusContext(
                 chain
                     .dropLast(1)
                     .toImmutableList()
-            UiTimelineV2.TimelinePostItem(
-                post = post,
+            post.copy(
                 presentation =
-                    UiTimelineV2.PostPresentation(
+                    post.presentation.copy(
                         inlineParents = inlineParents,
                     ),
             )
@@ -816,7 +814,7 @@ private fun List<UiTimelineV2>.resolveParents(): List<UiTimelineV2> {
     fun resolveParents(
         post: UiTimelineV2.TimelinePostItem,
         visiting: MutableSet<MicroBlogKey> = mutableSetOf(),
-    ): ImmutableList<UiTimelineV2.Post> {
+    ): ImmutableList<UiTimelineV2.TimelinePostItem> {
         val displayPost = post.displayPost
         if (!visiting.add(displayPost.statusKey)) {
             return persistentListOf()
@@ -829,7 +827,7 @@ private fun List<UiTimelineV2>.resolveParents(): List<UiTimelineV2> {
                 ?: return persistentListOf()
         return (
             resolveParents(parent, visiting) +
-                parent.displayPost
+                parent
         ).distinctBy { it.statusKey }
             .toImmutableList()
     }

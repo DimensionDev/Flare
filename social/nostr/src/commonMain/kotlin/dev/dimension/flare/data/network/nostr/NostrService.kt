@@ -1982,31 +1982,24 @@ internal class NostrService(
         val inlineParents =
             parentEventIds()
                 .mapNotNull { parentId ->
-                    parentId
-                        .takeUnless { it in visited }
-                        ?.let(eventsById::get)
-                        ?.let { resolveEvent(it, visited) }
+                    val event = parentId.takeUnless { it in visited }?.let(eventsById::get) ?: return@mapNotNull null
+                    val parent = resolveEvent(event, visited) ?: return@mapNotNull null
+                    UiTimelineV2.TimelinePostItem(
+                        post = parent,
+                        presentation =
+                            UiTimelineV2.PostPresentation(
+                                quotes =
+                                    (event as? TextNoteEvent)
+                                        ?.resolveQuotes(
+                                            eventsById,
+                                            visited + parentId,
+                                            resolveEvent,
+                                        ).orEmpty()
+                                        .toImmutableList(),
+                            ),
+                    )
                 }.toImmutableList()
-        val quotes =
-            (
-                quoteEventIds()
-                    .mapNotNull { quoteId ->
-                        quoteId
-                            .takeUnless { it in visited }
-                            ?.let(eventsById::get)
-                            ?.let { resolveEvent(it, visited) }
-                    } +
-                    quoteAddressReferences()
-                        .mapNotNull { address ->
-                            resolveAddressReference(
-                                address,
-                                eventsById,
-                                visited,
-                                resolveEvent,
-                            )
-                        }
-            ).distinctBy { it.statusKey }
-                .toImmutableList()
+        val quotes = resolveQuotes(eventsById, visited, resolveEvent)
         return if (inlineParents.isNotEmpty() || quotes.isNotEmpty()) {
             UiTimelineV2.TimelinePostItem(
                 post = post,
@@ -2020,6 +2013,30 @@ internal class NostrService(
             post
         }
     }
+
+    private fun TextNoteEvent.resolveQuotes(
+        eventsById: Map<String, Event>,
+        visited: Set<String>,
+        resolveEvent: (Event, Set<String>) -> UiTimelineV2.Post?,
+    ) = (
+        quoteEventIds()
+            .mapNotNull { quoteId ->
+                quoteId
+                    .takeUnless { it in visited }
+                    ?.let(eventsById::get)
+                    ?.let { resolveEvent(it, visited) }
+            } +
+            quoteAddressReferences()
+                .mapNotNull { address ->
+                    resolveAddressReference(
+                        address,
+                        eventsById,
+                        visited,
+                        resolveEvent,
+                    )
+                }
+    ).distinctBy { it.statusKey }
+        .toImmutableList()
 
     private fun statusShareUrl(eventIdHex: String): String = "https://nostter.app/${eventId(eventIdHex).toBech32()}"
 

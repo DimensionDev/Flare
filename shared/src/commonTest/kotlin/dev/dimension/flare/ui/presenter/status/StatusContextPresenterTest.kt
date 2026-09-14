@@ -119,7 +119,7 @@ class StatusContextPresenterTest {
             post = post,
             presentation =
                 UiTimelineV2.PostPresentation(
-                    inlineParents = parents.toPersistentList(),
+                    inlineParents = parents.map { UiTimelineV2.TimelinePostItem(it) }.toPersistentList(),
                 ),
         )
 }

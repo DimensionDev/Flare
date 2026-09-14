@@ -5,6 +5,8 @@ import androidx.room3.useWriterConnection
 import dev.dimension.flare.RobolectricTest
 import dev.dimension.flare.common.PlatformDispatchers
 import dev.dimension.flare.data.database.cache.mapper.saveToDatabase
+import dev.dimension.flare.data.database.cache.model.DbStatus
+import dev.dimension.flare.data.database.cache.model.DbStatusReference
 import dev.dimension.flare.data.database.cache.model.TranslationDisplayOptions
 import dev.dimension.flare.data.database.createDatabaseDriver
 import dev.dimension.flare.data.datasource.microblog.paging.TimelineDbPageCache
@@ -24,6 +26,7 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 import kotlin.time.Instant
 
@@ -224,6 +227,7 @@ class TimelineDatabaseWriteAmplificationTest : RobolectricTest() {
                         item.presentationReferences
                             .single()
                             .status
+                            ?.status
                             ?.data
                             ?.content
                     assertEquals(updatedQuote, semanticQuote)
@@ -310,8 +314,103 @@ class TimelineDatabaseWriteAmplificationTest : RobolectricTest() {
                     hydrated.presentationReferences
                         .single()
                         .status
+                        ?.status
                         ?.data
                         ?.content,
+                )
+            } finally {
+                database.close()
+            }
+        }
+
+    @Test
+    fun parentQuoteCacheTracksContentReferencesAndLateArrival() =
+        runTest {
+            val database =
+                Room
+                    .memoryDatabaseBuilder<CacheDatabase>()
+                    .setDriver(createDatabaseDriver())
+                    .setQueryCoroutineContext(PlatformDispatchers.IO)
+                    .build()
+            try {
+                val quote = createPost("parent-quote")
+                val parent = createTimelineWithQuote("parent", quote)
+                val reply =
+                    UiTimelineV2.TimelinePostItem(
+                        post = createPost("reply"),
+                        presentation = UiTimelineV2.PostPresentation(inlineParents = persistentListOf(parent)),
+                    )
+                saveToDatabase(database, listOf(TimelinePagingMapper.toDb(reply, PAGING_KEY, sortId = 0)))
+                val pageCache = TimelineDbPageCache()
+                val loader = TimelineDbPageLoader(database, PAGING_KEY, pageCache)
+                val options = TranslationDisplayOptions(false, false, "test")
+
+                suspend fun rendered() = loader.load(0, 1).single().toUi(options) as UiTimelineV2.TimelinePostItem
+                val before = rendered()
+                assertEquals(
+                    quote.statusKey,
+                    before.presentation.inlineParents
+                        .single()
+                        .presentation.quotes
+                        .single()
+                        .statusKey,
+                )
+                val hydrated = database.pagingTimelineDao().getTimelinePage(PAGING_KEY, 0, 1).single()
+                assertEquals(before, TimelinePagingMapper.toUi(hydrated, PAGING_KEY, options))
+
+                val updatedQuote = quote.copy(content = UiTranslatableText("updated parent quote".toUiPlainText()))
+                database.statusDao().update(
+                    updatedQuote.statusKey,
+                    AccountType.Guest,
+                    updatedQuote,
+                    updatedQuote.renderHash,
+                    updatedQuote.searchText,
+                )
+                assertTrue(pageCache.hasCurrentWindowChanged(database.pagingTimelineDao(), PAGING_KEY))
+                val updated = rendered()
+                assertNotEquals(before.renderHash, updated.renderHash)
+                assertEquals(
+                    "updated parent quote",
+                    updated.presentation.inlineParents
+                        .single()
+                        .presentation.quotes
+                        .single()
+                        .content.original.raw,
+                )
+
+                val parentId = DbStatus.createId(AccountType.Guest, parent.statusKey)
+                database.statusReferenceDao().delete(parentId)
+                assertTrue(pageCache.hasCurrentWindowChanged(database.pagingTimelineDao(), PAGING_KEY))
+                assertTrue(
+                    rendered()
+                        .presentation.inlineParents
+                        .single()
+                        .presentation.quotes
+                        .isEmpty(),
+                )
+
+                val lateQuote = createPost("late-parent-quote")
+                database.statusReferenceDao().insertNew(
+                    listOf(DbStatusReference(ReferenceType.Quote, parentId, DbStatus.createId(AccountType.Guest, lateQuote.statusKey))),
+                )
+                assertTrue(pageCache.hasCurrentWindowChanged(database.pagingTimelineDao(), PAGING_KEY))
+                assertTrue(
+                    rendered()
+                        .presentation.inlineParents
+                        .single()
+                        .presentation.quotes
+                        .isEmpty(),
+                )
+                saveToDatabase(database, listOf(TimelinePagingMapper.toDb(lateQuote, "late-quote-source", sortId = 0)))
+                assertTrue(pageCache.hasCurrentWindowChanged(database.pagingTimelineDao(), PAGING_KEY))
+                assertEquals(
+                    lateQuote.statusKey,
+                    rendered()
+                        .presentation.inlineParents
+                        .single()
+                        .presentation.quotes
+                        .single()
+                        .statusKey,
                 )
             } finally {
                 database.close()
@@ -343,7 +442,7 @@ class TimelineDatabaseWriteAmplificationTest : RobolectricTest() {
             post = root,
             presentation =
                 UiTimelineV2.PostPresentation(
-                    inlineParents = persistentListOf(parent),
+                    inlineParents = persistentListOf(UiTimelineV2.TimelinePostItem(parent)),
                     quotes = persistentListOf(quote),
                     repost = repost,
                 ),

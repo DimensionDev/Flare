@@ -6,7 +6,10 @@ import androidx.sqlite.async.executeSQL
 
 internal object TimelineRevisionCallback : RoomDatabase.Callback() {
     override suspend fun onOpen(connection: SQLiteConnection) {
-        TRIGGERS.forEach { connection.executeSQL(it) }
+        TRIGGERS.forEach { (oldName, sql) ->
+            connection.executeSQL("DROP TRIGGER IF EXISTS $oldName")
+            connection.executeSQL(sql)
+        }
     }
 
     private val TRIGGERS =
@@ -50,16 +53,22 @@ internal object TimelineRevisionCallback : RoomDatabase.Callback() {
                         "OR OLD.targetLanguage IS NOT NEW.targetLanguage)",
             ),
             referenceTrigger(
+                "timeline_semantic_reference_insert_revision",
+                "INSERT",
+                "status_reference",
+                statusAndParentTimelines("NEW.statusId"),
+            ),
+            referenceTrigger(
                 "timeline_semantic_reference_delete_revision",
                 "DELETE",
                 "status_reference",
-                "statusId = OLD.statusId",
+                statusAndParentTimelines("OLD.statusId"),
             ),
             referenceTrigger(
                 "timeline_semantic_reference_update_revision",
                 "UPDATE",
                 "status_reference",
-                "statusId = OLD.statusId OR statusId = NEW.statusId",
+                "(${statusAndParentTimelines("OLD.statusId")}) OR (${statusAndParentTimelines("NEW.statusId")})",
             ),
             referenceTrigger(
                 "timeline_presentation_reference_delete_revision",
@@ -82,15 +91,16 @@ internal object TimelineRevisionCallback : RoomDatabase.Callback() {
         table: String,
         contentId: String,
         condition: String = "",
-    ): String =
-        """
-        CREATE TRIGGER IF NOT EXISTS $name
-        AFTER $event ON $table
-        $condition
-        BEGIN
-            ${contentRevisionUpdate(contentId)}
-        END
-        """.trimIndent()
+    ): Pair<String, String> =
+        name to
+            """
+            CREATE TRIGGER IF NOT EXISTS ${name}_v2
+            AFTER $event ON $table
+            $condition
+            BEGIN
+                ${contentRevisionUpdate(contentId)}
+            END
+            """.trimIndent()
 
     private fun contentRevisionUpdate(contentId: String): String =
         """
@@ -113,6 +123,16 @@ internal object TimelineRevisionCallback : RoomDatabase.Callback() {
                 ON presentation.pagingKey = timeline.pagingKey
                 AND presentation.statusId = timeline.statusId
             WHERE presentation.referenceStatusId = $contentId
+            UNION
+            SELECT timeline._id
+            FROM DbPagingTimeline AS timeline
+            INNER JOIN timeline_item_presentation_reference AS parent
+                ON parent.pagingKey = timeline.pagingKey
+                AND parent.statusId = timeline.statusId
+                AND parent.presentationType = 'InlineParent'
+            INNER JOIN status_reference AS nested
+                ON nested.statusId = parent.referenceStatusId
+            WHERE nested.referenceStatusId = $contentId
         );
         """.trimIndent()
 
@@ -121,14 +141,28 @@ internal object TimelineRevisionCallback : RoomDatabase.Callback() {
         event: String,
         table: String,
         condition: String,
-    ): String =
+    ): Pair<String, String> =
+        name to
+            """
+            CREATE TRIGGER IF NOT EXISTS ${name}_v2
+            AFTER $event ON $table
+            BEGIN
+                UPDATE DbPagingTimeline
+                SET contentRevision = contentRevision + 1
+                WHERE $condition;
+            END
+            """.trimIndent()
+
+    private fun statusAndParentTimelines(statusId: String): String =
         """
-        CREATE TRIGGER IF NOT EXISTS $name
-        AFTER $event ON $table
-        BEGIN
-            UPDATE DbPagingTimeline
-            SET contentRevision = contentRevision + 1
-            WHERE $condition;
-        END
+        statusId = $statusId OR _id IN (
+            SELECT timeline._id
+            FROM DbPagingTimeline AS timeline
+            INNER JOIN timeline_item_presentation_reference AS parent
+                ON parent.pagingKey = timeline.pagingKey
+                AND parent.statusId = timeline.statusId
+                AND parent.presentationType = 'InlineParent'
+            WHERE parent.referenceStatusId = $statusId
+        )
         """.trimIndent()
 }

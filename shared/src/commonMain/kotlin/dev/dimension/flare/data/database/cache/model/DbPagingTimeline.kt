@@ -154,7 +154,7 @@ internal data class DbTimelineItemPresentationReferenceWithStatus(
         entityColumns = ["id"],
         entity = DbStatus::class,
     )
-    val status: DbStatusWithUser?,
+    val status: DbStatusWithReference?,
 )
 
 internal data class DbStatusWithReference(

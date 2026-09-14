@@ -33,7 +33,7 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
     private var showTranslate: Bool = true
     private var aiTldrEnabled: Bool = false
     private var showParents: Bool = true
-    private var inlineParents: [UiTimelineV2.Post] = []
+    private var inlineParents: [UiTimelineV2.TimelinePostItem] = []
     private var quotes: [UiTimelineV2.Post] = []
     private var allowsMediaCarousel: Bool = false
     private var carouselOuterHorizontalPadding: CGFloat = 0
@@ -64,7 +64,7 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
 
         init(
             data: UiTimelineV2.Post,
-            inlineParents: [UiTimelineV2.Post],
+            inlineParents: [UiTimelineV2.TimelinePostItem],
             quotes: [UiTimelineV2.Post],
             appearance: StatusUIKitAppearance,
             isDetail: Bool,
@@ -398,7 +398,7 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
         showTranslate: Bool = true,
         aiTldrEnabled: Bool = false,
         showParents: Bool = true,
-        inlineParents: [UiTimelineV2.Post] = [],
+        inlineParents: [UiTimelineV2.TimelinePostItem] = [],
         quotes: [UiTimelineV2.Post] = [],
         allowsMediaCarousel: Bool = false,
         carouselOuterHorizontalPadding: CGFloat = 0
@@ -1019,9 +1019,10 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
                 self?.notifyLocalHeightInvalidated()
             }
             container.child.configure(
-                data: parent,
+                data: parent.displayPost,
                 appearance: appearance,
                 withLeadingPadding: true,
+                quotes: Array(parent.presentation.quotes),
                 allowsMediaCarousel: allowsMediaCarousel,
                 carouselOuterHorizontalPadding: carouselOuterHorizontalPadding
             )

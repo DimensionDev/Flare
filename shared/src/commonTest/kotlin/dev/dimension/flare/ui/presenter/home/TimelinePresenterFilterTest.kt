@@ -77,7 +77,7 @@ class TimelinePresenterFilterTest {
                 post = filteredPost,
                 presentation =
                     UiTimelineV2.PostPresentation(
-                        inlineParents = persistentListOf(parent),
+                        inlineParents = persistentListOf(UiTimelineV2.TimelinePostItem(parent)),
                         quotes = persistentListOf(quote),
                         repost = repost,
                     ),
@@ -120,7 +120,7 @@ class TimelinePresenterFilterTest {
                 post = replyPost,
                 presentation =
                     UiTimelineV2.PostPresentation(
-                        inlineParents = persistentListOf(createSampleStatus(parentUser)),
+                        inlineParents = persistentListOf(UiTimelineV2.TimelinePostItem(createSampleStatus(parentUser))),
                     ),
             )
         val filter =
@@ -146,7 +146,7 @@ class TimelinePresenterFilterTest {
                 post = selfThreadPost,
                 presentation =
                     UiTimelineV2.PostPresentation(
-                        inlineParents = persistentListOf(createSampleStatus(currentUser)),
+                        inlineParents = persistentListOf(UiTimelineV2.TimelinePostItem(createSampleStatus(currentUser))),
                     ),
             )
         val replyToOtherUser =
@@ -156,8 +156,10 @@ class TimelinePresenterFilterTest {
                     UiTimelineV2.PostPresentation(
                         inlineParents =
                             persistentListOf(
-                                createSampleStatus(
-                                    currentUser.copy(key = MicroBlogKey("parentKey", "sampleHost")),
+                                UiTimelineV2.TimelinePostItem(
+                                    createSampleStatus(
+                                        currentUser.copy(key = MicroBlogKey("parentKey", "sampleHost")),
+                                    ),
                                 ),
                             ),
                     ),

@@ -231,11 +231,20 @@ class BlueskyRenderTest {
 
     @Test
     fun feedRender_mapsParentReply() {
+        val quoted =
+            RecordViewRecord(
+                uri = AtUri("at://did:plc:quoted/app.bsky.feed.post/parent-quote"),
+                cid = Cid("cid-parent-quote"),
+                author = createProfile("quoted", "quoted.bsky.social"),
+                value = jsonRecord("parent quoted content"),
+                indexedAt = Instant.parse("2024-01-01T00:00:00Z"),
+            )
         val parent =
             createPostView(
                 uri = "at://did:plc:parent/app.bsky.feed.post/10",
                 author = createProfile("parent", "parent.bsky.social"),
                 text = "parent content",
+                embed = PostViewEmbedUnion.RecordView(RecordView(RecordViewRecordUnion.ViewRecord(quoted))),
             )
         val child =
             createPostView(
@@ -257,6 +266,14 @@ class BlueskyRenderTest {
         val post = timelinePostItemOf(rendered.single())
         assertEquals(1, post.presentation.inlineParents.size)
         assertEquals(
+            "parent quoted content",
+            post.presentation.inlineParents
+                .single()
+                .presentation.quotes
+                .single()
+                .content.original.innerText,
+        )
+        assertEquals(
             "at://did:plc:parent/app.bsky.feed.post/10",
             post.presentation.inlineParents
                 .first()
@@ -266,7 +283,7 @@ class BlueskyRenderTest {
             "parent content",
             post.presentation.inlineParents
                 .first()
-                .content.original.innerText,
+                .displayPost.content.original.innerText,
         )
     }
 

@@ -499,7 +499,8 @@ private fun StatusContent(
                         ) {
                             presentation.inlineParents.fastForEach {
                                 CommonStatusComponent(
-                                    item = it,
+                                    item = it.displayPost,
+                                    quotes = it.presentation.quotes,
                                     isDetail = false,
                                     allowMediaCarousel = true,
                                     carouselOuterHorizontalPadding = screenHorizontalPadding,

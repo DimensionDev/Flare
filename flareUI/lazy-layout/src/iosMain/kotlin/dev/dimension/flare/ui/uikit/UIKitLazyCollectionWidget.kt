@@ -44,6 +44,7 @@ import platform.UIKit.UIStackViewAlignmentFill
 import platform.UIKit.UIStackViewAlignmentLeading
 import platform.UIKit.UIStackViewAlignmentTop
 import platform.UIKit.UIStackViewAlignmentTrailing
+import platform.UIKit.UIView
 import platform.UIKit.UIViewAutoresizingFlexibleHeight
 import platform.UIKit.UIViewAutoresizingFlexibleWidth
 import platform.UIKit.indexPathForItem
@@ -165,6 +166,35 @@ private class UIKitNativeLazyCollection(
         get() = view.tracking || view.dragging || view.decelerating
 
     override fun reloadData() = view.reloadData()
+
+    override fun updateItems(
+        index: Int,
+        removedCount: Int,
+        insertedCount: Int,
+        apply: () -> Double?,
+    ) {
+        UIView.performWithoutAnimation {
+            view.performBatchUpdates({
+                val offset = apply()
+                if (removedCount >
+                    0
+                ) {
+                    view.deleteItemsAtIndexPaths(
+                        (index until index + removedCount).map { NSIndexPath.indexPathForItem(it.toLong(), 0) },
+                    )
+                }
+                if (insertedCount >
+                    0
+                ) {
+                    view.insertItemsAtIndexPaths(
+                        (index until index + insertedCount).map { NSIndexPath.indexPathForItem(it.toLong(), 0) },
+                    )
+                }
+                if (offset != null) view.setContentOffset(checkNotNull(controller.model).mainAxisPoint(offset), animated = false)
+            }, completion = null)
+            view.layoutIfNeeded()
+        }
+    }
 
     override fun invalidateLayout() {
         val vertical = controller.model?.orientation != LazyListOrientation.Horizontal

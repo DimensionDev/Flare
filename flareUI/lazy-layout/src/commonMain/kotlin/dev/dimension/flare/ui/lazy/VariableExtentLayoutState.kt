@@ -1,3 +1,5 @@
+@file:OptIn(dev.dimension.flare.ui.LowLevelFlareApi::class)
+
 package dev.dimension.flare.ui.lazy
 
 import kotlin.math.abs
@@ -67,6 +69,44 @@ internal class VariableExtentLayoutState(
         this.spacing = spacing
         assignedExtents.clear()
         extentDeltas.reset(itemCount)
+    }
+
+    /** Reconciles only visited indices; unvisited content remains deferred to the provider. */
+    fun update(
+        provider: LazyItemProvider,
+        spacing: Double,
+        environment: Any?,
+    ) {
+        require(provider.itemCount >= 0) { "Lazy list item count must be non-negative." }
+        require(spacing.isFinite() && spacing >= 0.0) { "Lazy list spacing must be finite and non-negative." }
+        if (this.environment != environment) {
+            reset(provider.itemCount, spacing, environment)
+            return
+        }
+        if (itemCount == provider.itemCount) {
+            this.spacing = spacing
+            assignedExtents.keys.toList().forEach { index ->
+                resolve(index, provider.key(index), provider.layoutVersion(index), provider.contentType(index))
+            }
+            return
+        }
+        val delta = provider.itemCount - itemCount
+        val previous = assignedExtents.toMap()
+        reset(provider.itemCount, spacing, environment)
+        previous.forEach { (oldIndex, assigned) ->
+            // A native positional update is chosen from realized keys, not a full-list diff.
+            // Validate every retained measurement independently, including offscreen edits.
+            val shiftedIndex = oldIndex + delta
+            val index =
+                when {
+                    shiftedIndex in 0 until itemCount && provider.key(shiftedIndex) == assigned.measurementKey.key -> shiftedIndex
+                    oldIndex in 0 until itemCount && provider.key(oldIndex) == assigned.measurementKey.key -> oldIndex
+                    else -> return@forEach
+                }
+            if (provider.layoutVersion(index) == assigned.measurementKey.layoutVersion) {
+                assign(index, assigned.measurementKey, assigned.extent)
+            }
+        }
     }
 
     /** Applies an exact cached extent or a content-type estimate to one item. */

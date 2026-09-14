@@ -15,6 +15,14 @@ internal interface NativeLazyCollection {
 
     fun reloadData()
 
+    /** An unanimated positional splice. [apply] publishes the new count and geometry atomically. */
+    fun updateItems(
+        index: Int,
+        removedCount: Int,
+        insertedCount: Int,
+        apply: () -> Double?,
+    )
+
     fun invalidateLayout()
 
     fun layoutIfNeeded()
@@ -191,8 +199,16 @@ internal class NativeLazyCollectionController(
                 )
             val environmentChanged = environment != nextEnvironment
             if (modelResetPending || environmentChanged || nativeReloadPending) {
+                val splice =
+                    if (!nativeReloadPending && model != null &&
+                        !environmentChanged
+                    ) {
+                        positionalSplice(current.itemProvider)
+                    } else {
+                        null
+                    }
                 val inPlace =
-                    !nativeReloadPending && model != null && geometry.itemCount == current.itemProvider.itemCount &&
+                    !nativeReloadPending && model != null && itemCount == current.itemProvider.itemCount &&
                         bindings.values.all { binding ->
                             val index = binding.host.index
                             index in 0 until current.itemProvider.itemCount && current.itemProvider.key(index) == binding.host.key
@@ -200,14 +216,40 @@ internal class NativeLazyCollectionController(
                 if (!modelResetPending) pendingAnchor = captureAnchor() ?: pendingAnchor
                 modelResetPending = false
                 nativeReloadPending = false
-                model = current
-                environment = nextEnvironment
-                geometry.reset(current.itemProvider.itemCount, current.spacing.toDouble(), nextEnvironment)
-                if (inPlace) {
-                    bindings.values.toList().forEach { bind(it.item, it.host.index) }
+                val applyModel = {
+                    model = current
+                    environment = nextEnvironment
+                    geometry.update(current.itemProvider, current.spacing.toDouble(), nextEnvironment)
+                }
+                if (splice != null) {
+                    native.updateItems(splice.index, splice.removed, splice.inserted) {
+                        applyModel()
+                        bindings.values.toList().forEach { binding -> bind(binding.item, splice.newIndex(binding.host.index)) }
+                        pendingAnchor?.takeUnless { isPhysicalScroll }?.let { anchor ->
+                            val index = current.itemProvider.findIndexByKey(anchor.key, anchor.index, anchor.itemCount)
+                            if (index in 0 until itemCount) {
+                                val target =
+                                    restoredLazyViewportOffset(
+                                        geometry.itemStart(index) - anchor.offset,
+                                        anchor.viewportOffset,
+                                        viewport.offset,
+                                        anchor.preserveViewportDelta && anchor.orientation == current.orientation,
+                                    )
+                                pendingAnchor = null
+                                clampedOffset(target)
+                            } else {
+                                null
+                            }
+                        }
+                    }
                 } else {
-                    releaseAll()
-                    native.reloadData()
+                    applyModel()
+                    if (inPlace) {
+                        bindings.values.toList().forEach { bind(it.item, it.host.index) }
+                    } else {
+                        releaseAll()
+                        native.reloadData()
+                    }
                 }
                 native.invalidateLayout()
             }
@@ -281,6 +323,27 @@ internal class NativeLazyCollectionController(
             }
         }
         failure?.let { throw it }
+    }
+
+    private fun positionalSplice(provider: LazyItemProvider): PositionalSplice? {
+        // Unretained items are bound from the current provider when requested. A positional
+        // splice only needs to preserve every retained key; otherwise use the reload path.
+        val delta = provider.itemCount - itemCount
+        if (delta == 0 || bindings.isEmpty()) return null
+        val shifted =
+            bindings.values.filter { binding ->
+                val index = binding.host.index
+                index !in 0 until provider.itemCount || provider.key(index) != binding.host.key
+            }
+        val index = shifted.minOfOrNull { it.host.index + minOf(delta, 0) } ?: minOf(itemCount, provider.itemCount)
+        if (index < 0) return null
+        val splice = PositionalSplice(index, maxOf(-delta, 0), maxOf(delta, 0))
+        return splice.takeIf {
+            bindings.values.all { binding ->
+                val nextIndex = splice.newIndex(binding.host.index)
+                nextIndex in 0 until provider.itemCount && provider.key(nextIndex) == binding.host.key
+            }
+        }
     }
 
     private fun resolveExtent(index: Int): Boolean {
@@ -425,6 +488,15 @@ private class Binding(
 ) {
     lateinit var host: LazyItemHost
     var needsMeasurement = true
+}
+
+/** Native cells carry positions; only realized stable keys need preservation during this splice. */
+private data class PositionalSplice(
+    val index: Int,
+    val removed: Int,
+    val inserted: Int,
+) {
+    fun newIndex(oldIndex: Int): Int = if (oldIndex < index) oldIndex else oldIndex + inserted - removed
 }
 
 private data class ExtentEnvironment(

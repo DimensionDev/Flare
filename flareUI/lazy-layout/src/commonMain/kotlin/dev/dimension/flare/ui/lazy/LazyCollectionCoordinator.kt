@@ -165,10 +165,12 @@ internal class LazyItemHost(
     private var contentVersion: MutableState<Int>? = null
     private var boundModel: LazyCollectionModel? = null
     private var disposed: Boolean = false
-    private val hostedContent: FlareContent = {
-        contentVersion?.value
-        checkNotNull(content).invoke()
-    }
+
+    private fun hostedContent(): FlareContent =
+        {
+            contentVersion?.value
+            checkNotNull(content).invoke()
+        }
 
     internal val isDisposed: Boolean
         get() = disposed
@@ -211,18 +213,15 @@ internal class LazyItemHost(
             contentVersion = mutableStateOf(0)
             composition =
                 model.subcompositions.create(root).also { nextComposition ->
-                    nextComposition.setContent(hostedContent)
+                    nextComposition.setContent(hostedContent())
                 }
         } else {
             content = nextContent
+            val version = checkNotNull(contentVersion)
+            version.value += 1
             if (updateContentSynchronously) {
-                checkNotNull(composition).setContent {
-                    contentVersion?.value
-                    checkNotNull(content).invoke()
-                }
-            } else {
-                val version = checkNotNull(contentVersion)
-                version.value += 1
+                // Keep the same Compose root group so a stable key retains its child widgets.
+                checkNotNull(composition).setContent(hostedContent())
             }
         }
 

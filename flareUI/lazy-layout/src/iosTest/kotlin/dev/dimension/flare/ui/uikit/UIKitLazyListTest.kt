@@ -523,12 +523,77 @@ public class UIKitLazyListTest {
     }
 
     @Test
+    public fun prependPreservesTheVisibleItemCompositionAndNativeContent() {
+        val state = LazyListState()
+        val created = mutableMapOf<Int, Int>()
+        val disposed = mutableMapOf<Int, Int>()
+
+        fun content(prefix: Int): FlareContent =
+            {
+                LazyColumn(modifier = FlareModifier.None.fillMaxSize(), state = state) {
+                    items(count = 10_000 + prefix, key = { it - prefix }) { index ->
+                        val key = index - prefix
+                        DisposableEffect(key) {
+                            created[key] = (created[key] ?: 0) + 1
+                            onDispose { disposed[key] = (disposed[key] ?: 0) + 1 }
+                        }
+                        Text("Item $key", modifier = FlareModifier.None.height(60f))
+                    }
+                }
+            }
+        withLazyHost { host, _ ->
+            host.setContent(content(0))
+            val scroll = host.awaitScrollView()
+            awaitAppleUi("The insertion fixture did not mount.") { state.layoutInfo.visibleItems.isNotEmpty() }
+            runBlocking { state.scrollToItem(500, 13f) }
+            awaitAppleUi("The insertion anchor did not settle.") {
+                state.layoutInfo.visibleItems
+                    .firstOrNull()
+                    ?.let { it.key == 500 && abs(it.offset + 13f) < 1f } == true
+            }
+            val beforeCreated = created[500]
+            val beforeDisposed = disposed[500]
+            val originalRoot = scroll.itemRoots().first()
+            val originalText = originalRoot.arrangedSubviews.single()
+            host.setContent(content(20))
+            awaitAppleUi("The insertion lost the anchor.") {
+                state.layoutInfo.totalItemsCount == 10_020 &&
+                    state.layoutInfo.visibleItems
+                        .firstOrNull()
+                        ?.let { it.key == 500 && it.index == 520 && abs(it.offset + 13f) < 1f } ==
+                    true
+            }
+            assertEquals(beforeCreated, created[500], "Prepending rebuilt a retained item.")
+            assertEquals(beforeDisposed, disposed[500], "Prepending disposed a retained item.")
+            assertTrue(scroll.itemRoots().first() === originalRoot)
+            assertEquals(originalText, originalRoot.arrangedSubviews.single())
+            host.setContent(content(0))
+            awaitAppleUi("Removing the prefix lost the anchor.") {
+                state.layoutInfo.totalItemsCount == 10_000 &&
+                    state.layoutInfo.visibleItems
+                        .firstOrNull()
+                        ?.let { it.key == 500 && it.index == 500 && abs(it.offset + 13f) < 1f } ==
+                    true
+            }
+            assertEquals(beforeCreated, created[500])
+            assertEquals(beforeDisposed, disposed[500])
+            assertTrue(scroll.itemRoots().first() === originalRoot)
+        }
+    }
+
+    @Test
     public fun contentModelUpdateKeepsTheRealizedNativeRoot() {
         var label by mutableStateOf("Before")
+        var created = 0
+        var disposed = 0
         val content: FlareContent = {
             val labelSnapshot = label
             LazyColumn(modifier = FlareModifier.None.fillMaxSize()) {
                 item(key = "stable", contentType = labelSnapshot, layoutVersion = Unit) {
+                    DisposableEffect(Unit) {
+                        created += 1
+                        onDispose { disposed += 1 }
+                    }
                     Text(labelSnapshot, modifier = FlareModifier.None.height(40f))
                 }
             }
@@ -543,6 +608,7 @@ public class UIKitLazyListTest {
                 (originalRoot.arrangedSubviews.singleOrNull() as? UILabel)?.text == "Before"
             }
 
+            val originalText = originalRoot.arrangedSubviews.single()
             label = "After"
             host.setContent(content)
 
@@ -552,6 +618,9 @@ public class UIKitLazyListTest {
                 (updatedRoot.arrangedSubviews.singleOrNull() as? UILabel)?.text == "After"
             }
             assertTrue(updatedRoot === originalRoot, "UIKit recycled the native root for an in-place model update.")
+            assertEquals(originalText, updatedRoot.arrangedSubviews.single(), "The stable item rebuilt its native content.")
+            assertEquals(1, created, "A content update recreated the item composition.")
+            assertEquals(0, disposed)
         }
     }
 

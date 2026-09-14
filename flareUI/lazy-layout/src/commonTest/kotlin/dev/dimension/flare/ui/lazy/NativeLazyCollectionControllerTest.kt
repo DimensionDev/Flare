@@ -64,7 +64,7 @@ class NativeLazyCollectionControllerTest {
         fixture.flush()
         assertEquals(101, fixture.controller.itemCount)
         assertEquals(101, fixture.state.layoutInfo.totalItemsCount)
-        assertEquals(0, fixture.activeCompositions)
+        assertEquals(1, fixture.activeCompositions)
         fixture.controller.dispose()
     }
 
@@ -139,6 +139,15 @@ private class Fixture :
     override val isPhysicalScrollInProgress: Boolean get() = false
 
     override fun reloadData() = Unit
+
+    override fun updateItems(
+        index: Int,
+        removedCount: Int,
+        insertedCount: Int,
+        apply: () -> Double?,
+    ) {
+        apply()?.let { offset = it }
+    }
 
     override fun invalidateLayout() = Unit
 

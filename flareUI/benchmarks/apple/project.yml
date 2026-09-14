@@ -1,0 +1,40 @@
+name: AppleLazyBenchmark
+options:
+  deploymentTarget:
+    iOS: "17.0"
+    macOS: "13.0"
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    SWIFT_OPTIMIZATION_LEVEL: "-O"
+    CODE_SIGN_STYLE: Automatic
+    DEVELOPMENT_TEAM: 7LFDZ96332
+    GENERATE_INFOPLIST_FILE: YES
+    FRAMEWORK_SEARCH_PATHS:
+      - "$(inherited)"
+      - "$(SRCROOT)/../../lazy-layout/build/bin/$(KOTLIN_TARGET)/benchmarkReleaseFramework"
+    OTHER_LDFLAGS: "$(inherited) -framework FlareLazyBenchmark"
+targets:
+  LazyBenchmarkMac:
+    type: application
+    platform: macOS
+    sources: [Sources/Shared, Sources/macOS]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: dev.dimension.flare.lazy-benchmark.macos
+        KOTLIN_TARGET: macosArm64
+        ARCHS: arm64
+  LazyBenchmarkIOS:
+    type: application
+    platform: iOS
+    sources: [Sources/Shared, Sources/iOS]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: dev.dimension.flare.lazy-benchmark.ios
+        TARGETED_DEVICE_FAMILY: "1,2"
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
+        INFOPLIST_KEY_UISupportedInterfaceOrientations: UIInterfaceOrientationPortrait
+        KOTLIN_TARGET: iosArm64
+        "KOTLIN_TARGET[sdk=iphonesimulator*]": iosSimulatorArm64
+        "EXCLUDED_ARCHS[sdk=iphonesimulator*]": x86_64

@@ -23,15 +23,26 @@ import platform.CoreGraphics.CGRectMake
 import platform.Foundation.NSNotificationCenter
 import kotlin.math.abs
 
-internal actual fun createAppleLazyBenchmarkHost(): AppleLazyBenchmarkHost {
+internal actual fun createAppleLazyBenchmarkHost(embedded: Boolean): AppleLazyBenchmarkHost {
     NSApplication.sharedApplication
-    return AppKitLazyBenchmarkHost()
+    return AppKitLazyBenchmarkHost(embedded)
 }
 
-private class AppKitLazyBenchmarkHost : AppleLazyBenchmarkHost {
+private class AppKitLazyBenchmarkHost(
+    embedded: Boolean,
+) : AppleLazyBenchmarkHost {
     private val rect = CGRectMake(0.0, 0.0, 390.0, 780.0)
     private val window =
-        NSWindow(contentRect = rect, styleMask = NSWindowStyleMaskBorderless, backing = NSBackingStoreBuffered, defer = false)
+        if (embedded) {
+            null
+        } else {
+            NSWindow(
+                contentRect = rect,
+                styleMask = NSWindowStyleMaskBorderless,
+                backing = NSBackingStoreBuffered,
+                defer = false,
+            )
+        }
     private val host = FlareAppKitHost(createAppKitWidgetSystem(AppKitLazyLayoutRendererPlugin))
     private val scroll: NSScrollView?
         get() =
@@ -43,12 +54,15 @@ private class AppKitLazyBenchmarkHost : AppleLazyBenchmarkHost {
 
     init {
         // Kotlin/Native owns this reference; close() must not release it a second time.
-        window.releasedWhenClosed = false
+        window?.releasedWhenClosed = false
         val root = NSView(frame = rect)
-        window.contentView = root
+        window?.contentView = root
         host.view.frame = root.bounds
         root.addSubview(host.view)
+        window?.makeKeyAndOrderFront(null)
     }
+
+    override val nativeView: platform.darwin.NSObject get() = host.view
 
     override val platform: String = "macos"
 
@@ -100,6 +114,6 @@ private class AppKitLazyBenchmarkHost : AppleLazyBenchmarkHost {
 
     override fun dispose() {
         host.dispose()
-        window.close()
+        window?.close()
     }
 }

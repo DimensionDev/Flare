@@ -15,10 +15,12 @@ import platform.UIKit.UIWindow
 import platform.UIKit.item
 import kotlin.math.abs
 
-internal actual fun createAppleLazyBenchmarkHost(): AppleLazyBenchmarkHost = UIKitLazyBenchmarkHost()
+internal actual fun createAppleLazyBenchmarkHost(embedded: Boolean): AppleLazyBenchmarkHost = UIKitLazyBenchmarkHost(embedded)
 
-private class UIKitLazyBenchmarkHost : AppleLazyBenchmarkHost {
-    private val window = UIWindow(frame = CGRectMake(0.0, 0.0, 390.0, 780.0))
+private class UIKitLazyBenchmarkHost(
+    embedded: Boolean,
+) : AppleLazyBenchmarkHost {
+    private val window = if (embedded) null else UIWindow(frame = CGRectMake(0.0, 0.0, 390.0, 780.0))
     private val host = FlareUIKitHost(createUIKitWidgetSystem(UIKitLazyLayoutRendererPlugin))
     private val collection: UICollectionView?
         get() =
@@ -27,10 +29,12 @@ private class UIKitLazyBenchmarkHost : AppleLazyBenchmarkHost {
                 .singleOrNull()
 
     init {
-        host.view.setFrame(window.bounds)
-        window.addSubview(host.view)
-        window.hidden = false
+        host.view.setFrame(CGRectMake(0.0, 0.0, 390.0, 780.0))
+        window?.addSubview(host.view)
+        window?.hidden = false
     }
+
+    override val nativeView: platform.darwin.NSObject get() = host.view
 
     override val platform: String = "ios_simulator"
 
@@ -79,6 +83,6 @@ private class UIKitLazyBenchmarkHost : AppleLazyBenchmarkHost {
 
     override fun dispose() {
         host.dispose()
-        window.hidden = true
+        window?.hidden = true
     }
 }

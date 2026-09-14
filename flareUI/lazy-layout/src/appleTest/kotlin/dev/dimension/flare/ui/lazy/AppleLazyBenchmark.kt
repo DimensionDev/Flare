@@ -58,6 +58,8 @@ public class AppleLazyBenchmark {
 }
 
 internal interface AppleLazyBenchmarkHost {
+    val nativeView: platform.darwin.NSObject
+
     val platform: String
 
     fun setContent(content: FlareContent)
@@ -87,9 +89,9 @@ internal interface AppleLazyBenchmarkHost {
     fun dispose()
 }
 
-internal expect fun createAppleLazyBenchmarkHost(): AppleLazyBenchmarkHost
+internal expect fun createAppleLazyBenchmarkHost(embedded: Boolean = false): AppleLazyBenchmarkHost
 
-private data class BenchmarkFixture(
+internal data class BenchmarkFixture(
     val name: String,
     val count: Int,
     val cards: Boolean = false,
@@ -98,7 +100,7 @@ private data class BenchmarkFixture(
     fun extent(key: Int): Float = if (cards) 156f + (key.mod(3) * 24f) else 44f + (key.mod(5) * 12f)
 }
 
-private class Counters {
+internal class Counters {
     var created = 0
     var disposed = 0
     var active = 0
@@ -106,7 +108,7 @@ private class Counters {
     var keyLookups = 0
 }
 
-private class Workload(
+internal class Workload(
     val fixture: BenchmarkFixture,
 ) {
     val state = LazyListState()

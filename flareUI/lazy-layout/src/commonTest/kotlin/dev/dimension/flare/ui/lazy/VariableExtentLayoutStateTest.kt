@@ -1,3 +1,5 @@
+@file:OptIn(dev.dimension.flare.ui.LowLevelFlareApi::class)
+
 package dev.dimension.flare.ui.lazy
 
 import kotlin.math.max
@@ -8,6 +10,56 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 public class VariableExtentLayoutStateTest {
+    @Test
+    public fun sparseUpdateChecksOffscreenKeysBeforeRetainingShiftedMeasurements() {
+        val state = VariableExtentLayoutState()
+        state.reset(100, 4.0, "portrait")
+        state.record(0, 0, Unit, "row", 44.0)
+        state.record(50, 50, Unit, "row", 96.0)
+        var keyLookups = 0
+        val provider =
+            IntervalLazyListScope()
+                .apply {
+                    items(102, key = {
+                        keyLookups++
+                        when (it) {
+                            52 -> "replacement"
+                            80 -> 50
+                            else -> it - 2
+                        }
+                    }) {}
+                }.build()
+        state.update(provider, 4.0, "portrait")
+        assertEquals(44.0, state.itemExtent(2))
+        assertEquals(48.0, state.itemExtent(52), "An offscreen replacement inherited another key's extent.")
+        assertTrue(keyLookups < 10, "Updating two visited indices scanned the provider.")
+        state.resolve(80, 50, Unit, "row")
+        assertEquals(96.0, state.itemExtent(80))
+    }
+
+    @Test
+    public fun sizeVersionUpdateKeepsUnchangedGeometryAndInvalidatesOnlyTheChangedMeasurement() {
+        val state = VariableExtentLayoutState()
+        state.reset(100, 4.0, "portrait")
+        state.record(0, 0, Unit, "row", 80.0)
+        state.record(10, 10, 1, "row", 120.0)
+        val unchangedStart = state.itemStart(9)
+        val provider =
+            IntervalLazyListScope()
+                .apply {
+                    items(100, key = { it }, layoutVersion = { if (it == 10) 2 else Unit }) {}
+                }.build()
+        state.update(provider, 4.0, "portrait")
+        assertEquals(80.0, state.itemExtent(0))
+        assertEquals(unchangedStart, state.itemStart(9))
+        assertTrue(!state.hasExactMeasurement(10, 2))
+        val before = state.itemStart(11)
+        val previousExtent = state.itemExtent(10)
+        state.record(10, 10, 2, "row", 64.0)
+        assertEquals(before + 64.0 - previousExtent, state.itemStart(11))
+        assertEquals(unchangedStart, state.itemStart(9))
+    }
+
     @Test
     public fun measuredExtentOnlyMovesFollowingItems() {
         val state = VariableExtentLayoutState(defaultEstimatedExtent = 48.0)

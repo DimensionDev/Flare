@@ -230,6 +230,38 @@ public class AppKitLazyListTest {
     }
 
     @Test
+    public fun horizontalOffsetSurvivesLayoutInAVisibleWindow() {
+        val state = LazyListState()
+        withLazyHost(width = 390.0, height = 780.0) { host, window ->
+            window.makeKeyAndOrderFront(null)
+            NSApplication.sharedApplication.activateIgnoringOtherApps(true)
+            host.setContent {
+                LazyRow(modifier = FlareModifier.None.fillMaxSize(), state = state, spacing = 4f) {
+                    items(count = 100, key = { it }) { index ->
+                        Text("Item $index", modifier = FlareModifier.None.width(68f))
+                    }
+                }
+            }
+            val scroll = host.awaitScrollView()
+            awaitAppleUi("The visible horizontal list did not mount.") {
+                scroll.layoutSubtreeIfNeeded()
+                state.layoutInfo.visibleItems.isNotEmpty()
+            }
+            scroll.contentView().setBoundsOrigin(CGPointMake(48.0, 0.0))
+            scroll.reflectScrolledClipView(scroll.contentView())
+            repeat(3) {
+                CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.01, false)
+                scroll.layoutSubtreeIfNeeded()
+            }
+            assertEquals(48.0, scroll.contentView().bounds.useContents { origin.x }, absoluteTolerance = 0.5)
+            runBlocking { state.scrollToItem(50, 13f) }
+            awaitAppleUi("The visible horizontal list did not reach item 50.") {
+                state.layoutInfo.visibleItems.any { it.index == 50 && abs(it.offset + 13f) < 1f }
+            }
+        }
+    }
+
+    @Test
     public fun nativeCollectionViewSupportsBothLazyDirections() {
         assertTrue(NSThread.isMainThread)
         assertDirection(vertical = true) {
@@ -519,12 +551,77 @@ public class AppKitLazyListTest {
     }
 
     @Test
+    public fun prependPreservesTheVisibleItemCompositionAndNativeContent() {
+        val state = LazyListState()
+        val created = mutableMapOf<Int, Int>()
+        val disposed = mutableMapOf<Int, Int>()
+
+        fun content(prefix: Int): FlareContent =
+            {
+                LazyColumn(modifier = FlareModifier.None.fillMaxSize(), state = state) {
+                    items(count = 10_000 + prefix, key = { it - prefix }) { index ->
+                        val key = index - prefix
+                        DisposableEffect(key) {
+                            created[key] = (created[key] ?: 0) + 1
+                            onDispose { disposed[key] = (disposed[key] ?: 0) + 1 }
+                        }
+                        Text("Item $key", modifier = FlareModifier.None.height(60f))
+                    }
+                }
+            }
+        withLazyHost { host, _ ->
+            host.setContent(content(0))
+            val scroll = host.awaitScrollView()
+            awaitAppleUi("The insertion fixture did not mount.") { state.layoutInfo.visibleItems.isNotEmpty() }
+            runBlocking { state.scrollToItem(500, 13f) }
+            awaitAppleUi("The insertion anchor did not settle.") {
+                state.layoutInfo.visibleItems
+                    .firstOrNull()
+                    ?.let { it.key == 500 && abs(it.offset + 13f) < 1f } == true
+            }
+            val beforeCreated = created[500]
+            val beforeDisposed = disposed[500]
+            val originalRoot = scroll.itemRoots().first()
+            val originalText = originalRoot.arrangedSubviews.single()
+            host.setContent(content(20))
+            awaitAppleUi("The insertion lost the anchor.") {
+                state.layoutInfo.totalItemsCount == 10_020 &&
+                    state.layoutInfo.visibleItems
+                        .firstOrNull()
+                        ?.let { it.key == 500 && it.index == 520 && abs(it.offset + 13f) < 1f } ==
+                    true
+            }
+            assertEquals(beforeCreated, created[500], "Prepending rebuilt a retained item.")
+            assertEquals(beforeDisposed, disposed[500], "Prepending disposed a retained item.")
+            assertTrue(scroll.itemRoots().first() === originalRoot)
+            assertEquals(originalText, originalRoot.arrangedSubviews.single())
+            host.setContent(content(0))
+            awaitAppleUi("Removing the prefix lost the anchor.") {
+                state.layoutInfo.totalItemsCount == 10_000 &&
+                    state.layoutInfo.visibleItems
+                        .firstOrNull()
+                        ?.let { it.key == 500 && it.index == 500 && abs(it.offset + 13f) < 1f } ==
+                    true
+            }
+            assertEquals(beforeCreated, created[500])
+            assertEquals(beforeDisposed, disposed[500])
+            assertTrue(scroll.itemRoots().first() === originalRoot)
+        }
+    }
+
+    @Test
     public fun contentModelUpdateKeepsTheRealizedNativeRoot() {
         var label by mutableStateOf("Before")
+        var created = 0
+        var disposed = 0
         val content: FlareContent = {
             val labelSnapshot = label
             LazyColumn(modifier = FlareModifier.None.fillMaxSize()) {
                 item(key = "stable", contentType = labelSnapshot, layoutVersion = Unit) {
+                    DisposableEffect(Unit) {
+                        created += 1
+                        onDispose { disposed += 1 }
+                    }
                     Text(labelSnapshot, modifier = FlareModifier.None.height(40f))
                 }
             }
@@ -539,6 +636,7 @@ public class AppKitLazyListTest {
                 (originalRoot.arrangedSubviews.singleOrNull() as? NSTextField)?.stringValue == "Before"
             }
 
+            val originalText = originalRoot.arrangedSubviews.single()
             label = "After"
             host.setContent(content)
 
@@ -548,6 +646,9 @@ public class AppKitLazyListTest {
                 (updatedRoot.arrangedSubviews.singleOrNull() as? NSTextField)?.stringValue == "After"
             }
             assertTrue(updatedRoot === originalRoot, "AppKit recycled the native root for an in-place model update.")
+            assertEquals(originalText, updatedRoot.arrangedSubviews.single(), "The stable item rebuilt its native content.")
+            assertEquals(1, created, "A content update recreated the item composition.")
+            assertEquals(0, disposed)
         }
     }
 
@@ -677,6 +778,7 @@ public class AppKitLazyListTest {
                 backing = NSBackingStoreBuffered,
                 defer = false,
             )
+        window.releasedWhenClosed = false
         val root = NSView(frame = window.contentView?.frame ?: CGRectMake(0.0, 0.0, width, height))
         window.contentView = root
         val host = FlareAppKitHost(createAppKitWidgetSystem(AppKitLazyLayoutRendererPlugin))

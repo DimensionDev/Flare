@@ -25,9 +25,11 @@ import platform.AppKit.NSAnimationContext
 import platform.AppKit.NSCollectionView
 import platform.AppKit.NSCollectionViewDataSourceProtocol
 import platform.AppKit.NSCollectionViewDelegateProtocol
+import platform.AppKit.NSCollectionViewFlowLayout
 import platform.AppKit.NSCollectionViewItem
-import platform.AppKit.NSCollectionViewLayout
 import platform.AppKit.NSCollectionViewLayoutAttributes
+import platform.AppKit.NSCollectionViewScrollDirection.NSCollectionViewScrollDirectionHorizontal
+import platform.AppKit.NSCollectionViewScrollDirection.NSCollectionViewScrollDirectionVertical
 import platform.AppKit.NSColor
 import platform.AppKit.NSLayoutAttributeCenterX
 import platform.AppKit.NSLayoutAttributeCenterY
@@ -179,11 +181,54 @@ private class AppKitNativeLazyCollection(
 
     override fun reloadData() = collection.reloadData()
 
+    override fun updateItems(
+        index: Int,
+        removedCount: Int,
+        insertedCount: Int,
+        apply: () -> Double?,
+    ) {
+        NSAnimationContext.runAnimationGroup({ context ->
+            context?.duration = 0.0
+            context?.allowsImplicitAnimation = false
+            collection.performBatchUpdates({
+                val offset = apply()
+                if (removedCount >
+                    0
+                ) {
+                    collection.deleteItemsAtIndexPaths(
+                        (index until index + removedCount).map { NSIndexPath.indexPathForItem(it.toLong(), 0) }.toSet(),
+                    )
+                }
+                if (insertedCount >
+                    0
+                ) {
+                    collection.insertItemsAtIndexPaths(
+                        (index until index + insertedCount).map { NSIndexPath.indexPathForItem(it.toLong(), 0) }.toSet(),
+                    )
+                }
+                if (offset != null) {
+                    collection.setFrameSize(collection.lazyLayout.collectionViewContentSize())
+                    view.contentView().setBoundsOrigin(checkNotNull(controller.model).mainAxisPoint(offset))
+                    view.reflectScrolledClipView(view.contentView())
+                }
+            }, completionHandler = null)
+            collection.layoutSubtreeIfNeeded()
+        }, completionHandler = null)
+    }
+
     override fun invalidateLayout() {
         collection.lazyLayout.invalidateLayout()
     }
 
     override fun layoutIfNeeded() {
+        // AppKit clamps custom-layout document width to the viewport unless its layout
+        // advertises horizontal scrolling through NSCollectionViewFlowLayout.
+        collection.lazyLayout.scrollDirection =
+            if (controller.model?.orientation == LazyListOrientation.Horizontal) {
+                NSCollectionViewScrollDirectionHorizontal
+            } else {
+                NSCollectionViewScrollDirectionVertical
+            }
         // AppKit's document view must grow along either axis for NSClipView to expose
         // the full custom layout, including horizontal collections.
         val size = collection.lazyLayout.collectionViewContentSize()
@@ -256,7 +301,7 @@ private class AppKitLazyCollectionItem : NSCollectionViewItem {
 }
 
 private class AppKitLazyCollectionLayout :
-    NSCollectionViewLayout(),
+    NSCollectionViewFlowLayout(),
     FlareCollectionLayoutProtocol {
     var controller: NativeLazyCollectionController? = null
 

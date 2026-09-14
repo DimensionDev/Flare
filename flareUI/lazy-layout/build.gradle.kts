@@ -35,6 +35,11 @@ kotlin {
         }
         if (providers.gradleProperty("flareLazyBenchmark").orNull == "true") {
             binaries.test("benchmark", listOf(NativeBuildType.RELEASE))
+            binaries.framework("benchmark", listOf(NativeBuildType.RELEASE)) {
+                baseName = "FlareLazyBenchmark"
+                compilation = compilations.getByName("test")
+                isStatic = true
+            }
         }
     }
 

@@ -96,16 +96,21 @@ class UserHandlerTest : RobolectricTest() {
         loader = FakeUserLoader()
         onDeviceAI = FakeOnDeviceAI()
 
+        val scope = CoroutineScope(Dispatchers.Unconfined)
+        val openAIService = OpenAIService()
+        val aiCompletionService = AiCompletionService(openAIService, onDeviceAI)
         startKoin {
             modules(
                 module {
                     testSingle { db }
                     testSingle { appDataStore }
-                    testSingle<CoroutineScope> { CoroutineScope(Dispatchers.Unconfined) }
+                    testSingle<CoroutineScope> { scope }
                     testSingle<OnDeviceAI> { onDeviceAI }
-                    testSingle { OpenAIService() }
-                    testSingle { AiCompletionService(get(), get()) }
-                    testSingle<PreTranslationService> { OnlinePreTranslationService(get(), get(), get(), get()) }
+                    testSingle { openAIService }
+                    testSingle { aiCompletionService }
+                    testSingle<PreTranslationService> {
+                        OnlinePreTranslationService(db, appDataStore, aiCompletionService, scope)
+                    }
                     testSingle<PlatformFormatter> { TestFormatter() }
                 },
             )

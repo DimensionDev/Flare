@@ -20,6 +20,7 @@ import dev.dimension.flare.ui.presenter.login.PixivLoginProvider
 import dev.dimension.flare.ui.route.DeeplinkRoute
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.serialization.Serializable
 import kotlin.native.HiddenFromObjC
 
@@ -157,28 +158,43 @@ public data object PixivPlatformSpec :
         )
 
     override fun deepLinks(accountKey: MicroBlogKey): ImmutableList<PlatformDeepLink<*>> =
-        persistentListOf(
-            PlatformDeepLink(
-                uriPattern = "https://www.pixiv.net/artworks/{id}",
-                serializer = PixivIllustDeepLink.serializer(),
-                callback = { data ->
-                    DeeplinkRoute.Gallery.Detail(
-                        accountType = AccountType.Specific(accountKey),
-                        statusKey = MicroBlogKey(data.id, PIXIV_HOST),
+        buildList {
+            val baseUrls =
+                listOf(
+                    "https://www.$PIXIV_HOST",
+                    "https://www.$PIXIV_HOST/en",
+                    "https://$PIXIV_HOST",
+                    "https://$PIXIV_HOST/en",
+                )
+            for (baseUrl in baseUrls) {
+                for (suffix in listOf("", "/")) {
+                    add(
+                        PlatformDeepLink(
+                            uriPattern = "$baseUrl/artworks/{id}$suffix",
+                            serializer = PixivIllustDeepLink.serializer(),
+                            callback = { data ->
+                                DeeplinkRoute.Gallery.Detail(
+                                    accountType = AccountType.Specific(accountKey),
+                                    statusKey = MicroBlogKey(data.id, PIXIV_HOST),
+                                )
+                            },
+                        ),
                     )
-                },
-            ),
-            PlatformDeepLink(
-                uriPattern = "https://www.pixiv.net/users/{id}",
-                serializer = PixivUserDeepLink.serializer(),
-                callback = { data ->
-                    DeeplinkRoute.Profile.User(
-                        accountType = AccountType.Specific(accountKey),
-                        userKey = MicroBlogKey(data.id, PIXIV_HOST),
+                    add(
+                        PlatformDeepLink(
+                            uriPattern = "$baseUrl/users/{id}$suffix",
+                            serializer = PixivUserDeepLink.serializer(),
+                            callback = { data ->
+                                DeeplinkRoute.Profile.User(
+                                    accountType = AccountType.Specific(accountKey),
+                                    userKey = MicroBlogKey(data.id, PIXIV_HOST),
+                                )
+                            },
+                        ),
                     )
-                },
-            ),
-        )
+                }
+            }
+        }.toImmutableList()
 
     override fun createDataSource(context: PlatformDataSourceContext): MicroblogDataSource =
         PixivDataSource(

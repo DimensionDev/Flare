@@ -1,6 +1,8 @@
 package dev.dimension.flare.ui.component.platform
 
+import androidx.compose.material3.SliderState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 
 @Composable
@@ -12,12 +14,19 @@ internal actual fun PlatformSlider(
     onValueChangeFinished: (() -> Unit)?,
     valueRange: ClosedFloatingPointRange<Float>,
 ) {
+    val sliderState =
+        remember(valueRange) {
+            SliderState(value = value, trackRange = valueRange)
+        }
+    sliderState.value = value
+
     androidx.compose.material3.Slider(
-        value = value,
+        state = sliderState,
         onValueChange = onValueChange,
         modifier = modifier,
         enabled = enabled,
-        onValueChangeFinished = onValueChangeFinished,
-        valueRange = valueRange,
+        onValueChangeFinished = {
+            onValueChangeFinished?.invoke()
+        },
     )
 }

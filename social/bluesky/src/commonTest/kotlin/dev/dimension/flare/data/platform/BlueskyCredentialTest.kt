@@ -11,11 +11,12 @@ import sh.christian.ozone.oauth.OAuthScope
 import sh.christian.ozone.oauth.OAuthToken
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 import kotlin.time.Duration.Companion.minutes
 
 class BlueskyCredentialTest {
     @Test
-    fun legacyOAuthCredentialDefaultsToUnverifiedPds() =
+    fun legacyOAuthCredentialDefaultsToUnverifiedPdsAndUnknownNonce() =
         runTest {
             val credential: BlueskyCredential =
                 BlueskyCredential.OAuthCredential(
@@ -33,14 +34,16 @@ class BlueskyCredentialTest {
                             pdsUrl = "https://auth.example",
                         ),
                     pdsUrlVerified = true,
+                    pdsNonce = "pds-nonce",
                 )
             val currentJson =
                 BlueskyJson
                     .encodeToJsonElement(BlueskyCredential.serializer(), credential)
                     .jsonObject
             assertEquals(JsonPrimitive(true), currentJson["pdsUrlVerified"])
+            assertEquals(JsonPrimitive("pds-nonce"), currentJson["pdsNonce"])
 
-            val legacyJson = JsonObject(currentJson - "pdsUrlVerified")
+            val legacyJson = JsonObject(currentJson - "pdsUrlVerified" - "pdsNonce")
             val decoded =
                 BlueskyJson.decodeFromJsonElement(
                     BlueskyCredential.serializer(),
@@ -48,5 +51,7 @@ class BlueskyCredentialTest {
                 ) as BlueskyCredential.OAuthCredential
 
             assertEquals(false, decoded.pdsUrlVerified)
+            assertNull(decoded.pdsNonce)
+            assertEquals("nonce-old", decoded.oAuthToken.nonce)
         }
 }

@@ -27,6 +27,8 @@ internal sealed interface BlueskyCredential {
         override val baseUrl: String,
         val oAuthToken: OAuthToken,
         val pdsUrlVerified: Boolean = false,
+        // OAuthToken.nonce belongs to the authorization server; resource requests use this nonce.
+        val pdsNonce: String? = null,
     ) : BlueskyCredential {
         override val accessToken: String
             get() = oAuthToken.accessToken
@@ -45,6 +47,7 @@ internal sealed interface BlueskyCredential {
             if (oAuthToken.expiresIn != other.oAuthToken.expiresIn) return false
             if (oAuthToken.pdsUrl != other.oAuthToken.pdsUrl) return false
             if (pdsUrlVerified != other.pdsUrlVerified) return false
+            if (pdsNonce != other.pdsNonce) return false
 
             return true
         }
@@ -57,6 +60,7 @@ internal sealed interface BlueskyCredential {
             result = 31 * result + oAuthToken.expiresIn.hashCode()
             result = 31 * result + oAuthToken.pdsUrl.hashCode()
             result = 31 * result + pdsUrlVerified.hashCode()
+            result = 31 * result + pdsNonce.hashCode()
             return result
         }
     }

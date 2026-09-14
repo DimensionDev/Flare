@@ -2,9 +2,12 @@
 
 package dev.dimension.flare.ui.uikit
 
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import dev.dimension.flare.ui.FlareContent
 import dev.dimension.flare.ui.FlareModifier
@@ -27,10 +30,13 @@ import platform.CoreFoundation.kCFRunLoopDefaultMode
 import platform.CoreGraphics.CGPointMake
 import platform.CoreGraphics.CGRectMake
 import platform.Foundation.NSThread
+import platform.UIKit.UICollectionView
+import platform.UIKit.UICollectionViewCell
 import platform.UIKit.UILabel
 import platform.UIKit.UIScrollView
 import platform.UIKit.UIStackView
 import platform.UIKit.UIWindow
+import platform.UIKit.item
 import kotlin.math.abs
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -230,15 +236,15 @@ public class UIKitLazyListTest {
     }
 
     @Test
-    public fun nativeScrollViewSupportsBothLazyDirections() {
+    public fun nativeCollectionViewSupportsBothLazyDirections() {
         assertTrue(NSThread.isMainThread)
         assertDirection(vertical = true) {
-            LazyColumn {
+            LazyColumn(modifier = FlareModifier.None.fillMaxSize()) {
                 items(count = 10_000, key = { it }) { index -> Text("Item $index") }
             }
         }
         assertDirection(vertical = false) {
-            LazyRow {
+            LazyRow(modifier = FlareModifier.None.fillMaxSize()) {
                 items(count = 10_000, key = { it }) { index -> Text("Item $index") }
             }
         }
@@ -579,6 +585,43 @@ public class UIKitLazyListTest {
         }
     }
 
+    @Test
+    public fun nativeReuseDisposesOffscreenContentAndRestoresSaveableState() {
+        val active = mutableSetOf<Int>()
+        val tokens = mutableMapOf<Int, Int>()
+        var nextToken = 0
+        val state = LazyListState()
+        withLazyHost { host, _ ->
+            host.setContent {
+                LazyColumn(modifier = FlareModifier.None.fillMaxSize(), state = state) {
+                    items(count = 2_000, key = { it }, contentType = { it % 3 }) { index ->
+                        val token = rememberSaveable { nextToken++ }
+                        SideEffect { tokens[index] = token }
+                        DisposableEffect(index) {
+                            check(active.add(index))
+                            onDispose { active.remove(index) }
+                        }
+                        Text("Item $index", modifier = FlareModifier.None.height(36f))
+                    }
+                }
+            }
+            host.awaitScrollView()
+            awaitAppleUi("The first native item was not composed.") { 0 in active && 0 in tokens }
+            val originalToken = tokens.getValue(0)
+
+            runBlocking { state.scrollToItem(1_500) }
+            awaitAppleUi("The native collection retained an offscreen composition.") {
+                1_500 in active && 0 !in active
+            }
+            assertTrue(active.size < 100, "Native realization retained ${active.size} compositions.")
+
+            runBlocking { state.scrollToItem(0) }
+            awaitAppleUi("The native collection did not restore the first item.") { 0 in active }
+            assertEquals(originalToken, tokens.getValue(0))
+        }
+        assertTrue(active.isEmpty(), "Disposing the host leaked item compositions.")
+    }
+
     private fun assertDirection(
         vertical: Boolean,
         content: FlareContent,
@@ -648,8 +691,14 @@ public class UIKitLazyListTest {
             scroll?.layoutIfNeeded()
             scroll != null
         }
-        return checkNotNull(scroll)
+        return checkNotNull(scroll).also { assertTrue(it is UICollectionView) }
     }
 
-    private fun UIScrollView.itemRoots(): List<UIStackView> = subviews.filterIsInstance<UIStackView>()
+    private fun UIScrollView.itemRoots(): List<UIStackView> {
+        val collection = this as UICollectionView
+        return collection.visibleCells
+            .filterIsInstance<UICollectionViewCell>()
+            .sortedBy { collection.indexPathForCell(it)?.item }
+            .flatMap { it.contentView.subviews.filterIsInstance<UIStackView>() }
+    }
 }

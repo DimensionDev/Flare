@@ -7,3 +7,15 @@ internal fun needsAdaptiveLazyScrollCorrection(
     target: Double,
     tolerance: Double = 0.5,
 ): Boolean = abs(current - target) > tolerance
+
+internal fun restoredLazyViewportOffset(
+    anchorTargetAtCapture: Double,
+    capturedViewportOffset: Double,
+    currentViewportOffset: Double,
+    preserveViewportDelta: Boolean,
+): Double =
+    if (preserveViewportDelta) {
+        anchorTargetAtCapture + currentViewportOffset - capturedViewportOffset
+    } else {
+        anchorTargetAtCapture
+    }

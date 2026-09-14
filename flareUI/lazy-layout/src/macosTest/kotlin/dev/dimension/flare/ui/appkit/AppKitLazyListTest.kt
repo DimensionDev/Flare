@@ -2,9 +2,12 @@
 
 package dev.dimension.flare.ui.appkit
 
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import dev.dimension.flare.ui.FlareContent
 import dev.dimension.flare.ui.FlareModifier
@@ -23,6 +26,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import platform.AppKit.NSApplication
 import platform.AppKit.NSBackingStoreBuffered
+import platform.AppKit.NSCollectionView
+import platform.AppKit.NSCollectionViewItem
 import platform.AppKit.NSScrollView
 import platform.AppKit.NSScrollViewDidEndLiveScrollNotification
 import platform.AppKit.NSScrollViewWillStartLiveScrollNotification
@@ -32,6 +37,7 @@ import platform.AppKit.NSView
 import platform.AppKit.NSWindow
 import platform.AppKit.NSWindowStyleMaskBorderless
 import platform.AppKit.alignmentRectForFrame
+import platform.AppKit.item
 import platform.CoreFoundation.CFRunLoopRunInMode
 import platform.CoreFoundation.kCFRunLoopDefaultMode
 import platform.CoreGraphics.CGPointMake
@@ -224,15 +230,15 @@ public class AppKitLazyListTest {
     }
 
     @Test
-    public fun nativeScrollViewSupportsBothLazyDirections() {
+    public fun nativeCollectionViewSupportsBothLazyDirections() {
         assertTrue(NSThread.isMainThread)
         assertDirection(vertical = true) {
-            LazyColumn {
+            LazyColumn(modifier = FlareModifier.None.fillMaxSize()) {
                 items(count = 10_000, key = { it }) { index -> Text("Item $index") }
             }
         }
         assertDirection(vertical = false) {
-            LazyRow {
+            LazyRow(modifier = FlareModifier.None.fillMaxSize()) {
                 items(count = 10_000, key = { it }) { index -> Text("Item $index") }
             }
         }
@@ -575,6 +581,43 @@ public class AppKitLazyListTest {
         }
     }
 
+    @Test
+    public fun nativeReuseDisposesOffscreenContentAndRestoresSaveableState() {
+        val active = mutableSetOf<Int>()
+        val tokens = mutableMapOf<Int, Int>()
+        var nextToken = 0
+        val state = LazyListState()
+        withLazyHost { host, _ ->
+            host.setContent {
+                LazyColumn(modifier = FlareModifier.None.fillMaxSize(), state = state) {
+                    items(count = 2_000, key = { it }, contentType = { it % 3 }) { index ->
+                        val token = rememberSaveable { nextToken++ }
+                        SideEffect { tokens[index] = token }
+                        DisposableEffect(index) {
+                            check(active.add(index))
+                            onDispose { active.remove(index) }
+                        }
+                        Text("Item $index", modifier = FlareModifier.None.height(36f))
+                    }
+                }
+            }
+            host.awaitScrollView()
+            awaitAppleUi("The first native item was not composed.") { 0 in active && 0 in tokens }
+            val originalToken = tokens.getValue(0)
+
+            runBlocking { state.scrollToItem(1_500) }
+            awaitAppleUi("The native collection retained an offscreen composition.") {
+                1_500 in active && 0 !in active
+            }
+            assertTrue(active.size < 100, "Native realization retained ${active.size} compositions.")
+
+            runBlocking { state.scrollToItem(0) }
+            awaitAppleUi("The native collection did not restore the first item.") { 0 in active }
+            assertEquals(originalToken, tokens.getValue(0))
+        }
+        assertTrue(active.isEmpty(), "Disposing the host leaked item compositions.")
+    }
+
     private fun assertDirection(
         vertical: Boolean,
         content: FlareContent,
@@ -584,18 +627,21 @@ public class AppKitLazyListTest {
             val scroll = host.awaitScrollView()
             awaitAppleUi("AppKit lazy direction did not settle.") {
                 scroll.documentView?.layoutSubtreeIfNeeded()
-                scroll.itemRoots().isNotEmpty()
+                val document = scroll.documentView?.frame?.useContents { size.width to size.height }
+                val viewport = scroll.contentView().bounds.useContents { size.width to size.height }
+                scroll.itemRoots().isNotEmpty() && document != null &&
+                    if (vertical) document.second > viewport.second else document.first > viewport.first
             }
             assertEquals(vertical, scroll.hasVerticalScroller)
             assertEquals(!vertical, scroll.hasHorizontalScroller)
             val documentSize = checkNotNull(scroll.documentView).frame.useContents { size.width to size.height }
             val viewportSize = scroll.contentView().bounds.useContents { size.width to size.height }
             if (vertical) {
-                assertTrue(documentSize.second > viewportSize.second)
+                assertTrue(documentSize.second > viewportSize.second, "Vertical document=$documentSize viewport=$viewportSize")
             } else {
-                assertTrue(documentSize.first > viewportSize.first)
+                assertTrue(documentSize.first > viewportSize.first, "Horizontal document=$documentSize viewport=$viewportSize")
             }
-            assertTrue(scroll.itemRoots().size < 100)
+            assertTrue(scroll.itemRoots().size < 100, "Realized ${scroll.itemRoots().size} roots")
         }
     }
 
@@ -653,8 +699,15 @@ public class AppKitLazyListTest {
             scroll?.layoutSubtreeIfNeeded()
             scroll != null
         }
-        return checkNotNull(scroll)
+        return checkNotNull(scroll).also { assertTrue(it.documentView is NSCollectionView) }
     }
 
-    private fun NSScrollView.itemRoots(): List<NSStackView> = documentView?.subviews?.filterIsInstance<NSStackView>().orEmpty()
+    private fun NSScrollView.itemRoots(): List<NSStackView> {
+        val collection = documentView as NSCollectionView
+        return collection
+            .visibleItems()
+            .filterIsInstance<NSCollectionViewItem>()
+            .sortedBy { collection.indexPathForItem(it)?.item }
+            .mapNotNull { it.view as? NSStackView }
+    }
 }

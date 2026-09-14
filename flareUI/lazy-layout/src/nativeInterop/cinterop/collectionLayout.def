@@ -1,0 +1,4 @@
+language = Objective-C
+headers = FlareCollectionLayout.h
+headerFilter = FlareCollectionLayout.h
+package = dev.dimension.flare.ui.collectioninterop

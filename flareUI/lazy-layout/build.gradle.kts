@@ -1,5 +1,7 @@
 import dev.dimension.flareui.buildlogic.FlareUiPlatform
 import dev.dimension.flareui.buildlogic.flareUi
+import org.jetbrains.kotlin.gradle.plugin.mpp.NativeBuildType
+import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 
 plugins {
     id("dev.dimension.flareui.multiplatform-library")
@@ -24,6 +26,15 @@ kotlin {
         }
         withHostTest {
             isIncludeAndroidResources = true
+        }
+    }
+
+    targets.withType<KotlinNativeTarget>().configureEach {
+        compilations.getByName("main").cinterops.create("collectionLayout") {
+            includeDirs("src/nativeInterop/cinterop")
+        }
+        if (providers.gradleProperty("flareLazyBenchmark").orNull == "true") {
+            binaries.test("benchmark", listOf(NativeBuildType.RELEASE))
         }
     }
 

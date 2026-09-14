@@ -10,7 +10,7 @@ import dev.dimension.flare.ui.lazy.LazyCollectionWidget
 public object AppKitLazyLayoutRendererPlugin : FlareRendererPlugin<AppKitBackend> {
     override fun register(registrar: FlareWidgetRegistrar<AppKitBackend>) {
         registrar.register(LazyCollectionWidget::class) { _ ->
-            AppKitAdaptiveLazyCollectionWidget()
+            AppKitLazyCollectionWidget()
         }
     }
 }

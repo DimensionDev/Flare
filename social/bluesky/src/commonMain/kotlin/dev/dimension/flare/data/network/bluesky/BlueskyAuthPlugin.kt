@@ -20,8 +20,11 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.Url
+import io.ktor.http.auth.HttpAuthHeader
+import io.ktor.http.auth.parseAuthorizationHeaders
 import io.ktor.http.isSuccess
 import io.ktor.util.AttributeKey
+import io.ktor.utils.io.InternalAPI
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.sync.Mutex
@@ -120,7 +123,7 @@ internal class BlueskyAuthPlugin(
                     val newTokens =
                         when {
                             // A nonce challenge does not mean the access token has expired.
-                            error == "use_dpop_nonce" -> {
+                            error == "use_dpop_nonce" || result.response.isDpopNonceChallenge() -> {
                                 nonceCredential
                             }
 
@@ -149,6 +152,19 @@ internal class BlueskyAuthPlugin(
                 result
             }
         }
+
+        @OptIn(InternalAPI::class)
+        private fun HttpResponse.isDpopNonceChallenge(): Boolean =
+            status == HttpStatusCode.Unauthorized &&
+                headers.getAll(HttpHeaders.WWWAuthenticate).orEmpty().any { value ->
+                    runCatching { parseAuthorizationHeaders(value) }.getOrDefault(emptyList()).any { challenge ->
+                        challenge is HttpAuthHeader.Parameterized &&
+                            challenge.authScheme.equals("DPoP", ignoreCase = true) &&
+                            challenge.parameters.any {
+                                it.name.equals("error", ignoreCase = true) && it.value == "use_dpop_nonce"
+                            }
+                    }
+                }
 
         private suspend fun HttpRequestBuilder.auth(
             credential: BlueskyCredential,

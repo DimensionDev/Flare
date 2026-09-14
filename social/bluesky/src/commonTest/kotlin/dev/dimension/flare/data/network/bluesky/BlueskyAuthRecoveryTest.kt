@@ -148,6 +148,128 @@ class BlueskyAuthRecoveryTest {
         }
 
     @Test
+    fun headerNonceChallengeRecoversWithoutRefreshingTokens() =
+        runTest {
+            val challenges =
+                listOf(
+                    listOf("""DPoP error="use_dpop_nonce""""),
+                    listOf("""Bearer realm="example"""", """DPoP error="use_dpop_nonce""""),
+                    listOf("""Bearer realm="example, resource", dpop ERROR = "use_dpop_nonce""""),
+                )
+            for (body in listOf("", "<html>Nonce required</html>")) {
+                for (authenticate in challenges) {
+                    var attempts = 0
+                    withSession(apiResponse = {
+                        if (++attempts == 1) {
+                            authenticationChallenge(body, authenticate = authenticate)
+                        } else {
+                            jsonResponse(HttpStatusCode.OK, """{"ok":true}""", "pds-nonce-2")
+                        }
+                    }) {
+                        assertEquals(HttpStatusCode.OK, client.get(TIMELINE).status)
+                        assertEquals(0, refreshRequests.size, "Unexpected refresh for $authenticate")
+                        assertEquals(listOf("DPoP access-old", "DPoP access-old"), requests.map { it.headers[HttpHeaders.Authorization] })
+                        assertEquals(listOf(null, "pds-nonce-1"), requests.map { it.dpopNonce() })
+                        assertNotEquals(requests[0].headers["DPoP"], requests[1].headers["DPoP"])
+                        assertEquals("refresh-old", credentials.value.refreshToken)
+                        assertEquals("auth-nonce-old", (credentials.value as BlueskyCredential.OAuthCredential).oAuthToken.nonce)
+                    }
+                }
+            }
+        }
+
+    @Test
+    fun headerNonceChallengeRecoversWhenAuthorizationServerIsUnavailable() =
+        runTest {
+            for (status in listOf(HttpStatusCode.ServiceUnavailable, HttpStatusCode.TooManyRequests)) {
+                var attempts = 0
+                withSession(oauthTokenStatus = status, apiResponse = {
+                    if (++attempts == 1) {
+                        authenticationChallenge()
+                    } else {
+                        jsonResponse(HttpStatusCode.OK, "{}")
+                    }
+                }) {
+                    assertEquals(HttpStatusCode.OK, client.get(TIMELINE).status)
+                    assertEquals(0, refreshRequests.size)
+                    assertEquals(2, requests.size)
+                }
+            }
+        }
+
+    @Test
+    fun nonNonceAuthenticationChallengesStillRefreshTokens() =
+        runTest {
+            for (authenticate in listOf(
+                """DPoP error="invalid_token"""",
+                """DPoP error="invalid_token", error_description="use_dpop_nonce"""",
+                """Bearer error="use_dpop_nonce"""",
+                "DPoP error=\"unterminated",
+            )) {
+                var attempts = 0
+                withSession(apiResponse = {
+                    if (++attempts == 1) {
+                        authenticationChallenge(authenticate = listOf(authenticate))
+                    } else {
+                        jsonResponse(HttpStatusCode.OK, "{}")
+                    }
+                }) {
+                    assertEquals(HttpStatusCode.OK, client.get(TIMELINE).status)
+                    assertEquals(1, refreshRequests.size, "Expected token refresh for $authenticate")
+                    assertEquals(2, requests.size)
+                    assertEquals("access-new-1", credentials.value.accessToken)
+                }
+            }
+        }
+
+    @Test
+    fun headerNonceChallengeWithoutNonceDoesNotRefreshTokens() =
+        runTest {
+            withSession(apiResponse = { authenticationChallenge(nonce = null) }) {
+                assertEquals(HttpStatusCode.Unauthorized, client.get(TIMELINE).status)
+                assertEquals(0, refreshRequests.size)
+                assertEquals(1, requests.size)
+                assertEquals("access-old", credentials.value.accessToken)
+            }
+        }
+
+    @Test
+    fun headerNonceChallengeRetriesAreBounded() =
+        runTest {
+            var attempts = 0
+            withSession(apiResponse = { authenticationChallenge(nonce = "pds-nonce-${++attempts}") }) {
+                assertEquals(HttpStatusCode.Unauthorized, client.get(TIMELINE).status)
+                assertEquals(0, refreshRequests.size)
+                assertEquals(4, requests.size)
+                assertEquals("access-old", credentials.value.accessToken)
+                assertEquals("refresh-old", credentials.value.refreshToken)
+            }
+        }
+
+    @Test
+    fun headerNonceChallengeAfterRefreshUsesRotatedCredentials() =
+        runTest {
+            var attempts = 0
+            withSession(apiResponse = {
+                when (++attempts) {
+                    1 -> jsonResponse(HttpStatusCode.Unauthorized, """{"error":"InvalidToken"}""", "pds-nonce-1")
+                    2 -> authenticationChallenge(nonce = "pds-nonce-2")
+                    3 -> jsonResponse(HttpStatusCode.OK, "{}")
+                    else -> error("Unexpected request")
+                }
+            }) {
+                assertEquals(HttpStatusCode.OK, client.get(TIMELINE).status)
+                assertEquals(1, refreshRequests.size)
+                assertEquals(
+                    listOf("DPoP access-old", "DPoP access-new-1", "DPoP access-new-1"),
+                    requests.map { it.headers[HttpHeaders.Authorization] },
+                )
+                assertEquals(listOf(null, "pds-nonce-1", "pds-nonce-2"), requests.map { it.dpopNonce() })
+                assertEquals("refresh-new-1", credentials.value.refreshToken)
+            }
+        }
+
+    @Test
     fun successfulResponsesPersistPdsNoncesForFollowingRequests() =
         runTest {
             var attempts = 0
@@ -230,6 +352,7 @@ class BlueskyAuthRecoveryTest {
 
     private suspend fun withSession(
         oauth: Boolean = true,
+        oauthTokenStatus: HttpStatusCode = HttpStatusCode.OK,
         apiResponse: suspend MockRequestHandleScope.(HttpRequestData) -> HttpResponseData,
         block: suspend Session.() -> Unit,
     ) {
@@ -270,6 +393,9 @@ class BlueskyAuthRecoveryTest {
 
                         "/token" -> {
                             refreshRequests += request
+                            if (oauthTokenStatus != HttpStatusCode.OK) {
+                                return@MockEngine jsonResponse(oauthTokenStatus, """{"error":"temporarily_unavailable"}""")
+                            }
                             val version = refreshRequests.size
                             jsonResponse(
                                 HttpStatusCode.OK,
@@ -342,6 +468,21 @@ class BlueskyAuthRecoveryTest {
         headers =
             Headers.build {
                 append(HttpHeaders.ContentType, "application/json")
+                nonce?.let { append("DPoP-Nonce", it) }
+            },
+    )
+
+    private fun MockRequestHandleScope.authenticationChallenge(
+        body: String = "",
+        nonce: String? = "pds-nonce-1",
+        authenticate: List<String> = listOf("""DPoP error="use_dpop_nonce""""),
+    ) = respond(
+        content = body,
+        status = HttpStatusCode.Unauthorized,
+        headers =
+            Headers.build {
+                append(HttpHeaders.ContentType, "text/plain")
+                authenticate.forEach { append(HttpHeaders.WWWAuthenticate, it) }
                 nonce?.let { append("DPoP-Nonce", it) }
             },
     )

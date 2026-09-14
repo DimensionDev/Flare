@@ -112,11 +112,13 @@ class XQTRenderTest {
 
     @Test
     fun parentsAreRecognized() {
+        val quoted = createTweet("parent-quote", createUser("quote-user", "quote_user"), "parent quoted content")
         val parent =
             createTweet(
                 id = "status-parent",
                 user = createUser("user-parent", "parent_user"),
                 text = "parent content",
+                quotedStatus = quoted,
             )
         val child =
             createTweet(
@@ -136,10 +138,18 @@ class XQTRenderTest {
             )
         assertEquals(1, rendered.presentation.inlineParents.size)
         assertEquals(
+            "parent quoted content",
+            rendered.presentation.inlineParents
+                .single()
+                .presentation.quotes
+                .single()
+                .content.original.innerText,
+        )
+        assertEquals(
             "parent content",
             rendered.presentation.inlineParents
                 .first()
-                .content.original.innerText,
+                .displayPost.content.original.innerText,
         )
         assertEquals(
             "status-parent",

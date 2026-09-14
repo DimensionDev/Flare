@@ -251,7 +251,7 @@ class SerializationFormatBenchmarkTest {
                     ),
                 presentation =
                     UiTimelineV2.PostPresentation(
-                        inlineParents = persistentListOf(parent),
+                        inlineParents = persistentListOf(UiTimelineV2.TimelinePostItem(parent)),
                         quotes = persistentListOf(quote),
                         repost = repost,
                     ),

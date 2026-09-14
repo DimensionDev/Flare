@@ -140,12 +140,14 @@ class NostrServiceTest {
 
     @Test
     fun timelineMapsParentsMediaQuoteAndRepost() {
+        val quotedReplyId = "c".repeat(64)
         val events =
             listOf(
                 ROOT_EVENT_JSON,
                 REPLY_EVENT_JSON,
                 QUOTE_EVENT_JSON,
                 REPOST_EVENT_JSON,
+                REPLY_EVENT_JSON.replace(REPLY_EVENT_ID, quotedReplyId).replace(ROOT_EVENT_ID, QUOTE_EVENT_ID),
             ).map {
                 Event.fromJson(it)
             }
@@ -187,7 +189,7 @@ class NostrServiceTest {
             1,
             replyItem.presentation.inlineParents
                 .first()
-                .images.size,
+                .displayPost.images.size,
         )
 
         val quoteItem = timelinePostItemOf(timeline.first { it.statusKey.id == QUOTE_EVENT_ID })
@@ -198,6 +200,10 @@ class NostrServiceTest {
                 .filter { it.type == ReferenceType.Quote }
                 .map { it.statusKey.id },
         )
+        val quotedReply = timelinePostItemOf(timeline.first { it.statusKey.id == quotedReplyId })
+        val quotedParent = quotedReply.presentation.inlineParents.single()
+        assertEquals(QUOTE_EVENT_ID, quotedParent.statusKey.id)
+        assertEquals(listOf(ROOT_EVENT_ID), quotedParent.presentation.quotes.map { it.statusKey.id })
 
         val repost = timelinePostItemOf(timeline.first { it.statusKey.id == REPOST_EVENT_ID })
         val reposted = assertNotNull(repost.presentation.repost)

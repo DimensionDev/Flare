@@ -23,6 +23,8 @@ import dev.dimension.flare.data.datasource.microblog.DatabaseUpdater
 import dev.dimension.flare.data.datasource.microblog.PostActionFamily
 import dev.dimension.flare.data.datasource.microblog.PostEvent
 import dev.dimension.flare.data.datasource.microblog.loader.PostLoader
+import dev.dimension.flare.data.datasource.microblog.paging.TimelineDbPageCache
+import dev.dimension.flare.data.datasource.microblog.paging.TimelineDbPageLoader
 import dev.dimension.flare.data.datasource.microblog.paging.TimelinePagingMapper
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.datastore.model.AppSettings
@@ -232,9 +234,9 @@ class PostHandlerTest : RobolectricTest() {
                     .first()
                     .data
 
-            val cachedPost = assertNotNull(cached as? UiTimelineV2.Post)
-            assertEquals(postKey, cachedPost.statusKey)
-            assertEquals("wrapper content", cachedPost.content.original.raw)
+            val cachedPost = assertNotNull(cached.asTimelinePostItem()).displayPost
+            assertEquals(repostKey, cachedPost.statusKey)
+            assertEquals(repost.content.original.raw, cachedPost.content.original.raw)
             assertEquals(0, fakeLoader.statusCallCount)
         }
 
@@ -258,7 +260,7 @@ class PostHandlerTest : RobolectricTest() {
                     post = createPost(statusKey = postKey, images = persistentListOf(media)),
                     presentation =
                         UiTimelineV2.PostPresentation(
-                            inlineParents = persistentListOf(parent),
+                            inlineParents = persistentListOf(UiTimelineV2.TimelinePostItem(parent)),
                         ),
                 )
 
@@ -337,6 +339,108 @@ class PostHandlerTest : RobolectricTest() {
                 assertEquals(postKey, post.statusKey)
                 assertEquals(listOf(media.url), post.images.map { it.url })
             }
+        }
+
+    @Test
+    fun detailSeedRowKeepsCachedQuote() =
+        runTest {
+            startTestKoin(this@runTest)
+            val quote = createPost(MicroBlogKey("diagnostic-quote", "test.social"), text = "quoted content")
+            val item =
+                UiTimelineV2.TimelinePostItem(
+                    post = createPost(postKey),
+                    presentation = UiTimelineV2.PostPresentation(quotes = persistentListOf(quote)),
+                )
+            saveToDatabase(db, listOf(TimelinePagingMapper.toDb(item, pagingKey = "home")))
+            db.pagingTimelineDao().insertAll(
+                listOf(DbPagingTimeline(pagingKey = "diagnostic-context", statusId = DbStatus.createId(accountType, postKey), sortId = 0)),
+            )
+            for (pagingKey in listOf("home", "diagnostic-context")) {
+                val cached = TimelineDbPageLoader(db, pagingKey, TimelineDbPageCache()).load(0, 1).single().baseItem
+                assertEquals(
+                    listOf(quote.statusKey),
+                    cached
+                        .asTimelinePostItem()
+                        ?.presentation
+                        ?.quotes
+                        ?.map { it.statusKey },
+                    "Cached quote must be renderable in $pagingKey before detail refresh",
+                )
+            }
+        }
+
+    @Test
+    fun inlineParentQuoteIsVisibleBeforeDetailRefresh() =
+        runTest {
+            startTestKoin(this@runTest)
+            val quote = createPost(MicroBlogKey("diagnostic-quote", "test.social"), text = "quoted content")
+            val item =
+                UiTimelineV2.TimelinePostItem(
+                    post = createPost(postKey),
+                    presentation = UiTimelineV2.PostPresentation(quotes = persistentListOf(quote)),
+                )
+            val reply =
+                UiTimelineV2.TimelinePostItem(
+                    post = createPost(MicroBlogKey("reply", "test.social")),
+                    presentation = UiTimelineV2.PostPresentation(inlineParents = persistentListOf(item)),
+                )
+            saveToDatabase(db, listOf(TimelinePagingMapper.toDb(reply, pagingKey = "home")))
+            assertNotNull(db.statusDao().get(quote.statusKey, accountType).first())
+            val references = assertNotNull(db.statusDao().getWithReferences(postKey, accountType).first())
+            assertEquals(listOf(quote.statusKey), references.references.mapNotNull { it.status?.data?.statusKey })
+            val cacheable =
+                PostHandler(accountType, fakeLoader)
+                    .post(postKey, PostTranslationDisplay.Original)
+            val cached = cacheable.firstSuccess()
+
+            assertEquals(0, fakeLoader.statusCallCount)
+            fakeLoader.nextStatus = item
+            assertTrue(cacheable.refreshState.drop(1).first() is androidx.paging.LoadState.NotLoading)
+            val refreshed = cacheable.firstSuccess { it is UiTimelineV2.TimelinePostItem }
+            assertEquals(
+                listOf(quote.statusKey),
+                refreshed
+                    .asTimelinePostItem()
+                    ?.presentation
+                    ?.quotes
+                    ?.map { it.statusKey },
+            )
+            assertEquals(
+                listOf(quote.statusKey),
+                cached
+                    .asTimelinePostItem()
+                    ?.presentation
+                    ?.quotes
+                    ?.map { it.statusKey },
+                "Quote already cached by home timeline must appear before detail fetch",
+            )
+        }
+
+    @Test
+    fun quotedRepostContentIsAvailableBeforeDetailRefresh() =
+        runTest {
+            startTestKoin(this@runTest)
+            val quote = createPost(MicroBlogKey("repost-quote", "test.social"))
+            val original =
+                createPost(postKey).copy(
+                    references = persistentListOf(UiTimelineV2.Post.Reference(quote.statusKey, ReferenceType.Quote)),
+                )
+            val repost =
+                UiTimelineV2.TimelinePostItem(
+                    post = createPost(MicroBlogKey("repost-wrapper", "test.social")),
+                    presentation = UiTimelineV2.PostPresentation(quotes = persistentListOf(quote), repost = original),
+                )
+            saveToDatabase(db, listOf(TimelinePagingMapper.toDb(repost, "home")))
+            val cached = PostHandler(accountType, fakeLoader).post(postKey, PostTranslationDisplay.Original).firstSuccess()
+            assertEquals(0, fakeLoader.statusCallCount)
+            assertEquals(
+                listOf(quote.statusKey),
+                cached
+                    .asTimelinePostItem()
+                    ?.presentation
+                    ?.quotes
+                    ?.map { it.statusKey },
+            )
         }
 
     @Test

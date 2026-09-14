@@ -231,7 +231,7 @@ private fun List<UiTimelineV2>.extractBuiltInTimelineUsers(): List<UiProfile> =
                     item.displayPost.user,
                     item.presentation.message?.user,
                 ) +
-                    item.presentation.inlineParents.mapNotNull { it.user } +
+                    item.presentation.inlineParents.mapNotNull { it.displayPost.user } +
                     item.presentation.quotes.mapNotNull { it.user }
             }
 

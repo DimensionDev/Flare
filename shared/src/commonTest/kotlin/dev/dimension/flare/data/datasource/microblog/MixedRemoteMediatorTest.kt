@@ -60,6 +60,7 @@ import dev.dimension.flare.ui.model.UiHandle
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.UiTranslatableText
+import dev.dimension.flare.ui.model.asTimelinePostItem
 import dev.dimension.flare.ui.render.TranslationDocument
 import dev.dimension.flare.ui.render.TranslationTokenKind
 import dev.dimension.flare.ui.render.toUi
@@ -715,7 +716,10 @@ class MixedRemoteMediatorTest : RobolectricTest() {
                     post = post,
                     presentation =
                         UiTimelineV2.PostPresentation(
-                            inlineParents = listOfNotNull(thread.getOrNull(index - 1)).toPersistentList(),
+                            inlineParents =
+                                listOfNotNull(
+                                    thread.getOrNull(index - 1),
+                                ).map { UiTimelineV2.TimelinePostItem(it) }.toPersistentList(),
                         ),
                 )
             }
@@ -1009,6 +1013,55 @@ class MixedRemoteMediatorTest : RobolectricTest() {
                 rowsAfterPrepend
                     .filter { it.statusId in existingSortIds }
                     .associate { it.statusId to it.sortId },
+            )
+        }
+
+    @Test
+    fun collapsedParentKeepsQuote() =
+        runTest {
+            val accountType = AccountType.Specific(MicroBlogKey("timeline", "test.social"))
+            val user = profile(MicroBlogKey("user", "test.social"), "User")
+            val quote = createPost(accountType, user, MicroBlogKey("quote", "test.social"), "quoted content")
+            val parent =
+                UiTimelineV2.TimelinePostItem(
+                    post =
+                        createPost(accountType, user, MicroBlogKey("parent", "test.social"), "parent")
+                            .copy(references = persistentListOf(UiTimelineV2.Post.Reference(quote.statusKey, ReferenceType.Quote))),
+                    presentation = UiTimelineV2.PostPresentation(quotes = persistentListOf(quote)),
+                )
+            val reply = createPost(accountType, user, MicroBlogKey("reply", "test.social"), "reply", listOf(parent.post))
+            val uncollapsedLoader =
+                FakeLoader("diagnostic-parent-quote", collapseReplyChains = false) {
+                    PagingResult(data = listOf(reply, parent), nextKey = null)
+                }
+            val uncollapsed = TimelineRemoteMediator(uncollapsedLoader, db, allowLongText = false).timeline(20, PagingRequest.Refresh)
+            assertEquals(
+                listOf(quote.statusKey),
+                uncollapsed.data
+                    .single { it.statusKey == parent.statusKey }
+                    .asTimelinePostItem()
+                    ?.presentation
+                    ?.quotes
+                    ?.map { it.statusKey },
+            )
+            val loader =
+                FakeLoader("diagnostic-parent-quote") {
+                    PagingResult(data = listOf(reply, parent), nextKey = null)
+                }
+            val result = TimelineRemoteMediator(loader, db, allowLongText = false).timeline(20, PagingRequest.Refresh)
+            val collapsed = assertIs<UiTimelineV2.TimelinePostItem>(result.data.single())
+            val inlineParent = collapsed.presentation.inlineParents.single()
+
+            assertEquals(parent.statusKey, inlineParent.statusKey)
+            assertEquals(listOf(quote.statusKey), inlineParent.post.references.map { it.statusKey })
+            assertEquals(
+                listOf(quote.statusKey),
+                inlineParent
+                    .asTimelinePostItem()
+                    ?.presentation
+                    ?.quotes
+                    ?.map { it.statusKey },
+                "Parent quote must remain renderable after collapsing its reply chain",
             )
         }
 
@@ -2593,7 +2646,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
             post = post.copy(references = references.toPersistentList()),
             presentation =
                 UiTimelineV2.PostPresentation(
-                    inlineParents = inlineParents.toPersistentList(),
+                    inlineParents = inlineParents.map { UiTimelineV2.TimelinePostItem(it) }.toPersistentList(),
                 ),
         )
     }

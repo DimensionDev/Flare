@@ -23,6 +23,7 @@ import dev.dimension.flare.data.database.cache.model.DbStatusWithReference
 import dev.dimension.flare.data.database.cache.model.DbStatusWithUser
 import dev.dimension.flare.data.database.cache.model.DbTimelineItemPresentationReference
 import dev.dimension.flare.data.database.cache.model.DbTimelineItemPresentationReferenceWithStatus
+import dev.dimension.flare.data.database.cache.model.DbTimelineItemPresentationType
 import dev.dimension.flare.data.database.cache.model.DbTranslation
 import dev.dimension.flare.data.database.cache.model.TranslationEntityType
 import dev.dimension.flare.model.AccountType
@@ -110,6 +111,16 @@ internal suspend fun PagingTimelineDao.getTimelinePageInCurrentTransaction(
         batchStart = batchEnd
     }
 
+    val parentIds =
+        presentationReferences
+            .filter { it.presentationType == DbTimelineItemPresentationType.InlineParent }
+            .map { it.referenceStatusId }
+            .distinct()
+            .filterNot { it in statusById }
+    parentIds.chunked(QUERY_BATCH_SIZE).forEach { batch ->
+        semanticReferences += getPageStatusReferences(batch)
+    }
+
     val referencedStatusIds = LinkedHashSet<String>(semanticReferences.size + presentationReferences.size)
     semanticReferences.forEach { reference ->
         if (reference.referenceStatusId !in statusById) {
@@ -173,7 +184,16 @@ internal suspend fun PagingTimelineDao.getTimelinePageInCurrentTransaction(
                 hydratedPresentation +=
                     DbTimelineItemPresentationReferenceWithStatus(
                         reference = reference,
-                        status = hydratedStatusById[reference.referenceStatusId],
+                        status =
+                            hydratedStatusById[reference.referenceStatusId]?.let { status ->
+                                DbStatusWithReference(
+                                    status = status,
+                                    references =
+                                        semanticByRoot[reference.referenceStatusId].orEmpty().map { nested ->
+                                            DbStatusReferenceWithStatus(nested, hydratedStatusById[nested.referenceStatusId])
+                                        },
+                                )
+                            },
                     )
             }
             result +=

@@ -356,7 +356,7 @@ internal fun XQTTimeline.render(accountKey: MicroBlogKey): UiTimelineV2? {
             .mapNotNull {
                 it.tweets.tweetResults.result
                     ?.toTweetOrNull()
-            }.map { it.renderStatus(accountKey = accountKey) }
+            }.mapNotNull { it.render(accountKey = accountKey).asTimelinePostItem() }
             .toImmutableList()
     val retweetTweet = retweetUnion?.toTweetOrNull()
 
@@ -365,7 +365,7 @@ internal fun XQTTimeline.render(accountKey: MicroBlogKey): UiTimelineV2? {
             .toTweetOrNull()
             ?.renderStatus(
                 accountKey = accountKey,
-                parents = parentStatuses,
+                parents = parentStatuses.map { it.displayPost },
                 quote = quote,
                 notInterestedAction = notInterestedAction.takeIf { retweetTweet == null },
             ) ?: return null

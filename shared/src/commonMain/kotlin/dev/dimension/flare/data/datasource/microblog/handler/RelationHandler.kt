@@ -364,10 +364,16 @@ public class RelationHandler(
                     ?.containsUser(userKey) == true
             } ||
             presentationReferences.any { reference ->
-                reference.status
-                    ?.data
-                    ?.content
-                    ?.containsUser(userKey) == true
+                reference.status?.let { parent ->
+                    parent.status.data.content
+                        .containsUser(userKey) ||
+                        parent.references.any {
+                            it.status
+                                ?.data
+                                ?.content
+                                ?.containsUser(userKey) == true
+                        }
+                } == true
             }
 
     private fun UiTimelineV2.containsUser(userKey: MicroBlogKey): Boolean =

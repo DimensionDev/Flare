@@ -15,6 +15,7 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.ReferenceType
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.asTimelinePostItem
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 
 @OptIn(ExperimentalPagingApi::class)
@@ -178,7 +179,13 @@ internal class TimelineRemoteMediator(
                 .flatMap { item ->
                     listOfNotNull(item.status.status.data) +
                         item.status.references.mapNotNull { it.status?.data } +
-                        item.presentationReferences.mapNotNull { it.status?.data }
+                        item.presentationReferences.flatMap { reference ->
+                            listOfNotNull(reference.status?.status?.data) +
+                                reference.status
+                                    ?.references
+                                    .orEmpty()
+                                    .mapNotNull { it.status?.data }
+                        }
                 }.distinctBy { it.id },
             allowLongText = allowLongText,
         )
@@ -187,8 +194,6 @@ internal class TimelineRemoteMediator(
 
 private fun List<UiTimelineV2>.collapseReplyChains(): List<UiTimelineV2> {
     fun UiTimelineV2.TimelinePostItem.key(): Pair<AccountType, MicroBlogKey> = accountType to statusKey
-
-    fun UiTimelineV2.Post.key(): Pair<AccountType, MicroBlogKey> = accountType to statusKey
 
     val rootPosts =
         asSequence()
@@ -274,7 +279,9 @@ private fun List<UiTimelineV2>.collapseReplyChains(): List<UiTimelineV2> {
                                 (
                                     post.presentation.inlineParents.dropLast(1) +
                                         collapsed.presentation.inlineParents +
-                                        listOf(collapsed.displayPost)
+                                        listOf(
+                                            collapsed.copy(presentation = collapsed.presentation.copy(inlineParents = persistentListOf())),
+                                        )
                                 ).distinctBy { it.statusKey }
                                     .toImmutableList(),
                         ),

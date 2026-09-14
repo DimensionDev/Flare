@@ -879,7 +879,7 @@ class MicroblogTest : RobolectricTest() {
             assertEquals("home_${mapped.status.status.data.id}", post.itemKey)
             assertEquals(1, post.presentation.inlineParents.size)
             assertEquals(
-                "home_${mapped.presentationReferences.first().status?.data?.id}",
+                "home_${mapped.presentationReferences.first().status?.status?.data?.id}",
                 post.presentation.inlineParents
                     .first()
                     .itemKey,
@@ -990,13 +990,13 @@ class MicroblogTest : RobolectricTest() {
                 "parent original",
                 post.presentation.inlineParents
                     .first()
-                    .content.original.raw,
+                    .displayPost.content.original.raw,
             )
             assertEquals(
                 "父帖子",
                 post.presentation.inlineParents
                     .first()
-                    .content.translation
+                    .displayPost.content.translation
                     ?.raw,
             )
         }
@@ -2530,7 +2530,7 @@ class MicroblogTest : RobolectricTest() {
             presentation =
                 UiTimelineV2.PostPresentation(
                     message = message,
-                    inlineParents = inlineParents.toPersistentList(),
+                    inlineParents = inlineParents.map { UiTimelineV2.TimelinePostItem(it) }.toPersistentList(),
                     quotes = quotes.toPersistentList(),
                     repost = repost,
                 ),

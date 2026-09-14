@@ -57,7 +57,7 @@ public struct StatusView: View {
     private let forceHideActions: Bool
     private let showTranslate: Bool
     private let showParents: Bool
-    private let inlineParents: [UiTimelineV2.Post]
+    private let inlineParents: [UiTimelineV2.TimelinePostItem]
     private let quotes: [UiTimelineV2.Post]
     private let allowsMediaCarousel: Bool
     private let carouselOuterHorizontalPadding: CGFloat
@@ -77,7 +77,7 @@ public struct StatusView: View {
         forceHideActions: Bool = false,
         showTranslate: Bool = true,
         showParents: Bool = true,
-        inlineParents: [UiTimelineV2.Post] = [],
+        inlineParents: [UiTimelineV2.TimelinePostItem] = [],
         quotes: [UiTimelineV2.Post] = [],
         allowsMediaCarousel: Bool = false,
         carouselOuterHorizontalPadding: CGFloat = 0
@@ -174,8 +174,9 @@ public struct StatusView: View {
                         spacing: 0
                     ) {
                         StatusView(
-                            data: parent,
+                            data: parent.displayPost,
                             withLeadingPadding: true,
+                            quotes: Array(parent.presentation.quotes),
                             allowsMediaCarousel: allowsMediaCarousel,
                             carouselOuterHorizontalPadding: carouselOuterHorizontalPadding
                         )

@@ -744,7 +744,7 @@ class TimelineDatabaseBenchmarkTest : RobolectricTest() {
                     post = root,
                     presentation =
                         UiTimelineV2.PostPresentation(
-                            inlineParents = persistentListOf(parent),
+                            inlineParents = persistentListOf(UiTimelineV2.TimelinePostItem(parent)),
                             quotes = persistentListOf(quote),
                             repost = repost,
                         ),
@@ -795,7 +795,7 @@ class TimelineDatabaseBenchmarkTest : RobolectricTest() {
                 post = root,
                 presentation =
                     UiTimelineV2.PostPresentation(
-                        inlineParents = persistentListOf(parent),
+                        inlineParents = persistentListOf(UiTimelineV2.TimelinePostItem(parent)),
                         quotes = persistentListOf(quote),
                         repost = repost,
                     ),
@@ -942,7 +942,12 @@ class TimelineDatabaseBenchmarkTest : RobolectricTest() {
             items.forEach { item ->
                 add(item.status.status.data.id)
                 item.status.references.mapNotNullTo(this) { it.status?.data?.id }
-                item.presentationReferences.mapNotNullTo(this) { it.status?.data?.id }
+                item.presentationReferences.mapNotNullTo(this) {
+                    it.status
+                        ?.status
+                        ?.data
+                        ?.id
+                }
             }
         }.distinct()
 

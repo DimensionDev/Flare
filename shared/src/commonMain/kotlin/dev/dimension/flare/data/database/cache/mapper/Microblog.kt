@@ -42,21 +42,35 @@ private suspend fun saveToDatabaseInTransaction(
             .values
             .toList()
     val existingTimelineByPair = loadTimelineVersions(database, timelines)
-    val semanticRootsToSync =
+    val semanticStatusesToSync =
         items
             .filter { item ->
                 existingTimelineByPair[item.timeline.key]
                     ?.semanticReferenceSignature != item.timeline.semanticReferenceSignature
-            }.map { it.timeline.statusId }
-            .toSet()
+            }.flatMap { item ->
+                item.presentationReferences
+                    .mapNotNull { it.status } + item.status
+            }.associateBy { it.status.data.id }
+    val relatedStatuses =
+        semanticStatusesToSync.values
+            .flatMap { status -> status.references.mapNotNull { it.status?.data } }
+            .distinctBy { it.id }
+            .filterNot { it.id in semanticStatusesToSync }
     syncStatusReferences(
         database = database,
-        rootStatusIds = semanticRootsToSync.toList(),
+        rootStatusIds = semanticStatusesToSync.keys.toList() + relatedStatuses.map { it.id },
         incoming =
-            items
-                .filter { it.timeline.statusId in semanticRootsToSync }
-                .flatMap { it.status.references }
-                .map { it.reference },
+            semanticStatusesToSync.values.flatMap { it.references }.map { it.reference } +
+                relatedStatuses.flatMap { status ->
+                    (status.content as? UiTimelineV2.Post)?.references.orEmpty().mapIndexed { index, reference ->
+                        DbStatusReference(
+                            referenceType = reference.type,
+                            statusId = status.id,
+                            referenceStatusId = DbStatus.createId(status.accountType, reference.statusKey),
+                            referenceOrder = index,
+                        )
+                    }
+                },
     )
     val presentationItemsToSync =
         items.filter { item ->
@@ -140,7 +154,12 @@ private fun collectStatuses(items: List<DbPagingTimelineWithStatus>): List<DbSta
         items.forEach { item ->
             add(item.status.status.data)
             item.status.references.mapNotNullTo(this) { it.status?.data }
-            item.presentationReferences.mapNotNullTo(this) { it.status?.data }
+            item.presentationReferences.forEach { reference ->
+                reference.status?.let { status ->
+                    add(status.status.data)
+                    status.references.mapNotNullTo(this) { it.status?.data }
+                }
+            }
         }
     }.associateBy { it.id }
         .values

@@ -129,11 +129,13 @@ class MastodonRenderTest {
 
     @Test
     fun statusListRenderFlattensReplyParents() {
+        val quote = createStatus("parent-quote", createAccount("quote-user"), "<p>parent quote</p>")
         val root =
             createStatus(
                 id = "root",
                 account = createAccount("root-user"),
                 content = "<p>root</p>",
+                quote = quote,
             )
         val child =
             createStatus(
@@ -153,6 +155,16 @@ class MastodonRenderTest {
         val rendered = listOf(root, child, leaf).render(accountKey).timelinePostItems()
 
         assertEquals(listOf("leaf"), rendered.map { it.statusKey.id })
+        assertEquals(
+            "parent quote",
+            rendered
+                .single()
+                .presentation.inlineParents
+                .first()
+                .presentation.quotes
+                .single()
+                .content.original.innerText,
+        )
         assertEquals(
             listOf("root", "child"),
             rendered

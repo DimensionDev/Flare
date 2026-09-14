@@ -234,7 +234,7 @@ public sealed class UiTimelineV2 {
     @Immutable
     public data class PostPresentation public constructor(
         val message: Message? = null,
-        val inlineParents: SerializableImmutableList<Post> = persistentListOf(),
+        val inlineParents: SerializableImmutableList<TimelinePostItem> = persistentListOf(),
         val quotes: SerializableImmutableList<Post> = persistentListOf(),
         val repost: Post? = null,
     )
@@ -508,7 +508,7 @@ private fun UiTimelineV2.Post.renderSummaryHash(): Int =
 private fun UiTimelineV2.PostPresentation.renderSummaryHash(): Int =
     renderHashBuilder()
         .add(message?.renderHash)
-        .add(inlineParents.renderSummaryHash { it.renderSummaryHash() })
+        .add(inlineParents.renderSummaryHash { it.renderHash })
         .add(quotes.renderSummaryHash { it.renderSummaryHash() })
         .add(repost?.renderSummaryHash())
         .build()

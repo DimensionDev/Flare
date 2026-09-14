@@ -31,8 +31,17 @@ internal fun UiTimelineV2.applyTranslation(
     }
     if (this is UiTimelineV2.TimelinePostItem) {
         val translatedPost = post.applyTranslation(options, translations) as UiTimelineV2.Post
-        val translatedParents = presentation.inlineParents.mapTranslationIfChanged(options) { translations }
-        val translatedQuotes = presentation.quotes.mapTranslationIfChanged(options) { translations }
+        val translatedParents =
+            presentation.inlineParents.mapTranslationIfChanged {
+                it.applyTranslation(options, translations) as UiTimelineV2.TimelinePostItem
+            }
+        val translatedQuotes =
+            presentation.quotes.mapTranslationIfChanged {
+                it.applyTranslation(
+                    options,
+                    translations,
+                ) as UiTimelineV2.Post
+            }
         val translatedRepost = presentation.repost?.applyTranslation(options, translations) as? UiTimelineV2.Post
         if (
             translatedPost === post &&
@@ -203,12 +212,12 @@ internal fun UiTimelineV2.applyTranslation(
         is UiTimelineV2.TimelinePostItem -> {
             val translatedPost = post.applyTranslation(options, translationsFor(post.accountType, post.statusKey)) as UiTimelineV2.Post
             val translatedParents =
-                presentation.inlineParents.mapTranslationIfChanged(options) {
-                    translationsFor(it.accountType, it.statusKey)
+                presentation.inlineParents.mapTranslationIfChanged {
+                    it.applyTranslation(options, translationsFor) as UiTimelineV2.TimelinePostItem
                 }
             val translatedQuotes =
-                presentation.quotes.mapTranslationIfChanged(options) {
-                    translationsFor(it.accountType, it.statusKey)
+                presentation.quotes.mapTranslationIfChanged {
+                    it.applyTranslation(options, translationsFor(it.accountType, it.statusKey)) as UiTimelineV2.Post
                 }
             val translatedRepost =
                 presentation.repost?.let {
@@ -274,18 +283,17 @@ internal fun UiProfile.applyTranslation(
     }
 }
 
-private inline fun kotlinx.collections.immutable.ImmutableList<UiTimelineV2.Post>.mapTranslationIfChanged(
-    options: TranslationDisplayOptions,
-    translations: (UiTimelineV2.Post) -> List<DbTranslation>,
-): kotlinx.collections.immutable.ImmutableList<UiTimelineV2.Post> {
-    var result: MutableList<UiTimelineV2.Post>? = null
+private inline fun <T> kotlinx.collections.immutable.ImmutableList<T>.mapTranslationIfChanged(
+    transform: (T) -> T,
+): kotlinx.collections.immutable.ImmutableList<T> {
+    var result: MutableList<T>? = null
     forEachIndexed { index, post ->
-        val translated = post.applyTranslation(options, translations(post)) as UiTimelineV2.Post
+        val translated = transform(post)
         if (result != null) {
             result.add(translated)
         } else if (translated !== post) {
             result =
-                ArrayList<UiTimelineV2.Post>(size).also { copy ->
+                ArrayList<T>(size).also { copy ->
                     repeat(index) { copy += this[it] }
                     copy += translated
                 }

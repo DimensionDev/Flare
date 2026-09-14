@@ -86,6 +86,11 @@ kotlin {
                 implementation(libs.ktor.client.mock)
             }
         }
+        val jvmTest by getting {
+            dependencies {
+                implementation(projects.social.pixiv)
+            }
+        }
         val androidJvmMain by getting {
             dependencies {
                 implementation(libs.ktor.client.okhttp)

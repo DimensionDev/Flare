@@ -1,0 +1,97 @@
+name: Compose NativeKit CI
+
+on:
+  push:
+    branches:
+      - master
+      - release
+      - develop
+    paths:
+      - "compose-nativekit/**"
+      - ".github/workflows/compose-nativekit.yml"
+  pull_request:
+    branches:
+      - master
+      - release
+      - develop
+    paths:
+      - "compose-nativekit/**"
+      - ".github/workflows/compose-nativekit.yml"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  apple:
+    runs-on: [macos-26]
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          distribution: "jetbrains"
+          java-version: 25
+
+      - name: Setup Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Run Compose NativeKit checks
+        run: ./gradlew -p compose-nativekit check
+
+      - name: Generate demo project
+        run: xcodegen generate --spec compose-nativekit/demo/appleApp/project.yml
+
+      - name: Test AppKit demo layout
+        run: |
+          xcodebuild test \
+            -project compose-nativekit/demo/appleApp/ComposeNativeKitDemo.xcodeproj \
+            -scheme ComposeNativeKitDemo-macOS-Tests \
+            -destination "platform=macOS,arch=arm64" \
+            -derivedDataPath "$RUNNER_TEMP/compose-nativekit-macos-tests" \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Test AppKit demo launch
+        run: |
+          xcodebuild test \
+            -project compose-nativekit/demo/appleApp/ComposeNativeKitDemo.xcodeproj \
+            -scheme ComposeNativeKitDemo-macOS-UITests \
+            -destination "platform=macOS,arch=arm64" \
+            -derivedDataPath "$RUNNER_TEMP/compose-nativekit-macos-ui-tests"
+
+      - name: Test UIKit demo navigation
+        run: |
+          destination_id="$(
+            xcrun simctl list devices available | \
+              sed -nE 's/.*iPhone[^\(]*\(([0-9A-F-]{36})\).*/\1/p' | \
+              head -n 1
+          )"
+          test -n "$destination_id"
+          xcodebuild test \
+            -project compose-nativekit/demo/appleApp/ComposeNativeKitDemo.xcodeproj \
+            -scheme ComposeNativeKitDemo-iOS \
+            -destination "id=$destination_id" \
+            -derivedDataPath "$RUNNER_TEMP/compose-nativekit-ios-demo" \
+            -only-testing:iOSDemoUITests/ComposeNativeKitDemoNavigationTests
+
+      - name: Build AppKit demo
+        run: |
+          xcodebuild build \
+            -project compose-nativekit/demo/appleApp/ComposeNativeKitDemo.xcodeproj \
+            -scheme ComposeNativeKitDemo-macOS \
+            -destination "platform=macOS,arch=arm64" \
+            -derivedDataPath "$RUNNER_TEMP/compose-nativekit-macos-demo"
+
+          codesign --verify --deep --strict --verbose=2 \
+            "$RUNNER_TEMP/compose-nativekit-macos-demo/Build/Products/Debug/Compose NativeKit Demo.app"

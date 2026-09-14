@@ -24,8 +24,7 @@ build/
 */Pods/*
 */Flare.xcworkspace/*
 */Flare.xcodeproj/*
-/flareUI/demo/appleApp/FlareUIDemo.xcodeproj/
-/flareUI/benchmark/apple/FlareUIAppleBenchmark.xcodeproj/
+/compose-nativekit/demo/appleApp/ComposeNativeKitDemo.xcodeproj/
 shared/shared.podspec
 .kotlin
 .history

@@ -1,0 +1,4 @@
+language = Objective-C
+headers = NativeKitCollectionLayout.h
+headerFilter = NativeKitCollectionLayout.h
+package = dev.dimension.compose.nativekit.collectioninterop

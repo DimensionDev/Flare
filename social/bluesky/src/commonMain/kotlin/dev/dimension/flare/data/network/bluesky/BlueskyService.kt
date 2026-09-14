@@ -61,7 +61,7 @@ internal data class BlueskyService private constructor(
                         httpClient =
                             ktorClient {
                                 install(BaseUrlPlugin) {
-                                    this.baseUrlFlow = baseUrlFlow
+                                    this.baseUrlFlow = authTokenFlow?.map { it.baseUrl } ?: baseUrlFlow
                                 }
                             },
                         challengeSelector = { OAuthCodeChallengeMethodS256 },
@@ -125,6 +125,8 @@ private val BaseUrlPlugin =
     createClientPlugin("BaseUrlPlugin", ::BaseUrlConfig) {
         val baseUrlFlow = pluginConfig.baseUrlFlow ?: error("BaseUrlPlugin: baseUrlFlow is not set")
         onRequest { request, _ ->
+            // Metadata endpoints are absolute; only resolve the relative discovery request.
+            if (request.url.host.isNotEmpty()) return@onRequest
             baseUrlFlow.firstOrNull()?.let { baseUrl ->
                 request.url.protocol = Url(baseUrl).protocol
                 request.url.host = Url(baseUrl).host

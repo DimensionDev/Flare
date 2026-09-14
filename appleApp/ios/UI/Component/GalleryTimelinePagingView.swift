@@ -10,6 +10,7 @@ import FlareAppleCore
 
 struct UIGalleryTimelinePagingView: UIViewControllerRepresentable {
     let data: PagingState<UiTimelineV2>
+    var suppressInitialRefreshIndicator = false
     var onIsAtTopChanged: (Bool) -> Void = { _ in }
     @Environment(\.timelineAppearance) private var timelineAppearance
     @Environment(\.translateConfig) private var translateConfig
@@ -29,6 +30,7 @@ struct UIGalleryTimelinePagingView: UIViewControllerRepresentable {
         }
         controller.openURL = { url in openURL.callAsFunction(url) }
         controller.onIsAtTopChanged = onIsAtTopChanged
+        controller.suppressInitialRefreshIndicator = suppressInitialRefreshIndicator
         // Apply data before appearance so the appearance setter's reconfigure
         // sees a coherent itemIndexMap / currentSuccess pair.
         controller.update(data: data)
@@ -48,6 +50,7 @@ struct UIGalleryTimelinePagingView: UIViewControllerRepresentable {
         )
         controller.openURL = { url in openURL.callAsFunction(url) }
         controller.onIsAtTopChanged = onIsAtTopChanged
+        controller.suppressInitialRefreshIndicator = suppressInitialRefreshIndicator
     }
 }
 
@@ -87,6 +90,7 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
     private var lastProcessedUpdateSignature: UpdateSignature?
 
     var refreshCallback: (() async -> Void)?
+    var suppressInitialRefreshIndicator = false
     var openURL: ((URL) -> Void)?
     var onIsAtTopChanged: ((Bool) -> Void)?
     var appearance = GalleryUIKitAppearance(timeline: TimelineAppearance.companion.Default) {
@@ -110,6 +114,7 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
     private var heightCache: [String: CGFloat] = [:]
     private var heightCacheKeysByItemID: [String: Set<String>] = [:]
     private var isUserRefreshing = false
+    private var hasCompletedInitialRefreshCycle = false
     private var pendingScrollAnchor: ScrollAnchor?
     private var isRestoringScrollAnchor = false
     private var scrollingState = IsScrollingState()
@@ -151,6 +156,7 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
         setupCollectionView()
         setupDataSource()
         setupRefreshControl()
+        syncRefreshControl()
         if let data = currentData {
             applySnapshot(data: data)
             lastProcessedDataRef = data as AnyObject
@@ -284,6 +290,33 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
         data.isRefreshing_
     }
 
+    private func syncRefreshControl() {
+        guard let data = currentData else { return }
+        let isRefreshing = pagingIsRefreshing(data)
+        if !isRefreshing {
+            switch onEnum(of: data) {
+            case .loading:
+                break
+            case .success, .empty, .error:
+                hasCompletedInitialRefreshCycle = true
+            }
+        }
+
+        if isRefreshing {
+            guard !suppressInitialRefreshIndicator || hasCompletedInitialRefreshCycle || isUserRefreshing else {
+                if refreshControl.isRefreshing {
+                    refreshControl.endRefreshing()
+                }
+                return
+            }
+            if !refreshControl.isRefreshing, !isUserRefreshing {
+                refreshControl.beginRefreshing()
+            }
+        } else if !isUserRefreshing, refreshControl.isRefreshing {
+            refreshControl.endRefreshing()
+        }
+    }
+
     // MARK: - State
 
     func update(data: PagingState<UiTimelineV2>) {
@@ -298,13 +331,7 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
         }
         guard isViewLoaded else { return }
 
-        if pagingIsRefreshing(data) {
-            if !refreshControl.isRefreshing, !isUserRefreshing {
-                refreshControl.beginRefreshing()
-            }
-        } else if !isUserRefreshing, refreshControl.isRefreshing {
-            refreshControl.endRefreshing()
-        }
+        syncRefreshControl()
 
         if let lastRef = lastProcessedDataRef,
            lastRef === dataRef,

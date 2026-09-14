@@ -644,7 +644,7 @@ private struct GallerySideBar: View {
                     suppressInitialRefreshIndicator: true
                 )
             case .recommend:
-                UIGalleryTimelinePagingView(data: recommendations)
+                UIGalleryTimelinePagingView(data: recommendations, suppressInitialRefreshIndicator: true)
             }
         }
     }

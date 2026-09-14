@@ -562,6 +562,7 @@ private struct ProfileTimelineCollectionView: UIViewControllerRepresentable {
                 let kindChanged = self.kind != kind
                 let presenterChanged = self.presenterSource !== presenterSource
                 if kindChanged || presenterChanged {
+                    controller.resetInitialRefreshIndicatorSuppression()
                     cancellable = nil
                     timelinePresenter = nil
                     mediaPresenter = nil
@@ -694,9 +695,6 @@ private struct ProfileTimelineCollectionView: UIViewControllerRepresentable {
                     columnCount: timelineColumnCount,
                     presenterSource: tab.presenter
                 )
-                if needsBinding {
-                    controller.resetInitialRefreshIndicatorSuppression()
-                }
                 let presenter: KotlinPresenter<TimelineState>
                 if let cached = record.timelinePresenter {
                     presenter = cached
@@ -720,9 +718,6 @@ private struct ProfileTimelineCollectionView: UIViewControllerRepresentable {
                     columnCount: timelineColumnCount,
                     presenterSource: tab.presenter
                 )
-                if needsBinding {
-                    controller.resetInitialRefreshIndicatorSuppression()
-                }
                 let presenter: KotlinPresenter<ProfileMediaState>
                 if let cached = record.mediaPresenter {
                     presenter = cached

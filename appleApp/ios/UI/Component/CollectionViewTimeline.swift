@@ -318,7 +318,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     private var dataSource: UICollectionViewDiffableDataSource<Int, String>!
     private var refreshControl = UIRefreshControl()
     private var isUserRefreshing = false
-    private var shouldRevealRefreshControl = false
+    private var pendingRefreshControlOffsetY: CGFloat?
     private var hasCompletedInitialRefreshCycle = false
     private var scrollingState = IsScrollingState()
     private var lastReportedIsAtTop: Bool?
@@ -437,9 +437,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
             rememberProfileMediaScrollAnchor()
         }
         reportIsAtTop()
-        if shouldRevealRefreshControl {
-            revealRefreshControlIfNeeded()
-        }
+        revealRefreshControlIfNeeded()
         scheduleAutoplaySelection()
     }
 
@@ -1067,9 +1065,26 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         }
     }
 
+    private func pagingIsInitialLoading<Item: AnyObject>(_ data: PagingState<Item>?) -> Bool {
+        guard let data else { return true }
+        if case .loading = onEnum(of: data) {
+            return true
+        }
+        return false
+    }
+
+    private var currentPagingIsInitialLoading: Bool {
+        switch contentKind {
+        case .timeline:
+            pagingIsInitialLoading(currentData)
+        case .profileMedia:
+            pagingIsInitialLoading(currentProfileMediaData)
+        }
+    }
+
     func resetInitialRefreshIndicatorSuppression() {
         hasCompletedInitialRefreshCycle = false
-        shouldRevealRefreshControl = false
+        pendingRefreshControlOffsetY = nil
         guard isViewLoaded,
               suppressInitialRefreshIndicator,
               refreshControl.isRefreshing,
@@ -1188,7 +1203,8 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     }
 
     private func syncRefreshControl(isRefreshing: Bool) {
-        if !isRefreshing {
+        // Loading and an unbound data source are not completed refresh cycles.
+        if !isRefreshing && !currentPagingIsInitialLoading {
             hasCompletedInitialRefreshCycle = true
         }
 
@@ -1199,19 +1215,23 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
 
         if isRefreshing {
             guard !shouldSuppressInitialRefreshIndicator else {
-                shouldRevealRefreshControl = false
+                pendingRefreshControlOffsetY = nil
                 if refreshControl.isRefreshing {
                     refreshControl.endRefreshing()
                 }
                 return
             }
             if !refreshControl.isRefreshing {
+                // Capture the resting inset before UIKit adds space for the refresh control.
+                // Reading it after beginRefreshing() can count the indicator height twice.
+                pendingRefreshControlOffsetY = isUserRefreshing
+                    ? nil
+                    : -(collectionView.adjustedContentInset.top + max(refreshControl.bounds.height, 60))
                 refreshControl.beginRefreshing()
-                shouldRevealRefreshControl = !isUserRefreshing
                 revealRefreshControlIfNeeded()
             }
         } else if !isUserRefreshing {
-            shouldRevealRefreshControl = false
+            pendingRefreshControlOffsetY = nil
             if refreshControl.isRefreshing {
                 refreshControl.endRefreshing()
             }
@@ -1219,23 +1239,17 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     }
 
     private func revealRefreshControlIfNeeded() {
-        guard shouldRevealRefreshControl, refreshControl.isRefreshing else { return }
+        guard let targetOffsetY = pendingRefreshControlOffsetY,
+              refreshControl.isRefreshing else { return }
 
-        // `beginRefreshing()` alone does not make the indicator visible.
-        // Pull the collection view down far enough so the refresh control is revealed.
-        let refreshHeight = max(refreshControl.bounds.height, 60)
-        let targetOffsetY = -(collectionView.adjustedContentInset.top + refreshHeight)
-
-        guard collectionView.contentOffset.y > targetOffsetY else {
-            shouldRevealRefreshControl = false
-            return
-        }
+        // Consume the request before scrolling, which can trigger another layout pass.
+        pendingRefreshControlOffsetY = nil
+        guard collectionView.contentOffset.y > targetOffsetY else { return }
 
         collectionView.setContentOffset(
             CGPoint(x: collectionView.contentOffset.x, y: targetOffsetY),
-            animated: false
+            animated: true
         )
-        shouldRevealRefreshControl = false
     }
 
     private func reportIsAtTop() {

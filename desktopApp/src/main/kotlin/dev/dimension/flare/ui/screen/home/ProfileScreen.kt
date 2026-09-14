@@ -6,6 +6,7 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -448,30 +450,33 @@ internal fun ProfileScreen(
                                                 ),
                                         ) {
                                             val media = item.media
-                                            MediaItem(
-                                                media = media,
-                                                showCountdown = false,
-                                                modifier =
-                                                    Modifier
-                                                        .clip(FluentTheme.shapes.control)
-                                                        .padding(
-                                                            vertical = 4.dp,
-                                                        ).clipToBounds()
-                                                        .clickable {
-                                                            if (item.status.contentPostOrNull() != null) {
-                                                                onMediaClick(
-                                                                    item.statusKey,
-                                                                    item.index,
-                                                                    when (media) {
-                                                                        is UiMedia.Image -> media.previewUrl
-                                                                        is UiMedia.Video -> media.thumbnailUrl
-                                                                        is UiMedia.Gif -> media.previewUrl
-                                                                        else -> null
-                                                                    },
-                                                                )
-                                                            }
-                                                        },
-                                            )
+                                            BoxWithConstraints {
+                                                MediaItem(
+                                                    media = media,
+                                                    showCountdown = false,
+                                                    modifier =
+                                                        Modifier
+                                                            .clip(FluentTheme.shapes.control)
+                                                            .padding(
+                                                                vertical = 4.dp,
+                                                            ).heightIn(max = maxWidth * 21 / 9)
+                                                            .clipToBounds()
+                                                            .clickable {
+                                                                if (item.status.contentPostOrNull() != null) {
+                                                                    onMediaClick(
+                                                                        item.statusKey,
+                                                                        item.index,
+                                                                        when (media) {
+                                                                            is UiMedia.Image -> media.previewUrl
+                                                                            is UiMedia.Video -> media.thumbnailUrl
+                                                                            is UiMedia.Gif -> media.previewUrl
+                                                                            else -> null
+                                                                        },
+                                                                    )
+                                                                }
+                                                            },
+                                                )
+                                            }
                                         }
                                     }
                                 }

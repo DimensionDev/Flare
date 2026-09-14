@@ -1,0 +1,188 @@
+@file:OptIn(dev.dimension.compose.nativekit.LowLevelNativeKitApi::class)
+
+package dev.dimension.compose.nativekit.lazy
+
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.SaveableStateHolder
+import androidx.compose.runtime.saveable.rememberSaveableStateHolder
+import dev.dimension.compose.nativekit.EmitNativeKitWidget
+import dev.dimension.compose.nativekit.NativeKitComposable
+import dev.dimension.compose.nativekit.NativeKitModifier
+import dev.dimension.compose.nativekit.foundation.HorizontalAlignment
+import dev.dimension.compose.nativekit.foundation.VerticalAlignment
+import dev.dimension.compose.nativekit.rememberNativeKitSubcompositionFactory
+
+/**
+ * A vertically scrolling collection which composes item content only while its native cell is
+ * realized. Every item key must be unique and stable across updates.
+ *
+ * The list's main axis must receive a bounded size from its parent or [modifier].
+ */
+@Composable
+@NativeKitComposable
+public fun LazyColumn(
+    modifier: NativeKitModifier = NativeKitModifier.None,
+    state: LazyListState = rememberLazyListState(),
+    spacing: Float = 0f,
+    horizontalAlignment: HorizontalAlignment = HorizontalAlignment.Stretch,
+    content: LazyListScope.() -> Unit,
+) {
+    LazyList(
+        orientation = LazyListOrientation.Vertical,
+        modifier = modifier,
+        state = state,
+        spacing = spacing,
+        crossAxisAlignment = horizontalAlignment.toLazyAlignment(),
+        content = content,
+    )
+}
+
+/**
+ * A horizontally scrolling collection which composes item content only while its native cell is
+ * realized. Every item key must be unique and stable across updates.
+ *
+ * The list's main axis must receive a bounded size from its parent or [modifier].
+ */
+@Composable
+@NativeKitComposable
+public fun LazyRow(
+    modifier: NativeKitModifier = NativeKitModifier.None,
+    state: LazyListState = rememberLazyListState(),
+    spacing: Float = 0f,
+    verticalAlignment: VerticalAlignment = VerticalAlignment.Stretch,
+    content: LazyListScope.() -> Unit,
+) {
+    LazyList(
+        orientation = LazyListOrientation.Horizontal,
+        modifier = modifier,
+        state = state,
+        spacing = spacing,
+        crossAxisAlignment = verticalAlignment.toLazyAlignment(),
+        content = content,
+    )
+}
+
+@Composable
+@NativeKitComposable
+private fun LazyList(
+    orientation: LazyListOrientation,
+    modifier: NativeKitModifier,
+    state: LazyListState,
+    spacing: Float,
+    crossAxisAlignment: LazyCrossAxisAlignment,
+    content: LazyListScope.() -> Unit,
+) {
+    require(spacing.isFinite() && spacing >= 0f) {
+        "Lazy list spacing must be a finite, non-negative value."
+    }
+    val scope = IntervalLazyListScope().apply(content)
+    val saveableStateHolder = rememberSaveableStateHolder()
+    val saveableKeys = remember { LazySaveableKeyRegistry() }
+    val itemProvider =
+        SaveableLazyItemProvider(
+            delegate = scope.build(),
+            stateHolder = saveableStateHolder,
+            stateKeys = saveableKeys,
+        )
+    SideEffect {
+        if (itemProvider.itemCount <= MAX_EAGER_SAVEABLE_KEY_PRUNE_ITEMS) {
+            saveableKeys.removeMissingKeys(itemProvider, saveableStateHolder)
+        }
+    }
+    val model =
+        LazyCollectionModel(
+            orientation = orientation,
+            spacing = spacing,
+            crossAxisAlignment = crossAxisAlignment,
+            itemProvider = itemProvider,
+            subcompositions = rememberNativeKitSubcompositionFactory(),
+            state = state,
+        )
+    EmitNativeKitWidget(
+        componentType = LazyCollectionWidget::class,
+        modifier = modifier,
+        update = {
+            set(model, LazyCollectionWidget::setModel)
+        },
+    )
+}
+
+private class SaveableLazyItemProvider(
+    private val delegate: LazyItemProvider,
+    private val stateHolder: SaveableStateHolder,
+    private val stateKeys: LazySaveableKeyRegistry,
+) : LazyItemProvider by delegate {
+    @Composable
+    @NativeKitComposable
+    override fun Item(index: Int) {
+        val key = delegate.key(index)
+        val stateKey = stateKeys.idFor(delegate, index, key)
+        stateHolder.SaveableStateProvider(stateKey) {
+            delegate.Item(index)
+        }
+    }
+}
+
+private class LazySaveableKeyRegistry {
+    private val stateIds = mutableMapOf<Any, Long>()
+    private val validatedIndices = mutableMapOf<Any, Int>()
+    private var nextStateId: Long = 0L
+
+    fun idFor(
+        provider: LazyItemProvider,
+        index: Int,
+        key: Any,
+    ): Long {
+        val previousIndex = validatedIndices[key]
+        val duplicateInCurrentProvider =
+            previousIndex != null &&
+                previousIndex != index &&
+                previousIndex in 0 until provider.itemCount &&
+                provider.key(previousIndex) == key
+        check(!duplicateInCurrentProvider) {
+            "Lazy list key $key occurs at both index $previousIndex and $index in one provider generation."
+        }
+        validatedIndices[key] = index
+        return stateIds.getOrPut(key) { nextStateId++ }
+    }
+
+    fun removeMissingKeys(
+        provider: LazyItemProvider,
+        stateHolder: SaveableStateHolder,
+    ) {
+        // The current provider is bounded by the caller. A large browsing history must not
+        // disable cleanup when that provider shrinks or becomes empty.
+        if (stateIds.isEmpty()) return
+        val retainedKeys = mutableSetOf<Any>()
+        repeat(provider.itemCount) { index ->
+            val key = provider.key(index)
+            if (key in stateIds) retainedKeys += key
+        }
+        val removed = stateIds.keys - retainedKeys
+        removed.forEach { key ->
+            val stateId = checkNotNull(stateIds.remove(key))
+            validatedIndices.remove(key)
+            stateHolder.removeState(stateId)
+        }
+    }
+}
+
+private const val MAX_EAGER_SAVEABLE_KEY_PRUNE_ITEMS: Int = 1_000
+
+private fun HorizontalAlignment.toLazyAlignment(): LazyCrossAxisAlignment =
+    when (this) {
+        HorizontalAlignment.Start -> LazyCrossAxisAlignment.Start
+        HorizontalAlignment.Center -> LazyCrossAxisAlignment.Center
+        HorizontalAlignment.End -> LazyCrossAxisAlignment.End
+        HorizontalAlignment.Stretch -> LazyCrossAxisAlignment.Stretch
+    }
+
+private fun VerticalAlignment.toLazyAlignment(): LazyCrossAxisAlignment =
+    when (this) {
+        VerticalAlignment.Top -> LazyCrossAxisAlignment.Start
+        VerticalAlignment.Center -> LazyCrossAxisAlignment.Center
+        VerticalAlignment.Bottom -> LazyCrossAxisAlignment.End
+        VerticalAlignment.Stretch -> LazyCrossAxisAlignment.Stretch
+    }

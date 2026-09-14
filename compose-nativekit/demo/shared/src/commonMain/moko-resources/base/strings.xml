@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<resources>
+    <string name="catalog_title">Compose NativeKit Catalog</string>
+    <string name="catalog_description">Choose a feature to compare its native rendering across backends.</string>
+    <string name="open_resources_feature">Foundation and resources</string>
+    <string name="resources_feature_description">Text, buttons, rows, generated strings, plurals, and images.</string>
+    <string name="open_lazy_layouts_feature">Lazy layouts</string>
+    <string name="lazy_layouts_feature_description">Virtualized rows and columns with stable keys.</string>
+    <string name="back_to_catalog">Back to catalog</string>
+    <string name="demo_title">Compose NativeKit renderer runtime</string>
+    <string name="demo_description">One shared composition renders through the selected backend.</string>
+    <string name="count_format">Count: %d</string>
+    <string name="increment">Increment</string>
+    <string name="reset">Reset</string>
+    <string name="nativekit_mark_description">NativeKit resource image</string>
+    <string name="lazy_row_title">LazyRow: 50 cards</string>
+    <string name="lazy_column_title">LazyColumn: 10,000+ stable-key items</string>
+    <string name="lazy_card_format">Card %d</string>
+    <string name="lazy_item_format">Lazy item %d</string>
+</resources>

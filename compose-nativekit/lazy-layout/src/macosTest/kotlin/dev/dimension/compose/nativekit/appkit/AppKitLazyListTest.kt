@@ -1,0 +1,945 @@
+@file:OptIn(kotlinx.cinterop.ExperimentalForeignApi::class)
+
+package dev.dimension.compose.nativekit.appkit
+
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import dev.dimension.compose.nativekit.NativeKitContent
+import dev.dimension.compose.nativekit.NativeKitModifier
+import dev.dimension.compose.nativekit.foundation.Column
+import dev.dimension.compose.nativekit.foundation.Text
+import dev.dimension.compose.nativekit.foundation.VerticalAlignment
+import dev.dimension.compose.nativekit.lazy.LazyColumn
+import dev.dimension.compose.nativekit.lazy.LazyListState
+import dev.dimension.compose.nativekit.lazy.LazyRow
+import dev.dimension.compose.nativekit.lazy.awaitAppleUi
+import dev.dimension.compose.nativekit.lazy.items
+import kotlinx.cinterop.useContents
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import platform.AppKit.NSApplication
+import platform.AppKit.NSBackingStoreBuffered
+import platform.AppKit.NSCollectionView
+import platform.AppKit.NSCollectionViewItem
+import platform.AppKit.NSScrollView
+import platform.AppKit.NSScrollViewDidEndLiveScrollNotification
+import platform.AppKit.NSScrollViewWillStartLiveScrollNotification
+import platform.AppKit.NSStackView
+import platform.AppKit.NSTextField
+import platform.AppKit.NSView
+import platform.AppKit.NSWindow
+import platform.AppKit.NSWindowStyleMaskBorderless
+import platform.AppKit.alignmentRectForFrame
+import platform.AppKit.item
+import platform.CoreFoundation.CFRunLoopRunInMode
+import platform.CoreFoundation.kCFRunLoopDefaultMode
+import platform.CoreGraphics.CGPointMake
+import platform.CoreGraphics.CGRectMake
+import platform.Foundation.NSNotificationCenter
+import platform.Foundation.NSThread
+import kotlin.math.abs
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
+
+public class AppKitLazyListTest {
+    @Test
+    public fun aCollapsedItemCanExpandAfterItsLayoutVersionChanges() {
+        val state = LazyListState()
+
+        fun content(expanded: Boolean): NativeKitContent =
+            {
+                LazyColumn(modifier = NativeKitModifier.None.fillMaxSize(), state = state) {
+                    item(key = "changing", layoutVersion = expanded) {
+                        Text("Changing", modifier = NativeKitModifier.None.height(if (expanded) 72f else 0f))
+                    }
+                    item(key = "following") { Text("Following", modifier = NativeKitModifier.None.height(40f)) }
+                }
+            }
+        withLazyHost { host, _ ->
+            host.setContent(content(false))
+            host.awaitScrollView()
+            awaitAppleUi("The collapsed fixture did not settle.") {
+                state.layoutInfo.visibleItems
+                    .singleOrNull()
+                    ?.key == "following"
+            }
+            host.setContent(content(true))
+            awaitAppleUi("The zero-sized item was not rediscovered after expansion.") {
+                state.layoutInfo.visibleItems
+                    .singleOrNull { it.key == "changing" }
+                    ?.size == 72f &&
+                    state.layoutInfo.visibleItems
+                        .singleOrNull { it.key == "following" }
+                        ?.offset == 72f
+            }
+        }
+    }
+
+    @Test
+    public fun consecutivePrependsDuringDragKeepOriginalAnchor() {
+        assertPrependsDuringDrag(2)
+    }
+
+    @Test
+    public fun singlePrependDuringDragKeepsOriginalAnchor() {
+        assertPrependsDuringDrag(1)
+    }
+
+    private fun assertPrependsDuringDrag(prefixCount: Int) {
+        val state = LazyListState()
+
+        fun content(prefix: Int): NativeKitContent =
+            {
+                LazyColumn(modifier = NativeKitModifier.None.fillMaxSize(), state = state) {
+                    items(
+                        count = 200 + prefix,
+                        key = { it - prefix },
+                    ) { Text("Item ${it - prefix}", modifier = NativeKitModifier.None.height(48f)) }
+                }
+            }
+        withLazyHost { host, _ ->
+            host.setContent(content(0))
+            val scroll = host.awaitScrollView()
+            runBlocking { state.scrollToItem(20, 13f) }
+            NSNotificationCenter.defaultCenter.postNotificationName(NSScrollViewWillStartLiveScrollNotification, scroll)
+            for (prefix in 1..prefixCount) {
+                host.setContent(content(prefix))
+                awaitAppleUi("Prepend $prefix did not apply during live scrolling.") {
+                    state.layoutInfo.totalItemsCount == 200 + prefix && state.layoutInfo.visibleItems
+                        .firstOrNull()
+                        ?.key == 20 - prefix
+                }
+            }
+            NSNotificationCenter.defaultCenter.postNotificationName(NSScrollViewDidEndLiveScrollNotification, scroll)
+            assertEquals(
+                20,
+                state.layoutInfo.visibleItems
+                    .firstOrNull()
+                    ?.key,
+                "Earlier deferred prepend compensation was lost.",
+            )
+            assertEquals(
+                -13f,
+                state.layoutInfo.visibleItems
+                    .first()
+                    .offset,
+                absoluteTolerance = 1f,
+            )
+        }
+    }
+
+    @Test
+    public fun zeroHeightItemDoesNotLeaveAnEstimatedGap() {
+        val state = LazyListState()
+        withLazyHost { host, _ ->
+            host.setContent {
+                LazyColumn(modifier = NativeKitModifier.None.fillMaxSize(), state = state) {
+                    item(key = "collapsed") { Text("Hidden", modifier = NativeKitModifier.None.height(0f)) }
+                    item(key = "visible") { Text("Visible", modifier = NativeKitModifier.None.height(40f)) }
+                }
+            }
+            host.awaitScrollView()
+            awaitAppleUi("Zero-height fixture did not mount.") { state.layoutInfo.visibleItems.any { it.key == "visible" } }
+            assertEquals(
+                0f,
+                state.layoutInfo.visibleItems
+                    .single { it.key == "visible" }
+                    .offset,
+                absoluteTolerance = 0.5f,
+            )
+        }
+    }
+
+    @Test
+    public fun zeroWidthItemDoesNotLeaveAnEstimatedGap() {
+        val state = LazyListState()
+        withLazyHost { host, _ ->
+            host.setContent {
+                LazyRow(modifier = NativeKitModifier.None.fillMaxSize(), state = state) {
+                    item(key = "collapsed") { Text("Hidden", modifier = NativeKitModifier.None.width(0f)) }
+                    item(key = "visible") { Text("Visible", modifier = NativeKitModifier.None.width(40f)) }
+                }
+            }
+            host.awaitScrollView()
+            awaitAppleUi("Zero-width fixture did not mount.") { state.layoutInfo.visibleItems.any { it.key == "visible" } }
+            assertEquals(
+                0f,
+                state.layoutInfo.visibleItems
+                    .single { it.key == "visible" }
+                    .offset,
+                absoluteTolerance = 0.5f,
+            )
+        }
+    }
+
+    @Test
+    public fun adaptiveRecyclerMeasuresMainAxisWithoutAFixedItemContract() {
+        val state = LazyListState()
+        withLazyHost { host, _ ->
+            host.setContent {
+                LazyColumn(
+                    modifier = NativeKitModifier.None.fillMaxSize(),
+                    state = state,
+                ) {
+                    item(key = "dynamic") {
+                        Text("Dynamic", modifier = NativeKitModifier.None.height(73f))
+                    }
+                }
+            }
+
+            val scroll = host.awaitScrollView()
+            awaitAppleUi("AppKit adaptive item was not measured.") {
+                scroll.documentView?.layoutSubtreeIfNeeded()
+                state.layoutInfo.visibleItems
+                    .singleOrNull()
+                    ?.size == 73f
+            }
+
+            assertEquals(
+                73f,
+                state.layoutInfo.visibleItems
+                    .single()
+                    .size,
+                absoluteTolerance = 0.5f,
+            )
+            assertEquals(
+                73.0,
+                scroll
+                    .itemRoots()
+                    .single()
+                    .frame
+                    .useContents { size.height },
+                absoluteTolerance = 0.5,
+            )
+        }
+    }
+
+    @Test
+    public fun largeModelUpdateAndScrollingStayViewportBoundWithoutBlankItems() {
+        var count by mutableStateOf(0)
+        var keyLookups = 0
+        val state = LazyListState()
+        val content: NativeKitContent = {
+            val itemOffset = count
+            LazyColumn(
+                modifier = NativeKitModifier.None.fillMaxSize(),
+                state = state,
+            ) {
+                items(
+                    count = 10_000 + itemOffset,
+                    key = { index ->
+                        keyLookups += 1
+                        index - itemOffset
+                    },
+                    contentType = { index -> if ((index - itemOffset) % 5 == 0) "highlight" else "standard" },
+                ) { index ->
+                    val value = index - itemOffset
+                    Text(
+                        "Item $value",
+                        modifier = NativeKitModifier.None.height(if (value % 5 == 0) 52f else 36f),
+                    )
+                }
+            }
+        }
+
+        withLazyHost { host, _ ->
+            val render: (Int) -> Unit = { revision ->
+                host.setContent {
+                    check(revision >= 0)
+                    content()
+                }
+            }
+            render(0)
+            val scroll = host.awaitScrollView()
+            awaitAppleUi("AppKit large lazy list did not realize its first viewport.") {
+                state.layoutInfo.totalItemsCount == 10_000 && state.layoutInfo.visibleItems.isNotEmpty()
+            }
+
+            runBlocking { state.scrollToItem(538) }
+            awaitAppleUi("AppKit did not realize the deep anchor before the update.") {
+                state.layoutInfo.visibleItems.any { it.index == 538 }
+            }
+            val anchor = state.layoutInfo.visibleItems.first { it.offset + it.size > 0f }
+            keyLookups = 0
+            count = 1
+            render(1)
+            awaitAppleUi("AppKit did not preserve the deep stable-key anchor after the prepend.") {
+                state.layoutInfo.totalItemsCount == 10_001 &&
+                    state.layoutInfo.visibleItems.singleOrNull { it.key == anchor.key }?.let {
+                        it.index == anchor.index + 1 && abs(it.offset - anchor.offset) < 1f
+                    } == true
+            }
+            assertTrue(keyLookups < 500, "Deep prepend resolved $keyLookups keys instead of using the local anchor.")
+            assertVisibleContentMatchesLayout(scroll, state, itemOffset = 1)
+
+            listOf(24, 900, 40, 538).forEach { position ->
+                runBlocking { state.scrollToItem(position) }
+                awaitAppleUi("AppKit did not realize item $position after the update.") {
+                    state.layoutInfo.visibleItems.any { it.index == position }
+                }
+                assertVisibleContentMatchesLayout(scroll, state, itemOffset = 1)
+            }
+        }
+    }
+
+    @Test
+    public fun firstViewportDoesNotResolveEveryItemKey() {
+        var keyLookups = 0
+        withLazyHost { host, _ ->
+            host.setContent {
+                LazyColumn(modifier = NativeKitModifier.None.fillMaxSize()) {
+                    items(
+                        count = 10_000,
+                        key = { index ->
+                            keyLookups += 1
+                            index
+                        },
+                    ) { index -> Text("Item $index") }
+                }
+            }
+
+            val scroll = host.awaitScrollView()
+            awaitAppleUi("AppKit lazy viewport did not realize items.") {
+                scroll.documentView?.layoutSubtreeIfNeeded()
+                scroll.itemRoots().isNotEmpty()
+            }
+
+            assertTrue(keyLookups < 500, "First viewport resolved $keyLookups of 10,000 keys.")
+            assertTrue(scroll.itemRoots().size < 100, "The adaptive recycler realized too much overscan.")
+        }
+    }
+
+    @Test
+    public fun shrinkingTheModelCancelsAnInFlightNativeAnimation() {
+        var count by mutableIntStateOf(1_000)
+        val state = LazyListState()
+        var result: Result<Unit>? = null
+        val content: NativeKitContent = {
+            val countSnapshot = count
+            LazyColumn(modifier = NativeKitModifier.None.fillMaxSize(), state = state) {
+                items(count = countSnapshot, key = { it }) { index ->
+                    Text("Item $index", modifier = NativeKitModifier.None.height(36f))
+                }
+            }
+        }
+
+        withLazyHost { host, _ ->
+            host.setContent(content)
+            val scroll = host.awaitScrollView()
+            awaitAppleUi("AppKit cancellation fixture was not ready.") {
+                state.layoutInfo.totalItemsCount == 1_000 && state.layoutInfo.visibleItems.isNotEmpty()
+            }
+
+            CoroutineScope(Dispatchers.Unconfined).launch {
+                result = runCatching { state.animateScrollToItem(999) }
+            }
+            count = 1
+            host.setContent(content)
+
+            awaitAppleUi("AppKit did not cancel the outdated native animation.") {
+                result?.isFailure == true &&
+                    state.layoutInfo.totalItemsCount == 1 &&
+                    state.layoutInfo.visibleItems.map { it.index } == listOf(0)
+            }
+            CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.4, false)
+            assertEquals(listOf(0), state.layoutInfo.visibleItems.map { it.index })
+            assertEquals(
+                0.0,
+                scroll.contentView().bounds.useContents { origin.y },
+                absoluteTolerance = 0.5,
+            )
+        }
+    }
+
+    @Test
+    public fun horizontalOffsetSurvivesLayoutInAVisibleWindow() {
+        val state = LazyListState()
+        withLazyHost(width = 390.0, height = 780.0) { host, window ->
+            window.makeKeyAndOrderFront(null)
+            NSApplication.sharedApplication.activateIgnoringOtherApps(true)
+            host.setContent {
+                LazyRow(modifier = NativeKitModifier.None.fillMaxSize(), state = state, spacing = 4f) {
+                    items(count = 100, key = { it }) { index ->
+                        Text("Item $index", modifier = NativeKitModifier.None.width(68f))
+                    }
+                }
+            }
+            val scroll = host.awaitScrollView()
+            awaitAppleUi("The visible horizontal list did not mount.") {
+                scroll.layoutSubtreeIfNeeded()
+                state.layoutInfo.visibleItems.isNotEmpty()
+            }
+            scroll.contentView().setBoundsOrigin(CGPointMake(48.0, 0.0))
+            scroll.reflectScrolledClipView(scroll.contentView())
+            repeat(3) {
+                CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.01, false)
+                scroll.layoutSubtreeIfNeeded()
+            }
+            assertEquals(48.0, scroll.contentView().bounds.useContents { origin.x }, absoluteTolerance = 0.5)
+            runBlocking { state.scrollToItem(50, 13f) }
+            awaitAppleUi("The visible horizontal list did not reach item 50.") {
+                state.layoutInfo.visibleItems.any { it.index == 50 && abs(it.offset + 13f) < 1f }
+            }
+        }
+    }
+
+    @Test
+    public fun nativeCollectionViewSupportsBothLazyDirections() {
+        assertTrue(NSThread.isMainThread)
+        assertDirection(vertical = true) {
+            LazyColumn(modifier = NativeKitModifier.None.fillMaxSize()) {
+                items(count = 10_000, key = { it }) { index -> Text("Item $index") }
+            }
+        }
+        assertDirection(vertical = false) {
+            LazyRow(modifier = NativeKitModifier.None.fillMaxSize()) {
+                items(count = 10_000, key = { it }) { index -> Text("Item $index") }
+            }
+        }
+    }
+
+    @Test
+    public fun variableExtentsAndLayoutVersionUpdatesAreMeasuredIndividually() {
+        var expanded by mutableStateOf(false)
+        val state = LazyListState()
+        val content: NativeKitContent = {
+            LazyColumn(
+                modifier = NativeKitModifier.None.fillMaxSize(),
+                state = state,
+            ) {
+                item(key = "short") { Text("Short", modifier = NativeKitModifier.None.height(32f)) }
+                item(key = "dynamic", layoutVersion = expanded) {
+                    Text("Dynamic", modifier = NativeKitModifier.None.height(if (expanded) 126f else 88f))
+                }
+            }
+        }
+
+        withLazyHost { host, _ ->
+            host.setContent(content)
+            host.awaitScrollView()
+            awaitAppleUi("AppKit variable lazy items were not measured.") {
+                state.layoutInfo.visibleItems.map { it.size } == listOf(32f, 88f)
+            }
+
+            expanded = true
+            host.setContent(content)
+            awaitAppleUi("AppKit did not invalidate the changed layout version.") {
+                state.layoutInfo.visibleItems
+                    .singleOrNull { it.key == "dynamic" }
+                    ?.size == 126f
+            }
+            assertEquals(
+                126f,
+                state.layoutInfo.visibleItems
+                    .single { it.key == "dynamic" }
+                    .size,
+            )
+        }
+    }
+
+    @Test
+    public fun visibleItemRemeasuresWhenItsIntrinsicContentChanges() {
+        var expanded by mutableStateOf(false)
+        val state = LazyListState()
+        val content: NativeKitContent = {
+            val expandedSnapshot = expanded
+            LazyColumn(
+                modifier = NativeKitModifier.None.fillMaxSize(),
+                state = state,
+            ) {
+                item(key = "timeline-post") {
+                    Column(spacing = 4f) {
+                        Text("Timeline title")
+                        if (expandedSnapshot) {
+                            Text("First dynamic body line")
+                            Text("Second dynamic body line")
+                            Text("Third dynamic body line")
+                        }
+                    }
+                }
+            }
+        }
+        withLazyHost { host, _ ->
+            host.setContent(content)
+            host.awaitScrollView()
+            awaitAppleUi("AppKit intrinsic timeline item was not measured.") {
+                state.layoutInfo.visibleItems
+                    .singleOrNull()
+                    ?.size
+                    ?.let { it > 0f } == true
+            }
+            val collapsedSize =
+                state.layoutInfo.visibleItems
+                    .single()
+                    .size
+
+            expanded = true
+            host.setContent(content)
+            awaitAppleUi("AppKit did not remeasure intrinsic content after recomposition.") {
+                state.layoutInfo.visibleItems
+                    .singleOrNull()
+                    ?.size
+                    ?.let { it > collapsedSize + 20f } == true
+            }
+        }
+    }
+
+    @Test
+    public fun lazyGeometryMatchesTheSharedSpacingAndAlignmentContract() {
+        val columnState = LazyListState()
+        withLazyHost(width = 200.0, height = 120.0) { host, _ ->
+            host.setContent {
+                LazyColumn(
+                    modifier = NativeKitModifier.None.width(200f).height(120f),
+                    state = columnState,
+                    spacing = 6f,
+                ) {
+                    item(key = "first") { Text("First", modifier = NativeKitModifier.None.height(32f)) }
+                    item(key = "second") { Text("Second", modifier = NativeKitModifier.None.height(48f)) }
+                }
+            }
+            val scroll = host.awaitScrollView()
+            awaitAppleUi("AppKit column geometry did not settle.") {
+                val items = columnState.layoutInfo.visibleItems
+                items.size == 2 && items[0].size == 32f && items[1].offset == 38f && items[1].size == 48f
+            }
+
+            assertTrue(scroll.hasVerticalScroller)
+            assertTrue(!scroll.hasHorizontalScroller)
+            val firstRoot = scroll.itemRoots().minBy { it.frame.useContents { origin.y } }
+            val firstLabel = firstRoot.arrangedSubviews.single() as NSView
+            val alignmentRect = firstLabel.alignmentRectForFrame(firstLabel.frame)
+            assertEquals(200.0, alignmentRect.useContents { size.width }, absoluteTolerance = 1.0)
+        }
+
+        val rowState = LazyListState()
+        withLazyHost(width = 200.0, height = 80.0) { host, _ ->
+            host.setContent {
+                LazyRow(
+                    modifier = NativeKitModifier.None.width(200f).height(80f),
+                    state = rowState,
+                    spacing = 6f,
+                    verticalAlignment = VerticalAlignment.Center,
+                ) {
+                    item(key = "first") { Text("First", modifier = NativeKitModifier.None.width(40f).height(24f)) }
+                    item(key = "second") { Text("Second", modifier = NativeKitModifier.None.width(60f).height(24f)) }
+                }
+            }
+            val scroll = host.awaitScrollView()
+            awaitAppleUi("AppKit row geometry did not settle.") {
+                val items = rowState.layoutInfo.visibleItems
+                items.size == 2 && items[0].size == 40f && items[1].offset == 46f && items[1].size == 60f
+            }
+
+            assertTrue(!scroll.hasVerticalScroller)
+            assertTrue(scroll.hasHorizontalScroller)
+            val firstRoot = scroll.itemRoots().minBy { it.frame.useContents { origin.x } }
+            assertEquals(80.0, firstRoot.frame.useContents { size.height }, absoluteTolerance = 0.5)
+            val firstLabel = firstRoot.arrangedSubviews.single() as NSView
+            assertEquals(28.0, firstLabel.frame.useContents { origin.y }, absoluteTolerance = 1.0)
+        }
+    }
+
+    @Test
+    public fun prependKeepsTheStableKeyAnchorWithVariableExtents() {
+        var items by mutableStateOf((0 until 100).toList())
+        val state = LazyListState()
+        val content: NativeKitContent = {
+            val reverseContentTypes = items.size > 100
+            LazyColumn(
+                modifier = NativeKitModifier.None.fillMaxSize(),
+                state = state,
+            ) {
+                items(
+                    items = items,
+                    key = { it },
+                    contentType = { if ((it % 2 == 0) xor reverseContentTypes) "even" else "odd" },
+                ) { item ->
+                    Text("Item $item", modifier = NativeKitModifier.None.height(if (item % 2 == 0) 36f else 64f))
+                }
+            }
+        }
+
+        withLazyHost { host, _ ->
+            host.setContent(content)
+            host.awaitScrollView()
+            awaitAppleUi("AppKit lazy list was not ready for prepend.") {
+                state.layoutInfo.totalItemsCount == 100
+            }
+            runBlocking { state.scrollToItem(index = 20, scrollOffset = 17f) }
+            awaitAppleUi("AppKit anchor did not settle before prepend.") {
+                state.layoutInfo.visibleItems
+                    .singleOrNull { it.key == 20 }
+                    ?.offset
+                    ?.let { abs(it + 17f) < 1f } == true
+            }
+
+            items = listOf(-2, -1) + items
+            host.setContent(content)
+            awaitAppleUi("AppKit did not restore the stable-key anchor after prepend.") {
+                state.layoutInfo.totalItemsCount == 102 &&
+                    state.layoutInfo.visibleItems
+                        .singleOrNull { it.key == 20 }
+                        ?.offset
+                        ?.let { abs(it + 17f) < 1f } == true
+            }
+        }
+    }
+
+    @Test
+    public fun crossAxisResizeKeepsTheDeepStableKeyAnchor() {
+        val state = LazyListState()
+        withLazyHost { host, _ ->
+            host.setContent {
+                LazyColumn(
+                    modifier = NativeKitModifier.None.fillMaxSize(),
+                    state = state,
+                ) {
+                    items(count = 200, key = { it }) { index ->
+                        Text("Item $index", modifier = NativeKitModifier.None.height(if (index % 2 == 0) 36f else 64f))
+                    }
+                }
+            }
+
+            val scroll = host.awaitScrollView()
+            awaitAppleUi("AppKit resize fixture was not ready.") {
+                state.layoutInfo.totalItemsCount == 200 && state.layoutInfo.visibleItems.isNotEmpty()
+            }
+            runBlocking { state.scrollToItem(index = 80, scrollOffset = 17f) }
+            awaitAppleUi("AppKit resize anchor did not settle.") {
+                state.layoutInfo.visibleItems
+                    .singleOrNull { it.key == 80 }
+                    ?.offset
+                    ?.let { abs(it + 17f) < 1f } == true
+            }
+
+            scroll.setFrame(CGRectMake(0.0, 0.0, 220.0, 480.0))
+            scroll.needsLayout = true
+            awaitAppleUi("AppKit cross-axis resize changed the deep stable-key anchor.") {
+                scroll.layoutSubtreeIfNeeded()
+                state.layoutInfo.visibleItems
+                    .singleOrNull { it.key == 80 }
+                    ?.offset
+                    ?.let { abs(it + 17f) < 1f } == true
+            }
+        }
+    }
+
+    @Test
+    public fun modelUpdateDuringLiveScrollPreservesSubsequentPhysicalScrollDelta() {
+        var items by mutableStateOf((0 until 100).toList())
+        val state = LazyListState()
+        val content: NativeKitContent = {
+            LazyColumn(
+                modifier = NativeKitModifier.None.fillMaxSize(),
+                state = state,
+            ) {
+                items(items = items, key = { it }) { item ->
+                    Text("Item $item", modifier = NativeKitModifier.None.height(if (item % 2 == 0) 36f else 64f))
+                }
+            }
+        }
+
+        withLazyHost { host, _ ->
+            host.setContent(content)
+            val scroll = host.awaitScrollView()
+            awaitAppleUi("AppKit live-scroll update fixture was not ready.") {
+                state.layoutInfo.totalItemsCount == 100
+            }
+            runBlocking { state.scrollToItem(index = 20, scrollOffset = 17f) }
+            awaitAppleUi("AppKit live-scroll update anchor did not settle.") {
+                state.layoutInfo.visibleItems
+                    .singleOrNull { it.key == 20 }
+                    ?.offset
+                    ?.let { abs(it + 17f) < 1f } == true
+            }
+
+            val notificationCenter = NSNotificationCenter.defaultCenter
+            notificationCenter.postNotificationName(NSScrollViewWillStartLiveScrollNotification, `object` = scroll)
+            val offsetAtUpdate = scroll.contentView().bounds.useContents { origin.y }
+            items = listOf(-2, -1) + items
+            host.setContent(content)
+            scroll.contentView().setBoundsOrigin(CGPointMake(0.0, offsetAtUpdate + 12.0))
+            scroll.reflectScrolledClipView(scroll.contentView())
+            notificationCenter.postNotificationName(NSScrollViewDidEndLiveScrollNotification, `object` = scroll)
+
+            awaitAppleUi("AppKit model update discarded the live-scroll delta.") {
+                state.layoutInfo.totalItemsCount == 102 &&
+                    state.layoutInfo.visibleItems
+                        .singleOrNull { it.key == 20 }
+                        ?.let { it.index == 22 && abs(it.offset + 29f) < 1f } == true
+            }
+        }
+    }
+
+    @Test
+    public fun prependPreservesTheVisibleItemCompositionAndNativeContent() {
+        val state = LazyListState()
+        val created = mutableMapOf<Int, Int>()
+        val disposed = mutableMapOf<Int, Int>()
+
+        fun content(prefix: Int): NativeKitContent =
+            {
+                LazyColumn(modifier = NativeKitModifier.None.fillMaxSize(), state = state) {
+                    items(count = 10_000 + prefix, key = { it - prefix }) { index ->
+                        val key = index - prefix
+                        DisposableEffect(key) {
+                            created[key] = (created[key] ?: 0) + 1
+                            onDispose { disposed[key] = (disposed[key] ?: 0) + 1 }
+                        }
+                        Text("Item $key", modifier = NativeKitModifier.None.height(60f))
+                    }
+                }
+            }
+        withLazyHost { host, _ ->
+            host.setContent(content(0))
+            val scroll = host.awaitScrollView()
+            awaitAppleUi("The insertion fixture did not mount.") { state.layoutInfo.visibleItems.isNotEmpty() }
+            runBlocking { state.scrollToItem(500, 13f) }
+            awaitAppleUi("The insertion anchor did not settle.") {
+                state.layoutInfo.visibleItems
+                    .firstOrNull()
+                    ?.let { it.key == 500 && abs(it.offset + 13f) < 1f } == true
+            }
+            val beforeCreated = created[500]
+            val beforeDisposed = disposed[500]
+            val originalRoot = scroll.itemRoots().first()
+            val originalText = originalRoot.arrangedSubviews.single()
+            host.setContent(content(20))
+            awaitAppleUi("The insertion lost the anchor.") {
+                state.layoutInfo.totalItemsCount == 10_020 &&
+                    state.layoutInfo.visibleItems
+                        .firstOrNull()
+                        ?.let { it.key == 500 && it.index == 520 && abs(it.offset + 13f) < 1f } ==
+                    true
+            }
+            assertEquals(beforeCreated, created[500], "Prepending rebuilt a retained item.")
+            assertEquals(beforeDisposed, disposed[500], "Prepending disposed a retained item.")
+            assertTrue(scroll.itemRoots().first() === originalRoot)
+            assertEquals(originalText, originalRoot.arrangedSubviews.single())
+            host.setContent(content(0))
+            awaitAppleUi("Removing the prefix lost the anchor.") {
+                state.layoutInfo.totalItemsCount == 10_000 &&
+                    state.layoutInfo.visibleItems
+                        .firstOrNull()
+                        ?.let { it.key == 500 && it.index == 500 && abs(it.offset + 13f) < 1f } ==
+                    true
+            }
+            assertEquals(beforeCreated, created[500])
+            assertEquals(beforeDisposed, disposed[500])
+            assertTrue(scroll.itemRoots().first() === originalRoot)
+        }
+    }
+
+    @Test
+    public fun contentModelUpdateKeepsTheRealizedNativeRoot() {
+        var label by mutableStateOf("Before")
+        var created = 0
+        var disposed = 0
+        val content: NativeKitContent = {
+            val labelSnapshot = label
+            LazyColumn(modifier = NativeKitModifier.None.fillMaxSize()) {
+                item(key = "stable", contentType = labelSnapshot, layoutVersion = Unit) {
+                    DisposableEffect(Unit) {
+                        created += 1
+                        onDispose { disposed += 1 }
+                    }
+                    Text(labelSnapshot, modifier = NativeKitModifier.None.height(40f))
+                }
+            }
+        }
+
+        withLazyHost { host, _ ->
+            host.setContent(content)
+            val scroll = host.awaitScrollView()
+            lateinit var originalRoot: NSStackView
+            awaitAppleUi("AppKit content-update fixture was not ready.") {
+                originalRoot = scroll.itemRoots().singleOrNull() ?: return@awaitAppleUi false
+                (originalRoot.arrangedSubviews.singleOrNull() as? NSTextField)?.stringValue == "Before"
+            }
+
+            val originalText = originalRoot.arrangedSubviews.single()
+            label = "After"
+            host.setContent(content)
+
+            lateinit var updatedRoot: NSStackView
+            awaitAppleUi("AppKit content-only update did not reach the realized item.") {
+                updatedRoot = scroll.itemRoots().singleOrNull() ?: return@awaitAppleUi false
+                (updatedRoot.arrangedSubviews.singleOrNull() as? NSTextField)?.stringValue == "After"
+            }
+            assertTrue(updatedRoot === originalRoot, "AppKit recycled the native root for an in-place model update.")
+            assertEquals(originalText, updatedRoot.arrangedSubviews.single(), "The stable item rebuilt its native content.")
+            assertEquals(1, created, "A content update recreated the item composition.")
+            assertEquals(0, disposed)
+        }
+    }
+
+    @Test
+    public fun stateScrollsToAnUnmeasuredItemWithOffsetAndReportsTheViewport() {
+        val state = LazyListState()
+        withLazyHost { host, _ ->
+            host.setContent {
+                LazyColumn(
+                    modifier = NativeKitModifier.None.fillMaxSize(),
+                    state = state,
+                ) {
+                    items(count = 100, key = { it }, contentType = { it % 3 }) { index ->
+                        Text("Item $index", modifier = NativeKitModifier.None.height((28 + index % 3 * 17).toFloat()))
+                    }
+                }
+            }
+            host.awaitScrollView()
+            awaitAppleUi("AppKit lazy list was not ready for programmatic scrolling.") {
+                state.layoutInfo.totalItemsCount == 100
+            }
+
+            runBlocking { state.scrollToItem(index = 40, scrollOffset = 13f) }
+            awaitAppleUi("AppKit did not settle the requested dynamic item offset.") {
+                state.layoutInfo.visibleItems
+                    .singleOrNull { it.index == 40 }
+                    ?.offset
+                    ?.let { abs(it + 13f) < 1f } == true
+            }
+            assertEquals(100, state.layoutInfo.totalItemsCount)
+        }
+    }
+
+    @Test
+    public fun nativeReuseDisposesOffscreenContentAndRestoresSaveableState() {
+        val active = mutableSetOf<Int>()
+        val tokens = mutableMapOf<Int, Int>()
+        var nextToken = 0
+        val state = LazyListState()
+        withLazyHost { host, _ ->
+            host.setContent {
+                LazyColumn(modifier = NativeKitModifier.None.fillMaxSize(), state = state) {
+                    items(count = 2_000, key = { it }, contentType = { it % 3 }) { index ->
+                        val token = rememberSaveable { nextToken++ }
+                        SideEffect { tokens[index] = token }
+                        DisposableEffect(index) {
+                            check(active.add(index))
+                            onDispose { active.remove(index) }
+                        }
+                        Text("Item $index", modifier = NativeKitModifier.None.height(36f))
+                    }
+                }
+            }
+            host.awaitScrollView()
+            awaitAppleUi("The first native item was not composed.") { 0 in active && 0 in tokens }
+            val originalToken = tokens.getValue(0)
+
+            runBlocking { state.scrollToItem(1_500) }
+            awaitAppleUi("The native collection retained an offscreen composition.") {
+                1_500 in active && 0 !in active
+            }
+            assertTrue(active.size < 100, "Native realization retained ${active.size} compositions.")
+
+            runBlocking { state.scrollToItem(0) }
+            awaitAppleUi("The native collection did not restore the first item.") { 0 in active }
+            assertEquals(originalToken, tokens.getValue(0))
+        }
+        assertTrue(active.isEmpty(), "Disposing the host leaked item compositions.")
+    }
+
+    private fun assertDirection(
+        vertical: Boolean,
+        content: NativeKitContent,
+    ) {
+        withLazyHost { host, _ ->
+            host.setContent(content)
+            val scroll = host.awaitScrollView()
+            awaitAppleUi("AppKit lazy direction did not settle.") {
+                scroll.documentView?.layoutSubtreeIfNeeded()
+                val document = scroll.documentView?.frame?.useContents { size.width to size.height }
+                val viewport = scroll.contentView().bounds.useContents { size.width to size.height }
+                scroll.itemRoots().isNotEmpty() && document != null &&
+                    if (vertical) document.second > viewport.second else document.first > viewport.first
+            }
+            assertEquals(vertical, scroll.hasVerticalScroller)
+            assertEquals(!vertical, scroll.hasHorizontalScroller)
+            val documentSize = checkNotNull(scroll.documentView).frame.useContents { size.width to size.height }
+            val viewportSize = scroll.contentView().bounds.useContents { size.width to size.height }
+            if (vertical) {
+                assertTrue(documentSize.second > viewportSize.second, "Vertical document=$documentSize viewport=$viewportSize")
+            } else {
+                assertTrue(documentSize.first > viewportSize.first, "Horizontal document=$documentSize viewport=$viewportSize")
+            }
+            assertTrue(scroll.itemRoots().size < 100, "Realized ${scroll.itemRoots().size} roots")
+        }
+    }
+
+    private fun assertVisibleContentMatchesLayout(
+        scroll: NSScrollView,
+        state: LazyListState,
+        itemOffset: Int,
+    ) {
+        val labels =
+            scroll
+                .itemRoots()
+                .mapNotNull { it.arrangedSubviews.singleOrNull() as? NSTextField }
+                .map { it.stringValue }
+                .toSet()
+        state.layoutInfo.visibleItems.forEach { item ->
+            assertTrue(
+                "Item ${item.index - itemOffset}" in labels,
+                "Visible item ${item.index} rendered a blank or stale view. labels=$labels",
+            )
+        }
+    }
+
+    private fun withLazyHost(
+        width: Double = 320.0,
+        height: Double = 480.0,
+        block: (NativeKitAppKitHost, NSWindow) -> Unit,
+    ) {
+        NSApplication.sharedApplication
+        val window =
+            NSWindow(
+                contentRect = CGRectMake(0.0, 0.0, width, height),
+                styleMask = NSWindowStyleMaskBorderless,
+                backing = NSBackingStoreBuffered,
+                defer = false,
+            )
+        window.releasedWhenClosed = false
+        val root = NSView(frame = window.contentView?.frame ?: CGRectMake(0.0, 0.0, width, height))
+        window.contentView = root
+        val host = NativeKitAppKitHost(createAppKitWidgetSystem(AppKitLazyLayoutRendererPlugin))
+        try {
+            host.view.frame = root.bounds
+            root.addSubview(host.view)
+            block(host, window)
+        } finally {
+            host.dispose()
+            window.close()
+        }
+    }
+
+    private fun NativeKitAppKitHost.awaitScrollView(): NSScrollView {
+        var scroll: NSScrollView? = null
+        awaitAppleUi("AppKit adaptive lazy scroll view was not created.") {
+            view.layoutSubtreeIfNeeded()
+            scroll = view.arrangedSubviews.filterIsInstance<NSScrollView>().singleOrNull()
+            scroll?.frame = view.bounds
+            scroll?.layoutSubtreeIfNeeded()
+            scroll != null
+        }
+        return checkNotNull(scroll).also { assertTrue(it.documentView is NSCollectionView) }
+    }
+
+    private fun NSScrollView.itemRoots(): List<NSStackView> {
+        val collection = documentView as NSCollectionView
+        return collection
+            .visibleItems()
+            .filterIsInstance<NSCollectionViewItem>()
+            .sortedBy { collection.indexPathForItem(it)?.item }
+            .mapNotNull { it.view as? NSStackView }
+    }
+}

@@ -1,0 +1,191 @@
+name: ComposeNativeKitDemo
+
+options:
+  minimumXcodeGenVersion: 2.45.4
+  developmentLanguage: en
+  defaultConfig: Debug
+  deploymentTarget:
+    iOS: "17.0"
+    macOS: "13.0"
+
+configs:
+  Debug: debug
+  Release: release
+
+settings:
+  base:
+    CODE_SIGN_STYLE: Automatic
+    ENABLE_USER_SCRIPT_SANDBOXING: NO
+    "EXCLUDED_ARCHS[sdk=iphonesimulator*]": x86_64
+    SWIFT_VERSION: "6.0"
+
+targets:
+  iOSDemo:
+    type: application
+    platform: iOS
+    sources:
+      - path: Sources/iOS
+    settings:
+      base:
+        ASSETCATALOG_COMPILER_APPICON_NAME: ""
+        FRAMEWORK_SEARCH_PATHS:
+          - "$(inherited)"
+          - "$(SRCROOT)/../shared/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)"
+        GENERATE_INFOPLIST_FILE: NO
+        INFOPLIST_FILE: Info-iOS.plist
+        OTHER_LDFLAGS: "$(inherited) -framework ComposeNativeKit"
+        PRODUCT_BUNDLE_IDENTIFIER: dev.dimension.compose.nativekit.demo.ios
+        PRODUCT_NAME: Compose NativeKit Demo
+        TARGETED_DEVICE_FAMILY: "1,2"
+    postBuildScripts:
+      - name: Copy Moko resources
+        basedOnDependencyAnalysis: false
+        script: |
+          cd "$SRCROOT/../../.."
+          ./gradlew -p compose-nativekit :demo:shared:copyFrameworkResourcesToApp \
+            -Pmoko.resources.PLATFORM_NAME="$PLATFORM_NAME" \
+            -Pmoko.resources.CONFIGURATION="${KOTLIN_FRAMEWORK_BUILD_TYPE:-$CONFIGURATION}" \
+            -Pmoko.resources.ARCHS="$ARCHS" \
+            -Pmoko.resources.BUILT_PRODUCTS_DIR="$BUILT_PRODUCTS_DIR" \
+            -Pmoko.resources.CONTENTS_FOLDER_PATH="$UNLOCALIZED_RESOURCES_FOLDER_PATH"
+
+  iOSDemoUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: Tests/iOSUITests
+    dependencies:
+      - target: iOSDemo
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        PRODUCT_BUNDLE_IDENTIFIER: dev.dimension.compose.nativekit.demo.ios.uitests
+        TEST_TARGET_NAME: iOSDemo
+
+  macOSDemo:
+    type: application
+    platform: macOS
+    sources:
+      - path: Sources/macOS
+    settings:
+      base:
+        ASSETCATALOG_COMPILER_APPICON_NAME: ""
+        FRAMEWORK_SEARCH_PATHS:
+          - "$(inherited)"
+          - "$(SRCROOT)/../shared/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)"
+        GENERATE_INFOPLIST_FILE: NO
+        INFOPLIST_FILE: Info-macOS.plist
+        OTHER_LDFLAGS: "$(inherited) -framework ComposeNativeKit"
+        PRODUCT_BUNDLE_IDENTIFIER: dev.dimension.compose.nativekit.demo.macos
+        PRODUCT_NAME: Compose NativeKit Demo
+        ARCHS: arm64
+    postBuildScripts:
+      - name: Copy Moko resources
+        basedOnDependencyAnalysis: false
+        script: |
+          cd "$SRCROOT/../../.."
+          ./gradlew -p compose-nativekit :demo:shared:copyFrameworkResourcesToApp \
+            -Pmoko.resources.PLATFORM_NAME="$PLATFORM_NAME" \
+            -Pmoko.resources.CONFIGURATION="${KOTLIN_FRAMEWORK_BUILD_TYPE:-$CONFIGURATION}" \
+            -Pmoko.resources.ARCHS="$ARCHS" \
+            -Pmoko.resources.BUILT_PRODUCTS_DIR="$BUILT_PRODUCTS_DIR" \
+            -Pmoko.resources.CONTENTS_FOLDER_PATH="$UNLOCALIZED_RESOURCES_FOLDER_PATH"
+
+  macOSDemoTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - path: Tests/macOS
+      - path: Sources/macOS/ComposeNativeKitAppKitDemoLayout.swift
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        PRODUCT_BUNDLE_IDENTIFIER: dev.dimension.compose.nativekit.demo.macos.tests
+        ARCHS: arm64
+
+  macOSDemoUITests:
+    type: bundle.ui-testing
+    platform: macOS
+    sources:
+      - path: Tests/macOSUITests
+    dependencies:
+      - target: macOSDemo
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        PRODUCT_BUNDLE_IDENTIFIER: dev.dimension.compose.nativekit.demo.macos.uitests
+        TEST_TARGET_NAME: macOSDemo
+        ARCHS: arm64
+
+schemes:
+  ComposeNativeKitDemo-iOS:
+    build:
+      preActions:
+        - name: Compile Kotlin
+          settingsTarget: iOSDemo
+          script: |
+            cd "$SRCROOT/../../.."
+            export ARCHS=arm64
+            if [ -n "${GRADLE_JVM_ARGS:-}" ]; then
+              ./gradlew -p compose-nativekit "-Dorg.gradle.jvmargs=$GRADLE_JVM_ARGS" :demo:shared:embedAndSignAppleFrameworkForXcode
+            else
+              ./gradlew -p compose-nativekit :demo:shared:embedAndSignAppleFrameworkForXcode
+            fi
+      targets:
+        iOSDemo: all
+        iOSDemoUITests: test
+    test:
+      config: Debug
+      targets:
+        - iOSDemoUITests
+    run:
+      config: Debug
+    profile:
+      config: Release
+    analyze:
+      config: Debug
+    archive:
+      config: Release
+
+  ComposeNativeKitDemo-macOS:
+    build:
+      preActions:
+        - name: Compile Kotlin
+          settingsTarget: macOSDemo
+          script: |
+            cd "$SRCROOT/../../.."
+            export ARCHS=arm64
+            if [ -n "${GRADLE_JVM_ARGS:-}" ]; then
+              ./gradlew -p compose-nativekit "-Dorg.gradle.jvmargs=$GRADLE_JVM_ARGS" :demo:shared:embedAndSignAppleFrameworkForXcode
+            else
+              ./gradlew -p compose-nativekit :demo:shared:embedAndSignAppleFrameworkForXcode
+            fi
+      targets:
+        macOSDemo: all
+    run:
+      config: Debug
+    profile:
+      config: Release
+    analyze:
+      config: Debug
+    archive:
+      config: Release
+
+  ComposeNativeKitDemo-macOS-Tests:
+    build:
+      targets:
+        macOSDemoTests: test
+    test:
+      config: Debug
+      targets:
+        - macOSDemoTests
+
+  ComposeNativeKitDemo-macOS-UITests:
+    build:
+      targets:
+        macOSDemo: all
+        macOSDemoUITests: test
+    test:
+      config: Debug
+      targets:
+        - macOSDemoUITests

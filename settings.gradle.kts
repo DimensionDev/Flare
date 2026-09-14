@@ -22,6 +22,7 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "Flare"
+includeBuild("compose-nativekit")
 include(":app")
 include(":shared")
 include(":social:bluesky")

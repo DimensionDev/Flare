@@ -18,10 +18,13 @@ local.properties
 signing.properties
 
 build/
+.build/
+.swiftpm/
 */Podfile.lock
 */Pods/*
 */Flare.xcworkspace/*
 */Flare.xcodeproj/*
+/compose-nativekit/demo/appleApp/ComposeNativeKitDemo.xcodeproj/
 shared/shared.podspec
 .kotlin
 .history

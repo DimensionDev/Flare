@@ -41,6 +41,53 @@ import kotlin.test.assertTrue
 
 class LazyListDslTest {
     @Test
+    fun removedSaveableKeysArePrunedAfterLargeTraversal() {
+        assertRemovedSaveableKeysArePruned(1_001)
+    }
+
+    @Test
+    fun removedSaveableKeysArePrunedBelowThreshold() {
+        assertRemovedSaveableKeysArePruned(1_000)
+    }
+
+    private fun assertRemovedSaveableKeysArePruned(initialCount: Int) {
+        val widget = RecordingLazyCollectionWidget()
+        var count by mutableStateOf(initialCount)
+        var nextToken = 0
+        val content: FlareContent = {
+            LazyColumn {
+                items(count = count, key = { it }) {
+                    val token = rememberSaveable { nextToken++ }
+                    TestLeaf("Token $token")
+                }
+            }
+        }
+        HeadlessTestHost(RecordingChildren(), testWidgetSystem(widget)).use { host ->
+            host.setContent(content)
+            repeat(initialCount) { index ->
+                val itemHost = widget.coordinator.createItemHost(RecordingChildren())
+                itemHost.bind(index)
+                itemHost.dispose()
+            }
+            host.awaitIdle()
+            assertEquals(initialCount, nextToken)
+            count = 0
+            host.awaitIdle()
+            assertEquals(0, widget.currentModel?.itemProvider?.itemCount)
+            count = 1
+            host.awaitIdle()
+            val restoredRoot = RecordingChildren()
+            widget.coordinator.createItemHost(restoredRoot).bind(0)
+            host.awaitIdle()
+            assertEquals(
+                "Token $initialCount",
+                (restoredRoot.widgets.single() as RecordingLeafWidget).renderedText,
+                "State for a key removed by the empty dataset was retained after crossing the pruning threshold.",
+            )
+        }
+    }
+
+    @Test
     fun rebindingTheSameItemInTheSameModelKeepsItsComposition() {
         var contentUpdates = 0
         val factory =

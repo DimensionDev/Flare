@@ -85,6 +85,7 @@ internal class NativeLazyCollectionController(
     private var disposed = false
     private var physicalScrollInProgress = false
     private var programmaticScrollInProgress = false
+    private var animationGeneration = 0L
 
     // Native data-source counts and attributes always refer to the same applied generation.
     var model: LazyCollectionModel? = null
@@ -99,7 +100,7 @@ internal class NativeLazyCollectionController(
         get() = physicalScrollInProgress || native.isPhysicalScrollInProgress
 
     fun setModel(value: LazyCollectionModel) {
-        if (!modelResetPending) pendingAnchor = captureAnchor() ?: pendingAnchor
+        if (pendingAnchor == null) pendingAnchor = captureAnchor()
         if (isPhysicalScroll) pendingAnchor = pendingAnchor?.copy(preserveViewportDelta = true)
         coordinator.setModel(value)
     }
@@ -187,6 +188,8 @@ internal class NativeLazyCollectionController(
     fun layout() {
         if (disposed || layingOut) return
         val current = coordinator.model ?: return
+        var interruptedScroll: LazyListScrollRequest? = null
+        var geometryUnsettled = false
         layingOut = true
         try {
             val nextViewport = native.viewport(current.orientation)
@@ -199,6 +202,13 @@ internal class NativeLazyCollectionController(
                 )
             val environmentChanged = environment != nextEnvironment
             if (modelResetPending || environmentChanged || nativeReloadPending) {
+                // Layout corrections can stop the platform animation. Retarget the same request
+                // after applying this generation, and ignore completion from its old animation.
+                interruptedScroll = pendingScroll.takeUnless { programmaticScrollInProgress }
+                if (interruptedScroll != null) {
+                    animationGeneration++
+                    native.stopAnimatedScroll()
+                }
                 val splice =
                     if (!nativeReloadPending && model != null &&
                         !environmentChanged
@@ -213,13 +223,14 @@ internal class NativeLazyCollectionController(
                             val index = binding.host.index
                             index in 0 until current.itemProvider.itemCount && current.itemProvider.key(index) == binding.host.key
                         }
-                if (!modelResetPending) pendingAnchor = captureAnchor() ?: pendingAnchor
+                val geometrySplice = splice?.let { geometrySplice(checkNotNull(model).itemProvider, current.itemProvider, it) }
+                if (pendingAnchor == null) pendingAnchor = captureAnchor()
                 modelResetPending = false
                 nativeReloadPending = false
                 val applyModel = {
                     model = current
                     environment = nextEnvironment
-                    geometry.update(current.itemProvider, current.spacing.toDouble(), nextEnvironment)
+                    geometry.update(current.itemProvider, current.spacing.toDouble(), nextEnvironment, geometrySplice)
                 }
                 if (splice != null) {
                     native.updateItems(splice.index, splice.removed, splice.inserted) {
@@ -228,15 +239,20 @@ internal class NativeLazyCollectionController(
                         pendingAnchor?.takeUnless { isPhysicalScroll }?.let { anchor ->
                             val index = current.itemProvider.findIndexByKey(anchor.key, anchor.index, anchor.itemCount)
                             if (index in 0 until itemCount) {
+                                val start = geometry.itemStart(index)
                                 val target =
                                     restoredLazyViewportOffset(
-                                        geometry.itemStart(index) - anchor.offset,
+                                        start - anchor.offset,
                                         anchor.viewportOffset,
                                         viewport.offset,
                                         anchor.preserveViewportDelta && anchor.orientation == current.orientation,
                                     )
-                                pendingAnchor = null
-                                clampedOffset(target)
+                                val offset = clampedOffset(target)
+                                // Batch updates may request and resolve newly inserted geometry.
+                                // Keep the anchor until that layout settles, with the user's drag
+                                // delta already applied so our own offset correction is not added twice.
+                                pendingAnchor = Anchor(anchor.key, index, itemCount, start - offset, offset, current.orientation)
+                                offset
                             } else {
                                 null
                             }
@@ -255,6 +271,7 @@ internal class NativeLazyCollectionController(
             }
 
             val deferCorrection = isPhysicalScroll
+            val revisionBeforeRestoring = geometry.revision
             if (deferCorrection) pendingAnchor = pendingAnchor?.copy(preserveViewportDelta = true)
             val restored =
                 if (!deferCorrection) {
@@ -269,9 +286,10 @@ internal class NativeLazyCollectionController(
                     null
                 }
 
-            var changed = false
+            var changed = geometry.revision != revisionBeforeRestoring
             var pass = 0
             while (pass++ < MAX_LAYOUT_PASSES) {
+                val revision = geometry.revision
                 val viewport = viewport
                 var resolved = false
                 itemRange(viewport.offset, viewport.offset + viewport.extent).forEach { index ->
@@ -280,20 +298,26 @@ internal class NativeLazyCollectionController(
                 if (resolved) native.invalidateLayout()
                 native.layoutIfNeeded()
                 val measured = measurePendingItems()
-                changed = resolved || measured || changed
-                if (!measured) break
+                geometryUnsettled = resolved || measured || geometry.revision != revision
+                changed = geometryUnsettled || changed
+                if (!geometryUnsettled) break
                 native.invalidateLayout()
             }
+            val revisionBeforeFinalLayout = geometry.revision
             native.layoutIfNeeded()
+            changed = changed || geometry.revision != revisionBeforeFinalLayout
             if (changed && measurementAnchor != null) {
                 restoreAnchor(measurementAnchor)
                 native.layoutIfNeeded()
             }
+            geometryUnsettled = geometryUnsettled || geometry.revision != revisionBeforeFinalLayout
+            if (geometryUnsettled && measurementAnchor != null) pendingAnchor = measurementAnchor
             reportLayoutInfo()
         } finally {
             layingOut = false
         }
-        if (nativeReloadPending || bindings.values.any { it.needsMeasurement }) scheduleLayout()
+        interruptedScroll?.takeIf { it.isActive && pendingScroll === it }?.let(::performScroll)
+        if (geometryUnsettled || nativeReloadPending || bindings.values.any { it.needsMeasurement }) scheduleLayout()
     }
 
     fun dispose() {
@@ -305,9 +329,14 @@ internal class NativeLazyCollectionController(
         try {
             releaseAll()
         } finally {
-            coordinator.dispose()
-            model = null
-            reuseIdentifiers.clear()
+            try {
+                coordinator.dispose()
+            } finally {
+                model = null
+                pendingAnchor = null
+                geometry.reset(0, 0.0, null)
+                reuseIdentifiers.clear()
+            }
         }
     }
 
@@ -325,7 +354,7 @@ internal class NativeLazyCollectionController(
         failure?.let { throw it }
     }
 
-    private fun positionalSplice(provider: LazyItemProvider): PositionalSplice? {
+    private fun positionalSplice(provider: LazyItemProvider): LazyIndexSplice? {
         // Unretained items are bound from the current provider when requested. A positional
         // splice only needs to preserve every retained key; otherwise use the reload path.
         val delta = provider.itemCount - itemCount
@@ -337,7 +366,7 @@ internal class NativeLazyCollectionController(
             }
         val index = shifted.minOfOrNull { it.host.index + minOf(delta, 0) } ?: minOf(itemCount, provider.itemCount)
         if (index < 0) return null
-        val splice = PositionalSplice(index, maxOf(-delta, 0), maxOf(delta, 0))
+        val splice = LazyIndexSplice(index, maxOf(-delta, 0), maxOf(delta, 0))
         return splice.takeIf {
             bindings.values.all { binding ->
                 val nextIndex = splice.newIndex(binding.host.index)
@@ -416,15 +445,19 @@ internal class NativeLazyCollectionController(
                 request.cancel()
                 return
             }
+            // An explicit scroll target replaces the old viewport anchor. Deferred measurements
+            // must not restore that anchor and cancel the animation we are about to start.
+            pendingAnchor = null
             resolveExtent(request.index)
             native.invalidateLayout()
             native.layoutIfNeeded()
             val target = clampedOffset(geometry.itemStart(request.index) + request.scrollOffset)
             if (request.animated && needsAdaptiveLazyScrollCorrection(viewport.offset, target)) {
                 pendingScroll = request
+                val generation = ++animationGeneration
                 coordinator.reportScrollInProgress(true)
                 native.scrollTo(target, animated = true) {
-                    if (pendingScroll === request) finishScroll(request)
+                    if (pendingScroll === request && generation == animationGeneration) finishScroll(request)
                 }
             } else {
                 scrollTo(target)
@@ -456,6 +489,7 @@ internal class NativeLazyCollectionController(
     private fun cancelScroll(request: LazyListScrollRequest) {
         if (pendingScroll !== request) return
         pendingScroll = null
+        animationGeneration++
         native.stopAnimatedScroll()
         coordinator.reportScrollInProgress(isPhysicalScroll)
     }
@@ -491,12 +525,36 @@ private class Binding(
 }
 
 /** Native cells carry positions; only realized stable keys need preservation during this splice. */
-private data class PositionalSplice(
+internal data class LazyIndexSplice(
     val index: Int,
     val removed: Int,
     val inserted: Int,
 ) {
     fun newIndex(oldIndex: Int): Int = if (oldIndex < index) oldIndex else oldIndex + inserted - removed
+}
+
+/** Native updates only locate retained cells. Find the data boundary separately for cached prefixes. */
+private fun geometrySplice(
+    previous: LazyItemProvider,
+    current: LazyItemProvider,
+    nativeSplice: LazyIndexSplice,
+): LazyIndexSplice? {
+    var low = 0
+    var high = nativeSplice.index
+    // For a single insert/delete, equal keys form a prefix. Query its boundary rather than
+    // walking cached history. Arbitrary edits remain provisional and are validated by key on use.
+    while (low < high) {
+        val middle = low + (high - low) / 2
+        if (previous.key(middle) == current.key(middle)) low = middle + 1 else high = middle
+    }
+    val splice = nativeSplice.copy(index = low)
+
+    fun matches(index: Int): Boolean {
+        if (index !in 0 until previous.itemCount || index in splice.index until splice.index + splice.removed) return true
+        val next = splice.newIndex(index)
+        return next in 0 until current.itemCount && previous.key(index) == current.key(next)
+    }
+    return splice.takeIf { matches(low - 1) && matches(low + splice.removed) && matches(previous.itemCount - 1) }
 }
 
 private data class ExtentEnvironment(

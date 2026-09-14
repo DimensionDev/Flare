@@ -17,6 +17,139 @@ import kotlin.test.assertTrue
 
 class NativeLazyCollectionControllerTest {
     @Test
+    fun animationWaitsForDeferredAnchorCorrectionsWithoutLosingCompletion() =
+        runBlocking {
+            val fixture = Fixture()
+            fixture.controller.setModel(fixture.model(count = 100))
+            fixture.flush()
+            val prefix = ControllerTestItem(36.0)
+            fixture.controller.bind(prefix, 0)
+            fixture.controller.bind(ControllerTestItem(48.0), 10)
+            fixture.controller.layout()
+            fixture.state.scrollToItem(10)
+            val job = launch(Dispatchers.Unconfined) { fixture.state.animateScrollToItem(80, 7f) }
+            try {
+                var corrections = 30
+                fixture.onLayout = {
+                    if (corrections-- > 0) {
+                        prefix.extent += 1
+                        fixture.controller.bind(prefix, 0)
+                    } else {
+                        fixture.onLayout = null
+                    }
+                }
+                fixture.controller.setModel(fixture.model(count = 100).copy(spacing = 4f))
+                fixture.flush()
+                checkNotNull(fixture.animationCompletion) {
+                    "Deferred anchor restoration discarded the native completion."
+                }.invoke()
+                assertTrue(job.isCompleted)
+                assertFalse(job.isCancelled)
+                assertFalse(fixture.state.isScrollInProgress)
+            } finally {
+                job.cancel()
+                fixture.controller.dispose()
+            }
+        }
+
+    @Test
+    fun nativeSpliceAtTheViewportPreservesMeasurementsBeforeTheViewport() =
+        runBlocking {
+            val fixture = Fixture()
+            fixture.controller.setModel(fixture.model(count = 10_000))
+            fixture.flush()
+            repeat(4_200) { index ->
+                val item = ControllerTestItem(if (index == 0) 32.0 else 60.0)
+                fixture.controller.bind(item, index)
+                fixture.controller.layout()
+                fixture.controller.release(item)
+            }
+            fixture.controller.bind(ControllerTestItem(60.0), 4_200)
+            fixture.controller.layout()
+            fixture.state.scrollToItem(4_200)
+            val start = fixture.controller.itemStart(4_200)
+            fixture.controller.setModel(fixture.model(count = 10_001, prefix = 1))
+            fixture.flush()
+            assertEquals(32.0, fixture.controller.itemExtent(1), "A prepend lost a measurement older than the exact-size LRU.")
+            assertEquals(start + 48.0, fixture.controller.itemStart(4_201))
+            fixture.controller.dispose()
+        }
+
+    @Test
+    fun cachedSizesResolvedByNativeLayoutStillCorrectTheReorderedAnchor() =
+        runBlocking {
+            val fixture = Fixture()
+            fixture.controller.setModel(fixture.model(count = 100))
+            fixture.flush()
+            repeat(100) { index ->
+                val item =
+                    ControllerTestItem(
+                        when (index) {
+                            20 -> 90.0
+                            50 -> 30.0
+                            else -> 48.0
+                        },
+                    )
+                fixture.controller.bind(item, index)
+                fixture.controller.layout()
+                fixture.controller.release(item)
+            }
+            val anchor = ControllerTestItem(90.0)
+            fixture.controller.bind(anchor, 20)
+            fixture.controller.layout()
+            fixture.state.scrollToItem(20, 13f)
+
+            fixture.onReload = { fixture.controller.bind(anchor, 50) }
+            fixture.onLayout = {
+                fixture.onLayout = null
+                // A native layout attribute lookup consumes this cached prefix change before measure().
+                fixture.controller.itemExtent(20)
+            }
+            val provider =
+                IntervalLazyListScope()
+                    .apply {
+                        items(100, key = {
+                            when (it) {
+                                20 -> 50
+                                50 -> 20
+                                else -> it
+                            }
+                        }) {}
+                    }.build()
+            fixture.controller.setModel(fixture.model(count = 100).copy(itemProvider = provider))
+            fixture.flush()
+            assertEquals(
+                -13f,
+                fixture.state.layoutInfo.visibleItems
+                    .single { it.key == 20 }
+                    .offset,
+            )
+            fixture.controller.dispose()
+        }
+
+    @Test
+    fun updatingAnAnimationRetargetsItAndIgnoresTheOldCompletion() =
+        runBlocking {
+            val fixture = Fixture()
+            fixture.controller.setModel(fixture.model())
+            fixture.flush()
+            val job = launch(Dispatchers.Unconfined) { fixture.state.animateScrollToItem(10, 7f) }
+            val oldCompletion = checkNotNull(fixture.animationCompletion)
+            fixture.controller.setModel(fixture.model().copy(spacing = 4f))
+            fixture.flush()
+            assertEquals(1, fixture.animationStops)
+            oldCompletion()
+            assertTrue(job.isActive, "A superseded animation completed the current request.")
+            assertTrue(fixture.state.isScrollInProgress)
+            checkNotNull(fixture.animationCompletion).invoke()
+            assertTrue(job.isCompleted)
+            assertFalse(job.isCancelled)
+            assertFalse(fixture.state.isScrollInProgress)
+            assertEquals(527.0, fixture.viewport(LazyListOrientation.Vertical).offset)
+            fixture.controller.dispose()
+        }
+
+    @Test
     fun nativeReuseEndsTheOldCompositionAndBindsTheNewKey() {
         val fixture = Fixture()
         fixture.controller.setModel(fixture.model())
@@ -102,16 +235,20 @@ private class Fixture :
     var contentUpdates = 0
     var animationCompletion: (() -> Unit)? = null
     var animationStops = 0
+    var onLayout: (() -> Unit)? = null
+    var onReload: (() -> Unit)? = null
 
-    fun model(count: Int = 20) =
-        LazyCollectionModel(
-            LazyListOrientation.Vertical,
-            0f,
-            LazyCrossAxisAlignment.Stretch,
-            IntervalLazyListScope().apply { items(count, key = { it }) {} }.build(),
-            this,
-            state,
-        )
+    fun model(
+        count: Int = 20,
+        prefix: Int = 0,
+    ) = LazyCollectionModel(
+        LazyListOrientation.Vertical,
+        0f,
+        LazyCrossAxisAlignment.Stretch,
+        IntervalLazyListScope().apply { items(count, key = { it - prefix }) {} }.build(),
+        this,
+        state,
+    )
 
     fun flush() {
         while (scheduled.isNotEmpty()) scheduled.removeAt(0).invoke()
@@ -138,7 +275,9 @@ private class Fixture :
 
     override val isPhysicalScrollInProgress: Boolean get() = false
 
-    override fun reloadData() = Unit
+    override fun reloadData() {
+        onReload?.invoke()
+    }
 
     override fun updateItems(
         index: Int,
@@ -151,7 +290,9 @@ private class Fixture :
 
     override fun invalidateLayout() = Unit
 
-    override fun layoutIfNeeded() = Unit
+    override fun layoutIfNeeded() {
+        onLayout?.invoke()
+    }
 
     override fun scrollTo(
         offset: Double,
@@ -161,6 +302,7 @@ private class Fixture :
         if (animated) {
             animationCompletion = completion
         } else {
+            animationCompletion = null
             this.offset = offset
             completion()
         }
@@ -168,6 +310,7 @@ private class Fixture :
 
     override fun stopAnimatedScroll() {
         animationStops += 1
+        animationCompletion = null
     }
 
     override fun schedule(block: () -> Unit) {
@@ -175,7 +318,9 @@ private class Fixture :
     }
 }
 
-private class ControllerTestItem : NativeLazyItem {
+private class ControllerTestItem(
+    var extent: Double = 36.0,
+) : NativeLazyItem {
     override val children =
         object : FlareChildren {
             override fun insert(
@@ -200,5 +345,5 @@ private class ControllerTestItem : NativeLazyItem {
     override fun measure(
         orientation: LazyListOrientation,
         crossExtent: Double,
-    ): Double = 36.0
+    ): Double = extent
 }

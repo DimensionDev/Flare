@@ -44,6 +44,193 @@ import kotlin.test.assertTrue
 
 public class UIKitLazyListTest {
     @Test
+    public fun aCollapsedItemCanExpandAfterItsLayoutVersionChanges() {
+        val state = LazyListState()
+
+        fun content(expanded: Boolean): FlareContent =
+            {
+                LazyColumn(modifier = FlareModifier.None.fillMaxSize(), state = state) {
+                    item(key = "changing", layoutVersion = expanded) {
+                        Text("Changing", modifier = FlareModifier.None.height(if (expanded) 72f else 0f))
+                    }
+                    item(key = "following") { Text("Following", modifier = FlareModifier.None.height(40f)) }
+                }
+            }
+        withLazyHost { host, _ ->
+            host.setContent(content(false))
+            host.awaitScrollView()
+            awaitAppleUi("The collapsed fixture did not settle.") {
+                state.layoutInfo.visibleItems
+                    .singleOrNull()
+                    ?.key == "following"
+            }
+            host.setContent(content(true))
+            awaitAppleUi("The zero-sized item was not rediscovered after expansion.") {
+                state.layoutInfo.visibleItems
+                    .singleOrNull { it.key == "changing" }
+                    ?.size == 72f &&
+                    state.layoutInfo.visibleItems
+                        .singleOrNull { it.key == "following" }
+                        ?.offset == 72f
+            }
+        }
+    }
+
+    @Test
+    public fun animationCompletionSurvivesSpacingUpdate() {
+        val state = LazyListState()
+
+        fun content(spacing: Float): FlareContent =
+            {
+                LazyColumn(modifier = FlareModifier.None.fillMaxSize(), state = state, spacing = spacing) {
+                    items(count = 200, key = { it }) { Text("Item $it", modifier = FlareModifier.None.height(48f)) }
+                }
+            }
+        withLazyHost { host, _ ->
+            host.setContent(content(0f))
+            val scroll = host.awaitScrollView()
+            runBlocking { state.scrollToItem(20, 13f) }
+            val initialOffset = scroll.contentOffset.useContents { y }
+            val job = CoroutineScope(Dispatchers.Main.immediate).launch { state.animateScrollToItem(80, 13f) }
+            try {
+                assertTrue(state.isScrollInProgress)
+                host.setContent(content(4f))
+                awaitAppleUi("The spacing update did not move the anchor.") {
+                    scroll.contentOffset.useContents { y } > initialOffset + 40 &&
+                        state.layoutInfo.visibleItems.any { it.key == 20 && abs(it.offset + 13f) < 1f }
+                }
+                scroll.delegate?.scrollViewDidEndScrollingAnimation(scroll)
+                assertTrue(job.isCompleted, "The native end-animation callback did not complete the scroll request.")
+                assertTrue(!job.isCancelled)
+                assertTrue(!state.isScrollInProgress)
+                assertEquals(
+                    -13f,
+                    state.layoutInfo.visibleItems
+                        .single { it.index == 80 }
+                        .offset,
+                    absoluteTolerance = 1f,
+                )
+            } finally {
+                job.cancel()
+            }
+        }
+    }
+
+    @Test
+    public fun nativeAnimationCompletionResolvesTheScrollRequest() {
+        val state = LazyListState()
+        withLazyHost { host, _ ->
+            host.setContent {
+                LazyColumn(modifier = FlareModifier.None.fillMaxSize(), state = state) {
+                    items(count = 200, key = { it }) { Text("Item $it", modifier = FlareModifier.None.height(48f)) }
+                }
+            }
+            val scroll = host.awaitScrollView()
+            val job = CoroutineScope(Dispatchers.Main.immediate).launch { state.animateScrollToItem(80, 13f) }
+            try {
+                assertTrue(state.isScrollInProgress)
+                scroll.delegate?.scrollViewDidEndScrollingAnimation(scroll)
+                assertTrue(job.isCompleted, "The control did not complete its native animation callback.")
+            } finally {
+                job.cancel()
+            }
+        }
+    }
+
+    @Test
+    public fun consecutivePrependsDuringDragKeepOriginalAnchor() {
+        val state = LazyListState()
+
+        fun content(prefix: Int): FlareContent =
+            {
+                LazyColumn(modifier = FlareModifier.None.fillMaxSize(), state = state) {
+                    items(
+                        count = 200 + prefix,
+                        key = { it - prefix },
+                    ) { Text("Item ${it - prefix}", modifier = FlareModifier.None.height(48f)) }
+                }
+            }
+        withLazyHost { host, _ ->
+            host.setContent(content(0))
+            val scroll = host.awaitScrollView()
+            runBlocking { state.scrollToItem(20, 13f) }
+            val delegate = checkNotNull(scroll.delegate)
+            delegate.scrollViewWillBeginDragging(scroll)
+            host.setContent(content(1))
+            awaitAppleUi("First prepend did not apply during dragging.") {
+                state.layoutInfo.totalItemsCount == 201 && state.layoutInfo.visibleItems
+                    .firstOrNull()
+                    ?.key == 19
+            }
+            host.setContent(content(2))
+            awaitAppleUi("Second prepend did not apply during dragging.") {
+                state.layoutInfo.totalItemsCount == 202 && state.layoutInfo.visibleItems
+                    .firstOrNull()
+                    ?.key == 18
+            }
+            delegate.scrollViewDidEndDragging(scroll, willDecelerate = false)
+            assertEquals(
+                20,
+                state.layoutInfo.visibleItems
+                    .firstOrNull()
+                    ?.key,
+                "Earlier deferred prepend compensation was lost.",
+            )
+            assertEquals(
+                -13f,
+                state.layoutInfo.visibleItems
+                    .first()
+                    .offset,
+                absoluteTolerance = 1f,
+            )
+        }
+    }
+
+    @Test
+    public fun zeroHeightItemDoesNotLeaveAnEstimatedGap() {
+        val state = LazyListState()
+        withLazyHost { host, _ ->
+            host.setContent {
+                LazyColumn(modifier = FlareModifier.None.fillMaxSize(), state = state) {
+                    item(key = "collapsed") { Text("Hidden", modifier = FlareModifier.None.height(0f)) }
+                    item(key = "visible") { Text("Visible", modifier = FlareModifier.None.height(40f)) }
+                }
+            }
+            host.awaitScrollView()
+            awaitAppleUi("Zero-height fixture did not mount.") { state.layoutInfo.visibleItems.any { it.key == "visible" } }
+            assertEquals(
+                0f,
+                state.layoutInfo.visibleItems
+                    .single { it.key == "visible" }
+                    .offset,
+                absoluteTolerance = 0.5f,
+            )
+        }
+    }
+
+    @Test
+    public fun zeroWidthItemDoesNotLeaveAnEstimatedGap() {
+        val state = LazyListState()
+        withLazyHost { host, _ ->
+            host.setContent {
+                LazyRow(modifier = FlareModifier.None.fillMaxSize(), state = state) {
+                    item(key = "collapsed") { Text("Hidden", modifier = FlareModifier.None.width(0f)) }
+                    item(key = "visible") { Text("Visible", modifier = FlareModifier.None.width(40f)) }
+                }
+            }
+            host.awaitScrollView()
+            awaitAppleUi("Zero-width fixture did not mount.") { state.layoutInfo.visibleItems.any { it.key == "visible" } }
+            assertEquals(
+                0f,
+                state.layoutInfo.visibleItems
+                    .single { it.key == "visible" }
+                    .offset,
+                absoluteTolerance = 0.5f,
+            )
+        }
+    }
+
+    @Test
     public fun adaptiveRecyclerMeasuresMainAxisWithoutAFixedItemContract() {
         val state = LazyListState()
         withLazyHost { host, _ ->

@@ -152,7 +152,9 @@ private class LazySaveableKeyRegistry {
         provider: LazyItemProvider,
         stateHolder: SaveableStateHolder,
     ) {
-        if (stateIds.isEmpty() || stateIds.size > MAX_EAGER_SAVEABLE_KEY_PRUNE_ITEMS) return
+        // The current provider is bounded by the caller. A large browsing history must not
+        // disable cleanup when that provider shrinks or becomes empty.
+        if (stateIds.isEmpty()) return
         val retainedKeys = mutableSetOf<Any>()
         repeat(provider.itemCount) { index ->
             val key = provider.key(index)

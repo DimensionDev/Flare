@@ -3,26 +3,32 @@
 package dev.dimension.flare.ui.lazy
 
 import kotlin.math.abs
+import kotlin.math.floor
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.random.Random
 
 /**
  * Sparse main-axis geometry for a variable-size lazy list.
  *
  * Unknown items use an estimate. Real measurements are retained by stable key across data-set
- * resets, while the sparse Fenwick tree keeps measured-size corrections and viewport endpoint
- * lookup O(log itemCount).
+ * resets. A sparse ordered index keeps corrections, positional edits, and viewport lookups
+ * logarithmic in the number of visited items. Offscreen metadata is validated on demand.
  */
 internal class VariableExtentLayoutState(
     private val defaultEstimatedExtent: Double = DEFAULT_ESTIMATED_EXTENT,
     private val measurementTolerance: Double = DEFAULT_MEASUREMENT_TOLERANCE,
     private val maxCachedMeasurements: Int = DEFAULT_MEASUREMENT_CACHE_SIZE,
 ) {
-    private val extentDeltas = SparseFenwickTree()
-    private val assignedExtents = mutableMapOf<Int, AssignedExtent>()
+    private val assignedExtents = SparseExtentIndex(defaultEstimatedExtent)
     private val exactMeasurements = LinkedHashMap<MeasurementKey, Double>()
     private val estimators = mutableMapOf<Any, RollingMedian>()
     private var environment: Any? = UnsetEnvironment
+    private var provider: LazyItemProvider? = null
+    private var generation = 0L
+
+    var revision: Long = 0L
+        private set
 
     var itemCount: Int = 0
         private set
@@ -35,7 +41,7 @@ internal class VariableExtentLayoutState(
             if (itemCount == 0) return 0.0
             return itemCount * defaultEstimatedExtent +
                 (itemCount - 1) * spacing +
-                extentDeltas.prefixSum(itemCount)
+                assignedExtents.totalDelta
         }
 
     init {
@@ -67,46 +73,41 @@ internal class VariableExtentLayoutState(
         }
         this.itemCount = itemCount
         this.spacing = spacing
+        provider = null
         assignedExtents.clear()
-        extentDeltas.reset(itemCount)
+        revision++
     }
 
-    /** Reconciles only visited indices; unvisited content remains deferred to the provider. */
+    /** Publishes metadata without walking browsing history; native splices shift its index lazily. */
     fun update(
         provider: LazyItemProvider,
         spacing: Double,
         environment: Any?,
+        splice: LazyIndexSplice? = null,
     ) {
         require(provider.itemCount >= 0) { "Lazy list item count must be non-negative." }
         require(spacing.isFinite() && spacing >= 0.0) { "Lazy list spacing must be finite and non-negative." }
         if (this.environment != environment) {
             reset(provider.itemCount, spacing, environment)
-            return
-        }
-        if (itemCount == provider.itemCount) {
-            this.spacing = spacing
-            assignedExtents.keys.toList().forEach { index ->
-                resolve(index, provider.key(index), provider.layoutVersion(index), provider.contentType(index))
-            }
-            return
-        }
-        val delta = provider.itemCount - itemCount
-        val previous = assignedExtents.toMap()
-        reset(provider.itemCount, spacing, environment)
-        previous.forEach { (oldIndex, assigned) ->
-            // A native positional update is chosen from realized keys, not a full-list diff.
-            // Validate every retained measurement independently, including offscreen edits.
-            val shiftedIndex = oldIndex + delta
-            val index =
-                when {
-                    shiftedIndex in 0 until itemCount && provider.key(shiftedIndex) == assigned.measurementKey.key -> shiftedIndex
-                    oldIndex in 0 until itemCount && provider.key(oldIndex) == assigned.measurementKey.key -> oldIndex
-                    else -> return@forEach
-                }
-            if (provider.layoutVersion(index) == assigned.measurementKey.layoutVersion) {
-                assign(index, assigned.measurementKey, assigned.extent)
+        } else if (itemCount != provider.itemCount) {
+            if (splice != null) {
+                require(splice.index in 0..itemCount && splice.removed in 0..(itemCount - splice.index))
+                require(provider.itemCount == itemCount - splice.removed + splice.inserted)
+                assignedExtents.splice(splice)
+            } else {
+                // Arbitrary replacement has no positional mapping. Exact sizes remain keyed
+                // and are recovered when items are requested in the new index space.
+                assignedExtents.clear()
             }
         }
+        this.itemCount = provider.itemCount
+        this.spacing = spacing
+        this.provider = provider
+        generation++
+        // A zero-sized offscreen item otherwise cannot re-enter a range query to reveal a new
+        // layoutVersion. Restore positive provisional sizes in O(1), then validate on discovery.
+        assignedExtents.invalidateCollapsed()
+        revision++
     }
 
     /** Applies an exact cached extent or a content-type estimate to one item. */
@@ -119,11 +120,20 @@ internal class VariableExtentLayoutState(
         requireIndex(index)
         val measurementKey = MeasurementKey(key, layoutVersion)
         val assigned = assignedExtents[index]
-        if (assigned?.measurementKey == measurementKey) return null
+        if (assigned?.measurementKey == measurementKey && assigned.generation != INVALIDATED_COLLAPSED_GENERATION) {
+            if (assigned.generation != generation) {
+                assignedExtents[index] = assigned.copy(generation = generation)
+            }
+            return null
+        }
         val extent =
-            exactMeasurement(measurementKey)
-                ?: estimators[contentType.cacheKey()]?.median
-                ?: defaultEstimatedExtent
+            if (assigned?.measurementKey == measurementKey && assigned.generation == INVALIDATED_COLLAPSED_GENERATION) {
+                0.0
+            } else {
+                exactMeasurement(measurementKey)
+                    ?: estimators[contentType.cacheKey()]?.median
+                    ?: defaultEstimatedExtent
+            }
         return assign(index, measurementKey, extent)
     }
 
@@ -136,14 +146,18 @@ internal class VariableExtentLayoutState(
         extent: Double,
     ): ExtentChange? {
         requireIndex(index)
-        if (!extent.isFinite() || extent <= 0.0) return null
+        if (!extent.isFinite() || extent < 0.0) return null
         val measurementKey = MeasurementKey(key, layoutVersion)
         val previousMeasurement = exactMeasurements[measurementKey]
         cacheMeasurement(measurementKey, extent)
         val estimatorKey = contentType.cacheKey()
-        if (previousMeasurement == null ||
-            abs(previousMeasurement - extent) > measurementTolerance ||
-            estimatorKey !in estimators
+        // Collapsed items have an exact zero size, but cannot predict the size of unseen content.
+        if (extent > 0.0 &&
+            (
+                previousMeasurement == null ||
+                    abs(previousMeasurement - extent) > measurementTolerance ||
+                    estimatorKey !in estimators
+            )
         ) {
             estimators.getOrPut(estimatorKey) { RollingMedian() }.record(extent)
         }
@@ -152,6 +166,7 @@ internal class VariableExtentLayoutState(
 
     fun itemExtent(index: Int): Double {
         requireIndex(index)
+        validate(index)
         return assignedExtents[index]?.extent ?: defaultEstimatedExtent
     }
 
@@ -162,7 +177,8 @@ internal class VariableExtentLayoutState(
 
     fun itemStart(index: Int): Double {
         requireIndex(index)
-        return index * (defaultEstimatedExtent + spacing) + extentDeltas.prefixSum(index)
+        validate(index)
+        return index * (defaultEstimatedExtent + spacing) + assignedExtents.prefixSum(index)
     }
 
     fun visibleRange(
@@ -206,11 +222,21 @@ internal class VariableExtentLayoutState(
         offset: Double,
         onSearchNodeVisited: () -> Unit,
     ): Int =
-        extentDeltas.indexAtOrBefore(
+        assignedExtents.indexAtOrBefore(
             offset = offset,
             estimatedStride = defaultEstimatedExtent + spacing,
+            itemCount = itemCount,
             onNodeVisited = onSearchNodeVisited,
         )
+
+    private fun validate(index: Int) {
+        val provider = provider ?: return
+        // Native attribute queries can include unseen neighbors. Keep their default geometry
+        // stable until the controller explicitly resolves them for its viewport.
+        val assigned = assignedExtents[index] ?: return
+        if (assigned.generation == generation) return
+        resolve(index, provider.key(index), provider.layoutVersion(index), provider.contentType(index))
+    }
 
     private fun assign(
         index: Int,
@@ -219,13 +245,13 @@ internal class VariableExtentLayoutState(
     ): ExtentChange? {
         val previous = assignedExtents[index]?.extent ?: defaultEstimatedExtent
         val delta = extent - previous
-        if (abs(delta) <= measurementTolerance) {
-            assignedExtents[index] = AssignedExtent(measurementKey, previous)
+        if (extent != 0.0 && previous != 0.0 && abs(delta) <= measurementTolerance) {
+            assignedExtents[index] = AssignedExtent(measurementKey, previous, generation)
             return null
         }
-        assignedExtents[index] = AssignedExtent(measurementKey, extent)
-        extentDeltas.add(index, delta)
-        return ExtentChange(index, previous, extent)
+        assignedExtents[index] = AssignedExtent(measurementKey, extent, generation)
+        if (delta != 0.0) revision++
+        return if (delta == 0.0) null else ExtentChange(index, previous, extent)
     }
 
     private fun exactMeasurement(key: MeasurementKey): Double? {
@@ -270,75 +296,214 @@ private data class MeasurementKey(
 private data class AssignedExtent(
     val measurementKey: MeasurementKey,
     val extent: Double,
+    val generation: Long,
 )
 
-private class SparseFenwickTree {
-    private val nodes = mutableMapOf<Int, Double>()
-    private var size: Int = 0
+/** A treap over visited positions. Subtree shifts avoid rebuilding a prefix index after splices. */
+private class SparseExtentIndex(
+    private val defaultExtent: Double,
+) {
+    private var root: Node? = null
+    private val priorities = Random(0xF1A2E)
 
-    fun reset(size: Int) {
-        this.size = size
-        nodes.clear()
+    val totalDelta: Double get() = root.sum()
+
+    fun clear() {
+        root = null
     }
 
-    fun add(
-        index: Int,
-        delta: Double,
-    ) {
-        var node = index + 1
-        while (node <= size) {
-            val value = (nodes[node] ?: 0.0) + delta
-            if (abs(value) <= SPARSE_ZERO_TOLERANCE) {
-                nodes.remove(node)
-            } else {
-                nodes[node] = value
-            }
-            val increment = node and -node
-            if (node > size - increment) break
-            node += increment
+    fun invalidateCollapsed() {
+        root?.invalidateCollapsed()
+    }
+
+    operator fun get(index: Int): AssignedExtent? {
+        var node = root
+        while (node != null) {
+            node.push()
+            node =
+                when {
+                    index < node.index -> node.left
+                    index > node.index -> node.right
+                    else -> return node.value
+                }
         }
+        return null
+    }
+
+    operator fun set(
+        index: Int,
+        value: AssignedExtent,
+    ) {
+        root = put(root, index, value)
+    }
+
+    fun splice(splice: LazyIndexSplice) {
+        val (before, rest) = split(root, splice.index)
+        val (_, after) = split(rest, splice.index + splice.removed)
+        after?.shift(splice.inserted - splice.removed)
+        root = merge(before, after)
     }
 
     fun prefixSum(endExclusive: Int): Double {
-        var node = endExclusive
+        var node = root
         var result = 0.0
-        while (node > 0) {
-            result += nodes[node] ?: 0.0
-            node -= node and -node
+        while (node != null) {
+            node.push()
+            node =
+                if (endExclusive <= node.index) {
+                    node.left
+                } else {
+                    result += node.left.sum() + node.delta
+                    node.right
+                }
         }
         return result
     }
 
-    /** Returns the greatest item start at or before [offset] in one Fenwick descent. */
+    /** Searches measured positions once, then interpolates any remaining unmeasured gap. */
     inline fun indexAtOrBefore(
         offset: Double,
         estimatedStride: Double,
+        itemCount: Int,
         onNodeVisited: () -> Unit,
     ): Int {
-        if (size == 0) return 0
-
-        var step = 1
-        while (step <= size / 2) {
-            step = step shl 1
+        var node = root
+        var before = 0.0
+        var lower = 0
+        var upper = itemCount - 1
+        while (node != null) {
+            onNodeVisited()
+            node.push()
+            val start = node.index * estimatedStride + before + node.left.sum()
+            node =
+                if (start <= offset) {
+                    lower = node.index
+                    before += node.left.sum() + node.delta
+                    node.right
+                } else {
+                    upper = node.index - 1
+                    node.left
+                }
         }
+        return floor((offset - before) / estimatedStride).toInt().coerceIn(lower, max(lower, upper))
+    }
 
-        var prefixLength = 0
-        var prefixDelta = 0.0
-        while (step > 0) {
-            if (step <= size - prefixLength) {
-                val candidate = prefixLength + step
-                onNodeVisited()
-                val candidateDelta = prefixDelta + (nodes[candidate] ?: 0.0)
-                val candidateOffset = candidate * estimatedStride + candidateDelta
-                if (candidateOffset <= offset) {
-                    prefixLength = candidate
-                    prefixDelta = candidateDelta
+    private fun put(
+        node: Node?,
+        index: Int,
+        value: AssignedExtent,
+    ): Node {
+        if (node == null) return Node(index, value, priorities.nextInt())
+        node.push()
+        when {
+            index < node.index -> {
+                val left = put(node.left, index, value)
+                node.left = left
+                if (left.priority > node.priority) {
+                    node.left = left.right
+                    left.right = node.refresh()
+                    return left.refresh()
                 }
             }
-            step = step ushr 1
+
+            index > node.index -> {
+                val right = put(node.right, index, value)
+                node.right = right
+                if (right.priority > node.priority) {
+                    node.right = right.left
+                    right.left = node.refresh()
+                    return right.refresh()
+                }
+            }
+
+            else -> {
+                node.value = value
+            }
         }
-        return min(prefixLength, size - 1)
+        return node.refresh()
     }
+
+    private fun split(
+        node: Node?,
+        index: Int,
+    ): Pair<Node?, Node?> {
+        if (node == null) return null to null
+        node.push()
+        return if (node.index < index) {
+            val (before, after) = split(node.right, index)
+            node.right = before
+            node.refresh() to after
+        } else {
+            val (before, after) = split(node.left, index)
+            node.left = after
+            before to node.refresh()
+        }
+    }
+
+    private fun merge(
+        left: Node?,
+        right: Node?,
+    ): Node? {
+        if (left == null) return right
+        if (right == null) return left
+        left.push()
+        right.push()
+        return if (left.priority > right.priority) {
+            left.right = merge(left.right, right)
+            left.refresh()
+        } else {
+            right.left = merge(left, right.left)
+            right.refresh()
+        }
+    }
+
+    inner class Node(
+        var index: Int,
+        var value: AssignedExtent,
+        val priority: Int,
+    ) {
+        var left: Node? = null
+        var right: Node? = null
+        var pendingShift = 0
+        var pendingCollapsedInvalidation = false
+        var collapsedCount = if (value.extent == 0.0) 1 else 0
+        val delta: Double get() = value.extent - defaultExtent
+        var totalDelta: Double = delta
+
+        fun refresh(): Node {
+            totalDelta = left.sum() + delta + right.sum()
+            collapsedCount = (left?.collapsedCount ?: 0) + (right?.collapsedCount ?: 0) + if (value.extent == 0.0) 1 else 0
+            return this
+        }
+
+        fun invalidateCollapsed() {
+            if (collapsedCount == 0) return
+            totalDelta += collapsedCount * defaultExtent
+            if (value.extent == 0.0) value = value.copy(extent = defaultExtent, generation = INVALIDATED_COLLAPSED_GENERATION)
+            collapsedCount = 0
+            pendingCollapsedInvalidation = true
+        }
+
+        fun shift(delta: Int) {
+            index += delta
+            pendingShift += delta
+        }
+
+        fun push() {
+            if (pendingShift != 0) {
+                left?.shift(pendingShift)
+                right?.shift(pendingShift)
+                pendingShift = 0
+            }
+            if (pendingCollapsedInvalidation) {
+                left?.invalidateCollapsed()
+                right?.invalidateCollapsed()
+                pendingCollapsedInvalidation = false
+            }
+        }
+    }
+
+    private fun Node?.sum(): Double = this?.totalDelta ?: 0.0
 }
 
 private class RollingMedian(
@@ -373,7 +538,7 @@ private data object NullContentType
 private data object UnsetEnvironment
 
 private const val DEFAULT_ESTIMATED_EXTENT = 48.0
+private const val INVALIDATED_COLLAPSED_GENERATION = -1L
 private const val DEFAULT_MEASUREMENT_TOLERANCE = 0.5
 private const val DEFAULT_MEASUREMENT_CACHE_SIZE = 4_096
 private const val DEFAULT_ESTIMATOR_SAMPLE_SIZE = 15
-private const val SPARSE_ZERO_TOLERANCE = 0.000_001

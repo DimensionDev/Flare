@@ -11,6 +11,43 @@ import kotlin.test.assertTrue
 
 public class VariableExtentLayoutStateTest {
     @Test
+    public fun readingUnvisitedLayoutAttributesDoesNotShiftAJumpTarget() {
+        val state = VariableExtentLayoutState()
+        val provider = IntervalLazyListScope().apply { items(100, key = { it }) {} }.build()
+        state.update(provider, 0.0, Unit)
+        state.record(0, 0, Unit, null, 192.0)
+        state.resolve(80, 80, Unit, null)
+        val target = state.itemStart(80)
+        // Collections may ask for an adjacent offscreen attribute during a jump. Reading it
+        // must not promote an unseen item to the learned estimate and move the target again.
+        state.itemStart(79)
+        state.itemExtent(79)
+        assertEquals(target, state.itemStart(80))
+        state.resolve(79, 79, Unit, null)
+        assertEquals(target + 144.0, state.itemStart(80))
+    }
+
+    @Test
+    public fun collapsedItemsCanBeDiscoveredAfterTheirLayoutVersionChanges() {
+        val state = VariableExtentLayoutState()
+        state.reset(3, 0.0, Unit)
+        state.record(0, 0, false, null, 0.0)
+        state.record(1, 1, false, null, 48.0)
+        state.record(2, 2, false, null, 48.0)
+        assertEquals(1..2, state.visibleRange(0.0, 48.0))
+        val provider =
+            IntervalLazyListScope()
+                .apply {
+                    items(3, key = { it }, layoutVersion = { it == 0 }) {}
+                }.build()
+        state.update(provider, 0.0, Unit)
+        assertTrue(0 in state.visibleRange(0.0, 48.0), "The expanded item is excluded before its metadata can be requested.")
+        state.resolve(0, 0, true, null)
+        state.record(0, 0, true, null, 72.0)
+        assertEquals(72.0, state.itemStart(1))
+    }
+
+    @Test
     public fun sparseUpdateChecksOffscreenKeysBeforeRetainingShiftedMeasurements() {
         val state = VariableExtentLayoutState()
         state.reset(100, 4.0, "portrait")
@@ -29,7 +66,7 @@ public class VariableExtentLayoutStateTest {
                         }
                     }) {}
                 }.build()
-        state.update(provider, 4.0, "portrait")
+        state.update(provider, 4.0, "portrait", LazyIndexSplice(0, 0, 2))
         assertEquals(44.0, state.itemExtent(2))
         assertEquals(48.0, state.itemExtent(52), "An offscreen replacement inherited another key's extent.")
         assertTrue(keyLookups < 10, "Updating two visited indices scanned the provider.")
@@ -53,8 +90,9 @@ public class VariableExtentLayoutStateTest {
         assertEquals(80.0, state.itemExtent(0))
         assertEquals(unchangedStart, state.itemStart(9))
         assertTrue(!state.hasExactMeasurement(10, 2))
-        val before = state.itemStart(11)
+        // Offscreen versions are validated when requested, before computing the visible range.
         val previousExtent = state.itemExtent(10)
+        val before = state.itemStart(11)
         state.record(10, 10, 2, "row", 64.0)
         assertEquals(before + 64.0 - previousExtent, state.itemStart(11))
         assertEquals(unchangedStart, state.itemStart(9))
@@ -256,7 +294,7 @@ public class VariableExtentLayoutStateTest {
     }
 
     @Test
-    public fun visibleRangeUsesOneFenwickDescentPerEndpoint() {
+    public fun visibleRangeUsesOneSparseIndexDescentPerEndpoint() {
         val itemCount = 1_000_000
         val state =
             VariableExtentLayoutState(
@@ -280,6 +318,63 @@ public class VariableExtentLayoutStateTest {
             range,
         )
         assertTrue(nodeVisits <= 40, "Expected O(log N) node visits, but observed $nodeVisits")
+    }
+
+    @Test
+    public fun positionalEditsAndZeroExtentsMatchALinearOracle() {
+        val random = Random(0xED175)
+        var nextKey = 0
+        val items = MutableList(80) { nextKey++ to if (it % 4 == 0) 0.0 else 20.0 + it }
+        val state = VariableExtentLayoutState(measurementTolerance = 0.0)
+        val spacing = 3.0
+        state.reset(items.size, spacing, Unit)
+        items.forEachIndexed { index, (key, extent) -> state.record(index, key, Unit, null, extent) }
+        repeat(100) {
+            val index = random.nextInt(items.size + 1)
+            val removed = random.nextInt(min(5, items.size - index) + 1)
+            val inserted = random.nextInt(5)
+            repeat(removed) { items.removeAt(index) }
+            repeat(inserted) { offset ->
+                items.add(index + offset, nextKey++ to if (offset == 0) 0.0 else random.nextDouble(1.0, 120.0))
+            }
+            val snapshot = items.toList()
+            val provider = IntervalLazyListScope().apply { items(snapshot, key = { it.first }) {} }.build()
+            state.update(provider, spacing, Unit, LazyIndexSplice(index, removed, inserted))
+            repeat(inserted) { offset ->
+                val (key, extent) = items[index + offset]
+                state.record(index + offset, key, Unit, null, extent)
+            }
+            items.indices.shuffled(random).forEach { position ->
+                assertEquals(items[position].second, state.itemExtent(position), "Wrong extent after edit $it at $position")
+            }
+            val extents = items.map { it.second }
+            val starts = extents.itemStarts(spacing)
+            starts.forEachIndexed { position, start -> assertEquals(start, state.itemStart(position), 0.000_001) }
+            val total = if (items.isEmpty()) 0.0 else extents.sum() + (items.size - 1) * spacing
+            assertEquals(total, state.contentExtent, 0.000_001)
+            repeat(10) {
+                val start = random.nextDouble(0.0, total + 100)
+                val end = start + random.nextDouble(0.0, 100.0)
+                val expected = if (items.isEmpty()) IntRange.EMPTY else starts.indexAtOrBefore(start)..starts.indexAtOrBefore(end)
+                assertEquals(expected, state.visibleRange(start, end))
+            }
+        }
+    }
+
+    @Test
+    public fun zeroMeasurementsCollapseExactlyAndDoNotPredictUnseenItemsAsZero() {
+        val state = VariableExtentLayoutState()
+        state.reset(4, 0.0, Unit)
+        state.record(0, 0, Unit, null, 0.25)
+        state.record(0, 0, Unit, null, 0.0)
+        state.record(1, 1, Unit, "collapsed", 0.0)
+        state.record(2, 2, Unit, "collapsed", 0.0)
+        assertEquals(0.0, state.itemStart(3))
+        assertEquals(3..3, state.visibleRange(0.0, 1.0))
+        state.resolve(3, 3, Unit, "collapsed")
+        assertEquals(48.0, state.itemExtent(3))
+        state.record(0, 0, Unit, null, 0.25)
+        assertEquals(0.25, state.itemStart(3))
     }
 }
 

@@ -763,22 +763,24 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
             items.append(ContentColumnLayoutItem(view: view, spacingBefore: before, spacingAfter: after))
         }
         let translationDisplayed = data.translationDisplayState == .translated
-        let contentWarnings: [UiRichText] = if let warning = data.contentWarning {
-            if translationDisplayed, let translation = warning.translation {
-                appearance.showOriginalWithTranslation ? [warning.original, translation] : [translation]
-            } else {
-                [warning.original]
-            }
+        let contentWarnings: [StatusTextContent<UiRichText>] = if let warning = data.contentWarning {
+            StatusTextContent.visible(
+                original: warning.original,
+                translation: warning.translation,
+                translationDisplayed: translationDisplayed,
+                showOriginalWithTranslation: appearance.showOriginalWithTranslation
+            )
         } else {
             []
         }
-        let contents: [UiRichText] = if translationDisplayed, let translation = data.content.translation {
-            appearance.showOriginalWithTranslation ? [data.content.original, translation] : [translation]
-        } else {
-            [data.content.original]
-        }
-        let hasCW = contentWarnings.contains { !$0.isEmpty }
-        let shouldExpandTextByDefault = !hasCW && contents.reduce(0) { $0 + $1.innerText.count } <= 500
+        let contents = StatusTextContent.visible(
+            original: data.content.original,
+            translation: data.content.translation,
+            translationDisplayed: translationDisplayed,
+            showOriginalWithTranslation: appearance.showOriginalWithTranslation
+        )
+        let hasCW = contentWarnings.contains { !$0.text.isEmpty }
+        let shouldExpandTextByDefault = !hasCW && contents.reduce(0) { $0 + $1.text.innerText.count } <= 500
 
         // reply-to
         if let replyToHandle = data.replyToHandle {
@@ -789,17 +791,17 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
 
         // content warning
         if hasCW {
-            for (index, contentWarning) in contentWarnings.enumerated() where !contentWarning.isEmpty {
-                let contentWarningText = index == 0
+            for contentWarning in contentWarnings where !contentWarning.text.isEmpty {
+                let contentWarningText = contentWarning.cacheKeyOffset == 0
                     ? resolvedContentWarningText()
                     : resolvedContentWarningTranslationText()
                 contentWarningText.configure(
-                    text: contentWarning,
+                    text: contentWarning.text,
                     lineLimit: nil,
                     isTextSelectionEnabled: isDetail,
                     onOpenURL: openURL,
                     preferredContentSizeCategory: appearance.preferredContentSizeCategory,
-                    contentKey: Int(data.renderHash) * 4 + index
+                    contentKey: Int(data.renderHash) * 4 + contentWarning.cacheKeyOffset
                 )
                 append(contentWarningText, before: 4)
             }
@@ -834,21 +836,21 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
                 bodySelectionEnabled = false
                 bodyLineLimit = Int(maxLine)
             }
-            for (index, content) in contents.enumerated() where !content.isEmpty {
-                let bodyText = index == 0 ? resolvedBodyText() : resolvedBodyTranslationText()
+            for content in contents where !content.text.isEmpty {
+                let bodyText = content.cacheKeyOffset == 0 ? resolvedBodyText() : resolvedBodyTranslationText()
                 bodyText.configure(
-                    text: content,
+                    text: content.text,
                     lineLimit: bodyLineLimit,
                     isTextSelectionEnabled: bodySelectionEnabled,
                     onOpenURL: openURL,
                     preferredContentSizeCategory: appearance.preferredContentSizeCategory,
-                    contentKey: Int(data.renderHash) * 4 + 2 + index
+                    contentKey: Int(data.renderHash) * 4 + 2 + content.cacheKeyOffset
                 )
                 append(bodyText, before: visibleBodyCount == 0 ? 0 : 4)
                 visibleBodyCount += 1
             }
             if !shouldExpandTextByDefault,
-               contents.contains(where: { !$0.isEmpty }),
+               contents.contains(where: { !$0.text.isEmpty }),
                !isDetail,
                !expand,
                 showExpandTextButton {

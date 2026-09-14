@@ -206,6 +206,8 @@ final class TranslateStatusStateView: UIView, ManualLayoutMeasurable, TimelineHe
             spinner.stopAnimating()
             spinner.isHidden = true
         }
+        invalidateIntrinsicContentSize()
+        setNeedsLayout()
     }
 
     override func layoutSubviews() {

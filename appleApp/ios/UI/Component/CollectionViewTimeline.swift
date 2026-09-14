@@ -1065,6 +1065,23 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         }
     }
 
+    private func pagingIsInitialLoading<Item: AnyObject>(_ data: PagingState<Item>?) -> Bool {
+        guard let data else { return true }
+        if case .loading = onEnum(of: data) {
+            return true
+        }
+        return false
+    }
+
+    private var currentPagingIsInitialLoading: Bool {
+        switch contentKind {
+        case .timeline:
+            pagingIsInitialLoading(currentData)
+        case .profileMedia:
+            pagingIsInitialLoading(currentProfileMediaData)
+        }
+    }
+
     func resetInitialRefreshIndicatorSuppression() {
         hasCompletedInitialRefreshCycle = false
         pendingRefreshControlOffsetY = nil
@@ -1186,7 +1203,8 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     }
 
     private func syncRefreshControl(isRefreshing: Bool) {
-        if !isRefreshing {
+        // Loading and an unbound data source are not completed refresh cycles.
+        if !isRefreshing && !currentPagingIsInitialLoading {
             hasCompletedInitialRefreshCycle = true
         }
 

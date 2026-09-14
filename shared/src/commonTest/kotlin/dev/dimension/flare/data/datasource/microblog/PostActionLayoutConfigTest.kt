@@ -1,11 +1,15 @@
 package dev.dimension.flare.data.datasource.microblog
 
+import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiIcon
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toPersistentList
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertIs
+import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 
 class PostActionLayoutConfigTest {
     @Test
@@ -155,6 +159,104 @@ class PostActionLayoutConfigTest {
             )
 
         assertEquals(listOf<ActionMenu>(like), actions.applyPostActionLayout(config))
+    }
+
+    @Test
+    fun unavailableActionsKeepTheirConfiguredPositions() {
+        val reply = action(PostActionFamily.Reply, UiIcon.Reply)
+        val like = action(PostActionFamily.Like, UiIcon.Like)
+        val families = PostActionLayoutHelpers.allEditableFamilies.reversed()
+        val config =
+            PostActionLayoutConfig(
+                enabled = true,
+                primary = (families + families).toPersistentList(),
+            )
+
+        val result = persistentListOf(reply, like).applyPostActionLayout(config)
+
+        assertEquals(families.size, result.size)
+        families.zip(result).forEach { (family, action) ->
+            val item = assertIs<ActionMenu.Item>(action)
+            assertEquals(family, item.actionFamily)
+            when (family) {
+                PostActionFamily.Reply -> {
+                    assertEquals(reply, item)
+                }
+
+                PostActionFamily.Like -> {
+                    assertEquals(like, item)
+                }
+
+                else -> {
+                    assertFalse(item.enabled)
+                    assertEquals(ClickEvent.Noop, item.clickEvent)
+                    assertNotNull(item.icon)
+                    assertIs<ActionMenu.Item.Text.Localized>(item.text)
+                }
+            }
+        }
+        assertEquals(result, result.applyPostActionLayout(config))
+    }
+
+    @Test
+    fun unavailableActionsStayHiddenOutsideButtonRow() {
+        val families = PostActionLayoutHelpers.allEditableFamilies
+        val actions =
+            persistentListOf(
+                action(PostActionFamily.Reply, UiIcon.Reply),
+                ActionMenu.Group(
+                    displayItem = moreItem(),
+                    actions = persistentListOf(action(PostActionFamily.Share, UiIcon.Share)),
+                ),
+            )
+        val overflowConfig =
+            PostActionLayoutConfig(
+                enabled = true,
+                primary = persistentListOf(PostActionFamily.Reply),
+                overflow = families.toPersistentList(),
+            )
+        val primaryConfig = overflowConfig.copy(primary = families.toPersistentList())
+
+        listOf(
+            PostActionLayoutConfig.Default,
+            overflowConfig,
+            primaryConfig.copy(enabled = false),
+            primaryConfig.copy(
+                hidden =
+                    families
+                        .filterNot {
+                            it == PostActionFamily.Reply || it == PostActionFamily.Share
+                        }.toPersistentList(),
+                primary = families.filterNot { it == PostActionFamily.Share }.toPersistentList(),
+            ),
+        ).forEach { config ->
+            assertEquals(actions, actions.applyPostActionLayout(config))
+        }
+    }
+
+    @Test
+    fun availableTranslationActionsKeepTheirOriginalState() {
+        listOf(
+            ActionMenu.Item.Text.Localized.Type.Translate,
+            ActionMenu.Item.Text.Localized.Type.RetryTranslation,
+            ActionMenu.Item.Text.Localized.Type.ShowOriginal,
+        ).forEach { type ->
+            val translate =
+                ActionMenu.Item(
+                    icon = UiIcon.Translate,
+                    text = ActionMenu.Item.Text.Localized(type),
+                    actionFamily = PostActionFamily.Translate,
+                )
+            val actions = persistentListOf(ActionMenu.Group(displayItem = moreItem(), actions = persistentListOf(translate)))
+            val result =
+                actions.applyPostActionLayout(
+                    PostActionLayoutConfig(enabled = true, primary = persistentListOf(PostActionFamily.Translate)),
+                )
+
+            val displayed = assertIs<ActionMenu.Item>(result.single())
+            assertEquals(translate, displayed)
+            assertTrue(displayed.enabled)
+        }
     }
 
     private fun action(

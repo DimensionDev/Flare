@@ -20,6 +20,7 @@ internal expect fun PlatformDropdownMenuScope.PlatformDropdownMenuItem(
     modifier: Modifier = Modifier,
     leadingIcon: @Composable (() -> Unit)? = null,
     trailingIcon: @Composable (() -> Unit)? = null,
+    enabled: Boolean = true,
 )
 
 @Composable

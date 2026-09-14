@@ -107,6 +107,7 @@ public sealed class ActionMenu {
         val color: Color? = null,
         public val clickEvent: ClickEvent = ClickEvent.Noop,
         val actionFamily: PostActionFamily? = null,
+        val enabled: Boolean = true,
     ) : ActionMenu() {
         init {
             require(icon != null || text != null) {
@@ -234,7 +235,7 @@ public fun ImmutableList<ActionMenu>.applyPostActionLayout(config: PostActionLay
             .filterNot { it in hiddenFamilies }
             .filterNot { it in primaryFamilies }
 
-    val primaryActions = primaryFamilies.mapNotNull(::pick).toMutableList<ActionMenu>()
+    val primaryActions = primaryFamilies.map { family -> pick(family) ?: family.disabledAction() }
     val overflowActions = overflowFamilies.mapNotNull(::pick).toMutableList<ActionMenu>()
     overflowActions +=
         entries
@@ -449,6 +450,33 @@ private data class PostActionEntry(
     val action: ActionMenu,
     val family: PostActionFamily?,
 )
+
+private fun PostActionFamily.disabledAction(): ActionMenu.Item {
+    val (icon, text) =
+        when (this) {
+            PostActionFamily.Reply -> UiIcon.Reply to ActionMenu.Item.Text.Localized.Type.Reply
+            PostActionFamily.Comment -> UiIcon.Comment to ActionMenu.Item.Text.Localized.Type.Comment
+            PostActionFamily.Repost -> UiIcon.Retweet to ActionMenu.Item.Text.Localized.Type.Retweet
+            PostActionFamily.Quote -> UiIcon.Quote to ActionMenu.Item.Text.Localized.Type.Quote
+            PostActionFamily.Like -> UiIcon.Like to ActionMenu.Item.Text.Localized.Type.Like
+            PostActionFamily.React -> UiIcon.React to ActionMenu.Item.Text.Localized.Type.React
+            PostActionFamily.Translate -> UiIcon.Translate to ActionMenu.Item.Text.Localized.Type.Translate
+            PostActionFamily.Bookmark -> UiIcon.Bookmark to ActionMenu.Item.Text.Localized.Type.Bookmark
+            PostActionFamily.Favorite -> UiIcon.Favourite to ActionMenu.Item.Text.Localized.Type.Favorite
+            PostActionFamily.Share -> UiIcon.Share to ActionMenu.Item.Text.Localized.Type.Share
+            PostActionFamily.FxShare -> UiIcon.Share to ActionMenu.Item.Text.Localized.Type.FxShare
+            PostActionFamily.Delete -> UiIcon.Delete to ActionMenu.Item.Text.Localized.Type.Delete
+            PostActionFamily.Report -> UiIcon.Report to ActionMenu.Item.Text.Localized.Type.Report
+            PostActionFamily.MuteUser -> UiIcon.Mute to ActionMenu.Item.Text.Localized.Type.Mute
+            PostActionFamily.BlockUser -> UiIcon.Block to ActionMenu.Item.Text.Localized.Type.Block
+        }
+    return ActionMenu.Item(
+        icon = icon,
+        text = ActionMenu.Item.Text.Localized(text),
+        actionFamily = this,
+        enabled = false,
+    )
+}
 
 private fun Iterable<PostActionFamily>.cleanFamilies(): List<PostActionFamily> =
     filter { it in PostActionLayoutHelpers.allEditableFamilies }.distinct()

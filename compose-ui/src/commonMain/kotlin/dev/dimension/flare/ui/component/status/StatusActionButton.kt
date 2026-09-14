@@ -24,6 +24,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.PointerIcon
@@ -120,7 +121,7 @@ public fun StatusActionButton(
                     modifier =
                         Modifier
                             .height(PlatformTextStyle.current.fontSize.value.dp + 2.dp)
-                            .pointerHoverIcon(PointerIcon.Hand)
+                            .pointerHoverIcon(if (enabled) PointerIcon.Hand else PointerIcon.Default)
                             .clickable(
                                 onClick = onClicked,
                                 enabled = enabled,
@@ -142,7 +143,7 @@ public fun StatusActionButton(
                 modifier =
                     Modifier
                         .height(PlatformTextStyle.current.fontSize.value.dp + 2.dp)
-                        .pointerHoverIcon(PointerIcon.Hand)
+                        .pointerHoverIcon(if (enabled) PointerIcon.Hand else PointerIcon.Default)
                         .clickable(
                             onClick = onClicked,
                             enabled = enabled,
@@ -162,6 +163,7 @@ public fun StatusActionButton(
         modifier =
             modifier
                 .then(accessibilityModifier)
+                .alpha(if (enabled) 1f else 0.4f)
                 .padding(vertical = 4.dp, horizontal = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(2.dp),
@@ -204,7 +206,7 @@ public fun StatusActionButton(
                     color = color,
                     modifier =
                         Modifier
-                            .pointerHoverIcon(PointerIcon.Hand)
+                            .pointerHoverIcon(if (enabled) PointerIcon.Hand else PointerIcon.Default)
                             .clickable(
                                 onClick = onClicked,
                                 enabled = enabled,

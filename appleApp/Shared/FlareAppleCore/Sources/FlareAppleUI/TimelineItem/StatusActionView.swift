@@ -253,7 +253,9 @@ public struct StatusActionItemView: View {
             .accessibilityValue(
                 Text(verbatim: showNumbers ? (data.count?.humanized ?? "") : "")
             )
-            .macOSStatusActionHoverStyle(isEnabled: !useText)
+            .disabled(!data.enabled)
+            .opacity(data.enabled ? 1 : 0.4)
+            .macOSStatusActionHoverStyle(isEnabled: !useText && data.enabled)
             .statusActionFixedWidthSlot(
                 icon: data.icon,
                 fontSize: fontSize,

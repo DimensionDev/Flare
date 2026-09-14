@@ -29,6 +29,7 @@ internal actual fun PlatformDropdownMenuScope.PlatformDropdownMenuItem(
     modifier: Modifier,
     leadingIcon: @Composable (() -> Unit)?,
     trailingIcon: @Composable (() -> Unit)?,
+    enabled: Boolean,
 ) {
     DropdownMenuItem(
         text = text,
@@ -36,6 +37,7 @@ internal actual fun PlatformDropdownMenuScope.PlatformDropdownMenuItem(
         modifier = modifier,
         leadingIcon = leadingIcon,
         trailingIcon = trailingIcon,
+        enabled = enabled,
     )
 }
 

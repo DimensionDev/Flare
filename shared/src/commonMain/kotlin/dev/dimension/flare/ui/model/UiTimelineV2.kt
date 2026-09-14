@@ -672,6 +672,7 @@ private fun ActionMenu.Item.renderSummaryHash(): Int =
         .add(text.renderSummaryHash())
         .add(count)
         .add(color)
+        .add(enabled)
         .build()
 
 private fun ActionMenu.Item.Text?.renderSummaryHash(): Int =

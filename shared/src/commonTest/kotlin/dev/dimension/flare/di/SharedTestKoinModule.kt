@@ -22,7 +22,8 @@ internal class SharedTestKoinApplication
 
 internal fun startKoin(appDeclaration: KoinAppDeclaration? = null) = startKoinWithModules<SharedTestKoinApplication>(appDeclaration)
 
-// Koin 1.1.0 emits duplicate Native DSL hints when test-local types are registered more than once.
+// Koin 1.2.1 still emits duplicate Native DSL hints when test-local types are registered more than once.
+// Pass dependencies explicitly: the compiler checks get() calls but cannot see registrations through this wrapper.
 internal inline fun <reified T> KoinModule.testSingle(noinline definition: Definition<T>) = single(definition = definition)
 
 @Module

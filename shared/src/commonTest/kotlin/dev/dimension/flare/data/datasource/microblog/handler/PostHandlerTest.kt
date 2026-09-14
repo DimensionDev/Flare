@@ -121,6 +121,8 @@ class PostHandlerTest : RobolectricTest() {
     private fun startTestKoin(scope: CoroutineScope) {
         val detachedScope = CoroutineScope(scope.coroutineContext + SupervisorJob())
         injectedScope = detachedScope
+        val openAIService = OpenAIService()
+        val aiCompletionService = AiCompletionService(openAIService, onDeviceAI)
         startKoin {
             modules(
                 module {
@@ -128,9 +130,11 @@ class PostHandlerTest : RobolectricTest() {
                     testSingle { appDataStore }
                     testSingle<CoroutineScope> { detachedScope }
                     testSingle<OnDeviceAI> { onDeviceAI }
-                    testSingle { OpenAIService() }
-                    testSingle { AiCompletionService(get(), get()) }
-                    testSingle<PreTranslationService> { OnlinePreTranslationService(get(), get(), get(), get()) }
+                    testSingle { openAIService }
+                    testSingle { aiCompletionService }
+                    testSingle<PreTranslationService> {
+                        OnlinePreTranslationService(db, appDataStore, aiCompletionService, detachedScope)
+                    }
                     testSingle<PlatformFormatter> { TestFormatter() }
                 },
             )

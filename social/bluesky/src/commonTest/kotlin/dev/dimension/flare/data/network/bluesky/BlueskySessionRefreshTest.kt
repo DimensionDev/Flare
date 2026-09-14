@@ -125,6 +125,7 @@ class BlueskySessionRefreshTest {
             val original = oauthCredential()
             val credentials = MutableStateFlow<BlueskyCredential>(original)
             var requests = 0
+            val oauthClient = HttpClient(MockEngine { error("Nonce retries must not contact the authorization server") })
             val client =
                 HttpClient(
                     MockEngine {
@@ -135,6 +136,7 @@ class BlueskySessionRefreshTest {
                     install(BlueskyAuthPlugin) {
                         authTokenFlow = credentials
                         onAuthTokensChanged = { credentials.value = it }
+                        oauthApi = OAuthApi(oauthClient, challengeSelector = { OAuthCodeChallengeMethodS256 })
                     }
                 }
             try {
@@ -146,6 +148,7 @@ class BlueskySessionRefreshTest {
                 assertEquals(original.refreshToken, credentials.value.refreshToken)
             } finally {
                 client.close()
+                oauthClient.close()
             }
         }
 

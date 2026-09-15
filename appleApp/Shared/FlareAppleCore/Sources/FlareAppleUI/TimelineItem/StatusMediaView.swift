@@ -20,7 +20,10 @@ struct StatusMediaView: View {
     @Environment(\.timelineMediaActionHandler) private var timelineMediaActionHandler
     @State private var isBlur: Bool
     @State private var activeCarouselIndex: Int?
-    @State private var autoplayCarouselIndex: Int?
+    @Environment(\.timelinePlaybackCoordinator) private var playback
+    @State private var carouselID = UUID().uuidString
+    @State private var carouselOffset: CGFloat?
+    @State private var verticalOffset: CGFloat?
 //    @State private var selectedIndex: Int? = nil
 
     init(
@@ -42,7 +45,7 @@ struct StatusMediaView: View {
         self.carouselLeadingPadding = carouselLeadingPadding
         self.carouselTrailingPadding = carouselTrailingPadding
         self.isBlur = sensitive
-        self._autoplayCarouselIndex = State(initialValue: data.indices.first)
+        self._activeCarouselIndex = State(initialValue: nil)
     }
 
     var body: some View {
@@ -97,21 +100,24 @@ struct StatusMediaView: View {
         .if(!usesCarousel) { view in
             view.clipShape(.rect(cornerRadius: cornerRadius))
         }
-        .onChange(of: usesCarousel) { _, enabled in
-            if enabled {
-                autoplayCarouselIndex = data.indices.first
-            } else {
-                activeCarouselIndex = nil
-                autoplayCarouselIndex = nil
-            }
+        .onChange(of: usesCarousel) { _, _ in
+            activeCarouselIndex = nil
+            carouselOffset = nil
         }
         .onChange(of: data.count) { _, count in
             if let activeCarouselIndex, activeCarouselIndex >= count {
                 self.activeCarouselIndex = nil
             }
-            if let autoplayCarouselIndex, autoplayCarouselIndex >= count {
-                self.autoplayCarouselIndex = data.indices.first
+        }
+        .onGeometryChange(for: CGFloat.self) { geometry in
+            geometry.bounds(of: .scrollView(axis: .vertical))?.minY ?? 0
+        } action: { offset in
+            if #unavailable(iOS 18.0, macOS 15.0) {
+                if let verticalOffset, verticalOffset != offset {
+                    playback?.moved(source: "vertical", vertical: true)
+                }
             }
+            verticalOffset = offset
         }
     }
 
@@ -145,13 +151,24 @@ struct StatusMediaView: View {
                                     data[index],
                                     index: index,
                                     overflowCount: 0,
-                                    allowsAutoplay: !isBlur &&
-                                        index == autoplayCarouselIndex
+                                    allowsAutoplay: !isBlur
                                 )
+                                .environment(\.timelineCarouselItem, TimelineCarouselItem(
+                                    groupID: carouselID,
+                                    isSelected: index == (activeCarouselIndex ?? 0)
+                                ))
                                 .frame(width: itemSize.width, height: itemSize.height)
                                 .clipShape(.rect(cornerRadius: cornerRadius))
                                 .id(index)
                             }
+                        }
+                        .onGeometryChange(for: CGFloat.self) { proxy in
+                            proxy.frame(in: .scrollView(axis: .horizontal)).minX
+                        } action: { offset in
+                            if let carouselOffset, carouselOffset != offset {
+                                playback?.moved(source: carouselID, vertical: false)
+                            }
+                            carouselOffset = offset
                         }
                         .scrollTargetLayout()
                         .frame(height: geometry.size.height)
@@ -160,16 +177,11 @@ struct StatusMediaView: View {
                     }
                     .scrollIndicators(.hidden)
                     .scrollPosition(id: $activeCarouselIndex, anchor: .center)
-                    .onChange(of: activeCarouselIndex) { _, index in
-                        if let index, index != autoplayCarouselIndex {
-                            autoplayCarouselIndex = nil
-                        }
-                    }
-                    .task(id: activeCarouselIndex) {
-                        guard let activeCarouselIndex else { return }
-                        try? await Task.sleep(nanoseconds: 150_000_000)
-                        guard !Task.isCancelled else { return }
-                        autoplayCarouselIndex = activeCarouselIndex
+                    .modifier(TimelineScrollPhaseModifier { scrolling in
+                        playback?.setScrolling(scrolling, source: carouselID, vertical: false)
+                    })
+                    .onDisappear {
+                        playback?.setScrolling(false, source: carouselID, vertical: false)
                     }
                 }
             }

@@ -188,6 +188,7 @@ struct MediaViewerScreen<SupplementaryOverlay: View>: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .videoPlaybackPresentation()
         .onAppear {
             applyInitialSelectionIfNeeded()
         }

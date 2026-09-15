@@ -54,6 +54,7 @@ struct MacMediaViewerScreen: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .videoPlaybackPresentation()
         .ignoresSafeArea()
         .toolbar {
             ToolbarItem(placement: .principal) {

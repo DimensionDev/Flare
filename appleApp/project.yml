@@ -238,6 +238,10 @@ targets:
       - path: ios/Common/MediaViewerDismissGesturePolicy.swift
       - path: ios/Common/MediaViewerImageLayoutPolicy.swift
       - path: ios/Common/StatusTextContent.swift
+      - path: Shared/FlareAppleCore/Sources/FlareAppleUI/TimelineAutoplayPolicy.swift
+      - path: Shared/FlareAppleCore/Sources/FlareAppleUI/TimelinePlaybackCoordinator.swift
+      - path: Shared/FlareAppleCore/Sources/FlareAppleUI/VideoPlaybackArbiter.swift
+      - path: Shared/FlareAppleCore/Sources/FlareAppleUI/SharedVideoPlayer.swift
     settings:
       base:
         GENERATE_INFOPLIST_FILE: YES

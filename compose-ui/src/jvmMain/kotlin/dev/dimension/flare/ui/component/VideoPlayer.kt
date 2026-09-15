@@ -22,13 +22,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.onLayoutRectChanged
-import androidx.compose.ui.layout.onVisibilityChanged
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
@@ -40,9 +39,17 @@ import dev.dimension.flare.compose.ui.media_play_video
 import dev.dimension.flare.ui.component.status.LocalIsScrollingInProgress
 import dev.dimension.flare.ui.theme.PlatformTheme
 import io.github.composefluent.component.ProgressRing
+import io.github.kdroidfilter.composemediaplayer.InitialPlayerState
 import io.github.kdroidfilter.composemediaplayer.VideoPlayerState
 import io.github.kdroidfilter.composemediaplayer.VideoPlayerSurface
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.koinInject
 import org.koin.core.annotation.Single
 import kotlin.math.roundToLong
 
@@ -144,45 +151,30 @@ public fun VideoPlayer(
             }
         }
     },
+    controls: @Composable BoxScope.(VideoPlayerState) -> Unit = {},
 ) {
-    var isLoaded by remember { mutableStateOf(false) }
-    var visible by remember { mutableStateOf(false) }
-    var currentRect by remember { mutableStateOf(androidx.compose.ui.unit.IntRect.Zero) }
-    val binding = rememberSurfaceBinding(uri)
+    val playback = rememberTimelinePlayback()
+    val binding = rememberSurfaceBinding(uri, playback, muted)
     val playerState = binding.first
-    val windowInfo = androidx.compose.ui.platform.LocalWindowInfo.current
-
-    LaunchedEffect(binding.second, currentRect, visible, windowInfo.containerSize.height) {
-        binding.second.update(currentRect, visible, windowInfo.containerSize.height / 2f)
-    }
+    var isLoaded by remember(binding.second, playerState) { mutableStateOf(false) }
 
     LaunchedEffect(muted, playerState) {
         playerState?.volume = if (muted) 0f else 1f
     }
 
-    LaunchedEffect(visible, autoPlay, playerState) {
-        if (visible && autoPlay) {
-            playerState?.play()
-        } else {
-            playerState?.pause()
-        }
-    }
-
-    LaunchedEffect(playerState?.isPlaying, playerState?.sliderPos) {
-        isLoaded = playerState?.isPlaying == true && playerState.sliderPos > 0f
+    LaunchedEffect(playerState?.hasMedia, playerState?.isLoading) {
+        if (playerState?.hasMedia == true && !playerState.isLoading) isLoaded = true
     }
 
     Box(
-        modifier =
-            modifier
-                .onLayoutRectChanged(debounceMillis = 300) {
-                    currentRect = it.boundsInWindow
-                }.onVisibilityChanged(300, 0.66f) {
-                    visible = it
-                },
+        modifier = modifier.timelineVideoAutoplay(playback, binding.second, autoPlay),
     ) {
-        if ((!isLoaded && LocalIsScrollingInProgress.current) || !visible || playerState == null) {
-            idlePlaceholder()
+        if ((!isLoaded && LocalIsScrollingInProgress.current) || playerState == null) {
+            if (binding.second.isPreparing && !LocalIsScrollingInProgress.current) {
+                loadingPlaceholder()
+            } else {
+                idlePlaceholder()
+            }
         } else {
             AnimatedContent(
                 isLoaded,
@@ -213,11 +205,6 @@ public fun VideoPlayer(
                                 }
                             }
 
-                    DisposableEffect(Unit) {
-                        onDispose {
-                            playerState.stop()
-                        }
-                    }
                     Box {
                         VideoPlayerSurface(
                             playerState = playerState,
@@ -242,129 +229,160 @@ public fun VideoPlayer(
                     }
                 }
             }
+            if (showControls) controls(playerState)
         }
     }
 }
 
 @Composable
-private fun rememberSurfaceBinding(uri: String): Pair<VideoPlayerState?, SurfaceBindingManager.Binding> {
-    val manager: SurfaceBindingManager = org.koin.compose.koinInject()
-    var player by remember { mutableStateOf<VideoPlayerState?>(null) }
+private fun rememberSurfaceBinding(
+    uri: String,
+    playback: TimelinePlaybackCoordinator,
+    muted: Boolean,
+): Pair<VideoPlayerState?, SurfaceBindingManager.Binding> {
+    val manager: SurfaceBindingManager = koinInject()
+    var player by remember(uri, manager, playback, muted) { mutableStateOf<VideoPlayerState?>(null) }
     val binding =
-        remember(uri, manager) {
-            manager.register(uri) { videoPlayerState ->
-                player = videoPlayerState
-            }
+        remember(uri, manager, playback, muted) {
+            manager.register(uri, playback, muted) { player = it }
         }
-
-    androidx.compose.runtime.DisposableEffect(binding) {
+    DisposableEffect(binding, playback) {
+        playback.register(binding, binding::setActive)
         onDispose {
+            playback.remove(binding)
             binding.dispose()
         }
     }
-
     return player to binding
 }
 
 @androidx.compose.runtime.Stable
 @Single
-public class SurfaceBindingManager {
-    public val player: VideoPlayerState by lazy {
-        io.github.kdroidfilter.composemediaplayer.createVideoPlayerState().apply {
-            loop = true
-            volume = 0f
+internal class SurfaceBindingManager() {
+    private var scope: CoroutineScope = MainScope()
+    private var createPlayer: () -> VideoPlayerState = {
+        io.github.kdroidfilter.composemediaplayer
+            .createVideoPlayerState()
+    }
+
+    internal constructor(scope: CoroutineScope, createPlayer: () -> VideoPlayerState) : this() {
+        this.scope = scope
+        this.createPlayer = createPlayer
+    }
+
+    private val playerDelegate =
+        lazy {
+            createPlayer().apply {
+                loop = true
+                volume = 0f
+            }
         }
-    }
-
-    public interface Binding {
-        public fun update(
-            rect: androidx.compose.ui.unit.IntRect,
-            isVisible: Boolean,
-            windowCenterY: Float,
-        )
-
-        public fun dispose()
-    }
-
-    private data class Candidate(
-        val binding: Binding,
-        val uri: String,
-        val rect: androidx.compose.ui.unit.IntRect,
-        val isVisible: Boolean,
-        val windowCenterY: Float,
-        val callback: (VideoPlayerState?) -> Unit,
-    )
-
-    private val candidates = mutableMapOf<Binding, Candidate>()
+    val player: VideoPlayerState by playerDelegate
     private var activeBinding: Binding? = null
-    private var currentUri: String? = null
+    private var requestedSource: Pair<TimelinePlaybackCoordinator, String>? = null
+    private var currentSource: Pair<TimelinePlaybackCoordinator, String>? = null
+    private var prepareJob: Job? = null
 
-    internal fun register(
-        uri: String,
-        onActiveChanged: (VideoPlayerState?) -> Unit,
-    ): Binding =
-        object : Binding {
-            override fun update(
-                rect: androidx.compose.ui.unit.IntRect,
-                isVisible: Boolean,
-                windowCenterY: Float,
-            ) {
-                candidates[this] =
-                    Candidate(this, uri, rect, isVisible, windowCenterY, onActiveChanged)
-                recalculateActiveItem()
-            }
+    inner class Binding(
+        private val uri: String,
+        private val playback: TimelinePlaybackCoordinator,
+        private val muted: Boolean,
+        private val callback: (VideoPlayerState?) -> Unit,
+    ) {
+        var isPreparing by mutableStateOf(false)
+            private set
 
-            override fun dispose() {
-                candidates.remove(this)
-                if (activeBinding == this) {
-                    activeBinding = null
-                    player.pause() // Stop playback if the active one is removed
-                    recalculateActiveItem()
+        fun setActive(active: Boolean) {
+            if (active) {
+                if (activeBinding === this) return
+                activeBinding?.setActive(false)
+                activeBinding = this
+                requestedSource = playback to uri
+                isPreparing = true
+                prepareRequestedSource()
+            } else if (activeBinding === this) {
+                if (currentSource == (playback to uri) && prepareJob?.isActive != true && !player.isLoading) {
+                    playback.savePosition(uri, player.currentTime)
                 }
+                // Keep a pending restoration alive while paused. Native loading is
+                // asynchronous and cannot be cancelled by cancelling our observer.
+                player.pause()
+                activeBinding = null
+                isPreparing = false
+                callback(null)
             }
         }
 
-    private fun recalculateActiveItem() {
-        // Find best candidate
-        val best =
-            candidates.values
-                .filter { it.isVisible }
-                .minByOrNull { kotlin.math.abs(it.rect.center.y - it.windowCenterY) }
+        fun prepared() {
+            isPreparing = false
+            player.volume = if (muted) 0f else 1f
+            callback(player)
+            if (player.error == null) player.play()
+        }
 
-        if (best?.binding != activeBinding) {
-            val oldBinding = activeBinding
-            val newBinding = best?.binding
+        fun dispose() = setActive(false)
+    }
 
-            activeBinding = newBinding
+    fun register(
+        uri: String,
+        playback: TimelinePlaybackCoordinator,
+        muted: Boolean = true,
+        callback: (VideoPlayerState?) -> Unit,
+    ): Binding {
+        playback.onClose(this) { release(playback) }
+        return Binding(uri, playback, muted, callback)
+    }
 
-            if (best != null) {
-                // Check if we are switching to a candidate with the SAME URI
-                val oldCandidate = candidates[oldBinding]
-                val sameUri = oldCandidate?.uri == best.uri
-
-                if (!sameUri) {
-                    // Different URI: Prepare player
-                    if (currentUri != best.uri) {
-                        currentUri = best.uri
-                        player.openUri(best.uri)
-                    } else {
-                        if (!player.isPlaying) {
-                            player.play()
+    private fun prepareRequestedSource() {
+        if (prepareJob?.isActive == true) return
+        if (currentSource != null && currentSource == requestedSource) {
+            activeBinding?.prepared()
+            return
+        }
+        prepareJob =
+            scope.launch(start = CoroutineStart.UNDISPATCHED) {
+                // Serialize native opens: cancelling a coroutine waiting for metadata
+                // does not cancel the library's in-flight openUri operation.
+                while (currentSource != requestedSource) {
+                    currentSource = null
+                    if (player.hasMedia) {
+                        player.stop()
+                        snapshotFlow { !player.hasMedia }.first { it }
+                    }
+                    val source = requestedSource ?: break
+                    player.clearError()
+                    player.openUri(source.second, InitialPlayerState.PAUSE)
+                    // Linux keeps hasMedia true during openUri and clears isLoading
+                    // on pause. The completed stop above establishes a fresh baseline.
+                    snapshotFlow { (player.hasMedia && !player.isLoading) || player.error != null }.first { it }
+                    if (player.error != null) {
+                        if (requestedSource == source) break
+                        continue
+                    }
+                    currentSource = source
+                    if (requestedSource == source) {
+                        val seconds = source.first.position(source.second)
+                        if (seconds > 0 && player.duration > 0) {
+                            player.seekTo((seconds / player.duration * 1000).toFloat().coerceIn(0f, 1000f))
                         }
                     }
-                    // Notify bindings
-                } else {
-                    // Same URI: Seamless handover
-                    // Do nothing to the player state (it keeps playing)
                 }
-
-                oldCandidate?.callback?.invoke(null)
-                best.callback.invoke(player)
-            } else {
-                // No candidate
-                candidates[oldBinding]?.callback?.invoke(null)
-                player.pause()
+                activeBinding?.prepared()
             }
-        }
+    }
+
+    fun close() {
+        activeBinding?.setActive(false)
+        prepareJob?.cancel()
+        requestedSource = null
+        currentSource = null
+        if (playerDelegate.isInitialized()) player.dispose()
+    }
+
+    fun release(playback: TimelinePlaybackCoordinator) {
+        if (requestedSource?.first !== playback) return
+        activeBinding?.setActive(false)
+        requestedSource = null
+        if (playerDelegate.isInitialized()) prepareRequestedSource()
     }
 }

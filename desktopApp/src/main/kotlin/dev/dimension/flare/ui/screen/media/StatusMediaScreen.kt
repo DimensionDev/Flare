@@ -85,7 +85,9 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.LocalTimelineAppearance
+import dev.dimension.flare.ui.component.MediaViewerPlayback
 import dev.dimension.flare.ui.component.NetworkImage
+import dev.dimension.flare.ui.component.VideoPlayer
 import dev.dimension.flare.ui.component.accessibleDescription
 import dev.dimension.flare.ui.component.status.MediaItem
 import dev.dimension.flare.ui.humanizer.humanize
@@ -111,8 +113,6 @@ import io.github.composefluent.component.SubtleButton
 import io.github.composefluent.component.Text
 import io.github.composefluent.surface.Card
 import io.github.kdroidfilter.composemediaplayer.VideoPlayerState
-import io.github.kdroidfilter.composemediaplayer.VideoPlayerSurface
-import io.github.kdroidfilter.composemediaplayer.rememberVideoPlayerState
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
@@ -138,6 +138,15 @@ import kotlin.time.Duration.Companion.seconds
 
 @Composable
 internal fun StatusMediaScreen(
+    accountType: AccountType,
+    statusKey: MicroBlogKey,
+    index: Int,
+) {
+    MediaViewerPlayback { StatusMediaContent(accountType, statusKey, index) }
+}
+
+@Composable
+private fun StatusMediaContent(
     accountType: AccountType,
     statusKey: MicroBlogKey,
     index: Int,
@@ -329,63 +338,36 @@ internal fun VideoItem(
     description: String?,
     modifier: Modifier = Modifier,
 ) {
-    val playerState = rememberVideoPlayerState()
-    DisposableEffect(Unit) {
-        playerState.loop = true
-        playerState.openUri(url)
-        onDispose {
-            playerState.stop()
-        }
-    }
     var showControls by remember { mutableStateOf(true) }
-    Box(
-        modifier = modifier,
-    ) {
-        AnimatedContent(
-            playerState.isLoading && playerState.sliderPos == 0f,
-            transitionSpec = {
-                fadeIn() togetherWith fadeOut()
-            },
-            modifier =
-                Modifier
-                    .clickable {
-                        showControls = !showControls
-                    }.semantics {
-                        description?.let { contentDescription = it }
-                    },
-        ) { isLoading ->
-            if (!isLoading) {
-                VideoPlayerSurface(
-                    playerState = playerState,
-                )
-            } else {
-                NetworkImage(
-                    model = thumbnailUrl,
-                    contentDescription = description,
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Fit,
-                )
-            }
-        }
-        AnimatedVisibility(
-            showControls,
-            modifier =
-                Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = 16.dp)
-                    .widthIn(max = 480.dp),
-            enter = slideInVertically { it } + fadeIn(),
-            exit = slideOutVertically { it } + fadeOut(),
-        ) {
-            Card(
-                modifier = Modifier,
+    VideoPlayer(
+        uri = url,
+        previewUri = thumbnailUrl,
+        contentDescription = description,
+        modifier = modifier.clickable { showControls = !showControls },
+        muted = false,
+        showControls = true,
+        contentScale = ContentScale.Fit,
+        controls = { playerState ->
+            AnimatedVisibility(
+                showControls,
+                modifier =
+                    Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = 16.dp)
+                        .widthIn(max = 480.dp),
+                enter = slideInVertically { it } + fadeIn(),
+                exit = slideOutVertically { it } + fadeOut(),
             ) {
-                PlayerControl(
-                    state = playerState,
-                )
+                Card(
+                    modifier = Modifier,
+                ) {
+                    PlayerControl(
+                        state = playerState,
+                    )
+                }
             }
-        }
-    }
+        },
+    )
 }
 
 @Composable

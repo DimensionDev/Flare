@@ -126,6 +126,7 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.Glassify
 import dev.dimension.flare.ui.component.LocalTimelineAppearance
+import dev.dimension.flare.ui.component.MediaViewerPlayback
 import dev.dimension.flare.ui.component.SurfaceBindingManager
 import dev.dimension.flare.ui.component.VideoPlayer
 import dev.dimension.flare.ui.component.accessibleDescription
@@ -299,7 +300,7 @@ internal fun MediaViewerScreen(
         playbackSpeed = NORMAL_PLAYBACK_SPEED
         surfaceBindingManager.player.setPlaybackSpeed(NORMAL_PLAYBACK_SPEED)
     }
-    FlareTheme(darkTheme = true) {
+    MediaViewerPlaybackTheme {
         val swiperState =
             rememberSwiperState(
                 onDismiss = onDismiss,
@@ -944,6 +945,13 @@ internal fun MediaViewerScreen(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun MediaViewerPlaybackTheme(content: @Composable () -> Unit) {
+    MediaViewerPlayback {
+        FlareTheme(darkTheme = true, content = content)
     }
 }
 

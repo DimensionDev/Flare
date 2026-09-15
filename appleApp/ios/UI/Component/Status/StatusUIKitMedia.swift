@@ -9,6 +9,9 @@ struct TimelineVideoAutoplayCandidate {
     let id: String
     let url: URL
     let hostView: UIView
+    var groupID: String? = nil
+    var isSelected = true
+    var horizontalFraction: CGFloat = 1
 }
 
 extension Notification.Name {
@@ -39,7 +42,7 @@ private struct MediaItemSignature: Equatable {
             customHeaders = image.customHeaders
         case .video(let video):
             kind = "video"
-            primaryURL = video.thumbnailUrl
+            primaryURL = video.url + "|" + video.thumbnailUrl
             customHeaders = video.customHeaders
         case .gif(let gif):
             kind = "gif"
@@ -63,6 +66,7 @@ private struct MediaItemSignature: Equatable {
 //   VideoPlayer Swift package; invoking the status-media viewer on tap is the
 //   authoritative play path, matching the SwiftUI tap-to-expand behaviour.
 final class MediaUIView: UIView {
+    private(set) var videoURL: URL?
     private let imageView: UIImageView = {
         let iv = UIImageView()
         iv.contentMode = .scaleAspectFill
@@ -162,6 +166,7 @@ final class MediaUIView: UIView {
             return
         }
         lastMediaSignature = signature
+        videoURL = nil
         lastCornerRadius = cornerRadius
         layer.cornerRadius = cornerRadius
         imageView.kf.cancelDownloadTask()
@@ -172,6 +177,7 @@ final class MediaUIView: UIView {
         case .image(let image):
             loadImage(url: image.previewUrl, customHeaders: image.customHeaders)
         case .video(let video):
+            videoURL = URL(string: video.url)
             loadImage(url: video.thumbnailUrl, customHeaders: video.customHeaders)
             setAutoplayOverlay(.idle)
         case .gif(let gif):
@@ -186,6 +192,7 @@ final class MediaUIView: UIView {
         imageView.kf.cancelDownloadTask()
         imageView.image = nil
         lastMediaSignature = nil
+        videoURL = nil
         lastCornerRadius = nil
         detachAutoplayPlayer()
         setAutoplayOverlay(.idle, showsBadge: false)
@@ -315,6 +322,11 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding, UICollectionView
     private let blurView = UIVisualEffectView(effect: UIBlurEffect(style: .regular))
     private let toggleButton = UIButton(type: .system)
     private let overflowView = MediaOverflowView()
+
+    let autoplayGroupID = UUID().uuidString
+    private var selectedCarouselIndex = 0
+    private var hasInteractedWithCarousel = false
+    var isCarouselScrolling: Bool { carousel.isDragging || carousel.isDecelerating || carousel.isTracking }
 
     private var items: [UiMedia] = []
     private var sensitive: Bool = false
@@ -507,6 +519,8 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding, UICollectionView
             self.isBlurred = sensitive
         }
         if shouldResetCarousel {
+            selectedCarouselIndex = 0
+            hasInteractedWithCarousel = false
             carousel.setContentOffset(.zero, animated: false)
         }
         layer.cornerRadius = usesCarousel ? 0 : cornerRadius
@@ -515,22 +529,21 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding, UICollectionView
         updateBlurUI()
     }
 
+    var allowsVideoAutoplay: Bool { !(sensitive && isBlurred) }
+
     func autoplayCandidates(prefix: String) -> [TimelineVideoAutoplayCandidate] {
         guard !isHidden, window != nil, !items.isEmpty, !(sensitive && isBlurred) else { return [] }
         if usesCarousel {
-            guard !carousel.isDragging, !carousel.isDecelerating else { return [] }
-            let visibleBounds = CGRect(origin: carousel.contentOffset, size: carousel.bounds.size)
-            let candidate = carousel.visibleCells
-                .compactMap { cell -> (TimelineVideoAutoplayCandidate, CGFloat)? in
-                    guard let cell = cell as? CarouselMediaCollectionCell,
-                          let candidate = cell.mediaCell.autoplayCandidate(prefix: prefix) else {
-                        return nil
-                    }
-                    let visibleWidth = cell.frame.intersection(visibleBounds).width
-                    return visibleWidth > 0 ? (candidate, visibleWidth) : nil
-                }
-                .max { $0.1 < $1.1 }
-            return candidate.map { [$0.0] } ?? []
+            return carousel.visibleCells.compactMap { cell in
+                guard let cell = cell as? CarouselMediaCollectionCell,
+                      let index = carousel.indexPath(for: cell)?.item,
+                      var candidate = cell.mediaCell.autoplayCandidate(prefix: prefix) else { return nil }
+                let visibleWidth = max(0, cell.frame.intersection(carousel.bounds).width)
+                candidate.groupID = autoplayGroupID
+                candidate.isSelected = index == selectedCarouselIndex
+                candidate.horizontalFraction = cell.bounds.width > 0 ? visibleWidth / cell.bounds.width : 0
+                return candidate
+            }
         }
         return cellPool
             .prefix(visibleItemCount)
@@ -882,17 +895,38 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding, UICollectionView
     }
 
     func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
+        hasInteractedWithCarousel = true
+        NotificationCenter.default.post(name: .timelineVideoAutoplayNeedsUpdate, object: self,
+                                        userInfo: ["carouselInteraction": true])
+    }
+
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        updateCarouselSelection()
         NotificationCenter.default.post(name: .timelineVideoAutoplayNeedsUpdate, object: self)
     }
 
     func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+        updateCarouselSelection()
         NotificationCenter.default.post(name: .timelineVideoAutoplayNeedsUpdate, object: self)
     }
 
+    func scrollViewDidEndScrollingAnimation(_ scrollView: UIScrollView) {
+        scrollViewDidEndDecelerating(scrollView)
+    }
+
     func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
-        if !decelerate {
-            NotificationCenter.default.post(name: .timelineVideoAutoplayNeedsUpdate, object: self)
-        }
+        if !decelerate { scrollViewDidEndDecelerating(scrollView) }
+    }
+
+    private func updateCarouselSelection() {
+        guard hasInteractedWithCarousel else { return }
+        // Include images and compare centers, so wide items do not win by width.
+        let attributes = carouselLayout.layoutAttributesForElements(in: carousel.bounds) ?? []
+        let center = carousel.bounds.midX
+        guard let closest = attributes.min(by: { abs($0.center.x - center) < abs($1.center.x - center) }) else { return }
+        if let current = attributes.first(where: { $0.indexPath.item == selectedCarouselIndex }),
+           abs(current.center.x - center) <= abs(closest.center.x - center) + 2 { return }
+        selectedCarouselIndex = closest.indexPath.item
     }
 
     private func updateBlurUI() {

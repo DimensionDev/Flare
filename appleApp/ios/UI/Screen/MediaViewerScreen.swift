@@ -110,23 +110,26 @@ struct MediaViewerScreen<SupplementaryOverlay: View>: View {
                             mediaContent(media)
                                 .accessibilityLabel(Text(verbatim: media.accessibleDescription))
                                 .contextMenu {
-                                    MediaViewerContextMenu(
-                                        media: media,
-                                        showsDownloadAll: medias.count > 1,
-                                        isPreparingShare: isPreparingShare,
-                                        onDownload: {
-                                            saveMedia(media)
-                                        },
-                                        onDownloadAll: {
-                                            saveAllMedia()
-                                        },
-                                        onShareImage: {
-                                            shareSelectedImage(media)
-                                        },
-                                        onCopyLink: {
-                                            UIPasteboard.general.string = media.url
-                                        }
-                                    )
+                                    // Video long presses are reserved for temporary double-speed playback.
+                                    if !media.isVideoMedia {
+                                        MediaViewerContextMenu(
+                                            media: media,
+                                            showsDownloadAll: medias.count > 1,
+                                            isPreparingShare: isPreparingShare,
+                                            onDownload: {
+                                                saveMedia(media)
+                                            },
+                                            onDownloadAll: {
+                                                saveAllMedia()
+                                            },
+                                            onShareImage: {
+                                                shareSelectedImage(media)
+                                            },
+                                            onCopyLink: {
+                                                UIPasteboard.general.string = media.url
+                                            }
+                                        )
+                                    }
                                 }
                         }
                         .onTap {

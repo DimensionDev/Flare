@@ -111,7 +111,6 @@ struct GroupConfigScreen: View {
             }
         }
         .navigationTitle(item == nil ? "tab_settings_add_group" : "tab_settings_edit_group")
-        .modifier(ScrollMinimizingNavigationBar(enabled: false))
         .sheet(isPresented: $showAddTabSheet) {
             NavigationStack {
                 AddTabSheet(
@@ -232,7 +231,6 @@ struct IconPicker: View {
             .padding()
         }
         .navigationTitle("Select Icon")
-        .modifier(ScrollMinimizingNavigationBar(enabled: false))
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
                 Button("Cancel") {

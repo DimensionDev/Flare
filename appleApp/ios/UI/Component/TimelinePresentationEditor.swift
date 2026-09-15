@@ -218,7 +218,6 @@ public struct TimelineFilterSheet: View {
             }
         }
         .navigationTitle("tab_settings_filter_title")
-        .modifier(ScrollMinimizingNavigationBar(enabled: false))
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
                 Button {

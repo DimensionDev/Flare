@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.produceState
+import androidx.paging.ItemSnapshotList
 import androidx.paging.LoadState
 import androidx.paging.LoadStates
 import androidx.paging.compose.LazyPagingItems
@@ -87,12 +88,12 @@ public sealed class PagingState<T> {
         @Immutable
         internal data class PagingSuccess<T : Any>(
             private val data: LazyPagingItems<T>,
+            private val items: ItemSnapshotList<T>,
+            override val isRefreshing: Boolean,
             override val appendState: LoadState,
         ) : Success<T>() {
             override val itemCount: Int
-                get() = data.itemCount
-            override val isRefreshing: Boolean
-                get() = data.isRefreshing
+                get() = items.size
 
             override operator fun get(index: Int): T? =
                 if (index < 0 || index >= data.itemCount) {
@@ -101,12 +102,7 @@ public sealed class PagingState<T> {
                     data[index]
                 }
 
-            override fun peek(index: Int): T? =
-                if (index < 0 || index >= data.itemCount) {
-                    null
-                } else {
-                    data.peek(index)
-                }
+            override fun peek(index: Int): T? = items.getOrNull(index)
 
             override suspend fun refreshSuspend() {
                 data.refreshSuspend()
@@ -235,6 +231,10 @@ public fun <T : Any> LazyPagingItems<T>.toPagingState(): PagingState<T> {
     if (itemCount > 0) {
         return PagingState.Success.PagingSuccess(
             data = this,
+            // LazyPagingItems is reused across updates. Include the presented items and
+            // refresh state so equal load states cannot hide changes from UI consumers.
+            items = itemSnapshotList,
+            isRefreshing = isRefreshing,
             appendState = loadState.append,
         )
     } else if (snapshot.initialErrorOrNull() != null) {

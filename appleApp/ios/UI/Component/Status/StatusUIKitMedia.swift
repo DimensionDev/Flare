@@ -325,6 +325,9 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding, UICollectionView
 
     let autoplayGroupID = UUID().uuidString
     private var selectedCarouselIndex = 0
+    private weak var selectionStore: TimelineMediaSelections?
+    private var selectionURLs: [String] = []
+    private var pendingReturnedIndex: Int?
     private var hasInteractedWithCarousel = false
     var isCarouselScrolling: Bool { carousel.isDragging || carousel.isDecelerating || carousel.isTracking }
 
@@ -434,6 +437,11 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding, UICollectionView
                 lastCarouselSize = carousel.bounds.size
                 carouselLayout.invalidateLayout()
             }
+            if let index = pendingReturnedIndex, carousel.bounds.width > 0, items.indices.contains(index) {
+                pendingReturnedIndex = nil
+                carousel.layoutIfNeeded()
+                carousel.scrollToItem(at: IndexPath(item: index, section: 0), at: .centeredHorizontally, animated: false)
+            }
         } else {
             layoutGrid()
         }
@@ -519,6 +527,7 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding, UICollectionView
             self.isBlurred = sensitive
         }
         if shouldResetCarousel {
+            pendingReturnedIndex = nil
             selectedCarouselIndex = 0
             hasInteractedWithCarousel = false
             carousel.setContentOffset(.zero, animated: false)
@@ -527,6 +536,40 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding, UICollectionView
         updateAspectConstraint()
         reloadMediaLayout()
         updateBlurUI()
+        bindMediaSelection()
+    }
+
+    override func didMoveToWindow() {
+        super.didMoveToWindow()
+        if window == nil {
+            selectionStore?.remove(id: autoplayGroupID)
+            selectionStore = nil
+        } else {
+            bindMediaSelection()
+        }
+    }
+
+    private func bindMediaSelection() {
+        var responder: UIResponder? = self
+        while let current = responder {
+            if let controller = current as? UITimelineCollectionViewController {
+                let urls = items.map(\.url)
+                guard selectionStore !== controller.mediaSelections || selectionURLs != urls else { return }
+                selectionStore?.remove(id: autoplayGroupID)
+                selectionStore = controller.mediaSelections
+                selectionURLs = urls
+                controller.mediaSelections.register(id: autoplayGroupID, urls: urls) { [weak self] url in
+                    guard let self, let index = self.items.firstIndex(where: { $0.url == url }) else { return }
+                    self.selectedCarouselIndex = index
+                    self.pendingReturnedIndex = index
+                    self.setNeedsLayout()
+                    NotificationCenter.default.post(name: .timelineVideoAutoplayNeedsUpdate, object: self,
+                                                    userInfo: ["selectedMediaURL": url])
+                }
+                return
+            }
+            responder = current.next
+        }
     }
 
     var allowsVideoAutoplay: Bool { !(sensitive && isBlurred) }
@@ -549,7 +592,9 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding, UICollectionView
             .prefix(visibleItemCount)
             .compactMap { cell in
                 guard !cell.isHidden else { return nil }
-                return cell.autoplayCandidate(prefix: prefix)
+                guard var candidate = cell.autoplayCandidate(prefix: prefix) else { return nil }
+                candidate.groupID = autoplayGroupID
+                return candidate
             }
     }
 
@@ -873,6 +918,8 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding, UICollectionView
     private func handleCellTap(index: Int) {
         if sensitive, isBlurred { return }
         guard items.indices.contains(index) else { return }
+        NotificationCenter.default.post(name: .timelineVideoAutoplayNeedsUpdate, object: self,
+                                        userInfo: ["selectedMediaURL": items[index].url, "mediaClicked": true])
         onMediaClicked?(items[index], index)
     }
 

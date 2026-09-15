@@ -25,11 +25,13 @@ internal val LocalTimelineCarouselItem = compositionLocalOf<TimelineCarouselItem
 internal data class TimelineCarouselItem(
     val groupId: Any,
     val selected: Boolean,
+    val isCarousel: Boolean = true,
 )
 
 internal class TimelinePlaybackCoordinator(
     val scope: CoroutineScope,
     private val arbiter: VideoPlaybackArbiter = VideoPlaybackArbiter.shared,
+    private val memory: MediaPlaybackMemory = MediaPlaybackMemory.shared,
 ) {
     private val policy = TimelineAutoplayPolicy()
     private val candidates = linkedMapOf<Any, TimelineAutoplayPolicy.Candidate>()
@@ -38,21 +40,39 @@ internal class TimelinePlaybackCoordinator(
     private var selectionJob: Job? = null
     private var playingId: Any? = null
     private var closed = false
-    private val positions = mutableMapOf<Any, Double>()
+    val mediaSelections = TimelineMediaSelections()
+    private var viewerSelection: Pair<List<String>, String>? = null
     private val cleanup = mutableMapOf<Any, () -> Unit>()
     var viewport: Rect = Rect.Zero
 
     init {
-        arbiter.register(this, ::stopCurrentPlayer, ::scheduleSelection)
+        arbiter.register(this, ::stopCurrentPlayer, ::scheduleSelection, mediaSelections::returned)
     }
 
-    fun position(key: Any): Double = positions[key] ?: 0.0
+    fun position(key: String): Double = memory.position(key)
 
     fun savePosition(
-        key: Any,
+        key: String,
         seconds: Double,
     ) {
-        if (seconds.isFinite() && seconds >= 0) positions[key] = seconds
+        memory.save(key, seconds)
+    }
+
+    fun selectMedia(
+        groupId: Any,
+        uri: String,
+        userInitiated: Boolean,
+    ) {
+        if (userInitiated) arbiter.interacted(this)
+        policy.returnedToMedia(groupId, uri)
+        scheduleSelection()
+    }
+
+    fun selectViewerMedia(
+        urls: List<String>,
+        selectedUri: String?,
+    ) {
+        viewerSelection = selectedUri?.takeIf { it in urls }?.let { urls.toList() to it }
     }
 
     fun present() = arbiter.present(this)
@@ -105,13 +125,12 @@ internal class TimelinePlaybackCoordinator(
     fun close() {
         closed = true
         selectionJob?.cancel()
-        arbiter.remove(this)
         stopCurrentPlayer()
         players.clear()
         candidates.clear()
         cleanup.values.toList().forEach { it() }
         cleanup.clear()
-        positions.clear()
+        arbiter.remove(this, viewerSelection?.first.orEmpty(), viewerSelection?.second)
     }
 
     private fun scheduleSelection() {
@@ -167,6 +186,16 @@ public fun MediaViewerPlayback(content: @Composable () -> Unit) {
     CompositionLocalProvider(LocalTimelinePlayback provides playback, content = content)
 }
 
+/** Records the last selected page for the timeline that opened this viewer. */
+@Composable
+public fun MediaViewerSelection(
+    mediaUrls: List<String>,
+    selectedUri: String?,
+) {
+    val playback = LocalTimelinePlayback.current
+    SideEffect { playback?.selectViewerMedia(mediaUrls, selectedUri) }
+}
+
 @Composable
 internal fun rememberTimelinePlayback(): TimelinePlaybackCoordinator {
     val inherited = LocalTimelinePlayback.current
@@ -188,6 +217,7 @@ internal fun Modifier.timelineVideoAutoplay(
     playback: TimelinePlaybackCoordinator,
     id: Any,
     enabled: Boolean,
+    mediaUri: String,
 ): Modifier {
     val item = LocalTimelineCarouselItem.current
     val geometry = remember(id) { VideoGeometry() }
@@ -200,8 +230,9 @@ internal fun Modifier.timelineVideoAutoplay(
                 groupId = item?.groupId,
                 visible = enabled && !visible.isEmpty,
                 selected = item?.selected ?: true,
-                canStart = enabled && (item == null || visible.width >= geometry.bounds.width * 0.6f),
+                canStart = enabled && (item?.isCarousel != true || visible.width >= geometry.bounds.width * 0.6f),
                 distance = abs(geometry.bounds.center.y - playback.viewport.center.y),
+                mediaUri = mediaUri,
             ),
         )
     }

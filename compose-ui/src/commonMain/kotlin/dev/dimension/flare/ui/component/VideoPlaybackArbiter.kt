@@ -4,19 +4,22 @@ internal class VideoPlaybackArbiter {
     private data class Client(
         val stop: () -> Unit,
         val reconsider: () -> Unit,
+        val mediaReturned: (List<String>, String) -> Unit,
     )
 
     private val clients = mutableMapOf<Any, Client>()
     private var active: Any? = null
     private var preferred: Any? = null
     private val presentations = mutableListOf<Any>()
+    private val returnOwners = mutableMapOf<Any, Any?>()
 
     fun register(
         owner: Any,
         stop: () -> Unit,
         reconsider: () -> Unit,
+        mediaReturned: (List<String>, String) -> Unit = { _, _ -> },
     ) {
-        clients[owner] = Client(stop, reconsider)
+        clients[owner] = Client(stop, reconsider, mediaReturned)
     }
 
     fun interacted(owner: Any) {
@@ -44,16 +47,25 @@ internal class VideoPlaybackArbiter {
         reconsider()
     }
 
-    fun remove(owner: Any) {
+    fun remove(
+        owner: Any,
+        mediaUrls: List<String> = emptyList(),
+        selectedUri: String? = null,
+    ) {
+        val wasTop = presentations.lastOrNull() === owner
+        val returnOwner = returnOwners.remove(owner)
         if (active === owner) stopActive()
-        if (preferred === owner) preferred = null
+        if (wasTop && selectedUri != null) clients[returnOwner]?.mediaReturned?.invoke(mediaUrls, selectedUri)
+        if (preferred === owner) preferred = returnOwner?.takeIf { it in clients }
+        returnOwners.keys.filter { returnOwners[it] === owner }.forEach { returnOwners[it] = returnOwner }
         presentations.remove(owner)
         clients.remove(owner)
         reconsider()
     }
 
     fun present(owner: Any) {
-        presentations.remove(owner)
+        if (owner in presentations) return
+        returnOwners[owner] = preferred ?: active
         presentations.add(owner)
         preferred = owner
         stopActive()

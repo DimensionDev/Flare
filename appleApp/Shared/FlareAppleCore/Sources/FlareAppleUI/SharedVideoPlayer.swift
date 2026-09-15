@@ -28,11 +28,10 @@ private final class SharedVideoPlayer {
     private var wantsPlayback = false
     private var rate: Float = 1
 
-    func attach(_ session: VideoPlaybackSession, url: URL, position: Double, muted: Bool) -> AVQueuePlayer {
-        if owner !== session {
-            owner?.detach()
-            owner = session
-        }
+    func attach(_ session: VideoPlaybackSession, url: URL, position: Double?, muted: Bool) -> (AVQueuePlayer, Double) {
+        owner?.detach()
+        owner = session
+        let position = position ?? MediaPlaybackMemory.shared.position(for: url.absoluteString)
         generation += 1
         stopObserving()
         player.pause()
@@ -57,7 +56,7 @@ private final class SharedVideoPlayer {
                 self.owner?.refresh()
             }
         }
-        return player
+        return (player, position)
     }
 
     private enum PlaybackUpdate: Sendable {
@@ -147,6 +146,14 @@ private final class SharedVideoPlayer {
         refresh(session)
     }
 
+    func setPosition(for url: String, seconds: Double) {
+        guard seconds.isFinite, seconds >= 0 else { return }
+        if let owner, owner.mediaURL == url, abs(owner.position - seconds) > 0.5 {
+            owner.seek(to: seconds)
+        }
+        MediaPlaybackMemory.shared.save(seconds, for: url)
+    }
+
     func refresh(_ session: VideoPlaybackSession) {
         guard owner === session, !seeking, let pendingPosition,
               player.currentItem?.status == .readyToPlay else { return }
@@ -198,14 +205,19 @@ public final class VideoPlaybackSession {
 
     public init() {}
 
-    public func play(url: String, position: Double = 0, muted: Bool = true, rate: Float = 1) {
+    public static func setPosition(for url: String, seconds: Double) {
+        SharedVideoPlayer.shared.setPosition(for: url, seconds: seconds)
+    }
+
+    public func play(url: String, position: Double? = nil, muted: Bool = true, rate: Float = 1) {
         guard let mediaURL = URL(string: url) else {
             state = .error(URLError(.badURL))
             return
         }
         if player == nil || self.url != url {
-            self.position = position
-            player = SharedVideoPlayer.shared.attach(self, url: mediaURL, position: position, muted: muted)
+            let attachment = SharedVideoPlayer.shared.attach(self, url: mediaURL, position: position, muted: muted)
+            player = attachment.0
+            self.position = attachment.1
             self.url = url
             state = .loading
         }
@@ -254,6 +266,7 @@ public final class VideoPlaybackSession {
     public func detach() {
         guard player != nil else { return }
         position = SharedVideoPlayer.shared.position(self)
+        if let url { MediaPlaybackMemory.shared.save(position, for: url) }
         SharedVideoPlayer.shared.detach(self)
         player = nil
         isPlaying = false
@@ -266,7 +279,7 @@ public final class VideoPlaybackSession {
 final class VideoPlaybackPresentation {
     private struct Request {
         let url: String
-        let position: Double
+        var position: Double?
         var playing: Bool
         let rate: Float
     }
@@ -275,6 +288,8 @@ final class VideoPlaybackPresentation {
     private weak var session: VideoPlaybackSession?
     private var request: Request?
     private var presented = false
+    private var mediaURLs: [String] = []
+    private var selectedMediaURL: String?
 
     init(arbiter: VideoPlaybackArbiter = .shared) {
         self.arbiter = arbiter
@@ -293,10 +308,15 @@ final class VideoPlaybackPresentation {
         stop()
         request = nil
         session = nil
-        arbiter.withdraw(self)
+        arbiter.withdraw(self, mediaURLs: mediaURLs, selectedMediaURL: selectedMediaURL)
     }
 
-    func update(_ session: VideoPlaybackSession, url: String, position: Double, playing: Bool, rate: Float) {
+    func selectMedia(urls: [String], selectedURL: String?) {
+        mediaURLs = urls
+        selectedMediaURL = selectedURL
+    }
+
+    func update(_ session: VideoPlaybackSession, url: String, position: Double? = nil, playing: Bool, rate: Float) {
         if self.session !== session { self.session?.detach() }
         self.session = session
         request = Request(url: url, position: position, playing: playing, rate: rate)
@@ -313,8 +333,8 @@ final class VideoPlaybackPresentation {
 
     private func activate() {
         guard presented, let session, let request, arbiter.acquire(self) else { return }
-        let position = session.mediaURL == request.url ? session.position : request.position
-        session.play(url: request.url, position: position, muted: false, rate: request.rate)
+        self.request?.position = nil
+        session.play(url: request.url, position: request.position, muted: false, rate: request.rate)
         session.setPlaying(request.playing, rate: request.rate)
     }
 
@@ -340,18 +360,29 @@ extension EnvironmentValues {
 
 private struct VideoPlaybackPresentationModifier: ViewModifier {
     @State private var presentation = VideoPlaybackPresentation()
+    let mediaURLs: [String]
+    let selectedMediaURL: String?
 
     func body(content: Content) -> some View {
         content
             .environment(\.videoPlaybackPresentation, presentation)
-            .onAppear { presentation.begin() }
+            .onAppear {
+                presentation.selectMedia(urls: mediaURLs, selectedURL: selectedMediaURL)
+                presentation.begin()
+            }
+            .onChange(of: mediaURLs) { _, urls in
+                presentation.selectMedia(urls: urls, selectedURL: selectedMediaURL)
+            }
+            .onChange(of: selectedMediaURL) { _, url in
+                presentation.selectMedia(urls: mediaURLs, selectedURL: url)
+            }
             .onDisappear { presentation.end() }
     }
 }
 
 public extension View {
-    func videoPlaybackPresentation() -> some View {
-        modifier(VideoPlaybackPresentationModifier())
+    func videoPlaybackPresentation(mediaURLs: [String] = [], selectedMediaURL: String? = nil) -> some View {
+        modifier(VideoPlaybackPresentationModifier(mediaURLs: mediaURLs, selectedMediaURL: selectedMediaURL))
     }
 }
 

@@ -28,7 +28,7 @@ class SurfaceBindingManagerTest {
                     allocations++
                     fake.player
                 }
-            val timeline = TimelinePlaybackCoordinator(this, VideoPlaybackArbiter())
+            val timeline = TimelinePlaybackCoordinator(this, VideoPlaybackArbiter(), MediaPlaybackMemory())
             val observed = mutableListOf<VideoPlayerState?>()
             val a = manager.register("a", timeline) { observed += it }
             val b = manager.register("b", timeline) { observed += it }
@@ -78,8 +78,8 @@ class SurfaceBindingManagerTest {
         runTest {
             val fake = ControlledPlayer()
             val manager = SurfaceBindingManager(this) { fake.player }
-            val first = TimelinePlaybackCoordinator(this, VideoPlaybackArbiter())
-            val second = TimelinePlaybackCoordinator(this, VideoPlaybackArbiter())
+            val first = TimelinePlaybackCoordinator(this, VideoPlaybackArbiter(), MediaPlaybackMemory())
+            val second = TimelinePlaybackCoordinator(this, VideoPlaybackArbiter(), MediaPlaybackMemory())
             val a = manager.register("a", first) {}
             val b = manager.register("b", second) {}
             val c = manager.register("c", second) {}
@@ -109,7 +109,7 @@ class SurfaceBindingManagerTest {
         runTest {
             val fake = ControlledPlayer()
             val manager = SurfaceBindingManager(this) { fake.player }
-            val timeline = TimelinePlaybackCoordinator(this, VideoPlaybackArbiter())
+            val timeline = TimelinePlaybackCoordinator(this, VideoPlaybackArbiter(), MediaPlaybackMemory())
             manager.register("a", timeline) {}.setActive(true)
             timeline.close()
             assertFalse(fake.playing)
@@ -126,7 +126,7 @@ class SurfaceBindingManagerTest {
         runTest {
             val fake = ControlledPlayer()
             val manager = SurfaceBindingManager(this) { fake.player }
-            val timeline = TimelinePlaybackCoordinator(this, VideoPlaybackArbiter())
+            val timeline = TimelinePlaybackCoordinator(this, VideoPlaybackArbiter(), MediaPlaybackMemory())
             val a = manager.register("a", timeline) {}
             val b = manager.register("b", timeline) {}
             a.setActive(true)
@@ -156,7 +156,7 @@ class SurfaceBindingManagerTest {
         runTest {
             val fake = ControlledPlayer()
             val manager = SurfaceBindingManager(this) { fake.player }
-            val timeline = TimelinePlaybackCoordinator(this, VideoPlaybackArbiter())
+            val timeline = TimelinePlaybackCoordinator(this, VideoPlaybackArbiter(), MediaPlaybackMemory())
             manager.register("a", timeline) {}.setActive(true)
             manager.register("b", timeline) {}.setActive(true)
             fake.failLoading()
@@ -171,13 +171,122 @@ class SurfaceBindingManagerTest {
             manager.close()
         }
 
+    @Test
+    fun timelineAndViewerShareProgressAcrossPagesAndResumeAfterManualPause() =
+        runTest {
+            val fake = ControlledPlayer()
+            var allocations = 0
+            val manager =
+                SurfaceBindingManager(this) {
+                    allocations++
+                    fake.player
+                }
+            val memory = MediaPlaybackMemory()
+            val arbiter = VideoPlaybackArbiter()
+            val timeline = TimelinePlaybackCoordinator(this, arbiter, memory)
+            val viewer = TimelinePlaybackCoordinator(this, arbiter, memory)
+            val inlineA = manager.register("a", timeline) {}
+            val inlineB = manager.register("b", timeline) {}
+            val detailA = manager.register("a", viewer, muted = false) {}
+            val detailB = manager.register("b", viewer, muted = false) {}
+
+            fun activate(binding: SurfaceBindingManager.Binding) {
+                binding.setActive(true)
+                fake.finishLoading()
+                Snapshot.sendApplyNotifications()
+                runCurrent()
+            }
+
+            activate(inlineA)
+            fake.time = 37.0
+            activate(detailA)
+            assertEquals(37.0, fake.time, 0.001)
+            detailA.seek(120f)
+            fake.player.pause()
+            activate(detailB)
+            assertEquals(0.0, fake.time, 0.001)
+            fake.time = 8.0
+            activate(detailA)
+            assertEquals(12.0, fake.time, 0.001)
+            activate(detailB)
+            assertEquals(8.0, fake.time, 0.001)
+            fake.player.pause()
+            viewer.close()
+            activate(inlineB)
+            assertEquals(8.0, fake.time, 0.001)
+            assertTrue(fake.playing)
+            assertEquals(12.0, memory.position("a"), 0.001)
+            assertEquals(1, allocations)
+            fake.time = 19.0
+            fake.loading = true
+            timeline.close()
+            assertEquals(19.0, memory.position("b"), 0.001, "Buffering must not discard the current video's progress")
+            manager.close()
+        }
+
+    @Test
+    fun pendingSeekWinsOverStaleNativeTimeWhenClosingOrSwitchingImmediately() =
+        runTest {
+            val fake = ControlledPlayer()
+            val manager = SurfaceBindingManager(this) { fake.player }
+            val memory = MediaPlaybackMemory()
+            val timeline = TimelinePlaybackCoordinator(this, VideoPlaybackArbiter(), memory)
+            val a = manager.register("a", timeline) {}
+            val b = manager.register("b", timeline) {}
+            a.setActive(true)
+            fake.finishLoading()
+            Snapshot.sendApplyNotifications()
+            runCurrent()
+            fake.time = 37.0
+            fake.deferSeek = true
+            a.seek(100f)
+            b.setActive(true)
+            assertEquals(10.0, memory.position("a"), 0.001)
+            fake.finishLoading()
+            Snapshot.sendApplyNotifications()
+            runCurrent()
+            a.setActive(true)
+            fake.finishLoading()
+            Snapshot.sendApplyNotifications()
+            runCurrent()
+            a.setActive(false)
+            assertEquals(10.0, memory.position("a"), 0.001)
+            a.setActive(true)
+            a.seek(0f)
+            timeline.close()
+            assertEquals(0.0, memory.position("a"), 0.001)
+            manager.close()
+        }
+
+    @Test
+    fun seekingToTheEndDoesNotKeepAnOldPendingPositionAfterLooping() =
+        runTest {
+            val fake = ControlledPlayer()
+            val manager = SurfaceBindingManager(this) { fake.player }
+            val memory = MediaPlaybackMemory()
+            val timeline = TimelinePlaybackCoordinator(this, VideoPlaybackArbiter(), memory)
+            val binding = manager.register("a", timeline) {}
+            binding.setActive(true)
+            fake.finishLoading()
+            Snapshot.sendApplyNotifications()
+            runCurrent()
+            fake.time = 37.0
+            binding.seek(1000f)
+            fake.time = 3.0
+            timeline.close()
+            manager.close()
+            assertEquals(3.0, memory.position("a"), 0.001)
+        }
+
     private class ControlledPlayer {
         var loading by mutableStateOf(false)
         var hasMedia by mutableStateOf(false)
         private var error by mutableStateOf<VideoPlayerError?>(null)
-        var time = 0.0
+        var time by mutableStateOf(0.0)
         var playing = false
         var deferStop = false
+        var deferSeek = false
+        private var userDragging = false
         val opened = mutableListOf<String>()
         val played = mutableListOf<String>()
         private var opening: String? = null
@@ -242,7 +351,19 @@ class SurfaceBindingManagerTest {
                     }
 
                     "seekTo" -> {
-                        time = (args[0] as Float).toDouble() / 10
+                        if (!deferSeek) {
+                            val slider = args[0] as Float
+                            time = if (slider == 1000f) 0.0 else slider.toDouble() / 10
+                        }
+                        null
+                    }
+
+                    "getUserDragging" -> {
+                        userDragging
+                    }
+
+                    "setUserDragging" -> {
+                        userDragging = args[0] as Boolean
                         null
                     }
 

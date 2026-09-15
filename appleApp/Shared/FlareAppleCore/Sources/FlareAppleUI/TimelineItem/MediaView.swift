@@ -137,13 +137,11 @@ public struct MediaVideoView: View {
         let url = data.url
         let coordinator = playback
         let model = player
-        coordinator.register(id: id) { [weak coordinator] playing in
-            guard let coordinator else { return }
+        coordinator.register(id: id) { playing in
             if playing {
-                model.play(url: url, position: coordinator.position(for: url))
+                model.play(url: url)
             } else {
                 model.detach()
-                coordinator.savePosition(model.position, for: url)
             }
         }
     }
@@ -155,8 +153,9 @@ public struct MediaVideoView: View {
             groupID: carouselItem?.groupID,
             isVisible: geometry.visible && canAutoplay,
             isSelected: carouselItem?.isSelected ?? true,
-            canStart: canAutoplay && (carouselItem == nil || geometry.horizontalFraction >= 0.6),
-            distance: geometry.distance
+            canStart: canAutoplay && (carouselItem?.isCarousel != true || geometry.horizontalFraction >= 0.6),
+            distance: geometry.distance,
+            mediaURL: data.url
         ))
     }
 

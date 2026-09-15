@@ -86,6 +86,7 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.MediaViewerPlayback
+import dev.dimension.flare.ui.component.MediaViewerSelection
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.VideoPlayer
 import dev.dimension.flare.ui.component.accessibleDescription
@@ -174,6 +175,7 @@ private fun StatusMediaContent(
                 ) {
                     medias.size
                 }
+            MediaViewerSelection(medias.map { it.url }, medias.getOrNull(pagerState.currentPage)?.url)
             HorizontalFlipView(
                 state = pagerState,
                 enabled = state.lockPager,
@@ -347,7 +349,7 @@ internal fun VideoItem(
         muted = false,
         showControls = true,
         contentScale = ContentScale.Fit,
-        controls = { playerState ->
+        controls = { playerState, seek ->
             AnimatedVisibility(
                 showControls,
                 modifier =
@@ -363,6 +365,7 @@ internal fun VideoItem(
                 ) {
                     PlayerControl(
                         state = playerState,
+                        onSeek = seek,
                     )
                 }
             }
@@ -373,6 +376,7 @@ internal fun VideoItem(
 @Composable
 private fun PlayerControl(
     state: VideoPlayerState,
+    onSeek: (Float) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val playbackPositionLabel = stringResource(Res.string.media_playback_position)
@@ -426,7 +430,7 @@ private fun PlayerControl(
                     },
                     onValueChangeFinished = {
                         playerState.userDragging = false
-                        playerState.seekTo(playerState.sliderPos)
+                        onSeek(playerState.sliderPos)
                     },
                     modifier =
                         Modifier

@@ -115,6 +115,9 @@ public struct VideoControlView: View {
             baselineSeconds = seconds
             baselineDate = Date()
         }
+        .onDisappear {
+            if isSeeking { currentTime = CMTime(seconds: sliderValue, preferredTimescale: 600) }
+        }
         .onChange(of: currentTime.seconds) { _, newValue in
             guard !isSeeking, newValue.isFinite else { return }
             baselineSeconds = newValue
@@ -242,7 +245,8 @@ public struct StatusMediaVideoView: View {
             updatePlayback()
         }
         .onChange(of: time) { _, target in
-            if target.seconds.isFinite, abs(session.position - target.seconds) > 0.5 {
+            if target == time, session.mediaURL == data.url,
+               target.seconds.isFinite, abs(session.position - target.seconds) > 0.5 {
                 session.seek(to: target.seconds)
             }
         }
@@ -261,6 +265,10 @@ public struct StatusMediaVideoView: View {
         }
         .onDisappear {
             endFastPlayback()
+            if session.mediaURL == data.url, time.seconds.isFinite,
+               abs(session.position - time.seconds) > 0.5 {
+                session.seek(to: time.seconds)
+            }
             (presentation ?? fallbackPresentation).release(session)
             if presentation == nil { fallbackPresentation.end() }
         }
@@ -268,7 +276,7 @@ public struct StatusMediaVideoView: View {
 
     private func updatePlayback() {
         (presentation ?? fallbackPresentation).update(
-            session, url: data.url, position: time.seconds.isFinite ? time.seconds : 0,
+            session, url: data.url,
             playing: play, rate: playbackRate
         )
     }

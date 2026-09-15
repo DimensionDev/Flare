@@ -117,6 +117,26 @@ internal fun StatusMediaComponent(
         allowCarousel &&
             appearanceSettings.mediaLayout == TimelineMediaLayout.Carousel &&
             data.size > 1
+    val carouselState = if (usesCarousel) rememberLazyListState() else null
+    val carouselId = remember(post.statusKey) { Any() }
+    val playback = LocalTimelinePlayback.current
+    var selectedIndex by remember(post.statusKey) { mutableStateOf(0) }
+    val mediaUrls = remember(data) { data.map { it.url } }
+    val openMedia: (UiMedia) -> Unit = { media ->
+        playback?.selectMedia(carouselId, media.url, userInitiated = true)
+        onMediaClick(media)
+    }
+    DisposableEffect(playback, carouselId, mediaUrls, carouselState) {
+        playback?.mediaSelections?.register(carouselId, mediaUrls) { uri ->
+            val index = mediaUrls.indexOf(uri)
+            if (index >= 0) {
+                selectedIndex = index
+                playback.selectMedia(carouselId, uri, userInitiated = false)
+                carouselState?.requestScrollToItem(index)
+            }
+        }
+        onDispose { playback?.mediaSelections?.remove(carouselId) }
+    }
     val mediaContentModifier =
         Modifier.let {
             if (hideSensitive && SystemUtils.isBlurSupported) {
@@ -138,11 +158,7 @@ internal fun StatusMediaComponent(
                 modifier.clip(shape)
             },
     ) {
-        if (usesCarousel) {
-            val carouselState = rememberLazyListState()
-            val carouselId = remember(post.statusKey) { Any() }
-            val playback = LocalTimelinePlayback.current
-            var selectedIndex by remember(post.statusKey) { mutableStateOf(0) }
+        if (carouselState != null) {
             LaunchedEffect(carouselState, playback, carouselId) {
                 var interacted = false
                 snapshotFlow { carouselState.isScrollInProgress }.distinctUntilChanged().collect { scrolling ->
@@ -223,7 +239,7 @@ internal fun StatusMediaComponent(
                                 post = post,
                                 media = media,
                                 mediaCount = data.size,
-                                onMediaClick = onMediaClick,
+                                onMediaClick = openMedia,
                                 hideSensitive = hideSensitive,
                                 keepAspectRatio = false,
                                 fillContainer = true,
@@ -241,14 +257,18 @@ internal fun StatusMediaComponent(
             AdaptiveGrid(
                 content = {
                     data.fastForEach { media ->
-                        StatusMediaItem(
-                            post = post,
-                            media = media,
-                            mediaCount = data.size,
-                            onMediaClick = onMediaClick,
-                            hideSensitive = hideSensitive,
-                            keepAspectRatio = data.size == 1 && appearanceSettings.expandMediaSize,
-                        )
+                        CompositionLocalProvider(
+                            LocalTimelineCarouselItem provides TimelineCarouselItem(carouselId, selected = true, isCarousel = false),
+                        ) {
+                            StatusMediaItem(
+                                post = post,
+                                media = media,
+                                mediaCount = data.size,
+                                onMediaClick = openMedia,
+                                hideSensitive = hideSensitive,
+                                keepAspectRatio = data.size == 1 && appearanceSettings.expandMediaSize,
+                            )
+                        }
                     }
                 },
                 maxItems = if (appearanceSettings.limitMediaGridToNine) 9 else data.size,

@@ -189,7 +189,7 @@ public fun VideoPlayer(
         }
     }
     Box(
-        modifier = modifier.timelineVideoAutoplay(playback, binding.second, autoPlay && resumed),
+        modifier = modifier.timelineVideoAutoplay(playback, binding.second, autoPlay && resumed, request.uri),
     ) {
         if ((!isLoaded && LocalIsScrollingInProgress.current) || player == null) {
             idlePlaceholder()
@@ -304,8 +304,10 @@ public class SurfaceBindingManager(
                 }
         }
     public val player: ExoPlayer by playerDelegate
-    private var activeBinding: Binding? = null
-    private var activeRequest: Pair<TimelinePlaybackCoordinator, VideoRequest>? = null
+    private var activeBinding: Binding? by mutableStateOf(null)
+    private var activeRequest: Pair<TimelinePlaybackCoordinator, VideoRequest>? by mutableStateOf(null)
+
+    public fun playerFor(uri: String): ExoPlayer? = if (activeBinding != null && activeRequest?.second?.uri == uri) player else null
 
     public interface Binding {
         public fun setActive(active: Boolean)
@@ -332,17 +334,18 @@ public class SurfaceBindingManager(
                                 .mediaSourceFactory(request.customHeaders)
                                 .createMediaSource(MediaItem.fromUri(request.uri))
                         player.setMediaSource(source)
-                        player.seekTo((playback.position(request) * 1000).toLong())
+                        player.seekTo((playback.position(request.uri) * 1000).toLong())
                         player.prepare()
                         activeRequest = playback to request
                     }
+                    player.setPlaybackSpeed(1f)
                     player.volume = if (muted) 0f else 1f
                     player.setAudioAttributes(audioAttributes, !muted)
                     player.play()
                     callback(player)
                 } else if (activeBinding === this) {
-                    if (player.playbackState == Player.STATE_READY) {
-                        playback.savePosition(request, player.currentPosition / 1000.0)
+                    if (player.playbackState != Player.STATE_IDLE && player.playerError == null) {
+                        playback.savePosition(request.uri, player.currentPosition / 1000.0)
                     }
                     player.pause()
                     activeBinding = null

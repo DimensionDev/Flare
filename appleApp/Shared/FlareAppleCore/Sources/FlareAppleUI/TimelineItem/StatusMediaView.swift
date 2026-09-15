@@ -50,6 +50,9 @@ struct StatusMediaView: View {
 
     var body: some View {
         mediaContent
+        .onAppear { registerMediaSelection() }
+        .onChange(of: data.map(\.url)) { _, _ in registerMediaSelection() }
+        .onDisappear { playback?.mediaSelections.remove(id: carouselID) }
         .blur(radius: isBlur ? 20 : 0)
         .overlay(
             alignment: isBlur ? .center : .topLeading
@@ -123,6 +126,17 @@ struct StatusMediaView: View {
 
     private var usesCarousel: Bool {
         allowsCarousel && mediaLayout == .carousel && data.count > 1
+    }
+
+    private func registerMediaSelection() {
+        let urls = data.map(\.url)
+        let selection = $activeCarouselIndex
+        let groupID = carouselID
+        playback?.mediaSelections.register(id: groupID, urls: urls) { [weak playback] url in
+            guard let index = urls.firstIndex(of: url) else { return }
+            selection.wrappedValue = index
+            playback?.selectMedia(groupID: groupID, mediaURL: url, userInitiated: false)
+        }
     }
 
     @ViewBuilder
@@ -241,8 +255,12 @@ struct StatusMediaView: View {
         allowsAutoplay: Bool
     ) -> some View {
         MediaView(data: item, allowsAutoplay: allowsAutoplay)
+            .environment(\.timelineCarouselItem, TimelineCarouselItem(
+                groupID: carouselID, isSelected: !usesCarousel || index == (activeCarouselIndex ?? 0), isCarousel: usesCarousel
+            ))
             .onTapGesture {
                 if !sensitive || !isBlur {
+                    playback?.selectMedia(groupID: carouselID, mediaURL: item.url, userInitiated: true)
                     onMediaClicked(item, index)
                 }
             }

@@ -342,7 +342,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     private var currentAutoplayID: String?
     private var currentAutoplayURL: URL?
     private var autoplayPolicy = TimelineAutoplayPolicy()
-    private var autoplayPositions: [String: Double] = [:]
+    let mediaSelections = TimelineMediaSelections()
     private let autoplayCarousels = NSHashTable<StatusMediaUIView>.weakObjects()
     private var accessoryItemMap: [String: UITimelineCollectionViewAccessoryItem] = [:]
     private var pendingScrollAnchor: ScrollAnchor?
@@ -805,6 +805,8 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
             self?.detachAutoplayPlayer()
         }, reconsider: { [weak self] in
             self?.scheduleAutoplaySelection()
+        }, mediaReturned: { [weak self] urls, selected in
+            self?.mediaSelections.returned(urls: urls, selectedURL: selected)
         })
         NotificationCenter.default.addObserver(
             self,
@@ -876,6 +878,12 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         if notification.userInfo?["carouselInteraction"] as? Bool == true {
             VideoPlaybackArbiter.shared.interacted(self)
             autoplayPolicy.interactedWithCarousel(media.autoplayGroupID)
+        }
+        if let url = notification.userInfo?["selectedMediaURL"] as? String {
+            if notification.userInfo?["mediaClicked"] as? Bool == true {
+                VideoPlaybackArbiter.shared.interacted(self)
+            }
+            autoplayPolicy.returnedToMedia(groupID: media.autoplayGroupID, mediaURL: url)
         }
         validateCurrentAutoplayVisibility()
         scheduleAutoplaySelection()
@@ -2002,7 +2010,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
             let distance = hypot(rect.midX - collectionView.bounds.midX, rect.midY - collectionView.bounds.midY)
             return .init(id: candidate.id, groupID: candidate.groupID, isVisible: true,
                          isSelected: candidate.isSelected, canStart: candidate.horizontalFraction >= 0.6,
-                         distance: distance)
+                         distance: distance, mediaURL: candidate.url.absoluteString)
         }
         let id = autoplayPolicy.select(from: selection, isScrolling: false)
         return candidates.first { $0.id == id }
@@ -2040,7 +2048,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         currentAutoplayID = candidate.id
         currentAutoplayURL = candidate.url
         currentAutoplayHostView = candidate.hostView
-        autoplaySession.play(url: candidate.url.absoluteString, position: autoplayPositions[candidate.id] ?? 0)
+        autoplaySession.play(url: candidate.url.absoluteString)
         autoplayPlayerView.playerLayer.player = autoplaySession.player
         startAutoplayCountdownUpdates()
     }
@@ -2089,8 +2097,8 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
 
     private func saveAutoplayPosition() {
         autoplaySession.refresh()
-        if let currentAutoplayID {
-            autoplayPositions[currentAutoplayID] = autoplaySession.position
+        if let currentAutoplayURL, autoplaySession.player != nil {
+            MediaPlaybackMemory.shared.save(autoplaySession.position, for: currentAutoplayURL.absoluteString)
         }
     }
 

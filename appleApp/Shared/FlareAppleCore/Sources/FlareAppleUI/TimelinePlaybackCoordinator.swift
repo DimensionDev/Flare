@@ -22,13 +22,17 @@ final class TimelinePlaybackCoordinator {
     private var motionTasks: [String: Task<Void, Never>] = [:]
     private var selectionTask: Task<Void, Never>?
     private var playingID: String?
-    private var positions: [String: Double] = [:]
+    private var returningGroupID: String?
+    let mediaSelections = TimelineMediaSelections()
     private var suspended = false
 
     init(arbiter: VideoPlaybackArbiter = .shared) {
         self.arbiter = arbiter
         arbiter.register(self, stop: { [weak self] in self?.stopCurrentPlayer() },
-                         reconsider: { [weak self] in self?.scheduleSelection() })
+                         reconsider: { [weak self] in self?.scheduleSelection() },
+                         mediaReturned: { [weak self] urls, selected in
+                             self?.mediaSelections.returned(urls: urls, selectedURL: selected)
+                         })
     }
 
     func register(id: String, playback: @escaping (Bool) -> Void) {
@@ -55,6 +59,7 @@ final class TimelinePlaybackCoordinator {
             motionTasks.removeValue(forKey: motionSource)?.cancel()
             scrollingSources.remove(motionSource)
             if scrollingSources.insert(source).inserted {
+                returningGroupID = nil
                 arbiter.interacted(self)
                 if vertical { policy.verticalScrollBegan() }
                 else { policy.interactedWithCarousel(source) }
@@ -72,9 +77,11 @@ final class TimelinePlaybackCoordinator {
         guard !scrollingSources.contains(source) else { return }
         let motionSource = "motion:\(source)"
         if !scrollingSources.contains(source), !scrollingSources.contains(motionSource) {
-            arbiter.interacted(self)
-            if vertical { policy.verticalScrollBegan() }
-            else { policy.interactedWithCarousel(source) }
+            if vertical || returningGroupID != source {
+                arbiter.interacted(self)
+                if vertical { policy.verticalScrollBegan() }
+                else { policy.interactedWithCarousel(source) }
+            }
         }
         scrollingSources.insert(motionSource)
         selectionTask?.cancel()
@@ -85,6 +92,7 @@ final class TimelinePlaybackCoordinator {
             self.scrollingSources.remove(motionSource)
             self.motionTasks.removeValue(forKey: motionSource)
             self.reconcile(allowStart: self.scrollingSources.isEmpty)
+            if self.returningGroupID == source { self.returningGroupID = nil }
         }
     }
 
@@ -103,10 +111,11 @@ final class TimelinePlaybackCoordinator {
         }
     }
 
-    func position(for key: String) -> Double { positions[key] ?? 0 }
-
-    func savePosition(_ seconds: Double, for key: String) {
-        if seconds.isFinite, seconds >= 0 { positions[key] = seconds }
+    func selectMedia(groupID: String, mediaURL: String, userInitiated: Bool) {
+        returningGroupID = userInitiated ? nil : groupID
+        if userInitiated { arbiter.interacted(self) }
+        policy.returnedToMedia(groupID: groupID, mediaURL: mediaURL)
+        scheduleSelection()
     }
 
     private func scheduleSelection() {
@@ -115,6 +124,7 @@ final class TimelinePlaybackCoordinator {
         selectionTask = Task { [weak self] in
             do { try await Task.sleep(for: .milliseconds(200)) } catch { return }
             self?.reconcile(allowStart: true)
+            self?.returningGroupID = nil
         }
     }
 
@@ -159,6 +169,7 @@ private struct TimelinePlaybackCoordinatorKey: EnvironmentKey {
 struct TimelineCarouselItem: Equatable {
     let groupID: String
     let isSelected: Bool
+    var isCarousel = true
 }
 
 private struct TimelineCarouselItemKey: EnvironmentKey {

@@ -51,6 +51,7 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.core.annotation.Single
+import kotlin.math.abs
 import kotlin.math.roundToLong
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -151,7 +152,7 @@ public fun VideoPlayer(
             }
         }
     },
-    controls: @Composable BoxScope.(VideoPlayerState) -> Unit = {},
+    controls: @Composable BoxScope.(VideoPlayerState, (Float) -> Unit) -> Unit = { _, _ -> },
 ) {
     val playback = rememberTimelinePlayback()
     val binding = rememberSurfaceBinding(uri, playback, muted)
@@ -167,7 +168,7 @@ public fun VideoPlayer(
     }
 
     Box(
-        modifier = modifier.timelineVideoAutoplay(playback, binding.second, autoPlay),
+        modifier = modifier.timelineVideoAutoplay(playback, binding.second, autoPlay, uri),
     ) {
         if ((!isLoaded && LocalIsScrollingInProgress.current) || playerState == null) {
             if (binding.second.isPreparing && !LocalIsScrollingInProgress.current) {
@@ -229,7 +230,7 @@ public fun VideoPlayer(
                     }
                 }
             }
-            if (showControls) controls(playerState)
+            if (showControls) controls(playerState, binding.second::seek)
         }
     }
 }
@@ -282,6 +283,8 @@ internal class SurfaceBindingManager() {
     private var requestedSource: Pair<TimelinePlaybackCoordinator, String>? = null
     private var currentSource: Pair<TimelinePlaybackCoordinator, String>? = null
     private var prepareJob: Job? = null
+    private var seekJob: Job? = null
+    private var pendingSeek: Double? = null
 
     inner class Binding(
         private val uri: String,
@@ -296,13 +299,20 @@ internal class SurfaceBindingManager() {
             if (active) {
                 if (activeBinding === this) return
                 activeBinding?.setActive(false)
+                if (requestedSource != (playback to uri)) clearPendingSeek()
                 activeBinding = this
                 requestedSource = playback to uri
                 isPreparing = true
                 prepareRequestedSource()
             } else if (activeBinding === this) {
-                if (currentSource == (playback to uri) && prepareJob?.isActive != true && !player.isLoading) {
-                    playback.savePosition(uri, player.currentTime)
+                if (currentSource == (playback to uri) && prepareJob?.isActive != true) {
+                    val seconds =
+                        if (player.userDragging && player.duration > 0) {
+                            player.sliderPos / 1000.0 * player.duration
+                        } else {
+                            pendingSeek ?: player.currentTime
+                        }
+                    playback.savePosition(uri, seconds)
                 }
                 // Keep a pending restoration alive while paused. Native loading is
                 // asynchronous and cannot be cancelled by cancelling our observer.
@@ -315,9 +325,18 @@ internal class SurfaceBindingManager() {
 
         fun prepared() {
             isPreparing = false
+            player.userDragging = false
             player.volume = if (muted) 0f else 1f
             callback(player)
             if (player.error == null) player.play()
+        }
+
+        fun seek(sliderPosition: Float) {
+            if (activeBinding !== this || currentSource != (playback to uri) || player.duration <= 0) return
+            val seconds = sliderPosition.coerceIn(0f, 1000f) / 1000.0 * player.duration
+            if (!seconds.isFinite()) return
+            playback.savePosition(uri, seconds)
+            seekTo(seconds)
         }
 
         fun dispose() = setActive(false)
@@ -344,6 +363,7 @@ internal class SurfaceBindingManager() {
                 // Serialize native opens: cancelling a coroutine waiting for metadata
                 // does not cancel the library's in-flight openUri operation.
                 while (currentSource != requestedSource) {
+                    clearPendingSeek()
                     currentSource = null
                     if (player.hasMedia) {
                         player.stop()
@@ -363,7 +383,7 @@ internal class SurfaceBindingManager() {
                     if (requestedSource == source) {
                         val seconds = source.first.position(source.second)
                         if (seconds > 0 && player.duration > 0) {
-                            player.seekTo((seconds / player.duration * 1000).toFloat().coerceIn(0f, 1000f))
+                            seekTo(seconds)
                         }
                     }
                 }
@@ -374,6 +394,7 @@ internal class SurfaceBindingManager() {
     fun close() {
         activeBinding?.setActive(false)
         prepareJob?.cancel()
+        clearPendingSeek()
         requestedSource = null
         currentSource = null
         if (playerDelegate.isInitialized()) player.dispose()
@@ -384,5 +405,24 @@ internal class SurfaceBindingManager() {
         activeBinding?.setActive(false)
         requestedSource = null
         if (playerDelegate.isInitialized()) prepareRequestedSource()
+    }
+
+    private fun seekTo(seconds: Double) {
+        clearPendingSeek()
+        val duration = player.duration
+        val target = seconds.coerceIn(0.0, duration)
+        pendingSeek = target
+        player.seekTo((target / duration * 1000).toFloat())
+        seekJob =
+            scope.launch(start = CoroutineStart.UNDISPATCHED) {
+                snapshotFlow { player.currentTime }.first { abs(it - target) < 0.5 || (target == duration && it < 0.5) }
+                pendingSeek = null
+            }
+    }
+
+    private fun clearPendingSeek() {
+        seekJob?.cancel()
+        seekJob = null
+        pendingSeek = null
     }
 }

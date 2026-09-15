@@ -23,6 +23,8 @@ struct UITimelineCollectionView: UIViewControllerRepresentable {
     let columnCount: Int
     let accessoryItems: [UITimelineCollectionViewAccessoryItem]
     let suppressInitialRefreshIndicator: Bool
+    // Changing a non-nil key replaces the list while retaining its scroll position.
+    let contentKey: AnyHashable?
     let onIsAtTopChanged: (Bool) -> Void
     @Environment(\.timelineAppearance) private var timelineAppearance
     @Environment(\.globalAppearance) private var globalAppearance
@@ -40,6 +42,7 @@ struct UITimelineCollectionView: UIViewControllerRepresentable {
         columnCount: Int = 1,
         accessoryItems: [UITimelineCollectionViewAccessoryItem] = [],
         suppressInitialRefreshIndicator: Bool = false,
+        contentKey: AnyHashable? = nil,
         onIsAtTopChanged: @escaping (Bool) -> Void = { _ in }
     ) {
         self.data = data
@@ -49,6 +52,7 @@ struct UITimelineCollectionView: UIViewControllerRepresentable {
         self.columnCount = max(columnCount, 1)
         self.accessoryItems = accessoryItems
         self.suppressInitialRefreshIndicator = suppressInitialRefreshIndicator
+        self.contentKey = contentKey
         self.onIsAtTopChanged = onIsAtTopChanged
     }
 
@@ -72,7 +76,7 @@ struct UITimelineCollectionView: UIViewControllerRepresentable {
         controller.networkKind = networkKind
         controller.accessoryItems = accessoryItems
         controller.suppressInitialRefreshIndicator = suppressInitialRefreshIndicator
-        controller.update(data: data, columnCount: columnCount, headerState: headerState)
+        controller.update(data: data, columnCount: columnCount, headerState: headerState, contentKey: contentKey)
         return controller
     }
 
@@ -95,7 +99,7 @@ struct UITimelineCollectionView: UIViewControllerRepresentable {
         controller.networkKind = networkKind
         controller.accessoryItems = accessoryItems
         controller.suppressInitialRefreshIndicator = suppressInitialRefreshIndicator
-        controller.update(data: data, columnCount: columnCount, headerState: headerState)
+        controller.update(data: data, columnCount: columnCount, headerState: headerState, contentKey: contentKey)
     }
 }
 
@@ -128,6 +132,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
 
     private let detailStatusKey: MicroBlogKey?
     private var contentKind = ContentKind.timeline
+    private var contentKey: AnyHashable?
     private var currentData: PagingState<UiTimelineV2>?
     private var currentSuccess: PagingStateSuccess<UiTimelineV2>?
     private var headerState: UiState<UiTimelineV2>?
@@ -1099,8 +1104,20 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     func update(
         data: PagingState<UiTimelineV2>?,
         columnCount requestedColumnCount: Int,
-        headerState: UiState<UiTimelineV2>? = nil
+        headerState: UiState<UiTimelineV2>? = nil,
+        contentKey: AnyHashable? = nil
     ) {
+        let switchedContent = self.contentKey != nil && contentKey != nil && self.contentKey != contentKey
+        self.contentKey = contentKey
+        if switchedContent, isViewLoaded {
+            let offsetY = max(effectiveContentOffsetY, 0)
+            // A shorter tab must remain scrollable to the current position,
+            // including while its loading and empty states are displayed.
+            pendingScrollAnchor = nil
+            minimumVerticalScrollDistance = offsetY
+            restoreEffectiveContentOffsetAfterNextSnapshot(offsetY)
+            resetInitialRefreshIndicatorSuppression()
+        }
         let wasRefreshing = contentKind == .timeline && currentPagingIsRefreshing
         self.headerState = headerState
         let isRefreshing = data.map(pagingIsRefreshing) ?? false
@@ -1137,6 +1154,10 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
             currentSuccess = nextSuccess
             syncRefreshControl(isRefreshing: isRefreshing)
             applySnapshot(data: data)
+        }
+        if switchedContent {
+            // State cells share IDs across tabs; bind retries to the selected source.
+            reconfigureItems([Self.errorID, Self.footerErrorID])
         }
         if currentSuccess == nil && headerItem == nil {
             detachAutoplayPlayer(pause: true)
@@ -1346,6 +1367,10 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     }
 
     private func restorePendingContentOffsetIfNeeded(finalize: Bool) {
+        if minimumVerticalScrollDistance > 0 {
+            collectionView.layoutIfNeeded()
+            updateMinimumScrollableBottomInset()
+        }
         guard let offsetY = pendingEffectiveContentOffsetYAfterSnapshot else { return }
         restoreEffectiveContentOffset(offsetY, animated: false)
         if finalize {
@@ -1412,6 +1437,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
             syncRefreshControl(isRefreshing: plan.isRefreshing)
             collectionView.layoutIfNeeded()
             restorePendingContentOffsetIfNeeded(finalize: !plan.isInitialLoading)
+            accessVisiblePagingItems()
             collectionView.layer.removeAllAnimations()
 
             lastAppliedSignature = plan.signature
@@ -1627,6 +1653,15 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         plan: SnapshotPlan
     ) {
         var snapshot = preparedSnapshot
+        let generation = snapshotPreparationGeneration
+        if contentKey != nil,
+           minimumVerticalScrollDistance > 0,
+           pendingEffectiveContentOffsetYAfterSnapshot == nil,
+           allowsScrollAnchorRestoration {
+            // Loading may finish after the user has scrolled since the switch.
+            // Keep that newer position when the shorter snapshot is installed.
+            pendingEffectiveContentOffsetYAfterSnapshot = max(effectiveContentOffsetY, 0)
+        }
         let newSignature = plan.signature
         let previousSignature = lastAppliedSignature
         let headerChanged = previousSignature?.headerIDs != newSignature.headerIDs
@@ -1652,6 +1687,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
             lastLoadedItemIDs = plan.loadedItemIDs
             reconfigureItems(changedIDs)
             restorePendingContentOffsetIfNeeded(finalize: !plan.isInitialLoading)
+            accessVisiblePagingItems()
             validateCurrentAutoplayVisibility()
             scheduleAutoplaySelection()
             return
@@ -1670,6 +1706,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
             lastAppliedSignature = newSignature
             lastRenderHashMap = plan.renderHashMap
             lastLoadedItemIDs = plan.loadedItemIDs
+            accessVisiblePagingItems()
             validateCurrentAutoplayVisibility()
             scheduleAutoplaySelection()
             return
@@ -1702,10 +1739,11 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
                 CATransaction.begin()
                 CATransaction.setDisableActions(true)
                 dataSource.apply(snapshot, animatingDifferences: false) { [weak self] in
-                    guard let self else { return }
+                    guard let self, self.snapshotPreparationGeneration == generation else { return }
                     self.restoreScrollAnchorIfNeeded(scrollAnchor)
                     self.restorePendingContentOffsetIfNeeded(finalize: !plan.isInitialLoading)
                     self.pendingScrollAnchor = nil
+                    self.accessVisiblePagingItems()
                     self.validateCurrentAutoplayVisibility()
                     self.scheduleAutoplaySelection()
                 }
@@ -1715,11 +1753,13 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
             }
         } else {
             dataSource.apply(snapshot, animatingDifferences: shouldAnimateDifferences) { [weak self] in
-                guard let self else { return }
+                guard let self, self.snapshotPreparationGeneration == generation else { return }
                 self.restorePendingContentOffsetIfNeeded(finalize: !plan.isInitialLoading)
+                self.accessVisiblePagingItems()
                 self.validateCurrentAutoplayVisibility()
                 self.scheduleAutoplaySelection()
             }
+            restorePendingContentOffsetIfNeeded(finalize: false)
         }
         lastAppliedSignature = newSignature
         lastRenderHashMap = plan.renderHashMap
@@ -2228,6 +2268,26 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
 
     // MARK: - UICollectionViewDelegate
 
+    private func accessVisiblePagingItems() {
+        // Refresh can replace the paging source without changing any visible IDs.
+        // Those cells won't receive willDisplay again, but Paging still needs
+        // their access hints to load replies or the next page. peek() sends none.
+        for indexPath in collectionView.indexPathsForVisibleItems {
+            guard let itemID = dataSource.itemIdentifier(for: indexPath),
+                  let index = itemIndexMap[itemID] else { continue }
+            switch contentKind {
+            case .timeline:
+                if let success = currentSuccess, index >= 0, index < Int(success.itemCount) {
+                    _ = success.get(index: Int32(index))
+                }
+            case .profileMedia:
+                if let success = currentProfileMediaSuccess, index >= 0, index < Int(success.itemCount) {
+                    _ = success.get(index: Int32(index))
+                }
+            }
+        }
+    }
+
     func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
         if let itemID = dataSource.itemIdentifier(for: indexPath),
            let accessory = accessoryItemMap[itemID] {
@@ -2293,6 +2353,12 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     }
 
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        if contentKey != nil, scrollingState.isScrolling {
+            let requiredDistance = min(minimumVerticalScrollDistance, max(effectiveContentOffsetY, 0))
+            if minimumVerticalScrollDistance - requiredDistance > 0.5 {
+                minimumVerticalScrollDistance = requiredDistance
+            }
+        }
         restorePendingScrollAnchorIfNeeded()
         if allowsScrollAnchorRestoration {
             rememberProfileMediaScrollAnchor()

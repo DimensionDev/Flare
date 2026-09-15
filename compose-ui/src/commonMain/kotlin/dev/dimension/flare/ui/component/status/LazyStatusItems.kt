@@ -20,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import androidx.paging.LoadState
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.File
@@ -50,6 +51,7 @@ public fun LazyStaggeredGridScope.status(
 ): Unit =
     with(pagingState) {
         onSuccess {
+            pageStateUI(prependState, onRetry = { retry() }, showEnd = false)
             items(
                 itemCount,
                 key =
@@ -151,7 +153,15 @@ public fun LazyStaggeredGridScope.statusLoadingPlaceholders() {
 }
 
 public fun <T : Any> LazyStaggeredGridScope.appendStateUI(success: PagingState.Success<T>) {
-    success.appendState
+    pageStateUI(success.appendState, onRetry = { success.retry() }, showEnd = true)
+}
+
+private fun LazyStaggeredGridScope.pageStateUI(
+    state: LoadState,
+    onRetry: () -> Unit,
+    showEnd: Boolean,
+) {
+    state
         .onError {
             item(
                 span = StaggeredGridItemSpan.FullLine,
@@ -159,7 +169,7 @@ public fun <T : Any> LazyStaggeredGridScope.appendStateUI(success: PagingState.S
                 OnError(
 //                            modifier = Modifier.animateItem(),
                     error = it,
-                    onRetry = { success.retry() },
+                    onRetry = onRetry,
                 )
             }
         }.onLoading {
@@ -174,6 +184,7 @@ public fun <T : Any> LazyStaggeredGridScope.appendStateUI(success: PagingState.S
                 )
             }
         }.onEndOfList {
+            if (!showEnd) return@onEndOfList
             item(
                 span = StaggeredGridItemSpan.FullLine,
             ) {

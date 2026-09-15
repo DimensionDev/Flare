@@ -389,6 +389,8 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     private static let emptyID = "__empty__"
     private static let errorID = "__error__"
     private static let footerLoadingID = "__fl__"
+    private static let prependLoadingID = "__pl__"
+    private static let prependErrorID = "__pe__"
     private static let footerErrorID = "__fe__"
     private static let footerEndID = "__fend__"
 
@@ -885,10 +887,12 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
             errorView.onOpenURL = openURL
             errorView.configure(error: error.throwable, onRetry: {})
             cell.setHostedView(CenteredCellContentView(content: errorView), usesWaterfallLayout: columnCount > 1)
-        } else if itemID == Self.footerLoadingID {
+        } else if itemID == Self.footerLoadingID || itemID == Self.prependLoadingID {
             cell.setHostedView(makeLoadingFooterView(), usesWaterfallLayout: columnCount > 1)
         } else if itemID == Self.footerErrorID {
             configureFooterErrorCell(cell)
+        } else if itemID == Self.prependErrorID {
+            configureFooterErrorCell(cell, prepend: true)
         } else if itemID == Self.footerEndID {
             cell.setHostedView(makeTextFooterView(text: String(localized: "end_of_list")), usesWaterfallLayout: columnCount > 1)
         }
@@ -1007,17 +1011,17 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         cell.setHostedView(CenteredCellContentView(content: errorView), usesWaterfallLayout: columnCount > 1)
     }
 
-    private func configureFooterErrorCell(_ cell: TimelineHostedViewCell) {
+    private func configureFooterErrorCell(_ cell: TimelineHostedViewCell, prepend: Bool = false) {
         let errorView = ListErrorUIView()
         errorView.onOpenURL = openURL
         switch contentKind {
         case .timeline:
             guard let success = currentSuccess,
-                  case .error(let error) = onEnum(of: success.appendState) else { return }
+                  case .error(let error) = onEnum(of: prepend ? success.prependState : success.appendState) else { return }
             errorView.configure(error: error.error) { success.retry() }
         case .profileMedia:
             guard let success = currentProfileMediaSuccess,
-                  case .error(let error) = onEnum(of: success.appendState) else { return }
+                  case .error(let error) = onEnum(of: prepend ? success.prependState : success.appendState) else { return }
             errorView.configure(error: error.error) { success.retry() }
         }
         cell.setHostedView(
@@ -1157,7 +1161,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         }
         if switchedContent {
             // State cells share IDs across tabs; bind retries to the selected source.
-            reconfigureItems([Self.errorID, Self.footerErrorID])
+            reconfigureItems([Self.errorID, Self.footerErrorID, Self.prependErrorID])
         }
         if currentSuccess == nil && headerItem == nil {
             detachAutoplayPlayer(pause: true)
@@ -1580,6 +1584,15 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
                 newIndexMap[id] = index
             }
             footerIDs = footerItemIDs(for: success)
+            switch onEnum(of: success.prependState) {
+            case .loading:
+                headerIDs.append(Self.prependLoadingID)
+            case .error(let error):
+                headerIDs.append(Self.prependErrorID)
+                newRenderHashMap[Self.prependErrorID] = Int32(truncatingIfNeeded: error.error.hash)
+            case .notLoading:
+                break
+            }
         }
 
         let signature = SnapshotSignature(
@@ -1669,7 +1682,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
             pendingEffectiveContentOffsetYAfterSnapshot == nil &&
             previousSignature != nil &&
             (headerChanged || previousSignature?.itemIDs != newSignature.itemIDs) &&
-            (!headerChanged || effectiveContentOffsetY > 1) &&
+            (!headerChanged || detailStatusKey != nil || effectiveContentOffsetY > 1) &&
             allowsScrollAnchorRestoration
             ? captureScrollAnchor()
             : nil
@@ -2166,6 +2179,8 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         case Self.emptyID, Self.errorID, Self.headerErrorID:
             return CGSize(width: width, height: 240)
         case Self.footerLoadingID,
+             Self.prependLoadingID,
+             Self.prependErrorID,
              Self.footerErrorID,
              Self.footerEndID:
             return CGSize(width: width, height: 60)

@@ -699,7 +699,7 @@ test('generates paging state get bridge for visible items', async () => {
 		assert.match(generated, /export type PagingLoadState =/);
 		assert.match(
 			generated,
-			/export type PagingState<T> =\n\t\| \{ type: "Loading" \}\n\t\| \{ type: "Error"; message: string \| null \}\n\t\| \{ type: "Empty" \}\n\t\| \{ type: "Success"; itemCount: number; isRefreshing: boolean; appendState: PagingLoadState; peek\(index: number\): T \| null; get\(index: number\): void; retry\(\): void \};/
+			/export type PagingState<T> =\n\t\| \{ type: "Loading" \}\n\t\| \{ type: "Error"; message: string \| null \}\n\t\| \{ type: "Empty" \}\n\t\| \{ type: "Success"; itemCount: number; isRefreshing: boolean; appendState: PagingLoadState; prependState: PagingLoadState; peek\(index: number\): T \| null; get\(index: number\): void; retry\(\): void \};/
 		);
 		assert.match(generated, /call\("__webPagingPeek:listState", \{ index \}\)/);
 		assert.match(generated, /dispatch\("__webPagingGet:listState", \{ index \}\)/);

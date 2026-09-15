@@ -10,6 +10,7 @@ import dev.dimension.flare.data.database.cache.model.DbPagingTimeline
 import dev.dimension.flare.data.database.cache.model.DbStatus
 import dev.dimension.flare.data.datasource.microblog.datasource.PostDataSource
 import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
+import dev.dimension.flare.data.datasource.microblog.paging.PostContextLoader
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceFlow
@@ -102,7 +103,19 @@ public class StatusContextPresenter(
                                     }
                                 }
                             }
-                            loader
+                            // Ordinary cached details use full snapshots; staged loaders describe their own update scopes.
+                            if (
+                                loader is CacheableRemoteLoader<UiTimelineV2> &&
+                                loader !is PostContextLoader && accountType is AccountType.Specific
+                            ) {
+                                object : PostContextLoader, CacheableRemoteLoader<UiTimelineV2> by loader {
+                                    override val statusKey = key
+                                    override val accountKey = accountType.accountKey
+                                    override val collapseReplyChains = false
+                                }
+                            } else {
+                                loader
+                            }
                         }
                     }
             }

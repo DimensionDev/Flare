@@ -5,6 +5,7 @@ import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import dev.dimension.flare.data.repository.DebugRepository
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalPagingApi::class)
@@ -16,6 +17,8 @@ internal abstract class BaseRemoteMediator<Key : Any, Value : Any> : RemoteMedia
         withContext(PlatformDispatchers.IO) {
             try {
                 doLoad(loadType, state)
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 onError(e)
                 DebugRepository.error(e)

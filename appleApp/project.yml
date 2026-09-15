@@ -51,7 +51,7 @@ settings:
 packages:
   ChatLayout:
     url: https://github.com/ekazaev/ChatLayout
-    exactVersion: 2.4.2
+    exactVersion: 2.4.3
   CHTCollectionViewWaterfallLayout:
     url: https://github.com/chiahsien/CHTCollectionViewWaterfallLayout
     from: 1.0.1
@@ -60,7 +60,7 @@ packages:
     exactVersion: 1.7.0
   Firebase:
     url: https://github.com/firebase/firebase-ios-sdk.git
-    exactVersion: 12.15.0
+    exactVersion: 12.19.1
   GSPlayer:
     url: https://github.com/wxxsw/GSPlayer
     from: 0.2.30
@@ -69,7 +69,7 @@ packages:
     exactVersion: 1.0.5
   Kingfisher:
     url: https://github.com/onevcat/Kingfisher.git
-    exactVersion: 8.10.0
+    exactVersion: 8.12.0
   LazyPager:
     url: https://github.com/gh123man/LazyPager
     exactVersion: 1.2.1
@@ -78,7 +78,7 @@ packages:
     exactVersion: 0.62.2
   SwiftUI-Flow:
     url: https://github.com/tevelee/SwiftUI-Flow
-    exactVersion: 3.1.1
+    exactVersion: 3.5.1
   # Temporary fork: upstream Textual currently requires iOS 18 / macOS 15, while Flare still
   # supports iOS 17 / macOS 14. Switch back to gonzalezreal/textual when that is compatible.
   Textual:
@@ -86,7 +86,7 @@ packages:
     branch: main
   swiftui-introspect:
     url: https://github.com/siteline/swiftui-introspect
-    exactVersion: 27.0.0-beta.1
+    exactVersion: 27.0.0
   VideoPlayer:
     url: https://github.com/wxxsw/VideoPlayer
     exactVersion: 1.2.5

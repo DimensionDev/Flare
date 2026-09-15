@@ -23,11 +23,9 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberSliderState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -186,7 +184,12 @@ internal fun AppearanceThemeScreen(
                 shapes = ListItemDefaults.item(),
             )
 
-            var fontSizeDiff by remember { mutableFloatStateOf(globalAppearance.fontSizeDiff) }
+            val fontSizeState =
+                rememberSliderState(
+                    value = globalAppearance.fontSizeDiff,
+                    steps = 7,
+                    trackRange = -4f..4f,
+                )
             SegmentedListItem(
                 onClick = {},
                 shapes = ListItemDefaults.last(),
@@ -209,13 +212,13 @@ internal fun AppearanceThemeScreen(
                         Row {
                             IconButton(
                                 onClick = {
-                                    if (fontSizeDiff > -4f) {
-                                        fontSizeDiff -= 1f
+                                    if (fontSizeState.value > -4f) {
+                                        fontSizeState.value -= 1f
                                         hapticFeedback.performHapticFeedback(HapticFeedbackType.SegmentTick)
-                                        state.updateFontScale(fontSizeDiff)
+                                        state.updateFontScale(fontSizeState.value)
                                     }
                                 },
-                                enabled = fontSizeDiff > -4f,
+                                enabled = fontSizeState.value > -4f,
                             ) {
                                 FAIcon(
                                     FontAwesomeIcons.Solid.Minus,
@@ -223,29 +226,27 @@ internal fun AppearanceThemeScreen(
                                 )
                             }
                             Slider(
-                                value = fontSizeDiff,
+                                state = fontSizeState,
                                 onValueChange = {
-                                    fontSizeDiff = it
+                                    fontSizeState.value = it
                                     hapticFeedback.performHapticFeedback(HapticFeedbackType.SegmentTick)
                                 },
                                 onValueChangeFinished = {
-                                    state.updateFontScale(fontSizeDiff)
+                                    state.updateFontScale(fontSizeState.value)
                                 },
-                                valueRange = -4f..4f,
-                                steps = 7,
                                 modifier =
                                     Modifier
                                         .weight(1f),
                             )
                             IconButton(
                                 onClick = {
-                                    if (fontSizeDiff < 4f) {
-                                        fontSizeDiff += 1f
+                                    if (fontSizeState.value < 4f) {
+                                        fontSizeState.value += 1f
                                         hapticFeedback.performHapticFeedback(HapticFeedbackType.SegmentTick)
-                                        state.updateFontScale(fontSizeDiff)
+                                        state.updateFontScale(fontSizeState.value)
                                     }
                                 },
-                                enabled = fontSizeDiff < 4f,
+                                enabled = fontSizeState.value < 4f,
                             ) {
                                 FAIcon(
                                     FontAwesomeIcons.Solid.Plus,

@@ -7,19 +7,24 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.foundation.text.input.clearText
+import androidx.compose.foundation.text.input.rememberTextFieldState
+import androidx.compose.material3.ExpandedFullScreenSearchBar
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.SearchBarDefaults
+import androidx.compose.material3.SearchBarValue
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberSearchBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -47,9 +52,9 @@ import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.settings.LocalCacheSearchPresenter
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun LocalCacheSearchScreen(
     onBack: () -> Unit,
@@ -59,7 +64,9 @@ internal fun LocalCacheSearchScreen(
         presenter()
     }
     val keyboardController = LocalSoftwareKeyboardController.current
-    var text by rememberSaveable { mutableStateOf("") }
+    val textFieldState = rememberTextFieldState()
+    val searchBarState = rememberSearchBarState()
+    val scope = rememberCoroutineScope()
     val lazyListState = rememberLazyStaggeredGridState()
     val uriHandler = LocalUriHandler.current
     val showAskAi = LocalTimelineAppearance.current.aiConfig.agent
@@ -71,26 +78,24 @@ internal fun LocalCacheSearchScreen(
                         .fillMaxWidth(),
                 contentAlignment = Alignment.Center,
             ) {
-                androidx.compose.material3.SearchBar(
-                    inputField = {
+                val inputField =
+                    @Composable {
                         SearchBarDefaults.InputField(
-                            query = text,
-                            onQueryChange = { text = it },
+                            textFieldState = textFieldState,
+                            searchBarState = searchBarState,
                             onSearch = {
-                                state.setQuery(text)
-                                state.setSearchBarExpanded(false)
+                                state.setQuery(it)
+                                scope.launch { searchBarState.animateToCollapsed() }
                                 keyboardController?.hide()
                             },
-                            expanded = state.searchBarExpanded,
-                            onExpandedChange = state::setSearchBarExpanded,
                             placeholder = {
                                 Text(stringResource(R.string.local_history_search_placeholder))
                             },
                             leadingIcon = {
                                 IconButton(
                                     onClick = {
-                                        if (state.searchBarExpanded) {
-                                            state.setSearchBarExpanded(false)
+                                        if (searchBarState.currentValue == SearchBarValue.Expanded) {
+                                            scope.launch { searchBarState.animateToCollapsed() }
                                         } else {
                                             onBack()
                                         }
@@ -103,10 +108,10 @@ internal fun LocalCacheSearchScreen(
                                 }
                             },
                             trailingIcon = {
-                                if (text.isNotEmpty()) {
+                                if (textFieldState.text.isNotEmpty()) {
                                     IconButton(
                                         onClick = {
-                                            text = ""
+                                            textFieldState.clearText()
                                         },
                                     ) {
                                         FAIcon(
@@ -117,7 +122,18 @@ internal fun LocalCacheSearchScreen(
                                 }
                             },
                         )
-                    },
+                    }
+                androidx.compose.material3.SearchBar(
+                    state = searchBarState,
+                    inputField = inputField,
+                    modifier =
+                        Modifier
+                            .windowInsetsPadding(SearchBarDefaults.windowInsets)
+                            .padding(vertical = 8.dp),
+                )
+                ExpandedFullScreenSearchBar(
+                    state = searchBarState,
+                    inputField = inputField,
                     content = {
                         if (showAskAi) {
                             Box(
@@ -129,10 +145,11 @@ internal fun LocalCacheSearchScreen(
                             ) {
                                 ExtendedFloatingActionButton(
                                     onClick = {
-                                        state.setSearchBarExpanded(false)
+                                        scope.launch { searchBarState.animateToCollapsed() }
                                         keyboardController?.hide()
                                         onAskAiClick(
-                                            text
+                                            textFieldState.text
+                                                .toString()
                                                 .trim()
                                                 .takeIf { it.isNotEmpty() },
                                             state.selectedSearchType.toLocalHistoryAgentTarget(),
@@ -152,8 +169,6 @@ internal fun LocalCacheSearchScreen(
                             }
                         }
                     },
-                    expanded = state.searchBarExpanded,
-                    onExpandedChange = state::setSearchBarExpanded,
                 )
             }
         },
@@ -195,7 +210,7 @@ internal fun LocalCacheSearchScreen(
             when (state.selectedSearchType) {
                 SearchType.Status -> {
                     status(
-                        if (text.isEmpty()) {
+                        if (textFieldState.text.isEmpty()) {
                             state.history
                         } else {
                             state.data
@@ -205,7 +220,7 @@ internal fun LocalCacheSearchScreen(
 
                 SearchType.User -> {
                     itemsIndexed(
-                        if (text.isEmpty()) {
+                        if (textFieldState.text.isEmpty()) {
                             state.userHistory
                         } else {
                             state.searchUser
@@ -233,15 +248,8 @@ internal fun LocalCacheSearchScreen(
 private fun presenter() =
     run {
         val state = remember { LocalCacheSearchPresenter() }.invoke()
-        var searchBarExpanded by remember { mutableStateOf(false) }
         var selectedSearchType by remember { mutableStateOf(SearchType.Status) }
         object : LocalCacheSearchPresenter.State by state {
-            val searchBarExpanded = searchBarExpanded
-
-            fun setSearchBarExpanded(value: Boolean) {
-                searchBarExpanded = value
-            }
-
             val selectedSearchType = selectedSearchType
             val allSearchTypes = SearchType.entries.toImmutableList()
 

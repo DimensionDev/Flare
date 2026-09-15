@@ -1,4 +1,5 @@
 import Combine
+import Observation
 import FlareAppleCore
 import FlareAppleUI
 import Kingfisher
@@ -164,10 +165,11 @@ struct MacMainWindowNavigationRequest: Identifiable {
 }
 
 @MainActor
-final class MacMainWindowCoordinator: ObservableObject {
+@Observable
+final class MacMainWindowCoordinator {
     static let shared = MacMainWindowCoordinator()
 
-    @Published private(set) var navigationRequest: MacMainWindowNavigationRequest?
+    private(set) var navigationRequest: MacMainWindowNavigationRequest?
 
     private init() {}
 
@@ -179,13 +181,13 @@ final class MacMainWindowCoordinator: ObservableObject {
 
 private struct MacAppCommands: Commands {
     @Environment(\.openWindow) private var openWindow
-    @StateObject private var homeTimelineWithTabsPresenter = KotlinPresenter(
+    @State private var homeTimelineWithTabsPresenter = KotlinPresenter(
         presenter: HomeTimelineWithTabsPresenter()
     )
-    @StateObject private var notificationAccountsPresenter = KotlinPresenter(
+    @State private var notificationAccountsPresenter = KotlinPresenter(
         presenter: NotificationAccountsPresenter()
     )
-    @StateObject private var secondaryTabPresenter = KotlinPresenter(
+    @State private var secondaryTabPresenter = KotlinPresenter(
         presenter: SecondaryTabsPresenter()
     )
 
@@ -269,18 +271,19 @@ private struct MacAppCommands: Commands {
                     Button("Unavailable") {}
                         .disabled(true)
                 } else {
-                    ForEach(Array(accounts.enumerated()), id: \.offset) { _, account in
+                    ForEach(accounts, id: \.accountKey) { account in
+                        let tabs = account.tabs.compactMap { tab in
+                            route(for: tab).map { (tab: tab, route: $0) }
+                        }
                         Menu {
-                            ForEach(account.tabs, id: \.self) { tab in
-                                if let route = route(for: tab) {
-                                    Button {
-                                        openMainWindow(route: route)
-                                    } label: {
-                                        Label {
-                                            Text(tab.title.text)
-                                        } icon: {
-                                            Image(fontAwesome: tab.icon.fontAwesomeIcon)
-                                        }
+                            ForEach(tabs, id: \.tab) { destination in
+                                Button {
+                                    openMainWindow(route: destination.route)
+                                } label: {
+                                    Label {
+                                        Text(destination.tab.title.text)
+                                    } icon: {
+                                        Image(fontAwesome: destination.tab.icon.fontAwesomeIcon)
                                     }
                                 }
                             }
@@ -386,10 +389,11 @@ struct MacAgentWindowRequest: Identifiable {
 }
 
 @MainActor
-final class MacAgentWindowCoordinator: ObservableObject {
+@Observable
+final class MacAgentWindowCoordinator {
     static let shared = MacAgentWindowCoordinator()
 
-    @Published private(set) var request: MacAgentWindowRequest?
+    private(set) var request: MacAgentWindowRequest?
 
     private init() {}
 
@@ -414,10 +418,11 @@ struct MacDirectMessageWindowRequest: Identifiable {
 }
 
 @MainActor
-final class MacDirectMessageWindowCoordinator: ObservableObject {
+@Observable
+final class MacDirectMessageWindowCoordinator {
     static let shared = MacDirectMessageWindowCoordinator()
 
-    @Published private(set) var request: MacDirectMessageWindowRequest?
+    private(set) var request: MacDirectMessageWindowRequest?
 
     private init() {}
 

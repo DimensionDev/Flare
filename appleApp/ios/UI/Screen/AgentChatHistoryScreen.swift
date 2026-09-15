@@ -5,7 +5,7 @@ import KotlinSharedUI
 import SwiftUI
 
 struct AgentChatHistoryScreen: View {
-    @StateObject private var presenter = KotlinPresenter(presenter: AgentChatHistoryPresenter())
+    @State private var presenter = KotlinPresenter(presenter: AgentChatHistoryPresenter())
 
     var body: some View {
         AgentChatHistoryList(rooms: rooms) { room in

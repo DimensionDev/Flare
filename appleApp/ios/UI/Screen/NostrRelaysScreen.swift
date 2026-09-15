@@ -4,7 +4,7 @@ import FlareAppleCore
 
 struct NostrRelaysScreen: View {
     let accountKey: MicroBlogKey
-    @StateObject private var presenter: KotlinPresenter<NostrRelaysPresenterState>
+    @State private var presenter: KotlinPresenter<NostrRelaysPresenterState>
     @State private var showAddAlert = false
     @State private var relay = ""
 

@@ -42,7 +42,7 @@ struct ComposeScreen: View {
     let prefill: ComposePrefill?
     @FocusState private var keyboardFocused: Bool
     @FocusState private var cwKeyboardFocused: Bool
-    @StateObject private var presenter: KotlinPresenter<ComposeState>
+    @State private var presenter: KotlinPresenter<ComposeState>
     @State private var viewModel = ComposeContentViewModel()
     @State private var mediaViewModel = MediaViewModel()
     @State private var uiTextView: UITextView?

@@ -12,7 +12,7 @@ struct ProfileScreen: View {
     @Environment(\.timelineAppearance.timelineDisplayMode) private var timelineDisplayMode
     @Environment(\.timelineAppearance.aiConfig.agent) private var agentEnabled
 
-    @StateObject private var presenter: KotlinPresenter<ProfileState>
+    @State private var presenter: KotlinPresenter<ProfileState>
     @State private var selectedTab = 0
 
     init(
@@ -194,7 +194,7 @@ struct ProfileScreen: View {
 }
 
 struct ProfileWithUserNameAndHostScreen: View {
-    @StateObject private var presenter: KotlinPresenter<UserState>
+    @State private var presenter: KotlinPresenter<UserState>
     let accountType: AccountType
     let onFollowingClick: (MicroBlogKey) -> Void
     let onFansClick: (MicroBlogKey) -> Void
@@ -246,7 +246,7 @@ struct ProfileWithUserNameAndHostScreen: View {
 
 private struct ProfileTimelineTabContent: View {
     @Environment(\.openWindow) private var openWindow
-    @StateObject private var presenter: KotlinPresenter<TimelineState>
+    @State private var presenter: KotlinPresenter<TimelineState>
 
     init(presenter: TimelinePresenter) {
         _presenter = .init(wrappedValue: .init(presenter: presenter))
@@ -271,7 +271,7 @@ private struct ProfileGalleryTabContent: View {
         GridItem(.adaptive(minimum: 140, maximum: 240), spacing: 8)
     ]
 
-    @StateObject private var presenter: KotlinPresenter<ProfileMediaState>
+    @State private var presenter: KotlinPresenter<ProfileMediaState>
 
     init(
         presenter: ProfileMediaPresenter,

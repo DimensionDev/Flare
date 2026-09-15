@@ -519,15 +519,8 @@ public struct MacStatusShareData {
 
 public typealias MacCrossPostAction = (MacStatusShareData) -> Void
 
-private struct MacCrossPostActionKey: EnvironmentKey {
-    static let defaultValue: MacCrossPostAction? = nil
-}
-
 public extension EnvironmentValues {
-    var macCrossPostAction: MacCrossPostAction? {
-        get { self[MacCrossPostActionKey.self] }
-        set { self[MacCrossPostActionKey.self] = newValue }
-    }
+    @Entry var macCrossPostAction: MacCrossPostAction? = nil
 }
 
 struct MacStatusShareMenu<LabelContent: View>: View {
@@ -630,7 +623,7 @@ public struct MacStatusShareSheet: View {
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.dismiss) private var dismiss
     @Environment(\.timelineAppearance) private var timelineAppearance
-    @StateObject private var presenter: KotlinPresenter<StatusState>
+    @State private var presenter: KotlinPresenter<StatusState>
     @State private var theme: ColorScheme?
     @State private var previewStyle: MacStatusSharePreviewStyle = .card
     @State private var screenshotURL: URL?

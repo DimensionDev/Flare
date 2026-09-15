@@ -5,7 +5,7 @@ import FlareAppleUI
 
 struct ProfileInsightSheet: View {
     @Environment(\.dismiss) private var dismiss
-    @StateObject private var presenter: KotlinPresenter<ProfileInsightPresenterState>
+    @State private var presenter: KotlinPresenter<ProfileInsightPresenterState>
     let accountType: AccountType
     let onNavigate: (Route) -> Void
 

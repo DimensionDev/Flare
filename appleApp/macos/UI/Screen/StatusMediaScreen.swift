@@ -15,7 +15,7 @@ struct MacStatusMediaResolver: View {
     let onResolved: ([any UiMedia], Int, String?, MacMediaShareContext?) -> Void
     let onFinished: () -> Void
 
-    @StateObject private var presenter: KotlinPresenter<StatusState>
+    @State private var presenter: KotlinPresenter<StatusState>
     @State private var didFinish = false
 
     var body: some View {

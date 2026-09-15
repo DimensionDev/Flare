@@ -8,16 +8,16 @@ import SwiftUIBackports
 struct RootView: View {
     @Environment(\.openWindow) private var openWindow
     @Environment(\.openSettings) private var openSettings
-    @StateObject private var homeTabsPresenter = KotlinPresenter(presenter: HomeTabsPresenter())
-    @StateObject private var secondaryTabPresenter = KotlinPresenter(presenter: SecondaryTabsPresenter())
-    @StateObject private var homeTimelineWithTabsPresenter = KotlinPresenter(presenter: HomeTimelineWithTabsPresenter())
-    @StateObject private var allNotificationBadgePresenter = KotlinPresenter(presenter: AllNotificationBadgePresenter())
-    @StateObject private var notificationAccountsPresenter = KotlinPresenter(presenter: NotificationAccountsPresenter())
-    @StateObject private var loggedInPresenter = KotlinPresenter(presenter: LoggedInPresenter())
-    @StateObject private var aiAgentEnabledPresenter = KotlinPresenter(presenter: AiAgentEnabledPresenter())
-    @StateObject private var directMessageAvailabilityPresenter = KotlinPresenter(presenter: DirectMessageAvailabilityPresenter())
-    @ObservedObject private var mainWindowCoordinator = MacMainWindowCoordinator.shared
-    @ObservedObject private var inAppNotification = SwiftInAppNotification.shared
+    @State private var homeTabsPresenter = KotlinPresenter(presenter: HomeTabsPresenter())
+    @State private var secondaryTabPresenter = KotlinPresenter(presenter: SecondaryTabsPresenter())
+    @State private var homeTimelineWithTabsPresenter = KotlinPresenter(presenter: HomeTimelineWithTabsPresenter())
+    @State private var allNotificationBadgePresenter = KotlinPresenter(presenter: AllNotificationBadgePresenter())
+    @State private var notificationAccountsPresenter = KotlinPresenter(presenter: NotificationAccountsPresenter())
+    @State private var loggedInPresenter = KotlinPresenter(presenter: LoggedInPresenter())
+    @State private var aiAgentEnabledPresenter = KotlinPresenter(presenter: AiAgentEnabledPresenter())
+    @State private var directMessageAvailabilityPresenter = KotlinPresenter(presenter: DirectMessageAvailabilityPresenter())
+    private let mainWindowCoordinator = MacMainWindowCoordinator.shared
+    private let inAppNotification = SwiftInAppNotification.shared
     @State private var selectedTab: Route?
     @State private var mainNavigationRequest: MacMainWindowNavigationRequest?
     @State private var homeExpanded: Bool = true
@@ -101,17 +101,18 @@ struct RootView: View {
                         let items: [SecondaryTabsPresenter.Item] = data.data.cast(SecondaryTabsPresenter.Item.self)
                         if !items.isEmpty {
                             Section {
-                                ForEach(Array(items.enumerated()), id: \.offset) { _, item in
+                                ForEach(items, id: \.accountKey) { item in
+                                    let tabs = item.tabs.compactMap { tab in
+                                        route(for: tab).map { (tab: tab, route: $0) }
+                                    }
                                     DisclosureGroup {
-                                        ForEach(item.tabs, id: \.self) { (tab: SecondaryTabsPresenter.Tab) in
-                                            if let route = route(for: tab) {
-                                                Label {
-                                                    Text(tab.title.text)
-                                                } icon: {
-                                                    Image(fontAwesome: tab.icon.fontAwesomeIcon)
-                                                }
-                                                .tag(route)
+                                        ForEach(tabs, id: \.tab) { destination in
+                                            Label {
+                                                Text(destination.tab.title.text)
+                                            } icon: {
+                                                Image(fontAwesome: destination.tab.icon.fontAwesomeIcon)
                                             }
+                                            .tag(destination.route)
                                         }
                                     } label: {
                                         StateView(state: item.user) { user in

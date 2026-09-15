@@ -6,7 +6,7 @@ import FlareAppleUI
 struct ImportOPMLScreen: View {
     @Environment(\.dismiss) private var dismiss
     let url: URL
-    @StateObject private var presenter: KotlinPresenter<ImportOPMLPresenterState>
+    @State private var presenter: KotlinPresenter<ImportOPMLPresenterState>
     
     init(url: URL) {
         self.url = url

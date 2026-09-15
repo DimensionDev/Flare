@@ -1,6 +1,5 @@
 import FlareAppleCore
 import KotlinSharedUI
-import Combine
 import Drops
 import Foundation
 import SwiftUI
@@ -11,7 +10,7 @@ struct LoginExpiredToast: Identifiable {
     let platformId: String
 }
 
-final class SwiftInAppNotification: ObservableObject, InAppNotification {
+final class SwiftInAppNotification: InAppNotification {
     private init() {}
     static let shared = SwiftInAppNotification()
     var onRelogin: ((LoginExpiredToast) -> Void)?

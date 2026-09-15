@@ -6,8 +6,8 @@ import FlareAppleUI
 struct SecondaryTabsScreen: View {
     @Environment(\.dismiss) private var dismiss
     let onTabSelected: (Route) -> Void
-    @StateObject private var presenter = KotlinPresenter(presenter: SecondaryTabsPresenter())
-    @StateObject private var aiAgentEnabledPresenter = KotlinPresenter(presenter: AiAgentEnabledPresenter())
+    @State private var presenter = KotlinPresenter(presenter: SecondaryTabsPresenter())
+    @State private var aiAgentEnabledPresenter = KotlinPresenter(presenter: AiAgentEnabledPresenter())
     var body: some View {
         Group {
             if #available(iOS 18.0, *) {
@@ -36,21 +36,22 @@ struct SecondaryTabsScreen: View {
                 let items = data.cast(SecondaryTabsPresenter.Item.self)
                 if !items.isEmpty {
                     Section {
-                        ForEach(Array(items.enumerated()), id: \.offset) { _, item in
+                        ForEach(items, id: \.accountKey) { item in
+                            let tabs = item.tabs.compactMap { tab in
+                                route(for: tab).map { (tab: tab, route: $0) }
+                            }
                             DisclosureGroup {
-                                ForEach(item.tabs, id: \.self) { tab in
-                                    if let route = route(for: tab) {
-                                        Button {
-                                            onTabSelected(route)
-                                        } label: {
-                                            Label {
-                                                Text(tab.title.text)
-                                            } icon: {
-                                                Image(fontAwesome: tab.icon.fontAwesomeIcon)
-                                            }
+                                ForEach(tabs, id: \.tab) { destination in
+                                    Button {
+                                        onTabSelected(destination.route)
+                                    } label: {
+                                        Label {
+                                            Text(destination.tab.title.text)
+                                        } icon: {
+                                            Image(fontAwesome: destination.tab.icon.fontAwesomeIcon)
                                         }
-                                        .buttonStyle(.plain)
                                     }
+                                    .buttonStyle(.plain)
                                 }
                             } label: {
                                 StateView(state: item.user) { user in

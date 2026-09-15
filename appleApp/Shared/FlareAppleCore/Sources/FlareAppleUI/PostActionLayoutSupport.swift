@@ -72,7 +72,7 @@ public enum PostActionLayoutSupport {
 }
 
 public struct PostActionLayoutPreview: View {
-    @StateObject private var presenter = KotlinPresenter(presenter: AppearancePresenter())
+    @State private var presenter = KotlinPresenter(presenter: AppearancePresenter())
     @Environment(\.timelineAppearance) private var timelineAppearance
     private let config: PostActionLayoutConfig
 

@@ -1,5 +1,5 @@
 import AppKit
-import Combine
+import Observation
 import FlareAppleCore
 import Foundation
 import Kingfisher
@@ -16,10 +16,11 @@ struct MacMediaSaveLocationState {
     let displayName: String
 }
 
-final class MacMediaSaveLocationStore: ObservableObject {
+@Observable
+final class MacMediaSaveLocationStore {
     static let shared = MacMediaSaveLocationStore()
 
-    @Published private(set) var state: MacMediaSaveLocationState
+    private(set) var state: MacMediaSaveLocationState
 
     private let defaults: UserDefaults
 

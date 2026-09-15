@@ -6,8 +6,8 @@ import SwiftUI
 import SwiftUIBackports
 
 struct MacDirectMessagesScreen: View {
-    @ObservedObject private var windowCoordinator: MacDirectMessageWindowCoordinator
-    @StateObject private var presenter = KotlinPresenter(presenter: DirectMessageUserListPresenter())
+    private let windowCoordinator: MacDirectMessageWindowCoordinator
+    @State private var presenter = KotlinPresenter(presenter: DirectMessageUserListPresenter())
     @State private var selectedAccountKey: MicroBlogKey?
     @State private var selectedRoomID: String?
     @State private var selectedRoom: MacDMRoomSelection?
@@ -270,7 +270,7 @@ private struct MacDMRoomListColumn: View {
     let accountType: AccountType
     @Binding var selectedRoomID: String?
     @Binding var selectedRoom: MacDMRoomSelection?
-    @StateObject private var presenter: KotlinPresenter<DMListState>
+    @State private var presenter: KotlinPresenter<DMListState>
 
     init(
         accountType: AccountType,
@@ -487,7 +487,7 @@ private struct MacDMRoomRow: View {
 private struct MacDMConversationColumn: View {
     let selection: MacDMRoomSelection
     @Environment(\.openURL) private var openURL
-    @StateObject private var presenter: KotlinPresenter<DMConversationState>
+    @State private var presenter: KotlinPresenter<DMConversationState>
     @State private var inputText = ""
 
     init(selection: MacDMRoomSelection) {
@@ -712,7 +712,7 @@ private struct MacDMRoomResolver: View {
     let request: MacDMRoomResolveRequest
     let onResolved: (MicroBlogKey) -> Void
     let onFailed: () -> Void
-    @StateObject private var presenter: KotlinPresenter<UserDMConversationPresenterState>
+    @State private var presenter: KotlinPresenter<UserDMConversationPresenterState>
 
     init(
         request: MacDMRoomResolveRequest,

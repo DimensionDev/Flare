@@ -4,7 +4,7 @@ import FlareAppleCore
 
 public struct EditUserInListScreen: View {
     @Environment(\.dismiss) private var dismiss
-    @StateObject private var presenter: KotlinPresenter<EditAccountListState>
+    @State private var presenter: KotlinPresenter<EditAccountListState>
     
     public init(accountType: AccountType, userKey: MicroBlogKey) {
         self._presenter = .init(wrappedValue: .init(presenter: EditAccountListPresenter(accountType: accountType, userKey: userKey)))

@@ -4,7 +4,7 @@ import FlareAppleCore
 import FlareAppleUI
 
 struct LocalHistoryAgentScreen: View {
-    @StateObject private var presenter: KotlinPresenter<LocalHistoryAgentPresenterState>
+    @State private var presenter: KotlinPresenter<LocalHistoryAgentPresenterState>
     let onNavigate: (Route) -> Void
 
     var body: some View {

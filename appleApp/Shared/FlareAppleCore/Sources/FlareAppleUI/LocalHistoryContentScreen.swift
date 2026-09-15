@@ -4,7 +4,7 @@ import SwiftUI
 
 public struct LocalHistoryContentScreen<AskAiOverlay: View>: View {
     @Environment(\.timelineAppearance.aiConfig.agent) private var agentEnabled
-    @StateObject private var presenter = KotlinPresenter(presenter: LocalCacheSearchPresenter())
+    @State private var presenter = KotlinPresenter(presenter: LocalCacheSearchPresenter())
     @State private var searchText = ""
     @State private var isSearchPresented = false
     @State private var selection: LocalHistorySelection = .status

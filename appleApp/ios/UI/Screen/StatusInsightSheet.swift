@@ -5,7 +5,7 @@ import FlareAppleCore
 
 struct StatusInsightSheet: View {
     @Environment(\.dismiss) private var dismiss
-    @StateObject private var presenter: KotlinPresenter<StatusInsightPresenterState>
+    @State private var presenter: KotlinPresenter<StatusInsightPresenterState>
     let onNavigate: (Route) -> Void
 
     var body: some View {

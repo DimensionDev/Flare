@@ -1,23 +1,24 @@
 import SwiftUI
 import WebKit
-import Combine
+import Observation
 import FlareAppleUI
 
 struct BackportWebLoginScreen: View {
     @Environment(\.dismiss) var dismiss
-    @StateObject private var viewModel: BackportWebLoginViewModel
+    @State private var viewModel: BackportWebLoginViewModel?
+    private let onCookie: (String) -> Void
     let url: String
     init(
         onCookie: @escaping (String) -> Void,
         url: String
     ) {
-        self._viewModel = .init(wrappedValue: .init(onCookie: onCookie, url: url))
         self.url = url
+        self.onCookie = onCookie
     }
     
     var body: some View {
         NavigationStack {
-            if viewModel.canShowWebView {
+            if let viewModel, viewModel.canShowWebView {
                 BackportWebView(url: URL(string: url), configuration: viewModel.configuration) { webView in
                     webView.customUserAgent = "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Mobile/15E148 Safari/604.1"
                     webView.navigationDelegate = viewModel.delegate
@@ -37,6 +38,11 @@ struct BackportWebLoginScreen: View {
                 }
             }
         }
+        .task {
+            // Initialize after state is installed so view rebuilds don't clear cookies again.
+            guard viewModel == nil else { return }
+            viewModel = BackportWebLoginViewModel(onCookie: onCookie, url: url)
+        }
     }
 }
 
@@ -53,13 +59,13 @@ class WKDelegate: NSObject, WKNavigationDelegate {
     }
 }
 
-class BackportWebLoginViewModel: ObservableObject {
-    @Published
+@Observable
+final class BackportWebLoginViewModel {
     var canShowWebView = false
     let url: String
     let onCookie: (String) -> Void
     let delegate: WKDelegate
-    private var observers = [NSKeyValueObservation]()
+    @ObservationIgnored private var observers = [NSKeyValueObservation]()
     init(
         onCookie: @escaping (String) -> Void,
         url: String

@@ -11,7 +11,7 @@ struct MacComposeScreen: View {
     @FocusState private var textEditorFocused: Bool
 
     let request: MacComposeWindowRequest
-    @StateObject private var presenter: KotlinPresenter<ComposeState>
+    @State private var presenter: KotlinPresenter<ComposeState>
 
     @State private var viewModel = ComposeContentViewModel()
     @State private var sensitive = false

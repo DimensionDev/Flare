@@ -1,6 +1,7 @@
 import SwiftUI
 import AuthenticationServices
 import Combine
+import Observation
 import Foundation
 import FlareAppleCore
 import FlareAppleUI
@@ -17,7 +18,7 @@ struct ServiceSelectionScreen: View {
 
     let toHome: () -> Void
 
-    @StateObject private var presenter: KotlinPresenter<ServiceSelectState>
+    @State private var presenter: KotlinPresenter<ServiceSelectState>
     @State private var instanceInput = ""
     @State private var selectedMethods: [String: LoginMethodType] = [:]
 
@@ -291,7 +292,7 @@ struct ReloginScreen: View {
     let target: ReloginTarget
     let toHome: () -> Void
 
-    @StateObject private var presenter: KotlinPresenter<ReloginState>
+    @State private var presenter: KotlinPresenter<ReloginState>
     @State private var selectedMethod: LoginMethodType?
 
     init(target: ReloginTarget, toHome: @escaping () -> Void) {
@@ -385,7 +386,7 @@ struct ReloginScreen: View {
 private struct LoginFlowView: View {
     @Environment(\.webAuthenticationSession) private var webAuthenticationSession
 
-    @StateObject private var presenter: KotlinPresenter<LoginFlowPresenterState>
+    @State private var presenter: KotlinPresenter<LoginFlowPresenterState>
     @State private var qrContent: String?
     @State private var webCookieUrl: String?
 
@@ -561,7 +562,7 @@ private struct LoginFieldView: View {
         self.field = field
         self.onUpdate = onUpdate
         self.onSubmit = onSubmit
-        self._value = .init(initialValue: field.value)
+        self.value = field.value
     }
 
     var body: some View {
@@ -722,20 +723,21 @@ private struct LoginAgreementView: View {
 
 private struct MacOSWebLoginScreen: View {
     @Environment(\.dismiss) private var dismiss
-    @StateObject private var viewModel: MacOSWebLoginViewModel
+    @State private var viewModel: MacOSWebLoginViewModel?
+    private let onCookie: (String) -> Void
     private let url: String
 
     init(
         onCookie: @escaping (String) -> Void,
         url: String
     ) {
-        self._viewModel = .init(wrappedValue: .init(onCookie: onCookie, url: url))
         self.url = url
+        self.onCookie = onCookie
     }
 
     var body: some View {
         VStack(spacing: 0) {
-            if viewModel.canShowWebView {
+            if let viewModel, viewModel.canShowWebView {
                 MacOSWebView(url: URL(string: url), configuration: viewModel.configuration) { webView in
                     webView.navigationDelegate = viewModel.delegate
                 }
@@ -743,6 +745,11 @@ private struct MacOSWebLoginScreen: View {
                 ProgressView()
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
+        }
+        .task {
+            // Initialize after state is installed so view rebuilds don't clear cookies again.
+            guard viewModel == nil else { return }
+            viewModel = MacOSWebLoginViewModel(onCookie: onCookie, url: url)
         }
     }
 }
@@ -777,8 +784,9 @@ private final class MacOSCookieNavigationDelegate: NSObject, WKNavigationDelegat
     }
 }
 
-private final class MacOSWebLoginViewModel: ObservableObject {
-    @Published var canShowWebView = false
+@Observable
+private final class MacOSWebLoginViewModel {
+    var canShowWebView = false
 
     let delegate: MacOSCookieNavigationDelegate
 

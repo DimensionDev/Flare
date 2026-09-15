@@ -8,11 +8,11 @@ struct TimelineScreen: View {
     let tabItem: UiTimelineTabItem
     let allowGalleryMode: Bool
     let isHomeTimeline: Bool
-    @StateObject private var presenter: KotlinPresenter<TimelineItemPresenterState>
+    @State private var presenter: KotlinPresenter<TimelineItemPresenterState>
     @Environment(\.timelineAppearance) private var timelineAppearance
     @Environment(\.appSettings) private var appSettings
     @Environment(\.scenePhase) private var scenePhase
-    @StateObject private var canComposePresenter = KotlinPresenter(presenter: CanComposePresenter())
+    @State private var canComposePresenter = KotlinPresenter(presenter: CanComposePresenter())
 
     init(tabItem: UiTimelineTabItem, allowGalleryMode: Bool = false, isHomeTimeline: Bool = false) {
         self.tabItem = tabItem

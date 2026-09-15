@@ -3,7 +3,7 @@ import SwiftUI
 import FlareAppleCore
 
 public struct AllListScreen<Destination: Hashable>: View {
-    @StateObject private var presenter: KotlinPresenter<AllListWithTabsPresenterState>
+    @State private var presenter: KotlinPresenter<AllListWithTabsPresenterState>
     private let accountType: AccountType
     private let timelineDestination: (UiTimelineTabItem) -> Destination
     private let createListContent: (() -> AnyView)?

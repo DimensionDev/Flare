@@ -4,6 +4,7 @@ import SwiftUIBackports
 @preconcurrency import KotlinSharedUI
 import FlareAppleCore
 import Combine
+import Observation
 
 struct ProfileScreen: View {
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
@@ -14,7 +15,7 @@ struct ProfileScreen: View {
     let onFollowingClick: (MicroBlogKey) -> Void
     let onFansClick: (MicroBlogKey) -> Void
     let onProfileInsight: (MicroBlogKey) -> Void
-    @StateObject private var presenter: KotlinPresenter<ProfileState>
+    @State private var presenter: KotlinPresenter<ProfileState>
     @State private var selectedTab: Int = 0
     @State private var showToolbarTabPicker = false
     @State private var isProfileHeaderVisible = true
@@ -412,8 +413,9 @@ private struct TimelineUIKitPlaceholderCard: UIViewRepresentable {
     }
 }
 
-private final class ProfileTabSelectionProgress: ObservableObject {
-    @Published private(set) var pagePosition: CGFloat = 0
+@Observable
+private final class ProfileTabSelectionProgress {
+    private(set) var pagePosition: CGFloat = 0
 
     func update(_ pagePosition: CGFloat) {
         guard abs(self.pagePosition - pagePosition) > 0.0001 else { return }
@@ -424,7 +426,7 @@ private final class ProfileTabSelectionProgress: ObservableObject {
 private struct ProfileProgressTabBar: View {
     let tabs: [ProfileState.Tab]
     @Binding var selectedTab: Int
-    @ObservedObject var progress: ProfileTabSelectionProgress
+    let progress: ProfileTabSelectionProgress
 
     var body: some View {
         ProfileTabBar(
@@ -707,7 +709,7 @@ private struct ProfileTimelineCollectionView: UIViewControllerRepresentable {
                     try? await presenter.state.refresh()
                 }
                 if needsBinding {
-                    record.cancellable = presenter.$state
+                    record.cancellable = presenter.statePublisher
                         .sink { [weak controller] state in
                             controller?.update(data: state.listState, columnCount: timelineColumnCount)
                         }
@@ -730,7 +732,7 @@ private struct ProfileTimelineCollectionView: UIViewControllerRepresentable {
                     try? await presenter.state.refreshSuspend()
                 }
                 if needsBinding {
-                    record.cancellable = presenter.$state
+                    record.cancellable = presenter.statePublisher
                         .sink { [weak controller] state in
                             controller?.update(profileMediaData: state.mediaState)
                         }
@@ -1716,7 +1718,7 @@ extension ProfileScreen {
 }
 
 struct ProfileWithUserNameAndHostScreen: View {
-    @StateObject private var presenter: KotlinPresenter<UserState>
+    @State private var presenter: KotlinPresenter<UserState>
     let accountType: AccountType
     let onFollowingClick: (MicroBlogKey) -> Void
     let onFansClick: (MicroBlogKey) -> Void
@@ -1752,7 +1754,7 @@ struct ProfileWithUserNameAndHostScreen: View {
 }
 
 struct ProfileTimelineView: View {
-    @StateObject private var presenter: KotlinPresenter<TimelineState>
+    @State private var presenter: KotlinPresenter<TimelineState>
     
     init(presenter: TimelinePresenter) {
         self._presenter = .init(wrappedValue: .init(presenter: presenter))

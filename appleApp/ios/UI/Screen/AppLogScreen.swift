@@ -4,7 +4,7 @@ import FlareAppleCore
 import FlareAppleUI
 
 struct AppLogScreen: View {
-    @StateObject private var presenter = KotlinPresenter(presenter: DevModePresenter())
+    @State private var presenter = KotlinPresenter(presenter: DevModePresenter())
     @State private var selectedMessage: String? = nil
     @State private var exportedLogContent: String? = nil
     var body: some View {

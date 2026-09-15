@@ -12,7 +12,7 @@ struct HomeSidebarTabsSection: View {
     @Binding var isExpanded: Bool
     let onEditTab: (UiTimelineTabItem, @escaping (UiTimelineTabItem) -> Void) -> Void
 
-    @StateObject private var settingsPresenter = KotlinPresenter(presenter: HomeTabSettingsPresenter())
+    @State private var settingsPresenter = KotlinPresenter(presenter: HomeTabSettingsPresenter())
     @State private var isCustomizing = false
     @State private var editableTabs: [UiTimelineTabItem] = []
     @State private var addPopover: HomeSidebarAddPopover?
@@ -419,7 +419,7 @@ private struct HomeSidebarEditableTabRow: View {
 
 struct HomeSidebarAddTabPopover: View {
     @Environment(\.openWindow) private var openWindow
-    @StateObject private var presenter = KotlinPresenter(presenter: AllTabsPresenter())
+    @State private var presenter = KotlinPresenter(presenter: AllTabsPresenter())
     @State private var expandedSections: Set<String> = ["rss"]
     @State private var showCreateGroupPopover = false
 
@@ -542,7 +542,7 @@ struct HomeSidebarAddTabPopover: View {
 }
 
 private struct HomeSidebarCreateGroupPopover: View {
-    @StateObject private var presenter = KotlinPresenter(presenter: GroupConfigPresenter())
+    @State private var presenter = KotlinPresenter(presenter: GroupConfigPresenter())
     @State private var name = ""
     @State private var icon: IconType = IconType.Material(icon: .rss)
     @State private var tabs: [UiTimelineTabItem] = []

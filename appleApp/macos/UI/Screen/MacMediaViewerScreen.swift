@@ -39,7 +39,7 @@ struct MacMediaViewerScreen: View {
         self.preview = preview
         self.shareContext = shareContext
         let initialSelection = max(0, initialIndex)
-        self._selectedIndex = .init(initialValue: initialSelection)
+        self.selectedIndex = initialSelection
         self._scrollPosition = .init(initialValue: initialSelection)
     }
 

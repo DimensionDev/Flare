@@ -1,12 +1,13 @@
 import Foundation
 import Network
-@preconcurrency import Combine
+import Observation
 import SwiftUI
 import FlareAppleUI
 
 @MainActor
-final class NetworkMonitor: ObservableObject {
-    @Published private(set) var kind: NetworkKind = .cellular
+@Observable
+final class NetworkMonitor {
+    private(set) var kind: NetworkKind = .cellular
 
     private let monitor = NWPathMonitor()
     private let queue = DispatchQueue(label: "net.monitor.queue")
@@ -46,7 +47,7 @@ final class NetworkMonitor: ObservableObject {
 }
 
 struct NetworkStatusModifier: ViewModifier {
-    @StateObject private var monitor = NetworkMonitor()
+    @State private var monitor = NetworkMonitor()
 
     func body(content: Content) -> some View {
         content

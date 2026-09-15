@@ -6,7 +6,7 @@ import FlareAppleCore
 
 struct DMListScreen: View {
     let accountType: AccountType
-    @StateObject private var presenter: KotlinPresenter<DMListState>
+    @State private var presenter: KotlinPresenter<DMListState>
     var body: some View {
         List {
             PagingView(data: presenter.state.items) { item in
@@ -81,7 +81,7 @@ extension DMListScreen {
 }
 
 struct UserDMConversationScreen: View {
-    @StateObject private var presenter: KotlinPresenter<UserDMConversationPresenterState>
+    @State private var presenter: KotlinPresenter<UserDMConversationPresenterState>
     private let accountType: AccountType
     
     init(accountType: AccountType, userKey: MicroBlogKey) {
@@ -105,7 +105,7 @@ struct UserDMConversationScreen: View {
 struct DMConversationScreen: View {
     @State private var inputText: String = ""
     @Environment(\.openURL) private var openURL
-    @StateObject private var presenter: KotlinPresenter<DMConversationState>
+    @State private var presenter: KotlinPresenter<DMConversationState>
     var body: some View {
         DMConversationMessagesView(
             data: presenter.state.items,

@@ -12,13 +12,12 @@ struct Router<Root: View>: View {
     @State private var sheet: Route? = nil
     @State private var cover: Route? = nil
     @State private var alertRoute: Route? = nil
-    @StateObject private var deepLinkPresenter: KotlinPresenter<DeepLinkPresenterState>
-    @StateObject private var deepLinkHandler = DeepLinkHandler()
+    @State private var deepLinkPresenter: KotlinPresenter<DeepLinkPresenterState>
+    @State private var deepLinkHandler: DeepLinkHandler
     
     init(@ViewBuilder root: @escaping (@escaping (Route) -> Void) -> Root) {
         self.root = root
         let handler = DeepLinkHandler()
-        self._deepLinkHandler = .init(wrappedValue: handler)
         self._deepLinkPresenter = .init(wrappedValue: .init(presenter: DeepLinkPresenter(onRoute: { [weak handler] deeplinkRoute in
             if let route = Route.fromDeepLinkRoute(deeplinkRoute: deeplinkRoute){
                 handler?.onRoute?(route)
@@ -26,6 +25,7 @@ struct Router<Root: View>: View {
         }, onLink: { [weak handler] link in
             handler?.onLink?(link)
         })))
+        self.deepLinkHandler = handler
     }
     
     var body: some View {
@@ -148,7 +148,7 @@ struct Router<Root: View>: View {
     }
 }
 
-class DeepLinkHandler : ObservableObject {
+final class DeepLinkHandler {
     var onRoute: ((Route) -> Void)?
     var onLink: ((String) -> Void)?
 }

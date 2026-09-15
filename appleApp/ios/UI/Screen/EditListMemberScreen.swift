@@ -5,7 +5,7 @@ import FlareAppleUI
 
 struct EditListMemberScreen: View {
     @Environment(\.dismiss) var dismiss
-    @StateObject private var presenter: KotlinPresenter<EditListMemberState>
+    @State private var presenter: KotlinPresenter<EditListMemberState>
     @State private var searchText: String = ""
 
     init(accountType: AccountType, listId: String) {

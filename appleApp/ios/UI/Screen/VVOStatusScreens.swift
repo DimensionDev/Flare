@@ -39,9 +39,9 @@ struct VVOStatusScreen: View {
                 detailStatusKey: statusKey,
                 headerState: isCompactLayout ? presenter.state.status : nil,
                 accessoryItems: accessoryItems,
-                suppressInitialRefreshIndicator: true
+                suppressInitialRefreshIndicator: true,
+                contentKey: selectedType
             )
-            .id(selectedType)
             .ignoresSafeArea(edges: .vertical)
             .refreshable {
                 switch selectedType {

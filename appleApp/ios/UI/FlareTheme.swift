@@ -7,7 +7,7 @@ import FlareAppleUI
 
 struct FlareTheme<Content: View>: View {
     @ViewBuilder let content: () -> Content
-    @StateObject private var presenter = KotlinPresenter(presenter: EnvironmentSettingsPresenter())
+    @State private var presenter = KotlinPresenter(presenter: EnvironmentSettingsPresenter())
     @State private var openedURL: URL? = nil
     @State private var appSettings = AppSettings.companion.default
     @State private var globalAppearance: GlobalAppearance = GlobalAppearance.companion.Default

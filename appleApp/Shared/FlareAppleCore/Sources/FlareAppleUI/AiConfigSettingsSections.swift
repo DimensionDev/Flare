@@ -1,11 +1,11 @@
-import Combine
+import Observation
 import FlareAppleCore
 import Foundation
 import KotlinSharedUI
 import SwiftUI
 
 public struct AiConfigSettingsView: View {
-    @StateObject private var state = AiConfigSettingsState()
+    @State private var state = AiConfigSettingsState()
 
     public init() {}
 
@@ -18,7 +18,7 @@ public struct AiConfigSettingsView: View {
 }
 
 public struct AiConfigSettingsSections: View {
-    @StateObject private var state = AiConfigSettingsState()
+    @State private var state = AiConfigSettingsState()
 
     public init() {}
 
@@ -28,21 +28,11 @@ public struct AiConfigSettingsSections: View {
     }
 }
 
-private final class AiConfigSettingsState: ObservableObject {
+@Observable
+private final class AiConfigSettingsState {
     let presenter = KotlinPresenter(presenter: AiConfigPresenter())
-    @Published var editingField: AiConfigEditableField?
-    @Published var editingText = ""
-
-    private var cancellables = Set<AnyCancellable>()
-
-    init() {
-        presenter.$state
-            .dropFirst()
-            .sink { [weak self] _ in
-                self?.objectWillChange.send()
-            }
-            .store(in: &cancellables)
-    }
+    var editingField: AiConfigEditableField?
+    var editingText = ""
 
     func beginEditing(field: AiConfigEditableField, value: String) {
         editingText = value
@@ -66,7 +56,7 @@ private final class AiConfigSettingsState: ObservableObject {
 }
 
 private struct AiConfigSettingsSectionsContent: View {
-    @ObservedObject var state: AiConfigSettingsState
+    let state: AiConfigSettingsState
 
     var body: some View {
         Group {
@@ -289,7 +279,7 @@ private struct AiConfigSettingsSectionsContent: View {
 }
 
 private struct AiConfigEditSheet: View {
-    @ObservedObject var state: AiConfigSettingsState
+    @Bindable var state: AiConfigSettingsState
     let field: AiConfigEditableField
 
     var body: some View {
@@ -372,10 +362,8 @@ private struct AiConfigEditSheet: View {
 
 private extension View {
     func aiConfigSettingsSheets(state: AiConfigSettingsState) -> some View {
-        sheet(item: Binding(
-            get: { state.editingField },
-            set: { state.editingField = $0 }
-        )) { field in
+        @Bindable var state = state
+        return sheet(item: $state.editingField) { field in
             AiConfigEditSheet(state: state, field: field)
         }
     }

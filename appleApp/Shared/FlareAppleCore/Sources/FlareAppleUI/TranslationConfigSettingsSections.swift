@@ -1,10 +1,10 @@
-import Combine
+import Observation
 import FlareAppleCore
 import KotlinSharedUI
 import SwiftUI
 
 public struct TranslationConfigSettingsView: View {
-    @StateObject private var state = TranslationConfigSettingsState()
+    @State private var state = TranslationConfigSettingsState()
 
     public init() {}
 
@@ -17,7 +17,7 @@ public struct TranslationConfigSettingsView: View {
 }
 
 public struct TranslationConfigSettingsSections: View {
-    @StateObject private var state = TranslationConfigSettingsState()
+    @State private var state = TranslationConfigSettingsState()
 
     public init() {}
 
@@ -27,31 +27,15 @@ public struct TranslationConfigSettingsSections: View {
     }
 }
 
-private final class TranslationConfigSettingsState: ObservableObject {
+@Observable
+private final class TranslationConfigSettingsState {
     let presenter = KotlinPresenter(presenter: AiConfigPresenter())
     let aiTranslationTestPresenter = KotlinPresenter(presenter: AiTranslationTestPresenter())
-    @Published var editingField: TranslationConfigEditableField?
-    @Published var editingText = ""
-    @Published var showExcludedLanguagesPicker = false
-    @Published var pendingExcludedLanguages: Set<String> = []
-    @Published var excludedLanguagesQuery = ""
-
-    private var cancellables = Set<AnyCancellable>()
-
-    init() {
-        presenter.$state
-            .dropFirst()
-            .sink { [weak self] _ in
-                self?.objectWillChange.send()
-            }
-            .store(in: &cancellables)
-        aiTranslationTestPresenter.$state
-            .dropFirst()
-            .sink { [weak self] _ in
-                self?.objectWillChange.send()
-            }
-            .store(in: &cancellables)
-    }
+    var editingField: TranslationConfigEditableField?
+    var editingText = ""
+    var showExcludedLanguagesPicker = false
+    var pendingExcludedLanguages: Set<String> = []
+    var excludedLanguagesQuery = ""
 
     func beginEditing(field: TranslationConfigEditableField, value: String) {
         editingText = value
@@ -143,7 +127,7 @@ private final class TranslationConfigSettingsState: ObservableObject {
 }
 
 private struct TranslationConfigSettingsSectionsContent: View {
-    @ObservedObject var state: TranslationConfigSettingsState
+    let state: TranslationConfigSettingsState
 
     var body: some View {
         Section {
@@ -325,7 +309,7 @@ private struct TranslationConfigSettingsSectionsContent: View {
 }
 
 private struct TranslationConfigEditSheet: View {
-    @ObservedObject var state: TranslationConfigSettingsState
+    @Bindable var state: TranslationConfigSettingsState
     let field: TranslationConfigEditableField
 
     var body: some View {
@@ -362,7 +346,7 @@ private struct TranslationConfigEditSheet: View {
 }
 
 private struct TranslationExcludedLanguagesSheet: View {
-    @ObservedObject var state: TranslationConfigSettingsState
+    @Bindable var state: TranslationConfigSettingsState
 
     var body: some View {
         NavigationStack {
@@ -443,16 +427,11 @@ private struct TranslationExcludedLanguagesSheet: View {
 
 private extension View {
     func translationConfigSettingsSheets(state: TranslationConfigSettingsState) -> some View {
-        sheet(item: Binding(
-            get: { state.editingField },
-            set: { state.editingField = $0 }
-        )) { field in
+        @Bindable var state = state
+        return sheet(item: $state.editingField) { field in
             TranslationConfigEditSheet(state: state, field: field)
         }
-        .sheet(isPresented: Binding(
-            get: { state.showExcludedLanguagesPicker },
-            set: { state.showExcludedLanguagesPicker = $0 }
-        )) {
+        .sheet(isPresented: $state.showExcludedLanguagesPicker) {
             TranslationExcludedLanguagesSheet(state: state)
         }
     }

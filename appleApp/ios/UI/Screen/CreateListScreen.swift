@@ -5,7 +5,7 @@ import FlareAppleCore
 
 struct CreateListScreen: View {
     @Environment(\.dismiss) private var dismiss
-    @StateObject private var presenter: KotlinPresenter<CreateListState>
+    @State private var presenter: KotlinPresenter<CreateListState>
     @State private var avatar: PhotosPickerItem? = nil
     @State private var listName: String = ""
     @State private var listDescription: String = ""

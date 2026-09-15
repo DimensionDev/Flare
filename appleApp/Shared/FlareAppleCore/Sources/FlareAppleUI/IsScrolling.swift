@@ -1,9 +1,5 @@
 import SwiftUI
 
-private struct IsScrollingKey: EnvironmentKey {
-    static let defaultValue = false
-}
-
 @Observable
 public final class IsScrollingState {
     public var isScrolling: Bool
@@ -13,20 +9,9 @@ public final class IsScrollingState {
     }
 }
 
-private struct IsScrollingStateKey: EnvironmentKey {
-    static let defaultValue: IsScrollingState? = nil
-}
-
 public extension EnvironmentValues {
-    var isScrolling: Bool {
-        get { self[IsScrollingKey.self] }
-        set { self[IsScrollingKey.self] = newValue }
-    }
-
-    var isScrollingState: IsScrollingState? {
-        get { self[IsScrollingStateKey.self] }
-        set { self[IsScrollingStateKey.self] = newValue }
-    }
+    @Entry var isScrolling = false
+    @Entry var isScrollingState: IsScrollingState? = nil
 }
 
 @available(iOS 17.0, macOS 14.0, *)

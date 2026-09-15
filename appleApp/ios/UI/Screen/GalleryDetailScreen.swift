@@ -7,7 +7,7 @@ struct GalleryDetailScreen: View {
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @Environment(\.timelineAppearance) private var timelineAppearance
     @Environment(\.openURL) private var openURL
-    @StateObject private var presenter: KotlinPresenter<GalleryDetailPresenterState>
+    @State private var presenter: KotlinPresenter<GalleryDetailPresenterState>
     @State private var showInfoSheet = false
     @State private var selectedTab: GallerySideTab = .info
 
@@ -743,7 +743,7 @@ private struct GalleryDetailLoadingView: View {
 struct GalleryCommentsScreen: View {
     let accountType: AccountType
     let statusKey: MicroBlogKey
-    @StateObject private var presenter: KotlinPresenter<GalleryDetailPresenterState>
+    @State private var presenter: KotlinPresenter<GalleryDetailPresenterState>
 
     init(accountType: AccountType, statusKey: MicroBlogKey) {
         self.accountType = accountType

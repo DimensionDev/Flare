@@ -15,11 +15,11 @@ extension Notification.Name {
 struct FlareRoot: View {
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @Environment(\.globalAppearance) private var globalAppearance
-    @StateObject private var homeTabsPresenter = KotlinPresenter(presenter: HomeTabsPresenter())
-    @StateObject private var notificationBadgePresenter = KotlinPresenter(presenter: AllNotificationBadgePresenter())
-    @StateObject private var secondaryTabsPresenter = KotlinPresenter(presenter: SecondaryTabsPresenter())
-    @StateObject private var aiAgentEnabledPresenter = KotlinPresenter(presenter: AiAgentEnabledPresenter())
-    @StateObject private var inAppNotification = SwiftInAppNotification.shared
+    @State private var homeTabsPresenter = KotlinPresenter(presenter: HomeTabsPresenter())
+    @State private var notificationBadgePresenter = KotlinPresenter(presenter: AllNotificationBadgePresenter())
+    @State private var secondaryTabsPresenter = KotlinPresenter(presenter: SecondaryTabsPresenter())
+    @State private var aiAgentEnabledPresenter = KotlinPresenter(presenter: AiAgentEnabledPresenter())
+    @State private var inAppNotification = SwiftInAppNotification.shared
     @State var selectedTab: String?
     @State private var reloginRoute: Route?
     
@@ -45,12 +45,13 @@ struct FlareRoot: View {
                 if horizontalSizeClass == .regular {
                     if case .success(let data) = onEnum(of: secondaryTabsPresenter.state.items) {
                         let items = data.data.cast(SecondaryTabsPresenter.Item.self)
-                        ForEach(Array(items.enumerated()), id: \.offset) { _, item in
+                        ForEach(items, id: \.accountKey) { item in
+                            let tabs = item.tabs.compactMap { tab in
+                                route(for: tab).map { (tab: tab, route: $0) }
+                            }
                             TabSection {
-                                ForEach(item.tabs, id: \.self) { tab in
-                                    if let route = route(for: tab) {
-                                        secondarySidebarShortcut(tab, route: route)
-                                    }
+                                ForEach(tabs, id: \.tab) { destination in
+                                    secondarySidebarShortcut(destination.tab, route: destination.route)
                                 }
                             } header: {
                                 StateView(state: item.user) { user in
@@ -137,9 +138,9 @@ private extension View {
 struct BackportFlareRoot: View {
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @Environment(\.globalAppearance) private var globalAppearance
-    @StateObject private var homeTabsPresenter = KotlinPresenter(presenter: HomeTabsPresenter())
-    @StateObject private var notificationBadgePresenter = KotlinPresenter(presenter: AllNotificationBadgePresenter())
-    @StateObject private var inAppNotification = SwiftInAppNotification.shared
+    @State private var homeTabsPresenter = KotlinPresenter(presenter: HomeTabsPresenter())
+    @State private var notificationBadgePresenter = KotlinPresenter(presenter: AllNotificationBadgePresenter())
+    @State private var inAppNotification = SwiftInAppNotification.shared
     @State var selectedTab: String?
     @State private var reloginRoute: Route?
     
@@ -187,7 +188,7 @@ struct BackportFlareRoot: View {
 }
 
 @MainActor
-private final class TabBarDoubleTapTarget: NSObject, ObservableObject, UIGestureRecognizerDelegate {
+private final class TabBarDoubleTapTarget: NSObject, UIGestureRecognizerDelegate {
     private var action: () -> Void = {}
 
     private lazy var recognizer: UITapGestureRecognizer = {
@@ -220,7 +221,7 @@ private final class TabBarDoubleTapTarget: NSObject, ObservableObject, UIGesture
 }
 
 private struct TabBarDoubleTapModifier: ViewModifier {
-    @StateObject private var target = TabBarDoubleTapTarget()
+    @State private var target = TabBarDoubleTapTarget()
     let action: () -> Void
 
     func body(content: Content) -> some View {

@@ -21,7 +21,7 @@ struct StatusShareSheet: View {
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.dismiss) private var dismiss
     @Environment(\.timelineAppearance) private var timelineAppearance
-    @StateObject private var presenter: KotlinPresenter<StatusState>
+    @State private var presenter: KotlinPresenter<StatusState>
     @State private var renderScale: CGFloat = 2.0
     @State private var theme: ColorScheme? = nil
     @State private var previewStyle: SharePreviewStyle = .card

@@ -17,8 +17,8 @@ struct Router: View {
     @State private var statusMediaResolveRequest: MacStatusMediaResolveRequest?
     @State private var didHandleInitialActionRoute = false
     @State private var handledExternalNavigationRequestId: UUID?
-    @StateObject private var deepLinkPresenter: KotlinPresenter<DeepLinkPresenterState>
-    @StateObject private var deepLinkHandler: MacDeepLinkHandler
+    @State private var deepLinkPresenter: KotlinPresenter<DeepLinkPresenterState>
+    @State private var deepLinkHandler: MacDeepLinkHandler
 
     init(
         initialRoute: Route,
@@ -29,7 +29,6 @@ struct Router: View {
         self.externalNavigationRequest = externalNavigationRequest
         self.forwardsContentRoutesToMainWindow = forwardsContentRoutesToMainWindow
         let handler = MacDeepLinkHandler()
-        _deepLinkHandler = .init(wrappedValue: handler)
         _deepLinkPresenter = .init(
             wrappedValue: .init(
                 presenter: DeepLinkPresenter(
@@ -44,6 +43,7 @@ struct Router: View {
                 )
             )
         )
+        self.deepLinkHandler = handler
     }
 
     var body: some View {
@@ -291,7 +291,7 @@ struct Router: View {
     }
 }
 
-final class MacDeepLinkHandler: ObservableObject {
+final class MacDeepLinkHandler {
     var onRoute: ((Route) -> Void)?
     var onLink: ((String) -> Void)?
 }

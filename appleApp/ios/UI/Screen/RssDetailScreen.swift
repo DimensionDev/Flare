@@ -21,7 +21,7 @@ Maecenas fringilla vitae leo sit amet lacinia. Donec in dui a ex hendrerit volut
 
 """
     
-    @StateObject private var presenter: KotlinPresenter<RssDetailPresenterState>
+    @State private var presenter: KotlinPresenter<RssDetailPresenterState>
     @Environment(\.translateConfig) private var translateConfig
     @Environment(\.openURL) private var openURL
     let url: String
@@ -102,7 +102,7 @@ Maecenas fringilla vitae leo sit amet lacinia. Donec in dui a ex hendrerit volut
 
 // MARK: - Thin wrapper that owns the translate presenter and passes results to content
 private struct RssTranslateProvider<Content: View>: View {
-    @StateObject private var translatePresenter: KotlinPresenter<RssDetailTranslatePresenterState>
+    @State private var translatePresenter: KotlinPresenter<RssDetailTranslatePresenterState>
     let document: DocumentData
     let content: (_ translatedTitle: String?, _ translatedHtml: String?, _ isTranslating: Bool) -> Content
     

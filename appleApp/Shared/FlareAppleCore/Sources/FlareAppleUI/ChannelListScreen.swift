@@ -3,7 +3,7 @@ import SwiftUI
 import FlareAppleCore
 
 public struct ChannelListScreen<Destination: Hashable>: View {
-    @StateObject private var presenter: KotlinPresenter<MisskeyChannelListPresenterState>
+    @State private var presenter: KotlinPresenter<MisskeyChannelListPresenterState>
     private let accountType: AccountType
     private let timelineDestination: (UiTimelineTabItem) -> Destination
     @State private var selectedTab: MisskeyChannelListPresenterStateType = .following

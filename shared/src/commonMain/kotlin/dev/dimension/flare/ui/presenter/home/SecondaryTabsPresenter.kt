@@ -14,6 +14,7 @@ import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.allAccountServicesFlow
 import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.model.AccountType
+import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiState
@@ -41,6 +42,7 @@ public class SecondaryTabsPresenter : PresenterBase<SecondaryTabsPresenter.State
 
     @Immutable
     public class Item(
+        public val accountKey: MicroBlogKey,
         public val user: UiState<UiProfile>,
         public val tabs: ImmutableList<Tab>,
     )
@@ -93,6 +95,7 @@ public class SecondaryTabsPresenter : PresenterBase<SecondaryTabsPresenter.State
                                 }.map { userState ->
                                     userState.takeSuccess()?.let { user ->
                                         Item(
+                                            accountKey = service.accountKey,
                                             user = userState,
                                             tabs =
                                                 (

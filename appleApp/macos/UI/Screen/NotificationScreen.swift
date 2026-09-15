@@ -5,7 +5,7 @@ import SwiftUI
 
 struct NotificationScreen: View {
     let accountKey: MicroBlogKey
-    @StateObject private var presenter: KotlinPresenter<AccountNotificationPresenterState>
+    @State private var presenter: KotlinPresenter<AccountNotificationPresenterState>
     @State private var selectedFilter: NotificationFilter?
 
     init(accountKey: MicroBlogKey) {

@@ -19,7 +19,7 @@ struct GroupConfigScreen: View {
     @State private var showAddTabSheet = false
     @State private var showFilterSheet = false
     @State private var editItem: UiTimelineTabItem? = nil
-    @StateObject private var presenter: KotlinPresenter<GroupConfigPresenterState>
+    @State private var presenter: KotlinPresenter<GroupConfigPresenterState>
 
     init(
         item: UiGroupTimelineTabItem? = nil,
@@ -27,24 +27,22 @@ struct GroupConfigScreen: View {
     ) {
         self.item = item
         self.onConfirm = onConfirm
-        _name = State(initialValue: item?.title.text ?? "")
-        _icon = State(initialValue: item?.icon ?? IconType.Material(icon: .rss))
-        _enabled = State(initialValue: item?.enabled ?? true)
-        _mergePolicy = State(initialValue: item?.mergePolicy ?? .timePerPage)
-        _filterConfig = State(initialValue: item?.filterConfig ?? TimelineFilterConfig())
-        _appearancePatch = State(
-            initialValue: item?.appearancePatch ?? TimelinePresentationAppearancePatchHelper.shared.empty
-        )
-        _tabs = State(initialValue: Array((item?.children ?? []).reduce(into: [UiTimelineTabItem]()) { result, tab in
-            if !result.contains(where: { $0.id == tab.id }) {
-                result.append(tab)
-            }
-        }))
-        _presenter = StateObject(
+        _presenter = State(
             wrappedValue: KotlinPresenter(
                 presenter: GroupConfigPresenter()
             )
         )
+        self.name = item?.title.text ?? ""
+        self.icon = item?.icon ?? IconType.Material(icon: .rss)
+        self.enabled = item?.enabled ?? true
+        self.mergePolicy = item?.mergePolicy ?? .timePerPage
+        self.filterConfig = item?.filterConfig ?? TimelineFilterConfig()
+        self.appearancePatch = item?.appearancePatch ?? TimelinePresentationAppearancePatchHelper.shared.empty
+        self.tabs = Array((item?.children ?? []).reduce(into: [UiTimelineTabItem]()) { result, tab in
+            if !result.contains(where: { $0.id == tab.id }) {
+                result.append(tab)
+            }
+        })
     }
     
     var body: some View {

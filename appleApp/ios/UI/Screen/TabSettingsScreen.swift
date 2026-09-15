@@ -3,7 +3,7 @@ import FlareAppleUI
 import KotlinSharedUI
 import FlareAppleCore
 struct TabSettingsScreen: View {
-    @StateObject private var presenter = KotlinPresenter(presenter: HomeTabSettingsPresenter())
+    @State private var presenter = KotlinPresenter(presenter: HomeTabSettingsPresenter())
     @Environment(\.dismiss) private var dismiss
     @State private var enableMixedTimeline: Bool = false
     @State private var tabItems: [UiTimelineTabItem] = []
@@ -260,8 +260,8 @@ struct EditTabSheet: View {
     let onConfirm: (UiTimelineTabItem) -> Void
     let tabItem: UiTimelineTabItem
     let titleAndIconOnly: Bool
-    @StateObject private var presenter: KotlinPresenter<EditTabPresenterState>
-    @State private var text: String = ""
+    @State private var presenter: KotlinPresenter<EditTabPresenterState>
+    @State private var text: String
     @State private var enabled: Bool
     @State private var filterConfig: TimelineFilterConfig
     @State private var appearancePatch: AppearancePatch
@@ -272,12 +272,10 @@ struct EditTabSheet: View {
         self.tabItem = tabItem
         self.titleAndIconOnly = titleAndIconOnly
         self._presenter = .init(wrappedValue: .init(presenter: EditTabPresenter(tabItem: tabItem)))
-        self._text = State(initialValue: tabItem.title.text)
-        self._enabled = State(initialValue: tabItem.enabled)
-        self._filterConfig = State(initialValue: tabItem.filterConfig)
-        self._appearancePatch = State(
-            initialValue: tabItem.appearancePatch ?? TimelinePresentationAppearancePatchHelper.shared.empty
-        )
+        self.text = tabItem.title.text
+        self.enabled = tabItem.enabled
+        self.filterConfig = tabItem.filterConfig
+        self.appearancePatch = tabItem.appearancePatch ?? TimelinePresentationAppearancePatchHelper.shared.empty
     }
     
     var body: some View {
@@ -365,7 +363,7 @@ struct EditTabSheet: View {
 
 struct AddTabSheet: View {
     @Environment(\.dismiss) private var dismiss
-    @StateObject private var presenter: KotlinPresenter<AllTabsPresenterState>
+    @State private var presenter: KotlinPresenter<AllTabsPresenterState>
     let selectedTabs: [UiTimelineTabItem]
     let onDelete: (UiTimelineTabItem) -> Void
     let onAdd: (UiTimelineTabItem) -> Void

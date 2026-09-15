@@ -7,7 +7,7 @@ import SwiftUI
 struct StatusDetailScreen: View {
     @Environment(\.timelineAppearance.timelineDisplayMode) private var timelineDisplayMode
 
-    @StateObject private var presenter: KotlinPresenter<StatusContextPresenterState>
+    @State private var presenter: KotlinPresenter<StatusContextPresenterState>
     private let statusKey: MicroBlogKey
 
     init(accountType: AccountType, statusKey: MicroBlogKey) {

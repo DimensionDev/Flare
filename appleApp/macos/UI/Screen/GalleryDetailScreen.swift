@@ -5,7 +5,7 @@ import FlareAppleCore
 
 struct GalleryDetailScreen: View {
     @Environment(\.openURL) private var openURL
-    @StateObject private var presenter: KotlinPresenter<GalleryDetailPresenterState>
+    @State private var presenter: KotlinPresenter<GalleryDetailPresenterState>
 
     private let accountType: AccountType
     private let statusKey: MicroBlogKey
@@ -464,7 +464,7 @@ private struct GalleryDetailLoadingView: View {
 struct GalleryCommentsScreen: View {
     let accountType: AccountType
     let statusKey: MicroBlogKey
-    @StateObject private var presenter: KotlinPresenter<GalleryDetailPresenterState>
+    @State private var presenter: KotlinPresenter<GalleryDetailPresenterState>
 
     init(accountType: AccountType, statusKey: MicroBlogKey) {
         self.accountType = accountType

@@ -15,11 +15,11 @@ public struct EditRssSheet: View {
         "https://rsshub.pseudoyu.com"
     ]
 
-    @StateObject private var presenter: KotlinPresenter<EditRssSourcePresenterState>
+    @State private var presenter: KotlinPresenter<EditRssSourcePresenterState>
     @State private var url: String
     @State private var title: String = ""
     @State private var rssHubHost: String = ""
-    @State private var displayMode: RssDisplayMode = .fullContent
+    @State private var displayMode: RssDisplayMode
     @State private var selectedRssSources: [UiRssSource] = []
     @State private var selectedMastodonTypes: [SubscriptionType] = []
     @State private var showFileImporter = false
@@ -32,10 +32,10 @@ public struct EditRssSheet: View {
     ) {
         self.id = id
         self.onImportOPML = onImportOPML
-        _url = State(initialValue: initialUrl ?? "")
-        _displayMode = State(initialValue: initialDisplayMode ?? .fullContent)
         let kotlinId = id.map { KotlinInt(value: Int32($0)) }
-        _presenter = StateObject(wrappedValue: KotlinPresenter(presenter: EditRssSourcePresenter(id: kotlinId)))
+        _presenter = State(wrappedValue: KotlinPresenter(presenter: EditRssSourcePresenter(id: kotlinId)))
+        self.url = initialUrl ?? ""
+        self.displayMode = initialDisplayMode ?? .fullContent
     }
 
     public var body: some View {

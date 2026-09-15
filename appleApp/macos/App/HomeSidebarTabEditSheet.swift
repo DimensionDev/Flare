@@ -11,8 +11,8 @@ struct HomeSidebarTabEditSheet: View {
     let onCancel: () -> Void
     let onSave: (UiTimelineTabItem) -> Void
 
-    @StateObject private var presenter: KotlinPresenter<EditTabPresenterState>
-    @StateObject private var groupConfigPresenter: KotlinPresenter<GroupConfigPresenterState>
+    @State private var presenter: KotlinPresenter<EditTabPresenterState>
+    @State private var groupConfigPresenter: KotlinPresenter<GroupConfigPresenterState>
     @State private var text: String
     @State private var enabled: Bool
     @State private var mergePolicy: TimelineMergePolicy
@@ -31,16 +31,14 @@ struct HomeSidebarTabEditSheet: View {
         self.tab = tab
         self.onCancel = onCancel
         self.onSave = onSave
-        self._presenter = StateObject(wrappedValue: KotlinPresenter(presenter: EditTabPresenter(tabItem: tab)))
-        self._groupConfigPresenter = StateObject(wrappedValue: KotlinPresenter(presenter: GroupConfigPresenter()))
-        self._text = State(initialValue: tab.title.text)
-        self._enabled = State(initialValue: tab.enabled)
-        self._mergePolicy = State(initialValue: editableGroup?.mergePolicy ?? .timePerPage)
-        self._groupChildren = State(initialValue: editableGroup.map { Array($0.children) } ?? [])
-        self._filterConfig = State(initialValue: tab.filterConfig)
-        self._appearancePatch = State(
-            initialValue: tab.appearancePatch ?? TimelinePresentationAppearancePatchHelper.shared.empty
-        )
+        self._presenter = State(wrappedValue: KotlinPresenter(presenter: EditTabPresenter(tabItem: tab)))
+        self._groupConfigPresenter = State(wrappedValue: KotlinPresenter(presenter: GroupConfigPresenter()))
+        self.text = tab.title.text
+        self.enabled = tab.enabled
+        self.mergePolicy = editableGroup?.mergePolicy ?? .timePerPage
+        self.groupChildren = editableGroup.map { Array($0.children) } ?? []
+        self.filterConfig = tab.filterConfig
+        self.appearancePatch = tab.appearancePatch ?? TimelinePresentationAppearancePatchHelper.shared.empty
     }
 
     var body: some View {

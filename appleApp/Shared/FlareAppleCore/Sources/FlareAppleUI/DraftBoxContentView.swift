@@ -14,7 +14,7 @@ public enum DraftBoxContentRowMode {
 }
 
 public struct DraftBoxContentView: View {
-    @StateObject private var presenter = KotlinPresenter(presenter: DraftBoxPresenter())
+    @State private var presenter = KotlinPresenter(presenter: DraftBoxPresenter())
 
     private let rowMode: DraftBoxContentRowMode
     private let showsEditAction: Bool

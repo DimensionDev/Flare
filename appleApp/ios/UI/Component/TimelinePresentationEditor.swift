@@ -175,8 +175,8 @@ public struct TimelineFilterSheet: View {
         self.onCancel = onCancel
         self.onConfirm = onConfirm
         let current = initialFilterConfig
-        self._selectedKinds = State(initialValue: Set(kindOptions.filter { !current.excludedKinds.contains($0) }))
-        self._selectedContents = State(initialValue: Set(contentOptions.filter { !current.excludedContents.contains($0) }))
+        self.selectedKinds = Set(kindOptions.filter { !current.excludedKinds.contains($0) })
+        self.selectedContents = Set(contentOptions.filter { !current.excludedContents.contains($0) })
     }
 
     public var body: some View {

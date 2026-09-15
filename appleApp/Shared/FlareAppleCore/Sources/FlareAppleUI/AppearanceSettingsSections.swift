@@ -3,7 +3,7 @@ import KotlinSharedUI
 import SwiftUI
 
 public struct AppearanceThemeSettingsSection: View {
-    @StateObject private var presenter = KotlinPresenter(presenter: SettingsPresenter())
+    @State private var presenter = KotlinPresenter(presenter: SettingsPresenter())
     @Environment(\.globalAppearance) private var globalAppearance
     @Environment(\.timelineAppearance) private var timelineAppearance
 
@@ -55,9 +55,9 @@ public struct AppearanceThemeSettingsSection: View {
 }
 
 public struct AppearanceLayoutSettingsSection<PostActionLayoutLink: View>: View {
-    @StateObject private var presenter = KotlinPresenter(presenter: SettingsPresenter())
+    @State private var presenter = KotlinPresenter(presenter: SettingsPresenter())
     #if os(iOS)
-    @StateObject private var statusPresenter = KotlinPresenter(presenter: AppearancePresenter())
+    @State private var statusPresenter = KotlinPresenter(presenter: AppearancePresenter())
     @Environment(\.globalAppearance) private var globalAppearance
     #endif
     @Environment(\.timelineAppearance) private var appearance
@@ -159,9 +159,9 @@ public extension AppearanceLayoutSettingsSection where PostActionLayoutLink == E
 }
 
 public struct AppearanceDisplaySettingsSection: View {
-    @StateObject private var presenter = KotlinPresenter(presenter: SettingsPresenter())
+    @State private var presenter = KotlinPresenter(presenter: SettingsPresenter())
     #if os(iOS)
-    @StateObject private var statusPresenter = KotlinPresenter(presenter: AppearancePresenter())
+    @State private var statusPresenter = KotlinPresenter(presenter: AppearancePresenter())
     #endif
     @Environment(\.timelineAppearance) private var timelineAppearance
 
@@ -221,7 +221,7 @@ public struct AppearanceDisplaySettingsSection: View {
 }
 
 public struct BehaviorSettingsSection<LinkOpenDefaultsLink: View>: View {
-    @StateObject private var presenter = KotlinPresenter(presenter: SettingsPresenter())
+    @State private var presenter = KotlinPresenter(presenter: SettingsPresenter())
     @Environment(\.globalAppearance) private var globalAppearance
     @Environment(\.appSettings) private var appSettings
     private let linkOpenDefaultsLink: () -> LinkOpenDefaultsLink
@@ -285,7 +285,7 @@ public extension BehaviorSettingsSection where LinkOpenDefaultsLink == EmptyView
 }
 
 public struct LinkOpenDefaultsSettingsSection: View {
-    @StateObject private var presenter = KotlinPresenter(presenter: LinkOpenDefaultsPresenter())
+    @State private var presenter = KotlinPresenter(presenter: LinkOpenDefaultsPresenter())
 
     public init() {}
 
@@ -398,9 +398,9 @@ private struct LinkOpenDefaultAccountRow: View {
 }
 
 public struct AppearanceMediaSettingsSection: View {
-    @StateObject private var presenter = KotlinPresenter(presenter: SettingsPresenter())
+    @State private var presenter = KotlinPresenter(presenter: SettingsPresenter())
     #if os(iOS)
-    @StateObject private var statusPresenter = KotlinPresenter(presenter: AppearancePresenter())
+    @State private var statusPresenter = KotlinPresenter(presenter: AppearancePresenter())
     #endif
     @Environment(\.timelineAppearance) private var appearance
 

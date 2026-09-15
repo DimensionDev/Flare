@@ -1,4 +1,4 @@
-import Combine
+import Observation
 import Foundation
 import KotlinSharedUI
 import UserNotifications
@@ -9,13 +9,14 @@ struct LoginExpiredToast: Identifiable {
     let platformId: String
 }
 
-final class SwiftInAppNotification: NSObject, ObservableObject, InAppNotification, UNUserNotificationCenterDelegate {
+@Observable
+final class SwiftInAppNotification: NSObject, InAppNotification, UNUserNotificationCenterDelegate {
     static let shared = SwiftInAppNotification()
 
-    @Published private(set) var loginExpiredToast: LoginExpiredToast?
+    private(set) var loginExpiredToast: LoginExpiredToast?
 
     private let notificationCenter = UNUserNotificationCenter.current()
-    private var progressNotifications = Set<String>()
+    @ObservationIgnored private var progressNotifications = Set<String>()
 
     private override init() {
         super.init()

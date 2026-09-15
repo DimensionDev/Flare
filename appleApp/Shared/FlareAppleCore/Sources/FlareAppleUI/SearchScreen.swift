@@ -6,9 +6,9 @@ public struct SearchScreen: View {
     @Environment(\.openURL) private var openURL
     @Environment(\.timelineAppearance.aiConfig.agent) private var agentEnabled
     private let onAskAi: (String?) -> Void
-    @StateObject private var searchPresenter: KotlinPresenter<SearchState>
-    @StateObject private var searchHistoryPresenter: KotlinPresenter<SearchHistoryState>
-    @State private var searchText = ""
+    @State private var searchPresenter: KotlinPresenter<SearchState>
+    @State private var searchHistoryPresenter: KotlinPresenter<SearchHistoryState>
+    @State private var searchText: String
     @State private var committedSearchText: String
     @State private var isSearchPresented = false
     @State private var didRecordInitialQuery = false
@@ -24,8 +24,8 @@ public struct SearchScreen: View {
         self.onAskAi = onAskAi
         self._searchPresenter = .init(wrappedValue: .init(presenter: SearchPresenter(accountType: accountType, initialQuery: initialQuery)))
         self._searchHistoryPresenter = .init(wrappedValue: .init(presenter: SearchHistoryPresenter()))
-        self._searchText = .init(initialValue: initialQuery)
-        self._committedSearchText = .init(initialValue: initialQuery)
+        self.searchText = initialQuery
+        self.committedSearchText = initialQuery
     }
 
     public var body: some View {

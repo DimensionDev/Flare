@@ -144,9 +144,7 @@ struct MacComposeWindowRoot: View {
 
     init(requestID: UUID?) {
         self.requestID = requestID
-        _request = .init(
-            initialValue: MacComposeWindowCoordinator.shared.request(for: requestID)
-        )
+        self.request = MacComposeWindowCoordinator.shared.request(for: requestID)
     }
 
     var body: some View {

@@ -5,8 +5,8 @@ import SwiftUI
 public struct DeepLinkAccountPickerView<Route>: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.openURL) private var openURL
-    @StateObject private var defaultsActions: KotlinPresenter<LinkOpenDefaultsActionsPresenterState>
-    @State private var saveAsDefault: Bool
+    @State private var defaultsActions: KotlinPresenter<LinkOpenDefaultsActionsPresenterState>
+    @State private var saveAsDefault = false
 
     private let originalUrl: String
     private let data: [MicroBlogKey: Route]
@@ -20,8 +20,7 @@ public struct DeepLinkAccountPickerView<Route>: View {
         self.originalUrl = originalUrl
         self.data = data
         self.onNavigate = onNavigate
-        _defaultsActions = StateObject(wrappedValue: KotlinPresenter(presenter: LinkOpenDefaultsActionsPresenter(originalUrl: originalUrl)))
-        _saveAsDefault = State(initialValue: false)
+        _defaultsActions = State(wrappedValue: KotlinPresenter(presenter: LinkOpenDefaultsActionsPresenter(originalUrl: originalUrl)))
     }
 
     public var body: some View {
@@ -85,7 +84,7 @@ public struct DeepLinkAccountPickerView<Route>: View {
 }
 
 private struct DeepLinkAccountRow: View {
-    @StateObject private var presenter: KotlinPresenter<UserState>
+    @State private var presenter: KotlinPresenter<UserState>
 
     init(userKey: MicroBlogKey) {
         _presenter = .init(

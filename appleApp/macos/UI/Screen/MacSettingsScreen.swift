@@ -305,7 +305,7 @@ private struct MacSettingLabelContent: View {
 }
 
 private struct MacAccountManagementSettingsPane: View {
-    @StateObject private var presenter = KotlinPresenter(presenter: AccountManagementPresenter())
+    @State private var presenter = KotlinPresenter(presenter: AccountManagementPresenter())
     @State private var accounts: [AccountsStateAccountItem] = []
     @State private var isLoginSheetPresented = false
     @State private var pendingLogoutAccountKey: MicroBlogKey?
@@ -564,7 +564,7 @@ private struct MacAppearanceSettingsPane: View {
 }
 
 private struct MacBehaviorSettingsPane: View {
-    @StateObject private var linkOpenDefaultsPresenter = KotlinPresenter(presenter: LinkOpenDefaultsPresenter())
+    @State private var linkOpenDefaultsPresenter = KotlinPresenter(presenter: LinkOpenDefaultsPresenter())
 
     var body: some View {
         MacSettingsForm(
@@ -578,7 +578,7 @@ private struct MacBehaviorSettingsPane: View {
 }
 
 private struct MacLinkOpenDefaultsInlineSection: View {
-    @ObservedObject var presenter: KotlinPresenter<LinkOpenDefaultsPresenterState>
+    let presenter: KotlinPresenter<LinkOpenDefaultsPresenterState>
 
     var body: some View {
         Section {
@@ -742,8 +742,8 @@ private struct MacLocalFilterSettingsPane: View {
 }
 
 private struct MacStorageSettingsPane: View {
-    @StateObject private var presenter: KotlinPresenter<StorageState>
-    @StateObject private var mediaSaveLocationStore = MacMediaSaveLocationStore.shared
+    @State private var presenter: KotlinPresenter<StorageState>
+    @State private var mediaSaveLocationStore = MacMediaSaveLocationStore.shared
     @State private var showDatabaseClearAlert = false
     @State private var showImageClearAlert = false
     @State private var showMediaSaveLocationOptions = false
@@ -758,7 +758,7 @@ private struct MacStorageSettingsPane: View {
     @State private var showingAppLog = false
 
     init() {
-        _presenter = StateObject(wrappedValue: KotlinPresenter(presenter: StoragePresenter()))
+        _presenter = State(wrappedValue: KotlinPresenter(presenter: StoragePresenter()))
     }
 
     var body: some View {
@@ -1089,7 +1089,7 @@ private struct MacTranslationConfigSettingsPane: View {
 }
 
 private struct MacAppLogSettingsPane: View {
-    @StateObject private var presenter = KotlinPresenter(presenter: DevModePresenter())
+    @State private var presenter = KotlinPresenter(presenter: DevModePresenter())
     @State private var selectedMessage: MacLogMessage?
     @State private var exportedLogContent: String?
 

@@ -5,8 +5,8 @@ import Foundation
 import SwiftUI
 
 struct AgentChatHistoryScreen: View {
-    @ObservedObject private var windowCoordinator: MacAgentWindowCoordinator
-    @StateObject private var presenter = KotlinPresenter(presenter: AgentChatHistoryPresenter())
+    private let windowCoordinator: MacAgentWindowCoordinator
+    @State private var presenter = KotlinPresenter(presenter: AgentChatHistoryPresenter())
     @State private var selectedConversationId: String?
     @State private var activeDetailRoute: Route?
     @State private var activeDetailConversationId: String?
@@ -155,7 +155,7 @@ struct AgentChatHistoryScreen: View {
 
 struct AgentChatScreen: View {
     @Environment(\.openWindow) private var openWindow
-    @StateObject private var presenter: KotlinPresenter<GenericChatPresenterState>
+    @State private var presenter: KotlinPresenter<GenericChatPresenterState>
     let onNavigate: (Route) -> Void
 
     var body: some View {
@@ -216,7 +216,7 @@ extension AgentChatScreen {
 
 struct LocalHistoryAgentScreen: View {
     @Environment(\.openWindow) private var openWindow
-    @StateObject private var presenter: KotlinPresenter<LocalHistoryAgentPresenterState>
+    @State private var presenter: KotlinPresenter<LocalHistoryAgentPresenterState>
     let onNavigate: (Route) -> Void
 
     var body: some View {
@@ -270,7 +270,7 @@ extension LocalHistoryAgentScreen {
 
 struct StatusInsightScreen: View {
     @Environment(\.openWindow) private var openWindow
-    @StateObject private var presenter: KotlinPresenter<StatusInsightPresenterState>
+    @State private var presenter: KotlinPresenter<StatusInsightPresenterState>
     let onNavigate: (Route) -> Void
 
     var body: some View {
@@ -321,7 +321,7 @@ extension StatusInsightScreen {
 
 struct ProfileInsightScreen: View {
     @Environment(\.openWindow) private var openWindow
-    @StateObject private var presenter: KotlinPresenter<ProfileInsightPresenterState>
+    @State private var presenter: KotlinPresenter<ProfileInsightPresenterState>
     let accountType: AccountType
     let onNavigate: (Route) -> Void
 

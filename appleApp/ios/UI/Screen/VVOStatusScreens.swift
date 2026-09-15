@@ -7,7 +7,7 @@ import FlareAppleUI
 struct VVOStatusScreen: View {
     @Environment(\.timelineAppearance.timelineDisplayMode) private var timelineDisplayMode
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
-    @StateObject private var presenter: KotlinPresenter<VVOStatusDetailState>
+    @State private var presenter: KotlinPresenter<VVOStatusDetailState>
     @State private var selectedType: VVOStatusDetailType = .comment
     @State private var tabsView = VVOStatusTabsView()
     private let statusKey: MicroBlogKey
@@ -71,7 +71,7 @@ struct VVOStatusScreen: View {
 struct VVOCommentScreen: View {
     @Environment(\.timelineAppearance.timelineDisplayMode) private var timelineDisplayMode
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
-    @StateObject private var presenter: KotlinPresenter<VVOCommentState>
+    @State private var presenter: KotlinPresenter<VVOCommentState>
     private let statusKey: MicroBlogKey
 
     init(accountType: AccountType, statusKey: MicroBlogKey) {

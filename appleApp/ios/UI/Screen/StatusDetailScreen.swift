@@ -7,7 +7,7 @@ struct StatusDetailScreen: View {
     @Environment(\.timelineAppearance.timelineDisplayMode) private var timelineDisplayMode
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @Environment(\.openURL) private var openURL
-    @StateObject private var presenter: KotlinPresenter<StatusContextPresenterState>
+    @State private var presenter: KotlinPresenter<StatusContextPresenterState>
     private let statusKey: MicroBlogKey
 
     init(accountType: AccountType, statusKey: MicroBlogKey) {

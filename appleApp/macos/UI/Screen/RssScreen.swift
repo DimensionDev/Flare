@@ -5,7 +5,7 @@ import SwiftUI
 @preconcurrency import WebKit
 
 struct RssScreen: View {
-    @StateObject private var presenter = KotlinPresenter(presenter: RssListWithTabsPresenter())
+    @State private var presenter = KotlinPresenter(presenter: RssListWithTabsPresenter())
     @State private var selectedSourceId: Int?
     @State private var selectedTimelineItemID: String?
     @State private var selectedTimelineItem: RssTimelineItemSelection?
@@ -183,7 +183,7 @@ private struct RssTimelineColumn: View {
     @Binding var selectedItem: RssTimelineItemSelection?
 
     @Environment(\.timelineAppearance) private var timelineAppearance
-    @StateObject private var presenter: KotlinPresenter<TimelineItemPresenterState>
+    @State private var presenter: KotlinPresenter<TimelineItemPresenterState>
 
     init(
         source: UiRssSource,
@@ -195,7 +195,7 @@ private struct RssTimelineColumn: View {
         self.tabItem = tabItem
         _selectedItemID = selectedItemID
         _selectedItem = selectedItem
-        _presenter = StateObject(wrappedValue: KotlinPresenter(presenter: TimelineItemPresenter(timelineTabItem: tabItem)))
+        _presenter = State(wrappedValue: KotlinPresenter(presenter: TimelineItemPresenter(timelineTabItem: tabItem)))
     }
 
     var body: some View {
@@ -462,7 +462,7 @@ struct RssDetailScreen: View {
     let url: String
     private let fallbackTitle: String?
 
-    @StateObject private var presenter: KotlinPresenter<RssDetailPresenterState>
+    @State private var presenter: KotlinPresenter<RssDetailPresenterState>
     @Environment(\.translateConfig) private var translateConfig
     @Environment(\.openURL) private var openURL
     @State private var showTLDR = false
@@ -471,7 +471,7 @@ struct RssDetailScreen: View {
     init(url: String, descriptionHtml: String? = nil, descriptionTitle: String? = nil) {
         self.url = url
         self.fallbackTitle = descriptionTitle
-        _presenter = StateObject(
+        _presenter = State(
             wrappedValue: KotlinPresenter(
                 presenter: RssDetailPresenter(
                     url: url,
@@ -556,7 +556,7 @@ struct RssDetailScreen: View {
 }
 
 private struct RssTranslateProvider<Content: View>: View {
-    @StateObject private var translatePresenter: KotlinPresenter<RssDetailTranslatePresenterState>
+    @State private var translatePresenter: KotlinPresenter<RssDetailTranslatePresenterState>
     let document: DocumentData
     let content: (_ translatedTitle: String?, _ translatedHtml: String?, _ isTranslating: Bool) -> Content
 
@@ -566,7 +566,7 @@ private struct RssTranslateProvider<Content: View>: View {
     ) {
         self.document = document
         self.content = content
-        _translatePresenter = StateObject(
+        _translatePresenter = State(
             wrappedValue: KotlinPresenter(
                 presenter: RssDetailTranslatePresenter(
                     htmlContent: document.content,
@@ -976,11 +976,11 @@ private struct ImportOPMLScreen: View {
     @Environment(\.dismiss) private var dismiss
 
     let url: URL
-    @StateObject private var presenter: KotlinPresenter<ImportOPMLPresenterState>
+    @State private var presenter: KotlinPresenter<ImportOPMLPresenterState>
 
     init(url: URL) {
         self.url = url
-        _presenter = StateObject(wrappedValue: KotlinPresenter(presenter: ImportOPMLPresenter(opmlContent: Self.readContent(from: url))))
+        _presenter = State(wrappedValue: KotlinPresenter(presenter: ImportOPMLPresenter(opmlContent: Self.readContent(from: url))))
     }
 
     var body: some View {

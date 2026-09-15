@@ -4,7 +4,7 @@ import KotlinSharedUI
 import SwiftUI
 
 struct MacPostActionLayoutScreen: View {
-    @StateObject private var presenter = KotlinPresenter(presenter: SettingsPresenter())
+    @State private var presenter = KotlinPresenter(presenter: SettingsPresenter())
     @Environment(\.dismiss) private var dismiss
     @Environment(\.timelineAppearance) private var timelineAppearance
     @State private var config = PostActionLayoutConfig.companion.Default

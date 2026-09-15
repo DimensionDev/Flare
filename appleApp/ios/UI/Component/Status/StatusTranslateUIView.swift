@@ -199,12 +199,13 @@ final class StatusTranslateUIView: UIView, TimelineHeightProviding {
 
     private func ensureTranslationPresenters() {
         guard let content else { return }
+        let targetLanguage = currentTargetLanguage()
         if translationPresenter == nil {
             let presenter = KotlinPresenter(
-                presenter: TranslatePresenter(source: content, targetLanguage: currentTargetLanguage())
+                presenter: TranslatePresenter(source: content, targetLanguage: targetLanguage)
             )
             translationPresenter = presenter
-            presenter.$state
+            presenter.statePublisher
                 .receive(on: DispatchQueue.main)
                 .sink { [weak self] state in
                     self?.contentTranslation.render(state: state)
@@ -216,10 +217,10 @@ final class StatusTranslateUIView: UIView, TimelineHeightProviding {
 
         if let contentWarning, contentWarningPresenter == nil {
             let presenter = KotlinPresenter(
-                presenter: TranslatePresenter(source: contentWarning, targetLanguage: currentTargetLanguage())
+                presenter: TranslatePresenter(source: contentWarning, targetLanguage: targetLanguage)
             )
             contentWarningPresenter = presenter
-            presenter.$state
+            presenter.statePublisher
                 .receive(on: DispatchQueue.main)
                 .sink { [weak self] state in
                     self?.contentWarningTranslation.render(state: state)
@@ -238,11 +239,12 @@ final class StatusTranslateUIView: UIView, TimelineHeightProviding {
         } else {
             source = "Content:\n\(content.toTranslatableText())"
         }
+        let targetLanguage = currentTargetLanguage()
         let presenter = KotlinPresenter(
-            presenter: AiTLDRPresenter(source: source, targetLanguage: currentTargetLanguage())
+            presenter: AiTLDRPresenter(source: source, targetLanguage: targetLanguage)
         )
         summaryPresenter = presenter
-        presenter.$state
+        presenter.statePublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] state in
                 self?.summaryResult.render(state: state)

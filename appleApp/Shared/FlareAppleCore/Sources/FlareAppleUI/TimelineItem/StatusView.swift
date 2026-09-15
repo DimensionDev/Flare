@@ -12,24 +12,9 @@ public enum TimelineMediaMenuAction {
 }
 public typealias TimelineMediaActionHandler = (UiTimelineV2.Post, any UiMedia, TimelineMediaMenuAction) -> Void
 
-private struct TimelineMediaOpenActionKey: EnvironmentKey {
-    static let defaultValue: TimelineMediaOpenAction? = nil
-}
-
-private struct TimelineMediaActionHandlerKey: EnvironmentKey {
-    static let defaultValue: TimelineMediaActionHandler? = nil
-}
-
 public extension EnvironmentValues {
-    var timelineMediaOpenAction: TimelineMediaOpenAction? {
-        get { self[TimelineMediaOpenActionKey.self] }
-        set { self[TimelineMediaOpenActionKey.self] = newValue }
-    }
-
-    var timelineMediaActionHandler: TimelineMediaActionHandler? {
-        get { self[TimelineMediaActionHandlerKey.self] }
-        set { self[TimelineMediaActionHandlerKey.self] = newValue }
-    }
+    @Entry var timelineMediaOpenAction: TimelineMediaOpenAction? = nil
+    @Entry var timelineMediaActionHandler: TimelineMediaActionHandler? = nil
 }
 
 public struct StatusView: View {
@@ -602,39 +587,27 @@ private struct CollapsibleRichText: View {
     var body: some View {
         richText
             .fixedSize(horizontal: false, vertical: true)
-            .background {
-                GeometryReader { proxy in
-                    Color.clear.preference(
-                        key: RichTextFullHeightPreferenceKey.self,
-                        value: proxy.size.height
-                    )
-                }
+            .onGeometryChange(for: CGFloat.self) { proxy in
+                proxy.size.height
+            } action: { value in
+                fullHeight = value
+                publishOverflow(fullHeight: value, lineHeight: lineHeight)
             }
             .overlay(alignment: .topLeading) {
                 Text(verbatim: "A")
                     .fixedSize()
                     .hidden()
-                    .background {
-                        GeometryReader { proxy in
-                            Color.clear.preference(
-                                key: RichTextLineHeightPreferenceKey.self,
-                                value: proxy.size.height
-                            )
-                        }
+                    .onGeometryChange(for: CGFloat.self) { proxy in
+                        proxy.size.height
+                    } action: { value in
+                        lineHeight = value
+                        publishOverflow(fullHeight: fullHeight, lineHeight: value)
                     }
                     .allowsHitTesting(false)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .frame(maxHeight: collapsedHeight, alignment: .top)
             .clipped()
-            .onPreferenceChange(RichTextFullHeightPreferenceKey.self) { value in
-                fullHeight = value
-                publishOverflow(fullHeight: value, lineHeight: lineHeight)
-            }
-            .onPreferenceChange(RichTextLineHeightPreferenceKey.self) { value in
-                lineHeight = value
-                publishOverflow(fullHeight: fullHeight, lineHeight: value)
-            }
             .onChange(of: lineLimit) { _, _ in
                 publishOverflow(fullHeight: fullHeight, lineHeight: lineHeight)
             }
@@ -642,8 +615,7 @@ private struct CollapsibleRichText: View {
                 publishOverflow(fullHeight: fullHeight, lineHeight: lineHeight)
             }
             .onChange(of: text.raw) { _, _ in
-                fullHeight = 0
-                onOverflowChanged(false)
+                publishOverflow(fullHeight: fullHeight, lineHeight: lineHeight)
             }
     }
 
@@ -664,22 +636,6 @@ private struct CollapsibleRichText: View {
         }
         let limitHeight = ceil(max(lineHeight, fallbackLineHeight) * CGFloat(max(lineLimit, 1)))
         onOverflowChanged(fullHeight > limitHeight + 1)
-    }
-}
-
-private struct RichTextFullHeightPreferenceKey: PreferenceKey {
-    static let defaultValue: CGFloat = 0
-
-    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
-        value = max(value, nextValue())
-    }
-}
-
-private struct RichTextLineHeightPreferenceKey: PreferenceKey {
-    static let defaultValue: CGFloat = 0
-
-    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
-        value = max(value, nextValue())
     }
 }
 

@@ -4,8 +4,8 @@ import KotlinSharedUI
 import FlareAppleCore
 
 struct PostActionLayoutScreen: View {
-    @StateObject private var statusPresenter = KotlinPresenter(presenter: AppearancePresenter())
-    @StateObject private var presenter = KotlinPresenter(presenter: SettingsPresenter())
+    @State private var statusPresenter = KotlinPresenter(presenter: AppearancePresenter())
+    @State private var presenter = KotlinPresenter(presenter: SettingsPresenter())
     @Environment(\.timelineAppearance) private var timelineAppearance
     @State private var config = PostActionLayoutConfig.companion.Default
 

@@ -1,23 +1,24 @@
 import SwiftUI
 import WebKit
-import Combine
+import Observation
 import FlareAppleUI
 
 @available(iOS 26.0, *)
 struct WebLoginScreen: View {
     @Environment(\.dismiss) var dismiss
-    @StateObject private var viewModel: WebLoginViewModel
+    @State private var viewModel: WebLoginViewModel?
+    private let onCookie: (String) -> Void
     let url: String
     init(
         onCookie: @escaping (String) -> Void,
         url: String
     ) {
-        self._viewModel = .init(wrappedValue: .init(onCookie: onCookie, url: url))
         self.url = url
+        self.onCookie = onCookie
     }
     var body: some View {
         NavigationStack {
-            if viewModel.canShowWebView {
+            if let viewModel, viewModel.canShowWebView {
                 WebView(viewModel.page)
                     .onAppear {
                         if let requestURL = URL(string: url) {
@@ -38,6 +39,11 @@ struct WebLoginScreen: View {
                         }
                     }
             }
+        }
+        .task {
+            // Initialize after state is installed so view rebuilds don't clear cookies again.
+            guard viewModel == nil else { return }
+            viewModel = WebLoginViewModel(onCookie: onCookie, url: url)
         }
     }
 }
@@ -69,10 +75,9 @@ struct NavigationDecider: WebPage.NavigationDeciding {
 }
 
 @available(iOS 26.0, *)
-class WebLoginViewModel: ObservableObject {
-    @Published
+@Observable
+final class WebLoginViewModel {
     var config: WebPage.Configuration
-    @Published
     var page: WebPage
     let decider: NavigationDecider
     let onCookie: (String) -> Void
@@ -89,7 +94,6 @@ class WebLoginViewModel: ObservableObject {
         self.page.customUserAgent = "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Mobile/15E148 Safari/604.1"
         clearCookie()
     }
-    @Published
     var canShowWebView = false
     func getCookies() {
         config.websiteDataStore.httpCookieStore.getAllCookies { (cookies) in

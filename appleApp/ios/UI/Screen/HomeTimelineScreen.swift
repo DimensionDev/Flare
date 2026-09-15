@@ -18,12 +18,12 @@ struct HomeTimelineScreen: View {
     @Environment(\.openURL) private var openURL
     @State private var selectedTabId: String?
     @Namespace private var selectedTabIndicatorNamespace
-    @StateObject private var presenter: KotlinPresenter<HomeTimelineWithTabsPresenterState>
-    @StateObject private var activeAccountPresenter = KotlinPresenter(presenter: ActiveAccountPresenter())
-    @StateObject private var loggedInPresenter = KotlinPresenter(presenter: LoggedInPresenter())
-    @StateObject private var canComposePresenter = KotlinPresenter(presenter: CanComposePresenter())
-    @StateObject private var changeLogPresenter: KotlinPresenter<ChangeLogPresenterState>
-    @StateObject private var changeLogAccessoryHost: ChangeLogAccessoryHost
+    @State private var presenter: KotlinPresenter<HomeTimelineWithTabsPresenterState>
+    @State private var activeAccountPresenter = KotlinPresenter(presenter: ActiveAccountPresenter())
+    @State private var loggedInPresenter = KotlinPresenter(presenter: LoggedInPresenter())
+    @State private var canComposePresenter = KotlinPresenter(presenter: CanComposePresenter())
+    @State private var changeLogPresenter: KotlinPresenter<ChangeLogPresenterState>
+    @State private var changeLogAccessoryHost = ChangeLogAccessoryHost()
     private let currentVersion: String
 
     init(
@@ -47,11 +47,6 @@ struct HomeTimelineScreen: View {
         )
         self._changeLogPresenter = .init(
             wrappedValue: changeLogPresenter
-        )
-        self._changeLogAccessoryHost = .init(
-            wrappedValue: ChangeLogAccessoryHost(version: currentVersion) {
-                changeLogPresenter.state.dismissChangeLog()
-            }
         )
     }
 
@@ -246,7 +241,9 @@ struct HomeTimelineScreen: View {
         return [
             UITimelineCollectionViewAccessoryItem(
                 id: "change_log_\(currentVersion)",
-                view: changeLogAccessoryHost.view
+                view: changeLogAccessoryHost.view(version: currentVersion) { [changeLogPresenter] in
+                    changeLogPresenter.state.dismissChangeLog()
+                }
             ),
         ]
     }
@@ -333,10 +330,12 @@ private struct ChangeLogNotice: View {
     }
 }
 
-private final class ChangeLogAccessoryHost: ObservableObject {
-    let view = ChangeLogHostedAccessoryView()
+private final class ChangeLogAccessoryHost {
+    private var hostedView: ChangeLogHostedAccessoryView?
 
-    init(version: String, onDismiss: @escaping () -> Void) {
+    func view(version: String, onDismiss: @escaping () -> Void) -> ChangeLogHostedAccessoryView {
+        if let hostedView { return hostedView }
+        let view = ChangeLogHostedAccessoryView()
         view.update(
             AnyView(
                 ChangeLogNotice(
@@ -345,6 +344,8 @@ private final class ChangeLogAccessoryHost: ObservableObject {
                 )
             )
         )
+        hostedView = view
+        return view
     }
 }
 

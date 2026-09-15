@@ -20,7 +20,7 @@ private enum ServiceSelectionAnimation {
 
 struct ServiceSelectionScreen: View {
     let toHome: () -> Void
-    @StateObject private var presenter: KotlinPresenter<ServiceSelectState>
+    @State private var presenter: KotlinPresenter<ServiceSelectState>
     @State private var instanceInput = ""
     @State private var selectedMethods: [String: LoginMethodType] = [:]
 
@@ -282,7 +282,7 @@ struct ReloginScreen: View {
     let toHome: () -> Void
     @Environment(\.dismiss) private var dismiss
 
-    @StateObject private var presenter: KotlinPresenter<ReloginState>
+    @State private var presenter: KotlinPresenter<ReloginState>
     @State private var selectedMethod: LoginMethodType?
 
     init(target: ReloginTarget, toHome: @escaping () -> Void) {
@@ -376,7 +376,7 @@ struct ReloginScreen: View {
 private struct LoginFlowView: View {
     @Environment(\.webAuthenticationSession) private var webAuthenticationSession
 
-    @StateObject private var presenter: KotlinPresenter<LoginFlowPresenterState>
+    @State private var presenter: KotlinPresenter<LoginFlowPresenterState>
     @State private var qrContent: String?
     @State private var webCookieUrl: String?
 
@@ -552,7 +552,7 @@ private struct LoginFieldView: View {
         self.field = field
         self.onUpdate = onUpdate
         self.onSubmit = onSubmit
-        self._value = .init(initialValue: field.value)
+        self.value = field.value
     }
 
     var body: some View {

@@ -41,8 +41,7 @@ struct StatusMediaView: View {
         self.allowsCarousel = allowsCarousel
         self.carouselLeadingPadding = carouselLeadingPadding
         self.carouselTrailingPadding = carouselTrailingPadding
-        self._isBlur = State(initialValue: sensitive)
-        self._activeCarouselIndex = State(initialValue: nil)
+        self.isBlur = sensitive
         self._autoplayCarouselIndex = State(initialValue: data.indices.first)
     }
 

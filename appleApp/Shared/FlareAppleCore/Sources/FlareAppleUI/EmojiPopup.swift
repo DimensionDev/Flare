@@ -4,7 +4,7 @@ import SwiftUI
 import SwiftUIBackports
 
 public struct EmojiPopup: View {
-    @StateObject private var presenter: KotlinPresenter<EmojiHistoryPresenterState>
+    @State private var presenter: KotlinPresenter<EmojiHistoryPresenterState>
     @State private var filterText = ""
 
     private let data: EmojiData

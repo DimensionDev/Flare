@@ -31,7 +31,11 @@ public struct VideoControlView: View {
     @State private var baselineSeconds: Double = 0
     @State private var baselineDate = Date()
 
-    private let progressTimer = Timer.publish(every: 0.1, on: .main, in: .common).autoconnect()
+    private struct ProgressUpdates: Hashable {
+        let isActive: Bool
+        let duration: Double
+        let playbackRate: Float
+    }
 
     public init(
         isPlaying: Binding<Bool>,
@@ -128,8 +132,8 @@ public struct VideoControlView: View {
             baselineDate = Date()
             sliderValue = newValue
         }
-        .onChange(of: isPlaying) { _, playing in
-            if playing {
+        .onChange(of: isProgressActive) { _, active in
+            if active {
                 baselineSeconds = sliderValue
                 baselineDate = Date()
             }
@@ -143,14 +147,31 @@ public struct VideoControlView: View {
                 sliderValue = newValue
             }
         }
-        .onReceive(progressTimer) { _ in
-            guard !isSeeking, isPlaying, duration > 0 else { return }
-            let elapsed = Date().timeIntervalSince(baselineDate)
-            let projected = min(baselineSeconds + elapsed * Double(playbackRate), duration)
-            if projected != sliderValue {
-                sliderValue = projected
+        .task(id: ProgressUpdates(
+            isActive: isProgressActive,
+            duration: duration,
+            playbackRate: playbackRate
+        )) {
+            guard isProgressActive else { return }
+            while !Task.isCancelled {
+                do {
+                    try await Task.sleep(for: .milliseconds(100))
+                } catch {
+                    return
+                }
+                guard !Task.isCancelled else { return }
+                let elapsed = Date().timeIntervalSince(baselineDate)
+                let projected = min(baselineSeconds + elapsed * Double(playbackRate), duration)
+                if projected != sliderValue {
+                    sliderValue = projected
+                }
             }
         }
+    }
+
+    private var isProgressActive: Bool {
+        guard !isSeeking, isPlaying, case .playing(let duration) = videoState else { return false }
+        return duration > 0
     }
 
     private var duration: Double {
@@ -360,8 +381,8 @@ public struct StatusMediaVideoView: View {
                 configureMacPlayerIfNeeded()
                 updateMacPlayback()
             }
-            .onReceive(Timer.publish(every: 0.25, on: .main, in: .common).autoconnect()) { _ in
-                refreshMacState()
+            .task(id: macPlayerURL) {
+                await observeMacPlayback()
             }
             .onDisappear {
                 endFastPlayback()
@@ -385,8 +406,6 @@ public struct StatusMediaVideoView: View {
         resetMacPlayer()
         macPlayer.isMuted = false
         macPlayer.actionAtItemEnd = .advance
-        let item = AVPlayerItem(url: videoURL)
-        macPlayerLooper = AVPlayerLooper(player: macPlayer, templateItem: item)
         macPlayerURL = videoURL
         videoState = .loading
     }
@@ -411,20 +430,103 @@ public struct StatusMediaVideoView: View {
         }
     }
 
+    private enum MacPlaybackUpdate: Sendable {
+        case time
+        case state
+        case itemFailure(AVPlayerItem, any Error)
+        case loopFailure(any Error)
+    }
+
+    private func observeMacPlayback() async {
+        guard let url = macPlayerURL, !Task.isCancelled else { return }
+        let player = macPlayer
+        let (updates, continuation) = AsyncStream<MacPlaybackUpdate>.makeStream()
+        let timeObserver = player.addPeriodicTimeObserver(
+            forInterval: CMTime(seconds: 0.25, preferredTimescale: 600),
+            queue: .main
+        ) { _ in
+            continuation.yield(.time)
+        }
+        let itemChanges = player.publisher(for: \.currentItem)
+            .map { @Sendable item -> AnyPublisher<MacPlaybackUpdate, Never> in
+                guard let item else { return Just(.state).eraseToAnyPublisher() }
+                return item.publisher(for: \.status)
+                    .combineLatest(item.publisher(for: \.duration), item.publisher(for: \.error))
+                    .map { @Sendable status, _, error -> MacPlaybackUpdate in
+                        if status == .failed || error != nil {
+                            return .itemFailure(item, error ?? URLError(.cannotDecodeContentData))
+                        }
+                        return .state
+                    }
+                    .eraseToAnyPublisher()
+            }
+            .switchToLatest()
+        let subscription = player.publisher(for: \.timeControlStatus)
+            .combineLatest(
+                player.publisher(for: \.rate),
+                player.publisher(for: \.status),
+                player.publisher(for: \.error)
+            )
+            .map { @Sendable _ in MacPlaybackUpdate.state }
+            .merge(with: itemChanges)
+            .sink { @Sendable update in
+                continuation.yield(update)
+            }
+        defer {
+            subscription.cancel()
+            player.removeTimeObserver(timeObserver)
+            continuation.finish()
+        }
+
+        // A local item can fail immediately, so observe before adding it to the queue.
+        let looper = AVPlayerLooper(player: player, templateItem: AVPlayerItem(url: url))
+        macPlayerLooper = looper
+        let looperSubscription = looper.publisher(for: \.status)
+            .sink { @Sendable status in
+                if status == .failed {
+                    continuation.yield(.loopFailure(looper.error ?? URLError(.cannotDecodeContentData)))
+                }
+            }
+        defer { looperSubscription.cancel() }
+        updateMacPlayback()
+
+        for await update in updates {
+            guard !Task.isCancelled, player === macPlayer else { break }
+            switch update {
+            case .time:
+                refreshMacTime()
+            case .state:
+                refreshMacState()
+            case .itemFailure(let failedItem, let error):
+                if let item = player.currentItem, item !== failedItem { continue }
+                videoState = .error(error)
+            case .loopFailure(let error):
+                videoState = .error(error)
+            }
+        }
+    }
+
+    private func refreshMacTime() {
+        let playerTime = macPlayer.currentTime()
+        if playerTime.seconds.isFinite, abs((time.seconds.isFinite ? time.seconds : 0) - playerTime.seconds) > 0.05 {
+            time = playerTime
+        }
+    }
+
     private func refreshMacState() {
-        guard let item = macPlayer.currentItem, macPlayerURL != nil else {
+        guard macPlayerURL != nil else { return }
+        if macPlayer.status == .failed {
+            videoState = .error(macPlayer.error ?? URLError(.cannotDecodeContentData))
             return
         }
+        guard let item = macPlayer.currentItem else { return }
 
         if let error = item.error {
             videoState = .error(error)
             return
         }
 
-        let playerTime = macPlayer.currentTime()
-        if playerTime.seconds.isFinite, abs((time.seconds.isFinite ? time.seconds : 0) - playerTime.seconds) > 0.05 {
-            time = playerTime
-        }
+        refreshMacTime()
 
         let rawDuration = item.duration.seconds
         let duration = rawDuration.isFinite ? rawDuration : 0

@@ -8,8 +8,8 @@ import UIKit
 #endif
 
 public struct LocalFilterSettingsView: View {
-    @StateObject private var presenter = KotlinPresenter(presenter: LocalFilterPresenter())
-    @StateObject private var mxgaPresenter = KotlinPresenter(presenter: MxgaSettingsPresenter())
+    @State private var presenter = KotlinPresenter(presenter: LocalFilterPresenter())
+    @State private var mxgaPresenter = KotlinPresenter(presenter: MxgaSettingsPresenter())
     @State private var selectedFilter: UiKeywordFilter?
     @State private var showingAddFilter = false
 
@@ -143,7 +143,7 @@ public struct LocalFilterSettingsView: View {
 }
 
 private struct MxgaSettingsSection: View {
-    @ObservedObject var presenter: KotlinPresenter<MxgaSettingsState>
+    let presenter: KotlinPresenter<MxgaSettingsState>
     @Environment(\.openURL) private var openURL
 
     private let projectURL = URL(string: "https://github.com/foru17/make-x-great-again")!
@@ -215,11 +215,11 @@ private struct MxgaSettingsSection: View {
 private struct LocalFilterEditSheet: View {
     let onConfirm: (String, Bool, Bool, Bool, Bool) -> Void
     @Environment(\.dismiss) private var dismiss
-    @State private var keyword = ""
-    @State private var forTimeline = true
-    @State private var forNotification = true
-    @State private var forSearch = true
-    @State private var isRegex = false
+    @State private var keyword: String
+    @State private var forTimeline: Bool
+    @State private var forNotification: Bool
+    @State private var forSearch: Bool
+    @State private var isRegex: Bool
 
     var body: some View {
         Form {
@@ -282,12 +282,10 @@ private struct LocalFilterEditSheet: View {
         onConfirm: @escaping (String, Bool, Bool, Bool, Bool) -> Void
     ) {
         self.onConfirm = onConfirm
-        if let filter {
-            _keyword = .init(initialValue: filter.keyword)
-            _forTimeline = .init(initialValue: filter.forTimeline)
-            _forNotification = .init(initialValue: filter.forNotification)
-            _forSearch = .init(initialValue: filter.forSearch)
-            _isRegex = .init(initialValue: filter.isRegex)
-        }
+        self.keyword = filter?.keyword ?? ""
+        self.forTimeline = filter?.forTimeline ?? true
+        self.forNotification = filter?.forNotification ?? true
+        self.forSearch = filter?.forSearch ?? true
+        self.isRegex = filter?.isRegex ?? false
     }
 }

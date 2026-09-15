@@ -69,8 +69,8 @@ struct MediaViewerScreen<SupplementaryOverlay: View>: View {
         self.shareContext = shareContext
         self.showsSupplementaryOverlay = showsSupplementaryOverlay
         self.supplementaryOverlay = supplementaryOverlay
-        self._selectedIndex = .init(initialValue: max(0, initialIndex))
-        self._protectInitialPagerSelection = .init(initialValue: initialIndex > 0)
+        self.selectedIndex = max(0, initialIndex)
+        self.protectInitialPagerSelection = initialIndex > 0
     }
 
     var body: some View {

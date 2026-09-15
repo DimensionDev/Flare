@@ -52,7 +52,7 @@ struct StatusTranslateView: View {
 }
 
 struct TLDRView: View {
-    @StateObject private var presenter: KotlinPresenter<UiState<NSString>>
+    @State private var presenter: KotlinPresenter<UiState<NSString>>
     
     init(
         content: UiRichText,
@@ -83,7 +83,7 @@ struct TLDRView: View {
 }
 
 struct TranslateTextView: View {
-    @StateObject private var presenter: KotlinPresenter<UiState<UiRichText>>
+    @State private var presenter: KotlinPresenter<UiState<UiRichText>>
     
     init(
         text: UiRichText
@@ -109,7 +109,7 @@ struct TranslateTextView: View {
 
 
 public struct TLDRTextView: View {
-    @StateObject private var presenter: KotlinPresenter<UiState<NSString>>
+    @State private var presenter: KotlinPresenter<UiState<NSString>>
     
     public init(
         text: String

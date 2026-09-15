@@ -32,6 +32,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.Shape
@@ -150,7 +151,9 @@ internal fun Router(
                 },
         )
     NavDisplay(
-        modifier = modifier,
+        modifier =
+            modifier
+                .clipToBounds(),
         sceneStrategies =
             remember {
                 listOf(

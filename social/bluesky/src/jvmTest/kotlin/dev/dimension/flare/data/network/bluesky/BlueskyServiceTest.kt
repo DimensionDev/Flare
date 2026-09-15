@@ -38,7 +38,10 @@ class BlueskyServiceTest {
         val pdsOrigin = "http://127.0.0.1:${pdsServer.address.port}"
         val tokenOrigin = if (separateTokenEndpoint) "http://127.0.0.1:${tokenServer.address.port}" else authOrigin
         val requests = Collections.synchronizedList(mutableListOf<String>())
-        val tokenBody = """{"access_token":"access-new","token_type":"DPoP","expires_in":3600,"refresh_token":"refresh-new","scope":"atproto","sub":"did:plc:alice"}"""
+        val tokenBody =
+            """{"access_token":"access-new","token_type":"DPoP","expires_in":3600,
+            |"refresh_token":"refresh-new","scope":"atproto","sub":"did:plc:alice"}
+            """.trimMargin()
         authServer.createContext("/") { exchange ->
             requests += "issuer:${exchange.requestURI.path}"
             val body =

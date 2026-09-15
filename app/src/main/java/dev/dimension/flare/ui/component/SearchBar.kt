@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridScope
@@ -19,18 +20,18 @@ import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.delete
 import androidx.compose.foundation.text.input.rememberTextFieldState
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExpandedFullScreenSearchBar
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.SearchBarDefaults
+import androidx.compose.material3.SearchBarValue
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberSearchBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -60,6 +61,8 @@ import dev.dimension.flare.ui.presenter.home.SearchHistoryPresenter
 import dev.dimension.flare.ui.presenter.home.SearchHistoryState
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
+import kotlinx.coroutines.launch
+import androidx.compose.material3.SearchBarState as MaterialSearchBarState
 
 @Composable
 internal fun SearchBar(
@@ -70,17 +73,18 @@ internal fun SearchBar(
     historyFloatingActionButton: @Composable (() -> Unit)? = null,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
+    val searchBarState = rememberSearchBarState()
+    val scope = rememberCoroutineScope()
     SearchContent(
         onSearch = {
             onSearch.invoke(it)
             state.setQuery(it)
-            state.setExpanded(false)
+            scope.launch { searchBarState.animateToCollapsed() }
             keyboardController?.hide()
         },
-        expanded = state.expanded,
-        onExpandedChange = state::setExpanded,
+        searchBarState = searchBarState,
         onBack = {
-            state.setExpanded(false)
+            scope.launch { searchBarState.animateToCollapsed() }
         },
         historyState = state.searchHistories,
         modifier = modifier,
@@ -93,35 +97,30 @@ internal fun SearchBar(
     )
 }
 
-@OptIn(
-    ExperimentalMaterial3Api::class,
-)
 @Composable
 private fun SearchContent(
     historyState: UiState<ImmutableListWrapper<UiSearchHistory>>,
     onDelete: (UiSearchHistory) -> Unit,
     queryTextState: TextFieldState,
     onSearch: (String) -> Unit,
-    expanded: Boolean,
-    onExpandedChange: (Boolean) -> Unit,
+    searchBarState: MaterialSearchBarState,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
     trailingIcon: @Composable (() -> Unit)? = null,
     historyFloatingActionButton: @Composable (() -> Unit)? = null,
 ) {
-    androidx.compose.material3.SearchBar(
-        inputField = {
+    val inputField =
+        @Composable {
             SearchBarDefaults.InputField(
-                expanded = expanded,
-                onExpandedChange = onExpandedChange,
-                state = queryTextState,
+                searchBarState = searchBarState,
+                textFieldState = queryTextState,
                 onSearch = onSearch,
                 placeholder = {
                     Text(text = stringResource(R.string.discover_search_placeholder))
                 },
                 leadingIcon = {
                     AnimatedContent(
-                        expanded,
+                        searchBarState.currentValue == SearchBarValue.Expanded,
                         transitionSpec = {
                             fadeIn() togetherWith fadeOut()
                         },
@@ -138,10 +137,18 @@ private fun SearchContent(
                 },
                 trailingIcon = trailingIcon,
             )
-        },
-        modifier = modifier,
-        expanded = expanded,
-        onExpandedChange = onExpandedChange,
+        }
+    androidx.compose.material3.SearchBar(
+        state = searchBarState,
+        inputField = inputField,
+        modifier =
+            modifier
+                .windowInsetsPadding(SearchBarDefaults.windowInsets)
+                .padding(vertical = 8.dp),
+    )
+    ExpandedFullScreenSearchBar(
+        state = searchBarState,
+        inputField = inputField,
     ) {
         Box(
             modifier =
@@ -312,7 +319,6 @@ internal fun LazyStaggeredGridScope.searchContent(
 internal fun searchBarPresenter(initialQuery: String = ""): SearchBarState =
     run {
         val searchHistoryState = remember { SearchHistoryPresenter() }.invoke()
-        var expanded by remember { mutableStateOf(false) }
         LaunchedEffect(Unit) {
             if (initialQuery.isNotEmpty()) {
                 searchHistoryState.addSearchHistory(initialQuery)
@@ -323,12 +329,6 @@ internal fun searchBarPresenter(initialQuery: String = ""): SearchBarState =
         object :
             SearchBarState,
             SearchHistoryState by searchHistoryState {
-            override val expanded = expanded
-
-            override fun setExpanded(value: Boolean) {
-                expanded = value
-            }
-
             override val queryTextState: TextFieldState
                 get() = queryTextState
 
@@ -347,10 +347,7 @@ internal fun searchBarPresenter(initialQuery: String = ""): SearchBarState =
     }
 
 internal interface SearchBarState : SearchHistoryState {
-    val expanded: Boolean
     val queryTextState: TextFieldState
-
-    fun setExpanded(value: Boolean)
 
     fun deleteSearchHistory(history: UiSearchHistory)
 

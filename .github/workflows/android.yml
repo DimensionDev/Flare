@@ -39,7 +39,9 @@ jobs:
           java-version: 25
 
       - name: Setup Android SDK
-        uses: android-actions/setup-android@v2
+        uses: android-actions/setup-android@v4
+        with:
+          packages: platform-tools
 
       - name: Apply Signing
         env:
@@ -91,7 +93,9 @@ jobs:
           java-version: 25
 
       - name: Setup Android SDK
-        uses: android-actions/setup-android@v2
+        uses: android-actions/setup-android@v4
+        with:
+          packages: platform-tools
 
       - name: F-Droid prebuild
         run: |

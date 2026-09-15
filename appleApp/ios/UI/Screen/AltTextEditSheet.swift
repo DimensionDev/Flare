@@ -42,7 +42,6 @@ struct AltTextEditSheet: View {
             }
             .padding()
             .navigationTitle("Edit Description")
-            .modifier(ScrollMinimizingNavigationBar(enabled: false))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {

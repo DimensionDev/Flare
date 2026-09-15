@@ -19,7 +19,6 @@ struct WebLoginScreen: View {
         NavigationStack {
             if viewModel.canShowWebView {
                 WebView(viewModel.page)
-                    .modifier(ScrollMinimizingNavigationBar(enabled: false))
                     .onAppear {
                         if let requestURL = URL(string: url) {
                             viewModel.page.load(requestURL)

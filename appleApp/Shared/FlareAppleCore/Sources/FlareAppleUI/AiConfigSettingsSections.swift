@@ -334,7 +334,6 @@ private struct AiConfigEditSheet: View {
             }
             .formStyle(.grouped)
             .navigationTitle(Text(field.titleKey, bundle: FlareAppleUILocalization.bundle))
-            .modifier(ScrollMinimizingNavigationBar(enabled: false))
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button {

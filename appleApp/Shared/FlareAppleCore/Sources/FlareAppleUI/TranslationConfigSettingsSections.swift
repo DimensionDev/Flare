@@ -338,7 +338,6 @@ private struct TranslationConfigEditSheet: View {
             }
             .formStyle(.grouped)
             .navigationTitle(Text(field.titleKey, bundle: FlareAppleUILocalization.bundle))
-            .modifier(ScrollMinimizingNavigationBar(enabled: false))
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button {
@@ -376,7 +375,6 @@ private struct TranslationExcludedLanguagesSheet: View {
                 prompt: Text("Search language", bundle: FlareAppleUILocalization.bundle)
             )
             .navigationTitle(Text("Auto-translate excluded languages", bundle: FlareAppleUILocalization.bundle))
-            .modifier(ScrollMinimizingNavigationBar(enabled: false))
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button {

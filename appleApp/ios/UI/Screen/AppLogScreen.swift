@@ -66,7 +66,6 @@ struct AppLogScreen: View {
                         .padding()
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
-                .modifier(ScrollMinimizingNavigationBar())
                 .toolbar {
                     ToolbarItem(placement: .cancellationAction) {
                         Button {

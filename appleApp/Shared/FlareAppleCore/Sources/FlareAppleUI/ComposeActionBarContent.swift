@@ -206,7 +206,6 @@ public struct ComposeEmojiButton: View {
             .popover(isPresented: isPresented, arrowEdge: .bottom) {
                 NavigationStack {
                     EmojiPopup(data: emojis, onItemClicked: onSelect)
-                        .modifier(ScrollMinimizingNavigationBar(enabled: false))
                         .toolbar {
                             ToolbarItem(placement: .cancellationAction) {
                                 Button(role: .cancel) {

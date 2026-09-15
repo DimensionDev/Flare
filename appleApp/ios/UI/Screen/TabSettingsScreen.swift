@@ -325,7 +325,6 @@ struct EditTabSheet: View {
                 )
             }
         }
-        .modifier(ScrollMinimizingNavigationBar(enabled: false))
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
                 Button {
@@ -429,7 +428,6 @@ struct AddTabSheet: View {
             }
         }
         .navigationTitle("tab_settings_add_tab")
-        .modifier(ScrollMinimizingNavigationBar(enabled: false))
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
                 Button {

@@ -10,7 +10,7 @@ struct TimelineScreen: View {
     let allowGalleryMode: Bool
     let isHomeTimeline: Bool
     let accessoryItems: [UITimelineCollectionViewAccessoryItem]
-    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    @Environment(\.timelineAppearance) private var timelineAppearance
     @Environment(\.appSettings) private var appSettings
     @Environment(\.scenePhase) private var scenePhase
     @State var presenter: KotlinPresenter<TimelineItemPresenterState>
@@ -18,7 +18,7 @@ struct TimelineScreen: View {
     @State private var isTabRefreshInFlight = false
     init(
         tabItem: UiTimelineTabItem,
-        allowGalleryMode: Bool = false,
+        allowGalleryMode: Bool = true,
         isHomeTimeline: Bool = false,
         accessoryItems: [UITimelineCollectionViewAccessoryItem] = []
     ) {
@@ -44,6 +44,7 @@ struct TimelineScreen: View {
             accessoryItems: accessoryItems,
             onIsAtTopChanged: { isAtTop = $0 }
         )
+            .environment(\.timelineAppearance, tabItem.resolveTimelineAppearance(base: timelineAppearance))
             .refreshable {
                 try? await presenter.state.refreshSuspend()
             }

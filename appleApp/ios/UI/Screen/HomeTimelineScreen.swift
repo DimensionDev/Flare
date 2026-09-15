@@ -109,7 +109,6 @@ struct HomeTimelineScreen: View {
                                     ? []
                                     : changeLogAccessoryItems
                             )
-                                .environment(\.timelineAppearance, resolvedTimelineAppearance)
                                 .id(tab.id)
                         }
                         .safeAreaInset(edge: .top, spacing: 0) {
@@ -458,7 +457,7 @@ private struct DeckTimelineColumnRoot: View {
                 .backport
                 .glassEffect()
             }
-            .environment(\.timelineAppearance, tabItem.resolveTimelineAppearance(base: baseTimelineAppearance))
+            .environment(\.timelineAppearance, baseTimelineAppearance)
             .id(tabItem.id)
     }
 }

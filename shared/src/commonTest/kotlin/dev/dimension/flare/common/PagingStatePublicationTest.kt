@@ -6,6 +6,7 @@ import androidx.paging.PagingData
 import androidx.paging.compose.collectAsLazyPagingItems
 import app.cash.molecule.RecompositionMode
 import app.cash.molecule.moleculeFlow
+import dev.dimension.flare.RobolectricTest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancelAndJoin
@@ -24,7 +25,7 @@ import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class PagingStatePublicationTest {
+class PagingStatePublicationTest : RobolectricTest() {
     @Test
     fun repliesPublishANewStateAfterTheMainPost() =
         withPagingStates { pages, states ->

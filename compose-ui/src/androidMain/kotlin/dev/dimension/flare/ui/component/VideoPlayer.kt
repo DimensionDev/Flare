@@ -3,8 +3,6 @@
 package dev.dimension.flare.ui.component
 
 import android.content.Context
-import android.os.Build
-import android.view.WindowManager
 import androidx.annotation.OptIn
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
@@ -36,13 +34,9 @@ import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.keepScreenOn
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.onLayoutRectChanged
-import androidx.compose.ui.layout.onVisibilityChanged
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.dp
-import androidx.core.content.getSystemService
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
@@ -177,62 +171,34 @@ public fun VideoPlayer(
         }
     },
 ) {
-    var isLoaded by remember { mutableStateOf(false) }
-    var visible by remember { mutableStateOf(false) }
-    var currentRect by remember { mutableStateOf(IntRect.Zero) }
+    var resumed by remember { mutableStateOf(false) }
+    val playback = rememberTimelinePlayback()
     val request =
         remember(uri, customHeaders) {
             VideoRequest(uri = uri, customHeaders = customHeaders?.toMap().orEmpty())
         }
-    val binding = rememberSurfaceBinding(request)
+    val binding = rememberSurfaceBinding(request, playback, muted)
     val player = binding.first
+    var isLoaded by remember(binding.second, player) { mutableStateOf(false) }
 
-    LaunchedEffect(binding.second, currentRect, visible) {
-        binding.second.update(currentRect, visible)
+    LifecycleResumeEffect(binding.second) {
+        resumed = true
+        onPauseOrDispose {
+            resumed = false
+            binding.second.setActive(false)
+        }
     }
-
     Box(
-        modifier =
-            modifier
-                .onLayoutRectChanged(debounceMillis = 300) {
-                    currentRect = it.boundsInWindow
-                }.onVisibilityChanged(300, 0.66f) {
-                    visible = it
-                },
+        modifier = modifier.timelineVideoAutoplay(playback, binding.second, autoPlay && resumed, request.uri),
     ) {
-        if ((!isLoaded && LocalIsScrollingInProgress.current) || !visible || player == null) {
+        if ((!isLoaded && LocalIsScrollingInProgress.current) || player == null) {
             idlePlaceholder()
         } else {
             var remainingTime by remember { mutableLongStateOf(0L) }
             val playerState = rememberPresentationState(player)
-            DisposableEffect(muted, player) {
-                player.volume = if (muted) 0f else 1f
-                if (muted) {
-                    player.setAudioAttributes(audioAttributes, false)
-                } else {
-                    player.setAudioAttributes(audioAttributes, true)
-                }
-                onDispose {
-//                    player.volume = 0f
-//                    player.setAudioAttributes(audioAttributes, false)
-                }
-            }
-            LaunchedEffect(autoPlay) {
-                if (autoPlay) {
-                    player.play()
-                }
-            }
-            if (autoPlay) {
-                LifecycleResumeEffect(player) {
-                    player.play()
-                    onPauseOrDispose {
-                        player.pause()
-                    }
-                }
-            }
             LaunchedEffect(player) {
                 while (true) {
-                    isLoaded = player.isPlaying || player.currentPosition > 0L
+                    if (player.playbackState == Player.STATE_READY) isLoaded = true
                     if (remainingTimeContent != null) {
                         remainingTime = player.duration - player.currentPosition
                     }
@@ -276,11 +242,6 @@ public fun VideoPlayer(
                                     it
                                 }
                             }
-                    DisposableEffect(Unit) {
-                        onDispose {
-                            player.clearVideoSurface()
-                        }
-                    }
                     Box {
                         PlayerSurface(
                             player = player,
@@ -299,22 +260,24 @@ public fun VideoPlayer(
 }
 
 @Composable
-private fun rememberSurfaceBinding(request: VideoRequest): Pair<ExoPlayer?, SurfaceBindingManager.Binding> {
+private fun rememberSurfaceBinding(
+    request: VideoRequest,
+    playback: TimelinePlaybackCoordinator,
+    muted: Boolean,
+): Pair<ExoPlayer?, SurfaceBindingManager.Binding> {
     val manager: SurfaceBindingManager = koinInject()
-    var player by remember { mutableStateOf<ExoPlayer?>(null) }
+    var player by remember(request, manager, playback, muted) { mutableStateOf<ExoPlayer?>(null) }
     val binding =
-        remember(request, manager) {
-            manager.register(request) { exoPlayer ->
-                player = exoPlayer
-            }
+        remember(request, manager, playback, muted) {
+            manager.register(request, playback, muted) { player = it }
         }
-
-    DisposableEffect(binding) {
+    DisposableEffect(binding, playback) {
+        playback.register(binding, binding::setActive)
         onDispose {
+            playback.remove(binding)
             binding.dispose()
         }
     }
-
     return player to binding
 }
 
@@ -329,113 +292,82 @@ public class SurfaceBindingManager(
     @Provided private val context: Context,
     private val media3VideoCacheManager: Media3VideoCacheManager,
 ) {
-    public val player: ExoPlayer by lazy {
-        ExoPlayer
-            .Builder(context.applicationContext)
-            .setMediaSourceFactory(media3VideoCacheManager.mediaSourceFactory())
-            .build()
-            .apply {
-                playWhenReady = true
-                repeatMode = Player.REPEAT_MODE_ALL
-                volume = 0f
-            }
-    }
+    private val playerDelegate =
+        lazy {
+            ExoPlayer
+                .Builder(context.applicationContext)
+                .setMediaSourceFactory(media3VideoCacheManager.mediaSourceFactory())
+                .build()
+                .apply {
+                    repeatMode = Player.REPEAT_MODE_ALL
+                    volume = 0f
+                }
+        }
+    public val player: ExoPlayer by playerDelegate
+    private var activeBinding: Binding? by mutableStateOf(null)
+    private var activeRequest: Pair<TimelinePlaybackCoordinator, VideoRequest>? by mutableStateOf(null)
+
+    public fun playerFor(uri: String): ExoPlayer? = if (activeBinding != null && activeRequest?.second?.uri == uri) player else null
 
     public interface Binding {
-        public fun update(
-            rect: IntRect,
-            isVisible: Boolean,
-        )
+        public fun setActive(active: Boolean)
 
         public fun dispose()
     }
 
-    private data class Candidate(
-        val binding: Binding,
-        val request: VideoRequest,
-        val rect: IntRect,
-        val isVisible: Boolean,
-        val callback: (ExoPlayer?) -> Unit,
-    )
-
-    private val candidates = mutableMapOf<Binding, Candidate>()
-    private var activeBinding: Binding? = null
-    private var activeRequest: VideoRequest? = null
-
     internal fun register(
         request: VideoRequest,
-        onActiveChanged: (ExoPlayer?) -> Unit,
-    ): Binding =
-        object : Binding {
-            override fun update(
-                rect: IntRect,
-                isVisible: Boolean,
-            ) {
-                candidates[this] = Candidate(this, request, rect, isVisible, onActiveChanged)
-                recalculateActiveItem()
-            }
-
-            override fun dispose() {
-                candidates.remove(this)
-                if (activeBinding == this) {
-                    activeBinding = null
-                    player.pause() // Stop playback if the active one is removed
-                    recalculateActiveItem()
-                }
-            }
-        }
-
-    private fun recalculateActiveItem() {
-        val screenHeight =
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                context
-                    .getSystemService<WindowManager>()
-                    ?.currentWindowMetrics
-                    ?.bounds
-                    ?.height()
-                    ?: context.resources.displayMetrics.heightPixels
-            } else {
-                context.resources.displayMetrics.heightPixels
-            }
-        val screenCenterY = screenHeight / 2f
-
-        // Find best candidate
-        val best =
-            candidates.values
-                .filter { it.isVisible }
-                .minByOrNull { kotlin.math.abs(it.rect.center.y - screenCenterY) }
-
-        if (best?.binding != activeBinding) {
-            val oldBinding = activeBinding
-            val newBinding = best?.binding
-
-            activeBinding = newBinding
-
-            if (best != null) {
-                val oldCandidate = candidates[oldBinding]
-                if (activeRequest != best.request) {
-                    val mediaItem = MediaItem.fromUri(best.request.uri)
-                    val mediaSource =
-                        media3VideoCacheManager
-                            .mediaSourceFactory(best.request.customHeaders)
-                            .createMediaSource(mediaItem)
-                    player.setMediaSource(mediaSource)
-                    player.prepare()
-                    player.play()
-                    activeRequest = best.request
-                } else {
-                    if (!player.isPlaying) {
-                        player.play()
+        playback: TimelinePlaybackCoordinator,
+        muted: Boolean,
+        callback: (ExoPlayer?) -> Unit,
+    ): Binding {
+        playback.onClose(this) { release(playback) }
+        return object : Binding {
+            override fun setActive(active: Boolean) {
+                if (active) {
+                    if (activeBinding === this) return
+                    activeBinding?.setActive(false)
+                    activeBinding = this
+                    if (activeRequest != (playback to request)) {
+                        val source =
+                            media3VideoCacheManager
+                                .mediaSourceFactory(request.customHeaders)
+                                .createMediaSource(MediaItem.fromUri(request.uri))
+                        player.setMediaSource(source)
+                        player.seekTo((playback.position(request.uri) * 1000).toLong())
+                        player.prepare()
+                        activeRequest = playback to request
                     }
+                    player.setPlaybackSpeed(1f)
+                    player.volume = if (muted) 0f else 1f
+                    player.setAudioAttributes(audioAttributes, !muted)
+                    player.play()
+                    callback(player)
+                } else if (activeBinding === this) {
+                    if (player.playbackState != Player.STATE_IDLE && player.playerError == null) {
+                        playback.savePosition(request.uri, player.currentPosition / 1000.0)
+                    }
+                    player.pause()
+                    activeBinding = null
+                    callback(null)
                 }
-
-                oldCandidate?.callback?.invoke(null)
-                best.callback.invoke(player)
-            } else {
-                // No candidate
-                candidates[oldBinding]?.callback?.invoke(null)
-                player.pause()
             }
+
+            override fun dispose() = setActive(false)
+        }
+    }
+
+    internal fun close() {
+        if (playerDelegate.isInitialized()) player.release()
+    }
+
+    internal fun release(playback: TimelinePlaybackCoordinator) {
+        if (activeRequest?.first !== playback) return
+        activeBinding?.setActive(false)
+        activeRequest = null
+        if (playerDelegate.isInitialized()) {
+            player.stop()
+            player.clearMediaItems()
         }
     }
 }

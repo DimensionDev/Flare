@@ -18,18 +18,33 @@ public extension EnvironmentValues {
 private struct DetectScrollingModifier: ViewModifier {
     let debounceIdleSeconds: TimeInterval
 
+    @Environment(\.scenePhase) private var scenePhase
+    @State private var playback = TimelinePlaybackCoordinator()
     @State private var rawIsScrolling = false
     @State private var isScrolling = false
     @State private var isScrollingState = IsScrollingState()
     @State private var debounceTask: Task<Void, Never>?
 
     func body(content: Content) -> some View {
+        scrollingContent(content)
+            .environment(\.timelinePlaybackCoordinator, playback)
+            .onAppear { playback.setSuspended(scenePhase != .active) }
+            .onChange(of: scenePhase) { _, phase in playback.setSuspended(phase != .active) }
+            .onDisappear { playback.setSuspended(true) }
+    }
+
+    @ViewBuilder
+    private func scrollingContent(_ content: Content) -> some View {
         if #available(iOS 18.0, macOS 15.0, *) {
             content
                 .environment(\.isScrolling, isScrolling)
                 .environment(\.isScrollingState, isScrollingState)
                 .onScrollPhaseChange { _, phase in
                     rawIsScrolling = (phase != .idle)
+                    playback.setScrolling(phase != .idle, source: "vertical", vertical: true)
+                }
+                .onScrollGeometryChange(for: CGFloat.self) { $0.contentOffset.y } action: { old, new in
+                    if old != new { playback.moved(source: "vertical", vertical: true) }
                 }
                 .onChange(of: rawIsScrolling) { _, newValue in
                     if newValue {
@@ -63,7 +78,7 @@ private struct DetectScrollingModifier: ViewModifier {
 
 public extension View {
     @ViewBuilder
-    func detectScrolling(debounceIdle: TimeInterval = 0.500) -> some View {
+    func detectScrolling(debounceIdle: TimeInterval = 0.200) -> some View {
         if #available(iOS 17.0, macOS 14.0, *) {
             modifier(DetectScrollingModifier(debounceIdleSeconds: debounceIdle))
         } else {

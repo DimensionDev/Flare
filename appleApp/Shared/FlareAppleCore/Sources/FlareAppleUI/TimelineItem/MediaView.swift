@@ -3,8 +3,8 @@ import KotlinSharedUI
 import FlareAppleCore
 import AVFoundation
 
-#if canImport(VideoPlayer)
-import VideoPlayer
+#if os(iOS)
+import UIKit
 #endif
 
 public struct MediaView: View {
@@ -46,17 +46,13 @@ public struct MediaView: View {
 public struct MediaVideoView: View {
     @Environment(\.timelineAppearance.videoAutoplay) private var videoAutoplay
     @Environment(\.networkKind) private var networkKind
-    @Environment(\.isScrolling) private var isScrolling
-    @Environment(\.isScrollingState) private var isScrollingState
-    @State private var play = false
-    @State private var videoState: MediaVideoState = .idle
-    @State private var time: CMTime = .zero
-    @State private var isAppeared = false
-    #if os(macOS)
-    @State private var macPlayer: AVQueuePlayer?
-    @State private var macPlayerURL: URL?
-    @State private var macPlayerLooper: AVPlayerLooper?
-    #endif
+    @Environment(\.timelinePlaybackCoordinator) private var timelinePlayback
+    @Environment(\.timelineCarouselItem) private var carouselItem
+    @State private var fallbackPlayback = TimelinePlaybackCoordinator()
+    @State private var player = VideoPlaybackSession()
+    @State private var id = UUID().uuidString
+    @State private var geometry = InlineVideoGeometry()
+    @State private var appeared = false
     private let data: UiMediaVideo
     private let allowsAutoplay: Bool
 
@@ -65,24 +61,18 @@ public struct MediaVideoView: View {
         self.allowsAutoplay = allowsAutoplay
     }
 
-    private var effectiveIsScrolling: Bool {
-        isScrollingState?.isScrolling ?? isScrolling
-    }
+    private var playback: TimelinePlaybackCoordinator { timelinePlayback ?? fallbackPlayback }
 
     private var canAutoplay: Bool {
         guard allowsAutoplay else { return false }
         switch videoAutoplay {
-        case .always:
-            return true
-        case .wifi:
-            return networkKind == .wifi
-        case .never:
-            return false
+        case .always: return true
+        case .wifi: return networkKind == .wifi
+        case .never: return false
         }
     }
 
     public var body: some View {
-        #if os(iOS)
         Color.gray
             .overlay {
                 NetworkImage(data: data.thumbnailUrl, customHeader: data.customHeaders)
@@ -90,244 +80,138 @@ public struct MediaVideoView: View {
             }
             .clipped()
             .overlay {
-                if canAutoplay {
-                    player
+                if let avPlayer = player.player {
+                    #if os(macOS)
+                    MacAVPlayerView(player: avPlayer, videoGravity: .resizeAspectFill, showsControls: false)
+                        .allowsHitTesting(false)
+                    #elseif os(iOS)
+                    InlineAVPlayerView(player: avPlayer)
+                        .allowsHitTesting(false)
+                    #endif
                 }
             }
-            .overlay(alignment: .bottomLeading) {
-                statusOverlay
-            }
-        #elseif os(macOS)
-        macContent
-        #else
-        EmptyView()
-        #endif
-    }
-
-    @ViewBuilder
-    private var player: some View {
-        #if canImport(VideoPlayer)
-        if let videoURL = URL(string: data.url) {
-            VideoPlayer(url: videoURL, play: $play, time: $time)
-                .mute(true)
-                .autoReplay(true)
-                .onStateChanged { state in
-                    switch state {
-                    case .playing(let duration):
-                        videoState = .playing(duration)
-                    case .loading:
-                        videoState = .loading
-                    case .paused:
-                        videoState = .idle
-                    case .error(let error):
-                        videoState = .error(error)
+            .overlay(alignment: .bottomLeading) { statusOverlay }
+            .onGeometryChange(for: InlineVideoGeometry.self) { proxy in
+                let bounds = CGRect(origin: .zero, size: proxy.size)
+                let vertical = proxy.bounds(of: .scrollView(axis: .vertical)) ?? bounds
+                let horizontal = proxy.bounds(of: .scrollView(axis: .horizontal)) ?? bounds
+                let visible = bounds.intersection(vertical).intersection(horizontal)
+                return InlineVideoGeometry(
+                    visible: !visible.isEmpty,
+                    horizontalFraction: bounds.width > 0 ? max(0, visible.width) / bounds.width : 0,
+                    distance: Double(abs(bounds.midY - vertical.midY)),
+                    verticalOffset: vertical.minY
+                )
+            } action: { value in
+                if #unavailable(iOS 18.0, macOS 15.0) {
+                    if let oldOffset = geometry.verticalOffset, oldOffset != value.verticalOffset {
+                        playback.moved(source: "vertical", vertical: true)
                     }
                 }
-                .contentMode(.scaleAspectFill)
-                .onChange(of: effectiveIsScrolling) { _, newValue in
-                    play = !newValue && isAppeared && canAutoplay
-                }
-                .onAppear {
-                    isAppeared = true
-                    play = !effectiveIsScrolling && canAutoplay
-                }
-                .onDisappear {
-                    isAppeared = false
-                    play = false
-                    videoState = .idle
-                }
-                .allowsHitTesting(false)
-        }
-        #else
-        EmptyView()
-        #endif
-    }
-
-    #if os(macOS)
-    @ViewBuilder
-    private var macContent: some View {
-        Color.gray
-            .overlay {
-                NetworkImage(data: data.thumbnailUrl, customHeader: data.customHeaders)
-                    .allowsHitTesting(false)
-            }
-            .clipped()
-            .overlay {
-                if let macPlayer {
-                    MacAVPlayerView(player: macPlayer, videoGravity: .resizeAspectFill, showsControls: false)
-                        .allowsHitTesting(false)
-                }
-            }
-            .overlay(alignment: .bottomLeading) {
-                statusOverlay
+                geometry = value
+                updateCandidate()
             }
             .onAppear {
-                isAppeared = true
-                updateMacPlayback()
+                if timelinePlayback == nil { fallbackPlayback.setSuspended(false) }
+                appeared = true
+                registerPlayer()
+                updateCandidate()
             }
-            .onChange(of: effectiveIsScrolling) { _, _ in
-                updateMacPlayback()
-            }
-            .onChange(of: canAutoplay) { _, _ in
-                updateMacPlayback()
-            }
+            .onChange(of: canAutoplay) { _, _ in updateCandidate() }
+            .onChange(of: carouselItem) { _, _ in updateCandidate() }
             .onChange(of: data.url) { _, _ in
-                updateMacPlayback()
-            }
-            .task(id: play) {
-                guard play else { return }
-                while !Task.isCancelled {
-                    refreshMacState()
-                    try? await Task.sleep(for: .milliseconds(250))
-                }
+                playback.remove(id: id)
+                player.detach()
+                registerPlayer()
+                updateCandidate()
             }
             .onDisappear {
-                isAppeared = false
-                play = false
-                resetMacPlayer()
-                videoState = .idle
+                appeared = false
+                playback.remove(id: id)
+                player.detach()
+                if timelinePlayback == nil { fallbackPlayback.setSuspended(true) }
             }
     }
 
-    private func configureMacPlayerIfNeeded() {
-        guard let videoURL = URL(string: data.url) else {
-            resetMacPlayer()
-            videoState = .error(URLError(.badURL))
-            return
-        }
-
-        if macPlayerURL == videoURL, let macPlayer {
-            macPlayer.isMuted = true
-            macPlayer.actionAtItemEnd = .advance
-            return
-        }
-
-        resetMacPlayer()
-        let player = AVQueuePlayer()
-        player.isMuted = true
-        player.actionAtItemEnd = .advance
-        let item = AVPlayerItem(url: videoURL)
-        macPlayer = player
-        macPlayerLooper = AVPlayerLooper(player: player, templateItem: item)
-        macPlayerURL = videoURL
-        time = .zero
-        videoState = .loading
-    }
-
-    private func updateMacPlayback() {
-        guard isAppeared, canAutoplay else {
-            play = false
-            resetMacPlayer()
-            videoState = .idle
-            return
-        }
-
-        guard !effectiveIsScrolling else {
-            play = false
-            macPlayer?.pause()
-            videoState = .idle
-            return
-        }
-
-        configureMacPlayerIfNeeded()
-        guard let macPlayer else { return }
-        play = true
-        macPlayer.playImmediately(atRate: 1)
-    }
-
-    private func refreshMacState() {
-        guard let macPlayer, let item = macPlayer.currentItem, macPlayerURL != nil else {
-            return
-        }
-
-        if let error = item.error {
-            videoState = .error(error)
-            play = false
-            return
-        }
-
-        let currentTime = macPlayer.currentTime()
-        if currentTime.seconds.isFinite {
-            time = currentTime
-        }
-
-        let duration = item.duration.seconds
-        switch item.status {
-        case .readyToPlay:
-            switch macPlayer.timeControlStatus {
-            case .playing where macPlayer.rate != 0 && duration.isFinite:
-                videoState = .playing(duration)
-            case .playing:
-                videoState = play ? .loading : .idle
-            case .waitingToPlayAtSpecifiedRate:
-                videoState = .loading
-            case .paused:
-                videoState = play ? .loading : .idle
-            @unknown default:
-                videoState = play ? .loading : .idle
+    private func registerPlayer() {
+        let url = data.url
+        let coordinator = playback
+        let model = player
+        coordinator.register(id: id) { playing in
+            if playing {
+                model.play(url: url)
+            } else {
+                model.detach()
             }
-        case .failed:
-            videoState = .error(item.error ?? URLError(.cannotDecodeContentData))
-            play = false
-        case .unknown:
-            videoState = play ? .loading : .idle
-        @unknown default:
-            videoState = play ? .loading : .idle
         }
     }
 
-    private func resetMacPlayer() {
-        macPlayer?.pause()
-        macPlayerLooper = nil
-        macPlayer = nil
-        macPlayerURL = nil
+    private func updateCandidate() {
+        guard appeared else { return }
+        playback.update(.init(
+            id: id,
+            groupID: carouselItem?.groupID,
+            isVisible: geometry.visible && canAutoplay,
+            isSelected: carouselItem?.isSelected ?? true,
+            canStart: canAutoplay && (carouselItem?.isCarousel != true || geometry.horizontalFraction >= 0.6),
+            distance: geometry.distance,
+            mediaURL: data.url
+        ))
     }
-
-    private func formatMacRemainingTime(duration: Double) -> String {
-        guard duration.isFinite, duration > 0 else {
-            return "0:00"
-        }
-        let currentSeconds = time.seconds.isFinite ? time.seconds : 0
-        let remainingSeconds = max(Int((duration - currentSeconds).rounded(.down)), 0)
-        return String(format: "%d:%02d", remainingSeconds / 60, remainingSeconds % 60)
-    }
-    #endif
 
     @ViewBuilder
     private var statusOverlay: some View {
-        switch videoState {
-        case .idle:
-            Image(fontAwesome: .circlePlay)
-                .mediaVideoBadgeStyle()
+        switch player.state {
+        case .idle, .paused:
+            Image(fontAwesome: .circlePlay).mediaVideoBadgeStyle()
         case .loading:
-            ProgressView()
-                .tint(.white)
-                .mediaVideoBadgeStyle()
+            ProgressView().tint(.white).mediaVideoBadgeStyle()
         case .playing(let duration):
-            #if os(macOS)
-            Text(formatMacRemainingTime(duration: duration))
+            let remaining = max(Int((duration - player.position).rounded(.down)), 0)
+            Text(String(format: "%d:%02d", remaining / 60, remaining % 60))
                 .font(.caption)
                 .foregroundStyle(.white)
                 .mediaVideoBadgeStyle()
-            #else
-            Text(Date(timeIntervalSinceNow: duration - time.seconds), style: .timer)
-                .font(.caption)
-                .foregroundStyle(.white)
-                .mediaVideoBadgeStyle()
-            #endif
         case .error:
-            Image(systemName: "exclamationmark.triangle.fill")
-                .mediaVideoBadgeStyle()
+            Image(systemName: "exclamationmark.triangle.fill").mediaVideoBadgeStyle()
         }
     }
 }
 
-private enum MediaVideoState {
-    case idle
-    case loading
-    case playing(Double)
-    case error(any Error)
+private nonisolated struct InlineVideoGeometry: Equatable, Sendable {
+    var visible = false
+    var horizontalFraction: CGFloat = 0
+    var distance: Double = 0
+    var verticalOffset: CGFloat?
 }
+
+#if os(iOS)
+struct InlineAVPlayerView: UIViewRepresentable {
+    let player: AVPlayer
+    var videoGravity: AVLayerVideoGravity = .resizeAspectFill
+
+    final class PlayerView: UIView {
+        override class var layerClass: AnyClass { AVPlayerLayer.self }
+        var playerLayer: AVPlayerLayer { layer as! AVPlayerLayer }
+    }
+
+    func makeUIView(context: Context) -> PlayerView {
+        let view = PlayerView()
+        view.playerLayer.videoGravity = videoGravity
+        view.playerLayer.player = player
+        return view
+    }
+
+    func updateUIView(_ view: PlayerView, context: Context) {
+        view.playerLayer.player = player
+        view.playerLayer.videoGravity = videoGravity
+    }
+
+    static func dismantleUIView(_ view: PlayerView, coordinator: ()) {
+        view.playerLayer.player = nil
+    }
+}
+#endif
 
 private extension View {
     func mediaVideoBadgeStyle() -> some View {

@@ -216,6 +216,7 @@ private struct TimelinePagingRows: @MainActor RandomAccessCollection {
 public struct TimelineGalleryItemView: View {
     @Environment(\.openURL) private var openURL
     @Environment(\.timelineAppearance.showMedia) private var showMedia
+    @Environment(\.timelineAppearance.showSensitiveContent) private var showSensitiveContent
     @Environment(\.translateConfig) private var translateConfig
     @Environment(\.timelineMediaOpenAction) private var timelineMediaOpenAction
 
@@ -273,7 +274,7 @@ public struct TimelineGalleryItemView: View {
         }
         VStack(alignment: .leading, spacing: 0) {
             if showMedia, let media = post.images.first {
-                MediaView(data: media)
+                MediaView(data: media, allowsAutoplay: !post.sensitive || showSensitiveContent)
                     .aspectRatio(CGFloat(max(media.aspectRatio ?? 1, 0.3)), contentMode: .fit)
                     .clipped()
                     .highPriorityGesture(

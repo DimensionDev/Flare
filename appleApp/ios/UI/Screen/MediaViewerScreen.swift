@@ -39,7 +39,7 @@ struct MediaViewerScreen<SupplementaryOverlay: View>: View {
     @State private var selectedIndex: Int
     @State private var isPlaying: Bool = true
     @State private var videoState: VideoState = .idle
-    @State private var currentTime: CMTime = .zero
+    @State private var playbackTimes: [String: CMTime] = [:]
     @State private var opacity: CGFloat = 1
     @State private var dismissOffset: CGFloat = 0
     @State private var isDismissing = false
@@ -188,6 +188,7 @@ struct MediaViewerScreen<SupplementaryOverlay: View>: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .videoPlaybackPresentation(mediaURLs: medias.map(\.url), selectedMediaURL: selectedMedia?.url)
         .onAppear {
             applyInitialSelectionIfNeeded()
         }
@@ -197,7 +198,6 @@ struct MediaViewerScreen<SupplementaryOverlay: View>: View {
         .onChange(of: selectedIndex) { _, _ in
             isPlaying = true
             videoState = .idle
-            currentTime = .zero
             playbackRate = 1
         }
         .onChange(of: isVideoActivelyPlaying) { _, newValue in
@@ -236,7 +236,7 @@ struct MediaViewerScreen<SupplementaryOverlay: View>: View {
                     data: video,
                     play: $isPlaying,
                     videoState: $videoState,
-                    time: $currentTime,
+                    time: timeBinding(for: video.url),
                     playbackRate: $playbackRate
                 )
             } else {
@@ -355,10 +355,11 @@ struct MediaViewerScreen<SupplementaryOverlay: View>: View {
             if let selectedMedia, case .video = onEnum(of: selectedMedia) {
                 VideoControlView(
                     isPlaying: $isPlaying,
-                    currentTime: $currentTime,
+                    currentTime: timeBinding(for: selectedMedia.url),
                     videoState: videoState,
                     playbackRate: playbackRate
                 )
+                .id(selectedMedia.url)
             }
 
             if showData, !isLandscapeViewing, showsSupplementaryOverlay {
@@ -375,7 +376,7 @@ struct MediaViewerScreen<SupplementaryOverlay: View>: View {
             showData: showData,
             isLandscapeViewing: isLandscapeViewing,
             isPlaying: $isPlaying,
-            currentTime: $currentTime,
+            currentTime: timeBinding(for: selectedMedia?.url),
             videoState: videoState,
             playbackRate: playbackRate
         )
@@ -395,6 +396,17 @@ struct MediaViewerScreen<SupplementaryOverlay: View>: View {
                 }
                 protectInitialPagerSelection = false
                 selectedIndex = nextIndex
+            }
+        )
+    }
+
+    private func timeBinding(for url: String?) -> Binding<CMTime> {
+        guard let url else { return .constant(.zero) }
+        return Binding(
+            get: { playbackTimes[url] ?? CMTime(seconds: MediaPlaybackMemory.shared.position(for: url), preferredTimescale: 600) },
+            set: {
+                playbackTimes[url] = $0
+                VideoPlaybackSession.setPosition(for: url, seconds: $0.seconds)
             }
         )
     }

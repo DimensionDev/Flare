@@ -61,6 +61,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -126,6 +127,8 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.Glassify
 import dev.dimension.flare.ui.component.LocalTimelineAppearance
+import dev.dimension.flare.ui.component.MediaViewerPlayback
+import dev.dimension.flare.ui.component.MediaViewerSelection
 import dev.dimension.flare.ui.component.SurfaceBindingManager
 import dev.dimension.flare.ui.component.VideoPlayer
 import dev.dimension.flare.ui.component.accessibleDescription
@@ -297,9 +300,10 @@ internal fun MediaViewerScreen(
     LaunchedEffect(pagerState.currentPage) {
         state.setCurrentPage(pagerState.currentPage)
         playbackSpeed = NORMAL_PLAYBACK_SPEED
-        surfaceBindingManager.player.setPlaybackSpeed(NORMAL_PLAYBACK_SPEED)
     }
-    FlareTheme(darkTheme = true) {
+    MediaViewerPlaybackTheme {
+        val mediaItems = medias.takeSuccess().orEmpty()
+        MediaViewerSelection(mediaItems.map { it.url }, mediaItems.getOrNull(pagerState.currentPage)?.url)
         val swiperState =
             rememberSwiperState(
                 onDismiss = onDismiss,
@@ -420,16 +424,20 @@ internal fun MediaViewerScreen(
                                                         muted = false,
                                                         contentScale = ContentScale.Fit,
                                                     )
-                                                    VideoGestureOverlay(
-                                                        player = surfaceBindingManager.player,
-                                                        onClick = {
-                                                            state.setShowUi(!state.showUi)
-                                                        },
-                                                        onPlaybackSpeedChanged = {
-                                                            playbackSpeed = it
-                                                        },
-                                                        modifier = Modifier.fillMaxSize(),
-                                                    )
+                                                    surfaceBindingManager.playerFor(media.url)?.let { player ->
+                                                        key(media.url) {
+                                                            VideoGestureOverlay(
+                                                                player = player,
+                                                                onClick = {
+                                                                    state.setShowUi(!state.showUi)
+                                                                },
+                                                                onPlaybackSpeedChanged = {
+                                                                    playbackSpeed = it
+                                                                },
+                                                                modifier = Modifier.fillMaxSize(),
+                                                            )
+                                                        }
+                                                    }
                                                 }
                                             } else if (media is UiMedia.Audio) {
                                                 VideoPlayer(
@@ -716,13 +724,17 @@ internal fun MediaViewerScreen(
                                                 medias.getOrNull(state.currentPage)
                                             }
                                         if (current is UiMedia.Video) {
-                                            PlayerControl(
-                                                surfaceBindingManager.player,
-                                                playbackSpeed = playbackSpeed,
-                                                modifier =
-                                                    Modifier
-                                                        .widthIn(max = 480.dp),
-                                            )
+                                            surfaceBindingManager.playerFor(current.url)?.let { player ->
+                                                key(current.url) {
+                                                    PlayerControl(
+                                                        player,
+                                                        playbackSpeed = playbackSpeed,
+                                                        modifier =
+                                                            Modifier
+                                                                .widthIn(max = 480.dp),
+                                                    )
+                                                }
+                                            }
                                         }
                                     }
                                     if (status != null && !isBigScreen && state.showUi && !state.isLandscapeViewing) {
@@ -944,6 +956,13 @@ internal fun MediaViewerScreen(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun MediaViewerPlaybackTheme(content: @Composable () -> Unit) {
+    MediaViewerPlayback {
+        FlareTheme(darkTheme = true, content = content)
     }
 }
 

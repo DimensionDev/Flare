@@ -7,18 +7,7 @@ import FlareAppleCore
 
 #if os(iOS)
 import UIKit
-#if canImport(VideoPlayer)
-import VideoPlayer
 #endif
-#endif
-
-public enum VideoState {
-    case idle
-    case loading
-    case playing(Double)
-    case paused(Double)
-    case error(any Error)
-}
 
 public struct VideoControlView: View {
     @Binding private var isPlaying: Bool
@@ -126,6 +115,9 @@ public struct VideoControlView: View {
             baselineSeconds = seconds
             baselineDate = Date()
         }
+        .onDisappear {
+            if isSeeking { currentTime = CMTime(seconds: sliderValue, preferredTimescale: 600) }
+        }
         .onChange(of: currentTime.seconds) { _, newValue in
             guard !isSeeking, newValue.isFinite else { return }
             baselineSeconds = newValue
@@ -202,6 +194,8 @@ public struct VideoControlView: View {
 }
 
 public struct StatusMediaVideoView: View {
+    @Environment(\.videoPlaybackPresentation) private var presentation
+    @State private var fallbackPresentation = VideoPlaybackPresentation()
     @Binding private var play: Bool
     @Binding private var videoState: VideoState
     @Binding private var time: CMTime
@@ -212,11 +206,7 @@ public struct StatusMediaVideoView: View {
     @State private var seekFeedback: SeekFeedback?
     @State private var seekFeedbackOpacity: Double = 0
     @State private var seekFeedbackTask: Task<Void, Never>?
-    #if os(macOS)
-    @State private var macPlayer = AVQueuePlayer()
-    @State private var macPlayerURL: URL?
-    @State private var macPlayerLooper: AVPlayerLooper?
-    #endif
+    @State private var session = VideoPlaybackSession()
     private let data: UiMediaVideo
     private let seekInterval: Double = 5
     private let normalPlaybackRate: Float = 1
@@ -237,13 +227,58 @@ public struct StatusMediaVideoView: View {
     }
 
     public var body: some View {
-        #if os(iOS)
-        content
-        #elseif os(macOS)
-        macContent
-        #else
-        EmptyView()
-        #endif
+        Group {
+            #if os(iOS)
+            content
+            #else
+            Color.clear.overlay { player }
+            #endif
+        }
+        .onAppear {
+            if presentation == nil { fallbackPresentation.begin() }
+            updatePlayback()
+        }
+        .onChange(of: play) { _, _ in updatePlayback() }
+        .onChange(of: playbackRate) { _, _ in updatePlayback() }
+        .onChange(of: data.url) { _, _ in
+            session.detach()
+            updatePlayback()
+        }
+        .onChange(of: time) { _, target in
+            if target == time, session.mediaURL == data.url,
+               target.seconds.isFinite, abs(session.position - target.seconds) > 0.5 {
+                session.seek(to: target.seconds)
+            }
+        }
+        .onReceive(session.updates) { _ in
+            videoState = session.state
+            if session.player != nil {
+                switch session.state {
+                case .playing: if !play { play = true }
+                case .paused: if play { play = false }
+                default: break
+                }
+            }
+            if abs((time.seconds.isFinite ? time.seconds : 0) - session.position) > 0.05 {
+                time = CMTime(seconds: session.position, preferredTimescale: 600)
+            }
+        }
+        .onDisappear {
+            endFastPlayback()
+            if session.mediaURL == data.url, time.seconds.isFinite,
+               abs(session.position - time.seconds) > 0.5 {
+                session.seek(to: time.seconds)
+            }
+            (presentation ?? fallbackPresentation).release(session)
+            if presentation == nil { fallbackPresentation.end() }
+        }
+    }
+
+    private func updatePlayback() {
+        (presentation ?? fallbackPresentation).update(
+            session, url: data.url,
+            playing: play, rate: playbackRate
+        )
     }
 
     #if os(iOS)
@@ -314,270 +349,15 @@ public struct StatusMediaVideoView: View {
 
     @ViewBuilder
     private var player: some View {
-        #if os(iOS) && canImport(VideoPlayer)
-        if let videoURL = URL(string: data.url) {
-            VideoPlayer(url: videoURL, play: $play, time: $time)
-                .mute(false)
-                .autoReplay(true)
-                .speedRate(playbackRate)
-                .onStateChanged { state in
-                    switch state {
-                    case .playing(let duration):
-                        videoState = .playing(duration)
-                    case .loading:
-                        videoState = .loading
-                    case .paused:
-                        if case .playing(let duration) = videoState {
-                            videoState = .paused(duration)
-                        } else if case .paused(let duration) = videoState {
-                            videoState = .paused(duration)
-                        } else {
-                            videoState = .idle
-                        }
-                    case .error(let error):
-                        videoState = .error(error)
-                    }
-                }
-                .contentMode(.scaleAspectFit)
+        if let player = session.player {
+            #if os(iOS)
+            InlineAVPlayerView(player: player, videoGravity: .resizeAspect)
                 .allowsHitTesting(false)
-        }
-        #else
-        EmptyView()
-        #endif
-    }
-
-    #if os(macOS)
-    @ViewBuilder
-    private var macContent: some View {
-        Color.clear
-            .overlay {
-                if case .idle = videoState {
-                    NetworkImage(data: data.thumbnailUrl, customHeader: data.customHeaders)
-                        .scaledToFit()
-                        .allowsHitTesting(false)
-                } else {
-                    EmptyView()
-                }
-            }
-            .clipped()
-            .overlay {
-                if macPlayerURL != nil {
-                    MacAVPlayerView(player: macPlayer, videoGravity: .resizeAspect, showsControls: true)
-                }
-            }
-            .onAppear {
-                configureMacPlayerIfNeeded()
-                updateMacPlayback()
-            }
-            .onChange(of: play) { _, _ in
-                updateMacPlayback()
-            }
-            .onChange(of: playbackRate) { _, _ in
-                updateMacPlayback()
-            }
-            .onChange(of: time) { _, newValue in
-                seekMacPlayerIfNeeded(to: newValue)
-            }
-            .onChange(of: data.url) { _, _ in
-                configureMacPlayerIfNeeded()
-                updateMacPlayback()
-            }
-            .task(id: macPlayerURL) {
-                await observeMacPlayback()
-            }
-            .onDisappear {
-                endFastPlayback()
-                resetMacPlayer()
-            }
-    }
-
-    private func configureMacPlayerIfNeeded() {
-        guard let videoURL = URL(string: data.url) else {
-            resetMacPlayer()
-            videoState = .error(URLError(.badURL))
-            return
-        }
-
-        guard macPlayerURL != videoURL else {
-            macPlayer.isMuted = false
-            macPlayer.actionAtItemEnd = .advance
-            return
-        }
-
-        resetMacPlayer()
-        macPlayer.isMuted = false
-        macPlayer.actionAtItemEnd = .advance
-        macPlayerURL = videoURL
-        videoState = .loading
-    }
-
-    private func updateMacPlayback() {
-        configureMacPlayerIfNeeded()
-        if play {
-            macPlayer.playImmediately(atRate: playbackRate)
-        } else {
-            macPlayer.pause()
+            #elseif os(macOS)
+            MacAVPlayerView(player: player, videoGravity: .resizeAspect, showsControls: true)
+            #endif
         }
     }
-
-    private func seekMacPlayerIfNeeded(to target: CMTime) {
-        guard macPlayerURL != nil, target.seconds.isFinite else {
-            return
-        }
-
-        let current = macPlayer.currentTime().seconds
-        if !current.isFinite || abs(current - target.seconds) > 0.5 {
-            macPlayer.seek(to: target, toleranceBefore: .zero, toleranceAfter: .zero)
-        }
-    }
-
-    private enum MacPlaybackUpdate: Sendable {
-        case time
-        case state
-        case itemFailure(AVPlayerItem, any Error)
-        case loopFailure(any Error)
-    }
-
-    private func observeMacPlayback() async {
-        guard let url = macPlayerURL, !Task.isCancelled else { return }
-        let player = macPlayer
-        let (updates, continuation) = AsyncStream<MacPlaybackUpdate>.makeStream()
-        let timeObserver = player.addPeriodicTimeObserver(
-            forInterval: CMTime(seconds: 0.25, preferredTimescale: 600),
-            queue: .main
-        ) { _ in
-            continuation.yield(.time)
-        }
-        let itemChanges = player.publisher(for: \.currentItem)
-            .map { @Sendable item -> AnyPublisher<MacPlaybackUpdate, Never> in
-                guard let item else { return Just(.state).eraseToAnyPublisher() }
-                return item.publisher(for: \.status)
-                    .combineLatest(item.publisher(for: \.duration), item.publisher(for: \.error))
-                    .map { @Sendable status, _, error -> MacPlaybackUpdate in
-                        if status == .failed || error != nil {
-                            return .itemFailure(item, error ?? URLError(.cannotDecodeContentData))
-                        }
-                        return .state
-                    }
-                    .eraseToAnyPublisher()
-            }
-            .switchToLatest()
-        let subscription = player.publisher(for: \.timeControlStatus)
-            .combineLatest(
-                player.publisher(for: \.rate),
-                player.publisher(for: \.status),
-                player.publisher(for: \.error)
-            )
-            .map { @Sendable _ in MacPlaybackUpdate.state }
-            .merge(with: itemChanges)
-            .sink { @Sendable update in
-                continuation.yield(update)
-            }
-        defer {
-            subscription.cancel()
-            player.removeTimeObserver(timeObserver)
-            continuation.finish()
-        }
-
-        // A local item can fail immediately, so observe before adding it to the queue.
-        let looper = AVPlayerLooper(player: player, templateItem: AVPlayerItem(url: url))
-        macPlayerLooper = looper
-        let looperSubscription = looper.publisher(for: \.status)
-            .sink { @Sendable status in
-                if status == .failed {
-                    continuation.yield(.loopFailure(looper.error ?? URLError(.cannotDecodeContentData)))
-                }
-            }
-        defer { looperSubscription.cancel() }
-        updateMacPlayback()
-
-        for await update in updates {
-            guard !Task.isCancelled, player === macPlayer else { break }
-            switch update {
-            case .time:
-                refreshMacTime()
-            case .state:
-                refreshMacState()
-            case .itemFailure(let failedItem, let error):
-                if let item = player.currentItem, item !== failedItem { continue }
-                videoState = .error(error)
-            case .loopFailure(let error):
-                videoState = .error(error)
-            }
-        }
-    }
-
-    private func refreshMacTime() {
-        let playerTime = macPlayer.currentTime()
-        if playerTime.seconds.isFinite, abs((time.seconds.isFinite ? time.seconds : 0) - playerTime.seconds) > 0.05 {
-            time = playerTime
-        }
-    }
-
-    private func refreshMacState() {
-        guard macPlayerURL != nil else { return }
-        if macPlayer.status == .failed {
-            videoState = .error(macPlayer.error ?? URLError(.cannotDecodeContentData))
-            return
-        }
-        guard let item = macPlayer.currentItem else { return }
-
-        if let error = item.error {
-            videoState = .error(error)
-            return
-        }
-
-        refreshMacTime()
-
-        let rawDuration = item.duration.seconds
-        let duration = rawDuration.isFinite ? rawDuration : 0
-
-        switch item.status {
-        case .readyToPlay:
-            switch macPlayer.timeControlStatus {
-            case .playing where macPlayer.rate != 0:
-                videoState = .playing(duration)
-            case .playing:
-                videoState = play ? .loading : .idle
-            case .waitingToPlayAtSpecifiedRate:
-                videoState = .loading
-            case .paused:
-                if wasPlayingOrPaused {
-                    videoState = .paused(duration)
-                } else if play {
-                    videoState = .loading
-                } else {
-                    videoState = .idle
-                }
-            @unknown default:
-                videoState = play ? .loading : .idle
-            }
-        case .failed:
-            videoState = .error(item.error ?? URLError(.cannotDecodeContentData))
-        case .unknown:
-            videoState = play ? .loading : .idle
-        @unknown default:
-            videoState = play ? .loading : .idle
-        }
-    }
-
-    private var wasPlayingOrPaused: Bool {
-        switch videoState {
-        case .playing, .paused:
-            true
-        case .idle, .loading, .error:
-            false
-        }
-    }
-
-    private func resetMacPlayer() {
-        let player = macPlayer
-        player.pause()
-        macPlayerLooper = nil
-        macPlayer = AVQueuePlayer()
-        macPlayerURL = nil
-    }
-    #endif
 
     private func seek(by offset: Double) {
         let currentSeconds = time.seconds.isFinite ? time.seconds : 0

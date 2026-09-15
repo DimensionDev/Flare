@@ -1,9 +1,11 @@
 package dev.dimension.flare.data.datasource.mastodon
 
 import androidx.paging.ExperimentalPagingApi
-import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
+import dev.dimension.flare.data.datasource.microblog.paging.ContextUpdate
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
+import dev.dimension.flare.data.datasource.microblog.paging.PostContextLoader
+import dev.dimension.flare.data.datasource.microblog.paging.toContextUpdate
 import dev.dimension.flare.data.network.mastodon.MastodonService
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiTimelineV2
@@ -12,11 +14,11 @@ import dev.dimension.flare.ui.model.mapper.renderStatusContext
 
 @OptIn(ExperimentalPagingApi::class)
 internal class StatusDetailRemoteMediator(
-    private val statusKey: MicroBlogKey,
+    override val statusKey: MicroBlogKey,
     private val service: MastodonService,
-    private val accountKey: MicroBlogKey,
+    override val accountKey: MicroBlogKey,
     private val statusOnly: Boolean,
-) : CacheableRemoteLoader<UiTimelineV2> {
+) : PostContextLoader {
     override val collapseReplyChains: Boolean = false
 
     override val pagingKey: String =
@@ -28,6 +30,17 @@ internal class StatusDetailRemoteMediator(
             append(statusKey.toString())
             append("_")
             append(accountKey.toString())
+        }
+
+    override fun contextUpdate(
+        request: PagingRequest,
+        result: PagingResult<UiTimelineV2>,
+        initial: Boolean,
+    ): ContextUpdate =
+        if (request == PagingRequest.Refresh && !statusOnly) {
+            ContextUpdate(posts = result.data)
+        } else {
+            result.toContextUpdate(statusKey, if (initial) PagingRequest.Refresh else request, initial)
         }
 
     override suspend fun load(

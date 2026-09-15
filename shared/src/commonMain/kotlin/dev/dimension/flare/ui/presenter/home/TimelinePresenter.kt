@@ -2,6 +2,8 @@ package dev.dimension.flare.ui.presenter.home
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.paging.ExperimentalPagingApi
@@ -26,6 +28,8 @@ import dev.dimension.flare.data.datasource.microblog.offsetPagingConfig
 import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.NotSupportRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.OffsetFromStartPagingSource
+import dev.dimension.flare.data.datasource.microblog.paging.PostContextLoader
+import dev.dimension.flare.data.datasource.microblog.paging.PostContextRemoteMediator
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.TimelineDbPageCache
 import dev.dimension.flare.data.datasource.microblog.paging.TimelineDbPageLoader
@@ -57,6 +61,7 @@ import dev.dimension.flare.web.shared.WebPresenter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -97,6 +102,7 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
 
     private val timelineTabItemId: String?
     private val isHomeTimeline: Boolean
+    private val contextMediator = MutableStateFlow<PostContextRemoteMediator?>(null)
 
     private val timelineFilterConfigFlow: Flow<TimelineFilterConfig> by lazy {
         observeTimelineFilterConfig(
@@ -134,6 +140,7 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
     internal fun createPager(scope: CoroutineScope): Flow<PagingData<UiTimelineV2>> =
         loader
             .flatMapLatest { remoteLoader ->
+                contextMediator.value = null
                 when (remoteLoader) {
                     is NotSupportRemoteLoader<UiTimelineV2> -> {
                         PagingData.emptyFlow(isError = false)
@@ -184,25 +191,36 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
         run {
             val allowLongText = allowLongTextTranslationDisplay(loader)
             val pageCache = TimelineDbPageCache()
-            Pager(
-                config = offsetPagingConfig,
-                remoteMediator =
+            val notifyError: (Throwable) -> Unit = { e ->
+                if (e is LoginExpiredException) {
+                    inAppNotification.onError(Message.LoginExpired, e)
+                }
+            }
+            val mediator =
+                if (loader is PostContextLoader) {
+                    PostContextRemoteMediator(
+                        loader = loader,
+                        database = database,
+                        preTranslationService = preTranslationService,
+                        notifyError = notifyError,
+                    ).also { contextMediator.value = it }
+                } else {
                     TimelineRemoteMediator(
                         loader = loader,
                         database = database,
                         allowLongText = allowLongText,
                         preTranslationService = preTranslationService,
-                        notifyError = { e ->
-                            if (e is LoginExpiredException) {
-                                inAppNotification.onError(Message.LoginExpired, e)
-                            }
-                        },
+                        notifyError = notifyError,
                         refreshOnInitialize = {
                             shouldRefreshTimelineOnInitialize(isHomeTimeline) {
                                 settingsRepository.appSettings.first().refreshHomeTimelineOnLaunch
                             }
                         },
-                    ),
+                    )
+                }
+            Pager(
+                config = offsetPagingConfig,
+                remoteMediator = mediator,
                 pagingSourceFactory = {
                     OffsetFromStartPagingSource(
                         TimelineDbPageLoader(
@@ -225,14 +243,25 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
             },
         ).flow
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Composable
     final override fun body(): TimelineState {
         val scope = rememberCoroutineScope()
-        val listState =
+        val items =
             remember {
                 createPager(scope)
             }.collectAsLazyPagingItems()
-                .toPagingState()
+        val contextLoadStates by remember {
+            contextMediator.flatMapLatest { it?.loadStates ?: flowOf(null) }
+        }.collectAsState(null)
+        val retry =
+            remember(items) {
+                {
+                    contextMediator.value?.prepareRetry()
+                    items.retry()
+                }
+            }
+        val listState = items.toPagingState(contextLoadStates, retry)
         return object : TimelineState {
             override val listState = listState
 

@@ -44,6 +44,7 @@ public sealed class PagingState<T> {
         public abstract val itemCount: Int
         public abstract val isRefreshing: Boolean
         public abstract val appendState: LoadState
+        public open val prependState: LoadState = LoadState.NotLoading(endOfPaginationReached = true)
 
         public abstract operator fun get(index: Int): T?
 
@@ -91,6 +92,8 @@ public sealed class PagingState<T> {
             private val items: ItemSnapshotList<T>,
             override val isRefreshing: Boolean,
             override val appendState: LoadState,
+            override val prependState: LoadState = LoadState.NotLoading(endOfPaginationReached = true),
+            private val onRetry: () -> Unit = data::retry,
         ) : Success<T>() {
             override val itemCount: Int
                 get() = items.size
@@ -109,7 +112,7 @@ public sealed class PagingState<T> {
             }
 
             override fun retry() {
-                data.retry()
+                onRetry()
             }
 
             override fun itemKey(key: ((item: T) -> Any)?): (index: Int) -> Any = data.itemKey(key)
@@ -226,7 +229,10 @@ public fun <T : Any> UiState<LazyPagingItems<T>>.toPagingState(): PagingState<T>
     }
 
 @HiddenFromObjC
-public fun <T : Any> LazyPagingItems<T>.toPagingState(): PagingState<T> {
+public fun <T : Any> LazyPagingItems<T>.toPagingState(
+    contextLoadStates: LoadStates? = null,
+    onRetry: () -> Unit = this::retry,
+): PagingState<T> {
     val snapshot = snapshot()
     if (itemCount > 0) {
         return PagingState.Success.PagingSuccess(
@@ -234,13 +240,15 @@ public fun <T : Any> LazyPagingItems<T>.toPagingState(): PagingState<T> {
             // LazyPagingItems is reused across updates. Include the presented items and
             // refresh state so equal load states cannot hide changes from UI consumers.
             items = itemSnapshotList,
-            isRefreshing = isRefreshing,
-            appendState = loadState.append,
+            isRefreshing = contextLoadStates?.refresh?.isLoading ?: isRefreshing,
+            appendState = contextLoadStates?.append ?: loadState.append,
+            prependState = contextLoadStates?.prepend ?: LoadState.NotLoading(endOfPaginationReached = true),
+            onRetry = onRetry,
         )
     } else if (snapshot.initialErrorOrNull() != null) {
         return PagingState.Error(
             error = snapshot.initialErrorOrNull()!!,
-            onRetry = { retry() },
+            onRetry = onRetry,
         )
     } else if (!snapshot.isResolvedEmpty()) {
         return PagingState.Loading()

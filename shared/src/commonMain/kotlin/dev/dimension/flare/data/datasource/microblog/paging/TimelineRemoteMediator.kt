@@ -19,7 +19,7 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 
 @OptIn(ExperimentalPagingApi::class)
-internal class TimelineRemoteMediator(
+internal open class TimelineRemoteMediator(
     private val loader: CacheableRemoteLoader<UiTimelineV2>,
     private val database: CacheDatabase,
     private val allowLongText: Boolean,
@@ -174,6 +174,10 @@ internal class TimelineRemoteMediator(
         if (staleTimeline.isNotEmpty()) {
             database.pagingTimelineDao().delete(staleTimeline)
         }
+        enqueuePreTranslation(dataToSave)
+    }
+
+    protected fun enqueuePreTranslation(dataToSave: List<DbPagingTimelineWithStatus>) {
         preTranslationService.enqueueStatuses(
             dataToSave
                 .flatMap { item ->

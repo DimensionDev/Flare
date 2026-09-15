@@ -1,5 +1,7 @@
 package dev.dimension.flare.common
 
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.paging.LoadState
 import androidx.paging.LoadStates
 import androidx.paging.PagingData
@@ -67,6 +69,44 @@ class PagingStatePublicationTest : RobolectricTest() {
             assertNotEquals(idle, refreshing)
             assertFalse(idle.isRefreshing)
             assertTrue(refreshing.isRefreshing)
+        }
+
+    @Test
+    fun contextLoadingAndErrorsPublishWhilePagingRefreshIsStillRunning() =
+        runTest {
+            Dispatchers.setMain(StandardTestDispatcher(testScheduler))
+            val pages = MutableStateFlow(page("main", "cached reply", refresh = LoadState.Loading))
+            val context = MutableStateFlow(LoadStates(LoadState.NotLoading(false), LoadState.Loading, LoadState.Loading))
+            val states = mutableListOf<PagingState.Success<String>>()
+            var retries = 0
+            val job =
+                launch {
+                    moleculeFlow(RecompositionMode.Immediate) {
+                        val loading by context.collectAsState()
+                        pages.collectAsLazyPagingItems().toPagingState(loading) { retries++ }
+                    }.collect { it.onSuccess { states += this } }
+                }
+            try {
+                runCurrent()
+                val pending = states.last()
+                assertFalse(pending.isRefreshing)
+                assertTrue(pending.appendState is LoadState.Loading)
+                assertTrue(pending.prependState is LoadState.Loading)
+                assertEquals("cached reply", pending.peek(1))
+
+                context.value = context.value.copy(append = LoadState.Error(Exception("reply failed")))
+                runCurrent()
+                val failed = states.last()
+                assertNotEquals(pending, failed)
+                assertTrue(failed.appendState is LoadState.Error)
+                assertTrue(failed.prependState is LoadState.Loading)
+                assertEquals(2, failed.itemCount)
+                failed.retry()
+                assertEquals(1, retries)
+            } finally {
+                job.cancelAndJoin()
+                Dispatchers.resetMain()
+            }
         }
 
     private fun withPagingStates(

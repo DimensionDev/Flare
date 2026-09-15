@@ -7,9 +7,11 @@ import app.bsky.unspecced.GetPostThreadV2QueryParams
 import app.bsky.unspecced.GetPostThreadV2Sort
 import app.bsky.unspecced.GetPostThreadV2ThreadItem
 import app.bsky.unspecced.GetPostThreadV2ThreadItemValueUnion
-import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
+import dev.dimension.flare.data.datasource.microblog.paging.ContextUpdate
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
+import dev.dimension.flare.data.datasource.microblog.paging.PostContextLoader
+import dev.dimension.flare.data.datasource.microblog.paging.toContextUpdate
 import dev.dimension.flare.data.network.bluesky.BlueskyService
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiTimelineV2
@@ -19,11 +21,11 @@ import sh.christian.ozone.api.AtUri
 
 @OptIn(ExperimentalPagingApi::class)
 internal class StatusDetailRemoteMediator(
-    private val statusKey: MicroBlogKey,
+    override val statusKey: MicroBlogKey,
     private val getService: suspend () -> BlueskyService,
-    private val accountKey: MicroBlogKey,
+    override val accountKey: MicroBlogKey,
     private val statusOnly: Boolean,
-) : CacheableRemoteLoader<UiTimelineV2> {
+) : PostContextLoader {
     override val pagingKey: String =
         buildString {
             append("status_detail_")
@@ -35,6 +37,17 @@ internal class StatusDetailRemoteMediator(
             append(accountKey.toString())
         }
     override val collapseReplyChains: Boolean = false
+
+    override fun contextUpdate(
+        request: PagingRequest,
+        result: PagingResult<UiTimelineV2>,
+        initial: Boolean,
+    ): ContextUpdate =
+        if (request == PagingRequest.Refresh && !statusOnly) {
+            ContextUpdate(posts = result.data)
+        } else {
+            result.toContextUpdate(statusKey, if (initial) PagingRequest.Refresh else request, initial)
+        }
 
     override suspend fun load(
         pageSize: Int,

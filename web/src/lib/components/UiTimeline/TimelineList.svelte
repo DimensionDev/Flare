@@ -113,7 +113,19 @@
 		<div class="timeline-gallery-slot"></div>
 	{:else}
 		<div class="timeline-list-body">
-			{#each itemIndexes as index (index)}
+			{#if listState.prependState.type === 'Loading'}
+				<div class="timeline-append-state">
+					<progress class="progress progress-primary timeline-append-progress"></progress>
+				</div>
+			{:else if listState.prependState.type === 'Error'}
+				<div class="timeline-append-state">
+					<div class="alert alert-error timeline-append-error">
+						<span>{listState.prependState.message ?? m.timelineUnableToLoadMorePosts()}</span>
+						<button class="btn btn-sm" type="button" onclick={() => listState.retry()}>{m.actionRetry()}</button>
+					</div>
+				</div>
+			{/if}
+			{#each itemIndexes as index (listState.peek(index)?.itemKey ?? `placeholder-${index}`)}
 				{@const item = listState.peek(index)}
 				<article
 					class:card-row={cardStyleItems}

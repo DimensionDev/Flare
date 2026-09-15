@@ -852,6 +852,9 @@ class WebPresenterRendererTest {
             """put("appendState", encodeDevDimensionFlareCommonPagingStateDevDimensionFlareWebSharedSampleWebPagingStateLoadState(value.appendState))""",
         )
         kotlin.assertContains(
+            """put("prependState", encodeDevDimensionFlareCommonPagingStateDevDimensionFlareWebSharedSampleWebPagingStateLoadState(value.prependState))""",
+        )
+        kotlin.assertContains(
             """private fun encodeDevDimensionFlareCommonPagingStateDevDimensionFlareWebSharedSampleWebPagingStateLoadState(value: androidx.paging.LoadState): JsonElement =""",
         )
         kotlin.assertContains(""""__webPagingPeek:items" -> {""")

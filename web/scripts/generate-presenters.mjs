@@ -65,13 +65,13 @@ type PagingStateSnapshot =
 \t| { type: "Loading" }
 \t| { type: "Error"; message: string | null }
 \t| { type: "Empty" }
-\t| { type: "Success"; itemCount: number; isRefreshing: boolean; appendState: PagingLoadState };
+\t| { type: "Success"; itemCount: number; isRefreshing: boolean; appendState: PagingLoadState; prependState: PagingLoadState };
 
 export type PagingState<T> =
 \t| { type: "Loading" }
 \t| { type: "Error"; message: string | null }
 \t| { type: "Empty" }
-\t| { type: "Success"; itemCount: number; isRefreshing: boolean; appendState: PagingLoadState; peek(index: number): T | null; get(index: number): void; retry(): void };
+\t| { type: "Success"; itemCount: number; isRefreshing: boolean; appendState: PagingLoadState; prependState: PagingLoadState; peek(index: number): T | null; get(index: number): void; retry(): void };
 
 `,
 		snapshotType: () => 'PagingStateSnapshot',

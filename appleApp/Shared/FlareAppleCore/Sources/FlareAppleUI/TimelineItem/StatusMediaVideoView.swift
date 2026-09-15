@@ -302,6 +302,7 @@ public struct StatusMediaVideoView: View {
                     }
                     .padding(.horizontal, 56)
                     .opacity(seekFeedbackOpacity)
+                    .allowsHitTesting(false)
                 }
             }
             .onDisappear {
@@ -669,20 +670,15 @@ private struct VideoGestureOverlay: UIViewRepresentable {
     let onLongPressChanged: (Bool) -> Void
 
     func makeUIView(context: Context) -> UIView {
-        let view = WindowGestureHostView()
+        let view = UIView()
         view.backgroundColor = .clear
-        view.onWindowChanged = { [weak coordinator = context.coordinator, weak view] in
-            coordinator?.installGestures(from: view)
-        }
+        context.coordinator.installGestures(from: view)
         return view
     }
 
     func updateUIView(_ uiView: UIView, context: Context) {
         context.coordinator.onDoubleTap = onDoubleTap
         context.coordinator.onLongPressChanged = onLongPressChanged
-        DispatchQueue.main.async {
-            context.coordinator.installGestures(from: uiView)
-        }
     }
 
     static func dismantleUIView(_ uiView: UIView, coordinator: Coordinator) {
@@ -697,7 +693,6 @@ private struct VideoGestureOverlay: UIViewRepresentable {
         var onDoubleTap: (CGFloat, CGFloat) -> Void
         var onLongPressChanged: (Bool) -> Void
         private weak var sourceView: UIView?
-        private weak var installedWindow: UIWindow?
         private var doubleTapRecognizer: UITapGestureRecognizer?
         private var longPressRecognizer: UILongPressGestureRecognizer?
         private var longPressBeganInside = false
@@ -710,9 +705,8 @@ private struct VideoGestureOverlay: UIViewRepresentable {
             self.onLongPressChanged = onLongPressChanged
         }
 
-        func installGestures(from view: UIView?) {
-            sourceView = view
-            guard let window = view?.window, installedWindow !== window else { return }
+        func installGestures(from view: UIView) {
+            guard sourceView !== view else { return }
             uninstallGestures()
             sourceView = view
 
@@ -727,21 +721,21 @@ private struct VideoGestureOverlay: UIViewRepresentable {
             longPress.cancelsTouchesInView = false
             longPress.delegate = self
 
-            window.addGestureRecognizer(doubleTap)
-            window.addGestureRecognizer(longPress)
-            installedWindow = window
+            // Let UIKit hit testing exclude controls and panels above the video.
+            view.addGestureRecognizer(doubleTap)
+            view.addGestureRecognizer(longPress)
             doubleTapRecognizer = doubleTap
             longPressRecognizer = longPress
         }
 
         func uninstallGestures() {
             if let doubleTapRecognizer {
-                installedWindow?.removeGestureRecognizer(doubleTapRecognizer)
+                sourceView?.removeGestureRecognizer(doubleTapRecognizer)
             }
             if let longPressRecognizer {
-                installedWindow?.removeGestureRecognizer(longPressRecognizer)
+                sourceView?.removeGestureRecognizer(longPressRecognizer)
             }
-            installedWindow = nil
+            sourceView = nil
             doubleTapRecognizer = nil
             longPressRecognizer = nil
             longPressBeganInside = false
@@ -749,19 +743,17 @@ private struct VideoGestureOverlay: UIViewRepresentable {
 
         @objc func handleDoubleTap(_ recognizer: UITapGestureRecognizer) {
             guard recognizer.state == .ended,
-                  let window = recognizer.view,
                   let sourceView,
-                  let location = localLocation(from: recognizer, in: window, sourceView: sourceView) else { return }
+                  let location = localLocation(from: recognizer, in: sourceView) else { return }
             onDoubleTap(location.x, sourceView.bounds.width)
         }
 
         @objc func handleLongPress(_ recognizer: UILongPressGestureRecognizer) {
-            guard let window = recognizer.view,
-                  let sourceView else { return }
+            guard let sourceView else { return }
 
             switch recognizer.state {
             case .began:
-                longPressBeganInside = localLocation(from: recognizer, in: window, sourceView: sourceView) != nil
+                longPressBeganInside = localLocation(from: recognizer, in: sourceView) != nil
                 if longPressBeganInside {
                     onLongPressChanged(true)
                 }
@@ -775,13 +767,6 @@ private struct VideoGestureOverlay: UIViewRepresentable {
             }
         }
 
-        func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
-            guard let sourceView,
-                  let window = installedWindow else { return false }
-            let point = touch.location(in: window)
-            return sourceView.convert(sourceView.bounds, to: window).contains(point)
-        }
-
         func gestureRecognizer(
             _ gestureRecognizer: UIGestureRecognizer,
             shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer
@@ -791,27 +776,11 @@ private struct VideoGestureOverlay: UIViewRepresentable {
 
         private func localLocation(
             from recognizer: UIGestureRecognizer,
-            in windowView: UIView,
-            sourceView: UIView
+            in sourceView: UIView
         ) -> CGPoint? {
-            let pointInWindow = recognizer.location(in: windowView)
-            let sourceFrame = sourceView.convert(sourceView.bounds, to: windowView)
-            guard sourceFrame.contains(pointInWindow) else { return nil }
-            return sourceView.convert(pointInWindow, from: windowView)
+            let point = recognizer.location(in: sourceView)
+            return sourceView.bounds.contains(point) ? point : nil
         }
-    }
-}
-
-private final class WindowGestureHostView: UIView {
-    var onWindowChanged: (() -> Void)?
-
-    override func didMoveToWindow() {
-        super.didMoveToWindow()
-        onWindowChanged?()
-    }
-
-    override func point(inside point: CGPoint, with event: UIEvent?) -> Bool {
-        false
     }
 }
 #endif

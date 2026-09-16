@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="changelog_title">Üdv újra!</string>
+    <string name="changelog_message">Néhány változtatást végeztünk a legutóbbi bejelentkezésed óta. Íme a részletek:</string>
     <string name="changelog_current"><![CDATA[
             <span>%1$s verzió:</span>
             <ul>
@@ -9,6 +11,4 @@
                 <li>Megbízhatóbb lett a Bluesky-bejelentkezés, helyreállt a FANBOX-tartalmak betöltése, a Misskey-bejegyzések részletei pedig már a teljes beszélgetést megjelenítik.</li>
             </ul>
         ]]></string>
-    <string name="changelog_title">Üdv újra!</string>
-    <string name="changelog_message">Néhány változtatást végeztünk a legutóbbi bejelentkezésed óta. Íme a részletek:</string>
 </resources>

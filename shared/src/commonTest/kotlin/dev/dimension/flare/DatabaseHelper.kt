@@ -4,6 +4,7 @@ import androidx.room3.Room
 import androidx.room3.RoomDatabase
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.TimelineRevisionCallback
+import kotlinx.coroutines.test.TestScope
 import kotlin.reflect.KClass
 
 internal expect fun <T : RoomDatabase> Room.memoryDatabaseBuilder(databaseClass: KClass<T>): RoomDatabase.Builder<T>
@@ -16,3 +17,5 @@ internal inline fun <reified T : RoomDatabase> Room.memoryDatabaseBuilder(): Roo
     }
 
 expect open class RobolectricTest()
+
+internal expect fun TestScope.startPlatformEventLoop()

@@ -40,6 +40,7 @@ import dev.dimension.flare.memoryDatabaseBuilder
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.ReferenceType
+import dev.dimension.flare.startPlatformEventLoop
 import dev.dimension.flare.ui.humanizer.PlatformFormatter
 import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiTimelineV2
@@ -393,6 +394,7 @@ class PostContextRemoteMediatorTest : RobolectricTest() {
     @Test
     fun pagerPublishesTheUpdatedMainPostBeforeTheSlowRepliesFinish() =
         runTest {
+            startPlatformEventLoop()
             seed(listOf("parent", "main", "cached-reply"))
             val replies = CompletableDeferred<PagingResult<UiTimelineV2>>()
             val mediator =

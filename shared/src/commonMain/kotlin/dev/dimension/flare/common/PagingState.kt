@@ -8,7 +8,6 @@ import androidx.paging.ItemSnapshotList
 import androidx.paging.LoadState
 import androidx.paging.LoadStates
 import androidx.paging.compose.LazyPagingItems
-import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
 import dev.dimension.flare.ui.model.UiState
 import kotlinx.collections.immutable.ImmutableList
@@ -95,12 +94,17 @@ public sealed class PagingState<T> {
             override val itemCount: Int
                 get() = items.size
 
-            override operator fun get(index: Int): T? =
-                if (index < 0 || index >= data.itemCount) {
-                    null
-                } else {
+            override operator fun get(index: Int): T? {
+                if (index !in items.indices) {
+                    return null
+                }
+                // Only send load hints for the current snapshot. An older UI state must
+                // keep its count, keys, content types and items from the same snapshot.
+                if (items === data.itemSnapshotList) {
                     data[index]
                 }
+                return items[index]
+            }
 
             override fun peek(index: Int): T? = items.getOrNull(index)
 
@@ -112,9 +116,15 @@ public sealed class PagingState<T> {
                 data.retry()
             }
 
-            override fun itemKey(key: ((item: T) -> Any)?): (index: Int) -> Any = data.itemKey(key)
+            override fun itemKey(key: ((item: T) -> Any)?): (index: Int) -> Any {
+                // The default factory creates Android-saveable placeholder keys without
+                // reading the live list, and cannot collide with caller-provided keys.
+                val placeholderKey = data.itemKey()
+                return { index -> key?.let { items.getOrNull(index)?.let(it) } ?: placeholderKey(index) }
+            }
 
-            override fun itemContentType(contentType: ((item: T) -> Any?)?): (index: Int) -> Any? = data.itemContentType(contentType)
+            override fun itemContentType(contentType: ((item: T) -> Any?)?): (index: Int) -> Any? =
+                { index -> contentType?.let { items.getOrNull(index)?.let(it) } }
         }
     }
 }

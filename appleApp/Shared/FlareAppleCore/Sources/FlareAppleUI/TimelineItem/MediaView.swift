@@ -49,6 +49,8 @@ public struct MediaVideoView: View {
     @Environment(\.networkKind) private var networkKind
     @Environment(\.timelinePlaybackCoordinator) private var timelinePlayback
     @Environment(\.timelineCarouselItem) private var carouselItem
+    @Environment(\.isMultipleColumn) private var isMultipleColumn
+    @Environment(\.timelinePlaybackViewport) private var timelinePlaybackViewport
     @State private var fallbackPlayback = TimelinePlaybackCoordinator()
     @State private var player = VideoPlaybackSession()
     @State private var id = UUID().uuidString
@@ -95,16 +97,19 @@ public struct MediaVideoView: View {
                 }
             }
             .overlay(alignment: .bottomLeading) { statusOverlay }
-            .onGeometryChange(for: InlineVideoGeometry.self) { proxy in
+            .onGeometryChange(for: InlineVideoGeometry.self) { [timelinePlaybackViewport, isMultipleColumn] proxy in
                 let bounds = CGRect(origin: .zero, size: proxy.size)
-                let vertical = proxy.bounds(of: .scrollView(axis: .vertical)) ?? bounds
+                let scrollBounds = proxy.bounds(of: .scrollView(axis: .vertical)) ?? bounds
+                let globalBounds = proxy.frame(in: .global)
+                let viewport = timelinePlaybackViewport?.offsetBy(dx: -globalBounds.minX, dy: -globalBounds.minY) ?? scrollBounds
+                let vertical = scrollBounds.intersection(viewport)
                 let horizontal = proxy.bounds(of: .scrollView(axis: .horizontal)) ?? bounds
                 let visible = bounds.intersection(vertical).intersection(horizontal)
                 return InlineVideoGeometry(
                     visible: !visible.isEmpty,
                     horizontalFraction: bounds.width > 0 ? max(0, visible.width) / bounds.width : 0,
-                    distance: Double(abs(bounds.midY - vertical.midY)),
-                    verticalOffset: vertical.minY
+                    distance: TimelineAutoplayPolicy.centerDistance(of: bounds, in: viewport, multipleColumns: isMultipleColumn),
+                    verticalOffset: scrollBounds.minY
                 )
             } action: { value in
                 if #unavailable(iOS 18.0, macOS 15.0) {

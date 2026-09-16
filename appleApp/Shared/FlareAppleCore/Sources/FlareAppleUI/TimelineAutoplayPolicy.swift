@@ -1,7 +1,8 @@
 import Foundation
+import CoreGraphics
 
 /// Selection is separate from visibility: a selected item can start at 60%,
-/// while the current player can continue until its last visible pixel leaves.
+/// while the current player can continue during scrolling until it leaves view.
 public struct TimelineAutoplayPolicy {
     public struct Candidate: Equatable {
         public let id: String
@@ -9,6 +10,7 @@ public struct TimelineAutoplayPolicy {
         public let isVisible: Bool
         public let isSelected: Bool
         public let canStart: Bool
+        /// Distance from the complete video bounds to the viewport center, in points.
         public let distance: Double
         public let mediaURL: String?
 
@@ -29,6 +31,11 @@ public struct TimelineAutoplayPolicy {
     private var preferredMediaURL: String?
 
     public init() {}
+
+    public nonisolated static func centerDistance(of bounds: CGRect, in viewport: CGRect, multipleColumns: Bool) -> Double {
+        let dy = bounds.midY - viewport.midY
+        return Double(multipleColumns ? hypot(bounds.midX - viewport.midX, dy) : abs(dy))
+    }
 
     public mutating func verticalScrollBegan() {
         preferredGroupID = nil
@@ -64,11 +71,17 @@ public struct TimelineAutoplayPolicy {
                     $0.groupID == preferredGroupID && $0.isVisible && matchesSelection($0) && $0.canStart
                 }?.id
             }
-        } else if let current {
-            activeID = current.id
         } else {
-            activeID = candidates.filter { $0.isVisible && $0.isSelected && $0.canStart }
-                .min { $0.distance < $1.distance }?.id
+            let closest = candidates.filter {
+                $0.isVisible && $0.isSelected && ($0.canStart || $0.id == current?.id)
+            }
+                .min { $0.distance < $1.distance }
+            // Only near-ties retain the current video after scrolling settles.
+            if let current, current.isSelected, let closest, current.distance <= closest.distance + 2 {
+                activeID = current.id
+            } else {
+                activeID = closest?.id
+            }
         }
         return activeID
     }

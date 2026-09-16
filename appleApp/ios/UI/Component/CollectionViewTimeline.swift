@@ -2027,8 +2027,9 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     private func bestAutoplayCandidate() -> TimelineVideoAutoplayCandidate? {
         let candidates = visibleAutoplayCandidates()
         let selection = candidates.compactMap { candidate -> TimelineAutoplayPolicy.Candidate? in
-            guard let rect = visibleRect(for: candidate.hostView, in: collectionView) else { return nil }
-            let distance = hypot(rect.midX - collectionView.bounds.midX, rect.midY - collectionView.bounds.midY)
+            guard visibleRect(for: candidate.hostView, in: collectionView) != nil else { return nil }
+            let bounds = candidate.hostView.convert(candidate.hostView.bounds, to: collectionView)
+            let distance = TimelineAutoplayPolicy.centerDistance(of: bounds, in: autoplayViewport, multipleColumns: columnCount > 1)
             return .init(id: candidate.id, groupID: candidate.groupID, isVisible: true,
                          isSelected: candidate.isSelected, canStart: candidate.horizontalFraction >= 0.6,
                          distance: distance, mediaURL: candidate.url.absoluteString)
@@ -2143,6 +2144,12 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         VideoPlaybackArbiter.shared.release(self)
     }
 
+    private var autoplayViewport: CGRect {
+        // Scroll padding can include artificial space for short profiles. Only
+        // the safe area represents bars obscuring the actual viewport.
+        collectionView.bounds.inset(by: collectionView.safeAreaInsets)
+    }
+
     private func visibleRect(for hostView: UIView, in collectionView: UICollectionView) -> CGRect? {
         guard !hostView.isHidden,
               hostView.alpha > 0.01,
@@ -2151,7 +2158,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
               hostView.bounds.height > 1 else {
             return nil
         }
-        var visible = hostView.convert(hostView.bounds, to: collectionView).intersection(collectionView.bounds)
+        var visible = hostView.convert(hostView.bounds, to: collectionView).intersection(autoplayViewport)
         var ancestor = hostView.superview
         while let view = ancestor {
             guard !view.isHidden, view.alpha > 0.01 else { return nil }

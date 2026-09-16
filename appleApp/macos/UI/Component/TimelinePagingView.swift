@@ -359,6 +359,7 @@ private struct MacGalleryTimelineMasonryView: View {
             }
         }
         .padding(.horizontal, 16)
+        .environment(\.isMultipleColumn, columnCount > 1)
     }
 
     @ViewBuilder

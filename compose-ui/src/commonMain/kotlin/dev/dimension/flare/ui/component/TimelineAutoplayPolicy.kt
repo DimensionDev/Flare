@@ -1,5 +1,9 @@
 package dev.dimension.flare.ui.component
 
+import androidx.compose.ui.geometry.Rect
+import kotlin.math.abs
+import kotlin.math.hypot
+
 internal class TimelineAutoplayPolicy {
     data class Candidate(
         val id: Any,
@@ -7,6 +11,7 @@ internal class TimelineAutoplayPolicy {
         val visible: Boolean,
         val selected: Boolean = true,
         val canStart: Boolean,
+        // Distance from the complete video bounds to the viewport center, in dp.
         val distance: Float,
         val mediaUri: String? = null,
     )
@@ -59,14 +64,32 @@ internal class TimelineAutoplayPolicy {
                     }
                 }
 
-                current != null -> {
-                    current.id
-                }
-
                 else -> {
-                    candidates.filter { it.visible && it.selected && it.canStart }.minByOrNull { it.distance }?.id
+                    val closest =
+                        candidates
+                            .filter { it.visible && it.selected && (it.canStart || it.id == current?.id) }
+                            .minByOrNull { it.distance }
+                    // Only near-ties retain the current video after scrolling settles.
+                    if (current != null && current.selected && closest != null && current.distance <= closest.distance + 2f) {
+                        current.id
+                    } else {
+                        closest?.id
+                    }
                 }
             }
         return activeId
+    }
+
+    companion object {
+        fun centerDistance(
+            bounds: Rect,
+            viewport: Rect,
+            multipleColumns: Boolean,
+            density: Float,
+        ): Float {
+            val dy = bounds.center.y - viewport.center.y
+            val pixels = if (multipleColumns) hypot(bounds.center.x - viewport.center.x, dy) else abs(dy)
+            return pixels / density
+        }
     }
 }

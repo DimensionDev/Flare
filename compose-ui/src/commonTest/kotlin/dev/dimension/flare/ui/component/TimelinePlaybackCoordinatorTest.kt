@@ -11,6 +11,41 @@ import kotlin.test.assertTrue
 @OptIn(ExperimentalCoroutinesApi::class)
 class TimelinePlaybackCoordinatorTest {
     @Test
+    fun closerVisibleVideoTakesOverOnlyAfterScrollIdleDelay() =
+        runTest {
+            val playback = TimelinePlaybackCoordinator(this, VideoPlaybackArbiter())
+            val events = mutableListOf<String>()
+            val playing = mutableSetOf<String>()
+            for (id in listOf("a", "b")) {
+                playback.register(id) { active ->
+                    events += "$id:$active"
+                    if (active) playing.add(id) else playing.remove(id)
+                    assertTrue(playing.size <= 1)
+                }
+            }
+            val a = TimelineAutoplayPolicy.Candidate("a", visible = true, canStart = true, distance = 0f)
+            val b = TimelineAutoplayPolicy.Candidate("b", visible = true, canStart = true, distance = 100f)
+            playback.update(a)
+            playback.update(b)
+            advanceTimeBy(200)
+            runCurrent()
+            assertEquals(listOf("a:true"), events)
+            playback.setScrolling("vertical", scrolling = true, vertical = true)
+            playback.update(a.copy(distance = 100f))
+            playback.update(b.copy(distance = 0f))
+            advanceTimeBy(1000)
+            assertEquals(listOf("a:true"), events)
+            playback.setScrolling("vertical", scrolling = false, vertical = true)
+            advanceTimeBy(199)
+            runCurrent()
+            assertEquals(listOf("a:true"), events)
+            advanceTimeBy(1)
+            runCurrent()
+            assertEquals(listOf("a:true", "a:false", "b:true"), events)
+            playback.close()
+        }
+
+    @Test
     fun returningToVisibleIdleVideoSkipsDebounceButNeverStartsDuringScroll() =
         runTest {
             val arbiter = VideoPlaybackArbiter()

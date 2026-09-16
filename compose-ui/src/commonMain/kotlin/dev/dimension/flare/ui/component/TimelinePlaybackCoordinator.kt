@@ -5,19 +5,22 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.toSize
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlin.math.abs
 
 internal val LocalTimelinePlayback = compositionLocalOf<TimelinePlaybackCoordinator?> { null }
 internal val LocalTimelineCarouselItem = compositionLocalOf<TimelineCarouselItem?> { null }
@@ -48,7 +51,8 @@ internal class TimelinePlaybackCoordinator(
     val mediaSelections = TimelineMediaSelections()
     private var viewerSelection: Pair<List<String>, String>? = null
     private val cleanup = mutableMapOf<Any, () -> Unit>()
-    var viewport: Rect = Rect.Zero
+    var viewport: Rect? by mutableStateOf(null)
+    var multipleColumns: Boolean by mutableStateOf(false)
 
     init {
         arbiter.register(
@@ -274,9 +278,12 @@ internal fun Modifier.timelineVideoAutoplay(
 ): Modifier {
     val item = LocalTimelineCarouselItem.current
     val geometry = remember(id) { VideoGeometry() }
+    val viewport = playback.viewport
+    val multipleColumns = playback.multipleColumns
+    val density = LocalDensity.current.density
 
     fun update() {
-        val visible = if (playback.viewport.isEmpty) geometry.visible else geometry.visible.intersect(playback.viewport)
+        val visible = viewport?.let { geometry.visible.intersect(it) } ?: geometry.visible
         playback.update(
             TimelineAutoplayPolicy.Candidate(
                 id = id,
@@ -284,7 +291,7 @@ internal fun Modifier.timelineVideoAutoplay(
                 visible = enabled && !visible.isEmpty,
                 selected = item?.selected ?: true,
                 canStart = enabled && (item?.isCarousel != true || visible.width >= geometry.bounds.width * 0.6f),
-                distance = abs(geometry.bounds.center.y - playback.viewport.center.y),
+                distance = TimelineAutoplayPolicy.centerDistance(geometry.bounds, viewport ?: geometry.bounds, multipleColumns, density),
                 mediaUri = mediaUri,
             ),
         )

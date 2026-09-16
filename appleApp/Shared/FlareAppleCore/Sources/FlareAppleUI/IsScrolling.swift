@@ -14,6 +14,10 @@ public extension EnvironmentValues {
     @Entry var isScrollingState: IsScrollingState? = nil
 }
 
+extension EnvironmentValues {
+    @Entry var timelinePlaybackViewport: CGRect? = nil
+}
+
 @available(iOS 17.0, macOS 14.0, *)
 private struct DetectScrollingModifier: ViewModifier {
     let debounceIdleSeconds: TimeInterval
@@ -24,10 +28,16 @@ private struct DetectScrollingModifier: ViewModifier {
     @State private var isScrolling = false
     @State private var isScrollingState = IsScrollingState()
     @State private var debounceTask: Task<Void, Never>?
+    @State private var playbackViewport: CGRect?
 
     func body(content: Content) -> some View {
         scrollingContent(content)
             .environment(\.timelinePlaybackCoordinator, playback)
+            .environment(\.timelinePlaybackViewport, playbackViewport)
+            .onGeometryChange(for: CGRect.self) { proxy in
+                // SwiftUI's container frame already excludes its safe-area insets.
+                proxy.frame(in: .global)
+            } action: { playbackViewport = $0 }
             .onAppear { playback.setSuspended(scenePhase != .active) }
             .onChange(of: scenePhase) { _, phase in playback.setSuspended(phase != .active) }
             .onDisappear { playback.setSuspended(true) }

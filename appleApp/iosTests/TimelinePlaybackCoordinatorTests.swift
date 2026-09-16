@@ -2,6 +2,39 @@ import XCTest
 
 final class TimelinePlaybackCoordinatorTests: XCTestCase {
     @MainActor
+    func testCloserVisibleVideoTakesOverOnlyAfterScrollIdleDelay() async throws {
+        let playback = TimelinePlaybackCoordinator(arbiter: VideoPlaybackArbiter())
+        var events: [String] = []
+        var playing: Set<String> = []
+        var ended: ContinuousClock.Instant?
+        var switchDelay: Duration?
+        for id in ["a", "b"] {
+            playback.register(id: id) { active in
+                events.append("\(id):\(active)")
+                if active { playing.insert(id) } else { playing.remove(id) }
+                XCTAssertLessThanOrEqual(playing.count, 1)
+                if id == "b", active, let ended { switchDelay = ended.duration(to: .now) }
+            }
+        }
+        playback.update(.init(id: "a", isVisible: true, canStart: true, distance: 0))
+        playback.update(.init(id: "b", isVisible: true, canStart: true, distance: 100))
+        try await Task.sleep(for: .milliseconds(250))
+        XCTAssertEqual(events, ["a:true"])
+        playback.setScrolling(true, source: "vertical", vertical: true)
+        playback.update(.init(id: "a", isVisible: true, canStart: true, distance: 100))
+        playback.update(.init(id: "b", isVisible: true, canStart: true, distance: 0))
+        try await Task.sleep(for: .milliseconds(250))
+        XCTAssertEqual(events, ["a:true"])
+        ended = .now
+        playback.setScrolling(false, source: "vertical", vertical: true)
+        XCTAssertEqual(events, ["a:true"])
+        try await Task.sleep(for: .milliseconds(350))
+        XCTAssertEqual(events, ["a:true", "a:false", "b:true"])
+        XCTAssertGreaterThanOrEqual(switchDelay ?? .zero, .milliseconds(200))
+        playback.setSuspended(true)
+    }
+
+    @MainActor
     func testReturnSelectionStartsWhenTheNewPageBecomesVisibleWithoutTreatingItsJumpAsADrag() async throws {
         let arbiter = VideoPlaybackArbiter()
         let timeline = TimelinePlaybackCoordinator(arbiter: arbiter)

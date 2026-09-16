@@ -170,7 +170,7 @@ internal class PostContextRemoteMediator(
                 ++sequence
             }
         return try {
-            val result = loader.load(pageSize, pending.request)
+            val result = timeline(pageSize, pending.request)
             currentCoroutineContext().ensureActive()
             val update = loader.contextUpdate(pending.request, result, pending.initial)
             writes.withLock {

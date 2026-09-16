@@ -25,9 +25,6 @@ public interface PostContextLoader : CacheableRemoteLoader<UiTimelineV2> {
     public val statusKey: MicroBlogKey
     public val accountKey: MicroBlogKey
 
-    override val collapseReplyChains: Boolean
-        get() = false
-
     /**
      * Refresh normally contains both sides. A loader fetching context in a subsequent request
      * leaves that side null and returns its initial cursor in the paging result instead.

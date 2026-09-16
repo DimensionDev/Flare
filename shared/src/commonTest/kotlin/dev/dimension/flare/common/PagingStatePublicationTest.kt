@@ -89,9 +89,8 @@ class PagingStatePublicationTest : RobolectricTest() {
             try {
                 runCurrent()
                 val pending = states.last()
-                assertFalse(pending.isRefreshing)
+                assertTrue(pending.isRefreshing)
                 assertTrue(pending.appendState is LoadState.Loading)
-                assertTrue(pending.prependState is LoadState.Loading)
                 assertEquals("cached reply", pending.peek(1))
 
                 context.value = context.value.copy(append = LoadState.Error(Exception("reply failed")))
@@ -99,10 +98,20 @@ class PagingStatePublicationTest : RobolectricTest() {
                 val failed = states.last()
                 assertNotEquals(pending, failed)
                 assertTrue(failed.appendState is LoadState.Error)
-                assertTrue(failed.prependState is LoadState.Loading)
                 assertEquals(2, failed.itemCount)
                 failed.retry()
                 assertEquals(1, retries)
+
+                context.value = context.value.copy(append = LoadState.NotLoading(true))
+                runCurrent()
+                assertTrue(states.last().appendState is LoadState.Loading)
+                assertTrue(states.last().isRefreshing)
+
+                context.value = context.value.copy(prepend = LoadState.Error(Exception("parent failed")))
+                runCurrent()
+                assertTrue(states.last().appendState is LoadState.Error)
+                states.last().retry()
+                assertEquals(2, retries)
             } finally {
                 job.cancelAndJoin()
                 Dispatchers.resetMain()

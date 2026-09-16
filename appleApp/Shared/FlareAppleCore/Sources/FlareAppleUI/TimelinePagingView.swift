@@ -51,7 +51,6 @@ public struct TimelinePagingContent: View {
     private func successContent(_ success: PagingStateSuccess<UiTimelineV2>) -> some View {
         let count = Int(success.itemCount)
         let rows = TimelinePagingRows(success: success, count: count)
-        pageStateContent(success, prepend: true)
         ForEach(rows) { row in
             contentLayout {
                 TimelinePagingRowView(
@@ -65,12 +64,7 @@ public struct TimelinePagingContent: View {
             }
         }
 
-        pageStateContent(success, prepend: false)
-    }
-
-    @ViewBuilder
-    private func pageStateContent(_ success: PagingStateSuccess<UiTimelineV2>, prepend: Bool) -> some View {
-        switch onEnum(of: prepend ? success.prependState : success.appendState) {
+        switch onEnum(of: success.appendState) {
         case .error(let error):
             contentLayout {
                 ListErrorView(error: error.error) {

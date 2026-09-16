@@ -44,7 +44,6 @@ public sealed class PagingState<T> {
         public abstract val itemCount: Int
         public abstract val isRefreshing: Boolean
         public abstract val appendState: LoadState
-        public open val prependState: LoadState = LoadState.NotLoading(endOfPaginationReached = true)
 
         public abstract operator fun get(index: Int): T?
 
@@ -92,7 +91,6 @@ public sealed class PagingState<T> {
             private val items: ItemSnapshotList<T>,
             override val isRefreshing: Boolean,
             override val appendState: LoadState,
-            override val prependState: LoadState = LoadState.NotLoading(endOfPaginationReached = true),
             private val onRetry: () -> Unit = data::retry,
         ) : Success<T>() {
             override val itemCount: Int
@@ -240,9 +238,8 @@ public fun <T : Any> LazyPagingItems<T>.toPagingState(
             // LazyPagingItems is reused across updates. Include the presented items and
             // refresh state so equal load states cannot hide changes from UI consumers.
             items = itemSnapshotList,
-            isRefreshing = contextLoadStates?.refresh?.isLoading ?: isRefreshing,
-            appendState = contextLoadStates?.append ?: loadState.append,
-            prependState = contextLoadStates?.prepend ?: LoadState.NotLoading(endOfPaginationReached = true),
+            isRefreshing = isRefreshing,
+            appendState = contextLoadStates?.contextFooterState() ?: loadState.append,
             onRetry = onRetry,
         )
     } else if (snapshot.initialErrorOrNull() != null) {
@@ -256,6 +253,15 @@ public fun <T : Any> LazyPagingItems<T>.toPagingState(
         return PagingState.Empty(this::refresh)
     }
 }
+
+// Context work in either direction uses the existing footer.
+internal fun LoadStates.contextFooterState(): LoadState =
+    when {
+        append is LoadState.Error -> append
+        prepend is LoadState.Error -> prepend
+        append is LoadState.Loading || prepend is LoadState.Loading -> LoadState.Loading
+        else -> append
+    }
 
 @Immutable
 internal data class PagingSnapshot(

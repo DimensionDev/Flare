@@ -1,6 +1,7 @@
 package dev.dimension.flare.data.datasource.nostr
 
 import androidx.paging.ExperimentalPagingApi
+import dev.dimension.flare.data.datasource.microblog.paging.ContextPageUpdate
 import dev.dimension.flare.data.datasource.microblog.paging.ContextUpdate
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
@@ -31,7 +32,10 @@ internal class StatusDetailRemoteMediator(
         if (request == PagingRequest.Refresh) {
             ContextUpdate(posts = result.data)
         } else {
-            result.toContextUpdate(statusKey, if (initial) PagingRequest.Refresh else request, initial)
+            // The context is rendered as reply chains, which can include the focal post inline.
+            result.toContextUpdate(statusKey, request, initial).copy(
+                before = if (initial) ContextPageUpdate(emptyList(), cursor = null, replace = true) else null,
+            )
         }
 
     override suspend fun load(

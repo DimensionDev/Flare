@@ -1237,7 +1237,6 @@ private object PagingStateCodec : StateCodec {
         builder.appendLine("            put(\"itemCount\", value.itemCount)")
         builder.appendLine("            put(\"isRefreshing\", value.isRefreshing)")
         builder.appendLine("            put(\"appendState\", $loadStateEncoderName(value.appendState))")
-        builder.appendLine("            put(\"prependState\", $loadStateEncoderName(value.prependState))")
         builder.appendLine("        }")
         builder.appendLine("    }")
         builder.appendLine()

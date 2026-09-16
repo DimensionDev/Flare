@@ -32,12 +32,14 @@ import dev.dimension.flare.data.datasource.microblog.paging.TimelineDbPageCache
 import dev.dimension.flare.data.datasource.microblog.paging.TimelineDbPageLoader
 import dev.dimension.flare.data.datasource.microblog.paging.TimelinePageItem
 import dev.dimension.flare.data.datasource.microblog.paging.TimelinePagingMapper
+import dev.dimension.flare.data.datasource.microblog.paging.TimelineRemoteMediator
 import dev.dimension.flare.data.datasource.microblog.paging.toContextUpdate
 import dev.dimension.flare.di.startKoin
 import dev.dimension.flare.di.testSingle
 import dev.dimension.flare.memoryDatabaseBuilder
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.ReferenceType
 import dev.dimension.flare.ui.humanizer.PlatformFormatter
 import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiTimelineV2
@@ -460,6 +462,77 @@ class PostContextRemoteMediatorTest : RobolectricTest() {
                 Dispatchers.resetMain()
             }
         }
+
+    @Test
+    fun stagedRepliesKeepTheOriginalInlineParentPresentation() =
+        runTest {
+            val parent = post("parent")
+            val main = post("main").replyTo(parent)
+            val reply = post("reply").replyTo(main)
+            val nestedReply = post("nested").replyTo(reply)
+            val contextLoader =
+                loader(update = { request, result, initial ->
+                    val update = result.toContextUpdate(mainKey, request, initial)
+                    if (request == PagingRequest.Refresh) update.copy(after = null) else update
+                }) { request ->
+                    when (request) {
+                        PagingRequest.Refresh -> PagingResult(listOf(parent, main), nextKey = "replies")
+                        is PagingRequest.Append -> PagingResult(listOf(reply, nestedReply))
+                        is PagingRequest.Prepend -> error("Unexpected request")
+                    }
+                }
+            assertPresentationMatchesLegacy(contextLoader)
+        }
+
+    @Test
+    fun fullContextReplyChainsKeepTheOriginalInlineFocalPost() =
+        runTest {
+            val parent = post("parent")
+            val main = post("main").replyTo(parent)
+            val reply = post("reply").replyTo(main)
+            val nestedReply = post("nested").replyTo(reply)
+            val contextLoader =
+                loader(update = { request, result, initial ->
+                    if (request == PagingRequest.Refresh) {
+                        ContextUpdate(result.data)
+                    } else {
+                        result.toContextUpdate(mainKey, request, initial).copy(
+                            before = ContextPageUpdate(emptyList(), cursor = null, replace = true),
+                        )
+                    }
+                }) { request ->
+                    when (request) {
+                        PagingRequest.Refresh -> PagingResult(listOf(main), nextKey = "context")
+                        is PagingRequest.Append -> PagingResult(listOf(parent, main, reply, nestedReply))
+                        is PagingRequest.Prepend -> error("Unexpected request")
+                    }
+                }
+            assertPresentationMatchesLegacy(contextLoader)
+        }
+
+    private suspend fun assertPresentationMatchesLegacy(contextLoader: PostContextLoader) {
+        val legacyMediator = TimelineRemoteMediator(contextLoader, db, allowLongText = true)
+        assertIs<RemoteMediator.MediatorResult.Success>(legacyMediator.load(LoadType.REFRESH, state))
+        assertIs<RemoteMediator.MediatorResult.Success>(legacyMediator.load(LoadType.APPEND, state))
+        val expected =
+            TimelineDbPageLoader(db, pagingKey, TimelineDbPageCache())
+                .load(0, 20)
+                .map { it.baseItem }
+        db.pagingTimelineDao().deletePresentationReferences(pagingKey)
+        db.pagingTimelineDao().delete(pagingKey)
+        db.pagingTimelineDao().deletePagingKey(pagingKey)
+
+        val mediator = PostContextRemoteMediator(contextLoader, db)
+        assertIs<RemoteMediator.MediatorResult.Success>(mediator.load(LoadType.REFRESH, state))
+        val actual = TimelineDbPageLoader(db, pagingKey, TimelineDbPageCache()).load(0, 20).map { it.baseItem }
+        assertEquals(listOf("main", "nested"), actual.map { it.statusKey.id })
+        assertEquals(expected, actual)
+    }
+
+    private fun UiTimelineV2.Post.replyTo(parent: UiTimelineV2.Post) =
+        copy(
+            references = persistentListOf(UiTimelineV2.Post.Reference(statusKey = parent.statusKey, type = ReferenceType.Reply)),
+        )
 
     private fun loader(
         update: (PagingRequest, PagingResult<UiTimelineV2>, Boolean) -> ContextUpdate = { request, result, initial ->

@@ -90,6 +90,7 @@ public sealed class PagingState<T> {
             private val items: ItemSnapshotList<T>,
             override val isRefreshing: Boolean,
             override val appendState: LoadState,
+            private val onRetry: () -> Unit = data::retry,
         ) : Success<T>() {
             override val itemCount: Int
                 get() = items.size
@@ -113,7 +114,7 @@ public sealed class PagingState<T> {
             }
 
             override fun retry() {
-                data.retry()
+                onRetry()
             }
 
             override fun itemKey(key: ((item: T) -> Any)?): (index: Int) -> Any {
@@ -236,7 +237,10 @@ public fun <T : Any> UiState<LazyPagingItems<T>>.toPagingState(): PagingState<T>
     }
 
 @HiddenFromObjC
-public fun <T : Any> LazyPagingItems<T>.toPagingState(): PagingState<T> {
+public fun <T : Any> LazyPagingItems<T>.toPagingState(
+    contextLoadStates: LoadStates? = null,
+    onRetry: () -> Unit = this::retry,
+): PagingState<T> {
     val snapshot = snapshot()
     if (itemCount > 0) {
         return PagingState.Success.PagingSuccess(
@@ -245,12 +249,13 @@ public fun <T : Any> LazyPagingItems<T>.toPagingState(): PagingState<T> {
             // refresh state so equal load states cannot hide changes from UI consumers.
             items = itemSnapshotList,
             isRefreshing = isRefreshing,
-            appendState = loadState.append,
+            appendState = contextLoadStates?.contextFooterState() ?: loadState.append,
+            onRetry = onRetry,
         )
     } else if (snapshot.initialErrorOrNull() != null) {
         return PagingState.Error(
             error = snapshot.initialErrorOrNull()!!,
-            onRetry = { retry() },
+            onRetry = onRetry,
         )
     } else if (!snapshot.isResolvedEmpty()) {
         return PagingState.Loading()
@@ -258,6 +263,15 @@ public fun <T : Any> LazyPagingItems<T>.toPagingState(): PagingState<T> {
         return PagingState.Empty(this::refresh)
     }
 }
+
+// Context work in either direction uses the existing footer.
+internal fun LoadStates.contextFooterState(): LoadState =
+    when {
+        append is LoadState.Error -> append
+        prepend is LoadState.Error -> prepend
+        append is LoadState.Loading || prepend is LoadState.Loading -> LoadState.Loading
+        else -> append
+    }
 
 @Immutable
 internal data class PagingSnapshot(

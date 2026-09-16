@@ -5,9 +5,11 @@ import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.database.cache.mapper.cursor
 import dev.dimension.flare.data.database.cache.mapper.isBottomEnd
 import dev.dimension.flare.data.database.cache.mapper.tweets
-import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
+import dev.dimension.flare.data.datasource.microblog.paging.ContextUpdate
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
+import dev.dimension.flare.data.datasource.microblog.paging.PostContextLoader
+import dev.dimension.flare.data.datasource.microblog.paging.toContextUpdate
 import dev.dimension.flare.data.network.xqt.XQTService
 import dev.dimension.flare.data.network.xqt.model.PostCreateTweetRequestFeatures
 import dev.dimension.flare.data.network.xqt.model.Tweet
@@ -24,11 +26,11 @@ import kotlinx.serialization.Serializable
 
 @OptIn(ExperimentalPagingApi::class)
 internal class StatusDetailRemoteMediator(
-    private val statusKey: MicroBlogKey,
+    override val statusKey: MicroBlogKey,
     private val service: XQTService,
-    private val accountKey: MicroBlogKey,
+    override val accountKey: MicroBlogKey,
     private val statusOnly: Boolean,
-) : CacheableRemoteLoader<UiTimelineV2> {
+) : PostContextLoader {
     override val collapseReplyChains: Boolean = false
 
     override val pagingKey: String =
@@ -43,6 +45,17 @@ internal class StatusDetailRemoteMediator(
         }
 
     private var conversationId: String? = null
+
+    override fun contextUpdate(
+        request: PagingRequest,
+        result: PagingResult<UiTimelineV2>,
+        initial: Boolean,
+    ): ContextUpdate =
+        if (request == PagingRequest.Refresh && !statusOnly) {
+            ContextUpdate(posts = result.data)
+        } else {
+            result.toContextUpdate(statusKey, if (initial) PagingRequest.Refresh else request, initial)
+        }
 
     override suspend fun load(
         pageSize: Int,

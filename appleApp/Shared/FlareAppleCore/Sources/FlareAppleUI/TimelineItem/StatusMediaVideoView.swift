@@ -194,6 +194,7 @@ public struct VideoControlView: View {
 }
 
 public struct StatusMediaVideoView: View {
+    @Environment(\.scenePhase) private var scenePhase
     @Environment(\.videoPlaybackPresentation) private var presentation
     @State private var fallbackPresentation = VideoPlaybackPresentation()
     @Binding private var play: Bool
@@ -231,14 +232,27 @@ public struct StatusMediaVideoView: View {
             #if os(iOS)
             content
             #else
-            Color.clear.overlay { player }
+            Color.clear
+                .overlay {
+                    NetworkImage(data: data.thumbnailUrl, customHeader: data.customHeaders)
+                        .scaledToFit()
+                        .allowsHitTesting(false)
+                }
+                .clipped()
+                .overlay { player }
             #endif
         }
         .onAppear {
-            if presentation == nil { fallbackPresentation.begin() }
+            if presentation == nil {
+                fallbackPresentation.setSuspended(scenePhase != .active)
+                fallbackPresentation.begin()
+            }
             updatePlayback()
         }
         .onChange(of: play) { _, _ in updatePlayback() }
+        .onChange(of: scenePhase) { _, phase in
+            if presentation == nil { fallbackPresentation.setSuspended(phase != .active) }
+        }
         .onChange(of: playbackRate) { _, _ in updatePlayback() }
         .onChange(of: data.url) { _, _ in
             session.detach()
@@ -286,13 +300,9 @@ public struct StatusMediaVideoView: View {
     private var content: some View {
         Color.clear
             .overlay {
-                if case .idle = videoState {
-                    NetworkImage(data: data.thumbnailUrl, customHeader: data.customHeaders)
-                        .scaledToFit()
-                        .allowsHitTesting(false)
-                } else {
-                    EmptyView()
-                }
+                NetworkImage(data: data.thumbnailUrl, customHeader: data.customHeaders)
+                    .scaledToFit()
+                    .allowsHitTesting(false)
             }
             .clipped()
             .overlay {
@@ -350,10 +360,14 @@ public struct StatusMediaVideoView: View {
     private var player: some View {
         if let player = session.player {
             #if os(iOS)
-            InlineAVPlayerView(player: player, videoGravity: .resizeAspect)
+            InlineAVPlayerView(player: player, videoGravity: .resizeAspect,
+                               canDisplayFrame: session.hasRestoredPosition, onReady: session.surfaceReady)
+                .id(data.url)
                 .allowsHitTesting(false)
             #elseif os(macOS)
-            MacAVPlayerView(player: player, videoGravity: .resizeAspect, showsControls: true)
+            MacAVPlayerView(player: player, videoGravity: .resizeAspect, showsControls: true,
+                            canDisplayFrame: session.hasRestoredPosition, onReady: session.surfaceReady)
+                .id(data.url)
             #endif
         }
     }

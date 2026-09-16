@@ -40,13 +40,28 @@ internal class TimelinePlaybackCoordinator(
     private var selectionJob: Job? = null
     private var playingId: Any? = null
     private var closed = false
+    private var suspended = false
+    private var isPresentation = false
+    private var immediateReturn = false
+    var handoffUri: String? = null
+        private set
     val mediaSelections = TimelineMediaSelections()
     private var viewerSelection: Pair<List<String>, String>? = null
     private val cleanup = mutableMapOf<Any, () -> Unit>()
     var viewport: Rect = Rect.Zero
 
     init {
-        arbiter.register(this, ::stopCurrentPlayer, ::scheduleSelection, mediaSelections::returned)
+        arbiter.register(
+            this,
+            ::stopCurrentPlayer,
+            ::scheduleSelection,
+            mediaSelections::returned,
+            resume = {
+                immediateReturn = true
+                scheduleSelection()
+            },
+            willHandoff = { handoffUri = it },
+        )
     }
 
     fun position(key: String): Double = memory.position(key)
@@ -63,7 +78,10 @@ internal class TimelinePlaybackCoordinator(
         uri: String,
         userInitiated: Boolean,
     ) {
-        if (userInitiated) arbiter.interacted(this)
+        if (userInitiated) {
+            immediateReturn = false
+            arbiter.interacted(this)
+        }
         policy.returnedToMedia(groupId, uri)
         scheduleSelection()
     }
@@ -72,10 +90,19 @@ internal class TimelinePlaybackCoordinator(
         urls: List<String>,
         selectedUri: String?,
     ) {
-        viewerSelection = selectedUri?.takeIf { it in urls }?.let { urls.toList() to it }
+        val selection = selectedUri?.takeIf { it in urls }?.let { urls.toList() to it }
+        if (viewerSelection == selection) return
+        viewerSelection = selection
+        if (isPresentation) scheduleSelection()
     }
 
-    fun present() = arbiter.present(this)
+    fun present() {
+        if (isPresentation) return
+        isPresentation = true
+        immediateReturn = true
+        arbiter.present(this, viewerSelection?.second)
+        scheduleSelection()
+    }
 
     fun onClose(
         key: Any,
@@ -111,6 +138,7 @@ internal class TimelinePlaybackCoordinator(
         vertical: Boolean,
     ) {
         if (scrolling) {
+            immediateReturn = false
             if (scrollingSources.add(source)) {
                 arbiter.interacted(this)
                 if (vertical) policy.verticalScrollBegan() else policy.interactWithCarousel(source)
@@ -125,17 +153,34 @@ internal class TimelinePlaybackCoordinator(
     fun close() {
         closed = true
         selectionJob?.cancel()
+        arbiter.remove(this, viewerSelection?.first.orEmpty(), viewerSelection?.second)
         stopCurrentPlayer()
         players.clear()
         candidates.clear()
         cleanup.values.toList().forEach { it() }
         cleanup.clear()
-        arbiter.remove(this, viewerSelection?.first.orEmpty(), viewerSelection?.second)
+    }
+
+    fun setSuspended(value: Boolean) {
+        if (suspended == value) return
+        suspended = value
+        if (value) {
+            selectionJob?.cancel()
+            stopCurrentPlayer()
+            arbiter.release(this)
+        } else {
+            scheduleSelection()
+        }
     }
 
     private fun scheduleSelection() {
         selectionJob?.cancel()
-        if (closed || scrollingSources.isNotEmpty()) return
+        if (closed || suspended || scrollingSources.isNotEmpty()) return
+        if (immediateReturn) {
+            reconcile(allowStart = true)
+            if (playingId != null) immediateReturn = false
+            return
+        }
         selectionJob =
             scope.launch {
                 delay(200)
@@ -144,7 +189,7 @@ internal class TimelinePlaybackCoordinator(
     }
 
     private fun reconcile(allowStart: Boolean) {
-        if (closed) return
+        if (closed || suspended) return
         // Scrolling only invalidates the current item; full selection runs at idle.
         if (!allowStart || scrollingSources.isNotEmpty()) {
             if (playingId != null && candidates[playingId]?.visible != true) {
@@ -153,7 +198,9 @@ internal class TimelinePlaybackCoordinator(
             }
             return
         }
-        val next = policy.select(candidates.values, scrolling = false)
+        val selectedUri = viewerSelection?.second.takeIf { isPresentation }
+        val eligible = if (selectedUri == null) candidates.values else candidates.values.filter { it.mediaUri == selectedUri }
+        val next = policy.select(eligible, scrolling = false)
         if (next == null) arbiter.settledWithoutVideo(this)
         if (next == playingId) return
         if (next != null && !arbiter.acquire(this)) {
@@ -162,7 +209,10 @@ internal class TimelinePlaybackCoordinator(
         }
         playingId?.let { players[it]?.invoke(false) }
         playingId = next
-        next?.let { players[it]?.invoke(true) }
+        next?.let {
+            immediateReturn = false
+            players[it]?.invoke(true)
+        }
         if (next == null) arbiter.release(this)
     }
 
@@ -170,6 +220,7 @@ internal class TimelinePlaybackCoordinator(
         val old = playingId
         playingId = null
         old?.let { players[it]?.invoke(false) }
+        handoffUri = null
         policy.select(emptyList(), scrolling = true)
     }
 }
@@ -179,11 +230,13 @@ internal class TimelinePlaybackCoordinator(
 public fun MediaViewerPlayback(content: @Composable () -> Unit) {
     val scope = rememberCoroutineScope()
     val playback = remember(scope) { TimelinePlaybackCoordinator(scope) }
+    CompositionLocalProvider(LocalTimelinePlayback provides playback, content = content)
+    // Selection from the child is committed before preempting the timeline, so
+    // the outgoing binding knows whether the same media is being handed over.
+    SideEffect { playback.present() }
     DisposableEffect(playback) {
-        playback.present()
         onDispose { playback.close() }
     }
-    CompositionLocalProvider(LocalTimelinePlayback provides playback, content = content)
 }
 
 /** Records the last selected page for the timeline that opened this viewer. */

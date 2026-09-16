@@ -5,6 +5,8 @@ internal class VideoPlaybackArbiter {
         val stop: () -> Unit,
         val reconsider: () -> Unit,
         val mediaReturned: (List<String>, String) -> Unit,
+        val resume: () -> Unit,
+        val willHandoff: (String) -> Unit,
     )
 
     private val clients = mutableMapOf<Any, Client>()
@@ -18,8 +20,10 @@ internal class VideoPlaybackArbiter {
         stop: () -> Unit,
         reconsider: () -> Unit,
         mediaReturned: (List<String>, String) -> Unit = { _, _ -> },
+        resume: () -> Unit = reconsider,
+        willHandoff: (String) -> Unit = {},
     ) {
-        clients[owner] = Client(stop, reconsider, mediaReturned)
+        clients[owner] = Client(stop, reconsider, mediaReturned, resume, willHandoff)
     }
 
     fun interacted(owner: Any) {
@@ -54,31 +58,39 @@ internal class VideoPlaybackArbiter {
     ) {
         val wasTop = presentations.lastOrNull() === owner
         val returnOwner = returnOwners.remove(owner)
-        if (active === owner) stopActive()
+        if (active === owner) stopActive(if (wasTop) selectedUri else null)
         if (wasTop && selectedUri != null) clients[returnOwner]?.mediaReturned?.invoke(mediaUrls, selectedUri)
         if (preferred === owner) preferred = returnOwner?.takeIf { it in clients }
         returnOwners.keys.filter { returnOwners[it] === owner }.forEach { returnOwners[it] = returnOwner }
         presentations.remove(owner)
         clients.remove(owner)
-        reconsider()
+        reconsider(if (wasTop) returnOwner else null)
     }
 
-    fun present(owner: Any) {
+    fun present(
+        owner: Any,
+        selectedUri: String? = null,
+    ) {
         if (owner in presentations) return
         returnOwners[owner] = preferred ?: active
         presentations.add(owner)
         preferred = owner
-        stopActive()
+        stopActive(selectedUri)
     }
 
-    private fun stopActive() {
+    private fun stopActive(continuingToUri: String? = null) {
         val old = active
         active = null
-        clients[old]?.stop?.invoke()
+        clients[old]?.let { client ->
+            continuingToUri?.let(client.willHandoff)
+            client.stop()
+        }
     }
 
-    private fun reconsider() {
-        clients.values.toList().forEach { it.reconsider() }
+    private fun reconsider(immediateOwner: Any? = null) {
+        clients.toList().forEach { (owner, client) ->
+            if (owner === immediateOwner) client.resume() else client.reconsider()
+        }
     }
 
     companion object {

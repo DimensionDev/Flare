@@ -7,6 +7,7 @@ import androidx.compose.runtime.snapshots.Snapshot
 import io.github.kdroidfilter.composemediaplayer.VideoPlayerError
 import io.github.kdroidfilter.composemediaplayer.VideoPlayerState
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import java.lang.reflect.Proxy
@@ -18,6 +19,136 @@ import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class SurfaceBindingManagerTest {
+    @Test
+    fun backgroundingSeveralTimelinesDoesNotLeaveTheEarlierOnePermanentlySuspended() =
+        runTest {
+            val fake = ControlledPlayer()
+            val manager = SurfaceBindingManager(this) { fake.player }
+            val arbiter = VideoPlaybackArbiter()
+            val first = TimelinePlaybackCoordinator(this, arbiter, MediaPlaybackMemory())
+            val second = TimelinePlaybackCoordinator(this, arbiter, MediaPlaybackMemory())
+            val a = manager.register("a", first) {}
+            val b = manager.register("b", second) {}
+            first.register("a", a::setActive)
+            second.register("b", b::setActive)
+            first.update(TimelineAutoplayPolicy.Candidate("a", visible = true, canStart = true, distance = 0f))
+            advanceTimeBy(200)
+            runCurrent()
+            fake.finishLoading()
+            Snapshot.sendApplyNotifications()
+            runCurrent()
+            second.update(TimelineAutoplayPolicy.Candidate("b", visible = true, canStart = true, distance = 0f))
+            arbiter.interacted(second)
+            manager.setForeground(false)
+            advanceTimeBy(200)
+            runCurrent()
+            assertEquals(listOf("a"), fake.opened)
+            manager.setForeground(true)
+            advanceTimeBy(200)
+            runCurrent()
+            assertEquals(listOf("a", "b"), fake.opened)
+            fake.finishLoading()
+            Snapshot.sendApplyNotifications()
+            runCurrent()
+            first.setScrolling("vertical", scrolling = true, vertical = true)
+            first.setScrolling("vertical", scrolling = false, vertical = true)
+            advanceTimeBy(200)
+            runCurrent()
+            assertEquals(listOf("a", "b", "a"), fake.opened)
+            fake.finishLoading()
+            Snapshot.sendApplyNotifications()
+            runCurrent()
+            first.close()
+            second.close()
+            manager.close()
+        }
+
+    @Test
+    fun navigationKeepsTheSameVideoRunningButBackgroundingStopsAndReleasesIt() =
+        runTest {
+            val fake = ControlledPlayer()
+            val manager = SurfaceBindingManager(this) { fake.player }
+            val arbiter = VideoPlaybackArbiter()
+            val timeline = TimelinePlaybackCoordinator(this, arbiter, MediaPlaybackMemory())
+            val viewer = TimelinePlaybackCoordinator(this, arbiter, MediaPlaybackMemory())
+            val inline = manager.register("a", timeline) {}
+            val detail = manager.register("a", viewer, muted = false) {}
+            timeline.register("inline", inline::setActive)
+            viewer.register("detail", detail::setActive)
+            timeline.update(TimelineAutoplayPolicy.Candidate("inline", visible = true, canStart = true, distance = 0f, mediaUri = "a"))
+            advanceTimeBy(200)
+            runCurrent()
+            fake.finishLoading()
+            Snapshot.sendApplyNotifications()
+            runCurrent()
+            val pauses = fake.pauses
+            viewer.selectViewerMedia(listOf("a"), "a")
+            viewer.present()
+            assertTrue(fake.playing, "The outgoing media keeps running until its new surface attaches")
+            viewer.update(TimelineAutoplayPolicy.Candidate("detail", visible = true, canStart = true, distance = 0f, mediaUri = "a"))
+            assertEquals(listOf("a"), fake.opened)
+            assertEquals(pauses, fake.pauses)
+            viewer.close()
+            assertTrue(fake.playing)
+            assertEquals(pauses, fake.pauses)
+            manager.setForeground(false)
+            assertFalse(fake.playing)
+            assertFalse(fake.hasMedia)
+            advanceTimeBy(1000)
+            runCurrent()
+            assertEquals(listOf("a"), fake.opened, "Pending selection must not restart playback in the background")
+            manager.setForeground(true)
+            advanceTimeBy(200)
+            runCurrent()
+            assertEquals(listOf("a", "a"), fake.opened)
+            fake.finishLoading()
+            Snapshot.sendApplyNotifications()
+            runCurrent()
+            assertTrue(fake.playing)
+            timeline.close()
+            manager.close()
+        }
+
+    @Test
+    fun sameVideoHandoffKeepsLoadedMediaAndIdleBufferExpiresAfterFiveSeconds() =
+        runTest {
+            val fake = ControlledPlayer()
+            val manager = SurfaceBindingManager(this) { fake.player }
+            val memory = MediaPlaybackMemory()
+            val arbiter = VideoPlaybackArbiter()
+            val timeline = TimelinePlaybackCoordinator(this, arbiter, memory)
+            val viewer = TimelinePlaybackCoordinator(this, arbiter, memory)
+            val inline = manager.register("a", timeline) {}
+            val detail = manager.register("a", viewer, muted = false) {}
+            inline.setActive(true)
+            fake.finishLoading()
+            Snapshot.sendApplyNotifications()
+            runCurrent()
+            fake.time = 37.0
+            detail.setActive(true)
+            assertEquals(listOf("a"), fake.opened)
+            assertEquals(37.0, fake.time)
+            viewer.close()
+            assertFalse(fake.playing)
+            assertTrue(fake.hasMedia)
+            advanceTimeBy(4999)
+            runCurrent()
+            assertTrue(fake.hasMedia)
+            inline.setActive(true)
+            advanceTimeBy(1)
+            runCurrent()
+            assertEquals(listOf("a"), fake.opened)
+            assertTrue(fake.playing)
+            inline.setActive(false)
+            assertFalse(fake.playing)
+            advanceTimeBy(5000)
+            runCurrent()
+            assertFalse(fake.hasMedia)
+            assertEquals(37.0, memory.position("a"))
+            timeline.close()
+            manager.close()
+        }
+
     @Test
     fun interruptedLoadStillRestoresPositionAndAllBindingsShareOnePlayer() =
         runTest {
@@ -68,6 +199,8 @@ class SurfaceBindingManagerTest {
             observed.filterNotNull().forEach { assertSame(fake.player, it) }
             a.dispose()
             timeline.close()
+            advanceTimeBy(5000)
+            runCurrent()
             assertFalse(fake.hasMedia)
             assertEquals(1, allocations)
             manager.close()
@@ -100,6 +233,8 @@ class SurfaceBindingManagerTest {
             assertTrue(fake.playing)
             assertTrue(fake.hasMedia)
             second.close()
+            advanceTimeBy(5000)
+            runCurrent()
             assertFalse(fake.hasMedia)
             manager.close()
         }
@@ -117,6 +252,8 @@ class SurfaceBindingManagerTest {
             Snapshot.sendApplyNotifications()
             runCurrent()
             assertTrue(fake.played.isEmpty())
+            advanceTimeBy(5000)
+            runCurrent()
             assertFalse(fake.hasMedia)
             manager.close()
         }
@@ -192,7 +329,7 @@ class SurfaceBindingManagerTest {
 
             fun activate(binding: SurfaceBindingManager.Binding) {
                 binding.setActive(true)
-                fake.finishLoading()
+                if (fake.loading) fake.finishLoading()
                 Snapshot.sendApplyNotifications()
                 runCurrent()
             }
@@ -284,6 +421,7 @@ class SurfaceBindingManagerTest {
         private var error by mutableStateOf<VideoPlayerError?>(null)
         var time by mutableStateOf(0.0)
         var playing = false
+        var pauses = 0
         var deferStop = false
         var deferSeek = false
         private var userDragging = false
@@ -321,6 +459,10 @@ class SurfaceBindingManagerTest {
                 when (method.name) {
                     "isLoading" -> {
                         loading
+                    }
+
+                    "isPlaying" -> {
+                        playing
                     }
 
                     "getHasMedia" -> {
@@ -374,6 +516,7 @@ class SurfaceBindingManagerTest {
                     }
 
                     "pause" -> {
+                        pauses++
                         playing = false
                         loading = false
                         null

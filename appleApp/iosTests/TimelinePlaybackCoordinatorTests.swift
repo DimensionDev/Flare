@@ -2,6 +2,49 @@ import XCTest
 
 final class TimelinePlaybackCoordinatorTests: XCTestCase {
     @MainActor
+    func testReturnSelectionStartsWhenTheNewPageBecomesVisibleWithoutTreatingItsJumpAsADrag() async throws {
+        let arbiter = VideoPlaybackArbiter()
+        let timeline = TimelinePlaybackCoordinator(arbiter: arbiter)
+        var events: [String] = []
+        timeline.register(id: "a") { events.append("a:\($0)") }
+        timeline.register(id: "b") { events.append("b:\($0)") }
+        timeline.mediaSelections.register(id: "row", urls: ["a", "b"]) { [weak timeline] url in
+            timeline?.selectMedia(groupID: "row", mediaURL: url, userInitiated: false)
+        }
+        timeline.update(.init(id: "a", groupID: "row", isVisible: true, canStart: true, distance: 0, mediaURL: "a"))
+        timeline.update(.init(id: "b", groupID: "row", isVisible: false, canStart: false, distance: 0, mediaURL: "b"))
+        try await Task.sleep(for: .milliseconds(250))
+        let viewer = NSObject()
+        arbiter.present(viewer)
+        arbiter.withdraw(viewer, mediaURLs: ["a", "b"], selectedMediaURL: "b")
+        XCTAssertEqual(events, ["a:true", "a:false"])
+        timeline.moved(source: "row", vertical: false)
+        timeline.update(.init(id: "b", groupID: "row", isVisible: true, canStart: true, distance: 0, mediaURL: "b"))
+        XCTAssertEqual(events, ["a:true", "a:false", "b:true"])
+        timeline.setSuspended(true)
+    }
+
+    @MainActor
+    func testReturningToAVisibleIdleVideoDoesNotWaitForScrollDebounce() async throws {
+        let arbiter = VideoPlaybackArbiter()
+        let timeline = TimelinePlaybackCoordinator(arbiter: arbiter)
+        var events: [Bool] = []
+        timeline.register(id: "video") { events.append($0) }
+        timeline.update(.init(id: "video", isVisible: true, canStart: true, distance: 0))
+        try await Task.sleep(for: .milliseconds(250))
+        let viewer = NSObject()
+        arbiter.present(viewer)
+        XCTAssertEqual(events, [true, false])
+        arbiter.withdraw(viewer)
+        XCTAssertEqual(events, [true, false, true])
+        arbiter.present(viewer)
+        timeline.setScrolling(true, source: "vertical", vertical: true)
+        arbiter.withdraw(viewer)
+        XCTAssertEqual(events, [true, false, true, false])
+        timeline.setSuspended(true)
+    }
+
+    @MainActor
     func testPhaseEndWaitsForAFullIdleIntervalAfterTheLastMovement() async throws {
         let playback = TimelinePlaybackCoordinator(arbiter: VideoPlaybackArbiter())
         var ended: ContinuousClock.Instant?

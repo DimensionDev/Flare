@@ -44,6 +44,7 @@ public struct MediaView: View {
 }
 
 public struct MediaVideoView: View {
+    @Environment(\.scenePhase) private var scenePhase
     @Environment(\.timelineAppearance.videoAutoplay) private var videoAutoplay
     @Environment(\.networkKind) private var networkKind
     @Environment(\.timelinePlaybackCoordinator) private var timelinePlayback
@@ -82,10 +83,13 @@ public struct MediaVideoView: View {
             .overlay {
                 if let avPlayer = player.player {
                     #if os(macOS)
-                    MacAVPlayerView(player: avPlayer, videoGravity: .resizeAspectFill, showsControls: false)
+                    MacAVPlayerView(player: avPlayer, videoGravity: .resizeAspectFill, showsControls: false,
+                                    canDisplayFrame: player.hasRestoredPosition)
+                        .id(data.url)
                         .allowsHitTesting(false)
                     #elseif os(iOS)
-                    InlineAVPlayerView(player: avPlayer)
+                    InlineAVPlayerView(player: avPlayer, canDisplayFrame: player.hasRestoredPosition)
+                        .id(data.url)
                         .allowsHitTesting(false)
                     #endif
                 }
@@ -112,12 +116,15 @@ public struct MediaVideoView: View {
                 updateCandidate()
             }
             .onAppear {
-                if timelinePlayback == nil { fallbackPlayback.setSuspended(false) }
+                if timelinePlayback == nil { fallbackPlayback.setSuspended(scenePhase != .active) }
                 appeared = true
                 registerPlayer()
                 updateCandidate()
             }
             .onChange(of: canAutoplay) { _, _ in updateCandidate() }
+            .onChange(of: scenePhase) { _, phase in
+                if timelinePlayback == nil { fallbackPlayback.setSuspended(phase != .active) }
+            }
             .onChange(of: carouselItem) { _, _ in updateCandidate() }
             .onChange(of: data.url) { _, _ in
                 playback.remove(id: id)
@@ -189,26 +196,28 @@ private nonisolated struct InlineVideoGeometry: Equatable, Sendable {
 struct InlineAVPlayerView: UIViewRepresentable {
     let player: AVPlayer
     var videoGravity: AVLayerVideoGravity = .resizeAspectFill
+    var canDisplayFrame = true
+    var onReady: () -> Void = {}
 
-    final class PlayerView: UIView {
-        override class var layerClass: AnyClass { AVPlayerLayer.self }
-        var playerLayer: AVPlayerLayer { layer as! AVPlayerLayer }
-    }
-
-    func makeUIView(context: Context) -> PlayerView {
-        let view = PlayerView()
+    func makeUIView(context: Context) -> VideoPlaybackSurfaceView {
+        let view = VideoPlaybackSurfaceView()
+        view.onReady = onReady
+        view.canDisplayFrame = canDisplayFrame
         view.playerLayer.videoGravity = videoGravity
-        view.playerLayer.player = player
+        view.player = player
         return view
     }
 
-    func updateUIView(_ view: PlayerView, context: Context) {
-        view.playerLayer.player = player
+    func updateUIView(_ view: VideoPlaybackSurfaceView, context: Context) {
+        view.onReady = onReady
+        view.canDisplayFrame = canDisplayFrame
+        view.player = player
         view.playerLayer.videoGravity = videoGravity
     }
 
-    static func dismantleUIView(_ view: PlayerView, coordinator: ()) {
-        view.playerLayer.player = nil
+    static func dismantleUIView(_ view: VideoPlaybackSurfaceView, coordinator: ()) {
+        view.onReady = {}
+        view.player = nil
     }
 }
 #endif

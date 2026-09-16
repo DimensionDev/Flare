@@ -10,6 +10,8 @@ public final class VideoPlaybackArbiter {
         let stop: () -> Void
         let reconsider: () -> Void
         let mediaReturned: ([String], String) -> Void
+        let resume: () -> Void
+        let willHandoff: (String) -> Void
     }
 
     private var clients: [ObjectIdentifier: Client] = [:]
@@ -21,9 +23,13 @@ public final class VideoPlaybackArbiter {
     public init() {}
 
     public func register(_ owner: AnyObject, stop: @escaping () -> Void, reconsider: @escaping () -> Void,
-                         mediaReturned: @escaping ([String], String) -> Void = { _, _ in }) {
+                         mediaReturned: @escaping ([String], String) -> Void = { _, _ in },
+                         resume: (() -> Void)? = nil,
+                         willHandoff: @escaping (String) -> Void = { _ in }) {
         clients = clients.filter { $0.value.owner != nil }
-        clients[ObjectIdentifier(owner)] = Client(owner: owner, stop: stop, reconsider: reconsider, mediaReturned: mediaReturned)
+        clients[ObjectIdentifier(owner)] = Client(owner: owner, stop: stop, reconsider: reconsider,
+                                                 mediaReturned: mediaReturned, resume: resume ?? reconsider,
+                                                 willHandoff: willHandoff)
     }
 
     public func interacted(_ owner: AnyObject) {
@@ -57,7 +63,7 @@ public final class VideoPlaybackArbiter {
         let id = ObjectIdentifier(owner)
         let wasTop = presentations.last == id
         let returnOwner = returnOwners.removeValue(forKey: id)
-        if active == id { stopActive() }
+        if active == id { stopActive(continuingTo: wasTop ? selectedMediaURL : nil) }
         if wasTop, let returnOwner, let selectedMediaURL {
             clients[returnOwner]?.mediaReturned(mediaURLs, selectedMediaURL)
         }
@@ -70,26 +76,31 @@ public final class VideoPlaybackArbiter {
             }
         }
         presentations.removeAll { $0 == id }
-        reconsider()
+        reconsider(immediateOwner: wasTop ? returnOwner : nil)
     }
 
-    public func present(_ owner: AnyObject) {
+    public func present(_ owner: AnyObject, selectedMediaURL: String? = nil) {
         let id = ObjectIdentifier(owner)
         guard !presentations.contains(id) else { return }
         returnOwners[id] = preferred ?? active
         presentations.append(id)
         preferred = id
-        stopActive()
+        stopActive(continuingTo: selectedMediaURL)
     }
 
-    private func stopActive() {
+    private func stopActive(continuingTo mediaURL: String? = nil) {
         let old = active
         active = nil
-        if let old { clients[old]?.stop() }
+        if let old {
+            if let mediaURL { clients[old]?.willHandoff(mediaURL) }
+            clients[old]?.stop()
+        }
     }
 
-    private func reconsider() {
+    private func reconsider(immediateOwner: ObjectIdentifier? = nil) {
         clients = clients.filter { $0.value.owner != nil }
-        for client in Array(clients.values) { client.reconsider() }
+        for (id, client) in Array(clients) {
+            if id == immediateOwner { client.resume() } else { client.reconsider() }
+        }
     }
 }

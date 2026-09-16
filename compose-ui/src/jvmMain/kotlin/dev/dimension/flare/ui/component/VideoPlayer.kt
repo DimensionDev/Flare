@@ -1,9 +1,5 @@
 package dev.dimension.flare.ui.component
 
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
@@ -46,11 +42,25 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.core.annotation.Single
+import java.awt.AWTEvent
+import java.awt.EventQueue
+import java.awt.Toolkit
+import java.awt.Window
+import java.awt.event.AWTEventListener
+import java.awt.event.WindowEvent
+import java.lang.management.ManagementFactory
+import java.lang.management.MemoryNotificationInfo
+import java.lang.management.MemoryPoolMXBean
+import java.util.Collections
+import java.util.WeakHashMap
+import javax.management.NotificationEmitter
+import javax.management.NotificationListener
 import kotlin.math.abs
 import kotlin.math.roundToLong
 
@@ -157,79 +167,45 @@ public fun VideoPlayer(
     val playback = rememberTimelinePlayback()
     val binding = rememberSurfaceBinding(uri, playback, muted)
     val playerState = binding.first
-    var isLoaded by remember(binding.second, playerState) { mutableStateOf(false) }
-
-    LaunchedEffect(muted, playerState) {
-        playerState?.volume = if (muted) 0f else 1f
-    }
-
-    LaunchedEffect(playerState?.hasMedia, playerState?.isLoading) {
-        if (playerState?.hasMedia == true && !playerState.isLoading) isLoaded = true
-    }
-
+    // Keep the cover underneath the surface. The desktop renderer draws nothing
+    // until it has an actual frame; metadata readiness is not frame readiness.
     Box(
-        modifier = modifier.timelineVideoAutoplay(playback, binding.second, autoPlay, uri),
+        modifier = modifier.timelineVideoAutoplay(playback, binding.second, autoPlay && binding.second.isForeground, uri),
     ) {
-        if ((!isLoaded && LocalIsScrollingInProgress.current) || playerState == null) {
-            if (binding.second.isPreparing && !LocalIsScrollingInProgress.current) {
-                loadingPlaceholder()
-            } else {
-                idlePlaceholder()
-            }
+        if (playerState == null) {
+            if (binding.second.isPreparing && !LocalIsScrollingInProgress.current) loadingPlaceholder() else idlePlaceholder()
         } else {
-            AnimatedContent(
-                isLoaded,
-                transitionSpec = {
-                    fadeIn() togetherWith fadeOut()
-                },
-            ) { loaded ->
-                if (loaded) {
-                    val playerModifier =
-                        Modifier
-                            .clipToBounds()
-                            .semantics {
-                                contentDescription?.let { this.contentDescription = it }
-                            }.let {
-                                if (onClick != null) {
-                                    it.combinedClickable(
-                                        onClick = onClick,
-                                        onLongClick = onLongClick,
-                                    )
-                                } else {
-                                    it
-                                }
-                            }.let {
-                                if (aspectRatio != null) {
-                                    it.aspectRatio(aspectRatio)
-                                } else {
-                                    it
-                                }
-                            }
-
-                    Box {
-                        VideoPlayerSurface(
-                            playerState = playerState,
-                            modifier = playerModifier,
-                            contentScale = contentScale,
-                        )
-                        val remainingTime by remember {
-                            derivedStateOf {
-                                if (playerState.sliderPos > 0f) {
-                                    (((playerState.currentTime / (playerState.sliderPos / 1000)) - playerState.currentTime) * 1000)
-                                        .roundToLong()
-                                } else {
-                                    0L
-                                }
-                            }
-                        }
-                        remainingTimeContent?.invoke(this, remainingTime)
-                    }
-                } else {
-                    Box {
-                        loadingPlaceholder()
+            if (previewUri != null) {
+                NetworkImage(
+                    model = previewUri,
+                    contentDescription = contentDescription,
+                    contentScale = contentScale,
+                    modifier = Modifier.fillMaxSize(),
+                )
+            }
+            val playerModifier =
+                Modifier
+                    .clipToBounds()
+                    .semantics { contentDescription?.let { this.contentDescription = it } }
+                    .let {
+                        if (onClick != null) it.combinedClickable(onClick = onClick, onLongClick = onLongClick) else it
+                    }.let { if (aspectRatio != null) it.aspectRatio(aspectRatio) else it }
+            VideoPlayerSurface(
+                playerState = playerState,
+                modifier = playerModifier,
+                contentScale = contentScale,
+            )
+            LaunchedEffect(binding.second, playerState) { binding.second.surfaceAttached() }
+            val remainingTime by remember(playerState) {
+                derivedStateOf {
+                    if (playerState.sliderPos > 0f) {
+                        (((playerState.currentTime / (playerState.sliderPos / 1000)) - playerState.currentTime) * 1000).roundToLong()
+                    } else {
+                        0L
                     }
                 }
             }
+            remainingTimeContent?.invoke(this, remainingTime)
             if (showControls) controls(playerState, binding.second::seek)
         }
     }
@@ -242,6 +218,10 @@ private fun rememberSurfaceBinding(
     muted: Boolean,
 ): Pair<VideoPlayerState?, SurfaceBindingManager.Binding> {
     val manager: SurfaceBindingManager = koinInject()
+    DisposableEffect(manager) {
+        manager.observeAppFocus()
+        onDispose { }
+    }
     var player by remember(uri, manager, playback, muted) { mutableStateOf<VideoPlayerState?>(null) }
     val binding =
         remember(uri, manager, playback, muted) {
@@ -280,32 +260,121 @@ internal class SurfaceBindingManager() {
         }
     val player: VideoPlayerState by playerDelegate
     private var activeBinding: Binding? = null
-    private var requestedSource: Pair<TimelinePlaybackCoordinator, String>? = null
-    private var currentSource: Pair<TimelinePlaybackCoordinator, String>? = null
+    private var requestedSource: String? = null
+    private var requestedPlayback: TimelinePlaybackCoordinator? = null
+    private var currentSource: String? = null
+    private var retentionJob: Job? = null
+    private var handoffJob: Job? = null
+    private var transferring = false
     private var prepareJob: Job? = null
     private var seekJob: Job? = null
     private var pendingSeek: Double? = null
+    private var foreground by mutableStateOf(true)
+    private var focusListener: AWTEventListener? = null
+    private val suspendedPlaybacks = Collections.newSetFromMap(WeakHashMap<TimelinePlaybackCoordinator, Boolean>())
+    private var memoryListener: NotificationListener? = null
+    private var memoryPool: MemoryPoolMXBean? = null
+    private var previousMemoryThreshold = 0L
+    private var memoryThreshold = 0L
+
+    internal fun setForeground(value: Boolean) {
+        if (foreground == value) return
+        foreground = value
+        if (value) {
+            val playbacks = suspendedPlaybacks.toList()
+            suspendedPlaybacks.clear()
+            playbacks.forEach { it.setSuspended(false) }
+        } else {
+            requestedPlayback?.let {
+                suspendedPlaybacks.add(it)
+                it.setSuspended(true)
+            }
+            activeBinding?.setActive(false)
+            clearIdleBuffer()
+        }
+    }
+
+    fun observeAppFocus() {
+        if (focusListener != null) return
+        val listener =
+            AWTEventListener { event ->
+                if (event is WindowEvent) {
+                    when (event.id) {
+                        WindowEvent.WINDOW_GAINED_FOCUS -> {
+                            setForeground(true)
+                        }
+
+                        WindowEvent.WINDOW_LOST_FOCUS -> {
+                            if (event.oppositeWindow == null) {
+                                // Media details are another app window. Let AWT finish
+                                // the focus transfer before treating it as backgrounding.
+                                EventQueue.invokeLater {
+                                    if (focusListener != null && Window.getWindows().none { it.isFocused }) {
+                                        setForeground(false)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        Toolkit.getDefaultToolkit().addAWTEventListener(listener, AWTEvent.WINDOW_FOCUS_EVENT_MASK)
+        focusListener = listener
+        setForeground(Window.getWindows().any { it.isFocused })
+        // JVMs expose heap pressure through collection thresholds. Native mobile
+        // pressure notifications are handled by their platform implementations.
+        val pool =
+            ManagementFactory.getMemoryPoolMXBeans().firstOrNull {
+                it.isCollectionUsageThresholdSupported && it.usage.max > 0
+            }
+        val emitter = ManagementFactory.getMemoryMXBean() as? NotificationEmitter
+        if (pool != null && emitter != null) {
+            previousMemoryThreshold = pool.collectionUsageThreshold
+            memoryThreshold = previousMemoryThreshold.takeIf { it > 0 } ?: (pool.usage.max * 0.9).toLong()
+            pool.collectionUsageThreshold = memoryThreshold
+            memoryPool = pool
+            val pressureListener =
+                NotificationListener { notification, _ ->
+                    if (notification.type == MemoryNotificationInfo.MEMORY_COLLECTION_THRESHOLD_EXCEEDED) {
+                        scope.launch { clearIdleBuffer() }
+                    }
+                }
+            emitter.addNotificationListener(pressureListener, null, null)
+            memoryListener = pressureListener
+        }
+    }
 
     inner class Binding(
         private val uri: String,
-        private val playback: TimelinePlaybackCoordinator,
+        val playback: TimelinePlaybackCoordinator,
         private val muted: Boolean,
         private val callback: (VideoPlayerState?) -> Unit,
     ) {
+        val isForeground: Boolean get() = foreground
         var isPreparing by mutableStateOf(false)
             private set
 
         fun setActive(active: Boolean) {
             if (active) {
+                if (!foreground) {
+                    suspendedPlaybacks.add(playback)
+                    playback.setSuspended(true)
+                    return
+                }
                 if (activeBinding === this) return
+                transferring = requestedSource == uri
                 activeBinding?.setActive(false)
-                if (requestedSource != (playback to uri)) clearPendingSeek()
+                transferring = false
+                retentionJob?.cancel()
+                handoffJob?.cancel()
+                if (requestedSource != uri) clearPendingSeek()
                 activeBinding = this
-                requestedSource = playback to uri
+                requestedPlayback = playback
+                requestedSource = uri
                 isPreparing = true
                 prepareRequestedSource()
             } else if (activeBinding === this) {
-                if (currentSource == (playback to uri) && prepareJob?.isActive != true) {
+                if (currentSource == uri && prepareJob?.isActive != true) {
                     val seconds =
                         if (player.userDragging && player.duration > 0) {
                             player.sliderPos / 1000.0 * player.duration
@@ -313,30 +382,52 @@ internal class SurfaceBindingManager() {
                             pendingSeek ?: player.currentTime
                         }
                     playback.savePosition(uri, seconds)
+                    if (player.userDragging && player.duration > 0) seekTo(seconds)
                 }
                 // Keep a pending restoration alive while paused. Native loading is
                 // asynchronous and cannot be cancelled by cancelling our observer.
-                player.pause()
+                player.volume = 0f
+                if (!transferring && playback.handoffUri != uri) {
+                    player.pause()
+                } else {
+                    handoffJob?.cancel()
+                    handoffJob =
+                        scope.launch {
+                            delay(500)
+                            if (activeBinding == null) player.pause()
+                        }
+                }
                 activeBinding = null
                 isPreparing = false
                 callback(null)
+                retentionJob?.cancel()
+                retentionJob =
+                    scope.launch {
+                        delay(5000)
+                        clearIdleBuffer()
+                    }
             }
         }
 
         fun prepared() {
+            if (!isPreparing || pendingSeek != null) return
             isPreparing = false
             player.userDragging = false
-            player.volume = if (muted) 0f else 1f
+            player.volume = 0f
             callback(player)
-            if (player.error == null) player.play()
+            if (player.error == null && !player.isPlaying) player.play()
         }
 
         fun seek(sliderPosition: Float) {
-            if (activeBinding !== this || currentSource != (playback to uri) || player.duration <= 0) return
+            if (activeBinding !== this || currentSource != uri || player.duration <= 0) return
             val seconds = sliderPosition.coerceIn(0f, 1000f) / 1000.0 * player.duration
             if (!seconds.isFinite()) return
             playback.savePosition(uri, seconds)
             seekTo(seconds)
+        }
+
+        fun surfaceAttached() {
+            if (activeBinding === this) player.volume = if (muted) 0f else 1f
         }
 
         fun dispose() = setActive(false)
@@ -354,15 +445,16 @@ internal class SurfaceBindingManager() {
 
     private fun prepareRequestedSource() {
         if (prepareJob?.isActive == true) return
-        if (currentSource != null && currentSource == requestedSource) {
+        if (currentSource != null && currentSource == requestedSource && player.error == null) {
             activeBinding?.prepared()
             return
         }
+        if (player.error != null) currentSource = null
         prepareJob =
             scope.launch(start = CoroutineStart.UNDISPATCHED) {
                 // Serialize native opens: cancelling a coroutine waiting for metadata
                 // does not cancel the library's in-flight openUri operation.
-                while (currentSource != requestedSource) {
+                while (currentSource != requestedSource || (requestedSource == null && player.hasMedia)) {
                     clearPendingSeek()
                     currentSource = null
                     if (player.hasMedia) {
@@ -371,7 +463,7 @@ internal class SurfaceBindingManager() {
                     }
                     val source = requestedSource ?: break
                     player.clearError()
-                    player.openUri(source.second, InitialPlayerState.PAUSE)
+                    player.openUri(source, InitialPlayerState.PAUSE)
                     // Linux keeps hasMedia true during openUri and clears isLoading
                     // on pause. The completed stop above establishes a fresh baseline.
                     snapshotFlow { (player.hasMedia && !player.isLoading) || player.error != null }.first { it }
@@ -381,7 +473,7 @@ internal class SurfaceBindingManager() {
                     }
                     currentSource = source
                     if (requestedSource == source) {
-                        val seconds = source.first.position(source.second)
+                        val seconds = requestedPlayback?.position(source) ?: 0.0
                         if (seconds > 0 && player.duration > 0) {
                             seekTo(seconds)
                         }
@@ -392,18 +484,39 @@ internal class SurfaceBindingManager() {
     }
 
     fun close() {
+        focusListener?.let { Toolkit.getDefaultToolkit().removeAWTEventListener(it) }
+        focusListener = null
+        memoryListener?.let { (ManagementFactory.getMemoryMXBean() as? NotificationEmitter)?.removeNotificationListener(it) }
+        memoryListener = null
+        memoryPool?.let { if (it.collectionUsageThreshold == memoryThreshold) it.collectionUsageThreshold = previousMemoryThreshold }
+        memoryPool = null
         activeBinding?.setActive(false)
+        retentionJob?.cancel()
+        handoffJob?.cancel()
         prepareJob?.cancel()
         clearPendingSeek()
         requestedSource = null
+        requestedPlayback = null
         currentSource = null
         if (playerDelegate.isInitialized()) player.dispose()
     }
 
     fun release(playback: TimelinePlaybackCoordinator) {
-        if (requestedSource?.first !== playback) return
-        activeBinding?.setActive(false)
+        if (requestedPlayback !== playback) return
+        if (activeBinding?.playback === playback) activeBinding?.setActive(false)
+        handoffJob?.cancel()
+        handoffJob = null
+        if (activeBinding == null && playerDelegate.isInitialized()) player.pause()
+    }
+
+    internal fun clearIdleBuffer() {
+        if (activeBinding != null) return
+        retentionJob?.cancel()
+        retentionJob = null
+        handoffJob?.cancel()
+        handoffJob = null
         requestedSource = null
+        requestedPlayback = null
         if (playerDelegate.isInitialized()) prepareRequestedSource()
     }
 
@@ -417,6 +530,7 @@ internal class SurfaceBindingManager() {
             scope.launch(start = CoroutineStart.UNDISPATCHED) {
                 snapshotFlow { player.currentTime }.first { abs(it - target) < 0.5 || (target == duration && it < 0.5) }
                 pendingSeek = null
+                activeBinding?.prepared()
             }
     }
 

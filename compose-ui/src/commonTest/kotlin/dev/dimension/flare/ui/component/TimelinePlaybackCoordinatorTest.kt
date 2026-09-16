@@ -11,6 +11,29 @@ import kotlin.test.assertTrue
 @OptIn(ExperimentalCoroutinesApi::class)
 class TimelinePlaybackCoordinatorTest {
     @Test
+    fun returningToVisibleIdleVideoSkipsDebounceButNeverStartsDuringScroll() =
+        runTest {
+            val arbiter = VideoPlaybackArbiter()
+            val timeline = TimelinePlaybackCoordinator(this, arbiter)
+            val events = mutableListOf<Boolean>()
+            timeline.register("video") { events += it }
+            timeline.update(TimelineAutoplayPolicy.Candidate("video", visible = true, canStart = true, distance = 0f))
+            advanceTimeBy(200)
+            runCurrent()
+            val viewer = TimelinePlaybackCoordinator(this, arbiter)
+            viewer.present()
+            assertEquals(listOf(true, false), events)
+            viewer.close()
+            assertEquals(listOf(true, false, true), events)
+            val secondViewer = TimelinePlaybackCoordinator(this, arbiter)
+            secondViewer.present()
+            timeline.setScrolling("vertical", scrolling = true, vertical = true)
+            secondViewer.close()
+            assertEquals(listOf(true, false, true, false), events)
+            timeline.close()
+        }
+
+    @Test
     fun topVideoViewerResumesAfterImageViewerClosesDespiteBackgroundInteraction() =
         runTest {
             val arbiter = VideoPlaybackArbiter()

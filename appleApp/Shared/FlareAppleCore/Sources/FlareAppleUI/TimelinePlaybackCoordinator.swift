@@ -25,6 +25,7 @@ final class TimelinePlaybackCoordinator {
     private var returningGroupID: String?
     let mediaSelections = TimelineMediaSelections()
     private var suspended = false
+    private var immediateReturn = false
 
     init(arbiter: VideoPlaybackArbiter = .shared) {
         self.arbiter = arbiter
@@ -32,7 +33,10 @@ final class TimelinePlaybackCoordinator {
                          reconsider: { [weak self] in self?.scheduleSelection() },
                          mediaReturned: { [weak self] urls, selected in
                              self?.mediaSelections.returned(urls: urls, selectedURL: selected)
-                         })
+                         }, resume: { [weak self] in
+                             self?.immediateReturn = true
+                             self?.scheduleSelection()
+                         }, willHandoff: { VideoPlaybackSession.continuePlayback(to: $0) })
     }
 
     func register(id: String, playback: @escaping (Bool) -> Void) {
@@ -55,6 +59,7 @@ final class TimelinePlaybackCoordinator {
 
     func setScrolling(_ scrolling: Bool, source: String, vertical: Bool) {
         if scrolling {
+            immediateReturn = false
             let motionSource = "motion:\(source)"
             motionTasks.removeValue(forKey: motionSource)?.cancel()
             scrollingSources.remove(motionSource)
@@ -75,6 +80,12 @@ final class TimelinePlaybackCoordinator {
     // and programmatic scrolling. Real drag phases keep the source held longer.
     func moved(source: String, vertical: Bool) {
         guard !scrollingSources.contains(source) else { return }
+        if !vertical, returningGroupID == source, immediateReturn {
+            // Restoring the viewer's selected page is an immediate jump. Actual
+            // drag/animation phases above still hold playback until scrolling ends.
+            scheduleSelection()
+            return
+        }
         let motionSource = "motion:\(source)"
         if !scrollingSources.contains(source), !scrollingSources.contains(motionSource) {
             if vertical || returningGroupID != source {
@@ -113,7 +124,10 @@ final class TimelinePlaybackCoordinator {
 
     func selectMedia(groupID: String, mediaURL: String, userInitiated: Bool) {
         returningGroupID = userInitiated ? nil : groupID
-        if userInitiated { arbiter.interacted(self) }
+        if userInitiated {
+            immediateReturn = false
+            arbiter.interacted(self)
+        }
         policy.returnedToMedia(groupID: groupID, mediaURL: mediaURL)
         scheduleSelection()
     }
@@ -121,6 +135,11 @@ final class TimelinePlaybackCoordinator {
     private func scheduleSelection() {
         selectionTask?.cancel()
         guard scrollingSources.isEmpty, !suspended else { return }
+        if immediateReturn {
+            reconcile(allowStart: true)
+            if playingID != nil { immediateReturn = false }
+            return
+        }
         selectionTask = Task { [weak self] in
             do { try await Task.sleep(for: .milliseconds(200)) } catch { return }
             self?.reconcile(allowStart: true)
@@ -150,7 +169,10 @@ final class TimelinePlaybackCoordinator {
         }
         stopCurrentPlayer(resetPolicy: next == nil)
         playingID = next
-        if let next { players[next]?(true) }
+        if let next {
+            immediateReturn = false
+            players[next]?(true)
+        }
         else { arbiter.release(self) }
     }
 

@@ -14,29 +14,37 @@ import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.toSize
 import dev.dimension.flare.data.model.TimelineDisplayMode
 import dev.dimension.flare.ui.common.plus
 import dev.dimension.flare.ui.component.LocalTimelineAppearance
+import dev.dimension.flare.ui.component.LocalTimelinePlayback
+import dev.dimension.flare.ui.component.TimelinePlaybackCoordinator
 import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.theme.PlatformTheme
 import dev.dimension.flare.ui.theme.isLightTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
-import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 
-@OptIn(FlowPreview::class)
 @Composable
 public fun LazyStatusVerticalStaggeredGrid(
     modifier: Modifier = Modifier,
@@ -128,11 +136,15 @@ public fun LazyStatusVerticalStaggeredGrid(
             bigScreen -> verticalItemSpacing
             else -> 2.dp
         }
-    val isScrollInProgressDebounced by remember(state) {
-        snapshotFlow { state.isScrollInProgress }
-            .distinctUntilChanged()
-            .debounce(500)
-    }.collectAsState(false)
+    val playbackScope = rememberCoroutineScope()
+    val playback = remember(state) { TimelinePlaybackCoordinator(playbackScope) }
+    SideEffect { playback.multipleColumns = columnCount > 1 }
+    DisposableEffect(playback) { onDispose { playback.close() } }
+    LaunchedEffect(state, playback) {
+        snapshotFlow { state.isScrollInProgress }.distinctUntilChanged().collect { scrolling ->
+            playback.setScrolling(source = state, scrolling = scrolling, vertical = true)
+        }
+    }
     val gridModifier =
         if (plainTimeline && isLightTheme()) {
             modifier.background(PlatformTheme.colorScheme.card)
@@ -140,12 +152,27 @@ public fun LazyStatusVerticalStaggeredGrid(
             modifier
         }
     CompositionLocalProvider(
-        LocalIsScrollingInProgress provides isScrollInProgressDebounced,
+        LocalIsScrollingInProgress provides state.isScrollInProgress,
+        LocalTimelinePlayback provides playback,
         LocalMultipleColumns provides bigScreen,
         LocalEffectiveTimelineDisplayMode provides effectiveMode,
     ) {
         LazyVerticalStaggeredGrid(
-            modifier = gridModifier,
+            modifier =
+                gridModifier.onGloballyPositioned {
+                    val bounds = Rect(it.positionInWindow(), it.size.toSize())
+                    // Scaffold/window padding reserves the area occupied by bars.
+                    val viewport =
+                        with(density) {
+                            Rect(
+                                bounds.left + contentPadding.calculateLeftPadding(layoutDirection).toPx(),
+                                bounds.top + contentPadding.calculateTopPadding().toPx(),
+                                bounds.right - contentPadding.calculateRightPadding(layoutDirection).toPx(),
+                                bounds.bottom - contentPadding.calculateBottomPadding().toPx(),
+                            )
+                        }
+                    playback.viewport = viewport.intersect(it.boundsInWindow())
+                },
             columns = effectiveColumns,
             state = state,
             contentPadding = padding,

@@ -20,7 +20,7 @@ struct MacMediaViewerScreen: View {
     @State private var previewZoomScale: CGFloat = macMediaMinimumZoomScale
     @State private var isPlaying = true
     @State private var videoState: VideoState = .idle
-    @State private var currentTime: CMTime = .zero
+    @State private var playbackTimes: [String: CMTime] = [:]
     @State private var playbackRate: Float = 1
     @State private var didApplyInitialSelection = false
     @State private var isSharingSelectedMedia = false
@@ -54,6 +54,7 @@ struct MacMediaViewerScreen: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .videoPlaybackPresentation(mediaURLs: medias.map(\.url), selectedMediaURL: selectedMedia?.url)
         .ignoresSafeArea()
         .toolbar {
             ToolbarItem(placement: .principal) {
@@ -184,7 +185,7 @@ struct MacMediaViewerScreen: View {
                             zoomScale: zoomBinding(for: index),
                             isPlaying: $isPlaying,
                             videoState: $videoState,
-                            currentTime: $currentTime,
+                            currentTime: timeBinding(for: media.url),
                             playbackRate: $playbackRate
                         )
                         .frame(width: geometry.size.width, height: geometry.size.height)
@@ -243,6 +244,17 @@ struct MacMediaViewerScreen: View {
             ProgressView()
                 .tint(.white)
         }
+    }
+
+    private func timeBinding(for url: String?) -> Binding<CMTime> {
+        guard let url else { return .constant(.zero) }
+        return Binding(
+            get: { playbackTimes[url] ?? CMTime(seconds: MediaPlaybackMemory.shared.position(for: url), preferredTimescale: 600) },
+            set: {
+                playbackTimes[url] = $0
+                VideoPlaybackSession.setPosition(for: url, seconds: $0.seconds)
+            }
+        )
     }
 
     private var selectedMedia: (any UiMedia)? {
@@ -322,7 +334,6 @@ struct MacMediaViewerScreen: View {
     private func resetPlaybackState() {
         isPlaying = true
         videoState = .idle
-        currentTime = .zero
         playbackRate = 1
     }
 

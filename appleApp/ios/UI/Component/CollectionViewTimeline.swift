@@ -3,8 +3,8 @@ import FlareAppleCore
 import FlareAppleUI
 import KotlinSharedUI
 import CHTCollectionViewWaterfallLayout
-import GSPlayer
 import AVFoundation
+import Combine
 
 enum TimelineUIKitLayoutMetrics {
     static let horizontalInset: CGFloat = 16
@@ -330,15 +330,24 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     private var lastAppliedSignature: SnapshotSignature?
     private var lastRenderHashMap: [String: Int32] = [:]
     private var lastLoadedItemIDs: Set<String> = []
-    private let autoplayPlayerView = VideoPlayerView()
-    private var autoplayPlayerObservation: NSKeyValueObservation?
+    private let autoplayPlayerView = VideoPlaybackSurfaceView()
+    private let autoplaySession = VideoPlaybackSession()
+    private var autoplayReadinessSubscription: AnyCancellable?
+    private var autoplayLifecycleSubscription: AnyCancellable?
     private var autoplaySelectionTask: Task<Void, Never>?
     private var autoplayCountdownTask: Task<Void, Never>?
     private var postRefreshPoolCleanupTask: Task<Void, Never>?
     private var deferredPoolCleanupTask: Task<Void, Never>?
     private let deferredPoolCleanupCells = NSHashTable<TimelineUIKitCollectionViewCell>.weakObjects()
     private weak var currentAutoplayHostView: UIView?
+    private var isAutoplayViewVisible = false
+    private var isAutoplayViewportMoving = false
+    private var autoplayImmediateReturn = false
     private var currentAutoplayID: String?
+    private var currentAutoplayURL: URL?
+    private var autoplayPolicy = TimelineAutoplayPolicy()
+    let mediaSelections = TimelineMediaSelections()
+    private let autoplayCarousels = NSHashTable<StatusMediaUIView>.weakObjects()
     private var accessoryItemMap: [String: UITimelineCollectionViewAccessoryItem] = [:]
     private var pendingScrollAnchor: ScrollAnchor?
     private var lastProfileMediaScrollAnchor: ScrollAnchor?
@@ -428,7 +437,9 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        isAutoplayViewVisible = true
         reconfigureVisibleCells()
+        scheduleAutoplaySelection()
     }
 
     override func viewDidLayoutSubviews() {
@@ -475,9 +486,13 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
 
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
+        isAutoplayViewVisible = false
+        isAutoplayViewportMoving = false
+        scrollingState.isScrolling = false
         postRefreshPoolCleanupTask?.cancel()
         deferredPoolCleanupTask?.cancel()
-        detachAutoplayPlayer(pause: true)
+        detachAutoplayPlayer()
+        VideoPlaybackArbiter.shared.withdraw(self)
         accessoryItems.forEach { $0.onVisibilityChanged?(false) }
     }
 
@@ -486,7 +501,6 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         autoplayCountdownTask?.cancel()
         postRefreshPoolCleanupTask?.cancel()
         deferredPoolCleanupTask?.cancel()
-        autoplayPlayerObservation?.invalidate()
         NotificationCenter.default.removeObserver(self)
     }
 
@@ -789,19 +803,25 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     }
 
     private func setupVideoAutoplay() {
-        autoplayPlayerView.isMuted = true
-        autoplayPlayerView.isAutoReplay = true
-        autoplayPlayerView.contentMode = .scaleAspectFill
-        autoplayPlayerView.isUserInteractionEnabled = false
-        autoplayPlayerView.stateDidChanged = { [weak self] state in
-            Task { @MainActor in
-                self?.handleAutoplayPlayerStateChanged(state)
-            }
+        autoplayLifecycleSubscription = NotificationCenter.default.publisher(for: UIApplication.didEnterBackgroundNotification)
+            .merge(with: NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification))
+            .sink { [weak self] _ in self?.handleAutoplayAvailabilityChanged() }
+        autoplayReadinessSubscription = autoplaySession.updates.sink { [weak self] in
+            guard let self else { return }
+            self.autoplayPlayerView.canDisplayFrame = self.autoplaySession.hasRestoredPosition
         }
-        autoplayPlayerObservation =
-            autoplayPlayerView.playerLayer.observe(\.player, options: [.initial, .new]) { [weak self] _, _ in
-                self?.configureTimelineAutoplayPlayer()
-            }
+        autoplayPlayerView.playerLayer.videoGravity = .resizeAspectFill
+        autoplayPlayerView.isUserInteractionEnabled = false
+        VideoPlaybackArbiter.shared.register(self, stop: { [weak self] in
+            self?.detachAutoplayPlayer()
+        }, reconsider: { [weak self] in
+            self?.scheduleAutoplaySelection()
+        }, mediaReturned: { [weak self] urls, selected in
+            self?.mediaSelections.returned(urls: urls, selectedURL: selected)
+        }, resume: { [weak self] in
+            self?.autoplayImmediateReturn = true
+            self?.scheduleAutoplaySelection()
+        }, willHandoff: { VideoPlaybackSession.continuePlayback(to: $0) })
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(handleTimelineVideoAutoplayNeedsUpdate),
@@ -865,7 +885,21 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         collectionView.backgroundColor = backgroundColor
     }
 
-    @objc private func handleTimelineVideoAutoplayNeedsUpdate() {
+    @objc private func handleTimelineVideoAutoplayNeedsUpdate(_ notification: Notification) {
+        guard let media = notification.object as? StatusMediaUIView,
+              media.isDescendant(of: collectionView) else { return }
+        autoplayCarousels.add(media)
+        if notification.userInfo?["carouselInteraction"] as? Bool == true {
+            autoplayImmediateReturn = false
+            VideoPlaybackArbiter.shared.interacted(self)
+            autoplayPolicy.interactedWithCarousel(media.autoplayGroupID)
+        }
+        if let url = notification.userInfo?["selectedMediaURL"] as? String {
+            if notification.userInfo?["mediaClicked"] as? Bool == true {
+                VideoPlaybackArbiter.shared.interacted(self)
+            }
+            autoplayPolicy.returnedToMedia(groupID: media.autoplayGroupID, mediaURL: url)
+        }
         validateCurrentAutoplayVisibility()
         scheduleAutoplaySelection()
     }
@@ -1160,7 +1194,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
             reconfigureItems([Self.errorID, Self.footerErrorID])
         }
         if currentSuccess == nil && headerItem == nil {
-            detachAutoplayPlayer(pause: true)
+            detachAutoplayPlayer()
         } else {
             validateCurrentAutoplayVisibility()
             scheduleAutoplaySelection()
@@ -1420,7 +1454,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
             columnCount = max(newColumnCount, 1)
             updateState()
             clearAllHeightCache()
-            detachAutoplayPlayer(pause: true)
+            detachAutoplayPlayer()
             pendingScrollAnchor = nil
             itemIndexMap = plan.indexMap
 
@@ -1861,6 +1895,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     // MARK: - Video Autoplay
 
     private var isVideoAutoplayAllowed: Bool {
+        guard UIApplication.shared.applicationState == .active else { return false }
         switch appearance.videoAutoplay {
         case .never:
             return false
@@ -1876,15 +1911,20 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     private func handleAutoplayAvailabilityChanged() {
         validateCurrentAutoplayVisibility()
         guard isVideoAutoplayAllowed else {
-            detachAutoplayPlayer(pause: true)
+            detachAutoplayPlayer()
             return
         }
         scheduleAutoplaySelection()
     }
 
-    private func scheduleAutoplaySelection(delayNanoseconds: UInt64 = 300_000_000) {
+    private func scheduleAutoplaySelection(delayNanoseconds: UInt64 = 200_000_000) {
         autoplaySelectionTask?.cancel()
-        guard isViewLoaded, currentSuccess != nil || headerItem != nil, isVideoAutoplayAllowed else { return }
+        guard isViewLoaded, isAutoplayViewVisible, currentSuccess != nil || headerItem != nil, isVideoAutoplayAllowed else { return }
+        if autoplayImmediateReturn, !isAutoplayViewportMoving {
+            selectAutoplayCandidateIfStable()
+            if currentAutoplayID != nil { autoplayImmediateReturn = false }
+            return
+        }
         autoplaySelectionTask = Task { @MainActor [weak self] in
             do {
                 try await Task.sleep(nanoseconds: delayNanoseconds)
@@ -1969,33 +2009,33 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     }
 
     private func selectAutoplayCandidateIfStable() {
-        guard isVideoAutoplayAllowed, currentSuccess != nil || headerItem != nil else {
-            detachAutoplayPlayer(pause: true)
+        guard isAutoplayViewVisible, isVideoAutoplayAllowed, currentSuccess != nil || headerItem != nil else {
+            detachAutoplayPlayer()
             return
         }
-        guard !collectionView.isDragging, !collectionView.isDecelerating, !scrollingState.isScrolling else { return }
+        guard !collectionView.isDragging, !collectionView.isDecelerating, !scrollingState.isScrolling,
+              !autoplayCarousels.allObjects.contains(where: { $0.isDescendant(of: collectionView) && $0.isCarouselScrolling }) else { return }
+        isAutoplayViewportMoving = false
         guard let candidate = bestAutoplayCandidate() else {
-            detachAutoplayPlayer(pause: true)
+            VideoPlaybackArbiter.shared.settledWithoutVideo(self)
+            detachAutoplayPlayer()
             return
         }
         playAutoplayCandidate(candidate)
     }
 
     private func bestAutoplayCandidate() -> TimelineVideoAutoplayCandidate? {
-        let viewportRect = collectionView.bounds
-        guard viewportRect.width > 0, viewportRect.height > 0 else { return nil }
-        let visibleCenter = CGPoint(x: viewportRect.midX, y: viewportRect.midY)
-
-        return visibleAutoplayCandidates()
-            .compactMap { candidate -> (candidate: TimelineVideoAutoplayCandidate, distance: CGFloat)? in
-                guard let candidateRect = visibleRect(for: candidate.hostView, in: collectionView) else { return nil }
-                let candidateCenter = CGPoint(x: candidateRect.midX, y: candidateRect.midY)
-                let dx = candidateCenter.x - visibleCenter.x
-                let dy = candidateCenter.y - visibleCenter.y
-                return (candidate, dx * dx + dy * dy)
-            }
-            .min { lhs, rhs in lhs.distance < rhs.distance }?
-            .candidate
+        let candidates = visibleAutoplayCandidates()
+        let selection = candidates.compactMap { candidate -> TimelineAutoplayPolicy.Candidate? in
+            guard visibleRect(for: candidate.hostView, in: collectionView) != nil else { return nil }
+            let bounds = candidate.hostView.convert(candidate.hostView.bounds, to: collectionView)
+            let distance = TimelineAutoplayPolicy.centerDistance(of: bounds, in: autoplayViewport, multipleColumns: columnCount > 1)
+            return .init(id: candidate.id, groupID: candidate.groupID, isVisible: true,
+                         isSelected: candidate.isSelected, canStart: candidate.horizontalFraction >= 0.6,
+                         distance: distance, mediaURL: candidate.url.absoluteString)
+        }
+        let id = autoplayPolicy.select(from: selection, isScrolling: false)
+        return candidates.first { $0.id == id }
     }
 
     private func visibleAutoplayCandidates() -> [TimelineVideoAutoplayCandidate] {
@@ -2010,11 +2050,14 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     }
 
     private func playAutoplayCandidate(_ candidate: TimelineVideoAutoplayCandidate) {
-        guard currentAutoplayID != candidate.id || currentAutoplayHostView !== candidate.hostView else {
+        guard autoplaySession.player == nil || currentAutoplayID != candidate.id || currentAutoplayHostView !== candidate.hostView else {
             return
         }
-        guard let newHost = candidate.hostView as? MediaUIView else { return }
+        guard let newHost = candidate.hostView as? MediaUIView,
+              VideoPlaybackArbiter.shared.acquire(self) else { return }
 
+        saveAutoplayPosition()
+        autoplaySession.detach()
         if let oldHost = currentAutoplayHostView as? MediaUIView, oldHost !== candidate.hostView {
             oldHost.detachAutoplayPlayer()
         } else if autoplayPlayerView.superview !== candidate.hostView {
@@ -2025,37 +2068,12 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         newHost.setAutoplayOverlay(.loading)
 
         currentAutoplayID = candidate.id
+        currentAutoplayURL = candidate.url
         currentAutoplayHostView = candidate.hostView
-        autoplayPlayerView.play(for: candidate.url)
-        configureTimelineAutoplayPlayer()
-        autoplayPlayerView.isMuted = true
-        autoplayPlayerView.isAutoReplay = true
+        autoplaySession.play(url: candidate.url.absoluteString)
+        autoplayPlayerView.canDisplayFrame = autoplaySession.hasRestoredPosition
+        autoplayPlayerView.player = autoplaySession.player
         startAutoplayCountdownUpdates()
-    }
-
-    private func configureTimelineAutoplayPlayer() {
-        autoplayPlayerView.player?.preventsDisplaySleepDuringVideoPlayback = false
-    }
-
-    private func handleAutoplayPlayerStateChanged(_ state: VideoPlayerView.State) {
-        guard let host = currentAutoplayHostView as? MediaUIView else { return }
-        switch state {
-        case .none:
-            stopAutoplayCountdownUpdates()
-            host.setAutoplayOverlay(.idle)
-        case .loading:
-            stopAutoplayCountdownUpdates()
-            host.setAutoplayOverlay(.loading)
-        case .playing:
-            startAutoplayCountdownUpdates()
-            updateAutoplayCountdown()
-        case .paused:
-            stopAutoplayCountdownUpdates()
-            host.setAutoplayOverlay(.idle)
-        case .error:
-            stopAutoplayCountdownUpdates()
-            host.setAutoplayOverlay(.error)
-        }
     }
 
     private func startAutoplayCountdownUpdates() {
@@ -2064,7 +2082,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
             while !Task.isCancelled {
                 self?.updateAutoplayCountdown()
                 do {
-                    try await Task.sleep(nanoseconds: 500_000_000)
+                    try await Task.sleep(nanoseconds: 250_000_000)
                 } catch {
                     return
                 }
@@ -2079,41 +2097,57 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
 
     private func updateAutoplayCountdown() {
         guard let host = currentAutoplayHostView as? MediaUIView else { return }
-        let remaining = max(autoplayPlayerView.totalDuration - autoplayPlayerView.currentDuration, 0)
-        host.setAutoplayOverlay(.playing(remaining: remaining))
+        autoplaySession.refresh()
+        autoplayPlayerView.canDisplayFrame = autoplaySession.hasRestoredPosition
+        switch autoplaySession.state {
+        case .playing(let duration): host.setAutoplayOverlay(.playing(remaining: max(duration - autoplaySession.position, 0)))
+        case .loading: host.setAutoplayOverlay(.loading)
+        case .error: host.setAutoplayOverlay(.error)
+        case .idle, .paused: host.setAutoplayOverlay(.idle)
+        }
     }
 
     private func validateCurrentAutoplayVisibility() {
         guard currentAutoplayHostView != nil else { return }
         guard isVideoAutoplayAllowed,
               let host = currentAutoplayHostView,
-              let currentID = currentAutoplayID,
+              (host as? MediaUIView)?.videoURL == currentAutoplayURL,
               host.window != nil,
               visibleRect(for: host, in: collectionView) != nil else {
-            detachAutoplayPlayer(pause: true)
+            detachAutoplayPlayer()
             return
-        }
-        let stillValid = visibleAutoplayCandidates().contains { candidate in
-            candidate.id == currentID && candidate.hostView === host
-        }
-        if !stillValid {
-            detachAutoplayPlayer(pause: true)
         }
     }
 
-    private func detachAutoplayPlayer(pause: Bool) {
+    private func saveAutoplayPosition() {
+        autoplaySession.refresh()
+        if let currentAutoplayURL, autoplaySession.player != nil {
+            MediaPlaybackMemory.shared.save(autoplaySession.position, for: currentAutoplayURL.absoluteString)
+        }
+    }
+
+    private func detachAutoplayPlayer() {
+        saveAutoplayPosition()
+        _ = autoplayPolicy.select(from: [], isScrolling: true)
         autoplaySelectionTask?.cancel()
         stopAutoplayCountdownUpdates()
-        if pause {
-            autoplayPlayerView.pause(reason: .hidden)
-        }
+        autoplaySession.detach()
+        autoplayPlayerView.player = nil
         if let host = currentAutoplayHostView as? MediaUIView {
             host.detachAutoplayPlayer()
         } else {
             autoplayPlayerView.removeFromSuperview()
         }
         currentAutoplayID = nil
+        currentAutoplayURL = nil
         currentAutoplayHostView = nil
+        VideoPlaybackArbiter.shared.release(self)
+    }
+
+    private var autoplayViewport: CGRect {
+        // Scroll padding can include artificial space for short profiles. Only
+        // the safe area represents bars obscuring the actual viewport.
+        collectionView.bounds.inset(by: collectionView.safeAreaInsets)
     }
 
     private func visibleRect(for hostView: UIView, in collectionView: UICollectionView) -> CGRect? {
@@ -2124,10 +2158,19 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
               hostView.bounds.height > 1 else {
             return nil
         }
-        let rect = hostView.convert(hostView.bounds, to: collectionView)
-        let visibleRect = rect.intersection(collectionView.bounds)
-        guard !visibleRect.isNull, visibleRect.width > 1, visibleRect.height > 1 else { return nil }
-        return visibleRect
+        var visible = hostView.convert(hostView.bounds, to: collectionView).intersection(autoplayViewport)
+        var ancestor = hostView.superview
+        while let view = ancestor {
+            guard !view.isHidden, view.alpha > 0.01 else { return nil }
+            if let media = view as? StatusMediaUIView, !media.allowsVideoAutoplay { return nil }
+            if view.clipsToBounds {
+                visible = visible.intersection(view.convert(view.bounds, to: collectionView))
+            }
+            if view === collectionView { break }
+            ancestor = view.superview
+        }
+        guard !visible.isEmpty else { return nil }
+        return visible
     }
 
     // MARK: - CHTCollectionViewDelegateWaterfallLayout
@@ -2330,7 +2373,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
               host.isDescendant(of: cell) else {
             return
         }
-        detachAutoplayPlayer(pause: true)
+        detachAutoplayPlayer()
     }
 
     // MARK: - UIScrollViewDelegate
@@ -2341,6 +2384,10 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     }
 
     private func beginScrollInteraction() {
+        autoplayImmediateReturn = false
+        VideoPlaybackArbiter.shared.interacted(self)
+        autoplayPolicy.verticalScrollBegan()
+        isAutoplayViewportMoving = true
         if contentKind == .profileMedia {
             profileMediaGeometryTransition = nil
         }
@@ -2359,6 +2406,11 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
                 minimumVerticalScrollDistance = requiredDistance
             }
         }
+        if !scrollingState.isScrolling, !isAutoplayViewportMoving {
+            VideoPlaybackArbiter.shared.interacted(self)
+            autoplayPolicy.verticalScrollBegan()
+        }
+        isAutoplayViewportMoving = true
         restorePendingScrollAnchorIfNeeded()
         if allowsScrollAnchorRestoration {
             rememberProfileMediaScrollAnchor()
@@ -2366,6 +2418,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         reportIsAtTop()
         onContentOffsetChanged?(effectiveContentOffsetY)
         validateCurrentAutoplayVisibility()
+        scheduleAutoplaySelection()
     }
 
     func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {

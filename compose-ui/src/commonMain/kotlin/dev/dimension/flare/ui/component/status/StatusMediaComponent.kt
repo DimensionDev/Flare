@@ -17,12 +17,16 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -65,7 +69,10 @@ import dev.dimension.flare.ui.component.AdaptiveGrid
 import dev.dimension.flare.ui.component.AudioPlayer
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.LocalTimelineAppearance
+import dev.dimension.flare.ui.component.LocalTimelineCarouselItem
+import dev.dimension.flare.ui.component.LocalTimelinePlayback
 import dev.dimension.flare.ui.component.NetworkImage
+import dev.dimension.flare.ui.component.TimelineCarouselItem
 import dev.dimension.flare.ui.component.accessibleDescription
 import dev.dimension.flare.ui.component.platform.LocalWifiState
 import dev.dimension.flare.ui.component.platform.PlatformCircularProgressIndicator
@@ -84,7 +91,9 @@ import dev.dimension.flare.ui.route.DeeplinkRoute
 import dev.dimension.flare.ui.route.toUri
 import dev.dimension.flare.ui.theme.PlatformTheme
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.coroutines.flow.distinctUntilChanged
 import org.jetbrains.compose.resources.stringResource
+import kotlin.math.abs
 import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
@@ -108,6 +117,26 @@ internal fun StatusMediaComponent(
         allowCarousel &&
             appearanceSettings.mediaLayout == TimelineMediaLayout.Carousel &&
             data.size > 1
+    val carouselState = if (usesCarousel) rememberLazyListState() else null
+    val carouselId = remember(post.statusKey) { Any() }
+    val playback = LocalTimelinePlayback.current
+    var selectedIndex by remember(post.statusKey) { mutableStateOf(0) }
+    val mediaUrls = remember(data) { data.map { it.url } }
+    val openMedia: (UiMedia) -> Unit = { media ->
+        playback?.selectMedia(carouselId, media.url, userInitiated = true)
+        onMediaClick(media)
+    }
+    DisposableEffect(playback, carouselId, mediaUrls, carouselState) {
+        playback?.mediaSelections?.register(carouselId, mediaUrls) { uri ->
+            val index = mediaUrls.indexOf(uri)
+            if (index >= 0) {
+                selectedIndex = index
+                playback.selectMedia(carouselId, uri, userInitiated = false)
+                carouselState?.requestScrollToItem(index)
+            }
+        }
+        onDispose { playback?.mediaSelections?.remove(carouselId) }
+    }
     val mediaContentModifier =
         Modifier.let {
             if (hideSensitive && SystemUtils.isBlurSupported) {
@@ -129,7 +158,30 @@ internal fun StatusMediaComponent(
                 modifier.clip(shape)
             },
     ) {
-        if (usesCarousel) {
+        if (carouselState != null) {
+            LaunchedEffect(carouselState, playback, carouselId) {
+                var interacted = false
+                snapshotFlow { carouselState.isScrollInProgress }.distinctUntilChanged().collect { scrolling ->
+                    if (scrolling) interacted = true
+                    if (!scrolling && interacted) {
+                        val layout = carouselState.layoutInfo
+                        val center = (layout.viewportStartOffset + layout.viewportEndOffset) / 2f
+                        val closest = layout.visibleItemsInfo.minByOrNull { abs(it.offset + it.size / 2f - center) }
+                        val current = layout.visibleItemsInfo.firstOrNull { it.index == selectedIndex }
+                        if (closest != null && (
+                                current == null ||
+                                    abs(current.offset + current.size / 2f - center) > abs(closest.offset + closest.size / 2f - center) + 2f
+                            )
+                        ) {
+                            selectedIndex = closest.index
+                        }
+                    }
+                    playback?.setScrolling(source = carouselId, scrolling = scrolling, vertical = false)
+                }
+            }
+            DisposableEffect(playback, carouselId) {
+                onDispose { playback?.setScrolling(source = carouselId, scrolling = false, vertical = false) }
+            }
             BoxWithConstraints(
                 modifier =
                     mediaContentModifier
@@ -158,6 +210,7 @@ internal fun StatusMediaComponent(
                         ).dp
 
                 LazyRow(
+                    state = carouselState,
                     modifier =
                         Modifier
                             .fillMaxWidth()
@@ -179,20 +232,24 @@ internal fun StatusMediaComponent(
                                     height = carouselHeight.value,
                                     aspectRatio = media.timelineAspectRatio,
                                 ).dp
-                        StatusMediaItem(
-                            post = post,
-                            media = media,
-                            mediaCount = data.size,
-                            onMediaClick = onMediaClick,
-                            hideSensitive = hideSensitive,
-                            keepAspectRatio = false,
-                            fillContainer = true,
-                            modifier =
-                                Modifier
-                                    .fillParentMaxHeight()
-                                    .width(itemWidth)
-                                    .clip(shape),
-                        )
+                        CompositionLocalProvider(
+                            LocalTimelineCarouselItem provides TimelineCarouselItem(carouselId, index == selectedIndex),
+                        ) {
+                            StatusMediaItem(
+                                post = post,
+                                media = media,
+                                mediaCount = data.size,
+                                onMediaClick = openMedia,
+                                hideSensitive = hideSensitive,
+                                keepAspectRatio = false,
+                                fillContainer = true,
+                                modifier =
+                                    Modifier
+                                        .fillParentMaxHeight()
+                                        .width(itemWidth)
+                                        .clip(shape),
+                            )
+                        }
                     }
                 }
             }
@@ -200,14 +257,18 @@ internal fun StatusMediaComponent(
             AdaptiveGrid(
                 content = {
                     data.fastForEach { media ->
-                        StatusMediaItem(
-                            post = post,
-                            media = media,
-                            mediaCount = data.size,
-                            onMediaClick = onMediaClick,
-                            hideSensitive = hideSensitive,
-                            keepAspectRatio = data.size == 1 && appearanceSettings.expandMediaSize,
-                        )
+                        CompositionLocalProvider(
+                            LocalTimelineCarouselItem provides TimelineCarouselItem(carouselId, selected = true, isCarousel = false),
+                        ) {
+                            StatusMediaItem(
+                                post = post,
+                                media = media,
+                                mediaCount = data.size,
+                                onMediaClick = openMedia,
+                                hideSensitive = hideSensitive,
+                                keepAspectRatio = data.size == 1 && appearanceSettings.expandMediaSize,
+                            )
+                        }
                     }
                 },
                 maxItems = if (appearanceSettings.limitMediaGridToNine) 9 else data.size,

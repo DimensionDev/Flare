@@ -34,7 +34,18 @@ jobs:
           java-version: 25
       # Run tests
       - name: Run Tests
+        timeout-minutes: 120
         run: ./gradlew allTests -x wasmJsBrowserTest
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: ios-test-reports
+          path: |
+            **/build/test-results/**
+            **/build/reports/tests/**
+          if-no-files-found: ignore
+          retention-days: 7
       - name: Setup Xcode
         uses: maxim-lobanov/setup-xcode@v1
         with:

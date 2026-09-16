@@ -1,6 +1,7 @@
 
 import dev.dimension.flare.buildlogic.FlarePlatform
 import dev.dimension.flare.buildlogic.flare
+import java.time.Duration
 
 plugins {
     id("dev.dimension.flare.multiplatform-library")
@@ -190,6 +191,8 @@ if (sqliteNativeLibrary != null) {
 
     tasks.withType<org.gradle.api.tasks.testing.Test>().configureEach {
         if (name == "testAndroidHostTest") {
+            timeout.set(Duration.ofMinutes(5))
+            testLogging.events("started", "failed", "skipped")
             dependsOn(extractSqliteBundledJvmNative)
             systemProperty(
                 "androidx.sqlite.driver.bundled.path",

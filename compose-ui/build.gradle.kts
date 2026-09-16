@@ -64,6 +64,7 @@ kotlin {
             dependencies {
                 implementation(kotlin("test"))
                 implementation(libs.kotlinx.coroutines.test)
+                implementation(libs.molecule.runtime)
             }
         }
         val androidMain by getting {

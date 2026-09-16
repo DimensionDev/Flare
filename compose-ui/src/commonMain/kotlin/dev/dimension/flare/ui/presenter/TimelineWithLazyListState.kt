@@ -9,6 +9,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import dev.dimension.flare.common.onSuccess
@@ -49,7 +50,7 @@ public fun rememberTimelineItemPresenterWithLazyListState(
 }
 
 @Composable
-private fun rememberTimelineWithLazyListState(
+internal fun rememberTimelineWithLazyListState(
     baseState: TimelineItemPresenter.State,
     lazyListState: LazyStaggeredGridState,
 ): TimelineWithLazyListState {
@@ -57,13 +58,12 @@ private fun rememberTimelineWithLazyListState(
     var lastRefreshIndex by remember { mutableStateOf(0) }
     var newPostCount by remember { mutableStateOf(0) }
     baseState.listState.onSuccess {
+        // Observe each published snapshot without restarting the collector and
+        // dropping the first head change after every paging update.
+        val currentPagingState by rememberUpdatedState(this)
         LaunchedEffect(lazyListState) {
             snapshotFlow {
-                if (itemCount > 0) {
-                    peek(0)?.itemKey
-                } else {
-                    null
-                }
+                currentPagingState.peek(0)?.itemKey
             }.mapNotNull { it }
                 .distinctUntilChanged()
                 .drop(1)

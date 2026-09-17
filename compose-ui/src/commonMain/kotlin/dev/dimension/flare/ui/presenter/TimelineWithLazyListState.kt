@@ -14,6 +14,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.data.model.tab.UiTimelineTabItem
+import kotlinx.coroutines.flow.drop
 import moe.tlaster.precompose.molecule.producePresenter
 
 @Immutable
@@ -75,6 +76,30 @@ internal fun rememberTimelineWithLazyListState(
                     previousKeys = keys.toSet()
                 }
             }
+        }
+        LaunchedEffect(lazyListState) {
+            snapshotFlow {
+                val index = lazyListState.firstVisibleItemIndex
+                index to
+                    lazyListState.layoutInfo.visibleItemsInfo
+                        .firstOrNull { it.index == index }
+                        ?.key
+            }.drop(1)
+                .collect { (index, key) ->
+                    // Consume posts on viewport changes, not paging updates whose
+                    // new indices may arrive before the grid preserves its position.
+                    // A measured item's key also excludes any leading header cards.
+                    val pagingState = currentPagingState
+                    val postIndex =
+                        if (key == null) {
+                            index
+                        } else {
+                            (0 until pagingState.itemCount).indexOfFirst { pagingState.peek(it)?.itemKey == key }
+                        }
+                    if (postIndex >= 0) {
+                        newPostCount = minOf(newPostCount, postIndex)
+                    }
+                }
         }
     }
     LaunchedEffect(isAtTheTop) {

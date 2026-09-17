@@ -104,7 +104,124 @@ class TimelineWithLazyListStateTest {
         }
 
     @Test
-    fun scrollingOnlyClearsTheCountWhenReachingTheTop() =
+    fun scrollingThroughNewPostsDecreasesTheCount() =
+        withTimelineState { pages, states, scrollState ->
+            pages.value = page(-3..1)
+            runCurrent()
+            assertEquals(3, states.last().newPostsCount)
+
+            scrollState.requestScrollToItem(4)
+            runCurrent()
+            assertEquals(3, states.last().newPostsCount, "Keeping the old visible post after a prepend must not consume new posts")
+
+            scrollState.requestScrollToItem(2)
+            runCurrent()
+            assertEquals(2, states.last().newPostsCount, "Only the two new posts above the visible post should remain unread")
+
+            scrollState.requestScrollToItem(1)
+            runCurrent()
+            assertEquals(1, states.last().newPostsCount)
+
+            scrollState.requestScrollToItem(0, 20)
+            runCurrent()
+            assertEquals(0, states.last().newPostsCount)
+            assertFalse(states.last().showNewToots)
+        }
+
+    @Test
+    fun scrollingAwayDoesNotRestoreReadPosts() =
+        withTimelineState { pages, states, scrollState ->
+            pages.value = page(-3..1)
+            runCurrent()
+            scrollState.requestScrollToItem(4)
+            runCurrent()
+            scrollState.requestScrollToItem(2)
+            runCurrent()
+            assertEquals(2, states.last().newPostsCount)
+
+            scrollState.requestScrollToItem(4)
+            runCurrent()
+            assertEquals(2, states.last().newPostsCount)
+
+            scrollState.requestScrollToItem(3)
+            runCurrent()
+            assertEquals(2, states.last().newPostsCount)
+
+            scrollState.requestScrollToItem(1)
+            runCurrent()
+            assertEquals(1, states.last().newPostsCount)
+        }
+
+    @Test
+    fun refreshAfterReadingSomePostsPreservesCountWhenScrollUpdatesFirst() =
+        withTimelineState { pages, states, scrollState ->
+            pages.value = page(-3..1)
+            runCurrent()
+            scrollState.requestScrollToItem(4)
+            runCurrent()
+            scrollState.requestScrollToItem(2)
+            runCurrent()
+            assertEquals(2, states.last().newPostsCount)
+
+            scrollState.requestScrollToItem(4)
+            runCurrent()
+            pages.value = page(-5..1)
+            runCurrent()
+            assertEquals(4, states.last().newPostsCount)
+
+            scrollState.requestScrollToItem(3)
+            runCurrent()
+            assertEquals(3, states.last().newPostsCount)
+        }
+
+    @Test
+    fun refreshAfterReadingSomePostsPreservesCountWhenScrollUpdatesLast() =
+        withTimelineState { pages, states, scrollState ->
+            pages.value = page(-3..1)
+            runCurrent()
+            scrollState.requestScrollToItem(4)
+            runCurrent()
+            scrollState.requestScrollToItem(2)
+            runCurrent()
+            assertEquals(2, states.last().newPostsCount)
+
+            pages.value = page(-5..1)
+            runCurrent()
+            assertEquals(4, states.last().newPostsCount)
+            scrollState.requestScrollToItem(4)
+            runCurrent()
+            assertEquals(4, states.last().newPostsCount)
+
+            scrollState.requestScrollToItem(3)
+            runCurrent()
+            assertEquals(3, states.last().newPostsCount)
+        }
+
+    @Test
+    fun scrollingAmongOlderPostsDoesNotConsumeNewPosts() =
+        withTimelineState { pages, states, scrollState ->
+            pages.value = page(0..9)
+            runCurrent()
+            scrollState.requestScrollToItem(5)
+            runCurrent()
+
+            pages.value = page(-3..9)
+            runCurrent()
+            scrollState.requestScrollToItem(8)
+            runCurrent()
+            assertEquals(3, states.last().newPostsCount)
+
+            scrollState.requestScrollToItem(6)
+            runCurrent()
+            assertEquals(3, states.last().newPostsCount)
+
+            scrollState.requestScrollToItem(2)
+            runCurrent()
+            assertEquals(2, states.last().newPostsCount)
+        }
+
+    @Test
+    fun scrollingBeforeTheNewPostKeepsItUnread() =
         withTimelineState { pages, states, scrollState ->
             pages.value = page(-1..5)
             runCurrent()

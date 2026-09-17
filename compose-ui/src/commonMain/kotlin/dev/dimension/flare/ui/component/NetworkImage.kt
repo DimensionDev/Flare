@@ -77,7 +77,7 @@ public fun NetworkImage(
         contentScale = contentScale,
         alpha = alpha,
         colorFilter = colorFilter,
-        modifier = modifier,
+        modifier = modifier.mediaTransitionSource(model, contentScale = contentScale, alignment = alignment, headers = customHeaders),
         filterQuality = filterQuality,
         placeholder =
             placeholder

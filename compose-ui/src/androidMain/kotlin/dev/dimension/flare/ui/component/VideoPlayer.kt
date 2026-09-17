@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.LinearProgressIndicator
@@ -35,8 +36,10 @@ import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.keepScreenOn
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.LifecycleStartEffect
@@ -86,6 +89,7 @@ public fun VideoPlayer(
     muted: Boolean = false,
     showControls: Boolean = false,
     keepScreenOn: Boolean = false,
+    showVideoSurface: Boolean = true,
     aspectRatio: Float? = null,
     contentScale: ContentScale = ContentScale.Crop,
     onClick: (() -> Unit)? = null,
@@ -222,8 +226,25 @@ public fun VideoPlayer(
                         .let { if (onClick != null) it.combinedClickable(onClick = onClick, onLongClick = onLongClick) else it }
                         .let { if (keepScreenOn) it.keepScreenOn() else it }
                         .let { if (aspectRatio != null && presentation.videoSizeDp == null) it.aspectRatio(aspectRatio) else it }
-                PlayerSurface(player = player, modifier = playerModifier)
-                if (presentation.coverSurface) {
+                val view = LocalView.current
+                PlayerSurface(
+                    player = player,
+                    modifier =
+                        playerModifier.offset {
+                            // Keep the SurfaceView attached while a poster handles the overlay animation.
+                            // Moving it outside the window avoids alpha limitations without rebuilding its surface.
+                            IntOffset(if (showVideoSurface) 0 else view.rootView.width * 2, 0)
+                        },
+                )
+                if (!showVideoSurface) {
+                    NetworkImage(
+                        model = previewUri,
+                        customHeaders = customHeaders,
+                        contentDescription = contentDescription,
+                        contentScale = contentScale,
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                } else if (presentation.coverSurface) {
                     Box(Modifier.fillMaxSize()) { loadingPlaceholder() }
                 } else if (remainingTimeContent != null) {
                     VideoCountdown(player, remainingTimeContent)

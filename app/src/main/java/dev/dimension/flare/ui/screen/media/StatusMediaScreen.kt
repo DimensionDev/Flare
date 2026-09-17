@@ -60,6 +60,7 @@ import androidx.compose.material3.rememberSliderState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableFloatStateOf
@@ -243,6 +244,7 @@ internal fun MediaViewerScreen(
     status: UiTimelineV2.Post? = null,
     surfaceBindingManager: SurfaceBindingManager = koinInject(),
 ) {
+    val overlay = LocalMediaViewerOverlay.current
     val view = LocalView.current
     LaunchedEffect(view) {
         // The background fades with the swipe; the window dim would linger until dismissal.
@@ -303,17 +305,21 @@ internal fun MediaViewerScreen(
     }
     MediaViewerPlaybackTheme {
         val mediaItems = medias.takeSuccess().orEmpty()
+        val selectedMedia = mediaItems.getOrNull(pagerState.currentPage)
+        SideEffect { overlay?.selectMedia(selectedMedia?.url, selectedMedia?.previewKey(), selectedMedia !is UiMedia.Audio) }
         MediaViewerSelection(mediaItems.map { it.url }, mediaItems.getOrNull(pagerState.currentPage)?.url)
         val swiperState =
             rememberSwiperState(
                 onDismiss = onDismiss,
             )
+        val backgroundColor =
+            if (overlay == null) MaterialTheme.colorScheme.background.copy(alpha = 1 - swiperState.progress) else Color.Transparent
         Box(
             modifier =
                 Modifier
                     .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.background.copy(alpha = 1 - swiperState.progress))
-                    .alpha(1 - swiperState.progress),
+                    .background(backgroundColor)
+                    .alpha(if (overlay == null) 1 - swiperState.progress else 1f),
         ) {
             Box(
                 modifier =
@@ -324,9 +330,7 @@ internal fun MediaViewerScreen(
                     Box(
                         modifier = Modifier.weight(1f),
                     ) {
-                        Swiper(
-                            state = swiperState,
-                        ) {
+                        val pagerContent: @Composable () -> Unit = {
                             HorizontalPager(
                                 state = pagerState,
                                 userScrollEnabled = !state.lockPager,
@@ -388,6 +392,7 @@ internal fun MediaViewerScreen(
                                                     previewUrl = previewUrl,
                                                     customHeaders = media.customHeaders,
                                                     description = media.accessibleDescription(),
+                                                    isCurrentPage = pagerState.currentPage == index,
                                                     onClick = {
                                                         state.setShowUi(!state.showUi)
                                                     },
@@ -408,7 +413,12 @@ internal fun MediaViewerScreen(
                                                 )
                                             } else if (media is UiMedia.Video) {
                                                 Box(
-                                                    modifier = Modifier.fillMaxSize(),
+                                                    modifier =
+                                                        Modifier.fillMaxSize().mediaViewerViewport(
+                                                            url = media.url,
+                                                            previewUrl = media.thumbnailUrl,
+                                                            headers = media.customHeaders,
+                                                        ),
                                                 ) {
                                                     VideoPlayer(
                                                         uri = media.url,
@@ -421,6 +431,7 @@ internal fun MediaViewerScreen(
                                                         onClick = null,
                                                         showControls = true,
                                                         keepScreenOn = true,
+                                                        showVideoSurface = overlay?.let { it.isInteractive && it.dragY == 0f } ?: true,
                                                         muted = false,
                                                         contentScale = ContentScale.Fit,
                                                     )
@@ -488,6 +499,11 @@ internal fun MediaViewerScreen(
                                         }
                                 }
                             }
+                        }
+                        if (overlay != null) {
+                            MediaOverlayDismissArea(enabled = !state.lockPager, content = pagerContent)
+                        } else {
+                            Swiper(state = swiperState) { pagerContent() }
                         }
                         androidx.compose.animation.AnimatedVisibility(
                             visible = state.showUi,
@@ -1371,6 +1387,7 @@ private fun ImageItem(
     onLongClick: () -> Unit,
     setLockPager: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
+    isCurrentPage: Boolean = true,
 ) {
     val currentOnClick by rememberUpdatedState(onClick)
     val currentOnLongClick by rememberUpdatedState(onLongClick)
@@ -1438,7 +1455,15 @@ private fun ImageItem(
                 }.build(),
         contentDescription = description,
         state = rememberZoomableImageState(zoomableState),
-        modifier = modifier,
+        modifier =
+            modifier.mediaViewerViewport(
+                url = url,
+                previewUrl = previewUrl,
+                headers = customHeaders,
+                contentScale = contentScale,
+                alignment = alignment,
+                enabled = isCurrentPage,
+            ),
         contentScale = contentScale,
         alignment = alignment,
         onClick = {

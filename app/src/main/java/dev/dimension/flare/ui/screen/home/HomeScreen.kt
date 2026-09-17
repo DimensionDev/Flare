@@ -85,6 +85,8 @@ import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.settings.AiAgentEnabledPresenter
 import dev.dimension.flare.ui.route.Route
 import dev.dimension.flare.ui.route.Router
+import dev.dimension.flare.ui.screen.media.MediaViewerOverlayHost
+import dev.dimension.flare.ui.screen.media.isMediaViewerRoute
 import dev.dimension.flare.ui.screen.splash.SplashScreen
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
@@ -127,14 +129,17 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                 NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(
                     currentWindowAdaptiveInfoV2(),
                 )
-            Box {
+            MediaViewerOverlayHost {
                 NavigationSuiteScaffold2(
                     wideNavigationRailState = state.wideNavigationRailState,
                     modifier = Modifier.fillMaxSize(),
                     layoutType = layoutType,
                     showFab =
                         state.canComposeState.takeSuccess() == true &&
-                            state.topLevelBackStack.takeSuccess()?.currentKey is Route.Home,
+                            state.topLevelBackStack
+                                .takeSuccess()
+                                ?.backStack
+                                ?.lastOrNull { !it.isMediaViewerRoute() } is Route.Home,
                     onFabClicked = {
                         state.navigate(Route.Compose.New)
                     },
@@ -682,6 +687,14 @@ private fun navigate(
     scope: kotlinx.coroutines.CoroutineScope,
 ) {
     if (topLevelBackStack == null) return
+    if (route.isMediaViewerRoute()) {
+        scope.launch {
+            // The expanded rail owns a dialog window; finish hiding it before showing an activity overlay.
+            wideNavigationRailState.collapse()
+            topLevelBackStack.add(route)
+        }
+        return
+    }
     if (topLevelRoutes?.contains(route) == true) {
         topLevelBackStack.addTopLevel(route)
     } else {

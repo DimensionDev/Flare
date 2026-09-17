@@ -48,6 +48,7 @@ internal actual fun PlatformCircularProgressIndicator(
 internal actual fun PlatformCircularProgressIndicator(
     modifier: Modifier,
     color: Color?,
+    compact: Boolean,
 ) {
     ProgressRing(
         modifier = modifier,

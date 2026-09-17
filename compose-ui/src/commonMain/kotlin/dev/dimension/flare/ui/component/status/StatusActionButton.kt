@@ -96,47 +96,25 @@ public fun StatusActionButton(
             Modifier
         }
     val actionIcon: @Composable () -> Unit = {
-        if (!LocalIsScrollingInProgress.current) {
-            val contentColor = PlatformContentColor.current
-            AnimatedContent(
-                color,
-                transitionSpec = {
-                    if (targetState == contentColor) {
-                        fadeIn() togetherWith fadeOut()
-                    } else {
-                        fadeIn() +
-                            scaleIn(
-                                animationSpec =
-                                    spring(
-                                        stiffness = Spring.StiffnessMediumLow,
-                                        dampingRatio = Spring.DampingRatioMediumBouncy,
-                                    ),
-                            ) togetherWith scaleOut() + fadeOut()
-                    }.using(SizeTransform(clip = false))
-                },
-            ) { color ->
-                FAIcon(
-                    imageVector = icon,
-                    contentDescription = contentDescription,
-                    modifier =
-                        Modifier
-                            .height(PlatformTextStyle.current.fontSize.value.dp + 2.dp)
-                            .pointerHoverIcon(if (enabled) PointerIcon.Hand else PointerIcon.Default)
-                            .clickable(
-                                onClick = onClicked,
-                                enabled = enabled,
-                                interactionSource = interactionSource,
-                                indication =
-                                    rippleIndication(
-                                        bounded = false,
-                                        radius = 20.dp,
-                                        color = Color.Unspecified,
-                                    ),
-                            ),
-                    tint = color,
-                )
-            }
-        } else {
+        // Keep the icon mounted across scroll transitions; animate only color changes.
+        val contentColor = PlatformContentColor.current
+        AnimatedContent(
+            color,
+            transitionSpec = {
+                if (targetState == contentColor) {
+                    fadeIn() togetherWith fadeOut()
+                } else {
+                    fadeIn() +
+                        scaleIn(
+                            animationSpec =
+                                spring(
+                                    stiffness = Spring.StiffnessMediumLow,
+                                    dampingRatio = Spring.DampingRatioMediumBouncy,
+                                ),
+                        ) togetherWith scaleOut() + fadeOut()
+                }.using(SizeTransform(clip = false))
+            },
+        ) { color ->
             FAIcon(
                 imageVector = icon,
                 contentDescription = contentDescription,

@@ -113,6 +113,7 @@ internal fun AudioPlayer(
                         Modifier
                             .padding(horizontal = 8.dp)
                             .size(24.dp),
+                    compact = true,
                 )
             } else {
                 PlatformIconButton(

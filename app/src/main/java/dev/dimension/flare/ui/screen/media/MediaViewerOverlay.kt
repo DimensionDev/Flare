@@ -2,9 +2,7 @@ package dev.dimension.flare.ui.screen.media
 
 import androidx.activity.compose.PredictiveBackHandler
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animate
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.focusable
@@ -22,6 +20,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableFloatStateOf
@@ -80,8 +79,11 @@ import dev.dimension.flare.ui.component.LocalMediaTransitionSources
 import dev.dimension.flare.ui.component.MediaTransitionSources
 import dev.dimension.flare.ui.route.Route
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
@@ -145,9 +147,17 @@ internal class MediaViewerOverlayState(
     private val sources: MediaTransitionSources,
     route: Route.Media,
     private val onBack: () -> Unit,
+    private val motion: MediaViewerMotion,
 ) {
     private val origin = sources.takeOpeningSource(route.previewUrls())
     val progress = Animatable(0f)
+    private val background = Animatable(0f)
+    private val controls = Animatable(0f)
+    private var transitionJob: Job? = null
+    private var dragResetJob: Job? = null
+    private var returnStartProgress = 1f
+    private var returnStartBackground = 1f
+    private var returnStartControls = 1f
     var viewport: MediaViewport? by mutableStateOf(null)
         private set
     var dragY by mutableFloatStateOf(0f)
@@ -159,9 +169,12 @@ internal class MediaViewerOverlayState(
     private var dismissRequested = false
     private var disposed = false
     val hasHero: Boolean get() = hero != null
-    val isInteractive: Boolean get() = !opening && !returning && !dismissRequested
+    val isInteractive: Boolean get() = !opening && !returning && !dismissRequested && !disposed
     val dragScale: Float get() = 1f - (abs(dragY) / hostSize.height.coerceAtLeast(1f)).coerceIn(0f, 1f) * 0.2f
-    val backgroundAlpha: Float get() = progress.value * (1f - abs(dragY) / hostSize.height.coerceAtLeast(1f)).coerceIn(0f, 1f)
+    private val dragAlpha: Float get() = (1f - abs(dragY) / hostSize.height.coerceAtLeast(1f)).coerceIn(0f, 1f)
+    val backgroundAlpha: Float get() = background.value.coerceIn(0f, 1f) * dragAlpha
+    val controlsAlpha: Float get() = controls.value.coerceIn(0f, 1f) * dragAlpha
+    val contentAlpha: Float get() = if (hasHero) 0f else background.value.coerceIn(0f, 1f)
 
     fun updateViewport(value: MediaViewport) {
         if (!returning && dragY == 0f) viewport = value
@@ -200,7 +213,7 @@ internal class MediaViewerOverlayState(
             hero = MediaHero(origin, target)
             sources.hiddenSource = origin.id
         }
-        progress.animateTo(1f, tween(280, easing = FastOutSlowInEasing))
+        animateTo(1f)
         if (!returning && !dismissRequested) {
             hero = null
             opening = false
@@ -209,8 +222,17 @@ internal class MediaViewerOverlayState(
     }
 
     fun beginReturn() {
+        if (disposed) return
+        transitionJob?.cancel()
+        dragResetJob?.cancel()
+        returnStartProgress = progress.value
+        returnStartBackground = background.value
+        returnStartControls = controls.value
+        // A new Back gesture can interrupt cancellation of the previous one.
         if (returning) return
         returning = true
+        // An interrupted entrance must keep its current endpoints and on-screen bounds.
+        if (opening) return
         val target = viewport
         val source =
             if (origin != null && target != null) {
@@ -227,14 +249,23 @@ internal class MediaViewerOverlayState(
         }
     }
 
+    suspend fun seekReturn(fraction: Float) {
+        val remaining = 1f - fraction.coerceIn(0f, 1f)
+        progress.snapTo(returnStartProgress * remaining)
+        background.snapTo(returnStartBackground * remaining)
+        controls.snapTo(returnStartControls * (1f - fraction * 3f).coerceIn(0f, 1f))
+    }
+
     suspend fun cancelReturn() {
         if (dismissRequested || disposed) return
-        progress.animateTo(1f, tween(180))
+        animateTo(1f)
         if (dismissRequested || disposed) return
         returning = false
         opening = false
         hero = null
         sources.hiddenSource = null
+        // Predictive Back may have interrupted a drag's spring on its way back to rest.
+        resetDrag()
     }
 
     fun requestDismiss() {
@@ -246,16 +277,45 @@ internal class MediaViewerOverlayState(
     suspend fun close() {
         dismissRequested = true
         if (!opening || returning) beginReturn()
-        progress.animateTo(0f, tween(240, easing = FastOutSlowInEasing))
+        animateTo(0f)
         sources.hiddenSource = null
     }
 
+    private suspend fun animateTo(target: Float) =
+        coroutineScope {
+            transitionJob?.cancel()
+            transitionJob = coroutineContext.job
+            launch { background.animateTo(target, motion.background, initialVelocity = 0f) }
+            launch {
+                // Stagger by spatial progress, so system animation scaling also scales the reveal.
+                if (target == 1f) snapshotFlow { progress.value }.first { it >= 0.35f }
+                controls.animateTo(target, motion.controls, initialVelocity = 0f)
+            }
+            if (hasHero) {
+                // Drop the old velocity when reversing instead of briefly continuing away from the target.
+                progress.animateTo(target, motion.spatial, initialVelocity = 0f)
+            } else {
+                progress.snapTo(target)
+            }
+        }
+
+    fun beginDrag() {
+        dragResetJob?.cancel()
+    }
+
     suspend fun resetDrag() {
-        animate(dragY, 0f, animationSpec = tween(180)) { value, _ -> dragY = value }
+        if (!isInteractive || dragY == 0f) return
+        coroutineScope {
+            dragResetJob?.cancel()
+            dragResetJob = coroutineContext.job
+            animate(dragY, 0f, animationSpec = motion.drag) { value, _ -> dragY = value }
+        }
     }
 
     fun dispose() {
         disposed = true
+        transitionJob?.cancel()
+        dragResetJob?.cancel()
         sources.hiddenSource = null
     }
 
@@ -347,7 +407,7 @@ internal fun MediaOverlayLayer(
     PredictiveBackHandler(enabled = lifecycle == Lifecycle.State.RESUMED) { events ->
         state.beginReturn()
         try {
-            events.collect { state.progress.snapTo(1f - it.progress) }
+            events.collect { state.seekReturn(it.progress) }
             state.requestDismiss()
         } catch (_: CancellationException) {
             withContext(NonCancellable) { state.cancelReturn() }
@@ -370,22 +430,44 @@ internal fun MediaOverlayLayer(
                 // Own the full window, including the rail and bars, even where the content is transparent.
                 awaitPointerEventScope {
                     while (true) {
-                        val initial = awaitPointerEvent(PointerEventPass.Initial)
-                        if (!state.isInteractive) initial.changes.forEach { it.consume() }
+                        awaitPointerEvent(PointerEventPass.Initial)
                     }
                 }
             },
     ) {
+        state.HeroImage()
         Box(
             Modifier.fillMaxSize().graphicsLayer {
-                alpha = if (state.hasHero) 0f else state.progress.value
                 translationY = state.dragY
                 scaleX = state.dragScale
                 scaleY = state.dragScale
             },
         ) { content() }
-        state.HeroImage()
     }
+}
+
+@Composable
+internal fun Modifier.mediaViewerControls(): Modifier {
+    val overlay = LocalMediaViewerOverlay.current ?: return this
+    val hidden by remember(overlay) { derivedStateOf { overlay.controlsAlpha == 0f } }
+    // Only invisible controls need a blocker. A permanent node also captures drags in
+    // the toolbar's empty space before they can reach the image underneath it.
+    val input =
+        if (hidden) {
+            Modifier.pointerInput(Unit) {
+                awaitPointerEventScope {
+                    while (true) {
+                        awaitPointerEvent(PointerEventPass.Initial).changes.forEach { it.consume() }
+                    }
+                }
+            }
+        } else {
+            Modifier
+        }
+    return graphicsLayer { alpha = overlay.controlsAlpha }
+        .semantics { if (hidden) hideFromAccessibility() }
+        .focusProperties { canFocus = !hidden }
+        .then(input)
 }
 
 @Composable
@@ -423,25 +505,36 @@ internal fun MediaOverlayDismissArea(
     val scope = rememberCoroutineScope()
     val threshold = with(LocalDensity.current) { 96.dp.toPx() }
     Box(
-        Modifier.fillMaxSize().pointerInput(overlay, enabled) {
-            if (!enabled) return@pointerInput
-            detectVerticalDragGestures(
-                onVerticalDrag = { change, amount ->
-                    if (overlay.isInteractive) {
-                        change.consume()
-                        overlay.dragY += amount
+        Modifier
+            .fillMaxSize()
+            .graphicsLayer { alpha = overlay.contentAlpha }
+            .pointerInput(overlay) {
+                awaitPointerEventScope {
+                    while (true) {
+                        val event = awaitPointerEvent(PointerEventPass.Initial)
+                        if (!overlay.isInteractive) event.changes.forEach { it.consume() }
                     }
-                },
-                onDragEnd = {
-                    if (abs(overlay.dragY) >= threshold) {
-                        overlay.requestDismiss()
-                    } else {
-                        scope.launch { overlay.resetDrag() }
-                    }
-                },
-                onDragCancel = { scope.launch { overlay.resetDrag() } },
-            )
-        },
+                }
+            }.pointerInput(overlay, enabled) {
+                if (!enabled) return@pointerInput
+                detectVerticalDragGestures(
+                    onDragStart = { overlay.beginDrag() },
+                    onVerticalDrag = { change, amount ->
+                        if (overlay.isInteractive) {
+                            change.consume()
+                            overlay.dragY += amount
+                        }
+                    },
+                    onDragEnd = {
+                        if (abs(overlay.dragY) >= threshold) {
+                            overlay.requestDismiss()
+                        } else {
+                            scope.launch { overlay.resetDrag() }
+                        }
+                    },
+                    onDragCancel = { scope.launch { overlay.resetDrag() } },
+                )
+            },
     ) { content() }
 }
 

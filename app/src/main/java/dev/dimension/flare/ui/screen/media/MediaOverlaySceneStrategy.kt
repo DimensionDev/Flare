@@ -1,5 +1,6 @@
 package dev.dimension.flare.ui.screen.media
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalContext
 import androidx.compose.runtime.CompositionLocalProvider
@@ -72,8 +73,10 @@ private class MediaOverlayScene(
     private var state: MediaViewerOverlayState? = null
 
     override val content: @Composable () -> Unit = {
+        val scheme = MaterialTheme.motionScheme
+        val motion = remember(scheme) { MediaViewerMotion(scheme) }
         if (inDialog) {
-            val dialogState = remember(host, key) { MediaViewerOverlayState(MediaTransitionSources(), route, onBack) }
+            val dialogState = remember(host, key) { MediaViewerOverlayState(MediaTransitionSources(), route, onBack, motion) }
             SideEffect { state = dialogState }
             DisposableEffect(dialogState) { onDispose { dialogState.dispose() } }
             Dialog(
@@ -92,7 +95,7 @@ private class MediaOverlayScene(
             val presentation =
                 remember(host, key) {
                     MediaOverlayPresentation(
-                        state = MediaViewerOverlayState(host.sources, route, onBack),
+                        state = MediaViewerOverlayState(host.sources, route, onBack, motion),
                         entry = entry,
                         context = context,
                     )

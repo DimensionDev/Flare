@@ -1,5 +1,8 @@
 package dev.dimension.flare.ui.screen.media
 
+import androidx.compose.animation.core.TargetBasedAnimation
+import androidx.compose.animation.core.VectorConverter
+import androidx.compose.material3.MotionScheme
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.layout.ContentScale
@@ -8,6 +11,22 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class MediaTransitionGeometryTest {
+    @Test
+    fun expressiveMediaSpringConvergesWithoutOvershootingInEitherDirection() {
+        val motion = MediaViewerMotion(MotionScheme.expressive())
+        for ((start, end) in listOf(0f to 1f, 1f to 0f, 0.36f to 0f, 0.44f to 1f)) {
+            val animation = TargetBasedAnimation(motion.spatial, Float.VectorConverter, start, end)
+            var previous = start
+            for (millis in 0L..2_000L step 16) {
+                val value = animation.getValueFromNanos(millis * 1_000_000)
+                assertTrue("Progress must stay inside the current endpoints", value in minOf(start, end)..maxOf(start, end))
+                assertTrue("The image must always move toward its destination", if (end > start) value >= previous else value <= previous)
+                previous = value
+            }
+            assertEquals(end, previous, 0f)
+        }
+    }
+
     @Test
     fun expandingViewportDoesNotEnlargeTheImagePastItsFinalSize() {
         val image = Size(1600f, 900f)

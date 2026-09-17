@@ -510,7 +510,8 @@ internal fun MediaViewerScreen(
                             modifier =
                                 Modifier
                                     .fillMaxWidth()
-                                    .align(Alignment.TopCenter),
+                                    .align(Alignment.TopCenter)
+                                    .mediaViewerControls(),
                             enter = slideInVertically { -it },
                             exit = slideOutVertically { -it },
                         ) {
@@ -635,7 +636,8 @@ internal fun MediaViewerScreen(
                             visible = shouldShowBottomUi,
                             modifier =
                                 Modifier
-                                    .align(Alignment.BottomCenter),
+                                    .align(Alignment.BottomCenter)
+                                    .mediaViewerControls(),
                             enter = slideInVertically { it },
                             exit = slideOutVertically { it },
                         ) {
@@ -786,7 +788,10 @@ internal fun MediaViewerScreen(
                         }
                     }
                     if (isBigScreen && status != null) {
-                        AnimatedVisibility(state.showUi && !state.isLandscapeViewing) {
+                        AnimatedVisibility(
+                            state.showUi && !state.isLandscapeViewing,
+                            modifier = Modifier.mediaViewerControls(),
+                        ) {
                             Surface(
                                 modifier =
                                     Modifier

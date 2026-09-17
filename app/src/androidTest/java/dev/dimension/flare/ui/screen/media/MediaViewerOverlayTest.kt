@@ -12,7 +12,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MaterialExpressiveTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigationsuite.ExperimentalMaterial3AdaptiveNavigationSuiteApi
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
@@ -25,12 +25,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.ComposeUiFlags
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.MotionDurationScale
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.test.ComposeUiTestConfig
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.click
 import androidx.compose.ui.test.junit4.v2.createComposeRule
@@ -51,6 +53,7 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.scene.DialogSceneStrategy
 import androidx.navigation3.ui.NavDisplay
 import androidx.test.platform.app.InstrumentationRegistry
+import dev.dimension.flare.R
 import dev.dimension.flare.data.model.BottomBarStyle
 import dev.dimension.flare.data.model.appearance.GlobalAppearance
 import dev.dimension.flare.ui.component.LocalGlobalAppearance
@@ -73,8 +76,14 @@ import java.io.File
 
 @OptIn(ExperimentalMaterial3AdaptiveNavigationSuiteApi::class, ExperimentalComposeUiApi::class)
 class MediaViewerOverlayTest {
+    private val durationScale =
+        object : MotionDurationScale {
+            var scale = 1f
+            override val scaleFactor: Float get() = scale
+        }
+
     @get:Rule
-    val composeRule = createComposeRule()
+    val composeRule = createComposeRule(ComposeUiTestConfig(effectContext = durationScale))
 
     private val firstImage = testImage("first", android.graphics.Color.BLUE)
     private val secondImage = testImage("second", android.graphics.Color.GREEN)
@@ -142,7 +151,7 @@ class MediaViewerOverlayTest {
         composeRule.runOnIdle {
             viewer.beginReturn()
             assertTrue("A thumbnail with a visible part must retain its Hero transition", viewer.hasHero)
-            runBlocking { viewer.progress.snapTo(0f) }
+            runBlocking { viewer.seekReturn(1f) }
         }
         // Wait for the cached poster, then check the actual pixels at the handoff frame.
         composeRule.waitUntil(timeoutMillis = 5_000) {
@@ -176,9 +185,131 @@ class MediaViewerOverlayTest {
         assertTrue(firstFrame.width >= source.width)
         assertTrue(middleFrame.width > firstFrame.width)
         assertEquals(source, composeRule.onNodeWithTag("source_1").fetchSemanticsNode().boundsInRoot)
-        composeRule.mainClock.advanceTimeBy(400)
+        composeRule.mainClock.advanceTimeUntil { viewer.isInteractive }
+        composeRule.mainClock.advanceTimeByFrame()
         composeRule.onNodeWithTag("media_hero").assertDoesNotExist()
         composeRule.onNodeWithTag("media_viewer_overlay").assertExists()
+        composeRule.mainClock.autoAdvance = true
+    }
+
+    @Test
+    fun backgroundAndControlsAreIndependentOfTheImageSpring() {
+        setContent()
+        composeRule.mainClock.autoAdvance = false
+        openMedia()
+        waitForHero()
+        composeRule.mainClock.advanceTimeUntil { viewer.progress.value > 0.05f }
+        composeRule.runOnIdle {
+            assertTrue(viewer.progress.value < 0.35f)
+            assertTrue("The background must use its own faster effects spring", viewer.backgroundAlpha > viewer.progress.value)
+            assertEquals("Controls wait for the image to start moving", 0f, viewer.controlsAlpha)
+        }
+        composeRule.mainClock.advanceTimeUntil { viewer.controlsAlpha > 0.5f }
+        composeRule.runOnIdle {
+            assertTrue("Controls should appear while the image is still moving", viewer.hasHero)
+            assertTrue(viewer.progress.value < 1f)
+        }
+        composeRule.mainClock.autoAdvance = true
+        composeRule.waitForIdle()
+        composeRule.mainClock.autoAdvance = false
+        composeRule.runOnIdle { viewer.requestDismiss() }
+        composeRule.mainClock.advanceTimeUntil { viewer.controlsAlpha < 0.01f }
+        composeRule.runOnIdle {
+            assertTrue("Controls should fade out before the image arrives", viewer.hasHero)
+            assertTrue(viewer.progress.value > 0.1f)
+            assertTrue(viewer.backgroundAlpha > viewer.controlsAlpha)
+        }
+        composeRule.mainClock.autoAdvance = true
+        composeRule.waitForIdle()
+    }
+
+    @Test
+    fun predictiveBackDuringOpeningDoesNotJumpToFullScreenAndCanBeCancelled() {
+        setContent()
+        composeRule.mainClock.autoAdvance = false
+        openMedia()
+        waitForHero()
+        composeRule.mainClock.advanceTimeUntil { viewer.progress.value > 0.2f }
+        var start = 0f
+        composeRule.runOnIdle {
+            start = viewer.progress.value
+            dispatcher.dispatchOnBackStarted(backEvent(0f))
+            dispatcher.dispatchOnBackProgressed(backEvent(0.4f))
+        }
+        composeRule.mainClock.advanceTimeByFrame()
+        composeRule.runOnIdle {
+            assertEquals("Back must seek from the interrupted entrance", start * 0.6f, viewer.progress.value, 0.001f)
+            dispatcher.dispatchOnBackCancelled()
+        }
+        composeRule.mainClock.advanceTimeBy(96)
+        composeRule.runOnIdle {
+            start = viewer.progress.value
+            dispatcher.dispatchOnBackStarted(backEvent(0f))
+            dispatcher.dispatchOnBackProgressed(backEvent(0.2f))
+        }
+        composeRule.mainClock.advanceTimeByFrame()
+        composeRule.runOnIdle {
+            assertEquals("A second Back must interrupt recovery at its current position", start * 0.8f, viewer.progress.value, 0.001f)
+            dispatcher.dispatchOnBackCancelled()
+        }
+        composeRule.mainClock.advanceTimeByFrame()
+        var previous = viewer.progress.value
+        repeat(80) {
+            composeRule.mainClock.advanceTimeByFrame()
+            composeRule.runOnIdle {
+                assertTrue("Cancellation must converge without replaying the entrance", viewer.progress.value >= previous)
+                assertTrue(viewer.progress.value <= 1f)
+                previous = viewer.progress.value
+            }
+        }
+        composeRule.runOnIdle {
+            assertTrue(viewer.isInteractive)
+            assertEquals(2, stack.size)
+        }
+        composeRule.mainClock.autoAdvance = true
+    }
+
+    @Test
+    fun closeButtonCanInterruptTheImageEntranceWithoutGrowingAgain() {
+        setContent(medias = persistentListOf(UiMedia.Image(firstImage, firstImage, "Test image", 40f, 40f, false)))
+        composeRule.mainClock.autoAdvance = false
+        openMedia()
+        waitForHero()
+        composeRule.mainClock.advanceTimeUntil { viewer.controlsAlpha > 0.5f }
+        composeRule.runOnIdle { assertTrue(viewer.hasHero) }
+        val closeDescription = InstrumentationRegistry.getInstrumentation().targetContext.getString(R.string.navigate_back)
+        composeRule.onNodeWithContentDescription(closeDescription).performTouchInput { click() }
+        composeRule.mainClock.advanceTimeByFrame()
+        var previous = viewer.progress.value
+        repeat(80) {
+            composeRule.mainClock.advanceTimeByFrame()
+            composeRule.runOnIdle {
+                assertTrue("The interrupted image must shrink immediately", viewer.progress.value <= previous)
+                assertTrue(viewer.progress.value >= 0f)
+                previous = viewer.progress.value
+            }
+        }
+        composeRule.onNodeWithTag("media_viewer_overlay").assertDoesNotExist()
+        assertEquals(1, stack.size)
+        composeRule.mainClock.autoAdvance = true
+    }
+
+    @Test
+    fun disablingSystemAnimationsSkipsImageBackgroundAndControlMotion() {
+        durationScale.scale = 0f
+        setContent()
+        composeRule.mainClock.autoAdvance = false
+        openMedia()
+        composeRule.mainClock.advanceTimeBy(64)
+        composeRule.runOnIdle {
+            assertTrue(viewer.isInteractive)
+            assertFalse(viewer.hasHero)
+            assertEquals(1f, viewer.backgroundAlpha, 0f)
+            assertEquals(1f, viewer.controlsAlpha, 0f)
+            viewer.requestDismiss()
+        }
+        composeRule.mainClock.advanceTimeBy(64)
+        composeRule.onNodeWithTag("media_viewer_overlay").assertDoesNotExist()
         composeRule.mainClock.autoAdvance = true
     }
 
@@ -240,7 +371,7 @@ class MediaViewerOverlayTest {
         composeRule.waitForIdle()
         val heroBounds = composeRule.onNodeWithTag("media_hero").fetchSemanticsNode().boundsInRoot
         assertTrue(heroBounds.top > 0f)
-        composeRule.runOnIdle { runBlocking { viewer.progress.snapTo(0f) } }
+        composeRule.runOnIdle { runBlocking { viewer.seekReturn(1f) } }
         composeRule.waitForIdle()
         val destination = composeRule.onNodeWithTag("source_2").fetchSemanticsNode().boundsInRoot
         val returned = composeRule.onNodeWithTag("media_hero").fetchSemanticsNode().boundsInRoot
@@ -268,6 +399,75 @@ class MediaViewerOverlayTest {
             viewer.requestDismiss()
             viewer.requestDismiss()
             assertEquals(listOf<NavKey>(Route.Home), stack.toList())
+        }
+    }
+
+    @Test
+    fun aNewDragInterruptsSpringRecoveryAndReleaseSettlesWithoutOvershoot() {
+        setContent()
+        openMedia()
+        composeRule.mainClock.autoAdvance = false
+        val overlay = composeRule.onNodeWithTag("media_viewer_overlay")
+        overlay.performTouchInput {
+            down(center)
+            moveBy(Offset(0f, 120f))
+            up()
+        }
+        composeRule.mainClock.advanceTimeByFrame()
+        val released = viewer.dragY
+        assertTrue(released > 0f)
+        composeRule.mainClock.advanceTimeBy(48)
+        composeRule.runOnIdle { assertTrue(viewer.dragY in 0f..<released) }
+        overlay.performTouchInput {
+            down(center)
+            moveBy(Offset(0f, 120f))
+        }
+        composeRule.mainClock.advanceTimeByFrame()
+        val held = viewer.dragY
+        composeRule.mainClock.advanceTimeBy(96)
+        composeRule.runOnIdle { assertEquals("A held drag must stop the previous recovery spring", held, viewer.dragY, 0.01f) }
+        overlay.performTouchInput { up() }
+        composeRule.mainClock.advanceTimeByFrame()
+        var previous = viewer.dragY
+        repeat(80) {
+            composeRule.mainClock.advanceTimeByFrame()
+            composeRule.runOnIdle {
+                assertTrue("Recovery must not overshoot or move away from rest", viewer.dragY in 0f..previous)
+                previous = viewer.dragY
+            }
+        }
+        composeRule.runOnIdle {
+            assertEquals(0f, viewer.dragY, 0f)
+            assertEquals(2, stack.size)
+            assertTrue(viewer.isInteractive)
+        }
+        composeRule.mainClock.autoAdvance = true
+    }
+
+    @Test
+    fun cancellingBackDuringDragRecoveryAlsoRestoresTheDragOffset() {
+        setContent()
+        openMedia()
+        composeRule.mainClock.autoAdvance = false
+        composeRule.onNodeWithTag("media_viewer_overlay").performTouchInput {
+            down(center)
+            moveBy(Offset(0f, 120f))
+            up()
+        }
+        composeRule.mainClock.advanceTimeBy(48)
+        composeRule.runOnIdle {
+            assertTrue(viewer.dragY > 0f)
+            dispatcher.dispatchOnBackStarted(backEvent(0f))
+            dispatcher.dispatchOnBackProgressed(backEvent(0.4f))
+        }
+        composeRule.mainClock.advanceTimeByFrame()
+        composeRule.runOnIdle { dispatcher.dispatchOnBackCancelled() }
+        composeRule.mainClock.autoAdvance = true
+        composeRule.waitForIdle()
+        composeRule.runOnIdle {
+            assertTrue(viewer.isInteractive)
+            assertEquals("Cancelling Back must resume the interrupted drag recovery", 0f, viewer.dragY, 0f)
+            assertEquals(1f, viewer.backgroundAlpha, 0f)
         }
     }
 
@@ -347,7 +547,8 @@ class MediaViewerOverlayTest {
         setContent(medias = persistentListOf(UiMedia.Video(uri, firstImage, "Test video", 90f, 160f)))
         composeRule.mainClock.autoAdvance = false
         openMedia()
-        composeRule.mainClock.advanceTimeBy(500)
+        composeRule.mainClock.advanceTimeUntil { viewer.isInteractive }
+        composeRule.mainClock.advanceTimeByFrame()
         val manager = GlobalContext.get().get<SurfaceBindingManager>()
         composeRule.waitUntil(timeoutMillis = 10_000) {
             composeRule.mainClock.advanceTimeByFrame()
@@ -361,6 +562,9 @@ class MediaViewerOverlayTest {
             android.graphics.Color.red(pixel) > 200 && android.graphics.Color.blue(pixel) < 50
         }
         composeRule.onNodeWithTag("media_viewer_overlay").performTouchInput { swipeDown() }
+        composeRule.runOnIdle { assertEquals("The swipe must request dismissal", 1, stack.size) }
+        // Advance animation time directly; polling SurfaceView semantics once per frame is slow on emulators.
+        composeRule.mainClock.advanceTimeUntil { viewer.progress.value == 0f }
         composeRule.waitUntil(timeoutMillis = 5_000) {
             composeRule.mainClock.advanceTimeByFrame()
             composeRule.onAllNodesWithTag("media_viewer_overlay").fetchSemanticsNodes().isEmpty()
@@ -422,6 +626,13 @@ class MediaViewerOverlayTest {
         composeRule.onNodeWithTag("media_viewer_overlay").assertExists()
     }
 
+    private fun waitForHero() {
+        composeRule.waitUntil(timeoutMillis = 5_000) {
+            composeRule.mainClock.advanceTimeByFrame()
+            composeRule.onAllNodesWithTag("media_hero").fetchSemanticsNodes().isNotEmpty()
+        }
+    }
+
     private fun setContent(
         layout: NavigationSuiteType = NavigationSuiteType.NavigationRail,
         style: BottomBarStyle = BottomBarStyle.Floating,
@@ -429,7 +640,7 @@ class MediaViewerOverlayTest {
     ) {
         ComposeUiFlags.isMediaQueryIntegrationEnabled = true
         composeRule.setContent {
-            MaterialTheme {
+            MaterialExpressiveTheme {
                 CompositionLocalProvider(LocalGlobalAppearance provides GlobalAppearance.Default.copy(bottomBarStyle = style)) {
                     MediaViewerOverlayHost {
                         val host = checkNotNull(LocalMediaViewerOverlayHost.current)

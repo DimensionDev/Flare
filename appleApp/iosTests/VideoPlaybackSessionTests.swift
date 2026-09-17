@@ -1,6 +1,10 @@
 import AVFoundation
 import Combine
 import XCTest
+#if os(iOS)
+import AVFAudio
+import UIKit
+#endif
 
 final class VideoPlaybackSessionTests: XCTestCase {
     @MainActor
@@ -53,8 +57,181 @@ final class VideoPlaybackSessionTests: XCTestCase {
 
     @MainActor
     func testWarmHandoffPreservesLoadedItemAndIdleBufferExpires() async throws {
-        let url = FileManager.default.temporaryDirectory.appendingPathComponent("playback-\(UUID()).mp4")
+        let url = try await makeVideo()
         defer { try? FileManager.default.removeItem(at: url) }
+
+        let inline = VideoPlaybackSession()
+        let detail = VideoPlaybackSession()
+        defer {
+            inline.detach()
+            detail.detach()
+            VideoPlaybackSession.releaseIdleBuffer()
+        }
+        inline.play(url: url.absoluteString)
+        let player = try XCTUnwrap(inline.player)
+        try await waitUntilReady(player)
+        let item = try XCTUnwrap(player.currentItem)
+        XCTAssertEqual(item.status, .readyToPlay)
+        detail.play(url: url.absoluteString)
+        XCTAssertNil(inline.player)
+        XCTAssertTrue(detail.player === player)
+        XCTAssertTrue(player.currentItem === item)
+        detail.detach()
+        XCTAssertEqual(player.rate, 0)
+        XCTAssertTrue(player.currentItem === item)
+        try await Task.sleep(for: .milliseconds(100))
+        VideoPlaybackSession.setPosition(for: url.absoluteString, seconds: 17)
+        inline.play(url: url.absoluteString)
+        XCTAssertTrue(player.currentItem === item)
+        XCTAssertEqual(inline.position, 17, "A seek committed between surfaces must beat the retained position")
+        inline.detach()
+        try await Task.sleep(for: .milliseconds(5200))
+        XCTAssertTrue(player.items().isEmpty)
+    }
+
+    #if os(iOS)
+    @MainActor
+    func testPresentationPreservesPlaybackIntentAcrossATransportPause() async throws {
+        let url = try await makeVideo()
+        defer { try? FileManager.default.removeItem(at: url) }
+        let arbiter = VideoPlaybackArbiter()
+        let video = VideoPlaybackPresentation(arbiter: arbiter)
+        let image = VideoPlaybackPresentation(arbiter: arbiter)
+        let session = VideoPlaybackSession()
+        defer {
+            image.end()
+            video.end()
+            VideoPlaybackSession.releaseIdleBuffer()
+        }
+        video.begin()
+        video.update(session, url: url.absoluteString, playing: true, rate: 1)
+        let player = try XCTUnwrap(session.player)
+        try await waitUntilReady(player)
+
+        // A transport pause during a handoff is not a user pause command.
+        player.pause()
+        session.refresh()
+        image.begin()
+        XCTAssertNil(session.player)
+        image.end()
+        XCTAssertTrue(session.player === player)
+        XCTAssertEqual(player.rate, 1, "Returning to the video must preserve its requested playback")
+
+        video.update(session, url: url.absoluteString, playing: false, rate: 1)
+        image.begin()
+        image.end()
+        XCTAssertEqual(player.rate, 0, "An explicit user pause must survive preemption")
+        video.setSuspended(true)
+        video.setSuspended(false)
+        XCTAssertEqual(player.rate, 0, "Foregrounding must also preserve an explicit pause")
+    }
+
+    @MainActor
+    func testAudioCategoryFollowsTheAttachedSurfaceThroughPauseSeekAndHandoff() async throws {
+        let url = try await makeVideo()
+        defer { try? FileManager.default.removeItem(at: url) }
+        let inline = VideoPlaybackSession()
+        let detail = VideoPlaybackSession()
+        defer {
+            inline.detach()
+            detail.detach()
+            VideoPlaybackSession.releaseIdleBuffer()
+        }
+        try AVAudioSession.sharedInstance().setCategory(.ambient, options: .mixWithOthers)
+        inline.play(url: url.absoluteString)
+        let player = try XCTUnwrap(inline.player)
+        try await waitUntilReady(player)
+        XCTAssertEqual(AVAudioSession.sharedInstance().category, .ambient)
+
+        detail.play(url: url.absoluteString, muted: false)
+        XCTAssertEqual(AVAudioSession.sharedInstance().category, .playback,
+                       "Configure detail audio before starting its playback")
+        detail.setPlaying(false)
+        detail.seek(to: 17)
+        XCTAssertEqual(AVAudioSession.sharedInstance().category, .playback,
+                       "Pause and seek must not reconfigure the audio route")
+        VideoPlaybackSession.continuePlayback(to: url.absoluteString)
+        detail.detach()
+        XCTAssertEqual(AVAudioSession.sharedInstance().category, .playback)
+        inline.play(url: url.absoluteString)
+        XCTAssertEqual(AVAudioSession.sharedInstance().category, .ambient)
+
+        detail.play(url: url.absoluteString, muted: false)
+        detail.detach()
+        XCTAssertEqual(AVAudioSession.sharedInstance().category, .ambient)
+
+        detail.play(url: url.absoluteString, muted: false)
+        VideoPlaybackSession.continuePlayback(to: url.absoluteString)
+        detail.detach()
+        try await Task.sleep(for: .milliseconds(600))
+        XCTAssertEqual(AVAudioSession.sharedInstance().category, .ambient,
+                       "An abandoned handoff must release its audio session")
+    }
+
+    @MainActor
+    func testReadyVideoCoversTheThumbnailInItsLetterboxArea() async throws {
+        let url = try await makeVideo()
+        defer { try? FileManager.default.removeItem(at: url) }
+        let session = VideoPlaybackSession()
+        let window = UIWindow(frame: CGRect(x: 0, y: 0, width: 200, height: 100))
+        let controller = UIViewController()
+        let surface = VideoPlaybackSurfaceView(frame: window.bounds)
+        controller.view.backgroundColor = .magenta
+        window.rootViewController = controller
+        controller.view.addSubview(surface)
+        window.makeKeyAndVisible()
+        surface.onReady = session.surfaceReady
+        let subscription = session.updates.sink {
+            surface.canDisplayFrame = session.hasRestoredPosition
+        }
+        defer {
+            subscription.cancel()
+            surface.player = nil
+            session.detach()
+            VideoPlaybackSession.releaseIdleBuffer()
+            window.isHidden = true
+        }
+        session.play(url: url.absoluteString)
+        surface.playerLayer.videoGravity = .resizeAspect
+        surface.player = session.player
+        for _ in 0..<200 {
+            if surface.playerLayer.isReadyForDisplay, surface.alpha == 1, session.hasDisplayedFrame { break }
+            try await Task.sleep(for: .milliseconds(10))
+        }
+        XCTAssertTrue(surface.playerLayer.isReadyForDisplay)
+        XCTAssertEqual(surface.alpha, 1)
+        XCTAssertTrue(session.hasDisplayedFrame)
+        XCTAssertFalse(surface.playerLayer.videoRect.contains(CGPoint(x: 5, y: 50)))
+
+        var pixel = [UInt8](repeating: 0, count: 4)
+        pixel.withUnsafeMutableBytes { bytes in
+            let context = CGContext(data: bytes.baseAddress, width: 1, height: 1, bitsPerComponent: 8,
+                                    bytesPerRow: 4, space: CGColorSpaceCreateDeviceRGB(),
+                                    bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)!
+            context.translateBy(x: -5, y: -50)
+            controller.view.layer.render(in: context)
+        }
+        XCTAssertGreaterThan(pixel[3], 200)
+        XCTAssertLessThan(Int(pixel[0]) + Int(pixel[1]) + Int(pixel[2]), 40,
+                          "The ready video's letterbox must hide the thumbnail underneath")
+        session.detach()
+        session.surfaceReady()
+        XCTAssertFalse(session.hasDisplayedFrame, "A stale surface callback must not hide the next placeholder")
+    }
+    #endif
+
+    @MainActor
+    private func waitUntilReady(_ player: AVPlayer) async throws {
+        for _ in 0..<200 {
+            if player.currentItem?.status == .readyToPlay { break }
+            try await Task.sleep(for: .milliseconds(10))
+        }
+        XCTAssertEqual(player.currentItem?.status, .readyToPlay)
+    }
+
+    @MainActor
+    private func makeVideo() async throws -> URL {
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent("playback-\(UUID()).mp4")
         let writer = try AVAssetWriter(outputURL: url, fileType: .mp4)
         let input = AVAssetWriterInput(mediaType: .video, outputSettings: [
             AVVideoCodecKey: AVVideoCodecType.h264, AVVideoWidthKey: 16, AVVideoHeightKey: 16
@@ -74,36 +251,7 @@ final class VideoPlaybackSessionTests: XCTestCase {
         await writer.finishWriting()
         XCTAssertEqual(writer.status, .completed)
 
-        let inline = VideoPlaybackSession()
-        let detail = VideoPlaybackSession()
-        defer {
-            inline.detach()
-            detail.detach()
-            VideoPlaybackSession.releaseIdleBuffer()
-        }
-        inline.play(url: url.absoluteString)
-        let player = try XCTUnwrap(inline.player)
-        for _ in 0..<200 {
-            if player.currentItem?.status == .readyToPlay { break }
-            try await Task.sleep(for: .milliseconds(10))
-        }
-        let item = try XCTUnwrap(player.currentItem)
-        XCTAssertEqual(item.status, .readyToPlay)
-        detail.play(url: url.absoluteString)
-        XCTAssertNil(inline.player)
-        XCTAssertTrue(detail.player === player)
-        XCTAssertTrue(player.currentItem === item)
-        detail.detach()
-        XCTAssertEqual(player.rate, 0)
-        XCTAssertTrue(player.currentItem === item)
-        try await Task.sleep(for: .milliseconds(100))
-        VideoPlaybackSession.setPosition(for: url.absoluteString, seconds: 17)
-        inline.play(url: url.absoluteString)
-        XCTAssertTrue(player.currentItem === item)
-        XCTAssertEqual(inline.position, 17, "A seek committed between surfaces must beat the retained position")
-        inline.detach()
-        try await Task.sleep(for: .milliseconds(5200))
-        XCTAssertTrue(player.items().isEmpty)
+        return url
     }
 
     @MainActor

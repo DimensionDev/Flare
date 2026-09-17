@@ -32,6 +32,9 @@ private final class SharedVideoPlayer {
     private var handoffTask: Task<Void, Never>?
     private var lifecycleSubscriptions: Set<AnyCancellable> = []
     private var memoryPressure: DispatchSourceMemoryPressure?
+    #if os(iOS)
+    private var holdsAudioSession = false
+    #endif
 
     private init() {
         #if os(iOS)
@@ -51,17 +54,18 @@ private final class SharedVideoPlayer {
         memoryPressure = pressure
     }
 
-    func attach(_ session: VideoPlaybackSession, url: URL, position: Double?, muted: Bool) -> (AVQueuePlayer, Double) {
+    func attach(_ session: VideoPlaybackSession, url: URL, position: Double?, allowsAudio: Bool) -> (AVQueuePlayer, Double) {
         if loadedURL == url { continuePlayback(to: url.absoluteString) }
         owner?.detach()
         owner = session
+        updateAudioSession(active: allowsAudio)
         retentionTask?.cancel()
         handoffTask?.cancel()
         handoffTask = nil
         if loadedURL == url, playbackError == nil, player.error == nil,
            player.currentItem?.status != .failed, player.currentItem?.error == nil, !player.items().isEmpty {
-            player.isMuted = muted
-            player.preventsDisplaySleepDuringVideoPlayback = !muted
+            player.isMuted = true
+            player.preventsDisplaySleepDuringVideoPlayback = false
             if let position { seek(session, to: position) }
             return (player, self.position(session))
         }
@@ -72,8 +76,8 @@ private final class SharedVideoPlayer {
         player.pause()
         looper = nil
         player.removeAllItems()
-        player.isMuted = muted
-        player.preventsDisplaySleepDuringVideoPlayback = muted ? false : true
+        player.isMuted = true
+        player.preventsDisplaySleepDuringVideoPlayback = false
         pendingPosition = position > 0 ? position : nil
         seeking = false
         playbackError = nil
@@ -161,6 +165,22 @@ private final class SharedVideoPlayer {
         else if pendingPosition == nil, !seeking { player.playImmediately(atRate: rate) }
     }
 
+    func isPlaybackRequested(_ session: VideoPlaybackSession) -> Bool {
+        owner === session && wantsPlayback
+    }
+
+    private func updateAudioSession(active: Bool) {
+        #if os(iOS)
+        guard holdsAudioSession != active else { return }
+        holdsAudioSession = active
+        if active {
+            AudioSessionManager.shared.beginPlayback()
+        } else {
+            AudioSessionManager.shared.endPlayback()
+        }
+        #endif
+    }
+
     func unmute(_ session: VideoPlaybackSession) {
         guard owner === session else { return }
         player.isMuted = false
@@ -231,6 +251,7 @@ private final class SharedVideoPlayer {
         if handoffTask == nil {
             player.pause()
             wantsPlayback = false
+            updateAudioSession(active: false)
         }
         retentionTask?.cancel()
         retentionTask = Task { [weak self] in
@@ -257,6 +278,7 @@ private final class SharedVideoPlayer {
         if owner == nil, loadedURL != nil {
             player.pause()
             wantsPlayback = false
+            updateAudioSession(active: false)
         }
     }
 
@@ -293,8 +315,12 @@ public final class VideoPlaybackSession {
     public private(set) var player: AVQueuePlayer?
     public private(set) var state: VideoState = .idle
     public private(set) var position: Double = 0
-    public private(set) var isPlaying = false
+    public var isPlaying: Bool {
+        if case .playing = state { return true }
+        return false
+    }
     public private(set) var hasRestoredPosition = false
+    public private(set) var hasDisplayedFrame = false
     private var url: String?
     private var allowsAudio = false
 
@@ -326,8 +352,9 @@ public final class VideoPlaybackSession {
         }
         if player == nil || self.url != url {
             hasRestoredPosition = false
+            hasDisplayedFrame = false
             allowsAudio = !muted
-            let attachment = SharedVideoPlayer.shared.attach(self, url: mediaURL, position: position, muted: true)
+            let attachment = SharedVideoPlayer.shared.attach(self, url: mediaURL, position: position, allowsAudio: allowsAudio)
             player = attachment.0
             self.position = attachment.1
             self.url = url
@@ -337,11 +364,12 @@ public final class VideoPlaybackSession {
     }
 
     func surfaceReady() {
+        guard player != nil, hasRestoredPosition else { return }
+        hasDisplayedFrame = true
         if allowsAudio { SharedVideoPlayer.shared.unmute(self) }
     }
 
     public func setPlaying(_ playing: Bool, rate: Float = 1) {
-        isPlaying = playing
         SharedVideoPlayer.shared.update(self, playing: playing, rate: rate)
         refresh()
     }
@@ -357,7 +385,6 @@ public final class VideoPlaybackSession {
         if let error = SharedVideoPlayer.shared.error(self) ?? player.currentItem?.error {
             state = .error(error)
             if player.timeControlStatus != .paused { player.pause() }
-            isPlaying = false
             return
         }
         guard let item = player.currentItem else { return }
@@ -367,13 +394,11 @@ public final class VideoPlaybackSession {
         if item.status == .readyToPlay, duration.isFinite {
             if !isRestoringPosition { hasRestoredPosition = true }
             if player.timeControlStatus == .playing {
-                isPlaying = true
                 state = .playing(duration)
             } else if player.timeControlStatus == .paused, !isRestoringPosition {
-                isPlaying = false
                 state = .paused(duration)
             } else {
-                state = isPlaying ? .loading : .paused(duration)
+                state = SharedVideoPlayer.shared.isPlaybackRequested(self) ? .loading : .paused(duration)
             }
         } else {
             state = .loading
@@ -386,8 +411,8 @@ public final class VideoPlaybackSession {
         if let url { MediaPlaybackMemory.shared.save(position, for: url) }
         SharedVideoPlayer.shared.detach(self)
         player = nil
-        isPlaying = false
         hasRestoredPosition = false
+        hasDisplayedFrame = false
         state = .idle
         updateSubject.send()
     }
@@ -472,10 +497,13 @@ final class VideoPlaybackPresentation {
     }
 
     private func stop() {
+        #if os(macOS)
+        // macOS also accepts pause commands through AVPlayerView's native controls.
         if let session, let player = session.player, player.currentItem?.status == .readyToPlay,
            player.timeControlStatus == .paused, !session.isRestoringPosition {
             request?.playing = false
         }
+        #endif
         session?.detach()
     }
 }
@@ -556,6 +584,7 @@ public final class VideoPlaybackSurfaceView: UIView {
     }
 
     private func observeReadiness() {
+        backgroundColor = .black
         alpha = 0
         observation = playerLayer.observe(\.isReadyForDisplay, options: [.initial, .new]) { [weak self] _, _ in
             Task { @MainActor [weak self] in
@@ -569,8 +598,14 @@ public final class VideoPlaybackSurfaceView: UIView {
         let ready = canDisplayFrame && player != nil && playerLayer.isReadyForDisplay
         alpha = ready ? 1 : 0
         if ready, !reportedReady {
-            reportedReady = true
-            onReady()
+            let player = player
+            // Readiness can change inside updateUIView; publish it after that update.
+            Task { @MainActor [weak self] in
+                guard let self, !self.reportedReady, self.player === player,
+                      self.player != nil, self.canDisplayFrame, self.playerLayer.isReadyForDisplay else { return }
+                self.reportedReady = true
+                self.onReady()
+            }
         }
     }
 }

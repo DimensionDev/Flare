@@ -28,5 +28,4 @@ internal expect fun PlatformCircularProgressIndicator(
 internal expect fun PlatformCircularProgressIndicator(
     modifier: Modifier = Modifier,
     color: Color? = null,
-    compact: Boolean = false,
 )

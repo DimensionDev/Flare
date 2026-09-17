@@ -694,7 +694,6 @@ public fun MediaItem(
                                         .align(Alignment.BottomStart)
                                         .size(16.dp),
                                 color = Color.White,
-                                compact = true,
                             )
                         }
                     },

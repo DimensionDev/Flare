@@ -770,7 +770,6 @@ internal fun TranslationDisplayBadge(
                     PlatformCircularProgressIndicator(
                         modifier = Modifier.size(12.dp),
                         color = PlatformTheme.colorScheme.caption,
-                        compact = true,
                     )
                 }
 

@@ -23,7 +23,6 @@ import androidx.compose.foundation.shape.AbsoluteRoundedCornerShape
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.navigation3.rememberListDetailSceneStrategy
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -57,7 +56,6 @@ import androidx.navigation3.scene.DialogSceneStrategy
 import androidx.navigation3.ui.NavDisplay
 import androidx.navigationevent.NavigationEvent
 import dev.dimension.flare.ui.component.BottomSheetSceneStrategy
-import dev.dimension.flare.ui.component.LocalMediaTransitionGroup
 import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.screen.article.articleEntryBuilder
 import dev.dimension.flare.ui.screen.bluesky.blueskyEntryBuilder
@@ -66,8 +64,8 @@ import dev.dimension.flare.ui.screen.dm.dmEntryBuilder
 import dev.dimension.flare.ui.screen.gallery.galleryEntryBuilder
 import dev.dimension.flare.ui.screen.home.homeEntryBuilder
 import dev.dimension.flare.ui.screen.list.listEntryBuilder
-import dev.dimension.flare.ui.screen.media.LocalMediaViewerOverlayHost
-import dev.dimension.flare.ui.screen.media.MediaOverlaySceneStrategy
+import dev.dimension.flare.ui.screen.media.LocalMediaSharedTransitionHost
+import dev.dimension.flare.ui.screen.media.MediaSharedSceneStrategy
 import dev.dimension.flare.ui.screen.media.mediaEntryBuilder
 import dev.dimension.flare.ui.screen.misskey.misskeyEntryBuilder
 import dev.dimension.flare.ui.screen.profile.profileEntryBuilder
@@ -86,7 +84,7 @@ internal fun Router(
     openDrawer: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val mediaOverlayHost = LocalMediaViewerOverlayHost.current
+    val mediaHost = LocalMediaSharedTransitionHost.current
     val listDetailStrategy = rememberListDetailSceneStrategy<NavKey>()
     val uriHandler = LocalUriHandler.current
     val latestNavigate = rememberUpdatedState(navigate)
@@ -160,9 +158,9 @@ internal fun Router(
             modifier
                 .clipToBounds(),
         sceneStrategies =
-            remember(mediaOverlayHost) {
+            remember(mediaHost) {
                 listOfNotNull(
-                    mediaOverlayHost?.let { MediaOverlaySceneStrategy(it) },
+                    mediaHost?.let { MediaSharedSceneStrategy(it) },
                     DialogSceneStrategy(),
                     BottomSheetSceneStrategy(),
                     listDetailStrategy,
@@ -170,12 +168,6 @@ internal fun Router(
             },
         entryDecorators =
             listOf(
-                remember {
-                    NavEntryDecorator<NavKey> { entry ->
-                        val group = remember(entry.contentKey) { Any() }
-                        CompositionLocalProvider(LocalMediaTransitionGroup provides group) { entry.Content() }
-                    }
-                },
                 deviceCornerDecorator,
                 rememberSaveableStateHolderNavEntryDecorator(),
                 rememberViewModelStoreNavEntryDecorator(),

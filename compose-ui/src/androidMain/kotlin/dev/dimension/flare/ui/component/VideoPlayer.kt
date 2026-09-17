@@ -9,9 +9,12 @@ import android.content.Context
 import android.content.res.Configuration
 import android.os.Bundle
 import androidx.annotation.OptIn
+import androidx.compose.animation.EnterExitState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.aspectRatio
@@ -22,6 +25,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
@@ -29,14 +33,19 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.keepScreenOn
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.IntOffset
@@ -69,6 +78,7 @@ import org.koin.core.annotation.Provided
 import org.koin.core.annotation.Single
 import java.util.Collections
 import java.util.WeakHashMap
+import kotlin.random.Random
 
 private val audioAttributes by lazy {
     AudioAttributes
@@ -89,7 +99,6 @@ public fun VideoPlayer(
     muted: Boolean = false,
     showControls: Boolean = false,
     keepScreenOn: Boolean = false,
-    showVideoSurface: Boolean = true,
     aspectRatio: Float? = null,
     contentScale: ContentScale = ContentScale.Crop,
     onClick: (() -> Unit)? = null,
@@ -205,49 +214,82 @@ public fun VideoPlayer(
             binding.second.setActive(false)
         }
     }
+    val windowInfo = LocalWindowInfo.current
+    val shared = LocalMediaSharedTransition.current?.takeIf { it.windowInfo === windowInfo }
+    val destination = LocalMediaSharedDestination.current
+    val sourceEnabled = LocalMediaSharedSourcesEnabled.current
+    val group = LocalMediaSharedElementGroup.current ?: rememberSaveable { Random.nextLong() }
+    val sharedKey = previewUri?.let { MediaSharedElementKey(group, it) }
+    val hasSharedPoster = shared != null && previewUri != null && (sourceEnabled || destination != null)
+    val view = LocalView.current
+    val hideSurface =
+        hasSharedPoster && (
+            shared.scope.isTransitionActive || shared.dragging ||
+                (sourceEnabled && shared.hiddenKey == sharedKey) ||
+                destination?.visibilityScope?.transition?.let {
+                    it.currentState != EnterExitState.Visible || it.targetState != EnterExitState.Visible
+                } == true
+        )
     Box(
-        modifier = modifier.timelineVideoAutoplay(playback, binding.second, autoPlay && started, request.uri),
+        modifier =
+            modifier
+                .timelineVideoAutoplay(playback, binding.second, autoPlay && started, request.uri)
+                .pointerInput(shared, sharedKey, sourceEnabled) {
+                    if (shared != null && sharedKey != null && sourceEnabled) {
+                        awaitEachGesture {
+                            awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
+                            shared.pressedKey = sharedKey
+                        }
+                    }
+                },
     ) {
-        if (player == null) {
-            idlePlaceholder()
-        } else {
-            // Mount the surface while covered: STATE_READY only means the media
-            // is prepared, not that this new surface has received its first frame.
-            key(binding.second, player) {
-                val presentation = rememberPresentationState(player)
-                LaunchedEffect(presentation.coverSurface, resumed) {
-                    if (!presentation.coverSurface) binding.second.surfaceReady(visible = resumed)
-                }
-                val playerModifier =
-                    Modifier
-                        .clipToBounds()
-                        .semantics { contentDescription?.let { this.contentDescription = it } }
-                        .resizeWithContentScale(contentScale = contentScale, sourceSizeDp = presentation.videoSizeDp)
-                        .let { if (onClick != null) it.combinedClickable(onClick = onClick, onLongClick = onLongClick) else it }
-                        .let { if (keepScreenOn) it.keepScreenOn() else it }
-                        .let { if (aspectRatio != null && presentation.videoSizeDp == null) it.aspectRatio(aspectRatio) else it }
-                val view = LocalView.current
-                PlayerSurface(
-                    player = player,
+        if (hasSharedPoster) {
+            CompositionLocalProvider(LocalMediaSharedElementGroup provides group) {
+                NetworkImage(
+                    model = previewUri,
+                    customHeaders = customHeaders,
+                    contentDescription = contentDescription,
+                    contentScale = contentScale,
                     modifier =
-                        playerModifier.offset {
-                            // Keep the SurfaceView attached while a poster handles the overlay animation.
-                            // Moving it outside the window avoids alpha limitations without rebuilding its surface.
-                            IntOffset(if (showVideoSurface) 0 else view.rootView.width * 2, 0)
-                        },
+                        Modifier
+                            .matchParentSize()
+                            .mediaSharedElementDestination(previewUri)
+                            .alpha(if (hideSurface) 1f else 0f),
                 )
-                if (!showVideoSurface) {
-                    NetworkImage(
-                        model = previewUri,
-                        customHeaders = customHeaders,
-                        contentDescription = contentDescription,
-                        contentScale = contentScale,
-                        modifier = Modifier.fillMaxSize(),
+            }
+        }
+        CompositionLocalProvider(LocalMediaSharedSourcesEnabled provides false) {
+            if (player == null) {
+                if (!hideSurface) idlePlaceholder()
+            } else {
+                // Mount the surface while covered: STATE_READY only means the media
+                // is prepared, not that this new surface has received its first frame.
+                key(binding.second, player) {
+                    val presentation = rememberPresentationState(player)
+                    LaunchedEffect(presentation.coverSurface, resumed) {
+                        if (!presentation.coverSurface) binding.second.surfaceReady(visible = resumed)
+                    }
+                    val playerModifier =
+                        Modifier
+                            .clipToBounds()
+                            .semantics { contentDescription?.let { this.contentDescription = it } }
+                            .resizeWithContentScale(contentScale = contentScale, sourceSizeDp = presentation.videoSizeDp)
+                            .let { if (onClick != null) it.combinedClickable(onClick = onClick, onLongClick = onLongClick) else it }
+                            .let { if (keepScreenOn) it.keepScreenOn() else it }
+                            .let { if (aspectRatio != null && presentation.videoSizeDp == null) it.aspectRatio(aspectRatio) else it }
+                    PlayerSurface(
+                        player = player,
+                        modifier =
+                            playerModifier.offset {
+                                // Keep SurfaceView attached; only the Compose poster participates in shared transitions.
+                                IntOffset(if (hideSurface) view.rootView.width * 2 else 0, 0)
+                            },
                     )
-                } else if (presentation.coverSurface) {
-                    Box(Modifier.fillMaxSize()) { loadingPlaceholder() }
-                } else if (remainingTimeContent != null) {
-                    VideoCountdown(player, remainingTimeContent)
+                    if (!hideSurface && presentation.coverSurface) {
+                        Box(Modifier.fillMaxSize()) { loadingPlaceholder() }
+                    } else if (!hideSurface && remainingTimeContent != null) {
+                        VideoCountdown(player, remainingTimeContent)
+                    }
                 }
             }
         }

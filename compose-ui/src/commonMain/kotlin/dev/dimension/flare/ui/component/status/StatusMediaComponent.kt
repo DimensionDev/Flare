@@ -25,6 +25,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -67,17 +68,15 @@ import dev.dimension.flare.data.model.VideoAutoplay
 import dev.dimension.flare.ui.component.AdaptiveGrid
 import dev.dimension.flare.ui.component.AudioPlayer
 import dev.dimension.flare.ui.component.FAIcon
-import dev.dimension.flare.ui.component.LocalMediaTransitionGroup
-import dev.dimension.flare.ui.component.LocalMediaTransitionShape
-import dev.dimension.flare.ui.component.LocalMediaTransitionSourceEnabled
-import dev.dimension.flare.ui.component.LocalMediaTransitionSources
+import dev.dimension.flare.ui.component.LocalMediaSharedElementGroup
+import dev.dimension.flare.ui.component.LocalMediaSharedSourcesEnabled
+import dev.dimension.flare.ui.component.LocalMediaSharedTransition
 import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.LocalTimelineCarouselItem
 import dev.dimension.flare.ui.component.LocalTimelinePlayback
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.TimelineCarouselItem
 import dev.dimension.flare.ui.component.accessibleDescription
-import dev.dimension.flare.ui.component.mediaTransitionSource
 import dev.dimension.flare.ui.component.platform.LocalWifiState
 import dev.dimension.flare.ui.component.platform.PlatformCircularProgressIndicator
 import dev.dimension.flare.ui.component.platform.PlatformDropdownMenu
@@ -98,6 +97,7 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.flow.distinctUntilChanged
 import org.jetbrains.compose.resources.stringResource
 import kotlin.math.abs
+import kotlin.random.Random
 import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
@@ -122,22 +122,22 @@ internal fun StatusMediaComponent(
             appearanceSettings.mediaLayout == TimelineMediaLayout.Carousel &&
             data.size > 1
     val carouselState = if (usesCarousel) rememberLazyListState() else null
-    val carouselId = remember(post.statusKey) { Any() }
+    val carouselId = rememberSaveable(post.statusKey) { Random.nextLong() }
     val playback = LocalTimelinePlayback.current
-    val usesMediaTransitions = LocalMediaTransitionSources.current != null
+    val usesSharedElements = LocalMediaSharedTransition.current != null
     var selectedIndex by remember(post.statusKey) { mutableStateOf(0) }
     val mediaUrls = remember(data) { data.map { it.url } }
     val openMedia: (UiMedia) -> Unit = { media ->
         playback?.selectMedia(carouselId, media.url, userInitiated = true)
         onMediaClick(media)
     }
-    DisposableEffect(playback, carouselId, mediaUrls, carouselState, usesMediaTransitions) {
+    DisposableEffect(playback, carouselId, mediaUrls, carouselState, usesSharedElements) {
         playback?.mediaSelections?.register(carouselId, mediaUrls) { uri ->
             val index = mediaUrls.indexOf(uri)
             if (index >= 0) {
                 selectedIndex = index
                 playback.selectMedia(carouselId, uri, userInitiated = false)
-                if (!usesMediaTransitions) carouselState?.requestScrollToItem(index)
+                if (!usesSharedElements) carouselState?.requestScrollToItem(index)
             }
         }
         onDispose { playback?.mediaSelections?.remove(carouselId) }
@@ -175,8 +175,7 @@ internal fun StatusMediaComponent(
                         val current = layout.visibleItemsInfo.firstOrNull { it.index == selectedIndex }
                         if (closest != null && (
                                 current == null ||
-                                    abs(current.offset + current.size / 2f - center) >
-                                    abs(closest.offset + closest.size / 2f - center) + 2f
+                                    abs(current.offset + current.size / 2f - center) > abs(closest.offset + closest.size / 2f - center) + 2f
                             )
                         ) {
                             selectedIndex = closest.index
@@ -239,13 +238,13 @@ internal fun StatusMediaComponent(
                                     aspectRatio = media.timelineAspectRatio,
                                 ).dp
                         CompositionLocalProvider(
+                            LocalMediaSharedElementGroup provides carouselId,
                             LocalTimelineCarouselItem provides TimelineCarouselItem(carouselId, index == selectedIndex),
                         ) {
                             StatusMediaItem(
                                 post = post,
                                 media = media,
                                 mediaCount = data.size,
-                                shape = shape,
                                 onMediaClick = openMedia,
                                 hideSensitive = hideSensitive,
                                 keepAspectRatio = false,
@@ -265,13 +264,13 @@ internal fun StatusMediaComponent(
                 itemCount = data.size,
                 itemContent = { index ->
                     CompositionLocalProvider(
+                        LocalMediaSharedElementGroup provides carouselId,
                         LocalTimelineCarouselItem provides TimelineCarouselItem(carouselId, selected = true, isCarousel = false),
                     ) {
                         StatusMediaItem(
                             post = post,
                             media = data[index],
                             mediaCount = data.size,
-                            shape = shape,
                             onMediaClick = openMedia,
                             hideSensitive = hideSensitive,
                             keepAspectRatio = data.size == 1 && appearanceSettings.expandMediaSize,
@@ -402,7 +401,6 @@ private fun StatusMediaItem(
     post: UiTimelineV2.Post,
     media: UiMedia,
     mediaCount: Int,
-    shape: Shape,
     onMediaClick: (UiMedia) -> Unit,
     hideSensitive: Boolean,
     keepAspectRatio: Boolean,
@@ -418,9 +416,7 @@ private fun StatusMediaItem(
     }
     Box(modifier = modifier) {
         CompositionLocalProvider(
-            LocalMediaTransitionGroup provides (LocalTimelineCarouselItem.current?.groupId ?: LocalMediaTransitionGroup.current),
-            LocalMediaTransitionShape provides shape,
-            LocalMediaTransitionSourceEnabled provides (!hideSensitive && LocalMediaTransitionSourceEnabled.current),
+            LocalMediaSharedSourcesEnabled provides (!hideSensitive && LocalMediaSharedSourcesEnabled.current),
             LocalTimelineAppearance provides
                 appearanceSettings.copy(
                     videoAutoplay =
@@ -619,27 +615,6 @@ public fun MediaItem(
     keepAspectRatio: Boolean = true,
     showCountdown: Boolean = true,
     contentScale: ContentScale = ContentScale.Crop,
-) {
-    val preview =
-        when (media) {
-            is UiMedia.Image -> media.previewUrl
-            is UiMedia.Gif -> media.previewUrl
-            is UiMedia.Video -> media.thumbnailUrl
-            is UiMedia.Audio -> null
-        }
-    val sourceModifier = modifier.mediaTransitionSource(media.url, preview, contentScale, headers = media.customHeaders)
-    CompositionLocalProvider(LocalMediaTransitionSourceEnabled provides false) {
-        MediaItemContent(media, sourceModifier, keepAspectRatio, showCountdown, contentScale)
-    }
-}
-
-@Composable
-private fun MediaItemContent(
-    media: UiMedia,
-    modifier: Modifier,
-    keepAspectRatio: Boolean,
-    showCountdown: Boolean,
-    contentScale: ContentScale,
 ) {
     val appearanceSettings = LocalTimelineAppearance.current
     val accessibleDescription = media.accessibleDescription()

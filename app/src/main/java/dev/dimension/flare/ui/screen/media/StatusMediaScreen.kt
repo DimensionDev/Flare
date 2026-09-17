@@ -84,6 +84,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
@@ -127,12 +128,15 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.Glassify
+import dev.dimension.flare.ui.component.LocalMediaSharedDestination
+import dev.dimension.flare.ui.component.LocalMediaSharedTransition
 import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.MediaViewerPlayback
 import dev.dimension.flare.ui.component.MediaViewerSelection
 import dev.dimension.flare.ui.component.SurfaceBindingManager
 import dev.dimension.flare.ui.component.VideoPlayer
 import dev.dimension.flare.ui.component.accessibleDescription
+import dev.dimension.flare.ui.component.mediaSharedElementDestination
 import dev.dimension.flare.ui.component.placeholder
 import dev.dimension.flare.ui.component.status.CommonStatusComponent
 import dev.dimension.flare.ui.humanizer.humanize
@@ -167,8 +171,6 @@ import me.saket.telephoto.zoomable.rememberZoomableImageState
 import me.saket.telephoto.zoomable.rememberZoomableState
 import me.saket.telephoto.zoomable.spatial.CoordinateSpace
 import moe.tlaster.precompose.molecule.producePresenter
-import moe.tlaster.swiper.Swiper
-import moe.tlaster.swiper.rememberSwiperState
 import org.koin.compose.koinInject
 import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.milliseconds
@@ -244,7 +246,6 @@ internal fun MediaViewerScreen(
     status: UiTimelineV2.Post? = null,
     surfaceBindingManager: SurfaceBindingManager = koinInject(),
 ) {
-    val overlay = LocalMediaViewerOverlay.current
     val view = LocalView.current
     LaunchedEffect(view) {
         // The background fades with the swipe; the window dim would linger until dismissal.
@@ -305,21 +306,17 @@ internal fun MediaViewerScreen(
     }
     MediaViewerPlaybackTheme {
         val mediaItems = medias.takeSuccess().orEmpty()
-        val selectedMedia = mediaItems.getOrNull(pagerState.currentPage)
-        SideEffect { overlay?.selectMedia(selectedMedia?.url, selectedMedia?.previewKey(), selectedMedia !is UiMedia.Audio) }
         MediaViewerSelection(mediaItems.map { it.url }, mediaItems.getOrNull(pagerState.currentPage)?.url)
-        val swiperState =
-            rememberSwiperState(
-                onDismiss = onDismiss,
-            )
-        val backgroundColor =
-            if (overlay == null) MaterialTheme.colorScheme.background.copy(alpha = 1 - swiperState.progress) else Color.Transparent
+        val dismissState = remember { MediaDismissState() }
+        val windowInfo = LocalWindowInfo.current
+        val shared = LocalMediaSharedTransition.current?.takeIf { it.windowInfo === windowInfo }
+        SideEffect { shared?.dragging = dismissState.offset != 0f }
         Box(
             modifier =
                 Modifier
                     .fillMaxSize()
-                    .background(backgroundColor)
-                    .alpha(if (overlay == null) 1 - swiperState.progress else 1f),
+                    .background(MaterialTheme.colorScheme.background.copy(alpha = 1 - dismissState.progress))
+                    .alpha(1 - dismissState.progress),
         ) {
             Box(
                 modifier =
@@ -330,7 +327,11 @@ internal fun MediaViewerScreen(
                     Box(
                         modifier = Modifier.weight(1f),
                     ) {
-                        val pagerContent: @Composable () -> Unit = {
+                        MediaDismissGesture(
+                            state = dismissState,
+                            enabled = !state.lockPager && shared?.scope?.isTransitionActive != true,
+                            onDismiss = onDismiss,
+                        ) {
                             HorizontalPager(
                                 state = pagerState,
                                 userScrollEnabled = !state.lockPager,
@@ -350,168 +351,160 @@ internal fun MediaViewerScreen(
                                     } ?: it
                                 },
                             ) { index ->
-                                AnimatedContent(
-                                    medias,
-                                    transitionSpec = {
-                                        fadeIn() togetherWith fadeOut()
-                                    },
+                                val destination = LocalMediaSharedDestination.current
+                                CompositionLocalProvider(
+                                    LocalMediaSharedDestination provides destination.takeIf { index == pagerState.currentPage },
                                 ) {
-                                    it
-                                        .onSuccess { medias ->
-                                            val media = medias.getOrNull(index)
-                                            if (media == null) {
-                                                Box(
-                                                    modifier =
-                                                        Modifier
-                                                            .aspectRatio(1f)
-                                                            .fillMaxSize()
-                                                            .placeholder(true),
-                                                )
-                                                return@onSuccess
-                                            }
-                                            val imageUrl =
-                                                when (media) {
-                                                    is UiMedia.Audio -> media.previewUrl ?: media.url
-                                                    is UiMedia.Gif -> media.url
-                                                    is UiMedia.Image -> media.url
-                                                    is UiMedia.Video -> media.thumbnailUrl
+                                    AnimatedContent(
+                                        medias,
+                                        transitionSpec = {
+                                            fadeIn() togetherWith fadeOut()
+                                        },
+                                    ) {
+                                        it
+                                            .onSuccess { medias ->
+                                                val media = medias.getOrNull(index)
+                                                if (media == null) {
+                                                    Box(
+                                                        modifier =
+                                                            Modifier
+                                                                .aspectRatio(1f)
+                                                                .fillMaxSize()
+                                                                .placeholder(true),
+                                                    )
+                                                    return@onSuccess
                                                 }
-                                            val previewUrl =
-                                                when (media) {
-                                                    is UiMedia.Audio -> media.previewUrl ?: media.url
-                                                    is UiMedia.Gif -> media.previewUrl
-                                                    is UiMedia.Image -> media.previewUrl
-                                                    is UiMedia.Video -> media.thumbnailUrl
+                                                val imageUrl =
+                                                    when (media) {
+                                                        is UiMedia.Audio -> media.previewUrl ?: media.url
+                                                        is UiMedia.Gif -> media.url
+                                                        is UiMedia.Image -> media.url
+                                                        is UiMedia.Video -> media.thumbnailUrl
+                                                    }
+                                                val previewUrl =
+                                                    when (media) {
+                                                        is UiMedia.Audio -> media.previewUrl ?: media.url
+                                                        is UiMedia.Gif -> media.previewUrl
+                                                        is UiMedia.Image -> media.previewUrl
+                                                        is UiMedia.Video -> media.thumbnailUrl
+                                                    }
+                                                if (pagerState.currentPage != index || media is UiMedia.Image || media is UiMedia.Gif) {
+                                                    ImageItem(
+                                                        modifier =
+                                                            Modifier
+                                                                .fillMaxSize(),
+                                                        url = imageUrl,
+                                                        previewUrl = previewUrl,
+                                                        customHeaders = media.customHeaders,
+                                                        description = media.accessibleDescription(),
+                                                        onClick = {
+                                                            state.setShowUi(!state.showUi)
+                                                        },
+                                                        setLockPager = {
+                                                            if (pagerState.currentPage == index) {
+                                                                if (!isBigScreen) {
+                                                                    state.setShowUi(!it)
+                                                                }
+                                                                state.setLockPager(it)
+                                                            }
+                                                        },
+                                                        onLongClick = {
+                                                            hapticFeedback.performHapticFeedback(
+                                                                HapticFeedbackType.LongPress,
+                                                            )
+                                                            state.setShowSheet(true)
+                                                        },
+                                                    )
+                                                } else if (media is UiMedia.Video) {
+                                                    Box(
+                                                        modifier = Modifier.fillMaxSize(),
+                                                    ) {
+                                                        VideoPlayer(
+                                                            uri = media.url,
+                                                            customHeaders = media.customHeaders,
+                                                            previewUri = media.thumbnailUrl,
+                                                            contentDescription = media.accessibleDescription(),
+                                                            modifier = Modifier.fillMaxSize(),
+                                                            aspectRatio = media.aspectRatio,
+                                                            autoPlay = true,
+                                                            onClick = null,
+                                                            showControls = true,
+                                                            keepScreenOn = true,
+                                                            muted = false,
+                                                            contentScale = ContentScale.Fit,
+                                                        )
+                                                        surfaceBindingManager.playerFor(media.url)?.let { player ->
+                                                            key(media.url) {
+                                                                VideoGestureOverlay(
+                                                                    player = player,
+                                                                    onClick = {
+                                                                        state.setShowUi(!state.showUi)
+                                                                    },
+                                                                    onPlaybackSpeedChanged = {
+                                                                        playbackSpeed = it
+                                                                    },
+                                                                    modifier = Modifier.fillMaxSize(),
+                                                                )
+                                                            }
+                                                        }
+                                                    }
+                                                } else if (media is UiMedia.Audio) {
+                                                    VideoPlayer(
+                                                        uri = media.url,
+                                                        customHeaders = media.customHeaders,
+                                                        previewUri = null,
+                                                        contentDescription = media.accessibleDescription(),
+                                                        autoPlay = false,
+                                                        onClick = {
+                                                            state.setShowUi(!state.showUi)
+                                                        },
+                                                        onLongClick = {
+                                                            hapticFeedback.performHapticFeedback(
+                                                                HapticFeedbackType.LongPress,
+                                                            )
+                                                            state.setShowSheet(true)
+                                                        },
+                                                    )
                                                 }
-                                            if (pagerState.currentPage != index || media is UiMedia.Image || media is UiMedia.Gif) {
-                                                ImageItem(
-                                                    modifier =
-                                                        Modifier
-                                                            .fillMaxSize(),
-                                                    url = imageUrl,
-                                                    previewUrl = previewUrl,
-                                                    customHeaders = media.customHeaders,
-                                                    description = media.accessibleDescription(),
-                                                    isCurrentPage = pagerState.currentPage == index,
-                                                    onClick = {
-                                                        state.setShowUi(!state.showUi)
-                                                    },
-                                                    setLockPager = {
-                                                        if (pagerState.currentPage == index) {
+                                            }.onLoading {
+                                                if (preview != null) {
+                                                    ImageItem(
+                                                        url = preview,
+                                                        previewUrl = preview,
+                                                        customHeaders = null,
+                                                        description = null,
+                                                        onClick = { /*TODO*/ },
+                                                        setLockPager = {
                                                             if (!isBigScreen) {
                                                                 state.setShowUi(!it)
                                                             }
                                                             state.setLockPager(it)
-                                                        }
-                                                    },
-                                                    onLongClick = {
-                                                        hapticFeedback.performHapticFeedback(
-                                                            HapticFeedbackType.LongPress,
-                                                        )
-                                                        state.setShowSheet(true)
-                                                    },
-                                                )
-                                            } else if (media is UiMedia.Video) {
-                                                Box(
-                                                    modifier =
-                                                        Modifier.fillMaxSize().mediaViewerViewport(
-                                                            url = media.url,
-                                                            previewUrl = media.thumbnailUrl,
-                                                            headers = media.customHeaders,
-                                                        ),
-                                                ) {
-                                                    VideoPlayer(
-                                                        uri = media.url,
-                                                        customHeaders = media.customHeaders,
-                                                        previewUri = media.thumbnailUrl,
-                                                        contentDescription = media.accessibleDescription(),
-                                                        modifier = Modifier.fillMaxSize(),
-                                                        aspectRatio = media.aspectRatio,
-                                                        autoPlay = true,
-                                                        onClick = null,
-                                                        showControls = true,
-                                                        keepScreenOn = true,
-                                                        showVideoSurface = overlay?.let { it.isInteractive && it.dragY == 0f } ?: true,
-                                                        muted = false,
-                                                        contentScale = ContentScale.Fit,
+                                                        },
+                                                        modifier =
+                                                            Modifier
+                                                                .fillMaxSize(),
+                                                        onLongClick = { },
                                                     )
-                                                    surfaceBindingManager.playerFor(media.url)?.let { player ->
-                                                        key(media.url) {
-                                                            VideoGestureOverlay(
-                                                                player = player,
-                                                                onClick = {
-                                                                    state.setShowUi(!state.showUi)
-                                                                },
-                                                                onPlaybackSpeedChanged = {
-                                                                    playbackSpeed = it
-                                                                },
-                                                                modifier = Modifier.fillMaxSize(),
-                                                            )
-                                                        }
-                                                    }
+                                                } else {
+                                                    Box(
+                                                        modifier =
+                                                            Modifier
+                                                                .aspectRatio(1f)
+                                                                .fillMaxSize()
+                                                                .placeholder(true),
+                                                    )
                                                 }
-                                            } else if (media is UiMedia.Audio) {
-                                                VideoPlayer(
-                                                    uri = media.url,
-                                                    customHeaders = media.customHeaders,
-                                                    previewUri = null,
-                                                    contentDescription = media.accessibleDescription(),
-                                                    autoPlay = false,
-                                                    onClick = {
-                                                        state.setShowUi(!state.showUi)
-                                                    },
-                                                    onLongClick = {
-                                                        hapticFeedback.performHapticFeedback(
-                                                            HapticFeedbackType.LongPress,
-                                                        )
-                                                        state.setShowSheet(true)
-                                                    },
-                                                )
                                             }
-                                        }.onLoading {
-                                            if (preview != null) {
-                                                ImageItem(
-                                                    url = preview,
-                                                    previewUrl = preview,
-                                                    customHeaders = null,
-                                                    description = null,
-                                                    onClick = { /*TODO*/ },
-                                                    setLockPager = {
-                                                        if (!isBigScreen) {
-                                                            state.setShowUi(!it)
-                                                        }
-                                                        state.setLockPager(it)
-                                                    },
-                                                    modifier =
-                                                        Modifier
-                                                            .fillMaxSize(),
-                                                    onLongClick = { },
-                                                )
-                                            } else {
-                                                Box(
-                                                    modifier =
-                                                        Modifier
-                                                            .aspectRatio(1f)
-                                                            .fillMaxSize()
-                                                            .placeholder(true),
-                                                )
-                                            }
-                                        }
+                                    }
                                 }
                             }
-                        }
-                        if (overlay != null) {
-                            MediaOverlayDismissArea(enabled = !state.lockPager, content = pagerContent)
-                        } else {
-                            Swiper(state = swiperState) { pagerContent() }
                         }
                         androidx.compose.animation.AnimatedVisibility(
                             visible = state.showUi,
                             modifier =
                                 Modifier
                                     .fillMaxWidth()
-                                    .align(Alignment.TopCenter)
-                                    .mediaViewerControls(),
+                                    .align(Alignment.TopCenter),
                             enter = slideInVertically { -it },
                             exit = slideOutVertically { -it },
                         ) {
@@ -636,8 +629,7 @@ internal fun MediaViewerScreen(
                             visible = shouldShowBottomUi,
                             modifier =
                                 Modifier
-                                    .align(Alignment.BottomCenter)
-                                    .mediaViewerControls(),
+                                    .align(Alignment.BottomCenter),
                             enter = slideInVertically { it },
                             exit = slideOutVertically { it },
                         ) {
@@ -788,10 +780,7 @@ internal fun MediaViewerScreen(
                         }
                     }
                     if (isBigScreen && status != null) {
-                        AnimatedVisibility(
-                            state.showUi && !state.isLandscapeViewing,
-                            modifier = Modifier.mediaViewerControls(),
-                        ) {
+                        AnimatedVisibility(state.showUi && !state.isLandscapeViewing) {
                             Surface(
                                 modifier =
                                     Modifier
@@ -1392,7 +1381,6 @@ private fun ImageItem(
     onLongClick: () -> Unit,
     setLockPager: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
-    isCurrentPage: Boolean = true,
 ) {
     val currentOnClick by rememberUpdatedState(onClick)
     val currentOnLongClick by rememberUpdatedState(onLongClick)
@@ -1460,15 +1448,7 @@ private fun ImageItem(
                 }.build(),
         contentDescription = description,
         state = rememberZoomableImageState(zoomableState),
-        modifier =
-            modifier.mediaViewerViewport(
-                url = url,
-                previewUrl = previewUrl,
-                headers = customHeaders,
-                contentScale = contentScale,
-                alignment = alignment,
-                enabled = isCurrentPage,
-            ),
+        modifier = modifier.mediaSharedElementDestination(previewUrl),
         contentScale = contentScale,
         alignment = alignment,
         onClick = {
@@ -1481,7 +1461,7 @@ private fun ImageItem(
     )
 }
 
-private fun UiMedia.previewKey(): String? =
+internal fun UiMedia.previewKey(): String? =
     when (this) {
         is UiMedia.Audio -> previewUrl
         is UiMedia.Gif -> previewUrl

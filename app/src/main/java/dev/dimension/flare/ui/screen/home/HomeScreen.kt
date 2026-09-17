@@ -85,7 +85,7 @@ import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.settings.AiAgentEnabledPresenter
 import dev.dimension.flare.ui.route.Route
 import dev.dimension.flare.ui.route.Router
-import dev.dimension.flare.ui.screen.media.MediaViewerOverlayHost
+import dev.dimension.flare.ui.screen.media.MediaSharedTransitionHost
 import dev.dimension.flare.ui.screen.media.isMediaViewerRoute
 import dev.dimension.flare.ui.screen.splash.SplashScreen
 import kotlinx.coroutines.launch
@@ -129,7 +129,7 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                 NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(
                     currentWindowAdaptiveInfoV2(),
                 )
-            MediaViewerOverlayHost {
+            MediaSharedTransitionHost {
                 NavigationSuiteScaffold2(
                     wideNavigationRailState = state.wideNavigationRailState,
                     modifier = Modifier.fillMaxSize(),
@@ -689,7 +689,6 @@ private fun navigate(
     if (topLevelBackStack == null) return
     if (route.isMediaViewerRoute()) {
         scope.launch {
-            // The expanded rail owns a dialog window; finish hiding it before showing an activity overlay.
             wideNavigationRailState.collapse()
             topLevelBackStack.add(route)
         }

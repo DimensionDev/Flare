@@ -714,7 +714,6 @@ private fun ProfileMediaTab(
     val isBigScreen = isBigScreen()
     val uriHandler = LocalUriHandler.current
     CompositionLocalProvider(
-        dev.dimension.flare.ui.component.LocalMediaTransitionShape provides MaterialTheme.shapes.medium,
         LocalTimelineAppearance provides
             LocalTimelineAppearance.current.copy(
                 videoAutoplay = VideoAutoplay.NEVER,

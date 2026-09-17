@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.Dp
@@ -20,23 +19,25 @@ public fun AvatarComponent(
     contentDescription: String? = null,
 ) {
     val appearanceSettings = LocalTimelineAppearance.current
-    val shape =
-        when (appearanceSettings.avatarShape) {
-            AvatarShape.CIRCLE -> CircleShape
-            AvatarShape.SQUARE -> RoundedCornerShape(4.dp)
-        }
-    CompositionLocalProvider(LocalMediaTransitionShape provides shape) {
-        NetworkImage(
-            model = data?.url,
-            contentDescription = contentDescription,
-            customHeaders = data?.customHeaders,
-            modifier =
-                Modifier
-                    .size(size)
-                    .clip(shape)
-                    .then(modifier),
-        )
-    }
+    NetworkImage(
+        model = data?.url,
+        contentDescription = contentDescription,
+        customHeaders = data?.customHeaders,
+        modifier =
+            Modifier
+                .size(size)
+                .clip(
+                    when (appearanceSettings.avatarShape) {
+                        AvatarShape.CIRCLE -> {
+                            CircleShape
+                        }
+
+                        AvatarShape.SQUARE -> {
+                            RoundedCornerShape(4.dp)
+                        }
+                    },
+                ).then(modifier),
+    )
 }
 
 public object AvatarComponentDefaults {

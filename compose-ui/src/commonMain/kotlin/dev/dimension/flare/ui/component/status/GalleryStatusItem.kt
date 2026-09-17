@@ -30,8 +30,6 @@ import dev.dimension.flare.compose.ui.Res
 import dev.dimension.flare.compose.ui.feed_open_article
 import dev.dimension.flare.data.model.VideoAutoplay
 import dev.dimension.flare.ui.component.AvatarComponent
-import dev.dimension.flare.ui.component.LocalMediaTransitionGroup
-import dev.dimension.flare.ui.component.LocalMediaTransitionShape
 import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.RichText
@@ -133,8 +131,6 @@ private fun GalleryPostTile(
             if (post.images.isNotEmpty() && appearance.showMedia) {
                 val firstMedia = post.images.first()
                 CompositionLocalProvider(
-                    LocalMediaTransitionShape provides GalleryTileShape,
-                    LocalMediaTransitionGroup provides remember(post.statusKey) { Any() },
                     LocalTimelineAppearance provides
                         appearance.copy(videoAutoplay = VideoAutoplay.NEVER),
                 ) {

@@ -47,7 +47,6 @@ struct MediaViewerScreen<SupplementaryOverlay: View>: View {
     @State private var protectInitialPagerSelection: Bool
     @State private var didApplyInitialSelection = false
     @State private var isPreparingShare = false
-    @State private var holdsPlaybackSession = false
     @State private var playbackRate: Float = 1
     @State private var isLandscapeViewing = false
 
@@ -203,17 +202,10 @@ struct MediaViewerScreen<SupplementaryOverlay: View>: View {
             videoState = .idle
             playbackRate = 1
         }
-        .onChange(of: isVideoActivelyPlaying) { _, newValue in
-            updatePlaybackSession(playing: newValue)
-        }
         .onChange(of: isLandscapeViewing) { _, newValue in
             MediaOrientationController.setLandscape(newValue)
         }
         .onDisappear {
-            if holdsPlaybackSession {
-                AudioSessionManager.shared.endPlayback()
-                holdsPlaybackSession = false
-            }
             if isLandscapeViewing {
                 MediaOrientationController.setLandscape(false)
             }
@@ -421,11 +413,6 @@ struct MediaViewerScreen<SupplementaryOverlay: View>: View {
         return medias[selectedIndex]
     }
 
-    private var isVideoActivelyPlaying: Bool {
-        if case .playing = videoState { return true }
-        return false
-    }
-
     private var selectedMediaIsVideo: Bool {
         selectedMedia?.isVideoMedia == true
     }
@@ -450,16 +437,6 @@ struct MediaViewerScreen<SupplementaryOverlay: View>: View {
             selectedIndex = initialSelection
             protectInitialPagerSelection = initialSelection > 0
             didApplyInitialSelection = true
-        }
-    }
-
-    private func updatePlaybackSession(playing: Bool) {
-        if playing, !holdsPlaybackSession {
-            AudioSessionManager.shared.beginPlayback()
-            holdsPlaybackSession = true
-        } else if !playing, holdsPlaybackSession {
-            AudioSessionManager.shared.endPlayback()
-            holdsPlaybackSession = false
         }
     }
 

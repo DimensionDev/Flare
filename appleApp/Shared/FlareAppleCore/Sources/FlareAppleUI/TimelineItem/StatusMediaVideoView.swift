@@ -266,6 +266,7 @@ public struct StatusMediaVideoView: View {
         }
         .onReceive(session.updates) { _ in
             videoState = session.state
+            #if os(macOS)
             if session.player != nil {
                 switch session.state {
                 case .playing: if !play { play = true }
@@ -273,6 +274,7 @@ public struct StatusMediaVideoView: View {
                 default: break
                 }
             }
+            #endif
             if abs((time.seconds.isFinite ? time.seconds : 0) - session.position) > 0.05 {
                 time = CMTime(seconds: session.position, preferredTimescale: 600)
             }
@@ -298,11 +300,13 @@ public struct StatusMediaVideoView: View {
     #if os(iOS)
     @ViewBuilder
     private var content: some View {
-        Color.clear
+        Color.black
             .overlay {
-                NetworkImage(data: data.thumbnailUrl, customHeader: data.customHeaders)
-                    .scaledToFit()
-                    .allowsHitTesting(false)
+                if !session.hasDisplayedFrame {
+                    NetworkImage(data: data.thumbnailUrl, customHeader: data.customHeaders)
+                        .scaledToFit()
+                        .allowsHitTesting(false)
+                }
             }
             .clipped()
             .overlay {

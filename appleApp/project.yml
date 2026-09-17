@@ -242,6 +242,7 @@ targets:
       - path: Shared/FlareAppleCore/Sources/FlareAppleUI/TimelinePlaybackCoordinator.swift
       - path: Shared/FlareAppleCore/Sources/FlareAppleUI/VideoPlaybackArbiter.swift
       - path: Shared/FlareAppleCore/Sources/FlareAppleUI/SharedVideoPlayer.swift
+      - path: Shared/FlareAppleCore/Sources/FlareAppleUI/AudioSessionManager.swift
       - path: Shared/FlareAppleCore/Sources/FlareAppleUI/MediaPlaybackMemory.swift
     settings:
       base:

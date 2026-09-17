@@ -52,7 +52,7 @@ kotlin {
                 implementation(libs.molecule.runtime)
                 implementation(libs.paging.common)
                 implementation(libs.paging.compose)
-                implementation(libs.bluesky)
+                implementation(projects.social.bluesky.api)
                 implementation(libs.bluesky.oauth)
                 implementation(libs.cryptography.provider.optimal)
             }
@@ -77,5 +77,3 @@ kotlin {
         }
     }
 }
-
-

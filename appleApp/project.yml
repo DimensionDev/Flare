@@ -330,7 +330,6 @@ targets:
       - path: Shared/FlareAppleCore/Sources/FlareAppleCore
         excludes:
           - Resources/**
-      - path: Shared/FlareAppleResource/Resources/Localizable.xcstrings
     preBuildScripts:
       - name: Compile Kotlin
         basedOnDependencyAnalysis: false
@@ -360,7 +359,6 @@ targets:
       - path: Shared/FlareAppleCore/Sources/FlareAppleUI
         excludes:
           - Resources/**
-      - path: Shared/FlareAppleResource/Resources/Localizable.xcstrings
     dependencies:
       - package: Kingfisher
         link: false

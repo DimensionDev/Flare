@@ -71,7 +71,6 @@ kotlin {
                 implementation(libs.kotlinx.serialization.protobuf)
                 implementation(libs.ktor.client.resources)
                 implementation(libs.cryptography.provider.optimal)
-                implementation(libs.openai.client)
             }
         }
         val nonWebMain by getting {

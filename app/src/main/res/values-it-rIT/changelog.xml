@@ -3,10 +3,10 @@
     <string name="changelog_current"><![CDATA[
             <span>Versione %1$s:</span>
             <ul>
-                <li>Le schede dei profili ora si caricano in modo indipendente; i profili X possono mostrare Repost, In evidenza e Articoli quando disponibili.</li>
-                <li>Aggiunte opzioni globali e per singola timeline per nascondere le reazioni emoji.</li>
-                <li>Migliorate la navigazione e l’accessibilità con gesti Indietro predittivi più fluidi e descrizioni lunghe delle immagini scorrevoli.</li>
-                <li>Migliorata l’affidabilità dell’accesso a Bluesky, ripristinato il caricamento dei contenuti FANBOX e ampliati i dettagli dei post Misskey per mostrare l’intera conversazione.</li>
+                <li>Migliorata la riproduzione dei video nella timeline con transizioni più fluide, una migliore selezione automatica e il mantenimento della posizione quando si apre o chiude il visualizzatore multimediale.</li>
+                <li>Migliorata l’affidabilità della timeline: risposte e contesto restano visibili durante l’aggiornamento, il banner dei nuovi post si aggiorna correttamente e sono stati risolti gli arresti anomali della paginazione.</li>
+                <li>Migliorata l’accessibilità di post, contenuti multimediali e schermata di composizione con etichette, stati e controlli più chiari.</li>
+                <li>Migliorata l’affidabilità delle sessioni Bluesky, la compatibilità con le nuove risposte della timeline di X e il supporto per più formati di link a opere e profili Pixiv.</li>
             </ul>
         ]]></string>
     <string name="changelog_title">Bentornato!</string>

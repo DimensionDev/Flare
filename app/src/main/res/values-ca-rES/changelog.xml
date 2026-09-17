@@ -3,10 +3,10 @@
     <string name="changelog_current"><![CDATA[
             <span>Versió %1$s:</span>
             <ul>
-                <li>Les pestanyes dels perfils ara es carreguen de manera independent; els perfils d’X poden mostrar Republicacions, Destacats i Articles quan estiguin disponibles.</li>
-                <li>S’han afegit opcions globals i per cronologia per amagar les reaccions amb emojis.</li>
-                <li>S’han millorat la navegació i l’accessibilitat amb gestos predictius d’enrere més fluids i descripcions llargues d’imatges desplaçables.</li>
-                <li>S’ha millorat la fiabilitat de l’inici de sessió a Bluesky, s’ha restaurat la càrrega de contingut de FANBOX i els detalls de les publicacions de Misskey ara mostren tota la conversa.</li>
+                <li>S’ha millorat la reproducció de vídeo a la cronologia amb transicions més fluides, una millor selecció automàtica i la conservació del progrés en obrir o tancar el visor multimèdia.</li>
+                <li>S’ha millorat la fiabilitat de la cronologia: les respostes i el context continuen visibles durant les actualitzacions, el bàner de publicacions noves s’actualitza correctament i s’han corregit bloquejos de paginació.</li>
+                <li>S’ha millorat l’accessibilitat de les publicacions, els continguts multimèdia i la pantalla de redacció amb etiquetes, estats i controls més clars.</li>
+                <li>S’ha millorat la fiabilitat de les sessions de Bluesky, la compatibilitat amb noves respostes de la cronologia d’X i l’admissió de més formats d’enllaços d’obres i perfils de Pixiv.</li>
             </ul>
         ]]></string>
     <string name="changelog_title">Et donem la benvinguda de nou!</string>

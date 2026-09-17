@@ -32608,181 +32608,181 @@
         "af" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Weergawe %@:\n• Profieloortjies laai nou onafhanklik; X-profiele kan Herplasings, Hoogtepunte en Artikels wys wanneer beskikbaar, met ’n nuwe swiepbare ervaring op iOS.\n• Globale en tydlynspesifieke opsies is bygevoeg om emoji-reaksies te versteek, met duideliker, uitbreibare reaksie-uitlegte op Apple-platforms.\n• Die iOS-mediakyker is verbeter met op- of afswiep om toe te maak, stabieler voorskoue en beter hantering van hoë beelde.\n• Bluesky-aanmelding is betroubaarder, FANBOX-inhoud laai weer, en Misskey-plasingbesonderhede wys nou die volledige gesprek."
+            "value" : "Weergawe %@:\n• Verbeterde videoterrugspeel op die tydlyn met gladder oorgange, beter outomatiese videokeuse en behoue terugspeelvordering wanneer die mediakyker oop- of toegemaak word.\n• Verbeterde tydlynnavigasie en plasingbesonderhede: antwoorde en rolposisies bly ná herlaai behoue, Weibo-besonderhede gebruik die inheemse tydlynervaring en navigasiebalke verklein tydens rol op iOS 27.\n• Verbeterde toeganklikheid vir plasings, media en die opstelskerm met duideliker etikette, toestande en kontroles.\n• Verbeterde Bluesky-sessiebetroubaarheid, versoenbaarheid met nuwe X-tydlynreaksies en ondersteuning vir meer Pixiv-kunswerk- en profielskakelformate."
           }
         },
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "الإصدار %@:\n• يتم الآن تحميل علامات تبويب الملفات الشخصية بشكل مستقل؛ ويمكن لملفات X عرض إعادات النشر وأبرز المنشورات والمقالات عند توفرها، مع تجربة جديدة قابلة للسحب على iOS.\n• تمت إضافة خيارات عامة ولكل خط زمني لإخفاء تفاعلات الرموز التعبيرية، مع تخطيطات أوضح وقابلة للتوسيع للتفاعلات على منصات Apple.\n• تم تحسين عارض الوسائط على iOS بإمكانية السحب لأعلى أو لأسفل للإغلاق، ومعاينات أكثر ثباتًا، ودعم أفضل للصور الطويلة.\n• تحسّنت موثوقية تسجيل الدخول إلى Bluesky، وعاد تحميل محتوى FANBOX، وأصبحت تفاصيل منشورات Misskey تعرض المحادثة كاملة."
+            "value" : "الإصدار %@:\n• تحسين تشغيل فيديوهات الخط الزمني بانتقالات أكثر سلاسة واختيار تلقائي أفضل للفيديو، مع الاحتفاظ بموضع التشغيل عند فتح عارض الوسائط أو إغلاقه.\n• تحسين التنقل في الخط الزمني وتفاصيل المنشورات: تبقى الردود ومواضع التمرير بعد التحديث، وتستخدم تفاصيل Weibo تجربة الخط الزمني الأصلية، وتصغر أشرطة التنقل أثناء التمرير في iOS 27.\n• تحسين إمكانية الوصول في المنشورات والوسائط وشاشة الإنشاء من خلال تسميات وحالات وعناصر تحكم أوضح.\n• تحسين موثوقية جلسات Bluesky والتوافق مع استجابات الخط الزمني الجديدة من X ودعم المزيد من صيغ روابط الأعمال الفنية والملفات الشخصية في Pixiv."
           }
         },
         "bg" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Версия %@:\n• Разделите в профилите вече се зареждат независимо; профилите в X могат да показват препубликации, акценти и статии, когато са налични, с нов интерфейс с плъзгане в iOS.\n• Добавени са глобални настройки и настройки за всяка времева линия за скриване на реакциите с емоджи, с по-ясни и разгъващи се оформления на реакциите в платформите на Apple.\n• Подобрен е прегледът на мултимедия в iOS с плъзгане нагоре или надолу за затваряне, по-стабилни визуализации и по-добра работа с високи изображения.\n• Подобрена е надеждността на влизането в Bluesky, възстановено е зареждането на съдържание от FANBOX, а подробностите за публикации в Misskey вече показват целия разговор."
+            "value" : "Версия %@:\n• Подобрено възпроизвеждането на видео в хронологията с по-плавни преходи, по-добър автоматичен избор и запазване на позицията при отваряне или затваряне на медийния преглед.\n• Подобрени са навигацията в хронологията и подробностите за публикациите: отговорите и позицията на превъртане се запазват след обновяване, Weibo използва нативната хронология, а навигационните ленти се свиват при превъртане в iOS 27.\n• Подобрена е достъпността на публикациите, медиите и екрана за създаване с по-ясни етикети, състояния и контроли.\n• Подобрена е надеждността на сесиите в Bluesky, съвместимостта с нови отговори от хронологията на X и поддръжката на повече формати за връзки към творби и профили в Pixiv."
           }
         },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Versió %@:\n• Les pestanyes dels perfils ara es carreguen de manera independent; els perfils d’X poden mostrar Republicacions, Destacats i Articles quan estiguin disponibles, amb una nova experiència lliscable a iOS.\n• S’han afegit opcions globals i per cronologia per amagar les reaccions amb emojis, amb dissenys de reaccions més clars i ampliables a les plataformes d’Apple.\n• S’ha millorat el visor multimèdia d’iOS amb lliscament amunt o avall per tancar-lo, previsualitzacions més estables i una millor gestió de les imatges altes.\n• S’ha millorat la fiabilitat de l’inici de sessió a Bluesky, s’ha restaurat la càrrega de contingut de FANBOX i els detalls de les publicacions de Misskey ara mostren tota la conversa."
+            "value" : "Versió %@:\n• S’ha millorat la reproducció de vídeo a la cronologia amb transicions més fluides, una millor selecció automàtica i la conservació del progrés en obrir o tancar el visor multimèdia.\n• S’han millorat la navegació per la cronologia i els detalls de les publicacions: les respostes i la posició es conserven en actualitzar, els detalls de Weibo utilitzen la cronologia nativa i les barres de navegació es minimitzen en desplaçar-se a iOS 27.\n• S’ha millorat l’accessibilitat de les publicacions, els continguts multimèdia i la pantalla de redacció amb etiquetes, estats i controls més clars.\n• S’ha millorat la fiabilitat de les sessions de Bluesky, la compatibilitat amb noves respostes de la cronologia d’X i l’admissió de més formats d’enllaços d’obres i perfils de Pixiv."
           }
         },
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Verze %@:\n• Karty profilů se nyní načítají nezávisle; profily na X mohou zobrazovat reposty, výběry a články, jsou-li dostupné, a na iOS nabízí nové ovládání přejetím.\n• Přidány globální možnosti i možnosti pro jednotlivé časové osy ke skrytí emoji reakcí a přehlednější, rozbalitelné rozložení reakcí na platformách Apple.\n• Vylepšen prohlížeč médií v iOS: zavření přejetím nahoru nebo dolů, stabilnější náhledy a lepší zobrazení vysokých obrázků.\n• Zlepšena spolehlivost přihlašování k Bluesky, obnoveno načítání obsahu FANBOX a podrobnosti příspěvků Misskey nyní zobrazují celou konverzaci."
+            "value" : "Verze %@:\n• Vylepšeno přehrávání videí na časové ose: plynulejší přechody, lepší automatický výběr a zachování pozice při otevření či zavření prohlížeče médií.\n• Vylepšena navigace na časové ose a detaily příspěvků: odpovědi i pozice posunu se po obnovení zachovají, detaily Weibo používají nativní časovou osu a navigační lišty se při posouvání v iOS 27 minimalizují.\n• Vylepšeno zpřístupnění příspěvků, médií a obrazovky pro psaní díky jasnějším popiskům, stavům a ovládacím prvkům.\n• Zvýšena spolehlivost relací Bluesky, kompatibilita s novými odpověďmi časové osy X a podpora dalších formátů odkazů na díla a profily Pixiv."
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Version %@:\n• Profilfaner indlæses nu uafhængigt; X-profiler kan vise genopslag, højdepunkter og artikler, når de er tilgængelige, med en ny swipeoplevelse på iOS.\n• Tilføjet globale og tidslinjespecifikke muligheder for at skjule emoji-reaktioner samt tydeligere reaktionslayout, der kan udvides, på Apple-platforme.\n• Forbedret mediefremviseren på iOS med swipe op eller ned for at lukke, mere stabile forhåndsvisninger og bedre håndtering af høje billeder.\n• Forbedret pålideligheden af Bluesky-login, gendannet indlæsning af FANBOX-indhold og udvidet Misskey-opslagsdetaljer, så hele samtalen vises."
+            "value" : "Version %@:\n• Forbedret videoafspilning på tidslinjen med mere jævne overgange, bedre automatisk videovalg og bevaret afspilningsposition, når mediefremviseren åbnes eller lukkes.\n• Forbedret navigation og indlægsdetaljer: svar og rullepositioner bevares efter opdatering, Weibo-detaljer bruger den indbyggede tidslinje, og navigationslinjer minimeres under rulning i iOS 27.\n• Forbedret tilgængeligheden i indlæg, medier og oprettelsesskærmen med tydeligere etiketter, tilstande og betjeningselementer.\n• Forbedret stabiliteten af Bluesky-sessioner, kompatibiliteten med nye X-tidslinjesvar og understøttelsen af flere linkformater til Pixiv-værker og -profiler."
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Version %@:\n• Profil-Tabs werden jetzt unabhängig geladen; X-Profile können Reposts, Highlights und Artikel anzeigen, sofern verfügbar, mit einer neuen Wischbedienung auf iOS.\n• Globale und Timeline-spezifische Optionen zum Ausblenden von Emoji-Reaktionen sowie übersichtlichere, erweiterbare Reaktionslayouts auf Apple-Plattformen wurden hinzugefügt.\n• Der Medienbetrachter auf iOS wurde verbessert: Schließen durch Wischen nach oben oder unten, stabilere Vorschauen und bessere Darstellung hoher Bilder.\n• Die Zuverlässigkeit der Bluesky-Anmeldung wurde verbessert, das Laden von FANBOX-Inhalten wiederhergestellt und Misskey-Beitragsdetails zeigen jetzt die vollständige Unterhaltung."
+            "value" : "Version %@:\n• Die Videowiedergabe in Timelines wurde mit flüssigeren Übergängen, einer besseren automatischen Videoauswahl und gespeicherter Wiedergabeposition beim Öffnen oder Schließen der Medienansicht verbessert.\n• Timeline-Navigation und Beitragsdetails wurden verbessert: Antworten und Scrollpositionen bleiben nach Aktualisierungen erhalten, Weibo-Details nutzen die native Timeline und Navigationsleisten werden unter iOS 27 beim Scrollen minimiert.\n• Die Barrierefreiheit von Beiträgen, Medien und dem Verfassen-Bildschirm wurde durch deutlichere Beschriftungen, Zustände und Steuerelemente verbessert.\n• Die Zuverlässigkeit von Bluesky-Sitzungen, die Kompatibilität mit neuen X-Timeline-Antworten und die Unterstützung weiterer Pixiv-Linkformate für Werke und Profile wurden verbessert."
           }
         },
         "el" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Έκδοση %@:\n• Οι καρτέλες προφίλ φορτώνονται πλέον ανεξάρτητα· τα προφίλ X μπορούν να εμφανίζουν Αναδημοσιεύσεις, Επισημάνσεις και Άρθρα όταν είναι διαθέσιμα, με νέα εμπειρία σάρωσης στο iOS.\n• Προστέθηκαν καθολικές επιλογές και επιλογές ανά χρονογραμμή για απόκρυψη των αντιδράσεων emoji, με σαφέστερες, επεκτάσιμες διατάξεις αντιδράσεων στις πλατφόρμες Apple.\n• Βελτιώθηκε η προβολή πολυμέσων στο iOS με σάρωση προς τα πάνω ή κάτω για κλείσιμο, σταθερότερες προεπισκοπήσεις και καλύτερη διαχείριση ψηλών εικόνων.\n• Βελτιώθηκε η αξιοπιστία σύνδεσης στο Bluesky, αποκαταστάθηκε η φόρτωση περιεχομένου FANBOX και οι λεπτομέρειες αναρτήσεων Misskey εμφανίζουν πλέον ολόκληρη τη συζήτηση."
+            "value" : "Έκδοση %@:\n• Βελτιώθηκε η αναπαραγωγή βίντεο στη χρονογραμμή με ομαλότερες μεταβάσεις, καλύτερη αυτόματη επιλογή και διατήρηση της θέσης κατά το άνοιγμα ή κλείσιμο της προβολής πολυμέσων.\n• Βελτιώθηκε η πλοήγηση στη χρονογραμμή και οι λεπτομέρειες αναρτήσεων: απαντήσεις και θέση κύλισης διατηρούνται μετά την ανανέωση, οι λεπτομέρειες Weibo χρησιμοποιούν την εγγενή χρονογραμμή και οι γραμμές πλοήγησης ελαχιστοποιούνται κατά την κύλιση στο iOS 27.\n• Βελτιώθηκε η προσβασιμότητα σε αναρτήσεις, πολυμέσα και στην οθόνη σύνταξης με σαφέστερες ετικέτες, καταστάσεις και στοιχεία ελέγχου.\n• Βελτιώθηκε η αξιοπιστία των συνεδριών Bluesky, η συμβατότητα με νέες αποκρίσεις χρονογραμμής του X και η υποστήριξη περισσότερων μορφών συνδέσμων έργων και προφίλ Pixiv."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Version %@:\n• Profile tabs now load independently; X profiles can show Reposts, Highlights, and Articles when available, with a new swipeable experience on iOS.\n• Added global and per-timeline options to hide emoji reactions, with clearer, expandable reaction layouts on Apple platforms.\n• Improved the iOS media viewer with swipe-up/down dismissal, more stable previews, and better handling of tall images.\n• Improved Bluesky login reliability, restored FANBOX content loading, and expanded Misskey post details to show the full conversation."
+            "value" : "Version %@:\n• Improved timeline video playback with smoother transitions, better automatic video selection, and playback progress preserved when opening or closing the media viewer.\n• Improved timeline navigation and post details: replies and scroll positions survive refreshes, Weibo details use the native timeline experience, and navigation bars minimize while scrolling on iOS 27.\n• Improved accessibility across posts, media, and the compose screen with clearer labels, states, and controls.\n• Improved Bluesky session reliability, compatibility with new X timeline responses, and support for more Pixiv artwork and profile link formats."
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Versio %@:\n• Profiilin välilehdet latautuvat nyt toisistaan riippumatta. X-profiileissa voidaan näyttää uudelleenjulkaisut, kohokohdat ja artikkelit, kun niitä on saatavilla, ja iOS:ssä on uusi pyyhkäistävä käyttökokemus.\n• Lisättiin yleiset ja aikajanakohtaiset valinnat emoji-reaktioiden piilottamiseen sekä selkeämmät ja laajennettavat reaktioasettelut Apple-alustoille.\n• iOS:n mediakatselinta parannettiin: sulkeminen pyyhkäisemällä ylös tai alas, vakaammat esikatselut ja parempi tuki korkeille kuville.\n• Bluesky-kirjautumisen luotettavuutta parannettiin, FANBOX-sisällön lataus palautettiin ja Misskey-julkaisun tiedot näyttävät nyt koko keskustelun."
+            "value" : "Versio %@:\n• Aikajanan videotoistoa parannettiin sujuvammilla siirtymillä, paremmalla automaattisella videovalinnalla ja toistokohdan säilymisellä mediaselainta avattaessa tai suljettaessa.\n• Aikajanan selaamista ja julkaisujen tietoja parannettiin: vastaukset ja vierityskohta säilyvät päivityksissä, Weibo-tiedot käyttävät natiivia aikajanaa ja navigointipalkit pienenevät vieritettäessä iOS 27:ssä.\n• Julkaisujen, median ja kirjoitusnäkymän saavutettavuutta parannettiin selkeämmillä nimikkeillä, tiloilla ja säätimillä.\n• Bluesky-istuntojen luotettavuutta, yhteensopivuutta X:n uusien aikajanavastausten kanssa ja useampien Pixiv-teos- ja profiililinkkien tukea parannettiin."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Version %@ :\n• Les onglets de profil se chargent désormais indépendamment ; les profils X peuvent afficher les Republications, les Sélections et les Articles lorsqu’ils sont disponibles, avec une nouvelle navigation par balayage sur iOS.\n• Ajout d’options globales et par fil pour masquer les réactions emoji, avec des dispositions plus claires et extensibles sur les plateformes Apple.\n• Amélioration de la visionneuse multimédia sur iOS : balayage vers le haut ou le bas pour fermer, aperçus plus stables et meilleure gestion des images très hautes.\n• Amélioration de la fiabilité de la connexion Bluesky, rétablissement du chargement du contenu FANBOX et affichage de la conversation complète dans le détail des publications Misskey."
+            "value" : "Version %@ :\n• Amélioration de la lecture vidéo dans les fils avec des transitions plus fluides, une meilleure sélection automatique et la reprise à la même position après l’ouverture ou la fermeture de la visionneuse multimédia.\n• Amélioration de la navigation et des détails de publication : les réponses et positions de défilement sont conservées après actualisation, les détails Weibo utilisent le fil natif et les barres de navigation se réduisent lors du défilement sous iOS 27.\n• Amélioration de l’accessibilité des publications, des médias et de l’écran de rédaction grâce à des libellés, états et commandes plus clairs.\n• Amélioration de la fiabilité des sessions Bluesky, de la compatibilité avec les nouvelles réponses de fil X et de la prise en charge de davantage de formats de liens vers les œuvres et profils Pixiv."
           }
         },
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "גרסה %@:\n• כרטיסיות הפרופיל נטענות כעת בנפרד; פרופילים ב-X יכולים להציג פוסטים חוזרים, נקודות בולטות ומאמרים כשהם זמינים, עם חוויית החלקה חדשה ב-iOS.\n• נוספו אפשרויות כלליות ולכל ציר זמן להסתרת תגובות אימוג׳י, עם פריסות תגובות ברורות יותר הניתנות להרחבה בפלטפורמות Apple.\n• מציג המדיה ב-iOS שופר עם החלקה למעלה או למטה לסגירה, תצוגות מקדימות יציבות יותר וטיפול טוב יותר בתמונות גבוהות.\n• שופרה אמינות ההתחברות ל-Bluesky, שוחזרה טעינת תוכן FANBOX, ופרטי פוסטים ב-Misskey מציגים כעת את השיחה המלאה."
+            "value" : "גרסה %@:\n• שופרה הפעלת הסרטונים בציר הזמן עם מעברים חלקים יותר, בחירה אוטומטית טובה יותר ושמירת מיקום ההפעלה בעת פתיחה או סגירה של מציג המדיה.\n• שופרו הניווט בציר הזמן ופרטי הפוסטים: תגובות ומיקומי גלילה נשמרים לאחר רענון, פרטי Weibo משתמשים בציר הזמן המקורי וסרגלי הניווט מצטמצמים בגלילה ב-iOS 27.\n• שופרה הנגישות בפוסטים, במדיה ובמסך הכתיבה באמצעות תוויות, מצבים ופקדים ברורים יותר.\n• שופרה אמינות ההפעלות של Bluesky, התאימות לתגובות החדשות של ציר הזמן ב-X והתמיכה בתבניות נוספות של קישורים ליצירות ולפרופילים ב-Pixiv."
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@ verzió:\n• A profillapok mostantól egymástól függetlenül töltődnek be; az X-profilok elérhetőség esetén megjeleníthetik az újraközléseket, a kiemeléseket és a cikkeket, iOS-en pedig új, lapozható élményt kaptak.\n• Globális és idővonalankénti lehetőségek kerültek az emoji-reakciók elrejtéséhez, az Apple-platformokon pedig áttekinthetőbb, kibővíthető reakcióelrendezések érhetők el.\n• Javult az iOS médiamegjelenítője: felfelé vagy lefelé húzással bezárható, stabilabbak az előnézetek, és jobban kezeli a magas képeket.\n• Megbízhatóbb lett a Bluesky-bejelentkezés, helyreállt a FANBOX-tartalmak betöltése, a Misskey-bejegyzések részletei pedig már a teljes beszélgetést megjelenítik."
+            "value" : "%@ verzió:\n• Javult az idővonali videók lejátszása: simább átmenetek, jobb automatikus videóválasztás és a lejátszási pozíció megőrzése a médianézegető megnyitásakor vagy bezárásakor.\n• Javult az idővonal navigációja és a bejegyzésrészletek: frissítés után megmaradnak a válaszok és a görgetési helyzet, a Weibo-részletek natív idővonalat használnak, iOS 27-en pedig görgetéskor összehúzódnak a navigációs sávok.\n• Egyértelműbb címkékkel, állapotokkal és vezérlőkkel javult a bejegyzések, a média és a szerkesztőképernyő akadálymentessége.\n• Javult a Bluesky-munkamenetek megbízhatósága, az új X-idővonalválaszokkal való kompatibilitás és több Pixiv-alkotás- és profillink-formátum támogatása."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Versione %@:\n• Le schede dei profili ora si caricano in modo indipendente; i profili X possono mostrare Repost, In evidenza e Articoli quando disponibili, con una nuova esperienza scorrevole su iOS.\n• Aggiunte opzioni globali e per singola timeline per nascondere le reazioni emoji, con layout delle reazioni più chiari ed espandibili sulle piattaforme Apple.\n• Migliorato il visualizzatore multimediale su iOS con chiusura tramite scorrimento verso l’alto o il basso, anteprime più stabili e una migliore gestione delle immagini alte.\n• Migliorata l’affidabilità dell’accesso a Bluesky, ripristinato il caricamento dei contenuti FANBOX e ampliati i dettagli dei post Misskey per mostrare l’intera conversazione."
+            "value" : "Versione %@:\n• Migliorata la riproduzione dei video nella timeline con transizioni più fluide, una migliore selezione automatica e il mantenimento della posizione quando si apre o chiude il visualizzatore multimediale.\n• Migliorati la navigazione nella timeline e i dettagli dei post: risposte e posizione di scorrimento vengono conservate dopo l’aggiornamento, i dettagli Weibo usano la timeline nativa e le barre di navigazione si riducono durante lo scorrimento su iOS 27.\n• Migliorata l’accessibilità di post, contenuti multimediali e schermata di composizione con etichette, stati e controlli più chiari.\n• Migliorata l’affidabilità delle sessioni Bluesky, la compatibilità con le nuove risposte della timeline di X e il supporto per più formati di link a opere e profili Pixiv."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "バージョン %@:\n• プロフィールのタブを個別に読み込むようにしました。X のプロフィールでは、利用可能な場合にリポスト、ハイライト、記事を表示でき、iOS では新しいスワイプ操作に対応しました。\n• 絵文字リアクションを全体またはタイムラインごとに非表示にできるようにし、Apple プラットフォームではリアクションをより見やすく、展開可能なレイアウトに改善しました。\n• iOS のメディアビューアを改善し、上下どちらへのスワイプでも閉じられるようにしたほか、プレビューの安定性と縦長画像の表示を向上しました。\n• Bluesky のログイン安定性を改善し、FANBOX コンテンツの読み込みを復旧しました。また、Misskey の投稿詳細で会話全体を表示できるようにしました。"
+            "value" : "バージョン %@:\n• タイムラインの動画再生を改善しました。切り替えがより滑らかになり、再生する動画を適切に自動選択し、メディアビューアーを開閉しても再生位置を維持します。\n• タイムライン操作と投稿詳細を改善しました。更新後も返信とスクロール位置を維持し、Weibo の詳細画面はネイティブのタイムラインを使用します。iOS 27 ではスクロール中にナビゲーションバーが最小化されます。\n• 投稿、メディア、投稿作成画面のラベル、状態、操作を分かりやすくし、アクセシビリティを改善しました。\n• Bluesky セッションの安定性、新しい X タイムライン応答への互換性、および Pixiv の作品・プロフィールリンク形式への対応を改善しました。"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "버전 %@:\n• 프로필 탭이 이제 각각 독립적으로 로드됩니다. X 프로필에서는 이용 가능한 경우 재게시, 하이라이트 및 아티클을 표시하며, iOS에는 새로운 스와이프 탐색을 추가했습니다.\n• 이모지 반응을 전체 또는 타임라인별로 숨기는 옵션을 추가하고, Apple 플랫폼의 반응 레이아웃을 더 명확하고 펼칠 수 있게 개선했습니다.\n• iOS 미디어 뷰어에 위아래 스와이프 닫기를 추가하고, 미리보기 안정성과 세로로 긴 이미지 처리를 개선했습니다.\n• Bluesky 로그인 안정성을 개선하고 FANBOX 콘텐츠 로딩을 복구했으며, Misskey 게시물 상세 화면에서 전체 대화를 표시하도록 확장했습니다."
+            "value" : "버전 %@:\n• 타임라인 동영상 재생을 개선하여 전환이 더 부드러워지고 자동 동영상 선택이 향상되었으며, 미디어 뷰어를 열거나 닫아도 재생 위치가 유지됩니다.\n• 타임라인 탐색과 게시물 상세를 개선했습니다. 새로 고쳐도 답글과 스크롤 위치가 유지되고, Weibo 상세 화면은 네이티브 타임라인을 사용하며, iOS 27에서는 스크롤할 때 탐색 막대가 축소됩니다.\n• 게시물, 미디어 및 작성 화면에 더 명확한 레이블, 상태 및 컨트롤을 제공하여 접근성을 개선했습니다.\n• Bluesky 세션 안정성, 새로운 X 타임라인 응답과의 호환성 및 더 다양한 Pixiv 작품·프로필 링크 형식 지원을 개선했습니다."
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Versjon %@:\n• Profilfaner lastes nå uavhengig av hverandre. X-profiler kan vise viderepubliseringer, høydepunkter og artikler når de er tilgjengelige, med en ny sveipbar opplevelse på iOS.\n• Lagt til globale og tidslinjespesifikke valg for å skjule emoji-reaksjoner, med tydeligere reaksjonsoppsett som kan utvides på Apple-plattformer.\n• Forbedret medievisningen på iOS med sveip opp eller ned for å lukke, mer stabile forhåndsvisninger og bedre håndtering av høye bilder.\n• Forbedret påliteligheten ved Bluesky-innlogging, gjenopprettet lasting av FANBOX-innhold og utvidet Misskey-innleggsdetaljer til å vise hele samtalen."
+            "value" : "Versjon %@:\n• Forbedret videoavspilling i tidslinjen med jevnere overganger, bedre automatisk videovalg og bevart avspillingsposisjon når medievisningen åpnes eller lukkes.\n• Forbedret navigasjon og innleggsdetaljer: svar og rulleposisjoner bevares etter oppdatering, Weibo-detaljer bruker den innebygde tidslinjen, og navigasjonslinjer minimeres ved rulling i iOS 27.\n• Forbedret tilgjengeligheten i innlegg, medier og publiseringsskjermen med tydeligere etiketter, tilstander og kontroller.\n• Forbedret stabiliteten til Bluesky-økter, kompatibiliteten med nye X-tidslinjesvar og støtten for flere lenkeformater til Pixiv-verk og -profiler."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Versie %@:\n• Profieltabbladen worden nu onafhankelijk geladen; X-profielen kunnen Reposts, Hoogtepunten en Artikelen tonen wanneer beschikbaar, met een nieuwe veegervaring op iOS.\n• Globale en tijdlijnspecifieke opties toegevoegd om emoji-reacties te verbergen, met duidelijkere, uitklapbare reactielay-outs op Apple-platforms.\n• De mediaviewer op iOS is verbeterd met omhoog of omlaag vegen om te sluiten, stabielere voorbeelden en betere verwerking van hoge afbeeldingen.\n• De betrouwbaarheid van aanmelden bij Bluesky is verbeterd, het laden van FANBOX-inhoud is hersteld en Misskey-berichtdetails tonen nu het volledige gesprek."
+            "value" : "Versie %@:\n• De videoweergave in tijdlijnen is verbeterd met soepelere overgangen, betere automatische videoselectie en behoud van de afspeelpositie bij het openen of sluiten van de mediaviewer.\n• Tijdlijnnavigatie en berichtdetails zijn verbeterd: antwoorden en scrollposities blijven na vernieuwen behouden, Weibo-details gebruiken de systeemeigen tijdlijn en navigatiebalken worden tijdens scrollen in iOS 27 geminimaliseerd.\n• De toegankelijkheid van berichten, media en het opstelscherm is verbeterd met duidelijkere labels, statussen en bedieningselementen.\n• De betrouwbaarheid van Bluesky-sessies, compatibiliteit met nieuwe X-tijdlijnreacties en ondersteuning voor meer Pixiv-linkformaten voor werken en profielen zijn verbeterd."
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Wersja %@:\n• Karty profilu są teraz ładowane niezależnie; profile X mogą wyświetlać Reposty, Wyróżnione i Artykuły, gdy są dostępne, a w iOS dodano nową obsługę przesuwania.\n• Dodano globalne i osobne dla każdej osi czasu opcje ukrywania reakcji emoji oraz czytelniejsze, rozwijane układy reakcji na platformach Apple.\n• Ulepszono przeglądarkę multimediów w iOS: zamykanie przesunięciem w górę lub w dół, stabilniejsze podglądy i lepsza obsługa wysokich obrazów.\n• Poprawiono niezawodność logowania do Bluesky, przywrócono wczytywanie treści FANBOX, a szczegóły postów Misskey pokazują teraz całą rozmowę."
+            "value" : "Wersja %@:\n• Ulepszono odtwarzanie filmów na osi czasu: płynniejsze przejścia, lepszy automatyczny wybór oraz zachowanie pozycji po otwarciu lub zamknięciu przeglądarki multimediów.\n• Ulepszono nawigację po osi czasu i szczegóły wpisów: odpowiedzi i pozycja przewijania są zachowywane po odświeżeniu, szczegóły Weibo korzystają z natywnej osi czasu, a paski nawigacji minimalizują się podczas przewijania w iOS 27.\n• Ulepszono dostępność wpisów, multimediów i ekranu tworzenia dzięki czytelniejszym etykietom, stanom i elementom sterującym.\n• Zwiększono niezawodność sesji Bluesky, zgodność z nowymi odpowiedziami osi czasu X oraz obsługę większej liczby formatów odnośników do prac i profili Pixiv."
           }
         },
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Versão %@:\n• Os separadores de perfil são agora carregados de forma independente; os perfis do X podem mostrar Republicações, Destaques e Artigos quando disponíveis, com uma nova experiência de deslize no iOS.\n• Adicionadas opções globais e por cronologia para ocultar reações emoji, com esquemas de reações mais claros e expansíveis nas plataformas Apple.\n• Melhorado o visualizador multimédia no iOS com deslize para cima ou para baixo para fechar, pré-visualizações mais estáveis e melhor tratamento de imagens altas.\n• Melhorada a fiabilidade do início de sessão no Bluesky, restaurado o carregamento de conteúdo FANBOX e expandidos os detalhes das publicações Misskey para mostrar toda a conversa."
+            "value" : "Versão %@:\n• Melhorada a reprodução de vídeos na cronologia com transições mais fluidas, melhor seleção automática e preservação da posição ao abrir ou fechar o visualizador multimédia.\n• Melhoradas a navegação na cronologia e os detalhes das publicações: as respostas e posições de deslocamento mantêm-se após atualizar, os detalhes Weibo usam a cronologia nativa e as barras de navegação minimizam-se ao deslocar no iOS 27.\n• Melhorada a acessibilidade das publicações, dos conteúdos multimédia e do ecrã de composição com etiquetas, estados e controlos mais claros.\n• Melhorada a fiabilidade das sessões Bluesky, a compatibilidade com novas respostas da cronologia do X e o suporte para mais formatos de ligações de obras e perfis Pixiv."
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Versão %@:\n• As abas de perfil agora carregam de forma independente; perfis do X podem mostrar Reposts, Destaques e Artigos quando disponíveis, com uma nova experiência de navegação por gestos no iOS.\n• Adicionadas opções globais e por timeline para ocultar reações com emojis, com layouts de reações mais claros e expansíveis nas plataformas Apple.\n• Melhorado o visualizador de mídia no iOS com gesto para cima ou para baixo para fechar, prévias mais estáveis e melhor tratamento de imagens altas.\n• Melhorada a confiabilidade do login no Bluesky, restaurado o carregamento de conteúdo do FANBOX e ampliados os detalhes de posts do Misskey para mostrar toda a conversa."
+            "value" : "Versão %@:\n• Melhoramos a reprodução de vídeos na timeline com transições mais suaves, melhor seleção automática e preservação da posição ao abrir ou fechar o visualizador de mídia.\n• Melhoramos a navegação na timeline e os detalhes dos posts: respostas e posições de rolagem são preservadas após a atualização, os detalhes do Weibo usam a timeline nativa e as barras de navegação são minimizadas ao rolar no iOS 27.\n• Melhoramos a acessibilidade de posts, mídias e da tela de composição com rótulos, estados e controles mais claros.\n• Melhoramos a confiabilidade das sessões do Bluesky, a compatibilidade com novas respostas da timeline do X e o suporte a mais formatos de links de obras e perfis do Pixiv."
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Versiunea %@:\n• Filele profilului se încarcă acum independent; profilurile X pot afișa Redistribuiri, Evidențieri și Articole când sunt disponibile, cu o nouă experiență de glisare pe iOS.\n• Au fost adăugate opțiuni globale și pentru fiecare cronologie pentru ascunderea reacțiilor emoji, cu aspecte ale reacțiilor mai clare și extensibile pe platformele Apple.\n• Vizualizatorul media din iOS a fost îmbunătățit cu glisare în sus sau în jos pentru închidere, previzualizări mai stabile și o gestionare mai bună a imaginilor înalte.\n• A fost îmbunătățită fiabilitatea autentificării Bluesky, a fost restaurată încărcarea conținutului FANBOX, iar detaliile postărilor Misskey afișează acum întreaga conversație."
+            "value" : "Versiunea %@:\n• Redarea videoclipurilor în cronologie a fost îmbunătățită cu tranziții mai fluide, selecție automată mai bună și păstrarea poziției la deschiderea sau închiderea vizualizatorului media.\n• Navigarea în cronologie și detaliile postărilor au fost îmbunătățite: răspunsurile și poziția de derulare se păstrează după reîmprospătare, detaliile Weibo folosesc cronologia nativă, iar barele de navigare se minimizează la derulare în iOS 27.\n• Accesibilitatea postărilor, conținutului media și ecranului de compunere a fost îmbunătățită cu etichete, stări și comenzi mai clare.\n• A fost îmbunătățită fiabilitatea sesiunilor Bluesky, compatibilitatea cu noile răspunsuri ale cronologiei X și suportul pentru mai multe formate de linkuri către lucrări și profiluri Pixiv."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Версия %@:\n• Вкладки профиля теперь загружаются независимо; в профилях X при наличии отображаются репосты, избранное и статьи, а в iOS появилась новая навигация смахиванием.\n• Добавлены общие и отдельные для каждой ленты настройки скрытия эмодзи-реакций, а на платформах Apple раскладка реакций стала понятнее и получила возможность разворачивания.\n• Улучшен просмотр медиа в iOS: закрытие смахиванием вверх или вниз, более стабильные предпросмотры и лучшая поддержка высоких изображений.\n• Повышена надёжность входа в Bluesky, восстановлена загрузка контента FANBOX, а в деталях публикаций Misskey теперь отображается вся беседа."
+            "value" : "Версия %@:\n• Улучшено воспроизведение видео в ленте: более плавные переходы, точнее автоматический выбор видео и сохранение позиции при открытии или закрытии медиапросмотра.\n• Улучшены навигация по ленте и сведения о публикациях: ответы и позиция прокрутки сохраняются после обновления, страницы Weibo используют нативную ленту, а панели навигации сворачиваются при прокрутке в iOS 27.\n• Улучшена доступность публикаций, медиа и экрана создания благодаря более понятным подписям, состояниям и элементам управления.\n• Повышена надёжность сеансов Bluesky, совместимость с новыми ответами ленты X и поддержка дополнительных форматов ссылок на работы и профили Pixiv."
           }
         },
         "sr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Верзија %@:\n• Картице профила се сада учитавају независно; X профили могу да прикажу поновне објаве, истакнуто и чланке када су доступни, уз ново искуство превлачења на iOS-у.\n• Додате су глобалне и опције по временској линији за скривање емоџи реакција, уз јасније, прошириве распореде реакција на Apple платформама.\n• Побољшан је iOS прегледач медија: затварање превлачењем нагоре или надоле, стабилнији прегледи и боље руковање високим сликама.\n• Побољшана је поузданост пријаве на Bluesky, враћено је учитавање FANBOX садржаја, а детаљи Misskey објава сада приказују цео разговор."
+            "value" : "Верзија %@:\n• Побољшана је репродукција видеа на временској линији уз глаткије прелазе, бољи аутоматски избор и чување позиције при отварању или затварању приказивача медија.\n• Побољшана је навигација и приказ детаља објава: одговори и позиција померања остају сачувани након освежавања, Weibo детаљи користе изворну временску линију, а навигационе траке се смањују током померања у iOS-у 27.\n• Побољшана је приступачност објава, медија и екрана за састављање јаснијим ознакама, стањима и контролама.\n• Побољшана је поузданост Bluesky сесија, компатибилност са новим одговорима X временске линије и подршка за више формата веза ка Pixiv радовима и профилима."
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Version %@:\n• Profilflikar läses nu in oberoende av varandra. X-profiler kan visa återpubliceringar, höjdpunkter och artiklar när de är tillgängliga, med en ny svepbar upplevelse på iOS.\n• Lade till globala och tidslinjespecifika alternativ för att dölja emoji-reaktioner samt tydligare, expanderbara reaktionslayouter på Apple-plattformar.\n• Förbättrade medievisaren på iOS med svep uppåt eller nedåt för att stänga, stabilare förhandsvisningar och bättre hantering av höga bilder.\n• Förbättrade tillförlitligheten vid Bluesky-inloggning, återställde inläsning av FANBOX-innehåll och utökade Misskey-inläggsdetaljer så att hela konversationen visas."
+            "value" : "Version %@:\n• Förbättrad videouppspelning i tidslinjen med mjukare övergångar, bättre automatiskt videoval och sparad uppspelningsposition när medievisaren öppnas eller stängs.\n• Förbättrad tidslinjenavigering och inläggsdetaljer: svar och rullningspositioner bevaras efter uppdatering, Weibo-detaljer använder den inbyggda tidslinjen och navigeringsfält minimeras vid rullning i iOS 27.\n• Förbättrad tillgänglighet i inlägg, medier och publiceringsskärmen med tydligare etiketter, tillstånd och kontroller.\n• Förbättrad tillförlitlighet för Bluesky-sessioner, kompatibilitet med nya X-tidslinjesvar och stöd för fler länkformat till Pixiv-verk och -profiler."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sürüm %@:\n• Profil sekmeleri artık birbirinden bağımsız yükleniyor; X profilleri, mevcut olduğunda Yeniden Gönderiler, Öne Çıkanlar ve Makaleleri gösterebiliyor ve iOS’ta yeni bir kaydırma deneyimi sunuyor.\n• Emoji tepkilerini gizlemek için genel ve zaman akışı başına seçenekler ile Apple platformlarında daha anlaşılır, genişletilebilir tepki düzenleri eklendi.\n• iOS medya görüntüleyici; yukarı veya aşağı kaydırarak kapatma, daha kararlı önizlemeler ve uzun görsellerin daha iyi işlenmesiyle iyileştirildi.\n• Bluesky oturum açma güvenilirliği iyileştirildi, FANBOX içeriğinin yüklenmesi düzeltildi ve Misskey gönderi ayrıntıları artık konuşmanın tamamını gösteriyor."
+            "value" : "Sürüm %@:\n• Zaman akışındaki video oynatma; daha akıcı geçişler, daha iyi otomatik video seçimi ve medya görüntüleyici açılıp kapatıldığında oynatma konumunun korunmasıyla iyileştirildi.\n• Zaman akışı gezinmesi ve gönderi ayrıntıları iyileştirildi: yenilemeden sonra yanıtlar ve kaydırma konumu korunuyor, Weibo ayrıntıları yerel zaman akışını kullanıyor ve iOS 27’de kaydırırken gezinme çubukları küçülüyor.\n• Gönderilerde, medyada ve oluşturma ekranında daha anlaşılır etiketler, durumlar ve kontrollerle erişilebilirlik iyileştirildi.\n• Bluesky oturum güvenilirliği, yeni X zaman akışı yanıtlarıyla uyumluluk ve daha fazla Pixiv eser ve profil bağlantısı biçimi desteği iyileştirildi."
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Версія %@:\n• Вкладки профілю тепер завантажуються незалежно; у профілях X за наявності відображаються репости, вибране та статті, а в iOS з’явилася нова навігація свайпами.\n• Додано загальні й окремі для кожної стрічки налаштування приховування емодзі-реакцій, а на платформах Apple компонування реакцій стало зрозумілішим і розгортаним.\n• Покращено перегляд медіа в iOS: закриття свайпом угору або вниз, стабільніші попередні перегляди та краща підтримка високих зображень.\n• Підвищено надійність входу в Bluesky, відновлено завантаження вмісту FANBOX, а в деталях дописів Misskey тепер показується вся розмова."
+            "value" : "Версія %@:\n• Покращено відтворення відео у стрічці: плавніші переходи, кращий автоматичний вибір і збереження позиції під час відкриття або закриття переглядача медіа.\n• Покращено навігацію стрічкою та подробиці дописів: відповіді й позиція прокручування зберігаються після оновлення, сторінки Weibo використовують нативну стрічку, а панелі навігації згортаються під час прокручування в iOS 27.\n• Покращено доступність дописів, медіа й екрана створення завдяки зрозумілішим міткам, станам і елементам керування.\n• Підвищено надійність сеансів Bluesky, сумісність із новими відповідями стрічки X і підтримку більшої кількості форматів посилань на роботи та профілі Pixiv."
           }
         },
         "vi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Phiên bản %@:\n• Các thẻ hồ sơ giờ được tải độc lập; hồ sơ X có thể hiển thị Bài đăng lại, Nội dung nổi bật và Bài viết khi có, cùng trải nghiệm vuốt mới trên iOS.\n• Đã thêm tùy chọn chung và theo từng dòng thời gian để ẩn phản ứng emoji, với bố cục phản ứng rõ ràng hơn và có thể mở rộng trên các nền tảng Apple.\n• Cải thiện trình xem đa phương tiện trên iOS với thao tác vuốt lên hoặc xuống để đóng, bản xem trước ổn định hơn và khả năng xử lý ảnh dài tốt hơn.\n• Cải thiện độ ổn định khi đăng nhập Bluesky, khôi phục việc tải nội dung FANBOX và mở rộng chi tiết bài đăng Misskey để hiển thị toàn bộ cuộc trò chuyện."
+            "value" : "Phiên bản %@:\n• Cải thiện phát video trên dòng thời gian với chuyển cảnh mượt hơn, chọn video tự động tốt hơn và giữ nguyên vị trí phát khi mở hoặc đóng trình xem đa phương tiện.\n• Cải thiện điều hướng dòng thời gian và chi tiết bài đăng: phản hồi cùng vị trí cuộn được giữ lại sau khi làm mới, chi tiết Weibo dùng dòng thời gian gốc và thanh điều hướng thu gọn khi cuộn trên iOS 27.\n• Cải thiện khả năng hỗ trợ tiếp cận cho bài đăng, nội dung đa phương tiện và màn hình soạn thảo với nhãn, trạng thái và điều khiển rõ ràng hơn.\n• Cải thiện độ ổn định của phiên Bluesky, khả năng tương thích với phản hồi dòng thời gian mới của X và hỗ trợ thêm định dạng liên kết tác phẩm, hồ sơ Pixiv."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "版本 %@：\n• 个人资料标签页现在可独立加载；X 个人资料会在可用时显示“转帖”“亮点”和“文章”，iOS 端还支持全新的滑动切换体验。\n• 新增全局及单条时间线隐藏 Emoji 回应的选项，并改进 Apple 平台的回应布局，内容更清晰且可展开查看更多。\n• 改进 iOS 媒体查看器：支持向上或向下滑动关闭，预览更稳定，并能更好地显示长图。\n• 提升 Bluesky 登录可靠性，恢复 FANBOX 内容加载，并让 Misskey 帖子详情显示完整对话。"
+            "value" : "版本 %@：\n• 改进时间线视频播放：切换更流畅，可自动选择更合适的视频，并在打开或关闭媒体查看器时保留播放进度。\n• 改进时间线导航和帖子详情：刷新后会保留回复与滚动位置，微博详情使用原生时间线体验，iOS 27 上的导航栏会在滚动时自动收起。\n• 改进帖子、媒体和发帖界面的无障碍体验，提供更清晰的标签、状态说明和操作控件。\n• 提升 Bluesky 会话稳定性，兼容 X 时间线的新响应格式，并支持更多 Pixiv 作品及用户链接格式。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "版本 %@：\n• 個人檔案分頁現在可獨立載入；X 個人檔案會在可用時顯示「轉貼」、「亮點」和「文章」，iOS 端亦支援全新的滑動切換體驗。\n• 新增全域及個別時間軸隱藏 Emoji 回應的選項，並改善 Apple 平台的回應版面，內容更清晰且可展開查看更多。\n• 改善 iOS 媒體檢視器：支援向上或向下滑動關閉、預覽更穩定，並能更妥善地顯示長圖。\n• 提升 Bluesky 登入可靠性、恢復 FANBOX 內容載入，並讓 Misskey 貼文詳細資料顯示完整對話。"
+            "value" : "版本 %@：\n• 改善時間軸影片播放：切換更流暢，可自動選擇更合適的影片，並在開啟或關閉媒體檢視器時保留播放進度。\n• 改善時間軸導覽和貼文詳細資料：重新整理後會保留回覆與捲動位置，微博詳細資料採用原生時間軸體驗，iOS 27 上的導覽列會在捲動時自動收合。\n• 改善貼文、媒體和發文介面的輔助使用體驗，提供更清晰的標籤、狀態說明和操作控制項。\n• 提升 Bluesky 工作階段穩定性、相容 X 時間軸的新回應格式，並支援更多 Pixiv 作品及使用者連結格式。"
           }
         }
       }

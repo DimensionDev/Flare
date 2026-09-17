@@ -3,10 +3,10 @@
     <string name="changelog_current"><![CDATA[
             <span>%1$s verzió:</span>
             <ul>
-                <li>A profillapok mostantól egymástól függetlenül töltődnek be; az X-profilok elérhetőség esetén megjeleníthetik az újraközléseket, a kiemeléseket és a cikkeket.</li>
-                <li>Globális és idővonalankénti lehetőségek kerültek az emoji-reakciók elrejtéséhez.</li>
-                <li>Javult a navigáció és az akadálymentesség a gördülékenyebb prediktív visszalépési gesztusokkal és a görgethető hosszú képleírásokkal.</li>
-                <li>Megbízhatóbb lett a Bluesky-bejelentkezés, helyreállt a FANBOX-tartalmak betöltése, a Misskey-bejegyzések részletei pedig már a teljes beszélgetést megjelenítik.</li>
+                <li>Javult az idővonali videók lejátszása: simább átmenetek, jobb automatikus videóválasztás és a lejátszási pozíció megőrzése a médianézegető megnyitásakor vagy bezárásakor.</li>
+                <li>Megbízhatóbb lett az idővonal: frissítés közben is láthatók maradnak a válaszok és a beszélgetés környezete, az új bejegyzések jelzése megfelelően frissül, a lapozási összeomlások pedig megszűntek.</li>
+                <li>Egyértelműbb címkékkel, állapotokkal és vezérlőkkel javult a bejegyzések, a média és a szerkesztőképernyő akadálymentessége.</li>
+                <li>Javult a Bluesky-munkamenetek megbízhatósága, az új X-idővonalválaszokkal való kompatibilitás és több Pixiv-alkotás- és profillink-formátum támogatása.</li>
             </ul>
         ]]></string>
     <string name="changelog_title">Üdv újra!</string>

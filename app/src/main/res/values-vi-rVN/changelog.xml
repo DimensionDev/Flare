@@ -3,10 +3,10 @@
     <string name="changelog_current"><![CDATA[
             <span>Phiên bản %1$s:</span>
             <ul>
-                <li>Các thẻ hồ sơ giờ được tải độc lập; hồ sơ X có thể hiển thị Bài đăng lại, Nội dung nổi bật và Bài viết khi có.</li>
-                <li>Đã thêm tùy chọn chung và theo từng dòng thời gian để ẩn phản ứng emoji.</li>
-                <li>Cải thiện khả năng điều hướng và tiếp cận với cử chỉ quay lại dự đoán mượt hơn và phần mô tả hình ảnh dài có thể cuộn.</li>
-                <li>Cải thiện độ ổn định khi đăng nhập Bluesky, khôi phục việc tải nội dung FANBOX và mở rộng chi tiết bài đăng Misskey để hiển thị toàn bộ cuộc trò chuyện.</li>
+                <li>Cải thiện phát video trên dòng thời gian với chuyển cảnh mượt hơn, chọn video tự động tốt hơn và giữ nguyên vị trí phát khi mở hoặc đóng trình xem đa phương tiện.</li>
+                <li>Cải thiện độ ổn định của dòng thời gian: phản hồi và ngữ cảnh hội thoại vẫn hiển thị khi làm mới, biểu ngữ bài đăng mới cập nhật chính xác và lỗi treo khi phân trang đã được khắc phục.</li>
+                <li>Cải thiện khả năng hỗ trợ tiếp cận cho bài đăng, nội dung đa phương tiện và màn hình soạn thảo với nhãn, trạng thái và điều khiển rõ ràng hơn.</li>
+                <li>Cải thiện độ ổn định của phiên Bluesky, khả năng tương thích với phản hồi dòng thời gian mới của X và hỗ trợ thêm định dạng liên kết tác phẩm, hồ sơ Pixiv.</li>
             </ul>
         ]]></string>
     <string name="changelog_title">Chào mừng trở lại!</string>

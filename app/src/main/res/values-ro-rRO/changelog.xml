@@ -5,10 +5,10 @@
     <string name="changelog_current"><![CDATA[
             <span>Versiunea %1$s:</span>
             <ul>
-                <li>Filele profilului se încarcă acum independent; profilurile X pot afișa Redistribuiri, Evidențieri și Articole când sunt disponibile.</li>
-                <li>Au fost adăugate opțiuni globale și pentru fiecare cronologie pentru ascunderea reacțiilor emoji.</li>
-                <li>Navigarea și accesibilitatea au fost îmbunătățite prin gesturi predictive de revenire mai fluide și descrieri lungi ale imaginilor care pot fi derulate.</li>
-                <li>A fost îmbunătățită fiabilitatea autentificării Bluesky, a fost restaurată încărcarea conținutului FANBOX, iar detaliile postărilor Misskey afișează acum întreaga conversație.</li>
+                <li>Redarea videoclipurilor în cronologie a fost îmbunătățită cu tranziții mai fluide, selecție automată mai bună și păstrarea poziției la deschiderea sau închiderea vizualizatorului media.</li>
+                <li>Fiabilitatea cronologiei a fost îmbunătățită: răspunsurile și contextul rămân vizibile la reîmprospătare, bannerul de postări noi se actualizează corect, iar blocările de paginare au fost remediate.</li>
+                <li>Accesibilitatea postărilor, conținutului media și ecranului de compunere a fost îmbunătățită cu etichete, stări și comenzi mai clare.</li>
+                <li>A fost îmbunătățită fiabilitatea sesiunilor Bluesky, compatibilitatea cu noile răspunsuri ale cronologiei X și suportul pentru mai multe formate de linkuri către lucrări și profiluri Pixiv.</li>
             </ul>
         ]]></string>
 </resources>

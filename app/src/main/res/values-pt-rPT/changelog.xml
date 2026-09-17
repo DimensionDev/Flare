@@ -5,10 +5,10 @@
     <string name="changelog_current"><![CDATA[
             <span>Versão %1$s:</span>
             <ul>
-                <li>Os separadores de perfil são agora carregados de forma independente; os perfis do X podem mostrar Republicações, Destaques e Artigos quando disponíveis.</li>
-                <li>Adicionadas opções globais e por cronologia para ocultar reações emoji.</li>
-                <li>Melhoradas a navegação e a acessibilidade com gestos preditivos de voltar mais fluidos e descrições longas de imagens deslocáveis.</li>
-                <li>Melhorada a fiabilidade do início de sessão no Bluesky, restaurado o carregamento de conteúdo FANBOX e expandidos os detalhes das publicações Misskey para mostrar toda a conversa.</li>
+                <li>Melhorada a reprodução de vídeos na cronologia com transições mais fluidas, melhor seleção automática e preservação da posição ao abrir ou fechar o visualizador multimédia.</li>
+                <li>Melhorada a fiabilidade da cronologia: as respostas e o contexto permanecem visíveis durante a atualização, o aviso de novas publicações é atualizado corretamente e foram corrigidas falhas de paginação.</li>
+                <li>Melhorada a acessibilidade das publicações, dos conteúdos multimédia e do ecrã de composição com etiquetas, estados e controlos mais claros.</li>
+                <li>Melhorada a fiabilidade das sessões Bluesky, a compatibilidade com novas respostas da cronologia do X e o suporte para mais formatos de ligações de obras e perfis Pixiv.</li>
             </ul>
         ]]></string>
 </resources>

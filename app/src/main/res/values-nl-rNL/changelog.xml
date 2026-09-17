@@ -5,10 +5,10 @@
     <string name="changelog_current"><![CDATA[
             <span>Versie %1$s:</span>
             <ul>
-                <li>Profieltabbladen worden nu onafhankelijk geladen, en X-profielen kunnen Reposts, Hoogtepunten en Artikelen tonen wanneer beschikbaar.</li>
-                <li>Globale en tijdlijnspecifieke opties toegevoegd om emoji-reacties te verbergen.</li>
-                <li>Navigatie en toegankelijkheid verbeterd met vloeiendere voorspellende teruggebaren en schuifbare lange afbeeldingsbeschrijvingen.</li>
-                <li>De betrouwbaarheid van aanmelden bij Bluesky is verbeterd, het laden van FANBOX-inhoud is hersteld en Misskey-berichtdetails tonen nu het volledige gesprek.</li>
+                <li>De videoweergave in tijdlijnen is verbeterd met soepelere overgangen, betere automatische videoselectie en behoud van de afspeelpositie bij het openen of sluiten van de mediaviewer.</li>
+                <li>De betrouwbaarheid van tijdlijnen is verbeterd: antwoorden en gesprekscontext blijven tijdens vernieuwen zichtbaar, de melding voor nieuwe berichten wordt correct bijgewerkt en crashes bij paginering zijn opgelost.</li>
+                <li>De toegankelijkheid van berichten, media en het opstelscherm is verbeterd met duidelijkere labels, statussen en bedieningselementen.</li>
+                <li>De betrouwbaarheid van Bluesky-sessies, compatibiliteit met nieuwe X-tijdlijnreacties en ondersteuning voor meer Pixiv-linkformaten voor werken en profielen zijn verbeterd.</li>
             </ul>
         ]]></string>
 </resources>

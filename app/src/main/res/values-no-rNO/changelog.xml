@@ -5,10 +5,10 @@
     <string name="changelog_current"><![CDATA[
             <span>Versjon %1$s:</span>
             <ul>
-                <li>Profilfaner lastes nå uavhengig av hverandre. X-profiler kan vise viderepubliseringer, høydepunkter og artikler når de er tilgjengelige.</li>
-                <li>Lagt til globale og tidslinjespesifikke valg for å skjule emoji-reaksjoner.</li>
-                <li>Forbedret navigasjon og tilgjengelighet med jevnere forutsigbare tilbakebevegelser og rullbare lange bildebeskrivelser.</li>
-                <li>Forbedret påliteligheten ved Bluesky-innlogging, gjenopprettet lasting av FANBOX-innhold og utvidet Misskey-innleggsdetaljer til å vise hele samtalen.</li>
+                <li>Forbedret videoavspilling i tidslinjen med jevnere overganger, bedre automatisk videovalg og bevart avspillingsposisjon når medievisningen åpnes eller lukkes.</li>
+                <li>Forbedret stabiliteten til tidslinjen: svar og samtalekontekst forblir synlige under oppdatering, banneret for nye innlegg oppdateres riktig, og krasj ved sideinnlasting er rettet.</li>
+                <li>Forbedret tilgjengeligheten i innlegg, medier og publiseringsskjermen med tydeligere etiketter, tilstander og kontroller.</li>
+                <li>Forbedret stabiliteten til Bluesky-økter, kompatibiliteten med nye X-tidslinjesvar og støtten for flere lenkeformater til Pixiv-verk og -profiler.</li>
             </ul>
         ]]></string>
 </resources>

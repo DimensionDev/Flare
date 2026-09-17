@@ -5,10 +5,10 @@
     <string name="changelog_current"><![CDATA[
             <span>Versio %1$s:</span>
             <ul>
-                <li>Profiilin välilehdet latautuvat nyt toisistaan riippumatta. X-profiileissa voidaan näyttää uudelleenjulkaisut, kohokohdat ja artikkelit, kun niitä on saatavilla.</li>
-                <li>Lisättiin yleiset ja aikajanakohtaiset valinnat emoji-reaktioiden piilottamiseen.</li>
-                <li>Navigointia ja saavutettavuutta parannettiin sujuvammilla ennakoivilla paluueleillä ja vieritettävillä pitkillä kuvauksilla.</li>
-                <li>Bluesky-kirjautumisen luotettavuutta parannettiin, FANBOX-sisällön lataus palautettiin ja Misskey-julkaisun tiedot näyttävät nyt koko keskustelun.</li>
+                <li>Aikajanan videotoistoa parannettiin sujuvammilla siirtymillä, paremmalla automaattisella videovalinnalla ja toistokohdan säilymisellä mediaselainta avattaessa tai suljettaessa.</li>
+                <li>Aikajanan luotettavuutta parannettiin: vastaukset ja keskustelun konteksti säilyvät näkyvissä päivityksen aikana, uusien julkaisujen ilmoitus päivittyy oikein ja sivutuksen kaatumiset korjattiin.</li>
+                <li>Julkaisujen, median ja kirjoitusnäkymän saavutettavuutta parannettiin selkeämmillä nimikkeillä, tiloilla ja säätimillä.</li>
+                <li>Bluesky-istuntojen luotettavuutta, yhteensopivuutta X:n uusien aikajanavastausten kanssa ja useampien Pixiv-teos- ja profiililinkkien tukea parannettiin.</li>
             </ul>
         ]]></string>
 </resources>

@@ -5,10 +5,10 @@
     <string name="changelog_current"><![CDATA[
             <span>Version %1$s:</span>
             <ul>
-                <li>Profile tabs now load independently, and X profiles can show Reposts, Highlights, and Articles when available.</li>
-                <li>Added global and per-timeline options to hide emoji reactions.</li>
-                <li>Improved navigation and accessibility with smoother predictive-back gestures and scrollable long image descriptions.</li>
-                <li>Improved Bluesky login reliability, restored FANBOX content loading, and expanded Misskey post details to show the full conversation.</li>
+                <li>Improved timeline video playback with smoother transitions, better automatic video selection, and playback progress preserved when opening or closing the media viewer.</li>
+                <li>Improved timeline reliability: replies and conversation context remain visible during refreshes, the new-posts banner updates correctly, and paging crashes are fixed.</li>
+                <li>Improved accessibility across posts, media, and the compose screen with clearer labels, states, and controls.</li>
+                <li>Improved Bluesky session reliability, compatibility with new X timeline responses, and support for more Pixiv artwork and profile link formats.</li>
             </ul>
         ]]></string>
 </resources>

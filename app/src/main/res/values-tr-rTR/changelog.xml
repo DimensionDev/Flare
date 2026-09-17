@@ -3,10 +3,10 @@
     <string name="changelog_current"><![CDATA[
             <span>Sürüm %1$s:</span>
             <ul>
-                <li>Profil sekmeleri artık birbirinden bağımsız yükleniyor; X profilleri, mevcut olduğunda Yeniden Gönderiler, Öne Çıkanlar ve Makaleleri gösterebiliyor.</li>
-                <li>Emoji tepkilerini gizlemek için genel ve zaman akışı başına seçenekler eklendi.</li>
-                <li>Daha akıcı tahmine dayalı geri hareketleri ve kaydırılabilir uzun görsel açıklamalarıyla gezinme ve erişilebilirlik iyileştirildi.</li>
-                <li>Bluesky oturum açma güvenilirliği iyileştirildi, FANBOX içeriğinin yüklenmesi düzeltildi ve Misskey gönderi ayrıntıları artık konuşmanın tamamını gösteriyor.</li>
+                <li>Zaman akışındaki video oynatma; daha akıcı geçişler, daha iyi otomatik video seçimi ve medya görüntüleyici açılıp kapatıldığında oynatma konumunun korunmasıyla iyileştirildi.</li>
+                <li>Zaman akışı güvenilirliği artırıldı: yenileme sırasında yanıtlar ve konuşma bağlamı görünür kalıyor, yeni gönderi bildirimi doğru güncelleniyor ve sayfalama çökmeleri düzeltildi.</li>
+                <li>Gönderilerde, medyada ve oluşturma ekranında daha anlaşılır etiketler, durumlar ve kontrollerle erişilebilirlik iyileştirildi.</li>
+                <li>Bluesky oturum güvenilirliği, yeni X zaman akışı yanıtlarıyla uyumluluk ve daha fazla Pixiv eser ve profil bağlantısı biçimi desteği iyileştirildi.</li>
             </ul>
         ]]></string>
     <string name="changelog_title">Tekrar hoş geldiniz!</string>

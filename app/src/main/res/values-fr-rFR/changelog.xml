@@ -3,10 +3,10 @@
     <string name="changelog_current"><![CDATA[
             <span>Version %1$s :</span>
             <ul>
-                <li>Les onglets de profil se chargent désormais indépendamment ; les profils X peuvent afficher les Republications, les Sélections et les Articles lorsqu’ils sont disponibles.</li>
-                <li>Ajout d’options globales et par fil pour masquer les réactions emoji.</li>
-                <li>Amélioration de la navigation et de l’accessibilité avec des gestes de retour prédictif plus fluides et le défilement des longues descriptions d’images.</li>
-                <li>Amélioration de la fiabilité de la connexion Bluesky, rétablissement du chargement du contenu FANBOX et affichage de la conversation complète dans le détail des publications Misskey.</li>
+                <li>Amélioration de la lecture vidéo dans les fils avec des transitions plus fluides, une meilleure sélection automatique et la reprise à la même position après l’ouverture ou la fermeture de la visionneuse multimédia.</li>
+                <li>Amélioration de la fiabilité des fils : les réponses et le contexte restent visibles pendant l’actualisation, la bannière des nouvelles publications se met correctement à jour et les plantages de pagination sont corrigés.</li>
+                <li>Amélioration de l’accessibilité des publications, des médias et de l’écran de rédaction grâce à des libellés, états et commandes plus clairs.</li>
+                <li>Amélioration de la fiabilité des sessions Bluesky, de la compatibilité avec les nouvelles réponses de fil X et de la prise en charge de davantage de formats de liens vers les œuvres et profils Pixiv.</li>
             </ul>
         ]]></string>
     <string name="changelog_title">Bon retour !</string>

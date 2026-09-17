@@ -5,10 +5,10 @@
     <string name="changelog_current"><![CDATA[
             <span>Version %1$s:</span>
             <ul>
-                <li>Profil-Tabs werden jetzt unabhängig geladen, und X-Profile können Reposts, Highlights und Artikel anzeigen, sofern verfügbar.</li>
-                <li>Globale und Timeline-spezifische Optionen zum Ausblenden von Emoji-Reaktionen wurden hinzugefügt.</li>
-                <li>Navigation und Barrierefreiheit wurden durch flüssigere vorausschauende Zurück-Gesten und scrollbare lange Bildbeschreibungen verbessert.</li>
-                <li>Die Zuverlässigkeit der Bluesky-Anmeldung wurde verbessert, das Laden von FANBOX-Inhalten wiederhergestellt und Misskey-Beitragsdetails zeigen jetzt die vollständige Unterhaltung.</li>
+                <li>Die Videowiedergabe in Timelines wurde mit flüssigeren Übergängen, einer besseren automatischen Videoauswahl und gespeicherter Wiedergabeposition beim Öffnen oder Schließen der Medienansicht verbessert.</li>
+                <li>Timelines sind zuverlässiger: Antworten und Gesprächskontext bleiben beim Aktualisieren sichtbar, der Hinweis auf neue Beiträge wird korrekt aktualisiert und Abstürze beim Nachladen wurden behoben.</li>
+                <li>Die Barrierefreiheit von Beiträgen, Medien und dem Verfassen-Bildschirm wurde durch deutlichere Beschriftungen, Zustände und Steuerelemente verbessert.</li>
+                <li>Die Zuverlässigkeit von Bluesky-Sitzungen, die Kompatibilität mit neuen X-Timeline-Antworten und die Unterstützung weiterer Pixiv-Linkformate für Werke und Profile wurden verbessert.</li>
             </ul>
         ]]></string>
 </resources>

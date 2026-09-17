@@ -10,6 +10,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -24,6 +25,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.ComposeUiFlags
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toPixelMap
@@ -39,6 +41,7 @@ import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.pinch
 import androidx.compose.ui.test.swipeDown
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.media3.common.util.UnstableApi
@@ -78,6 +81,7 @@ class MediaViewerOverlayTest {
     private val stack = mutableStateListOf<NavKey>(Route.Home)
     private val selected = mutableStateOf(firstImage)
     private val showSecondSource = mutableStateOf(true)
+    private val sourceOffset = mutableStateOf(DpOffset.Zero)
     private lateinit var dispatcher: OnBackPressedDispatcher
     private lateinit var viewer: MediaViewerOverlayState
     private var barClicks = 0
@@ -98,6 +102,62 @@ class MediaViewerOverlayTest {
     fun coversClassicBottomBar() {
         setContent(NavigationSuiteType.NavigationBar, BottomBarStyle.Classic)
         assertCoversNavigation()
+    }
+
+    @Test
+    fun partiallyVisibleThumbnailStillHasAHeroReturn() {
+        assertPartiallyVisibleThumbnailUsesHero(DpOffset(0.dp, 40.dp))
+    }
+
+    @Test
+    fun horizontallyClippedThumbnailStillHasAHeroReturn() {
+        assertPartiallyVisibleThumbnailUsesHero(DpOffset(40.dp, 0.dp))
+    }
+
+    @Test
+    fun completelyClippedThumbnailUsesFadeOnReturn() {
+        setContent()
+        openMedia()
+        composeRule.runOnIdle { sourceOffset.value = DpOffset(0.dp, 120.dp) }
+        composeRule.waitForIdle()
+        composeRule.runOnIdle {
+            viewer.beginReturn()
+            assertFalse("A thumbnail with no visible pixels must not be a return target", viewer.hasHero)
+            viewer.requestDismiss()
+        }
+        composeRule.waitForIdle()
+        composeRule.onNodeWithTag("media_viewer_overlay").assertDoesNotExist()
+    }
+
+    private fun assertPartiallyVisibleThumbnailUsesHero(offset: DpOffset) {
+        sourceOffset.value = offset
+        setContent()
+        val visible = composeRule.onNodeWithTag("source_1").fetchSemanticsNode().boundsInRoot
+        val inside = visible.center
+        val outside = if (offset.x.value > 0) Offset(visible.right + 2f, inside.y) else Offset(inside.x, visible.bottom + 2f)
+        val original = composeRule.onRoot().captureToImage().toPixelMap()
+        val expectedInside = original[inside.x.toInt(), inside.y.toInt()]
+        val expectedOutside = original[outside.x.toInt(), outside.y.toInt()]
+        openMedia()
+        composeRule.runOnIdle {
+            viewer.beginReturn()
+            assertTrue("A thumbnail with a visible part must retain its Hero transition", viewer.hasHero)
+            runBlocking { viewer.progress.snapTo(0f) }
+        }
+        // Wait for the cached poster, then check the actual pixels at the handoff frame.
+        composeRule.waitUntil(timeoutMillis = 5_000) {
+            val pixels = composeRule.onRoot().captureToImage().toPixelMap()
+            pixels[inside.x.toInt(), inside.y.toInt()] == expectedInside
+        }
+        val returned = composeRule.onRoot().captureToImage().toPixelMap()
+        assertEquals(
+            "The Hero must not paint the clipped-out part of its thumbnail",
+            expectedOutside,
+            returned[outside.x.toInt(), outside.y.toInt()],
+        )
+        composeRule.runOnIdle { viewer.requestDismiss() }
+        composeRule.waitForIdle()
+        composeRule.onNodeWithTag("media_viewer_overlay").assertDoesNotExist()
     }
 
     @Test
@@ -307,7 +367,10 @@ class MediaViewerOverlayTest {
         }
         composeRule.onNodeWithTag("media_viewer_overlay").assertDoesNotExist()
         assertEquals(1, stack.size)
+        // Flush deferred Media3 listener cleanup on the UI thread before test teardown.
+        composeRule.mainClock.advanceTimeByFrame()
         composeRule.mainClock.autoAdvance = true
+        composeRule.waitForIdle()
     }
 
     @Test
@@ -397,18 +460,21 @@ class MediaViewerOverlayTest {
                                             val group = remember { Any() }
                                             CompositionLocalProvider(LocalMediaTransitionGroup provides group) {
                                                 Column(Modifier.fillMaxSize().background(Color.White)) {
-                                                    Box(
-                                                        Modifier
-                                                            .size(
-                                                                100.dp,
-                                                            ).mediaTransitionSource(
-                                                                firstImage,
-                                                            ).testTag("source_1")
-                                                            .background(Color.Blue)
-                                                            .clickable {
-                                                                stack.add(Route.Media.Image(firstImage, firstImage))
-                                                            },
-                                                    )
+                                                    Box(Modifier.size(100.dp).clipToBounds()) {
+                                                        Box(
+                                                            Modifier
+                                                                .offset(x = sourceOffset.value.x, y = sourceOffset.value.y)
+                                                                .size(
+                                                                    100.dp,
+                                                                ).mediaTransitionSource(
+                                                                    firstImage,
+                                                                ).testTag("source_1")
+                                                                .background(Color.Blue)
+                                                                .clickable {
+                                                                    stack.add(Route.Media.Image(firstImage, firstImage))
+                                                                },
+                                                        )
+                                                    }
                                                     if (showSecondSource.value) {
                                                         Box(
                                                             Modifier

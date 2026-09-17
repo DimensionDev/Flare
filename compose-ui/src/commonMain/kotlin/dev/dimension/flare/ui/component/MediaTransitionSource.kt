@@ -69,13 +69,8 @@ public class MediaTransitionSources {
             root
                 .localBoundingBoxOf(child, clipBounds = true)
                 .intersect(Rect(0f, 0f, root.size.width.toFloat(), root.size.height.toFloat()))
-        // Partly clipped or recycled items must not fly through the edge of a list on return.
-        if (bounds.width <= 0 || bounds.height <= 0 ||
-            visible.width < bounds.width - 1f || visible.height < bounds.height - 1f
-        ) {
-            return null
-        }
-        return Snapshot(id, group, url, previewUrl, bounds, contentScale, alignment, shape, headers)
+        if (bounds.isEmpty || visible.isEmpty) return null
+        return Snapshot(id, group, url, previewUrl, bounds, visible, contentScale, alignment, shape, headers)
     }
 
     internal class Source(
@@ -97,6 +92,7 @@ public class MediaTransitionSources {
         val url: String,
         val previewUrl: String,
         val bounds: Rect,
+        val visibleBounds: Rect,
         val contentScale: ContentScale,
         val alignment: Alignment,
         val shape: Shape,

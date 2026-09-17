@@ -11,9 +11,10 @@ import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.AbsoluteRoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -31,9 +32,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.withFrameNanos
+import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
@@ -43,6 +46,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.geometry.lerp
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Outline
+import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
@@ -262,6 +266,7 @@ internal class MediaViewerOverlayState(
         val source = current.source
         val target = current.viewport
         val bounds = lerp(source.bounds, target.bounds, fraction)
+        val visibleBounds = lerp(source.visibleBounds, target.bounds, fraction).translate(-bounds.topLeft)
         val density = LocalDensity.current
         val direction = LocalLayoutDirection.current
         val outline = source.shape.createOutline(source.bounds.size, direction, density)
@@ -294,11 +299,25 @@ internal class MediaViewerOverlayState(
             contentDescription = null,
             modifier =
                 Modifier
-                    .offset { IntOffset(bounds.left.roundToInt(), bounds.top.roundToInt()) }
+                    .wrapContentSize(AbsoluteAlignment.TopLeft, unbounded = true)
+                    .absoluteOffset { IntOffset(bounds.left.roundToInt(), bounds.top.roundToInt()) }
                     .size(with(density) { bounds.width.toDp() }, with(density) { bounds.height.toDp() })
                     .testTag("media_hero")
-                    .clip(shape),
-            contentScale = InterpolatedContentScale(source.contentScale, target.contentScale, fraction),
+                    .clip(shape)
+                    .drawWithContent {
+                        // Keep the original image scale even when only part of the thumbnail is visible.
+                        clipRect(visibleBounds.left, visibleBounds.top, visibleBounds.right, visibleBounds.bottom) {
+                            this@drawWithContent.drawContent()
+                        }
+                    },
+            contentScale =
+                InterpolatedContentScale(
+                    source.contentScale,
+                    target.contentScale,
+                    source.bounds.size,
+                    target.bounds.size,
+                    fraction,
+                ),
             alignment = InterpolatedAlignment(source.alignment, target.alignment, fraction),
             onError = {
                 // A failed/evicted thumbnail must not leave the viewer invisible during a transition.
@@ -442,14 +461,17 @@ internal fun draggedBounds(
 internal class InterpolatedContentScale(
     private val from: ContentScale,
     private val to: ContentScale,
+    private val fromSize: Size,
+    private val toSize: Size,
     private val fraction: Float,
 ) : ContentScale {
     override fun computeScaleFactor(
         srcSize: Size,
         dstSize: Size,
     ): ScaleFactor {
-        val start = from.computeScaleFactor(srcSize, dstSize)
-        val end = to.computeScaleFactor(srcSize, dstSize)
+        // Resolve both endpoints against their own viewport, not the growing intermediate box.
+        val start = from.computeScaleFactor(srcSize, fromSize)
+        val end = to.computeScaleFactor(srcSize, toSize)
         return ScaleFactor(start.scaleX + (end.scaleX - start.scaleX) * fraction, start.scaleY + (end.scaleY - start.scaleY) * fraction)
     }
 }

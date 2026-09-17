@@ -26,7 +26,8 @@ private enum class AdaptiveGridSlot {
 
 @Composable
 internal fun AdaptiveGrid(
-    content: @Composable () -> Unit,
+    itemCount: Int,
+    itemContent: @Composable (Int) -> Unit,
     modifier: Modifier = Modifier,
     spacing: Dp = 4.dp,
     expandedSize: Boolean = true,
@@ -50,9 +51,12 @@ internal fun AdaptiveGrid(
     SubcomposeLayout(
         modifier = modifier,
         measurePolicy = { constraints ->
-            val measurables = subcompose(AdaptiveGridSlot.Content, content)
-            val visibleMeasurables = measurables.take(maxItems)
-            val overflowCount = measurables.size - visibleMeasurables.size
+            val visibleCount = minOf(itemCount, maxItems)
+            val visibleMeasurables =
+                subcompose(AdaptiveGridSlot.Content) {
+                    repeat(visibleCount) { itemContent(it) }
+                }
+            val overflowCount = itemCount - visibleCount
             var overflowX = 0
             var overflowY = 0
             var overflowWidth = 0

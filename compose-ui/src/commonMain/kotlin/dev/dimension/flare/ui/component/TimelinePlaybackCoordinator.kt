@@ -3,6 +3,7 @@ package dev.dimension.flare.ui.component
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
@@ -10,6 +11,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.layout.boundsInWindow
@@ -277,12 +279,12 @@ internal fun Modifier.timelineVideoAutoplay(
     mediaUri: String,
 ): Modifier {
     val item = LocalTimelineCarouselItem.current
-    val geometry = remember(id) { VideoGeometry() }
-    val viewport = playback.viewport
-    val multipleColumns = playback.multipleColumns
+    val geometry = remember(playback, id) { VideoGeometry() }
     val density = LocalDensity.current.density
 
     fun update() {
+        val viewport = playback.viewport
+        val multipleColumns = playback.multipleColumns
         val visible = viewport?.let { geometry.visible.intersect(it) } ?: geometry.visible
         playback.update(
             TimelineAutoplayPolicy.Candidate(
@@ -297,6 +299,10 @@ internal fun Modifier.timelineVideoAutoplay(
         )
     }
     SideEffect { update() }
+    LaunchedEffect(playback, id, item, enabled, mediaUri, density) {
+        // Viewport-only changes must update candidates without restarting the video UI.
+        snapshotFlow { playback.viewport to playback.multipleColumns }.collect { update() }
+    }
     return onGloballyPositioned {
         geometry.bounds = Rect(it.positionInWindow(), it.size.toSize())
         geometry.visible = it.boundsInWindow()

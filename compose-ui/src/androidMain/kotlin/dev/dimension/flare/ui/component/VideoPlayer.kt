@@ -26,7 +26,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
-import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -59,7 +58,6 @@ import dev.dimension.flare.ui.theme.PlatformTheme
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.android.awaitFrame
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
@@ -213,13 +211,6 @@ public fun VideoPlayer(
             // is prepared, not that this new surface has received its first frame.
             key(binding.second, player) {
                 val presentation = rememberPresentationState(player)
-                var remainingTime by remember { mutableLongStateOf(0L) }
-                LaunchedEffect(player) {
-                    while (true) {
-                        if (remainingTimeContent != null) remainingTime = player.duration - player.currentPosition
-                        awaitFrame()
-                    }
-                }
                 LaunchedEffect(presentation.coverSurface, resumed) {
                     if (!presentation.coverSurface) binding.second.surfaceReady(visible = resumed)
                 }
@@ -234,8 +225,8 @@ public fun VideoPlayer(
                 PlayerSurface(player = player, modifier = playerModifier)
                 if (presentation.coverSurface) {
                     Box(Modifier.fillMaxSize()) { loadingPlaceholder() }
-                } else {
-                    remainingTimeContent?.invoke(this, remainingTime)
+                } else if (remainingTimeContent != null) {
+                    VideoCountdown(player, remainingTimeContent)
                 }
             }
         }

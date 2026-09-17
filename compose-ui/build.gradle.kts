@@ -23,6 +23,10 @@ kotlin {
     }
     android {
         experimentalProperties["android.experimental.kmp.enableAndroidResources"] = true
+        withDeviceTest {
+            instrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+            execution = "HOST"
+        }
     }
     sourceSets {
         val commonMain by getting {
@@ -77,6 +81,13 @@ kotlin {
                 implementation(libs.bundles.media3)
                 implementation(project.dependencies.platform(libs.koin.bom))
                 implementation(libs.bundles.koin)
+            }
+        }
+        val androidDeviceTest by getting {
+            dependencies {
+                implementation(libs.androidx.test.ext.junit)
+                implementation(libs.ui.test.junit4)
+                implementation(libs.ui.test.manifest)
             }
         }
         val jvmMain by getting {

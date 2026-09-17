@@ -10,7 +10,6 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -638,7 +637,6 @@ private fun StatusQuoteComponent(
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun StatusReactionComponent(
     data: UiTimelineV2.Post,
@@ -673,74 +671,56 @@ private fun StatusReactionComponent(
             }
         }
         if (showEmojiReactions) {
-            // the original FlowRow without overflow just call the
-            // FlowRow with overflow, so suppress the deprecation
-            // since the original one just call the FlowRow with overflow
-            @Suppress("DEPRECATION")
-            androidx.compose.foundation.layout.FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                itemVerticalAlignment = Alignment.CenterVertically,
-                maxLines = if (isDetail) Int.MAX_VALUE else 2,
-                overflow =
-                    androidx.compose.foundation.layout.FlowRowOverflow.expandIndicator {
-                        PlatformText(
-                            text =
-                                stringResource(
-                                    resource = Res.string.mastodon_item_show_more,
-                                ),
-                            style = PlatformTheme.typography.caption,
-                            color = PlatformTheme.colorScheme.caption,
-                        )
-                    },
-            ) {
-                data.emojiReactions.fastForEach { reaction ->
-                    val color =
-                        if (reaction.me) {
-                            PlatformTheme.colorScheme.primaryContainer
-                        } else {
-                            PlatformTheme.colorScheme.cardAlt
-                        }
-                    val borderColor =
-                        if (reaction.me) {
-                            PlatformTheme.colorScheme.primary
-                        } else {
-                            Color.Transparent
-                        }
-                    PlatformCard(
-                        shape = RoundedCornerShape(100),
-                        containerColor = color,
+            StatusReactionRow(
+                itemCount = data.emojiReactions.size,
+                isDetail = isDetail,
+            ) { index ->
+                val reaction = data.emojiReactions[index]
+                val color =
+                    if (reaction.me) {
+                        PlatformTheme.colorScheme.primaryContainer
+                    } else {
+                        PlatformTheme.colorScheme.cardAlt
+                    }
+                val borderColor =
+                    if (reaction.me) {
+                        PlatformTheme.colorScheme.primary
+                    } else {
+                        Color.Transparent
+                    }
+                PlatformCard(
+                    shape = RoundedCornerShape(100),
+                    containerColor = color,
+                    modifier =
+                        Modifier
+                            .border(
+                                FlareDividerDefaults.thickness,
+                                color = borderColor,
+                                shape = RoundedCornerShape(100),
+                            ),
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
                         modifier =
                             Modifier
-                                .border(
-                                    FlareDividerDefaults.thickness,
-                                    color = borderColor,
-                                    shape = RoundedCornerShape(100),
-                                ),
+                                .clickable {
+                                    reaction.onClicked.invoke(
+                                        ClickContext(uriHandler::openUri),
+                                    )
+                                }.padding(horizontal = 8.dp, vertical = 4.dp),
                     ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier =
-                                Modifier
-                                    .clickable {
-                                        reaction.onClicked.invoke(
-                                            ClickContext(uriHandler::openUri),
-                                        )
-                                    }.padding(horizontal = 8.dp, vertical = 4.dp),
-                        ) {
-                            if (reaction.isUnicode) {
-                                PlatformText(reaction.name)
-                            } else {
-                                EmojiImage(
-                                    uri = reaction.url,
-                                    modifier = Modifier.height(16.dp),
-                                )
-                            }
-                            Spacer(modifier = Modifier.width(4.dp))
-                            PlatformText(
-                                text = reaction.count.humanized,
+                        if (reaction.isUnicode) {
+                            PlatformText(reaction.name)
+                        } else {
+                            EmojiImage(
+                                uri = reaction.url,
+                                modifier = Modifier.height(16.dp),
                             )
                         }
+                        Spacer(modifier = Modifier.width(4.dp))
+                        PlatformText(
+                            text = reaction.count.humanized,
+                        )
                     }
                 }
             }
@@ -1628,11 +1608,12 @@ private fun ExpandedCard(
     Column(
         modifier = modifier,
     ) {
-        card.media?.let {
+        card.media?.let { media ->
             AdaptiveGrid(
-                content = {
+                itemCount = 1,
+                itemContent = {
                     MediaItem(
-                        media = it,
+                        media = media,
                         keepAspectRatio = appearanceSettings.expandMediaSize,
                         modifier =
                             Modifier

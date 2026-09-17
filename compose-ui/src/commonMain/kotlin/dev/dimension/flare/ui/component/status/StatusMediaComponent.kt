@@ -44,7 +44,6 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.util.fastForEach
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.CirclePlay
@@ -255,20 +254,19 @@ internal fun StatusMediaComponent(
             }
         } else {
             AdaptiveGrid(
-                content = {
-                    data.fastForEach { media ->
-                        CompositionLocalProvider(
-                            LocalTimelineCarouselItem provides TimelineCarouselItem(carouselId, selected = true, isCarousel = false),
-                        ) {
-                            StatusMediaItem(
-                                post = post,
-                                media = media,
-                                mediaCount = data.size,
-                                onMediaClick = openMedia,
-                                hideSensitive = hideSensitive,
-                                keepAspectRatio = data.size == 1 && appearanceSettings.expandMediaSize,
-                            )
-                        }
+                itemCount = data.size,
+                itemContent = { index ->
+                    CompositionLocalProvider(
+                        LocalTimelineCarouselItem provides TimelineCarouselItem(carouselId, selected = true, isCarousel = false),
+                    ) {
+                        StatusMediaItem(
+                            post = post,
+                            media = data[index],
+                            mediaCount = data.size,
+                            onMediaClick = openMedia,
+                            hideSensitive = hideSensitive,
+                            keepAspectRatio = data.size == 1 && appearanceSettings.expandMediaSize,
+                        )
                     }
                 },
                 maxItems = if (appearanceSettings.limitMediaGridToNine) 9 else data.size,

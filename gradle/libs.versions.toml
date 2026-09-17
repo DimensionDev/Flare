@@ -22,7 +22,6 @@ compose-bom = "2026.09.00"
 ksp = "2.3.12"
 koog = "1.2.0-SNAPSHOT"
 nucleus = "1.15.7"
-openaiClient = "4.1.0"
 paging = "3.5.1"
 kotlinx-datetime = "0.8.0"
 kotlinx-collections-immutable = "0.5.2"
@@ -48,6 +47,7 @@ skie = "0.10.14"
 ksoup = "0.2.6"
 versionUpdate = "0.61.0"
 bluesky = "0.3.4-SNAPSHOT"
+blueskyLexicons = "2026.09.04"
 kotlinx-coroutines = "1.11.0"
 koin = "4.2.2"
 koin-plugin = "1.2.1"
@@ -73,7 +73,7 @@ qrose = "1.2.1"
 [libraries]
 adaptive-navigation3 = { module = "org.jetbrains.compose.material3.adaptive:adaptive-navigation3", version.ref = "adaptiveNavigation3" }
 androidx-collection = { module = "androidx.collection:collection", version.ref = "collection" }
-bluesky = { module = "moe.tlaster.ozone:bluesky", version.ref = "bluesky" }
+bluesky-lexicons = { module = "sh.christian.ozone:lexicons", version.ref = "blueskyLexicons" }
 bluesky-oauth = { module = "moe.tlaster.ozone:oauth", version.ref = "bluesky" }
 composewebview = { module = "io.github.kdroidfilter:composewebview", version.ref = "composewebview" }
 crashkios-crashlytics = { module = "co.touchlab.crashkios:crashlytics", version.ref = "crashkios" }
@@ -99,7 +99,6 @@ nucleus-decorated-window = { module = "io.github.kdroidfilter:nucleus.decorated-
 readability = { module = "moe.tlaster:readability", version.ref = "readability" }
 sentry = { module = "io.sentry:sentry", version.ref = "sentry" }
 systemColor = { module = "io.github.kdroidfilter:nucleus.system-color", version.ref = "nucleus" }
-openai-client = { module = "com.aallam.openai:openai-client", version.ref = "openaiClient" }
 prettytime = { module = "org.ocpsoft.prettytime:prettytime", version.ref = "prettytime" }
 reorderable = { module = "sh.calvin.reorderable:reorderable", version.ref = "reorderable" }
 richtext-ui = { module = "com.halilibo.compose-richtext:richtext-ui", version.ref = "richtextUiMaterial3" }
@@ -180,6 +179,7 @@ ktorfit-lib = { group = "de.jensklingenberg.ktorfit", name = "ktorfit-lib", vers
 ktorfit-ksp = { group = "de.jensklingenberg.ktorfit", name = "ktorfit-ksp", version.ref = "ktorfit" }
 ktorfit-converters-response = { group = "de.jensklingenberg.ktorfit", name = "ktorfit-converters-response", version.ref = "ktorfit" }
 
+ktor-client-core = { group = "io.ktor", name = "ktor-client-core", version.ref = "ktor" }
 ktor-client-content-negotiation = { group = "io.ktor", name = "ktor-client-content-negotiation", version.ref = "ktor" }
 ktor-serialization-kotlinx-json = { group = "io.ktor", name = "ktor-serialization-kotlinx-json", version.ref = "ktor" }
 ktor-serialization-kotlinx-xml = { group = "io.ktor", name = "ktor-serialization-kotlinx-xml", version.ref = "ktor" }
@@ -256,6 +256,7 @@ ktorfit = ["ktorfit-lib", "ktorfit-converters-response"]
 navigation3 = ["androidx-navigation3-runtime", "androidx-navigation3-ui", "androidx-lifecycle-viewmodel-navigation3", "androidx-material3-adaptive-navigation3"]
 
 [plugins]
+ozone-generator = { id = "moe.tlaster.ozone.generator", version.ref = "bluesky" }
 android-application = { id = "com.android.application", version.ref = "agp" }
 android-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }

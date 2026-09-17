@@ -4,6 +4,12 @@ pluginManagement {
         google()
         mavenCentral()
         gradlePluginPortal()
+        maven("https://central.sonatype.com/repository/maven-snapshots/") {
+            content {
+                includeGroup("moe.tlaster.ozone")
+                includeGroup("moe.tlaster.ozone.generator")
+            }
+        }
     }
 }
 // START Non-FOSS component
@@ -25,6 +31,7 @@ rootProject.name = "Flare"
 include(":app")
 include(":shared")
 include(":social:bluesky")
+include(":social:bluesky:api")
 include(":social:fanbox")
 include(":social:mastodon")
 include(":social:misskey")

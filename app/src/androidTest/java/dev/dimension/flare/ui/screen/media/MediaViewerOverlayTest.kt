@@ -217,7 +217,7 @@ class MediaViewerOverlayTest {
         composeRule.runOnIdle {
             assertTrue("Controls should fade out before the image arrives", viewer.hasHero)
             assertTrue(viewer.progress.value > 0.1f)
-            assertTrue(viewer.backgroundAlpha > viewer.controlsAlpha)
+            assertTrue("The background should also fade out before the image arrives", viewer.backgroundAlpha < 0.01f)
         }
         composeRule.mainClock.autoAdvance = true
         composeRule.waitForIdle()

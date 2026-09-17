@@ -8,8 +8,8 @@ import androidx.compose.material3.MotionScheme
 internal class MediaViewerMotion(
     scheme: MotionScheme,
 ) {
-    // Keep the theme's full-screen spring speed, but media must never grow past its destination.
-    private val stiffness = (scheme.slowSpatialSpec<Float>() as? SpringSpec)?.stiffness ?: Spring.StiffnessLow
+    // Use the theme's default spatial stiffness without letting media grow past its destination.
+    private val stiffness = (scheme.defaultSpatialSpec<Float>() as? SpringSpec)?.stiffness ?: Spring.StiffnessLow
     val spatial =
         spring<Float>(
             dampingRatio = Spring.DampingRatioNoBouncy,
@@ -22,6 +22,6 @@ internal class MediaViewerMotion(
             stiffness = stiffness,
             visibilityThreshold = 0.5f,
         )
-    val background = scheme.slowEffectsSpec<Float>()
+    val background = scheme.defaultEffectsSpec<Float>()
     val controls = scheme.defaultEffectsSpec<Float>()
 }

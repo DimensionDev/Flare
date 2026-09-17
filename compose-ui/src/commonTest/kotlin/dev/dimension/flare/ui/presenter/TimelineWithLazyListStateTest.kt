@@ -46,6 +46,116 @@ class TimelineWithLazyListStateTest {
             assertEquals("post--1", items.peek(0)?.itemKey)
             assertEquals(1, scrollState.firstVisibleItemIndex)
             assertTrue(updated.showNewToots, "A new head should show the banner while reading older posts")
+            assertEquals(1, updated.newPostsCount, "One prepended post should be counted without another scroll event")
+            assertTrue(states.all { !it.showNewToots || it.newPostsCount > 0 }, "The visible banner must never report zero posts")
+        }
+
+    @Test
+    fun newPostsAreCountedWhenScrollPositionUpdatesFirst() =
+        withTimelineState { pages, states, scrollState ->
+            scrollState.requestScrollToItem(2)
+            runCurrent()
+
+            pages.value = page(-1..1)
+            runCurrent()
+
+            assertTrue(states.last().showNewToots)
+            assertEquals(1, states.last().newPostsCount)
+        }
+
+    @Test
+    fun newPostsAreCountedWhenScrollPositionUpdatesLast() =
+        withTimelineState { pages, states, scrollState ->
+            pages.value = page(-1..1)
+            runCurrent()
+
+            scrollState.requestScrollToItem(2)
+            runCurrent()
+
+            assertTrue(states.last().showNewToots)
+            assertEquals(1, states.last().newPostsCount)
+        }
+
+    @Test
+    fun prependingPostsAndDroppingTheTailPreservesTheNewPostsCount() =
+        withTimelineState { pages, states, _ ->
+            pages.value = page(-1..0)
+            runCurrent()
+
+            assertEquals(2, assertIs<PagingState.Success<UiTimelineV2>>(states.last().listState).itemCount)
+            assertTrue(states.last().showNewToots)
+            assertEquals(1, states.last().newPostsCount)
+        }
+
+    @Test
+    fun newPostsCountAccumulatesAcrossRefreshes() =
+        withTimelineState { pages, states, _ ->
+            pages.value = page(-1..1)
+            runCurrent()
+            assertEquals(1, states.last().newPostsCount)
+
+            pages.value = page(-3..1)
+            runCurrent()
+            assertEquals(3, states.last().newPostsCount)
+
+            pages.value = page(-3..1)
+            runCurrent()
+            assertEquals(3, states.last().newPostsCount)
+        }
+
+    @Test
+    fun scrollingOnlyClearsTheCountWhenReachingTheTop() =
+        withTimelineState { pages, states, scrollState ->
+            pages.value = page(-1..5)
+            runCurrent()
+            assertEquals(1, states.last().newPostsCount)
+
+            scrollState.requestScrollToItem(4)
+            runCurrent()
+            assertEquals(1, states.last().newPostsCount)
+
+            scrollState.requestScrollToItem(1)
+            runCurrent()
+            assertEquals(1, states.last().newPostsCount)
+
+            scrollState.requestScrollToItem(0)
+            runCurrent()
+            assertFalse(states.last().showNewToots)
+            assertEquals(0, states.last().newPostsCount)
+        }
+
+    @Test
+    fun loadingOlderPostsDoesNotIncreaseTheNewPostsCount() =
+        withTimelineState { pages, states, _ ->
+            pages.value = page(-1..5)
+            runCurrent()
+
+            assertTrue(states.last().showNewToots)
+            assertEquals(1, states.last().newPostsCount)
+
+            pages.value = page(-1..9)
+            runCurrent()
+            assertEquals(1, states.last().newPostsCount)
+        }
+
+    @Test
+    fun replacingTheLoadedPageCountsTheNewlyPresentedPosts() =
+        withTimelineState { pages, states, _ ->
+            pages.value = page(-3..-1)
+            runCurrent()
+
+            assertTrue(states.last().showNewToots)
+            assertEquals(3, states.last().newPostsCount)
+        }
+
+    @Test
+    fun removingTheFirstPostDoesNotReportNewPosts() =
+        withTimelineState { pages, states, _ ->
+            pages.value = page(1..1)
+            runCurrent()
+
+            assertFalse(states.last().showNewToots)
+            assertEquals(0, states.last().newPostsCount)
         }
 
     @Test
@@ -56,6 +166,7 @@ class TimelineWithLazyListStateTest {
 
             assertEquals(3, assertIs<PagingState.Success<UiTimelineV2>>(states.last().listState).itemCount)
             assertFalse(states.last().showNewToots)
+            assertEquals(0, states.last().newPostsCount)
         }
 
     @Test
@@ -66,6 +177,7 @@ class TimelineWithLazyListStateTest {
 
             assertEquals("post--1", assertIs<PagingState.Success<UiTimelineV2>>(states.last().listState).peek(0)?.itemKey)
             assertFalse(states.last().showNewToots)
+            assertEquals(0, states.last().newPostsCount)
         }
 
     @Test
@@ -74,14 +186,17 @@ class TimelineWithLazyListStateTest {
             pages.value = page(-1..1)
             runCurrent()
             assertTrue(states.last().showNewToots)
+            assertEquals(1, states.last().newPostsCount)
 
             states.last().onNewTootsShown()
             runCurrent()
             assertFalse(states.last().showNewToots)
+            assertEquals(0, states.last().newPostsCount)
 
             pages.value = page(-2..1)
             runCurrent()
             assertTrue(states.last().showNewToots)
+            assertEquals(1, states.last().newPostsCount)
         }
 
     private fun withTimelineState(

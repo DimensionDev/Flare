@@ -7,16 +7,13 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.data.model.tab.UiTimelineTabItem
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.drop
-import kotlinx.coroutines.flow.mapNotNull
 import moe.tlaster.precompose.molecule.producePresenter
 
 @Immutable
@@ -54,64 +51,46 @@ internal fun rememberTimelineWithLazyListState(
     baseState: TimelineItemPresenter.State,
     lazyListState: LazyStaggeredGridState,
 ): TimelineWithLazyListState {
-    var showNewToots by remember { mutableStateOf(false) }
-    var lastRefreshIndex by remember { mutableStateOf(0) }
-    var newPostCount by remember { mutableStateOf(0) }
-    baseState.listState.onSuccess {
-        // Observe each published snapshot without restarting the collector and
-        // dropping the first head change after every paging update.
-        val currentPagingState by rememberUpdatedState(this)
-        LaunchedEffect(lazyListState) {
-            snapshotFlow {
-                currentPagingState.peek(0)?.itemKey
-            }.mapNotNull { it }
-                .distinctUntilChanged()
-                .drop(1)
-                .collect {
-                    showNewToots = true
-                    lastRefreshIndex = lazyListState.firstVisibleItemIndex
-                }
-        }
-    }
-    LaunchedEffect(lazyListState) {
-        snapshotFlow { lazyListState.firstVisibleItemIndex }
-            .distinctUntilChanged()
-            .collect {
-                if (it > lastRefreshIndex && showNewToots) {
-                    newPostCount =
-                        if (newPostCount > 0) {
-                            minOf(newPostCount, it - lastRefreshIndex)
-                        } else {
-                            it - lastRefreshIndex
-                        }
-                }
-            }
-    }
+    var newPostCount by remember { mutableIntStateOf(0) }
     val isAtTheTop by remember(lazyListState) {
         derivedStateOf {
             lazyListState.firstVisibleItemIndex == 0 &&
                 lazyListState.firstVisibleItemScrollOffset == 0
         }
     }
-    LaunchedEffect(isAtTheTop, showNewToots) {
-        if (isAtTheTop) {
-            showNewToots = false
+    baseState.listState.onSuccess {
+        val currentPagingState by rememberUpdatedState(this)
+        LaunchedEffect(lazyListState) {
+            var previousKeys = emptySet<String>()
+            snapshotFlow {
+                val pagingState = currentPagingState
+                (0 until pagingState.itemCount).mapNotNull { pagingState.peek(it)?.itemKey }
+            }.collect { keys ->
+                if (keys.isNotEmpty()) {
+                    // Count the new prefix before the first previously loaded post.
+                    // Scroll indices can already have moved by the time this snapshot arrives.
+                    if (previousKeys.isNotEmpty() && !isAtTheTop) {
+                        newPostCount += keys.takeWhile { it !in previousKeys }.size
+                    }
+                    previousKeys = keys.toSet()
+                }
+            }
         }
     }
-    LaunchedEffect(showNewToots) {
-        if (!showNewToots) {
+    LaunchedEffect(isAtTheTop) {
+        if (isAtTheTop) {
             newPostCount = 0
         }
     }
     return object :
         TimelineWithLazyListState,
         TimelineItemPresenter.State by baseState {
-        override val showNewToots = showNewToots
+        override val showNewToots = newPostCount > 0
         override val lazyListState = lazyListState
         override val newPostsCount = newPostCount
 
         override fun onNewTootsShown() {
-            showNewToots = false
+            newPostCount = 0
         }
     }
 }

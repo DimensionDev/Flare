@@ -2,6 +2,8 @@ package dev.dimension.flare.ui.screen.media
 
 import android.graphics.Bitmap
 import android.net.Uri
+import android.os.SystemClock
+import android.view.MotionEvent
 import androidx.activity.OnBackPressedDispatcher
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.foundation.background
@@ -295,10 +297,37 @@ class MediaSharedTransitionTest {
                 android.graphics.Color.red(pixel) > 200 && android.graphics.Color.blue(pixel) < 50
             }
             val screenshot = instrumentation.uiAutomation.takeScreenshot()
+            val screenWidth = screenshot.width
+            val screenHeight = screenshot.height
             val letterbox = screenshot.getPixel(screenshot.width / 2, screenshot.height / 3)
             screenshot.recycle()
             assertTrue("The thumbnail must not remain behind the ready SurfaceView", android.graphics.Color.blue(letterbox) < 50)
-            composeRule.onNodeWithTag("media_shared_viewer").performTouchInput { swipeDown() }
+            // Playback updates run on Android frames while the Compose test clock is paused.
+            // Inject the swipe without waiting for Compose to become idle.
+            val downTime = SystemClock.uptimeMillis()
+            for (step in 0..20) {
+                val action =
+                    when (step) {
+                        0 -> MotionEvent.ACTION_DOWN
+                        20 -> MotionEvent.ACTION_UP
+                        else -> MotionEvent.ACTION_MOVE
+                    }
+                val event =
+                    MotionEvent.obtain(
+                        downTime,
+                        SystemClock.uptimeMillis(),
+                        action,
+                        screenWidth / 2f,
+                        screenHeight * (.3f + .5f * step / 20f),
+                        0,
+                    )
+                try {
+                    instrumentation.sendPointerSync(event)
+                } finally {
+                    event.recycle()
+                }
+                composeRule.mainClock.advanceTimeByFrame()
+            }
             composeRule.waitUntil(timeoutMillis = 5_000) {
                 composeRule.mainClock.advanceTimeByFrame()
                 host.presentations.isEmpty()

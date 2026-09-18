@@ -64,6 +64,8 @@ internal class MediaSharedPresentation(
     private var dismissRequested = false
 
     init {
+        // Hide the source before composing the destination so they never both target visible.
+        shared.hiddenKey = shared.pressedKey?.takeIf { it.group == group }
         shared.pressedKey = null
     }
 

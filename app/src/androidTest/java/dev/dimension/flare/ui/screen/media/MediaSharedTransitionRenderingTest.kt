@@ -8,9 +8,23 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
+import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialExpressiveTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.adaptive.navigationsuite.ExperimentalMaterial3AdaptiveNavigationSuiteApi
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
+import androidx.compose.material3.rememberWideNavigationRailState
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -21,6 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.MotionDurationScale
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.ComposeUiTestConfig
@@ -37,9 +52,13 @@ import androidx.navigation3.ui.NavDisplay
 import androidx.test.platform.app.InstrumentationRegistry
 import dev.dimension.flare.common.MediaFileNamePolicy
 import dev.dimension.flare.data.model.appearance.GlobalAppearance
+import dev.dimension.flare.ui.component.FlareScaffold
+import dev.dimension.flare.ui.component.FlareTopAppBar
 import dev.dimension.flare.ui.component.LocalGlobalAppearance
 import dev.dimension.flare.ui.component.LocalMediaSharedElementGroup
+import dev.dimension.flare.ui.component.NavigationSuiteScaffold2
 import dev.dimension.flare.ui.component.NetworkImage
+import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.route.Route
@@ -49,8 +68,9 @@ import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import java.io.File
+import kotlin.math.abs
 
-@OptIn(ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class, ExperimentalMaterial3AdaptiveNavigationSuiteApi::class)
 class MediaSharedTransitionRenderingTest {
     @get:Rule
     val composeRule =
@@ -65,11 +85,15 @@ class MediaSharedTransitionRenderingTest {
     private val instrumentation = InstrumentationRegistry.getInstrumentation()
     private val stack = mutableStateListOf<NavKey>(Route.Home)
     private val medias = mutableStateOf<UiState<ImmutableList<UiMedia>>>(UiState.Loading())
+    private val gridState = LazyStaggeredGridState()
     private lateinit var host: MediaSharedTransitionHostState
     private lateinit var uri: String
 
     @Test
     fun landscapeImageMovesContinuouslyInBothDirections() = captureTransition(800, 450, false)
+
+    @Test
+    fun scrolledImageMovesFromAndReturnsToItsTimelinePosition() = captureTransition(800, 450, false, scroll = 320f)
 
     @Test
     fun tallImageMovesContinuouslyInBothDirections() = captureTransition(300, 1200, false)
@@ -84,6 +108,7 @@ class MediaSharedTransitionRenderingTest {
         width: Int,
         height: Int,
         startLoading: Boolean,
+        scroll: Float = 0f,
     ) {
         uri = fixture(width, height)
         val fullImage = if (startLoading) fixture(width * 2, height * 2) else uri
@@ -96,15 +121,20 @@ class MediaSharedTransitionRenderingTest {
         composeRule.waitForIdle()
         // Let the actual image decoder populate Coil's memory cache before the entrance.
         composeRule.waitUntil(5_000) { frameBounds().width > 20 }
+        if (scroll != 0f) {
+            composeRule.runOnIdle { gridState.dispatchRawDelta(scroll) }
+            composeRule.waitForIdle()
+        }
         composeRule.mainClock.autoAdvance = false
         val folder =
             File(
                 instrumentation.targetContext.cacheDir,
-                "shared-frames-$width-$height-$startLoading",
+                "shared-frames-$width-$height-$startLoading-$scroll",
             ).apply { mkdirs() }
         val rows = mutableListOf<String>()
         val opening = mutableListOf<FrameBounds>()
         val closing = mutableListOf<FrameBounds>()
+        val source = frameBounds(File(folder, "source.png"))
         try {
             composeRule.onNodeWithTag("render_source").performTouchInput { click() }
             for (index in 0 until 90) {
@@ -142,6 +172,11 @@ class MediaSharedTransitionRenderingTest {
         }
         composeRule.waitForIdle()
         assertTrue("The viewer should be removed after the return transition", host.presentations.isEmpty())
+        val returned = frameBounds(File(folder, "returned.png"))
+        assertTrue(
+            "The timeline image should return to its original position: $source -> $returned",
+            abs(returned.left - source.left) <= 4 && abs(returned.top - source.top) <= 4,
+        )
         assertTrue("The image should stay visible during the transition", (opening + closing).all { it.width > 0 && it.height > 0 })
         val duplicates = (opening + closing).filter { it.components > 1 || it.edgeSpread > 12 }
         assertTrue("The frame contains overlapping or separate copies: $duplicates", duplicates.isEmpty())
@@ -149,6 +184,27 @@ class MediaSharedTransitionRenderingTest {
         assertTrue("The opening image width jumps backwards: $reversals", reversals.isEmpty())
         val jumps = closing.zipWithNext().filter { (a, b) -> a.height > 0 && b.height > a.height + 32 }
         assertTrue("The closing image suddenly grows: $jumps", jumps.isEmpty())
+        if (width > height) assertPositionContinuity(source, opening.last(), opening + closing)
+    }
+
+    private fun assertPositionContinuity(
+        source: FrameBounds,
+        destination: FrameBounds,
+        frames: List<FrameBounds>,
+    ) {
+        // The default shared-bounds spring applies the same progress to position and size.
+        val errors =
+            frames.mapIndexedNotNull { index, frame ->
+                val progress = (frame.width - source.width).toFloat() / (destination.width - source.width)
+                val expectedX = source.left + (destination.left - source.left) * progress
+                val expectedY = source.top + (destination.top - source.top) * progress
+                if (abs(frame.left - expectedX) > 16f || abs(frame.top - expectedY) > 16f) {
+                    "frame=$index actual=$frame expected=($expectedX,$expectedY)"
+                } else {
+                    null
+                }
+            }
+        assertTrue("The animation leaves the path between the visible source and destination: $errors", errors.isEmpty())
     }
 
     private fun setContent() {
@@ -158,49 +214,86 @@ class MediaSharedTransitionRenderingTest {
                 CompositionLocalProvider(LocalGlobalAppearance provides GlobalAppearance.Default) {
                     MediaSharedTransitionHost {
                         host = checkNotNull(LocalMediaSharedTransitionHost.current)
-                        NavDisplay(
-                            backStack = stack,
-                            onBack = { stack.removeLastOrNull() },
-                            sceneStrategies = remember(host) { listOf(MediaSharedSceneStrategy(host)) },
-                            entryDecorators =
-                                listOf(
-                                    rememberSaveableStateHolderNavEntryDecorator(),
-                                    rememberViewModelStoreNavEntryDecorator(),
-                                ),
-                            entryProvider =
-                                entryProvider {
-                                    entry<Route.Home> {
-                                        Box(Modifier.fillMaxSize().background(Color.White).padding(start = 32.dp, top = 160.dp)) {
-                                            CompositionLocalProvider(LocalMediaSharedElementGroup provides 7L) {
-                                                NetworkImage(
-                                                    model = uri,
-                                                    contentDescription = "source fixture",
-                                                    modifier =
-                                                        Modifier
-                                                            .size(160.dp, 120.dp)
-                                                            .clipToBounds()
-                                                            .testTag("render_source")
-                                                            .clickable { stack.add(Route.Media.Image(uri, uri)) },
-                                                )
-                                            }
+                        NavigationSuiteScaffold2(
+                            navigationSuiteItems = {
+                                item(selected = true, onClick = {}, icon = { Text("Home") }, label = { Text("Home") })
+                            },
+                            secondaryItems = {},
+                            wideNavigationRailState = rememberWideNavigationRailState(),
+                            layoutType = NavigationSuiteType.NavigationBar,
+                            showFab = true,
+                            modifier = Modifier.fillMaxSize(),
+                        ) {
+                            NavDisplay(
+                                backStack = stack,
+                                onBack = { stack.removeLastOrNull() },
+                                sceneStrategies = remember(host) { listOf(MediaSharedSceneStrategy(host)) },
+                                entryDecorators =
+                                    listOf(
+                                        rememberSaveableStateHolderNavEntryDecorator(),
+                                        rememberViewModelStoreNavEntryDecorator(),
+                                    ),
+                                entryProvider =
+                                    entryProvider {
+                                        entry<Route.Home> {
+                                            Timeline()
                                         }
-                                    }
-                                    entry<Route.Media.Image>(metadata = { mapOf(MEDIA_SHARED_ROUTE to it) }) {
-                                        MediaViewerScreen(
-                                            medias = medias.value,
-                                            initialIndex = 0,
-                                            preview = uri,
-                                            onDismiss = checkNotNull(LocalMediaSharedDismiss.current),
-                                            toAltText = {},
-                                            uriHandler = LocalUriHandler.current,
-                                            fileName = MediaFileNamePolicy::rawMediaFileName,
-                                            fileNames = MediaFileNamePolicy::rawMediaFileNames,
-                                        )
-                                    }
-                                },
-                        )
+                                        entry<Route.Media.Image>(metadata = { mapOf(MEDIA_SHARED_ROUTE to it) }) {
+                                            MediaViewerScreen(
+                                                medias = medias.value,
+                                                initialIndex = 0,
+                                                preview = uri,
+                                                onDismiss = checkNotNull(LocalMediaSharedDismiss.current),
+                                                toAltText = {},
+                                                uriHandler = LocalUriHandler.current,
+                                                fileName = MediaFileNamePolicy::rawMediaFileName,
+                                                fileNames = MediaFileNamePolicy::rawMediaFileNames,
+                                            )
+                                        }
+                                    },
+                            )
+                        }
                     }
                 }
+            }
+        }
+    }
+
+    @Composable
+    private fun Timeline() {
+        val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+        FlareScaffold(
+            topBar = { FlareTopAppBar(title = { Text("Timeline") }, scrollBehavior = scrollBehavior) },
+            modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        ) { padding ->
+            HorizontalPager(state = rememberPagerState(pageCount = { 1 })) {
+                RefreshContainer(isRefreshing = false, onRefresh = {}, indicatorPadding = padding, content = {
+                    LazyVerticalStaggeredGrid(
+                        columns = StaggeredGridCells.Fixed(1),
+                        state = gridState,
+                        contentPadding = padding,
+                        modifier = Modifier.fillMaxSize().background(Color.White),
+                    ) {
+                        items(16, key = { it }) { index ->
+                            Box(Modifier.fillMaxWidth().height(200.dp).padding(start = 32.dp, top = 20.dp)) {
+                                if (index == 2) {
+                                    CompositionLocalProvider(LocalMediaSharedElementGroup provides 7L) {
+                                        NetworkImage(
+                                            model = uri,
+                                            contentDescription = "source fixture",
+                                            modifier =
+                                                Modifier
+                                                    .size(160.dp, 120.dp)
+                                                    .clipToBounds()
+                                                    .testTag("render_source")
+                                                    .clickable { stack.add(Route.Media.Image(uri, uri)) },
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                })
             }
         }
     }

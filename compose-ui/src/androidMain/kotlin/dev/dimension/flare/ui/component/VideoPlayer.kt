@@ -245,17 +245,24 @@ public fun VideoPlayer(
     ) {
         if (hasSharedPoster) {
             CompositionLocalProvider(LocalMediaSharedElementGroup provides group) {
-                NetworkImage(
-                    model = previewUri,
-                    customHeaders = customHeaders,
-                    contentDescription = contentDescription,
-                    contentScale = contentScale,
-                    modifier =
-                        Modifier
-                            .matchParentSize()
-                            .mediaSharedElementDestination(previewUri)
-                            .alpha(if (hideSurface) 1f else 0f),
-                )
+                if (destination != null) {
+                    val painter = rememberMediaSharedImagePainter(previewUri, customHeaders)
+                    MediaSharedImage(
+                        preview = previewUri,
+                        painter = painter,
+                        visible = hideSurface,
+                        aspectRatio = aspectRatio ?: painter.mediaAspectRatio,
+                        modifier = Modifier.matchParentSize(),
+                    )
+                } else {
+                    NetworkImage(
+                        model = previewUri,
+                        customHeaders = customHeaders,
+                        contentDescription = contentDescription,
+                        contentScale = contentScale,
+                        modifier = Modifier.matchParentSize().alpha(if (hideSurface) 1f else 0f),
+                    )
+                }
             }
         }
         CompositionLocalProvider(LocalMediaSharedSourcesEnabled provides false) {

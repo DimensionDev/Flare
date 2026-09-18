@@ -7,13 +7,12 @@ import android.os.Build
 import android.view.WindowManager
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterExitState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -131,13 +130,15 @@ import dev.dimension.flare.ui.component.Glassify
 import dev.dimension.flare.ui.component.LocalMediaSharedDestination
 import dev.dimension.flare.ui.component.LocalMediaSharedTransition
 import dev.dimension.flare.ui.component.LocalTimelineAppearance
+import dev.dimension.flare.ui.component.MediaSharedImage
 import dev.dimension.flare.ui.component.MediaViewerPlayback
 import dev.dimension.flare.ui.component.MediaViewerSelection
 import dev.dimension.flare.ui.component.SurfaceBindingManager
 import dev.dimension.flare.ui.component.VideoPlayer
 import dev.dimension.flare.ui.component.accessibleDescription
-import dev.dimension.flare.ui.component.mediaSharedElementDestination
+import dev.dimension.flare.ui.component.mediaAspectRatio
 import dev.dimension.flare.ui.component.placeholder
+import dev.dimension.flare.ui.component.rememberMediaSharedImagePainter
 import dev.dimension.flare.ui.component.status.CommonStatusComponent
 import dev.dimension.flare.ui.humanizer.humanize
 import dev.dimension.flare.ui.model.UiMedia
@@ -145,7 +146,6 @@ import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.contentPostOrNull
 import dev.dimension.flare.ui.model.isSuccess
-import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.presenter.invoke
@@ -164,12 +164,10 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import me.saket.telephoto.ExperimentalTelephotoApi
 import me.saket.telephoto.zoomable.DoubleClickToZoomListener
-import me.saket.telephoto.zoomable.Viewport
 import me.saket.telephoto.zoomable.ZoomSpec
 import me.saket.telephoto.zoomable.coil3.ZoomableAsyncImage
 import me.saket.telephoto.zoomable.rememberZoomableImageState
 import me.saket.telephoto.zoomable.rememberZoomableState
-import me.saket.telephoto.zoomable.spatial.CoordinateSpace
 import moe.tlaster.precompose.molecule.producePresenter
 import org.koin.compose.koinInject
 import kotlin.math.roundToInt
@@ -355,146 +353,101 @@ internal fun MediaViewerScreen(
                                 CompositionLocalProvider(
                                     LocalMediaSharedDestination provides destination.takeIf { index == pagerState.currentPage },
                                 ) {
-                                    AnimatedContent(
-                                        medias,
-                                        transitionSpec = {
-                                            fadeIn() togetherWith fadeOut()
-                                        },
-                                    ) {
-                                        it
-                                            .onSuccess { medias ->
-                                                val media = medias.getOrNull(index)
-                                                if (media == null) {
-                                                    Box(
-                                                        modifier =
-                                                            Modifier
-                                                                .aspectRatio(1f)
-                                                                .fillMaxSize()
-                                                                .placeholder(true),
-                                                    )
-                                                    return@onSuccess
+                                    val media = medias.takeSuccess()?.getOrNull(index)
+                                    val previewUrl =
+                                        when (media) {
+                                            is UiMedia.Audio -> media.previewUrl ?: media.url
+                                            null -> preview
+                                            else -> media.previewKey()
+                                        }
+                                    val showImage =
+                                        media == null || pagerState.currentPage != index || media is UiMedia.Image || media is UiMedia.Gif
+                                    if (showImage && previewUrl != null) {
+                                        // Keep one image node when Loading becomes Success. Two AnimatedContent
+                                        // children would otherwise register the same shared key in the viewer scope.
+                                        ImageItem(
+                                            modifier = Modifier.fillMaxSize(),
+                                            url =
+                                                when (media) {
+                                                    is UiMedia.Image, is UiMedia.Gif -> media.url
+                                                    else -> previewUrl
+                                                },
+                                            previewUrl = previewUrl,
+                                            aspectRatio =
+                                                when (media) {
+                                                    is UiMedia.Image -> (media.width / media.height).takeIf { it.isFinite() && it > 0f }
+                                                    is UiMedia.Gif -> (media.width / media.height).takeIf { it.isFinite() && it > 0f }
+                                                    is UiMedia.Video -> (media.width / media.height).takeIf { it.isFinite() && it > 0f }
+                                                    else -> null
+                                                },
+                                            customHeaders = media?.customHeaders,
+                                            description = media?.accessibleDescription(),
+                                            onClick = { state.setShowUi(!state.showUi) },
+                                            setLockPager = {
+                                                if (pagerState.currentPage == index) {
+                                                    if (!isBigScreen) state.setShowUi(!it)
+                                                    state.setLockPager(it)
                                                 }
-                                                val imageUrl =
-                                                    when (media) {
-                                                        is UiMedia.Audio -> media.previewUrl ?: media.url
-                                                        is UiMedia.Gif -> media.url
-                                                        is UiMedia.Image -> media.url
-                                                        is UiMedia.Video -> media.thumbnailUrl
-                                                    }
-                                                val previewUrl =
-                                                    when (media) {
-                                                        is UiMedia.Audio -> media.previewUrl ?: media.url
-                                                        is UiMedia.Gif -> media.previewUrl
-                                                        is UiMedia.Image -> media.previewUrl
-                                                        is UiMedia.Video -> media.thumbnailUrl
-                                                    }
-                                                if (pagerState.currentPage != index || media is UiMedia.Image || media is UiMedia.Gif) {
-                                                    ImageItem(
-                                                        modifier =
-                                                            Modifier
-                                                                .fillMaxSize(),
-                                                        url = imageUrl,
-                                                        previewUrl = previewUrl,
-                                                        customHeaders = media.customHeaders,
-                                                        description = media.accessibleDescription(),
+                                            },
+                                            onLongClick = {
+                                                if (media != null) {
+                                                    hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                    state.setShowSheet(true)
+                                                }
+                                            },
+                                        )
+                                    } else if (media is UiMedia.Video) {
+                                        Box(
+                                            modifier = Modifier.fillMaxSize(),
+                                        ) {
+                                            VideoPlayer(
+                                                uri = media.url,
+                                                customHeaders = media.customHeaders,
+                                                previewUri = media.thumbnailUrl,
+                                                contentDescription = media.accessibleDescription(),
+                                                modifier = Modifier.fillMaxSize(),
+                                                aspectRatio = media.aspectRatio,
+                                                autoPlay = true,
+                                                onClick = null,
+                                                showControls = true,
+                                                keepScreenOn = true,
+                                                muted = false,
+                                                contentScale = ContentScale.Fit,
+                                            )
+                                            surfaceBindingManager.playerFor(media.url)?.let { player ->
+                                                key(media.url) {
+                                                    VideoGestureOverlay(
+                                                        player = player,
                                                         onClick = {
                                                             state.setShowUi(!state.showUi)
                                                         },
-                                                        setLockPager = {
-                                                            if (pagerState.currentPage == index) {
-                                                                if (!isBigScreen) {
-                                                                    state.setShowUi(!it)
-                                                                }
-                                                                state.setLockPager(it)
-                                                            }
+                                                        onPlaybackSpeedChanged = {
+                                                            playbackSpeed = it
                                                         },
-                                                        onLongClick = {
-                                                            hapticFeedback.performHapticFeedback(
-                                                                HapticFeedbackType.LongPress,
-                                                            )
-                                                            state.setShowSheet(true)
-                                                        },
-                                                    )
-                                                } else if (media is UiMedia.Video) {
-                                                    Box(
                                                         modifier = Modifier.fillMaxSize(),
-                                                    ) {
-                                                        VideoPlayer(
-                                                            uri = media.url,
-                                                            customHeaders = media.customHeaders,
-                                                            previewUri = media.thumbnailUrl,
-                                                            contentDescription = media.accessibleDescription(),
-                                                            modifier = Modifier.fillMaxSize(),
-                                                            aspectRatio = media.aspectRatio,
-                                                            autoPlay = true,
-                                                            onClick = null,
-                                                            showControls = true,
-                                                            keepScreenOn = true,
-                                                            muted = false,
-                                                            contentScale = ContentScale.Fit,
-                                                        )
-                                                        surfaceBindingManager.playerFor(media.url)?.let { player ->
-                                                            key(media.url) {
-                                                                VideoGestureOverlay(
-                                                                    player = player,
-                                                                    onClick = {
-                                                                        state.setShowUi(!state.showUi)
-                                                                    },
-                                                                    onPlaybackSpeedChanged = {
-                                                                        playbackSpeed = it
-                                                                    },
-                                                                    modifier = Modifier.fillMaxSize(),
-                                                                )
-                                                            }
-                                                        }
-                                                    }
-                                                } else if (media is UiMedia.Audio) {
-                                                    VideoPlayer(
-                                                        uri = media.url,
-                                                        customHeaders = media.customHeaders,
-                                                        previewUri = null,
-                                                        contentDescription = media.accessibleDescription(),
-                                                        autoPlay = false,
-                                                        onClick = {
-                                                            state.setShowUi(!state.showUi)
-                                                        },
-                                                        onLongClick = {
-                                                            hapticFeedback.performHapticFeedback(
-                                                                HapticFeedbackType.LongPress,
-                                                            )
-                                                            state.setShowSheet(true)
-                                                        },
-                                                    )
-                                                }
-                                            }.onLoading {
-                                                if (preview != null) {
-                                                    ImageItem(
-                                                        url = preview,
-                                                        previewUrl = preview,
-                                                        customHeaders = null,
-                                                        description = null,
-                                                        onClick = { /*TODO*/ },
-                                                        setLockPager = {
-                                                            if (!isBigScreen) {
-                                                                state.setShowUi(!it)
-                                                            }
-                                                            state.setLockPager(it)
-                                                        },
-                                                        modifier =
-                                                            Modifier
-                                                                .fillMaxSize(),
-                                                        onLongClick = { },
-                                                    )
-                                                } else {
-                                                    Box(
-                                                        modifier =
-                                                            Modifier
-                                                                .aspectRatio(1f)
-                                                                .fillMaxSize()
-                                                                .placeholder(true),
                                                     )
                                                 }
                                             }
+                                        }
+                                    } else if (media is UiMedia.Audio) {
+                                        VideoPlayer(
+                                            uri = media.url,
+                                            customHeaders = media.customHeaders,
+                                            previewUri = null,
+                                            contentDescription = media.accessibleDescription(),
+                                            autoPlay = false,
+                                            onClick = {
+                                                state.setShowUi(!state.showUi)
+                                            },
+                                            onLongClick = {
+                                                hapticFeedback.performHapticFeedback(
+                                                    HapticFeedbackType.LongPress,
+                                                )
+                                                state.setShowSheet(true)
+                                            },
+                                        )
+                                    } else if (media == null && medias !is UiState.Error) {
+                                        Box(Modifier.aspectRatio(1f).fillMaxSize().placeholder(true))
                                     }
                                 }
                             }
@@ -1375,6 +1328,7 @@ private const val MEDIA_VIEWER_PRESENTER_KEY = "media_viewer"
 private fun ImageItem(
     url: String,
     previewUrl: String,
+    aspectRatio: Float?,
     customHeaders: ImmutableMap<String, String>?,
     description: String?,
     onClick: () -> Unit,
@@ -1400,65 +1354,66 @@ private fun ImageItem(
             zoomableState.resetZoom()
         }
     }
-    var alignment by remember {
-        mutableStateOf(Alignment.Center)
-    }
-    var contentScale by remember {
-        mutableStateOf(ContentScale.Fit)
-    }
-    LaunchedEffect(zoomableState.coordinateSystem.contentBounds(false)) {
-        // only set once to prevent jitter
-        if (contentScale == ContentScale.Fit) {
-            val aspectRatio =
-                with(zoomableState.coordinateSystem) {
-                    contentBounds(false).rectIn(CoordinateSpace.Viewport)
-                }.let {
-                    it.height / it.width
+    val previewPainter = rememberMediaSharedImagePainter(previewUrl, customHeaders)
+    val ratio = previewPainter.mediaAspectRatio ?: aspectRatio
+    val fillWidth = ratio != null && ratio < 9f / 19.5f
+    val imageState = rememberZoomableImageState(zoomableState)
+    val shared = LocalMediaSharedTransition.current?.takeIf { it.windowInfo === LocalWindowInfo.current }
+    val destination = LocalMediaSharedDestination.current
+    val transitioning =
+        destination != null && shared != null && (
+            shared.scope.isTransitionActive ||
+                destination.visibilityScope.transition.let {
+                    it.currentState != EnterExitState.Visible || it.targetState != EnterExitState.Visible
                 }
-            val targetAspectRatio = 19.5f / 9f
-            if (aspectRatio > targetAspectRatio) {
-                alignment = Alignment.TopCenter
-                contentScale = ContentScale.FillWidth
-            }
-        }
-    }
+        )
+    val showPreview = transitioning || !imageState.isImageDisplayed
 
-    ZoomableAsyncImage(
-        model =
-            ImageRequest
-                .Builder(LocalContext.current)
-                .data(url)
-                .placeholderMemoryCacheKey(previewUrl)
-//                .crossfade(1_000)
-                .size(Size.ORIGINAL)
-                .let { builder ->
-                    if (customHeaders.isNullOrEmpty()) {
-                        builder
-                    } else {
-                        builder.httpHeaders(
-                            NetworkHeaders
-                                .Builder()
-                                .apply {
-                                    customHeaders.forEach { (key, value) ->
-                                        set(key, value)
-                                    }
-                                }.build(),
-                        )
-                    }
-                }.build(),
-        contentDescription = description,
-        state = rememberZoomableImageState(zoomableState),
-        modifier = modifier.mediaSharedElementDestination(previewUrl),
-        contentScale = contentScale,
-        alignment = alignment,
-        onClick = {
-            currentOnClick()
-        },
-        onLongClick = {
-            currentOnLongClick()
-        },
-        onDoubleClick = DoubleClickToZoomListener.cycle(2f),
-    )
+    Box(modifier) {
+        ZoomableAsyncImage(
+            model =
+                ImageRequest
+                    .Builder(LocalContext.current)
+                    .data(url)
+                    .placeholderMemoryCacheKey(previewUrl)
+                    .size(Size.ORIGINAL)
+                    .let { builder ->
+                        if (customHeaders.isNullOrEmpty()) {
+                            builder
+                        } else {
+                            builder.httpHeaders(
+                                NetworkHeaders
+                                    .Builder()
+                                    .apply {
+                                        customHeaders.forEach { (key, value) ->
+                                            set(key, value)
+                                        }
+                                    }.build(),
+                            )
+                        }
+                    }.build(),
+            contentDescription = description,
+            state = imageState,
+            modifier = Modifier.fillMaxSize().alpha(if (showPreview) 0f else 1f),
+            contentScale = if (fillWidth) ContentScale.FillWidth else ContentScale.Fit,
+            alignment = if (fillWidth) Alignment.TopCenter else Alignment.Center,
+            onClick = {
+                currentOnClick()
+            },
+            onLongClick = {
+                currentOnLongClick()
+            },
+            onDoubleClick = DoubleClickToZoomListener.cycle(2f),
+        )
+        MediaSharedImage(
+            preview = previewUrl,
+            painter = previewPainter,
+            visible = showPreview,
+            modifier = Modifier.matchParentSize(),
+            aspectRatio = ratio,
+            fillWidth = fillWidth,
+        )
+    }
 }
 
 internal fun UiMedia.previewKey(): String? =

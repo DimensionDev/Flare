@@ -8,6 +8,16 @@
     <string name="profile_header_fans_count">%1$s 关注者</string>
     <string name="profile_header_toots_count">%1$s 帖子</string>
     <string name="profile_misskey_header_status_count">%1$s 帖子</string>
+    <string name="profile_open_user">打开 %1$s 的配置文件</string>
+    <string name="profile_picture">%1$s 的个人资料图片</string>
+    <string name="profile_banner">%1$s 的个人资料横幅广告</string>
+    <string name="profile_mark_verified">已验证的个人资料</string>
+    <string name="profile_mark_cat">餐厅账户</string>
+    <string name="profile_mark_bot">帐号账户</string>
+    <string name="profile_mark_locked">锁定配置文件</string>
+    <string name="profile_field_location">地点</string>
+    <string name="profile_field_website">网址</string>
+    <string name="profile_field_verified_link">已验证链接</string>
     <string name="profile_header_button_follow">关注</string>
     <string name="profile_header_button_request_follow">请求关注</string>
     <string name="profile_header_button_following">正在关注</string>
@@ -78,6 +88,17 @@
     <string name="status_sensitive_media">敏感媒体</string>
     <string name="show_media">显示媒体</string>
     <string name="hide_media">隐藏媒体</string>
+    <string name="show_sensitive_media">显示敏感媒体</string>
+    <string name="hide_sensitive_media">隐藏敏感媒体</string>
+    <string name="media_image_no_alt">图像，没有提供替代文本</string>
+    <string name="media_video_no_alt">视频，没有提供替代文本</string>
+    <string name="media_audio_no_description">音频，未提供描述</string>
+    <string name="media_view_alt_text">查看替代文本</string>
+    <string name="media_play_audio">播放音频</string>
+    <string name="media_pause_audio">暂停音频</string>
+    <string name="media_play_video">播放视频</string>
+    <string name="media_video_error">视频加载失败</string>
+    <string name="media_audio_playback_position">音频播放位置</string>
     <string name="media_menu_download">下载</string>
     <string name="media_menu_download_all">下载全部</string>
     <string name="media_menu_share_image">分享图片</string>
@@ -110,6 +131,7 @@
     <string name="favourite">收藏</string>
     <string name="unfavourite">取消收藏</string>
     <string name="more">更多</string>
+    <string name="status_platform">平台: %1$s</string>
     <string name="quote">引用</string>
     <string name="reaction_add">添加回应</string>
     <string name="reaction_remove">移除回应</string>
@@ -131,6 +153,9 @@
     <string name="reply_to">回复 %1$s</string>
     <string name="status_detail_translate">翻译</string>
     <string name="status_detail_tldr">总结</string>
+    <string name="status_view_insight">查看帖子视图</string>
+    <string name="status_open_post">打开帖子</string>
+    <string name="feed_open_article">打开文章</string>
     <string name="translation_badge_translated">已翻译</string>
     <string name="translation_badge_translating">正在翻译…</string>
     <string name="translation_badge_failed">翻译失败</string>
@@ -338,6 +363,8 @@
     <string name="tab_settings_drag">拖动</string>
     <string name="tab_settings_edit">编辑</string>
     <string name="tab_settings_remove">移除</string>
+    <string name="feed_subscribe">订阅订阅</string>
+    <string name="feed_unsubscribe">取消订阅订阅</string>
     <string name="tab_settings_default">默认</string>
     <string name="tab_settings_list">列表</string>
     <string name="tab_settings_feed">源</string>
@@ -359,6 +386,11 @@
     <string name="service_select_welcome_message">输入服务器以开始。</string>
     <string name="service_select_welcome_hint">Flare 支持 Mastodon, Misskey, Bluesky, Nostr 和 X。</string>
     <string name="service_select_welcome_list_hint">或者从这些服务器中选择</string>
+    <string name="service_select_search">搜索服务器</string>
+    <string name="service_select_clear">清除服务器</string>
+    <string name="service_select_detected_platform">检测到的平台： %1$s</string>
+    <string name="service_select_unknown_platform">未知平台</string>
+    <string name="service_select_detecting_platform">检测平台</string>
     <string name="bluesky_login_username_hint">用户名</string>
     <string name="bluesky_login_password_hint">密码</string>
     <string name="bluesky_login_auth_factor_token_hint">2FA 令牌</string>
@@ -426,12 +458,11 @@
     <string name="pixiv_ranking_week_original_title">原始排名</string>
     <string name="pixiv_ranking_week_rookie_title">Rookie 排名</string>
     <string name="pixiv_ranking_day_manga_title">Manga Ranking</string>
-    <string name="illustrations_title">插画</string>
-    <string name="manga_title">漫画</string>
-    <string name="app_name" translatable="false">Flare</string>
     <string name="pixiv_private_following_title">私密关注</string>
     <string name="pixiv_private_bookmarks_title">私密书签</string>
     <string name="pixiv_private_favourites_title">私密收藏</string>
+    <string name="illustrations_title">插画</string>
+    <string name="manga_title">漫画</string>
     <string name="fanbox_supported_title">支持中</string>
     <string name="fanbox_recommended_creators_title">推荐创作者</string>
 </resources>

@@ -3,6 +3,9 @@ import SwiftUI
 import FlareAppleCore
 
 public struct SearchScreen: View {
+    @Environment(\.timelineListRenderer) private var listRenderer
+    @State private var listScope = UUID().uuidString
+    @State private var searchGeneration = UUID().uuidString
     @Environment(\.openURL) private var openURL
     @Environment(\.timelineAppearance.aiConfig.agent) private var agentEnabled
     private let onAskAi: (String?) -> Void
@@ -43,46 +46,7 @@ public struct SearchScreen: View {
     }
 
     private var content: some View {
-        List {
-            if case .success(let usersState) = onEnum(of: searchPresenter.state.users) {
-                Section {
-                    ScrollView(.horizontal) {
-                        LazyHStack(spacing: 8) {
-                            ForEach(0..<usersState.itemCount, id: \.self) { index in
-                                ListCardView {
-                                    if let item = usersState.peek(index: index) {
-                                        UserCompatView(data: item)
-                                            .onAppear {
-                                                _ = usersState.get(index: index)
-                                            }
-                                            .padding()
-                                            .onTapGesture {
-                                                item.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
-                                            }
-                                    } else {
-                                        UserLoadingView()
-                                            .padding()
-                                    }
-                                }
-                                .frame(maxWidth: 280)
-                            }
-                        }
-                    }
-                    .scrollIndicators(.hidden)
-                } header: {
-                    Text("local_history_user", bundle: FlareAppleUILocalization.bundle)
-                }
-                .padding(.horizontal)
-                .listRowSeparator(.hidden)
-                .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
-                .listRowBackground(Color.clear)
-            }
-            Section {
-                TimelinePagingListContent(data: searchPresenter.state.status)
-            } header: {
-                Text("local_history_status", bundle: FlareAppleUILocalization.bundle)
-            }
-        }
+        scrollingContent
         .scrollContentBackground(.hidden)
         .searchListRowSpacing(2)
         .listStyle(.plain)
@@ -116,6 +80,7 @@ public struct SearchScreen: View {
         .detectScrolling()
         .onChange(of: searchText) {
             if isSearchPresented && searchText.isEmpty {
+                searchGeneration = UUID().uuidString
                 committedSearchText = ""
                 searchPresenter.state.search(query: "")
             } else if !isSearchPresented && searchText.isEmpty && !committedSearchText.isEmpty {
@@ -123,6 +88,9 @@ public struct SearchScreen: View {
                     searchText = committedSearchText
                 }
             }
+        }
+        .onChange(of: searchPresenter.state.selectedAccount?.key) { _, _ in
+            searchGeneration = UUID().uuidString
         }
         .onAppear {
             guard !didRecordInitialQuery else { return }
@@ -138,6 +106,7 @@ public struct SearchScreen: View {
         let query = rawQuery.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !query.isEmpty else { return }
 
+        searchGeneration = UUID().uuidString
         searchText = query
         committedSearchText = query
         searchHistoryPresenter.state.addSearchHistory(keyword: query)
@@ -149,6 +118,68 @@ public struct SearchScreen: View {
         let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
         isSearchPresented = false
         onAskAi(query.isEmpty ? nil : query)
+    }
+
+    @ViewBuilder
+    private var scrollingContent: some View {
+        if let listRenderer {
+            listRenderer(timelineListRequest)
+        } else {
+            List {
+                if case .success(let usersState) = onEnum(of: searchPresenter.state.users) {
+                    Section {
+                        ScrollView(.horizontal) {
+                            LazyHStack(spacing: 8) {
+                                ForEach(0..<usersState.itemCount, id: \.self) { index in
+                                    ListCardView {
+                                        if let item = usersState.peek(index: index) {
+                                            UserCompatView(data: item)
+                                                .onAppear {
+                                                    _ = usersState.get(index: index)
+                                                }
+                                                .padding()
+                                                .onTapGesture {
+                                                    item.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
+                                                }
+                                        } else {
+                                            UserLoadingView()
+                                                .padding()
+                                        }
+                                    }
+                                    .frame(maxWidth: 280)
+                                }
+                            }
+                        }
+                        .scrollIndicators(.hidden)
+                    } header: {
+                        Text("local_history_user", bundle: FlareAppleUILocalization.bundle)
+                    }
+                    .padding(.horizontal)
+                    .listRowSeparator(.hidden)
+                    .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
+                    .listRowBackground(Color.clear)
+                }
+                Section {
+                    TimelinePagingListContent(data: searchPresenter.state.status)
+                } header: {
+                    Text("local_history_status", bundle: FlareAppleUILocalization.bundle)
+                }
+            }
+        }
+    }
+
+    private var timelineListRequest: TimelineListRequest {
+        var headers: [TimelineListHeader] = []
+        if case .success(let users) = onEnum(of: searchPresenter.state.users) {
+            headers.append(.title("local_history_user"))
+            headers.append(TimelineListHeader(id: "users") { TimelineListUserStrip(users: users) })
+        }
+        headers.append(.title("local_history_status"))
+        return TimelineListRequest(
+            key: "\(listScope):\(searchGeneration)",
+            content: .posts(searchPresenter.state.status),
+            headers: headers
+        )
     }
 
     #if os(iOS)

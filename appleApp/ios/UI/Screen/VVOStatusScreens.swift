@@ -10,9 +10,11 @@ struct VVOStatusScreen: View {
     @State private var presenter: KotlinPresenter<VVOStatusDetailState>
     @State private var selectedType: VVOStatusDetailType = .comment
     @State private var tabsView = VVOStatusTabsView()
+    private let accountType: AccountType
     private let statusKey: MicroBlogKey
 
     init(accountType: AccountType, statusKey: MicroBlogKey) {
+        self.accountType = accountType
         self.statusKey = statusKey
         self._presenter = .init(
             wrappedValue: .init(
@@ -34,21 +36,25 @@ struct VVOStatusScreen: View {
                 .padding(.leading, 16)
             }
 
-            UITimelineCollectionView(
-                data: selectedType == .comment ? presenter.state.comment : presenter.state.repost,
-                detailStatusKey: statusKey,
-                headerState: isCompactLayout ? presenter.state.status : nil,
-                accessoryItems: accessoryItems,
-                suppressInitialRefreshIndicator: true,
-                contentKey: selectedType
-            )
-            .ignoresSafeArea(edges: .vertical)
-            .refreshable {
-                switch selectedType {
-                case .comment:
-                    try? await presenter.state.refreshComment()
-                case .repost:
-                    try? await presenter.state.refreshRepost()
+            GeometryReader { proxy in
+                UITimelineCollectionView(
+                    data: selectedType == .comment ? presenter.state.comment : presenter.state.repost,
+                    detailStatusKey: statusKey,
+                    headerState: isCompactLayout ? presenter.state.status : nil,
+                    columnCount: TimelineColumnPolicy.adaptive.columnCount(for: proxy.size.width),
+                    accessoryItems: accessoryItems,
+                    suppressInitialRefreshIndicator: true,
+                    contentKey: selectedType,
+                    readingKey: "vvo-status:\(accountType):\(statusKey)"
+                )
+                .ignoresSafeArea(edges: .vertical)
+                .refreshable {
+                    switch selectedType {
+                    case .comment:
+                        try? await presenter.state.refreshComment()
+                    case .repost:
+                        try? await presenter.state.refreshRepost()
+                    }
                 }
             }
         }
@@ -72,9 +78,11 @@ struct VVOCommentScreen: View {
     @Environment(\.timelineAppearance.timelineDisplayMode) private var timelineDisplayMode
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @State private var presenter: KotlinPresenter<VVOCommentState>
+    private let accountType: AccountType
     private let statusKey: MicroBlogKey
 
     init(accountType: AccountType, statusKey: MicroBlogKey) {
+        self.accountType = accountType
         self.statusKey = statusKey
         self._presenter = .init(
             wrappedValue: .init(
@@ -84,17 +92,20 @@ struct VVOCommentScreen: View {
     }
 
     var body: some View {
-        UITimelineCollectionView(
-            data: presenter.state.list,
-            detailStatusKey: statusKey,
-            headerState: presenter.state.root,
-            suppressInitialRefreshIndicator: true
-        )
-        .ignoresSafeArea(edges: .vertical)
-        .frame(maxWidth: horizontalSizeClass == .compact ? .infinity : 600)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .refreshable {
-            try? await presenter.state.refresh()
+        GeometryReader { proxy in
+            UITimelineCollectionView(
+                data: presenter.state.list,
+                detailStatusKey: statusKey,
+                headerState: presenter.state.root,
+                columnCount: TimelineColumnPolicy.adaptive.columnCount(for: proxy.size.width),
+                suppressInitialRefreshIndicator: true,
+                readingKey: "vvo-comment:\(accountType):\(statusKey)"
+            )
+            .ignoresSafeArea(edges: .vertical)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .refreshable {
+                try? await presenter.state.refresh()
+            }
         }
         .background(Color(timelineDisplayMode == .plain ? .clear : .systemGroupedBackground))
     }

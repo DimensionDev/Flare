@@ -4,6 +4,9 @@ import Flow
 import SwiftUI
 
 public struct DiscoverContentScreen<AskAiOverlay: View>: View {
+    @Environment(\.timelineListRenderer) private var listRenderer
+    @State private var listScope = UUID().uuidString
+    @State private var searchGeneration = UUID().uuidString
     @Environment(\.openURL) private var openURL
     @Environment(\.timelineAppearance.aiConfig.agent) private var agentEnabled
     @State private var presenter: KotlinPresenter<DiscoverState>
@@ -32,13 +35,7 @@ public struct DiscoverContentScreen<AskAiOverlay: View>: View {
     }
 
     public var body: some View {
-        List {
-            if searchPresenter.state.searching {
-                searchResultContent
-            } else {
-                discoverContent
-            }
-        }
+        scrollingContent
         .modifier(DiscoverListStyle())
         .refreshable {
             if searchPresenter.state.searching {
@@ -101,11 +98,54 @@ public struct DiscoverContentScreen<AskAiOverlay: View>: View {
                 }
             }
         }
+        .onChange(of: presenter.state.selectedAccount?.key) { _, _ in
+            listScope = UUID().uuidString
+        }
         .onChange(of: presenter.state.selectedAccount) { _, newAccount in
             if let newAccount {
                 searchPresenter.state.setAccount(profile: newAccount)
             }
         }
+    }
+
+    @ViewBuilder
+    private var scrollingContent: some View {
+        if let listRenderer {
+            listRenderer(timelineListRequest)
+        } else {
+            List {
+                if searchPresenter.state.searching {
+                    searchResultContent
+                } else {
+                    discoverContent
+                }
+            }
+        }
+    }
+
+    private var timelineListRequest: TimelineListRequest {
+        let searching = searchPresenter.state.searching
+        let users = searching ? searchPresenter.state.users : presenter.state.users
+        let posts = searching ? searchPresenter.state.status : presenter.state.status
+        var headers: [TimelineListHeader] = []
+        if case .success(let data) = onEnum(of: users) {
+            headers.append(.title(searching ? "local_history_user" : "discover_users"))
+            headers.append(TimelineListHeader(id: "users") { TimelineListUserStrip(users: data) })
+        }
+        if !searching, case .success(let tags) = onEnum(of: presenter.state.hashtags) {
+            headers.append(.title("discover_tags"))
+            headers.append(TimelineListHeader(id: "tags") {
+                DiscoverHashtagSection(hashtagsState: tags, onSelect: commitSearch).content
+                    .padding(.horizontal, 16)
+            })
+        }
+        let showsPosts = !posts.isEmpty && !posts.isError
+        if showsPosts { headers.append(.title(searching ? "local_history_status" : "discover_status")) }
+        return TimelineListRequest(
+            key: "\(listScope):\(searching ? searchGeneration : "discover")",
+            content: showsPosts ? .posts(posts) : .none,
+            headers: headers
+        )
     }
 
     #if os(iOS)
@@ -264,6 +304,7 @@ public struct DiscoverContentScreen<AskAiOverlay: View>: View {
         let query = rawQuery.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !query.isEmpty else { return }
 
+        searchGeneration = UUID().uuidString
         searchText = query
         committedSearchText = query
         searchHistoryPresenter.state.addSearchHistory(keyword: query)
@@ -400,42 +441,46 @@ private struct DiscoverHashtagSection: View {
 
     var body: some View {
         Section {
-            HFlow(spacing: 8) {
-                ForEach(0..<Int(hashtagsState.itemCount), id: \.self) { index in
-                    if let item = hashtagsState.peek(index: Int32(index)) {
-                        Button {
-                            onSelect(item.hashtag)
-                        } label: {
-                            Text(item.hashtag)
-                                .lineLimit(1)
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 8)
-                        }
-                        .buttonStyle(.plain)
-                        .background(
-                            Color.flareSecondarySystemGroupedBackground,
-                            in: RoundedRectangle(cornerRadius: 8, style: .continuous)
-                        )
-                        .onAppear {
-                            _ = hashtagsState.get(index: Int32(index))
-                        }
-                    } else {
-                        Text("#loading", bundle: FlareAppleUILocalization.bundle)
-                            .lineLimit(1)
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 8)
-                            .background(
-                                Color.flareSecondarySystemGroupedBackground,
-                                in: RoundedRectangle(cornerRadius: 8, style: .continuous)
-                            )
-                            .redacted(reason: .placeholder)
-                    }
-                }
-            }
+            content
         } header: {
             Text("discover_tags", bundle: FlareAppleUILocalization.bundle)
         }
         .modifier(DiscoverSectionRowStyle())
+    }
+
+    var content: some View {
+        HFlow(spacing: 8) {
+            ForEach(0..<Int(hashtagsState.itemCount), id: \.self) { index in
+                if let item = hashtagsState.peek(index: Int32(index)) {
+                    Button {
+                        onSelect(item.hashtag)
+                    } label: {
+                        Text(item.hashtag)
+                            .lineLimit(1)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 8)
+                    }
+                    .buttonStyle(.plain)
+                    .background(
+                        Color.flareSecondarySystemGroupedBackground,
+                        in: RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    )
+                    .onAppear {
+                        _ = hashtagsState.get(index: Int32(index))
+                    }
+                } else {
+                    Text("#loading", bundle: FlareAppleUILocalization.bundle)
+                        .lineLimit(1)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 8)
+                        .background(
+                            Color.flareSecondarySystemGroupedBackground,
+                            in: RoundedRectangle(cornerRadius: 8, style: .continuous)
+                        )
+                        .redacted(reason: .placeholder)
+                }
+            }
+        }
     }
 }
 

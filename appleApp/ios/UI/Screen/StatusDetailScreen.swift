@@ -21,9 +21,10 @@ struct StatusDetailScreen: View {
                 data: presenter.state.listState,
                 detailStatusKey: statusKey,
                 key: presenter.key,
-                suppressInitialRefreshIndicator: true
+                suppressInitialRefreshIndicator: true,
+                columnPolicy: .single
             )
-                .frame(maxWidth: horizontalSizeClass == .compact ? .infinity : 600, alignment: .center)
+                .frame(maxWidth: 600, alignment: .center)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color(timelineDisplayMode == .plain ? .clear : .systemGroupedBackground))

@@ -233,11 +233,17 @@ targets:
   iOSTests:
     type: bundle.unit-test
     platform: iOS
+    dependencies:
+      - package: CHTCollectionViewWaterfallLayout
     sources:
       - path: iosTests
       - path: ios/Common/MediaViewerDismissGesturePolicy.swift
       - path: ios/Common/MediaViewerImageLayoutPolicy.swift
       - path: ios/Common/StatusTextContent.swift
+      - path: ios/UI/Component/TimelineCollectionView.swift
+      - path: ios/UI/Component/TimelineLayoutPolicy.swift
+      - path: ios/UI/Component/TimelineScrollPositionStore.swift
+      - path: ios/UI/Component/TimelineHostedAccessoryView.swift
       - path: Shared/FlareAppleCore/Sources/FlareAppleUI/TimelineAutoplayPolicy.swift
       - path: Shared/FlareAppleCore/Sources/FlareAppleUI/TimelinePlaybackCoordinator.swift
       - path: Shared/FlareAppleCore/Sources/FlareAppleUI/VideoPlaybackArbiter.swift

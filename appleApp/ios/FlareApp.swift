@@ -30,6 +30,7 @@ struct FlareApp: App {
                     BackportFlareRoot()
                 }
             }
+            .modifier(IOSTimelineListEnvironment())
             .onChange(of: scenePhase) { _, phase in
                 MediaCacheMaintenance.handleScenePhase(phase)
             }

@@ -39,7 +39,7 @@ struct TimelineScreen: View {
         UITimelinePagingView(
             data: presenter.state.listState,
             detailStatusKey: nil,
-            key: presenter.key,
+            key: "timeline:\(tabItem.id):\(tabItem.loaderKey)",
             allowGalleryMode: allowGalleryMode,
             accessoryItems: accessoryItems,
             onIsAtTopChanged: { isAtTop = $0 }

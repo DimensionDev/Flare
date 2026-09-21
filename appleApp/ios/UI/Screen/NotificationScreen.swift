@@ -7,6 +7,8 @@ import SwiftUIBackports
 import FlareAppleCore
 
 struct NotificationScreen: View {
+    @Environment(\.timelineScrollPositions) private var scrollPositions
+    @Environment(\.timelineAccountScope) private var accountScope
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @State private var presenter: KotlinPresenter<AllNotificationPresenterState> = .init(presenter: AllNotificationPresenter())
     @State private var selectedAccountStableKey: String?
@@ -55,7 +57,7 @@ struct NotificationScreen: View {
 
     private var timelineKey: String {
         [
-            presenter.key,
+            "notifications",
             presenterSelectedAccountStableKey ?? "none",
             presenterSelectedFilterStableKey ?? "none",
         ].joined(separator: "::")
@@ -168,6 +170,7 @@ struct NotificationScreen: View {
         else {
             return
         }
+        scrollPositions?.removePositions(withPrefix: "\(accountScope):notifications::\(selectedAccountStableKey)::")
         presenter.state.setAccount(profile: profile)
     }
 

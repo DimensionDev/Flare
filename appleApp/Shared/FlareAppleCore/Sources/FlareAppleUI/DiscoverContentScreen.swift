@@ -67,6 +67,9 @@ public struct DiscoverContentScreen<AskAiOverlay: View>: View {
 
             #if os(iOS)
             accountToolbarItem
+            if #available(iOS 26.0, *) {
+                DefaultToolbarItem(kind: .search, placement: .bottomBar)
+            }
             #elseif os(macOS)
             macAccountToolbarItem
             #endif

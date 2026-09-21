@@ -178,8 +178,12 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         scrollPositions = store
         pendingSavedPosition = key.map { store?[$0] ?? .top }
         lastRestorationLoadCount = nil
+        isSnapshotReadyForReadingPosition = false
+        snapshotPreparationGeneration += 1
         collectionView?.resetReadingPosition()
     }
+
+    var hasPendingReadingPosition: Bool { pendingSavedPosition != nil }
 
     var hasSavedReadingPosition: Bool {
         guard let readingKey else { return false }

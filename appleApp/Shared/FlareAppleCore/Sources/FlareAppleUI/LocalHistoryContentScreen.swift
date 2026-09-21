@@ -5,7 +5,7 @@ import SwiftUI
 public struct LocalHistoryContentScreen<AskAiOverlay: View>: View {
     @Environment(\.timelineListRenderer) private var listRenderer
     @State private var listScope = UUID().uuidString
-    @State private var searchGeneration = UUID().uuidString
+    @State private var searchPresenter = KotlinPresenter(presenter: LocalCacheSearchPresenter())
     @Environment(\.timelineAppearance.aiConfig.agent) private var agentEnabled
     @State private var presenter = KotlinPresenter(presenter: LocalCacheSearchPresenter())
     @State private var searchText = ""
@@ -66,6 +66,12 @@ public struct LocalHistoryContentScreen<AskAiOverlay: View>: View {
         .onSubmit(of: .search) {
             submitSearch()
         }
+        .onChange(of: normalizedSearchText) { _, query in
+            if listRenderer != nil, query.isEmpty {
+                committedQuery = ""
+                searchPresenter = KotlinPresenter(presenter: LocalCacheSearchPresenter())
+            }
+        }
     }
 
     @ViewBuilder
@@ -86,12 +92,12 @@ public struct LocalHistoryContentScreen<AskAiOverlay: View>: View {
     private var timelineListRequest: TimelineListRequest {
         let content: TimelineListRequest.Content
         if selection == .status {
-            content = .posts(committedQuery.isEmpty ? presenter.state.history : presenter.state.data)
+            content = .posts(committedQuery.isEmpty ? presenter.state.history : searchPresenter.state.data)
         } else {
-            content = .users(committedQuery.isEmpty ? presenter.state.userHistory : presenter.state.searchUser)
+            content = .users(committedQuery.isEmpty ? presenter.state.userHistory : searchPresenter.state.searchUser)
         }
         return TimelineListRequest(
-            key: "\(listScope):\(searchGeneration):\(selection)",
+            key: "\(listScope):\(committedQuery.isEmpty ? "history" : searchPresenter.key):\(selection)",
             content: content
         )
     }
@@ -119,9 +125,17 @@ public struct LocalHistoryContentScreen<AskAiOverlay: View>: View {
     }
 
     private func submitSearch() {
-        committedQuery = normalizedSearchText
-        searchGeneration = UUID().uuidString
-        presenter.state.setQuery(value: normalizedSearchText)
+        let query = normalizedSearchText
+        if listRenderer != nil {
+            if !query.isEmpty {
+                let source = KotlinPresenter(presenter: LocalCacheSearchPresenter())
+                source.state.setQuery(value: query)
+                searchPresenter = source
+            }
+            committedQuery = query
+        } else {
+            presenter.state.setQuery(value: query)
+        }
     }
 
     private func askAi() {

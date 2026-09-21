@@ -6,7 +6,6 @@ import SwiftUI
 public struct DiscoverContentScreen<AskAiOverlay: View>: View {
     @Environment(\.timelineListRenderer) private var listRenderer
     @State private var listScope = UUID().uuidString
-    @State private var searchGeneration = UUID().uuidString
     @Environment(\.openURL) private var openURL
     @Environment(\.timelineAppearance.aiConfig.agent) private var agentEnabled
     @State private var presenter: KotlinPresenter<DiscoverState>
@@ -91,7 +90,7 @@ public struct DiscoverContentScreen<AskAiOverlay: View>: View {
         .onChange(of: searchText) {
             if isSearchPresented && searchText.isEmpty {
                 committedSearchText = ""
-                searchPresenter.state.search(query: "")
+                search(query: "")
             } else if !isSearchPresented && searchText.isEmpty && !committedSearchText.isEmpty {
                 DispatchQueue.main.async {
                     searchText = committedSearchText
@@ -100,9 +99,12 @@ public struct DiscoverContentScreen<AskAiOverlay: View>: View {
         }
         .onChange(of: presenter.state.selectedAccount?.key) { _, _ in
             listScope = UUID().uuidString
+            if listRenderer != nil {
+                search(query: committedSearchText)
+            }
         }
         .onChange(of: presenter.state.selectedAccount) { _, newAccount in
-            if let newAccount {
+            if listRenderer == nil, let newAccount {
                 searchPresenter.state.setAccount(profile: newAccount)
             }
         }
@@ -142,7 +144,7 @@ public struct DiscoverContentScreen<AskAiOverlay: View>: View {
         let showsPosts = !posts.isEmpty && !posts.isError
         if showsPosts { headers.append(.title(searching ? "local_history_status" : "discover_status")) }
         return TimelineListRequest(
-            key: "\(listScope):\(searching ? searchGeneration : "discover")",
+            key: "\(listScope):\(searching ? searchPresenter.key : "discover")",
             content: showsPosts ? .posts(posts) : .none,
             headers: headers
         )
@@ -163,7 +165,9 @@ public struct DiscoverContentScreen<AskAiOverlay: View>: View {
                             }, set: { value in
                                 if value {
                                     presenter.state.setAccount(profile: account)
-                                    searchPresenter.state.setAccount(profile: account)
+                                    if listRenderer == nil {
+                                        searchPresenter.state.setAccount(profile: account)
+                                    }
                                 }
                             })) {
                                 Label {
@@ -304,12 +308,22 @@ public struct DiscoverContentScreen<AskAiOverlay: View>: View {
         let query = rawQuery.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !query.isEmpty else { return }
 
-        searchGeneration = UUID().uuidString
         searchText = query
         committedSearchText = query
         searchHistoryPresenter.state.addSearchHistory(keyword: query)
-        searchPresenter.state.search(query: query)
+        search(query: query)
         isSearchPresented = false
+    }
+
+    private func search(query: String) {
+        guard listRenderer != nil else {
+            searchPresenter.state.search(query: query)
+            return
+        }
+        let accountType = presenter.state.selectedAccount.map {
+            AccountType.Specific(accountKey: $0.key)
+        } ?? presenter.state.selectedAccountType
+        searchPresenter = KotlinPresenter(presenter: SearchPresenter(accountType: accountType, initialQuery: query))
     }
 
     private func askAi() {

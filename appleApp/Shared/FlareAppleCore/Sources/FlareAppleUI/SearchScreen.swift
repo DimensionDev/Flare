@@ -5,7 +5,7 @@ import FlareAppleCore
 public struct SearchScreen: View {
     @Environment(\.timelineListRenderer) private var listRenderer
     @State private var listScope = UUID().uuidString
-    @State private var searchGeneration = UUID().uuidString
+    @State private var searchAccountType: AccountType
     @Environment(\.openURL) private var openURL
     @Environment(\.timelineAppearance.aiConfig.agent) private var agentEnabled
     private let onAskAi: (String?) -> Void
@@ -25,6 +25,7 @@ public struct SearchScreen: View {
         onAskAi: @escaping (String?) -> Void = { _ in }
     ) {
         self.onAskAi = onAskAi
+        self._searchAccountType = .init(initialValue: accountType)
         self._searchPresenter = .init(wrappedValue: .init(presenter: SearchPresenter(accountType: accountType, initialQuery: initialQuery)))
         self._searchHistoryPresenter = .init(wrappedValue: .init(presenter: SearchHistoryPresenter()))
         self.searchText = initialQuery
@@ -80,17 +81,13 @@ public struct SearchScreen: View {
         .detectScrolling()
         .onChange(of: searchText) {
             if isSearchPresented && searchText.isEmpty {
-                searchGeneration = UUID().uuidString
                 committedSearchText = ""
-                searchPresenter.state.search(query: "")
+                search(query: "")
             } else if !isSearchPresented && searchText.isEmpty && !committedSearchText.isEmpty {
                 DispatchQueue.main.async {
                     searchText = committedSearchText
                 }
             }
-        }
-        .onChange(of: searchPresenter.state.selectedAccount?.key) { _, _ in
-            searchGeneration = UUID().uuidString
         }
         .onAppear {
             guard !didRecordInitialQuery else { return }
@@ -106,12 +103,25 @@ public struct SearchScreen: View {
         let query = rawQuery.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !query.isEmpty else { return }
 
-        searchGeneration = UUID().uuidString
         searchText = query
         committedSearchText = query
         searchHistoryPresenter.state.addSearchHistory(keyword: query)
-        searchPresenter.state.search(query: query)
+        search(query: query)
         isSearchPresented = false
+    }
+
+    private func search(query: String, accountType: AccountType? = nil) {
+        guard listRenderer != nil else {
+            searchPresenter.state.search(query: query)
+            return
+        }
+        let accountType = accountType ?? searchPresenter.state.selectedAccount.map {
+            AccountType.Specific(accountKey: $0.key)
+        } ?? searchAccountType
+        searchAccountType = accountType
+        // The source and its reading key change together. The previous query's
+        // asynchronous results cannot consume the new query's top reset.
+        searchPresenter = KotlinPresenter(presenter: SearchPresenter(accountType: accountType, initialQuery: query))
     }
 
     private func askAi() {
@@ -176,7 +186,7 @@ public struct SearchScreen: View {
         }
         headers.append(.title("local_history_status"))
         return TimelineListRequest(
-            key: "\(listScope):\(searchGeneration)",
+            key: "\(listScope):\(searchPresenter.key)",
             content: .posts(searchPresenter.state.status),
             headers: headers
         )
@@ -196,7 +206,11 @@ public struct SearchScreen: View {
                                 searchPresenter.state.selectedAccount?.key == account.key
                             }, set: { value in
                                 if value {
-                                    searchPresenter.state.setAccount(profile: account)
+                                    if listRenderer != nil {
+                                        search(query: committedSearchText, accountType: AccountType.Specific(accountKey: account.key))
+                                    } else {
+                                        searchPresenter.state.setAccount(profile: account)
+                                    }
                                 }
                             })) {
                                 Label {

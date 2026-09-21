@@ -1332,6 +1332,7 @@ private final class ProfileTimelinePagerViewController: UIViewController,
         _ page: UITimelineCollectionViewController,
         oldEffectiveOffset: CGFloat? = nil
     ) {
+        let hasPendingReadingPosition = page.hasPendingReadingPosition
         let topInset = headerHeight + pickerHeight
         let insetChanged = abs(page.topContentInset - topInset) > 0.5
         if insetChanged {
@@ -1340,7 +1341,7 @@ private final class ProfileTimelinePagerViewController: UIViewController,
         if abs(page.minimumVerticalScrollDistance - collapseDistance) > 0.5 {
             page.minimumVerticalScrollDistance = collapseDistance
         }
-        if insetChanged, let oldEffectiveOffset,
+        if insetChanged, !hasPendingReadingPosition, let oldEffectiveOffset,
            !page.restoresScrollAnchorOnSnapshotChanges || oldEffectiveOffset <= collapseDistance {
             page.restoreEffectiveContentOffset(oldEffectiveOffset, animated: false)
         }

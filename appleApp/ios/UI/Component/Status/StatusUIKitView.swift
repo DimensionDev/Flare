@@ -999,9 +999,11 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
                 showNumbers: appearance.showNumbers,
                 isDetail: isDetail
             )
-            let actionsContainer = resolvedActionsContainer()
-            actionsContainer.content = actionsView
-            append(actionsContainer, before: 8)
+            if actionsView.hasVisibleActions {
+                let actionsContainer = resolvedActionsContainer()
+                actionsContainer.content = actionsView
+                append(actionsContainer, before: 8)
+            }
         }
 
         return items

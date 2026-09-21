@@ -6,7 +6,6 @@ import dev.dimension.flare.data.datasource.microblog.PostActionFamily
 import dev.dimension.flare.data.datasource.microblog.PostActionLayoutConfig
 import dev.dimension.flare.data.datasource.microblog.applyPostActionLayout
 import dev.dimension.flare.data.translation.PreTranslationStoreSupport
-import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.TranslationDisplayState
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiTimelineV2
@@ -17,13 +16,11 @@ import dev.dimension.flare.ui.render.toUiPlainText
 import kotlinx.collections.immutable.persistentListOf
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertIs
 import kotlin.test.assertNull
 
 class TranslationDisplayTest {
     @Test
-    fun skippedEmptyPostKeepsTranslateSlotInButtonRow() {
+    fun skippedEmptyPostOmitsUnavailableTranslateAction() {
         val post =
             createSampleStatus(createSampleUser()).copy(
                 content = UiTranslatableText("".toUiPlainText()),
@@ -67,11 +64,7 @@ class TranslationDisplayTest {
                 ),
             )
 
-        val translate = assertIs<ActionMenu.Item>(actions.first())
-        assertEquals(PostActionFamily.Translate, translate.actionFamily)
-        assertEquals(UiIcon.Translate, translate.icon)
-        assertEquals(ClickEvent.Noop, translate.clickEvent)
-        assertFalse(translate.enabled)
+        assertEquals(post.actions, actions)
         assertEquals(post.actions, displayed.actions)
     }
 

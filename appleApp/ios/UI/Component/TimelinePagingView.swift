@@ -60,6 +60,7 @@ struct UITimelinePagingView: View {
                 )
                 .ignoresSafeArea(edges: .vertical)
             }
+            .modifier(TimelineListBackground(columnPolicy: columnPolicy))
         }
     }
 }

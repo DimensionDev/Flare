@@ -51,6 +51,7 @@ private struct IOSTimelineList: View {
             )
             .ignoresSafeArea(edges: .vertical)
         }
+        .modifier(TimelineListBackground(columnPolicy: .adaptive))
     }
 
     private var posts: PagingState<UiTimelineV2>? {

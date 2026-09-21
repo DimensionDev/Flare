@@ -119,6 +119,15 @@ struct TimelineUIKitAppearance: Equatable {
         timelineDisplayMode == .card
     }
 
+    static func backgroundColor(
+        displayMode: TimelineDisplayMode,
+        isMultipleColumn: Bool,
+        usesGroupedBackgroundOverride: Bool? = nil
+    ) -> UIColor {
+        let usesGroupedBackground = usesGroupedBackgroundOverride ?? (displayMode == .card || isMultipleColumn)
+        return usesGroupedBackground ? .systemGroupedBackground : .systemBackground
+    }
+
     init(
         timeline: TimelineAppearance,
         fontSizeDiff: Float = 0,

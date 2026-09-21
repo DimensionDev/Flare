@@ -997,11 +997,11 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     }
 
     private func updateBackgroundColors() {
-        let usesGroupedBackground = usesGroupedBackgroundOverride ?? (
-            appearance.usesCardBackground ||
-                (columnCount > 1 && contentKind != .profileMedia)
+        let backgroundColor = TimelineUIKitAppearance.backgroundColor(
+            displayMode: appearance.timelineDisplayMode,
+            isMultipleColumn: columnCount > 1 && contentKind != .profileMedia,
+            usesGroupedBackgroundOverride: usesGroupedBackgroundOverride
         )
-        let backgroundColor: UIColor = usesGroupedBackground ? .systemGroupedBackground : .systemBackground
         view.backgroundColor = backgroundColor
         collectionView.backgroundColor = backgroundColor
     }

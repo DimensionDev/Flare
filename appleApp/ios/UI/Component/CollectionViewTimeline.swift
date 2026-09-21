@@ -1598,13 +1598,17 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
 
     @discardableResult
     private func restoreScrollAnchorIfNeeded(_ anchor: ScrollAnchor?) -> Bool {
-        guard let anchor,
+        guard !isRestoringScrollAnchor,
+              let anchor,
               isViewLoaded,
               allowsScrollAnchorRestoration,
               let indexPath = dataSource.indexPath(for: anchor.itemID) else {
             return false
         }
 
+        // Layout can synchronously trigger scrollViewDidScroll and another restoration.
+        isRestoringScrollAnchor = true
+        defer { isRestoringScrollAnchor = false }
         view.layoutIfNeeded()
         collectionView.layoutIfNeeded()
 
@@ -1615,9 +1619,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         let targetOffsetY = attributes.frame.minY - anchor.distanceFromViewportTop
         let targetOffset = CGPoint(x: collectionView.contentOffset.x, y: clampedContentOffsetY(targetOffsetY))
         if abs(collectionView.contentOffset.y - targetOffset.y) > 0.5 {
-            isRestoringScrollAnchor = true
             collectionView.setContentOffset(targetOffset, animated: false)
-            isRestoringScrollAnchor = false
         }
         return true
     }
@@ -1945,7 +1947,10 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         let newSignature = plan.signature
         let previousSignature = lastAppliedSignature
         let headerChanged = previousSignature?.headerIDs != newSignature.headerIDs
-        let scrollAnchor = restoresScrollAnchorOnSnapshotChanges &&
+        // Other lists restore in TimelineCollectionView. Two anchors can repeatedly
+        // undo each other's content offset when a snapshot prepends items at the top.
+        let scrollAnchor = !collectionView.preservesReadingPosition &&
+            restoresScrollAnchorOnSnapshotChanges &&
             pendingSavedPosition == nil &&
             pendingEffectiveContentOffsetYAfterSnapshot == nil &&
             previousSignature != nil &&

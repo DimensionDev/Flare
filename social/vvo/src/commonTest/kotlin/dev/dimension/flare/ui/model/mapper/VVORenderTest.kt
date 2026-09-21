@@ -149,19 +149,14 @@ class VVORenderTest {
 
         assertEquals(
             listOf(
-                PostActionFamily.Reply,
                 PostActionFamily.Comment,
                 PostActionFamily.Quote,
                 PostActionFamily.Like,
-                PostActionFamily.React,
             ),
             actions.map { assertIs<ActionMenu.Item>(it).actionFamily },
         )
-        assertEquals(
-            listOf(PostActionFamily.Reply, PostActionFamily.React),
-            actions.filterIsInstance<ActionMenu.Item>().filterNot { it.enabled }.map { it.actionFamily },
-        )
-        assertEquals(quote, actions[2])
+        assertTrue(actions.all { it in post.actions })
+        assertEquals(quote, actions[1])
 
         val hiddenConfig = PostActionLayoutHelpers.moveTo(config, PostActionFamily.Repost, PostActionPlacement.Hidden)
         assertEquals(

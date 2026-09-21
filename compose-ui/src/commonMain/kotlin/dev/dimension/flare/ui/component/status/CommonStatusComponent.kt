@@ -483,7 +483,6 @@ public fun CommonStatusComponent(
                 )
             }
             if (appearanceSettings.postActionStyle != PostActionStyle.Hidden || isDetail) {
-                Spacer(modifier = Modifier.height(8.dp))
                 if (isDetail) {
                     CompositionLocalProvider(
                         PlatformContentColor provides PlatformTheme.colorScheme.text,
@@ -493,7 +492,8 @@ public fun CommonStatusComponent(
                             item.actions,
                             modifier =
                                 Modifier
-                                    .fillMaxWidth(),
+                                    .fillMaxWidth()
+                                    .padding(top = 8.dp),
                         )
                     }
                 } else {
@@ -505,7 +505,8 @@ public fun CommonStatusComponent(
                             item.actions,
                             modifier =
                                 Modifier
-                                    .fillMaxWidth(),
+                                    .fillMaxWidth()
+                                    .padding(top = 8.dp),
                         )
                     }
                 }
@@ -967,6 +968,7 @@ internal fun StatusActions(
         remember(items, appearanceSettings.postActionLayout) {
             items.applyPostActionLayout(appearanceSettings.postActionLayout)
         }
+    if (displayItems.isEmpty()) return
     val haptics = LocalHapticFeedback.current
     val launcher = LocalUriHandler.current
     Row(

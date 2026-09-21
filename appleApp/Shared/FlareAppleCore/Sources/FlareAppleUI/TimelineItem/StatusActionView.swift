@@ -30,12 +30,20 @@ public struct StatusActionsView: View {
     private let useText: Bool
     private let allowSpacer: Bool
     private let applyPostActionLayout: Bool
+    private let topPadding: CGFloat
 
-    public init(data: [ActionMenu], useText: Bool, allowSpacer: Bool = true, applyPostActionLayout: Bool = true) {
+    public init(
+        data: [ActionMenu],
+        useText: Bool,
+        allowSpacer: Bool = true,
+        applyPostActionLayout: Bool = true,
+        topPadding: CGFloat = 0
+    ) {
         self.data = data
         self.useText = useText
         self.allowSpacer = allowSpacer
         self.applyPostActionLayout = applyPostActionLayout
+        self.topPadding = topPadding
     }
 
     public var body: some View {
@@ -51,7 +59,7 @@ public struct StatusActionsView: View {
                     openURL: openURL
                 )
             }
-        } else {
+        } else if !actions.isEmpty {
             HStack(spacing: postActionStyle == .stretch ? nil : 4) {
                 ForEach(0..<actions.count, id: \.self) { index in
                     let item = actions[index]
@@ -73,6 +81,7 @@ public struct StatusActionsView: View {
                 }
             }
             .labelIconToTitleSpacingIfAvailable(2)
+            .padding(.top, topPadding)
         }
     }
 

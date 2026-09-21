@@ -8,7 +8,6 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertIs
-import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 class PostActionLayoutConfigTest {
@@ -162,7 +161,7 @@ class PostActionLayoutConfigTest {
     }
 
     @Test
-    fun unavailableActionsKeepTheirConfiguredPositions() {
+    fun unavailableActionsAreOmittedWithoutChangingAvailableActionOrder() {
         val reply = action(PostActionFamily.Reply, UiIcon.Reply)
         val like = action(PostActionFamily.Like, UiIcon.Like)
         val families = PostActionLayoutHelpers.allEditableFamilies.reversed()
@@ -174,28 +173,85 @@ class PostActionLayoutConfigTest {
 
         val result = persistentListOf(reply, like).applyPostActionLayout(config)
 
-        assertEquals(families.size, result.size)
-        families.zip(result).forEach { (family, action) ->
-            val item = assertIs<ActionMenu.Item>(action)
-            assertEquals(family, item.actionFamily)
-            when (family) {
-                PostActionFamily.Reply -> {
-                    assertEquals(reply, item)
-                }
-
-                PostActionFamily.Like -> {
-                    assertEquals(like, item)
-                }
-
-                else -> {
-                    assertFalse(item.enabled)
-                    assertEquals(ClickEvent.Noop, item.clickEvent)
-                    assertNotNull(item.icon)
-                    assertIs<ActionMenu.Item.Text.Localized>(item.text)
-                }
-            }
-        }
+        assertEquals(listOf<ActionMenu>(like, reply), result)
         assertEquals(result, result.applyPostActionLayout(config))
+    }
+
+    @Test
+    fun standaloneQuoteDoesNotGenerateUnavailableReply() {
+        val quote = action(PostActionFamily.Quote, UiIcon.Quote)
+        val config =
+            PostActionLayoutConfig(
+                enabled = true,
+                primary = persistentListOf(PostActionFamily.Repost, PostActionFamily.Reply),
+            )
+
+        assertEquals(listOf<ActionMenu>(quote), persistentListOf(quote).applyPostActionLayout(config))
+    }
+
+    @Test
+    fun favoriteWithBookmarkIconDoesNotGenerateUnavailableBookmark() {
+        val favorite = action(PostActionFamily.Favorite, UiIcon.Bookmark)
+        val actions = persistentListOf(ActionMenu.Group(displayItem = moreItem(), actions = persistentListOf(favorite)))
+        val config =
+            PostActionLayoutConfig(
+                enabled = true,
+                primary = persistentListOf(PostActionFamily.Bookmark, PostActionFamily.Favorite),
+            )
+
+        assertEquals(listOf<ActionMenu>(favorite), actions.applyPostActionLayout(config))
+    }
+
+    @Test
+    fun existingActionsWithTheSameIconRemainDistinct() {
+        val bookmark = action(PostActionFamily.Bookmark, UiIcon.Bookmark)
+        val favorite = action(PostActionFamily.Favorite, UiIcon.Bookmark)
+        val actions = persistentListOf(bookmark, favorite)
+        val config =
+            PostActionLayoutConfig(
+                enabled = true,
+                primary = persistentListOf(PostActionFamily.Favorite, PostActionFamily.Bookmark),
+            )
+
+        assertEquals(listOf<ActionMenu>(favorite, bookmark), actions.applyPostActionLayout(config))
+    }
+
+    @Test
+    fun existingDisabledAndNoopActionsKeepTheirState() {
+        val disabled = action(PostActionFamily.Reply, UiIcon.Reply).copy(enabled = false)
+        val translating = action(PostActionFamily.Translate, UiIcon.Translate).copy(clickEvent = ClickEvent.Noop)
+        val config =
+            PostActionLayoutConfig(
+                enabled = true,
+                primary = persistentListOf(PostActionFamily.Reply, PostActionFamily.Translate, PostActionFamily.Like),
+            )
+
+        assertEquals(
+            listOf<ActionMenu>(disabled, translating),
+            persistentListOf(disabled, translating).applyPostActionLayout(config),
+        )
+    }
+
+    @Test
+    fun emptyOrFullyHiddenActionsDoNotGenerateButtons() {
+        val reply = action(PostActionFamily.Reply, UiIcon.Reply)
+        val config = PostActionLayoutConfig(enabled = true)
+
+        assertTrue(persistentListOf<ActionMenu>().applyPostActionLayout(config).isEmpty())
+        assertTrue(
+            persistentListOf(reply)
+                .applyPostActionLayout(config.copy(hidden = persistentListOf(PostActionFamily.Reply)))
+                .isEmpty(),
+        )
+    }
+
+    @Test
+    fun unavailablePrimaryActionsKeepRemainingActionsInMoreMenu() {
+        val share = action(PostActionFamily.Share, UiIcon.Share)
+        val unknown = ActionMenu.Item(icon = UiIcon.Info)
+        val actions = persistentListOf(ActionMenu.Group(displayItem = moreItem(), actions = persistentListOf(share, unknown)))
+
+        assertEquals(actions, actions.applyPostActionLayout(PostActionLayoutConfig(enabled = true)))
     }
 
     @Test

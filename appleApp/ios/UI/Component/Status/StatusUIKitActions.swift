@@ -10,6 +10,8 @@ import FlareAppleCore
 final class StatusActionsUIView: UIView, ManualLayoutMeasurable, TimelineHeightProviding {
     var onOpenURL: ((URL) -> Void)?
 
+    var hasVisibleActions: Bool { !managedChildren.isEmpty }
+
     private var managedChildren: [UIView] = []
 
     // Inputs

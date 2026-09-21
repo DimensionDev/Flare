@@ -27,6 +27,8 @@ final class TimelineCollectionView: UICollectionView {
     private var readingPosition: ReadingPosition?
     private var isRestoringReadingPosition = false
 
+    var hasReadingPosition: Bool { readingPosition != nil }
+
     override var frame: CGRect {
         willSet {
             // Setting frame can resize bounds without calling its setter.
@@ -53,12 +55,21 @@ final class TimelineCollectionView: UICollectionView {
         readingPosition = captureReadingPosition()
     }
 
+    func prepareForSnapshotChange() {
+        guard preservesReadingPosition,
+              !isRestoringReadingPosition,
+              !isTracking, !isDragging, !isDecelerating else { return }
+
+        // An explicit jump to the top applies to the loaded snapshot. Once items
+        // are visible, later snapshots must preserve their IDs instead.
+        if readingPosition?.itemID == nil {
+            readingPosition = captureReadingPosition()
+        }
+    }
+
     func captureReadingPosition() -> ReadingPosition? {
         guard bounds.width > 1, bounds.height > 1 else { return nil }
         let viewportTop = contentOffset.y + (readingTopInset?() ?? adjustedContentInset.top)
-        if contentOffset.y + adjustedContentInset.top <= 1 {
-            return .top
-        }
         let viewportBottom = contentOffset.y + bounds.height - adjustedContentInset.bottom
         let firstItem = indexPathsForVisibleItems.compactMap { indexPath -> (id: String, frame: CGRect)? in
             guard let id = readingItemID?(indexPath),
@@ -79,7 +90,9 @@ final class TimelineCollectionView: UICollectionView {
                 itemOrder: readingItemIDs?() ?? [firstItem.id]
             )
         }
-        return nil
+        // Without a visible item (for example during initial loading), keep the
+        // top as a fallback rather than treating it as a permanent reading anchor.
+        return contentOffset.y + adjustedContentInset.top <= 1 ? .top : nil
     }
 
     func restoreReadingPosition(_ position: ReadingPosition) {

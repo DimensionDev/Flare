@@ -342,7 +342,11 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
             }
             guard isViewLoaded else { return }
             if restoresScrollAnchorOnSnapshotChanges && pendingSavedPosition == nil {
-                collectionView.prepareForLayoutChange()
+                if oldIDs == newIDs {
+                    collectionView.prepareForLayoutChange()
+                } else {
+                    collectionView.prepareForSnapshotChange()
+                }
             }
             collectionView.collectionViewLayout.invalidateLayout()
             if oldIDs == newIDs {
@@ -1963,7 +1967,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         if restoresScrollAnchorOnSnapshotChanges, pendingSavedPosition == nil,
            previousSignature != nil, previousSignature != newSignature,
            pendingEffectiveContentOffsetYAfterSnapshot == nil {
-            collectionView.prepareForLayoutChange()
+            collectionView.prepareForSnapshotChange()
         }
         if plan.isInitialLoading, previousSignature != nil,
            pendingSavedPosition == nil, pendingEffectiveContentOffsetYAfterSnapshot == nil,
@@ -2026,6 +2030,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
                     !refreshControl.isRefreshing &&
                     pendingEffectiveContentOffsetYAfterSnapshot == nil &&
                     scrollAnchor == nil &&
+                    !collectionView.hasReadingPosition &&
                     !collectionView.isDragging &&
                     !collectionView.isDecelerating
 

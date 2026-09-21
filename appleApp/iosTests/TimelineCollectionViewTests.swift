@@ -106,12 +106,59 @@ final class TimelineCollectionViewTests: XCTestCase {
         let fixture = Fixture(width: 700, columns: 2)
         fixture.scroll(to: 2_000)
         let position = try fixture.readingPosition()
-        fixture.collectionView.prepareForLayoutChange()
+        fixture.collectionView.prepareForSnapshotChange()
         var snapshot = fixture.dataSource.snapshot()
         snapshot.insertItems(["200", "201", "202"], beforeItem: "0")
         fixture.dataSource.apply(snapshot, animatingDifferences: false)
         fixture.settle()
         try fixture.assertPosition(position)
+    }
+
+    func testPrependingAtTheTopKeepsThePreviouslyVisibleItem() throws {
+        let fixture = Fixture(width: 390, columns: 1)
+        fixture.collectionView.contentInset.top = 88
+        fixture.scroll(to: -88)
+        let position = try fixture.readingPosition()
+
+        fixture.collectionView.prepareForSnapshotChange()
+        var snapshot = fixture.dataSource.snapshot()
+        snapshot.insertItems(["200", "201"], beforeItem: "0")
+        fixture.dataSource.apply(snapshot, animatingDifferences: false)
+        fixture.settle()
+
+        try fixture.assertPosition(position)
+    }
+
+    func testPrependingAfterResizingAtTheTopKeepsTheVisibleItem() throws {
+        let fixture = Fixture(width: 390, columns: 1)
+        fixture.resize(width: 700, columns: 2)
+        let position = try fixture.readingPosition()
+
+        fixture.collectionView.prepareForSnapshotChange()
+        var snapshot = fixture.dataSource.snapshot()
+        snapshot.insertItems(["200", "201", "202"], beforeItem: "0")
+        fixture.dataSource.apply(snapshot, animatingDifferences: false)
+        fixture.settle()
+
+        try fixture.assertPosition(position)
+    }
+
+    func testPrependingAfterAnExplicitTopRestoreKeepsTheLoadedItem() throws {
+        let fixture = Fixture(width: 390, columns: 1)
+        fixture.scroll(to: 2_000)
+        fixture.collectionView.restoreReadingPosition(.top)
+        fixture.settle()
+        XCTAssertEqual(fixture.collectionView.contentOffset.y, 0, accuracy: 0.5)
+        let position = try fixture.readingPosition()
+
+        for id in ["200", "201"] {
+            fixture.collectionView.prepareForSnapshotChange()
+            var snapshot = fixture.dataSource.snapshot()
+            snapshot.insertItems([id], beforeItem: snapshot.itemIdentifiers[0])
+            fixture.dataSource.apply(snapshot, animatingDifferences: false)
+            fixture.settle()
+            try fixture.assertPosition(position)
+        }
     }
 
     func testResizingUsesOneLayoutInstanceEvenForSingleColumn() throws {

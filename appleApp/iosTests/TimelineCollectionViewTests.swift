@@ -173,6 +173,214 @@ final class TimelineCollectionViewTests: XCTestCase {
         try fixture.assertPosition(position)
     }
 
+    func testRefreshKeepsItsIndicatorAndReadingItemThroughHeightAndSnapshotChanges() async throws {
+        let fixture = Fixture(width: 390, columns: 1)
+        let window = fixture.showInWindow()
+        defer { window.isHidden = true }
+        let view = fixture.collectionView
+        view.setTopContentInset(52)
+        fixture.scroll(to: -52)
+        let position = try fixture.readingPosition()
+        view.refreshControl = UIRefreshControl()
+
+        view.beginRefreshing(revealingIndicator: true)
+        try await Task.sleep(for: .milliseconds(80))
+        view.prepareForLayoutChange()
+        fixture.extraHeight = 35
+        view.collectionViewLayout.invalidateLayout()
+        // A repeated SwiftUI update must not overwrite UIKit's refresh inset.
+        view.setTopContentInset(52)
+        view.layoutIfNeeded()
+        try await Task.sleep(for: .milliseconds(400))
+        XCTAssertLessThan(view.contentOffset.y, -82)
+
+        view.prepareForSnapshotChange()
+        var snapshot = fixture.dataSource.snapshot()
+        snapshot.insertItems(["200", "201"], beforeItem: "0")
+        await fixture.dataSource.apply(snapshot, animatingDifferences: false)
+        fixture.settle()
+        try fixture.assertPosition(position)
+
+        view.endRefreshing()
+        try await Task.sleep(for: .milliseconds(400))
+        fixture.settle()
+        XCTAssertEqual(view.contentInset.top, 52, accuracy: 0.5)
+        XCTAssertFalse(view.isPresentingRefresh)
+        try fixture.assertPosition(position)
+    }
+
+    func testInsetsAndColumnsCanChangeWhileRefreshing() async throws {
+        let fixture = Fixture(width: 390, columns: 1)
+        let window = fixture.showInWindow()
+        defer { window.isHidden = true }
+        let view = fixture.collectionView
+        view.setTopContentInset(52)
+        fixture.scroll(to: -52)
+        let position = try fixture.readingPosition()
+        view.refreshControl = UIRefreshControl()
+        view.beginRefreshing(revealingIndicator: true)
+        let refreshInset = view.contentInset.top - 52
+
+        view.prepareForLayoutChange()
+        view.setTopContentInset(88)
+        fixture.resize(width: 900, columns: 3)
+        XCTAssertEqual(view.contentInset.top, 88 + refreshInset, accuracy: 0.5)
+        try await Task.sleep(for: .milliseconds(400))
+        try fixture.assertPosition(position)
+        view.endRefreshing()
+        try await Task.sleep(for: .milliseconds(400))
+        XCTAssertEqual(view.contentInset.top, 88, accuracy: 0.5)
+        try fixture.assertPosition(position)
+    }
+
+    func testFastRefreshAndUserScrollingDoNotRestoreAnOutdatedPosition() async throws {
+        let fixture = Fixture(width: 390, columns: 1)
+        let window = fixture.showInWindow()
+        defer { window.isHidden = true }
+        let view = fixture.collectionView
+        view.setTopContentInset(52)
+        fixture.scroll(to: -52)
+        view.refreshControl = UIRefreshControl()
+        view.beginRefreshing(revealingIndicator: true)
+        try await Task.sleep(for: .milliseconds(50))
+        view.endRefreshing()
+        try await Task.sleep(for: .milliseconds(400))
+        XCTAssertEqual(view.contentOffset.y, -52, accuracy: 0.5)
+
+        view.beginRefreshing(revealingIndicator: true)
+        try await Task.sleep(for: .milliseconds(50))
+        view.interruptRefreshForScrolling()
+        fixture.scroll(to: 1_400)
+        view.endRefreshing()
+        try await Task.sleep(for: .milliseconds(400))
+        XCTAssertEqual(view.contentOffset.y, 1_400, accuracy: 0.5)
+        XCTAssertEqual(view.contentInset.top, 52, accuracy: 0.5)
+    }
+
+    func testRefreshAwayFromTopAndCancellationKeepExplicitPositions() async throws {
+        let fixture = Fixture(width: 390, columns: 1)
+        let window = fixture.showInWindow()
+        defer { window.isHidden = true }
+        let view = fixture.collectionView
+        view.setTopContentInset(52)
+        fixture.scroll(to: 1_400)
+        view.refreshControl = UIRefreshControl()
+        view.beginRefreshing(revealingIndicator: true)
+        try await Task.sleep(for: .milliseconds(400))
+        XCTAssertEqual(view.contentOffset.y, 1_400, accuracy: 0.5)
+        view.endRefreshing()
+        try await Task.sleep(for: .milliseconds(400))
+        XCTAssertEqual(view.contentOffset.y, 1_400, accuracy: 0.5)
+
+        fixture.scroll(to: -52)
+        view.beginRefreshing(revealingIndicator: true)
+        try await Task.sleep(for: .milliseconds(50))
+        view.cancelRefresh()
+        fixture.scroll(to: 800)
+        try await Task.sleep(for: .milliseconds(400))
+        XCTAssertEqual(view.contentOffset.y, 800, accuracy: 0.5)
+        XCTAssertEqual(view.contentInset.top, 52, accuracy: 0.5)
+    }
+
+    func testPullRefreshDoesNotSaveTheElasticDragDistance() async throws {
+        let fixture = Fixture(width: 390, columns: 1)
+        let window = fixture.showInWindow()
+        defer { window.isHidden = true }
+        let view = fixture.collectionView
+        view.setTopContentInset(52)
+        fixture.scroll(to: -52)
+        let position = try fixture.readingPosition()
+        view.refreshControl = UIRefreshControl()
+        // UIKit starts a pull refresh before sending valueChanged to the controller.
+        view.refreshControl?.beginRefreshing()
+        view.setContentOffset(CGPoint(x: 0, y: -180), animated: false)
+        view.beginRefreshing(revealingIndicator: false)
+        view.endRefreshing()
+        try await Task.sleep(for: .milliseconds(400))
+        try fixture.assertPosition(position)
+        XCTAssertEqual(view.contentInset.top, 52, accuracy: 0.5)
+    }
+
+    func testRefreshStartedBeforeWindowAttachmentRevealsItsIndicator() async throws {
+        let fixture = Fixture(width: 390, columns: 1)
+        let view = fixture.collectionView
+        view.setTopContentInset(52)
+        fixture.scroll(to: -52)
+        view.frame = .zero
+        view.refreshControl = UIRefreshControl()
+        view.beginRefreshing(revealingIndicator: true)
+        view.frame = CGRect(x: 0, y: 0, width: 390, height: 600)
+        let window = fixture.showInWindow()
+        defer { window.isHidden = true }
+        try await Task.sleep(for: .milliseconds(400))
+        XCTAssertLessThan(view.contentOffset.y, -82)
+        XCTAssertTrue(view.refreshControl?.isRefreshing == true, "inset=\(view.contentInset.top), presenting=\(view.isPresentingRefresh)")
+        view.endRefreshing()
+        try await Task.sleep(for: .milliseconds(400))
+        XCTAssertEqual(view.contentOffset.y, -52, accuracy: 0.5,
+            "inset=\(view.contentInset.top), resting=\(view.restingAdjustedTopInset), presenting=\(view.isPresentingRefresh)")
+    }
+
+    func testNewRefreshCanReverseAnUnfinishedCollapse() async throws {
+        let fixture = Fixture(width: 390, columns: 1)
+        let window = fixture.showInWindow()
+        defer { window.isHidden = true }
+        let view = fixture.collectionView
+        view.setTopContentInset(52)
+        fixture.scroll(to: -52)
+        view.refreshControl = UIRefreshControl()
+        view.beginRefreshing(revealingIndicator: true)
+        try await Task.sleep(for: .milliseconds(400))
+        view.endRefreshing()
+        try await Task.sleep(for: .milliseconds(50))
+        view.beginRefreshing(revealingIndicator: true)
+        try await Task.sleep(for: .milliseconds(400))
+        XCTAssertLessThan(view.contentOffset.y, -82)
+        XCTAssertEqual(view.contentInset.top - 52, view.refreshControl?.bounds.height ?? 0, accuracy: 0.5)
+        view.endRefreshing()
+        try await Task.sleep(for: .milliseconds(400))
+        XCTAssertEqual(view.contentOffset.y, -52, accuracy: 0.5)
+    }
+
+    func testRefreshFinishedBeforeWindowAttachmentDoesNotStartLater() async throws {
+        let fixture = Fixture(width: 390, columns: 1)
+        let view = fixture.collectionView
+        view.setTopContentInset(52)
+        fixture.scroll(to: -52)
+        view.frame = .zero
+        view.refreshControl = UIRefreshControl()
+        view.beginRefreshing(revealingIndicator: true)
+        view.endRefreshing()
+        view.frame = CGRect(x: 0, y: 0, width: 390, height: 600)
+        let window = fixture.showInWindow()
+        defer { window.isHidden = true }
+        try await Task.sleep(for: .milliseconds(400))
+        XCTAssertFalse(view.isPresentingRefresh)
+        XCTAssertFalse(view.refreshControl?.isRefreshing == true)
+        XCTAssertEqual(view.contentOffset.y, -52, accuracy: 0.5)
+        XCTAssertEqual(view.contentInset.top, 52, accuracy: 0.5)
+    }
+
+    func testInitialRefreshCanRevealBeforeAnyReadingItemsExist() async throws {
+        let view = TimelineCollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
+        view.contentInsetAdjustmentBehavior = .never
+        view.setTopContentInset(52)
+        view.refreshControl = UIRefreshControl()
+        view.beginRefreshing(revealingIndicator: true)
+        view.frame = CGRect(x: 0, y: 0, width: 390, height: 600)
+        let window = UIWindow(frame: view.frame)
+        let controller = UIViewController()
+        window.rootViewController = controller
+        controller.view.addSubview(view)
+        window.makeKeyAndVisible()
+        defer { window.isHidden = true }
+        try await Task.sleep(for: .milliseconds(400))
+        XCTAssertLessThan(view.contentOffset.y, -82)
+        view.endRefreshing()
+        try await Task.sleep(for: .milliseconds(400))
+        XCTAssertEqual(view.contentOffset.y, -52, accuracy: 0.5)
+    }
+
     func testColumnThresholdIncludesInsetsAndSpacing() {
         XCTAssertEqual(TimelineColumnPolicy.adaptive.columnCount(for: 679), 1)
         XCTAssertEqual(TimelineColumnPolicy.adaptive.columnCount(for: 680), 2)
@@ -235,6 +443,17 @@ final class TimelineCollectionViewTests: XCTestCase {
             collectionView.resetReadingPosition()
             collectionView.setContentOffset(CGPoint(x: 0, y: offset), animated: false)
             settle()
+        }
+
+        func showInWindow() -> UIWindow {
+            let window = UIWindow(frame: collectionView.frame)
+            let controller = UIViewController()
+            window.rootViewController = controller
+            controller.view.addSubview(collectionView)
+            window.makeKeyAndVisible()
+            controller.view.layoutIfNeeded()
+            settle()
+            return window
         }
 
         func resize(width: CGFloat, columns: Int) {

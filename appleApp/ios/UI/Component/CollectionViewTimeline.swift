@@ -174,6 +174,10 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     func setReadingContext(key: String?, store: TimelineScrollPositionStore?) {
         guard readingKey != key || scrollPositions !== store else { return }
         saveReadingPosition()
+        refreshRequestGeneration += 1
+        pendingRefreshEnd = false
+        isUserRefreshing = false
+        collectionView?.cancelRefresh()
         readingKey = key
         scrollPositions = store
         pendingSavedPosition = key.map { store?[$0] ?? .top }
@@ -272,10 +276,8 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     }
     var topContentInset: CGFloat = 0 {
         didSet {
-            guard isViewLoaded else { return }
-            if oldValue != topContentInset {
-                collectionView.prepareForLayoutChange()
-            }
+            guard oldValue != topContentInset, isViewLoaded else { return }
+            collectionView.prepareForLayoutChange()
             updateContentInsets()
         }
     }
@@ -337,6 +339,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
             accessoryItemMap = Dictionary(
                 uniqueKeysWithValues: zip(newIDs, accessoryItems)
             )
+            guard !oldIDs.isEmpty || !newIDs.isEmpty else { return }
             for accessory in accessoryItems {
                 (accessory.view as? TimelineHostedAccessoryView)?.onHeightChanged = { [weak self] in
                     guard let self, self.isViewLoaded else { return }
@@ -364,17 +367,17 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
 
     var effectiveContentOffsetY: CGFloat {
         guard isViewLoaded else { return 0 }
-        return collectionView.contentOffset.y + collectionView.adjustedContentInset.top
+        return collectionView.contentOffset.y + collectionView.restingAdjustedTopInset
     }
 
     var maximumEffectiveContentOffsetY: CGFloat {
         guard isViewLoaded else { return 0 }
-        let minimumOffsetY = -collectionView.adjustedContentInset.top
+        let minimumOffsetY = -collectionView.restingAdjustedTopInset
         let maximumOffsetY = max(
             minimumOffsetY,
             collectionView.contentSize.height - collectionView.bounds.height + collectionView.adjustedContentInset.bottom
         )
-        return maximumOffsetY + collectionView.adjustedContentInset.top
+        return maximumOffsetY + collectionView.restingAdjustedTopInset
     }
 
     var scrollDecelerationRate: UIScrollView.DecelerationRate {
@@ -398,6 +401,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     func restoreContentOffset(_ offset: CGPoint, animated: Bool) {
         guard isViewLoaded else { return }
         pendingSavedPosition = nil
+        if collectionView.isPresentingRefresh { collectionView.cancelRefresh() }
         collectionView.resetReadingPosition()
         view.layoutIfNeeded()
         collectionView.layoutIfNeeded()
@@ -412,7 +416,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         restoreContentOffset(
             CGPoint(
                 x: collectionView.contentOffset.x,
-                y: offsetY - collectionView.adjustedContentInset.top
+                y: offsetY - collectionView.restingAdjustedTopInset
             ),
             animated: animated
         )
@@ -421,11 +425,12 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     func setEffectiveContentOffset(_ offsetY: CGFloat, animated: Bool) {
         pendingSavedPosition = nil
         guard isViewLoaded else { return }
+        if collectionView.isPresentingRefresh { collectionView.cancelRefresh() }
         collectionView.resetReadingPosition()
         collectionView.setContentOffset(
             CGPoint(
                 x: collectionView.contentOffset.x,
-                y: clampedContentOffsetY(offsetY - collectionView.adjustedContentInset.top)
+                y: clampedContentOffsetY(offsetY - collectionView.restingAdjustedTopInset)
             ),
             animated: animated
         )
@@ -435,6 +440,8 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     private var dataSource: UICollectionViewDiffableDataSource<Int, String>!
     private var refreshControl = UIRefreshControl()
     private var isUserRefreshing = false
+    private var pendingRefreshEnd = false
+    private var refreshRequestGeneration = 0
     private var pendingRefreshControlOffsetY: CGFloat?
     private var hasCompletedInitialRefreshCycle = false
     private var scrollingState = IsScrollingState()
@@ -551,6 +558,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        finishPendingRefreshIfReady()
         isAutoplayViewVisible = true
         reconfigureVisibleCells()
         scheduleAutoplaySelection()
@@ -641,10 +649,10 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         collectionView.readingTopInset = { [weak self] in
             guard let self else { return 0 }
             if self.extendsContentUnderTopBars {
-                return min(self.collectionView.adjustedContentInset.top,
+                return min(self.collectionView.restingAdjustedTopInset,
                     self.collectionView.safeAreaInsets.top + max(self.topContentInset - self.minimumVerticalScrollDistance, 0))
             }
-            return self.collectionView.adjustedContentInset.top
+            return self.collectionView.restingAdjustedTopInset
         }
         collectionView.keyboardDismissMode = .interactive
         collectionView.delegate = self
@@ -961,16 +969,14 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
 
     private func updateContentInsets() {
         guard collectionView != nil else { return }
-        let oldAdjustedTopInset = collectionView.adjustedContentInset.top
+        let oldAdjustedTopInset = collectionView.restingAdjustedTopInset
         let wasPinnedToTop = abs(collectionView.contentOffset.y + oldAdjustedTopInset) < 1
-        let automaticTopInset = max(0, oldAdjustedTopInset - collectionView.contentInset.top)
+        let automaticTopInset = max(0, collectionView.adjustedContentInset.top - collectionView.contentInset.top)
         let desiredTopInset = topContentInset - (extendsContentUnderTopBars ? automaticTopInset : 0)
-        if abs(collectionView.contentInset.top - desiredTopInset) > 0.5 {
-            collectionView.contentInset.top = desiredTopInset
-        }
+        collectionView.setTopContentInset(desiredTopInset)
         collectionView.verticalScrollIndicatorInsets.top = topScrollIndicatorInset
-        if wasPinnedToTop {
-            let topOffset = -collectionView.adjustedContentInset.top
+        if wasPinnedToTop, !collectionView.isPresentingRefresh, !refreshControl.isRefreshing {
+            let topOffset = -collectionView.restingAdjustedTopInset
             if abs(collectionView.contentOffset.y - topOffset) > 0.5 {
                 collectionView.setContentOffset(
                     CGPoint(x: collectionView.contentOffset.x, y: topOffset),
@@ -994,7 +1000,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         )
         let maximumOffsetWithoutBottomInset =
             collectionView.contentSize.height - collectionView.bounds.height +
-            automaticBottomInset + collectionView.adjustedContentInset.top
+            automaticBottomInset + collectionView.restingAdjustedTopInset
         let requiredBottomInset = max(
             0,
             minimumVerticalScrollDistance - maximumOffsetWithoutBottomInset
@@ -1235,13 +1241,24 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
 
     @objc private func handleRefresh() {
         isUserRefreshing = true
-        Task { @MainActor in
+        if collectionView.preservesReadingPosition {
+            collectionView.beginRefreshing(revealingIndicator: false)
+        }
+        let generation = refreshRequestGeneration
+        Task { @MainActor [refreshCallback] in
+            guard generation == refreshRequestGeneration else { return }
             if let refreshCallback {
                 await refreshCallback()
             }
+            guard generation == refreshRequestGeneration else { return }
             isUserRefreshing = false
             if !currentPagingIsRefreshing {
-                refreshControl.endRefreshing()
+                if collectionView.preservesReadingPosition {
+                    pendingRefreshEnd = true
+                    finishPendingRefreshIfReady()
+                } else {
+                    refreshControl.endRefreshing()
+                }
             }
         }
     }
@@ -1281,15 +1298,12 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     }
 
     func resetInitialRefreshIndicatorSuppression() {
+        refreshRequestGeneration += 1
+        pendingRefreshEnd = false
+        isUserRefreshing = false
+        collectionView?.cancelRefresh()
         hasCompletedInitialRefreshCycle = false
         pendingRefreshControlOffsetY = nil
-        guard isViewLoaded,
-              suppressInitialRefreshIndicator,
-              refreshControl.isRefreshing,
-              !isUserRefreshing else {
-            return
-        }
-        refreshControl.endRefreshing()
     }
 
     // MARK: - State Update
@@ -1475,9 +1489,19 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         if isRefreshing {
             guard !shouldSuppressInitialRefreshIndicator else {
                 pendingRefreshControlOffsetY = nil
-                if refreshControl.isRefreshing {
+                pendingRefreshEnd = false
+                if collectionView.preservesReadingPosition {
+                    collectionView.endRefreshing()
+                } else if refreshControl.isRefreshing {
                     refreshControl.endRefreshing()
                 }
+                return
+            }
+            if collectionView.preservesReadingPosition {
+                pendingRefreshEnd = false
+                collectionView.beginRefreshing(
+                    revealingIndicator: !isUserRefreshing && pendingSavedPosition?.itemID == nil
+                )
                 return
             }
             if !refreshControl.isRefreshing {
@@ -1491,10 +1515,22 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
             }
         } else if !isUserRefreshing {
             pendingRefreshControlOffsetY = nil
+            if collectionView.preservesReadingPosition {
+                // The state can finish before its prepared snapshot reaches UIKit.
+                pendingRefreshEnd = refreshControl.isRefreshing || collectionView.isPresentingRefresh
+                return
+            }
             if refreshControl.isRefreshing {
                 refreshControl.endRefreshing()
             }
         }
+    }
+
+    private func finishPendingRefreshIfReady() {
+        guard pendingRefreshEnd, isSnapshotReadyForReadingPosition, !isUserRefreshing,
+              allowsScrollAnchorRestoration else { return }
+        pendingRefreshEnd = false
+        collectionView.endRefreshing()
     }
 
     private func revealRefreshControlIfNeeded() {
@@ -1514,7 +1550,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
 
     private func updatePinnedHeader() {
         guard isViewLoaded, collectionView != nil, dataSource != nil else { return }
-        let top = collectionView.contentOffset.y + collectionView.adjustedContentInset.top
+        let top = collectionView.contentOffset.y + collectionView.restingAdjustedTopInset
         let titles = accessoryItems.compactMap { item -> (UIView, CGRect)? in
             guard let view = item.pinnedView,
                   let path = dataSource.indexPath(for: Self.accessoryPrefix + item.id),
@@ -1633,7 +1669,8 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     }
 
     private func restorePendingContentOffsetIfNeeded(finalize: Bool) {
-        isSnapshotReadyForReadingPosition = true
+        if finalize { isSnapshotReadyForReadingPosition = true }
+        defer { if finalize { finishPendingRefreshIfReady() } }
         restoreSavedPositionIfReady()
         if minimumVerticalScrollDistance > 0 {
             collectionView.layoutIfNeeded()
@@ -2674,7 +2711,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
 
     private func beginScrollInteraction() {
         pendingSavedPosition = nil
-        collectionView.resetReadingPosition()
+        collectionView.interruptRefreshForScrolling()
         autoplayImmediateReturn = false
         VideoPlaybackArbiter.shared.interacted(self)
         autoplayPolicy.verticalScrollBegan()
@@ -2738,6 +2775,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
 
     private func endScrollInteraction() {
         scrollingState.isScrolling = false
+        finishPendingRefreshIfReady()
         rememberProfileMediaScrollAnchor()
         scheduleAutoplaySelection()
         scheduleDeferredPoolCleanup()

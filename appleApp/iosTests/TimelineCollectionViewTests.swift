@@ -381,6 +381,90 @@ final class TimelineCollectionViewTests: XCTestCase {
         XCTAssertEqual(view.contentOffset.y, -52, accuracy: 0.5)
     }
 
+    func testAutomaticInsetsCountTheRefreshControlOnlyOnce() async throws {
+        let fixture = Fixture(width: 390, columns: 1)
+        let window = fixture.showInWindow()
+        defer { window.isHidden = true }
+        let view = fixture.collectionView
+        view.alwaysBounceVertical = true
+        view.contentInsetAdjustmentBehavior = .automatic
+        window.rootViewController?.additionalSafeAreaInsets.top = 100
+        view.setTopContentInset(52)
+        window.layoutIfNeeded()
+        fixture.settle()
+        let restingInset = view.adjustedContentInset.top
+        fixture.scroll(to: -restingInset)
+        let control = UIRefreshControl()
+        view.refreshControl = control
+
+        view.beginRefreshing(revealingIndicator: true)
+        try await Task.sleep(for: .milliseconds(400))
+        fixture.settle()
+        XCTAssertEqual(view.restingAdjustedTopInset, restingInset, accuracy: 0.5)
+        let first = try XCTUnwrap(view.layoutAttributesForItem(at: IndexPath(item: 0, section: 0))).frame
+        XCTAssertEqual(first.minY - view.contentOffset.y, restingInset + control.bounds.height, accuracy: 0.5)
+
+        view.endRefreshing()
+        try await Task.sleep(for: .milliseconds(400))
+        fixture.settle()
+        XCTAssertEqual(view.adjustedContentInset.top, restingInset, accuracy: 0.5)
+        XCTAssertEqual(view.contentOffset.y, -restingInset, accuracy: 0.5)
+    }
+
+    func testNativeRefreshStartsWithAnimationsEnabled() async throws {
+        final class RefreshControl: UIRefreshControl {
+            var animationStates: [Bool] = []
+            override func beginRefreshing() {
+                animationStates.append(UIView.areAnimationsEnabled)
+                super.beginRefreshing()
+            }
+        }
+        let fixture = Fixture(width: 390, columns: 1)
+        let window = fixture.showInWindow()
+        defer { window.isHidden = true }
+        let view = fixture.collectionView
+        let control = RefreshControl()
+        view.refreshControl = control
+        UIView.performWithoutAnimation { view.beginRefreshing(revealingIndicator: true) }
+        try await Task.sleep(for: .milliseconds(400))
+        XCTAssertTrue(control.isRefreshing)
+        XCTAssertFalse(control.animationStates.isEmpty)
+        XCTAssertTrue(control.animationStates.allSatisfy { $0 })
+        view.cancelRefresh()
+    }
+
+    func testAutomaticInsetsFollowSafeAreaAndPageChangesDuringRefresh() async throws {
+        let fixture = Fixture(width: 390, columns: 1)
+        let window = fixture.showInWindow()
+        defer { window.isHidden = true }
+        let view = fixture.collectionView
+        view.alwaysBounceVertical = true
+        view.contentInsetAdjustmentBehavior = .automatic
+        window.rootViewController?.additionalSafeAreaInsets.top = 100
+        view.setTopContentInset(52)
+        window.layoutIfNeeded()
+        fixture.settle()
+        let originalInset = view.adjustedContentInset.top
+        let originalSafeArea = view.safeAreaInsets.top
+        fixture.scroll(to: -originalInset)
+        let control = UIRefreshControl()
+        view.refreshControl = control
+        view.beginRefreshing(revealingIndicator: true)
+        try await Task.sleep(for: .milliseconds(400))
+
+        window.rootViewController?.additionalSafeAreaInsets.top = 130
+        view.setTopContentInset(88)
+        window.layoutIfNeeded()
+        fixture.resize(width: 900, columns: 3)
+        let expectedInset = originalInset + 36 + view.safeAreaInsets.top - originalSafeArea
+        XCTAssertEqual(view.restingAdjustedTopInset, expectedInset, accuracy: 0.5)
+        XCTAssertEqual(view.contentOffset.y, -expectedInset - control.bounds.height, accuracy: 0.5)
+        view.endRefreshing()
+        try await Task.sleep(for: .milliseconds(400))
+        fixture.settle()
+        XCTAssertEqual(view.contentOffset.y, -expectedInset, accuracy: 0.5)
+    }
+
     func testLegacyRefreshNeverAcquiresAnAutomaticReadingAnchor() async throws {
         let fixture = Fixture(width: 390, columns: 2)
         let window = fixture.showInWindow()

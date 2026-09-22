@@ -180,6 +180,11 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         guard readingKey != key || scrollPositions !== store || readingPositionOwner !== owner ||
               positionExpiresWithOwner != (owner != nil) else { return }
         saveReadingPosition()
+        if isProgrammaticScrolling, let collectionView {
+            collectionView.setContentOffset(collectionView.contentOffset, animated: false)
+            isProgrammaticScrolling = false
+            scrollingState.isScrolling = false
+        }
         refreshRequestGeneration += 1
         pendingRefreshEnd = false
         isUserRefreshing = false
@@ -414,7 +419,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         collectionView.resetReadingPosition()
         view.layoutIfNeeded()
         collectionView.layoutIfNeeded()
-        collectionView.setContentOffset(
+        applyExplicitContentOffset(
             CGPoint(x: offset.x, y: clampedContentOffsetY(offset.y)),
             animated: animated
         )
@@ -436,13 +441,25 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         guard isViewLoaded else { return }
         if collectionView.isPresentingRefresh { collectionView.cancelRefresh() }
         collectionView.resetReadingPosition()
-        collectionView.setContentOffset(
+        applyExplicitContentOffset(
             CGPoint(
                 x: collectionView.contentOffset.x,
                 y: clampedContentOffsetY(offsetY - collectionView.restingAdjustedTopInset)
             ),
             animated: animated
         )
+    }
+
+    private func applyExplicitContentOffset(_ offset: CGPoint, animated: Bool) {
+        let shouldAnimate = animated && abs(collectionView.contentOffset.y - offset.y) > 0.5
+        if shouldAnimate {
+            beginScrollInteraction()
+            isProgrammaticScrolling = true
+        }
+        collectionView.setContentOffset(offset, animated: shouldAnimate)
+        if !shouldAnimate, isProgrammaticScrolling {
+            endScrollInteraction()
+        }
     }
 
     private var collectionView: TimelineCollectionView!
@@ -454,6 +471,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     private var pendingRefreshControlOffsetY: CGFloat?
     private var hasCompletedInitialRefreshCycle = false
     private var scrollingState = IsScrollingState()
+    private var isProgrammaticScrolling = false
     private var lastReportedIsAtTop: Bool?
     private var lastAppliedSignature: SnapshotSignature?
     private var lastRenderHashMap: [String: Int32] = [:]
@@ -623,6 +641,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         isAutoplayViewVisible = false
         isAutoplayViewportMoving = false
         scrollingState.isScrolling = false
+        isProgrammaticScrolling = false
         postRefreshPoolCleanupTask?.cancel()
         deferredPoolCleanupTask?.cancel()
         detachAutoplayPlayer()
@@ -667,6 +686,9 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
             guard let self, let (_, frame) = self.pinnedHeaderGeometry() else { return 0 }
             let top = self.collectionView.contentOffset.y + self.collectionView.restingAdjustedTopInset
             return max(frame.maxY - top, 0)
+        }
+        collectionView.isScrollInteractionActive = { [weak self] in
+            self?.scrollingState.isScrolling == true
         }
         collectionView.keyboardDismissMode = .interactive
         collectionView.delegate = self
@@ -867,7 +889,6 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
 
         heightCache[key] = correctedHeight
         heightCacheKeysByItemID[itemID, default: []].insert(key)
-        collectionView.prepareForLayoutChange()
         pendingHeightCorrections[key] = correctedHeight
         scheduleHeightCorrectionFlush()
     }
@@ -888,8 +909,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         }
 
         pendingHeightCorrections.removeAll(keepingCapacity: true)
-        collectionView.collectionViewLayout.invalidateLayout()
-        collectionView.performBatchUpdates(nil)
+        collectionView.invalidateMeasuredHeights()
     }
 
     private func applyLayoutForColumnCount() {
@@ -2702,6 +2722,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     }
 
     private func beginScrollInteraction() {
+        isProgrammaticScrolling = false
         pendingSavedPosition = nil
         collectionView.interruptRefreshForScrolling()
         autoplayImmediateReturn = false
@@ -2758,6 +2779,8 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
 
     func scrollViewShouldScrollToTop(_ scrollView: UIScrollView) -> Bool {
         beginScrollInteraction()
+        isProgrammaticScrolling = abs(scrollView.contentOffset.y + scrollView.adjustedContentInset.top) > 0.5
+        if !isProgrammaticScrolling { endScrollInteraction() }
         return true
     }
 
@@ -2766,6 +2789,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     }
 
     private func endScrollInteraction() {
+        isProgrammaticScrolling = false
         scrollingState.isScrolling = false
         finishPendingRefreshIfReady()
         rememberProfileMediaScrollAnchor()

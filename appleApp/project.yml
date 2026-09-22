@@ -256,6 +256,35 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: dev.dimension.flare.tests
         SWIFT_DEFAULT_ACTOR_ISOLATION: nonisolated
 
+  TimelineTestHost:
+    type: application
+    platform: iOS
+    sources:
+      - path: iosTimelineTestHost
+      - path: ios/UI/Component/TimelineCollectionView.swift
+    dependencies:
+      - package: CHTCollectionViewWaterfallLayout
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        PRODUCT_BUNDLE_IDENTIFIER: dev.dimension.flare.timeline-tests
+
+  iOSInteractionTests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: iosUITests
+    dependencies:
+      - target: TimelineTestHost
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        PRODUCT_BUNDLE_IDENTIFIER: dev.dimension.flare.interaction-tests
+        TEST_TARGET_NAME: TimelineTestHost
+        SWIFT_DEFAULT_ACTOR_ISOLATION: nonisolated
+
   macOS:
     templates: [FirebaseOptionalApp]
     type: application
@@ -413,12 +442,22 @@ schemes:
       config: Debug
       targets:
         - iOSTests
+        - iOSInteractionTests
     profile:
       config: Release
     analyze:
       config: Debug
     archive:
       config: Release
+
+  TimelineInteractionTests:
+    build:
+      targets:
+        iOSInteractionTests: all
+    test:
+      config: Debug
+      targets:
+        - iOSInteractionTests
 
   macOS:
     build:

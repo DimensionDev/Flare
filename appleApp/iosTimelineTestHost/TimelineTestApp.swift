@@ -68,6 +68,8 @@ private final class TimelineTestController: UIViewController, CHTCollectionViewD
         list.readingIndexPath = { [weak self] in Int($0).flatMap { self?.dataSource.indexPath(for: $0) } }
         list.readingItemIDs = { [weak self] in self?.dataSource.snapshot().itemIdentifiers.map(String.init) ?? [] }
         list.isScrollInteractionActive = { [weak self] in self?.scrolling == true }
+        list.onProgrammaticScrollBegan = { [weak self] in self?.scrolling = true }
+        list.onProgrammaticScrollEnded = { [weak self] in self?.scrolling = false }
         list.refreshControl = UIRefreshControl()
         if scenario != "initial-refresh" { loadItems() }
     }
@@ -120,7 +122,9 @@ private final class TimelineTestController: UIViewController, CHTCollectionViewD
     private func checkScrollToTop() async {
         jump(to: 3_000)
         await settle(100)
-        _ = scrollViewShouldScrollToTop(list)
+        // SwiftUI's tab reselection calls the animated setter directly. It does
+        // not use the status-bar scrollViewShouldScrollToTop delegate entry.
+        list.prepareForLayoutChange()
         list.setContentOffset(CGPoint(x: 0, y: -list.restingAdjustedTopInset), animated: true)
         await settle(100)
         check(list.contentOffset.y > 100, "scroll animation did not start")
@@ -224,6 +228,7 @@ private final class TimelineTestController: UIViewController, CHTCollectionViewD
     }
 
     func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
+        list.endProgrammaticScrolling()
         scrolling = true
         list.interruptRefreshForScrolling()
     }
@@ -238,6 +243,9 @@ private final class TimelineTestController: UIViewController, CHTCollectionViewD
         if !decelerate { scrolling = false }
     }
     func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) { scrolling = false }
-    func scrollViewDidEndScrollingAnimation(_ scrollView: UIScrollView) { scrolling = false }
+    func scrollViewDidEndScrollingAnimation(_ scrollView: UIScrollView) {
+        list.endProgrammaticScrolling()
+        scrolling = false
+    }
     func scrollViewDidScrollToTop(_ scrollView: UIScrollView) { scrolling = false }
 }

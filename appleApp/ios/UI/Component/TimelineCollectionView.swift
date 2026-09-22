@@ -1,6 +1,7 @@
 import UIKit
 
-/// Coordinates reading anchors and refresh presentation across layout changes.
+/// Applies bookmarks only while a snapshot or geometry change is being laid out.
+/// UIKit owns scrolling and refresh animations.
 final class TimelineCollectionView: UICollectionView {
     var readingItemID: ((IndexPath) -> String?)?
     var readingIndexPath: ((String) -> IndexPath?)?
@@ -9,6 +10,8 @@ final class TimelineCollectionView: UICollectionView {
     // Occlusion affects which item is visible, not the bookmark's viewport origin.
     var readingTopOcclusion: (() -> CGFloat)?
     var isScrollInteractionActive: (() -> Bool)?
+    var onProgrammaticScrollBegan: (() -> Void)?
+    var onProgrammaticScrollEnded: (() -> Void)?
     var preservesReadingPosition = true {
         didSet {
             if !preservesReadingPosition {
@@ -31,19 +34,21 @@ final class TimelineCollectionView: UICollectionView {
         }
     }
 
+    // This is a pending layout transaction, not a continuously enforced offset.
     private var readingPosition: ReadingPosition?
+    private var readingPositionGeneration = 0
     private var isRestoringReadingPosition = false
     private var appliedTopInset: CGFloat?
     private var restingAutomaticInset: (amount: CGFloat, safeAreaTop: CGFloat)?
 
-    private enum RefreshPhase { case idle, revealing, refreshing, settling }
-    private var refreshPhase = RefreshPhase.idle
-    private var refreshOffset: CGFloat = 0
-    private var refreshAnimation: (from: CGFloat, to: CGFloat, start: CFTimeInterval)?
-    private var refreshDisplayLink: CADisplayLink?
+    private var refreshRequested = false
+    private var pendingRefreshReveal = false
+    private var isEndingRefresh = false
+    private var isRevealingRefresh = false
+    private var isProgrammaticScrolling = false
 
     var hasReadingPosition: Bool { readingPosition != nil }
-    var isPresentingRefresh: Bool { refreshPhase != .idle }
+    var isPresentingRefresh: Bool { refreshRequested || isEndingRefresh || refreshControl?.isRefreshing == true }
 
     var restingAdjustedTopInset: CGFloat {
         rememberRestingAutomaticInset()
@@ -71,157 +76,133 @@ final class TimelineCollectionView: UICollectionView {
 
     override func adjustedContentInsetDidChange() {
         super.adjustedContentInsetDidChange()
+        if isEndingRefresh, refreshInset <= 0.5 {
+            isEndingRefresh = false
+            setNeedsLayout()
+        }
         rememberRestingAutomaticInset()
     }
 
     private var hasScrollGesture: Bool { isTracking || isDragging || isDecelerating }
 
     private var allowsReadingPositionRestoration: Bool {
-        !hasScrollGesture && isScrollInteractionActive?() != true
+        !hasScrollGesture && !isProgrammaticScrolling && !isRevealingRefresh && isScrollInteractionActive?() != true
     }
 
     /// UIKit also writes contentInset while refreshing. Apply only the page's delta.
     func setTopContentInset(_ inset: CGFloat) {
         let previous = appliedTopInset ?? contentInset.top
+        if inset != previous { prepareForLayoutChange() }
         appliedTopInset = inset
         if inset != previous {
             contentInset.top += inset - previous
+            if isRevealingRefresh {
+                isRevealingRefresh = false
+                super.setContentOffset(contentOffset, animated: false)
+                pendingRefreshReveal = true
+                setNeedsLayout()
+            }
         }
     }
 
     func beginRefreshing(revealingIndicator: Bool) {
-        guard preservesReadingPosition, let refreshControl,
-              refreshPhase == .idle || refreshPhase == .settling else { return }
-        let wasRefreshing = refreshControl.isRefreshing
-        let hasViewport = bounds.width > 1 && bounds.height > 1
-        let wasAtTop = contentOffset.y + restingAdjustedTopInset <= 1 ||
-            (!hasViewport && readingPosition?.itemID == nil)
+        guard preservesReadingPosition, let refreshControl, !refreshRequested else { return }
+        let wasAtTop = contentOffset.y + restingAdjustedTopInset <= 1 || bounds.height <= 1
         if appliedTopInset == nil { appliedTopInset = contentInset.top }
-        if refreshPhase == .idle, !wasRefreshing {
-            readingPosition = captureReadingPosition() ?? readingPosition
-        }
-        stopRefreshAnimation()
-        if window != nil || wasRefreshing {
-            beginNativeRefreshingIfNeeded()
-        }
-
-        if wasRefreshing {
-            // A pull has already exposed the control. Its elastic distance is not
-            // part of the bookmark saved when the gesture ends.
-            refreshOffset = refreshInset
-            refreshPhase = .refreshing
-        } else if revealingIndicator && wasAtTop && !isTracking && !isDragging && !isDecelerating {
-            refreshPhase = .revealing
-            startRefreshRevealIfReady()
-        } else {
-            refreshPhase = .refreshing
-        }
+        pendingRefreshReveal = revealingIndicator && wasAtTop && !refreshControl.isRefreshing && !hasScrollGesture
+        refreshRequested = true
+        isEndingRefresh = false
+        startRefreshIfReady()
     }
 
-    private func startRefreshRevealIfReady() {
-        guard refreshPhase == .revealing, refreshAnimation == nil,
-              window != nil, bounds.width > 1, bounds.height > 1 else { return }
-        beginNativeRefreshingIfNeeded()
-        // A control started offscreen can defer its inset until it is exposed.
-        let height = max(refreshInset, refreshControl?.bounds.height ?? 0)
-        guard height > 0 else { return }
-        animateRefreshOffset(to: height)
-    }
-
-    private func beginNativeRefreshingIfNeeded() {
-        guard let refreshControl, !refreshControl.isRefreshing else { return }
-        // A surrounding snapshot/measurement transaction may disable animations.
-        // That must not suppress the activity indicator's own repeating animation.
-        let animationsEnabled = UIView.areAnimationsEnabled
-        UIView.setAnimationsEnabled(true)
-        defer { UIView.setAnimationsEnabled(animationsEnabled) }
-        refreshControl.beginRefreshing()
+    private func startRefreshIfReady() {
+        guard refreshRequested, let refreshControl, window != nil,
+              bounds.width > 1, bounds.height > 1 else { return }
+        if !refreshControl.isRefreshing {
+            // Diffable updates can disable UIView animations. Do not inherit that
+            // setting for the native spinner's repeating animation.
+            withRefreshAnimations { refreshControl.beginRefreshing() }
+        }
+        guard pendingRefreshReveal else { return }
+        pendingRefreshReveal = false
+        let target = -restingAdjustedTopInset - max(refreshInset, refreshControl.bounds.height)
+        guard target < contentOffset.y else { return }
+        resetReadingPosition()
+        isRevealingRefresh = true
+        super.setContentOffset(CGPoint(x: contentOffset.x, y: target), animated: true)
     }
 
     func endRefreshing() {
-        guard let refreshControl, refreshPhase != .settling,
-              refreshControl.isRefreshing || isPresentingRefresh else { return }
-        layoutIfNeeded()
-        UIView.performWithoutAnimation {
-            refreshControl.endRefreshing()
-            // Preserve the current presented gap until our own transition removes
-            // it. UIKit's inset change must not move the reading item separately.
-            restoreReadingPositionIfNeeded()
+        guard refreshRequested || refreshControl?.isRefreshing == true else { return }
+        pendingRefreshReveal = false
+        if isRevealingRefresh {
+            isRevealingRefresh = false
+            super.setContentOffset(contentOffset, animated: false)
         }
-        if isTracking || isDragging || isDecelerating {
-            interruptRefreshForScrolling()
-        } else {
-            refreshPhase = .settling
-            animateRefreshOffset(to: 0)
-        }
+        // Preserve the reading item through UIKit's inset removal. The bookmark
+        // is consumed when the native refresh inset is gone, not on every frame.
+        prepareForLayoutChange()
+        readingPositionGeneration += 1
+        refreshRequested = false
+        isEndingRefresh = refreshControl?.isRefreshing == true
+        withRefreshAnimations { refreshControl?.endRefreshing() }
+        if refreshInset <= 0.5 { isEndingRefresh = false }
+        setNeedsLayout()
+    }
+
+    private func withRefreshAnimations(_ action: () -> Void) {
+        let enabled = UIView.areAnimationsEnabled
+        UIView.setAnimationsEnabled(true)
+        defer { UIView.setAnimationsEnabled(enabled) }
+        action()
     }
 
     func interruptRefreshForScrolling() {
-        stopRefreshAnimation()
-        let managesRefresh = preservesReadingPosition && refreshControl?.isRefreshing == true
-        refreshOffset = managesRefresh ? refreshInset : 0
-        refreshPhase = managesRefresh ? .refreshing : .idle
+        pendingRefreshReveal = false
+        isRevealingRefresh = false
         resetReadingPosition()
     }
 
     func cancelRefresh() {
-        stopRefreshAnimation()
-        refreshPhase = .idle
-        refreshOffset = 0
-        resetReadingPosition()
+        interruptRefreshForScrolling()
+        refreshRequested = false
+        isEndingRefresh = refreshControl?.isRefreshing == true
         UIView.performWithoutAnimation { refreshControl?.endRefreshing() }
+        if refreshInset <= 0.5 { isEndingRefresh = false }
     }
 
-    private func animateRefreshOffset(to target: CGFloat) {
-        // Animate the gap so each frame can use the item's latest measured geometry.
-        stopRefreshAnimation()
-        guard window != nil, UIView.areAnimationsEnabled, !UIAccessibility.isReduceMotionEnabled,
-              abs(target - refreshOffset) > 0.5 else {
-            finishRefreshAnimation(at: target)
-            return
+    override func setContentOffset(_ contentOffset: CGPoint, animated: Bool) {
+        // SwiftUI tab reselection uses this entry directly, without calling
+        // scrollViewShouldScrollToTop. Explicit navigation supersedes bookmarks.
+        // UICollectionView also issues animated requests for the unchanged offset
+        // during layout. Those are not navigation and must leave the update alone.
+        if animated && abs(self.contentOffset.y - contentOffset.y) <= 0.5 { return }
+        if animated || isProgrammaticScrolling {
+            interruptRefreshForScrolling()
         }
-        refreshAnimation = (refreshOffset, target, CACurrentMediaTime())
-        let link = CADisplayLink(target: RefreshAnimationTarget(self), selector: #selector(RefreshAnimationTarget.tick(_:)))
-        refreshDisplayLink = link
-        link.add(to: .main, forMode: .common)
-    }
-
-    fileprivate func advanceRefreshAnimation(_ link: CADisplayLink) {
-        guard let animation = refreshAnimation else { return }
-        let progress = min(max((link.timestamp - animation.start) / 0.3, 0), 1)
-        if progress >= 1 {
-            finishRefreshAnimation(at: animation.to)
-            return
+        let shouldAnimate = animated && window != nil && abs(self.contentOffset.y - contentOffset.y) > 0.5
+        let wasProgrammaticScrolling = isProgrammaticScrolling
+        if shouldAnimate {
+            isProgrammaticScrolling = true
+            onProgrammaticScrollBegan?()
+        } else if isProgrammaticScrolling {
+            endProgrammaticScrolling()
         }
-        let eased = 1 - pow(1 - progress, 3)
-        refreshOffset = animation.from + (animation.to - animation.from) * eased
-        layoutIfNeeded()
-        restoreReadingPositionIfNeeded()
+        super.setContentOffset(contentOffset, animated: shouldAnimate)
+        if wasProgrammaticScrolling && !shouldAnimate { onProgrammaticScrollEnded?() }
     }
 
-    private func finishRefreshAnimation(at offset: CGFloat) {
-        stopRefreshAnimation()
-        refreshOffset = offset
-        refreshPhase = refreshPhase == .revealing ? .refreshing : .idle
-        setNeedsLayout()
-        restoreReadingPositionIfNeeded()
-    }
-
-    private func stopRefreshAnimation() {
-        refreshDisplayLink?.invalidate()
-        refreshDisplayLink = nil
-        refreshAnimation = nil
+    func endProgrammaticScrolling() {
+        isProgrammaticScrolling = false
+        isRevealingRefresh = false
     }
 
     override func didMoveToWindow() {
         super.didMoveToWindow()
-        if window == nil, let animation = refreshAnimation {
-            finishRefreshAnimation(at: animation.to)
-        } else if window != nil {
-            if refreshPhase == .refreshing {
-                beginNativeRefreshingIfNeeded()
-            }
-            setNeedsLayout()
+        if window != nil {
+            startRefreshIfReady()
+        } else {
+            endProgrammaticScrolling()
         }
     }
 
@@ -256,15 +237,15 @@ final class TimelineCollectionView: UICollectionView {
               !isRestoringReadingPosition,
               allowsReadingPositionRestoration else { return }
 
-        // An explicit jump to the top applies to the loaded snapshot. Once items
-        // are visible, later snapshots must preserve their IDs instead.
+        // Each snapshot starts from the current viewport. A previous explicit
+        // jump must not pin subsequent prepends to the start of the new data.
         if readingPosition?.itemID == nil {
             readingPosition = captureReadingPosition()
         }
     }
 
     func captureReadingPosition() -> ReadingPosition? {
-        if isPresentingRefresh, readingPosition?.itemID != nil { return readingPosition }
+        if let readingPosition { return readingPosition }
         guard bounds.width > 1, bounds.height > 1 else { return nil }
         let viewportTop = readingViewportTop()
         if let firstItem = firstVisibleReadingItem(viewportTop: viewportTop) {
@@ -283,10 +264,8 @@ final class TimelineCollectionView: UICollectionView {
     }
 
     private func readingViewportTop() -> CGFloat {
-        if refreshPhase == .refreshing, readingPosition == nil, refreshControl?.isRefreshing == true {
-            refreshOffset = min(refreshInset, max(0, -contentOffset.y - restingAdjustedTopInset))
-        }
-        let top = contentOffset.y + (readingTopInset?() ?? restingAdjustedTopInset) + refreshOffset
+        let top = contentOffset.y + (readingTopInset?() ?? restingAdjustedTopInset) + refreshInset
+        // Elastic pull distance is not a saved reading offset.
         return isPresentingRefresh ? max(top, 0) : top
     }
 
@@ -335,17 +314,30 @@ final class TimelineCollectionView: UICollectionView {
     }
 
     func restoreReadingPosition(_ position: ReadingPosition) {
+        readingPositionGeneration += 1
         readingPosition = position
         setNeedsLayout()
     }
 
     func resetReadingPosition() {
+        readingPositionGeneration += 1
         readingPosition = nil
+    }
+
+    private func finishReadingPositionRestoration() {
+        // Diffable updates and measured cells can trigger further layout passes
+        // within the same update. Release only after those queued passes settle.
+        readingPositionGeneration += 1
+        let generation = readingPositionGeneration
+        DispatchQueue.main.async { [weak self] in
+            guard let self, self.readingPositionGeneration == generation else { return }
+            self.resetReadingPosition()
+        }
     }
 
     override func layoutSubviews() {
         super.layoutSubviews()
-        startRefreshRevealIfReady()
+        startRefreshIfReady()
         restoreReadingPositionIfNeeded()
     }
 
@@ -356,10 +348,7 @@ final class TimelineCollectionView: UICollectionView {
             resetReadingPosition()
             return
         }
-        if readingPosition == nil, isPresentingRefresh {
-            readingPosition = captureReadingPosition()
-        }
-        guard let readingPosition else { return }
+        guard let readingPosition, !isEndingRefresh else { return }
 
         isRestoringReadingPosition = true
         defer { isRestoringReadingPosition = false }
@@ -367,45 +356,34 @@ final class TimelineCollectionView: UICollectionView {
         let targetY: CGFloat
         switch readingPosition {
         case .top:
-            targetY = -restingAdjustedTopInset - refreshOffset
+            targetY = -adjustedContentInset.top
         case .item(let id, let distanceFromTop, let itemOrder):
             let indexPath = readingIndexPath?(id) ?? {
                 let index = itemOrder.firstIndex(of: id) ?? 0
                 let candidates = Array(itemOrder.dropFirst(index + 1)) + Array(itemOrder.prefix(index).reversed())
                 return candidates.lazy.compactMap({ self.readingIndexPath?($0) }).first
             }()
-            guard let indexPath,
-                  let frame = collectionViewLayout.layoutAttributesForItem(at: indexPath)?.frame else {
-                resetReadingPosition()
+            guard let indexPath else {
+                // No old item survives a replacement. Start below the bars;
+                // never turn the disappearing refresh gap into an item offset.
+                self.readingPosition = .top
+                setNeedsLayout()
                 return
             }
+            guard let frame = collectionViewLayout.layoutAttributesForItem(at: indexPath)?.frame else { return }
             // Resizing can make a card shorter; keep the reading item visible.
             let distance = max(distanceFromTop, (readingTopOcclusion?() ?? 0) + 1 - frame.height)
-            if distance != distanceFromTop {
-                // Refined heights can make an estimated offset unreachable. Keep
-                // the visible offset instead of replaying that estimate on resize.
-                self.readingPosition = .item(id: id, distanceFromTop: distance, itemOrder: itemOrder)
-            }
-            targetY = frame.minY - distance - (readingTopInset?() ?? restingAdjustedTopInset) - refreshOffset
+            targetY = frame.minY - distance - (readingTopInset?() ?? restingAdjustedTopInset) - refreshInset
         }
-        let minimumY = -max(adjustedContentInset.top, restingAdjustedTopInset + refreshOffset)
+        let minimumY = -adjustedContentInset.top
         let maximumY = max(minimumY, contentSize.height - bounds.height + adjustedContentInset.bottom)
         let offsetY = min(max(targetY, minimumY), maximumY)
         let tolerance = 0.5 / max(traitCollection.displayScale, 1)
         if abs(contentOffset.y - offsetY) > tolerance {
-            setContentOffset(CGPoint(x: contentOffset.x, y: offsetY), animated: false)
+            super.setContentOffset(CGPoint(x: contentOffset.x, y: offsetY), animated: false)
         }
-    }
-}
-
-@MainActor
-private final class RefreshAnimationTarget: NSObject {
-    private weak var collectionView: TimelineCollectionView?
-
-    init(_ collectionView: TimelineCollectionView) { self.collectionView = collectionView }
-
-    @objc func tick(_ link: CADisplayLink) {
-        guard let collectionView else { link.invalidate(); return }
-        collectionView.advanceRefreshAnimation(link)
+        // Later height reports capture a fresh position before invalidation.
+        // Keeping this bookmark alive would fight native scrolling indefinitely.
+        finishReadingPositionRestoration()
     }
 }

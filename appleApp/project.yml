@@ -235,12 +235,14 @@ targets:
     platform: iOS
     dependencies:
       - package: CHTCollectionViewWaterfallLayout
+      - target: TimelineUnitTestHost
     sources:
       - path: iosTests
       - path: ios/Common/MediaViewerDismissGesturePolicy.swift
       - path: ios/Common/MediaViewerImageLayoutPolicy.swift
       - path: ios/Common/StatusTextContent.swift
       - path: ios/UI/Component/TimelineCollectionView.swift
+      - path: ios/UI/Component/TimelineItemHeightCache.swift
       - path: ios/UI/Component/TimelineLayoutPolicy.swift
       - path: ios/UI/Component/TimelineScrollPositionStore.swift
       - path: ios/UI/Component/TimelineHostedAccessoryView.swift
@@ -255,6 +257,20 @@ targets:
         GENERATE_INFOPLIST_FILE: YES
         PRODUCT_BUNDLE_IDENTIFIER: dev.dimension.flare.tests
         SWIFT_DEFAULT_ACTOR_ISOLATION: nonisolated
+        TEST_HOST: $(BUILT_PRODUCTS_DIR)/TimelineUnitTestHost.app/TimelineUnitTestHost
+        BUNDLE_LOADER: $(TEST_HOST)
+
+  TimelineUnitTestHost:
+    type: application
+    platform: iOS
+    sources:
+      - path: iosUnitTestHost
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        PRODUCT_BUNDLE_IDENTIFIER: dev.dimension.flare.unit-test-host
 
   TimelineTestHost:
     type: application

@@ -66,7 +66,7 @@ final class TimelineCollectionViewTests: XCTestCase {
         fixture.resize(width: 900, columns: 3)
 
         fixture.extraHeight = 35
-        fixture.collectionView.collectionViewLayout.invalidateLayout()
+        fixture.collectionView.invalidateMeasuredHeights()
         fixture.settle()
 
         try fixture.assertPosition(position)
@@ -171,6 +171,32 @@ final class TimelineCollectionViewTests: XCTestCase {
         fixture.resize(width: 390, columns: 1)
         XCTAssertTrue(layout === fixture.collectionView.collectionViewLayout)
         try fixture.assertPosition(position)
+    }
+
+    func testReplacingEveryItemDuringRefreshReturnsBelowTheTopInset() async throws {
+        let fixture = Fixture(width: 390, columns: 1)
+        let window = fixture.showInWindow()
+        defer { window.isHidden = true }
+        let view = fixture.collectionView
+        view.setTopContentInset(74)
+        fixture.scroll(to: -74)
+        view.refreshControl = UIRefreshControl()
+        view.beginRefreshing(revealingIndicator: true)
+        try await Task.sleep(for: .milliseconds(400))
+
+        view.prepareForSnapshotChange()
+        var snapshot = NSDiffableDataSourceSnapshot<Int, String>()
+        snapshot.appendSections([0])
+        snapshot.appendItems((200..<320).map(String.init))
+        await fixture.dataSource.apply(snapshot, animatingDifferences: false)
+        fixture.settle()
+        view.endRefreshing()
+        try await Task.sleep(for: .milliseconds(500))
+        fixture.settle()
+
+        XCTAssertEqual(view.contentOffset.y, -74, accuracy: 0.5)
+        XCTAssertEqual(try fixture.readingPosition().id, "200")
+        XCTAssertEqual(try fixture.readingPosition().distance, 0, accuracy: 0.5)
     }
 
     func testRefreshKeepsItsIndicatorAndReadingItemThroughHeightAndSnapshotChanges() async throws {
@@ -668,6 +694,10 @@ final class TimelineCollectionViewTests: XCTestCase {
         func collectionView(_ view: UICollectionView, layout: UICollectionViewLayout, sizeForItemAt path: IndexPath) -> CGSize {
             let width = (view.bounds.width - CGFloat(columns - 1) * 8) / CGFloat(columns)
             return CGSize(width: width, height: Cell.height(index: Int(dataSource.itemIdentifier(for: path)!)!, width: width) + extraHeight)
+        }
+
+        func scrollViewDidEndScrollingAnimation(_ scrollView: UIScrollView) {
+            collectionView.endProgrammaticScrolling()
         }
 
         static func layout(columns: Int) -> UICollectionViewLayout {

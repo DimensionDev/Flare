@@ -400,6 +400,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     }
 
     func beginExternalScrollInteraction() {
+        collectionView.endProgrammaticScrolling()
         beginScrollInteraction()
     }
 
@@ -451,15 +452,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     }
 
     private func applyExplicitContentOffset(_ offset: CGPoint, animated: Bool) {
-        let shouldAnimate = animated && abs(collectionView.contentOffset.y - offset.y) > 0.5
-        if shouldAnimate {
-            beginScrollInteraction()
-            isProgrammaticScrolling = true
-        }
-        collectionView.setContentOffset(offset, animated: shouldAnimate)
-        if !shouldAnimate, isProgrammaticScrolling {
-            endScrollInteraction()
-        }
+        collectionView.setContentOffset(offset, animated: animated)
     }
 
     private var collectionView: TimelineCollectionView!
@@ -503,7 +496,6 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     private var isRestoringScrollAnchor = false
     private var isApplyingContentTransition = false
     private var snapshotPreparationGeneration = 0
-    private var heightCachePruneGeneration = 0
 
     // Maps item identifier → paging index.
     private var itemIndexMap: [String: Int] = [:]
@@ -642,6 +634,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         isAutoplayViewportMoving = false
         scrollingState.isScrolling = false
         isProgrammaticScrolling = false
+        collectionView.endProgrammaticScrolling()
         postRefreshPoolCleanupTask?.cancel()
         deferredPoolCleanupTask?.cancel()
         detachAutoplayPlayer()
@@ -689,6 +682,14 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         }
         collectionView.isScrollInteractionActive = { [weak self] in
             self?.scrollingState.isScrolling == true
+        }
+        collectionView.onProgrammaticScrollBegan = { [weak self] in
+            guard let self else { return }
+            self.beginScrollInteraction()
+            self.isProgrammaticScrolling = true
+        }
+        collectionView.onProgrammaticScrollEnded = { [weak self] in
+            self?.endScrollInteraction()
         }
         collectionView.keyboardDismissMode = .interactive
         collectionView.delegate = self
@@ -750,22 +751,23 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         return card
     }()
     private var heightCache: [String: CGFloat] = [:]
-    private var heightCacheKeysByItemID: [String: Set<String>] = [:]
-    private var pendingHeightCorrections: [String: CGFloat] = [:]
+    private var itemHeightCache = TimelineItemHeightCache()
+    private var hasPendingHeightCorrections = false
     private var isHeightCorrectionFlushScheduled = false
 
     private func clearAllHeightCache() {
         heightCache.removeAll(keepingCapacity: true)
-        heightCacheKeysByItemID.removeAll(keepingCapacity: true)
-        pendingHeightCorrections.removeAll(keepingCapacity: true)
+        itemHeightCache.removeAll()
+        hasPendingHeightCorrections = false
     }
 
     private func heightCacheWidthKey(for width: CGFloat) -> Int {
         Int((width * UIScreen.main.scale).rounded(.toNearestOrAwayFromZero))
     }
 
-    private func timelineHeightCacheKey(itemID: String, renderHash: Int32, width: CGFloat) -> String {
-        "\(itemID):\(renderHash):\(columnCount > 1):\(heightCacheWidthKey(for: width))"
+    private func heightGeometry(itemID: String, width: CGFloat) -> TimelineItemHeightCache.Geometry {
+        .init(widthInPixels: heightCacheWidthKey(for: width),
+              multipleColumns: columnCount > 1 && itemID != Self.headerTimelineID)
     }
 
     private func measuredCompressedCardHeight(
@@ -841,36 +843,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     }
 
     private func pruneHeightCache(keepingItemIDs: Set<String>) {
-        let existing = Set(heightCacheKeysByItemID.keys)
-        let removed = existing.subtracting(keepingItemIDs)
-        guard !removed.isEmpty else { return }
-        for itemID in removed {
-            guard let keys = heightCacheKeysByItemID.removeValue(forKey: itemID) else { continue }
-            for key in keys {
-                heightCache.removeValue(forKey: key)
-            }
-        }
-    }
-
-    private func scheduleHeightCachePrune(keepingItemIDs: Set<String>) {
-        let existingItemIDs = Array(heightCacheKeysByItemID.keys)
-        guard existingItemIDs.count > keepingItemIDs.count else { return }
-
-        heightCachePruneGeneration += 1
-        let generation = heightCachePruneGeneration
-        DispatchQueue.global(qos: .utility).async { [existingItemIDs, keepingItemIDs] in
-            let removed = existingItemIDs.filter { !keepingItemIDs.contains($0) }
-            guard !removed.isEmpty else { return }
-            DispatchQueue.main.async { [weak self] in
-                guard let self, self.heightCachePruneGeneration == generation else { return }
-                for itemID in removed where !keepingItemIDs.contains(itemID) {
-                    guard let keys = self.heightCacheKeysByItemID.removeValue(forKey: itemID) else { continue }
-                    for key in keys {
-                        self.heightCache.removeValue(forKey: key)
-                    }
-                }
-            }
-        }
+        itemHeightCache.keep(keepingItemIDs)
     }
 
     private func applyMeasuredHeightCorrection(
@@ -880,16 +853,11 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         height: CGFloat
     ) {
         guard width > 1, height.isFinite else { return }
-        let key = timelineHeightCacheKey(itemID: itemID, renderHash: renderHash, width: width)
         let correctedHeight = max(ceil(height), 1)
-        if let cachedHeight = heightCache[key],
-           abs(cachedHeight - correctedHeight) <= 1 {
-            return
-        }
-
-        heightCache[key] = correctedHeight
-        heightCacheKeysByItemID[itemID, default: []].insert(key)
-        pendingHeightCorrections[key] = correctedHeight
+        guard itemHeightCache.store(correctedHeight, for: itemID,
+                                    geometry: heightGeometry(itemID: itemID, width: width),
+                                    renderHash: renderHash) else { return }
+        hasPendingHeightCorrections = true
         scheduleHeightCorrectionFlush()
     }
 
@@ -903,12 +871,12 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
 
     private func flushPendingHeightCorrections() {
         isHeightCorrectionFlushScheduled = false
-        guard isViewLoaded, !pendingHeightCorrections.isEmpty else {
-            pendingHeightCorrections.removeAll(keepingCapacity: true)
+        guard isViewLoaded, hasPendingHeightCorrections else {
+            hasPendingHeightCorrections = false
             return
         }
 
-        pendingHeightCorrections.removeAll(keepingCapacity: true)
+        hasPendingHeightCorrections = false
         collectionView.invalidateMeasuredHeights()
     }
 
@@ -1139,8 +1107,8 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
             let item = row.data
             cell.cachedPreferredHeight = { [weak self] width in
                 guard let self else { return nil }
-                let key = self.timelineHeightCacheKey(itemID: itemID, renderHash: item.renderHash, width: width)
-                return self.heightCache[key]
+                return self.itemHeightCache.height(for: itemID,
+                    geometry: self.heightGeometry(itemID: itemID, width: width), renderHash: item.renderHash)
             }
             cell.onPreferredHeightChanged = { [weak self] width, height in
                 self?.applyMeasuredHeightCorrection(
@@ -2056,7 +2024,9 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
             pendingSavedPosition = collectionView.captureReadingPosition()
         }
         itemIndexMap = plan.indexMap
-        scheduleHeightCachePrune(keepingItemIDs: Set(plan.indexMap.keys).union(plan.headerIDs))
+        if previousSignature?.itemIDs != newSignature.itemIDs || previousSignature?.headerIDs != newSignature.headerIDs {
+            pruneHeightCache(keepingItemIDs: Set(plan.indexMap.keys).union(plan.headerIDs))
+        }
 
         if previousSignature == newSignature {
             let changedIDs = changedItemIDs(
@@ -2543,8 +2513,8 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         }
 
         if itemID.hasPrefix(Self.userPrefix) {
-            let key = timelineHeightCacheKey(itemID: itemID, renderHash: lastRenderHashMap[itemID] ?? 0, width: width)
-            return CGSize(width: width, height: heightCache[key] ?? 96)
+            return CGSize(width: width, height: itemHeightCache.height(for: itemID,
+                geometry: heightGeometry(itemID: itemID, width: width)) ?? 96)
         }
 
         if itemID.hasPrefix(Self.accessoryPrefix),
@@ -2598,12 +2568,11 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         }
 
         if itemID.hasPrefix(Self.timelinePrefix),
-           let row = timelineItem(for: itemID) {
-            let item = row.data
-            let key = timelineHeightCacheKey(itemID: itemID, renderHash: item.renderHash, width: width)
-            // Waterfall visits every loaded item on resize. Only displayed cells
-            // build content and report measured heights; offscreen rows stay cheap.
-            return CGSize(width: width, height: heightCache[key] ?? 240)
+           timelineItem(for: itemID) != nil {
+            // A render-only update keeps its previous measured geometry while the
+            // visible cell validates the new payload. Offscreen rows stay cheap.
+            return CGSize(width: width, height: itemHeightCache.height(for: itemID,
+                geometry: heightGeometry(itemID: itemID, width: width)) ?? 240)
         }
 
         return CGSize(width: width, height: 200)
@@ -2717,6 +2686,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     // MARK: - UIScrollViewDelegate
 
     func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
+        collectionView.endProgrammaticScrolling()
         onScrollInteractionBegan?()
         beginScrollInteraction()
     }
@@ -2789,6 +2759,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     }
 
     private func endScrollInteraction() {
+        collectionView.endProgrammaticScrolling()
         isProgrammaticScrolling = false
         scrollingState.isScrolling = false
         finishPendingRefreshIfReady()

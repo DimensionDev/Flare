@@ -456,7 +456,6 @@ private struct ProfileTimelineCollectionView: UIViewControllerRepresentable {
     @Environment(\.openURL) private var openURL
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
-    @Environment(\.timelineScrollPositions) private var scrollPositions
     @Environment(\.timelineAccountScope) private var accountScope
 
     func makeCoordinator() -> Coordinator {
@@ -536,7 +535,6 @@ private struct ProfileTimelineCollectionView: UIViewControllerRepresentable {
                     coordinator.pageController(
                         for: tab,
                         readingScope: accountScope + ":" + readingScope,
-                        scrollPositions: scrollPositions,
                         timelineColumnCount: timelineColumnCount,
                         appearance: appearance,
                         networkKind: networkKind,
@@ -558,6 +556,7 @@ private struct ProfileTimelineCollectionView: UIViewControllerRepresentable {
             }
 
             let controller = UITimelineCollectionViewController(detailStatusKey: nil)
+            let positions = TimelinePagePositions()
             var cancellable: AnyCancellable?
             var columnCount: Int?
             var kind: Kind?
@@ -675,7 +674,6 @@ private struct ProfileTimelineCollectionView: UIViewControllerRepresentable {
         func pageController(
             for tab: ProfileState.Tab,
             readingScope: String,
-            scrollPositions: TimelineScrollPositionStore?,
             timelineColumnCount: Int,
             appearance: TimelineUIKitAppearance,
             networkKind: NetworkKind,
@@ -700,7 +698,7 @@ private struct ProfileTimelineCollectionView: UIViewControllerRepresentable {
 
             switch onEnum(of: tab) {
             case .timeline(let tab):
-                controller.setReadingContext(key: "\(readingScope):\(tabID)", store: scrollPositions)
+                controller.setReadingState(record.positions.state(for: tabID, scope: readingScope))
                 controller.restoresScrollAnchorOnSnapshotChanges = true
                 let needsBinding = record.prepare(
                     kind: .timeline,

@@ -245,7 +245,7 @@ targets:
       - path: ios/UI/Component/TimelineItemHeightCache.swift
       - path: ios/UI/Component/Status/StatusMediaCarouselLayout.swift
       - path: ios/UI/Component/TimelineLayoutPolicy.swift
-      - path: ios/UI/Component/TimelineScrollPositionStore.swift
+      - path: ios/UI/Component/TimelineReadingState.swift
       - path: ios/UI/Component/TimelineHostedAccessoryView.swift
       - path: Shared/FlareAppleCore/Sources/FlareAppleUI/TimelineAutoplayPolicy.swift
       - path: Shared/FlareAppleCore/Sources/FlareAppleUI/TimelinePlaybackCoordinator.swift
@@ -260,6 +260,23 @@ targets:
         SWIFT_DEFAULT_ACTOR_ISOLATION: nonisolated
         TEST_HOST: $(BUILT_PRODUCTS_DIR)/TimelineUnitTestHost.app/TimelineUnitTestHost
         BUNDLE_LOADER: $(TEST_HOST)
+
+  TimelineControllerTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: iosControllerTests
+    dependencies:
+      - target: iOS
+      - target: FlareAppleCore
+      - target: FlareAppleUI
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        PRODUCT_BUNDLE_IDENTIFIER: dev.dimension.flare.controller-tests
+        TEST_HOST: $(BUILT_PRODUCTS_DIR)/Flare.app/Flare
+        BUNDLE_LOADER: $(TEST_HOST)
+        SWIFT_DEFAULT_ACTOR_ISOLATION: nonisolated
 
   TimelineUnitTestHost:
     type: application
@@ -490,3 +507,12 @@ schemes:
       config: Debug
     archive:
       config: Release
+
+  TimelineControllerTests:
+    build:
+      targets:
+        TimelineControllerTests: all
+    test:
+      config: Debug
+      targets:
+        - TimelineControllerTests

@@ -5,7 +5,6 @@ import FlareAppleCore
 import KotlinSharedUI
 
 struct IOSTimelineListEnvironment: ViewModifier {
-    @State private var positions = TimelineScrollPositionStore()
     @State private var accounts = KotlinPresenter(presenter: AccountsPresenter())
     @State private var resolvedAccountKey = "pending"
     @State private var accountGeneration = UUID().uuidString
@@ -22,12 +21,10 @@ struct IOSTimelineListEnvironment: ViewModifier {
 
     func body(content: Content) -> some View {
         content
-            .environment(\.timelineScrollPositions, positions)
             .environment(\.timelineAccountScope, "\(resolvedAccountKey):\(accountGeneration)")
             .onChange(of: accountKey, initial: true) { _, key in
                 guard let key, key != resolvedAccountKey else { return }
                 resolvedAccountKey = key
-                positions.removeAll()
                 accountGeneration = UUID().uuidString
             }
             .environment(\.timelineListRenderer, TimelineListRenderer { IOSTimelineList(request: $0) })
@@ -38,6 +35,8 @@ private struct IOSTimelineList: View {
     let request: TimelineListRequest
     @Environment(\.self) private var environment
     @State private var headers = TimelineHeaderViews()
+    @State private var positions = TimelinePagePositions()
+    @Environment(\.timelineAccountScope) private var accountScope
 
     var body: some View {
         GeometryReader { geometry in
@@ -47,8 +46,7 @@ private struct IOSTimelineList: View {
                 userData: users,
                 columnCount: TimelineColumnPolicy.adaptive.columnCount(for: geometry.size.width),
                 accessoryItems: headers.update(request.headers, environment: environment),
-                readingKey: request.key,
-                readingPositionOwner: request.positionOwner
+                readingState: positions.state(for: request.key, scope: "\(accountScope):\(request.positionScope)", owner: request.positionOwner)
             )
             .ignoresSafeArea(edges: .vertical)
         }

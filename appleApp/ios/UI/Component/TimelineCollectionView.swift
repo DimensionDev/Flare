@@ -12,7 +12,8 @@ final class TimelineCollectionView: UICollectionView {
     // The owner knows when the snapshot and measurements for this layout are ready.
     // A nil path denotes a restore to the top, without a target item.
     var isReadingLayoutReady: ((IndexPath?) -> Bool)?
-    var isScrollInteractionActive: (() -> Bool)?
+    private var isExternalScrollInteractionActive = false
+    var isScrollInteractionActive: Bool { hasScrollGesture || isProgrammaticScrolling || isExternalScrollInteractionActive }
     var onProgrammaticScrollBegan: (() -> Void)?
     var onProgrammaticScrollEnded: (() -> Void)?
     var preservesReadingPosition = true {
@@ -51,7 +52,7 @@ final class TimelineCollectionView: UICollectionView {
     private var pendingRefreshReveal = false
     private var isEndingRefresh = false
     private var isRevealingRefresh = false
-    private var isProgrammaticScrolling = false
+    private(set) var isProgrammaticScrolling = false
 
     var hasReadingPosition: Bool { readingPosition != nil }
     var isPresentingRefresh: Bool { refreshRequested || isEndingRefresh || refreshControl?.isRefreshing == true }
@@ -92,7 +93,7 @@ final class TimelineCollectionView: UICollectionView {
     private var hasScrollGesture: Bool { isTracking || isDragging || isDecelerating }
 
     private var allowsReadingPositionRestoration: Bool {
-        !hasScrollGesture && !isProgrammaticScrolling && !isRevealingRefresh && isScrollInteractionActive?() != true
+        !isScrollInteractionActive && !isRevealingRefresh
     }
 
     /// UIKit also writes contentInset while refreshing. Apply only the page's delta.
@@ -189,13 +190,28 @@ final class TimelineCollectionView: UICollectionView {
         let shouldAnimate = animated && window != nil && abs(self.contentOffset.y - contentOffset.y) > 0.5
         let wasProgrammaticScrolling = isProgrammaticScrolling
         if shouldAnimate {
-            isProgrammaticScrolling = true
-            onProgrammaticScrollBegan?()
+            beginProgrammaticScrolling()
         } else if isProgrammaticScrolling {
             endProgrammaticScrolling()
         }
         super.setContentOffset(contentOffset, animated: shouldAnimate)
         if wasProgrammaticScrolling && !shouldAnimate { onProgrammaticScrollEnded?() }
+    }
+
+    func beginProgrammaticScrolling() {
+        isProgrammaticScrolling = true
+        onProgrammaticScrollBegan?()
+    }
+
+    func beginExternalScrollInteraction() {
+        endProgrammaticScrolling()
+        isExternalScrollInteractionActive = true
+        interruptRefreshForScrolling()
+    }
+
+    func endScrollInteraction() {
+        endProgrammaticScrolling()
+        isExternalScrollInteractionActive = false
     }
 
     func endProgrammaticScrolling() {

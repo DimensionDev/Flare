@@ -187,6 +187,7 @@ public struct SearchScreen: View {
         headers.append(.title("local_history_status"))
         return TimelineListRequest(
             key: "\(listScope):\(searchPresenter.key)",
+            positionScope: listScope,
             content: .posts(searchPresenter.state.status),
             headers: headers,
             positionOwner: searchPresenter

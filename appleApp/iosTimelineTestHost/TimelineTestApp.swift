@@ -67,7 +67,6 @@ private final class TimelineTestController: UIViewController, CHTCollectionViewD
         list.readingItemID = { [weak self] in self?.dataSource.itemIdentifier(for: $0).map(String.init) }
         list.readingIndexPath = { [weak self] in Int($0).flatMap { self?.dataSource.indexPath(for: $0) } }
         list.readingItemIDs = { [weak self] in self?.dataSource.snapshot().itemIdentifiers.map(String.init) ?? [] }
-        list.isScrollInteractionActive = { [weak self] in self?.scrolling == true }
         list.onProgrammaticScrollBegan = { [weak self] in self?.scrolling = true }
         list.onProgrammaticScrollEnded = { [weak self] in self?.scrolling = false }
         list.refreshControl = UIRefreshControl()
@@ -234,6 +233,7 @@ private final class TimelineTestController: UIViewController, CHTCollectionViewD
     }
 
     func scrollViewShouldScrollToTop(_ scrollView: UIScrollView) -> Bool {
+        list.beginProgrammaticScrolling()
         scrolling = true
         list.interruptRefreshForScrolling()
         return true

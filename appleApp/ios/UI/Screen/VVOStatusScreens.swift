@@ -44,8 +44,7 @@ struct VVOStatusScreen: View {
                     columnCount: TimelineColumnPolicy.adaptive.columnCount(for: proxy.size.width),
                     accessoryItems: accessoryItems,
                     suppressInitialRefreshIndicator: true,
-                    contentKey: selectedType,
-                    readingKey: "vvo-status:\(accountType):\(statusKey)"
+                    contentKey: selectedType
                 )
                 .ignoresSafeArea(edges: .vertical)
                 .refreshable {
@@ -98,8 +97,7 @@ struct VVOCommentScreen: View {
                 detailStatusKey: statusKey,
                 headerState: presenter.state.root,
                 columnCount: TimelineColumnPolicy.adaptive.columnCount(for: proxy.size.width),
-                suppressInitialRefreshIndicator: true,
-                readingKey: "vvo-comment:\(accountType):\(statusKey)"
+                suppressInitialRefreshIndicator: true
             )
             .ignoresSafeArea(edges: .vertical)
             .frame(maxWidth: .infinity, maxHeight: .infinity)

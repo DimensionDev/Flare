@@ -224,20 +224,20 @@ final class TimelineCollectionViewTests: XCTestCase {
     }
 
     func testReturningToAnotherTabRestoresItsItemAtTheNewWidth() throws {
-        let store = TimelineScrollPositionStore()
+        let positions = TimelinePagePositions()
         let first = Fixture(width: 390, columns: 1)
         first.scroll(to: 4_000)
         let expected = try first.readingPosition()
-        store["account-a:home"] = first.collectionView.captureReadingPosition()
+        positions.state(for: "home", scope: "account-a").position = first.collectionView.captureReadingPosition()
         let other = Fixture(width: 390, columns: 1)
         other.scroll(to: 1_000)
-        store["account-a:bookmarks"] = other.collectionView.captureReadingPosition()
+        positions.state(for: "bookmarks", scope: "account-a").position = other.collectionView.captureReadingPosition()
 
         let returning = Fixture(width: 900, columns: 3)
-        returning.collectionView.restoreReadingPosition(try XCTUnwrap(store["account-a:home"]))
+        returning.collectionView.restoreReadingPosition(try XCTUnwrap(positions.state(for: "home", scope: "account-a").position))
         returning.settle()
         try returning.assertPosition(expected)
-        XCTAssertNil(store["account-b:home"])
+        XCTAssertNil(positions.state(for: "home", scope: "account-b").position)
     }
 
     func testPrependingItemsKeepsTheReadingItemInsteadOfItsIndex() throws {
@@ -670,31 +670,31 @@ final class TimelineCollectionViewTests: XCTestCase {
         XCTAssertEqual(secondAfter, secondBefore, accuracy: 0.5)
     }
 
-    func testQueryPositionsExpireWithoutEvictingVisitedTimelinesOrLiveTabs() {
-        let store = TimelineScrollPositionStore()
-        store["home"] = .item(id: "home-item", distanceFromTop: -20, itemOrder: ["home-item"])
+    func testQueryBookmarksAreReleasedWithTheirSourceAndPage() {
+        var positions: TimelinePagePositions? = TimelinePagePositions()
+        let home = positions!.state(for: "home", scope: "account")
+        home.position = .item(id: "home-item", distanceFromTop: -20, itemOrder: ["home-item"])
         var query: NSObject? = NSObject()
-        weak var weakQuery = query
-        let position = TimelineCollectionView.ReadingPosition.item(id: "result", distanceFromTop: -10, itemOrder: ["result"])
-        store.save(position, for: "query:posts", owner: query)
-        store.save(position, for: "query:users", owner: query)
-        XCTAssertEqual(store["query:posts"]?.itemID, "result")
-        XCTAssertEqual(store["query:users"]?.itemID, "result")
+        weak var queryState = positions!.state(for: "query", scope: "account", owner: query)
+        queryState?.position = .top
+        XCTAssertNotNil(queryState)
         query = nil
-        XCTAssertNil(weakQuery)
-        XCTAssertNil(store["query:posts"])
-        XCTAssertNil(store["query:users"])
-        XCTAssertEqual(store["home"]?.itemID, "home-item")
+        XCTAssertTrue(home === positions!.state(for: "home", scope: "account"))
+        XCTAssertNil(queryState)
+        weak var otherPage = positions!.state(for: "other", scope: "account")
+        positions = nil
+        XCTAssertNil(otherPage)
+    }
 
-        let activeQuery = NSObject()
-        for index in 0..<100 {
-            let expiredQuery = NSObject()
-            store.save(position, for: "old-query-\(index)", owner: expiredQuery)
-        }
-        store.save(position, for: "active-query", owner: activeQuery)
-        for index in 0..<100 { XCTAssertNil(store["old-query-\(index)"]) }
-        XCTAssertEqual(store["active-query"]?.itemID, "result")
-        XCTAssertEqual(store["home"]?.itemID, "home-item")
+    func testChangingAccountsCannotResurrectAnOldBookmark() {
+        let positions = TimelinePagePositions()
+        let old = positions.state(for: "home", scope: "a")
+        old.position = .top
+        XCTAssertNil(positions.state(for: "home", scope: "b").position)
+        // An outgoing controller can still save during dismantling. Its detached
+        // page state must not write into the newly selected account's state.
+        old.position = .item(id: "old", distanceFromTop: -10, itemOrder: ["old"])
+        XCTAssertNil(positions.state(for: "home", scope: "a").position)
     }
 
     func testRefinedHeightDoesNotReplayAnUnreachableEstimatedOffset() throws {

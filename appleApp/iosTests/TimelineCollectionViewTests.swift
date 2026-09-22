@@ -381,6 +381,92 @@ final class TimelineCollectionViewTests: XCTestCase {
         XCTAssertEqual(view.contentOffset.y, -52, accuracy: 0.5)
     }
 
+    func testLegacyRefreshNeverAcquiresAnAutomaticReadingAnchor() async throws {
+        let fixture = Fixture(width: 390, columns: 2)
+        let window = fixture.showInWindow()
+        defer { window.isHidden = true }
+        let view = fixture.collectionView
+        view.preservesReadingPosition = false
+        view.setTopContentInset(52)
+        fixture.scroll(to: -52)
+        view.refreshControl = UIRefreshControl()
+        view.refreshControl?.beginRefreshing()
+        try await Task.sleep(for: .milliseconds(350))
+        // Profile media keeps UIKit's refresh and its existing scroll restoration.
+        view.interruptRefreshForScrolling()
+        fixture.scroll(to: 1_400)
+        view.refreshControl?.endRefreshing()
+        try await Task.sleep(for: .milliseconds(400))
+        fixture.settle()
+        XCTAssertFalse(view.isPresentingRefresh)
+        XCTAssertFalse(view.hasReadingPosition)
+        view.setContentOffset(CGPoint(x: 0, y: 1_600), animated: false)
+        fixture.settle()
+        XCTAssertEqual(view.contentOffset.y, 1_600, accuracy: 0.5)
+    }
+
+    func testPinnedHeaderSelectsTheFirstUncoveredItemWithoutChangingItsOffset() throws {
+        let fixture = Fixture(width: 390, columns: 1)
+        let view = fixture.collectionView
+        view.setTopContentInset(52)
+        view.readingTopOcclusion = { 40 }
+        let first = try XCTUnwrap(view.layoutAttributesForItem(at: IndexPath(item: 0, section: 0)))
+        fixture.scroll(to: first.frame.maxY - 10 - 52)
+        let secondBefore = try XCTUnwrap(view.layoutAttributesForItem(at: IndexPath(item: 1, section: 0))).frame.minY - view.contentOffset.y
+        XCTAssertEqual(view.captureReadingPosition()?.itemID, "1")
+        view.prepareForLayoutChange()
+        fixture.extraHeight = 100
+        view.collectionViewLayout.invalidateLayout()
+        fixture.settle()
+        let secondAfter = try XCTUnwrap(view.layoutAttributesForItem(at: IndexPath(item: 1, section: 0))).frame.minY - view.contentOffset.y
+        XCTAssertEqual(secondAfter, secondBefore, accuracy: 0.5)
+    }
+
+    func testQueryPositionsExpireWithoutEvictingVisitedTimelinesOrLiveTabs() {
+        let store = TimelineScrollPositionStore()
+        store["home"] = .item(id: "home-item", distanceFromTop: -20, itemOrder: ["home-item"])
+        var query: NSObject? = NSObject()
+        weak var weakQuery = query
+        let position = TimelineCollectionView.ReadingPosition.item(id: "result", distanceFromTop: -10, itemOrder: ["result"])
+        store.save(position, for: "query:posts", owner: query)
+        store.save(position, for: "query:users", owner: query)
+        XCTAssertEqual(store["query:posts"]?.itemID, "result")
+        XCTAssertEqual(store["query:users"]?.itemID, "result")
+        query = nil
+        XCTAssertNil(weakQuery)
+        XCTAssertNil(store["query:posts"])
+        XCTAssertNil(store["query:users"])
+        XCTAssertEqual(store["home"]?.itemID, "home-item")
+
+        let activeQuery = NSObject()
+        for index in 0..<100 {
+            let expiredQuery = NSObject()
+            store.save(position, for: "old-query-\(index)", owner: expiredQuery)
+        }
+        store.save(position, for: "active-query", owner: activeQuery)
+        for index in 0..<100 { XCTAssertNil(store["old-query-\(index)"]) }
+        XCTAssertEqual(store["active-query"]?.itemID, "result")
+        XCTAssertEqual(store["home"]?.itemID, "home-item")
+    }
+
+    func testRefinedHeightDoesNotReplayAnUnreachableEstimatedOffset() throws {
+        let fixture = Fixture(width: 390, columns: 1)
+        let view = fixture.collectionView
+        let frame = try XCTUnwrap(view.layoutAttributesForItem(at: IndexPath(item: 0, section: 0))).frame
+        fixture.scroll(to: frame.height - 2)
+        view.prepareForLayoutChange()
+        fixture.extraHeight = -100
+        view.collectionViewLayout.invalidateLayout()
+        fixture.settle()
+        let measuredPosition = try fixture.readingPosition()
+
+        view.prepareForLayoutChange()
+        fixture.extraHeight = -80
+        view.collectionViewLayout.invalidateLayout()
+        fixture.settle()
+        try fixture.assertPosition(measuredPosition)
+    }
+
     func testColumnThresholdIncludesInsetsAndSpacing() {
         XCTAssertEqual(TimelineColumnPolicy.adaptive.columnCount(for: 679), 1)
         XCTAssertEqual(TimelineColumnPolicy.adaptive.columnCount(for: 680), 2)

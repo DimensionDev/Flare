@@ -6,6 +6,8 @@ final class TimelineCollectionView: UICollectionView {
     var readingIndexPath: ((String) -> IndexPath?)?
     var readingItemIDs: (() -> [String])?
     var readingTopInset: (() -> CGFloat)?
+    // Occlusion affects which item is visible, not the bookmark's viewport origin.
+    var readingTopOcclusion: (() -> CGFloat)?
     var preservesReadingPosition = true {
         didSet {
             if !preservesReadingPosition {
@@ -59,7 +61,7 @@ final class TimelineCollectionView: UICollectionView {
     }
 
     func beginRefreshing(revealingIndicator: Bool) {
-        guard let refreshControl,
+        guard preservesReadingPosition, let refreshControl,
               refreshPhase == .idle || refreshPhase == .settling else { return }
         let wasRefreshing = refreshControl.isRefreshing
         let hasViewport = bounds.width > 1 && bounds.height > 1
@@ -117,8 +119,9 @@ final class TimelineCollectionView: UICollectionView {
 
     func interruptRefreshForScrolling() {
         stopRefreshAnimation()
-        refreshOffset = refreshControl?.isRefreshing == true ? refreshInset : 0
-        refreshPhase = refreshControl?.isRefreshing == true ? .refreshing : .idle
+        let managesRefresh = preservesReadingPosition && refreshControl?.isRefreshing == true
+        refreshOffset = managesRefresh ? refreshInset : 0
+        refreshPhase = managesRefresh ? .refreshing : .idle
         resetReadingPosition()
     }
 
@@ -229,11 +232,12 @@ final class TimelineCollectionView: UICollectionView {
         }
         let top = contentOffset.y + (readingTopInset?() ?? restingAdjustedTopInset) + refreshOffset
         let viewportTop = isPresentingRefresh ? max(top, 0) : top
+        let visibleTop = viewportTop + max(readingTopOcclusion?() ?? 0, 0)
         let viewportBottom = contentOffset.y + bounds.height - adjustedContentInset.bottom
         let firstItem = indexPathsForVisibleItems.compactMap { indexPath -> (id: String, frame: CGRect)? in
             guard let id = readingItemID?(indexPath),
                   let frame = layoutAttributesForItem(at: indexPath)?.frame,
-                  frame.maxY > viewportTop,
+                  frame.maxY > visibleTop,
                   frame.minY < viewportBottom else { return nil }
             return (id, frame)
         }.min { lhs, rhs in
@@ -273,7 +277,8 @@ final class TimelineCollectionView: UICollectionView {
     }
 
     private func restoreReadingPositionIfNeeded() {
-        guard !isRestoringReadingPosition, bounds.width > 1, bounds.height > 1 else { return }
+        guard preservesReadingPosition, !isRestoringReadingPosition,
+              bounds.width > 1, bounds.height > 1 else { return }
         if isTracking || isDragging || isDecelerating {
             resetReadingPosition()
             return
@@ -302,7 +307,12 @@ final class TimelineCollectionView: UICollectionView {
                 return
             }
             // Resizing can make a card shorter; keep the reading item visible.
-            let distance = max(distanceFromTop, 1 - frame.height)
+            let distance = max(distanceFromTop, (readingTopOcclusion?() ?? 0) + 1 - frame.height)
+            if distance != distanceFromTop {
+                // Refined heights can make an estimated offset unreachable. Keep
+                // the visible offset instead of replaying that estimate on resize.
+                self.readingPosition = .item(id: id, distanceFromTop: distance, itemOrder: itemOrder)
+            }
             targetY = frame.minY - distance - (readingTopInset?() ?? restingAdjustedTopInset) - refreshOffset
         }
         let minimumY = -max(adjustedContentInset.top, restingAdjustedTopInset + refreshOffset)

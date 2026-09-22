@@ -188,7 +188,8 @@ public struct SearchScreen: View {
         return TimelineListRequest(
             key: "\(listScope):\(searchPresenter.key)",
             content: .posts(searchPresenter.state.status),
-            headers: headers
+            headers: headers,
+            positionOwner: searchPresenter
         )
     }
 

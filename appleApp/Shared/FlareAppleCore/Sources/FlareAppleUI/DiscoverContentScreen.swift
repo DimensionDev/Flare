@@ -146,7 +146,8 @@ public struct DiscoverContentScreen<AskAiOverlay: View>: View {
         return TimelineListRequest(
             key: "\(listScope):\(searching ? searchPresenter.key : "discover")",
             content: showsPosts ? .posts(posts) : .none,
-            headers: headers
+            headers: headers,
+            positionOwner: searching ? searchPresenter : presenter
         )
     }
 

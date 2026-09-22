@@ -98,7 +98,8 @@ public struct LocalHistoryContentScreen<AskAiOverlay: View>: View {
         }
         return TimelineListRequest(
             key: "\(listScope):\(committedQuery.isEmpty ? "history" : searchPresenter.key):\(selection)",
-            content: content
+            content: content,
+            positionOwner: committedQuery.isEmpty ? presenter : searchPresenter
         )
     }
 

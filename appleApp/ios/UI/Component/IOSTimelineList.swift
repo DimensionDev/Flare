@@ -47,7 +47,8 @@ private struct IOSTimelineList: View {
                 userData: users,
                 columnCount: TimelineColumnPolicy.adaptive.columnCount(for: geometry.size.width),
                 accessoryItems: headers.update(request.headers, environment: environment),
-                readingKey: request.key
+                readingKey: request.key,
+                readingPositionOwner: request.positionOwner
             )
             .ignoresSafeArea(edges: .vertical)
         }

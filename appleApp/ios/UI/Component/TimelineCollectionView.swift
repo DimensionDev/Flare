@@ -9,6 +9,9 @@ final class TimelineCollectionView: UICollectionView {
     var readingTopInset: (() -> CGFloat)?
     // Occlusion affects which item is visible, not the bookmark's viewport origin.
     var readingTopOcclusion: (() -> CGFloat)?
+    // The owner knows when the snapshot and measurements for this layout are ready.
+    // A nil path denotes a restore to the top, without a target item.
+    var isReadingLayoutReady: ((IndexPath?) -> Bool)?
     var isScrollInteractionActive: (() -> Bool)?
     var onProgrammaticScrollBegan: (() -> Void)?
     var onProgrammaticScrollEnded: (() -> Void)?
@@ -36,6 +39,9 @@ final class TimelineCollectionView: UICollectionView {
 
     // This is a pending layout transaction, not a continuously enforced offset.
     private var readingPosition: ReadingPosition?
+    // Passive across size changes: a different column may become visually first,
+    // or a shorter card may temporarily clamp the original intra-item distance.
+    private var geometryReadingPosition: ReadingPosition?
     private var readingPositionGeneration = 0
     private var isRestoringReadingPosition = false
     private var appliedTopInset: CGFloat?
@@ -210,7 +216,7 @@ final class TimelineCollectionView: UICollectionView {
         willSet {
             // Setting frame can resize bounds without calling its setter.
             if frame.size != newValue.size, bounds.width > 1, bounds.height > 1 {
-                prepareForLayoutChange()
+                prepareForGeometryChange()
             }
         }
     }
@@ -218,18 +224,28 @@ final class TimelineCollectionView: UICollectionView {
     override var bounds: CGRect {
         willSet {
             if bounds.size != newValue.size, bounds.width > 1, bounds.height > 1 {
-                prepareForLayoutChange()
+                prepareForGeometryChange()
             }
         }
     }
 
     func prepareForLayoutChange() {
         guard preservesReadingPosition,
-              readingPosition == nil,
               !isRestoringReadingPosition,
               allowsReadingPositionRestoration else { return }
 
-        readingPosition = captureReadingPosition()
+        readingPositionGeneration += 1
+        if readingPosition == nil { readingPosition = captureCurrentLayoutPosition() }
+    }
+
+    func prepareForGeometryChange() {
+        guard preservesReadingPosition, !isRestoringReadingPosition,
+              allowsReadingPositionRestoration else { return }
+        if geometryReadingPosition == nil {
+            geometryReadingPosition = captureReadingPosition()
+        }
+        readingPositionGeneration += 1
+        readingPosition = geometryReadingPosition
     }
 
     func prepareForSnapshotChange() {
@@ -237,15 +253,29 @@ final class TimelineCollectionView: UICollectionView {
               !isRestoringReadingPosition,
               allowsReadingPositionRestoration else { return }
 
-        // Each snapshot starts from the current viewport. A previous explicit
-        // jump must not pin subsequent prepends to the start of the new data.
+        // Reuse the item bookmark if a snapshot arrives during reflow. Once a top
+        // restore completes, later prepends capture the loaded reading item.
         if readingPosition?.itemID == nil {
-            readingPosition = captureReadingPosition()
+            readingPosition = captureCurrentLayoutPosition()
         }
+        readingPositionGeneration += 1
+    }
+
+    private func captureCurrentLayoutPosition() -> ReadingPosition? {
+        if let readingPosition { return readingPosition }
+        if case .item(let id, _, let itemOrder) = geometryReadingPosition,
+           let path = readingIndexPath?(id),
+           let frame = layoutAttributesForItem(at: path)?.frame {
+            // A later content/inset update preserves the displayed distance. Keep
+            // the unclamped geometry bookmark only for the next size change.
+            return .item(id: id, distanceFromTop: frame.minY - readingViewportTop(), itemOrder: itemOrder)
+        }
+        return captureReadingPosition()
     }
 
     func captureReadingPosition() -> ReadingPosition? {
         if let readingPosition { return readingPosition }
+        if let geometryReadingPosition, geometryReadingPosition.itemID != nil { return geometryReadingPosition }
         guard bounds.width > 1, bounds.height > 1 else { return nil }
         let viewportTop = readingViewportTop()
         if let firstItem = firstVisibleReadingItem(viewportTop: viewportTop) {
@@ -315,6 +345,7 @@ final class TimelineCollectionView: UICollectionView {
 
     func restoreReadingPosition(_ position: ReadingPosition) {
         readingPositionGeneration += 1
+        geometryReadingPosition = position.itemID == nil ? nil : position
         readingPosition = position
         setNeedsLayout()
     }
@@ -322,16 +353,19 @@ final class TimelineCollectionView: UICollectionView {
     func resetReadingPosition() {
         readingPositionGeneration += 1
         readingPosition = nil
+        geometryReadingPosition = nil
     }
 
-    private func finishReadingPositionRestoration() {
-        // Diffable updates and measured cells can trigger further layout passes
-        // within the same update. Release only after those queued passes settle.
-        readingPositionGeneration += 1
+    private func finishReadingPositionRestoration(at indexPath: IndexPath?) {
+        // Child cells measure after the collection's layout pass. Check readiness
+        // outside layout; a snapshot/measurement event will retry if still pending.
         let generation = readingPositionGeneration
         DispatchQueue.main.async { [weak self] in
-            guard let self, self.readingPositionGeneration == generation else { return }
-            self.resetReadingPosition()
+            guard let self, self.readingPositionGeneration == generation,
+                  !self.isEndingRefresh, self.allowsReadingPositionRestoration,
+                  self.isReadingLayoutReady?(indexPath) != false else { return }
+            self.readingPosition = nil
+            if self.geometryReadingPosition?.itemID == nil { self.geometryReadingPosition = nil }
         }
     }
 
@@ -354,8 +388,10 @@ final class TimelineCollectionView: UICollectionView {
         defer { isRestoringReadingPosition = false }
 
         let targetY: CGFloat
+        let targetIndexPath: IndexPath?
         switch readingPosition {
         case .top:
+            targetIndexPath = nil
             targetY = -adjustedContentInset.top
         case .item(let id, let distanceFromTop, let itemOrder):
             let indexPath = readingIndexPath?(id) ?? {
@@ -367,8 +403,16 @@ final class TimelineCollectionView: UICollectionView {
                 // No old item survives a replacement. Start below the bars;
                 // never turn the disappearing refresh gap into an item offset.
                 self.readingPosition = .top
+                geometryReadingPosition = nil
                 setNeedsLayout()
                 return
+            }
+            targetIndexPath = indexPath
+            if let replacementID = readingItemID?(indexPath), replacementID != id {
+                let replacement = ReadingPosition.item(id: replacementID, distanceFromTop: distanceFromTop,
+                                                       itemOrder: readingItemIDs?() ?? [replacementID])
+                self.readingPosition = replacement
+                if geometryReadingPosition != nil { geometryReadingPosition = replacement }
             }
             guard let frame = collectionViewLayout.layoutAttributesForItem(at: indexPath)?.frame else { return }
             // Resizing can make a card shorter; keep the reading item visible.
@@ -382,8 +426,6 @@ final class TimelineCollectionView: UICollectionView {
         if abs(contentOffset.y - offsetY) > tolerance {
             super.setContentOffset(CGPoint(x: contentOffset.x, y: offsetY), animated: false)
         }
-        // Later height reports capture a fresh position before invalidation.
-        // Keeping this bookmark alive would fight native scrolling indefinitely.
-        finishReadingPositionRestoration()
+        finishReadingPositionRestoration(at: targetIndexPath)
     }
 }

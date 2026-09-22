@@ -243,6 +243,7 @@ targets:
       - path: ios/Common/StatusTextContent.swift
       - path: ios/UI/Component/TimelineCollectionView.swift
       - path: ios/UI/Component/TimelineItemHeightCache.swift
+      - path: ios/UI/Component/Status/StatusMediaCarouselLayout.swift
       - path: ios/UI/Component/TimelineLayoutPolicy.swift
       - path: ios/UI/Component/TimelineScrollPositionStore.swift
       - path: ios/UI/Component/TimelineHostedAccessoryView.swift

@@ -309,7 +309,7 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding, UICollectionView
 
     private let grid = UIView()
     private let carouselLayout: UICollectionViewFlowLayout = {
-        let layout = UICollectionViewFlowLayout()
+        let layout = StatusMediaCarouselLayout()
         layout.scrollDirection = .horizontal
         layout.minimumLineSpacing = 4
         layout.minimumInteritemSpacing = 4
@@ -343,7 +343,6 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding, UICollectionView
     private var toggleButtonPositionConstraints: [NSLayoutConstraint] = []
     private var aspectConstraint: NSLayoutConstraint?
     private var lastLayoutWidth: CGFloat = 0
-    private var lastCarouselSize: CGSize = .zero
     private let spacing: CGFloat = 4
     private var cellPool: [MediaGridCellView] = []
     private var lastConfigureSignature: ConfigureSignature?
@@ -433,10 +432,6 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding, UICollectionView
         super.layoutSubviews()
         layer.cornerRadius = usesCarousel ? 0 : cornerRadius
         if usesCarousel {
-            if carousel.bounds.size != lastCarouselSize {
-                lastCarouselSize = carousel.bounds.size
-                carouselLayout.invalidateLayout()
-            }
             if let index = pendingReturnedIndex, carousel.bounds.width > 0, items.indices.contains(index) {
                 pendingReturnedIndex = nil
                 carousel.layoutIfNeeded()

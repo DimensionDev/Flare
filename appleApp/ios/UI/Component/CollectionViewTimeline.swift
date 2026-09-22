@@ -268,7 +268,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
                 return
             }
             collectionView.prepareForLayoutChange()
-            clearAllHeightCache()
+            clearHeightCache()
             applyLayoutForColumnCount()
             reconfigureVisibleCells()
             handleAutoplayAvailabilityChanged()
@@ -278,7 +278,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     var aiTldrEnabled = false {
         didSet {
             guard oldValue != aiTldrEnabled, isViewLoaded else { return }
-            clearAllHeightCache()
+            clearHeightCache()
             reconfigureVisibleCells()
         }
     }
@@ -322,7 +322,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
             }
             guard oldValue != columnCount, isViewLoaded else { return }
             guard !isApplyingContentTransition else { return }
-            collectionView.prepareForLayoutChange()
+            collectionView.prepareForGeometryChange()
             let scrollAnchor: ScrollAnchor?
             if contentKind == .profileMedia {
                 if let transition = profileMediaGeometryTransition,
@@ -336,7 +336,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
             } else {
                 scrollAnchor = nil
             }
-            clearAllHeightCache()
+            clearHeightCache(keepingItemMeasurements: contentKind != .profileMedia)
             applyLayoutForColumnCount()
             reconfigureVisibleCells()
             updateBackgroundColors()
@@ -680,6 +680,9 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
             let top = self.collectionView.contentOffset.y + self.collectionView.restingAdjustedTopInset
             return max(frame.maxY - top, 0)
         }
+        collectionView.isReadingLayoutReady = { [weak self] indexPath in
+            self?.isReadingLayoutReady(at: indexPath) == true
+        }
         collectionView.isScrollInteractionActive = { [weak self] in
             self?.scrollingState.isScrolling == true
         }
@@ -755,10 +758,31 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     private var hasPendingHeightCorrections = false
     private var isHeightCorrectionFlushScheduled = false
 
-    private func clearAllHeightCache() {
+    private func clearHeightCache(keepingItemMeasurements: Bool = false) {
         heightCache.removeAll(keepingCapacity: true)
-        itemHeightCache.removeAll()
-        hasPendingHeightCorrections = false
+        if !keepingItemMeasurements {
+            itemHeightCache.removeAll()
+            hasPendingHeightCorrections = false
+        }
+    }
+
+    private func isReadingLayoutReady(at indexPath: IndexPath?) -> Bool {
+        guard isSnapshotReadyForReadingPosition, !hasPendingHeightCorrections else { return false }
+        guard let indexPath else { return true }
+        // Only the target and already visible cells participate. Never measure the
+        // offscreen feed merely to finish a rotation or a prepend.
+        let paths = Set(collectionView.indexPathsForVisibleItems + [indexPath])
+        for path in paths {
+            guard let id = dataSource.itemIdentifier(for: path),
+                  id.hasPrefix(Self.timelinePrefix) || id.hasPrefix(Self.userPrefix) else { continue }
+            guard let frame = collectionView.layoutAttributesForItem(at: path)?.frame,
+                  let renderHash = lastRenderHashMap[id],
+                  itemHeightCache.height(for: id, geometry: heightGeometry(itemID: id, width: frame.width),
+                                         renderHash: renderHash) != nil else { return false }
+            if let cell = collectionView.cellForItem(at: path) as? TimelineUIKitCollectionViewCell,
+               !cell.hasMeasuredHeight(for: frame.width) { return false }
+        }
+        return true
     }
 
     private func heightCacheWidthKey(for width: CGFloat) -> Int {
@@ -854,6 +878,9 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     ) {
         guard width > 1, height.isFinite else { return }
         let correctedHeight = max(ceil(height), 1)
+        // An unchanged measured height can still replace an estimate/stale render
+        // and complete a pending restore, without requiring a layout invalidation.
+        if collectionView.hasReadingPosition { collectionView.setNeedsLayout() }
         guard itemHeightCache.store(correctedHeight, for: itemID,
                                     geometry: heightGeometry(itemID: itemID, width: width),
                                     renderHash: renderHash) else { return }
@@ -1677,7 +1704,10 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     }
 
     private func restorePendingContentOffsetIfNeeded(finalize: Bool) {
-        if finalize { isSnapshotReadyForReadingPosition = true }
+        if finalize {
+            isSnapshotReadyForReadingPosition = true
+            if collectionView.hasReadingPosition { collectionView.setNeedsLayout() }
+        }
         defer { if finalize { finishPendingRefreshIfReady() } }
         restoreSavedPositionIfReady()
         if minimumVerticalScrollDistance > 0 {
@@ -1721,8 +1751,9 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     ) {
         if contentKind == newKind, columnCount != newColumnCount,
            pendingEffectiveContentOffsetYAfterSnapshot == nil {
-            collectionView.prepareForLayoutChange()
+            collectionView.prepareForGeometryChange()
         }
+        let keepsMeasurements = contentKind == newKind && newKind != .profileMedia
         // Invalidate any in-flight snapshot for the previous tab before replacing
         // both its data and layout in the same non-animated transaction.
         snapshotPreparationGeneration += 1
@@ -1737,7 +1768,8 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
             setContentKind(newKind)
             columnCount = max(newColumnCount, 1)
             updateState()
-            clearAllHeightCache()
+            clearHeightCache(keepingItemMeasurements: keepsMeasurements)
+            pruneHeightCache(keepingItemIDs: Set(plan.indexMap.keys).union(plan.headerIDs))
             detachAutoplayPlayer()
             pendingScrollAnchor = nil
             itemIndexMap = plan.indexMap
@@ -3019,6 +3051,10 @@ private final class TimelineUIKitCollectionViewCell: UICollectionViewCell {
         hostedBottomConstraint = bottomConstraint
         NSLayoutConstraint.activate(hostedConstraints)
         lastPreferredHeightReport = nil
+    }
+
+    func hasMeasuredHeight(for width: CGFloat) -> Bool {
+        !pendingFreshMeasurement && lastMeasuredWidth == width
     }
 
     private func measuredHostedHeight(width: CGFloat) -> CGFloat {

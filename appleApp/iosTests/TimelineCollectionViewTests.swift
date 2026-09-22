@@ -5,6 +5,144 @@ import CHTCollectionViewWaterfallLayout
 
 @MainActor
 final class TimelineCollectionViewTests: XCTestCase {
+    func testRoundTripKeepsTheOriginalItemWhenAnotherColumnStartsEarlier() throws {
+        let fixture = Fixture(width: 390, columns: 1)
+        let frame = try XCTUnwrap(fixture.collectionView.layoutAttributesForItem(at: IndexPath(item: 1, section: 0))).frame
+        fixture.scroll(to: frame.minY + 50)
+        let position = try fixture.readingPosition()
+        XCTAssertEqual(position.id, "1")
+
+        fixture.resize(width: 900, columns: 3)
+        try fixture.assertPosition(position)
+        XCTAssertNotEqual(try fixture.readingPosition().id, position.id, "The visual first column is not the saved reading item")
+        fixture.resize(width: 390, columns: 1)
+        try fixture.assertPosition(position)
+        XCTAssertFalse(fixture.collectionView.hasReadingPosition, "A completed rotation must not continuously enforce an offset")
+    }
+
+    func testDelayedMeasurementDoesNotLoseAnOffsetClampedByAnEstimate() throws {
+        let fixture = Fixture(width: 390, columns: 1)
+        fixture.heightOverride = { _, _ in 700 }
+        fixture.collectionView.collectionViewLayout.invalidateLayout()
+        fixture.settle()
+        fixture.scroll(to: 700 + 400)
+        let position = try fixture.readingPosition()
+
+        fixture.collectionView.prepareForLayoutChange()
+        fixture.collectionView.isReadingLayoutReady = { _ in false }
+        fixture.heightOverride = { _, _ in 240 }
+        fixture.resize(width: 600, columns: 1)
+        XCTAssertTrue(fixture.collectionView.hasReadingPosition, "An estimate must not finish restoration")
+        // A real cell can report its height several run-loop turns after resizing.
+        fixture.heightOverride = { _, _ in 650 }
+        fixture.collectionView.isReadingLayoutReady = { _ in true }
+        fixture.collectionView.invalidateMeasuredHeights()
+        fixture.settle()
+        try fixture.assertPosition(position)
+        XCTAssertFalse(fixture.collectionView.hasReadingPosition)
+
+        fixture.collectionView.prepareForLayoutChange()
+        fixture.heightOverride = { _, _ in 700 }
+        fixture.resize(width: 390, columns: 1)
+        try fixture.assertPosition(position)
+    }
+
+    func testActuallyShorterCardRetainsItsOriginalOffsetForTheReturnWidth() throws {
+        let fixture = Fixture(width: 390, columns: 1)
+        fixture.heightOverride = { _, width in width < 500 ? 700 : 200 }
+        fixture.collectionView.collectionViewLayout.invalidateLayout()
+        fixture.settle()
+        fixture.scroll(to: 1_100)
+        let position = try fixture.readingPosition()
+        fixture.resize(width: 600, columns: 1)
+        XCTAssertEqual(try fixture.readingPosition().id, position.id)
+        XCTAssertFalse(fixture.collectionView.hasReadingPosition)
+        fixture.resize(width: 390, columns: 1)
+        try fixture.assertPosition(position)
+    }
+
+    func testScrollingSupersedesARestoreWaitingForMeasurements() throws {
+        let fixture = Fixture(width: 390, columns: 1)
+        fixture.scroll(to: 3_000)
+        fixture.collectionView.isReadingLayoutReady = { _ in false }
+        fixture.resize(width: 900, columns: 3)
+        XCTAssertTrue(fixture.collectionView.hasReadingPosition)
+
+        fixture.scroll(to: 2_000)
+        let position = try fixture.readingPosition()
+        fixture.collectionView.isReadingLayoutReady = { _ in true }
+        fixture.collectionView.invalidateMeasuredHeights()
+        fixture.settle()
+        fixture.resize(width: 390, columns: 1)
+        try fixture.assertPosition(position)
+    }
+
+    func testContentExpansionAfterReflowKeepsTheDisplayedOffset() throws {
+        let fixture = Fixture(width: 390, columns: 1)
+        fixture.heightOverride = { _, width in width < 500 ? 700 : 200 }
+        fixture.collectionView.collectionViewLayout.invalidateLayout()
+        fixture.settle()
+        fixture.scroll(to: 1_100)
+        let original = try fixture.readingPosition()
+        fixture.resize(width: 600, columns: 1)
+        let clamped = try fixture.readingPosition()
+
+        // A local expansion after measurement has settled is a new content change,
+        // not another step of the rotation that originally clamped the offset.
+        fixture.heightOverride = { _, _ in 700 }
+        fixture.collectionView.invalidateMeasuredHeights()
+        fixture.settle()
+        try fixture.assertPosition(clamped)
+        fixture.resize(width: 390, columns: 1)
+        try fixture.assertPosition(original)
+    }
+
+    func testTabToTopSupersedesARestoreWaitingForMeasurements() async throws {
+        let fixture = Fixture(width: 390, columns: 1)
+        let window = fixture.showInWindow()
+        defer { window.isHidden = true }
+        let view = fixture.collectionView
+        view.setTopContentInset(88)
+        fixture.scroll(to: 3_000)
+        view.isReadingLayoutReady = { _ in false }
+        fixture.resize(width: 700, columns: 2)
+        XCTAssertTrue(view.hasReadingPosition)
+
+        view.setContentOffset(CGPoint(x: 0, y: -88), animated: true)
+        try await Task.sleep(for: .milliseconds(500))
+        view.isReadingLayoutReady = { _ in true }
+        view.invalidateMeasuredHeights()
+        fixture.settle()
+        // Yield the main-actor test task so the queued completion can run.
+        try await Task.sleep(for: .milliseconds(20))
+        XCTAssertEqual(view.contentOffset.y, -88, accuracy: 0.5)
+        XCTAssertFalse(view.hasReadingPosition)
+        fixture.resize(width: 390, columns: 1)
+        XCTAssertEqual(view.contentOffset.y, -88, accuracy: 0.5)
+    }
+
+    func testPrependDuringDelayedRotationKeepsTheOriginalItem() throws {
+        let fixture = Fixture(width: 390, columns: 1)
+        fixture.scroll(to: 3_000)
+        let position = try fixture.readingPosition()
+        fixture.collectionView.isReadingLayoutReady = { _ in false }
+        fixture.resize(width: 700, columns: 2)
+        fixture.collectionView.prepareForSnapshotChange()
+        var snapshot = fixture.dataSource.snapshot()
+        snapshot.insertItems(["200", "201"], beforeItem: "0")
+        fixture.dataSource.apply(snapshot, animatingDifferences: false)
+        fixture.settle()
+        XCTAssertTrue(fixture.collectionView.hasReadingPosition)
+
+        fixture.collectionView.isReadingLayoutReady = { _ in true }
+        fixture.collectionView.invalidateMeasuredHeights()
+        fixture.settle()
+        try fixture.assertPosition(position)
+        XCTAssertFalse(fixture.collectionView.hasReadingPosition)
+        fixture.resize(width: 390, columns: 1)
+        try fixture.assertPosition(position)
+    }
+
     func testSingleAndMultipleColumnsKeepTheSameReadingPosition() throws {
         let fixture = Fixture(width: 390, columns: 1)
         fixture.scroll(to: 4_000)
@@ -608,6 +746,7 @@ final class TimelineCollectionViewTests: XCTestCase {
         var dataSource: UICollectionViewDiffableDataSource<Int, String>!
         var columns: Int
         var extraHeight: CGFloat = 0
+        var heightOverride: ((Int, CGFloat) -> CGFloat)?
 
         init(width: CGFloat, columns: Int) {
             self.columns = columns
@@ -654,7 +793,7 @@ final class TimelineCollectionViewTests: XCTestCase {
 
         func resize(width: CGFloat, columns: Int) {
             if self.columns != columns {
-                collectionView.prepareForLayoutChange()
+                collectionView.prepareForGeometryChange()
                 self.columns = columns
                 (collectionView.collectionViewLayout as! CHTCollectionViewWaterfallLayout).columnCount = columns
                 collectionView.collectionViewLayout.invalidateLayout()
@@ -693,7 +832,8 @@ final class TimelineCollectionViewTests: XCTestCase {
 
         func collectionView(_ view: UICollectionView, layout: UICollectionViewLayout, sizeForItemAt path: IndexPath) -> CGSize {
             let width = (view.bounds.width - CGFloat(columns - 1) * 8) / CGFloat(columns)
-            return CGSize(width: width, height: Cell.height(index: Int(dataSource.itemIdentifier(for: path)!)!, width: width) + extraHeight)
+            let index = Int(dataSource.itemIdentifier(for: path)!)!
+            return CGSize(width: width, height: heightOverride?(index, width) ?? (Cell.height(index: index, width: width) + extraHeight))
         }
 
         func scrollViewDidEndScrollingAnimation(_ scrollView: UIScrollView) {

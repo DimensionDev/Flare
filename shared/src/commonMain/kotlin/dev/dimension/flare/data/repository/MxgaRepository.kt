@@ -18,7 +18,7 @@ import io.ktor.http.isSuccess
 import io.ktor.utils.io.cancel
 import io.ktor.utils.io.core.readText
 import io.ktor.utils.io.core.remaining
-import io.ktor.utils.io.readRemaining
+import io.ktor.utils.io.readBuffer
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -174,7 +174,7 @@ internal class MxgaRepository(
             channel.cancel()
             error("MXGA response is too large")
         }
-        val body = channel.readRemaining(maxBytes + 1)
+        val body = channel.readBuffer(maxBytes + 1)
         if (body.remaining > maxBytes) {
             channel.cancel()
             error("MXGA response is too large")

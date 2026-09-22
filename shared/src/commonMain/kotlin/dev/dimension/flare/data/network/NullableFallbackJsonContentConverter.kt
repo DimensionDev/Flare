@@ -13,7 +13,7 @@ import io.ktor.util.reflect.TypeInfo
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.charsets.Charset
 import io.ktor.utils.io.core.readText
-import io.ktor.utils.io.readRemaining
+import io.ktor.utils.io.readBuffer
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.json.Json
@@ -48,7 +48,7 @@ private class NullableFallbackJsonContentConverter(
         content: ByteReadChannel,
     ): Any? {
         val serializer = json.serializersModule.serializerForTypeInfo(typeInfo)
-        val body = content.readRemaining().readText(charset)
+        val body = content.readBuffer().readText(charset)
         return try {
             json.decodeFromStringWithNullableFallback(serializer, body)
         } catch (cause: Throwable) {

@@ -17,7 +17,7 @@ import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 import io.ktor.utils.io.cancel
 import io.ktor.utils.io.core.remaining
-import io.ktor.utils.io.readRemaining
+import io.ktor.utils.io.readBuffer
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.io.readByteArray
@@ -152,7 +152,7 @@ private suspend fun HttpResponse.readLimitedSource(maxBytes: Long) =
             channel.cancel()
             error("Link card response is too large")
         }
-        val source = channel.readRemaining(maxBytes + 1)
+        val source = channel.readBuffer(maxBytes + 1)
         if (source.remaining > maxBytes) {
             channel.cancel()
             error("Link card response is too large")

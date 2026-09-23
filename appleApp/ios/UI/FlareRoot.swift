@@ -42,7 +42,8 @@ struct FlareRoot: View {
                     }
                     .badge(homeTabRoute(tab) == .notification ? Int(notificationBadgePresenter.state.count) : 0)
                 }
-                if horizontalSizeClass == .regular {
+                // iPhone Duo also has a regular width when unfolded; these shortcuts are iPad-only.
+                if UIDevice.current.userInterfaceIdiom == .pad && horizontalSizeClass == .regular {
                     if case .success(let data) = onEnum(of: secondaryTabsPresenter.state.items) {
                         let items = data.data.cast(SecondaryTabsPresenter.Item.self)
                         ForEach(items, id: \.accountKey) { item in

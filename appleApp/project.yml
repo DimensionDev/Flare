@@ -233,11 +233,20 @@ targets:
   iOSTests:
     type: bundle.unit-test
     platform: iOS
+    dependencies:
+      - package: CHTCollectionViewWaterfallLayout
+      - target: TimelineUnitTestHost
     sources:
       - path: iosTests
       - path: ios/Common/MediaViewerDismissGesturePolicy.swift
       - path: ios/Common/MediaViewerImageLayoutPolicy.swift
       - path: ios/Common/StatusTextContent.swift
+      - path: ios/UI/Component/TimelineCollectionView.swift
+      - path: ios/UI/Component/TimelineItemHeightCache.swift
+      - path: ios/UI/Component/Status/StatusMediaCarouselLayout.swift
+      - path: ios/UI/Component/TimelineLayoutPolicy.swift
+      - path: ios/UI/Component/TimelineReadingState.swift
+      - path: ios/UI/Component/TimelineHostedAccessoryView.swift
       - path: Shared/FlareAppleCore/Sources/FlareAppleUI/TimelineAutoplayPolicy.swift
       - path: Shared/FlareAppleCore/Sources/FlareAppleUI/TimelinePlaybackCoordinator.swift
       - path: Shared/FlareAppleCore/Sources/FlareAppleUI/VideoPlaybackArbiter.swift
@@ -248,6 +257,66 @@ targets:
       base:
         GENERATE_INFOPLIST_FILE: YES
         PRODUCT_BUNDLE_IDENTIFIER: dev.dimension.flare.tests
+        SWIFT_DEFAULT_ACTOR_ISOLATION: nonisolated
+        TEST_HOST: $(BUILT_PRODUCTS_DIR)/TimelineUnitTestHost.app/TimelineUnitTestHost
+        BUNDLE_LOADER: $(TEST_HOST)
+
+  TimelineControllerTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: iosControllerTests
+    dependencies:
+      - target: iOS
+      - target: FlareAppleCore
+      - target: FlareAppleUI
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        PRODUCT_BUNDLE_IDENTIFIER: dev.dimension.flare.controller-tests
+        TEST_HOST: $(BUILT_PRODUCTS_DIR)/Flare.app/Flare
+        BUNDLE_LOADER: $(TEST_HOST)
+        SWIFT_DEFAULT_ACTOR_ISOLATION: nonisolated
+
+  TimelineUnitTestHost:
+    type: application
+    platform: iOS
+    sources:
+      - path: iosUnitTestHost
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        PRODUCT_BUNDLE_IDENTIFIER: dev.dimension.flare.unit-test-host
+
+  TimelineTestHost:
+    type: application
+    platform: iOS
+    sources:
+      - path: iosTimelineTestHost
+      - path: ios/UI/Component/TimelineCollectionView.swift
+    dependencies:
+      - package: CHTCollectionViewWaterfallLayout
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        PRODUCT_BUNDLE_IDENTIFIER: dev.dimension.flare.timeline-tests
+
+  iOSInteractionTests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: iosUITests
+    dependencies:
+      - target: TimelineTestHost
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        PRODUCT_BUNDLE_IDENTIFIER: dev.dimension.flare.interaction-tests
+        TEST_TARGET_NAME: TimelineTestHost
         SWIFT_DEFAULT_ACTOR_ISOLATION: nonisolated
 
   macOS:
@@ -407,12 +476,22 @@ schemes:
       config: Debug
       targets:
         - iOSTests
+        - iOSInteractionTests
     profile:
       config: Release
     analyze:
       config: Debug
     archive:
       config: Release
+
+  TimelineInteractionTests:
+    build:
+      targets:
+        iOSInteractionTests: all
+    test:
+      config: Debug
+      targets:
+        - iOSInteractionTests
 
   macOS:
     build:
@@ -428,3 +507,12 @@ schemes:
       config: Debug
     archive:
       config: Release
+
+  TimelineControllerTests:
+    build:
+      targets:
+        TimelineControllerTests: all
+    test:
+      config: Debug
+      targets:
+        - TimelineControllerTests

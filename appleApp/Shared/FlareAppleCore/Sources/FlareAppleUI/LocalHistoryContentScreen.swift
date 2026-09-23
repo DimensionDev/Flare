@@ -3,9 +3,13 @@ import FlareAppleCore
 import SwiftUI
 
 public struct LocalHistoryContentScreen<AskAiOverlay: View>: View {
+    @Environment(\.timelineListRenderer) private var listRenderer
+    @State private var listScope = UUID().uuidString
+    @State private var searchPresenter = KotlinPresenter(presenter: LocalCacheSearchPresenter())
     @Environment(\.timelineAppearance.aiConfig.agent) private var agentEnabled
     @State private var presenter = KotlinPresenter(presenter: LocalCacheSearchPresenter())
     @State private var searchText = ""
+    @State private var committedQuery = ""
     @State private var isSearchPresented = false
     @State private var selection: LocalHistorySelection = .status
 
@@ -21,13 +25,7 @@ public struct LocalHistoryContentScreen<AskAiOverlay: View>: View {
     }
 
     public var body: some View {
-        List {
-            if selection == .status {
-                statusContent
-            } else {
-                userContent
-            }
-        }
+        scrollingContent
         .modifier(LocalHistoryListStyle(selection: selection))
         .toolbar {
             #if os(macOS)
@@ -68,6 +66,42 @@ public struct LocalHistoryContentScreen<AskAiOverlay: View>: View {
         .onSubmit(of: .search) {
             submitSearch()
         }
+        .onChange(of: normalizedSearchText) { _, query in
+            if listRenderer != nil, query.isEmpty {
+                committedQuery = ""
+                searchPresenter = KotlinPresenter(presenter: LocalCacheSearchPresenter())
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var scrollingContent: some View {
+        if let listRenderer {
+            listRenderer(timelineListRequest)
+        } else {
+            List {
+                if selection == .status {
+                    statusContent
+                } else {
+                    userContent
+                }
+            }
+        }
+    }
+
+    private var timelineListRequest: TimelineListRequest {
+        let content: TimelineListRequest.Content
+        if selection == .status {
+            content = .posts(committedQuery.isEmpty ? presenter.state.history : searchPresenter.state.data)
+        } else {
+            content = .users(committedQuery.isEmpty ? presenter.state.userHistory : searchPresenter.state.searchUser)
+        }
+        return TimelineListRequest(
+            key: "\(listScope):\(committedQuery.isEmpty ? "history" : searchPresenter.key):\(selection)",
+            positionScope: listScope,
+            content: content,
+            positionOwner: committedQuery.isEmpty ? presenter : searchPresenter
+        )
     }
 
     @ViewBuilder
@@ -93,7 +127,17 @@ public struct LocalHistoryContentScreen<AskAiOverlay: View>: View {
     }
 
     private func submitSearch() {
-        presenter.state.setQuery(value: normalizedSearchText)
+        let query = normalizedSearchText
+        if listRenderer != nil {
+            if !query.isEmpty {
+                let source = KotlinPresenter(presenter: LocalCacheSearchPresenter())
+                source.state.setQuery(value: query)
+                searchPresenter = source
+            }
+            committedQuery = query
+        } else {
+            presenter.state.setQuery(value: query)
+        }
     }
 
     private func askAi() {

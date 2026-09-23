@@ -4,35 +4,42 @@ import KotlinSharedUI
 import FlareAppleUI
 
 struct UITimelinePagingView: View {
-    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @Environment(\.timelineAppearance.timelineDisplayMode) private var timelineDisplayMode
     @Environment(\.refresh) private var refreshAction: RefreshAction?
     let data: PagingState<UiTimelineV2>
     let detailStatusKey: MicroBlogKey?
     let key: String
+    let readingState: TimelineReadingState?
+    @State private var positions = TimelinePagePositions()
+    @Environment(\.timelineAccountScope) private var accountScope
     let topContentInset: CGFloat
     let allowGalleryMode: Bool
     let accessoryItems: [UITimelineCollectionViewAccessoryItem]
     let suppressInitialRefreshIndicator: Bool
+    let columnPolicy: TimelineColumnPolicy
     let onIsAtTopChanged: (Bool) -> Void
 
     init(
         data: PagingState<UiTimelineV2>,
         detailStatusKey: MicroBlogKey?,
         key: String,
+        readingState: TimelineReadingState? = nil,
         topContentInset: CGFloat = 0,
         allowGalleryMode: Bool = false,
         accessoryItems: [UITimelineCollectionViewAccessoryItem] = [],
         suppressInitialRefreshIndicator: Bool = false,
+        columnPolicy: TimelineColumnPolicy = .adaptive,
         onIsAtTopChanged: @escaping (Bool) -> Void = { _ in }
     ) {
         self.data = data
         self.detailStatusKey = detailStatusKey
         self.key = key
+        self.readingState = readingState
         self.topContentInset = topContentInset
         self.allowGalleryMode = allowGalleryMode
         self.accessoryItems = accessoryItems
         self.suppressInitialRefreshIndicator = suppressInitialRefreshIndicator
+        self.columnPolicy = columnPolicy
         self.onIsAtTopChanged = onIsAtTopChanged
     }
 
@@ -44,34 +51,21 @@ struct UITimelinePagingView: View {
                 onIsAtTopChanged: onIsAtTopChanged
             )
                 .ignoresSafeArea(edges: .vertical)
-        } else if UIDevice.current.userInterfaceIdiom == .phone ||
-            horizontalSizeClass == .compact {
-            singleListView
         } else {
             GeometryReader { proxy in
                 UITimelineCollectionView(
                     data: data,
                     detailStatusKey: detailStatusKey,
                     topContentInset: topContentInset,
-                    columnCount: max(Int((proxy.size.width / 320).rounded(.down)), 1),
+                    columnCount: columnPolicy.columnCount(for: proxy.size.width),
                     accessoryItems: accessoryItems,
                     suppressInitialRefreshIndicator: suppressInitialRefreshIndicator,
+                    readingState: readingState ?? positions.state(for: key, scope: accountScope),
                     onIsAtTopChanged: onIsAtTopChanged
                 )
                 .ignoresSafeArea(edges: .vertical)
             }
+            .modifier(TimelineListBackground(columnPolicy: columnPolicy))
         }
-    }
-
-    var singleListView: some View {
-        UITimelineCollectionView(
-            data: data,
-            detailStatusKey: detailStatusKey,
-            topContentInset: topContentInset,
-            accessoryItems: accessoryItems,
-            suppressInitialRefreshIndicator: suppressInitialRefreshIndicator,
-            onIsAtTopChanged: onIsAtTopChanged
-        )
-        .ignoresSafeArea(edges: .vertical)
     }
 }

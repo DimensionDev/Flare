@@ -149,7 +149,7 @@ struct ProfileScreen: View {
                             LazyVStack(spacing: 0) {
                                 ProfileTabsLoadingPlaceholder()
                                 ProfileTimelineUIKitLoadingPlaceholder(
-                                    columnCount: max(Int((proxy.size.width / 320).rounded(.down)), 1)
+                                    columnCount: TimelineColumnPolicy.adaptive.columnCount(for: proxy.size.width)
                                 )
                             }
                         }
@@ -232,12 +232,11 @@ struct ProfileScreen: View {
         GeometryReader { proxy in
             ProfileTimelineCollectionView(
                 profileState: presenter.state,
+                readingScope: "profile:\(accountType):\(userKey.map(String.init(describing:)) ?? "self")",
                 tabs: tabs,
                 selectedTab: $selectedTab,
                 showsProfileAccessories: showsProfileAccessories,
-                timelineColumnCount: showsProfileAccessories
-                    ? 1
-                    : max(Int((proxy.size.width / 320).rounded(.down)), 1),
+                timelineColumnCount: TimelineColumnPolicy.adaptive.columnCount(for: proxy.size.width),
                 onFollowClick: { user, followButtonState in
                     handleFollowAction(user: user, followButtonState: followButtonState)
                 },
@@ -439,6 +438,7 @@ private struct ProfileProgressTabBar: View {
 
 private struct ProfileTimelineCollectionView: UIViewControllerRepresentable {
     let profileState: ProfileState
+    let readingScope: String
     let tabs: [ProfileState.Tab]
     @Binding var selectedTab: Int
     let showsProfileAccessories: Bool
@@ -455,6 +455,8 @@ private struct ProfileTimelineCollectionView: UIViewControllerRepresentable {
     @Environment(\.networkKind) private var networkKind
     @Environment(\.openURL) private var openURL
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+
+    @Environment(\.timelineAccountScope) private var accountScope
 
     func makeCoordinator() -> Coordinator {
         Coordinator()
@@ -532,6 +534,7 @@ private struct ProfileTimelineCollectionView: UIViewControllerRepresentable {
                 makeController: {
                     coordinator.pageController(
                         for: tab,
+                        readingScope: accountScope + ":" + readingScope,
                         timelineColumnCount: timelineColumnCount,
                         appearance: appearance,
                         networkKind: networkKind,
@@ -553,6 +556,7 @@ private struct ProfileTimelineCollectionView: UIViewControllerRepresentable {
             }
 
             let controller = UITimelineCollectionViewController(detailStatusKey: nil)
+            let positions = TimelinePagePositions()
             var cancellable: AnyCancellable?
             var columnCount: Int?
             var kind: Kind?
@@ -577,6 +581,7 @@ private struct ProfileTimelineCollectionView: UIViewControllerRepresentable {
             }
 
             func close() {
+                controller.saveReadingPosition()
                 cancellable = nil
                 controller.onContentOffsetChanged = nil
                 controller.onScrollInteractionBegan = nil
@@ -668,6 +673,7 @@ private struct ProfileTimelineCollectionView: UIViewControllerRepresentable {
 
         func pageController(
             for tab: ProfileState.Tab,
+            readingScope: String,
             timelineColumnCount: Int,
             appearance: TimelineUIKitAppearance,
             networkKind: NetworkKind,
@@ -692,6 +698,8 @@ private struct ProfileTimelineCollectionView: UIViewControllerRepresentable {
 
             switch onEnum(of: tab) {
             case .timeline(let tab):
+                controller.setReadingState(record.positions.state(for: tabID, scope: readingScope))
+                controller.restoresScrollAnchorOnSnapshotChanges = true
                 let needsBinding = record.prepare(
                     kind: .timeline,
                     columnCount: timelineColumnCount,
@@ -1228,7 +1236,7 @@ private final class ProfileTimelinePagerViewController: UIViewController,
         from source: ProfileTimelinePageViewController,
         to target: UITimelineCollectionViewController
     ) {
-        guard let source = source.timelineController else { return }
+        guard !target.hasSavedReadingPosition, let source = source.timelineController else { return }
         let offsetY = min(max(source.effectiveContentOffsetY, 0), collapseDistance)
         target.loadViewIfNeeded()
         target.restoreEffectiveContentOffset(offsetY, animated: false)
@@ -1322,6 +1330,7 @@ private final class ProfileTimelinePagerViewController: UIViewController,
         _ page: UITimelineCollectionViewController,
         oldEffectiveOffset: CGFloat? = nil
     ) {
+        let hasPendingReadingPosition = page.hasPendingReadingPosition
         let topInset = headerHeight + pickerHeight
         let insetChanged = abs(page.topContentInset - topInset) > 0.5
         if insetChanged {
@@ -1330,7 +1339,8 @@ private final class ProfileTimelinePagerViewController: UIViewController,
         if abs(page.minimumVerticalScrollDistance - collapseDistance) > 0.5 {
             page.minimumVerticalScrollDistance = collapseDistance
         }
-        if insetChanged, let oldEffectiveOffset {
+        if insetChanged, !hasPendingReadingPosition, let oldEffectiveOffset,
+           !page.restoresScrollAnchorOnSnapshotChanges || oldEffectiveOffset <= collapseDistance {
             page.restoreEffectiveContentOffset(oldEffectiveOffset, animated: false)
         }
     }
@@ -1750,20 +1760,5 @@ struct ProfileWithUserNameAndHostScreen: View {
         } loadingContent: {
             ProgressView()
         }
-    }
-}
-
-struct ProfileTimelineView: View {
-    @State private var presenter: KotlinPresenter<TimelineState>
-    
-    init(presenter: TimelinePresenter) {
-        self._presenter = .init(wrappedValue: .init(presenter: presenter))
-    }
-    
-    var body: some View {
-        TimelinePagingListContent(data: presenter.state.listState)
-//            .refreshable {
-//                try? await presenter.state.refresh()
-//            }
     }
 }

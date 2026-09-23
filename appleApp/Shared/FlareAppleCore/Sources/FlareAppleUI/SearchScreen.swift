@@ -3,6 +3,9 @@ import SwiftUI
 import FlareAppleCore
 
 public struct SearchScreen: View {
+    @Environment(\.timelineListRenderer) private var listRenderer
+    @State private var listScope = UUID().uuidString
+    @State private var searchAccountType: AccountType
     @Environment(\.openURL) private var openURL
     @Environment(\.timelineAppearance.aiConfig.agent) private var agentEnabled
     private let onAskAi: (String?) -> Void
@@ -22,6 +25,7 @@ public struct SearchScreen: View {
         onAskAi: @escaping (String?) -> Void = { _ in }
     ) {
         self.onAskAi = onAskAi
+        self._searchAccountType = .init(initialValue: accountType)
         self._searchPresenter = .init(wrappedValue: .init(presenter: SearchPresenter(accountType: accountType, initialQuery: initialQuery)))
         self._searchHistoryPresenter = .init(wrappedValue: .init(presenter: SearchHistoryPresenter()))
         self.searchText = initialQuery
@@ -43,46 +47,7 @@ public struct SearchScreen: View {
     }
 
     private var content: some View {
-        List {
-            if case .success(let usersState) = onEnum(of: searchPresenter.state.users) {
-                Section {
-                    ScrollView(.horizontal) {
-                        LazyHStack(spacing: 8) {
-                            ForEach(0..<usersState.itemCount, id: \.self) { index in
-                                ListCardView {
-                                    if let item = usersState.peek(index: index) {
-                                        UserCompatView(data: item)
-                                            .onAppear {
-                                                _ = usersState.get(index: index)
-                                            }
-                                            .padding()
-                                            .onTapGesture {
-                                                item.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
-                                            }
-                                    } else {
-                                        UserLoadingView()
-                                            .padding()
-                                    }
-                                }
-                                .frame(maxWidth: 280)
-                            }
-                        }
-                    }
-                    .scrollIndicators(.hidden)
-                } header: {
-                    Text("local_history_user", bundle: FlareAppleUILocalization.bundle)
-                }
-                .padding(.horizontal)
-                .listRowSeparator(.hidden)
-                .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
-                .listRowBackground(Color.clear)
-            }
-            Section {
-                TimelinePagingListContent(data: searchPresenter.state.status)
-            } header: {
-                Text("local_history_status", bundle: FlareAppleUILocalization.bundle)
-            }
-        }
+        scrollingContent
         .scrollContentBackground(.hidden)
         .searchListRowSpacing(2)
         .listStyle(.plain)
@@ -117,7 +82,7 @@ public struct SearchScreen: View {
         .onChange(of: searchText) {
             if isSearchPresented && searchText.isEmpty {
                 committedSearchText = ""
-                searchPresenter.state.search(query: "")
+                search(query: "")
             } else if !isSearchPresented && searchText.isEmpty && !committedSearchText.isEmpty {
                 DispatchQueue.main.async {
                     searchText = committedSearchText
@@ -141,14 +106,92 @@ public struct SearchScreen: View {
         searchText = query
         committedSearchText = query
         searchHistoryPresenter.state.addSearchHistory(keyword: query)
-        searchPresenter.state.search(query: query)
+        search(query: query)
         isSearchPresented = false
+    }
+
+    private func search(query: String, accountType: AccountType? = nil) {
+        guard listRenderer != nil else {
+            searchPresenter.state.search(query: query)
+            return
+        }
+        let accountType = accountType ?? searchPresenter.state.selectedAccount.map {
+            AccountType.Specific(accountKey: $0.key)
+        } ?? searchAccountType
+        searchAccountType = accountType
+        // The source and its reading key change together. The previous query's
+        // asynchronous results cannot consume the new query's top reset.
+        searchPresenter = KotlinPresenter(presenter: SearchPresenter(accountType: accountType, initialQuery: query))
     }
 
     private func askAi() {
         let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
         isSearchPresented = false
         onAskAi(query.isEmpty ? nil : query)
+    }
+
+    @ViewBuilder
+    private var scrollingContent: some View {
+        if let listRenderer {
+            listRenderer(timelineListRequest)
+        } else {
+            List {
+                if case .success(let usersState) = onEnum(of: searchPresenter.state.users) {
+                    Section {
+                        ScrollView(.horizontal) {
+                            LazyHStack(spacing: 8) {
+                                ForEach(0..<usersState.itemCount, id: \.self) { index in
+                                    ListCardView {
+                                        if let item = usersState.peek(index: index) {
+                                            UserCompatView(data: item)
+                                                .onAppear {
+                                                    _ = usersState.get(index: index)
+                                                }
+                                                .padding()
+                                                .onTapGesture {
+                                                    item.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
+                                                }
+                                        } else {
+                                            UserLoadingView()
+                                                .padding()
+                                        }
+                                    }
+                                    .frame(maxWidth: 280)
+                                }
+                            }
+                        }
+                        .scrollIndicators(.hidden)
+                    } header: {
+                        Text("local_history_user", bundle: FlareAppleUILocalization.bundle)
+                    }
+                    .padding(.horizontal)
+                    .listRowSeparator(.hidden)
+                    .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
+                    .listRowBackground(Color.clear)
+                }
+                Section {
+                    TimelinePagingListContent(data: searchPresenter.state.status)
+                } header: {
+                    Text("local_history_status", bundle: FlareAppleUILocalization.bundle)
+                }
+            }
+        }
+    }
+
+    private var timelineListRequest: TimelineListRequest {
+        var headers: [TimelineListHeader] = []
+        if case .success(let users) = onEnum(of: searchPresenter.state.users) {
+            headers.append(.title("local_history_user"))
+            headers.append(TimelineListHeader(id: "users") { TimelineListUserStrip(users: users) })
+        }
+        headers.append(.title("local_history_status"))
+        return TimelineListRequest(
+            key: "\(listScope):\(searchPresenter.key)",
+            positionScope: listScope,
+            content: .posts(searchPresenter.state.status),
+            headers: headers,
+            positionOwner: searchPresenter
+        )
     }
 
     #if os(iOS)
@@ -165,7 +208,11 @@ public struct SearchScreen: View {
                                 searchPresenter.state.selectedAccount?.key == account.key
                             }, set: { value in
                                 if value {
-                                    searchPresenter.state.setAccount(profile: account)
+                                    if listRenderer != nil {
+                                        search(query: committedSearchText, accountType: AccountType.Specific(accountKey: account.key))
+                                    } else {
+                                        searchPresenter.state.setAccount(profile: account)
+                                    }
                                 }
                             })) {
                                 Label {

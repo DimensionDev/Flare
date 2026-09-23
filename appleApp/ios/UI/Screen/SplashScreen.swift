@@ -14,5 +14,6 @@ struct SplashScreen: View {
                 .frame(width: 96, height: 96)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .ignoresSafeArea()
     }
 }

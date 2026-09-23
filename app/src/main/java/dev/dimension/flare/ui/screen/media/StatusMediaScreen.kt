@@ -126,7 +126,7 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.Glassify
-import dev.dimension.flare.ui.component.LocalTimelineAppearance
+import dev.dimension.flare.ui.component.LocalGlobalAppearance
 import dev.dimension.flare.ui.component.MediaViewerPlayback
 import dev.dimension.flare.ui.component.MediaViewerSelection
 import dev.dimension.flare.ui.component.SurfaceBindingManager
@@ -138,6 +138,7 @@ import dev.dimension.flare.ui.humanizer.humanize
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.asTimelinePostItem
 import dev.dimension.flare.ui.model.contentPostOrNull
 import dev.dimension.flare.ui.model.isSuccess
 import dev.dimension.flare.ui.model.onLoading
@@ -149,6 +150,7 @@ import dev.dimension.flare.ui.theme.FlareTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -222,6 +224,12 @@ internal fun StatusMediaScreen(
             )
         },
         status = status,
+        quotes =
+            state.status
+                .takeSuccess()
+                ?.asTimelinePostItem()
+                ?.presentation
+                ?.quotes ?: persistentListOf(),
         surfaceBindingManager = surfaceBindingManager,
     )
 }
@@ -241,8 +249,10 @@ internal fun MediaViewerScreen(
     fileName: (UiMedia) -> String,
     fileNames: (List<UiMedia>) -> Map<String, UiMedia>,
     status: UiTimelineV2.Post? = null,
+    quotes: ImmutableList<UiTimelineV2.Post> = persistentListOf(),
     surfaceBindingManager: SurfaceBindingManager = koinInject(),
 ) {
+    val showPost = LocalGlobalAppearance.current.showPostInMediaViewer
     val view = LocalView.current
     LaunchedEffect(view) {
         // The background fades with the swipe; the window dim would linger until dismissal.
@@ -315,11 +325,12 @@ internal fun MediaViewerScreen(
                     .background(MaterialTheme.colorScheme.background.copy(alpha = 1 - swiperState.progress))
                     .alpha(1 - swiperState.progress),
         ) {
-            Box(
-                modifier =
-                    Modifier
-                        .fillMaxSize(),
-            ) {
+            MediaPostSheet(
+                post = status,
+                quotes = quotes,
+                visible = showPost && !isBigScreen && state.showUi && !state.isLandscapeViewing,
+                uriHandler = uriHandler,
+            ) { postPeekHeight ->
                 Row {
                     Box(
                         modifier = Modifier.weight(1f),
@@ -612,14 +623,15 @@ internal fun MediaViewerScreen(
 
                                 else -> {
                                     state.showUi &&
-                                        (pagerState.pageCount > 1 || status != null)
+                                        (pagerState.pageCount > 1)
                                 }
                             }
                         androidx.compose.animation.AnimatedVisibility(
                             visible = shouldShowBottomUi,
                             modifier =
                                 Modifier
-                                    .align(Alignment.BottomCenter),
+                                    .align(Alignment.BottomCenter)
+                                    .padding(bottom = postPeekHeight),
                             enter = slideInVertically { it },
                             exit = slideOutVertically { it },
                         ) {
@@ -644,7 +656,7 @@ internal fun MediaViewerScreen(
                                 Column(
                                     modifier =
                                         Modifier.let {
-                                            if (status == null && !isBigScreen) {
+                                            if (postPeekHeight == 0.dp && !isBigScreen) {
                                                 it.windowInsetsPadding(
                                                     WindowInsets.systemBars.only(
                                                         WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom,
@@ -737,39 +749,11 @@ internal fun MediaViewerScreen(
                                             }
                                         }
                                     }
-                                    if (status != null && !isBigScreen && state.showUi && !state.isLandscapeViewing) {
-                                        CompositionLocalProvider(
-                                            LocalTimelineAppearance provides
-                                                LocalTimelineAppearance.current.copy(
-                                                    showMedia = false,
-                                                    showLinkPreview = false,
-                                                ),
-                                            LocalUriHandler provides uriHandler,
-                                        ) {
-                                            CommonStatusComponent(
-                                                item = status,
-                                                showMedia = false,
-                                                modifier =
-                                                    Modifier
-                                                        .padding(
-                                                            horizontal = screenHorizontalPadding,
-                                                            vertical = 8.dp,
-                                                        ).windowInsetsPadding(
-                                                            WindowInsets.systemBars.only(
-                                                                WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom,
-                                                            ),
-                                                        ),
-                                                maxLines = 3,
-                                                showExpandButton = false,
-                                                isQuote = true,
-                                            )
-                                        }
-                                    }
                                 }
                             }
                         }
                     }
-                    if (isBigScreen && status != null) {
+                    if (isBigScreen && status != null && showPost) {
                         AnimatedVisibility(state.showUi && !state.isLandscapeViewing) {
                             Surface(
                                 modifier =
@@ -781,15 +765,11 @@ internal fun MediaViewerScreen(
                                 contentColor = MaterialTheme.colorScheme.onSurface,
                             ) {
                                 CompositionLocalProvider(
-                                    LocalTimelineAppearance provides
-                                        LocalTimelineAppearance.current.copy(
-                                            showMedia = false,
-                                            showLinkPreview = false,
-                                        ),
                                     LocalUriHandler provides uriHandler,
                                 ) {
                                     CommonStatusComponent(
                                         item = status,
+                                        quotes = quotes,
                                         showMedia = false,
                                         modifier =
                                             Modifier

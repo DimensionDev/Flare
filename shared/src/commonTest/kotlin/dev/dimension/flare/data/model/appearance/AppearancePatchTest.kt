@@ -26,12 +26,23 @@ import kotlin.test.assertFalse
 
 class AppearancePatchTest {
     @Test
+    fun mediaViewerPostPreferenceSurvivesStorageAndCanReturnToDefault() {
+        val stored = AppearancePatch.EMPTY.set(AppearanceKeys.ShowPostInMediaViewer, false).toBag()
+        val restored = stored.toPatch()
+
+        assertFalse(restored.toGlobalAppearance().showPostInMediaViewer)
+        assertEquals(true, restored.clear(AppearanceKeys.ShowPostInMediaViewer).toGlobalAppearance().showPostInMediaViewer)
+        assertEquals(true, AppearanceBag().toPatch().toGlobalAppearance().showPostInMediaViewer)
+    }
+
+    @Test
     fun emptyPatchSynthesizesDefaultAppearanceSettings() {
         assertEquals(AppearanceSettings.Default, AppearancePatch.EMPTY.toAppearanceSettings())
         assertFalse(TimelineAppearance.Default.expandContentWarning)
         assertEquals(TimelineMediaLayout.Grid, TimelineAppearance.Default.mediaLayout)
         assertEquals(true, TimelineAppearance.Default.limitMediaGridToNine)
         assertEquals(true, TimelineAppearance.Default.showEmojiReactions)
+        assertEquals(true, AppearancePatch.EMPTY.toGlobalAppearance().showPostInMediaViewer)
     }
 
     @Test
@@ -55,6 +66,7 @@ class AppearancePatchTest {
                 .set(AppearanceKeys.Theme, Theme.DARK)
                 .set(AppearanceKeys.ShowBottomBarLabels, false)
                 .set(AppearanceKeys.DeckMode, true)
+                .set(AppearanceKeys.ShowPostInMediaViewer, false)
                 .set(AppearanceKeys.AvatarShape, AvatarShape.SQUARE)
                 .set(AppearanceKeys.ShowMedia, false)
                 .set(AppearanceKeys.ExpandContentWarning, true)
@@ -69,6 +81,7 @@ class AppearancePatchTest {
                 theme = Theme.DARK,
                 showBottomBarLabels = false,
                 deckMode = true,
+                showPostInMediaViewer = false,
             ),
             patch.toGlobalAppearance(),
         )
@@ -195,6 +208,7 @@ class AppearancePatchTest {
             setOf(
                 AppearanceKeys.ShowBottomBarLabels,
                 AppearanceKeys.DeckMode,
+                AppearanceKeys.ShowPostInMediaViewer,
                 AppearanceKeys.ExpandContentWarning,
                 AppearanceKeys.MediaLayout,
                 AppearanceKeys.LimitMediaGridToNine,

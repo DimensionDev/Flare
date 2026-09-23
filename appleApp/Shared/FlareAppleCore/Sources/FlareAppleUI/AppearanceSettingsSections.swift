@@ -398,6 +398,7 @@ private struct LinkOpenDefaultAccountRow: View {
 }
 
 public struct AppearanceMediaSettingsSection: View {
+    @Environment(\.globalAppearance) private var globalAppearance
     @State private var presenter = KotlinPresenter(presenter: SettingsPresenter())
     #if os(iOS)
     @State private var statusPresenter = KotlinPresenter(presenter: AppearancePresenter())
@@ -421,6 +422,16 @@ public struct AppearanceMediaSettingsSection: View {
                 Text("appearance_show_media", bundle: FlareAppleUILocalization.bundle)
                 Text("appearance_show_media_description", bundle: FlareAppleUILocalization.bundle)
             }
+            #if os(iOS)
+            Toggle(isOn: Binding(get: {
+                globalAppearance.showPostInMediaViewer
+            }, set: { newValue in
+                presenter.state.updateShowPostInMediaViewer(value: newValue)
+            })) {
+                Text("appearance_show_post_in_media_viewer", bundle: FlareAppleUILocalization.bundle)
+                Text("appearance_show_post_in_media_viewer_description", bundle: FlareAppleUILocalization.bundle)
+            }
+            #endif
             if appearance.showMedia {
                 Toggle(isOn: Binding(get: {
                     appearance.expandMediaSize

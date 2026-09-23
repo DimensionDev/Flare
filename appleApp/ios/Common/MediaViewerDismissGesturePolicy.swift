@@ -12,6 +12,16 @@ enum MediaViewerDismissGesturePolicy {
     static let distanceThreshold: CGFloat = 0.5
     static let scrollEdgeTolerance: CGFloat = 1
 
+    @MainActor
+    static func belongsToViewer(_ touchedController: UIViewController, viewer: UIViewController) -> Bool {
+        var controller: UIViewController? = touchedController
+        while let current = controller {
+            if current === viewer { return true }
+            controller = current.parent
+        }
+        return false
+    }
+
     static func verticalOffset(
         for layer: MediaViewerDismissLayer,
         translationY: CGFloat

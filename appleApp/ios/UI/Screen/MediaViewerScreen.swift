@@ -12,19 +12,9 @@ struct MediaViewerShareContext {
     let userHandle: String?
 }
 
-struct MediaViewerOverlayContext {
-    let selectedMedia: (any UiMedia)?
-    let mediaCount: Int
-    let selectedIndex: Binding<Int>
-    let showData: Bool
-    let isLandscapeViewing: Bool
-    let isPlaying: Binding<Bool>
-    let currentTime: Binding<CMTime>
-    let videoState: VideoState
-    let playbackRate: Float
-}
-
-struct MediaViewerScreen<SupplementaryOverlay: View>: View {
+struct MediaViewerScreen: View {
+    @Environment(\.globalAppearance.showPostInMediaViewer) private var showPostInMediaViewer
+    @Environment(\.openURL) private var openURL
     @Environment(\.dismiss) private var dismiss
 
     let medias: [any UiMedia]
@@ -33,8 +23,8 @@ struct MediaViewerScreen<SupplementaryOverlay: View>: View {
     let previewAspectRatio: CGFloat?
     let previewIsImage: Bool
     let shareContext: MediaViewerShareContext?
-    let showsSupplementaryOverlay: Bool
-    @ViewBuilder let supplementaryOverlay: (MediaViewerOverlayContext) -> SupplementaryOverlay
+    let post: UiTimelineV2.Post?
+    let quotes: [UiTimelineV2.Post]
 
     @State private var selectedIndex: Int
     @State private var isPlaying: Bool = true
@@ -49,6 +39,9 @@ struct MediaViewerScreen<SupplementaryOverlay: View>: View {
     @State private var isPreparingShare = false
     @State private var playbackRate: Float = 1
     @State private var isLandscapeViewing = false
+    @State private var postSheetPresented = false
+    @State private var postSummaryHeight: CGFloat = 120
+    @State private var postDetent: PresentationDetent = .height(120)
 
     init(
         medias: [any UiMedia],
@@ -57,8 +50,8 @@ struct MediaViewerScreen<SupplementaryOverlay: View>: View {
         previewAspectRatio: CGFloat? = nil,
         previewIsImage: Bool = true,
         shareContext: MediaViewerShareContext? = nil,
-        showsSupplementaryOverlay: Bool = false,
-        @ViewBuilder supplementaryOverlay: @escaping (MediaViewerOverlayContext) -> SupplementaryOverlay
+        post: UiTimelineV2.Post? = nil,
+        quotes: [UiTimelineV2.Post] = []
     ) {
         self.medias = medias
         self.initialIndex = initialIndex
@@ -66,8 +59,8 @@ struct MediaViewerScreen<SupplementaryOverlay: View>: View {
         self.previewAspectRatio = previewAspectRatio
         self.previewIsImage = previewIsImage
         self.shareContext = shareContext
-        self.showsSupplementaryOverlay = showsSupplementaryOverlay
-        self.supplementaryOverlay = supplementaryOverlay
+        self.post = post
+        self.quotes = quotes
         self.selectedIndex = max(0, initialIndex)
         self.protectInitialPagerSelection = initialIndex > 0
     }
@@ -157,7 +150,7 @@ struct MediaViewerScreen<SupplementaryOverlay: View>: View {
                             )
                         )
 
-                        if shouldShowBottomOverlay {
+                        if shouldShowBottomOverlay, !postSheetPresented {
                             bottomOverlay
                                 .offset(
                                     y: MediaViewerDismissGesturePolicy.verticalOffset(
@@ -173,6 +166,7 @@ struct MediaViewerScreen<SupplementaryOverlay: View>: View {
             .ignoresSafeArea()
 
             MediaViewerDismissGestureHost(
+                enabled: !postExpanded,
                 onChanged: updateDismissGesture,
                 onEnded: endDismissGesture,
                 onCancelled: cancelDismissGesture
@@ -188,11 +182,20 @@ struct MediaViewerScreen<SupplementaryOverlay: View>: View {
                     .allowsHitTesting(!isDismissing)
                     .zIndex(3)
             }
+            if postExpanded {
+                Color.black.opacity(0.32)
+                    .ignoresSafeArea()
+                    .onTapGesture { collapsePost() }
+                    .accessibilityAddTraits(.isButton)
+                    .accessibilityLabel(Text("media_post_collapse"))
+                    .zIndex(4)
+            }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .videoPlaybackPresentation(mediaURLs: medias.map(\.url), selectedMediaURL: selectedMedia?.url)
         .onAppear {
             applyInitialSelectionIfNeeded()
+            postSheetPresented = shouldShowPostSheet
         }
         .onChange(of: mediaSignature) { _, _ in
             applyInitialSelectionIfNeeded()
@@ -209,6 +212,13 @@ struct MediaViewerScreen<SupplementaryOverlay: View>: View {
             if isLandscapeViewing {
                 MediaOrientationController.setLandscape(false)
             }
+        }
+        .onChange(of: shouldShowPostSheet) { _, visible in
+            collapsePost()
+            postSheetPresented = visible
+        }
+        .sheet(isPresented: $postSheetPresented) {
+            mediaPostSheet
         }
         .background(.black.opacity(opacity))
         .background(ClearFullScreenBackground())
@@ -248,7 +258,9 @@ struct MediaViewerScreen<SupplementaryOverlay: View>: View {
 
     private var topOverlay: some View {
         HStack(spacing: 8) {
-            topOverlayButton(width: 44, action: { dismiss() }) {
+            topOverlayButton(width: 44, action: {
+                if postExpanded { collapsePost() } else { dismiss() }
+            }) {
                 Image(fontAwesome: .xmark)
             }
             .accessibilityLabel("Close")
@@ -340,7 +352,7 @@ struct MediaViewerScreen<SupplementaryOverlay: View>: View {
     private var bottomOverlayContent: some View {
         VStack(spacing: 8) {
             if showData, !isLandscapeViewing, medias.count > 1 {
-                if !showsSupplementaryOverlay, medias.count > 10 {
+                if post == nil, medias.count > 10 {
                     MediaPageSlider(count: medias.count, page: $selectedIndex)
                 } else {
                     LazyPagerIndicator(count: medias.count, page: $selectedIndex)
@@ -357,24 +369,82 @@ struct MediaViewerScreen<SupplementaryOverlay: View>: View {
                 .id(selectedMedia.url)
             }
 
-            if showData, !isLandscapeViewing, showsSupplementaryOverlay {
-                supplementaryOverlay(overlayContext)
-            }
         }
     }
 
-    private var overlayContext: MediaViewerOverlayContext {
-        MediaViewerOverlayContext(
-            selectedMedia: selectedMedia,
-            mediaCount: medias.count,
-            selectedIndex: $selectedIndex,
-            showData: showData,
-            isLandscapeViewing: isLandscapeViewing,
-            isPlaying: $isPlaying,
-            currentTime: timeBinding(for: selectedMedia?.url),
-            videoState: videoState,
-            playbackRate: playbackRate
-        )
+    private var shouldShowPostSheet: Bool {
+        showPostInMediaViewer && post != nil && showData && !isLandscapeViewing && !isDismissing
+    }
+
+    private var postExpanded: Bool {
+        postSheetPresented && postDetent == .large
+    }
+
+    private func collapsePost() {
+        withAnimation {
+            postDetent = .height(postSummaryHeight)
+        }
+    }
+
+    @ViewBuilder
+    private var mediaPostSheet: some View {
+        if let post {
+            VStack(spacing: 0) {
+                if postDetent == .large {
+                    HStack {
+                        Spacer()
+                        Button(action: collapsePost) {
+                            Image(systemName: "chevron.down")
+                                .frame(width: 44, height: 44)
+                        }
+                        .accessibilityLabel(Text("media_post_collapse"))
+                    }
+                    .padding(.horizontal)
+                    ScrollView {
+                        StatusView(
+                            data: post,
+                            isDetail: true,
+                            isClickable: false,
+                            showAttachments: false,
+                            showParents: false,
+                            quotes: quotes
+                        )
+                        .padding(.horizontal)
+                        .padding(.bottom)
+                    }
+                } else {
+                    VStack(spacing: 8) {
+                        bottomOverlayContent
+                        if let user = post.user {
+                            UserOnelineView(data: user, showAvatar: true, trailing: { EmptyView() }) {
+                                user.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
+                            }
+                        }
+                        StatusActionsView(data: Array(post.actions), useText: false)
+                    }
+                    .padding(.horizontal)
+                    .padding(.top, 24)
+                    .padding(.bottom, 8)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .onGeometryChange(for: CGFloat.self) { proxy in
+                        ceil(proxy.size.height)
+                    } action: { height in
+                        guard height > 0, height != postSummaryHeight else { return }
+                        postSummaryHeight = height
+                        if postDetent != .large { postDetent = .height(height) }
+                    }
+                    Spacer(minLength: 0)
+                }
+            }
+            .presentationDetents([.height(postSummaryHeight), .large], selection: $postDetent)
+            .presentationDragIndicator(.visible)
+            .presentationContentInteraction(.resizes)
+            // The viewer supplies the expanded scrim so tapping it collapses, rather than dismisses, the sheet.
+            .presentationBackgroundInteraction(.enabled)
+            .presentationBackground(postDetent == .large ? .regularMaterial : .ultraThinMaterial)
+            .interactiveDismissDisabled()
+            .preferredColorScheme(.dark)
+        }
     }
 
     private var pagerSelectedIndex: Binding<Int> {
@@ -421,7 +491,7 @@ struct MediaViewerScreen<SupplementaryOverlay: View>: View {
         if selectedMediaIsVideo {
             return showData
         }
-        return showData && !isLandscapeViewing && (medias.count > 1 || showsSupplementaryOverlay)
+        return showData && !isLandscapeViewing && (medias.count > 1)
     }
 
     private var mediaSignature: String {
@@ -644,6 +714,7 @@ struct MediaViewerScreen<SupplementaryOverlay: View>: View {
 }
 
 private struct MediaViewerDismissGestureHost: UIViewRepresentable {
+    let enabled: Bool
     let onChanged: (CGFloat, CGFloat) -> Void
     let onEnded: (CGFloat, CGFloat, CGFloat) -> Bool
     let onCancelled: () -> Void
@@ -658,6 +729,7 @@ private struct MediaViewerDismissGestureHost: UIViewRepresentable {
     }
 
     func updateUIView(_ uiView: MediaViewerDismissGestureHostView, context: Context) {
+        context.coordinator.enabled = enabled
         context.coordinator.onChanged = onChanged
         context.coordinator.onEnded = onEnded
         context.coordinator.onCancelled = onCancelled
@@ -682,6 +754,7 @@ private struct MediaViewerDismissGestureHost: UIViewRepresentable {
     }
 
     final class Coordinator: NSObject, UIGestureRecognizerDelegate {
+        var enabled = true
         var onChanged: (CGFloat, CGFloat) -> Void
         var onEnded: (CGFloat, CGFloat, CGFloat) -> Bool
         var onCancelled: () -> Void
@@ -753,8 +826,17 @@ private struct MediaViewerDismissGestureHost: UIViewRepresentable {
             }
         }
 
+        private func owningViewController(of view: UIView) -> UIViewController? {
+            var responder: UIResponder? = view
+            while let current = responder {
+                if let controller = current as? UIViewController { return controller }
+                responder = current.next
+            }
+            return nil
+        }
+
         func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
-            guard gestureRecognizer === panRecognizer,
+            guard enabled, gestureRecognizer === panRecognizer,
                   let panRecognizer,
                   let sourceView else { return false }
             let velocity = panRecognizer.velocity(in: sourceView)
@@ -773,8 +855,14 @@ private struct MediaViewerDismissGestureHost: UIViewRepresentable {
         }
 
         func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
-            guard let sourceView,
+            guard enabled, let sourceView,
                   let window = installedWindow else { return false }
+            // The recognizer is installed on UIWindow, so screen bounds alone also include sheets.
+            if let sourceController = owningViewController(of: sourceView),
+               let touchedController = touch.view.flatMap({ owningViewController(of: $0) }),
+               !MediaViewerDismissGesturePolicy.belongsToViewer(touchedController, viewer: sourceController) {
+                return false
+            }
             let point = touch.location(in: window)
             guard sourceView.convert(sourceView.bounds, to: window).contains(point) else {
                 return false
@@ -960,24 +1048,5 @@ private struct MediaPageSlider: View {
 
     private func clampedPage(_ value: Int, maxPage: Int) -> Int {
         min(max(value, 0), maxPage)
-    }
-}
-
-extension MediaViewerScreen where SupplementaryOverlay == EmptyView {
-    init(
-        medias: [any UiMedia],
-        initialIndex: Int,
-        preview: String?,
-        shareContext: MediaViewerShareContext? = nil
-    ) {
-        self.init(
-            medias: medias,
-            initialIndex: initialIndex,
-            preview: preview,
-            shareContext: shareContext,
-            showsSupplementaryOverlay: false
-        ) { _ in
-            EmptyView()
-        }
     }
 }

@@ -2,6 +2,22 @@ import XCTest
 import UIKit
 
 final class MediaViewerDismissGesturePolicyTests: XCTestCase {
+    @MainActor
+    func testDismissGestureIncludesPagerChildrenButExcludesPresentedSheet() {
+        let viewer = UIViewController()
+        let pager = UIViewController()
+        let image = UIViewController()
+        viewer.addChild(pager)
+        pager.addChild(image)
+        let sheet = UIViewController()
+        let sheetContent = UIViewController()
+        sheet.addChild(sheetContent)
+
+        XCTAssertTrue(MediaViewerDismissGesturePolicy.belongsToViewer(viewer, viewer: viewer))
+        XCTAssertTrue(MediaViewerDismissGesturePolicy.belongsToViewer(image, viewer: viewer))
+        XCTAssertFalse(MediaViewerDismissGesturePolicy.belongsToViewer(sheetContent, viewer: viewer))
+    }
+
     func testFastVerticalSwipesDismissInBothDirections() {
         XCTAssertTrue(
             MediaViewerDismissGesturePolicy.shouldDismiss(

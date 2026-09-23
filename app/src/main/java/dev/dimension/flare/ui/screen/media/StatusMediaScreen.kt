@@ -24,13 +24,13 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.systemBarsPadding
@@ -42,8 +42,10 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearWavyProgressIndicator
@@ -125,7 +127,6 @@ import dev.dimension.flare.common.shareImageMedia
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.FAIcon
-import dev.dimension.flare.ui.component.Glassify
 import dev.dimension.flare.ui.component.LocalGlobalAppearance
 import dev.dimension.flare.ui.component.MediaViewerPlayback
 import dev.dimension.flare.ui.component.MediaViewerSelection
@@ -312,6 +313,7 @@ internal fun MediaViewerScreen(
         playbackSpeed = NORMAL_PLAYBACK_SPEED
     }
     MediaViewerPlaybackTheme {
+        val motionScheme = MaterialTheme.motionScheme
         val mediaItems = medias.takeSuccess().orEmpty()
         MediaViewerSelection(mediaItems.map { it.url }, mediaItems.getOrNull(pagerState.currentPage)?.url)
         val swiperState =
@@ -506,8 +508,12 @@ internal fun MediaViewerScreen(
                                 Modifier
                                     .fillMaxWidth()
                                     .align(Alignment.TopCenter),
-                            enter = slideInVertically { -it },
-                            exit = slideOutVertically { -it },
+                            enter =
+                                slideInVertically(
+                                    motionScheme.defaultSpatialSpec(),
+                                ) { -it } + fadeIn(motionScheme.defaultEffectsSpec()),
+                            exit =
+                                slideOutVertically(motionScheme.defaultSpatialSpec()) { -it } + fadeOut(motionScheme.defaultEffectsSpec()),
                         ) {
                             Row(
                                 modifier =
@@ -516,17 +522,10 @@ internal fun MediaViewerScreen(
                                         .padding(horizontal = 4.dp, vertical = 8.dp),
                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                             ) {
-                                Glassify(
+                                FilledTonalIconButton(
                                     onClick = {
                                         onDismiss.invoke()
                                     },
-                                    modifier = Modifier.size(40.dp),
-                                    shape = CircleShape,
-                                    color = MaterialTheme.colorScheme.secondaryContainer,
-//                            colors = IconButtonDefaults.filledTonalIconButtonColors(
-//                                containerColor = Color.Transparent,
-//                                contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-//                            )
                                 ) {
                                     FAIcon(
                                         FontAwesomeIcons.Solid.Xmark,
@@ -536,13 +535,10 @@ internal fun MediaViewerScreen(
                                 Spacer(modifier = Modifier.weight(1f))
                                 medias.onSuccess { medias ->
                                     val current = medias.getOrNull(state.currentPage) ?: return@onSuccess
-                                    Glassify(
+                                    FilledTonalIconButton(
                                         onClick = {
                                             state.setLandscapeViewing(!state.isLandscapeViewing)
                                         },
-                                        color = MaterialTheme.colorScheme.secondaryContainer,
-                                        modifier = Modifier.size(40.dp),
-                                        shape = CircleShape,
                                     ) {
                                         FAIcon(
                                             if (state.isLandscapeViewing) {
@@ -554,13 +550,10 @@ internal fun MediaViewerScreen(
                                         )
                                     }
                                     if (!current.description.isNullOrEmpty()) {
-                                        Glassify(
+                                        FilledTonalIconButton(
                                             onClick = {
                                                 toAltText.invoke(current)
                                             },
-                                            color = MaterialTheme.colorScheme.secondaryContainer,
-                                            modifier = Modifier.size(40.dp),
-                                            shape = CircleShape,
                                         ) {
                                             FAIcon(
                                                 FontAwesomeIcons.Solid.CircleInfo,
@@ -568,7 +561,7 @@ internal fun MediaViewerScreen(
                                             )
                                         }
                                     }
-                                    Glassify(
+                                    FilledTonalIconButton(
                                         onClick = {
                                             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
                                                 if (!permissionState.status.isGranted) {
@@ -580,9 +573,6 @@ internal fun MediaViewerScreen(
                                                 saveMedia(current)
                                             }
                                         },
-                                        color = MaterialTheme.colorScheme.secondaryContainer,
-                                        modifier = Modifier.size(40.dp),
-                                        shape = CircleShape,
                                     ) {
                                         FAIcon(
                                             FontAwesomeIcons.Solid.Download,
@@ -590,13 +580,10 @@ internal fun MediaViewerScreen(
                                         )
                                     }
                                     AnimatedVisibility(current is UiMedia.Image) {
-                                        Glassify(
+                                        FilledTonalIconButton(
                                             onClick = {
                                                 shareMedia(current)
                                             },
-                                            color = MaterialTheme.colorScheme.secondaryContainer,
-                                            modifier = Modifier.size(40.dp),
-                                            shape = CircleShape,
                                         ) {
                                             FAIcon(
                                                 FontAwesomeIcons.Solid.ShareNodes,
@@ -631,44 +618,31 @@ internal fun MediaViewerScreen(
                             modifier =
                                 Modifier
                                     .align(Alignment.BottomCenter)
-                                    .padding(bottom = postPeekHeight),
-                            enter = slideInVertically { it },
-                            exit = slideOutVertically { it },
+                                    .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Horizontal))
+                                    .padding(
+                                        start = 16.dp,
+                                        end = 16.dp,
+                                        bottom =
+                                            maxOf(
+                                                postPeekHeight,
+                                                WindowInsets.systemBars.asPaddingValues().calculateBottomPadding(),
+                                            ) + 8.dp,
+                                    ).widthIn(max = BottomSheetDefaults.SheetMaxWidth),
+                            enter = slideInVertically(motionScheme.defaultSpatialSpec()) { it } + fadeIn(motionScheme.defaultEffectsSpec()),
+                            exit =
+                                slideOutVertically(
+                                    motionScheme.defaultSpatialSpec(),
+                                ) { it } + fadeOut(motionScheme.defaultEffectsSpec()),
                         ) {
-                            Glassify(
-                                modifier =
-                                    Modifier
-                                        .let {
-                                            if (isBigScreen) {
-                                                it
-                                                    .safeContentPadding()
-                                                    .clip(
-                                                        MaterialTheme.shapes.medium,
-                                                    )
-                                            } else {
-                                                it
-                                                    .fillMaxWidth()
-                                            }
-                                        },
-                                color = MaterialTheme.colorScheme.surfaceContainer,
-                                contentColor = MaterialTheme.colorScheme.onBackground,
+                            Surface(
+                                shape = MaterialTheme.shapes.extraLarge,
+                                color = BottomSheetDefaults.ContainerColor,
                             ) {
                                 Column(
-                                    modifier =
-                                        Modifier.let {
-                                            if (postPeekHeight == 0.dp && !isBigScreen) {
-                                                it.windowInsetsPadding(
-                                                    WindowInsets.systemBars.only(
-                                                        WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom,
-                                                    ),
-                                                )
-                                            } else {
-                                                it
-                                            }
-                                        },
+                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
                                     horizontalAlignment = Alignment.CenterHorizontally,
                                 ) {
-                                    if (state.showUi && !state.isLandscapeViewing && pagerState.pageCount > 1) {
+                                    if (!state.isLandscapeViewing && pagerState.pageCount > 1) {
                                         if (status == null && pagerState.pageCount > 10) {
                                             MediaPageSlider(
                                                 pageCount = pagerState.pageCount,
@@ -680,30 +654,10 @@ internal fun MediaViewerScreen(
                                                         }
                                                     }
                                                 },
-                                                modifier =
-                                                    Modifier
-                                                        .let {
-                                                            if (isBigScreen) {
-                                                                it
-                                                            } else {
-                                                                it.padding(
-                                                                    start = 16.dp,
-                                                                    top = 8.dp,
-                                                                    end = 16.dp,
-                                                                )
-                                                            }
-                                                        }.widthIn(max = 480.dp),
+                                                modifier = Modifier.widthIn(max = 480.dp),
                                             )
                                         } else {
                                             Row(
-                                                modifier =
-                                                    Modifier.let {
-                                                        if (isBigScreen) {
-                                                            it
-                                                        } else {
-                                                            it.padding(top = 8.dp)
-                                                        }
-                                                    },
                                                 horizontalArrangement = Arrangement.Center,
                                             ) {
                                                 repeat(pagerState.pageCount) { iteration ->

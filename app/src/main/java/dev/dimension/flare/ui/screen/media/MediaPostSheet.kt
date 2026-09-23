@@ -1,6 +1,13 @@
 package dev.dimension.flare.ui.screen.media
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateDp
+import androidx.compose.animation.core.updateTransition
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -20,6 +27,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SheetValue
@@ -36,7 +44,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
@@ -56,8 +63,8 @@ import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.launch
 
-/** Keeps the media subtree mounted while the standard sheet moves between its two anchors. */
-@OptIn(ExperimentalMaterial3Api::class)
+/** Only the sheet participates in visibility transitions; media stays mounted underneath it. */
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 internal fun MediaPostSheet(
     post: UiTimelineV2.Post?,
@@ -66,96 +73,120 @@ internal fun MediaPostSheet(
     uriHandler: UriHandler,
     content: @Composable (peekHeight: Dp) -> Unit,
 ) {
-    val sheetState =
-        rememberBottomSheetState(
-            initialValue = SheetValue.PartiallyExpanded,
-            enabledValues = setOf(SheetValue.PartiallyExpanded, SheetValue.Expanded),
-        )
-    val scaffoldState = rememberBottomSheetScaffoldState(bottomSheetState = sheetState)
-    val scope = rememberCoroutineScope()
     val density = LocalDensity.current
     var summaryHeight by remember { mutableStateOf(80.dp) }
     var handleHeight by remember { mutableStateOf(48.dp) }
     val showSheet = visible && post != null
-    val expanded =
-        showSheet &&
-            (sheetState.currentValue == SheetValue.Expanded || sheetState.targetValue == SheetValue.Expanded)
-    val collapse: () -> Unit = { scope.launch { sheetState.partialExpand() } }
-    LaunchedEffect(showSheet) {
-        if (!showSheet) sheetState.partialExpand()
-    }
+    val motionScheme = MaterialTheme.motionScheme
+    val visibility = updateTransition(showSheet, label = "Media post visibility")
+    val bottomInset by
+        visibility.animateDp(
+            transitionSpec = { motionScheme.defaultSpatialSpec() },
+            label = "Media controls inset",
+        ) {
+            if (it) summaryHeight + handleHeight else 0.dp
+        }
     BoxWithConstraints(Modifier.fillMaxSize()) {
         val expandedHeight = (maxHeight * 0.9f - handleHeight).coerceAtLeast(summaryHeight)
-        BottomSheetScaffold(
-            scaffoldState = scaffoldState,
-            sheetPeekHeight = if (showSheet) summaryHeight + handleHeight else 0.dp,
-            sheetSwipeEnabled = showSheet,
-            sheetMaxWidth = Dp.Unspecified,
-            sheetShape = if (expanded) BottomSheetDefaults.ExpandedShape else RectangleShape,
-            sheetContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-            sheetContentColor = MaterialTheme.colorScheme.onSurface,
-            containerColor = Color.Transparent,
-            sheetDragHandle =
-                if (showSheet) {
-                    { BottomSheetDefaults.DragHandle(Modifier.onSizeChanged { handleHeight = with(density) { it.height.toDp() } }) }
-                } else {
-                    null
-                },
-            sheetContent = {
-                if (showSheet) {
-                    CompositionLocalProvider(LocalUriHandler provides uriHandler) {
-                        Box(Modifier.fillMaxWidth().height(expandedHeight)) {
-                            if (!expanded) {
-                                Column(
-                                    Modifier
-                                        .fillMaxWidth()
-                                        .onSizeChanged { summaryHeight = with(density) { it.height.toDp() } },
-                                ) {
-                                    StatusSummaryComponent(
-                                        item = post,
-                                        modifier =
+        content(bottomInset.coerceAtLeast(0.dp))
+        visibility.AnimatedVisibility(
+            visible = { it },
+            modifier = Modifier.fillMaxSize(),
+            enter = fadeIn(motionScheme.defaultEffectsSpec()),
+            exit = fadeOut(motionScheme.defaultEffectsSpec()),
+        ) {
+            val sheetState =
+                rememberBottomSheetState(
+                    initialValue = SheetValue.PartiallyExpanded,
+                    enabledValues = setOf(SheetValue.PartiallyExpanded, SheetValue.Expanded),
+                )
+            val scope = rememberCoroutineScope()
+            val expanded = sheetState.currentValue == SheetValue.Expanded || sheetState.targetValue == SheetValue.Expanded
+            val collapse: () -> Unit = { scope.launch { sheetState.partialExpand() } }
+            // Also collapse if a show interrupts an exit before AnimatedVisibility disposes the sheet.
+            LaunchedEffect(showSheet) {
+                if (showSheet) sheetState.partialExpand()
+            }
+            val slideDistance =
+                with(density) { (if (expanded) expandedHeight + handleHeight else summaryHeight + handleHeight).roundToPx() }
+            Box(Modifier.fillMaxSize()) {
+                AnimatedVisibility(
+                    visible = expanded && showSheet,
+                    enter = fadeIn(motionScheme.defaultEffectsSpec()),
+                    exit = fadeOut(motionScheme.defaultEffectsSpec()),
+                ) {
+                    Box(Modifier.fillMaxSize().background(BottomSheetDefaults.ScrimColor).clickable(onClick = collapse))
+                }
+                BottomSheetScaffold(
+                    modifier =
+                        Modifier.animateEnterExit(
+                            enter = slideInVertically(motionScheme.defaultSpatialSpec()) { slideDistance },
+                            exit = slideOutVertically(motionScheme.defaultSpatialSpec()) { slideDistance },
+                        ),
+                    scaffoldState = rememberBottomSheetScaffoldState(bottomSheetState = sheetState),
+                    sheetPeekHeight = summaryHeight + handleHeight,
+                    sheetSwipeEnabled = showSheet,
+                    containerColor = Color.Transparent,
+                    sheetDragHandle = {
+                        BottomSheetDefaults.DragHandle(Modifier.onSizeChanged { handleHeight = with(density) { it.height.toDp() } })
+                    },
+                    sheetContent = {
+                        if (post != null) {
+                            CompositionLocalProvider(LocalUriHandler provides uriHandler) {
+                                Box(Modifier.fillMaxWidth().height(expandedHeight)) {
+                                    if (!expanded) {
+                                        Column(
                                             Modifier
-                                                .padding(horizontal = screenHorizontalPadding, vertical = 8.dp)
-                                                .windowInsetsPadding(
-                                                    WindowInsets.systemBars.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom),
-                                                ),
-                                    )
-                                }
-                            }
-                            if (expanded) {
-                                Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surfaceContainer)) {
-                                    Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                                        IconButton(onClick = collapse, modifier = Modifier.align(Alignment.CenterEnd)) {
-                                            FAIcon(FontAwesomeIcons.Solid.ChevronDown, stringResource(R.string.media_post_collapse))
+                                                .fillMaxWidth()
+                                                .onSizeChanged { summaryHeight = with(density) { it.height.toDp() } },
+                                        ) {
+                                            StatusSummaryComponent(
+                                                item = post,
+                                                modifier =
+                                                    Modifier
+                                                        .padding(horizontal = screenHorizontalPadding, vertical = 8.dp)
+                                                        .windowInsetsPadding(
+                                                            WindowInsets.systemBars.only(
+                                                                WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom,
+                                                            ),
+                                                        ),
+                                            )
                                         }
                                     }
-                                    CommonStatusComponent(
-                                        item = post,
-                                        isDetail = true,
-                                        showMedia = false,
-                                        quotes = quotes,
-                                        modifier =
-                                            Modifier
-                                                .verticalScroll(rememberScrollState())
-                                                .padding(horizontal = screenHorizontalPadding, vertical = 8.dp)
-                                                .windowInsetsPadding(
-                                                    WindowInsets.systemBars.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom),
-                                                ),
-                                    )
+                                    if (expanded) {
+                                        Column(Modifier.fillMaxSize()) {
+                                            Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                                                IconButton(onClick = collapse, modifier = Modifier.align(Alignment.CenterEnd)) {
+                                                    FAIcon(
+                                                        FontAwesomeIcons.Solid.ChevronDown,
+                                                        stringResource(R.string.media_post_collapse),
+                                                    )
+                                                }
+                                            }
+                                            CommonStatusComponent(
+                                                item = post,
+                                                isDetail = true,
+                                                showMedia = false,
+                                                quotes = quotes,
+                                                modifier =
+                                                    Modifier
+                                                        .verticalScroll(rememberScrollState())
+                                                        .padding(horizontal = screenHorizontalPadding, vertical = 8.dp)
+                                                        .windowInsetsPadding(
+                                                            WindowInsets.systemBars.only(
+                                                                WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom,
+                                                            ),
+                                                        ),
+                                            )
+                                        }
+                                    }
                                 }
                             }
                         }
-                    }
-                }
-            },
-        ) {
-            Box(Modifier.fillMaxSize()) {
-                content(if (showSheet) summaryHeight + handleHeight else 0.dp)
-                if (expanded) {
-                    Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.32f)).clickable(onClick = collapse))
-                }
+                    },
+                ) {}
             }
+            BackHandler(enabled = showSheet && expanded, onBack = collapse)
         }
     }
-    BackHandler(enabled = expanded, onBack = collapse)
 }

@@ -219,6 +219,24 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         }
     }
 
+    func testWaterfallUsesMeasuredHeightsForFractionalColumnWidths() async throws {
+        let fixture = await Fixture(posts: true, columns: 2)
+        // Two columns produce a half-pixel width at 3x and 2x respectively.
+        for width: CGFloat in [871, 871.5] {
+            await fixture.resize(width: width, columns: 2)
+            let paths = fixture.collection.indexPathsForVisibleItems
+            XCTAssertGreaterThanOrEqual(paths.count, 2)
+            for path in paths {
+                let cell = try XCTUnwrap(fixture.collection.cellForItem(at: path) as? TimelineUIKitCollectionViewCell)
+                let card = try XCTUnwrap(descendants(cell).compactMap { $0 as? AdaptiveTimelineCardUIView }.first)
+                let frame = try XCTUnwrap(fixture.collection.layoutAttributesForItem(at: path)?.frame)
+                let measuredHeight = ceil(try XCTUnwrap(card.timelineHeight(for: frame.width))) + 1
+                XCTAssertEqual(frame.height, measuredHeight, accuracy: 1,
+                    "Item \(path) must use its measured height at container width \(width), rather than the 240pt estimate")
+            }
+        }
+    }
+
     private func descendants(_ view: UIView) -> [UIView] { [view] + view.subviews.flatMap(descendants) }
 
     @MainActor

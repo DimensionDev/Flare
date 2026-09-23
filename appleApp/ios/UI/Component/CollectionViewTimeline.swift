@@ -1674,11 +1674,8 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
             return CGSize(width: collectionView.bounds.width, height: 200)
         }
         let section = indexPath.section
-        let columns = isFullWidthSection(at: section) ? 1 : max(columnCount, 1)
-        let insets = waterfallInsets(for: section, layout: layout)
-        let available = collectionView.bounds.width - insets.left - insets.right
-        let totalSpacing = CGFloat(columns - 1) * layout.minimumColumnSpacing
-        let width = max((available - totalSpacing) / CGFloat(columns), 1)
+        // Match the pixel-aligned cell width used when storing measured heights.
+        let width = max(layout.itemWidth(inSection: section), 1)
 
         guard let itemID = dataSource.itemIdentifier(for: indexPath) else {
             return CGSize(width: width, height: 200)

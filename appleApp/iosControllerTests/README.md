@@ -21,6 +21,8 @@ normal `AppleSharedHelper` initialization, without XCTest class enumeration.
 The tests cover source changes, page bookmark lifetime, prepend/append, complete
 replacement, likes, coalesced inputs, refresh begin/end, footer updates, VVO's
 shared numeric offset, and image geometry through repeated column/width changes.
+They also verify that fractional column widths use measured cell heights instead
+of retaining the 240pt estimate when layout and cache widths round differently.
 The fixtures yield the main actor while settling: a nested synchronous run loop
 cannot drain the controller's serialized main-queue submissions reliably.
 

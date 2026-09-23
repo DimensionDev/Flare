@@ -523,8 +523,8 @@ public class ComposePresenter(
             composeConfig
                 .mapNotNull {
                     it.visibility
-                }.map {
-                    visibilityPresenter()
+                }.map { visibilityConfig ->
+                    visibilityPresenter(visibilityConfig)
                 }
         val pollMaxOptions =
             composeConfig
@@ -835,33 +835,38 @@ public class ComposePresenter(
     }
 
     @Composable
-    private fun visibilityPresenter(): VisibilityState {
+    private fun visibilityPresenter(config: ComposeConfig.Visibility): VisibilityState {
         var showVisibilityMenu by remember {
             mutableStateOf(false)
         }
         var visibility by remember {
-            mutableStateOf(UiTimelineV2.Post.Visibility.Public)
+            mutableStateOf(config.defaultVisibility)
         }
         var hasExplicitVisibility by remember {
             mutableStateOf(false)
         }
-        LaunchedEffect(Unit) {
-            appDataStore.composeConfigData.data.firstOrNull()?.let { data ->
+        LaunchedEffect(config) {
+            val savedVisibility =
                 if (!hasExplicitVisibility) {
-                    visibility = data.visibility
+                    appDataStore.composeConfigData.data
+                        .firstOrNull()
+                        ?.visibility
+                } else {
+                    null
                 }
-            }
+            val candidate =
+                if (hasExplicitVisibility) {
+                    visibility
+                } else {
+                    savedVisibility
+                }
+            visibility = candidate?.takeIf { it in config.allVisibilities } ?: config.defaultVisibility
         }
+        val resolvedVisibility = visibility.takeIf { it in config.allVisibilities } ?: config.defaultVisibility
         return object : VisibilityState {
-            override val visibility = visibility
+            override val visibility = resolvedVisibility
 
-            override val allVisibilities =
-                persistentListOf(
-                    UiTimelineV2.Post.Visibility.Public,
-                    UiTimelineV2.Post.Visibility.Home,
-                    UiTimelineV2.Post.Visibility.Followers,
-                    UiTimelineV2.Post.Visibility.Specified,
-                )
+            override val allVisibilities = config.allVisibilities
 
             override val showVisibilityMenu: Boolean
                 get() = showVisibilityMenu
@@ -876,11 +881,11 @@ public class ComposePresenter(
 
             override fun setVisibility(value: UiTimelineV2.Post.Visibility) {
                 hasExplicitVisibility = true
-                visibility = value
+                visibility = value.takeIf { it in config.allVisibilities } ?: config.defaultVisibility
             }
 
             override fun clear() {
-                visibility = UiTimelineV2.Post.Visibility.Public
+                visibility = config.defaultVisibility
                 showVisibilityMenu = false
                 hasExplicitVisibility = true
             }

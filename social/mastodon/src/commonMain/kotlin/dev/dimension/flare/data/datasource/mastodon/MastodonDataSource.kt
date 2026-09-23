@@ -479,7 +479,7 @@ internal open class MastodonDataSource(
                     accountKey = accountKey,
                 ),
             contentWarning = ComposeConfig.ContentWarning,
-            visibility = ComposeConfig.Visibility,
+            visibility = ComposeConfig.Visibility(),
             language = ComposeConfig.Language(1),
         )
 

@@ -16,7 +16,10 @@ import dev.dimension.flare.ui.model.UiStrings
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withTimeout
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -113,6 +116,100 @@ class LoginPlatformRegistryTest {
         }
 
     @Test
+    fun detectionKeepsPriorityWhenLowerPriorityCompletesFirst() =
+        runTest {
+            val fallbackCompleted = CompletableDeferred<Unit>()
+            val registry =
+                testRegistry(
+                    testProvider(
+                        platformId = "Misskey",
+                        detectorPriority = 70,
+                        methods = listOf(LoginMethodSpec(LoginMethodType.Password, UiStrings.PasswordLogin)),
+                        detectorBlock = { host ->
+                            fallbackCompleted.await()
+                            NodeDetection(host, "misskey", compatibleMode = false)
+                        },
+                    ),
+                    testProvider(
+                        platformId = "Mastodon",
+                        detectorPriority = 60,
+                        detectorBlock = { host ->
+                            fallbackCompleted.complete(Unit)
+                            NodeDetection(host, "misskey", compatibleMode = true)
+                        },
+                    ),
+                )
+
+            val detected = withTimeout(1_000) { registry.detectPlatformId("example.social") }
+
+            assertEquals("Misskey", detected.platformId)
+            assertEquals("Misskey", detected.platformDisplayName)
+            assertEquals(UiIcon.Mastodon, detected.platformIcon)
+            assertEquals(listOf(LoginMethodType.Password), detected.loginMethods.map { it.type })
+            assertEquals(false, detected.compatibleMode)
+        }
+
+    @Test
+    fun detectionTimesOutHungProbeAndReturnsSuccessfulFallback() =
+        runTest {
+            val hungProbeCancelled = CompletableDeferred<Unit>()
+            val registry =
+                testRegistry(
+                    testProvider(
+                        platformId = "Misskey",
+                        detectorPriority = 70,
+                        detectorBlock = {
+                            try {
+                                awaitCancellation()
+                            } finally {
+                                hungProbeCancelled.complete(Unit)
+                            }
+                        },
+                    ),
+                    testProvider(platformId = "Mastodon", detectedSoftware = "mastodon"),
+                )
+
+            val detected = withTimeout(10_001) { registry.detectPlatformId("example.social") }
+
+            assertEquals("Mastodon", detected.platformId)
+            hungProbeCancelled.await()
+        }
+
+    @Test
+    fun detectionCancelsUnneededProbesAfterSuccess() =
+        runTest {
+            val fallbackStarted = CompletableDeferred<Unit>()
+            val fallbackCancelled = CompletableDeferred<Unit>()
+            val registry =
+                testRegistry(
+                    testProvider(
+                        platformId = "Misskey",
+                        detectorPriority = 70,
+                        detectorBlock = { host ->
+                            fallbackStarted.await()
+                            NodeDetection(host, "misskey", compatibleMode = false)
+                        },
+                    ),
+                    testProvider(
+                        platformId = "Mastodon",
+                        detectorBlock = {
+                            fallbackStarted.complete(Unit)
+                            try {
+                                awaitCancellation()
+                            } finally {
+                                fallbackCancelled.complete(Unit)
+                            }
+                        },
+                    ),
+                )
+
+            withTimeout(1_000) {
+                assertEquals("Misskey", registry.detectPlatformId("example.social").platformId)
+                fallbackCancelled.await()
+            }
+        }
+
+    @Test
     fun detectionDoesNotSwallowCancellation() =
         runTest {
             val registry =
@@ -151,6 +248,7 @@ class LoginPlatformRegistryTest {
         detectorPriority: Int = 0,
         detectedSoftware: String? = null,
         detectorFailure: Throwable? = null,
+        detectorBlock: (suspend (String) -> NodeDetection?)? = null,
     ): LoginPlatformProvider =
         object : LoginPlatformProvider {
             override val platformId: String = platformId
@@ -164,6 +262,7 @@ class LoginPlatformRegistryTest {
                     override val priority: Int = detectorPriority
 
                     override suspend fun detect(host: String): NodeDetection? {
+                        detectorBlock?.let { return it(host) }
                         detectorFailure?.let { throw it }
                         return detectedSoftware?.let {
                             NodeDetection(

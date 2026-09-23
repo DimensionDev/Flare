@@ -447,7 +447,9 @@ struct MacComposeScreen: View {
     }
 
     private func send() {
+        let files = mediaItems.compactMap(\.file)
         presenter.state.send(data: composeData) { dispatched in
+            defer { withExtendedLifetime(files) {} }
             if dispatched.boolValue {
                 dismissComposeWindow()
             }
@@ -455,7 +457,9 @@ struct MacComposeScreen: View {
     }
 
     private func saveDraft(shouldDismiss: Bool) {
+        let files = mediaItems.compactMap(\.file)
         presenter.state.saveDraft(data: composeData) { dispatched in
+            defer { withExtendedLifetime(files) {} }
             guard dispatched.boolValue else { return }
             if shouldDismiss {
                 dismissComposeWindow()
@@ -824,7 +828,9 @@ private struct MacComposeMediaTile: View {
 private struct MacComposeMediaItem: Identifiable {
     let id = UUID()
     let fileName: String
-    let data: Data
+    let data: Data?
+    let file: ComposeMediaFile?
+    let mimeType: String?
     let type: FileType
     var altText = ""
 
@@ -834,24 +840,34 @@ private struct MacComposeMediaItem: Identifiable {
         }
 
         self.fileName = Self.normalizedFileName(fileName, contentType: contentType)
-        self.data = data
+        if contentType?.conforms(to: .movie) == true {
+            guard let file = try? ComposeMediaFile(data: data, fileName: self.fileName) else { return nil }
+            self.file = file
+            self.data = nil
+        } else {
+            self.data = data
+            self.file = nil
+        }
+        self.mimeType = contentType?.preferredMIMEType
         self.type = Self.fileType(for: contentType)
     }
 
     init?(url: URL) {
-        let didStartAccessing = url.startAccessingSecurityScopedResource()
-        defer {
-            if didStartAccessing {
-                url.stopAccessingSecurityScopedResource()
-            }
-        }
-
-        guard let data = try? Data(contentsOf: url) else {
+        guard let file = try? ComposeMediaFile(copying: url) else {
             return nil
         }
-        self.fileName = url.lastPathComponent
-        self.data = data
-        self.type = MacComposeMediaItem.fileType(for: url)
+        self.init(file: file)
+    }
+
+    init(file: ComposeMediaFile, fileName: String? = nil, contentType: UTType? = nil) {
+        let url = file.url
+        let resourceContentType = (try? url.resourceValues(forKeys: [.contentTypeKey]))?.contentType
+        let resolvedType = contentType ?? resourceContentType ?? UTType(filenameExtension: url.pathExtension)
+        self.fileName = Self.normalizedFileName(fileName ?? url.lastPathComponent, contentType: resolvedType)
+        self.data = nil
+        self.file = file
+        self.mimeType = resolvedType?.preferredMIMEType
+        self.type = Self.fileType(for: resolvedType)
     }
 
     static func loadItems(
@@ -870,15 +886,12 @@ private struct MacComposeMediaItem: Identifiable {
         }
 
         let group = DispatchGroup()
-        let lock = NSLock()
         var results = Array<MacComposeMediaItem?>(repeating: nil, count: providers.count)
 
         for (index, provider) in providers.enumerated() {
             group.enter()
             provider.loadMacComposeMediaItem { item in
-                lock.lock()
                 results[index] = item
-                lock.unlock()
                 group.leave()
             }
         }
@@ -910,11 +923,11 @@ private struct MacComposeMediaItem: Identifiable {
 
     init?(draftMedia: UiDraftMedia) {
         let fileURL = URL(fileURLWithPath: draftMedia.cachePath)
-        guard let data = try? Data(contentsOf: fileURL) else {
-            return nil
-        }
+        guard FileManager.default.fileExists(atPath: fileURL.path) else { return nil }
         self.fileName = draftMedia.fileName ?? fileURL.lastPathComponent
-        self.data = data
+        self.data = nil
+        self.file = ComposeMediaFile(draftURL: fileURL)
+        self.mimeType = nil
         self.altText = draftMedia.altText ?? ""
         switch draftMedia.type {
         case .image:
@@ -928,20 +941,18 @@ private struct MacComposeMediaItem: Identifiable {
 
     var image: NSImage? {
         guard type == .image else { return nil }
-        return NSImage(data: data)
+        if let file { return NSImage(contentsOf: file.url) }
+        return data.flatMap(NSImage.init(data:))
     }
 
     var composeMedia: ComposeData.Media {
-        ComposeData.Media(
-            file: .init(name: fileName, data: KotlinByteArray.from(data: data), type: type),
-            altText: altText.isEmpty ? nil : altText
-        )
-    }
-
-    private static func fileType(for url: URL) -> FileType {
-        let resourceContentType = (try? url.resourceValues(forKeys: [.contentTypeKey]))?.contentType
-        let contentType = resourceContentType ?? UTType(filenameExtension: url.pathExtension)
-        return fileType(for: contentType)
+        let item: FileItem
+        if let file {
+            item = .init(name: fileName, path: file.url.path, type: type, mimeType: mimeType)
+        } else {
+            item = .init(name: fileName, data: KotlinByteArray.from(data: data!), type: type, mimeType: mimeType)
+        }
+        return ComposeData.Media(file: item, altText: altText.isEmpty ? nil : altText)
     }
 
     private static func fileType(for contentType: UTType?) -> FileType {
@@ -1027,14 +1038,19 @@ private extension UTType {
 }
 
 private extension NSItemProvider {
-    func loadMacComposeMediaItem(completion: @escaping (MacComposeMediaItem?) -> Void) {
+    func loadMacComposeMediaItem(completion: @escaping @MainActor @Sendable (MacComposeMediaItem?) -> Void) {
         if hasItemConformingToTypeIdentifier(UTType.fileURL.identifier) {
+            let fallback: @MainActor @Sendable () -> Void = {
+                self.loadMediaData(completion: completion)
+            }
             loadFileURL { url in
-                if let url,
-                   let item = MacComposeMediaItem(url: url) {
-                    completion(item)
-                } else {
-                    self.loadMediaData(completion: completion)
+                let file = url.flatMap { try? ComposeMediaFile(copying: $0) }
+                DispatchQueue.main.async {
+                    if let file {
+                        completion(MacComposeMediaItem(file: file))
+                    } else {
+                        fallback()
+                    }
                 }
             }
         } else {
@@ -1042,7 +1058,7 @@ private extension NSItemProvider {
         }
     }
 
-    private func loadFileURL(completion: @escaping (URL?) -> Void) {
+    private func loadFileURL(completion: @escaping @Sendable (URL?) -> Void) {
         loadItem(forTypeIdentifier: UTType.fileURL.identifier, options: nil) { item, _ in
             switch item {
             case let url as URL:
@@ -1064,24 +1080,40 @@ private extension NSItemProvider {
         }
     }
 
-    private func loadMediaData(completion: @escaping (MacComposeMediaItem?) -> Void) {
+    private func loadMediaData(completion: @escaping @MainActor @Sendable (MacComposeMediaItem?) -> Void) {
         guard let contentType = firstRegisteredMediaContentType else {
             completion(nil)
             return
         }
 
-        loadDataRepresentation(forTypeIdentifier: contentType.identifier) { data, _ in
-            guard let data,
-                  let item =
-                    MacComposeMediaItem(
-                        data: data,
-                        fileName: self.suggestedName,
-                        contentType: contentType
-                    ) else {
-                completion(nil)
-                return
+        let fileName = suggestedName
+        if contentType.conforms(to: .movie) {
+            loadFileRepresentation(forTypeIdentifier: contentType.identifier) { url, _ in
+                // The provider's URL expires when this callback returns.
+                let file = url.flatMap { try? ComposeMediaFile(copying: $0) }
+                DispatchQueue.main.async {
+                    completion(file.map {
+                        MacComposeMediaItem(
+                            file: $0,
+                            fileName: fileName ?? $0.url.lastPathComponent,
+                            contentType: contentType
+                        )
+                    })
+                }
             }
-            completion(item)
+            return
+        }
+
+        loadDataRepresentation(forTypeIdentifier: contentType.identifier) { data, _ in
+            DispatchQueue.main.async {
+                completion(data.flatMap {
+                    MacComposeMediaItem(
+                        data: $0,
+                        fileName: fileName,
+                        contentType: contentType
+                    )
+                })
+            }
         }
     }
 
@@ -1094,7 +1126,7 @@ private extension NSItemProvider {
         return mediaTypes.first(where: { !$0.isAbstractComposeMediaContentType }) ?? mediaTypes.first
     }
 
-    private static func fileURL(from value: String) -> URL? {
+    private nonisolated static func fileURL(from value: String) -> URL? {
         if let url = URL(string: value), url.isFileURL {
             return url
         }

@@ -79,6 +79,8 @@ class DraftMediaStoreTest {
             val secondPersist = store.persist("group-2", restored)
 
             assertEquals(firstPersist.map { it.cachePath }, secondPersist.map { it.cachePath })
+            assertContentEquals(byteArrayOf(1), fileStorage.read(secondPersist[0].cachePath.toPath()))
+            assertContentEquals(byteArrayOf(2), fileStorage.read(secondPersist[1].cachePath.toPath()))
             assertEquals(
                 2,
                 fileSystem

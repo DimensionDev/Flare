@@ -12,6 +12,7 @@ import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logging
+import io.ktor.client.request.HttpRequestBuilder
 import kotlinx.serialization.json.Json
 import kotlin.experimental.ExperimentalObjCRefinement
 import kotlin.native.HiddenFromObjC
@@ -53,7 +54,7 @@ public fun ktorClient(
         install(Logging) {
             logger = FlareLogger
             filter {
-                BuildConfig.debug || DebugRepository.isEnabled
+                (BuildConfig.debug || DebugRepository.isEnabled) && !it.isMediaUpload()
             }
             level =
                 if (BuildConfig.debug) {
@@ -65,6 +66,17 @@ public fun ktorClient(
     }
 
 internal expect val httpClientEngine: HttpClientEngine
+
+// Logging's BODY mode collects the entire outgoing stream. Keep upload payloads out of it,
+// including X's base64 form chunks and the authenticated retry of a Bluesky upload.
+internal fun HttpRequestBuilder.isMediaUpload(): Boolean {
+    val path = url.pathSegments.joinToString("/")
+    return path.endsWith("media/upload.json") ||
+        path.endsWith("com.atproto.repo.uploadBlob") ||
+        path.endsWith("app.bsky.video.uploadVideo") ||
+        path.endsWith("api/v1/media") || path.endsWith("api/v2/media") ||
+        path.endsWith("drive/files/create") || path.endsWith("upload") || path.endsWith("statuses/uploadPic")
+}
 
 internal data object FlareLogger : io.ktor.client.plugins.logging.Logger {
     override fun log(message: String) {

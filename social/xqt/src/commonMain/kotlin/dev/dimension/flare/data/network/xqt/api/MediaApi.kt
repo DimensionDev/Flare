@@ -62,4 +62,12 @@ internal data class TwitterUploadProcessInfo(
     val progressPercent: Int? = null,
     @SerialName("state")
     val state: String? = null,
+    val error: TwitterUploadError? = null,
+)
+
+@Serializable
+internal data class TwitterUploadError(
+    val code: Int? = null,
+    val name: String? = null,
+    val message: String? = null,
 )

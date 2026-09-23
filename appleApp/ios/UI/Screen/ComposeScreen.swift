@@ -3,6 +3,8 @@ import KotlinSharedUI
 import FlareAppleCore
 import FlareAppleUI
 import PhotosUI
+import CoreTransferable
+import UniformTypeIdentifiers
 import SwiftUIIntrospect
 import SwiftUIBackports
 
@@ -240,7 +242,7 @@ struct ComposeScreen: View {
                         Image(systemName: "paperplane.fill")
                     }
                 }
-                .disabled(!presenter.state.canSend)
+                .disabled(!presenter.state.canSend || mediaViewModel.items.contains { !$0.isReady })
             }
         }
     }
@@ -295,7 +297,8 @@ struct ComposeScreen: View {
                     mediaViewModel.update()
                 }),
                 maxSelectionCount: mediaViewModel.maxSize,
-                matching: .any(of: [.images, .videos, .livePhotos])
+                matching: .any(of: [.images, .videos, .livePhotos]),
+                preferredItemEncoding: .current
             ) {
                 Image(fontAwesome: .image)
             }
@@ -531,8 +534,11 @@ struct ComposeScreen: View {
     }
     
     private func send() {
+        guard mediaViewModel.items.allSatisfy(\.isReady) else { return }
+        let files = mediaViewModel.items.compactMap(\.file)
         let data = getComposeData()
         presenter.state.send(data: data) { dispatched in
+            defer { withExtendedLifetime(files) {} }
             if dispatched.boolValue {
                 dismiss()
             }
@@ -540,7 +546,10 @@ struct ComposeScreen: View {
     }
 
     private func saveDraft(shouldDismiss: Bool = false) {
+        guard mediaViewModel.items.allSatisfy(\.isReady) else { return }
+        let files = mediaViewModel.items.compactMap(\.file)
         presenter.state.saveDraft(data: getComposeData()) { dispatched in
+            defer { withExtendedLifetime(files) {} }
             guard dispatched.boolValue else { return }
             if shouldDismiss {
                 dismiss()
@@ -558,13 +567,15 @@ struct ComposeScreen: View {
     
     private func getMedia() -> [ComposeData.Media] {
         return mediaViewModel.items.compactMap { item in
-            guard let data = item.data else {
+            let file: FileItem
+            if let source = item.file {
+                file = .init(name: item.fileName, path: source.url.path, type: item.type, mimeType: item.mimeType)
+            } else if let data = item.data {
+                file = .init(name: item.fileName, data: KotlinByteArray.from(data: data), type: item.type, mimeType: item.mimeType)
+            } else {
                 return nil
             }
-            return .init(
-                file: .init(name: item.fileName, data: KotlinByteArray.from(data: data), type: item.type),
-                altText: item.altText.isEmpty ? nil : item.altText
-            )
+            return .init(file: file, altText: item.altText.isEmpty ? nil : item.altText)
         }
     }
     private func getVisibility() -> UiTimelineV2.PostVisibility {
@@ -656,6 +667,19 @@ class MediaViewModel {
     }
 }
 
+private nonisolated struct PickedComposeFile: Transferable {
+    let file: ComposeMediaFile
+
+    static var transferRepresentation: some TransferRepresentation {
+        FileRepresentation(importedContentType: .movie) { received in
+            PickedComposeFile(file: try ComposeMediaFile(copying: received.file))
+        }
+        FileRepresentation(importedContentType: .image) { received in
+            PickedComposeFile(file: try ComposeMediaFile(copying: received.file))
+        }
+    }
+}
+
 @Observable
 class MediaItem: Equatable, Identifiable {
     static func == (lhs: MediaItem, rhs: MediaItem) -> Bool {
@@ -664,9 +688,13 @@ class MediaItem: Equatable, Identifiable {
     let item: PhotosPickerItem?
     var image: UIImage?
     var data: Data?
+    var file: ComposeMediaFile?
+    var mimeType: String?
+    var loadError: String?
+    var isReady: Bool { file != nil || data != nil }
     var altText: String = ""
     let id: String
-    let fileName: String
+    var fileName: String
     var type: FileType = .other
     
     init(item: PhotosPickerItem) {
@@ -682,17 +710,22 @@ class MediaItem: Equatable, Identifiable {
             }
         }
         
-        item.loadTransferable(type: Data.self) { result in
-            do {
-                if let data = try result.get() {
-                    if let uiImage = UIImage(data: data) {
-                        DispatchQueue.main.async {
-                            self.data = data
-                            self.image = uiImage
-                        }
+        self.mimeType = item.supportedContentTypes.first?.preferredMIMEType
+        item.loadTransferable(type: PickedComposeFile.self) { result in
+            DispatchQueue.main.async {
+                do {
+                    guard let picked = try result.get() else {
+                        self.loadError = "Unable to load this media file"
+                        return
                     }
+                    self.file = picked.file
+                    self.fileName = picked.file.url.lastPathComponent
+                    if self.type == .image {
+                        self.image = UIImage(contentsOfFile: picked.file.url.path)
+                    }
+                } catch {
+                    self.loadError = error.localizedDescription
                 }
-            } catch {
             }
         }
     }
@@ -709,20 +742,18 @@ class MediaItem: Equatable, Identifiable {
 
     init?(draftMedia: UiDraftMedia) {
         let fileURL = URL(fileURLWithPath: draftMedia.cachePath)
-        guard let data = try? Data(contentsOf: fileURL) else {
-            return nil
-        }
+        guard FileManager.default.fileExists(atPath: fileURL.path) else { return nil }
 
         self.item = nil
         self.id = draftMedia.cachePath
         self.fileName = draftMedia.fileName ?? fileURL.lastPathComponent
-        self.data = data
+        self.file = ComposeMediaFile(draftURL: fileURL)
         self.altText = draftMedia.altText ?? ""
 
         switch draftMedia.type {
         case .image:
             self.type = .image
-            self.image = UIImage(data: data)
+            self.image = UIImage(contentsOfFile: fileURL.path)
         case .video:
             self.type = .video
         default:
@@ -793,58 +824,67 @@ struct ComposeMediaItemView: View {
     let item: MediaItem
     var mediaViewModel: MediaViewModel
     @State private var showAltTextEditor = false
-    
+
     var body: some View {
-        if let image = item.image {
-            Image(uiImage: image)
-                .resizable()
-                .scaledToFill()
-                .frame(width: 128, height: 128)
-                .cornerRadius(8)
-                .overlay(alignment: .bottomLeading) {
-                    if mediaViewModel.enableAltText && !item.altText.isEmpty {
-                        Text("ALT")
-                            .font(.caption2)
-                            .bold()
-                            .foregroundStyle(.black)
-                            .padding(.horizontal, 4)
-                            .padding(.vertical, 2)
-                            .background(.white.opacity(0.8))
-                            .clipShape(RoundedRectangle(cornerRadius: 4))
-                            .padding(4)
-                    }
+        Group {
+            if let image = item.image {
+                Image(uiImage: image).resizable().scaledToFill()
+            } else if let error = item.loadError {
+                VStack {
+                    Image(systemName: "exclamationmark.triangle")
+                    Text(verbatim: error).font(.caption).lineLimit(3)
                 }
-                .onTapGesture {
-                    if mediaViewModel.enableAltText {
-                        showAltTextEditor = true
-                    }
-                }
-                .contextMenu {
-                    Button(action: {
-                        withAnimation {
-                            mediaViewModel.remove(item: item)
-                        }
-                    }, label: {
-                        Label {
-                            Text("delete")
-                        } icon: {
-                            Image(fontAwesome: .trash)
-                        }
-                    })
-                    
-                    if mediaViewModel.enableAltText {
-                        Button {
-                            showAltTextEditor = true
-                        } label: {
-                            Label("Edit Description", systemImage: "pencil")
-                        }
-                    }
-                }
-                .sheet(isPresented: $showAltTextEditor) {
-                    AltTextEditSheet(item: item, maxLength: mediaViewModel.altTextMaxLength)
-                }
-                .accessibilityLabel(Text(verbatim: mediaDescription))
+            } else if item.isReady {
+                Image(systemName: item.type == .video ? "video.fill" : "photo").font(.largeTitle)
+            } else {
+                ProgressView()
+            }
         }
+        .frame(width: 128, height: 128)
+        .cornerRadius(8)
+        .overlay(alignment: .bottomLeading) {
+            if mediaViewModel.enableAltText && !item.altText.isEmpty {
+                Text("ALT")
+                    .font(.caption2)
+                    .bold()
+                    .foregroundStyle(.black)
+                    .padding(.horizontal, 4)
+                    .padding(.vertical, 2)
+                    .background(.white.opacity(0.8))
+                    .clipShape(RoundedRectangle(cornerRadius: 4))
+                    .padding(4)
+            }
+        }
+        .onTapGesture {
+            if mediaViewModel.enableAltText {
+                showAltTextEditor = true
+            }
+        }
+        .contextMenu {
+            Button(action: {
+                withAnimation {
+                    mediaViewModel.remove(item: item)
+                }
+            }, label: {
+                Label {
+                    Text("delete")
+                } icon: {
+                    Image(fontAwesome: .trash)
+                }
+            })
+
+            if mediaViewModel.enableAltText {
+                Button {
+                    showAltTextEditor = true
+                } label: {
+                    Label("Edit Description", systemImage: "pencil")
+                }
+            }
+        }
+        .sheet(isPresented: $showAltTextEditor) {
+            AltTextEditSheet(item: item, maxLength: mediaViewModel.altTextMaxLength)
+        }
+        .accessibilityLabel(Text(verbatim: mediaDescription))
     }
 
     private var mediaDescription: String {

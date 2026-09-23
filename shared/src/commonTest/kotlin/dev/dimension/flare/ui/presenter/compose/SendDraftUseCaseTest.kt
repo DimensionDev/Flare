@@ -25,9 +25,13 @@ import dev.dimension.flare.memoryDatabaseBuilder
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiTimelineV2
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import okio.FileSystem
@@ -70,6 +74,59 @@ class SendDraftUseCaseTest : RobolectricTest() {
         db.close()
         deleteTestRootPath(root)
     }
+
+    @Test
+    fun cancelledSendKeepsMediaAndMakesUnsentDestinationsRetryable() =
+        runTest {
+            val accounts = listOf(mastodonAccount("a", "example.com"), mastodonAccount("b", "example.com"))
+            val entered = CompletableDeferred<Unit>()
+            val useCase =
+                testUseCase { _, _, _ ->
+                    entered.complete(Unit)
+                    awaitCancellation()
+                }
+            val job =
+                launch {
+                    useCase(
+                        ComposeDraftBundle(
+                            accounts = accounts,
+                            groupId = "cancelled",
+                            template =
+                                ComposeData(
+                                    content = "video",
+                                    medias = listOf(media("clip.mp4", byteArrayOf(1, 2, 3), altText = null)),
+                                ),
+                        ),
+                    ) {}
+                }
+            entered.await()
+            job.cancelAndJoin()
+            val draft = assertNotNull(repository.draft("cancelled").first())
+            assertTrue(draft.targets.all { it.status == DraftTargetStatus.FAILED })
+            assertContentEquals(
+                byteArrayOf(1, 2, 3),
+                mediaStore
+                    .restore(draft.medias)
+                    .single()
+                    .file
+                    .readBytes(),
+            )
+            var retries = 0
+            val retry =
+                testUseCase(findAccount = { key -> accounts.find { it.accountKey == key } }) { _, data, _ ->
+                    assertContentEquals(
+                        byteArrayOf(1, 2, 3),
+                        data.medias
+                            .single()
+                            .file
+                            .readBytes(),
+                    )
+                    retries++
+                }
+            retry("cancelled") {}
+            assertEquals(2, retries)
+            assertNull(repository.draft("cancelled").first())
+        }
 
     @Test
     fun sendBundleSuccessDeletesDraftAfterAllTargetsSucceed() =

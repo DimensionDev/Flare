@@ -2,7 +2,6 @@ package dev.dimension.flare.data.datasource.mastodon
 
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.map
-import dev.dimension.flare.common.FileType
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
@@ -295,33 +294,25 @@ internal open class MastodonDataSource(
                     it as? ComposeStatus.Quote
                 }?.statusKey
                 ?.id
+        val mediaLimits = if (data.medias.isNotEmpty()) service.mediaLimits() else null
         val mediaIds =
             data.medias
                 .mapIndexed { index, (file, altText) ->
-                    val bytes = file.readBytes()
-                    val isImage = file.type == FileType.Image
-
-                    val finalBytes =
-                        if (isImage) {
-                            imageCompressor.compress(
-                                imageBytes = bytes,
-                                maxSize = MEDIA_COMPRESSION.maxSizeBytes,
-                                maxDimensions = MEDIA_COMPRESSION.maxWidth to MEDIA_COMPRESSION.maxHeight,
-                            )
-                        } else {
-                            bytes
-                        }
+                    val upload = file.uploadMedia().compressImage(imageCompressor, MEDIA_COMPRESSION)
+                    upload.validate(
+                        "Mastodon",
+                        acceptedTypes = mediaLimits?.supportedMIMETypes,
+                        maxBytes = if (upload.isVideo) mediaLimits?.videoSizeLimit else mediaLimits?.imageSizeLimit,
+                    )
                     service
                         .upload(
-                            finalBytes,
-                            name = file.name ?: "unknown",
+                            upload,
                             description = altText,
-                            mimeType = file.mimeType,
                         ).also {
                             progress()
                         }
-                }.mapNotNull {
-                    it.id
+                }.map {
+                    checkNotNull(it.id) { "Mastodon media upload did not return an ID" }
                 }
         service.post(
             Uuid.random().toString(),

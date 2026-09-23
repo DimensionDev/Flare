@@ -1,11 +1,10 @@
 package dev.dimension.flare.data.network.nostr
 
-import dev.dimension.flare.common.FileType
 import dev.dimension.flare.common.JSON
+import dev.dimension.flare.common.UploadMedia
+import dev.dimension.flare.data.network.asContent
 import dev.dimension.flare.data.network.ktorClient
 import dev.dimension.flare.data.network.nullableFallbackJson
-import dev.whyoleg.cryptography.CryptographyProvider
-import dev.whyoleg.cryptography.algorithms.SHA256
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -13,7 +12,6 @@ import io.ktor.client.request.header
 import io.ktor.client.request.put
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
-import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.URLBuilder
@@ -21,6 +19,10 @@ import io.ktor.http.appendPathSegments
 import io.ktor.http.takeFrom
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import okio.HashingSink
+import okio.blackholeSink
+import okio.buffer
+import okio.use
 import kotlin.io.encoding.Base64
 
 internal class NostrBlossomUploader(
@@ -35,13 +37,15 @@ internal class NostrBlossomUploader(
 ) {
     suspend fun upload(
         serverUrl: String,
-        name: String?,
-        bytes: ByteArray,
-        fileType: FileType,
+        media: UploadMedia,
         altText: String?,
     ): UploadedMedia {
-        val sha256 = bytes.sha256Hex()
-        val mimeType = guessMimeType(name = name, fileType = fileType)
+        val sha256 =
+            HashingSink.sha256(blackholeSink()).let { hash ->
+                hash.buffer().use { sink -> media.forEachChunk { bytes, count -> sink.write(bytes, 0, count) } }
+                hash.hash.hex()
+            }
+        val mimeType = media.mimeType
         val response =
             httpClient.put(
                 URLBuilder()
@@ -51,7 +55,7 @@ internal class NostrBlossomUploader(
             ) {
                 header(HttpHeaders.Authorization, buildAuthHeader(sha256))
                 header(HttpHeaders.ContentType, mimeType)
-                setBody(bytes)
+                setBody(media.asContent())
             }
         if (response.status !in listOf(HttpStatusCode.OK, HttpStatusCode.Created)) {
             val detail =
@@ -65,43 +69,9 @@ internal class NostrBlossomUploader(
             url = descriptor.url,
             mimeType = descriptor.type.ifBlank { mimeType },
             sha256 = descriptor.sha256.ifBlank { sha256 },
-            size = descriptor.size.takeIf { it > 0 } ?: bytes.size.toLong(),
+            size = descriptor.size.takeIf { it > 0 } ?: media.size,
             altText = altText?.trim()?.takeIf { it.isNotEmpty() },
         )
-    }
-
-    private suspend fun ByteArray.sha256Hex(): String {
-        val hasher =
-            CryptographyProvider
-                .Default
-                .get(SHA256)
-                .hasher()
-        return hasher
-            .hash(this)
-            .toHexString()
-    }
-
-    private fun guessMimeType(
-        name: String?,
-        fileType: FileType,
-    ): String {
-        val normalizedName = name?.lowercase().orEmpty()
-        return when {
-            normalizedName.endsWith(".jpg") || normalizedName.endsWith(".jpeg") -> ContentType.Image.JPEG.toString()
-            normalizedName.endsWith(".png") -> ContentType.Image.PNG.toString()
-            normalizedName.endsWith(".gif") -> ContentType.Image.GIF.toString()
-            normalizedName.endsWith(".webp") -> "image/webp"
-            normalizedName.endsWith(".avif") -> "image/avif"
-            normalizedName.endsWith(".heic") -> "image/heic"
-            normalizedName.endsWith(".heif") -> "image/heif"
-            normalizedName.endsWith(".mp4") -> "video/mp4"
-            normalizedName.endsWith(".mov") -> "video/quicktime"
-            normalizedName.endsWith(".webm") -> "video/webm"
-            normalizedName.endsWith(".m4v") -> "video/x-m4v"
-            fileType == FileType.Image -> ContentType.Image.Any.toString()
-            fileType == FileType.Video -> ContentType.Video.Any.toString()
-            else -> ContentType.Application.OctetStream.toString()
-        }
     }
 
     internal companion object {

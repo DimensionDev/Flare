@@ -14,4 +14,6 @@ public actual class FileItem internal constructor(
     ) : this({ data }, name, type, mimeType)
 
     public actual suspend fun readBytes(): ByteArray = loader()
+
+    public actual suspend fun uploadMedia(): UploadMedia = UploadMedia.fromBytes(name, loader(), mimeType)
 }

@@ -11,7 +11,11 @@ import dev.dimension.flare.data.repository.SaveDraftInput
 import dev.dimension.flare.data.repository.SaveDraftTarget
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiAccount
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.withContext
 import kotlin.time.Clock
 
 internal class SendDraftUseCase(
@@ -107,7 +111,7 @@ internal class SendDraftUseCase(
         val progressTracker = ComposeProgressTracker(targets)
         progress(progressTracker.state())
         val failures = mutableListOf<Throwable>()
-        targets.forEach { target ->
+        targets.forEachIndexed { index, target ->
             draftRepository.updateTargetStatus(
                 groupId = groupId,
                 accountKey = target.account.accountKey,
@@ -128,6 +132,20 @@ internal class SendDraftUseCase(
                 progress(progressTracker.state())
                 draftRepository.deleteTarget(groupId, target.account.accountKey)
             } catch (throwable: Exception) {
+                if (!currentCoroutineContext().isActive) {
+                    // Keep the files and make every unsent destination retryable after cancellation.
+                    withContext(NonCancellable) {
+                        targets.drop(index).forEach { pending ->
+                            draftRepository.updateTargetStatus(
+                                groupId = groupId,
+                                accountKey = pending.account.accountKey,
+                                status = DraftTargetStatus.FAILED,
+                                errorMessage = "Upload cancelled",
+                            )
+                        }
+                    }
+                    throw throwable
+                }
                 repeat(pendingProgressTicks) {
                     progressTracker.onComposeProgress(target.account.accountKey)
                     progress(progressTracker.state())

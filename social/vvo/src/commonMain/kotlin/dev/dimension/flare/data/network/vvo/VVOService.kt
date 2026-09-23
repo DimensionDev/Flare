@@ -2,7 +2,9 @@ package dev.dimension.flare.data.network.vvo
 
 import de.jensklingenberg.ktorfit.converter.ResponseConverterFactory
 import dev.dimension.flare.common.JSON
+import dev.dimension.flare.common.UploadMedia
 import dev.dimension.flare.common.decodeJson
+import dev.dimension.flare.data.network.appendMedia
 import dev.dimension.flare.data.network.ktorClient
 import dev.dimension.flare.data.network.nullableFallbackJson
 import dev.dimension.flare.data.network.vvo.api.ConfigApi
@@ -31,9 +33,8 @@ import io.ktor.client.request.forms.submitFormWithBinaryData
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.statement.bodyAsText
-import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
-import io.ktor.utils.io.core.writeFully
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
@@ -174,42 +175,34 @@ internal class VVOService private constructor(
 
     suspend fun uploadPic(
         st: String,
-        filename: String,
-        bytes: ByteArray,
+        media: UploadMedia,
         xsrfToken: String = st,
         type: String = "json",
     ): UploadResponse =
-        httpClientFactory {
-            install(HttpTimeout) {
-                connectTimeoutMillis = 2.minutes.inWholeMilliseconds
-                requestTimeoutMillis = 2.minutes.inWholeMilliseconds
-                socketTimeoutMillis = 2.minutes.inWholeMilliseconds
-            }
-            install(VVOHeaderPlugin) {
-                chocolateProvider = ::currentChocolate
-            }
-        }.submitFormWithBinaryData(
-            url = "https://$vvoHost/api/statuses/uploadPic",
-            formData =
-                formData {
-                    append("type", type)
-                    append(
-                        "pic",
-                        filename,
-                        bodyBuilder = {
-                            writeFully(bytes)
-                        },
-                        size = bytes.size.toLong(),
-                        contentType = ContentType.Image.JPEG,
-                    )
-
-                    append("st", st)
+        coroutineScope {
+            httpClientFactory {
+                install(HttpTimeout) {
+                    connectTimeoutMillis = 2.minutes.inWholeMilliseconds
+                    requestTimeoutMillis = 2.minutes.inWholeMilliseconds
+                    socketTimeoutMillis = 2.minutes.inWholeMilliseconds
+                }
+                install(VVOHeaderPlugin) {
+                    chocolateProvider = ::currentChocolate
+                }
+            }.submitFormWithBinaryData(
+                url = "https://$vvoHost/api/statuses/uploadPic",
+                formData =
+                    formData {
+                        append("type", type)
+                        appendMedia("pic", media, this@coroutineScope)
+                        append("st", st)
+                    },
+                block = {
+                    header("X-Xsrf-Token", xsrfToken)
                 },
-            block = {
-                header("X-Xsrf-Token", xsrfToken)
-            },
-        ).bodyAsText()
-            .decodeJson<UploadResponse>()
+            ).bodyAsText()
+                .decodeJson<UploadResponse>()
+        }
 
     suspend fun emojis(): EmojiData =
         httpClientFactory {

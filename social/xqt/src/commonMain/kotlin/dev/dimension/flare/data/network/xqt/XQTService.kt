@@ -3,8 +3,6 @@ package dev.dimension.flare.data.network.xqt
 import dev.dimension.flare.common.Locale
 import dev.dimension.flare.data.network.ktorClient
 import dev.dimension.flare.data.network.ktorfit
-import dev.dimension.flare.data.platform.XQT_PLATFORM_ID
-import dev.dimension.flare.data.translation.canonicalTranslationLanguage
 import dev.dimension.flare.data.network.xqt.api.DefaultApi
 import dev.dimension.flare.data.network.xqt.api.DmApi
 import dev.dimension.flare.data.network.xqt.api.GuestApi
@@ -38,7 +36,9 @@ import dev.dimension.flare.data.network.xqt.api.createV11PostApi
 import dev.dimension.flare.data.network.xqt.api.createV20GetApi
 import dev.dimension.flare.data.network.xqt.api.createVDmPostJsonPostApi
 import dev.dimension.flare.data.network.xqt.elonmusk114514.ElonMusk1145141919810
+import dev.dimension.flare.data.platform.XQT_PLATFORM_ID
 import dev.dimension.flare.data.repository.LoginExpiredException
+import dev.dimension.flare.data.translation.canonicalTranslationLanguage
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.xqtHost
 import io.ktor.client.call.body
@@ -70,8 +70,9 @@ private fun config(
     url: String = baseUrl,
     accountKey: MicroBlogKey? = null,
     chocolateFlow: Flow<String>? = null,
+    validateStatus: Boolean = false,
 ) = ktorfit(url, json = XQT_JSON) {
-    expectSuccess = false
+    expectSuccess = validateStatus
     install(XQTHeaderPlugin) {
         this.chocolateFlow = chocolateFlow
         this.accountKey = accountKey
@@ -134,6 +135,7 @@ internal class XQTService(
         url = uploadUrl,
         accountKey = accountKey,
         chocolateFlow = chocolateFlow,
+        validateStatus = true,
     ).createMediaApi(),
     ListsApi by config(
         accountKey = accountKey,

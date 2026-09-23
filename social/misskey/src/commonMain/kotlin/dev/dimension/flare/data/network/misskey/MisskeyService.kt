@@ -1,6 +1,8 @@
 package dev.dimension.flare.data.network.misskey
 
+import dev.dimension.flare.common.UploadMedia
 import dev.dimension.flare.common.decodeJson
+import dev.dimension.flare.data.network.appendMedia
 import dev.dimension.flare.data.network.ktorfit
 import dev.dimension.flare.data.network.misskey.api.AccountApi
 import dev.dimension.flare.data.network.misskey.api.AntennasApi
@@ -36,9 +38,9 @@ import io.ktor.client.request.forms.formData
 import io.ktor.client.request.header
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
-import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
 import io.ktor.http.contentLength
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
 
@@ -98,33 +100,27 @@ internal class MisskeyService(
     AntennasApi by config(baseUrl, accountKey, accessTokenFlow).createAntennasApi(),
     ChannelsApi by config(baseUrl, accountKey, accessTokenFlow).createChannelsApi() {
     suspend fun upload(
-        data: ByteArray,
-        name: String,
+        data: UploadMedia,
         sensitive: Boolean = false,
         comment: String? = null,
-    ): DriveFile? {
-        val token = accessTokenFlow?.firstOrNull()
-        val multipart =
-            MultiPartFormDataContent(
-                formData {
-                    append(
-                        "file",
-                        data,
-                        Headers.build {
-                            append(HttpHeaders.ContentDisposition, "filename=$name")
-                        },
-                    )
-                    append("isSensitive", sensitive)
-                    if (token != null) {
-                        append("i", token)
-                    }
-                    if (comment != null) {
-                        append("comment", comment)
-                    }
-                },
+    ): DriveFile? =
+        coroutineScope {
+            val token = accessTokenFlow?.firstOrNull()
+            val multipart =
+                MultiPartFormDataContent(
+                    formData {
+                        appendMedia("file", data, this@coroutineScope)
+                        append("isSensitive", sensitive)
+                        if (token != null) {
+                            append("i", token)
+                        }
+                        if (comment != null) {
+                            append("comment", comment)
+                        }
+                    },
+                )
+            driveFilesCreate(
+                multipart,
             )
-        return driveFilesCreate(
-            multipart,
-        )
-    }
+        }
 }

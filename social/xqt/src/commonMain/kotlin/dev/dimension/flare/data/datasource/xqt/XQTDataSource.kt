@@ -2,7 +2,6 @@ package dev.dimension.flare.data.datasource.xqt
 
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.map
-import dev.dimension.flare.common.FileType
 import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
@@ -38,6 +37,7 @@ import dev.dimension.flare.data.datasource.microblog.paging.notSupported
 import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.tab.ShortcutSpec
 import dev.dimension.flare.data.model.tab.TimelineSpec
+import dev.dimension.flare.data.network.xqt.XQTMediaUploader
 import dev.dimension.flare.data.network.xqt.XQTService
 import dev.dimension.flare.data.network.xqt.model.CreateBookmarkRequest
 import dev.dimension.flare.data.network.xqt.model.CreateBookmarkRequestVariables
@@ -85,19 +85,12 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
-import kotlin.io.encoding.Base64
-import kotlin.io.encoding.ExperimentalEncodingApi
-import kotlin.time.Duration.Companion.seconds
 
 private const val BULK_SIZE: Long = 512 * 1024L // 512 Kib
-private const val MAX_ASYNC_UPLOAD_SIZE = 10
 
 private val MEDIA_COMPRESSION =
     ComposeConfig.Media.Compression(
@@ -556,24 +549,8 @@ internal class XQTDataSource(
                 ?.normalizedRaw
         val mediaIds =
             data.medias.mapIndexed { index, (item, altText) ->
-                val bytes = item.readBytes()
-                val isImage = item.type == FileType.Image
-
-                val finalBytes =
-                    if (isImage) {
-                        imageCompressor.compress(
-                            imageBytes = bytes,
-                            maxSize = MEDIA_COMPRESSION.maxSizeBytes,
-                            maxDimensions = MEDIA_COMPRESSION.maxWidth to MEDIA_COMPRESSION.maxHeight,
-                        )
-                    } else {
-                        bytes
-                    }
-
-                uploadMedia(
-                    mediaType = getMeidaTypeFromName(item.name),
-                    mediaData = finalBytes,
-                ).also {
+                val upload = item.uploadMedia().compressImage(imageCompressor, MEDIA_COMPRESSION)
+                XQTMediaUploader(service).upload(upload).also {
                     if (data.sensitive || !altText.isNullOrEmpty()) {
                         service.postMediaMetadataCreate(
                             body =
@@ -632,82 +609,6 @@ internal class XQTDataSource(
                 ),
         )
     }
-
-    private fun getMeidaTypeFromName(name: String?): String =
-        when {
-            name == null -> "image/jpeg"
-            name.endsWith(".jpg") -> "image/jpeg"
-            name.endsWith(".jpeg") -> "image/jpeg"
-            name.endsWith(".png") -> "image/png"
-            name.endsWith(".gif") -> "image/gif"
-            name.endsWith(".mp4") -> "video/mp4"
-            name.endsWith(".mov") -> "video/quicktime"
-            else -> "image/jpeg"
-        }
-
-    @OptIn(ExperimentalEncodingApi::class)
-    suspend fun uploadMedia(
-        mediaType: String,
-        mediaData: ByteArray,
-    ): String =
-        coroutineScope {
-            val totalBytes = mediaData.size.toLong()
-            val mediaId =
-                service
-                    .initUpload(
-                        mediaType = mediaType,
-                        totalBytes = totalBytes.toString(),
-                        category = if (mediaType.contains("video")) "tweet_video" else "tweet_image",
-                    ).mediaIDString ?: throw Error("init upload failed")
-
-            var streamReadLength = 0
-            val uploadChunks = mutableListOf<ByteArray>()
-            var uploadTimes = 0
-            var uploadBytes = 0L
-
-            suspend fun uploadAll() {
-                uploadChunks
-                    .mapIndexed { index, array ->
-                        async {
-                            service.appendUpload(
-                                mediaId = mediaId,
-                                segmentIndex = (uploadTimes * MAX_ASYNC_UPLOAD_SIZE + index.toLong()).toString(),
-                                mediaData = Base64.encode(array),
-                            )
-                            uploadBytes += array.size
-                        }
-                    }.awaitAll()
-                uploadTimes++
-                uploadChunks.clear()
-            }
-
-            while (streamReadLength < totalBytes) {
-                val currentBulkSize = BULK_SIZE.coerceAtMost(totalBytes - streamReadLength).toInt()
-                val chunk =
-                    mediaData.slice(streamReadLength until streamReadLength + currentBulkSize)
-                uploadChunks.add(chunk.toByteArray())
-                if (uploadChunks.size >= MAX_ASYNC_UPLOAD_SIZE) {
-                    uploadAll()
-                }
-                streamReadLength += currentBulkSize
-            }
-            if (uploadChunks.isNotEmpty()) {
-                uploadAll()
-            }
-
-            var checkCount = 0
-            var response = service.finalizeUpload(mediaId)
-            var awaitTime = response.processingInfo?.checkAfterSecs
-            while (awaitTime != null) {
-                delay(awaitTime.seconds)
-                checkCount += 1
-                response = service.uploadStatus(mediaId)
-                awaitTime = response.processingInfo?.checkAfterSecs
-            }
-
-            val mediaIdString = checkNotNull(response.mediaIDString) { "upload failed" }
-            mediaIdString
-        }
 
     override fun searchStatus(query: String) =
         SearchStatusPagingSource(

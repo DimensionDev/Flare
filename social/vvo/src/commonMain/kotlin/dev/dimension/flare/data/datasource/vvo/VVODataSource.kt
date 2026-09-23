@@ -3,7 +3,6 @@ package dev.dimension.flare.data.datasource.vvo
 import androidx.paging.ExperimentalPagingApi
 import dev.dimension.flare.common.CacheData
 import dev.dimension.flare.common.FileItem
-import dev.dimension.flare.common.FileType
 import dev.dimension.flare.common.MemCacheable
 import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
@@ -539,24 +538,13 @@ internal class VVODataSource(
         fileItem: FileItem,
         st: String,
     ): String {
-        val bytes = fileItem.readBytes()
-        val isImage = fileItem.type == FileType.Image
-
-        val finalBytes =
-            if (isImage) {
-                imageCompressor.compress(
-                    imageBytes = bytes,
-                    maxSize = MEDIA_COMPRESSION.maxSizeBytes,
-                    maxDimensions = MEDIA_COMPRESSION.maxWidth to MEDIA_COMPRESSION.maxHeight,
-                )
-            } else {
-                bytes
-            }
+        val media = fileItem.uploadMedia()
+        require(!media.isVideo) { "Weibo video uploads are not supported" }
+        media.validate("Weibo")
         val response =
             service.uploadPic(
                 st = st,
-                bytes = finalBytes,
-                filename = fileItem.name ?: "file",
+                media = media.compressImage(imageCompressor, MEDIA_COMPRESSION),
             )
         return response.picID ?: throw Exception("upload failed")
     }

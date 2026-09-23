@@ -1,7 +1,7 @@
 package dev.dimension.flare.data.network.nostr
 
-import dev.dimension.flare.common.FileType
 import dev.dimension.flare.common.JSON
+import dev.dimension.flare.common.UploadMedia
 import dev.dimension.flare.common.jsonObjectOrNull
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.PostActionFamily
@@ -972,16 +972,12 @@ internal class NostrService(
 
     internal suspend fun uploadMedia(
         serverUrl: String,
-        name: String?,
-        bytes: ByteArray,
-        fileType: FileType,
+        media: UploadMedia,
         altText: String?,
     ): UploadedMedia =
         blossomUploader.upload(
             serverUrl = serverUrl,
-            name = name,
-            bytes = bytes,
-            fileType = fileType,
+            media = media,
             altText = altText,
         )
 

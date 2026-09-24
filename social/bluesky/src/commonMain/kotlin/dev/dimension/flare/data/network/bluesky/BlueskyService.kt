@@ -101,6 +101,8 @@ internal data class BlueskyService private constructor(
         val token =
             getServiceAuth(
                 GetServiceAuthQueryParams(
+                    // The video service uses this token to upload the processed blob to the user's PDS.
+                    // https://docs.bsky.app/docs/tutorials/video#recommended-method
                     aud = "did:web:${Url(baseUrlFlow.first()).host}",
                     lxm = Nsid("com.atproto.repo.uploadBlob"),
                     exp = Clock.System.now().epochSeconds + 30 * 60,

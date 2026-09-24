@@ -161,14 +161,17 @@ internal class SendDraftUseCase(
                 composeDraft(target.account, target.data) {
                     pendingProgressTicks++
                 }
+                // Publishing succeeded: retire this target before progress reporting can be cancelled.
+                withContext(NonCancellable) {
+                    draftRepository.deleteTarget(groupId, target.account.accountKey)
+                    pendingTargets.remove(target.account.accountKey)
+                }
                 repeat(pendingProgressTicks) {
                     progressTracker.onComposeProgress(target.account.accountKey)
                     progress(progressTracker.state())
                 }
                 progressTracker.onComposeSuccess(target.account.accountKey)
                 progress(progressTracker.state())
-                draftRepository.deleteTarget(groupId, target.account.accountKey)
-                pendingTargets.remove(target.account.accountKey)
             } catch (throwable: Exception) {
                 if (!currentCoroutineContext().isActive) {
                     throw throwable

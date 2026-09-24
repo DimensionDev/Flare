@@ -980,11 +980,13 @@ internal fun StatusActions(
     val appearanceSettings = LocalTimelineAppearance.current
     val displayItems =
         remember(items, appearanceSettings.postActionLayout) {
-            items.applyPostActionLayout(appearanceSettings.postActionLayout)
+            items.applyPostActionLayout(appearanceSettings.postActionLayout).filterNot { it == ActionMenu.Divider }
         }
     if (displayItems.isEmpty()) return
     val haptics = LocalHapticFeedback.current
     val launcher = LocalUriHandler.current
+    val isStretched = appearanceSettings.postActionStyle == PostActionStyle.Stretch
+    val trailingNumberWidth = PlatformTextStyle.current.fontSize.value.dp * 2.5f + 2.dp
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.Bottom,
@@ -993,16 +995,30 @@ internal fun StatusActions(
                 PostActionStyle.Hidden -> Arrangement.spacedBy(4.dp, Alignment.Start)
                 PostActionStyle.LeftAligned -> Arrangement.spacedBy(4.dp, Alignment.Start)
                 PostActionStyle.RightAligned -> Arrangement.spacedBy(4.dp, Alignment.End)
-                PostActionStyle.Stretch -> Arrangement.SpaceBetween
+                PostActionStyle.Stretch -> Arrangement.Start
             },
     ) {
         displayItems.fastForEachIndexed { index, action ->
+            val number =
+                when (action) {
+                    is ActionMenu.Item -> action.count
+                    is ActionMenu.Group -> action.displayItem.count
+                    ActionMenu.Divider -> null
+                }
+            // Equal leading slots keep icon centers independent of the count's width.
+            val actionModifier =
+                when {
+                    !isStretched || displayItems.size == 1 -> Modifier
+                    index != displayItems.lastIndex -> Modifier.weight(1f)
+                    else -> Modifier.width(28.dp + if (number != null) trailingNumberWidth else 0.dp)
+                }
             if (index == displayItems.lastIndex && appearanceSettings.postActionStyle == PostActionStyle.LeftAligned) {
                 Spacer(modifier = Modifier.weight(1f))
             }
             when (action) {
                 is ActionMenu.Group -> {
                     StatusActionGroup(
+                        modifier = actionModifier,
                         icon =
                             action.displayItem.icon?.toImageVector()
                                 ?: FontAwesomeIcons.Solid.Ellipsis,
@@ -1014,9 +1030,10 @@ internal fun StatusActions(
                             action.displayItem.text?.asString()
                                 ?: stringResource(Res.string.more),
                         withTextMinWidth =
-                            appearanceSettings.postActionFixedWidth &&
+                            !isStretched && appearanceSettings.postActionFixedWidth &&
                                 action.displayItem.count != null &&
                                 index != displayItems.lastIndex,
+                        isStretched = isStretched,
                     ) { closeMenu, isMenuShown ->
                         action.actions.fastForEach { subActions ->
                             when (subActions) {
@@ -1037,6 +1054,7 @@ internal fun StatusActions(
 
                 is ActionMenu.Item -> {
                     StatusActionButton(
+                        modifier = actionModifier,
                         icon =
                             action.icon?.toImageVector()
                                 ?: FontAwesomeIcons.Solid.Ellipsis,
@@ -1048,9 +1066,10 @@ internal fun StatusActions(
                                 ?: stringResource(Res.string.more),
                         enabled = action.enabled,
                         withTextMinWidth =
-                            appearanceSettings.postActionFixedWidth &&
+                            !isStretched && appearanceSettings.postActionFixedWidth &&
                                 action.count != null &&
                                 index != displayItems.lastIndex,
+                        isStretched = isStretched,
                         onClicked = {
                             action.onClicked.let { onClick ->
                                 haptics.performHapticFeedback(HapticFeedbackType.ContextClick)

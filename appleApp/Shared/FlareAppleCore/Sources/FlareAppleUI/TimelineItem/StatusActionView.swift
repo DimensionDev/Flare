@@ -47,7 +47,10 @@ public struct StatusActionsView: View {
     }
 
     public var body: some View {
-        let actions = resolvedData
+        let actions = resolvedData.filter { action in
+            if case .divider = onEnum(of: action) { return useText }
+            return true
+        }
         if useText {
             ForEach(0..<actions.count, id: \.self) { index in
                 StatusActionView(
@@ -60,12 +63,18 @@ public struct StatusActionsView: View {
                 )
             }
         } else if !actions.isEmpty {
-            HStack(spacing: postActionStyle == .stretch ? nil : 4) {
+            let isStretched = postActionStyle == .stretch && allowSpacer
+            let layout = isStretched
+                ? AnyLayout(StatusActionStretchLayout(
+                    iconWidth: StatusActionHitArea.iconWidth(fontSize: fontSize),
+                    trailingNumberWidth: hasTrailingCount(actions) ? fontSize * 2.5 + 2 : 0
+                ))
+                : AnyLayout(HStackLayout(spacing: postActionStyle == .stretch ? nil : 4))
+            layout {
                 ForEach(0..<actions.count, id: \.self) { index in
                     let item = actions[index]
                     if (index == actions.count - 1 && postActionStyle == .leftAligned) ||
-                        (postActionStyle == .rightAligned && index == 0) ||
-                        (postActionStyle == .stretch && index != 0) {
+                        (postActionStyle == .rightAligned && index == 0) {
                         if allowSpacer {
                             Spacer()
                         }
@@ -73,15 +82,25 @@ public struct StatusActionsView: View {
                     StatusActionView(
                         data: item,
                         useText: useText,
-                        isFixedWidth: postActionFixedWidth && index != actions.count - 1,
+                        isFixedWidth: !isStretched && postActionFixedWidth && index != actions.count - 1,
                         fontSize: fontSize,
                         showNumbers: showNumbers,
-                        openURL: openURL
+                        openURL: openURL,
+                        isStretched: isStretched
                     )
                 }
             }
             .labelIconToTitleSpacingIfAvailable(2)
             .padding(.top, topPadding)
+        }
+    }
+
+    private func hasTrailingCount(_ actions: [ActionMenu]) -> Bool {
+        guard let last = actions.last else { return false }
+        switch onEnum(of: last) {
+        case .item(let item): return item.count != nil
+        case .group(let group): return group.displayItem.count != nil
+        case .divider: return false
         }
     }
 
@@ -106,6 +125,7 @@ public struct StatusActionView: View {
     private let fontSize: CGFloat
     private let showNumbers: Bool
     private let openURL: OpenURLAction
+    private let isStretched: Bool
 
     public init(
         data: ActionMenu,
@@ -113,7 +133,8 @@ public struct StatusActionView: View {
         isFixedWidth: Bool,
         fontSize: CGFloat,
         showNumbers: Bool,
-        openURL: OpenURLAction
+        openURL: OpenURLAction,
+        isStretched: Bool = false
     ) {
         self.data = data
         self.useText = useText
@@ -121,6 +142,7 @@ public struct StatusActionView: View {
         self.fontSize = fontSize
         self.showNumbers = showNumbers
         self.openURL = openURL
+        self.isStretched = isStretched
     }
 
     public var body: some View {
@@ -132,7 +154,8 @@ public struct StatusActionView: View {
                 isFixedWidth: isFixedWidth,
                 fontSize: fontSize,
                 showNumbers: showNumbers,
-                openURL: openURL
+                openURL: openURL,
+                isStretched: isStretched
             )
         case .group(let group):
             if useText {
@@ -162,7 +185,13 @@ public struct StatusActionView: View {
                     }
                 } label: {
                     Group {
-                        if let text = group.displayItem.count?.humanized, showNumbers, !text.isEmpty {
+                        if isStretched {
+                            StatusActionStretchedLabel(
+                                icon: group.displayItem.icon,
+                                text: showNumbers ? group.displayItem.count.map { Text($0.humanized) } : nil,
+                                fontSize: fontSize
+                            )
+                        } else if let text = group.displayItem.count?.humanized, showNumbers, !text.isEmpty {
                             Label {
                                 Text(text)
                                     .lineLimit(1)
@@ -215,6 +244,7 @@ public struct StatusActionItemView: View {
     private let fontSize: CGFloat
     private let showNumbers: Bool
     private let openURL: OpenURLAction
+    private let isStretched: Bool
 
     public init(
         data: ActionMenu.Item,
@@ -222,7 +252,8 @@ public struct StatusActionItemView: View {
         isFixedWidth: Bool,
         fontSize: CGFloat,
         showNumbers: Bool,
-        openURL: OpenURLAction
+        openURL: OpenURLAction,
+        isStretched: Bool = false
     ) {
         self.data = data
         self.useText = useText
@@ -230,6 +261,7 @@ public struct StatusActionItemView: View {
         self.fontSize = fontSize
         self.showNumbers = showNumbers
         self.openURL = openURL
+        self.isStretched = isStretched
     }
 
     private var resolvedText: Text? {
@@ -308,7 +340,9 @@ public struct StatusActionItemView: View {
     @ViewBuilder
     private var actionLabel: some View {
         Group {
-            if let text = resolvedText {
+            if isStretched, !useText {
+                StatusActionStretchedLabel(icon: data.icon, text: resolvedText, fontSize: fontSize)
+            } else if let text = resolvedText {
                 Label {
                     text.frame(minWidth: isFixedWidth ? fontSize * 2.5 : nil, alignment: .leading)
                 } icon: {
@@ -348,12 +382,70 @@ public struct StatusActionItemView: View {
 
 // MARK: - Helpers
 
-private enum StatusActionHitArea {
+private nonisolated enum StatusActionHitArea {
     static let horizontalInset: CGFloat = 4
     static let verticalInset: CGFloat = 4
 
+    static func iconWidth(fontSize: CGFloat) -> CGFloat {
+        max(20, labelContentHeight(fontSize: fontSize))
+    }
+
     static func labelContentHeight(fontSize: CGFloat) -> CGFloat {
         fontSize + 2
+    }
+}
+
+private struct StatusActionStretchedLabel: View {
+    let icon: UiIcon?
+    let text: Text?
+    let fontSize: CGFloat
+
+    var body: some View {
+        HStack(spacing: 2) {
+            StatusActionIcon(icon: icon)
+                .frame(width: StatusActionHitArea.iconWidth(fontSize: fontSize))
+            if let text {
+                text
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+}
+
+private struct StatusActionStretchLayout: Layout {
+    let iconWidth: CGFloat
+    let trailingNumberWidth: CGFloat
+
+    private func slotWidth(totalWidth: CGFloat, count: Int) -> CGFloat {
+        guard count > 1 else { return totalWidth }
+        // Counts use the space after each icon; only the final count needs a reserved slot.
+        let lastWidth = iconWidth + StatusActionHitArea.horizontalInset * 2 + trailingNumberWidth
+        return max(0, totalWidth - lastWidth) / CGFloat(count - 1)
+    }
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        let width = proposal.width ?? subviews.reduce(0) { $0 + $1.sizeThatFits(.unspecified).width }
+        let slot = slotWidth(totalWidth: width, count: subviews.count)
+        let height = subviews.enumerated().reduce(CGFloat.zero) { height, entry in
+            let itemWidth = entry.offset == subviews.count - 1 ? width - slot * CGFloat(entry.offset) : slot
+            return max(height, entry.element.sizeThatFits(ProposedViewSize(width: itemWidth, height: proposal.height)).height)
+        }
+        return CGSize(width: width, height: height)
+    }
+
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        let slot = slotWidth(totalWidth: bounds.width, count: subviews.count)
+        for (index, subview) in subviews.enumerated() {
+            let offset = slot * CGFloat(index)
+            let itemWidth = index == subviews.count - 1 ? bounds.width - offset : slot
+            subview.place(
+                at: CGPoint(x: bounds.minX + offset, y: bounds.midY),
+                anchor: .leading,
+                proposal: ProposedViewSize(width: itemWidth, height: bounds.height)
+            )
+        }
     }
 }
 

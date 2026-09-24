@@ -25,6 +25,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.PointerIcon
@@ -36,6 +37,7 @@ import androidx.compose.ui.semantics.disabled
 import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.ui.component.AnimatedNumber
 import dev.dimension.flare.ui.component.FAIcon
@@ -59,6 +61,7 @@ public fun StatusActionButton(
     contentDescription: String? = null,
     enabled: Boolean = true,
     withTextMinWidth: Boolean = false,
+    isStretched: Boolean = false,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val appearanceSettings = LocalTimelineAppearance.current
@@ -182,8 +185,11 @@ public fun StatusActionButton(
                 AnimatedNumber(
                     number = displayNumber,
                     color = color,
+                    overflow = if (isStretched) TextOverflow.Ellipsis else TextOverflow.Clip,
+                    softWrap = !isStretched,
                     modifier =
                         Modifier
+                            .then(if (isStretched) Modifier.clipToBounds() else Modifier)
                             .pointerHoverIcon(if (enabled) PointerIcon.Hand else PointerIcon.Default)
                             .clickable(
                                 onClick = onClicked,
@@ -206,6 +212,7 @@ internal fun StatusActionGroup(
     contentDescription: String? = null,
     enabled: Boolean = true,
     withTextMinWidth: Boolean = false,
+    isStretched: Boolean = false,
     subMenus: @Composable PlatformDropdownMenuScope.(closeMenu: () -> Unit, isMenuShown: Boolean) -> Unit,
 ) {
     var showMenu by remember { mutableStateOf(false) }
@@ -222,6 +229,7 @@ internal fun StatusActionGroup(
             color = color,
             enabled = enabled,
             withTextMinWidth = withTextMinWidth,
+            isStretched = isStretched,
         )
         PlatformDropdownMenu(
             expanded = showMenu,

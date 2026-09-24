@@ -13,13 +13,10 @@ enum MediaViewerDismissGesturePolicy {
     static let scrollEdgeTolerance: CGFloat = 1
 
     @MainActor
-    static func belongsToViewer(_ touchedController: UIViewController, viewer: UIViewController) -> Bool {
-        var controller: UIViewController? = touchedController
-        while let current = controller {
-            if current === viewer { return true }
-            controller = current.parent
-        }
-        return false
+    static func belongsToViewer(_ touchedView: UIView, viewer: UIView) -> Bool {
+        // LazyPager embeds hosting views without attaching their controllers as children.
+        // View containment still distinguishes media content from a separately presented sheet.
+        touchedView.isDescendant(of: viewer)
     }
 
     static func verticalOffset(

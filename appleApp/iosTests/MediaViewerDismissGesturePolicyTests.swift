@@ -3,19 +3,23 @@ import UIKit
 
 final class MediaViewerDismissGesturePolicyTests: XCTestCase {
     @MainActor
-    func testDismissGestureIncludesPagerChildrenButExcludesPresentedSheet() {
+    func testDismissGestureIncludesEmbeddedHostingViewsButExcludesPresentedSheet() {
         let viewer = UIViewController()
         let pager = UIViewController()
         let image = UIViewController()
         viewer.addChild(pager)
-        pager.addChild(image)
+        viewer.view.addSubview(pager.view)
+        // LazyPager adds the hosting view without adding its controller as a child.
+        pager.view.addSubview(image.view)
         let sheet = UIViewController()
         let sheetContent = UIViewController()
         sheet.addChild(sheetContent)
+        sheet.view.addSubview(sheetContent.view)
 
-        XCTAssertTrue(MediaViewerDismissGesturePolicy.belongsToViewer(viewer, viewer: viewer))
-        XCTAssertTrue(MediaViewerDismissGesturePolicy.belongsToViewer(image, viewer: viewer))
-        XCTAssertFalse(MediaViewerDismissGesturePolicy.belongsToViewer(sheetContent, viewer: viewer))
+        XCTAssertNil(image.parent)
+        XCTAssertTrue(MediaViewerDismissGesturePolicy.belongsToViewer(viewer.view, viewer: viewer.view))
+        XCTAssertTrue(MediaViewerDismissGesturePolicy.belongsToViewer(image.view, viewer: viewer.view))
+        XCTAssertFalse(MediaViewerDismissGesturePolicy.belongsToViewer(sheetContent.view, viewer: viewer.view))
     }
 
     func testFastVerticalSwipesDismissInBothDirections() {

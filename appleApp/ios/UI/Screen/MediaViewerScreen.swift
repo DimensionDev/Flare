@@ -857,9 +857,9 @@ private struct MediaViewerDismissGestureHost: UIViewRepresentable {
             guard enabled, let sourceView,
                   let window = installedWindow else { return false }
             // The recognizer is installed on UIWindow, so screen bounds alone also include sheets.
-            if let sourceController = owningViewController(of: sourceView),
-               let touchedController = touch.view.flatMap({ owningViewController(of: $0) }),
-               !MediaViewerDismissGesturePolicy.belongsToViewer(touchedController, viewer: sourceController) {
+            guard let viewer = owningViewController(of: sourceView)?.view,
+                  let touchedView = touch.view,
+                  MediaViewerDismissGesturePolicy.belongsToViewer(touchedView, viewer: viewer) else {
                 return false
             }
             let point = touch.location(in: window)

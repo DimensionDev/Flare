@@ -24,16 +24,34 @@ struct FlareApp: App {
     var body: some Scene {
         WindowGroup {
             FlareTheme {
-                if #available(iOS 18.0, *) {
-                    FlareRoot()
-                } else {
-                    BackportFlareRoot()
-                }
+                root
             }
             .modifier(IOSTimelineListEnvironment())
             .onChange(of: scenePhase) { _, phase in
                 MediaCacheMaintenance.handleScenePhase(phase)
             }
+        }
+    }
+
+    @ViewBuilder
+    private var root: some View {
+        #if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("--media-viewer-test") {
+            MediaViewerTestFixture()
+        } else {
+            appRoot
+        }
+        #else
+        appRoot
+        #endif
+    }
+
+    @ViewBuilder
+    private var appRoot: some View {
+        if #available(iOS 18.0, *) {
+            FlareRoot()
+        } else {
+            BackportFlareRoot()
         }
     }
     

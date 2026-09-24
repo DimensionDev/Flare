@@ -319,6 +319,20 @@ targets:
         TEST_TARGET_NAME: TimelineTestHost
         SWIFT_DEFAULT_ACTOR_ISOLATION: nonisolated
 
+  MediaViewerInteractionTests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: iosMediaUITests
+    dependencies:
+      - target: iOS
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        PRODUCT_BUNDLE_IDENTIFIER: dev.dimension.flare.media-interaction-tests
+        TEST_TARGET_NAME: iOS
+        SWIFT_DEFAULT_ACTOR_ISOLATION: nonisolated
+
   macOS:
     templates: [FirebaseOptionalApp]
     type: application
@@ -477,6 +491,7 @@ schemes:
       targets:
         - iOSTests
         - iOSInteractionTests
+        - MediaViewerInteractionTests
     profile:
       config: Release
     analyze:
@@ -492,6 +507,15 @@ schemes:
       config: Debug
       targets:
         - iOSInteractionTests
+
+  MediaViewerInteractionTests:
+    build:
+      targets:
+        MediaViewerInteractionTests: all
+    test:
+      config: Debug
+      targets:
+        - MediaViewerInteractionTests
 
   macOS:
     build:

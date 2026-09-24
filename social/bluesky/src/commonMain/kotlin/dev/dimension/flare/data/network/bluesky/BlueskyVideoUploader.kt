@@ -31,7 +31,7 @@ internal class BlueskyVideoUploader(
         did: String,
         token: String,
     ): Blob {
-        media.validate("Bluesky", listOf("video/mp4"), 300_000_000)
+        media.validateBlueskyVideoInput()
         var job =
             client
                 .post("$VIDEO_SERVICE/app.bsky.video.uploadVideo") {
@@ -43,7 +43,15 @@ internal class BlueskyVideoUploader(
         return withTimeout(30.minutes) {
             while (true) {
                 // already_exists can return an error alongside a reusable blob.
-                job.blob?.let { return@withTimeout it }
+                job.blob?.let { blob ->
+                    val mimeType =
+                        when (blob) {
+                            is Blob.StandardBlob -> blob.mimeType
+                            is Blob.LegacyBlob -> blob.mimeType
+                        }
+                    check(mimeType == "video/mp4") { "Bluesky video processing did not return an MP4 blob" }
+                    return@withTimeout blob
+                }
                 check(job.error == null && job.state != "JOB_STATE_FAILED" && job.state != "JOB_STATE_COMPLETED") {
                     "Bluesky video processing failed: ${job.message ?: job.error ?: job.state}"
                 }
@@ -73,6 +81,12 @@ internal class BlueskyVideoUploader(
     private companion object {
         const val VIDEO_SERVICE = "https://video.bsky.app/xrpc"
     }
+}
+
+// The video service processes original GIF/MOV input into MP4 for the post embed.
+// https://github.com/bluesky-social/social-app/blob/main/src/lib/constants.ts
+internal fun UploadMedia.validateBlueskyVideoInput() {
+    validate("Bluesky", listOf("video/mp4", "video/quicktime", "image/gif"), 300_000_000)
 }
 
 @Serializable

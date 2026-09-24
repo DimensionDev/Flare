@@ -11,6 +11,7 @@ import dev.dimension.flare.data.repository.SaveDraftInput
 import dev.dimension.flare.data.repository.SaveDraftTarget
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiAccount
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.firstOrNull
@@ -45,38 +46,41 @@ internal class SendDraftUseCase(
         onPrepared: suspend () -> Unit = {},
         progress: suspend (ComposeProgressState) -> Unit,
     ) {
-        val persistedMedia = draftMediaStore.persist(bundle.groupId, bundle.template.medias)
-        val savedGroupId =
-            draftRepository.saveDraft(
-                input =
-                    SaveDraftInput(
-                        groupId = bundle.groupId,
-                        content = bundle.template.toDraftContent(),
-                        targets =
-                            bundle.accounts.map {
-                                SaveDraftTarget(
-                                    accountKey = it.accountKey,
-                                    status = DraftTargetStatus.SENDING,
-                                    attemptCount = 1,
-                                    lastAttemptAt = Clock.System.now().toEpochMilliseconds(),
-                                )
-                            },
-                        medias = persistedMedia,
-                    ),
+        withCancellationRecovery(bundle.groupId, bundle.accounts.map { it.accountKey }) { pendingTargets ->
+            val persistedMedia = draftMediaStore.persist(bundle.groupId, bundle.template.medias)
+            val savedGroupId =
+                draftRepository.saveDraft(
+                    input =
+                        SaveDraftInput(
+                            groupId = bundle.groupId,
+                            content = bundle.template.toDraftContent(),
+                            targets =
+                                bundle.accounts.map {
+                                    SaveDraftTarget(
+                                        accountKey = it.accountKey,
+                                        status = DraftTargetStatus.SENDING,
+                                        attemptCount = 1,
+                                        lastAttemptAt = Clock.System.now().toEpochMilliseconds(),
+                                    )
+                                },
+                            medias = persistedMedia,
+                        ),
+                )
+            val data =
+                bundle.template.copy(
+                    medias =
+                        draftMediaStore.restore(
+                            checkNotNull(draftRepository.draft(savedGroupId).firstOrNull()).medias,
+                        ),
+                )
+            onPrepared()
+            sendDatas(
+                targets = bundle.accounts.map { ComposeTargetData(account = it, data = data) },
+                groupId = savedGroupId,
+                pendingTargets = pendingTargets,
+                progress = progress,
             )
-        val data =
-            bundle.template.copy(
-                medias =
-                    draftMediaStore.restore(
-                        checkNotNull(draftRepository.draft(savedGroupId).firstOrNull()).medias,
-                    ),
-            )
-        onPrepared()
-        sendDatas(
-            targets = bundle.accounts.map { ComposeTargetData(account = it, data = data) },
-            groupId = savedGroupId,
-            progress = progress,
-        )
+        }
     }
 
     suspend operator fun invoke(
@@ -96,22 +100,55 @@ internal class SendDraftUseCase(
                         )
                     }
                 }
-        sendDatas(
-            targets = datas,
-            groupId = groupId,
-            progress = progress,
-        )
+        withCancellationRecovery(groupId, datas.map { it.account.accountKey }) { pendingTargets ->
+            sendDatas(
+                targets = datas,
+                groupId = groupId,
+                pendingTargets = pendingTargets,
+                progress = progress,
+            )
+        }
+    }
+
+    private suspend fun withCancellationRecovery(
+        groupId: String,
+        accountKeys: List<MicroBlogKey>,
+        send: suspend (MutableSet<MicroBlogKey>) -> Unit,
+    ) {
+        val pendingTargets = accountKeys.toMutableSet()
+        var cancelled = false
+        try {
+            send(pendingTargets)
+        } catch (cancellation: CancellationException) {
+            cancelled = true
+            throw cancellation
+        } finally {
+            if (cancelled || !currentCoroutineContext().isActive) {
+                // Cover preparation, progress callbacks, and database writes as well as the upload.
+                withContext(NonCancellable) {
+                    pendingTargets.forEach { accountKey ->
+                        draftRepository.updateTargetStatus(
+                            groupId = groupId,
+                            accountKey = accountKey,
+                            status = DraftTargetStatus.FAILED,
+                            errorMessage = "Upload cancelled",
+                        )
+                    }
+                }
+            }
+        }
     }
 
     private suspend fun sendDatas(
         targets: List<ComposeTargetData>,
         groupId: String,
+        pendingTargets: MutableSet<MicroBlogKey>,
         progress: suspend (ComposeProgressState) -> Unit,
     ) {
         val progressTracker = ComposeProgressTracker(targets)
         progress(progressTracker.state())
         val failures = mutableListOf<Throwable>()
-        targets.forEachIndexed { index, target ->
+        targets.forEach { target ->
             draftRepository.updateTargetStatus(
                 groupId = groupId,
                 accountKey = target.account.accountKey,
@@ -131,19 +168,9 @@ internal class SendDraftUseCase(
                 progressTracker.onComposeSuccess(target.account.accountKey)
                 progress(progressTracker.state())
                 draftRepository.deleteTarget(groupId, target.account.accountKey)
+                pendingTargets.remove(target.account.accountKey)
             } catch (throwable: Exception) {
                 if (!currentCoroutineContext().isActive) {
-                    // Keep the files and make every unsent destination retryable after cancellation.
-                    withContext(NonCancellable) {
-                        targets.drop(index).forEach { pending ->
-                            draftRepository.updateTargetStatus(
-                                groupId = groupId,
-                                accountKey = pending.account.accountKey,
-                                status = DraftTargetStatus.FAILED,
-                                errorMessage = "Upload cancelled",
-                            )
-                        }
-                    }
                     throw throwable
                 }
                 repeat(pendingProgressTicks) {
@@ -158,6 +185,7 @@ internal class SendDraftUseCase(
                     attemptCount = 1,
                     lastAttemptAt = Clock.System.now().toEpochMilliseconds(),
                 )
+                pendingTargets.remove(target.account.accountKey)
                 failures += throwable
             }
         }

@@ -9,6 +9,10 @@ import kotlin.native.HiddenFromObjC
 @Immutable
 public sealed interface UiMedia {
     public val url: String
+    public val downloadUrl: String?
+        get() = null
+    public val urlForDownload: String
+        get() = downloadUrl ?: url
     public val description: String?
     public val customHeaders: SerializableImmutableMap<String, String>?
 
@@ -46,6 +50,7 @@ public sealed interface UiMedia {
         val height: Float,
         val width: Float,
         override val customHeaders: SerializableImmutableMap<String, String>? = null,
+        override val downloadUrl: String? = null,
     ) : UiMedia {
         val aspectRatio: Float
             get() = (width / (height.takeUnless { it == 0f } ?: 1f)).takeUnless { it == 0f } ?: 1f

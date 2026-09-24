@@ -6,6 +6,7 @@ import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoade
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.network.bluesky.BlueskyService
+import dev.dimension.flare.data.network.bluesky.resolveBlueskyVideoDownloadUrls
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.render
@@ -56,9 +57,10 @@ internal class SearchStatusRemoteMediator(
                 }
             }.requireResponse()
 
+        val downloadUrls = resolveBlueskyVideoDownloadUrls(response.posts)
         return PagingResult(
             endOfPaginationReached = response.cursor == null,
-            data = response.posts.map { it.render(accountKey) },
+            data = response.posts.map { it.render(accountKey, downloadUrls) },
             nextKey = response.cursor,
         )
     }

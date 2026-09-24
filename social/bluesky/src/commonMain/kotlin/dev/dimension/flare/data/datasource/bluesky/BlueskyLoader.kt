@@ -80,7 +80,7 @@ internal class BlueskyLoader(
                 ).requireResponse()
                 .posts
                 .first()
-                .render(accountKey)
+                .renderWithDownloadUrls(accountKey)
         } else {
             // "at://${handle}/app.bsky.feed.post/${id}"
             val handle = statusKey.id.substringAfter("at://").substringBefore("/")
@@ -99,7 +99,7 @@ internal class BlueskyLoader(
                 ).requireResponse()
                 .posts
                 .first()
-                .render(accountKey)
+                .renderWithDownloadUrls(accountKey)
         }
     }
 

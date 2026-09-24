@@ -13,6 +13,7 @@ import io.ktor.client.request.header
 import io.ktor.client.request.prepareGet
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.HttpHeaders
+import io.ktor.http.isSuccess
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.readAvailable
 import kotlinx.coroutines.Dispatchers
@@ -52,6 +53,10 @@ internal class DesktopDownloadManager(
             }
 
             try {
+                val resourcePath = url.substringBefore('?').substringBefore('#').lowercase()
+                require(!resourcePath.endsWith(".m3u8") && !resourcePath.endsWith(".mpd") && !resourcePath.endsWith(".ism/manifest")) {
+                    "Adaptive streams require a downloadable media URL"
+                }
                 if (notify) {
                     inAppNotification.message(Res.string.media_download_started)
                 }
@@ -61,6 +66,7 @@ internal class DesktopDownloadManager(
                             header(key, value)
                         }
                     }.execute { response ->
+                        check(response.status.isSuccess()) { "Media download failed: HTTP ${response.status.value}" }
                         writeResponseToFile(
                             response = response,
                             outputFile = tempFile,
@@ -100,7 +106,7 @@ internal class DesktopDownloadManager(
             val success =
                 runCatching {
                     download(
-                        url = media.url,
+                        url = media.urlForDownload,
                         targetFile = targetFile,
                         overwrite = overwrite,
                         customHeaders = media.customHeaders,

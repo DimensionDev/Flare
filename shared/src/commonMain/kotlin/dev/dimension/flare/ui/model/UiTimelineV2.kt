@@ -615,6 +615,7 @@ private fun UiMedia.renderSummaryHash(): Int =
         is UiMedia.Video -> {
             renderHashBuilder()
                 .add(url)
+                .add(downloadUrl)
                 .add(thumbnailUrl)
                 .add(description)
                 .add(height.toBits())

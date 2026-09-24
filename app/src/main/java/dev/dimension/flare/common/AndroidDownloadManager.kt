@@ -137,7 +137,7 @@ internal class AndroidDownloadManager(
             val success =
                 runCatching {
                     saveMedia(
-                        uri = media.url,
+                        uri = media.urlForDownload,
                         fileName = fileName,
                         customHeaders = media.customHeaders,
                         onDownloadStarted = {},

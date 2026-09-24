@@ -109,7 +109,7 @@ private suspend inline fun <reified T> HttpClient.getJson(
     }
 }
 
-private fun didDocumentUrl(did: String): Url =
+internal fun didDocumentUrl(did: String): Url =
     when {
         did.startsWith("did:plc:") -> Url("https://plc.directory/$did")
         did.startsWith("did:web:") -> didWebDocumentUrl(did)
@@ -150,7 +150,7 @@ private fun Url.authorizationServerMetadataUrl(): Url =
         appendPathSegments(".well-known", "oauth-authorization-server")
     }
 
-private fun Url.requireHttpsOrigin(description: String): Url {
+internal fun Url.requireHttpsOrigin(description: String): Url {
     require(protocol == URLProtocol.HTTPS) { "$description must use HTTPS: $this" }
     require(user.isNullOrEmpty() && password.isNullOrEmpty()) { "$description must not contain credentials: $this" }
     require(encodedPath.isEmpty() || encodedPath == "/") { "$description must not contain a path: $this" }

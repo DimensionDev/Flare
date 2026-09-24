@@ -652,7 +652,8 @@ private fun presenter(
                     ) ?: return
                 scope.launch {
                     desktopDownloadManager.download(
-                        url = item.url,
+                        url = item.urlForDownload,
+                        customHeaders = item.customHeaders,
                         targetFile = targetFile,
                     )
                 }

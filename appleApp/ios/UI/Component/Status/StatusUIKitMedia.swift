@@ -28,11 +28,13 @@ enum VideoAutoplayOverlayState {
 private struct MediaItemSignature: Equatable {
     let kind: String
     let primaryURL: String
+    let downloadURL: String?
     let altText: String
     let aspectRatio: CGFloat?
     let customHeaders: [String: String]?
 
     init(media: UiMedia) {
+        downloadURL = media.downloadUrl
         altText = media.description_ ?? ""
         aspectRatio = media.carouselLayoutAspectRatio
         switch onEnum(of: media) {

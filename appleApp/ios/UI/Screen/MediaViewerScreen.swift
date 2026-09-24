@@ -584,7 +584,7 @@ struct MediaViewerScreen: View {
             )
         case .video(let video):
             MediaSaver.shared.saveVideo(
-                url: video.url,
+                url: video.urlForDownload,
                 customHeaders: video.customHeaders,
                 showsDownloadStarted: showsDownloadStarted,
                 showsSaveResult: showsSaveResult,

@@ -1495,7 +1495,7 @@ private fun mediaViewerPresenter(
                 is UiMedia.Audio -> download(data.url, fileName, data.customHeaders, context)
                 is UiMedia.Gif -> download(data.url, fileName, data.customHeaders, context)
                 is UiMedia.Image -> save(data.url, fileName, context)
-                is UiMedia.Video -> download(data.url, fileName, data.customHeaders, context)
+                is UiMedia.Video -> download(data.urlForDownload, fileName, data.customHeaders, context)
             }
         }
 

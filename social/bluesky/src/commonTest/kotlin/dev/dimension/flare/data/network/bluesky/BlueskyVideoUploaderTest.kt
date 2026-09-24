@@ -106,6 +106,33 @@ class BlueskyVideoUploaderTest {
             }
         }
 
+    @Test
+    fun quickTimeVideoIsRejectedBeforeUploadEvenWithMp4Name() =
+        runTest {
+            var requests = 0
+            val client =
+                videoClient {
+                    requests++
+                    respond("""{"jobId":"job","state":"JOB_STATE_COMPLETED","blob":$blobJson}""")
+                }
+            try {
+                val media =
+                    UploadMedia.fromBytes(
+                        "clip.mp4",
+                        byteArrayOf(0, 0, 0, 20) + "ftypqt  ".encodeToByteArray(),
+                        "video/mp4",
+                    )
+                val error =
+                    assertFailsWith<IllegalArgumentException> {
+                        BlueskyVideoUploader(client).upload(media, "did:plc:test", "token")
+                    }
+                assertEquals("Bluesky does not support video/quicktime: clip.mov", error.message)
+                assertEquals(0, requests)
+            } finally {
+                client.close()
+            }
+        }
+
     private fun TestScope.videoClient(handler: MockRequestHandler): HttpClient =
         HttpClient(MockEngine) {
             engine {

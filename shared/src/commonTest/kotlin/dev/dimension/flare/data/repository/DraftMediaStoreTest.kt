@@ -93,6 +93,32 @@ class DraftMediaStoreTest {
         }
 
     @Test
+    fun persistRestorePersistWithMaximumLengthFileName() =
+        runTest {
+            val store = DraftMediaStore(fileStorage)
+            // The draft's "0_" prefix makes the destination basename exactly 255 bytes.
+            val fileName = "${"a".repeat(249)}.mp4"
+            val bytes = byteArrayOf(1, 2, 3)
+            val persisted =
+                store.persist(
+                    "long-file-name",
+                    listOf(media(name = fileName, bytes = bytes, type = FileType.Video, altText = null)),
+                )
+            val destination = persisted.single().cachePath.toPath()
+
+            assertEquals("0_$fileName", destination.name)
+            assertEquals(fileName, persisted.single().fileName)
+            assertContentEquals(bytes, fileStorage.read(destination))
+
+            val restored = store.restore(persisted.mapIndexed { index, media -> media.toDraftMedia("long-file-name", index) })
+            val savedAgain = store.persist("long-file-name", restored)
+
+            assertEquals(destination.toString(), savedAgain.single().cachePath)
+            assertContentEquals(bytes, fileStorage.read(destination))
+            assertEquals(listOf(destination), fileSystem.list(checkNotNull(destination.parent)))
+        }
+
+    @Test
     fun persistRestorePersistWithSameFileNameOverwritesContent() =
         runTest {
             val store = DraftMediaStore(fileStorage)

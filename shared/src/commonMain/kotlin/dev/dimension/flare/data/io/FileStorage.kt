@@ -81,7 +81,7 @@ internal open class OkioFileStorage(
     ): Unit =
         withContext(PlatformDispatchers.IO) {
             // A restored draft may be its own source. Never truncate it before the copy completes.
-            val temporary = checkNotNull(path.parent).resolve(".${path.name}.${Uuid.random()}.part")
+            val temporary = checkNotNull(path.parent).resolve(".${Uuid.random()}.part")
             try {
                 fileSystem.sink(temporary).buffer().use { sink ->
                     media.forEachChunk { bytes, count -> sink.write(bytes, 0, count) }

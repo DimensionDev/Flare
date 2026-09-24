@@ -3,16 +3,16 @@ package dev.dimension.flare.ui.screen.home
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.ListItemShapes
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.SegmentedListItem
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -21,7 +21,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -32,6 +31,7 @@ import dev.dimension.flare.data.model.tab.TimelinePostKind
 import dev.dimension.flare.data.model.tab.TimelineReplyVisibility
 import dev.dimension.flare.data.model.tab.replyVisibility
 import dev.dimension.flare.data.model.tab.withReplyVisibility
+import dev.dimension.flare.ui.component.FlareDropdownMenu
 import dev.dimension.flare.ui.theme.segmentedShapes2
 
 @Composable
@@ -109,10 +109,12 @@ internal fun TimelineFilterDialog(
                                 selectedKinds + option
                             }
                     },
+                    leadingItemCount = 1,
                     extraContent = {
-                        ReplyVisibilityOptions(
+                        ReplyVisibilitySelector(
                             selected = selectedReplyVisibility,
                             onSelect = { selectedReplyVisibility = it },
+                            shapes = ListItemDefaults.segmentedShapes2(0, kindOptions.size + 1),
                         )
                     },
                 )
@@ -161,6 +163,7 @@ private fun <T> FilterSection(
     selected: Set<T>,
     label: @Composable (T) -> String,
     onToggle: (T) -> Unit,
+    leadingItemCount: Int = 0,
     extraContent: @Composable () -> Unit = {},
 ) {
     Column(
@@ -173,7 +176,7 @@ private fun <T> FilterSection(
             SegmentedListItem(
                 checked = checked,
                 onCheckedChange = { onToggle(option) },
-                shapes = ListItemDefaults.segmentedShapes2(index, options.size),
+                shapes = ListItemDefaults.segmentedShapes2(index + leadingItemCount, options.size + leadingItemCount),
                 content = {
                     Text(text = label(option))
                 },
@@ -192,35 +195,50 @@ private fun <T> FilterSection(
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun ReplyVisibilityOptions(
+private fun ReplyVisibilitySelector(
     selected: TimelineReplyVisibility,
     onSelect: (TimelineReplyVisibility) -> Unit,
+    shapes: ListItemShapes,
 ) {
-    Column(
-        verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
-    ) {
-        Text(text = stringResource(id = R.string.tab_settings_filter_reply))
-        TimelineReplyVisibility.entries.forEach { option ->
-            val label =
-                when (option) {
-                    TimelineReplyVisibility.AllReplies -> R.string.tab_settings_filter_all_replies
-                    TimelineReplyVisibility.ToFollowedAccounts -> R.string.tab_settings_filter_to_followed_accounts
-                    TimelineReplyVisibility.NoReplies -> R.string.tab_settings_filter_no_replies
-                }
-            Row(
-                modifier = Modifier.fillMaxWidth().clickable { onSelect(option) },
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                RadioButton(
-                    selected = selected == option,
-                    onClick = { onSelect(option) },
-                )
-                Text(text = stringResource(id = label))
+    var expanded by remember { mutableStateOf(false) }
+    SegmentedListItem(
+        checked = expanded,
+        onCheckedChange = { expanded = it },
+        shapes = shapes,
+        content = {
+            Text(text = stringResource(id = R.string.tab_settings_filter_reply))
+        },
+        trailingContent = {
+            TextButton(onClick = { expanded = true }) {
+                Text(text = stringResource(id = selected.label))
             }
-        }
-    }
+            FlareDropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false },
+            ) {
+                TimelineReplyVisibility.entries.forEach { option ->
+                    DropdownMenuItem(
+                        text = { Text(text = stringResource(id = option.label)) },
+                        onClick = {
+                            onSelect(option)
+                            expanded = false
+                        },
+                    )
+                }
+            }
+        },
+    )
 }
+
+private val TimelineReplyVisibility.label: Int
+    get() =
+        when (this) {
+            TimelineReplyVisibility.AllReplies -> R.string.tab_settings_filter_all_replies
+            TimelineReplyVisibility.ToFollowedAccounts -> R.string.tab_settings_filter_to_followed_accounts
+            TimelineReplyVisibility.NoReplies -> R.string.tab_settings_filter_no_replies
+        }
 
 @Composable
 private fun filterKindLabel(kind: TimelinePostKind): String =

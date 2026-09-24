@@ -1182,59 +1182,65 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
            pendingEffectiveContentOffsetYAfterSnapshot == nil, restoresScrollAnchorOnSnapshotChanges {
             pendingSavedPosition = collectionView.captureReadingPosition()
         }
-        if columnsChanged || kindChanged {
-            clearHeightCache(keepingItemMeasurements: !kindChanged && contentKind != .profileMedia)
-        }
-        if previousPlan?.signature.itemIDs != plan.itemIDs || previousPlan?.signature.headerIDs != plan.headerIDs {
-            pruneHeightCache(keepingItemIDs: Set(plan.indexMap.keys).union(plan.headerIDs))
-        }
-
-        let existing = Set(dataSource.snapshot().itemIdentifiers)
-        if columnsChanged || kindChanged {
-            pendingReconfigureIDs.formUnion(existing)
-        }
-        // Error cells carry retry callbacks for the current paging source, even
-        // when their stable identifiers have not changed.
-        pendingReconfigureIDs.formUnion([Self.errorID, Self.footerErrorID, Self.headerErrorID])
-        let changedIDs = (plan.headerIDs + plan.accessoryIDs + plan.itemIDs + plan.footerIDs).filter {
-            existing.contains($0) && (pendingReconfigureIDs.contains($0) ||
-                previousPlan?.renderHashMap[$0] != plan.renderHashMap[$0])
-        }
-        pendingReconfigureIDs.removeAll()
-        renderedPlan = plan
-        accessoryItemMap = Dictionary(uniqueKeysWithValues: accessoryItems.map { ("\(Self.accessoryPrefix)\($0.id)", $0) })
-        if columnsChanged || kindChanged {
-            applyLayoutForColumnCount()
-            updateBackgroundColors()
-        }
-        syncRefreshControl(isRefreshing: plan.isRefreshing)
-
-        let completion = { [weak self] in
-            guard let self else { return }
-            if self.readingState === restoringState {
-                if let mediaAnchor { self.restoreScrollAnchorIfNeeded(mediaAnchor) }
-                self.restorePendingContentOffsetIfNeeded(finalize: !plan.isInitialLoading)
+        let keepsReadingPosition = previousPlan != nil && !kindChanged && !switchedContent &&
+            pendingSavedPosition == nil && pendingEffectiveContentOffsetYAfterSnapshot == nil &&
+            restoresScrollAnchorOnSnapshotChanges
+        let survivingIDs = keepsReadingPosition ? Set(plan.headerIDs + plan.accessoryIDs + plan.itemIDs) : []
+        collectionView.performUpdatesPreservingReadingPosition(keepingItemIDs: survivingIDs) {
+            if columnsChanged || kindChanged {
+                clearHeightCache(keepingItemMeasurements: !kindChanged && contentKind != .profileMedia)
             }
-            self.accessVisiblePagingItems()
-            self.updateAutoplayConfiguration()
-            if wasRefreshing && !plan.isRefreshing { self.schedulePostRefreshPoolCleanup() }
-            self.isApplyingSnapshot = false
-            if self.pendingInput != nil || !self.pendingReconfigureIDs.isEmpty { self.scheduleSubmission() }
+            if previousPlan?.signature.itemIDs != plan.itemIDs || previousPlan?.signature.headerIDs != plan.headerIDs {
+                pruneHeightCache(keepingItemIDs: Set(plan.indexMap.keys).union(plan.headerIDs))
+            }
+
+            let existing = Set(dataSource.snapshot().itemIdentifiers)
+            if columnsChanged || kindChanged {
+                pendingReconfigureIDs.formUnion(existing)
+            }
+            // Error cells carry retry callbacks for the current paging source, even
+            // when their stable identifiers have not changed.
+            pendingReconfigureIDs.formUnion([Self.errorID, Self.footerErrorID, Self.headerErrorID])
+            let changedIDs = (plan.headerIDs + plan.accessoryIDs + plan.itemIDs + plan.footerIDs).filter {
+                existing.contains($0) && (pendingReconfigureIDs.contains($0) ||
+                    previousPlan?.renderHashMap[$0] != plan.renderHashMap[$0])
+            }
+            pendingReconfigureIDs.removeAll()
+            renderedPlan = plan
+            accessoryItemMap = Dictionary(uniqueKeysWithValues: accessoryItems.map { ("\(Self.accessoryPrefix)\($0.id)", $0) })
+            if columnsChanged || kindChanged {
+                applyLayoutForColumnCount()
+                updateBackgroundColors()
+            }
+            syncRefreshControl(isRefreshing: plan.isRefreshing)
+
+            let completion = { [weak self] in
+                guard let self else { return }
+                if self.readingState === restoringState {
+                    if let mediaAnchor { self.restoreScrollAnchorIfNeeded(mediaAnchor) }
+                    self.restorePendingContentOffsetIfNeeded(finalize: !plan.isInitialLoading)
+                }
+                self.accessVisiblePagingItems()
+                self.updateAutoplayConfiguration()
+                if wasRefreshing && !plan.isRefreshing { self.schedulePostRefreshPoolCleanup() }
+                self.isApplyingSnapshot = false
+                if self.pendingInput != nil || !self.pendingReconfigureIDs.isEmpty { self.scheduleSubmission() }
+            }
+            guard structureChanged || !changedIDs.isEmpty else {
+                completion()
+                return
+            }
+            // No full snapshot construction for no-op/like-only updates. Footer and
+            // column changes use the same completion and readiness rules as all others.
+            var snapshot = structureChanged ? Self.makeSnapshot(from: plan) : dataSource.snapshot()
+            snapshot.reconfigureItems(changedIDs)
+            let animate = structureChanged && !columnsChanged && !kindChanged &&
+                !plan.isRefreshing && !refreshControl.isRefreshing &&
+                pendingEffectiveContentOffsetYAfterSnapshot == nil && mediaAnchor == nil &&
+                !collectionView.hasReadingPosition && allowsScrollAnchorRestoration
+            dataSource.apply(snapshot, animatingDifferences: animate, completion: completion)
+            restorePendingContentOffsetIfNeeded(finalize: false)
         }
-        guard structureChanged || !changedIDs.isEmpty else {
-            completion()
-            return
-        }
-        // No full snapshot construction for no-op/like-only updates. Footer and
-        // column changes use the same completion and readiness rules as all others.
-        var snapshot = structureChanged ? Self.makeSnapshot(from: plan) : dataSource.snapshot()
-        snapshot.reconfigureItems(changedIDs)
-        let animate = structureChanged && !columnsChanged && !kindChanged &&
-            !plan.isRefreshing && !refreshControl.isRefreshing &&
-            pendingEffectiveContentOffsetYAfterSnapshot == nil && mediaAnchor == nil &&
-            !collectionView.hasReadingPosition && allowsScrollAnchorRestoration
-        dataSource.apply(snapshot, animatingDifferences: animate, completion: completion)
-        restorePendingContentOffsetIfNeeded(finalize: false)
     }
 
     private func syncRefreshControl(isRefreshing: Bool) {

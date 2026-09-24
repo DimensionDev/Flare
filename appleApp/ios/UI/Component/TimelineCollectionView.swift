@@ -335,15 +335,37 @@ final class TimelineCollectionView: UICollectionView {
     /// Apply measured geometry without moving content under an active gesture.
     /// Called from the controller's coalesced flush, outside cell measurement/layout.
     func invalidateMeasuredHeights() {
-        let viewportTop = readingViewportTop()
-        let item = preservesReadingPosition && hasScrollGesture
-            ? firstVisibleReadingItem(viewportTop: viewportTop) : nil
-        let oldOffset = contentOffset.y
         prepareForLayoutChange()
         UIView.performWithoutAnimation {
-            collectionViewLayout.invalidateLayout()
+            performUpdatesPreservingReadingPosition {
+                collectionViewLayout.invalidateLayout()
+                layoutIfNeeded()
+            }
+        }
+    }
+
+    /// Capture and compensate in the same main-thread update, before another pan
+    /// or deceleration step can run. Never restore this offset from a completion.
+    func performUpdatesPreservingReadingPosition(keepingItemIDs: Set<String>? = nil, _ updates: () -> Void) {
+        let viewportTop = readingViewportTop()
+        var item = preservesReadingPosition && hasScrollGesture &&
+            !isProgrammaticScrolling && !isExternalScrollInteractionActive && !isRevealingRefresh
+            ? firstVisibleReadingItem(viewportTop: viewportTop) : nil
+        if let anchor = item, let keepingItemIDs, !keepingItemIDs.contains(anchor.id) {
+            let order = readingItemIDs?() ?? []
+            let index = order.firstIndex(of: anchor.id) ?? 0
+            let replacement = order.dropFirst(index + 1).first(where: keepingItemIDs.contains)
+                ?? order.prefix(index).reversed().first(where: keepingItemIDs.contains)
+            item = replacement.map { (id: $0, frame: anchor.frame) }
+        }
+        let oldOffset = contentOffset.y
+        let wasWithinBounds = oldOffset >= -adjustedContentInset.top &&
+            oldOffset <= max(-adjustedContentInset.top, contentSize.height - bounds.height + adjustedContentInset.bottom)
+        updates()
+        guard let item, preservesReadingPosition, !isProgrammaticScrolling, !isRevealingRefresh else { return }
+        UIView.performWithoutAnimation {
             layoutIfNeeded()
-            guard let item, let path = readingIndexPath?(item.id),
+            guard let path = readingIndexPath?(item.id),
                   let frame = collectionViewLayout.layoutAttributesForItem(at: path)?.frame else { return }
             let oldDistance = item.frame.minY - viewportTop
             // The estimate may have put the viewport beyond the measured card.
@@ -351,7 +373,13 @@ final class TimelineCollectionView: UICollectionView {
             let distance = max(oldDistance, (readingTopOcclusion?() ?? 0) + 1 - frame.height)
             // UIKit's invalidation delta preserves the pan/deceleration trajectory.
             // Account for any offset adjustment UIKit already made at the bottom.
-            let delta = oldOffset + frame.minY - item.frame.minY + oldDistance - distance - contentOffset.y
+            var targetOffset = oldOffset + frame.minY - item.frame.minY + oldDistance - distance
+            if wasWithinBounds {
+                let minimum = -adjustedContentInset.top
+                let maximum = max(minimum, contentSize.height - bounds.height + adjustedContentInset.bottom)
+                targetOffset = min(max(targetOffset, minimum), maximum)
+            }
+            let delta = targetOffset - contentOffset.y
             guard abs(delta) > 0.5 / max(traitCollection.displayScale, 1) else { return }
             let context = UICollectionViewLayoutInvalidationContext()
             context.contentOffsetAdjustment.y = delta

@@ -821,4 +821,5 @@
     <string name="fanbox_recommended_creators_title">Recommended creators</string>
     <string name="settings_appearance_show_post_in_media_viewer">Show post in media viewer</string>
     <string name="settings_appearance_show_post_in_media_viewer_description">Show the author and actions, and drag up to read the post</string>
+    <string name="unable_to_open_link">Unable to open this link</string>
 </resources>

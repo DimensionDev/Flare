@@ -353,6 +353,7 @@ private fun FanboxPostDetailBody.BodyContent.toArticleBlocks(
         val htmlBlocks =
             html.toArticleHtmlBlocks(
                 keyPrefix = "$postId:html",
+                sourceUrl = sourceUrl,
                 sensitive = sensitive,
                 imageHeaders = imageHeaders,
             )
@@ -579,10 +580,11 @@ private fun String.httpUrlOrNull(): String? =
 
 private fun String.toArticleHtmlBlocks(
     keyPrefix: String,
+    sourceUrl: String,
     sensitive: Boolean,
     imageHeaders: ImmutableMap<String, String>? = null,
 ): List<UiArticleBlock> =
-    parseHtml(this)
+    parseHtml(this, baseUri = sourceUrl)
         .toUi()
         .renderRuns
         .mapIndexedNotNull { index, content ->

@@ -72,6 +72,7 @@ import dev.dimension.flare.ui.presenter.home.rss.RssDetailPresenter
 import dev.dimension.flare.ui.presenter.home.rss.RssDetailTranslatePresenter
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.server.AiTLDRPresenter
+import dev.dimension.flare.ui.render.parseHtml
 import dev.dimension.flare.ui.theme.isLightTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import io.ktor.http.Url
@@ -334,8 +335,6 @@ internal fun RssDetailScreen(
                             modifier =
                             Modifier,
                         ) {
-                            // Use translated content if available by creating a new DocumentData
-                            // whose lazy .element will re-parse the translated HTML
                             val displayData =
                                 state.translateState?.translatedHtml?.let { htmlState ->
                                     when (htmlState) {
@@ -344,7 +343,7 @@ internal fun RssDetailScreen(
                                     }
                                 } ?: data
                             RssRichText(
-                                element = displayData.element,
+                                element = remember(displayData.content, url) { parseHtml(displayData.content, baseUri = url) },
                                 imageHeader = state.headers,
                             )
                         }

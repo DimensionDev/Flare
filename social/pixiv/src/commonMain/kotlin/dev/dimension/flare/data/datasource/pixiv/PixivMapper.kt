@@ -62,7 +62,7 @@ internal fun PixivIllust.toUiTimeline(accountKey: MicroBlogKey): UiTimelineV2.Po
                             )
                         }
                     }.trim().let {
-                        parseHtml(it).toUi()
+                        parseHtml(it, baseUri = "https://$PIXIV_HOST/artworks/$id").toUi()
                     },
             ),
         actions =

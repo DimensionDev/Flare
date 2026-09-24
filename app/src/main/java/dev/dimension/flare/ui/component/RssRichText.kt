@@ -37,6 +37,7 @@ import com.halilibo.richtext.ui.string.RichTextString
 import com.halilibo.richtext.ui.string.RichTextStringStyle
 import com.halilibo.richtext.ui.string.Text
 import com.halilibo.richtext.ui.string.withFormat
+import dev.dimension.flare.ui.render.resolvedHref
 import dev.dimension.flare.ui.route.DeeplinkRoute
 import dev.dimension.flare.ui.route.toUri
 import kotlinx.collections.immutable.ImmutableMap
@@ -201,8 +202,8 @@ private fun RichTextScope.RenderElement(
         }
 
         "a" -> {
-            val href = element.attribute("href")?.value
-            if (!href.isNullOrEmpty()) {
+            val href = element.resolvedHref()
+            if (href != null) {
                 with(context.builder) {
                     withFormat(
                         RichTextString.Format.Link(destination = href),

@@ -563,7 +563,7 @@ internal fun renderVVOText(
     accountKey: MicroBlogKey,
     sourceLanguages: List<String> = emptyList(),
 ): UiRichText {
-    val element = parseHtml(text)
+    val element = parseHtml(text, baseUri = "https://$vvoHost/")
     extractImagesFromLinks(element)
     element.childNodes().forEach {
         replaceMentionAndHashtag(element, it, accountKey)

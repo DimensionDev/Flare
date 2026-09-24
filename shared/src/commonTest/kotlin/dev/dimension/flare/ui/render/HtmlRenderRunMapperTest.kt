@@ -8,6 +8,51 @@ import kotlin.test.assertTrue
 
 class HtmlRenderRunMapperTest {
     @Test
+    fun resolves_relative_links_against_the_source_page() {
+        val links =
+            mapOf(
+                "/posts/123" to "https://example.com/posts/123",
+                "../next" to "https://example.com/next",
+                "//other.example/post" to "https://other.example/post",
+                "#section" to "https://example.com/articles/current#section",
+            )
+        links.forEach { (href, expected) ->
+            val element = parseHtml("""<a href="$href">link</a>""", baseUri = "https://example.com/articles/current")
+            val content = assertIs<RenderContent.Text>(mapHtmlToRenderContents(element).single())
+            assertEquals(expected, assertIs<RenderRun.Text>(content.runs.single()).style.link)
+        }
+    }
+
+    @Test
+    fun does_not_make_blank_or_unresolved_links_clickable() {
+        listOf("", " ", "#section", "/posts/123", "//example.com/post", "example.com/post").forEach { href ->
+            val content = assertIs<RenderContent.Text>(map("""<a href="$href">link</a>""").single())
+            val run = assertIs<RenderRun.Text>(content.runs.single())
+            assertEquals("link", run.text)
+            assertNull(run.style.link, href)
+        }
+    }
+
+    @Test
+    fun preserves_absolute_and_internal_links() {
+        listOf("https://example.com/post", "flare://Settings", "mailto:hello@example.com", "tel:123").forEach { href ->
+            val content = assertIs<RenderContent.Text>(map("""<a href=" $href ">link</a>""").single())
+            assertEquals(href, assertIs<RenderRun.Text>(content.runs.single()).style.link)
+        }
+    }
+
+    @Test
+    fun resolves_block_image_links_against_the_source_page() {
+        val element =
+            parseHtml(
+                """<figure><img src="https://example.com/image.jpg" href="/posts/123"/></figure>""",
+                baseUri = "https://example.com/article",
+            )
+        val image = assertIs<RenderContent.BlockImage>(mapHtmlToRenderContents(element).single())
+        assertEquals("https://example.com/posts/123", image.href)
+    }
+
+    @Test
     fun maps_inline_styles_into_single_text_block() {
         val contents = map("<p>Hello <strong><a href=\"https://example.com\">world</a></strong><small><u>!</u></small></p>")
 

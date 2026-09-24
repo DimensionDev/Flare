@@ -59,7 +59,7 @@ private class RenderRunBuilder {
     ) {
         when (element.tagName().lowercase()) {
             "a" -> {
-                renderChildren(element, style.copy(link = element.attr("href").ifEmpty { null }), block)
+                renderChildren(element, style.copy(link = element.resolvedHref()), block)
             }
 
             "strong", "b" -> {
@@ -170,7 +170,7 @@ private class RenderRunBuilder {
                     appendBlockImage(
                         url = src,
                         alt = element.attr("alt"),
-                        href = element.attr("href").ifEmpty { null },
+                        href = element.resolvedHref(),
                     )
                 } else {
                     appendImage(

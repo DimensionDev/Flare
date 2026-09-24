@@ -59,10 +59,6 @@ public struct SearchScreen: View {
         .toolbar {
             #if os(macOS)
             askAiToolbarItem
-            #elseif os(iOS)
-            if #available(iOS 26.0, *) {
-                DefaultToolbarItem(kind: .search, placement: .bottomBar)
-            }
             #endif
             accountToolbarItem
         }

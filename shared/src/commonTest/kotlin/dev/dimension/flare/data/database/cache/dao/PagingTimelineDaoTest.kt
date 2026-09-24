@@ -47,7 +47,7 @@ class PagingTimelineDaoTest : RobolectricTest() {
             val parentReference =
                 DbTimelineItemPresentationReference(
                     pagingKey = "mixed",
-                    statusId = "leaf",
+                    timelineId = DbPagingTimeline.createId("mixed", "leaf"),
                     referenceStatusId = "parent",
                     presentationType = DbTimelineItemPresentationType.InlineParent,
                 )
@@ -63,8 +63,12 @@ class PagingTimelineDaoTest : RobolectricTest() {
                         referenceStatusId = "repost",
                         presentationType = DbTimelineItemPresentationType.Repost,
                     ),
-                    parentReference.copy(pagingKey = "other", referenceStatusId = "other-parent"),
-                    parentReference.copy(statusId = "deleted-root", referenceStatusId = "orphaned-parent"),
+                    parentReference.copy(
+                        pagingKey = "other",
+                        timelineId = DbPagingTimeline.createId("other", "leaf"),
+                        referenceStatusId = "other-parent",
+                    ),
+                    parentReference.copy(timelineId = "deleted-root", referenceStatusId = "orphaned-parent"),
                 ),
             )
 

@@ -229,6 +229,29 @@ class BlueskyNotificationRenderTest {
     }
 
     @Test
+    fun aggregationKeepsItsFirstPositionWithoutRegroupingIndependentMentions() {
+        val firstUri = AtUri("at://did:plc:post/app.bsky.feed.post/first")
+        val secondUri = AtUri("at://did:plc:post/app.bsky.feed.post/second")
+        val author = createProfile("actor", "actor.bsky.social")
+        val first = createNotification(ListNotificationsNotificationReason.Mention, firstUri.atUri, author)
+        val follower1 = createNotification(ListNotificationsNotificationReason.Follow, "at://did:plc:actor/app.bsky.graph.follow/1", author)
+        val second = createNotification(ListNotificationsNotificationReason.Mention, secondUri.atUri, author)
+        val follower2 = createNotification(ListNotificationsNotificationReason.Follow, "at://did:plc:actor/app.bsky.graph.follow/2", author)
+        val references =
+            persistentMapOf(
+                firstUri to createPostView(firstUri.atUri, createProfileBasic("actor", "actor.bsky.social"), "first"),
+                secondUri to createPostView(secondUri.atUri, createProfileBasic("actor", "actor.bsky.social"), "second"),
+            )
+
+        val rendered = listOf(first, follower1, second, follower2).render(accountKey, references)
+
+        assertEquals(3, rendered.size)
+        assertEquals(firstUri.atUri, rendered[0].statusKey.id)
+        assertEquals(2, assertIs<UiTimelineV2.UserList>(rendered[1]).users.size)
+        assertEquals(secondUri.atUri, rendered[2].statusKey.id)
+    }
+
+    @Test
     fun otherReasons_renderUserAndMessage() {
         val reasons =
             listOf(

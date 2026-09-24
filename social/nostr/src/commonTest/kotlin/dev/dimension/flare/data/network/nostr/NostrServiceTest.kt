@@ -225,6 +225,40 @@ class NostrServiceTest {
             else -> error("Expected post timeline item, got ${item::class.simpleName}")
         }
 
+    @Test
+    fun notificationsDoNotFetchOrAttachParentsButKeepQuoteAndRepostTargets() {
+        val events = listOf(REPLY_EVENT_JSON, ROOT_EVENT_JSON, QUOTE_EVENT_JSON, REPOST_EVENT_JSON).map(Event::fromJson)
+        val service = createService()
+        try {
+            service.run {
+                assertTrue(referencedEventIds(events[0], includeReplyParents = false).isEmpty())
+                assertEquals(listOf(ROOT_EVENT_ID), referencedEventIds(events[0], includeReplyParents = true))
+                assertEquals(listOf(ROOT_EVENT_ID), referencedEventIds(events[2], includeReplyParents = false))
+                assertEquals(listOf(ROOT_EVENT_ID), referencedEventIds(events[3], includeReplyParents = false))
+                val items =
+                    events.toUiNotifications(
+                        accountPubkey = ROOT_EVENT_PUBKEY,
+                        profiles = mapOf(ROOT_EVENT_PUBKEY to profileOf(ROOT_EVENT_PUBKEY, null, null)),
+                        eventsById = events.associateBy { it.id },
+                    )
+                assertEquals(events.map { it.id }, items.map { it.statusKey.id })
+                val reply = timelinePostItemOf(items[0])
+                assertTrue(reply.presentation.inlineParents.isEmpty())
+                assertEquals(REPLY_EVENT_ID, reply.presentation.notificationKey?.id)
+                assertEquals(listOf(ROOT_EVENT_ID), timelinePostItemOf(items[2]).presentation.quotes.map { it.statusKey.id })
+                assertEquals(
+                    ROOT_EVENT_ID,
+                    timelinePostItemOf(items[3])
+                        .presentation.repost
+                        ?.statusKey
+                        ?.id,
+                )
+            }
+        } finally {
+            service.close()
+        }
+    }
+
     private fun timelinePostItemOf(item: UiTimelineV2): UiTimelineV2.TimelinePostItem = assertIs<UiTimelineV2.TimelinePostItem>(item)
 
     @Test

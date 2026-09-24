@@ -555,8 +555,12 @@ internal fun List<ListNotificationsNotification>.render(
                                 .subject.uri
                     }
 
-                    else -> {
+                    ListNotificationsNotificationReason.Follow -> {
                         it.reason to null
+                    }
+
+                    else -> {
+                        it.reason to it.uri
                     }
                 }
             }.filter { it.value.any() }
@@ -844,6 +848,7 @@ private fun PostView.renderTimelineItem(
             presentation =
                 UiTimelineV2.PostPresentation(
                     message = message,
+                    notificationKey = message?.statusKey,
                     quotes = quotes,
                 ),
         )

@@ -202,6 +202,7 @@ internal fun Notification.render(accountKey: MicroBlogKey): UiTimelineV2 {
             presentation =
                 renderedStatus.presentation.copy(
                     message = message,
+                    notificationKey = message.statusKey,
                 ),
         )
     } else {

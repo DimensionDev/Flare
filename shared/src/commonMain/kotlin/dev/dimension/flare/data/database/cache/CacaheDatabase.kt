@@ -7,7 +7,7 @@ import androidx.room3.RoomDatabase
 import androidx.room3.RoomDatabaseConstructor
 import androidx.room3.withWriteTransaction
 
-internal const val CACHE_DATABASE_VERSION = 47
+internal const val CACHE_DATABASE_VERSION = 48
 
 @Database(
     entities = [

@@ -144,20 +144,34 @@ internal open class TimelineRemoteMediator(
                     }
                     data
                 }
+            } else if (request is PagingRequest.Append && loader is NotificationTimelineLoader) {
+                val existing =
+                    data
+                        .map { it.timeline.statusId }
+                        .distinct()
+                        .chunked(500)
+                        .flatMap { statusIds ->
+                            database.pagingTimelineDao().getByPagingKeyAndStatusIds(pagingKey, statusIds)
+                        }.associateBy { it._id }
+                data.map { item ->
+                    existing[item.timeline._id]?.let { previous ->
+                        item.copy(timeline = item.timeline.copy(sortId = previous.sortId))
+                    } ?: item
+                }
             } else {
                 data
             }
         val staleTimeline =
             if (request is PagingRequest.Refresh) {
-                val retainedStatusIds =
+                val retainedTimelineIds =
                     dataToSave
                         .groupBy { it.timeline.pagingKey }
-                        .mapValues { (_, rows) -> rows.mapTo(mutableSetOf()) { it.timeline.statusId } }
-                (retainedStatusIds.keys + loader.pagingKey).flatMap { key ->
+                        .mapValues { (_, rows) -> rows.mapTo(mutableSetOf()) { it.timeline._id } }
+                (retainedTimelineIds.keys + loader.pagingKey).flatMap { key ->
                     database
                         .pagingTimelineDao()
                         .getByPagingKey(key)
-                        .filter { it.statusId !in retainedStatusIds[key].orEmpty() }
+                        .filter { it._id !in retainedTimelineIds[key].orEmpty() }
                 }
             } else {
                 emptyList()
@@ -168,7 +182,7 @@ internal open class TimelineRemoteMediator(
                 .pagingTimelineDao()
                 .deletePresentationReferences(
                     pagingKey = pagingKey,
-                    statusIds = rows.map { it.statusId },
+                    timelineIds = rows.map { it._id },
                 )
         }
         if (staleTimeline.isNotEmpty()) {

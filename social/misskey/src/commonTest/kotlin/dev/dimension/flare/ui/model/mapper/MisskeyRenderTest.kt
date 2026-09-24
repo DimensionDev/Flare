@@ -311,6 +311,25 @@ class MisskeyRenderTest {
             avatarUrl = "https://misskey.io/$id.png",
         )
 
+    @Test
+    fun notificationKeepsOnlyExplicitApiParentsAndQuotes() {
+        val user = createUser("actor")
+        val root = createNote("root", user, "root")
+        val parent = createNote("parent", user, "parent", reply = root, replyId = root.id)
+        val quote = createNote("quote", user, "quote")
+        val reply = createNote("reply", user, "reply", reply = parent, replyId = parent.id, renote = quote)
+        val notification = Notification("notification", "2024-01-02T00:00:00Z", "reply", user = user, note = reply)
+
+        val rendered = assertIs<UiTimelineV2.TimelinePostItem>(notification.render(accountKey))
+
+        assertEquals("notification", rendered.presentation.notificationKey?.id)
+        assertEquals(listOf("root", "parent"), rendered.presentation.inlineParents.map { it.statusKey.id })
+        assertEquals(listOf("quote"), rendered.presentation.quotes.map { it.statusKey.id })
+        val withoutEmbeddedParent = notification.copy(note = reply.copy(reply = null))
+        val withoutParent = assertIs<UiTimelineV2.TimelinePostItem>(withoutEmbeddedParent.render(accountKey))
+        assertEquals(emptyList(), withoutParent.presentation.inlineParents)
+    }
+
     private fun createFile(
         id: String,
         type: String,

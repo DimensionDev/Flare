@@ -3,9 +3,22 @@ package dev.dimension.flare.ui.model.mapper
 import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.data.database.cache.mapper.cursor
 import dev.dimension.flare.data.network.xqt.model.CursorType
+import dev.dimension.flare.data.network.xqt.model.InstructionUnion
+import dev.dimension.flare.data.network.xqt.model.ItemResult
+import dev.dimension.flare.data.network.xqt.model.ModuleEntry
+import dev.dimension.flare.data.network.xqt.model.ModuleItem
 import dev.dimension.flare.data.network.xqt.model.NotificationsTimelineResponse
+import dev.dimension.flare.data.network.xqt.model.TimelineAddEntries
+import dev.dimension.flare.data.network.xqt.model.TimelineAddEntry
+import dev.dimension.flare.data.network.xqt.model.TimelineNotification
+import dev.dimension.flare.data.network.xqt.model.TimelineNotificationTweetRef
+import dev.dimension.flare.data.network.xqt.model.TimelineTimelineItem
+import dev.dimension.flare.data.network.xqt.model.TimelineTimelineModule
+import dev.dimension.flare.data.network.xqt.model.TimelineTweet
+import dev.dimension.flare.data.network.xqt.model.Tweet
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.asTimelinePostItem
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.plugin.module.dsl.modules
@@ -14,6 +27,8 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
+import kotlin.test.assertNotEquals
+import kotlin.test.assertTrue
 import kotlin.time.Instant
 
 class XQTNotificationMapperTest {
@@ -67,6 +82,169 @@ class XQTNotificationMapperTest {
         assertEquals("actor", followedUser.value.key.id)
         assertEquals("Actor", followedUser.value.name.raw)
         assertEquals("actor_handle", followedUser.value.handle.raw)
+        assertEquals("follow-notification", followedUser.statusKey.id)
+        assertEquals("like-notification", likedPost.presentation.notificationKey?.id)
+    }
+
+    @Test
+    fun sampleKeepsSixteenNotificationEntriesInApiOrder() {
+        // Same entry types, repeated targets and reply relationships as the supplied response.
+        val specification =
+            listOf(
+                Triple("bell_icon", null, null),
+                Triple("person_icon", null, null),
+                Triple(null, "reply-1", "liked-reply"),
+                Triple("heart_icon", "liked-reply", "reply-2"),
+                Triple(null, "reply-2", "reply-3"),
+                Triple(null, "reply-3", "missing-parent"),
+                Triple(null, "reply-4", "reply-5"),
+                Triple(null, "reply-5", "root"),
+                Triple("person_icon", null, null),
+                Triple("heart_icon", "root", null),
+                Triple("retweet_icon", "same-post", null),
+                Triple("heart_icon", "same-post", null),
+                Triple("milestone_icon", null, null),
+                Triple("person_icon", null, null),
+                Triple("person_icon", null, null),
+                Triple("heart_icon", "other-post", null),
+            )
+        val base = baseNotification()
+        val target =
+            assertIs<Tweet>(
+                base.template.targetObjects!!
+                    .first()
+                    .tweetResults!!
+                    .result,
+            )
+        val entries =
+            specification.mapIndexed { index, (icon, postId, parentId) ->
+                val id = "notification-$index"
+                val tweet =
+                    postId?.let {
+                        target.copy(restId = it, legacy = target.legacy!!.copy(idStr = it, in_reply_to_status_id_str = parentId))
+                    }
+                val content =
+                    if (icon == null) {
+                        TimelineTweet(tweetResults = ItemResult(result = tweet))
+                    } else {
+                        base.copy(
+                            id = id,
+                            notificationIcon = icon,
+                            template =
+                                base.template.copy(
+                                    targetObjects = listOfNotNull(tweet?.let { TimelineNotificationTweetRef(ItemResult(result = it)) }),
+                                ),
+                        )
+                    }
+                TimelineAddEntry(TimelineTimelineItem(content), id, (100 - index).toString())
+            }
+        val items = listOf<InstructionUnion>(TimelineAddEntries(entries)).renderNotifications(accountKey)
+
+        assertEquals(16, items.size)
+        assertEquals(
+            entries.map { it.entryId },
+            items.map {
+                it
+                    .asTimelinePostItem()
+                    ?.presentation
+                    ?.notificationKey
+                    ?.id ?: it.statusKey.id
+            },
+        )
+        assertTrue(items.mapNotNull { it.asTimelinePostItem() }.all { it.presentation.inlineParents.isEmpty() })
+        assertEquals(items[10].statusKey, items[11].statusKey)
+        assertNotEquals(
+            items[10].asTimelinePostItem()?.presentation?.notificationKey,
+            items[11].asTimelinePostItem()?.presentation?.notificationKey,
+        )
+    }
+
+    @Test
+    fun notificationKeepsQuoteEmbeddedInApiResponse() {
+        val base = baseNotification()
+        val target =
+            assertIs<Tweet>(
+                base.template.targetObjects!!
+                    .first()
+                    .tweetResults!!
+                    .result,
+            )
+        val quote = target.copy(restId = "quote", legacy = target.legacy!!.copy(idStr = "quote"))
+        val item =
+            base.copy(
+                template =
+                    base.template.copy(
+                        targetObjects =
+                            listOf(
+                                TimelineNotificationTweetRef(
+                                    ItemResult(result = target.copy(quotedStatusResult = ItemResult(result = quote))),
+                                ),
+                            ),
+                    ),
+            )
+        val rendered =
+            listOf<InstructionUnion>(
+                TimelineAddEntries(
+                    listOf(
+                        TimelineAddEntry(TimelineTimelineItem(item), "like-notification", "1"),
+                    ),
+                ),
+            ).renderNotifications(accountKey).single()
+
+        assertEquals(listOf("quote"), assertIs<UiTimelineV2.TimelinePostItem>(rendered).presentation.quotes.map { it.statusKey.id })
+    }
+
+    private fun baseNotification(): TimelineNotification {
+        val instructions =
+            GRAPHQL_NOTIFICATIONS
+                .decodeJson<NotificationsTimelineResponse>()
+                .data.viewerV2.userResults.result.notificationTimeline.timeline!!
+                .instructions
+        val entry = assertIs<TimelineAddEntries>(instructions.single()).propertyEntries[1]
+        return assertIs<TimelineNotification>(assertIs<TimelineTimelineItem>(entry.content).itemContent)
+    }
+
+    @Test
+    fun notificationKeepsAnExplicitApiConversationModule() {
+        val target =
+            assertIs<Tweet>(
+                baseNotification()
+                    .template.targetObjects!!
+                    .first()
+                    .tweetResults!!
+                    .result,
+            )
+        val parent = target.copy(restId = "parent", legacy = target.legacy!!.copy(idStr = "parent", conversationIdStr = "parent"))
+        val reply =
+            target.copy(
+                restId = "reply",
+                legacy =
+                    target.legacy.copy(
+                        idStr = "reply",
+                        conversationIdStr = "parent",
+                        in_reply_to_status_id_str = "parent",
+                    ),
+            )
+        val module =
+            TimelineTimelineModule(
+                items =
+                    listOf(parent, reply).map {
+                        ModuleItem("module-${it.restId}", ModuleEntry(TimelineTweet(tweetResults = ItemResult(result = it))))
+                    },
+            )
+        val items =
+            listOf<InstructionUnion>(
+                TimelineAddEntries(
+                    listOf(
+                        TimelineAddEntry(module, "notification-module", "1"),
+                    ),
+                ),
+            ).renderNotifications(accountKey)
+
+        val rendered = assertIs<UiTimelineV2.TimelinePostItem>(items.single())
+        assertEquals("reply", rendered.statusKey.id)
+        assertEquals(listOf("parent"), rendered.presentation.inlineParents.map { it.statusKey.id })
+        assertEquals("notification-module:reply", rendered.presentation.notificationKey?.id)
     }
 }
 

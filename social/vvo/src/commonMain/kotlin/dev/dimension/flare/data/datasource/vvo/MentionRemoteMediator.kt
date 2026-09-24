@@ -1,7 +1,7 @@
 package dev.dimension.flare.data.datasource.vvo
 
 import androidx.paging.ExperimentalPagingApi
-import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
+import dev.dimension.flare.data.datasource.microblog.paging.NotificationTimelineLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.network.vvo.VVOService
@@ -16,7 +16,7 @@ internal class MentionRemoteMediator(
     private val service: VVOService,
     private val accountKey: MicroBlogKey,
     private val onClearMarker: suspend () -> Unit,
-) : CacheableRemoteLoader<UiTimelineV2> {
+) : NotificationTimelineLoader {
     override val pagingKey: String = "mention_$accountKey"
 
     override suspend fun load(

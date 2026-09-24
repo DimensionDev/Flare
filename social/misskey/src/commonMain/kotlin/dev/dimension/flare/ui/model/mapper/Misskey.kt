@@ -35,6 +35,7 @@ import dev.dimension.flare.ui.model.UiPoll
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.UiTranslatableText
+import dev.dimension.flare.ui.model.asTimelinePostItem
 import dev.dimension.flare.ui.model.toUiImage
 import dev.dimension.flare.ui.render.RenderBlockStyle
 import dev.dimension.flare.ui.render.RenderContent
@@ -288,13 +289,13 @@ internal fun Notification.render(accountKey: MicroBlogKey): UiTimelineV2 {
                 } else {
                     it
                 }
-            }?.renderStatus(accountKey)
+            }?.renderNotificationPost(accountKey)
     return status?.let {
-        UiTimelineV2.TimelinePostItem(
-            post = it,
+        it.copy(
             presentation =
-                UiTimelineV2.PostPresentation(
+                it.presentation.copy(
                     message = message,
+                    notificationKey = message.statusKey,
                 ),
         )
     }
@@ -397,6 +398,21 @@ public enum class MisskeyAchievement(
     internal companion object {
         fun fromString(id: String): MisskeyAchievement? = entries.find { it.id == id }
     }
+}
+
+private fun Note.renderNotificationPost(accountKey: MicroBlogKey): UiTimelineV2.TimelinePostItem {
+    val post = requireNotNull(render(accountKey).asTimelinePostItem())
+    return post.copy(
+        presentation =
+            post.presentation.copy(
+                inlineParents =
+                    generateSequence(reply) { it.reply }
+                        .toList()
+                        .asReversed()
+                        .map { requireNotNull(it.render(accountKey).asTimelinePostItem()) }
+                        .toImmutableList(),
+            ),
+    )
 }
 
 internal fun Note.render(accountKey: MicroBlogKey): UiTimelineV2 {

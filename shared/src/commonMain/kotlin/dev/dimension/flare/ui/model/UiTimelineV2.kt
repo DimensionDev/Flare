@@ -199,7 +199,8 @@ public sealed class UiTimelineV2 {
         override val itemKey: String? = post.itemKey,
     ) : UiTimelineV2() {
         override val statusKey: MicroBlogKey = post.statusKey
-        override val createdAt: UiDateTime = post.createdAt
+        override val createdAt: UiDateTime =
+            if (presentation.notificationKey != null) presentation.message?.createdAt ?: post.createdAt else post.createdAt
         override val accountType: AccountType = post.accountType
         override val searchText: String =
             buildString {
@@ -237,6 +238,7 @@ public sealed class UiTimelineV2 {
         val inlineParents: SerializableImmutableList<TimelinePostItem> = persistentListOf(),
         val quotes: SerializableImmutableList<Post> = persistentListOf(),
         val repost: Post? = null,
+        val notificationKey: MicroBlogKey? = null,
     )
 
     @Serializable
@@ -508,6 +510,7 @@ private fun UiTimelineV2.Post.renderSummaryHash(): Int =
 private fun UiTimelineV2.PostPresentation.renderSummaryHash(): Int =
     renderHashBuilder()
         .add(message?.renderHash)
+        .add(notificationKey)
         .add(inlineParents.renderSummaryHash { it.renderHash })
         .add(quotes.renderSummaryHash { it.renderSummaryHash() })
         .add(repost?.renderSummaryHash())

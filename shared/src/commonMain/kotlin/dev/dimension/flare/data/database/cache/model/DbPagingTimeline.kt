@@ -9,6 +9,7 @@ import androidx.room3.PrimaryKey
 import androidx.room3.Relation
 import dev.dimension.flare.common.decodeProtobuf
 import dev.dimension.flare.common.encodeProtobuf
+import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.ReferenceType
 import dev.dimension.flare.ui.model.UiTimelineV2
 import kotlin.time.Instant
@@ -17,7 +18,6 @@ import kotlin.time.Instant
     indices = [
         Index(
             value = ["statusId", "pagingKey"],
-            unique = true,
         ),
         Index(
             value = ["pagingKey", "sortId"],
@@ -34,6 +34,7 @@ internal data class DbPagingTimeline(
     val semanticReferenceSignature: String = "",
     val presentationReferenceSignature: String = "",
     val contentRevision: Long = 0,
+    val notificationKey: MicroBlogKey? = null,
     @PrimaryKey
     val _id: String = createId(pagingKey, statusId),
 ) {
@@ -47,16 +48,16 @@ internal data class DbPagingTimeline(
 
 @Entity(
     tableName = "timeline_item_presentation_reference",
-    primaryKeys = ["pagingKey", "statusId", "presentationType", "referenceStatusId"],
+    primaryKeys = ["pagingKey", "timelineId", "presentationType", "referenceStatusId"],
     indices = [
         Index(
-            value = ["referenceStatusId", "pagingKey", "statusId"],
+            value = ["referenceStatusId", "pagingKey", "timelineId"],
         ),
     ],
 )
 internal data class DbTimelineItemPresentationReference(
     val pagingKey: String,
-    val statusId: String,
+    val timelineId: String,
     val referenceStatusId: String,
     val presentationType: DbTimelineItemPresentationType,
     val referenceOrder: Int = 0,
@@ -94,8 +95,8 @@ internal data class DbPagingTimelineWithStatus(
     @Embedded(prefix = "status_")
     val statusData: DbStatus,
     @Relation(
-        parentColumns = ["pagingKey", "statusId"],
-        entityColumns = ["pagingKey", "statusId"],
+        parentColumns = ["pagingKey", "_id"],
+        entityColumns = ["pagingKey", "timelineId"],
         entity = DbTimelineItemPresentationReference::class,
     )
     val presentationReferences: List<DbTimelineItemPresentationReferenceWithStatus> = emptyList(),

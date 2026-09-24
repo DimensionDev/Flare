@@ -61,6 +61,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlin.time.Clock
 
@@ -548,6 +549,31 @@ internal class AgentToolsTest {
                         it.value.contains("hello from agent")
                 },
             )
+        }
+
+    @Test
+    fun composeToolRejectsVisibilityOutsidePlatformOptions() =
+        runTest {
+            val dataSource =
+                StubComposeDataSource(
+                    accountKey = MicroBlogKey("alice", "example.social"),
+                    visibility = ComposeConfig.Visibility(allVisibilities = persistentListOf(UiTimelineV2.Post.Visibility.Public)),
+                )
+            val inputRequestStore = AgentToolInputRequestStore()
+            val result =
+                composePostTool(dataSource, inputRequestStore).execute(
+                    ComposePostTool.Args(
+                        content = "hello from agent",
+                        accountId = "alice",
+                        accountHost = "example.social",
+                        visibility = "followers",
+                        confirmed = true,
+                    ),
+                )
+
+            assertTrue(result.contains("does not support Followers visibility"))
+            assertFalse(dataSource.composed)
+            assertNull(inputRequestStore.snapshot())
         }
 
     @Test
@@ -1634,6 +1660,7 @@ private class StubSubscriptionTimelineLoader(
 
 private class StubComposeDataSource(
     override val accountKey: MicroBlogKey,
+    private val visibility: ComposeConfig.Visibility = ComposeConfig.Visibility(),
 ) : ComposeDataSource {
     var composed: Boolean = false
     var lastData: ComposeData? = null
@@ -1649,7 +1676,7 @@ private class StubComposeDataSource(
     override fun composeConfig(type: ComposeType): ComposeConfig =
         ComposeConfig(
             text = ComposeConfig.Text(maxLength = 300),
-            visibility = ComposeConfig.Visibility,
+            visibility = visibility,
             language = ComposeConfig.Language(maxCount = 1),
         )
 

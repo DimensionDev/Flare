@@ -109,7 +109,6 @@ public struct StatusView: View {
         } else {
             [data.content.original]
         }
-        let shouldExpandTextByDefault = contentWarningIsEmpty && contents.reduce(0) { $0 + $1.innerText.count } <= 500
         let poll = data.poll
         let images = Array(data.images)
         let hasImages = !images.isEmpty
@@ -134,13 +133,8 @@ public struct StatusView: View {
         let accountType = data.accountType
         let statusKey = data.statusKey
         let effectiveLineLimit = max(maxLine ?? Int(appearanceLineLimit), 1)
-        let usesExplicitShortLineLimit = maxLine != nil && effectiveLineLimit < 5
-        let contentLineLimit: Int? =
-            if isDetail || ((shouldExpandTextByDefault || textExpanded) && !usesExplicitShortLineLimit) {
-                nil
-            } else {
-                effectiveLineLimit
-            }
+        let contentLineLimit: Int? = isDetail || textExpanded ? nil : effectiveLineLimit
+        let collapseThreshold = maxLine == nil ? max(10, effectiveLineLimit) : effectiveLineLimit
         let canExpandLineLimitedContent = contentLineLimit != nil && !isDetail && !textExpanded && showExpandTextButton
         let hasPreMediaBody =
             replyToHandle != nil ||
@@ -305,6 +299,7 @@ public struct StatusView: View {
                                                     CollapsibleRichText(
                                                         text: content,
                                                         lineLimit: contentLineLimit,
+                                                        collapseThreshold: collapseThreshold,
                                                         isExpanded: textExpanded,
                                                         isTextSelectionEnabled: isDetail
                                                     ) { overflows in
@@ -566,6 +561,7 @@ public struct StatusView: View {
 private struct CollapsibleRichText: View {
     let text: UiRichText
     let lineLimit: Int?
+    let collapseThreshold: Int
     let isExpanded: Bool
     let isTextSelectionEnabled: Bool
     let onOverflowChanged: (Bool) -> Void
@@ -578,9 +574,16 @@ private struct CollapsibleRichText: View {
         max(lineHeight, fallbackLineHeight)
     }
 
+    private var overflows: Bool {
+        fullHeight > ceil(effectiveLineHeight * CGFloat(max(collapseThreshold, 1))) + 1
+    }
+
     private var collapsedHeight: CGFloat? {
         guard let lineLimit, !isExpanded else { return nil }
-        return ceil(effectiveLineHeight * CGFloat(max(lineLimit, 1)))
+        if fullHeight == 0 {
+            return ceil(effectiveLineHeight * CGFloat(max(collapseThreshold, 1)))
+        }
+        return overflows ? ceil(effectiveLineHeight * CGFloat(max(lineLimit, 1))) : nil
     }
 
     var body: some View {
@@ -610,6 +613,9 @@ private struct CollapsibleRichText: View {
             .onChange(of: lineLimit) { _, _ in
                 publishOverflow(fullHeight: fullHeight, lineHeight: lineHeight)
             }
+            .onChange(of: collapseThreshold) { _, _ in
+                publishOverflow(fullHeight: fullHeight, lineHeight: lineHeight)
+            }
             .onChange(of: isExpanded) { _, _ in
                 publishOverflow(fullHeight: fullHeight, lineHeight: lineHeight)
             }
@@ -629,12 +635,12 @@ private struct CollapsibleRichText: View {
     }
 
     private func publishOverflow(fullHeight: CGFloat, lineHeight: CGFloat) {
-        guard let lineLimit, !isExpanded else {
+        guard lineLimit != nil, !isExpanded else {
             onOverflowChanged(false)
             return
         }
-        let limitHeight = ceil(max(lineHeight, fallbackLineHeight) * CGFloat(max(lineLimit, 1)))
-        onOverflowChanged(fullHeight > limitHeight + 1)
+        let thresholdHeight = ceil(max(lineHeight, fallbackLineHeight) * CGFloat(max(collapseThreshold, 1)))
+        onOverflowChanged(fullHeight > thresholdHeight + 1)
     }
 }
 

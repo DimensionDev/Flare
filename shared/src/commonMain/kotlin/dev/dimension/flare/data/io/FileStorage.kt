@@ -1,8 +1,15 @@
 package dev.dimension.flare.data.io
 
+import dev.dimension.flare.common.PlatformDispatchers
+import dev.dimension.flare.common.UploadMedia
+import kotlinx.coroutines.withContext
+import okio.Buffer
 import okio.FileSystem
 import okio.Path
 import okio.Path.Companion.toPath
+import okio.buffer
+import okio.use
+import kotlin.uuid.Uuid
 
 internal interface FileStorage {
     fun dataStoreFile(fileName: String): Path
@@ -22,6 +29,11 @@ internal interface FileStorage {
     )
 
     fun read(path: Path): ByteArray
+
+    suspend fun write(
+        path: Path,
+        media: UploadMedia,
+    )
 
     fun delete(path: Path)
 
@@ -61,6 +73,23 @@ internal open class OkioFileStorage(
     override fun read(path: Path): ByteArray =
         fileSystem.read(path) {
             readByteArray()
+        }
+
+    override suspend fun write(
+        path: Path,
+        media: UploadMedia,
+    ): Unit =
+        withContext(PlatformDispatchers.IO) {
+            // A restored draft may be its own source. Never truncate it before the copy completes.
+            val temporary = checkNotNull(path.parent).resolve(".${Uuid.random()}.part")
+            try {
+                fileSystem.sink(temporary).buffer().use { sink ->
+                    media.forEachChunk { bytes, count -> sink.write(bytes, 0, count) }
+                }
+                fileSystem.atomicMove(temporary, path)
+            } finally {
+                fileSystem.delete(temporary, mustExist = false)
+            }
         }
 
     override fun delete(path: Path) {
@@ -105,6 +134,15 @@ internal class InMemoryFileStorage(
     override fun read(path: Path): ByteArray =
         checkNotNull(files[path]) { "File not found: $path" }
             .copyOf()
+
+    override suspend fun write(
+        path: Path,
+        media: UploadMedia,
+    ) {
+        val buffer = Buffer()
+        media.forEachChunk { bytes, count -> buffer.write(bytes, 0, count) }
+        write(path, buffer.readByteArray())
+    }
 
     override fun delete(path: Path) {
         files -= path

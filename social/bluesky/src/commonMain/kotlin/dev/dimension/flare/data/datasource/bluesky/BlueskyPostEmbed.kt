@@ -9,6 +9,7 @@ import app.bsky.embed.ImagesImage
 import app.bsky.embed.Record
 import app.bsky.embed.RecordWithMedia
 import app.bsky.embed.RecordWithMediaMediaUnion
+import app.bsky.embed.Video
 import app.bsky.feed.PostEmbedUnion
 import kotlinx.collections.immutable.toImmutableList
 
@@ -16,17 +17,21 @@ internal const val BLUESKY_LEGACY_IMAGE_LIMIT = 4
 internal const val BLUESKY_GALLERY_AUTHOR_LIMIT = 10
 internal const val BLUESKY_ALT_TEXT_LIMIT = 2000
 
-internal sealed interface BlueskyImageEmbed {
+internal sealed interface BlueskyMediaEmbed {
+    data class VideoMedia(
+        val value: Video,
+    ) : BlueskyMediaEmbed
+
     data class LegacyImages(
         val value: Images,
-    ) : BlueskyImageEmbed
+    ) : BlueskyMediaEmbed
 
     data class GalleryImages(
         val value: Gallery,
-    ) : BlueskyImageEmbed
+    ) : BlueskyMediaEmbed
 }
 
-internal fun List<ImagesImage>.toBlueskyImageEmbed(): BlueskyImageEmbed? {
+internal fun List<ImagesImage>.toBlueskyMediaEmbed(): BlueskyMediaEmbed? {
     require(size <= BLUESKY_GALLERY_AUTHOR_LIMIT) {
         "Bluesky supports at most $BLUESKY_GALLERY_AUTHOR_LIMIT images when authoring a post"
     }
@@ -36,13 +41,13 @@ internal fun List<ImagesImage>.toBlueskyImageEmbed(): BlueskyImageEmbed? {
         }
 
         size <= BLUESKY_LEGACY_IMAGE_LIMIT -> {
-            BlueskyImageEmbed.LegacyImages(
+            BlueskyMediaEmbed.LegacyImages(
                 Images(images = toImmutableList()),
             )
         }
 
         else -> {
-            BlueskyImageEmbed.GalleryImages(
+            BlueskyMediaEmbed.GalleryImages(
                 Gallery(
                     items =
                         map { image ->
@@ -65,7 +70,7 @@ internal fun List<ImagesImage>.toBlueskyImageEmbed(): BlueskyImageEmbed? {
 
 internal fun buildBlueskyPostEmbed(
     quote: Record?,
-    media: BlueskyImageEmbed?,
+    media: BlueskyMediaEmbed?,
     external: PostEmbedUnion.External?,
 ): PostEmbedUnion? =
     when {
@@ -91,16 +96,18 @@ internal fun buildBlueskyPostEmbed(
         }
     }
 
-private fun BlueskyImageEmbed.toPostEmbedUnion(): PostEmbedUnion =
+private fun BlueskyMediaEmbed.toPostEmbedUnion(): PostEmbedUnion =
     when (this) {
-        is BlueskyImageEmbed.LegacyImages -> PostEmbedUnion.Images(value)
-        is BlueskyImageEmbed.GalleryImages -> PostEmbedUnion.Gallery(value)
+        is BlueskyMediaEmbed.VideoMedia -> PostEmbedUnion.Video(value)
+        is BlueskyMediaEmbed.LegacyImages -> PostEmbedUnion.Images(value)
+        is BlueskyMediaEmbed.GalleryImages -> PostEmbedUnion.Gallery(value)
     }
 
-private fun BlueskyImageEmbed.toRecordWithMediaUnion(): RecordWithMediaMediaUnion =
+private fun BlueskyMediaEmbed.toRecordWithMediaUnion(): RecordWithMediaMediaUnion =
     when (this) {
-        is BlueskyImageEmbed.LegacyImages -> RecordWithMediaMediaUnion.Images(value)
-        is BlueskyImageEmbed.GalleryImages -> RecordWithMediaMediaUnion.Gallery(value)
+        is BlueskyMediaEmbed.VideoMedia -> RecordWithMediaMediaUnion.Video(value)
+        is BlueskyMediaEmbed.LegacyImages -> RecordWithMediaMediaUnion.Images(value)
+        is BlueskyMediaEmbed.GalleryImages -> RecordWithMediaMediaUnion.Gallery(value)
     }
 
 internal fun ByteArray.requireJpegAspectRatio(): AspectRatio {

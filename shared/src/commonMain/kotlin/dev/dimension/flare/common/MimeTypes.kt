@@ -28,10 +28,33 @@ public object MimeTypes {
             (bytes[6].toInt() and 0xFF) == 0x79 &&
             (bytes[7].toInt() and 0xFF) == 0x70
         ) {
-            return "video/mp4"
+            return when (bytes.copyOfRange(8, 12).decodeToString()) {
+                "qt  " -> "video/quicktime"
+                "heic", "heix", "hevc", "hevx" -> "image/heic"
+                "mif1", "msf1" -> "image/heif"
+                "avif", "avis" -> "image/avif"
+                else -> "video/mp4"
+            }
         }
         return null
     }
+
+    public fun fromFileName(name: String?): String? =
+        when (name?.substringAfterLast('.', "")?.lowercase()) {
+            "jpg", "jpeg" -> "image/jpeg"
+            "png" -> "image/png"
+            "gif" -> "image/gif"
+            "webp" -> "image/webp"
+            "heic" -> "image/heic"
+            "heif" -> "image/heif"
+            "avif" -> "image/avif"
+            "mp4", "m4v" -> "video/mp4"
+            "mov" -> "video/quicktime"
+            "webm" -> "video/webm"
+            "mkv" -> "video/x-matroska"
+            "avi" -> "video/x-msvideo"
+            else -> null
+        }
 
     public fun extensionFor(mimeType: String?): String? =
         when (mimeType?.lowercase()?.substringBefore(';')?.trim()) {

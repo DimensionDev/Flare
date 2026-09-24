@@ -1,6 +1,5 @@
 package dev.dimension.flare.data.datasource.nostr
 
-import dev.dimension.flare.common.FileType
 import dev.dimension.flare.common.SwitchingServiceManager
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
@@ -477,17 +476,13 @@ internal class NostrDataSource(
         val credential = credentialFlow.first()
         val medias =
             data.medias.map { media ->
-                val bytes = media.file.readBytes()
-                require(media.file.type != FileType.Other) {
-                    "Unsupported Nostr media type: ${media.file.name.orEmpty()}"
-                }
+                val upload = media.file.uploadMedia()
+                upload.validate("Nostr")
                 serviceManager
                     .withService {
                         it.uploadMedia(
                             serverUrl = credential.mediaServerUrl,
-                            name = media.file.name,
-                            bytes = bytes,
-                            fileType = media.file.type,
+                            media = upload,
                             altText = media.altText,
                         )
                     }.also {

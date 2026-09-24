@@ -25,9 +25,17 @@ import dev.dimension.flare.memoryDatabaseBuilder
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiTimelineV2
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import okio.FileSystem
@@ -70,6 +78,274 @@ class SendDraftUseCaseTest : RobolectricTest() {
         db.close()
         deleteTestRootPath(root)
     }
+
+    @Test
+    fun cancelledSendKeepsMediaAndMakesUnsentDestinationsRetryable() =
+        runTest {
+            val accounts = listOf(mastodonAccount("a", "example.com"), mastodonAccount("b", "example.com"))
+            val entered = CompletableDeferred<Unit>()
+            val useCase =
+                testUseCase { _, _, _ ->
+                    entered.complete(Unit)
+                    awaitCancellation()
+                }
+            val job =
+                launch {
+                    useCase(
+                        ComposeDraftBundle(
+                            accounts = accounts,
+                            groupId = "cancelled",
+                            template =
+                                ComposeData(
+                                    content = "video",
+                                    medias = listOf(media("clip.mp4", byteArrayOf(1, 2, 3), altText = null)),
+                                ),
+                        ),
+                    ) {}
+                }
+            entered.await()
+            job.cancelAndJoin()
+            val draft = assertNotNull(repository.draft("cancelled").first())
+            assertTrue(draft.targets.all { it.status == DraftTargetStatus.FAILED })
+            assertContentEquals(
+                byteArrayOf(1, 2, 3),
+                mediaStore
+                    .restore(draft.medias)
+                    .single()
+                    .file
+                    .readBytes(),
+            )
+            var retries = 0
+            val retry =
+                testUseCase(findAccount = { key -> accounts.find { it.accountKey == key } }) { _, data, _ ->
+                    assertContentEquals(
+                        byteArrayOf(1, 2, 3),
+                        data.medias
+                            .single()
+                            .file
+                            .readBytes(),
+                    )
+                    retries++
+                }
+            retry("cancelled") {}
+            assertEquals(2, retries)
+            assertNull(repository.draft("cancelled").first())
+        }
+
+    @Test
+    fun cancellationInPreparedCallbackMakesDraftRetryable() =
+        runTest {
+            assertSetupCancellationIsRetryable(
+                onPrepared = {
+                    currentCoroutineContext().cancel()
+                    awaitCancellation()
+                },
+            )
+        }
+
+    @Test
+    fun cancellationInInitialProgressMakesDraftRetryable() =
+        runTest {
+            assertSetupCancellationIsRetryable(
+                progress = {
+                    currentCoroutineContext().cancel()
+                    awaitCancellation()
+                },
+            )
+        }
+
+    @Test
+    fun cancellationAtInitialStatusUpdateMakesDraftRetryable() =
+        runTest {
+            assertSetupCancellationIsRetryable(
+                // Return normally so cancellation is observed by the following database update.
+                progress = { currentCoroutineContext().cancel() },
+            )
+        }
+
+    @Test
+    fun cancellationExceptionFromPreparedCallbackMakesDraftRetryable() =
+        runTest {
+            assertSetupCancellationIsRetryable(
+                onPrepared = { throw CancellationException("Preparation cancelled") },
+            )
+        }
+
+    @Test
+    fun cancellationInFailureProgressMakesRemainingTargetsRetryable() =
+        runTest {
+            val accounts = listOf(mastodonAccount("a", "example.com"), mastodonAccount("b", "example.com"))
+            val useCase =
+                testUseCase { _, _, progress ->
+                    progress()
+                    error("Upload failed")
+                }
+            val job =
+                launch {
+                    useCase(
+                        ComposeDraftBundle(
+                            accounts = accounts,
+                            groupId = "cancelled-failure-progress",
+                            template =
+                                ComposeData(
+                                    content = "video",
+                                    medias = listOf(media("clip.mp4", byteArrayOf(1, 2, 3), altText = null)),
+                                ),
+                        ),
+                    ) { state ->
+                        if (state is ComposeProgressState.Progress && state.current == 1) {
+                            currentCoroutineContext().cancel()
+                            awaitCancellation()
+                        }
+                    }
+                }
+            job.join()
+            assertTrue(job.isCancelled)
+            val draft = assertNotNull(repository.draft("cancelled-failure-progress").first())
+            assertEquals(List(2) { DraftTargetStatus.FAILED }, draft.targets.map { it.status })
+            val sent = mutableListOf<SentCompose>()
+            val retry = testUseCase(sent = sent, findAccount = { key -> accounts.find { it.accountKey == key } })
+            retry("cancelled-failure-progress") {}
+            assertEquals(accounts.map { it.accountKey }, sent.map { it.account.accountKey })
+            assertNull(repository.draft("cancelled-failure-progress").first())
+        }
+
+    @Test
+    fun cancellationInMediaProgressAfterPublishDoesNotRetryPublishedTarget() =
+        runTest {
+            assertCancellationAfterPublishOnlyRetriesUnsentTargets(cancelAtProgress = 1)
+        }
+
+    @Test
+    fun cancellationInSuccessProgressAfterPublishDoesNotRetryPublishedTarget() =
+        runTest {
+            assertCancellationAfterPublishOnlyRetriesUnsentTargets(cancelAtProgress = 2)
+        }
+
+    @Test
+    fun cancellationAsComposeReturnsStillRetiresPublishedTarget() =
+        runTest {
+            val accounts = listOf(mastodonAccount("a", "example.com"), mastodonAccount("b", "example.com"))
+            val published = mutableListOf<MicroBlogKey>()
+            val useCase =
+                testUseCase { account, _, _ ->
+                    published += account.accountKey
+                    currentCoroutineContext().cancel()
+                }
+            val job =
+                launch {
+                    useCase(
+                        ComposeDraftBundle(
+                            accounts = accounts,
+                            groupId = "cancelled-compose-return",
+                            template = ComposeData(content = "post"),
+                        ),
+                    ) {}
+                }
+            job.join()
+            assertTrue(job.isCancelled)
+            assertEquals(listOf(accounts.first().accountKey), published)
+            val draft = assertNotNull(repository.draft("cancelled-compose-return").first())
+            assertEquals(listOf(accounts.last().accountKey), draft.targets.map { it.accountKey })
+            assertEquals(DraftTargetStatus.FAILED, draft.targets.single().status)
+            val retry =
+                testUseCase(findAccount = { key -> accounts.find { it.accountKey == key } }) { account, _, _ ->
+                    published += account.accountKey
+                }
+            retry("cancelled-compose-return") {}
+            assertEquals(accounts.map { it.accountKey }, published)
+            assertNull(repository.draft("cancelled-compose-return").first())
+        }
+
+    @Test
+    fun cancellationKeepsCompletedTargetsDeletedAndPreservesEarlierFailures() =
+        runTest {
+            val accounts = listOf("sent", "failed", "cancelled", "queued").map { mastodonAccount(it, "example.com") }
+            val entered = CompletableDeferred<Unit>()
+            val useCase =
+                testUseCase { account, _, _ ->
+                    when (account.accountKey.id) {
+                        "failed" -> {
+                            error("Server rejected the post")
+                        }
+
+                        "cancelled" -> {
+                            entered.complete(Unit)
+                            awaitCancellation()
+                        }
+                    }
+                }
+            val job =
+                launch {
+                    useCase(
+                        ComposeDraftBundle(
+                            accounts = accounts,
+                            groupId = "cancelled-after-partial-send",
+                            template = ComposeData(content = "partial send"),
+                        ),
+                    ) {}
+                }
+            entered.await()
+            job.cancelAndJoin()
+            val draft = assertNotNull(repository.draft("cancelled-after-partial-send").first())
+            assertEquals(accounts.drop(1).map { it.accountKey }.toSet(), draft.targets.map { it.accountKey }.toSet())
+            assertEquals(List(3) { DraftTargetStatus.FAILED }, draft.targets.map { it.status })
+            assertEquals("Server rejected the post", draft.targets.single { it.accountKey.id == "failed" }.errorMessage)
+            val sent = mutableListOf<SentCompose>()
+            val retry = testUseCase(sent = sent, findAccount = { key -> accounts.find { it.accountKey == key } })
+            retry("cancelled-after-partial-send") {}
+            assertEquals(3, sent.size)
+            assertEquals(accounts.drop(1).map { it.accountKey }.toSet(), sent.map { it.account.accountKey }.toSet())
+            assertNull(repository.draft("cancelled-after-partial-send").first())
+        }
+
+    @Test
+    fun cancellationDuringRetryDoesNotChangeAlreadySendingTargets() =
+        runTest {
+            val accounts = listOf("sending", "draft", "failed").map { mastodonAccount(it, "example.com") }
+            saveDraftGroup(
+                groupId = "cancelled-retry",
+                content = sampleContent("retry"),
+                targets =
+                    listOf(
+                        SaveDraftTarget(accounts[0].accountKey, DraftTargetStatus.SENDING),
+                        SaveDraftTarget(accounts[1].accountKey, DraftTargetStatus.DRAFT),
+                        SaveDraftTarget(accounts[2].accountKey, DraftTargetStatus.FAILED),
+                    ),
+            )
+            val sent = mutableListOf<SentCompose>()
+            val useCase = testUseCase(sent = sent, findAccount = { key -> accounts.find { it.accountKey == key } })
+            val job =
+                launch {
+                    useCase("cancelled-retry") {
+                        currentCoroutineContext().cancel()
+                        awaitCancellation()
+                    }
+                }
+            job.join()
+            assertTrue(job.isCancelled)
+            assertTrue(sent.isEmpty())
+            val draft = assertNotNull(repository.draft("cancelled-retry").first())
+            assertEquals(
+                mapOf(
+                    accounts[0].accountKey to DraftTargetStatus.SENDING,
+                    accounts[1].accountKey to DraftTargetStatus.FAILED,
+                    accounts[2].accountKey to DraftTargetStatus.FAILED,
+                ),
+                draft.targets.associate { it.accountKey to it.status },
+            )
+            useCase("cancelled-retry") {}
+            assertEquals(accounts.drop(1).map { it.accountKey }, sent.map { it.account.accountKey })
+            assertEquals(
+                accounts[0].accountKey,
+                repository
+                    .draft("cancelled-retry")
+                    .first()
+                    ?.targets
+                    ?.single()
+                    ?.accountKey,
+            )
+        }
 
     @Test
     fun sendBundleSuccessDeletesDraftAfterAllTargetsSucceed() =
@@ -748,6 +1024,108 @@ class SendDraftUseCaseTest : RobolectricTest() {
             val error = assertIs<ComposeProgressState.Error>(progresses.last())
             assertIs<ComposeDraftFailedException>(error.throwable)
         }
+
+    private suspend fun TestScope.assertCancellationAfterPublishOnlyRetriesUnsentTargets(cancelAtProgress: Int) {
+        val accounts = listOf(mastodonAccount("a", "example.com"), mastodonAccount("b", "example.com"))
+        val published = mutableListOf<MicroBlogKey>()
+        val bytes = byteArrayOf(1, 2, 3)
+        val useCase =
+            testUseCase { account, _, progress ->
+                progress()
+                published += account.accountKey
+            }
+        val job =
+            launch {
+                useCase(
+                    ComposeDraftBundle(
+                        accounts = accounts,
+                        groupId = "cancelled-after-publish",
+                        template =
+                            ComposeData(
+                                content = "video",
+                                medias = listOf(media("clip.mp4", bytes, type = FileType.Video, altText = null)),
+                            ),
+                    ),
+                ) { state ->
+                    if (state is ComposeProgressState.Progress && state.current == cancelAtProgress) {
+                        currentCoroutineContext().cancel()
+                        awaitCancellation()
+                    }
+                }
+            }
+        job.join()
+        assertTrue(job.isCancelled)
+        assertEquals(listOf(accounts.first().accountKey), published)
+        val draft = assertNotNull(repository.draft("cancelled-after-publish").first())
+        assertEquals(listOf(accounts.last().accountKey), draft.targets.map { it.accountKey })
+        assertEquals(DraftTargetStatus.FAILED, draft.targets.single().status)
+        assertContentEquals(
+            bytes,
+            mediaStore
+                .restore(draft.medias)
+                .single()
+                .file
+                .readBytes(),
+        )
+        val retry =
+            testUseCase(findAccount = { key -> accounts.find { it.accountKey == key } }) { account, data, _ ->
+                assertContentEquals(
+                    bytes,
+                    data.medias
+                        .single()
+                        .file
+                        .readBytes(),
+                )
+                published += account.accountKey
+            }
+        retry("cancelled-after-publish") {}
+        assertEquals(accounts.map { it.accountKey }, published)
+        assertNull(repository.draft("cancelled-after-publish").first())
+    }
+
+    private suspend fun TestScope.assertSetupCancellationIsRetryable(
+        onPrepared: suspend () -> Unit = {},
+        progress: suspend (ComposeProgressState) -> Unit = {},
+    ) {
+        val accounts = listOf(mastodonAccount("a", "example.com"), mastodonAccount("b", "example.com"))
+        val sent = mutableListOf<SentCompose>()
+        val useCase = testUseCase(sent = sent)
+        val job =
+            launch {
+                useCase(
+                    bundle =
+                        ComposeDraftBundle(
+                            accounts = accounts,
+                            groupId = "cancelled-setup",
+                            template =
+                                ComposeData(
+                                    content = "video",
+                                    medias = listOf(media("clip.mp4", byteArrayOf(1, 2, 3), altText = null)),
+                                ),
+                        ),
+                    onPrepared = onPrepared,
+                    progress = progress,
+                )
+            }
+        job.join()
+        assertTrue(job.isCancelled)
+        assertTrue(sent.isEmpty())
+        val draft = assertNotNull(repository.draft("cancelled-setup").first())
+        assertEquals(accounts.map { it.accountKey }.toSet(), draft.targets.map { it.accountKey }.toSet())
+        assertEquals(List(accounts.size) { DraftTargetStatus.FAILED }, draft.targets.map { it.status })
+        assertContentEquals(
+            byteArrayOf(1, 2, 3),
+            mediaStore
+                .restore(draft.medias)
+                .single()
+                .file
+                .readBytes(),
+        )
+        val retry = testUseCase(sent = sent, findAccount = { key -> accounts.find { it.accountKey == key } })
+        retry("cancelled-setup") {}
+        assertEquals(accounts.map { it.accountKey }, sent.map { it.account.accountKey })
+        assertNull(repository.draft("cancelled-setup").first())
+    }
 
     private fun testUseCase(
         sent: MutableList<SentCompose> = mutableListOf(),

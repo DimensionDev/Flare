@@ -27,7 +27,7 @@ internal class DraftMediaStore(
                         .ifBlank { "${Uuid.random()}.bin" }
                 val path = fileStorage.draftMediaFile(groupId, "${index}_$fileName")
                 fileStorage.createDirectories(checkNotNull(path.parent))
-                fileStorage.write(path, media.file.readBytes())
+                fileStorage.write(path, media.file.uploadMedia())
                 SaveDraftMedia(
                     cachePath = path.toString(),
                     fileName = media.file.name,

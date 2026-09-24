@@ -1,5 +1,6 @@
 package dev.dimension.flare.common
 
+import okio.source
 import java.io.File
 import java.net.URLConnection
 import java.nio.file.Files
@@ -11,6 +12,8 @@ public actual class FileItem(
     public actual val mimeType: String? = resolveMimeType(file),
 ) {
     public actual suspend fun readBytes(): ByteArray = file.readBytes()
+
+    public actual suspend fun uploadMedia(): UploadMedia = UploadMedia.fromSource(name, mimeType, file.length()) { file.source() }
 
     private companion object {
         fun resolveType(fileName: String): FileType {

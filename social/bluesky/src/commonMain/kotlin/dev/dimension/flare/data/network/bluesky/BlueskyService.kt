@@ -1,5 +1,7 @@
 package dev.dimension.flare.data.network.bluesky
 
+import com.atproto.server.GetServiceAuthQueryParams
+import dev.dimension.flare.common.UploadMedia
 import dev.dimension.flare.data.network.ktorClient
 import dev.dimension.flare.data.platform.BlueskyCredential
 import dev.dimension.flare.model.MicroBlogKey
@@ -12,14 +14,18 @@ import io.ktor.client.request.HttpRequestPipeline
 import io.ktor.http.Url
 import io.ktor.util.AttributeKey
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import sh.christian.ozone.BlueskyApi
 import sh.christian.ozone.XrpcBlueskyApi
+import sh.christian.ozone.api.Nsid
+import sh.christian.ozone.api.model.Blob
 import sh.christian.ozone.oauth.OAuthApi
 import sh.christian.ozone.oauth.OAuthCodeChallengeMethod
 import kotlin.io.encoding.Base64
+import kotlin.time.Clock
 
 // compatibility support for darwin (iOS, macOS) since Ktor's SHA-256 implementation is not available there
 // see: https://github.com/ktorio/ktor/blob/477d76409fec6c2d71683817c6060f1b2afdcbb2/ktor-utils/posix/src/io/ktor/util/CryptoNative.kt#L25C57-L25C92
@@ -87,6 +93,23 @@ internal data class BlueskyService private constructor(
     ) : this(
         baseUrlFlow = flowOf(baseUrl),
     )
+
+    private val videoUploader by lazy { BlueskyVideoUploader() }
+
+    suspend fun uploadVideo(media: UploadMedia): Blob {
+        media.validate("Bluesky", listOf("video/mp4"), 300_000_000)
+        val token =
+            getServiceAuth(
+                GetServiceAuthQueryParams(
+                    // The video service uses this token to upload the processed blob to the user's PDS.
+                    // https://docs.bsky.app/docs/tutorials/video#recommended-method
+                    aud = "did:web:${Url(baseUrlFlow.first()).host}",
+                    lxm = Nsid("com.atproto.repo.uploadBlob"),
+                    exp = Clock.System.now().epochSeconds + 30 * 60,
+                ),
+            ).requireResponse().token
+        return videoUploader.upload(media, checkNotNull(accountKey).id, token)
+    }
 
     fun newBaseUrlService(baseUrl: String): BlueskyService = copy(baseUrlFlow = flowOf(baseUrl))
 }

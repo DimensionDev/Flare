@@ -1,8 +1,10 @@
 package dev.dimension.flare.data.network.bluesky
 
 import com.sun.net.httpserver.HttpServer
+import dev.dimension.flare.common.UploadMedia
 import dev.dimension.flare.data.platform.BlueskyCredential
 import dev.dimension.flare.model.MicroBlogKey
+import io.ktor.http.Url
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
@@ -14,10 +16,41 @@ import java.net.InetSocketAddress
 import java.util.Collections
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.minutes
 
 class BlueskyServiceTest {
+    @Test
+    fun videoServiceAuthRequestsPdsAudienceAndBlobUploadScope() =
+        runBlocking {
+            val pdsServer = HttpServer.create(InetSocketAddress("127.0.0.1", 0), 0)
+            val pdsOrigin = "http://127.0.0.1:${pdsServer.address.port}"
+            val requests = Collections.synchronizedList(mutableListOf<Url>())
+            pdsServer.createContext("/xrpc/com.atproto.server.getServiceAuth") { exchange ->
+                requests += Url("$pdsOrigin${exchange.requestURI}")
+                // Stop at the auth boundary so this test never contacts the real video service.
+                val body = """{"error":"InvalidRequest","message":"Service auth disabled for this test"}""".toByteArray()
+                exchange.responseHeaders.add("Content-Type", "application/json")
+                exchange.sendResponseHeaders(400, body.size.toLong())
+                exchange.responseBody.use { it.write(body) }
+            }
+            pdsServer.start()
+            try {
+                val service = BlueskyService(pdsOrigin)
+                val media = UploadMedia.fromBytes("clip.mp4", byteArrayOf(1))
+                withTimeout(10_000) {
+                    val error = assertFailsWith<IllegalArgumentException> { service.uploadVideo(media) }
+                    assertTrue(error.message.orEmpty().contains("Service auth disabled for this test"))
+                }
+                val query = requests.single().parameters
+                assertEquals("did:web:127.0.0.1", query["aud"])
+                assertEquals("com.atproto.repo.uploadBlob", query["lxm"])
+            } finally {
+                pdsServer.stop(0)
+            }
+        }
+
     @Test
     fun switchingResourceServerMustKeepOAuthRefreshOnIssuer() =
         runBlocking {

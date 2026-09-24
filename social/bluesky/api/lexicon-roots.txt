@@ -70,5 +70,6 @@ com.atproto.repo.strongRef
 com.atproto.repo.uploadBlob
 com.atproto.server.createSession
 com.atproto.server.describeServer
+com.atproto.server.getServiceAuth
 com.atproto.server.getSession
 com.atproto.server.refreshSession

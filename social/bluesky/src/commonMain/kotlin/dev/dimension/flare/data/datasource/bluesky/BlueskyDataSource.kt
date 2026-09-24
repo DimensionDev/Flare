@@ -11,6 +11,7 @@ import app.bsky.bookmark.CreateBookmarkRequest
 import app.bsky.bookmark.DeleteBookmarkRequest
 import app.bsky.embed.ImagesImage
 import app.bsky.embed.Record
+import app.bsky.embed.Video
 import app.bsky.feed.GetPostsQueryParams
 import app.bsky.feed.Post
 import app.bsky.feed.PostEmbedUnion
@@ -25,7 +26,6 @@ import com.atproto.repo.CreateRecordResponse
 import com.atproto.repo.DeleteRecordRequest
 import com.atproto.repo.StrongRef
 import dev.dimension.flare.common.BasePagingSource
-import dev.dimension.flare.common.FileType
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
@@ -294,8 +294,14 @@ internal class BlueskyDataSource(
         require(data.medias.size <= BLUESKY_GALLERY_AUTHOR_LIMIT) {
             "Bluesky supports at most $BLUESKY_GALLERY_AUTHOR_LIMIT images when authoring a post"
         }
+        val uploads = data.medias.map { it.file.uploadMedia() }
+        uploads.forEach { upload ->
+            require(!upload.isGif) { "Bluesky does not accept GIF files without conversion" }
+            upload.validate("Bluesky")
+        }
+        val hasVideo = uploads.any { it.isVideo }
+        require(!hasVideo || uploads.size == 1) { "Bluesky supports one video per post, without other media" }
         data.medias.forEach { media ->
-            require(media.file.type == FileType.Image) { "Bluesky image embeds only accept images" }
             require(media.altText.orEmpty().length <= BLUESKY_ALT_TEXT_LIMIT) {
                 "Bluesky image alt text must be at most $BLUESKY_ALT_TEXT_LIMIT characters"
             }
@@ -319,6 +325,7 @@ internal class BlueskyDataSource(
         val galleryRequiresAspectRatio = data.medias.size > BLUESKY_LEGACY_IMAGE_LIMIT
         val uploadedImages =
             data.medias
+                .filterNot { hasVideo }
                 .map { (item, altText) ->
                     val bytes = item.readBytes()
                     val finalBytes =
@@ -374,7 +381,15 @@ internal class BlueskyDataSource(
                         ),
                     )
                 }
-        val imageEmbed = uploadedImages.toBlueskyImageEmbed()
+        val mediaEmbed =
+            if (hasVideo) {
+                BlueskyMediaEmbed
+                    .VideoMedia(
+                        Video(video = service.uploadVideo(uploads.single()), alt = data.medias.single().altText),
+                    ).also { progress() }
+            } else {
+                uploadedImages.toBlueskyMediaEmbed()
+            }
         val externalEmbed =
             if (quoteId == null && data.medias.isEmpty()) {
                 facets
@@ -397,7 +412,7 @@ internal class BlueskyDataSource(
                 embed =
                     buildBlueskyPostEmbed(
                         quote = quoteRecord,
-                        media = imageEmbed,
+                        media = mediaEmbed,
                         external = externalEmbed,
                     ),
                 reply =

@@ -5,7 +5,6 @@ import androidx.paging.Pager
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.map
-import dev.dimension.flare.common.FileType
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
@@ -456,30 +455,18 @@ internal class MisskeyDataSource(
         val mediaIds =
             data.medias
                 .mapIndexed { index, (item, altText) ->
-                    val bytes = item.readBytes()
-                    val isImage = item.type == FileType.Image
-
-                    val finalBytes =
-                        if (isImage) {
-                            imageCompressor.compress(
-                                imageBytes = bytes,
-                                maxSize = MEDIA_COMPRESSION.maxSizeBytes,
-                                maxDimensions = MEDIA_COMPRESSION.maxWidth to MEDIA_COMPRESSION.maxHeight,
-                            )
-                        } else {
-                            bytes
-                        }
+                    val upload = item.uploadMedia().compressImage(imageCompressor, MEDIA_COMPRESSION)
+                    upload.validate("Misskey")
                     service
                         .upload(
-                            finalBytes,
-                            name = item.name ?: "unknown",
+                            upload,
                             sensitive = data.sensitive,
                             comment = altText,
                         ).also {
                             progress()
                         }
-                }.mapNotNull {
-                    it?.id
+                }.map {
+                    checkNotNull(it?.id) { "Misskey media upload did not return an ID" }
                 }
         service.notesCreate(
             NotesCreateRequest(

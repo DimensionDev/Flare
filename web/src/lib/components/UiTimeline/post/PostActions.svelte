@@ -21,6 +21,11 @@
 
 	const deepLink = useDeepLink();
 	const componentId = $props.id();
+	const visibleActions = $derived(actions.filter((action) => action.type !== 'Divider'));
+	const lastAction = $derived(visibleActions.at(-1));
+	const lastActionHasCount = $derived(
+		lastAction?.type === 'Item' ? lastAction.count != null : lastAction?.displayItem.count != null,
+	);
 
 	function performAction(action: ActionMenuActionItem): void {
 		deepLink.performClickEvent(action.clickEvent);
@@ -61,9 +66,11 @@
 <div
 	class:detail-actions={detailActions}
 	class={`actions actions-${appearance.postActionStyle.toLowerCase()}`}
+	class:trailing-count={lastActionHasCount}
+	style={`--action-columns: ${visibleActions.length > 1 ? `repeat(${visibleActions.length - 1}, minmax(0, 1fr)) var(--last-action-width)` : 'minmax(0, 1fr)'};`}
 	aria-label={m.postActionsAriaLabel()}
 >
-	{#each actions as action, index}
+	{#each visibleActions as action, index}
 		{@render ActionControl(action, appearance, index)}
 	{/each}
 </div>
@@ -79,7 +86,7 @@
 		>
 			<FaIcon name={action.icon} size={15} />
 			{#if appearance.showNumbers && action.count}
-				<span>{action.count.humanized}</span>
+				<span class="action-count">{action.count.humanized}</span>
 			{/if}
 		</button>
 	{:else if action.type === 'Group'}
@@ -98,7 +105,7 @@
 		>
 			<FaIcon name={action.displayItem.icon} size={15} />
 			{#if appearance.showNumbers && action.displayItem.count}
-				<span>{action.displayItem.count.humanized}</span>
+				<span class="action-count">{action.displayItem.count.humanized}</span>
 			{/if}
 		</button>
 		<ul
@@ -183,7 +190,32 @@
 	}
 
 	.actions-stretch {
-		justify-content: space-between;
+		--last-action-width: calc(15px + 0.5rem + 2px);
+		display: grid;
+		grid-template-columns: var(--action-columns);
+		gap: 0;
+	}
+
+	.actions-stretch.trailing-count {
+		/* Reserve a stable count slot even when numbers are hidden or zero. */
+		--last-action-width: calc(15px + 0.5rem + 2px + 0.25rem + 4ch);
+	}
+
+	.actions-stretch > .action-button {
+		display: flex;
+		width: 100%;
+		min-width: 0;
+		flex-wrap: nowrap;
+		justify-content: flex-start;
+		gap: 0.25rem;
+		padding-inline: 0.25rem;
+	}
+
+	.actions-stretch .action-count {
+		min-width: 0;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
 	}
 
 	.actions-leftaligned > button:last-of-type {

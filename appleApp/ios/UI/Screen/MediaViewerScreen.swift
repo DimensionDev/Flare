@@ -72,25 +72,22 @@ struct MediaViewerScreen: View {
                     Group {
                         if let preview {
                             LazyPager(data: [preview]) { preview in
-                                switch MediaViewerImageLayoutPolicy.previewLayout(isImage: previewIsImage) {
-                                case .adaptiveImage:
-                                    AdaptiveKFImage(
-                                        data: preview,
-                                        placeholder: nil,
-                                        mediaAspectRatio: previewAspectRatio
-                                    )
-                                case .aspectFit:
-                                    NetworkImage(data: preview)
-                                        .scaledToFit()
+                                Group {
+                                    switch MediaViewerImageLayoutPolicy.previewLayout(isImage: previewIsImage) {
+                                    case .adaptiveImage:
+                                        AdaptiveKFImage(
+                                            data: preview,
+                                            placeholder: nil,
+                                            mediaAspectRatio: previewAspectRatio
+                                        )
+                                    case .aspectFit:
+                                        NetworkImage(data: preview)
+                                            .scaledToFit()
+                                    }
                                 }
+                                .modifier(MediaViewerDismissOffset(offset: $dismissOffset))
                             }
                             .zoomable(min: 1, max: 5, doubleTapGesture: .scale(2))
-                            .offset(
-                                y: MediaViewerDismissGesturePolicy.verticalOffset(
-                                    for: .media,
-                                    translationY: dismissOffset
-                                )
-                            )
                         } else {
                             ProgressView()
                         }
@@ -123,6 +120,8 @@ struct MediaViewerScreen: View {
                                         )
                                     }
                                 }
+                                // Move the content, keeping the pager's safe-area insets stable.
+                                .modifier(MediaViewerDismissOffset(offset: $dismissOffset))
                         }
                         .onTap {
                             withAnimation {
@@ -143,12 +142,6 @@ struct MediaViewerScreen: View {
                         .settings { config in
                             config.preloadAmount = 99
                         }
-                        .offset(
-                            y: MediaViewerDismissGesturePolicy.verticalOffset(
-                                for: .media,
-                                translationY: dismissOffset
-                            )
-                        )
 
                         if shouldShowBottomOverlay, !postSheetPresented {
                             bottomOverlay
@@ -709,6 +702,16 @@ struct MediaViewerScreen: View {
             return topViewController(from: presentedViewController)
         }
         return viewController
+    }
+}
+
+private struct MediaViewerDismissOffset: ViewModifier {
+    // LazyPager hosts pages in separate SwiftUI trees. Reading the binding here
+    // preserves the animation transaction when the dismiss gesture settles.
+    @Binding var offset: CGFloat
+
+    func body(content: Content) -> some View {
+        content.offset(y: MediaViewerDismissGesturePolicy.verticalOffset(for: .media, translationY: offset))
     }
 }
 

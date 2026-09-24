@@ -1,3 +1,4 @@
+import UIKit
 import XCTest
 
 final class MediaViewerInteractionTests: XCTestCase {
@@ -39,6 +40,83 @@ final class MediaViewerInteractionTests: XCTestCase {
     @MainActor func testImageSwipeUpWithoutPost() { assertDismisses(upward: true, withoutPost: true) }
     @MainActor func testVideoSwipeDownWithSummary() { assertDismisses(upward: false, video: true) }
     @MainActor func testVideoSwipeUpWithSummary() { assertDismisses(upward: true, video: true) }
+
+    @MainActor
+    func testCancelledImageDragsWithSummary() throws {
+        try assertCancelledImageDragsRestorePosition()
+    }
+
+    @MainActor
+    func testCancelledImageDragsWithoutPost() throws {
+        try assertCancelledImageDragsRestorePosition(withoutPost: true)
+    }
+
+    @MainActor
+    func testCancelledImageDragsWithIndicator() throws {
+        try assertCancelledImageDragsRestorePosition(indicator: true)
+    }
+
+    @MainActor
+    private func assertCancelledImageDragsRestorePosition(withoutPost: Bool = false, indicator: Bool = false) throws {
+        let app = openMedia(withoutPost: withoutPost, indicator: indicator)
+        defer { app.terminate() }
+        let before = app.screenshot()
+        let original = try XCTUnwrap(imageVerticalBounds(in: before), "The fixture image must be visible")
+        // Repeated cancellations must not accumulate drift in either direction.
+        for delta in [0.15, 0.15, -0.15] {
+            let start = app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.45))
+            let end = app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.45 + delta))
+            start.press(forDuration: 0.05, thenDragTo: end, withVelocity: .slow, thenHoldForDuration: 0.3)
+            XCTAssertTrue(app.buttons["Close"].exists)
+            XCTAssertFalse(app.staticTexts["Media dismissed"].exists)
+            let returned = NSPredicate { _, _ in
+                guard let current = self.imageVerticalBounds(in: app.screenshot()) else { return false }
+                return abs(current.lowerBound - original.lowerBound) <= 1
+                    && abs(current.upperBound - original.upperBound) <= 1
+            }
+            let result = XCTWaiter.wait(for: [XCTNSPredicateExpectation(predicate: returned, object: nil)], timeout: 2)
+            if result != .completed {
+                for (name, screenshot) in [("before-cancelled-drag", before), ("after-cancelled-drag", app.screenshot())] {
+                    let attachment = XCTAttachment(screenshot: screenshot)
+                    attachment.name = name
+                    attachment.lifetime = .keepAlways
+                    add(attachment)
+                }
+            }
+            XCTAssertEqual(result, .completed, "The rendered image must return to its original position after a cancelled drag")
+        }
+        app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.65)).press(
+            forDuration: 0.05,
+            thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.08)),
+            withVelocity: .fast, thenHoldForDuration: 0
+        )
+        XCTAssertTrue(app.staticTexts["Media dismissed"].waitForExistence(timeout: 4))
+    }
+
+    // Read the rendered teal fixture to catch movement inside the pager,
+    // independently of the accessibility wrapper's frame.
+    private func imageVerticalBounds(in screenshot: XCUIScreenshot) -> ClosedRange<CGFloat>? {
+        guard let image = screenshot.image.cgImage else { return nil }
+        var pixels = [UInt8](repeating: 0, count: image.width * image.height * 4)
+        let rows: [Int] = pixels.withUnsafeMutableBytes { buffer in
+            guard let context = CGContext(
+                data: buffer.baseAddress, width: image.width, height: image.height,
+                bitsPerComponent: 8, bytesPerRow: image.width * 4,
+                space: CGColorSpaceCreateDeviceRGB(),
+                bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue | CGBitmapInfo.byteOrder32Big.rawValue
+            ) else { return [] }
+            context.draw(image, in: CGRect(x: 0, y: 0, width: image.width, height: image.height))
+            return (0..<image.height).filter { y in
+                let offset = (y * image.width + image.width / 2) * 4
+                let red = Int(buffer[offset])
+                let green = Int(buffer[offset + 1])
+                let blue = Int(buffer[offset + 2])
+                return green > 120 && blue > 120 && green > red + 30 && blue > red + 30
+            }
+        }
+        guard let first = rows.first, let last = rows.last else { return nil }
+        return (CGFloat(first) / screenshot.image.scale)...(CGFloat(last + 1) / screenshot.image.scale)
+    }
 
     @MainActor
     func testSheetDragExpandsAndCollapsesWithoutDismissingViewer() {

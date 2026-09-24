@@ -405,6 +405,7 @@ struct MediaViewerScreen: View {
                     }
                     .padding(.top, 24)
                 } else {
+                    Spacer(minLength: 0)
                     VStack(spacing: 8) {
                         bottomOverlayContent
                         if let user = post.user {
@@ -419,13 +420,17 @@ struct MediaViewerScreen: View {
                     .padding(.bottom, 8)
                     .fixedSize(horizontal: false, vertical: true)
                     .onGeometryChange(for: CGFloat.self) { proxy in
-                        ceil(proxy.size.height)
+                        let height = ceil(proxy.size.height)
+                        if #available(iOS 26.0, *) {
+                            // Keep the native sheet shape consistent with and without media controls.
+                            return max(120, height)
+                        }
+                        return height
                     } action: { height in
                         guard height > 0, height != postSummaryHeight else { return }
                         postSummaryHeight = height
                         if postDetent != .large { postDetent = .height(height) }
                     }
-                    Spacer(minLength: 0)
                 }
             }
 

@@ -2,11 +2,12 @@ import XCTest
 
 final class MediaViewerInteractionTests: XCTestCase {
     @MainActor
-    private func openMedia(video: Bool = false, withoutPost: Bool = false) -> XCUIApplication {
+    private func openMedia(video: Bool = false, withoutPost: Bool = false, indicator: Bool = false) -> XCUIApplication {
         let app = XCUIApplication()
         app.launchArguments = ["--media-viewer-test", "-AppleLanguages", "(en)", "-AppleLocale", "en_US"]
         if video { app.launchArguments.append("--video") }
         if withoutPost { app.launchArguments.append("--without-post") }
+        if indicator { app.launchArguments.append("--indicator") }
         app.launch()
         let open = app.buttons["media-fixture-open"]
         XCTAssertTrue(open.waitForExistence(timeout: 15))
@@ -73,13 +74,27 @@ final class MediaViewerInteractionTests: XCTestCase {
     }
 
     @MainActor
-    private func checkSummaryLayout(video: Bool) {
-        let app = openMedia(video: video)
+    func testSummaryKeepsWidthAndBottomSpacingWithAndWithoutControls() throws {
+        guard #available(iOS 26.0, *) else {
+            throw XCTSkip("The minimum summary height targets the iOS 26 sheet design")
+        }
+        let image = try XCTUnwrap(checkSummaryLayout(video: false))
+        let indicator = try XCTUnwrap(checkSummaryLayout(video: false, indicator: true))
+        let video = try XCTUnwrap(checkSummaryLayout(video: true))
+
+        XCTAssertEqual(image.sheet.width, indicator.sheet.width, accuracy: 1)
+        XCTAssertEqual(image.sheet.width, video.sheet.width, accuracy: 1)
+        XCTAssertEqual(image.bottomGap, indicator.bottomGap, accuracy: 2)
+        XCTAssertEqual(image.bottomGap, video.bottomGap, accuracy: 2)
+        XCTAssertEqual(image.sheet.height, indicator.sheet.height, accuracy: 1)
+        XCTAssertGreaterThan(video.sheet.height, image.sheet.height, "The summary must still grow to fit video controls")
+    }
+
+    @MainActor
+    @discardableResult
+    private func checkSummaryLayout(video: Bool, indicator: Bool = false) -> (sheet: CGRect, bottomGap: CGFloat)? {
+        let app = openMedia(video: video, indicator: indicator)
         defer { app.terminate() }
-        let screenshot = XCTAttachment(screenshot: app.screenshot())
-        screenshot.name = video ? "video-summary" : "image-summary"
-        screenshot.lifetime = .keepAlways
-        add(screenshot)
         let action = app.buttons["More"].firstMatch.frame
         let sheet = app.otherElements.containing(.button, identifier: "More").allElementsBoundByIndex
             .map(\.frame)
@@ -91,6 +106,12 @@ final class MediaViewerInteractionTests: XCTestCase {
             print("MEDIA-LAYOUT sheet=\(sheet) action=\(action) bottomGap=\(bottomGap)")
             // iPhone sheets reserve up to 34pt for the home indicator, plus our 8pt padding.
             XCTAssertLessThanOrEqual(bottomGap, 44, "The summary must not leave extra space beyond its native safe area and bottom padding")
+            let screenshot = XCTAttachment(screenshot: app.screenshot())
+            screenshot.name = video ? "video-summary" : (indicator ? "indicator-summary" : "image-summary")
+            screenshot.lifetime = .keepAlways
+            add(screenshot)
+            return (sheet, bottomGap)
         }
+        return nil
     }
 }

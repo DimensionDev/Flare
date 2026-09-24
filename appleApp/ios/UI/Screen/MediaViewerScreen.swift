@@ -389,17 +389,8 @@ struct MediaViewerScreen: View {
     @ViewBuilder
     private var mediaPostSheet: some View {
         if let post {
-            VStack(spacing: 0) {
+            let content = VStack(spacing: 0) {
                 if postDetent == .large {
-                    HStack {
-                        Spacer()
-                        Button(action: collapsePost) {
-                            Image(systemName: "chevron.down")
-                                .frame(width: 44, height: 44)
-                        }
-                        .accessibilityLabel(Text("media_post_collapse"))
-                    }
-                    .padding(.horizontal)
                     ScrollView {
                         StatusView(
                             data: post,
@@ -412,6 +403,7 @@ struct MediaViewerScreen: View {
                         .padding(.horizontal)
                         .padding(.bottom)
                     }
+                    .padding(.top, 24)
                 } else {
                     VStack(spacing: 8) {
                         bottomOverlayContent
@@ -436,12 +428,19 @@ struct MediaViewerScreen: View {
                     Spacer(minLength: 0)
                 }
             }
+
+            Group {
+                if #available(iOS 26.0, *) {
+                    content
+                } else {
+                    content.presentationBackground(postDetent == .large ? .regularMaterial : .ultraThinMaterial)
+                }
+            }
             .presentationDetents([.height(postSummaryHeight), .large], selection: $postDetent)
             .presentationDragIndicator(.visible)
             .presentationContentInteraction(.resizes)
             // The viewer supplies the expanded scrim so tapping it collapses, rather than dismisses, the sheet.
             .presentationBackgroundInteraction(.enabled)
-            .presentationBackground(postDetent == .large ? .regularMaterial : .ultraThinMaterial)
             .interactiveDismissDisabled()
             .preferredColorScheme(.dark)
         }

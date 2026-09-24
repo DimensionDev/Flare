@@ -29,7 +29,8 @@ public enum AppleMediaFileExtension {
 
     public nonisolated static func video(url: URL, response: URLResponse?, fallback: String = "mp4") -> String {
         let pathExtension = url.pathExtension.lowercased()
-        if !pathExtension.isEmpty, pathExtension != "m3u8" {
+        if !pathExtension.isEmpty, pathExtension != "m3u8",
+           !url.path.hasSuffix("/xrpc/com.atproto.sync.getBlob") {
             return pathExtension
         }
 

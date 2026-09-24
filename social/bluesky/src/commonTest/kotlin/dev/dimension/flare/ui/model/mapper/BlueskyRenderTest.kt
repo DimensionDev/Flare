@@ -13,6 +13,7 @@ import app.bsky.embed.RecordViewRecordEmbedUnion
 import app.bsky.embed.RecordViewRecordUnion
 import app.bsky.embed.RecordWithMediaView
 import app.bsky.embed.RecordWithMediaViewMediaUnion
+import app.bsky.embed.VideoView
 import app.bsky.feed.FeedViewPost
 import app.bsky.feed.FeedViewPostReasonUnion
 import app.bsky.feed.PostView
@@ -70,6 +71,83 @@ class BlueskyRenderTest {
 
         assertEquals("alice", profile.name.raw)
         assertEquals("alice.bsky.social", profile.handle.raw)
+    }
+
+    @Test
+    fun videoDownloadUrlsPreservePlaybackForDirectQuotedAndRepostedVideos() {
+        val playlist = "https://video.example/playlist.m3u8"
+        val download = "https://author.example/xrpc/com.atproto.sync.getBlob?did=author&cid=video"
+        val video = VideoView(cid = Cid("video"), playlist = Uri(playlist))
+        val original =
+            createPostView(
+                uri = "at://did:plc:author/app.bsky.feed.post/video",
+                author = createProfile("author", "author.bsky.social"),
+                text = "video",
+                embed = PostViewEmbedUnion.VideoView(video),
+            )
+        val urls = mapOf(playlist to download)
+        val direct = assertIs<UiMedia.Video>(original.render(accountKey, urls).images.single())
+        assertEquals(playlist, direct.url)
+        assertEquals(download, direct.downloadUrl)
+        assertEquals(
+            playlist,
+            original
+                .render(accountKey)
+                .images
+                .single()
+                .urlForDownload,
+        )
+
+        val quotedRecord =
+            RecordViewRecord(
+                uri = original.uri,
+                cid = original.cid,
+                author = original.author,
+                value = original.record,
+                embeds = listOf(RecordViewRecordEmbedUnion.VideoView(video)),
+                indexedAt = original.indexedAt,
+            )
+        val quote =
+            createPostView(
+                uri = "at://did:plc:quoter/app.bsky.feed.post/quote",
+                author = createProfile("quoter", "quoter.bsky.social"),
+                text = "quote",
+                embed = PostViewEmbedUnion.RecordView(RecordView(RecordViewRecordUnion.ViewRecord(quotedRecord))),
+            )
+        val quoted = timelinePostItemOf(listOf(FeedViewPost(quote)).render(accountKey, urls).single())
+        assertEquals(
+            direct,
+            quoted.presentation.quotes
+                .single()
+                .images
+                .single(),
+        )
+
+        val attached =
+            quote.copy(
+                embed =
+                    PostViewEmbedUnion.RecordWithMediaView(
+                        RecordWithMediaView(
+                            record = RecordView(RecordViewRecordUnion.ViewRecord(quotedRecord)),
+                            media = RecordWithMediaViewMediaUnion.VideoView(video),
+                        ),
+                    ),
+            )
+        assertEquals(direct, attached.render(accountKey, urls).images.single())
+
+        val repost =
+            FeedViewPost(
+                post = original,
+                reason =
+                    FeedViewPostReasonUnion.ReasonRepost(
+                        ReasonRepost(
+                            by = createProfile("reposter", "reposter.bsky.social"),
+                            indexedAt = original.indexedAt,
+                        ),
+                    ),
+            )
+        val reposted = timelinePostItemOf(listOf(repost).render(accountKey, urls).single())
+        assertEquals(direct, assertNotNull(reposted.presentation.repost).images.single())
     }
 
     @Test

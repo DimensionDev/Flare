@@ -202,7 +202,7 @@ struct MacMediaExportSource: Identifiable, Hashable {
         case .video(let video):
             self.init(
                 kind: .video,
-                url: video.url,
+                url: video.urlForDownload,
                 customHeaders: video.customHeaders,
                 shareContext: shareContext
             )

@@ -8,7 +8,6 @@ import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.network.bluesky.BlueskyService
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiTimelineV2
-import dev.dimension.flare.ui.model.mapper.render
 import sh.christian.ozone.api.AtUri
 
 @OptIn(ExperimentalPagingApi::class)
@@ -58,7 +57,7 @@ internal class ListTimelineRemoteMediator(
 
         return PagingResult(
             endOfPaginationReached = response.cursor == null,
-            data = response.feed.render(accountKey),
+            data = response.feed.renderWithDownloadUrls(accountKey),
             nextKey = response.cursor,
         )
     }

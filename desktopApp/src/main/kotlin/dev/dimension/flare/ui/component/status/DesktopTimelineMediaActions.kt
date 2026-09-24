@@ -42,7 +42,7 @@ internal fun ProvideDesktopTimelineMediaActions(content: @Composable () -> Unit)
                                     ) ?: return@TimelineMediaActionHandler
                                 scope.launch {
                                     downloadManager.download(
-                                        url = media.url,
+                                        url = media.urlForDownload,
                                         targetFile = targetFile,
                                         customHeaders = media.customHeaders,
                                     )

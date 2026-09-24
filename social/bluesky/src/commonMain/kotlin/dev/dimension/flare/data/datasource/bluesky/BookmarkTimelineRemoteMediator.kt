@@ -1,11 +1,13 @@
 package dev.dimension.flare.data.datasource.bluesky
 
 import androidx.paging.ExperimentalPagingApi
+import app.bsky.bookmark.BookmarkViewItemUnion
 import app.bsky.bookmark.GetBookmarksQueryParams
 import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.network.bluesky.BlueskyService
+import dev.dimension.flare.data.network.bluesky.resolveBlueskyVideoDownloadUrls
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.render
@@ -50,9 +52,11 @@ internal class BookmarkTimelineRemoteMediator(
                 }
             }
 
+        val posts = response.bookmarks.mapNotNull { (it.item as? BookmarkViewItemUnion.PostView)?.value }
+        val downloadUrls = resolveBlueskyVideoDownloadUrls(posts)
         return PagingResult(
             endOfPaginationReached = response.bookmarks.isEmpty() || response.cursor == null,
-            data = response.bookmarks.mapNotNull { it.render(accountKey) },
+            data = response.bookmarks.mapNotNull { it.render(accountKey, downloadUrls) },
             nextKey = response.cursor,
         )
     }

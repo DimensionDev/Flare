@@ -96,7 +96,7 @@ private fun CoroutineScope.downloadMedia(
     launch {
         runCatching {
             downloadManager.downloadMedia(
-                uri = media.url,
+                uri = media.urlForDownload,
                 fileName = post.statusMediaFileName(media),
                 customHeaders = media.customHeaders,
                 callback =

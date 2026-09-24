@@ -80,7 +80,7 @@ struct MediaViewerTestFixture: View {
         } catch {
             assertionFailure("Could not create video fixture: \(error)")
         }
-        return UiMediaVideo(url: videoURL.absoluteString, thumbnailUrl: imageURL.absoluteString, description: "Fixture video", height: 240, width: 320, customHeaders: nil)
+        return UiMediaVideo(url: videoURL.absoluteString, thumbnailUrl: imageURL.absoluteString, description: "Fixture video", height: 240, width: 320, customHeaders: nil, downloadUrl: nil)
     }
 
     private func richText(_ text: String) -> UiRichText {

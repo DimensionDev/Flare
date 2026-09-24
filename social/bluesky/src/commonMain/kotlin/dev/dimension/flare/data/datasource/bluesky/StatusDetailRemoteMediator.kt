@@ -13,6 +13,7 @@ import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.datasource.microblog.paging.PostContextLoader
 import dev.dimension.flare.data.datasource.microblog.paging.toContextUpdate
 import dev.dimension.flare.data.network.bluesky.BlueskyService
+import dev.dimension.flare.data.network.bluesky.resolveBlueskyVideoDownloadUrls
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.render
@@ -72,7 +73,12 @@ internal class StatusDetailRemoteMediator(
                                         sort = GetPostThreadV2Sort.Top,
                                     ),
                                 ).requireResponse()
-                        context.thread.renderThread(accountKey)
+                        context.thread.renderThread(
+                            accountKey,
+                            resolveBlueskyVideoDownloadUrls(
+                                context.thread.mapNotNull { (it.value as? GetPostThreadV2ThreadItemValueUnion.Post)?.value?.post },
+                            ),
+                        )
                     }
                 }
 
@@ -92,7 +98,7 @@ internal class StatusDetailRemoteMediator(
                             ).requireResponse()
                             .posts
                             .firstOrNull()
-                    listOfNotNull(current).map(::FeedViewPost).render(accountKey)
+                    listOfNotNull(current).map(::FeedViewPost).renderWithDownloadUrls(accountKey)
                 }
             }
 
@@ -105,10 +111,20 @@ internal class StatusDetailRemoteMediator(
     }
 }
 
-internal fun List<GetPostThreadV2ThreadItem>.renderThread(accountKey: MicroBlogKey): List<UiTimelineV2> =
+internal fun List<GetPostThreadV2ThreadItem>.renderThread(
+    accountKey: MicroBlogKey,
+    downloadUrls: Map<String, String> = emptyMap(),
+): List<UiTimelineV2> =
     mapNotNull { item ->
         when (val value = item.value) {
-            is GetPostThreadV2ThreadItemValueUnion.Post -> listOf(FeedViewPost(value.value.post)).render(accountKey).firstOrNull()
-            else -> null
+            is GetPostThreadV2ThreadItemValueUnion.Post -> {
+                listOf(
+                    FeedViewPost(value.value.post),
+                ).render(accountKey, downloadUrls).firstOrNull()
+            }
+
+            else -> {
+                null
+            }
         }
     }

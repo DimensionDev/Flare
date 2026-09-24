@@ -1,17 +1,14 @@
 package dev.dimension.flare.data.network.nostr
 
+import com.vitorpamplona.quartz.nip19Bech32.Nip19Parser
+import com.vitorpamplona.quartz.nip19Bech32.entities.Entity
+import com.vitorpamplona.quartz.nip19Bech32.entities.NProfile
+import com.vitorpamplona.quartz.nip19Bech32.entities.NPub
 import dev.dimension.flare.common.JSON
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.JsonArray
-import kotlinx.serialization.json.JsonPrimitive
-import kotlinx.serialization.json.buildJsonObject
-import rust.nostr.sdk.Event as RustEvent
-import rust.nostr.sdk.Filter as RustFilter
-import rust.nostr.sdk.Nip19 as RustNip19
-import rust.nostr.sdk.Nip19Enum as RustNip19Enum
-import rust.nostr.sdk.PublicKey as RustPublicKey
-import rust.nostr.sdk.RelayUrl as RustRelayUrl
+import com.vitorpamplona.quartz.nip01Core.core.Event as QuartzEvent
+import com.vitorpamplona.quartz.nip01Core.relay.filters.Filter as QuartzFilter
 
 internal data class Filter(
     val ids: List<String> = emptyList(),
@@ -23,30 +20,17 @@ internal data class Filter(
     val limit: Int? = null,
     val search: String? = null,
 ) {
-    fun toRust(): RustFilter {
-        val json =
-            buildJsonObject {
-                if (ids.isNotEmpty()) {
-                    put("ids", JsonArray(ids.map(::JsonPrimitive)))
-                }
-                if (authors.isNotEmpty()) {
-                    put("authors", JsonArray(authors.map(::JsonPrimitive)))
-                }
-                if (kinds.isNotEmpty()) {
-                    put("kinds", JsonArray(kinds.map(::JsonPrimitive)))
-                }
-                tags.forEach { (key, values) ->
-                    if (values.isNotEmpty()) {
-                        put("#$key", JsonArray(values.map(::JsonPrimitive)))
-                    }
-                }
-                since?.let { put("since", JsonPrimitive(it)) }
-                until?.let { put("until", JsonPrimitive(it)) }
-                limit?.let { put("limit", JsonPrimitive(it)) }
-                search?.takeIf { it.isNotBlank() }?.let { put("search", JsonPrimitive(it)) }
-            }
-        return RustFilter.Companion.fromJson(json.toString())
-    }
+    fun toQuartz(): QuartzFilter =
+        QuartzFilter(
+            ids = ids.takeIf { it.isNotEmpty() },
+            authors = authors.takeIf { it.isNotEmpty() },
+            kinds = kinds.takeIf { it.isNotEmpty() },
+            tags = tags.filterValues { it.isNotEmpty() }.takeIf { it.isNotEmpty() },
+            since = since,
+            until = until,
+            limit = limit,
+            search = search?.takeIf { it.isNotBlank() },
+        )
 }
 
 internal sealed class Event(
@@ -60,12 +44,10 @@ internal sealed class Event(
 ) {
     fun toJson(): String = rawJson
 
-    fun toRust(): RustEvent = RustEvent.Companion.fromJson(rawJson)
-
     open fun dTag(): String = tags.firstOrNull { it.size > 1 && it[0] == "d" }?.get(1).orEmpty()
 
     companion object {
-        fun fromJson(raw: String): Event = RustEvent.Companion.fromJson(raw).use { it.toCompatEvent() }
+        fun fromJson(raw: String): Event = QuartzEvent.fromJson(raw).toCompatEvent()
     }
 }
 
@@ -266,7 +248,7 @@ internal class PeopleListEvent(
     }
 }
 
-internal fun RustEvent.toCompatEvent(): Event {
+internal fun QuartzEvent.toCompatEvent(): Event {
     val snapshot = snapshot()
     return when (snapshot.kind) {
         MetadataEvent.KIND -> {
@@ -385,24 +367,15 @@ private data class EventSnapshot(
     val rawJson: String,
 )
 
-private fun RustEvent.snapshot(): EventSnapshot =
+private fun QuartzEvent.snapshot(): EventSnapshot =
     EventSnapshot(
-        id = id().use { it.toHex() },
-        pubKey = author().use { it.toHex() },
-        createdAt = createdAt().use { it.asSecs().toLong() },
-        kind = kind().use { it.asU16().toInt() },
-        content = content(),
-        tags =
-            runCatching {
-                tags().use { tags ->
-                    tags
-                        .toVec()
-                        .map { tag ->
-                            tag.use { it.asVec().toTypedArray() }
-                        }.toTypedArray()
-                }
-            }.getOrDefault(emptyArray()),
-        rawJson = asJson(),
+        id = id,
+        pubKey = pubKey,
+        createdAt = createdAt,
+        kind = kind,
+        content = content,
+        tags = tags,
+        rawJson = toJson(),
     )
 
 internal class GenericEvent(
@@ -449,17 +422,9 @@ internal typealias NormalizedRelayUrl = String
 
 internal object RelayUrlNormalizer {
     fun normalizeOrNull(raw: String): NormalizedRelayUrl? =
-        runCatching {
-            RustRelayUrl.Companion.parse(raw).use { relayUrl ->
-                relayUrl.toString().let {
-                    if (it.endsWith("/")) {
-                        it
-                    } else {
-                        "$it/"
-                    }
-                }
-            }
-        }.getOrNull()
+        com.vitorpamplona.quartz.nip01Core.relay.normalizer.RelayUrlNormalizer
+            .normalizeOrNull(raw)
+            ?.url
 
     fun isRelayUrl(raw: String): Boolean = normalizeOrNull(raw) != null
 }
@@ -713,22 +678,20 @@ internal fun Array<Array<String>>.userIdSet(): Set<String> =
 
 internal fun Array<Array<String>>.mutedUserIdSet(): Set<String> = userIdSet()
 
-internal fun nostrBech32PublicKey(hex: String): String = RustPublicKey.Companion.parse(hex).use { it.toBech32() }
+internal fun nostrBech32PublicKey(hex: String): String = NPub.create(hex)
 
 internal fun parsePublicKeyHex(raw: String): String? {
     val value = raw.removePrefix("nostr:").trim()
     return when {
         value.startsWith("npub1", ignoreCase = true) -> {
             withNip19(value) { nip19 ->
-                (nip19 as? RustNip19Enum.Pubkey)?.npub?.use { it.toHex() }
+                (nip19 as? NPub)?.hex
             }
         }
 
         value.startsWith("nprofile1", ignoreCase = true) -> {
             withNip19(value) { nip19 ->
-                (nip19 as? RustNip19Enum.Profile)?.nprofile?.use { profile ->
-                    profile.publicKey().use { it.toHex() }
-                }
+                (nip19 as? NProfile)?.hex
             }
         }
 
@@ -744,13 +707,12 @@ internal fun parsePublicKeyHex(raw: String): String? {
 
 internal inline fun <T> withNip19(
     value: String,
-    block: (RustNip19Enum) -> T,
+    block: (Entity) -> T,
 ): T? =
-    runCatching {
-        RustNip19.Companion
-            .fromBech32(value)
-            .asEnum()
-            .use(block)
-    }.getOrNull()
+    Nip19Parser
+        .uriToRoute(value)
+        ?.takeIf { it.nip19raw.equals(value, ignoreCase = true) && it.additionalChars.isNullOrEmpty() }
+        ?.entity
+        ?.let(block)
 
 private fun isHexKey(value: String): Boolean = value.length == 64 && value.all { it.isDigit() || it.lowercaseChar() in 'a'..'f' }

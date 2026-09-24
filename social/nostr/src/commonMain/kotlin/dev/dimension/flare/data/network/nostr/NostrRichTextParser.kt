@@ -1,5 +1,9 @@
 package dev.dimension.flare.data.network.nostr
 
+import com.vitorpamplona.quartz.nip19Bech32.entities.NEvent
+import com.vitorpamplona.quartz.nip19Bech32.entities.NNote
+import com.vitorpamplona.quartz.nip19Bech32.entities.NProfile
+import com.vitorpamplona.quartz.nip19Bech32.entities.NPub
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiProfile
@@ -12,7 +16,6 @@ import dev.dimension.flare.ui.render.uiRichTextOf
 import dev.dimension.flare.ui.route.DeeplinkRoute
 import dev.dimension.flare.ui.route.toUri
 import kotlinx.collections.immutable.toImmutableList
-import rust.nostr.sdk.Nip19Enum as RustNip19Enum
 
 internal data class NostrTextPreprocessResult(
     val text: String,
@@ -177,15 +180,13 @@ private fun String.extractMentionedProfilePubkey(): String? {
     return when {
         value.startsWith("npub1", ignoreCase = true) -> {
             withNip19(value) { nip19 ->
-                (nip19 as? RustNip19Enum.Pubkey)?.npub?.use { it.toHex() }
+                (nip19 as? NPub)?.hex
             }
         }
 
         value.startsWith("nprofile1", ignoreCase = true) -> {
             withNip19(value) { nip19 ->
-                (nip19 as? RustNip19Enum.Profile)?.nprofile?.use { profile ->
-                    profile.publicKey().use { it.toHex() }
-                }
+                (nip19 as? NProfile)?.hex
             }
         }
 
@@ -237,15 +238,13 @@ private fun String.referencesQuotedEvent(quoteEventIds: Set<String>): Boolean {
     return when {
         value.startsWith("note1", ignoreCase = true) -> {
             withNip19(value) { nip19 ->
-                (nip19 as? RustNip19Enum.Note)?.eventId?.use { it.toHex() in quoteEventIds }
+                (nip19 as? NNote)?.hex?.let { it in quoteEventIds }
             } == true
         }
 
         value.startsWith("nevent1", ignoreCase = true) -> {
             withNip19(value) { nip19 ->
-                (nip19 as? RustNip19Enum.Event)?.event?.use { event ->
-                    event.eventId().use { it.toHex() in quoteEventIds }
-                }
+                (nip19 as? NEvent)?.hex?.let { it in quoteEventIds }
             } == true
         }
 
@@ -383,15 +382,13 @@ private fun parseProfileReference(
         when {
             value.startsWith("npub1", ignoreCase = true) -> {
                 withNip19(value) { nip19 ->
-                    (nip19 as? RustNip19Enum.Pubkey)?.npub?.use { it.toHex() }
+                    (nip19 as? NPub)?.hex
                 }
             }
 
             value.startsWith("nprofile1", ignoreCase = true) -> {
                 withNip19(value) { nip19 ->
-                    (nip19 as? RustNip19Enum.Profile)?.nprofile?.use { profile ->
-                        profile.publicKey().use { it.toHex() }
-                    }
+                    (nip19 as? NProfile)?.hex
                 }
             }
 
@@ -433,15 +430,13 @@ private fun parseEventReference(
         when {
             value.startsWith("note1", ignoreCase = true) -> {
                 withNip19(value) { nip19 ->
-                    (nip19 as? RustNip19Enum.Note)?.eventId?.use { it.toHex() }
+                    (nip19 as? NNote)?.hex
                 }
             }
 
             value.startsWith("nevent1", ignoreCase = true) -> {
                 withNip19(value) { nip19 ->
-                    (nip19 as? RustNip19Enum.Event)?.event?.use { event ->
-                        event.eventId().use { it.toHex() }
-                    }
+                    (nip19 as? NEvent)?.hex
                 }
             }
 

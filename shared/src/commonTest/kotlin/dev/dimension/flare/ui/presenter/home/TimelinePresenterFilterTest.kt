@@ -170,6 +170,35 @@ class TimelinePresenterFilterTest {
     }
 
     @Test
+    fun replyToUnfollowedFilterOnlyExcludesRepliesWithKnownUnfollowedParents() {
+        val author = createSampleUser()
+        val parentKey = MicroBlogKey("parentKey", "sampleHost")
+
+        fun replyToParent(isFollowing: Boolean?): UiTimelineV2.TimelinePostItem {
+            val parent =
+                createSampleStatus(
+                    author.copy(
+                        key = parentKey,
+                        isFollowing = isFollowing,
+                    ),
+                )
+            return UiTimelineV2.TimelinePostItem(
+                post = createSampleStatus(author),
+                presentation =
+                    UiTimelineV2.PostPresentation(
+                        inlineParents = persistentListOf(UiTimelineV2.TimelinePostItem(parent)),
+                    ),
+            )
+        }
+
+        val filter = TimelineFilterConfig(excludedKinds = listOf(TimelinePostKind.ReplyToUnfollowed))
+
+        assertFalse(replyToParent(isFollowing = false).matchesTimelineFilter(filter))
+        assertTrue(replyToParent(isFollowing = true).matchesTimelineFilter(filter))
+        assertTrue(replyToParent(isFollowing = null).matchesTimelineFilter(filter))
+    }
+
+    @Test
     fun matchesKeywordFiltersUsesRegexForRegexRules() {
         val status =
             createSampleStatus(createSampleUser()).copy(

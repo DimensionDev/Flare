@@ -345,7 +345,13 @@ internal fun UiTimelineV2.TimelinePostItem.traits(): TimelinePostTraits {
             if (hasParentFromOtherUser) {
                 add(TimelinePostKind.Reply)
             }
-            if (presentation.inlineParents.lastOrNull()?.displayPost?.user?.isFollowing == false) {
+            if (
+                presentation.inlineParents
+                    .lastOrNull()
+                    ?.displayPost
+                    ?.user
+                    ?.isFollowing == false
+            ) {
                 add(TimelinePostKind.ReplyToUnfollowed)
             }
             if (presentation.repost != null) {

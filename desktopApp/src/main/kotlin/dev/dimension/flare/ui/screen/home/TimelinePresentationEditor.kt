@@ -2,7 +2,6 @@ package dev.dimension.flare.ui.screen.home
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -133,7 +132,6 @@ import io.github.composefluent.component.Flyout
 import io.github.composefluent.component.FlyoutPlacement
 import io.github.composefluent.component.MenuFlyoutContainer
 import io.github.composefluent.component.MenuFlyoutItem
-import io.github.composefluent.component.RadioButton
 import io.github.composefluent.component.Switcher
 import io.github.composefluent.component.Text
 import io.github.composefluent.component.TextField
@@ -767,7 +765,7 @@ private fun TimelineFilterDialog(
                             }
                     },
                     extraContent = {
-                        ReplyVisibilityOptions(
+                        ReplyVisibilitySelector(
                             selected = selectedReplyVisibility,
                             onSelect = { selectedReplyVisibility = it },
                         )
@@ -831,37 +829,38 @@ private fun <T> FilterSection(
 }
 
 @Composable
-private fun ReplyVisibilityOptions(
+private fun ReplyVisibilitySelector(
     selected: TimelineReplyVisibility,
     onSelect: (TimelineReplyVisibility) -> Unit,
 ) {
-    Column(
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-    ) {
-        Text(stringResource(Res.string.tab_settings_filter_reply))
-        TimelineReplyVisibility.entries.forEach { option ->
-            val interactionSource = remember(option) { MutableInteractionSource() }
-            Row(
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .clickable(
-                            interactionSource = interactionSource,
-                            indication = null,
-                            onClick = { onSelect(option) },
-                        ),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                RadioButton(
-                    selected = selected == option,
-                    interactionSource = interactionSource,
-                    onClick = { onSelect(option) },
+    MenuFlyoutContainer(
+        flyout = {
+            TimelineReplyVisibility.entries.forEach { option ->
+                MenuFlyoutItem(
+                    onClick = {
+                        onSelect(option)
+                        isFlyoutVisible = false
+                    },
+                    text = { Text(stringResource(option.label)) },
                 )
-                Text(stringResource(option.label))
             }
-        }
-    }
+        },
+        content = {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Text(stringResource(Res.string.tab_settings_filter_reply))
+                DropDownButton(
+                    onClick = { isFlyoutVisible = !isFlyoutVisible },
+                    content = { Text(stringResource(selected.label)) },
+                )
+            }
+        },
+        adaptivePlacement = true,
+        placement = FlyoutPlacement.BottomAlignedEnd,
+    )
 }
 
 private val TimelineReplyVisibility.label: StringResource

@@ -755,4 +755,6 @@
     <string name="seek_forward_5_seconds">转发5秒</string>
     <string name="select_account_current">选择帐户。当前: %1$s</string>
     <string name="selected">已选择</string>
+    <string name="settings_appearance_show_post_in_media_viewer">在媒体查看器中显示帖子</string>
+    <string name="settings_appearance_show_post_in_media_viewer_description">显示作者和操作栏，上滑可阅读帖子详情</string>
 </resources>

@@ -86,6 +86,8 @@ public class SettingsPresenter : PresenterBase<SettingsPresenter.State>() {
 
             override fun updateShowMedia(value: Boolean) = update(AppearanceKeys.ShowMedia, value)
 
+            override fun updateShowPostInMediaViewer(value: Boolean) = update(AppearanceKeys.ShowPostInMediaViewer, value)
+
             override fun updateExpandMediaSize(value: Boolean) = update(AppearanceKeys.ExpandMediaSize, value)
 
             override fun updateMediaLayout(value: TimelineMediaLayout) = update(AppearanceKeys.MediaLayout, value)
@@ -171,6 +173,8 @@ public class SettingsPresenter : PresenterBase<SettingsPresenter.State>() {
         public fun updateInAppBrowser(value: Boolean)
 
         public fun updateShowMedia(value: Boolean)
+
+        public fun updateShowPostInMediaViewer(value: Boolean)
 
         public fun updateExpandMediaSize(value: Boolean)
 

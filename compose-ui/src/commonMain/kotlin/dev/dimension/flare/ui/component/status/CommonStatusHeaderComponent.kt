@@ -2,6 +2,7 @@ package dev.dimension.flare.ui.component.status
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
@@ -31,21 +32,26 @@ public fun CommonStatusHeaderComponent(
     data: UiProfile,
     onUserClick: (MicroBlogKey) -> Unit,
     modifier: Modifier = Modifier,
+    avatarModifier: Modifier = Modifier,
+    nameModifier: Modifier = Modifier,
+    handleModifier: Modifier = Modifier,
     leadingContent: @Composable (RowScope.() -> Unit)? = {
-        AvatarComponent(
-            data = data.avatar,
-            contentDescription =
-                stringResource(
-                    Res.string.profile_open_user,
-                    data.handle.canonical,
-                ),
-            modifier =
-                Modifier
-                    .pointerHoverIcon(PointerIcon.Hand)
-                    .clickable {
-                        onUserClick(data.key)
-                    },
-        )
+        Box(avatarModifier, propagateMinConstraints = true) {
+            AvatarComponent(
+                data = data.avatar,
+                contentDescription =
+                    stringResource(
+                        Res.string.profile_open_user,
+                        data.handle.canonical,
+                    ),
+                modifier =
+                    Modifier
+                        .pointerHoverIcon(PointerIcon.Hand)
+                        .clickable {
+                            onUserClick(data.key)
+                        },
+            )
+        }
     },
     trailing: @Composable RowScope.() -> Unit = {},
 ) {
@@ -55,7 +61,7 @@ public fun CommonStatusHeaderComponent(
             RichText(
                 text = data.name,
                 modifier =
-                    Modifier
+                    nameModifier
                         .pointerHoverIcon(PointerIcon.Hand)
                         .clickable(
                             interactionSource = remember { MutableInteractionSource() },
@@ -73,7 +79,7 @@ public fun CommonStatusHeaderComponent(
                 style = PlatformTheme.typography.caption,
                 color = PlatformTheme.colorScheme.caption,
                 modifier =
-                    Modifier
+                    handleModifier
                         .pointerHoverIcon(PointerIcon.Hand)
                         .clickable(
                             interactionSource = remember { MutableInteractionSource() },

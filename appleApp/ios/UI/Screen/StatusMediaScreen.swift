@@ -32,21 +32,9 @@ struct StatusMediaScreen: View {
                 statusKey: statusKey.description(),
                 userHandle: statusUserHandle
             ),
-            showsSupplementaryOverlay: true
-        ) { _ in
-            StateView(state: presenter.state.status) { timeline in
-                if let content = timeline.timelineContentPost {
-                    StatusView(
-                        data: content,
-                        isQuote: true,
-                        showMedia: false,
-                        maxLine: 3,
-                        showExpandTextButton: false,
-                        showParents: false
-                    )
-                }
-            }
-        }
+            post: statusPost,
+            quotes: statusQuotes
+        )
         .onAppear {
             syncMediasIfNeeded(animated: false)
         }
@@ -67,6 +55,21 @@ struct StatusMediaScreen: View {
                 medias = Array(content.images)
             }
         }
+    }
+
+    private var statusPost: UiTimelineV2.Post? {
+        if case .success(let success) = onEnum(of: presenter.state.status) {
+            return success.data.timelineContentPost
+        }
+        return nil
+    }
+
+    private var statusQuotes: [UiTimelineV2.Post] {
+        if case .success(let success) = onEnum(of: presenter.state.status),
+           case .timelinePostItem(let item) = onEnum(of: success.data) {
+            return Array(item.presentation.quotes)
+        }
+        return []
     }
 
     private var statusUserHandle: String {

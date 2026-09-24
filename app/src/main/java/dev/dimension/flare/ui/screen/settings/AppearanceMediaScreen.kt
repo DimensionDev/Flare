@@ -135,6 +135,24 @@ internal fun AppearanceMediaScreen(onBack: () -> Unit) {
                     )
                 },
             )
+            SegmentedListItem(
+                onClick = {
+                    state.update(AppearanceKeys.ShowPostInMediaViewer, !globalAppearance.showPostInMediaViewer)
+                },
+                shapes = ListItemDefaults.item(),
+                content = {
+                    Text(text = stringResource(R.string.settings_appearance_show_post_in_media_viewer))
+                },
+                supportingContent = {
+                    Text(text = stringResource(R.string.settings_appearance_show_post_in_media_viewer_description))
+                },
+                trailingContent = {
+                    Switch(
+                        checked = globalAppearance.showPostInMediaViewer,
+                        onCheckedChange = { state.update(AppearanceKeys.ShowPostInMediaViewer, it) },
+                    )
+                },
+            )
             AnimatedVisibility(timelineAppearance.showMedia) {
                 SegmentedListItem(
                     onClick = {

@@ -37,6 +37,7 @@ public struct StatusView: View {
     private let isClickable: Bool
     private let withLeadingPadding: Bool
     private let showMedia: Bool
+    private let showAttachments: Bool
     private let maxLine: Int?
     private let showExpandTextButton: Bool
     private let forceHideActions: Bool
@@ -57,6 +58,7 @@ public struct StatusView: View {
         isClickable: Bool = true,
         withLeadingPadding: Bool = false,
         showMedia: Bool = true,
+        showAttachments: Bool = true,
         maxLine: Int? = nil,
         showExpandTextButton: Bool = true,
         forceHideActions: Bool = false,
@@ -73,6 +75,7 @@ public struct StatusView: View {
         self.isClickable = isClickable
         self.withLeadingPadding = withLeadingPadding
         self.showMedia = showMedia
+        self.showAttachments = showAttachments
         self.maxLine = maxLine
         self.showExpandTextButton = showExpandTextButton
         self.forceHideActions = forceHideActions
@@ -116,6 +119,7 @@ public struct StatusView: View {
             showAsFullWidth &&
             user != nil &&
             showMedia &&
+            showAttachments &&
             allowsMediaCarousel &&
             mediaLayout == .carousel &&
             images.count > 1
@@ -348,7 +352,7 @@ public struct StatusView: View {
                         alignment: .leading,
                         spacing: 0,
                     ) {
-                        if hasImages, showMedia {
+                        if hasImages, showMedia, showAttachments {
                             StatusMediaContent(
                                 post: data,
                                 data: images,

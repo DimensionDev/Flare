@@ -55,6 +55,8 @@ public object AppearanceKeys {
 
     public object ShowMedia : PerTimeline<Boolean>("timeline.show_media", true, Boolean.serializer())
 
+    public object ShowPostInMediaViewer : Global<Boolean>("app.show_post_in_media_viewer", true, Boolean.serializer())
+
     public object ShowSensitiveContent : PerTimeline<Boolean>("timeline.show_sensitive_content", false, Boolean.serializer())
 
     public object ExpandContentWarning : PerTimeline<Boolean>("timeline.expand_content_warning", false, Boolean.serializer())
@@ -133,6 +135,7 @@ public object AppearanceKeys {
             ShowBottomBarLabels,
             DeckMode,
             ShowMedia,
+            ShowPostInMediaViewer,
             ShowSensitiveContent,
             ExpandContentWarning,
             ExpandMediaSize,

@@ -819,4 +819,6 @@
     <string name="agent_ui_status_insight_user_placeholder">You can also enter a user link, handle, or userKey…</string>
     <string name="fanbox_supported_title">Supporting</string>
     <string name="fanbox_recommended_creators_title">Recommended creators</string>
+    <string name="settings_appearance_show_post_in_media_viewer">Show post in media viewer</string>
+    <string name="settings_appearance_show_post_in_media_viewer_description">Show the author and actions, and drag up to read the post</string>
 </resources>

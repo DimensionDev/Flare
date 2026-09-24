@@ -2,6 +2,7 @@ package dev.dimension.flare.ui.component.status
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.runtime.Composable
@@ -25,20 +26,25 @@ public fun UserCompat(
     user: UiProfile,
     modifier: Modifier = Modifier,
     onUserClick: (MicroBlogKey) -> Unit = {},
+    avatarModifier: Modifier = Modifier,
+    nameModifier: Modifier = Modifier,
+    handleModifier: Modifier = Modifier,
     leading: @Composable (RowScope.() -> Unit)? = {
-        AvatarComponent(
-            data = user.avatar,
-            size = AvatarComponentDefaults.compatSize,
-            contentDescription =
-                stringResource(
-                    Res.string.profile_open_user,
-                    user.handle.canonical,
-                ),
-            modifier =
-                Modifier.clickable {
-                    onUserClick.invoke(user.key)
-                },
-        )
+        Box(avatarModifier, propagateMinConstraints = true) {
+            AvatarComponent(
+                data = user.avatar,
+                size = AvatarComponentDefaults.compatSize,
+                contentDescription =
+                    stringResource(
+                        Res.string.profile_open_user,
+                        user.handle.canonical,
+                    ),
+                modifier =
+                    Modifier.clickable {
+                        onUserClick.invoke(user.key)
+                    },
+            )
+        }
     },
     trailing: @Composable RowScope.() -> Unit = {},
 ) {
@@ -62,7 +68,7 @@ public fun UserCompat(
                     text = name,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.alignByBaseline(),
+                    modifier = Modifier.alignByBaseline().then(nameModifier),
                 )
                 PlatformText(
                     text = handle.canonical,
@@ -70,7 +76,7 @@ public fun UserCompat(
                     color = PlatformTheme.colorScheme.caption,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.alignByBaseline(),
+                    modifier = Modifier.alignByBaseline().then(handleModifier),
                 )
             }
             trailing.invoke(this)

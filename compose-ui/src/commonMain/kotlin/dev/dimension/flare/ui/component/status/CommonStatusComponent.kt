@@ -183,6 +183,10 @@ public fun CommonStatusComponent(
     quotes: ImmutableList<UiTimelineV2.Post> = persistentListOf(),
     allowMediaCarousel: Boolean = false,
     carouselOuterHorizontalPadding: Dp = 0.dp,
+    nameModifier: Modifier = Modifier,
+    handleModifier: Modifier = Modifier,
+    avatarModifier: Modifier = Modifier,
+    actionsModifier: Modifier = Modifier,
 ) {
     val uriHandler = LocalUriHandler.current
     val openPostLabel = stringResource(Res.string.status_open_post)
@@ -359,6 +363,9 @@ public fun CommonStatusComponent(
                     } else {
                         CommonStatusHeaderComponent(
                             data = user,
+                            nameModifier = nameModifier,
+                            handleModifier = handleModifier,
+                            avatarModifier = avatarModifier,
                             onUserClick = {
                                 user.onClicked.invoke(
                                     ClickContext(
@@ -498,7 +505,8 @@ public fun CommonStatusComponent(
                             modifier =
                                 Modifier
                                     .fillMaxWidth()
-                                    .padding(top = 8.dp),
+                                    .padding(top = 8.dp)
+                                    .then(actionsModifier),
                         )
                     }
                 } else {
@@ -511,7 +519,8 @@ public fun CommonStatusComponent(
                             modifier =
                                 Modifier
                                     .fillMaxWidth()
-                                    .padding(top = 8.dp),
+                                    .padding(top = 8.dp)
+                                    .then(actionsModifier),
                         )
                     }
                 }

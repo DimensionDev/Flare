@@ -56,6 +56,68 @@ final class VideoPlaybackSessionTests: XCTestCase {
     }
 
     @MainActor
+    func testSwitchingMediaCancelsLoadingLooperBeforeReusingPlayer() async throws {
+        let firstURL = try await makeVideo()
+        let secondURL = try await makeVideo()
+        defer {
+            try? FileManager.default.removeItem(at: firstURL)
+            try? FileManager.default.removeItem(at: secondURL)
+        }
+        let first = VideoPlaybackSession()
+        let second = VideoPlaybackSession()
+        defer {
+            first.detach()
+            second.detach()
+            VideoPlaybackSession.releaseIdleBuffer()
+        }
+        first.play(url: firstURL.absoluteString, playing: false)
+        let player = try XCTUnwrap(first.player)
+        // Keep the old looper alive, as AVFoundation's pending asset load does.
+        let oldLooper = try XCTUnwrap(SharedVideoPlayer.shared.looper)
+        defer { oldLooper.disableLooping() }
+        XCTAssertEqual(oldLooper.status, .unknown)
+
+        second.play(url: secondURL.absoluteString, playing: false)
+        XCTAssertNil(first.player)
+        XCTAssertTrue(second.player === player)
+        XCTAssertEqual(oldLooper.status, .cancelled,
+                       "The old looper must stop managing the queue before another looper takes over")
+        // A regression must fail the assertion without letting two live loopers abort the test host.
+        guard oldLooper.status == .cancelled else { return }
+        let newLooper = try XCTUnwrap(SharedVideoPlayer.shared.looper)
+        XCTAssertFalse(newLooper === oldLooper)
+        try await waitUntilReady(player)
+        XCTAssertEqual(newLooper.status, .ready)
+        XCTAssertFalse(player.items().isEmpty)
+        for item in player.items() {
+            XCTAssertEqual((item.asset as? AVURLAsset)?.url, secondURL)
+        }
+    }
+
+    @MainActor
+    func testReleasingIdleBufferCancelsLoadingLooper() async throws {
+        let url = try await makeVideo()
+        defer { try? FileManager.default.removeItem(at: url) }
+        let session = VideoPlaybackSession()
+        defer {
+            session.detach()
+            VideoPlaybackSession.releaseIdleBuffer()
+        }
+        session.play(url: url.absoluteString, playing: false)
+        let player = try XCTUnwrap(session.player)
+        let looper = try XCTUnwrap(SharedVideoPlayer.shared.looper)
+        defer { looper.disableLooping() }
+        XCTAssertEqual(looper.status, .unknown)
+
+        session.detach()
+        VideoPlaybackSession.releaseIdleBuffer()
+        XCTAssertEqual(looper.status, .cancelled,
+                       "A pending looper must not repopulate the queue after the idle buffer is released")
+        XCTAssertNil(SharedVideoPlayer.shared.looper)
+        XCTAssertTrue(player.items().isEmpty)
+    }
+
+    @MainActor
     func testWarmHandoffPreservesLoadedItemAndIdleBufferExpires() async throws {
         let url = try await makeVideo()
         defer { try? FileManager.default.removeItem(at: url) }
@@ -71,11 +133,15 @@ final class VideoPlaybackSessionTests: XCTestCase {
         let player = try XCTUnwrap(inline.player)
         try await waitUntilReady(player)
         let item = try XCTUnwrap(player.currentItem)
+        let looper = try XCTUnwrap(SharedVideoPlayer.shared.looper)
+        defer { looper.disableLooping() }
         XCTAssertEqual(item.status, .readyToPlay)
         detail.play(url: url.absoluteString)
         XCTAssertNil(inline.player)
         XCTAssertTrue(detail.player === player)
         XCTAssertTrue(player.currentItem === item)
+        XCTAssertTrue(SharedVideoPlayer.shared.looper === looper)
+        XCTAssertEqual(looper.status, .ready)
         detail.detach()
         XCTAssertEqual(player.rate, 0)
         XCTAssertTrue(player.currentItem === item)
@@ -83,9 +149,11 @@ final class VideoPlaybackSessionTests: XCTestCase {
         VideoPlaybackSession.setPosition(for: url.absoluteString, seconds: 17)
         inline.play(url: url.absoluteString)
         XCTAssertTrue(player.currentItem === item)
+        XCTAssertTrue(SharedVideoPlayer.shared.looper === looper)
         XCTAssertEqual(inline.position, 17, "A seek committed between surfaces must beat the retained position")
         inline.detach()
         try await Task.sleep(for: .milliseconds(5200))
+        XCTAssertEqual(looper.status, .cancelled)
         XCTAssertTrue(player.items().isEmpty)
     }
 

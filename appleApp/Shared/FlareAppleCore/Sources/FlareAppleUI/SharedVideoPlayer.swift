@@ -12,11 +12,11 @@ public enum VideoState {
 
 /// The only AVPlayer allocation for inline video and the media viewer.
 @MainActor
-private final class SharedVideoPlayer {
+final class SharedVideoPlayer {
     static let shared = SharedVideoPlayer()
     private lazy var player = AVQueuePlayer()
     private weak var owner: VideoPlaybackSession?
-    private var looper: AVPlayerLooper?
+    private(set) var looper: AVPlayerLooper?
     private var playbackSubscription: AnyCancellable?
     private var looperSubscription: AnyCancellable?
     private var timeObserver: Any?
@@ -74,6 +74,8 @@ private final class SharedVideoPlayer {
         generation += 1
         stopObserving()
         player.pause()
+        // Pending asset loading can retain the old looper after we release it.
+        looper?.disableLooping()
         looper = nil
         player.removeAllItems()
         player.isMuted = true
@@ -296,6 +298,7 @@ private final class SharedVideoPlayer {
         generation += 1
         stopObserving()
         player.pause()
+        looper?.disableLooping()
         looper = nil
         player.removeAllItems()
         loadedURL = nil

@@ -204,8 +204,7 @@ private fun ReplyVisibilitySelector(
 ) {
     var expanded by remember { mutableStateOf(false) }
     SegmentedListItem(
-        checked = expanded,
-        onCheckedChange = { expanded = it },
+        onClick = { expanded = true },
         shapes = shapes,
         content = {
             Text(text = stringResource(id = R.string.tab_settings_filter_reply))

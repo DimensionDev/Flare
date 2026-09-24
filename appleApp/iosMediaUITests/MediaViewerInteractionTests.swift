@@ -13,7 +13,7 @@ final class MediaViewerInteractionTests: XCTestCase {
         XCTAssertTrue(open.waitForExistence(timeout: 15))
         open.tap()
         XCTAssertTrue(app.buttons["Close"].waitForExistence(timeout: 10))
-        if !withoutPost { XCTAssertTrue(app.staticTexts["Media Test User"].waitForExistence(timeout: 10)) }
+        if !withoutPost { XCTAssertTrue(app.buttons["More"].firstMatch.waitForExistence(timeout: 10)) }
         return app
     }
 
@@ -74,10 +74,7 @@ final class MediaViewerInteractionTests: XCTestCase {
     }
 
     @MainActor
-    func testSummaryKeepsWidthAndBottomSpacingWithAndWithoutControls() throws {
-        guard #available(iOS 26.0, *) else {
-            throw XCTSkip("The minimum summary height targets the iOS 26 sheet design")
-        }
+    func testSummaryFitsProfileAndMediaControls() throws {
         let image = try XCTUnwrap(checkSummaryLayout(video: false))
         let indicator = try XCTUnwrap(checkSummaryLayout(video: false, indicator: true))
         let video = try XCTUnwrap(checkSummaryLayout(video: true))
@@ -86,8 +83,8 @@ final class MediaViewerInteractionTests: XCTestCase {
         XCTAssertEqual(image.sheet.width, video.sheet.width, accuracy: 1)
         XCTAssertEqual(image.bottomGap, indicator.bottomGap, accuracy: 2)
         XCTAssertEqual(image.bottomGap, video.bottomGap, accuracy: 2)
-        XCTAssertEqual(image.sheet.height, indicator.sheet.height, accuracy: 1)
-        XCTAssertGreaterThan(video.sheet.height, image.sheet.height, "The summary must still grow to fit video controls")
+        XCTAssertGreaterThan(indicator.sheet.height, image.sheet.height, "The summary must grow to fit the page indicator")
+        XCTAssertGreaterThan(video.sheet.height, indicator.sheet.height, "The summary must grow to fit video controls")
     }
 
     @MainActor

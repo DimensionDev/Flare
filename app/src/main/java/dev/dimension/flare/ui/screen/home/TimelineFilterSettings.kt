@@ -58,6 +58,7 @@ internal fun TimelineFilterDialog(
                 TimelinePostKind.Reply,
                 TimelinePostKind.Repost,
                 TimelinePostKind.Quote,
+                TimelinePostKind.ReplyToUnfollowed,
             )
         }
     val contentOptions =
@@ -182,6 +183,7 @@ private fun filterKindLabel(kind: TimelinePostKind): String =
         TimelinePostKind.Reply -> stringResource(id = R.string.tab_settings_filter_reply)
         TimelinePostKind.Repost -> stringResource(id = R.string.tab_settings_filter_repost)
         TimelinePostKind.Quote -> stringResource(id = R.string.tab_settings_filter_quote)
+        TimelinePostKind.ReplyToUnfollowed -> stringResource(id = R.string.tab_settings_filter_reply_to_unfollowed)
         TimelinePostKind.Original -> error("Original is not exposed in timeline filter UI")
     }
 

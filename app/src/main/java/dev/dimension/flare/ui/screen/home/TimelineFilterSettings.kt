@@ -33,6 +33,7 @@ import dev.dimension.flare.data.model.tab.replyVisibility
 import dev.dimension.flare.data.model.tab.withReplyVisibility
 import dev.dimension.flare.ui.component.FlareDropdownMenu
 import dev.dimension.flare.ui.theme.segmentedShapes2
+import dev.dimension.flare.ui.theme.single
 
 @Composable
 internal fun TimelineFilterSettingsItem(
@@ -114,7 +115,7 @@ internal fun TimelineFilterDialog(
                         ReplyVisibilitySelector(
                             selected = selectedReplyVisibility,
                             onSelect = { selectedReplyVisibility = it },
-                            shapes = ListItemDefaults.segmentedShapes2(0, kindOptions.size + 1),
+                            shapes = ListItemDefaults.single(),
                         )
                     },
                 )

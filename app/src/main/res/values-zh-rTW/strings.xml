@@ -757,5 +757,4 @@
     <string name="settings_translation_show_original_with_translation_description">在翻譯前顯示原始文字</string>
     <string name="settings_appearance_show_post_in_media_viewer">在媒體檢視器中顯示貼文</string>
     <string name="settings_appearance_show_post_in_media_viewer_description">顯示作者和操作列，上滑可閱讀貼文詳情</string>
-    <string name="media_post_collapse">收合貼文</string>
 </resources>

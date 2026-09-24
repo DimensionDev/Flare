@@ -757,5 +757,4 @@
     <string name="selected">已选择</string>
     <string name="settings_appearance_show_post_in_media_viewer">在媒体查看器中显示帖子</string>
     <string name="settings_appearance_show_post_in_media_viewer_description">显示作者和操作栏，上滑可阅读帖子详情</string>
-    <string name="media_post_collapse">收起帖子</string>
 </resources>

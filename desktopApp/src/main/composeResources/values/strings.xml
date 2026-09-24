@@ -582,6 +582,7 @@
     <string name="tab_settings_filter_reply">Replies</string>
     <string name="tab_settings_filter_repost">Reposts</string>
     <string name="tab_settings_filter_quote">Quotes</string>
+    <string name="tab_settings_filter_reply_to_unfollowed">Replies to accounts you don’t follow</string>
     <string name="tab_settings_filter_text_only">Text-only</string>
     <string name="tab_settings_filter_image">Images</string>
     <string name="tab_settings_filter_video">Videos</string>

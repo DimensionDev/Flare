@@ -108,6 +108,7 @@ import dev.dimension.flare.tab_settings_filter_image
 import dev.dimension.flare.tab_settings_filter_kind_group
 import dev.dimension.flare.tab_settings_filter_quote
 import dev.dimension.flare.tab_settings_filter_reply
+import dev.dimension.flare.tab_settings_filter_reply_to_unfollowed
 import dev.dimension.flare.tab_settings_filter_repost
 import dev.dimension.flare.tab_settings_filter_text_only
 import dev.dimension.flare.tab_settings_filter_title
@@ -696,6 +697,7 @@ private fun TimelineFilterDialog(
                 TimelinePostKind.Reply,
                 TimelinePostKind.Repost,
                 TimelinePostKind.Quote,
+                TimelinePostKind.ReplyToUnfollowed,
             )
         }
     val contentOptions =
@@ -818,6 +820,7 @@ private fun filterKindLabel(kind: TimelinePostKind): String =
         TimelinePostKind.Reply -> stringResource(Res.string.tab_settings_filter_reply)
         TimelinePostKind.Repost -> stringResource(Res.string.tab_settings_filter_repost)
         TimelinePostKind.Quote -> stringResource(Res.string.tab_settings_filter_quote)
+        TimelinePostKind.ReplyToUnfollowed -> stringResource(Res.string.tab_settings_filter_reply_to_unfollowed)
         TimelinePostKind.Original -> error("Original is not exposed in timeline filter UI")
     }
 

@@ -65,6 +65,7 @@ public enum class TimelinePostKind {
     Reply,
     Repost,
     Quote,
+    ReplyToUnfollowed,
 }
 
 @Immutable

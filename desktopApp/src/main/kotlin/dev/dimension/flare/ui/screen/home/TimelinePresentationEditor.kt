@@ -2,6 +2,7 @@ package dev.dimension.flare.ui.screen.home
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -41,6 +42,9 @@ import dev.dimension.flare.data.model.appearance.TimelineAppearance
 import dev.dimension.flare.data.model.tab.TimelineFilterConfig
 import dev.dimension.flare.data.model.tab.TimelinePostContent
 import dev.dimension.flare.data.model.tab.TimelinePostKind
+import dev.dimension.flare.data.model.tab.TimelineReplyVisibility
+import dev.dimension.flare.data.model.tab.replyVisibility
+import dev.dimension.flare.data.model.tab.withReplyVisibility
 import dev.dimension.flare.edit_tab_enabled
 import dev.dimension.flare.edit_tab_with_avatar
 import dev.dimension.flare.ok
@@ -102,16 +106,18 @@ import dev.dimension.flare.settings_appearance_video_autoplay_never
 import dev.dimension.flare.settings_appearance_video_autoplay_wifi
 import dev.dimension.flare.settings_post_action_fixed_width
 import dev.dimension.flare.settings_post_action_fixed_width_description
+import dev.dimension.flare.tab_settings_filter_all_replies
 import dev.dimension.flare.tab_settings_filter_content_group
 import dev.dimension.flare.tab_settings_filter_desc
 import dev.dimension.flare.tab_settings_filter_image
 import dev.dimension.flare.tab_settings_filter_kind_group
+import dev.dimension.flare.tab_settings_filter_no_replies
 import dev.dimension.flare.tab_settings_filter_quote
 import dev.dimension.flare.tab_settings_filter_reply
-import dev.dimension.flare.tab_settings_filter_reply_to_unfollowed
 import dev.dimension.flare.tab_settings_filter_repost
 import dev.dimension.flare.tab_settings_filter_text_only
 import dev.dimension.flare.tab_settings_filter_title
+import dev.dimension.flare.tab_settings_filter_to_followed_accounts
 import dev.dimension.flare.tab_settings_filter_video
 import dev.dimension.flare.ui.component.TabIcon
 import dev.dimension.flare.ui.model.UiText
@@ -127,6 +133,7 @@ import io.github.composefluent.component.Flyout
 import io.github.composefluent.component.FlyoutPlacement
 import io.github.composefluent.component.MenuFlyoutContainer
 import io.github.composefluent.component.MenuFlyoutItem
+import io.github.composefluent.component.RadioButton
 import io.github.composefluent.component.Switcher
 import io.github.composefluent.component.Text
 import io.github.composefluent.component.TextField
@@ -694,10 +701,8 @@ private fun TimelineFilterDialog(
     val kindOptions =
         remember {
             listOf(
-                TimelinePostKind.Reply,
                 TimelinePostKind.Repost,
                 TimelinePostKind.Quote,
-                TimelinePostKind.ReplyToUnfollowed,
             )
         }
     val contentOptions =
@@ -710,6 +715,9 @@ private fun TimelineFilterDialog(
         }
     var selectedKinds by remember(filterConfig) {
         mutableStateOf(kindOptions.filterNot { it in filterConfig.excludedKinds }.toSet())
+    }
+    var selectedReplyVisibility by remember(filterConfig) {
+        mutableStateOf(filterConfig.replyVisibility)
     }
     var selectedContents by remember(filterConfig) {
         mutableStateOf(contentOptions.filterNot { it in filterConfig.excludedContents }.toSet())
@@ -726,7 +734,7 @@ private fun TimelineFilterDialog(
                         TimelineFilterConfig(
                             excludedKinds = kindOptions.filterNot { option -> option in selectedKinds },
                             excludedContents = contentOptions.filterNot { option -> option in selectedContents },
-                        ),
+                        ).withReplyVisibility(selectedReplyVisibility),
                     )
                 }
 
@@ -758,6 +766,12 @@ private fun TimelineFilterDialog(
                                 selectedKinds + option
                             }
                     },
+                    extraContent = {
+                        ReplyVisibilityOptions(
+                            selected = selectedReplyVisibility,
+                            onSelect = { selectedReplyVisibility = it },
+                        )
+                    },
                 )
                 FilterSection(
                     title = stringResource(Res.string.tab_settings_filter_content_group),
@@ -785,11 +799,13 @@ private fun <T> FilterSection(
     selected: Set<T>,
     label: @Composable (T) -> String,
     onToggle: (T) -> Unit,
+    extraContent: @Composable () -> Unit = {},
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
         Text(title)
+        extraContent()
         LazyColumn(
             modifier = Modifier.heightIn(max = 160.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp),
@@ -815,12 +831,53 @@ private fun <T> FilterSection(
 }
 
 @Composable
+private fun ReplyVisibilityOptions(
+    selected: TimelineReplyVisibility,
+    onSelect: (TimelineReplyVisibility) -> Unit,
+) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        Text(stringResource(Res.string.tab_settings_filter_reply))
+        TimelineReplyVisibility.entries.forEach { option ->
+            val interactionSource = remember(option) { MutableInteractionSource() }
+            Row(
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .clickable(
+                            interactionSource = interactionSource,
+                            indication = null,
+                            onClick = { onSelect(option) },
+                        ),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                RadioButton(
+                    selected = selected == option,
+                    interactionSource = interactionSource,
+                    onClick = { onSelect(option) },
+                )
+                Text(stringResource(option.label))
+            }
+        }
+    }
+}
+
+private val TimelineReplyVisibility.label: StringResource
+    get() =
+        when (this) {
+            TimelineReplyVisibility.AllReplies -> Res.string.tab_settings_filter_all_replies
+            TimelineReplyVisibility.ToFollowedAccounts -> Res.string.tab_settings_filter_to_followed_accounts
+            TimelineReplyVisibility.NoReplies -> Res.string.tab_settings_filter_no_replies
+        }
+
+@Composable
 private fun filterKindLabel(kind: TimelinePostKind): String =
     when (kind) {
-        TimelinePostKind.Reply -> stringResource(Res.string.tab_settings_filter_reply)
+        TimelinePostKind.Reply, TimelinePostKind.ReplyToUnfollowed -> error("Replies use a dedicated filter")
         TimelinePostKind.Repost -> stringResource(Res.string.tab_settings_filter_repost)
         TimelinePostKind.Quote -> stringResource(Res.string.tab_settings_filter_quote)
-        TimelinePostKind.ReplyToUnfollowed -> stringResource(Res.string.tab_settings_filter_reply_to_unfollowed)
         TimelinePostKind.Original -> error("Original is not exposed in timeline filter UI")
     }
 

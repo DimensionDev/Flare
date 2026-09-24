@@ -3,6 +3,7 @@ package dev.dimension.flare.ui.screen.home
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.rememberScrollState
@@ -11,6 +12,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.ListItemShapes
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.SegmentedListItem
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -19,6 +21,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -26,6 +29,9 @@ import dev.dimension.flare.R
 import dev.dimension.flare.data.model.tab.TimelineFilterConfig
 import dev.dimension.flare.data.model.tab.TimelinePostContent
 import dev.dimension.flare.data.model.tab.TimelinePostKind
+import dev.dimension.flare.data.model.tab.TimelineReplyVisibility
+import dev.dimension.flare.data.model.tab.replyVisibility
+import dev.dimension.flare.data.model.tab.withReplyVisibility
 import dev.dimension.flare.ui.theme.segmentedShapes2
 
 @Composable
@@ -55,10 +61,8 @@ internal fun TimelineFilterDialog(
     val kindOptions =
         remember {
             listOf(
-                TimelinePostKind.Reply,
                 TimelinePostKind.Repost,
                 TimelinePostKind.Quote,
-                TimelinePostKind.ReplyToUnfollowed,
             )
         }
     val contentOptions =
@@ -71,6 +75,9 @@ internal fun TimelineFilterDialog(
         }
     var selectedKinds by remember(filterConfig) {
         mutableStateOf(kindOptions.filterNot { it in filterConfig.excludedKinds }.toSet())
+    }
+    var selectedReplyVisibility by remember(filterConfig) {
+        mutableStateOf(filterConfig.replyVisibility)
     }
     var selectedContents by remember(filterConfig) {
         mutableStateOf(contentOptions.filterNot { it in filterConfig.excludedContents }.toSet())
@@ -102,6 +109,12 @@ internal fun TimelineFilterDialog(
                                 selectedKinds + option
                             }
                     },
+                    extraContent = {
+                        ReplyVisibilityOptions(
+                            selected = selectedReplyVisibility,
+                            onSelect = { selectedReplyVisibility = it },
+                        )
+                    },
                 )
                 FilterSection(
                     title = stringResource(id = R.string.tab_settings_filter_content_group),
@@ -126,7 +139,7 @@ internal fun TimelineFilterDialog(
                         TimelineFilterConfig(
                             excludedKinds = kindOptions.filterNot { it in selectedKinds },
                             excludedContents = contentOptions.filterNot { it in selectedContents },
-                        ),
+                        ).withReplyVisibility(selectedReplyVisibility),
                     )
                 },
             ) {
@@ -148,11 +161,13 @@ private fun <T> FilterSection(
     selected: Set<T>,
     label: @Composable (T) -> String,
     onToggle: (T) -> Unit,
+    extraContent: @Composable () -> Unit = {},
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
     ) {
         Text(text = title)
+        extraContent()
         options.forEachIndexed { index, option ->
             val checked = option in selected
             SegmentedListItem(
@@ -178,12 +193,41 @@ private fun <T> FilterSection(
 }
 
 @Composable
+private fun ReplyVisibilityOptions(
+    selected: TimelineReplyVisibility,
+    onSelect: (TimelineReplyVisibility) -> Unit,
+) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
+    ) {
+        Text(text = stringResource(id = R.string.tab_settings_filter_reply))
+        TimelineReplyVisibility.entries.forEach { option ->
+            val label =
+                when (option) {
+                    TimelineReplyVisibility.AllReplies -> R.string.tab_settings_filter_all_replies
+                    TimelineReplyVisibility.ToFollowedAccounts -> R.string.tab_settings_filter_to_followed_accounts
+                    TimelineReplyVisibility.NoReplies -> R.string.tab_settings_filter_no_replies
+                }
+            Row(
+                modifier = Modifier.fillMaxWidth().clickable { onSelect(option) },
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                RadioButton(
+                    selected = selected == option,
+                    onClick = { onSelect(option) },
+                )
+                Text(text = stringResource(id = label))
+            }
+        }
+    }
+}
+
+@Composable
 private fun filterKindLabel(kind: TimelinePostKind): String =
     when (kind) {
-        TimelinePostKind.Reply -> stringResource(id = R.string.tab_settings_filter_reply)
+        TimelinePostKind.Reply, TimelinePostKind.ReplyToUnfollowed -> error("Replies use a dedicated filter")
         TimelinePostKind.Repost -> stringResource(id = R.string.tab_settings_filter_repost)
         TimelinePostKind.Quote -> stringResource(id = R.string.tab_settings_filter_quote)
-        TimelinePostKind.ReplyToUnfollowed -> stringResource(id = R.string.tab_settings_filter_reply_to_unfollowed)
         TimelinePostKind.Original -> error("Original is not exposed in timeline filter UI")
     }
 

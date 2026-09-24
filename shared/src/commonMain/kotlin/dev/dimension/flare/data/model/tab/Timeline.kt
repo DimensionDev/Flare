@@ -58,6 +58,35 @@ public data class TimelineFilterConfig(
     val excludedContents: List<TimelinePostContent> = emptyList(),
 )
 
+public enum class TimelineReplyVisibility {
+    AllReplies,
+    ToFollowedAccounts,
+    NoReplies,
+}
+
+public val TimelineFilterConfig.replyVisibility: TimelineReplyVisibility
+    get() =
+        when {
+            TimelinePostKind.Reply in excludedKinds -> TimelineReplyVisibility.NoReplies
+            TimelinePostKind.ReplyToUnfollowed in excludedKinds -> TimelineReplyVisibility.ToFollowedAccounts
+            else -> TimelineReplyVisibility.AllReplies
+        }
+
+public fun TimelineFilterConfig.withReplyVisibility(visibility: TimelineReplyVisibility): TimelineFilterConfig {
+    val replyExclusions =
+        when (visibility) {
+            TimelineReplyVisibility.AllReplies -> emptyList()
+            TimelineReplyVisibility.ToFollowedAccounts -> listOf(TimelinePostKind.ReplyToUnfollowed)
+            TimelineReplyVisibility.NoReplies -> listOf(TimelinePostKind.Reply)
+        }
+    return copy(
+        excludedKinds =
+            excludedKinds.filterNot {
+                it == TimelinePostKind.Reply || it == TimelinePostKind.ReplyToUnfollowed
+            } + replyExclusions,
+    )
+}
+
 @Immutable
 @Serializable
 public enum class TimelinePostKind {

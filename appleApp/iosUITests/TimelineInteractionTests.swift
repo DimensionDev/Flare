@@ -23,7 +23,10 @@ final class TimelineInteractionTests: XCTestCase {
     @MainActor func testHeightRefinementDoesNotInterruptScrollToTop() { run("scroll-to-top") }
     @MainActor func testHeightRefinementPreservesAnActivePan() { run("drag", gesture: true) }
     @MainActor func testHeightRefinementPreservesDeceleration() { run("deceleration", gesture: true) }
-    @MainActor func testRefinedReadingItemRemainsVisibleDuringPan() { run("refine-reading-item", gesture: true) }
+    @MainActor func testRefiningAPartlyHiddenCardKeepsVisibleContentDuringPan() { run("refine-reading-item", gesture: true) }
+    @MainActor func testRefiningAPartlyHiddenCardKeepsVisibleContentDuringDeceleration() { run("refine-reading-item-deceleration", gesture: true) }
+    @MainActor func testPrependDuringPullRefreshKeepsTheReadingItem() { run("pull-refresh", gesture: true) }
+    @MainActor func testPrependDuringRefreshRevealKeepsTheReadingItem() { run("fast-refresh-prepend") }
     @MainActor func testSnapshotChangesPreserveAnActivePan() { run("snapshot-drag", gesture: true) }
     @MainActor func testSnapshotChangesPreserveDeceleration() { run("snapshot-deceleration", gesture: true) }
     @MainActor func testSnapshotChangesPreserveMultipleColumns() { run("snapshot-columns-deceleration", gesture: true) }

@@ -34,6 +34,9 @@ private final class TimelineTestController: UIViewController, CHTCollectionViewD
     private var started = false
     private var failures: [String] = []
     private let scenario = ProcessInfo.processInfo.arguments.dropFirst().first ?? "refresh"
+    private var receivedPullRefresh = false
+    private var pendingRefreshSnapshot: NSDiffableDataSourceSnapshot<Int, Int>?
+    private var didCommitRefreshSnapshot = false
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -70,6 +73,7 @@ private final class TimelineTestController: UIViewController, CHTCollectionViewD
         list.onProgrammaticScrollBegan = { [weak self] in self?.scrolling = true }
         list.onProgrammaticScrollEnded = { [weak self] in self?.scrolling = false }
         list.refreshControl = UIRefreshControl()
+        list.refreshControl?.addTarget(self, action: #selector(pullRefreshBegan), for: .valueChanged)
         if scenario != "initial-refresh" { loadItems() }
     }
 
@@ -81,7 +85,8 @@ private final class TimelineTestController: UIViewController, CHTCollectionViewD
             await settle(200)
             switch scenario {
             case "scroll-to-top": await checkScrollToTop()
-            case "drag", "deceleration", "refine-reading-item": await checkGesture()
+            case "drag", "deceleration", "refine-reading-item", "refine-reading-item-deceleration": await checkGesture()
+            case "pull-refresh", "fast-refresh-prepend": await checkRefreshWithPrepend()
             case let name where name.hasPrefix("snapshot-"): await checkSnapshotGesture()
             default: await checkRefresh()
             }
@@ -144,7 +149,7 @@ private final class TimelineTestController: UIViewController, CHTCollectionViewD
     }
 
     private func checkGesture() async {
-        let refineReadingItem = scenario == "refine-reading-item"
+        let refineReadingItem = scenario.hasPrefix("refine-reading-item")
         if refineReadingItem {
             heights[20] = 600
             list.invalidateMeasuredHeights()
@@ -164,6 +169,8 @@ private final class TimelineTestController: UIViewController, CHTCollectionViewD
             return
         }
         let oldScreenY = oldFrame.minY - list.contentOffset.y
+        let nextPath = dataSource.indexPath(for: id + 1)!
+        let nextScreenY = layout.layoutAttributesForItem(at: nextPath)!.frame.minY - list.contentOffset.y
         if refineReadingItem {
             heights[id] = 120
         } else {
@@ -173,8 +180,9 @@ private final class TimelineTestController: UIViewController, CHTCollectionViewD
         list.layoutIfNeeded()
         let newScreenY = layout.layoutAttributesForItem(at: path)!.frame.minY - list.contentOffset.y
         if refineReadingItem {
-            check(list.captureReadingPosition()?.itemID == String(id), "refinement hid the reading item during the pan")
-            check(abs(newScreenY - list.restingAdjustedTopInset + 119) < 1, "unreachable estimated offset was not clamped to the reading item")
+            let newNextScreenY = layout.layoutAttributesForItem(at: nextPath)!.frame.minY - list.contentOffset.y
+            check(abs(newNextScreenY - nextScreenY) < 1,
+                  "shrinking the partly hidden card moved visible content by \(newNextScreenY - nextScreenY)pt")
         } else {
             check(abs(newScreenY - oldScreenY) < 1, "height refinement moved reading item by \(newScreenY - oldScreenY)pt")
         }
@@ -183,6 +191,62 @@ private final class TimelineTestController: UIViewController, CHTCollectionViewD
             let offset = list.contentOffset.y
             await settle(40)
             check(abs(list.contentOffset.y - offset) > 1, "height compensation stopped momentum")
+        }
+    }
+
+    @objc private func pullRefreshBegan() {
+        receivedPullRefresh = true
+        list.beginRefreshing(revealingIndicator: false)
+    }
+
+    private func checkRefreshWithPrepend() async {
+        let baseline = list.restingAdjustedTopInset
+        jump(to: -baseline)
+        if scenario == "pull-refresh" {
+            let ready = UILabel(frame: CGRect(x: 16, y: 0, width: 200, height: 20))
+            ready.text = "Ready"
+            ready.accessibilityIdentifier = "gesture-ready"
+            view.addSubview(ready)
+            for _ in 0..<1000 {
+                if receivedPullRefresh { break }
+                try? await Task.sleep(for: .milliseconds(10))
+            }
+            check(receivedPullRefresh, "native pull refresh did not start")
+        } else {
+            list.beginRefreshing(revealingIndicator: true)
+        }
+        await settle(50)
+        if scenario == "pull-refresh" {
+            check(list.isScrollInteractionActive && list.contentOffset.y < -baseline,
+                  "refresh result did not arrive during the elastic pull")
+        }
+        var snapshot = dataSource.snapshot()
+        snapshot.insertItems(Array(200..<205), beforeItem: 0)
+        pendingRefreshSnapshot = snapshot
+        applyPendingRefreshSnapshot()
+        for _ in 0..<1000 {
+            if didCommitRefreshSnapshot { break }
+            await settle(10)
+        }
+        check(didCommitRefreshSnapshot, "refresh result remained queued after scrolling ended")
+        await settle(600)
+        let frame = layout.layoutAttributesForItem(at: dataSource.indexPath(for: 0)!)!.frame
+        check(abs(frame.minY - list.contentOffset.y - baseline) < 1,
+              "refresh moved the old first row by \(frame.minY - list.contentOffset.y - baseline)pt")
+        check(!list.hasReadingPosition, "refresh left a stale bookmark")
+        // Remove the native spinner after sampling so XCTest can finish quiescing.
+        list.refreshControl = nil
+    }
+
+    private func applyPendingRefreshSnapshot() {
+        guard let snapshot = pendingRefreshSnapshot, !list.shouldDeferSnapshotChanges else { return }
+        pendingRefreshSnapshot = nil
+        list.prepareForSnapshotChange()
+        list.performUpdatesPreservingReadingPosition(keepingItemIDs: Set(snapshot.itemIdentifiers.map(String.init))) {
+            dataSource.apply(snapshot, animatingDifferences: false) { [weak self] in
+                self?.didCommitRefreshSnapshot = true
+                self?.list.endRefreshing()
+            }
         }
     }
 
@@ -306,12 +370,17 @@ private final class TimelineTestController: UIViewController, CHTCollectionViewD
     }
 
     func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
-        if !decelerate { scrolling = false }
+        if !decelerate { endScrollInteraction() }
     }
-    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) { scrolling = false }
+    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) { endScrollInteraction() }
     func scrollViewDidEndScrollingAnimation(_ scrollView: UIScrollView) {
-        list.endProgrammaticScrolling()
-        scrolling = false
+        endScrollInteraction()
     }
-    func scrollViewDidScrollToTop(_ scrollView: UIScrollView) { scrolling = false }
+    func scrollViewDidScrollToTop(_ scrollView: UIScrollView) { endScrollInteraction() }
+
+    private func endScrollInteraction() {
+        list.endScrollInteraction()
+        scrolling = false
+        applyPendingRefreshSnapshot()
+    }
 }

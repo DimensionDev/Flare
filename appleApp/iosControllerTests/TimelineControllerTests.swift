@@ -83,6 +83,33 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         XCTAssertFalse(fixture.collection.isPresentingRefresh)
     }
 
+    func testPullRefreshCommitsOnlyTheLatestInputAfterTheGestureSettles() async throws {
+        let fixture = await Fixture(posts: true)
+        let collection = fixture.collection
+        let originalIDs = collection.readingItemIDs?()
+        fixture.controller.beginExternalScrollInteraction()
+        collection.setContentOffset(CGPoint(x: 0, y: -180), animated: false)
+        collection.beginRefreshing(revealingIndicator: false)
+
+        fixture.input.items.insert(.post(makeRow(100)), at: 0)
+        await fixture.apply()
+        fixture.input.items.insert(.post(makeRow(101)), at: 0)
+        await fixture.apply()
+        XCTAssertEqual(collection.readingItemIDs?(), originalIDs,
+            "A prepend must not turn the elastic pull distance into a reading offset")
+        XCTAssertTrue(collection.isPresentingRefresh, "Refresh cannot finish before its queued result commits")
+
+        // The profile's external scroll coordinator reports the same interaction
+        // boundary as a native pan. Model its return to the resting refresh inset.
+        collection.setContentOffset(CGPoint(x: 0, y: -collection.adjustedContentInset.top), animated: false)
+        fixture.controller.endExternalScrollInteraction()
+        await fixture.settle()
+
+        XCTAssertEqual(Array(collection.readingItemIDs?().prefix(3) ?? []), ["t:case-101", "t:case-100", "t:case-0"])
+        try fixture.assertPosition(("t:case-0", 0))
+        XCTAssertFalse(collection.isPresentingRefresh)
+    }
+
     func testUnboundInputDoesNotConsumeInitialRefreshSuppression() async {
         let fixture = await Fixture()
         fixture.controller.suppressInitialRefreshIndicator = true

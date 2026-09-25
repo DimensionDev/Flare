@@ -138,7 +138,7 @@ public struct StatusView: View {
         let statusKey = data.statusKey
         let effectiveLineLimit = max(maxLine ?? Int(appearanceLineLimit), 1)
         let contentLineLimit: Int? = isDetail || textExpanded ? nil : effectiveLineLimit
-        let collapseThreshold = maxLine == nil ? max(10, effectiveLineLimit) : effectiveLineLimit
+        let collapseThreshold = maxLine == nil ? max(15, effectiveLineLimit) : effectiveLineLimit
         let canExpandLineLimitedContent = contentLineLimit != nil && !isDetail && !textExpanded && showExpandTextButton
         let hasPreMediaBody =
             replyToHandle != nil ||

@@ -396,7 +396,7 @@ struct MacSidebarSettingLabel: View {
 struct MacSidebarFilterEditor: View {
     @Binding var filterConfig: TimelineFilterConfig
 
-    private let kindOptions: [TimelinePostKind] = [.reply, .repost, .quote]
+    private let kindOptions: [TimelinePostKind] = [.repost, .quote]
     private let contentOptions: [TimelinePostContent] = [.text, .image, .video]
 
     var body: some View {
@@ -405,6 +405,13 @@ struct MacSidebarFilterEditor: View {
                 Text("tab_settings_filter_kind_group")
                     .font(.caption)
                     .foregroundStyle(.secondary)
+
+                Picker("tab_settings_filter_reply", selection: replyVisibilityBinding) {
+                    Text("tab_settings_filter_all_replies").tag(TimelineReplyVisibility.allReplies)
+                    Text("tab_settings_filter_to_followed_accounts").tag(TimelineReplyVisibility.toFollowedAccounts)
+                    Text("tab_settings_filter_no_replies").tag(TimelineReplyVisibility.noReplies)
+                }
+                .pickerStyle(.menu)
 
                 ForEach(kindOptions, id: \.self) { kind in
                     Toggle(isOn: includedKindBinding(kind)) {
@@ -459,6 +466,13 @@ struct MacSidebarFilterEditor: View {
         )
     }
 
+    private var replyVisibilityBinding: Binding<TimelineReplyVisibility> {
+        Binding(
+            get: { timelineReplyVisibility(for: filterConfig) },
+            set: { filterConfig = applyingReplyVisibility($0, to: filterConfig) }
+        )
+    }
+
     private func includedContentBinding(_ content: TimelinePostContent) -> Binding<Bool> {
         Binding(
             get: { !filterConfig.excludedContents.contains(content) },
@@ -476,6 +490,29 @@ struct MacSidebarFilterEditor: View {
             }
         )
     }
+}
+
+private func timelineReplyVisibility(for filterConfig: TimelineFilterConfig) -> TimelineReplyVisibility {
+    if filterConfig.excludedKinds.contains(.reply) {
+        return .noReplies
+    }
+    if filterConfig.excludedKinds.contains(.replyToUnfollowed) {
+        return .toFollowedAccounts
+    }
+    return .allReplies
+}
+
+private func applyingReplyVisibility(
+    _ visibility: TimelineReplyVisibility,
+    to filterConfig: TimelineFilterConfig
+) -> TimelineFilterConfig {
+    var excludedKinds = filterConfig.excludedKinds.filter { $0 != .reply && $0 != .replyToUnfollowed }
+    if visibility == .noReplies {
+        excludedKinds.append(.reply)
+    } else if visibility == .toFollowedAccounts {
+        excludedKinds.append(.replyToUnfollowed)
+    }
+    return TimelineFilterConfig(excludedKinds: excludedKinds, excludedContents: filterConfig.excludedContents)
 }
 
 private extension TimelinePostKind {

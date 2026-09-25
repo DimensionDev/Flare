@@ -199,6 +199,29 @@ class TimelinePresenterFilterTest {
     }
 
     @Test
+    fun replyToUnfollowedFilterKeepsSelfReplies() {
+        val author = createSampleUser()
+        val selfThread =
+            UiTimelineV2.TimelinePostItem(
+                post = createSampleStatus(author),
+                presentation =
+                    UiTimelineV2.PostPresentation(
+                        inlineParents =
+                            persistentListOf(
+                                UiTimelineV2.TimelinePostItem(
+                                    createSampleStatus(author.copy(isFollowing = false)),
+                                ),
+                            ),
+                    ),
+            )
+        val filter = TimelineFilterConfig(excludedKinds = listOf(TimelinePostKind.ReplyToUnfollowed))
+
+        assertFalse(TimelinePostKind.Reply in selfThread.traits().kinds)
+        assertFalse(TimelinePostKind.ReplyToUnfollowed in selfThread.traits().kinds)
+        assertTrue(selfThread.matchesTimelineFilter(filter))
+    }
+
+    @Test
     fun matchesKeywordFiltersUsesRegexForRegexRules() {
         val status =
             createSampleStatus(createSampleUser()).copy(

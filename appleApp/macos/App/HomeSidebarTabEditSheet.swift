@@ -468,8 +468,8 @@ struct MacSidebarFilterEditor: View {
 
     private var replyVisibilityBinding: Binding<TimelineReplyVisibility> {
         Binding(
-            get: { timelineReplyVisibility(for: filterConfig) },
-            set: { filterConfig = applyingReplyVisibility($0, to: filterConfig) }
+            get: { filterConfig.replyVisibility },
+            set: { filterConfig = filterConfig.withReplyVisibility(visibility: $0) }
         )
     }
 
@@ -490,29 +490,6 @@ struct MacSidebarFilterEditor: View {
             }
         )
     }
-}
-
-private func timelineReplyVisibility(for filterConfig: TimelineFilterConfig) -> TimelineReplyVisibility {
-    if filterConfig.excludedKinds.contains(.reply) {
-        return .noReplies
-    }
-    if filterConfig.excludedKinds.contains(.replyToUnfollowed) {
-        return .toFollowedAccounts
-    }
-    return .allReplies
-}
-
-private func applyingReplyVisibility(
-    _ visibility: TimelineReplyVisibility,
-    to filterConfig: TimelineFilterConfig
-) -> TimelineFilterConfig {
-    var excludedKinds = filterConfig.excludedKinds.filter { $0 != .reply && $0 != .replyToUnfollowed }
-    if visibility == .noReplies {
-        excludedKinds.append(.reply)
-    } else if visibility == .toFollowedAccounts {
-        excludedKinds.append(.replyToUnfollowed)
-    }
-    return TimelineFilterConfig(excludedKinds: excludedKinds, excludedContents: filterConfig.excludedContents)
 }
 
 private extension TimelinePostKind {

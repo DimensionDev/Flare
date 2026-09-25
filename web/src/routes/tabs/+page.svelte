@@ -15,6 +15,7 @@
 		type TimelineMergePolicy,
 		type TimelinePostContent,
 		type TimelinePostKind,
+		type TimelineReplyVisibility,
 		type UiTimelineTabItem,
 		type UiText,
 		type VideoAutoplay,
@@ -28,8 +29,7 @@
 	const tabSettings = createHomeTabSettingsPresenter();
 	const allTabs = createAllTabsPresenter();
 	const environmentSettings = useEnvironmentSettings();
-	type ReplyVisibility = 'AllReplies' | 'ToFollowedAccounts' | 'NoReplies';
-	const replyVisibilityOptions: Array<{ value: ReplyVisibility; label: string }> = [
+	const replyVisibilityOptions: Array<{ value: TimelineReplyVisibility; label: string }> = [
 		{ value: 'AllReplies', label: m.tabSettingsFilterAllReplies() },
 		{ value: 'ToFollowedAccounts', label: m.tabSettingsFilterToFollowedAccounts() },
 		{ value: 'NoReplies', label: m.tabSettingsFilterNoReplies() },
@@ -531,23 +531,6 @@
 		return items.includes(value) ? items.filter((item) => item !== value) : [...items, value];
 	}
 
-	function replyVisibilityFromExcludedKinds(excludedKinds: TimelinePostKind[]): ReplyVisibility {
-		if (excludedKinds.includes('Reply')) return 'NoReplies';
-		if (excludedKinds.includes('ReplyToUnfollowed')) return 'ToFollowedAccounts';
-		return 'AllReplies';
-	}
-
-	function excludedKindsWithReplyVisibility(
-		excludedKinds: TimelinePostKind[],
-		visibility: ReplyVisibility
-	): TimelinePostKind[] {
-		const preservedKinds = excludedKinds.filter(
-			(kind) => kind !== 'Reply' && kind !== 'ReplyToUnfollowed'
-		);
-		if (visibility === 'NoReplies') return [...preservedKinds, 'Reply'];
-		if (visibility === 'ToFollowedAccounts') return [...preservedKinds, 'ReplyToUnfollowed'];
-		return preservedKinds;
-	}
 </script>
 
 <svelte:head>
@@ -1014,13 +997,13 @@
 							<span>{m.tabSettingsFilterReply()}</span>
 							<select
 								class="select select-bordered select-sm max-w-full"
-								value={replyVisibilityFromExcludedKinds(form.excludedKinds)}
+								value={tabSettings.replyVisibilityForKinds(form.excludedKinds.join(','))}
 								onchange={(event) =>
 									update({
 										...form,
-										excludedKinds: excludedKindsWithReplyVisibility(
-											form.excludedKinds,
-											event.currentTarget.value as ReplyVisibility
+										excludedKinds: tabSettings.kindsWithReplyVisibility(
+											form.excludedKinds.join(','),
+											event.currentTarget.value as TimelineReplyVisibility
 										),
 									})}
 							>
@@ -1367,13 +1350,13 @@
 							<span>{m.tabSettingsFilterReply()}</span>
 							<select
 								class="select select-bordered select-sm max-w-full"
-								value={replyVisibilityFromExcludedKinds(form.excludedKinds)}
+								value={tabSettings.replyVisibilityForKinds(form.excludedKinds.join(','))}
 								onchange={(event) =>
 									update({
 										...form,
-										excludedKinds: excludedKindsWithReplyVisibility(
-											form.excludedKinds,
-											event.currentTarget.value as ReplyVisibility
+										excludedKinds: tabSettings.kindsWithReplyVisibility(
+											form.excludedKinds.join(','),
+											event.currentTarget.value as TimelineReplyVisibility
 										),
 									})}
 							>

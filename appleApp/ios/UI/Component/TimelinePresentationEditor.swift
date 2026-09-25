@@ -178,7 +178,7 @@ public struct TimelineFilterSheet: View {
         let current = initialFilterConfig
         self.selectedKinds = Set(kindOptions.filter { !current.excludedKinds.contains($0) })
         self.selectedContents = Set(contentOptions.filter { !current.excludedContents.contains($0) })
-        self.selectedReplyVisibility = timelineReplyVisibility(for: current)
+        self.selectedReplyVisibility = current.replyVisibility
     }
 
     public var body: some View {
@@ -241,13 +241,10 @@ public struct TimelineFilterSheet: View {
             ToolbarItem(placement: .confirmationAction) {
                 Button {
                     onConfirm(
-                        applyingReplyVisibility(
-                            selectedReplyVisibility,
-                            to: TimelineFilterConfig(
-                                excludedKinds: kindOptions.filter { !selectedKinds.contains($0) },
-                                excludedContents: contentOptions.filter { !selectedContents.contains($0) }
-                            )
-                        )
+                        TimelineFilterConfig(
+                            excludedKinds: kindOptions.filter { !selectedKinds.contains($0) },
+                            excludedContents: contentOptions.filter { !selectedContents.contains($0) }
+                        ).withReplyVisibility(visibility: selectedReplyVisibility)
                     )
                 } label: {
                     Label {
@@ -259,29 +256,6 @@ public struct TimelineFilterSheet: View {
             }
         }
     }
-}
-
-private func timelineReplyVisibility(for filterConfig: TimelineFilterConfig) -> TimelineReplyVisibility {
-    if filterConfig.excludedKinds.contains(.reply) {
-        return .noReplies
-    }
-    if filterConfig.excludedKinds.contains(.replyToUnfollowed) {
-        return .toFollowedAccounts
-    }
-    return .allReplies
-}
-
-private func applyingReplyVisibility(
-    _ visibility: TimelineReplyVisibility,
-    to filterConfig: TimelineFilterConfig
-) -> TimelineFilterConfig {
-    var excludedKinds = filterConfig.excludedKinds.filter { $0 != .reply && $0 != .replyToUnfollowed }
-    if visibility == .noReplies {
-        excludedKinds.append(.reply)
-    } else if visibility == .toFollowedAccounts {
-        excludedKinds.append(.replyToUnfollowed)
-    }
-    return TimelineFilterConfig(excludedKinds: excludedKinds, excludedContents: filterConfig.excludedContents)
 }
 
 private extension TimelinePostKind {

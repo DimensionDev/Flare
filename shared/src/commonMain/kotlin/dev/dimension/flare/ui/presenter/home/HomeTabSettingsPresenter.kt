@@ -13,10 +13,14 @@ import dev.dimension.flare.data.model.appearance.AppearancePatch
 import dev.dimension.flare.data.model.appearance.TimelineAppearance
 import dev.dimension.flare.data.model.tab.TimelineFilterConfig
 import dev.dimension.flare.data.model.tab.TimelineMergePolicy
+import dev.dimension.flare.data.model.tab.TimelinePostKind
+import dev.dimension.flare.data.model.tab.TimelineReplyVisibility
 import dev.dimension.flare.data.model.tab.UiGroupTimelineTabItem
 import dev.dimension.flare.data.model.tab.UiTimelineTabItem
 import dev.dimension.flare.data.model.tab.isSystemHomeMixedTimeline
+import dev.dimension.flare.data.model.tab.replyVisibility
 import dev.dimension.flare.data.model.tab.resolveTimelineAppearance
+import dev.dimension.flare.data.model.tab.withReplyVisibility
 import dev.dimension.flare.data.model.tab.withSystemHomeMixedTimelineEnabled
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.di.koinInject
@@ -85,6 +89,18 @@ public class HomeTabSettingsPresenter : PresenterBase<HomeTabSettingsPresenter.S
                         enabled = enabled,
                         mergePolicy = mergePolicy,
                     ).toImmutableList()
+
+            override fun replyVisibilityForKinds(excludedKinds: String): TimelineReplyVisibility =
+                TimelineFilterConfig(excludedKinds = excludedKinds.parseEnumList()).replyVisibility
+
+            override fun kindsWithReplyVisibility(
+                excludedKinds: String,
+                visibility: TimelineReplyVisibility,
+            ): ImmutableList<TimelinePostKind> =
+                TimelineFilterConfig(excludedKinds = excludedKinds.parseEnumList())
+                    .withReplyVisibility(visibility)
+                    .excludedKinds
+                    .toImmutableList()
 
             override fun updateTabPresentation(
                 tab: UiTimelineTabItem,
@@ -271,6 +287,13 @@ public class HomeTabSettingsPresenter : PresenterBase<HomeTabSettingsPresenter.S
             enabled: Boolean,
             mergePolicy: TimelineMergePolicy,
         ): ImmutableList<UiTimelineTabItem>
+
+        public fun replyVisibilityForKinds(excludedKinds: String): TimelineReplyVisibility
+
+        public fun kindsWithReplyVisibility(
+            excludedKinds: String,
+            visibility: TimelineReplyVisibility,
+        ): ImmutableList<TimelinePostKind>
 
         public fun updateTabPresentation(
             tab: UiTimelineTabItem,

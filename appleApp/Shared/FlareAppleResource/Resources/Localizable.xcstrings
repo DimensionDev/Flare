@@ -170287,6 +170287,16 @@
         }
       }
     },
+    "tab_settings_filter_all_replies" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All replies"
+          }
+        }
+      }
+    },
     "tab_settings_filter_configured" : {
       "localizations" : {
         "af" : {
@@ -171207,6 +171217,26 @@
         }
       }
     },
+    "tab_settings_filter_no_replies" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No replies"
+          }
+        }
+      }
+    },
+    "tab_settings_filter_reply" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Replies"
+          }
+        }
+      }
+    },
     "tab_settings_filter_text_only" : {
       "localizations" : {
         "af" : {
@@ -171571,6 +171601,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "篩選器"
+          }
+        }
+      }
+    },
+    "tab_settings_filter_to_followed_accounts" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "To followed accounts"
           }
         }
       }

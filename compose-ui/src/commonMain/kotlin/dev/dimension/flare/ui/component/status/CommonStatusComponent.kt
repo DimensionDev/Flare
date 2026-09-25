@@ -1338,7 +1338,7 @@ private fun StatusContentComponent(
                 }
             }.orEmpty()
     val effectiveMaxLines = (maxLines ?: appearanceSettings.lineLimit).coerceAtLeast(1)
-    val collapseThresholdLines = maxLines?.coerceAtLeast(1) ?: 10
+    val collapseThresholdLines = maxLines?.coerceAtLeast(1) ?: 15
     var expanded by rememberSaveable {
         mutableStateOf(false)
     }

@@ -7,16 +7,25 @@ import kotlin.test.assertTrue
 
 class StatusContentLineLimitTest {
     @Test
-    fun collapsesOnlyAfterTenVisualLines() {
-        assertFalse(shouldCollapseRichText(fullHeight = 200, lineHeight = 20, collapseThresholdLines = 10))
-        assertTrue(shouldCollapseRichText(fullHeight = 201, lineHeight = 20, collapseThresholdLines = 10))
+    fun collapsesOnlyAfterFifteenVisualLines() {
+        assertFalse(shouldCollapseRichText(fullHeight = 300, lineHeight = 20, collapseThresholdLines = 15))
+        assertTrue(shouldCollapseRichText(fullHeight = 301, lineHeight = 20, collapseThresholdLines = 15))
+        assertEquals(
+            300,
+            collapsedRichTextHeight(
+                fullHeight = 300,
+                lineHeight = 20,
+                lineLimit = 5,
+                collapseThresholdLines = 15,
+            ),
+        )
         assertEquals(
             100,
             collapsedRichTextHeight(
-                fullHeight = 201,
+                fullHeight = 301,
                 lineHeight = 20,
                 lineLimit = 5,
-                collapseThresholdLines = 10,
+                collapseThresholdLines = 15,
             ),
         )
     }
@@ -29,15 +38,15 @@ class StatusContentLineLimitTest {
 
     @Test
     fun largerLineLimitDoesNotCollapseContentThatAlreadyFits() {
-        assertEquals(240, collapsedRichTextHeight(fullHeight = 240, lineHeight = 20, lineLimit = 15, collapseThresholdLines = 10))
-        assertEquals(300, collapsedRichTextHeight(fullHeight = 320, lineHeight = 20, lineLimit = 15, collapseThresholdLines = 10))
+        assertEquals(320, collapsedRichTextHeight(fullHeight = 320, lineHeight = 20, lineLimit = 20, collapseThresholdLines = 15))
+        assertEquals(400, collapsedRichTextHeight(fullHeight = 420, lineHeight = 20, lineLimit = 20, collapseThresholdLines = 15))
     }
 
     @Test
     fun veryLargeLineLimitsDoNotOverflow() {
         assertEquals(
             240,
-            collapsedRichTextHeight(fullHeight = 240, lineHeight = 20, lineLimit = Int.MAX_VALUE, collapseThresholdLines = 10),
+            collapsedRichTextHeight(fullHeight = 240, lineHeight = 20, lineLimit = Int.MAX_VALUE, collapseThresholdLines = 15),
         )
     }
 }

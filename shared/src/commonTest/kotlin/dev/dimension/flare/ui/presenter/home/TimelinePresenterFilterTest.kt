@@ -7,6 +7,7 @@ import dev.dimension.flare.data.model.tab.TimelinePostKind
 import dev.dimension.flare.data.repository.KeywordFilterPattern
 import dev.dimension.flare.di.startKoin
 import dev.dimension.flare.di.testSingle
+import dev.dimension.flare.model.DbAccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.humanizer.PlatformFormatter
 import dev.dimension.flare.ui.model.UiMedia
@@ -219,6 +220,30 @@ class TimelinePresenterFilterTest {
         assertFalse(TimelinePostKind.Reply in selfThread.traits().kinds)
         assertFalse(TimelinePostKind.ReplyToUnfollowed in selfThread.traits().kinds)
         assertTrue(selfThread.matchesTimelineFilter(filter))
+    }
+
+    @Test
+    fun accountRelationOverridesStaleParentFollowingSnapshot() {
+        val author = createSampleUser()
+        val parentKey = MicroBlogKey("parentKey", "sampleHost")
+        val replyPost = createSampleStatus(author)
+        val parentPost =
+            createSampleStatus(author.copy(key = parentKey, isFollowing = false))
+                .copy(accountType = replyPost.accountType)
+        val reply =
+            UiTimelineV2.TimelinePostItem(
+                post = replyPost,
+                presentation =
+                    UiTimelineV2.PostPresentation(
+                        inlineParents = persistentListOf(UiTimelineV2.TimelinePostItem(parentPost)),
+                    ),
+            )
+        val filter = TimelineFilterConfig(excludedKinds = listOf(TimelinePostKind.ReplyToUnfollowed))
+        val relationKey = (parentPost.accountType as DbAccountType) to parentKey
+
+        assertFalse(reply.matchesTimelineFilter(filter))
+        assertTrue(reply.matchesTimelineFilter(filter, mapOf(relationKey to true)))
+        assertFalse(reply.matchesTimelineFilter(filter, mapOf(relationKey to false)))
     }
 
     @Test

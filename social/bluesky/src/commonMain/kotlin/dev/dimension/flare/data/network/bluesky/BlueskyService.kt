@@ -97,7 +97,7 @@ internal data class BlueskyService private constructor(
     private val videoUploader by lazy { BlueskyVideoUploader() }
 
     suspend fun uploadVideo(media: UploadMedia): Blob {
-        media.validate("Bluesky", listOf("video/mp4"), 300_000_000)
+        media.validateBlueskyVideoInput()
         val token =
             getServiceAuth(
                 GetServiceAuthQueryParams(

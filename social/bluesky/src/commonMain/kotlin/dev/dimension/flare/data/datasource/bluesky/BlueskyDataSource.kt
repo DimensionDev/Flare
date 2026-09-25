@@ -11,7 +11,6 @@ import app.bsky.bookmark.CreateBookmarkRequest
 import app.bsky.bookmark.DeleteBookmarkRequest
 import app.bsky.embed.ImagesImage
 import app.bsky.embed.Record
-import app.bsky.embed.Video
 import app.bsky.feed.GetPostsQueryParams
 import app.bsky.feed.Post
 import app.bsky.feed.PostEmbedUnion
@@ -296,11 +295,10 @@ internal class BlueskyDataSource(
         }
         val uploads = data.medias.map { it.file.uploadMedia() }
         uploads.forEach { upload ->
-            require(!upload.isGif) { "Bluesky does not accept GIF files without conversion" }
             upload.validate("Bluesky")
         }
-        val hasVideo = uploads.any { it.isVideo }
-        require(!hasVideo || uploads.size == 1) { "Bluesky supports one video per post, without other media" }
+        val hasVideo = uploads.any { it.isVideo || it.isGif }
+        require(!hasVideo || uploads.size == 1) { "Bluesky supports one video or GIF per post, without other media" }
         data.medias.forEach { media ->
             require(media.altText.orEmpty().length <= BLUESKY_ALT_TEXT_LIMIT) {
                 "Bluesky image alt text must be at most $BLUESKY_ALT_TEXT_LIMIT characters"
@@ -383,9 +381,11 @@ internal class BlueskyDataSource(
                 }
         val mediaEmbed =
             if (hasVideo) {
-                BlueskyMediaEmbed
-                    .VideoMedia(
-                        Video(video = service.uploadVideo(uploads.single()), alt = data.medias.single().altText),
+                val upload = uploads.single()
+                upload
+                    .toBlueskyMediaEmbed(
+                        blob = service.uploadVideo(upload),
+                        altText = data.medias.single().altText,
                     ).also { progress() }
             } else {
                 uploadedImages.toBlueskyMediaEmbed()

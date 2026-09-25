@@ -15,6 +15,7 @@ import dev.dimension.flare.data.database.cache.model.DbStatusReference
 import dev.dimension.flare.data.database.cache.model.DbStatusReferenceWithStatus
 import dev.dimension.flare.data.database.cache.model.DbStatusWithReference
 import dev.dimension.flare.data.database.cache.model.DbTranslation
+import dev.dimension.flare.data.database.cache.model.DbUserRelation
 import dev.dimension.flare.data.database.cache.model.TranslationDisplayMode
 import dev.dimension.flare.data.database.cache.model.TranslationDisplayOptions
 import dev.dimension.flare.data.database.cache.model.TranslationEntityType
@@ -43,6 +44,7 @@ import dev.dimension.flare.ui.model.TranslationDisplayState
 import dev.dimension.flare.ui.model.UiHandle
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiProfile
+import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.UiTranslatableText
 import dev.dimension.flare.ui.model.toUiImage
@@ -184,6 +186,75 @@ class MicroblogTest : RobolectricTest() {
             val savedUser = db.userDao().findByKey(userKey).first()
             assertNotNull(savedUser)
             assertEquals("New Name", savedUser.content.name.raw)
+        }
+
+    @Test
+    fun saveToDatabaseRefreshesFollowingRelationsFromTimelineProfiles() =
+        runTest {
+            val accountKey = MicroBlogKey(id = "account", host = "test.com")
+            val account = AccountType.Specific(accountKey)
+            val targetKey = MicroBlogKey(id = "follow-target", host = "test.com")
+            val target = createUser(targetKey, "Follow Target").copy(isFollowing = true)
+            val replyAuthor = createUser(MicroBlogKey(id = "reply-author", host = "test.com"), "Reply Author")
+
+            fun replyWithTarget(profile: UiProfile) =
+                timelinePostItem(
+                    post =
+                        createPost(
+                            accountKey = accountKey,
+                            user = replyAuthor,
+                            statusKey = MicroBlogKey(id = "following-refresh-reply", host = "test.com"),
+                            text = "reply text",
+                        ),
+                    inlineParents =
+                        listOf(
+                            createPost(
+                                accountKey = accountKey,
+                                user = profile,
+                                statusKey = MicroBlogKey(id = "following-refresh-parent", host = "test.com"),
+                                text = "parent text",
+                            ),
+                        ),
+                )
+
+            saveToDatabase(db, listOf(TimelinePagingMapper.toDb(replyWithTarget(target), "home")))
+            db.userDao().insertUserRelation(
+                DbUserRelation(
+                    accountType = account,
+                    userKey = targetKey,
+                    relation = UiRelation(following = true, isFans = true, muted = true),
+                ),
+            )
+            val otherAccount = AccountType.Specific(MicroBlogKey(id = "other-account", host = "test.com"))
+            db.userDao().insertUserRelation(
+                DbUserRelation(
+                    accountType = otherAccount,
+                    userKey = targetKey,
+                    relation = UiRelation(following = true),
+                ),
+            )
+
+            saveToDatabase(
+                db,
+                listOf(TimelinePagingMapper.toDb(replyWithTarget(target.copy(isFollowing = false)), "home")),
+            )
+
+            assertEquals(
+                UiRelation(following = false, isFans = true, muted = true),
+                db
+                    .userDao()
+                    .getUserRelation(account, targetKey)
+                    .first()
+                    ?.relation,
+            )
+            assertEquals(
+                UiRelation(following = true),
+                db
+                    .userDao()
+                    .getUserRelation(otherAccount, targetKey)
+                    .first()
+                    ?.relation,
+            )
         }
 
     @Test

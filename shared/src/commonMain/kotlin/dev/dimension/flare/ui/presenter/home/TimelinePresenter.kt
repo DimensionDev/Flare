@@ -346,6 +346,7 @@ internal fun UiTimelineV2.TimelinePostItem.traits(): TimelinePostTraits {
                 add(TimelinePostKind.Reply)
             }
             if (
+                hasParentFromOtherUser &&
                 presentation.inlineParents
                     .lastOrNull()
                     ?.displayPost

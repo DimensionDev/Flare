@@ -97,6 +97,9 @@ internal interface UserDao {
         userKey: MicroBlogKey,
     ): Flow<DbUserRelation?>
 
+    @Query("SELECT * FROM DbUserRelation")
+    fun getUserRelations(): Flow<List<DbUserRelation>>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertUserRelation(relation: DbUserRelation)
 

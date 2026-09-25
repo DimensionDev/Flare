@@ -454,6 +454,9 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         }
         reportIsAtTop()
         revealRefreshControlIfNeeded()
+        // Insets or a size change can finish/cancel a refresh reveal without a
+        // scroll-end delegate callback. Resume its queued input on the next layout.
+        if !collectionView.shouldDeferSnapshotChanges { scheduleSubmission() }
         autoplay.reconsider()
     }
 
@@ -1117,6 +1120,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
 
     private func scheduleSubmission() {
         guard isViewLoaded, !isApplyingSnapshot, !isSubmissionScheduled else { return }
+        guard pendingInput != nil || !pendingReconfigureIDs.isEmpty else { return }
         isSubmissionScheduled = true
         DispatchQueue.main.async { [weak self] in
             guard let self else { return }
@@ -1131,6 +1135,9 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     private func applyPendingInput() {
         guard !isApplyingSnapshot else { return }
         guard pendingInput != nil || !pendingReconfigureIDs.isEmpty else { return }
+        // Keep the source, index map and snapshot together until UIKit finishes
+        // the refresh pull/reveal. A new page's saved position supersedes the pull.
+        guard pendingSavedPosition != nil || !collectionView.shouldDeferSnapshotChanges else { return }
         let input = (content: pendingInput?.content() ?? content, columns: pendingInput?.columns ?? columnCount,
                      retainedOffset: pendingInput?.retainedOffset)
         pendingInput = nil
@@ -1296,7 +1303,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     }
 
     private func finishPendingRefreshIfReady() {
-        guard pendingRefreshEnd, isSnapshotReadyForReadingPosition, !isUserRefreshing,
+        guard pendingRefreshEnd, pendingInput == nil, isSnapshotReadyForReadingPosition, !isUserRefreshing,
               allowsScrollAnchorRestoration else { return }
         pendingRefreshEnd = false
         collectionView.endRefreshing()
@@ -1879,6 +1886,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
 
     private func endScrollInteraction() {
         collectionView.endScrollInteraction()
+        scheduleSubmission()
         finishPendingRefreshIfReady()
         rememberProfileMediaScrollAnchor()
         autoplay.reconsider()

@@ -57,6 +57,14 @@ final class TimelineCollectionView: UICollectionView {
     var hasReadingPosition: Bool { readingPosition != nil }
     var isPresentingRefresh: Bool { refreshRequested || isEndingRefresh || refreshControl?.isRefreshing == true }
 
+    // Prepending during an elastic pull moves the offset into the normal content
+    // range, so UIKit can no longer spring back to the original reading position.
+    // The owner keeps its latest input queued until the interaction ends.
+    var shouldDeferSnapshotChanges: Bool {
+        preservesReadingPosition && (isRevealingRefresh ||
+            (isPresentingRefresh && isScrollInteractionActive && contentOffset.y <= -restingAdjustedTopInset))
+    }
+
     var restingAdjustedTopInset: CGFloat {
         rememberRestingAutomaticInset()
         let automaticInset: CGFloat
@@ -245,13 +253,15 @@ final class TimelineCollectionView: UICollectionView {
         }
     }
 
-    func prepareForLayoutChange() {
+    func prepareForLayoutChange(preferringVisibleTop: Bool = false) {
         guard preservesReadingPosition,
               !isRestoringReadingPosition,
               allowsReadingPositionRestoration else { return }
 
         readingPositionGeneration += 1
-        if readingPosition == nil { readingPosition = captureCurrentLayoutPosition() }
+        if readingPosition == nil {
+            readingPosition = captureCurrentLayoutPosition(preferringVisibleTop: preferringVisibleTop)
+        }
     }
 
     func prepareForGeometryChange() {
@@ -277,7 +287,7 @@ final class TimelineCollectionView: UICollectionView {
         readingPositionGeneration += 1
     }
 
-    private func captureCurrentLayoutPosition() -> ReadingPosition? {
+    private func captureCurrentLayoutPosition(preferringVisibleTop: Bool = false) -> ReadingPosition? {
         if let readingPosition { return readingPosition }
         if case .item(let id, _, let itemOrder) = geometryReadingPosition,
            let path = readingIndexPath?(id),
@@ -286,15 +296,15 @@ final class TimelineCollectionView: UICollectionView {
             // the unclamped geometry bookmark only for the next size change.
             return .item(id: id, distanceFromTop: frame.minY - readingViewportTop(), itemOrder: itemOrder)
         }
-        return captureReadingPosition()
+        return captureReadingPosition(preferringVisibleTop: preferringVisibleTop)
     }
 
-    func captureReadingPosition() -> ReadingPosition? {
+    func captureReadingPosition(preferringVisibleTop: Bool = false) -> ReadingPosition? {
         if let readingPosition { return readingPosition }
         if let geometryReadingPosition, geometryReadingPosition.itemID != nil { return geometryReadingPosition }
         guard bounds.width > 1, bounds.height > 1 else { return nil }
         let viewportTop = readingViewportTop()
-        if let firstItem = firstVisibleReadingItem(viewportTop: viewportTop) {
+        if let firstItem = firstVisibleReadingItem(viewportTop: viewportTop, preferringVisibleTop: preferringVisibleTop) {
             return .item(
                 id: firstItem.id,
                 distanceFromTop: firstItem.frame.minY - viewportTop,
@@ -315,16 +325,21 @@ final class TimelineCollectionView: UICollectionView {
         return isPresentingRefresh ? max(top, 0) : top
     }
 
-    private func firstVisibleReadingItem(viewportTop: CGFloat) -> (id: String, frame: CGRect)? {
+    private func firstVisibleReadingItem(viewportTop: CGFloat, preferringVisibleTop: Bool = false) -> (id: String, frame: CGRect)? {
         let visibleTop = viewportTop + max(readingTopOcclusion?() ?? 0, 0)
         let viewportBottom = contentOffset.y + bounds.height - adjustedContentInset.bottom
-        return indexPathsForVisibleItems.compactMap { indexPath -> (id: String, frame: CGRect)? in
+        let candidates = indexPathsForVisibleItems.compactMap { indexPath -> (id: String, frame: CGRect)? in
             guard let id = readingItemID?(indexPath),
                   let frame = layoutAttributesForItem(at: indexPath)?.frame,
                   frame.maxY > visibleTop,
                   frame.minY < viewportBottom else { return nil }
             return (id, frame)
-        }.min { lhs, rhs in
+        }
+        // A partly hidden estimate can shrink without moving its own top edge,
+        // while every card below it moves. Anchor an edge the reader can see.
+        // Fall back to the partly visible card when it fills the whole viewport.
+        let visibleTops = preferringVisibleTop ? candidates.filter { $0.frame.minY >= visibleTop } : []
+        return (visibleTops.isEmpty ? candidates : visibleTops).min { lhs, rhs in
             if abs(lhs.frame.minY - rhs.frame.minY) > 0.5 {
                 return lhs.frame.minY < rhs.frame.minY
             }
@@ -335,9 +350,9 @@ final class TimelineCollectionView: UICollectionView {
     /// Apply measured geometry without moving content under an active gesture.
     /// Called from the controller's coalesced flush, outside cell measurement/layout.
     func invalidateMeasuredHeights() {
-        prepareForLayoutChange()
+        prepareForLayoutChange(preferringVisibleTop: true)
         UIView.performWithoutAnimation {
-            performUpdatesPreservingReadingPosition {
+            performUpdatesPreservingReadingPosition(preferringVisibleTop: true) {
                 collectionViewLayout.invalidateLayout()
                 layoutIfNeeded()
             }
@@ -346,11 +361,15 @@ final class TimelineCollectionView: UICollectionView {
 
     /// Capture and compensate in the same main-thread update, before another pan
     /// or deceleration step can run. Never restore this offset from a completion.
-    func performUpdatesPreservingReadingPosition(keepingItemIDs: Set<String>? = nil, _ updates: () -> Void) {
+    func performUpdatesPreservingReadingPosition(
+        keepingItemIDs: Set<String>? = nil,
+        preferringVisibleTop: Bool = false,
+        _ updates: () -> Void
+    ) {
         let viewportTop = readingViewportTop()
         var item = preservesReadingPosition && hasScrollGesture &&
             !isProgrammaticScrolling && !isExternalScrollInteractionActive && !isRevealingRefresh
-            ? firstVisibleReadingItem(viewportTop: viewportTop) : nil
+            ? firstVisibleReadingItem(viewportTop: viewportTop, preferringVisibleTop: preferringVisibleTop) : nil
         if let anchor = item, let keepingItemIDs, !keepingItemIDs.contains(anchor.id) {
             let order = readingItemIDs?() ?? []
             let index = order.firstIndex(of: anchor.id) ?? 0

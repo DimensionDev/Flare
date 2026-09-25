@@ -715,6 +715,42 @@ final class TimelineCollectionViewTests: XCTestCase {
         try fixture.assertPosition(measuredPosition)
     }
 
+    func testMeasuringAPartlyHiddenEstimateKeepsTheNextVisibleTop() throws {
+        let fixture = Fixture(width: 390, columns: 1)
+        let view = fixture.collectionView
+        fixture.heightOverride = { _, _ in 240 }
+        view.collectionViewLayout.invalidateLayout()
+        fixture.settle()
+        let frame = try XCTUnwrap(view.layoutAttributesForItem(at: IndexPath(item: 20, section: 0))).frame
+        fixture.scroll(to: frame.minY + 200)
+        let next = IndexPath(item: 21, section: 0)
+        let screenY = try XCTUnwrap(view.layoutAttributesForItem(at: next)).frame.minY - view.contentOffset.y
+
+        fixture.heightOverride = { id, _ in id == 20 ? 100 : 240 }
+        view.invalidateMeasuredHeights()
+        fixture.settle()
+
+        XCTAssertEqual(try XCTUnwrap(view.layoutAttributesForItem(at: next)).frame.minY - view.contentOffset.y,
+                       screenY, accuracy: 0.5)
+    }
+
+    func testMeasuringACardFillingTheViewportKeepsThatItemVisible() throws {
+        let fixture = Fixture(width: 390, columns: 1)
+        let view = fixture.collectionView
+        fixture.heightOverride = { _, _ in 1_200 }
+        view.collectionViewLayout.invalidateLayout()
+        fixture.settle()
+        fixture.scroll(to: 400)
+
+        fixture.heightOverride = { _, _ in 200 }
+        view.invalidateMeasuredHeights()
+        fixture.settle()
+
+        XCTAssertEqual(try fixture.readingPosition().id, "0")
+        let frame = try XCTUnwrap(view.layoutAttributesForItem(at: IndexPath(item: 0, section: 0))).frame
+        XCTAssertGreaterThan(frame.maxY, view.contentOffset.y)
+    }
+
     func testColumnThresholdIncludesInsetsAndSpacing() {
         XCTAssertEqual(TimelineColumnPolicy.adaptive.columnCount(for: 679), 1)
         XCTAssertEqual(TimelineColumnPolicy.adaptive.columnCount(for: 680), 2)

@@ -21,6 +21,10 @@ normal `AppleSharedHelper` initialization, without XCTest class enumeration.
 The tests cover source changes, page bookmark lifetime, prepend/append, complete
 replacement, likes, coalesced inputs, refresh begin/end, footer updates, VVO's
 shared numeric offset, and image geometry through repeated column/width changes.
+Pull-refresh results stay queued until the elastic gesture settles, and only the
+latest input commits. Native interaction tests also cover prepends during refresh
+reveal and measured height changes to a partly hidden card while dragging or
+decelerating; the next visible card must keep its screen position.
 They also verify that fractional column widths use measured cell heights instead
 of retaining the 240pt estimate when layout and cache widths round differently.
 The fixtures yield the main actor while settling: a nested synchronous run loop

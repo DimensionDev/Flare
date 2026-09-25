@@ -36,6 +36,7 @@ internal data class DbTimelinePageIdentity(
     val sortId: Long,
     val messageRenderHash: Int?,
     val contentRevision: Long,
+    val timelineId: String = statusId,
 )
 
 internal data class DbPagingTimelineVersion(
@@ -63,6 +64,7 @@ private const val TIMELINE_WITH_STATUS_QUERY =
         "DbPagingTimeline.statusId AS statusId, " +
         "DbPagingTimeline.sortId AS sortId, " +
         "DbPagingTimeline.message AS message, " +
+        "DbPagingTimeline.notificationKey AS notificationKey, " +
         "DbPagingTimeline.messageRenderHash AS messageRenderHash, " +
         "DbPagingTimeline.semanticReferenceSignature AS semanticReferenceSignature, " +
         "DbPagingTimeline.presentationReferenceSignature AS presentationReferenceSignature, " +
@@ -93,10 +95,9 @@ internal suspend fun PagingTimelineDao.getTimelinePageInCurrentTransaction(
     if (roots.isEmpty()) {
         return emptyList()
     }
-    val rootIds = ArrayList<String>(roots.size)
+    val rootIds = roots.map { it.status.id }.distinct()
     val statusById = LinkedHashMap<String, DbStatus>(roots.size * 4)
     roots.forEach { root ->
-        rootIds += root.status.id
         statusById[root.status.id] = root.status
     }
 
@@ -107,8 +108,10 @@ internal suspend fun PagingTimelineDao.getTimelinePageInCurrentTransaction(
         val batchEnd = minOf(batchStart + QUERY_BATCH_SIZE, rootIds.size)
         val batch = rootIds.subList(batchStart, batchEnd)
         semanticReferences += getPageStatusReferences(batch)
-        presentationReferences += getPagePresentationReferences(pagingKey, batch)
         batchStart = batchEnd
+    }
+    roots.map { it.timeline._id }.chunked(QUERY_BATCH_SIZE).forEach { batch ->
+        presentationReferences += getPagePresentationReferences(pagingKey, batch)
     }
 
     val parentIds =
@@ -163,7 +166,7 @@ internal suspend fun PagingTimelineDao.getTimelinePageInCurrentTransaction(
     }
     val presentationByRoot = HashMap<String, MutableList<DbTimelineItemPresentationReference>>()
     presentationReferences.forEach { reference ->
-        presentationByRoot.getOrPut(reference.statusId, ::ArrayList) += reference
+        presentationByRoot.getOrPut(reference.timelineId, ::ArrayList) += reference
     }
 
     return ArrayList<DbPagingTimelineWithStatus>(roots.size).also { result ->
@@ -178,7 +181,7 @@ internal suspend fun PagingTimelineDao.getTimelinePageInCurrentTransaction(
                         status = hydratedStatusById[reference.referenceStatusId],
                     )
             }
-            val presentation = presentationByRoot[rootStatusId].orEmpty()
+            val presentation = presentationByRoot[root.timeline._id].orEmpty()
             val hydratedPresentation = ArrayList<DbTimelineItemPresentationReferenceWithStatus>(presentation.size)
             presentation.forEach { reference ->
                 hydratedPresentation +=
@@ -253,12 +256,12 @@ internal interface PagingTimelineDao {
 
     @Query(
         "SELECT * FROM timeline_item_presentation_reference " +
-            "WHERE pagingKey = :pagingKey AND statusId IN (:statusIds) " +
-            "ORDER BY statusId, referenceOrder, presentationType, referenceStatusId",
+            "WHERE pagingKey = :pagingKey AND timelineId IN (:timelineIds) " +
+            "ORDER BY timelineId, referenceOrder, presentationType, referenceStatusId",
     )
     suspend fun getPagePresentationReferences(
         pagingKey: String,
-        statusIds: List<String>,
+        timelineIds: List<String>,
     ): List<DbTimelineItemPresentationReference>
 
     @Query("SELECT * FROM DbStatus WHERE id IN (:ids)")
@@ -283,6 +286,7 @@ internal interface PagingTimelineDao {
     @Query(
         "SELECT " +
             "DbPagingTimeline.statusId AS statusId, " +
+            "DbPagingTimeline._id AS timelineId, " +
             "DbPagingTimeline.sortId AS sortId, " +
             "DbPagingTimeline.messageRenderHash AS messageRenderHash, " +
             "DbPagingTimeline.contentRevision AS contentRevision " +
@@ -373,20 +377,20 @@ internal interface PagingTimelineDao {
 
     @Query(
         "DELETE FROM timeline_item_presentation_reference " +
-            "WHERE pagingKey = :pagingKey AND statusId IN (:statusIds)",
+            "WHERE pagingKey = :pagingKey AND timelineId IN (:timelineIds)",
     )
     suspend fun deletePresentationReferences(
         pagingKey: String,
-        statusIds: List<String>,
+        timelineIds: List<String>,
     )
 
     @Query(
         "SELECT * FROM timeline_item_presentation_reference " +
-            "WHERE pagingKey = :pagingKey AND statusId IN (:statusIds)",
+            "WHERE pagingKey = :pagingKey AND timelineId IN (:timelineIds)",
     )
     suspend fun getPresentationReferences(
         pagingKey: String,
-        statusIds: List<String>,
+        timelineIds: List<String>,
     ): List<DbTimelineItemPresentationReference>
 
     @Query("DELETE FROM timeline_item_presentation_reference WHERE pagingKey = :pagingKey")
@@ -422,7 +426,7 @@ internal interface PagingTimelineDao {
             "UNION " +
             "SELECT presentation.referenceStatusId FROM timeline_item_presentation_reference AS presentation " +
             "INNER JOIN DbPagingTimeline AS timeline " +
-            "ON timeline.pagingKey = presentation.pagingKey AND timeline.statusId = presentation.statusId " +
+            "ON timeline.pagingKey = presentation.pagingKey AND timeline._id = presentation.timelineId " +
             "WHERE timeline.pagingKey = :pagingKey AND presentation.presentationType = 'InlineParent'",
     )
     suspend fun getStatusIdsWithInlineParents(pagingKey: String): List<String>

@@ -22,6 +22,7 @@ import dev.dimension.flare.data.datasource.microblog.handler.RelationHandler
 import dev.dimension.flare.data.datasource.microblog.handler.UserHandler
 import dev.dimension.flare.data.datasource.microblog.loader.RelationActionType
 import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
+import dev.dimension.flare.data.datasource.microblog.paging.NotificationTimelineLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
@@ -361,7 +362,7 @@ internal class NostrDataSource(
         )
 
     override fun notification(type: NotificationFilter): RemoteLoader<UiTimelineV2> =
-        object : CacheableRemoteLoader<UiTimelineV2> {
+        object : NotificationTimelineLoader {
             override val pagingKey: String = "notification_${type.name.lowercase()}_$accountKey"
 
             override suspend fun load(

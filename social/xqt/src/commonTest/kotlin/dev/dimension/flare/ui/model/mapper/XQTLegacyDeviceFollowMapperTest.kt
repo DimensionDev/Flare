@@ -56,6 +56,7 @@ class XQTLegacyDeviceFollowMapperTest {
             val response = decodeLikeProduction(DEVICE_FOLLOW_RESPONSE)
             assertEquals(3, response.globalObjects?.users?.size)
             val timeline = response.tweets().single()
+            assertEquals("tweet-retweet-wrapper", timeline.entryId)
             val wrapper = assertIs<Tweet>(timeline.tweets.tweetResults.result)
             val wrapperUser = assertIs<User>(wrapper.core?.userResults?.result)
             val original = assertIs<Tweet>(assertNotNull(wrapper.legacy).retweetedStatusResult?.result)

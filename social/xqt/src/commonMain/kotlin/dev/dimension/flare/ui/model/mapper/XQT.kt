@@ -7,6 +7,7 @@ import dev.dimension.flare.common.Locale
 import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.database.cache.mapper.XQTTimeline
+import dev.dimension.flare.data.database.cache.mapper.tweets
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.PostActionFamily
 import dev.dimension.flare.data.datasource.microblog.PostEvent
@@ -149,12 +150,33 @@ internal fun List<InstructionUnion>.renderNotifications(accountKey: MicroBlogKey
             is TimelineAddEntries -> instruction.propertyEntries
             else -> emptyList()
         }
-    }.mapNotNull { entry ->
-        val itemContent = (entry.content as? TimelineTimelineItem)?.itemContent
-        when (itemContent) {
-            is TimelineNotification -> itemContent.renderNotification(accountKey)
-            is TimelineTweet -> itemContent.renderMention(accountKey)
-            else -> null
+    }.flatMap { entry ->
+        when (val content = entry.content) {
+            is TimelineTimelineItem -> {
+                listOfNotNull(
+                    when (val item = content.itemContent) {
+                        is TimelineNotification -> item.renderNotification(accountKey)
+                        is TimelineTweet -> item.renderMention(accountKey, entry.entryId)
+                        else -> null
+                    },
+                )
+            }
+
+            is TimelineTimelineModule -> {
+                listOf<InstructionUnion>(TimelineAddEntries(listOf(entry))).tweets().mapNotNull { module ->
+                    val post = module.render(accountKey)?.asTimelinePostItem() ?: return@mapNotNull null
+                    post.copy(
+                        presentation =
+                            post.presentation.copy(
+                                notificationKey = MicroBlogKey("${entry.entryId}:${module.id}", accountKey.host),
+                            ),
+                    )
+                }
+            }
+
+            else -> {
+                emptyList()
+            }
         }
     }
 
@@ -177,7 +199,7 @@ private fun TimelineNotification.renderNotification(accountKey: MicroBlogKey): U
                 reference.tweetResults
                     ?.result
                     ?.toTweetOrNull()
-                    ?.renderStatus(accountKey)
+                    ?.render(accountKey)
             }
     val url = notificationUrl.url
     val message =
@@ -215,7 +237,7 @@ private fun TimelineNotification.renderNotification(accountKey: MicroBlogKey): U
                 message = message,
                 value = users.first(),
                 createdAt = createdAt,
-                statusKey = users.first().key,
+                statusKey = statusKey,
                 accountType = AccountType.Specific(accountKey),
             )
         }
@@ -241,13 +263,20 @@ private fun TimelineNotification.renderNotification(accountKey: MicroBlogKey): U
     }
 }
 
-private fun TimelineTweet.renderMention(accountKey: MicroBlogKey): UiTimelineV2? {
-    val post = tweetResults.result?.toTweetOrNull()?.renderStatus(accountKey) ?: return null
-    val user = post.user
+private fun TimelineTweet.renderMention(
+    accountKey: MicroBlogKey,
+    entryId: String,
+): UiTimelineV2? {
+    val post =
+        tweetResults.result
+            ?.toTweetOrNull()
+            ?.render(accountKey)
+            ?.asTimelinePostItem() ?: return null
+    val user = post.displayPost.user
     return post.withPresentationMessage(
         UiTimelineV2.Message(
             user = user,
-            statusKey = post.statusKey,
+            statusKey = MicroBlogKey(entryId, accountKey.host),
             icon = UiIcon.Mention,
             type =
                 UiTimelineV2.Message.Type.Localized(
@@ -291,6 +320,7 @@ private fun UiTimelineV2.withPresentationMessage(message: UiTimelineV2.Message):
         presentation =
             post.presentation.copy(
                 message = message,
+                notificationKey = message.statusKey,
             ),
     )
 }

@@ -128,7 +128,7 @@ internal class MixedRemoteMediator(
                         if (committed.isNotEmpty()) {
                             database
                                 .pagingTimelineDao()
-                                .deletePresentationReferences(source.stagingKey, committed.map { it.statusId })
+                                .deletePresentationReferences(source.stagingKey, committed.map { it._id })
                             database.pagingTimelineDao().delete(committed)
                         }
                     }

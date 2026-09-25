@@ -795,7 +795,7 @@ internal class NostrService(
             return emptyList()
         }
 
-        val eventGraph = loadEventGraph(roots = events)
+        val eventGraph = loadEventGraph(roots = events, includeReplyParents = false)
         val interactionStats =
             loadInteractionStats(
                 accountPubkey = pubKeyHex,
@@ -1704,7 +1704,7 @@ internal class NostrService(
         }
     }
 
-    private fun List<Event>.toUiNotifications(
+    internal fun List<Event>.toUiNotifications(
         accountPubkey: String,
         profiles: Map<String, UiProfile>,
         eventsById: Map<String, Event>,
@@ -1964,6 +1964,7 @@ internal class NostrService(
         renderContext: NostrTextRenderContext?,
         visited: Set<String>,
         resolveEvent: (Event, Set<String>) -> UiTimelineV2.Post?,
+        includeReplyParents: Boolean = true,
     ): UiTimelineV2 {
         val post =
             toUi(
@@ -1977,6 +1978,8 @@ internal class NostrService(
             )
         val inlineParents =
             parentEventIds()
+                .takeIf { includeReplyParents }
+                .orEmpty()
                 .mapNotNull { parentId ->
                     val event = parentId.takeUnless { it in visited }?.let(eventsById::get) ?: return@mapNotNull null
                     val parent = resolveEvent(event, visited) ?: return@mapNotNull null
@@ -2329,6 +2332,7 @@ internal class NostrService(
             presentation =
                 post.presentation.copy(
                     message = message,
+                    notificationKey = message.statusKey,
                 ),
         )
     }
@@ -2362,6 +2366,7 @@ internal class NostrService(
                         renderContext = null,
                         visited = setOf(id),
                         resolveEvent = { event, visited -> resolveEvent(event, visited) },
+                        includeReplyParents = false,
                     )
                 val hasParent = parentEventIds().isNotEmpty()
                 post.withPresentationMessage(
@@ -2433,6 +2438,7 @@ internal class NostrService(
                                         ),
                                 ),
                             repost = boosted,
+                            notificationKey = wrapperStatusKey,
                         ),
                 )
             }
@@ -2462,6 +2468,7 @@ internal class NostrService(
                                         ),
                                 ),
                             repost = boosted,
+                            notificationKey = wrapperStatusKey,
                         ),
                 )
             }
@@ -2471,7 +2478,10 @@ internal class NostrService(
             }
         }
 
-    private suspend fun loadEventGraph(roots: List<Event>): Map<String, Event> {
+    private suspend fun loadEventGraph(
+        roots: List<Event>,
+        includeReplyParents: Boolean = true,
+    ): Map<String, Event> {
         val eventsById = LinkedHashMap<String, Event>()
         val pendingEventIds = LinkedHashSet<String>()
         val pendingAddresses = LinkedHashMap<String, Address>()
@@ -2482,7 +2492,7 @@ internal class NostrService(
             }
             eventsById[event.id] = event
             embeddedEvents(event).forEach(::register)
-            referencedEventIds(event)
+            referencedEventIds(event, includeReplyParents)
                 .filterNot(eventsById::containsKey)
                 .forEach(pendingEventIds::add)
             referencedAddresses(event).forEach { address ->
@@ -2557,9 +2567,12 @@ internal class NostrService(
             .mapNotNull { (_, values) -> values.maxByOrNull { it.createdAt } }
     }
 
-    private fun referencedEventIds(event: Event): List<String> =
+    internal fun referencedEventIds(
+        event: Event,
+        includeReplyParents: Boolean,
+    ): List<String> =
         when (event) {
-            is TextNoteEvent -> event.parentEventIds() + event.quoteEventIds()
+            is TextNoteEvent -> event.parentEventIds().takeIf { includeReplyParents }.orEmpty() + event.quoteEventIds()
             is ReactionEvent -> event.originalPost()
             is RepostEvent -> listOfNotNull(event.boostedEventId())
             is GenericRepostEvent -> listOfNotNull(event.boostedEventId())

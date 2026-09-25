@@ -144,7 +144,9 @@ internal open class TimelineRemoteMediator(
                     }
                     data
                 }
-            } else if (request is PagingRequest.Append && loader is NotificationTimelineLoader) {
+            } else if (request is PagingRequest.Append && data.isNotEmpty()) {
+                // Repeated posts may have fresh content, but moving them to the end
+                // shifts the items being read while the next page is loading.
                 val existing =
                     data
                         .map { it.timeline.statusId }

@@ -12,7 +12,7 @@ final class TimelineInteractionTests: XCTestCase {
             let start = list.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.35))
             let end = list.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.8))
             start.press(forDuration: 0.05, thenDragTo: end,
-                        withVelocity: scenario == "deceleration" ? .fast : .slow,
+                        withVelocity: scenario.contains("deceleration") ? .fast : .slow,
                         thenHoldForDuration: 0)
         }
         let result = app.staticTexts["timeline-result"]
@@ -24,6 +24,9 @@ final class TimelineInteractionTests: XCTestCase {
     @MainActor func testHeightRefinementPreservesAnActivePan() { run("drag", gesture: true) }
     @MainActor func testHeightRefinementPreservesDeceleration() { run("deceleration", gesture: true) }
     @MainActor func testRefinedReadingItemRemainsVisibleDuringPan() { run("refine-reading-item", gesture: true) }
+    @MainActor func testSnapshotChangesPreserveAnActivePan() { run("snapshot-drag", gesture: true) }
+    @MainActor func testSnapshotChangesPreserveDeceleration() { run("snapshot-deceleration", gesture: true) }
+    @MainActor func testSnapshotChangesPreserveMultipleColumns() { run("snapshot-columns-deceleration", gesture: true) }
     @MainActor func testRefreshAnimatesWithoutExtraBlankSpace() { run("refresh") }
     @MainActor func testInitialRefreshAnimatesWithoutExtraBlankSpace() { run("initial-refresh") }
     @MainActor func testRefreshSpinnerSurvivesAnUnanimatedUpdate() { run("refresh-without-animations") }

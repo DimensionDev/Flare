@@ -39,7 +39,7 @@ private final class TimelineTestController: UIViewController, CHTCollectionViewD
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
         additionalSafeAreaInsets.top = 80
-        layout.columnCount = 1
+        layout.columnCount = scenario.contains("columns") ? 2 : 1
         layout.minimumInteritemSpacing = 0
         layout.minimumColumnSpacing = 8
         layout.sectionInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
@@ -82,6 +82,7 @@ private final class TimelineTestController: UIViewController, CHTCollectionViewD
             switch scenario {
             case "scroll-to-top": await checkScrollToTop()
             case "drag", "deceleration", "refine-reading-item": await checkGesture()
+            case let name where name.hasPrefix("snapshot-"): await checkSnapshotGesture()
             default: await checkRefresh()
             }
             let result = UILabel(frame: CGRect(x: 16, y: view.safeAreaInsets.top, width: view.bounds.width - 32, height: 80))
@@ -153,15 +154,8 @@ private final class TimelineTestController: UIViewController, CHTCollectionViewD
             jump(to: layout.collectionViewContentSize.height - list.bounds.height + list.adjustedContentInset.bottom)
         }
         await settle(100)
-        let ready = UILabel(frame: CGRect(x: 16, y: 0, width: 200, height: 20))
-        ready.text = "Ready"
-        ready.accessibilityIdentifier = "gesture-ready"
-        view.addSubview(ready)
-        let decelerating = scenario == "deceleration"
-        for _ in 0..<1500 {
-            if decelerating ? list.isDecelerating : list.isDragging { break }
-            try? await Task.sleep(for: .milliseconds(10))
-        }
+        let decelerating = scenario.contains("deceleration")
+        await waitForGesture()
         check(decelerating ? list.isDecelerating : list.isDragging, "native gesture was not observed")
         guard let id = list.captureReadingPosition()?.itemID.flatMap(Int.init),
               let path = dataSource.indexPath(for: id), id > 0,
@@ -189,6 +183,78 @@ private final class TimelineTestController: UIViewController, CHTCollectionViewD
             let offset = list.contentOffset.y
             await settle(40)
             check(abs(list.contentOffset.y - offset) > 1, "height compensation stopped momentum")
+        }
+    }
+
+    private func waitForGesture() async {
+        let ready = UILabel(frame: CGRect(x: 16, y: 0, width: 200, height: 20))
+        ready.text = "Ready"
+        ready.accessibilityIdentifier = "gesture-ready"
+        view.addSubview(ready)
+        let decelerating = scenario.contains("deceleration")
+        for _ in 0..<1500 {
+            if decelerating ? list.isDecelerating : list.isDragging { break }
+            try? await Task.sleep(for: .milliseconds(10))
+        }
+    }
+
+    private func checkSnapshotGesture() async {
+        let frame = layout.layoutAttributesForItem(at: dataSource.indexPath(for: 80)!)!.frame
+        jump(to: frame.minY + 40 - list.restingAdjustedTopInset)
+        await settle(100)
+        await waitForGesture()
+        let decelerating = scenario.contains("deceleration")
+        check(decelerating ? list.isDecelerating : list.isDragging, "native gesture was not observed")
+        for change in ["append", "insert", "move", "delete", "delete-reading-item", "measure", "delete-tail"] {
+            // Delayed measurement must use the user's current position.
+            if change == "measure" { await settle(40) }
+            guard let id = list.captureReadingPosition()?.itemID.flatMap(Int.init),
+                  let path = dataSource.indexPath(for: id),
+                  let oldFrame = layout.layoutAttributesForItem(at: path)?.frame else {
+                failures.append("missing reading item before \(change)")
+                return
+            }
+            let oldScreenY = oldFrame.minY - list.contentOffset.y
+            var snapshot = dataSource.snapshot()
+            var expectedID = id
+            switch change {
+            case "append": snapshot.appendItems([200, 201])
+            case "insert": snapshot.insertItems([202], beforeItem: 0)
+            case "move": snapshot.moveItem(1, afterItem: 201)
+            case "delete": snapshot.deleteItems([2])
+            case "measure": heights[0] = itemHeight(0) + 120
+            case "delete-tail":
+                snapshot.deleteItems(Array(snapshot.itemIdentifiers.dropFirst(snapshot.indexOfItem(id)! + 1)))
+            default:
+                expectedID = snapshot.itemIdentifiers[snapshot.indexOfItem(id)! + 1]
+                snapshot.deleteItems([id])
+            }
+            if change == "measure" {
+                list.invalidateMeasuredHeights()
+            } else {
+                list.prepareForSnapshotChange()
+                list.performUpdatesPreservingReadingPosition(keepingItemIDs: Set(snapshot.itemIdentifiers.map(String.init))) {
+                    dataSource.apply(snapshot, animatingDifferences: false, completion: nil)
+                }
+            }
+            list.layoutIfNeeded()
+            let newFrame = layout.layoutAttributesForItem(at: dataSource.indexPath(for: expectedID)!)!.frame
+            let expectedY = max(oldScreenY, list.restingAdjustedTopInset + 1 - newFrame.height)
+            if change == "delete-tail" {
+                let bottom = max(-list.adjustedContentInset.top, list.contentSize.height - list.bounds.height + list.adjustedContentInset.bottom)
+                check(abs(list.contentOffset.y - bottom) < 1, "removing the tail left a blank viewport")
+                check(newFrame.maxY > list.contentOffset.y + list.restingAdjustedTopInset, "removing the tail hid the reading item")
+            } else {
+                check(abs(newFrame.minY - list.contentOffset.y - expectedY) < 1,
+                      "\(change) moved reading item by \(newFrame.minY - list.contentOffset.y - expectedY)pt")
+            }
+            check(decelerating ? list.isDecelerating : list.isDragging, "\(change) cancelled gesture")
+            check(!list.hasReadingPosition, "\(change) left a stale bookmark")
+        }
+        if decelerating {
+            let offset = list.contentOffset.y
+            await settle(40)
+            check(abs(list.contentOffset.y - offset) > 1, "snapshot compensation stopped momentum")
         }
     }
 

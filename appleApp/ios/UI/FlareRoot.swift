@@ -73,6 +73,7 @@ struct FlareRoot: View {
                     }
                 }
             }
+            .modifier(IPadCompactTabBarModifier(primaryTabIDs: items.map(\.name)))
             .modifier(TabBarDoubleTapModifier {
                 NotificationCenter.default.post(name: .tabDoubleTapped, object: selectedTab)
             })

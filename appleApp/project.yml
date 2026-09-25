@@ -235,9 +235,12 @@ targets:
     platform: iOS
     dependencies:
       - package: CHTCollectionViewWaterfallLayout
+      - package: swiftui-introspect
+        product: SwiftUIIntrospect
       - target: TimelineUnitTestHost
     sources:
       - path: iosTests
+      - path: ios/UI/Component/IPadCompactTabBarModifier.swift
       - path: ios/Common/MediaViewerDismissGesturePolicy.swift
       - path: ios/Common/MediaViewerImageLayoutPolicy.swift
       - path: ios/Common/StatusTextContent.swift

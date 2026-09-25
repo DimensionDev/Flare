@@ -1234,7 +1234,8 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
             // column changes use the same completion and readiness rules as all others.
             var snapshot = structureChanged ? Self.makeSnapshot(from: plan) : dataSource.snapshot()
             snapshot.reconfigureItems(changedIDs)
-            let animate = structureChanged && !columnsChanged && !kindChanged &&
+            // Placeholder animations would delay queued content until their completion.
+            let animate = structureChanged && !plan.isInitialLoading && !columnsChanged && !kindChanged &&
                 !plan.isRefreshing && !refreshControl.isRefreshing &&
                 pendingEffectiveContentOffsetYAfterSnapshot == nil && mediaAnchor == nil &&
                 !collectionView.hasReadingPosition && allowsScrollAnchorRestoration

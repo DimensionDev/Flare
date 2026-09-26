@@ -7,7 +7,6 @@ import KotlinSharedUI
 struct IOSTimelineListEnvironment: ViewModifier {
     @State private var accounts = KotlinPresenter(presenter: AccountsPresenter())
     @State private var resolvedAccountKey = "pending"
-    @State private var accountGeneration = UUID().uuidString
 
     private var accountKey: String? {
         if case .success(let account) = onEnum(of: accounts.state.activeAccount) {
@@ -21,22 +20,25 @@ struct IOSTimelineListEnvironment: ViewModifier {
 
     func body(content: Content) -> some View {
         content
-            .environment(\.timelineAccountScope, "\(resolvedAccountKey):\(accountGeneration)")
+            .environment(\.timelineAccountID, resolvedAccountKey)
             .onChange(of: accountKey, initial: true) { _, key in
                 guard let key, key != resolvedAccountKey else { return }
                 resolvedAccountKey = key
-                accountGeneration = UUID().uuidString
             }
-            .environment(\.timelineListRenderer, TimelineListRenderer { IOSTimelineList(request: $0) })
+            .environment(\.timelineListRenderer, TimelineListRenderer {
+                IOSTimelineList(request: $0).id("\(resolvedAccountKey):\($0.key)")
+            })
     }
+}
+
+extension EnvironmentValues {
+    @Entry var timelineAccountID = ""
 }
 
 private struct IOSTimelineList: View {
     let request: TimelineListRequest
     @Environment(\.self) private var environment
     @State private var headers = TimelineHeaderViews()
-    @State private var positions = TimelinePagePositions()
-    @Environment(\.timelineAccountScope) private var accountScope
 
     var body: some View {
         GeometryReader { geometry in
@@ -45,8 +47,7 @@ private struct IOSTimelineList: View {
                 detailStatusKey: nil,
                 userData: users,
                 columnCount: TimelineColumnPolicy.adaptive.columnCount(for: geometry.size.width),
-                accessoryItems: headers.update(request.headers, environment: environment),
-                readingState: positions.state(for: request.key, scope: "\(accountScope):\(request.positionScope)", owner: request.positionOwner)
+                accessoryItems: headers.update(request.headers, environment: environment)
             )
             .ignoresSafeArea(edges: .vertical)
         }

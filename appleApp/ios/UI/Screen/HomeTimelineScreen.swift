@@ -17,8 +17,6 @@ struct HomeTimelineScreen: View {
     @Environment(\.timelineAppearance) private var timelineAppearance
     @Environment(\.openURL) private var openURL
     @State private var selectedTabId: String?
-    @State private var positions = TimelinePagePositions()
-    @Environment(\.timelineAccountScope) private var accountScope
     @Namespace private var selectedTabIndicatorNamespace
     @State private var presenter: KotlinPresenter<HomeTimelineWithTabsPresenterState>
     @State private var activeAccountPresenter = KotlinPresenter(presenter: ActiveAccountPresenter())
@@ -56,7 +54,6 @@ struct HomeTimelineScreen: View {
         GeometryReader { proxy in
             StateView(state: presenter.state.tabState) { state in
                 let tabs: [UiTimelineTabItem] = state.cast(UiTimelineTabItem.self)
-                let _ = positions.keep(Set(tabs.map { "\($0.id):\($0.loaderKey)" }))
                 if tabs.isEmpty {
                     ContentUnavailableView("tab_settings_title", systemImage: "square.grid.2x2")
                         .toolbar {
@@ -80,7 +77,6 @@ struct HomeTimelineScreen: View {
                     if globalAppearance.deckMode && horizontalSizeClass == .regular {
                         DeckTimelineLayout(
                             tabs: tabs,
-                            positions: positions,
                             baseTimelineAppearance: timelineAppearance,
                             columnWidth: min(max(proxy.size.width * 0.42, 320), 420),
                             toTabSetting: toTabSetting,
@@ -107,7 +103,6 @@ struct HomeTimelineScreen: View {
                         ZStack {
                             TimelineScreen(
                                 tabItem: tab,
-                                readingState: positions.state(for: "\(tab.id):\(tab.loaderKey)", scope: accountScope),
                                 allowGalleryMode: true,
                                 isHomeTimeline: true,
                                 accessoryItems: resolvedTimelineAppearance.timelineDisplayMode == .gallery
@@ -416,8 +411,6 @@ private final class ChangeLogHostedAccessoryView: UIView {
 
 private struct DeckTimelineLayout: View {
     let tabs: [UiTimelineTabItem]
-    let positions: TimelinePagePositions
-    @Environment(\.timelineAccountScope) private var accountScope
     let baseTimelineAppearance: TimelineAppearance
     let columnWidth: CGFloat
     let toTabSetting: () -> Void
@@ -429,7 +422,6 @@ private struct DeckTimelineLayout: View {
                 ForEach(tabs, id: \.id) { tab in
                     DeckTimelineColumnRoot(
                         tabItem: tab,
-                        readingState: positions.state(for: "\(tab.id):\(tab.loaderKey)", scope: accountScope),
                         baseTimelineAppearance: baseTimelineAppearance,
                         toTabSetting: toTabSetting
                     )
@@ -450,12 +442,11 @@ private struct DeckTimelineLayout: View {
 
 private struct DeckTimelineColumnRoot: View {
     let tabItem: UiTimelineTabItem
-    let readingState: TimelineReadingState
     let baseTimelineAppearance: TimelineAppearance
     let toTabSetting: () -> Void
 
     var body: some View {
-        TimelineScreen(tabItem: tabItem, readingState: readingState, allowGalleryMode: true)
+        TimelineScreen(tabItem: tabItem, allowGalleryMode: true)
             .safeAreaInset(edge: .bottom) {
                 Label {
                     TimelineTabTitle(title: tabItem.title)

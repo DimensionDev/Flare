@@ -18,7 +18,7 @@ own scheme; the existing lightweight unit and interaction schemes still run on
 older runtimes. The controller cases can also run in a diagnostic app after the
 normal `AppleSharedHelper` initialization, without XCTest class enumeration.
 
-The tests cover source changes, page bookmark lifetime, prepend/append, complete
+The tests cover list switching, reloads through placeholders, prepend/append, complete
 replacement, likes, coalesced inputs, refresh begin/end, footer updates, VVO's
 shared numeric offset, and image geometry through repeated column/width changes.
 Pull-refresh results stay queued until the elastic gesture settles, and only the
@@ -30,11 +30,8 @@ of retaining the 240pt estimate when layout and cache widths round differently.
 The fixtures yield the main actor while settling: a nested synchronous run loop
 cannot drain the controller's serialized main-queue submissions reliably.
 
-The implementation has four state owners:
+The implementation has three state owners:
 
-- Page containers keep `TimelineReadingState` only for their live tabs/queries.
-  Closing a detail navigation entry discards its bookmark. Restoration never
-  issues paging requests for data no longer retained by the source.
 - The controller installs one content/snapshot generation at a time, retaining
   only the latest pending input. It builds full snapshots for structural changes;
   payload changes only reconfigure affected IDs. Accessories use the same commit.
@@ -44,3 +41,7 @@ The implementation has four state owners:
 - Cells measure their current width and report once per fresh measurement.
   Controller-local height storage retains at most two geometries per live item.
   `TimelineAutoplay` handles playback without controlling list offsets.
+
+Changing the list identity creates a fresh list at the top. Pages do not store
+reading positions for previously selected tabs or queries. The current list
+keeps its position through refreshes, loading placeholders and layout changes.

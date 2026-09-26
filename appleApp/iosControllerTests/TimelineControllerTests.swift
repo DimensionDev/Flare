@@ -1,23 +1,49 @@
 import XCTest
 import UIKit
+import SwiftUI
 import KotlinSharedUI
 import FlareAppleUI
 @testable import Flare
 
 @MainActor
 final class TimelineControllerIntegrationTests: XCTestCase {
-    func testNewSearchStartsAtTopAndReturningRestoresPosition() async throws {
-        let fixture = await Fixture()
-        await fixture.scroll(2_500)
-        let position = try fixture.position()
-        fixture.controller.setReadingState(fixture.positions.state(for: "new-search", scope: "account"))
-        fixture.controller.update(data: nil, columnCount: 1)
-        await fixture.settle()
-        XCTAssertEqual(fixture.controller.effectiveContentOffsetY, 0, accuracy: 0.5)
-        fixture.controller.setReadingState(fixture.positions.state(for: "original", scope: "account"))
-        fixture.controller.update(data: nil, columnCount: 1)
-        await fixture.settle()
-        try fixture.assertPosition(position)
+    func testSwitchingListsAlwaysStartsAtTopButUpdatingTheSameListKeepsPosition() async throws {
+        let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first)
+        let previousKeyWindow = scene.windows.first(where: \.isKeyWindow)
+        let host = UIHostingController(rootView: ListSwitchTestView(key: "mixed").modifier(IOSTimelineListEnvironment()))
+        let window = UIWindow(windowScene: scene)
+        window.rootViewController = host
+        window.makeKeyAndVisible()
+        defer {
+            window.isHidden = true
+            window.rootViewController = nil
+            previousKeyWindow?.makeKey()
+        }
+
+        func settle() async {
+            for _ in 0..<25 {
+                host.view.setNeedsLayout()
+                host.view.layoutIfNeeded()
+                try? await Task.sleep(for: .milliseconds(10))
+            }
+        }
+
+        for key in ["mixed", "other", "mixed"] {
+            host.rootView = ListSwitchTestView(key: key).modifier(IOSTimelineListEnvironment())
+            await settle()
+            let list = try XCTUnwrap(descendants(host.view).compactMap { $0 as? TimelineCollectionView }.first)
+            XCTAssertEqual(list.contentOffset.y + list.restingAdjustedTopInset, 0, accuracy: 0.5)
+            let controller = try XCTUnwrap(list.delegate as? UITimelineCollectionViewController)
+            controller.restoreEffectiveContentOffset(800, animated: false)
+            await settle()
+            let offset = list.contentOffset.y
+            XCTAssertGreaterThan(offset, 500)
+
+            host.rootView = ListSwitchTestView(key: key).modifier(IOSTimelineListEnvironment())
+            await settle()
+            XCTAssertTrue(descendants(host.view).contains { $0 === list })
+            XCTAssertEqual(list.contentOffset.y, offset, accuracy: 0.5)
+        }
     }
 
     func testControllerResizesWithoutReplacingItsLayoutOrLosingPosition() async throws {
@@ -51,6 +77,17 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         fixture.controller.accessoryItems = Array(fixture.controller.accessoryItems.prefix(2))
         await fixture.settle()
         XCTAssertEqual(fixture.controller.effectiveContentOffsetY, 2_500, accuracy: 0.5)
+    }
+
+    func testSwitchingToALoadedProfileListDoesNotOverrideALaterScroll() async throws {
+        let fixture = await Fixture(posts: true)
+        fixture.controller.restoreEffectiveContentOffset(0, animated: false)
+        fixture.controller.restoreEffectiveContentOffsetAfterNextSnapshot(0)
+        await fixture.scroll(1_000)
+        let expected = try fixture.position()
+        fixture.input.items.insert(.post(makeRow(100)), at: 0)
+        await fixture.apply()
+        try fixture.assertPosition(expected)
     }
 
     func testPinnedHeaderUsesCommittedAccessoriesUntilTheNextSnapshot() async {
@@ -195,35 +232,31 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         XCTAssertFalse(fixture.collection.hasReadingPosition)
     }
 
-    func testDataReleasedDoesNotPageToRecoverABookmark() async {
+    func testReloadThroughPlaceholdersKeepsTheCurrentReadingPosition() async throws {
         let fixture = await Fixture(posts: true)
-        let state = TimelineReadingState()
-        state.position = .item(id: "t:released", distanceFromTop: -10, itemOrder: ["t:released"])
-        var accessed: [Int] = []
-        fixture.input.access = { accessed.append($0) }
-        fixture.controller.setReadingState(state)
+        await fixture.scroll(2_500)
+        let expected = try fixture.position()
+        let items = fixture.input.items
+        fixture.input.state = .loading
+        fixture.input.items = []
         await fixture.apply()
-        XCTAssertEqual(fixture.controller.effectiveContentOffsetY, 0, accuracy: 0.5)
-        XCTAssertFalse(accessed.contains(fixture.input.items.count - 1))
+        fixture.input.state = .loaded
+        fixture.input.items = [.post(makeRow(100))] + items
+        await fixture.apply()
+        try fixture.assertPosition(expected)
     }
 
-    func testDetailBookmarkLifetimeMatchesItsNavigationEntry() async throws {
-        let state = TimelineReadingState()
+    func testNavigationKeepsTheLiveListButReopeningStartsAtTop() async throws {
         let fixture = await Fixture(posts: true)
-        fixture.controller.setReadingState(state)
-        await fixture.apply()
         await fixture.scroll(1_500)
-        fixture.controller.saveReadingPosition()
         let expected = try fixture.position()
         // Deeper navigation returns to the same controller.
         fixture.controller.viewWillDisappear(false)
         fixture.controller.viewWillAppear(false)
         await fixture.settle()
         try fixture.assertPosition(expected)
-        // Popping the entry releases its page state. Reopening has no bookmark.
+        // Reopening creates a fresh list with no saved position.
         let reopened = await Fixture(posts: true)
-        reopened.controller.setReadingState(TimelineReadingState())
-        await reopened.apply()
         XCTAssertEqual(reopened.controller.effectiveContentOffsetY, 0, accuracy: 0.5)
     }
 
@@ -266,10 +299,24 @@ final class TimelineControllerIntegrationTests: XCTestCase {
 
     private func descendants(_ view: UIView) -> [UIView] { [view] + view.subviews.flatMap(descendants) }
 
+    private struct ListSwitchTestView: View {
+        let key: String
+        @Environment(\.timelineListRenderer) private var renderer
+
+        var body: some View {
+            renderer?(TimelineListRequest(
+                key: key,
+                content: .none,
+                headers: (0..<80).map { index in
+                    TimelineListHeader(id: String(index)) { Color.clear.frame(height: 120) }
+                }
+            ))
+        }
+    }
+
     @MainActor
     private final class Fixture {
         let controller = UITimelineCollectionViewController(detailStatusKey: nil)
-        let positions = TimelinePagePositions()
         var collection: TimelineCollectionView { controller.view.subviews.compactMap { $0 as? TimelineCollectionView }.first! }
 
         var input = TimelineContent()
@@ -277,7 +324,6 @@ final class TimelineControllerIntegrationTests: XCTestCase {
 
         init(posts: Bool = false, columns: Int = 1) async {
             self.columns = columns
-            controller.setReadingState(positions.state(for: "original", scope: "account"))
             if posts {
                 input.state = .loaded
                 input.items = (0..<60).map { .post(makeRow($0)) }

@@ -7,6 +7,7 @@ import Combine
 import Observation
 
 struct ProfileScreen: View {
+    @Environment(\.timelineAccountID) private var accountID
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @Environment(\.openURL) private var openURL
     @Environment(\.timelineAppearance.aiConfig.agent) private var agentEnabled
@@ -232,7 +233,6 @@ struct ProfileScreen: View {
         GeometryReader { proxy in
             ProfileTimelineCollectionView(
                 profileState: presenter.state,
-                readingScope: "profile:\(accountType):\(userKey.map(String.init(describing:)) ?? "self")",
                 tabs: tabs,
                 selectedTab: $selectedTab,
                 showsProfileAccessories: showsProfileAccessories,
@@ -259,6 +259,7 @@ struct ProfileScreen: View {
                     }
                 }
             )
+            .id(accountID)
         }
         .ignoresSafeArea(edges: .vertical)
     }
@@ -438,7 +439,6 @@ private struct ProfileProgressTabBar: View {
 
 private struct ProfileTimelineCollectionView: UIViewControllerRepresentable {
     let profileState: ProfileState
-    let readingScope: String
     let tabs: [ProfileState.Tab]
     @Binding var selectedTab: Int
     let showsProfileAccessories: Bool
@@ -455,8 +455,6 @@ private struct ProfileTimelineCollectionView: UIViewControllerRepresentable {
     @Environment(\.networkKind) private var networkKind
     @Environment(\.openURL) private var openURL
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
-
-    @Environment(\.timelineAccountScope) private var accountScope
 
     func makeCoordinator() -> Coordinator {
         Coordinator()
@@ -534,7 +532,6 @@ private struct ProfileTimelineCollectionView: UIViewControllerRepresentable {
                 makeController: {
                     coordinator.pageController(
                         for: tab,
-                        readingScope: accountScope + ":" + readingScope,
                         timelineColumnCount: timelineColumnCount,
                         appearance: appearance,
                         networkKind: networkKind,
@@ -556,7 +553,6 @@ private struct ProfileTimelineCollectionView: UIViewControllerRepresentable {
             }
 
             let controller = UITimelineCollectionViewController(detailStatusKey: nil)
-            let positions = TimelinePagePositions()
             var cancellable: AnyCancellable?
             var columnCount: Int?
             var kind: Kind?
@@ -581,7 +577,6 @@ private struct ProfileTimelineCollectionView: UIViewControllerRepresentable {
             }
 
             func close() {
-                controller.saveReadingPosition()
                 cancellable = nil
                 controller.onContentOffsetChanged = nil
                 controller.onScrollInteractionBegan = nil
@@ -673,7 +668,6 @@ private struct ProfileTimelineCollectionView: UIViewControllerRepresentable {
 
         func pageController(
             for tab: ProfileState.Tab,
-            readingScope: String,
             timelineColumnCount: Int,
             appearance: TimelineUIKitAppearance,
             networkKind: NetworkKind,
@@ -698,7 +692,6 @@ private struct ProfileTimelineCollectionView: UIViewControllerRepresentable {
 
             switch onEnum(of: tab) {
             case .timeline(let tab):
-                controller.setReadingState(record.positions.state(for: tabID, scope: readingScope))
                 controller.restoresScrollAnchorOnSnapshotChanges = true
                 let needsBinding = record.prepare(
                     kind: .timeline,
@@ -1070,11 +1063,8 @@ private final class ProfileTimelinePagerViewController: UIViewController,
                     isProgrammatic: false
                 )
             }
-            let isFirstActivation = target.timelineController == nil
             let timeline = activate(target)
-            if isFirstActivation {
-                synchronizeInitialOffset(from: source, to: timeline)
-            }
+            synchronizeInitialOffset(from: source, to: timeline)
         }
     }
 
@@ -1086,7 +1076,6 @@ private final class ProfileTimelinePagerViewController: UIViewController,
     private func selectPage(at index: Int, animated: Bool) {
         guard pages.indices.contains(index) else { return }
         let target = pages[index]
-        let isFirstActivation = target.timelineController == nil
         let targetTimeline = activate(target)
         let visiblePage = pageViewController.viewControllers?.first as? ProfileTimelinePageViewController
         let sourceIndex = visiblePage.flatMap(index(of:)) ?? currentIndex
@@ -1098,7 +1087,7 @@ private final class ProfileTimelinePagerViewController: UIViewController,
             }
             return
         }
-        if isFirstActivation, let visiblePage {
+        if let visiblePage {
             synchronizeInitialOffset(from: visiblePage, to: targetTimeline)
         }
         let direction: UIPageViewController.NavigationDirection = index >= sourceIndex ? .forward : .reverse
@@ -1236,7 +1225,7 @@ private final class ProfileTimelinePagerViewController: UIViewController,
         from source: ProfileTimelinePageViewController,
         to target: UITimelineCollectionViewController
     ) {
-        guard !target.hasSavedReadingPosition, let source = source.timelineController else { return }
+        guard let source = source.timelineController else { return }
         let offsetY = min(max(source.effectiveContentOffsetY, 0), collapseDistance)
         target.loadViewIfNeeded()
         target.restoreEffectiveContentOffset(offsetY, animated: false)

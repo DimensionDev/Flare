@@ -4,7 +4,6 @@ import FlareAppleCore
 
 public struct SearchScreen: View {
     @Environment(\.timelineListRenderer) private var listRenderer
-    @State private var listScope = UUID().uuidString
     @State private var searchAccountType: AccountType
     @Environment(\.openURL) private var openURL
     @Environment(\.timelineAppearance.aiConfig.agent) private var agentEnabled
@@ -115,7 +114,7 @@ public struct SearchScreen: View {
             AccountType.Specific(accountKey: $0.key)
         } ?? searchAccountType
         searchAccountType = accountType
-        // The source and its reading key change together. The previous query's
+        // The source and its list identity change together. The previous query's
         // asynchronous results cannot consume the new query's top reset.
         searchPresenter = KotlinPresenter(presenter: SearchPresenter(accountType: accountType, initialQuery: query))
     }
@@ -182,11 +181,9 @@ public struct SearchScreen: View {
         }
         headers.append(.title("local_history_status"))
         return TimelineListRequest(
-            key: "\(listScope):\(searchPresenter.key)",
-            positionScope: listScope,
+            key: searchPresenter.key,
             content: .posts(searchPresenter.state.status),
-            headers: headers,
-            positionOwner: searchPresenter
+            headers: headers
         )
     }
 

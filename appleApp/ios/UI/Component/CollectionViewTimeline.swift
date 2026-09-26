@@ -25,9 +25,6 @@ struct UITimelineCollectionView: UIViewControllerRepresentable {
     // Changing a non-nil key replaces the list while retaining its scroll position.
     let contentKey: AnyHashable?
     let onIsAtTopChanged: (Bool) -> Void
-    let readingState: TimelineReadingState?
-    @State private var localPositions = TimelinePagePositions()
-    @Environment(\.timelineAccountScope) private var accountScope
     @Environment(\.timelineAppearance) private var timelineAppearance
     @Environment(\.globalAppearance) private var globalAppearance
     @Environment(\.aiConfig) private var aiConfig
@@ -46,7 +43,6 @@ struct UITimelineCollectionView: UIViewControllerRepresentable {
         accessoryItems: [UITimelineCollectionViewAccessoryItem] = [],
         suppressInitialRefreshIndicator: Bool = false,
         contentKey: AnyHashable? = nil,
-        readingState: TimelineReadingState? = nil,
         onIsAtTopChanged: @escaping (Bool) -> Void = { _ in }
     ) {
         self.data = data
@@ -58,7 +54,6 @@ struct UITimelineCollectionView: UIViewControllerRepresentable {
         self.accessoryItems = accessoryItems
         self.suppressInitialRefreshIndicator = suppressInitialRefreshIndicator
         self.contentKey = contentKey
-        self.readingState = readingState
         self.onIsAtTopChanged = onIsAtTopChanged
     }
 
@@ -73,7 +68,6 @@ struct UITimelineCollectionView: UIViewControllerRepresentable {
     }
 
     private func configure(_ controller: UITimelineCollectionViewController) {
-        controller.setReadingState(readingState ?? localPositions.state(for: "page", scope: accountScope))
         controller.refreshCallback = refreshAction.map { action in
             { await action() }
         }
@@ -97,10 +91,6 @@ struct UITimelineCollectionView: UIViewControllerRepresentable {
         } else {
             controller.update(data: data, columnCount: columnCount, headerState: headerState, contentKey: contentKey)
         }
-    }
-
-    static func dismantleUIViewController(_ controller: UITimelineCollectionViewController, coordinator: ()) {
-        controller.saveReadingPosition()
     }
 }
 
@@ -134,39 +124,18 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     private var contentKey: AnyHashable? { content.key }
     private var headerState: UiState<UiTimelineV2>? { content.header }
 
-    private var readingState: TimelineReadingState?
-    private var pendingSavedPosition: TimelineCollectionView.ReadingPosition?
+    private var pendingReloadPosition: TimelineCollectionView.ReadingPosition?
     private var isSnapshotReadyForReadingPosition = false
 
-    func setReadingState(_ state: TimelineReadingState) {
-        guard readingState !== state else { return }
-        saveReadingPosition()
-        if let collectionView, collectionView.isProgrammaticScrolling {
-            collectionView.setContentOffset(collectionView.contentOffset, animated: false)
-        }
-        resetInitialRefreshIndicatorSuppression()
-        readingState = state
-        pendingSavedPosition = state.position ?? .top
-        isSnapshotReadyForReadingPosition = false
-        collectionView?.resetReadingPosition()
-    }
+    var hasPendingReadingPosition: Bool { pendingReloadPosition != nil }
 
-    var hasPendingReadingPosition: Bool { pendingSavedPosition != nil }
-    var hasSavedReadingPosition: Bool { readingState?.position != nil }
-
-    func saveReadingPosition() {
-        guard pendingSavedPosition == nil, isViewLoaded, !currentPagingIsInitialLoading,
-              let position = collectionView.captureReadingPosition() else { return }
-        readingState?.position = position
-    }
-
-    private func restoreSavedPositionIfReady() {
-        guard let position = pendingSavedPosition, isViewLoaded,
+    private func restoreReloadPositionIfReady() {
+        guard let position = pendingReloadPosition, isViewLoaded,
               isSnapshotReadyForReadingPosition,
               !currentPagingIsInitialLoading, collectionView.bounds.width > 1 else { return }
-        pendingSavedPosition = nil
-        // Resolve against the data already held by this page. Never page backwards
-        // or load more solely to recover a bookmark whose data has been released.
+        pendingReloadPosition = nil
+        // A reload can temporarily replace this list's rows with placeholders.
+        // Restore only against the rows still available when loading finishes.
         collectionView.restoreReadingPosition(position)
         collectionView.setNeedsLayout()
     }
@@ -285,13 +254,13 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     }
 
     func restoreEffectiveContentOffsetAfterNextSnapshot(_ offsetY: CGFloat) {
-        guard isViewLoaded else { return }
+        guard isViewLoaded, pendingInput != nil || isApplyingSnapshot || currentPagingIsInitialLoading else { return }
         pendingEffectiveContentOffsetYAfterSnapshot = offsetY
     }
 
     func restoreContentOffset(_ offset: CGPoint, animated: Bool) {
         guard isViewLoaded else { return }
-        pendingSavedPosition = nil
+        pendingReloadPosition = nil
         if collectionView.isPresentingRefresh { collectionView.cancelRefresh() }
         collectionView.resetReadingPosition()
         view.layoutIfNeeded()
@@ -314,7 +283,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     }
 
     func setEffectiveContentOffset(_ offsetY: CGFloat, animated: Bool) {
-        pendingSavedPosition = nil
+        pendingReloadPosition = nil
         guard isViewLoaded else { return }
         if collectionView.isPresentingRefresh { collectionView.cancelRefresh() }
         collectionView.resetReadingPosition()
@@ -446,7 +415,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         updateProfileMediaColumnCount()
         updateContentInsets()
         updatePinnedHeader()
-        restoreSavedPositionIfReady()
+        restoreReloadPositionIfReady()
         if profileMediaGeometryTransition?.originColumnCount == columnCount {
             restoreProfileMediaGeometryTransition(finalize: false)
         } else {
@@ -488,7 +457,6 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     }
 
     override func viewWillDisappear(_ animated: Bool) {
-        saveReadingPosition()
         super.viewWillDisappear(animated)
         autoplay.setVisible(false)
         collectionView.endScrollInteraction()
@@ -1135,9 +1103,9 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     private func applyPendingInput() {
         guard !isApplyingSnapshot else { return }
         guard pendingInput != nil || !pendingReconfigureIDs.isEmpty else { return }
-        // Keep the source, index map and snapshot together until UIKit finishes
-        // the refresh pull/reveal. A new page's saved position supersedes the pull.
-        guard pendingSavedPosition != nil || !collectionView.shouldDeferSnapshotChanges else { return }
+        // Keep the source, index map and snapshot together until
+        // the refresh pull/reveal settles.
+        guard !collectionView.shouldDeferSnapshotChanges else { return }
         let input = (content: pendingInput?.content() ?? content, columns: pendingInput?.columns ?? columnCount,
                      retainedOffset: pendingInput?.retainedOffset)
         pendingInput = nil
@@ -1149,7 +1117,6 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         let columnsChanged = columnCount != input.columns
         let switchedContent = contentKey != nil && input.content.key != nil && contentKey != input.content.key
         let wasRefreshing = currentPagingIsRefreshing
-        let restoringState = readingState
 
         if switchedContent {
             let offsetY = input.retainedOffset ?? max(effectiveContentOffsetY, 0)
@@ -1181,16 +1148,16 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         }
         let plan = makeCurrentSnapshotPlan()
         let structureChanged = previousPlan?.signature != plan.signature
-        if structureChanged, previousPlan != nil, pendingSavedPosition == nil,
+        if structureChanged, previousPlan != nil, pendingReloadPosition == nil,
            pendingEffectiveContentOffsetYAfterSnapshot == nil, restoresScrollAnchorOnSnapshotChanges {
             collectionView.prepareForSnapshotChange()
         }
-        if plan.isInitialLoading, previousPlan != nil, pendingSavedPosition == nil,
+        if plan.isInitialLoading, previousPlan != nil, pendingReloadPosition == nil,
            pendingEffectiveContentOffsetYAfterSnapshot == nil, restoresScrollAnchorOnSnapshotChanges {
-            pendingSavedPosition = collectionView.captureReadingPosition()
+            pendingReloadPosition = collectionView.captureReadingPosition()
         }
         let keepsReadingPosition = previousPlan != nil && !kindChanged && !switchedContent &&
-            pendingSavedPosition == nil && pendingEffectiveContentOffsetYAfterSnapshot == nil &&
+            pendingReloadPosition == nil && pendingEffectiveContentOffsetYAfterSnapshot == nil &&
             restoresScrollAnchorOnSnapshotChanges
         let survivingIDs = keepsReadingPosition ? Set(plan.headerIDs + plan.accessoryIDs + plan.itemIDs) : []
         collectionView.performUpdatesPreservingReadingPosition(keepingItemIDs: survivingIDs) {
@@ -1223,10 +1190,8 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
 
             let completion = { [weak self] in
                 guard let self else { return }
-                if self.readingState === restoringState {
-                    if let mediaAnchor { self.restoreScrollAnchorIfNeeded(mediaAnchor) }
-                    self.restorePendingContentOffsetIfNeeded(finalize: !plan.isInitialLoading)
-                }
+                if let mediaAnchor { self.restoreScrollAnchorIfNeeded(mediaAnchor) }
+                self.restorePendingContentOffsetIfNeeded(finalize: !plan.isInitialLoading)
                 self.accessVisiblePagingItems()
                 self.updateAutoplayConfiguration()
                 if wasRefreshing && !plan.isRefreshing { self.schedulePostRefreshPoolCleanup() }
@@ -1276,7 +1241,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
             if collectionView.preservesReadingPosition {
                 pendingRefreshEnd = false
                 collectionView.beginRefreshing(
-                    revealingIndicator: !isUserRefreshing && pendingSavedPosition?.itemID == nil
+                    revealingIndicator: !isUserRefreshing && pendingReloadPosition?.itemID == nil
                 )
                 return
             }
@@ -1455,7 +1420,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
             if collectionView.hasReadingPosition { collectionView.setNeedsLayout() }
         }
         defer { if finalize { finishPendingRefreshIfReady() } }
-        restoreSavedPositionIfReady()
+        restoreReloadPositionIfReady()
         if minimumVerticalScrollDistance > 0 {
             collectionView.layoutIfNeeded()
             updateMinimumScrollableBottomInset()
@@ -1830,7 +1795,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
 
     private func beginScrollInteraction() {
         pendingInput?.retainedOffset = nil
-        pendingSavedPosition = nil
+        pendingReloadPosition = nil
         collectionView.interruptRefreshForScrolling()
         autoplay.scrollBegan()
         if contentKind == .profileMedia {
@@ -1891,6 +1856,5 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         rememberProfileMediaScrollAnchor()
         autoplay.reconsider()
         scheduleDeferredPoolCleanup()
-        saveReadingPosition()
     }
 }

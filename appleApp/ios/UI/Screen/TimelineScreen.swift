@@ -7,7 +7,6 @@ import FlareAppleUI
 
 struct TimelineScreen: View {
     let tabItem: UiTimelineTabItem
-    var readingState: TimelineReadingState? = nil
     let allowGalleryMode: Bool
     let isHomeTimeline: Bool
     let accessoryItems: [UITimelineCollectionViewAccessoryItem]
@@ -19,13 +18,11 @@ struct TimelineScreen: View {
     @State private var isTabRefreshInFlight = false
     init(
         tabItem: UiTimelineTabItem,
-        readingState: TimelineReadingState? = nil,
         allowGalleryMode: Bool = true,
         isHomeTimeline: Bool = false,
         accessoryItems: [UITimelineCollectionViewAccessoryItem] = []
     ) {
         self.tabItem = tabItem
-        self.readingState = readingState
         self.allowGalleryMode = allowGalleryMode
         self.isHomeTimeline = isHomeTimeline
         self.accessoryItems = accessoryItems
@@ -43,7 +40,6 @@ struct TimelineScreen: View {
             data: presenter.state.listState,
             detailStatusKey: nil,
             key: "timeline:\(tabItem.id):\(tabItem.loaderKey)",
-            readingState: readingState,
             allowGalleryMode: allowGalleryMode,
             accessoryItems: accessoryItems,
             onIsAtTopChanged: { isAtTop = $0 }

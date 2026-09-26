@@ -7,8 +7,6 @@ import SwiftUIBackports
 import FlareAppleCore
 
 struct NotificationScreen: View {
-    @State private var positions = TimelinePagePositions()
-    @Environment(\.timelineAccountScope) private var accountScope
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @State private var presenter: KotlinPresenter<AllNotificationPresenterState> = .init(presenter: AllNotificationPresenter())
     @State private var selectedAccountStableKey: String?
@@ -87,7 +85,6 @@ struct NotificationScreen: View {
             data: presenter.state.timeline,
             detailStatusKey: nil,
             key: timelineKey,
-            readingState: positions.state(for: timelineKey, scope: "\(accountScope):\(presenterSelectedAccountStableKey ?? "none")"),
             topContentInset: horizontalSizeClass == .compact && !isSyncingAccountSelection ? filterSegmentsHeight + 8 : 0,
             onIsAtTopChanged: { isAtTop = $0 }
         )

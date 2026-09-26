@@ -248,7 +248,6 @@ targets:
       - path: ios/UI/Component/TimelineItemHeightCache.swift
       - path: ios/UI/Component/Status/StatusMediaCarouselLayout.swift
       - path: ios/UI/Component/TimelineLayoutPolicy.swift
-      - path: ios/UI/Component/TimelineReadingState.swift
       - path: ios/UI/Component/TimelineHostedAccessoryView.swift
       - path: Shared/FlareAppleCore/Sources/FlareAppleUI/TimelineAutoplayPolicy.swift
       - path: Shared/FlareAppleCore/Sources/FlareAppleUI/TimelinePlaybackCoordinator.swift

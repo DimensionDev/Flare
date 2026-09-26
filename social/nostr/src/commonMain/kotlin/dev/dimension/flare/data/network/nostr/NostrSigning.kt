@@ -60,7 +60,7 @@ internal interface NostrEventSigner : AutoCloseable {
     val canSign: Boolean
     val canSignWithoutInteraction: Boolean
 
-    suspend fun sign(template: EventTemplate<QuartzEvent>): QuartzEvent
+    suspend fun sign(template: EventTemplate<out QuartzEvent>): QuartzEvent
 
     override fun close() = Unit
 }
@@ -86,7 +86,7 @@ internal fun nostrEventSigner(
                     else -> true
                 }
 
-        override suspend fun sign(template: EventTemplate<QuartzEvent>): QuartzEvent {
+        override suspend fun sign(template: EventTemplate<out QuartzEvent>): QuartzEvent {
             check(canSign) { "This Nostr account is read-only. Connect a signer to publish events." }
             val signed =
                 when (credential) {
@@ -190,7 +190,7 @@ internal class NostrBunkerSession(
             signer.getPublicKey().also { require(expectedPubkey == null || it == expectedPubkey) { "Bunker account identity changed" } }
         }
 
-    suspend fun sign(template: EventTemplate<QuartzEvent>): QuartzEvent = withTimeout(10.seconds) { signer().sign(template) }
+    suspend fun sign(template: EventTemplate<out QuartzEvent>): QuartzEvent = withTimeout(10.seconds) { signer().sign(template) }
 
     override fun close() {
         closed.value = true

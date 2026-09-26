@@ -4,6 +4,9 @@
 # Re-evaluate after upgrading to an Android artifact that bundles the rule.
 -keep class de.jensklingenberg.ktorfit.** { *; }
 
+# OpenTelemetry retains this compile-time annotation; its generated value classes are bundled.
+-dontwarn com.google.auto.value.AutoValue
+
 # Optional JVM management APIs are not available on Android. Keep these
 # suppressions until a clean optimized release succeeds without them.
 -dontwarn java.lang.management.**

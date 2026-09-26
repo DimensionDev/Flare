@@ -175,12 +175,13 @@ class QuartzMigrationTest {
             QuartzTestRelays(this).use { network ->
                 val bunker = localSigner("2".repeat(64))
                 val transport = localSigner("3".repeat(64))
-                val commands = mutableListOf<String>()
+                val commands = linkedMapOf<String, String>()
                 network.onPublished = { event ->
                     assertEquals(transport.pubKey, event.pubKey)
                     val request = JSON.parseToJsonElement(bunker.decrypt(event.content, event.pubKey)).jsonObject
                     val method = request.getValue("method").jsonPrimitive.content
-                    commands += method
+                    // A relay can replay a publish on connection; count logical NIP-46 requests by ID.
+                    commands[request.getValue("id").jsonPrimitive.content] = method
                     val result =
                         when (method) {
                             "get_public_key" -> {
@@ -226,7 +227,7 @@ class QuartzMigrationTest {
                         }
                     }
                 }
-                assertEquals(listOf("get_public_key", "sign_event", "get_public_key", "sign_event"), commands)
+                assertEquals(listOf("get_public_key", "sign_event", "get_public_key", "sign_event"), commands.values.toList())
             }
         }
 

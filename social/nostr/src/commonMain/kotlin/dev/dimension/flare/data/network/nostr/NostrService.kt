@@ -2,6 +2,8 @@ package dev.dimension.flare.data.network.nostr
 
 import com.vitorpamplona.quartz.nip01Core.core.toHexKey
 import com.vitorpamplona.quartz.nip01Core.crypto.KeyPair
+import com.vitorpamplona.quartz.nip01Core.hints.EventHintBundle
+import com.vitorpamplona.quartz.nip01Core.relay.client.INostrClient
 import com.vitorpamplona.quartz.nip01Core.signers.EventTemplate
 import com.vitorpamplona.quartz.nip19Bech32.entities.NEvent
 import com.vitorpamplona.quartz.nip19Bech32.entities.NNote
@@ -50,6 +52,8 @@ import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.Instant
 import com.vitorpamplona.quartz.nip01Core.core.Event as QuartzEvent
+import com.vitorpamplona.quartz.nip18Reposts.GenericRepostEvent as QuartzGenericRepostEvent
+import com.vitorpamplona.quartz.nip25Reactions.ReactionEvent as QuartzReactionEvent
 
 internal val defaultNostrRelays: List<String> =
     listOf(
@@ -65,6 +69,7 @@ internal class NostrService(
     credential: NostrCredential,
     private val amberSignerBridge: AmberSignerBridge,
     initialRelays: List<String> = emptyList(),
+    private val suppliedClient: INostrClient? = null,
 ) : AutoCloseable {
     companion object {
         private val HEX_KEY_REGEX = Regex("^[0-9a-fA-F]{64}\$")
@@ -225,7 +230,7 @@ internal class NostrService(
     private val signerHandle = nostrEventSigner(this.credential.effectiveSigner, pubKeyHex, amberSignerBridge)
     private val currentRelays = MutableStateFlow(normalizedNostrRelays(normalizeRelayUrls(initialRelays)))
     private val relayClient by lazy { NostrRelayClient(signerHandle) { currentRelays.value } }
-    private val client get() = relayClient.client
+    private val client get() = suppliedClient ?: relayClient.client
     internal val canSign: Boolean get() = signerHandle.canSign
     private val blossomUploader by lazy {
         NostrBlossomUploader(
@@ -236,7 +241,7 @@ internal class NostrService(
     }
 
     override fun close() {
-        relayClient.close()
+        if (suppliedClient == null) relayClient.close()
         signerHandle.close()
     }
 
@@ -740,27 +745,18 @@ internal class NostrService(
 
     internal suspend fun repost(statusKey: MicroBlogKey): String {
         val target = loadEvent(statusKey) ?: error("Repost target not found: $statusKey")
-        val tags =
-            listOf(arrayOf("e", target.id), pTag(target.pubKey)) +
-                if (target.kind == TextNoteEvent.KIND) emptyList() else listOf(arrayOf("k", target.kind.toString()))
         return sendEventBuilder(
-            eventTemplate(
-                kind = if (target.kind == TextNoteEvent.KIND) RepostEvent.KIND else GenericRepostEvent.KIND,
-                content = target.toJson(),
-                tags = tags,
-            ),
+            if (target.kind == TextNoteEvent.KIND) {
+                eventTemplate(RepostEvent.KIND, target.toJson(), listOf(arrayOf("e", target.id), pTag(target.pubKey)))
+            } else {
+                QuartzGenericRepostEvent.build(EventHintBundle(QuartzEvent.fromJson(target.toJson())))
+            },
         )
     }
 
     internal suspend fun react(statusKey: MicroBlogKey): String {
         val target = loadEvent(statusKey) ?: error("Reaction target not found: $statusKey")
-        return sendEventBuilder(
-            eventTemplate(
-                kind = ReactionEvent.KIND,
-                content = ReactionEvent.LIKE,
-                tags = listOf(arrayOf("e", target.id), pTag(target.pubKey), arrayOf("k", target.kind.toString())),
-            ),
-        )
+        return sendEventBuilder(QuartzReactionEvent.like(EventHintBundle(QuartzEvent.fromJson(target.toJson()))))
     }
 
     internal suspend fun report(statusKey: MicroBlogKey) {
@@ -905,7 +901,7 @@ internal class NostrService(
     private suspend fun queryAllRelays(filters: List<Filter>): List<Event> =
         client.fetchNostrEvents(currentRelays.value, filters).map { it.toCompatEvent() }
 
-    private suspend fun sendEventBuilder(builder: EventTemplate<QuartzEvent>): String {
+    private suspend fun sendEventBuilder(builder: EventTemplate<out QuartzEvent>): String {
         requireWritable()
         val event = signerHandle.sign(builder)
         return client.publishNostrEvent(event, currentRelays.value)

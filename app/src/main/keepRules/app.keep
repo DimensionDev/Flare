@@ -4,11 +4,8 @@
 # Re-evaluate after upgrading to an Android artifact that bundles the rule.
 -keep class de.jensklingenberg.ktorfit.** { *; }
 
-# Temporary compatibility workaround for nostr-sdk-kmp 0.44.8.
-# Its published Android consumer rule targets rust.nostr.*, while the generated
-# UniFFI/JNA bindings are in rust.nostr.sdk. Re-evaluate after upgrading it or
-# validating that the narrower JNA boundary rules are sufficient in release.
--keep class rust.nostr.sdk.** { *; }
+# OpenTelemetry retains this compile-time annotation; its generated value classes are bundled.
+-dontwarn com.google.auto.value.AutoValue
 
 # Optional JVM management APIs are not available on Android. Keep these
 # suppressions until a clean optimized release succeeds without them.

@@ -15,6 +15,7 @@
 		type TimelineMergePolicy,
 		type TimelinePostContent,
 		type TimelinePostKind,
+		type TimelineReplyVisibility,
 		type UiTimelineTabItem,
 		type UiText,
 		type VideoAutoplay,
@@ -28,6 +29,11 @@
 	const tabSettings = createHomeTabSettingsPresenter();
 	const allTabs = createAllTabsPresenter();
 	const environmentSettings = useEnvironmentSettings();
+	const replyVisibilityOptions: Array<{ value: TimelineReplyVisibility; label: string }> = [
+		{ value: 'AllReplies', label: m.tabSettingsFilterAllReplies() },
+		{ value: 'ToFollowedAccounts', label: m.tabSettingsFilterToFollowedAccounts() },
+		{ value: 'NoReplies', label: m.tabSettingsFilterNoReplies() },
+	];
 	const mergePolicyOptions: Array<{ value: TimelineMergePolicy; label: string }> = [
 		{ value: 'TimePerPage', label: m.tabSettingsMergePolicyTimePerPage() },
 		{ value: 'Time', label: m.tabSettingsMergePolicyTime() },
@@ -35,7 +41,6 @@
 	];
 	const postKindOptions: Array<{ value: TimelinePostKind; label: string }> = [
 		{ value: 'Original', label: m.tabSettingsFilterOriginal() },
-		{ value: 'Reply', label: m.tabSettingsFilterReply() },
 		{ value: 'Repost', label: m.tabSettingsFilterRepost() },
 		{ value: 'Quote', label: m.tabSettingsFilterQuote() },
 	];
@@ -525,6 +530,7 @@
 	function toggleArrayValue<T>(items: T[], value: T): T[] {
 		return items.includes(value) ? items.filter((item) => item !== value) : [...items, value];
 	}
+
 </script>
 
 <svelte:head>
@@ -987,6 +993,25 @@
 				<div class="tab-edit-filter">
 					<div>
 						<h4 class="section-title">{m.tabSettingsFilterKinds()}</h4>
+						<label class="filter-reply-row rounded-box border border-base-300 bg-base-100">
+							<span>{m.tabSettingsFilterReply()}</span>
+							<select
+								class="select select-bordered select-sm max-w-full"
+								value={tabSettings.replyVisibilityForKinds(form.excludedKinds.join(','))}
+								onchange={(event) =>
+									update({
+										...form,
+										excludedKinds: tabSettings.kindsWithReplyVisibility(
+											form.excludedKinds.join(','),
+											event.currentTarget.value as TimelineReplyVisibility
+										),
+									})}
+							>
+								{#each replyVisibilityOptions as option (option.value)}
+									<option value={option.value}>{option.label}</option>
+								{/each}
+							</select>
+						</label>
 						<div class="filter-options">
 							{#each postKindOptions as option (option.value)}
 								<label class="filter-option desktop-filter-option">
@@ -1321,6 +1346,25 @@
 				<div class="tab-edit-filter">
 					<div>
 						<h4 class="section-title">{m.tabSettingsFilterKinds()}</h4>
+						<label class="filter-reply-row rounded-box border border-base-300 bg-base-100">
+							<span>{m.tabSettingsFilterReply()}</span>
+							<select
+								class="select select-bordered select-sm max-w-full"
+								value={tabSettings.replyVisibilityForKinds(form.excludedKinds.join(','))}
+								onchange={(event) =>
+									update({
+										...form,
+										excludedKinds: tabSettings.kindsWithReplyVisibility(
+											form.excludedKinds.join(','),
+											event.currentTarget.value as TimelineReplyVisibility
+										),
+									})}
+							>
+								{#each replyVisibilityOptions as option (option.value)}
+									<option value={option.value}>{option.label}</option>
+								{/each}
+							</select>
+						</label>
 						<div class="filter-options">
 							{#each postKindOptions as option (option.value)}
 								<label class="filter-option desktop-filter-option">
@@ -1984,6 +2028,16 @@
 	.desktop-filter-option {
 		min-height: 2rem;
 		padding: 0.25rem 0;
+	}
+
+	.filter-reply-row {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) auto;
+		align-items: center;
+		gap: 0.75rem;
+		min-height: 2.75rem;
+		margin-top: 0.35rem;
+		padding: 0.35rem 0.55rem;
 	}
 
 	.desktop-dialog-actions {

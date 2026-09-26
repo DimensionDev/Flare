@@ -396,7 +396,7 @@ struct MacSidebarSettingLabel: View {
 struct MacSidebarFilterEditor: View {
     @Binding var filterConfig: TimelineFilterConfig
 
-    private let kindOptions: [TimelinePostKind] = [.reply, .repost, .quote]
+    private let kindOptions: [TimelinePostKind] = [.repost, .quote]
     private let contentOptions: [TimelinePostContent] = [.text, .image, .video]
 
     var body: some View {
@@ -405,6 +405,13 @@ struct MacSidebarFilterEditor: View {
                 Text("tab_settings_filter_kind_group")
                     .font(.caption)
                     .foregroundStyle(.secondary)
+
+                Picker("tab_settings_filter_reply", selection: replyVisibilityBinding) {
+                    Text("tab_settings_filter_all_replies").tag(TimelineReplyVisibility.allReplies)
+                    Text("tab_settings_filter_to_followed_accounts").tag(TimelineReplyVisibility.toFollowedAccounts)
+                    Text("tab_settings_filter_no_replies").tag(TimelineReplyVisibility.noReplies)
+                }
+                .pickerStyle(.menu)
 
                 ForEach(kindOptions, id: \.self) { kind in
                     Toggle(isOn: includedKindBinding(kind)) {
@@ -456,6 +463,13 @@ struct MacSidebarFilterEditor: View {
                     excludedContents: filterConfig.excludedContents
                 )
             }
+        )
+    }
+
+    private var replyVisibilityBinding: Binding<TimelineReplyVisibility> {
+        Binding(
+            get: { filterConfig.replyVisibility },
+            set: { filterConfig = filterConfig.withReplyVisibility(visibility: $0) }
         )
     }
 

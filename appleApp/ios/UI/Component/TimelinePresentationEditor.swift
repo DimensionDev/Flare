@@ -161,10 +161,11 @@ private struct TimelineFilterSettingsItem: View {
 public struct TimelineFilterSheet: View {
     @State private var selectedKinds: Set<TimelinePostKind>
     @State private var selectedContents: Set<TimelinePostContent>
+    @State private var selectedReplyVisibility: TimelineReplyVisibility
     private let onCancel: () -> Void
     private let onConfirm: (TimelineFilterConfig) -> Void
 
-    private let kindOptions: [TimelinePostKind] = [.reply, .repost, .quote]
+    private let kindOptions: [TimelinePostKind] = [.repost, .quote]
     private let contentOptions: [TimelinePostContent] = [.text, .image, .video]
 
     public init(
@@ -177,11 +178,18 @@ public struct TimelineFilterSheet: View {
         let current = initialFilterConfig
         self.selectedKinds = Set(kindOptions.filter { !current.excludedKinds.contains($0) })
         self.selectedContents = Set(contentOptions.filter { !current.excludedContents.contains($0) })
+        self.selectedReplyVisibility = current.replyVisibility
     }
 
     public var body: some View {
         Form {
             Section {
+                Picker("tab_settings_filter_reply", selection: $selectedReplyVisibility) {
+                    Text("tab_settings_filter_all_replies").tag(TimelineReplyVisibility.allReplies)
+                    Text("tab_settings_filter_to_followed_accounts").tag(TimelineReplyVisibility.toFollowedAccounts)
+                    Text("tab_settings_filter_no_replies").tag(TimelineReplyVisibility.noReplies)
+                }
+
                 ForEach(kindOptions, id: \.self) { kind in
                     Toggle(isOn: Binding(get: {
                         selectedKinds.contains(kind)
@@ -236,7 +244,7 @@ public struct TimelineFilterSheet: View {
                         TimelineFilterConfig(
                             excludedKinds: kindOptions.filter { !selectedKinds.contains($0) },
                             excludedContents: contentOptions.filter { !selectedContents.contains($0) }
-                        )
+                        ).withReplyVisibility(visibility: selectedReplyVisibility)
                     )
                 } label: {
                     Label {

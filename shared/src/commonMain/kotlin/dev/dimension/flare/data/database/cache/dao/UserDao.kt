@@ -97,8 +97,20 @@ internal interface UserDao {
         userKey: MicroBlogKey,
     ): Flow<DbUserRelation?>
 
+    @Query("SELECT * FROM DbUserRelation WHERE accountType = :accountType AND userKey IN (:userKeys)")
+    suspend fun getUserRelations(
+        accountType: DbAccountType,
+        userKeys: List<MicroBlogKey>,
+    ): List<DbUserRelation>
+
+    @Query("SELECT * FROM DbUserRelation")
+    fun getUserRelations(): Flow<List<DbUserRelation>>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertUserRelation(relation: DbUserRelation)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertUserRelations(relations: List<DbUserRelation>)
 
     @Query("DELETE FROM DbUserRelation WHERE accountType = :accountType AND userKey = :userKey")
     suspend fun deleteUserRelation(

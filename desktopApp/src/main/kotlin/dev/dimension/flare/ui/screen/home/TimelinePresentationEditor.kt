@@ -41,6 +41,9 @@ import dev.dimension.flare.data.model.appearance.TimelineAppearance
 import dev.dimension.flare.data.model.tab.TimelineFilterConfig
 import dev.dimension.flare.data.model.tab.TimelinePostContent
 import dev.dimension.flare.data.model.tab.TimelinePostKind
+import dev.dimension.flare.data.model.tab.TimelineReplyVisibility
+import dev.dimension.flare.data.model.tab.replyVisibility
+import dev.dimension.flare.data.model.tab.withReplyVisibility
 import dev.dimension.flare.edit_tab_enabled
 import dev.dimension.flare.edit_tab_with_avatar
 import dev.dimension.flare.ok
@@ -102,15 +105,18 @@ import dev.dimension.flare.settings_appearance_video_autoplay_never
 import dev.dimension.flare.settings_appearance_video_autoplay_wifi
 import dev.dimension.flare.settings_post_action_fixed_width
 import dev.dimension.flare.settings_post_action_fixed_width_description
+import dev.dimension.flare.tab_settings_filter_all_replies
 import dev.dimension.flare.tab_settings_filter_content_group
 import dev.dimension.flare.tab_settings_filter_desc
 import dev.dimension.flare.tab_settings_filter_image
 import dev.dimension.flare.tab_settings_filter_kind_group
+import dev.dimension.flare.tab_settings_filter_no_replies
 import dev.dimension.flare.tab_settings_filter_quote
 import dev.dimension.flare.tab_settings_filter_reply
 import dev.dimension.flare.tab_settings_filter_repost
 import dev.dimension.flare.tab_settings_filter_text_only
 import dev.dimension.flare.tab_settings_filter_title
+import dev.dimension.flare.tab_settings_filter_to_followed_accounts
 import dev.dimension.flare.tab_settings_filter_video
 import dev.dimension.flare.ui.component.TabIcon
 import dev.dimension.flare.ui.model.UiText
@@ -693,7 +699,6 @@ private fun TimelineFilterDialog(
     val kindOptions =
         remember {
             listOf(
-                TimelinePostKind.Reply,
                 TimelinePostKind.Repost,
                 TimelinePostKind.Quote,
             )
@@ -708,6 +713,9 @@ private fun TimelineFilterDialog(
         }
     var selectedKinds by remember(filterConfig) {
         mutableStateOf(kindOptions.filterNot { it in filterConfig.excludedKinds }.toSet())
+    }
+    var selectedReplyVisibility by remember(filterConfig) {
+        mutableStateOf(filterConfig.replyVisibility)
     }
     var selectedContents by remember(filterConfig) {
         mutableStateOf(contentOptions.filterNot { it in filterConfig.excludedContents }.toSet())
@@ -724,7 +732,7 @@ private fun TimelineFilterDialog(
                         TimelineFilterConfig(
                             excludedKinds = kindOptions.filterNot { option -> option in selectedKinds },
                             excludedContents = contentOptions.filterNot { option -> option in selectedContents },
-                        ),
+                        ).withReplyVisibility(selectedReplyVisibility),
                     )
                 }
 
@@ -756,6 +764,12 @@ private fun TimelineFilterDialog(
                                 selectedKinds + option
                             }
                     },
+                    extraContent = {
+                        ReplyVisibilitySelector(
+                            selected = selectedReplyVisibility,
+                            onSelect = { selectedReplyVisibility = it },
+                        )
+                    },
                 )
                 FilterSection(
                     title = stringResource(Res.string.tab_settings_filter_content_group),
@@ -783,11 +797,13 @@ private fun <T> FilterSection(
     selected: Set<T>,
     label: @Composable (T) -> String,
     onToggle: (T) -> Unit,
+    extraContent: @Composable () -> Unit = {},
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
         Text(title)
+        extraContent()
         LazyColumn(
             modifier = Modifier.heightIn(max = 160.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp),
@@ -813,9 +829,52 @@ private fun <T> FilterSection(
 }
 
 @Composable
+private fun ReplyVisibilitySelector(
+    selected: TimelineReplyVisibility,
+    onSelect: (TimelineReplyVisibility) -> Unit,
+) {
+    MenuFlyoutContainer(
+        flyout = {
+            TimelineReplyVisibility.entries.forEach { option ->
+                MenuFlyoutItem(
+                    onClick = {
+                        onSelect(option)
+                        isFlyoutVisible = false
+                    },
+                    text = { Text(stringResource(option.label)) },
+                )
+            }
+        },
+        content = {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Text(stringResource(Res.string.tab_settings_filter_reply))
+                DropDownButton(
+                    onClick = { isFlyoutVisible = !isFlyoutVisible },
+                    content = { Text(stringResource(selected.label)) },
+                )
+            }
+        },
+        adaptivePlacement = true,
+        placement = FlyoutPlacement.BottomAlignedEnd,
+    )
+}
+
+private val TimelineReplyVisibility.label: StringResource
+    get() =
+        when (this) {
+            TimelineReplyVisibility.AllReplies -> Res.string.tab_settings_filter_all_replies
+            TimelineReplyVisibility.ToFollowedAccounts -> Res.string.tab_settings_filter_to_followed_accounts
+            TimelineReplyVisibility.NoReplies -> Res.string.tab_settings_filter_no_replies
+        }
+
+@Composable
 private fun filterKindLabel(kind: TimelinePostKind): String =
     when (kind) {
-        TimelinePostKind.Reply -> stringResource(Res.string.tab_settings_filter_reply)
+        TimelinePostKind.Reply, TimelinePostKind.ReplyToUnfollowed -> error("Replies use a dedicated filter")
         TimelinePostKind.Repost -> stringResource(Res.string.tab_settings_filter_repost)
         TimelinePostKind.Quote -> stringResource(Res.string.tab_settings_filter_quote)
         TimelinePostKind.Original -> error("Original is not exposed in timeline filter UI")

@@ -9,8 +9,10 @@ import dev.dimension.flare.data.database.cache.model.DbStatus
 import dev.dimension.flare.data.database.cache.model.DbStatusReference
 import dev.dimension.flare.data.database.cache.model.DbTimelineItemPresentationReference
 import dev.dimension.flare.data.database.cache.model.DbTimelineItemPresentationType
+import dev.dimension.flare.data.database.cache.model.DbUserRelation
 import dev.dimension.flare.model.ReferenceType
 import dev.dimension.flare.ui.model.UiProfile
+import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiTimelineV2
 
 internal suspend fun saveToDatabase(
@@ -27,6 +29,7 @@ private suspend fun saveToDatabaseInTransaction(
     val statuses = collectStatuses(items)
     val users = statuses.flatMap { it.content.usersInContent() }.distinctBy { it.key }
     database.upsertUsers(users.map { it.toDbUser() })
+    syncFollowingRelations(database, statuses)
     val statusChanges = loadChangedStatuses(database, statuses)
     if (statusChanges.inserted.isNotEmpty()) {
         database.statusDao().insertNew(statusChanges.inserted)
@@ -89,6 +92,59 @@ private suspend fun saveToDatabaseInTransaction(
     }
     if (timelineChanges.updated.isNotEmpty()) {
         database.pagingTimelineDao().updateExisting(timelineChanges.updated)
+    }
+}
+
+private suspend fun syncFollowingRelations(
+    database: CacheDatabase,
+    statuses: List<DbStatus>,
+) {
+    val incoming =
+        statuses
+            .flatMap { status ->
+                status.content.usersInContent().mapNotNull { user ->
+                    user.isFollowing?.let { isFollowing ->
+                        DbUserRelation(
+                            accountType = status.accountType,
+                            userKey = user.key,
+                            relation = UiRelation(following = isFollowing),
+                        )
+                    }
+                }
+            }.associateBy { it.accountType to it.userKey }
+            .values
+            .toList()
+    if (incoming.isEmpty()) return
+
+    incoming.groupBy { it.accountType }.forEach { (accountType, accountRelations) ->
+        val existingByUserKey =
+            accountRelations
+                .map { it.userKey }
+                .chunked(SQL_IN_BATCH_SIZE)
+                .flatMap { database.userDao().getUserRelations(accountType, it) }
+                .associateBy { it.userKey }
+        val changedRelations =
+            accountRelations.mapNotNull { incomingRelation ->
+                val existing = existingByUserKey[incomingRelation.userKey]
+                when {
+                    existing == null -> {
+                        incomingRelation
+                    }
+
+                    existing.relation.following != incomingRelation.relation.following -> {
+                        existing.copy(
+                            relation = existing.relation.copy(following = incomingRelation.relation.following),
+                        )
+                    }
+
+                    else -> {
+                        null
+                    }
+                }
+            }
+        changedRelations
+            .chunked(SQL_IN_BATCH_SIZE)
+            .forEach { database.userDao().insertUserRelations(it) }
     }
 }
 

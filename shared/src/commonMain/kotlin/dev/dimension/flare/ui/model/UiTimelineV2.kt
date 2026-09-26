@@ -533,6 +533,7 @@ private fun UiProfile.renderSummaryHash(): Int =
         .add(matrices.platformFansCount)
         .add(mark)
         .add(bottomContent?.renderSummaryHash())
+        .add(isFollowing)
         .build()
 
 private fun UiProfile.BottomContent.renderSummaryHash(): Int =

@@ -1900,14 +1900,35 @@ private fun TwitterArticleBlock.toArticleBlocks(
         val entity = entities.entityValue(entityKey) ?: return emptyList()
         if (entity.type.equals("MEDIA", ignoreCase = true)) {
             return entity.data.mediaItems.mapIndexedNotNull { mediaIndex, mediaItem ->
-                mediaMap[mediaItem.mediaId]
-                    ?.toUiArticleImage(description = entity.data.caption)
-                    ?.let { media ->
+                val media = mediaMap[mediaItem.mediaId] ?: return@mapIndexedNotNull null
+                val info = media.mediaInfo
+                val videoUrl =
+                    info
+                        ?.takeIf { it.typeName == "ApiVideo" }
+                        ?.variants
+                        ?.filter { !it.url.isNullOrBlank() }
+                        ?.maxByOrNull { it.bitRate ?: 0 }
+                        ?.url
+                if (videoUrl != null) {
+                    UiArticleBlock.Video(
+                        key = "$blockKey:video:$mediaIndex",
+                        media =
+                            UiMedia.Video(
+                                url = videoUrl,
+                                thumbnailUrl = media.displayImageUrl().orEmpty(),
+                                height = info.displayHeight()?.toFloat() ?: 0f,
+                                width = info.displayWidth()?.toFloat() ?: 0f,
+                                description = entity.data.caption?.takeIf { it.isNotBlank() },
+                            ),
+                    )
+                } else {
+                    media.toUiArticleImage(description = entity.data.caption)?.let { image ->
                         UiArticleBlock.Image(
                             key = "$blockKey:image:$mediaIndex",
-                            media = media,
+                            media = image,
                         )
                     }
+                }
             }
         }
         return emptyList()
@@ -2017,4 +2038,4 @@ private fun List<TwitterArticleInlineStyleRange>.hasStyle(
     }
 
 private fun List<dev.dimension.flare.data.network.xqt.model.TwitterArticleEntityEntry>.entityValue(key: Int): TwitterArticleEntity? =
-    getOrNull(key)?.value ?: firstOrNull { it.key == key.toString() }?.value
+    firstOrNull { it.key == key.toString() }?.value

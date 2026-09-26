@@ -33,7 +33,6 @@ public data class UiProfile public constructor(
     public val matrices: Matrices,
     public val mark: SerializableImmutableList<Mark>,
     public val bottomContent: BottomContent?,
-    public val isFollowing: Boolean? = null,
 ) {
     public constructor(
         key: MicroBlogKey,
@@ -97,7 +96,6 @@ public data class UiProfile public constructor(
             matrices = matrices.mergeWith(existing.matrices),
             mark = (existing.mark + mark).distinct().toPersistentList(),
             bottomContent = bottomContent.mergeWith(existing.bottomContent),
-            isFollowing = isFollowing ?: existing.isFollowing,
         )
     }
 

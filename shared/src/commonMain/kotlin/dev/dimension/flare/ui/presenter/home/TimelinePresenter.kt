@@ -23,7 +23,6 @@ import dev.dimension.flare.common.onError
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.common.toPagingState
 import dev.dimension.flare.data.database.cache.CacheDatabase
-import dev.dimension.flare.data.database.cache.model.DbUserRelation
 import dev.dimension.flare.data.database.cache.model.TranslationDisplayOptions
 import dev.dimension.flare.data.datasource.microblog.offsetPagingConfig
 import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
@@ -52,8 +51,6 @@ import dev.dimension.flare.data.repository.isMxgaMatch
 import dev.dimension.flare.data.translation.PreTranslationService
 import dev.dimension.flare.data.translation.TranslationSettingsSupport
 import dev.dimension.flare.di.koinInject
-import dev.dimension.flare.model.DbAccountType
-import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformRegistry
 import dev.dimension.flare.model.ReferenceType
 import dev.dimension.flare.ui.model.UiMedia
@@ -112,18 +109,6 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
             settingsRepository = settingsRepository,
             timelineTabItemId = timelineTabItemId,
         )
-    }
-
-    @OptIn(ExperimentalCoroutinesApi::class)
-    private val followingRelationsFlow: Flow<Map<Pair<DbAccountType, MicroBlogKey>, Boolean>> by lazy {
-        timelineFilterConfigFlow
-            .flatMapLatest { filterConfig ->
-                if (TimelinePostKind.ReplyToUnfollowed in filterConfig.excludedKinds) {
-                    database.userDao().getUserRelations().map { it.toFollowingRelationMap() }
-                } else {
-                    flowOf(emptyMap())
-                }
-            }.distinctUntilChanged()
     }
 
     private val mxgaEnabledFlow: Flow<Boolean> by lazy {
@@ -187,12 +172,11 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
                         timelineFilterConfigFlow,
                         mxgaEnabledFlow,
                         mxgaRepository.snapshot,
-                        followingRelationsFlow,
-                    ) { filterList, timelineFilterConfig, mxgaEnabled, mxgaSnapshot, followingRelations ->
+                    ) { filterList, timelineFilterConfig, mxgaEnabled, mxgaSnapshot ->
                         pager
                             .filter { item ->
                                 item.matchesKeywordFilters(filterList) &&
-                                    item.matchesTimelineFilter(timelineFilterConfig, followingRelations) &&
+                                    item.matchesTimelineFilter(timelineFilterConfig) &&
                                     (!mxgaEnabled || !item.isMxgaMatch(mxgaSnapshot, platformRegistry))
                             }.map {
                                 transform(it)
@@ -331,15 +315,12 @@ private fun String.matches(filter: KeywordFilterPattern): Boolean =
         contains(filter.keyword, ignoreCase = true)
     }
 
-internal fun UiTimelineV2.matchesTimelineFilter(
-    filterConfig: TimelineFilterConfig,
-    followingRelations: Map<Pair<DbAccountType, MicroBlogKey>, Boolean> = emptyMap(),
-): Boolean {
+internal fun UiTimelineV2.matchesTimelineFilter(filterConfig: TimelineFilterConfig): Boolean {
     if (filterConfig.excludedKinds.isEmpty() && filterConfig.excludedContents.isEmpty()) {
         return true
     }
     val post = asTimelinePostItem() ?: return true
-    val traits = post.traits(followingRelations)
+    val traits = post.traits()
     return filterConfig.excludedKinds.none(traits.kinds::contains) &&
         filterConfig.excludedContents.none(traits.contents::contains)
 }
@@ -349,9 +330,7 @@ internal data class TimelinePostTraits(
     val contents: Set<TimelinePostContent>,
 )
 
-internal fun UiTimelineV2.TimelinePostItem.traits(
-    followingRelations: Map<Pair<DbAccountType, MicroBlogKey>, Boolean> = emptyMap(),
-): TimelinePostTraits {
+internal fun UiTimelineV2.TimelinePostItem.traits(): TimelinePostTraits {
     val visiblePost = displayPost
     val kinds =
         buildSet {
@@ -363,21 +342,8 @@ internal fun UiTimelineV2.TimelinePostItem.traits(
                             ?.key
                             ?.let { it != currentUserKey } == true
                     }
-            val lastParent = presentation.inlineParents.lastOrNull()
-            val lastParentUser = lastParent?.displayPost?.user
-            val parentIsFollowing =
-                lastParentUser?.key?.let { userKey ->
-                    (lastParent.accountType as? DbAccountType)
-                        ?.let { accountType -> followingRelations[accountType to userKey] }
-                } ?: lastParentUser?.isFollowing
             if (hasParentFromOtherUser) {
                 add(TimelinePostKind.Reply)
-            }
-            if (
-                hasParentFromOtherUser &&
-                parentIsFollowing == false
-            ) {
-                add(TimelinePostKind.ReplyToUnfollowed)
             }
             if (presentation.repost != null) {
                 add(TimelinePostKind.Repost)
@@ -417,11 +383,6 @@ internal fun UiTimelineV2.TimelinePostItem.traits(
         contents = contents,
     )
 }
-
-private fun List<DbUserRelation>.toFollowingRelationMap(): Map<Pair<DbAccountType, MicroBlogKey>, Boolean> =
-    associate { relation ->
-        (relation.accountType to relation.userKey) to relation.relation.following
-    }
 
 private fun UiTimelineV2.Post.isTimelineFilterEmpty(): Boolean =
     content.original.raw.isBlank() &&

@@ -1128,7 +1128,6 @@ internal fun chat.bsky.actor.ProfileViewBasic.render(accountKey: MicroBlogKey): 
         bottomContent = null,
         platformId = BLUESKY_PLATFORM_ID,
         platformIcon = dev.dimension.flare.ui.model.UiIcon.Bluesky,
-        isFollowing = viewer?.let { it.following != null },
         clickEvent =
             ClickEvent.Deeplink(
                 DeeplinkRoute.Profile
@@ -1167,7 +1166,6 @@ internal fun ProfileViewBasic.render(accountKey: MicroBlogKey): UiProfile {
         bottomContent = null,
         platformId = BLUESKY_PLATFORM_ID,
         platformIcon = dev.dimension.flare.ui.model.UiIcon.Bluesky,
-        isFollowing = viewer?.let { it.following != null },
         clickEvent =
             ClickEvent.Deeplink(
                 DeeplinkRoute.Profile
@@ -1206,7 +1204,6 @@ internal fun ProfileView.render(accountKey: MicroBlogKey): UiProfile {
         bottomContent = null,
         platformId = BLUESKY_PLATFORM_ID,
         platformIcon = dev.dimension.flare.ui.model.UiIcon.Bluesky,
-        isFollowing = viewer?.let { it.following != null },
         clickEvent =
             ClickEvent.Deeplink(
                 DeeplinkRoute.Profile
@@ -1245,7 +1242,6 @@ internal fun ProfileViewDetailed.render(accountKey: MicroBlogKey): UiProfile {
         bottomContent = null,
         platformId = BLUESKY_PLATFORM_ID,
         platformIcon = dev.dimension.flare.ui.model.UiIcon.Bluesky,
-        isFollowing = viewer?.let { it.following != null },
         clickEvent =
             ClickEvent.Deeplink(
                 DeeplinkRoute.Profile

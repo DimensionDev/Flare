@@ -1,5 +1,6 @@
 package dev.dimension.flare.ui.model.mapper
 
+import dev.dimension.flare.data.network.xqt.XQT_JSON
 import dev.dimension.flare.data.network.xqt.model.Entities
 import dev.dimension.flare.data.network.xqt.model.Hashtag
 import dev.dimension.flare.data.network.xqt.model.NoteTweet
@@ -219,6 +220,88 @@ class XQTTest {
         assertEquals(800f, imageBlock.media.width)
         assertEquals(600f, imageBlock.media.height)
         assertEquals("Image caption", imageBlock.media.description)
+    }
+
+    @Test
+    fun renderArticle_resolvesFirstImageByEntityKeyInsteadOfListPosition() {
+        val tweet =
+            createArticleTweet(
+                id = "2090996210215924046",
+                article =
+                    XQT_JSON.decodeFromString<TwitterArticleResult>(
+                        """
+                        {
+                          "title": "Article with unordered entities",
+                          "content_state": {
+                            "blocks": [{"key": "6k58m", "type": "atomic", "entityRanges": [{"key": 0, "offset": 0, "length": 1}]}],
+                            "entityMap": [
+                              {"key": "12", "value": {"type": "MEDIA", "data": {"mediaItems": [{"mediaId": "last-image"}]}}},
+                              {"key": "0", "value": {"type": "MEDIA", "data": {"mediaItems": [{"mediaId": "first-image"}]}}}
+                            ]
+                          },
+                          "media_entities": [
+                            {"media_id": "last-image", "media_info": {"original_img_url": "https://pbs.twimg.com/media/last.jpg"}},
+                            {"media_id": "first-image", "media_info": {"original_img_url": "https://pbs.twimg.com/media/HQSwpCkWkAANe5x.jpg"}}
+                          ]
+                        }
+                        """.trimIndent(),
+                    ),
+            )
+
+        val article = tweet.renderArticle(accountKey) ?: error("Expected article")
+        val image = assertIs<UiArticleBlock.Image>(article.content.blocks.single())
+        assertEquals("https://pbs.twimg.com/media/HQSwpCkWkAANe5x.jpg", image.media.url)
+    }
+
+    @Test
+    fun renderArticle_rendersApiVideoWithPlayableVariant() {
+        val tweet =
+            createArticleTweet(
+                id = "2090996210215924046",
+                article =
+                    XQT_JSON.decodeFromString<TwitterArticleResult>(
+                        """
+                        {
+                          "title": "Article with video",
+                          "content_state": {
+                            "blocks": [{"key": "3mcte", "type": "atomic", "entityRanges": [{"key": 3, "offset": 0, "length": 1}]}],
+                            "entityMap": [
+                              {"key": "3", "value": {"type": "MEDIA", "data": {
+                                "caption": "Video caption",
+                                "mediaItems": [{"mediaId": "2090991421415178240", "mediaCategory": "AmplifyVideo"}]
+                              }}}
+                            ]
+                          },
+                          "media_entities": [{
+                            "media_id": "2090991421415178240",
+                            "media_info": {
+                              "__typename": "ApiVideo",
+                              "preview_image": {
+                                "original_img_url": "https://pbs.twimg.com/video-thumbnail.jpg",
+                                "original_img_width": 720,
+                                "original_img_height": 1562
+                              },
+                              "variants": [
+                                {"bit_rate": 9000000, "content_type": "video/mp4"},
+                                {"bit_rate": 8000000, "content_type": "video/mp4", "url": " "},
+                                {"bit_rate": 632000, "content_type": "video/mp4", "url": "https://video.twimg.com/low.mp4"},
+                                {"bit_rate": 2176000, "content_type": "video/mp4", "url": "https://video.twimg.com/high.mp4"},
+                                {"content_type": "application/x-mpegURL", "url": "https://video.twimg.com/playlist.m3u8"}
+                              ]
+                            }
+                          }]
+                        }
+                        """.trimIndent(),
+                    ),
+            )
+
+        val article = tweet.renderArticle(accountKey) ?: error("Expected article")
+        val video = assertIs<UiArticleBlock.Video>(article.content.blocks.single())
+        assertEquals("https://video.twimg.com/high.mp4", video.media.url)
+        assertEquals("https://pbs.twimg.com/video-thumbnail.jpg", video.media.thumbnailUrl)
+        assertEquals(720f, video.media.width)
+        assertEquals(1562f, video.media.height)
+        assertEquals("Video caption", video.media.description)
     }
 
     @Test

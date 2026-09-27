@@ -30,6 +30,32 @@ import kotlin.test.assertTrue
 
 class NostrWebSocketTest {
     @Test
+    fun failedHandshakeReportsOneFailureAndCannotSendOrReconnectTheSameAdapter() =
+        runTest {
+            var requests = 0
+            val engine =
+                MockEngine {
+                    requests++
+                    error("handshake failed")
+                }
+            HttpClient(engine) { install(WebSockets) }.use { http ->
+                val listener = Listener()
+                val socket = NostrWebSocket(NormalizedRelayUrl("wss://relay.example"), http, listener, backgroundScope)
+                assertFalse(socket.send("before connect"))
+                socket.connect()
+                assertEquals("handshake failed", listener.failed.await().message)
+                socket.connect()
+                socket.disconnect()
+                assertEquals(1, requests)
+                assertFalse(socket.send("after failure"))
+                assertTrue(socket.needsReconnect())
+                assertFalse(listener.opened.isCompleted)
+                assertFalse(listener.closed.isCompleted)
+            }
+            engine.close()
+        }
+
+    @Test
     fun preservesFrameOrderAndReportsRemoteClosure() =
         runTest {
             val wire = TestSession(backgroundScope.coroutineContext)

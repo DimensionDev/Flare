@@ -125,13 +125,14 @@ internal class NostrService(
             suspend fun awaitAccount(): ImportedAccount.RemoteSigner
         }
 
-        internal fun beginQrLogin(relays: List<String> = defaultNostrRelays): PendingQrLogin = NostrQrLogin(normalizeRelayUrls(relays))
+        internal fun beginQrLogin(relays: List<String> = defaultNostrRelays): PendingQrLogin =
+            NostrQrLogin(normalizeRelayUrls(relays).ifEmpty { defaultNostrRelays })
 
         internal suspend fun resolvePublicRelays(
             pubkeyHex: String,
             bootstrapRelays: List<String> = defaultNostrRelays,
         ): List<String> {
-            val normalizedBootstrap = normalizeRelayUrls(bootstrapRelays)
+            val normalizedBootstrap = normalizeRelayUrls(bootstrapRelays).ifEmpty { defaultNostrRelays }
             return NostrRelayClient().use { transport ->
                 val events =
                     transport.client
@@ -180,7 +181,7 @@ internal class NostrService(
             }
         }
 
-        private fun extractRelayUrls(events: List<Event>): List<String> {
+        internal fun extractRelayUrls(events: List<Event>): List<String> {
             val relayListEvent =
                 events
                     .filter { it.kind == RELAY_LIST_METADATA_KIND }
@@ -219,7 +220,6 @@ internal class NostrService(
 
         private fun normalizeRelayUrls(relays: List<String>): List<String> =
             relays
-                .ifEmpty { defaultNostrRelays }
                 .map(String::trim)
                 .filter(String::isNotEmpty)
                 .distinct()
@@ -228,7 +228,7 @@ internal class NostrService(
     private val credential = credential.normalized(accountKey)
     private val pubKeyHex = this.credential.effectivePubkeyHex(accountKey)
     private val signerHandle = nostrEventSigner(this.credential.effectiveSigner, pubKeyHex, amberSignerBridge)
-    private val currentRelays = MutableStateFlow(normalizedNostrRelays(normalizeRelayUrls(initialRelays)))
+    private val currentRelays = MutableStateFlow(normalizedNostrRelays(normalizeRelayUrls(initialRelays).ifEmpty { defaultNostrRelays }))
     private val relayClient by lazy { NostrRelayClient(signerHandle) { currentRelays.value } }
     private val client get() = suppliedClient ?: relayClient.client
     internal val canSign: Boolean get() = signerHandle.canSign
@@ -250,7 +250,7 @@ internal class NostrService(
     }
 
     suspend fun updateRelays(relays: List<String>) {
-        currentRelays.value = normalizedNostrRelays(normalizeRelayUrls(relays))
+        currentRelays.value = normalizedNostrRelays(normalizeRelayUrls(relays).ifEmpty { defaultNostrRelays })
     }
 
     internal sealed interface ImportedAccount {
@@ -994,7 +994,7 @@ internal class NostrService(
         tags: List<Array<String>> = emptyList(),
     ): EventTemplate<QuartzEvent> = eventTemplate(TextNoteEvent.KIND, content, tags)
 
-    private suspend fun buildBlossomUploadAuthEvent(sha256: String): String {
+    internal suspend fun buildBlossomUploadAuthEvent(sha256: String): String {
         requireWritable()
         return signerHandle
             .sign(

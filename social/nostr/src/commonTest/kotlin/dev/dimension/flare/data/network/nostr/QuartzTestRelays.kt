@@ -1,12 +1,21 @@
 package dev.dimension.flare.data.network.nostr
 
+import com.vitorpamplona.quartz.nip01Core.crypto.KeyPair
 import com.vitorpamplona.quartz.nip01Core.crypto.verify
 import com.vitorpamplona.quartz.nip01Core.relay.client.NostrClient
 import com.vitorpamplona.quartz.nip01Core.relay.normalizer.NormalizedRelayUrl
 import com.vitorpamplona.quartz.nip01Core.relay.sockets.WebSocket
 import com.vitorpamplona.quartz.nip01Core.relay.sockets.WebSocketListener
 import com.vitorpamplona.quartz.nip01Core.relay.sockets.WebsocketBuilder
+import com.vitorpamplona.quartz.nip01Core.signers.EventTemplate
+import com.vitorpamplona.quartz.nip01Core.signers.NostrSignerInternal
 import dev.dimension.flare.common.JSON
+import dev.dimension.flare.data.datasource.nostr.NostrCache
+import dev.dimension.flare.data.platform.NostrCredential
+import dev.dimension.flare.data.platform.NostrSignerCredential
+import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.model.UiProfile
+import dev.dimension.flare.ui.model.UiTimelineV2
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
@@ -25,6 +34,8 @@ internal class QuartzTestRelays(
     val relays = normalizedNostrRelays((1..4).map { "wss://relay$it.example" })
     val requests = Channel<Unit>(Channel.UNLIMITED)
     val storedEvents = mutableListOf<QuartzEvent>()
+    val queries = mutableListOf<Pair<NormalizedRelayUrl, List<JsonObject>>>()
+    val published = mutableListOf<QuartzEvent>()
     var endStoredEvents = true
     var acceptedRelays = relays
     var requireAuthentication = false
@@ -94,6 +105,7 @@ internal class QuartzTestRelays(
                     "REQ" -> {
                         val id = frame[1].jsonPrimitive.content
                         subscriptions[id] = frame.drop(2).map { it.jsonObject }
+                        queries += url to subscriptions.getValue(id)
                         if (requireAuthentication && url !in authenticatedRelays) {
                             out.onMessage("[\"CLOSED\",\"$id\",\"auth-required: authenticate first\"]")
                         } else {
@@ -109,6 +121,7 @@ internal class QuartzTestRelays(
 
                     "EVENT" -> {
                         val event = QuartzEvent.fromJson(frame[1].toString())
+                        published += event
                         out.onMessage("[\"OK\",\"${event.id}\",${url in acceptedRelays},\"test relay\"]")
                         onPublished(event)
                     }
@@ -127,3 +140,66 @@ internal class QuartzTestRelays(
         }
     }
 }
+
+internal fun nostrTestSigner(index: Int = 0) =
+    NostrSignerInternal(
+        KeyPair(
+            // The legacy n - 1 vector has the same x-only pubkey as scalar 1; actors must be distinct.
+            requireNotNull(
+                parseNostrSecret(
+                    if (index == 2) {
+                        "2".repeat(64)
+                    } else {
+                        rustNostrKeyFixtures[index].getValue("nsec").jsonPrimitive.content
+                    },
+                ),
+            ),
+        ),
+    )
+
+internal suspend fun nostrTestEvent(
+    content: String = "test note",
+    kind: Int = 1,
+    time: Long = 1700000000,
+    tags: List<List<String>> = emptyList(),
+    author: Int = 0,
+): QuartzEvent =
+    nostrTestSigner(author).sign(
+        EventTemplate<QuartzEvent>(
+            time,
+            kind,
+            tags.map { it.toTypedArray() }.toTypedArray(),
+            content,
+        ),
+    )
+
+internal fun QuartzTestRelays.service(
+    credential: NostrCredential =
+        NostrCredential(
+            pubkeyHex = nostrTestSigner().pubKey,
+            signer =
+                NostrSignerCredential.LocalKey(
+                    rustNostrKeyFixtures
+                        .first()
+                        .getValue("nsec")
+                        .jsonPrimitive.content,
+                ),
+        ),
+    cache: NostrCache =
+        object : NostrCache {
+            override suspend fun getProfiles(pubKeys: List<String>): Map<String, UiProfile> = emptyMap()
+
+            override suspend fun getPost(
+                accountKey: MicroBlogKey,
+                statusKey: MicroBlogKey,
+            ): UiTimelineV2.Post? = null
+        },
+): NostrService =
+    NostrService(
+        cache,
+        MicroBlogKey(credential.pubkeyHex, "nostr"),
+        credential,
+        UnsupportedAmberSignerBridge("Unavailable"),
+        relays.map { it.url },
+        client,
+    )

@@ -3,7 +3,6 @@ package dev.dimension.flare.data.datasource.bluesky
 import androidx.paging.ExperimentalPagingApi
 import app.bsky.feed.FeedViewPost
 import app.bsky.feed.GetTimelineQueryParams
-import app.bsky.feed.GetTimelineResponse
 import app.bsky.feed.ReplyRefParentUnion
 import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
@@ -53,21 +52,18 @@ internal class HomeTimelineRemoteMediator(
             } ?: return PagingResult(
                 endOfPaginationReached = true,
             )
-        return response.renderHomeTimeline(accountKey)
+        return PagingResult(
+            endOfPaginationReached = response.cursor == null,
+            data = response.feed.filterNot { it.isReplyToUnfollowedAccount(accountKey) }.renderWithDownloadUrls(accountKey),
+            nextKey = response.cursor,
+        )
     }
 }
 
-internal suspend fun GetTimelineResponse.renderHomeTimeline(accountKey: MicroBlogKey): PagingResult<UiTimelineV2> =
-    PagingResult(
-        endOfPaginationReached = cursor == null,
-        data = feed.filter { it.isVisibleInHomeTimeline(accountKey) }.renderWithDownloadUrls(accountKey),
-        nextKey = cursor,
-    )
-
-private fun FeedViewPost.isVisibleInHomeTimeline(accountKey: MicroBlogKey): Boolean {
-    val parent = (reply?.parent as? ReplyRefParentUnion.PostView)?.value ?: return true
+internal fun FeedViewPost.isReplyToUnfollowedAccount(accountKey: MicroBlogKey): Boolean {
+    val parent = (reply?.parent as? ReplyRefParentUnion.PostView)?.value ?: return false
     // Keep self-threads and replies to the viewer, who cannot follow their own account.
-    if (parent.author.did == post.author.did || parent.author.did.did == accountKey.id) return true
-    val viewer = parent.author.viewer ?: return true
-    return viewer.following != null
+    if (parent.author.did == post.author.did || parent.author.did.did == accountKey.id) return false
+    val viewer = parent.author.viewer ?: return false
+    return viewer.following == null
 }

@@ -97,16 +97,6 @@ public class ListMemberHandler(
         userKey: MicroBlogKey,
     ) {
         val listKey = MicroBlogKey(listId, accountKey.host)
-        database.connect {
-            database.listDao().insertAllMember(
-                listOf(
-                    DbListMember(
-                        listKey = listKey,
-                        memberKey = userKey,
-                    ),
-                ),
-            )
-        }
         tryRun {
             loader.addMember(listId, userKey)
         }.onSuccess { user ->
@@ -114,12 +104,13 @@ public class ListMemberHandler(
                 database.upsertUsers(
                     listOf(user.toDbUser()),
                 )
-            }
-        }.onFailure {
-            database.connect {
-                database.listDao().deleteMemberFromList(
-                    listKey = listKey,
-                    memberKey = userKey,
+                database.listDao().insertAllMember(
+                    listOf(
+                        DbListMember(
+                            listKey = listKey,
+                            memberKey = user.key,
+                        ),
+                    ),
                 )
             }
         }

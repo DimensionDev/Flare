@@ -75,11 +75,19 @@ internal interface ListDao {
     )
 
     @Transaction
-    @Query("SELECT * FROM DbListMember WHERE listKey = :listKey")
+    @Query(
+        "SELECT DbListMember.* FROM DbListMember " +
+            "INNER JOIN DbUser ON DbUser.userKey = DbListMember.memberKey " +
+            "WHERE DbListMember.listKey = :listKey",
+    )
     fun getListMembers(listKey: MicroBlogKey): PagingSource<Int, DbListMemberWithContent>
 
     @Transaction
-    @Query("SELECT * FROM DbListMember WHERE listKey = :listKey")
+    @Query(
+        "SELECT DbListMember.* FROM DbListMember " +
+            "INNER JOIN DbUser ON DbUser.userKey = DbListMember.memberKey " +
+            "WHERE DbListMember.listKey = :listKey",
+    )
     fun getListMembersFlow(listKey: MicroBlogKey): Flow<List<DbListMemberWithContent>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

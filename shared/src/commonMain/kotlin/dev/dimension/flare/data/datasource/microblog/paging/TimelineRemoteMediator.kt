@@ -301,7 +301,7 @@ private fun List<UiTimelineV2>.collapseReplyChains(): List<UiTimelineV2> {
                     val ancestor = chain[index]
                     add(ancestor.copy(presentation = ancestor.presentation.copy(inlineParents = persistentListOf())))
                 }
-            }.distinctBy { it.statusKey }
+            }.distinctBy { it.accountType to it.statusKey }
                 .toImmutableList()
         post.copy(presentation = post.presentation.copy(inlineParents = inlineParents))
     }

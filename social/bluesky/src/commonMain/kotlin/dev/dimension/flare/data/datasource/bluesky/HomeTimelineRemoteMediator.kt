@@ -1,7 +1,9 @@
 package dev.dimension.flare.data.datasource.bluesky
 
 import androidx.paging.ExperimentalPagingApi
+import app.bsky.feed.FeedViewPost
 import app.bsky.feed.GetTimelineQueryParams
+import app.bsky.feed.ReplyRefParentUnion
 import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
@@ -52,8 +54,16 @@ internal class HomeTimelineRemoteMediator(
             )
         return PagingResult(
             endOfPaginationReached = response.cursor == null,
-            data = response.feed.renderWithDownloadUrls(accountKey),
+            data = response.feed.filterNot { it.isReplyToUnfollowedAccount(accountKey) }.renderWithDownloadUrls(accountKey),
             nextKey = response.cursor,
         )
     }
+}
+
+internal fun FeedViewPost.isReplyToUnfollowedAccount(accountKey: MicroBlogKey): Boolean {
+    val parent = (reply?.parent as? ReplyRefParentUnion.PostView)?.value ?: return false
+    // Keep self-threads and replies to the viewer, who cannot follow their own account.
+    if (parent.author.did == post.author.did || parent.author.did.did == accountKey.id) return false
+    val viewer = parent.author.viewer ?: return false
+    return viewer.following == null
 }

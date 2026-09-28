@@ -1313,6 +1313,69 @@ class MixedRemoteMediatorTest : RobolectricTest() {
             assertEquals(listOf(postA.statusKey, postB.statusKey, postC.statusKey), posts.map { it.statusKey })
         }
 
+    @OptIn(ExperimentalPagingApi::class)
+    @Test
+    fun refreshCollapseKeepsSameStatusKeyParentsFromDifferentAccounts() =
+        runTest {
+            val firstAccount = AccountType.Specific(MicroBlogKey("timeline-a", "mastodon.example"))
+            val secondAccount = AccountType.Specific(MicroBlogKey("timeline-b", "mastodon.example"))
+            val sharedStatusKey = MicroBlogKey("shared-parent", "mastodon.example")
+            val firstParent =
+                createPost(
+                    accountType = firstAccount,
+                    user = profile(MicroBlogKey("user-a", "mastodon.example"), "User A"),
+                    statusKey = sharedStatusKey,
+                    text = "Parent A",
+                )
+            val secondParent =
+                createPost(
+                    accountType = secondAccount,
+                    user = profile(MicroBlogKey("user-b", "mastodon.example"), "User B"),
+                    statusKey = sharedStatusKey,
+                    text = "Parent B",
+                )
+            val leaf =
+                timelinePostItem(
+                    post =
+                        createPost(
+                            accountType = secondAccount,
+                            user = profile(MicroBlogKey("leaf-user", "mastodon.example"), "Leaf User"),
+                            statusKey = MicroBlogKey("leaf", "mastodon.example"),
+                            text = "Leaf",
+                        ),
+                    inlineParents = listOf(firstParent, secondParent),
+                )
+            val loader =
+                FakeLoader("reply_chain_cross_account_parent") { request ->
+                    when (request) {
+                        PagingRequest.Refresh -> {
+                            PagingResult(
+                                data = listOf(secondParent, leaf),
+                                nextKey = null,
+                            )
+                        }
+
+                        is PagingRequest.Append -> {
+                            error("No append expected")
+                        }
+
+                        is PagingRequest.Prepend -> {
+                            error("No prepend expected")
+                        }
+                    }
+                }
+
+            val mediator = TimelineRemoteMediator(loader = loader, database = db, allowLongText = false)
+            val result = mediator.timeline(pageSize = 20, request = PagingRequest.Refresh)
+            val collapsedPost = assertIs<UiTimelineV2.TimelinePostItem>(result.data.single())
+
+            assertEquals(leaf.statusKey, collapsedPost.statusKey)
+            assertEquals(
+                listOf(firstAccount to sharedStatusKey, secondAccount to sharedStatusKey),
+                collapsedPost.presentation.inlineParents.map { it.accountType to it.statusKey },
+            )
+        }
+
     @Test
     fun timelineDoesNotOverflowWhenReplyChainContainsCycle() =
         runTest {

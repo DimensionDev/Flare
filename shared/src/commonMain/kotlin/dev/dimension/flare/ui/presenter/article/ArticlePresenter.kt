@@ -16,7 +16,7 @@ import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.saveToDatabase
 import dev.dimension.flare.data.datasource.microblog.datasource.ArticleDataSource
 import dev.dimension.flare.data.datasource.microblog.paging.TimelinePagingMapper
-import dev.dimension.flare.data.datasource.microblog.paging.toPagingSource
+import dev.dimension.flare.data.datasource.microblog.paging.toTimelinePagingSource
 import dev.dimension.flare.data.datasource.microblog.pagingConfig
 import dev.dimension.flare.data.repository.AccountService
 import dev.dimension.flare.data.repository.STATUS_HISTORY_PAGING_KEY
@@ -119,7 +119,7 @@ internal fun articleCommentsFlow(
             dataSource as? ArticleDataSource
                 ?: error("Current service does not support article data source")
         Pager(config = pagingConfig) {
-            articleDataSource.articleComments(articleKey).toPagingSource()
+            articleDataSource.articleComments(articleKey).toTimelinePagingSource()
         }.flow
     }
 

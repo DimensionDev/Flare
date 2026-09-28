@@ -343,21 +343,8 @@ internal fun MediaViewerScreen(
                             HorizontalPager(
                                 state = pagerState,
                                 userScrollEnabled = !state.lockPager,
-                                key = {
-                                    when (val mediaState = medias) {
-                                        is UiState.Error -> {
-                                            preview
-                                        }
-
-                                        is UiState.Loading -> {
-                                            preview
-                                        }
-
-                                        is UiState.Success -> {
-                                            mediaState.data.getOrNull(it)?.previewKey()
-                                        }
-                                    } ?: it
-                                },
+                                // Keep the loading placeholder attached to the image originally tapped.
+                                key = { index -> if (medias is UiState.Success) index else initialIndex },
                             ) { index ->
                                 AnimatedContent(
                                     medias,
@@ -1384,14 +1371,6 @@ private fun ImageItem(
         onDoubleClick = DoubleClickToZoomListener.cycle(2f),
     )
 }
-
-private fun UiMedia.previewKey(): String? =
-    when (this) {
-        is UiMedia.Audio -> previewUrl
-        is UiMedia.Gif -> previewUrl
-        is UiMedia.Image -> previewUrl
-        is UiMedia.Video -> thumbnailUrl
-    }
 
 @Composable
 private fun statusMediaPresenter(

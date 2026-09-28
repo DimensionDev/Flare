@@ -11,7 +11,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.common.toPagingState
-import dev.dimension.flare.data.datasource.microblog.paging.toPagingSource
+import dev.dimension.flare.data.datasource.microblog.paging.toTimelinePagingSource
 import dev.dimension.flare.data.datasource.microblog.pagingConfig
 import dev.dimension.flare.data.datasource.vvo.VVODataSource
 import dev.dimension.flare.data.repository.AccountService
@@ -53,7 +53,7 @@ public class VVOCommentPresenter(
         serviceFlow.flatMapLatest { service ->
             require(service is VVODataSource)
             Pager(config = pagingConfig) {
-                service.commentChild(commentKey = commentKey).toPagingSource()
+                service.commentChild(commentKey = commentKey).toTimelinePagingSource()
             }.flow
         }
     }

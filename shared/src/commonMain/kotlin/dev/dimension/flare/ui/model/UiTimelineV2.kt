@@ -421,6 +421,27 @@ public sealed class UiTimelineV2 {
     }
 }
 
+public val UiTimelineV2.stableItemKey: String
+    get() {
+        itemKey?.let { return it }
+        val notificationKey = (this as? UiTimelineV2.TimelinePostItem)?.presentation?.notificationKey
+        val kind =
+            when {
+                notificationKey != null -> "notification"
+                this is UiTimelineV2.Post || this is UiTimelineV2.TimelinePostItem -> "post"
+                else -> itemType
+            }
+        val account =
+            when (val account = accountType) {
+                AccountType.Guest -> listOf("guest")
+                is AccountType.GuestHost -> listOf("guest_host", account.host)
+                is AccountType.Specific -> listOf("specific", account.accountKey.id, account.accountKey.host)
+            }
+        val identity = notificationKey ?: statusKey
+        return (account + listOf(kind, identity.id, identity.host))
+            .joinToString(separator = "") { "${it.length}:$it" }
+    }
+
 internal fun UiTimelineV2.withItemKey(itemKey: String?): UiTimelineV2 {
     if (this.itemKey == itemKey) {
         return this

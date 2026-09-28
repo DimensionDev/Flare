@@ -40,6 +40,7 @@ import dev.dimension.flare.ui.component.placeholder
 import dev.dimension.flare.ui.component.platform.PlatformLinearProgressIndicator
 import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.stableItemKey
 import dev.dimension.flare.ui.theme.PlatformTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import org.jetbrains.compose.resources.stringResource
@@ -54,7 +55,7 @@ public fun LazyStaggeredGridScope.status(
                 itemCount,
                 key =
                     itemKey {
-                        it.itemKey ?: it.hashCode()
+                        it.stableItemKey
                     },
                 contentType =
                     itemContentType {

@@ -1374,6 +1374,38 @@ class MixedRemoteMediatorTest : RobolectricTest() {
         }
 
     @Test
+    fun timelinePreservesSharedAncestorsForEachReplyBranch() =
+        runTest {
+            val accountType = AccountType.Specific(MicroBlogKey("timeline", "test.social"))
+            val user = profile(MicroBlogKey("user", "test.social"), "User")
+            val root = createPost(accountType, user, MicroBlogKey("root", "test.social"), "Root")
+            val parent = createPost(accountType, user, MicroBlogKey("parent", "test.social"), "Parent", listOf(root))
+            val extra = createPost(accountType, user, MicroBlogKey("extra", "test.social"), "Extra")
+            val first =
+                timelinePostItem(
+                    createPost(accountType, user, MicroBlogKey("first", "test.social"), "First", listOf(parent)),
+                    inlineParents = listOf(root, extra, parent),
+                )
+            val second = createPost(accountType, user, MicroBlogKey("second", "test.social"), "Second", listOf(parent))
+
+            for (data in listOf(listOf(first, second, parent, root), listOf(root, parent, first, second))) {
+                val loader = FakeLoader("branching_reply_chain") { PagingResult(data = data) }
+                val result = TimelineRemoteMediator(loader, db, allowLongText = false).timeline(20, PagingRequest.Refresh)
+                val posts = result.data.map { assertIs<UiTimelineV2.TimelinePostItem>(it) }
+
+                assertEquals(listOf(first.statusKey, second.statusKey), posts.map { it.statusKey })
+                assertEquals(
+                    listOf(root.statusKey, extra.statusKey, parent.statusKey),
+                    posts[0].presentation.inlineParents.map { it.statusKey },
+                )
+                assertEquals(
+                    listOf(root.statusKey, parent.statusKey),
+                    posts[1].presentation.inlineParents.map { it.statusKey },
+                )
+            }
+        }
+
+    @Test
     fun timelineDoesNotOverflowWhenReplyChainIsVeryLong() =
         runTest {
             val accountKey = MicroBlogKey(id = "timeline", host = "mastodon.example")

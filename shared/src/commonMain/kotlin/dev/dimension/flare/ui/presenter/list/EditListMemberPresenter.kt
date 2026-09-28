@@ -59,9 +59,9 @@ public class EditListMemberPresenter(
     private val membersFlow by lazy {
         serviceFlow.flatMapLatest { service ->
             if (service is ListDataSource) {
-                service.listMemberHandler.listMembersListFlow(listId)
+                service.listMemberHandler.listMemberKeysFlow(listId)
             } else {
-                flowOf(emptyList<UiProfile>())
+                flowOf(emptySet<MicroBlogKey>())
             }
         }
     }
@@ -82,7 +82,7 @@ public class EditListMemberPresenter(
                     service.searchUser(filter).toPagingSource()
                 }.flow.map { pagingData ->
                     pagingData.map { user ->
-                        user to members.any { member -> member.key == user.key }
+                        user to (user.key in members)
                     }
                 }
             }

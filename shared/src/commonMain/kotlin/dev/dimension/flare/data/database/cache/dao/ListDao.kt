@@ -90,6 +90,9 @@ internal interface ListDao {
     )
     fun getListMembersFlow(listKey: MicroBlogKey): Flow<List<DbListMemberWithContent>>
 
+    @Query("SELECT memberKey FROM DbListMember WHERE listKey = :listKey")
+    fun getListMemberKeysFlow(listKey: MicroBlogKey): Flow<List<MicroBlogKey>>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAllMember(members: List<DbListMember>)
 

@@ -220,6 +220,34 @@ class ListMemberHandlerTest : RobolectricTest() {
         }
 
     @Test
+    fun addingExistingMemberWithoutCachedProfileDoesNotCallLoader() =
+        runTest {
+            val listId = "orphaned-list"
+            val userKey = MicroBlogKey("existing-member", accountKey.host)
+            db.connect {
+                db.listDao().insertAllMember(listOf(DbListMember(MicroBlogKey(listId, accountKey.host), userKey)))
+            }
+            var addCalls = 0
+            fakeLoader.nextAddMemberResult = createUiProfile(userKey)
+            fakeLoader.beforeAddMember = { addCalls++ }
+
+            assertTrue(handler.listMembersListFlow(listId).first().isEmpty())
+            assertEquals(setOf(userKey), handler.listMemberKeysFlow(listId).first())
+            assertTrue(handler.listMemberKeysFlow("other-list").first().isEmpty())
+
+            handler.addMember(listId, userKey)
+
+            assertEquals(0, addCalls)
+
+            handler.removeMember(listId, userKey)
+            assertTrue(handler.listMemberKeysFlow(listId).first().isEmpty())
+            handler.addMember(listId, userKey)
+            handler.addMember(listId, userKey)
+            assertEquals(1, addCalls)
+            assertEquals(setOf(userKey), handler.listMemberKeysFlow(listId).first())
+        }
+
+    @Test
     fun addMemberInsertsMemberAndUserIntoDatabase() =
         runTest {
             val userKey = MicroBlogKey(id = "user-1", host = "test.social")

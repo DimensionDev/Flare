@@ -25,6 +25,7 @@ import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiProfile
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
@@ -96,6 +97,12 @@ public class ListMemberHandler(
                 }
             }
 
+    public fun listMemberKeysFlow(listId: String): Flow<Set<MicroBlogKey>> =
+        database
+            .listDao()
+            .getListMemberKeysFlow(MicroBlogKey(listId, accountKey.host))
+            .map { it.toSet() }
+
     public suspend fun addMember(
         listId: String,
         userKey: MicroBlogKey,
@@ -103,6 +110,7 @@ public class ListMemberHandler(
         val requestKey = listId to userKey
         if (requestKey in pendingAdds.getAndUpdate { it + requestKey }) return
         try {
+            if (userKey in listMemberKeysFlow(listId).first()) return
             val listKey = MicroBlogKey(listId, accountKey.host)
             tryRun {
                 loader.addMember(listId, userKey)

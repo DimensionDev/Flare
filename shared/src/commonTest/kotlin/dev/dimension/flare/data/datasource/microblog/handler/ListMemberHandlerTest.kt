@@ -1,5 +1,6 @@
 package dev.dimension.flare.data.datasource.microblog.handler
 
+import androidx.paging.PagingSource
 import androidx.room3.Room
 import dev.dimension.flare.RobolectricTest
 import dev.dimension.flare.data.database.cache.CacheDatabase
@@ -7,6 +8,7 @@ import dev.dimension.flare.data.database.cache.connect
 import dev.dimension.flare.data.database.cache.mapper.toDbUser
 import dev.dimension.flare.data.database.cache.mapper.upsertUsers
 import dev.dimension.flare.data.database.cache.model.DbListMember
+import dev.dimension.flare.data.database.cache.model.DbListMemberWithContent
 import dev.dimension.flare.data.database.createDatabaseDriver
 import dev.dimension.flare.data.datasource.microblog.loader.ListMemberLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
@@ -22,9 +24,14 @@ import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.render.toUiPlainText
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
@@ -33,6 +40,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertIs
 import kotlin.test.assertTrue
 import kotlin.time.Instant
 
@@ -88,6 +96,156 @@ class ListMemberHandlerTest : RobolectricTest() {
         db.close()
         stopKoin()
     }
+
+    @Test
+    fun addingUncachedMemberKeepsObservedListReadableWhileRequestIsPending() =
+        runTest {
+            val userKey = MicroBlogKey(id = "uncached-user", host = "test.social")
+            val requestStarted = CompletableDeferred<Unit>()
+            val finishRequest = CompletableDeferred<Unit>()
+            var addCalls = 0
+            fakeLoader.nextAddMemberResult = createUiProfile(userKey)
+            fakeLoader.beforeAddMember = {
+                addCalls++
+                requestStarted.complete(Unit)
+                finishRequest.await()
+            }
+
+            val adding = launch { handler.addMember("pending-list", userKey) }
+            requestStarted.await()
+            val duplicate = launch { handler.addMember("pending-list", userKey) }
+            try {
+                runCurrent()
+                assertEquals(1, addCalls)
+                assertTrue(handler.listMembersListFlow("pending-list").first().isEmpty())
+            } finally {
+                finishRequest.complete(Unit)
+                adding.join()
+                duplicate.join()
+            }
+            assertEquals(listOf(userKey), handler.listMembersListFlow("pending-list").first().map { it.key })
+        }
+
+    @Test
+    fun pendingAddDoesNotBlockOtherMembersOrLists() =
+        runTest {
+            val firstUser = createUiProfile(MicroBlogKey("first-user", accountKey.host))
+            val secondUser = createUiProfile(MicroBlogKey("second-user", accountKey.host))
+            val requestStarted = CompletableDeferred<Unit>()
+            val finishRequest = CompletableDeferred<Unit>()
+            fakeLoader.nextAddMemberResult = firstUser
+            fakeLoader.beforeAddMember = {
+                requestStarted.complete(Unit)
+                finishRequest.await()
+            }
+
+            val adding = launch { handler.addMember("pending-list", firstUser.key) }
+            requestStarted.await()
+            try {
+                fakeLoader.beforeAddMember = {}
+                fakeLoader.nextAddMemberResult = secondUser
+                handler.addMember("pending-list", secondUser.key)
+                fakeLoader.nextAddMemberResult = firstUser
+                handler.addMember("other-list", firstUser.key)
+                assertEquals(listOf(secondUser.key), handler.listMembersListFlow("pending-list").first().map { it.key })
+                assertEquals(listOf(firstUser.key), handler.listMembersListFlow("other-list").first().map { it.key })
+            } finally {
+                fakeLoader.nextAddMemberResult = firstUser
+                finishRequest.complete(Unit)
+                adding.join()
+            }
+        }
+
+    @Test
+    fun interruptedAddDoesNotLeaveMemberWithoutUser() =
+        runTest {
+            val userKey = MicroBlogKey(id = "interrupted-user", host = "test.social")
+            val requestStarted = CompletableDeferred<Unit>()
+            fakeLoader.nextAddMemberResult = createUiProfile(userKey)
+            fakeLoader.beforeAddMember = {
+                requestStarted.complete(Unit)
+                awaitCancellation()
+            }
+
+            val adding = launch { handler.addMember("interrupted-list", userKey) }
+            requestStarted.await()
+            adding.cancelAndJoin()
+
+            assertTrue(handler.listMembersListFlow("interrupted-list").first().isEmpty())
+            db.connect { db.upsertUsers(listOf(createUiProfile(userKey).toDbUser())) }
+            assertTrue(handler.listMembersListFlow("interrupted-list").first().isEmpty())
+            fakeLoader.beforeAddMember = {}
+            handler.addMember("interrupted-list", userKey)
+            assertEquals(listOf(userKey), handler.listMembersListFlow("interrupted-list").first().map { it.key })
+        }
+
+    @Test
+    fun memberQueriesSkipMissingUsersUntilTheyAreCached() =
+        runTest {
+            val listId = "existing-list"
+            val listKey = MicroBlogKey(listId, accountKey.host)
+            val cachedUser = createUiProfile(MicroBlogKey("cached-member", accountKey.host))
+            val missingUser = createUiProfile(MicroBlogKey("missing-member", accountKey.host))
+            db.connect {
+                db.upsertUsers(listOf(cachedUser.toDbUser()))
+                db.listDao().insertAllMember(
+                    listOf(
+                        DbListMember(listKey, cachedUser.key),
+                        DbListMember(listKey, missingUser.key),
+                        DbListMember(MicroBlogKey("other-list", accountKey.host), cachedUser.key),
+                    ),
+                )
+            }
+
+            suspend fun assertMembers(vararg keys: MicroBlogKey) {
+                assertEquals(
+                    keys.toSet(),
+                    handler
+                        .listMembersListFlow(listId)
+                        .first()
+                        .map { it.key }
+                        .toSet(),
+                )
+                val page =
+                    db.listDao().getListMembers(listKey).load(
+                        PagingSource.LoadParams.Refresh(key = null, loadSize = 20, placeholdersEnabled = false),
+                    )
+                val members = assertIs<PagingSource.LoadResult.Page<Int, DbListMemberWithContent>>(page).data
+                assertEquals(keys.toSet(), members.map { it.user.userKey }.toSet())
+            }
+
+            assertMembers(cachedUser.key)
+            db.connect { db.upsertUsers(listOf(missingUser.toDbUser())) }
+            assertMembers(cachedUser.key, missingUser.key)
+        }
+
+    @Test
+    fun addingExistingMemberWithoutCachedProfileDoesNotCallLoader() =
+        runTest {
+            val listId = "orphaned-list"
+            val userKey = MicroBlogKey("existing-member", accountKey.host)
+            db.connect {
+                db.listDao().insertAllMember(listOf(DbListMember(MicroBlogKey(listId, accountKey.host), userKey)))
+            }
+            var addCalls = 0
+            fakeLoader.nextAddMemberResult = createUiProfile(userKey)
+            fakeLoader.beforeAddMember = { addCalls++ }
+
+            assertTrue(handler.listMembersListFlow(listId).first().isEmpty())
+            assertEquals(setOf(userKey), handler.listMemberKeysFlow(listId).first())
+            assertTrue(handler.listMemberKeysFlow("other-list").first().isEmpty())
+
+            handler.addMember(listId, userKey)
+
+            assertEquals(0, addCalls)
+
+            handler.removeMember(listId, userKey)
+            assertTrue(handler.listMemberKeysFlow(listId).first().isEmpty())
+            handler.addMember(listId, userKey)
+            handler.addMember(listId, userKey)
+            assertEquals(1, addCalls)
+            assertEquals(setOf(userKey), handler.listMemberKeysFlow(listId).first())
+        }
 
     @Test
     fun addMemberInsertsMemberAndUserIntoDatabase() =
@@ -178,6 +336,10 @@ class ListMemberHandlerTest : RobolectricTest() {
             val listKey = MicroBlogKey("list-5", accountKey.host)
             val members = db.listDao().getListMembersFlow(listKey).first()
             assertTrue(members.isEmpty())
+            fakeLoader.shouldFail = false
+            fakeLoader.nextAddMemberResult = createUiProfile(userKey)
+            handler.addMember("list-5", userKey)
+            assertEquals(listOf(userKey), handler.listMembersListFlow("list-5").first().map { it.key })
         }
 
     @Test
@@ -384,6 +546,7 @@ class ListMemberHandlerTest : RobolectricTest() {
 private class FakeListMemberLoader : ListMemberLoader {
     var nextAddMemberResult: UiProfile? = null
     var shouldFail: Boolean = false
+    var beforeAddMember: suspend () -> Unit = {}
 
     private val members = mutableMapOf<String, MutableList<UiProfile>>()
 
@@ -436,6 +599,7 @@ private class FakeListMemberLoader : ListMemberLoader {
         listId: String,
         userKey: MicroBlogKey,
     ): UiProfile {
+        beforeAddMember()
         if (shouldFail) throw RuntimeException("Fake loader failure")
         val user = nextAddMemberResult ?: throw IllegalStateException("nextAddMemberResult not set")
         members.getOrPut(listId) { mutableListOf() }.add(user)

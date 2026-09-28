@@ -315,7 +315,7 @@ internal fun MediaViewerScreen(
     MediaViewerPlaybackTheme {
         val motionScheme = MaterialTheme.motionScheme
         val mediaItems = medias.takeSuccess().orEmpty()
-        MediaViewerSelection(mediaItems.map { it.url }, mediaItems.getOrNull(pagerState.currentPage)?.url)
+        MediaViewerSelection(mediaItems.map { it.url }, pagerState.currentPage)
         val swiperState =
             rememberSwiperState(
                 onDismiss = onDismiss,

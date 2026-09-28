@@ -122,18 +122,14 @@ internal fun StatusMediaComponent(
     var selectedIndex by remember(post.statusKey) { mutableStateOf(0) }
     val mediaUrls = remember(data) { data.map { it.url } }
     val openMedia: (Int) -> Unit = { index ->
-        val media = data[index]
-        playback?.selectMedia(carouselId, media.url, userInitiated = true)
+        playback?.selectMedia(carouselId, index, userInitiated = true)
         onMediaClick(index)
     }
     DisposableEffect(playback, carouselId, mediaUrls, carouselState) {
-        playback?.mediaSelections?.register(carouselId, mediaUrls) { uri ->
-            val index = mediaUrls.indexOf(uri)
-            if (index >= 0) {
-                selectedIndex = index
-                playback.selectMedia(carouselId, uri, userInitiated = false)
-                carouselState?.requestScrollToItem(index)
-            }
+        playback?.mediaSelections?.register(carouselId, mediaUrls) { index ->
+            selectedIndex = index
+            playback.selectMedia(carouselId, index, userInitiated = false)
+            carouselState?.requestScrollToItem(index)
         }
         onDispose { playback?.mediaSelections?.remove(carouselId) }
     }
@@ -233,7 +229,7 @@ internal fun StatusMediaComponent(
                                     aspectRatio = media.timelineAspectRatio,
                                 ).dp
                         CompositionLocalProvider(
-                            LocalTimelineCarouselItem provides TimelineCarouselItem(carouselId, index == selectedIndex),
+                            LocalTimelineCarouselItem provides TimelineCarouselItem(carouselId, index, index == selectedIndex),
                         ) {
                             StatusMediaItem(
                                 post = post,
@@ -258,7 +254,7 @@ internal fun StatusMediaComponent(
                 itemCount = data.size,
                 itemContent = { index ->
                     CompositionLocalProvider(
-                        LocalTimelineCarouselItem provides TimelineCarouselItem(carouselId, selected = true, isCarousel = false),
+                        LocalTimelineCarouselItem provides TimelineCarouselItem(carouselId, index, selected = true, isCarousel = false),
                     ) {
                         StatusMediaItem(
                             post = post,

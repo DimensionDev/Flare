@@ -82,7 +82,7 @@ class SurfaceBindingManagerTest {
             Snapshot.sendApplyNotifications()
             runCurrent()
             val pauses = fake.pauses
-            viewer.selectViewerMedia(listOf("a"), "a")
+            viewer.selectViewerMedia(listOf("a"), 0)
             viewer.present()
             assertTrue(fake.playing, "The outgoing media keeps running until its new surface attaches")
             viewer.update(TimelineAutoplayPolicy.Candidate("detail", visible = true, canStart = true, distance = 0f, mediaUri = "a"))

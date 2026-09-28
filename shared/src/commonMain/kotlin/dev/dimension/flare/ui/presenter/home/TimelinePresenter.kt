@@ -362,13 +362,17 @@ internal fun UiTimelineV2.TimelinePostItem.traits(): TimelinePostTraits {
         }
     val contents =
         buildSet {
-            val hasVisualMedia = visiblePost.images.any { it is UiMedia.Image || it is UiMedia.Gif || it is UiMedia.Video }
+            val hasVisualMedia =
+                visiblePost.images.any {
+                    it is UiMedia.Image || it is UiMedia.Gif || it is UiMedia.Ugoira ||
+                        it is UiMedia.Video
+                }
             if (visiblePost.content.original.raw
                     .isNotBlank() && !hasVisualMedia
             ) {
                 add(TimelinePostContent.Text)
             }
-            if (visiblePost.images.any { it is UiMedia.Image || it is UiMedia.Gif }) {
+            if (visiblePost.images.any { it is UiMedia.Image || it is UiMedia.Gif || it is UiMedia.Ugoira }) {
                 add(TimelinePostContent.Image)
             }
             if (visiblePost.images.any { it is UiMedia.Video }) {

@@ -621,6 +621,10 @@ private fun UiCard.renderSummaryHash(): Int =
 
 private fun UiMedia.renderSummaryHash(): Int =
     when (this) {
+        is UiMedia.Ugoira -> {
+            hashCode()
+        }
+
         is UiMedia.Audio -> {
             renderHashBuilder()
                 .add(url)

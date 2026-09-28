@@ -10,15 +10,31 @@ import android.provider.DocumentsContract
 import android.provider.MediaStore
 import android.util.Log
 import android.webkit.MimeTypeMap
+import android.widget.Toast
 import androidx.annotation.OptIn
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.media3.common.C
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.DataSpec
+import dev.dimension.flare.R
+import dev.dimension.flare.media.UgoiraStore
 import dev.dimension.flare.ui.component.Media3VideoCacheManager
 import dev.dimension.flare.ui.model.UiMedia
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import org.koin.core.annotation.Provided
 import org.koin.core.annotation.Single
@@ -46,6 +62,90 @@ internal class AndroidDownloadManager(
     }
 
     private val nextDownloadId = AtomicLong()
+    private val exportScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+    private val exportMutex = Mutex()
+    private var exportJob: Job? = null
+    private var smallerChoice: CompletableDeferred<Boolean>? = null
+    var ugoiraProgress by mutableStateOf<Float?>(null)
+        private set
+    var needsSmallerUgoira by mutableStateOf(false)
+        private set
+
+    fun cancelUgoira() {
+        exportJob?.cancel()
+        smallerChoice?.complete(false)
+    }
+
+    fun exportSmallerUgoira() {
+        smallerChoice?.complete(true)
+    }
+
+    suspend fun saveUgoira(
+        media: UiMedia.Ugoira,
+        fileName: String,
+        askDirectoryUri: Uri? = null,
+    ): Boolean =
+        exportScope
+            .async {
+                exportMutex.withLock {
+                    exportJob = currentCoroutineContext()[Job]
+                    ugoiraProgress = 0f
+                    try {
+                        val animation = UgoiraStore.load(media) { ugoiraProgress = it * .5f }
+                        try {
+                            val file = File.createTempFile("ugoira-", ".mp4", context.cacheDir)
+                            try {
+                                suspend fun encode(smaller: Boolean) =
+                                    encodeUgoira(animation, file, smaller) {
+                                        withContext(Dispatchers.Main) { ugoiraProgress = .5f + it * .5f }
+                                    }
+                                try {
+                                    encode(false)
+                                } catch (_: UgoiraResolutionUnsupported) {
+                                    val choice = CompletableDeferred<Boolean>()
+                                    smallerChoice = choice
+                                    needsSmallerUgoira = true
+                                    if (!choice.await()) return@withLock false
+                                    needsSmallerUgoira = false
+                                    encode(true)
+                                }
+                                currentCoroutineContext().ensureActive()
+                                val saved =
+                                    saveFile(fileName, "video/mp4", askDirectoryUri) { output ->
+                                        file.inputStream().use { it.copyTo(output) }
+                                        true
+                                    }
+                                Toast
+                                    .makeText(
+                                        context,
+                                        if (saved) R.string.media_save_success else R.string.media_save_fail,
+                                        Toast.LENGTH_SHORT,
+                                    ).show()
+                                saved
+                            } finally {
+                                file.delete()
+                            }
+                        } finally {
+                            UgoiraStore.release(animation)
+                        }
+                    } catch (error: Exception) {
+                        if (error !is CancellationException) {
+                            Toast
+                                .makeText(
+                                    context,
+                                    R.string.media_save_fail,
+                                    Toast.LENGTH_SHORT,
+                                ).show()
+                        }
+                        false
+                    } finally {
+                        ugoiraProgress = null
+                        needsSmallerUgoira = false
+                        smallerChoice = null
+                        exportJob = null
+                    }
+                }
+            }.await()
 
     /**
      * Minimal download callback interface
@@ -136,13 +236,17 @@ internal class AndroidDownloadManager(
         mediaByFileName.forEach { (fileName, media) ->
             val success =
                 runCatching {
-                    saveMedia(
-                        uri = media.urlForDownload,
-                        fileName = fileName,
-                        customHeaders = media.customHeaders,
-                        onDownloadStarted = {},
-                        askDirectoryUri = askDirectoryUri,
-                    )
+                    if (media is UiMedia.Ugoira) {
+                        saveUgoira(media, fileName, askDirectoryUri)
+                    } else {
+                        saveMedia(
+                            uri = media.urlForDownload,
+                            fileName = fileName,
+                            customHeaders = media.customHeaders,
+                            onDownloadStarted = {},
+                            askDirectoryUri = askDirectoryUri,
+                        )
+                    }
                 }.getOrDefault(false)
             if (success) {
                 succeededFileNames += fileName

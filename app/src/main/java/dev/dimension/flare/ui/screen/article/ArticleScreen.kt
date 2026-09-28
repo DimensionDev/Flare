@@ -951,6 +951,7 @@ private fun UiMedia.previewUrl(): String? =
     when (this) {
         is UiMedia.Audio -> previewUrl
         is UiMedia.Gif -> previewUrl
+        is UiMedia.Ugoira -> previewUrl
         is UiMedia.Image -> previewUrl
         is UiMedia.Video -> thumbnailUrl
     }

@@ -88,6 +88,7 @@ import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.MediaViewerPlayback
 import dev.dimension.flare.ui.component.MediaViewerSelection
 import dev.dimension.flare.ui.component.NetworkImage
+import dev.dimension.flare.ui.component.UgoiraPlayer
 import dev.dimension.flare.ui.component.VideoPlayer
 import dev.dimension.flare.ui.component.accessibleDescription
 import dev.dimension.flare.ui.component.status.MediaItem
@@ -215,6 +216,12 @@ private fun StatusMediaContent(
             ) {
                 val media = medias[it]
                 when (media) {
+                    is UiMedia.Ugoira -> {
+                        val zoom = rememberZoomableState(zoomSpec = ZoomSpec(maxZoomFactor = 10f))
+                        LaunchedEffect(zoom.zoomFraction) { state.setLockPager((zoom.zoomFraction ?: 0f) > .01f) }
+                        UgoiraPlayer(media, Modifier.fillMaxSize().zoomable(zoom), autoplay = pagerState.currentPage == it, controls = true)
+                    }
+
                     is UiMedia.Image -> {
                         ImageItem(
                             modifier = Modifier.fillMaxSize(),
@@ -302,6 +309,7 @@ private fun StatusMediaContent(
                                         is UiMedia.Gif -> media.previewUrl
                                         is UiMedia.Image -> media.previewUrl
                                         is UiMedia.Video -> media.thumbnailUrl
+                                        is UiMedia.Ugoira -> media.previewUrl
                                     },
                                 contentDescription = media.accessibleDescription(),
                                 modifier =
@@ -314,19 +322,21 @@ private fun StatusMediaContent(
                         CommandBarSeparator()
                     }
                 }
-                item {
-                    SubtleButton(
-                        onClick = {
-                            val current = medias[pagerState.currentPage]
-                            state.save(current)
-                        },
-                        content = {
-                            FAIcon(
-                                FontAwesomeIcons.Solid.FloppyDisk,
-                                contentDescription = stringResource(Res.string.media_save),
-                            )
-                        },
-                    )
+                if (medias.getOrNull(pagerState.currentPage) !is UiMedia.Ugoira) {
+                    item {
+                        SubtleButton(
+                            onClick = {
+                                val current = medias[pagerState.currentPage]
+                                state.save(current)
+                            },
+                            content = {
+                                FAIcon(
+                                    FontAwesomeIcons.Solid.FloppyDisk,
+                                    contentDescription = stringResource(Res.string.media_save),
+                                )
+                            },
+                        )
+                    }
                 }
             }
         }
@@ -635,6 +645,7 @@ private fun presenter(
         }
 
         fun save(item: UiMedia) {
+            if (item is UiMedia.Ugoira) return
             val status = state.status.takeSuccess()?.contentPostOrNull()
             if (status != null) {
                 val userHandle = status.user?.handle?.canonical ?: "unknown"

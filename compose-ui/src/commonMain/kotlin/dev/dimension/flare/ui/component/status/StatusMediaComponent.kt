@@ -72,6 +72,7 @@ import dev.dimension.flare.ui.component.LocalTimelineCarouselItem
 import dev.dimension.flare.ui.component.LocalTimelinePlayback
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.TimelineCarouselItem
+import dev.dimension.flare.ui.component.UgoiraPlayer
 import dev.dimension.flare.ui.component.accessibleDescription
 import dev.dimension.flare.ui.component.platform.LocalWifiState
 import dev.dimension.flare.ui.component.platform.PlatformCircularProgressIndicator
@@ -377,6 +378,7 @@ private val UiMedia.carouselAspectRatio: Float
                 is UiMedia.Image -> width / height
                 is UiMedia.Video -> width / height
                 is UiMedia.Gif -> width / height
+                is UiMedia.Ugoira -> width / height
                 is UiMedia.Audio -> 0f
             }
         return ratio.takeIf { it.isFinite() && it > 0f } ?: 0f
@@ -522,22 +524,9 @@ private fun TimelineMediaDropdownMenu(
         expanded = expanded,
         onDismissRequest = onDismissRequest,
     ) {
-        TimelineMediaMenuItem(
-            label = stringResource(Res.string.media_menu_download),
-            icon = {
-                FAIcon(
-                    imageVector = FontAwesomeIcons.Solid.Download,
-                    contentDescription = null,
-                    modifier = Modifier.size(18.dp),
-                )
-            },
-            onClick = {
-                onAction(TimelineMediaMenuAction.Download)
-            },
-        )
-        if (showDownloadAll) {
+        if (media !is UiMedia.Ugoira || mediaActionConfig.canSaveUgoira) {
             TimelineMediaMenuItem(
-                label = stringResource(Res.string.media_menu_download_all),
+                label = stringResource(Res.string.media_menu_download),
                 icon = {
                     FAIcon(
                         imageVector = FontAwesomeIcons.Solid.Download,
@@ -546,9 +535,24 @@ private fun TimelineMediaDropdownMenu(
                     )
                 },
                 onClick = {
-                    onAction(TimelineMediaMenuAction.DownloadAll)
+                    onAction(TimelineMediaMenuAction.Download)
                 },
             )
+            if (showDownloadAll) {
+                TimelineMediaMenuItem(
+                    label = stringResource(Res.string.media_menu_download_all),
+                    icon = {
+                        FAIcon(
+                            imageVector = FontAwesomeIcons.Solid.Download,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp),
+                        )
+                    },
+                    onClick = {
+                        onAction(TimelineMediaMenuAction.DownloadAll)
+                    },
+                )
+            }
         }
         if (media is UiMedia.Image && mediaActionConfig.showShareImage) {
             TimelineMediaMenuItem(
@@ -607,6 +611,18 @@ public fun MediaItem(
     val appearanceSettings = LocalTimelineAppearance.current
     val accessibleDescription = media.accessibleDescription()
     when (media) {
+        is UiMedia.Ugoira -> {
+            val wifi = LocalWifiState.current
+            UgoiraPlayer(
+                media,
+                modifier.fillMaxWidth().let { if (keepAspectRatio) it.aspectRatio(media.aspectRatio) else it },
+                autoplay =
+                    appearanceSettings.videoAutoplay == VideoAutoplay.ALWAYS ||
+                        (appearanceSettings.videoAutoplay == VideoAutoplay.WIFI && wifi),
+                contentScale = contentScale,
+            )
+        }
+
         is UiMedia.Image -> {
             NetworkImage(
                 model = media.previewUrl,

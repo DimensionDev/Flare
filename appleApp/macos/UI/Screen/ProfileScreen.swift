@@ -479,6 +479,8 @@ private extension UiMedia {
             .video
         case .gif:
             .gif
+        case .ugoira:
+            .video
         case .audio:
             .audio
         }
@@ -492,6 +494,8 @@ private extension UiMedia {
             video.thumbnailUrl.isEmpty ? video.url : video.thumbnailUrl
         case .gif(let gif):
             gif.previewUrl.isEmpty ? gif.url : gif.previewUrl
+        case .ugoira(let animation):
+            animation.previewUrl
         case .audio(let audio):
             audio.previewUrl
         }
@@ -505,6 +509,8 @@ private extension UiMedia {
             video.thumbnailUrl
         case .gif(let gif):
             gif.previewUrl
+        case .ugoira(let animation):
+            animation.previewUrl
         case .audio:
             nil
         }
@@ -518,6 +524,8 @@ private extension UiMedia {
             video.customHeaders
         case .gif(let gif):
             gif.customHeaders
+        case .ugoira(let animation):
+            animation.customHeaders
         case .audio(let audio):
             audio.customHeaders
         }

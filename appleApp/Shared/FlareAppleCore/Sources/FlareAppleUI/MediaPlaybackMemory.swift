@@ -4,6 +4,17 @@ import Foundation
 @MainActor
 public final class MediaPlaybackMemory {
     public static let shared = MediaPlaybackMemory()
+    private var generations: [String: Int] = [:]
+    public func generation(for url: String) -> Int { generations[key(url)] ?? 0 }
+    private var pauses: [String: Bool] = [:]
+    public func paused(for url: String) -> Bool { pauses[key(url)] ?? false }
+    public func savePaused(_ paused: Bool, for url: String) { pauses[key(url)] = paused }
+    public func reset(_ url: String) {
+        generations[key(url)] = generation(for: url) + 1
+        positions[key(url)] = nil
+        pauses[key(url)] = nil
+    }
+
     private var positions: [String: Double] = [:]
 
     public init() {}

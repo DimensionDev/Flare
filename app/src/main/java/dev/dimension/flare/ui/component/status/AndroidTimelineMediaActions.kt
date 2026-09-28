@@ -3,14 +3,26 @@ package dev.dimension.flare.ui.component.status
 import android.content.ClipData
 import android.content.Context
 import android.widget.Toast
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import dev.dimension.flare.R
 import dev.dimension.flare.common.AndroidDownloadManager
 import dev.dimension.flare.common.MediaFileNamePolicy
@@ -34,6 +46,7 @@ internal fun ProvideAndroidTimelineMediaActions(content: @Composable () -> Unit)
         remember(context, clipboard, scope, downloadManager, mediaLinkLabel) {
             TimelineMediaActionConfig(
                 showShareImage = true,
+                canSaveUgoira = true,
                 handler =
                     TimelineMediaActionHandler { post, media, action ->
                         when (action) {
@@ -83,7 +96,25 @@ internal fun ProvideAndroidTimelineMediaActions(content: @Composable () -> Unit)
             )
         }
     CompositionLocalProvider(LocalTimelineMediaActionConfig provides config) {
-        content()
+        Box(Modifier.fillMaxSize()) {
+            content()
+            downloadManager.ugoiraProgress?.let { progress ->
+                Surface(Modifier.align(Alignment.BottomCenter).padding(16.dp), shape = MaterialTheme.shapes.medium, tonalElevation = 4.dp) {
+                    Column(Modifier.padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                        if (downloadManager.needsSmallerUgoira) {
+                            Text(stringResource(R.string.ugoira_resolution_unsupported))
+                            TextButton(
+                                onClick = downloadManager::exportSmallerUgoira,
+                            ) { Text(stringResource(R.string.ugoira_export_smaller)) }
+                        } else {
+                            LinearProgressIndicator(progress = { progress })
+                            Text(stringResource(R.string.ugoira_export_progress, (progress * 100).toInt()))
+                        }
+                        TextButton(onClick = downloadManager::cancelUgoira) { Text(stringResource(android.R.string.cancel)) }
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -94,6 +125,10 @@ private fun CoroutineScope.downloadMedia(
     media: UiMedia,
 ) {
     launch {
+        if (media is UiMedia.Ugoira) {
+            downloadManager.saveUgoira(media, post.statusMediaFileName(media))
+            return@launch
+        }
         runCatching {
             downloadManager.downloadMedia(
                 uri = media.urlForDownload,

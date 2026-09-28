@@ -576,4 +576,6 @@
     <string name="manga_title">Manga</string>
     <string name="fanbox_supported_title">Supporting</string>
     <string name="fanbox_recommended_creators_title">Recommended creators</string>
+    <string name="ugoira_play">Play animation</string>
+    <string name="ugoira_pause">Pause animation</string>
 </resources>

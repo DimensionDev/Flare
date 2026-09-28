@@ -1,3 +1,4 @@
+import FlareAppleUI
 import FlareAppleCore
 import Foundation
 import GSPlayer
@@ -24,6 +25,15 @@ class MediaSaver: NSObject, UIDocumentPickerDelegate {
 
     func showBatchSaveResult(success: Bool) {
         showSaveResult(success: success, mediaType: .photoAlbum)
+    }
+
+    func saveUgoira(_ media: UiMediaUgoira, fileName: String, showsSaveResult: Bool = true, completion: (@Sendable (Bool) -> Void)? = nil) {
+        UgoiraExporter.shared.save(media, fileName: fileName, write: { url in
+            let success: Bool = await withCheckedContinuation { continuation in
+                self.saveVideoFileToPhotos(url, showsSaveResult: showsSaveResult) { continuation.resume(returning: $0) }
+            }
+            if !success { throw CocoaError(.fileWriteUnknown) }
+        }, completion: { success in completion?(success) })
     }
 
     func saveImage(

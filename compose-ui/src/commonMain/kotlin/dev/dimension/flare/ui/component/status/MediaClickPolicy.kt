@@ -35,6 +35,7 @@ private fun UiTimelineV2.Post.statusMediaRoute(
                 is UiMedia.Image -> media.previewUrl
                 is UiMedia.Video -> media.thumbnailUrl
                 is UiMedia.Gif -> media.previewUrl
+                is UiMedia.Ugoira -> media.previewUrl
                 is UiMedia.Audio -> null
             },
         aspectRatio =
@@ -42,6 +43,7 @@ private fun UiTimelineV2.Post.statusMediaRoute(
                 is UiMedia.Image -> media.aspectRatio
                 is UiMedia.Video -> media.aspectRatio
                 is UiMedia.Gif -> media.aspectRatio
+                is UiMedia.Ugoira -> media.aspectRatio
                 is UiMedia.Audio -> 0f
             },
         previewIsImage = media is UiMedia.Image,

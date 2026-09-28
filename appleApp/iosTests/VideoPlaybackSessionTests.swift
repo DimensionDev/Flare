@@ -8,6 +8,25 @@ import UIKit
 
 final class VideoPlaybackSessionTests: XCTestCase {
     @MainActor
+    func testFramePlaybackStopsForViewerAndResumesOnReturn() {
+        let arbiter = VideoPlaybackArbiter()
+        let gallery = VideoPlaybackPresentation(arbiter: arbiter)
+        let viewer = VideoPlaybackPresentation(arbiter: arbiter)
+        let owner = NSObject()
+        var playing = false
+        gallery.begin()
+        gallery.updateFrames(owner: owner, play: { playing = true }, stop: { playing = false })
+        XCTAssertTrue(playing)
+        viewer.begin()
+        XCTAssertFalse(playing)
+        viewer.end()
+        XCTAssertTrue(playing)
+        gallery.setSuspended(true)
+        XCTAssertFalse(playing)
+        gallery.end()
+    }
+
+    @MainActor
     func testMissingMediaReportsFailureWithoutPollingAndStopsUpdatesAfterDetach() async throws {
         let session = VideoPlaybackSession()
         var updateCount = 0

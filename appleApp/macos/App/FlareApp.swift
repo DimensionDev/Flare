@@ -35,7 +35,7 @@ struct FlareApp: App {
     var body: some Scene {
         Window("Flare", id: MacWindowID.main) {
             FlareTheme {
-                RootView()
+                RootView().ugoiraExportStatus()
             }
         }
         .defaultSize(width: 480, height: 600)
@@ -58,7 +58,7 @@ struct FlareApp: App {
 
         WindowGroup("Media", id: MacWindowID.media, for: MacMediaWindowValue.self) { request in
             FlareTheme {
-                MacMediaWindowRoot(value: request.wrappedValue)
+                MacMediaWindowRoot(value: request.wrappedValue).ugoiraExportStatus()
             }
         }
         .defaultSize(width: 960, height: 720)

@@ -69,6 +69,8 @@ enum IOSTimelineMediaActions {
         completion: (@Sendable (Bool) -> Void)? = nil
     ) {
         switch onEnum(of: media) {
+        case .ugoira(let animation):
+            MediaSaver.shared.saveUgoira(animation, fileName: fileName(post: post, media: media), showsSaveResult: showsSaveResult, completion: completion)
         case .image(let image):
             MediaSaver.shared.saveImage(
                 url: image.url,

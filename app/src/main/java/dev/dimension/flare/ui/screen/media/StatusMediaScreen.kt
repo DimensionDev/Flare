@@ -131,6 +131,7 @@ import dev.dimension.flare.ui.component.LocalGlobalAppearance
 import dev.dimension.flare.ui.component.MediaViewerPlayback
 import dev.dimension.flare.ui.component.MediaViewerSelection
 import dev.dimension.flare.ui.component.SurfaceBindingManager
+import dev.dimension.flare.ui.component.UgoiraPlayer
 import dev.dimension.flare.ui.component.VideoPlayer
 import dev.dimension.flare.ui.component.accessibleDescription
 import dev.dimension.flare.ui.component.placeholder
@@ -168,6 +169,7 @@ import me.saket.telephoto.zoomable.coil3.ZoomableAsyncImage
 import me.saket.telephoto.zoomable.rememberZoomableImageState
 import me.saket.telephoto.zoomable.rememberZoomableState
 import me.saket.telephoto.zoomable.spatial.CoordinateSpace
+import me.saket.telephoto.zoomable.zoomable
 import moe.tlaster.precompose.molecule.producePresenter
 import moe.tlaster.swiper.Swiper
 import moe.tlaster.swiper.rememberSwiperState
@@ -371,6 +373,7 @@ internal fun MediaViewerScreen(
                                                     is UiMedia.Gif -> media.url
                                                     is UiMedia.Image -> media.url
                                                     is UiMedia.Video -> media.thumbnailUrl
+                                                    is UiMedia.Ugoira -> media.previewUrl
                                                 }
                                             val previewUrl =
                                                 when (media) {
@@ -378,6 +381,7 @@ internal fun MediaViewerScreen(
                                                     is UiMedia.Gif -> media.previewUrl
                                                     is UiMedia.Image -> media.previewUrl
                                                     is UiMedia.Video -> media.thumbnailUrl
+                                                    is UiMedia.Ugoira -> media.previewUrl
                                                 }
                                             if (pagerState.currentPage != index || media is UiMedia.Image || media is UiMedia.Gif) {
                                                 ImageItem(
@@ -406,6 +410,10 @@ internal fun MediaViewerScreen(
                                                         state.setShowSheet(true)
                                                     },
                                                 )
+                                            } else if (media is UiMedia.Ugoira) {
+                                                val zoom = rememberZoomableState(zoomSpec = ZoomSpec(maxZoomFactor = 10f))
+                                                LaunchedEffect(zoom.zoomFraction) { state.setLockPager((zoom.zoomFraction ?: 0f) > .01f) }
+                                                UgoiraPlayer(media, Modifier.fillMaxSize().zoomable(zoom), controls = true)
                                             } else if (media is UiMedia.Video) {
                                                 Box(
                                                     modifier = Modifier.fillMaxSize(),
@@ -1475,6 +1483,7 @@ private fun mediaViewerPresenter(
                 is UiMedia.Gif -> download(data.url, fileName, data.customHeaders, context)
                 is UiMedia.Image -> save(data.url, fileName, context)
                 is UiMedia.Video -> download(data.urlForDownload, fileName, data.customHeaders, context)
+                is UiMedia.Ugoira -> scope.launch { mediaDownloadManager.saveUgoira(data, fileName) }
             }
         }
 
@@ -1532,7 +1541,7 @@ private fun mediaViewerPresenter(
                     }
                 }
 
-                is UiMedia.Video -> {}
+                is UiMedia.Video, is UiMedia.Ugoira -> {}
             }
         }
 

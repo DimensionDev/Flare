@@ -97,7 +97,7 @@ internal class DesktopDownloadManager(
     ): MediaDownloadBatchResult {
         val succeededFileNames = mutableListOf<String>()
         val failedFileNames = mutableListOf<String>()
-        mediaByFileName.forEach { (fileName, media) ->
+        mediaByFileName.filterValues { it !is UiMedia.Ugoira }.forEach { (fileName, media) ->
             val targetFile =
                 File(
                     targetDirectory,

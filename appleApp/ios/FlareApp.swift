@@ -27,6 +27,7 @@ struct FlareApp: App {
                 root
             }
             .modifier(IOSTimelineListEnvironment())
+        .ugoiraExportStatus()
             .onChange(of: scenePhase) { _, phase in
                 MediaCacheMaintenance.handleScenePhase(phase)
             }

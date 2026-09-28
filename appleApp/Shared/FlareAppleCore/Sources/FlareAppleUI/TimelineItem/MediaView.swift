@@ -35,6 +35,8 @@ public struct MediaView: View {
                             .allowsHitTesting(false)
                     }
                     .clipped()
+            case .ugoira(let animation):
+                MediaVideoView(data: animation, allowsAutoplay: allowsAutoplay)
             case .audio:
                 EmptyView()
             }
@@ -53,13 +55,19 @@ public struct MediaVideoView: View {
     @Environment(\.timelinePlaybackViewport) private var timelinePlaybackViewport
     @State private var fallbackPlayback = TimelinePlaybackCoordinator()
     @State private var player = VideoPlaybackSession()
+    @State private var ugoira = UgoiraPlaybackSession()
     @State private var id = UUID().uuidString
     @State private var geometry = InlineVideoGeometry()
     @State private var appeared = false
-    private let data: UiMediaVideo
+    private let data: any UiMedia
     private let allowsAutoplay: Bool
 
     public init(data: UiMediaVideo, allowsAutoplay: Bool = true) {
+        self.data = data
+        self.allowsAutoplay = allowsAutoplay
+    }
+
+    public init(data: UiMediaUgoira, allowsAutoplay: Bool = true) {
         self.data = data
         self.allowsAutoplay = allowsAutoplay
     }
@@ -78,12 +86,15 @@ public struct MediaVideoView: View {
     public var body: some View {
         Color.gray
             .overlay {
-                NetworkImage(data: data.thumbnailUrl, customHeader: data.customHeaders)
+                NetworkImage(data: data.mediaPreviewURL, customHeader: data.customHeaders)
                     .allowsHitTesting(false)
+                    .opacity(data is UiMediaUgoira && ugoira.image != nil ? 0 : 1)
             }
             .clipped()
             .overlay {
-                if let avPlayer = player.player {
+                if let animation = data as? UiMediaUgoira, ugoira.image != nil {
+                    UgoiraFrameView(media: animation, session: ugoira).allowsHitTesting(false)
+                } else if let avPlayer = player.player {
                     #if os(macOS)
                     MacAVPlayerView(player: avPlayer, videoGravity: .resizeAspectFill, showsControls: false,
                                     canDisplayFrame: player.hasRestoredPosition)
@@ -134,6 +145,7 @@ public struct MediaVideoView: View {
             .onChange(of: data.url) { _, _ in
                 playback.remove(id: id)
                 player.detach()
+                ugoira.detach()
                 registerPlayer()
                 updateCandidate()
             }
@@ -141,6 +153,7 @@ public struct MediaVideoView: View {
                 appeared = false
                 playback.remove(id: id)
                 player.detach()
+                ugoira.detach()
                 if timelinePlayback == nil { fallbackPlayback.setSuspended(true) }
             }
     }
@@ -149,11 +162,14 @@ public struct MediaVideoView: View {
         let url = data.url
         let coordinator = playback
         let model = player
+        let animation = data as? UiMediaUgoira
+        let ugoiraModel = ugoira
         coordinator.register(id: id) { playing in
             if playing {
-                model.play(url: url)
+                if let animation { ugoiraModel.play(animation) } else { model.play(url: url) }
             } else {
                 model.detach()
+                ugoiraModel.detach()
             }
         }
     }
@@ -173,19 +189,27 @@ public struct MediaVideoView: View {
 
     @ViewBuilder
     private var statusOverlay: some View {
-        switch player.state {
-        case .idle, .paused:
-            Image(fontAwesome: .circlePlay).mediaVideoBadgeStyle()
-        case .loading:
-            ProgressView().tint(.white).mediaVideoBadgeStyle()
-        case .playing(let duration):
-            let remaining = max(Int((duration - player.position).rounded(.down)), 0)
-            Text(String(format: "%d:%02d", remaining / 60, remaining % 60))
-                .font(.caption)
-                .foregroundStyle(.white)
-                .mediaVideoBadgeStyle()
-        case .error:
-            Image(systemName: "exclamationmark.triangle.fill").mediaVideoBadgeStyle()
+        if data is UiMediaUgoira {
+            if ugoira.image == nil, canAutoplay, !ugoira.failed {
+                ProgressView(value: ugoira.progress).mediaVideoBadgeStyle()
+            } else {
+                Image(fontAwesome: .circlePlay).mediaVideoBadgeStyle()
+            }
+        } else {
+            switch player.state {
+            case .idle, .paused:
+                Image(fontAwesome: .circlePlay).mediaVideoBadgeStyle()
+            case .loading:
+                ProgressView().tint(.white).mediaVideoBadgeStyle()
+            case .playing(let duration):
+                let remaining = max(Int((duration - player.position).rounded(.down)), 0)
+                Text(String(format: "%d:%02d", remaining / 60, remaining % 60))
+                    .font(.caption)
+                    .foregroundStyle(.white)
+                    .mediaVideoBadgeStyle()
+            case .error:
+                Image(systemName: "exclamationmark.triangle.fill").mediaVideoBadgeStyle()
+            }
         }
     }
 }

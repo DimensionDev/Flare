@@ -2681,6 +2681,21 @@ private fun storagePresenter(
                 ?.div(1024L * 1024L) ?: 0L,
         )
     }
+    LaunchedEffect(refreshKey) {
+        imageCacheSize =
+            (
+                (
+                    SingletonImageLoader
+                        .get(
+                            PlatformContext.INSTANCE,
+                        ).diskCache
+                        ?.size ?: 0
+                ) +
+                    dev.dimension.flare.media.UgoiraStore
+                        .cacheSize()
+            ) /
+            (1024 * 1024)
+    }
     var expanded by remember { mutableStateOf(false) }
     object : StorageState by state {
         val expanded = expanded
@@ -2699,6 +2714,8 @@ private fun storagePresenter(
                 try {
                     withContext(Dispatchers.IO) {
                         SingletonImageLoader.get(PlatformContext.INSTANCE).diskCache?.clear()
+                        dev.dimension.flare.media.UgoiraStore
+                            .clearCache()
                     }
                     refreshKey++
                 } finally {

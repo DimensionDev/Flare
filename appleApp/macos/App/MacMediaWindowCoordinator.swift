@@ -222,6 +222,8 @@ private extension UiMedia {
             image.previewUrl
         case .video(let video):
             video.thumbnailUrl
+        case .ugoira(let animation):
+            animation.previewUrl
         case .gif(let gif):
             gif.previewUrl
         case .audio:

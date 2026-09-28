@@ -591,6 +591,10 @@ private struct MacMediaViewerPage: View {
     @ViewBuilder
     private var mediaContent: some View {
         switch onEnum(of: media) {
+        case .ugoira(let animation):
+            MacZoomableScrollView(magnification: $zoomScale, minimumMagnification: macMediaMinimumZoomScale, maximumMagnification: macMediaMaximumZoomScale) {
+                UgoiraPlayer(media: animation, active: isSelected).frame(maxWidth: .infinity, maxHeight: .infinity)
+            }
         case .image(let image):
             zoomableImage(url: image.url, preview: image.previewUrl, customHeaders: image.customHeaders)
         case .gif(let gif):
@@ -1124,7 +1128,7 @@ private final class FlareZoomScrollView: NSScrollView {
 private extension UiMedia {
     var isMacZoomableMedia: Bool {
         switch onEnum(of: self) {
-        case .image, .gif:
+        case .image, .gif, .ugoira:
             true
         case .video, .audio:
             false

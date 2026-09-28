@@ -339,6 +339,14 @@ private fun storagePresenter(context: Context) =
             )
         }
 
+        LaunchedEffect(Unit) {
+            imageCacheSize =
+                (
+                    (context.imageLoader.diskCache?.size ?: 0) +
+                        dev.dimension.flare.media.UgoiraStore
+                            .cacheSize()
+                ) / (1024 * 1024)
+        }
         object : StorageState by state {
             val imageCacheSize: Long = imageCacheSize
             val isClearingImageCache: Boolean = isClearingImageCache
@@ -354,6 +362,8 @@ private fun storagePresenter(context: Context) =
                     try {
                         withContext(Dispatchers.IO) {
                             context.imageLoader.diskCache?.clear()
+                            dev.dimension.flare.media.UgoiraStore
+                                .clearCache()
                         }
                         imageCacheSize = 0L
                     } finally {

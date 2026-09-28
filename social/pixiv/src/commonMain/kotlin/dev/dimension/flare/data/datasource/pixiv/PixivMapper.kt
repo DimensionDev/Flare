@@ -41,7 +41,7 @@ internal fun PixivIllust.toUiTimeline(accountKey: MicroBlogKey): UiTimelineV2.Po
     val statusKey = pixivIllustKey(id)
     return UiTimelineV2.Post(
         platformId = PIXIV_PLATFORM_ID,
-        images = toUiMedia().toPersistentList(),
+        images = toUiMedia(accountKey).toPersistentList(),
         sensitive = xRestrict > 0 || sanityLevel >= 6,
         contentWarning = UiTranslatableText(original = title.toUiPlainText()),
         user = user.toUiProfile(accountKey),
@@ -267,8 +267,24 @@ private fun PixivIllust.renderContent(): String =
         }
     }
 
-internal fun PixivIllust.toUiMedia(): List<UiMedia> {
+internal fun PixivIllust.toUiMedia(accountKey: MicroBlogKey): List<UiMedia> {
     val headers = persistentMapOf("Referer" to PIXIV_IMAGE_REFERER)
+    if (type == "ugoira" && dev.dimension.flare.media.UgoiraStore.supportsPlayback) {
+        val preview = imageUrls.medium ?: imageUrls.large ?: imageUrls.squareMedium ?: return emptyList()
+        return listOf(
+            UiMedia.Ugoira(
+                statusKey = pixivIllustKey(id),
+                accountKey = accountKey,
+                previewUrl = preview,
+                originalFrameUrl = metaSinglePage?.originalImageUrl ?: imageUrls.original,
+                description = title,
+                width = width.toFloat(),
+                height = height.toFloat(),
+                sensitive = xRestrict > 0 || sanityLevel >= 6,
+                customHeaders = headers,
+            ),
+        )
+    }
     return if (metaPages.isNotEmpty()) {
         metaPages.mapNotNull { page ->
             page.imageUrls.toUiImage(

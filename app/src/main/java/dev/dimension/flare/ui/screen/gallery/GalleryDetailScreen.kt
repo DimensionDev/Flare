@@ -80,6 +80,7 @@ import dev.dimension.flare.ui.component.ErrorContent
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.FlareTopAppBar
+import dev.dimension.flare.ui.component.GalleryMedia
 import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.RichText
@@ -345,10 +346,8 @@ private fun CompactGalleryContent(
                     ) { index ->
                         val image = images[index]
                         Box(Modifier.fillMaxSize()) {
-                            NetworkImage(
-                                model = image.url,
-                                contentDescription = image.description,
-                                customHeaders = image.customHeaders,
+                            GalleryMedia(
+                                media = image,
                                 contentScale = ContentScale.Fit,
                                 modifier =
                                     Modifier
@@ -424,10 +423,8 @@ private fun BigScreenGalleryContent(
                 ) { index ->
                     val image = images[index]
                     Box(Modifier.fillMaxSize()) {
-                        NetworkImage(
-                            model = image.url,
-                            contentDescription = image.description,
-                            customHeaders = image.customHeaders,
+                        GalleryMedia(
+                            media = image,
                             contentScale = ContentScale.Fit,
                             modifier =
                                 Modifier
@@ -465,20 +462,23 @@ private fun BigScreenGalleryContent(
 
 @Composable
 private fun GalleryImage(
-    image: UiMedia.Image,
+    image: UiMedia,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    NetworkImage(
-        model = image.url,
-        contentDescription = image.description,
-        customHeaders = image.customHeaders,
+    GalleryMedia(
+        media = image,
         contentScale = ContentScale.FillWidth,
         modifier =
             modifier
                 .fillMaxWidth()
-                .aspectRatio(image.aspectRatio)
-                .clickable(onClick = onClick),
+                .aspectRatio(
+                    when (image) {
+                        is UiMedia.Image -> image.aspectRatio
+                        is UiMedia.Ugoira -> image.aspectRatio
+                        else -> 1f
+                    },
+                ).clickable(onClick = onClick),
     )
 }
 
@@ -1161,9 +1161,14 @@ private fun GalleryDetail.shareRoute(): Route.Status.ShareSheet =
         shareUrl = url,
     )
 
-private fun GalleryDetail.galleryMediaRoute(media: UiMedia.Image): Route.Media.RawMedia =
+private fun GalleryDetail.galleryMediaRoute(media: UiMedia): Route.Media.RawMedia =
     Route.Media.RawMedia(
         medias = images,
         index = images.indexOfFirst { it.url == media.url }.coerceAtLeast(0),
-        preview = media.previewUrl,
+        preview =
+            when (media) {
+                is UiMedia.Image -> media.previewUrl
+                is UiMedia.Ugoira -> media.previewUrl
+                else -> null
+            },
     )

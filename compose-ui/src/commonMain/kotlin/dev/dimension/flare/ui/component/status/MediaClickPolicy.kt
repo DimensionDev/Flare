@@ -7,12 +7,13 @@ import dev.dimension.flare.ui.route.DeeplinkRoute
 import dev.dimension.flare.ui.route.toUri
 
 internal fun UiTimelineV2.Post.openMedia(
-    media: UiMedia,
+    index: Int,
     launcher: (String) -> Unit,
 ) {
+    val media = images.getOrNull(index) ?: return
     when (mediaClickPolicy) {
         UiTimelineV2.Post.MediaClickPolicy.OpenStatusMedia -> {
-            launcher(statusMediaRoute(media).toUri())
+            launcher(statusMediaRoute(media, index).toUri())
         }
 
         UiTimelineV2.Post.MediaClickPolicy.OpenPostClickEvent -> {
@@ -21,14 +22,14 @@ internal fun UiTimelineV2.Post.openMedia(
     }
 }
 
-private fun UiTimelineV2.Post.statusMediaRoute(media: UiMedia): DeeplinkRoute.Media.StatusMedia {
-    val mediaIndex =
-        images.indexOf(media).takeIf { it >= 0 }
-            ?: images.indexOfFirst { it.url == media.url }.coerceAtLeast(0)
-    return DeeplinkRoute.Media.StatusMedia(
+private fun UiTimelineV2.Post.statusMediaRoute(
+    media: UiMedia,
+    index: Int,
+): DeeplinkRoute.Media.StatusMedia =
+    DeeplinkRoute.Media.StatusMedia(
         statusKey = statusKey,
         accountType = accountType,
-        index = mediaIndex,
+        index = index,
         preview =
             when (media) {
                 is UiMedia.Image -> media.previewUrl
@@ -45,4 +46,3 @@ private fun UiTimelineV2.Post.statusMediaRoute(media: UiMedia): DeeplinkRoute.Me
             },
         previewIsImage = media is UiMedia.Image,
     )
-}

@@ -29,6 +29,7 @@ internal val LocalTimelineCarouselItem = compositionLocalOf<TimelineCarouselItem
 
 internal data class TimelineCarouselItem(
     val groupId: Any,
+    val mediaIndex: Int,
     val selected: Boolean,
     val isCarousel: Boolean = true,
 )
@@ -51,7 +52,7 @@ internal class TimelinePlaybackCoordinator(
     var handoffUri: String? = null
         private set
     val mediaSelections = TimelineMediaSelections()
-    private var viewerSelection: Pair<List<String>, String>? = null
+    private var viewerSelection: Pair<List<String>, Int>? = null
     private val cleanup = mutableMapOf<Any, () -> Unit>()
     var viewport: Rect? by mutableStateOf(null)
     var multipleColumns: Boolean by mutableStateOf(false)
@@ -81,22 +82,22 @@ internal class TimelinePlaybackCoordinator(
 
     fun selectMedia(
         groupId: Any,
-        uri: String,
+        mediaIndex: Int,
         userInitiated: Boolean,
     ) {
         if (userInitiated) {
             immediateReturn = false
             arbiter.interacted(this)
         }
-        policy.returnedToMedia(groupId, uri)
+        policy.returnedToMedia(groupId, mediaIndex)
         scheduleSelection()
     }
 
     fun selectViewerMedia(
         urls: List<String>,
-        selectedUri: String?,
+        selectedIndex: Int?,
     ) {
-        val selection = selectedUri?.takeIf { it in urls }?.let { urls.toList() to it }
+        val selection = selectedIndex?.takeIf { it in urls.indices }?.let { urls.toList() to it }
         if (viewerSelection == selection) return
         viewerSelection = selection
         if (isPresentation) scheduleSelection()
@@ -106,7 +107,7 @@ internal class TimelinePlaybackCoordinator(
         if (isPresentation) return
         isPresentation = true
         immediateReturn = true
-        arbiter.present(this, viewerSelection?.second)
+        arbiter.present(this, viewerSelection?.let { it.first[it.second] })
         scheduleSelection()
     }
 
@@ -204,7 +205,7 @@ internal class TimelinePlaybackCoordinator(
             }
             return
         }
-        val selectedUri = viewerSelection?.second.takeIf { isPresentation }
+        val selectedUri = viewerSelection?.let { it.first[it.second] }.takeIf { isPresentation }
         val eligible = if (selectedUri == null) candidates.values else candidates.values.filter { it.mediaUri == selectedUri }
         val next = policy.select(eligible, scrolling = false)
         if (next == null) arbiter.settledWithoutVideo(this)
@@ -249,10 +250,10 @@ public fun MediaViewerPlayback(content: @Composable () -> Unit) {
 @Composable
 public fun MediaViewerSelection(
     mediaUrls: List<String>,
-    selectedUri: String?,
+    selectedIndex: Int?,
 ) {
     val playback = LocalTimelinePlayback.current
-    SideEffect { playback?.selectViewerMedia(mediaUrls, selectedUri) }
+    SideEffect { playback?.selectViewerMedia(mediaUrls, selectedIndex) }
 }
 
 @Composable
@@ -295,6 +296,7 @@ internal fun Modifier.timelineVideoAutoplay(
                 canStart = enabled && (item?.isCarousel != true || visible.width >= geometry.bounds.width * 0.6f),
                 distance = TimelineAutoplayPolicy.centerDistance(geometry.bounds, viewport ?: geometry.bounds, multipleColumns, density),
                 mediaUri = mediaUri,
+                mediaIndex = item?.mediaIndex,
             ),
         )
     }

@@ -29,6 +29,7 @@ public sealed class UiTimelineV2 {
     public abstract val accountType: AccountType
 
     public abstract val itemKey: String?
+    public abstract val stableItemKey: String
     public abstract val renderHash: Int
 
     @Transient
@@ -41,6 +42,26 @@ public sealed class UiTimelineV2 {
             is UserList -> "user_list"
             is Message -> "message"
         }
+
+    protected fun calculateStableItemKey(): String {
+        itemKey?.let { return it }
+        val notificationKey = (this as? TimelinePostItem)?.presentation?.notificationKey
+        val kind =
+            when {
+                notificationKey != null -> "notification"
+                this is Post || this is TimelinePostItem -> "post"
+                else -> itemType
+            }
+        val account =
+            when (val account = accountType) {
+                AccountType.Guest -> listOf("guest")
+                is AccountType.GuestHost -> listOf("guest_host", account.host)
+                is AccountType.Specific -> listOf("specific", account.accountKey.id, account.accountKey.host)
+            }
+        val identity = notificationKey ?: statusKey
+        return (account + listOf(kind, identity.id, identity.host))
+            .joinToString(separator = "") { "${it.length}:$it" }
+    }
 
     @Serializable
     @Immutable
@@ -56,6 +77,8 @@ public sealed class UiTimelineV2 {
         @Transient
         override val itemKey: String? = null,
     ) : UiTimelineV2() {
+        @Transient
+        override val stableItemKey: String = calculateStableItemKey()
         override val searchText: String? = null
         val onClicked: ClickContext.() -> Unit by lazy {
             clickEvent.onClicked
@@ -153,6 +176,9 @@ public sealed class UiTimelineV2 {
             }
         }
         override val statusKey: MicroBlogKey = MicroBlogKey.fromRss(url)
+
+        @Transient
+        override val stableItemKey: String = calculateStableItemKey()
         override val searchText: String =
             buildString {
                 title?.let {
@@ -202,6 +228,9 @@ public sealed class UiTimelineV2 {
         override val createdAt: UiDateTime =
             if (presentation.notificationKey != null) presentation.message?.createdAt ?: post.createdAt else post.createdAt
         override val accountType: AccountType = post.accountType
+
+        @Transient
+        override val stableItemKey: String = calculateStableItemKey()
         override val searchText: String =
             buildString {
                 append(post.searchText)
@@ -271,6 +300,8 @@ public sealed class UiTimelineV2 {
         @Transient
         override val itemKey: String? = null,
     ) : UiTimelineV2() {
+        @Transient
+        override val stableItemKey: String = calculateStableItemKey()
         override val searchText: String =
             buildString {
                 user?.name?.raw?.let {
@@ -380,6 +411,8 @@ public sealed class UiTimelineV2 {
         @Transient
         override val itemKey: String? = null,
     ) : UiTimelineV2() {
+        @Transient
+        override val stableItemKey: String = calculateStableItemKey()
         override val searchText: String? = null
         override val renderHash: Int by lazy {
             renderHashBuilder()
@@ -406,6 +439,8 @@ public sealed class UiTimelineV2 {
         @Transient
         override val itemKey: String? = null,
     ) : UiTimelineV2() {
+        @Transient
+        override val stableItemKey: String = calculateStableItemKey()
         override val searchText: String? = null
         override val renderHash: Int by lazy {
             renderHashBuilder()

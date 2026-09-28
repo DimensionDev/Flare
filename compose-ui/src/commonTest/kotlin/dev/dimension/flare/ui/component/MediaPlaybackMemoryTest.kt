@@ -28,21 +28,21 @@ class MediaPlaybackMemoryTest {
         }
 
     @Test
-    fun returnSelectionSurvivesUnmountAndDoesNotChangeOtherCollections() {
+    fun duplicateSelectionSurvivesUnmountAndDoesNotChangeOtherCollections() {
         val selections = TimelineMediaSelections()
-        var selected = "a"
-        selections.register("first", listOf("a", "b")) { selected = it }
+        var selected = 0
+        selections.register("first", listOf("a", "a")) { selected = it }
         selections.register("other", listOf("c", "d")) { fail("Unrelated collection") }
         selections.remove("first")
-        selections.returned(listOf("a", "b"), "b")
-        selections.register("remounted", listOf("a", "b")) { selected = it }
-        assertEquals("b", selected)
-        selections.returned(listOf("a", "b"), "c")
-        assertEquals("b", selected)
-        selected = "a"
+        selections.returned(listOf("a", "a"), 1)
+        selections.register("remounted", listOf("a", "a")) { selected = it }
+        assertEquals(1, selected)
+        selections.returned(listOf("a", "a"), 2)
+        assertEquals(1, selected)
+        selected = 0
         selections.remove("remounted")
-        selections.register("again", listOf("a", "b")) { selected = it }
-        assertEquals("a", selected, "An applied return must not override a later user selection")
+        selections.register("again", listOf("a", "a")) { selected = it }
+        assertEquals(0, selected, "An applied return must not override a later user selection")
     }
 
     @Test
@@ -52,14 +52,14 @@ class MediaPlaybackMemoryTest {
         val other = Any()
         val viewer = Any()
         val events = mutableListOf<String>()
-        arbiter.register(timeline, {}, { events += "resume" }, { _, uri -> events += uri })
+        arbiter.register(timeline, {}, { events += "resume" }, { _, index -> events += "select:$index" })
         arbiter.register(other, {}, {}, { _, _ -> fail("Wrong timeline") })
         arbiter.register(viewer, { events += "save-progress" }, {})
         arbiter.interacted(timeline)
         arbiter.present(viewer)
         assertTrue(arbiter.acquire(viewer))
-        arbiter.remove(viewer, listOf("a", "b"), "b")
-        assertEquals(listOf("save-progress", "b", "resume"), events)
+        arbiter.remove(viewer, listOf("a", "b"), 1)
+        assertEquals(listOf("save-progress", "select:1", "resume"), events)
         assertFalse(arbiter.acquire(other))
         assertTrue(arbiter.acquire(timeline))
     }
@@ -67,7 +67,16 @@ class MediaPlaybackMemoryTest {
     @Test
     fun returnedVideoWaitsForVisibilityAndSelectedImageBlocksFallback() {
         val policy = TimelineAutoplayPolicy()
-        val a = TimelineAutoplayPolicy.Candidate("a", "post", visible = true, canStart = true, distance = 0f, mediaUri = "a")
+        val a =
+            TimelineAutoplayPolicy.Candidate(
+                "a",
+                "post",
+                visible = true,
+                canStart = true,
+                distance = 0f,
+                mediaUri = "a",
+                mediaIndex = 0,
+            )
         val b =
             TimelineAutoplayPolicy.Candidate(
                 "b",
@@ -77,11 +86,12 @@ class MediaPlaybackMemoryTest {
                 canStart = false,
                 distance = 20f,
                 mediaUri = "b",
+                mediaIndex = 1,
             )
-        policy.returnedToMedia("post", "b")
+        policy.returnedToMedia("post", 1)
         assertNull(policy.select(listOf(a, b), scrolling = false))
         assertEquals("b", policy.select(listOf(a, b.copy(canStart = true)), scrolling = false))
-        policy.returnedToMedia("post", "image")
+        policy.returnedToMedia("post", 2)
         assertNull(policy.select(listOf(a, b.copy(canStart = true)), scrolling = false))
         policy.verticalScrollBegan()
         assertEquals("a", policy.select(listOf(a, b), scrolling = false))

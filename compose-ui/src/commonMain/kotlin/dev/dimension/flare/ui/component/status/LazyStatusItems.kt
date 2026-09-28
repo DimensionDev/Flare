@@ -54,7 +54,7 @@ public fun LazyStaggeredGridScope.status(
                 itemCount,
                 key =
                     itemKey {
-                        it.itemKey ?: it.hashCode()
+                        it.stableItemKey
                     },
                 contentType =
                     itemContentType {

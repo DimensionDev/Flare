@@ -21,16 +21,16 @@ internal class MediaPlaybackMemory {
 internal class TimelineMediaSelections {
     private data class Collection(
         val urls: List<String>,
-        val select: (String) -> Unit,
+        val select: (Int) -> Unit,
     )
 
     private val collections = mutableMapOf<Any, Collection>()
-    private val selections = mutableMapOf<List<String>, String>()
+    private val selections = mutableMapOf<List<String>, Int>()
 
     fun register(
         id: Any,
         urls: List<String>,
-        select: (String) -> Unit,
+        select: (Int) -> Unit,
     ) {
         collections[id] = Collection(urls.toList(), select)
         selections.remove(urls)?.let(select)
@@ -42,11 +42,11 @@ internal class TimelineMediaSelections {
 
     fun returned(
         urls: List<String>,
-        selectedUri: String,
+        selectedIndex: Int,
     ) {
-        if (selectedUri !in urls) return
+        if (selectedIndex !in urls.indices) return
         val matching = collections.values.toList().filter { it.urls == urls }
-        if (matching.isEmpty()) selections[urls.toList()] = selectedUri else selections.remove(urls)
-        matching.forEach { it.select(selectedUri) }
+        if (matching.isEmpty()) selections[urls.toList()] = selectedIndex else selections.remove(urls)
+        matching.forEach { it.select(selectedIndex) }
     }
 }

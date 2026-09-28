@@ -99,7 +99,7 @@ import kotlin.time.Duration.Companion.milliseconds
 internal fun StatusMediaComponent(
     post: UiTimelineV2.Post,
     data: ImmutableList<UiMedia>,
-    onMediaClick: (UiMedia) -> Unit,
+    onMediaClick: (Int) -> Unit,
     sensitive: Boolean,
     shape: Shape,
     allowCarousel: Boolean = false,
@@ -121,18 +121,15 @@ internal fun StatusMediaComponent(
     val playback = LocalTimelinePlayback.current
     var selectedIndex by remember(post.statusKey) { mutableStateOf(0) }
     val mediaUrls = remember(data) { data.map { it.url } }
-    val openMedia: (UiMedia) -> Unit = { media ->
-        playback?.selectMedia(carouselId, media.url, userInitiated = true)
-        onMediaClick(media)
+    val openMedia: (Int) -> Unit = { index ->
+        playback?.selectMedia(carouselId, index, userInitiated = true)
+        onMediaClick(index)
     }
     DisposableEffect(playback, carouselId, mediaUrls, carouselState) {
-        playback?.mediaSelections?.register(carouselId, mediaUrls) { uri ->
-            val index = mediaUrls.indexOf(uri)
-            if (index >= 0) {
-                selectedIndex = index
-                playback.selectMedia(carouselId, uri, userInitiated = false)
-                carouselState?.requestScrollToItem(index)
-            }
+        playback?.mediaSelections?.register(carouselId, mediaUrls) { index ->
+            selectedIndex = index
+            playback.selectMedia(carouselId, index, userInitiated = false)
+            carouselState?.requestScrollToItem(index)
         }
         onDispose { playback?.mediaSelections?.remove(carouselId) }
     }
@@ -232,13 +229,13 @@ internal fun StatusMediaComponent(
                                     aspectRatio = media.timelineAspectRatio,
                                 ).dp
                         CompositionLocalProvider(
-                            LocalTimelineCarouselItem provides TimelineCarouselItem(carouselId, index == selectedIndex),
+                            LocalTimelineCarouselItem provides TimelineCarouselItem(carouselId, index, index == selectedIndex),
                         ) {
                             StatusMediaItem(
                                 post = post,
                                 media = media,
                                 mediaCount = data.size,
-                                onMediaClick = openMedia,
+                                onMediaClick = { openMedia(index) },
                                 hideSensitive = hideSensitive,
                                 keepAspectRatio = false,
                                 fillContainer = true,
@@ -257,13 +254,13 @@ internal fun StatusMediaComponent(
                 itemCount = data.size,
                 itemContent = { index ->
                     CompositionLocalProvider(
-                        LocalTimelineCarouselItem provides TimelineCarouselItem(carouselId, selected = true, isCarousel = false),
+                        LocalTimelineCarouselItem provides TimelineCarouselItem(carouselId, index, selected = true, isCarousel = false),
                     ) {
                         StatusMediaItem(
                             post = post,
                             media = data[index],
                             mediaCount = data.size,
-                            onMediaClick = openMedia,
+                            onMediaClick = { openMedia(index) },
                             hideSensitive = hideSensitive,
                             keepAspectRatio = data.size == 1 && appearanceSettings.expandMediaSize,
                         )
@@ -393,7 +390,7 @@ private fun StatusMediaItem(
     post: UiTimelineV2.Post,
     media: UiMedia,
     mediaCount: Int,
-    onMediaClick: (UiMedia) -> Unit,
+    onMediaClick: () -> Unit,
     hideSensitive: Boolean,
     keepAspectRatio: Boolean,
     modifier: Modifier = Modifier,
@@ -430,7 +427,7 @@ private fun StatusMediaItem(
                         isMenuExpanded = it
                     },
                     onClick = {
-                        onMediaClick(media)
+                        onMediaClick()
                     },
                     modifier = mediaModifier,
                     menu = {
@@ -464,7 +461,7 @@ private fun StatusMediaItem(
                     media = media,
                     modifier =
                         mediaModifier.clickable {
-                            onMediaClick(media)
+                            onMediaClick()
                         },
                     keepAspectRatio = keepAspectRatio,
                 )

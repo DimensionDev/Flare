@@ -14,32 +14,34 @@ internal class TimelineAutoplayPolicy {
         // Distance from the complete video bounds to the viewport center, in dp.
         val distance: Float,
         val mediaUri: String? = null,
+        val mediaIndex: Int? = null,
     )
 
     var activeId: Any? = null
         private set
     private var preferredGroupId: Any? = null
-    private var preferredMediaUri: String? = null
+    private var preferredMediaIndex: Int? = null
 
     fun verticalScrollBegan() {
         preferredGroupId = null
-        preferredMediaUri = null
+        preferredMediaIndex = null
     }
 
     fun interactWithCarousel(groupId: Any) {
         preferredGroupId = groupId
-        preferredMediaUri = null
+        preferredMediaIndex = null
     }
 
     fun returnedToMedia(
         groupId: Any,
-        mediaUri: String,
+        mediaIndex: Int,
     ) {
         preferredGroupId = groupId
-        preferredMediaUri = mediaUri
+        preferredMediaIndex = mediaIndex
     }
 
-    private fun matchesSelection(candidate: Candidate): Boolean = preferredMediaUri?.let { candidate.mediaUri == it } ?: candidate.selected
+    private fun matchesSelection(candidate: Candidate): Boolean =
+        preferredMediaIndex?.let { candidate.mediaIndex == it } ?: candidate.selected
 
     fun select(
         candidates: Collection<Candidate>,

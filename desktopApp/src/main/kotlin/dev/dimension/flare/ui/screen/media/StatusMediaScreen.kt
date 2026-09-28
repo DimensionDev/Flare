@@ -175,7 +175,7 @@ private fun StatusMediaContent(
                 ) {
                     medias.size
                 }
-            MediaViewerSelection(medias.map { it.url }, medias.getOrNull(pagerState.currentPage)?.url)
+            MediaViewerSelection(medias.map { it.url }, pagerState.currentPage)
             HorizontalFlipView(
                 state = pagerState,
                 enabled = state.lockPager,

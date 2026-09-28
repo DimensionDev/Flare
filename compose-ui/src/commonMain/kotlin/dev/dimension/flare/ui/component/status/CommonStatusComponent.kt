@@ -152,7 +152,6 @@ import dev.dimension.flare.ui.component.toImageVector
 import dev.dimension.flare.ui.model.ClickContext
 import dev.dimension.flare.ui.model.TranslationDisplayState
 import dev.dimension.flare.ui.model.UiCard
-import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiPoll
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.UiTranslatableText
@@ -412,7 +411,7 @@ public fun CommonStatusComponent(
                 if (isDetail && !item.content.original.isEmpty && appearanceSettings.showTranslateButton) {
                     TranslationComponent(
                         item = item,
-                        statusKey = item.itemKey ?: item.hashCode().toString(),
+                        statusKey = item.stableItemKey,
                         contentWarning = item.contentWarning?.original,
                         rawContent = item.content.original.innerText,
                         content = item.content.original,
@@ -428,9 +427,9 @@ public fun CommonStatusComponent(
                     allowMediaCarousel = allowMediaCarousel,
                     carouselLeadingPadding = carouselLeadingPadding,
                     carouselTrailingPadding = carouselEdgePadding,
-                    onMediaClick = { media ->
+                    onMediaClick = { index ->
                         item.openMedia(
-                            media = media,
+                            index = index,
                             launcher = uriHandler::openUri,
                         )
                     },
@@ -536,7 +535,7 @@ internal fun StatusMediasComponent(
     allowMediaCarousel: Boolean,
     carouselLeadingPadding: Dp,
     carouselTrailingPadding: Dp,
-    onMediaClick: (UiMedia) -> Unit,
+    onMediaClick: (Int) -> Unit,
 ) {
     val appearanceSettings = LocalTimelineAppearance.current
     var showMedia by remember { mutableStateOf(false) }

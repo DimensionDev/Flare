@@ -139,7 +139,7 @@ private fun GalleryPostTile(
                         onExpandedChange = { isMenuExpanded = it },
                         onClick = {
                             post.openMedia(
-                                media = firstMedia,
+                                index = 0,
                                 launcher = uriHandler::openUri,
                             )
                         },

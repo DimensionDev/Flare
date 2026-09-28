@@ -487,7 +487,7 @@ private fun LazyListScope.articleComments(
             articleCommentsTitle()
             items(
                 count = comments.itemCount,
-                key = comments.itemKey { item -> item.itemKey ?: item.hashCode() },
+                key = comments.itemKey { item -> item.stableItemKey },
                 contentType = comments.itemContentType { item -> item.itemType },
             ) { index ->
                 ArticleBodyContainer {

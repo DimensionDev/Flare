@@ -11,6 +11,59 @@ import kotlin.test.assertTrue
 @OptIn(ExperimentalCoroutinesApi::class)
 class TimelinePlaybackCoordinatorTest {
     @Test
+    fun returningFromDuplicateMediaKeepsCarouselPositionAndAutoplayOccurrence() =
+        runTest {
+            val arbiter = VideoPlaybackArbiter()
+            val timeline = TimelinePlaybackCoordinator(this, arbiter)
+            val urls = listOf("video", "video")
+            var selectedIndex = 1
+            var playingIndex: Int? = null
+            urls.forEachIndexed { index, uri ->
+                timeline.register(index) { playing ->
+                    if (playing) {
+                        playingIndex = index
+                    } else if (playingIndex == index) {
+                        playingIndex = null
+                    }
+                }
+                timeline.update(
+                    TimelineAutoplayPolicy.Candidate(
+                        id = index,
+                        groupId = "carousel",
+                        visible = true,
+                        selected = index == selectedIndex,
+                        canStart = true,
+                        distance = 0f,
+                        mediaUri = uri,
+                        mediaIndex = index,
+                    ),
+                )
+            }
+            timeline.mediaSelections.register("carousel", urls) { index ->
+                selectedIndex = index
+                timeline.selectMedia("carousel", index, userInitiated = false)
+            }
+            advanceTimeBy(200)
+            runCurrent()
+            assertEquals(1, playingIndex)
+            timeline.selectMedia("carousel", 1, userInitiated = true)
+            val viewer = TimelinePlaybackCoordinator(this, arbiter)
+            viewer.selectViewerMedia(urls, 1)
+            viewer.present()
+            viewer.close()
+            assertEquals(1, selectedIndex)
+            assertEquals(1, playingIndex)
+            val secondViewer = TimelinePlaybackCoordinator(this, arbiter)
+            secondViewer.selectViewerMedia(urls, 1)
+            secondViewer.present()
+            secondViewer.selectViewerMedia(urls, 0)
+            secondViewer.close()
+            assertEquals(0, selectedIndex)
+            assertEquals(0, playingIndex)
+            timeline.close()
+        }
+
+    @Test
     fun closerVisibleVideoTakesOverOnlyAfterScrollIdleDelay() =
         runTest {
             val playback = TimelinePlaybackCoordinator(this, VideoPlaybackArbiter())

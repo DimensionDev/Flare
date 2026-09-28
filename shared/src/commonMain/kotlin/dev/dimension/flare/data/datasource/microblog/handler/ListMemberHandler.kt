@@ -24,7 +24,10 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiProfile
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.update
 import kotlin.native.HiddenFromObjC
 
 @OptIn(ExperimentalPagingApi::class)
@@ -36,6 +39,7 @@ public class ListMemberHandler(
 ) {
     private val accountType: DbAccountType = AccountType.Specific(accountKey)
     private val database: CacheDatabase by koinInject()
+    private val pendingAdds = MutableStateFlow(emptySet<Pair<String, MicroBlogKey>>())
     private val memberPagingKey: String
         get() = "${pagingKey}_members"
 
@@ -96,23 +100,29 @@ public class ListMemberHandler(
         listId: String,
         userKey: MicroBlogKey,
     ) {
-        val listKey = MicroBlogKey(listId, accountKey.host)
-        tryRun {
-            loader.addMember(listId, userKey)
-        }.onSuccess { user ->
-            database.connect {
-                database.upsertUsers(
-                    listOf(user.toDbUser()),
-                )
-                database.listDao().insertAllMember(
-                    listOf(
-                        DbListMember(
-                            listKey = listKey,
-                            memberKey = user.key,
+        val requestKey = listId to userKey
+        if (requestKey in pendingAdds.getAndUpdate { it + requestKey }) return
+        try {
+            val listKey = MicroBlogKey(listId, accountKey.host)
+            tryRun {
+                loader.addMember(listId, userKey)
+            }.onSuccess { user ->
+                database.connect {
+                    database.upsertUsers(
+                        listOf(user.toDbUser()),
+                    )
+                    database.listDao().insertAllMember(
+                        listOf(
+                            DbListMember(
+                                listKey = listKey,
+                                memberKey = user.key,
+                            ),
                         ),
-                    ),
-                )
+                    )
+                }
             }
+        } finally {
+            pendingAdds.update { it - requestKey }
         }
     }
 

@@ -31,6 +31,7 @@ import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
@@ -102,21 +103,57 @@ class ListMemberHandlerTest : RobolectricTest() {
             val userKey = MicroBlogKey(id = "uncached-user", host = "test.social")
             val requestStarted = CompletableDeferred<Unit>()
             val finishRequest = CompletableDeferred<Unit>()
+            var addCalls = 0
             fakeLoader.nextAddMemberResult = createUiProfile(userKey)
             fakeLoader.beforeAddMember = {
+                addCalls++
                 requestStarted.complete(Unit)
                 finishRequest.await()
             }
 
             val adding = launch { handler.addMember("pending-list", userKey) }
             requestStarted.await()
+            val duplicate = launch { handler.addMember("pending-list", userKey) }
             try {
+                runCurrent()
+                assertEquals(1, addCalls)
                 assertTrue(handler.listMembersListFlow("pending-list").first().isEmpty())
             } finally {
                 finishRequest.complete(Unit)
                 adding.join()
+                duplicate.join()
             }
             assertEquals(listOf(userKey), handler.listMembersListFlow("pending-list").first().map { it.key })
+        }
+
+    @Test
+    fun pendingAddDoesNotBlockOtherMembersOrLists() =
+        runTest {
+            val firstUser = createUiProfile(MicroBlogKey("first-user", accountKey.host))
+            val secondUser = createUiProfile(MicroBlogKey("second-user", accountKey.host))
+            val requestStarted = CompletableDeferred<Unit>()
+            val finishRequest = CompletableDeferred<Unit>()
+            fakeLoader.nextAddMemberResult = firstUser
+            fakeLoader.beforeAddMember = {
+                requestStarted.complete(Unit)
+                finishRequest.await()
+            }
+
+            val adding = launch { handler.addMember("pending-list", firstUser.key) }
+            requestStarted.await()
+            try {
+                fakeLoader.beforeAddMember = {}
+                fakeLoader.nextAddMemberResult = secondUser
+                handler.addMember("pending-list", secondUser.key)
+                fakeLoader.nextAddMemberResult = firstUser
+                handler.addMember("other-list", firstUser.key)
+                assertEquals(listOf(secondUser.key), handler.listMembersListFlow("pending-list").first().map { it.key })
+                assertEquals(listOf(firstUser.key), handler.listMembersListFlow("other-list").first().map { it.key })
+            } finally {
+                fakeLoader.nextAddMemberResult = firstUser
+                finishRequest.complete(Unit)
+                adding.join()
+            }
         }
 
     @Test
@@ -137,6 +174,9 @@ class ListMemberHandlerTest : RobolectricTest() {
             assertTrue(handler.listMembersListFlow("interrupted-list").first().isEmpty())
             db.connect { db.upsertUsers(listOf(createUiProfile(userKey).toDbUser())) }
             assertTrue(handler.listMembersListFlow("interrupted-list").first().isEmpty())
+            fakeLoader.beforeAddMember = {}
+            handler.addMember("interrupted-list", userKey)
+            assertEquals(listOf(userKey), handler.listMembersListFlow("interrupted-list").first().map { it.key })
         }
 
     @Test
@@ -268,6 +308,10 @@ class ListMemberHandlerTest : RobolectricTest() {
             val listKey = MicroBlogKey("list-5", accountKey.host)
             val members = db.listDao().getListMembersFlow(listKey).first()
             assertTrue(members.isEmpty())
+            fakeLoader.shouldFail = false
+            fakeLoader.nextAddMemberResult = createUiProfile(userKey)
+            handler.addMember("list-5", userKey)
+            assertEquals(listOf(userKey), handler.listMembersListFlow("list-5").first().map { it.key })
         }
 
     @Test

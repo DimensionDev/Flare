@@ -223,7 +223,8 @@ private fun List<UiTimelineV2>.collapseReplyChains(): List<UiTimelineV2> {
         return this
     }
 
-    val collapsedPosts = mutableMapOf<Pair<AccountType, MicroBlogKey>, UiTimelineV2.TimelinePostItem>()
+    val visitedPosts = mutableMapOf<Pair<AccountType, MicroBlogKey>, UiTimelineV2.TimelinePostItem>()
+    val parentKeys = mutableMapOf<Pair<AccountType, MicroBlogKey>, Pair<AccountType, MicroBlogKey>>()
     val ancestorKeys = mutableSetOf<Pair<AccountType, MicroBlogKey>>()
 
     fun UiTimelineV2.TimelinePostItem.directParentKey(): Pair<AccountType, MicroBlogKey>? =
@@ -238,37 +239,22 @@ private fun List<UiTimelineV2>.collapseReplyChains(): List<UiTimelineV2> {
                 ?.let { post.accountType to it.statusKey }
                 ?.takeIf { it in rootPosts }
 
-    fun collapse(start: UiTimelineV2.TimelinePostItem): UiTimelineV2.TimelinePostItem {
-        val startKey = start.key()
-        collapsedPosts[startKey]?.let {
-            return it
-        }
-
-        val path = mutableListOf<UiTimelineV2.TimelinePostItem>()
+    // Resolve links and break cycles before expanding only the posts that remain visible.
+    forEach { item ->
+        var current = item.asTimelinePostItem() ?: return@forEach
         val activeKeys = mutableSetOf<Pair<AccountType, MicroBlogKey>>()
-        var current = start
-        var collapsed: UiTimelineV2.TimelinePostItem
-
-        while (true) {
+        while (current.key() !in visitedPosts) {
             val currentKey = current.key()
-            collapsedPosts[currentKey]?.let {
-                if (path.isNotEmpty()) {
-                    ancestorKeys += currentKey
-                }
-                collapsed = it
-                break
-            }
-
+            visitedPosts[currentKey] = current
             activeKeys += currentKey
             val directParentKey = current.directParentKey()
             val directParent =
                 directParentKey
                     ?.takeUnless { it in activeKeys }
                     ?.let { rootPosts.getValue(it) }
-
             if (directParent == null || directParent.accountType != current.accountType) {
-                collapsed =
-                    if (directParentKey in activeKeys) {
+                if (directParentKey in activeKeys) {
+                    visitedPosts[currentKey] =
                         current.copy(
                             presentation =
                                 current.presentation.copy(
@@ -278,49 +264,45 @@ private fun List<UiTimelineV2>.collapseReplyChains(): List<UiTimelineV2> {
                                             .toImmutableList(),
                                 ),
                         )
-                    } else {
-                        current
-                    }
-                collapsedPosts[currentKey] = collapsed
+                }
                 break
             }
-
+            parentKeys[currentKey] = directParent.key()
             ancestorKeys += directParent.key()
-            path += current
             current = directParent
         }
-
-        for (post in path.asReversed()) {
-            collapsed =
-                post.copy(
-                    presentation =
-                        post.presentation.copy(
-                            inlineParents =
-                                (
-                                    post.presentation.inlineParents.dropLast(1) +
-                                        collapsed.presentation.inlineParents +
-                                        listOf(
-                                            collapsed.copy(presentation = collapsed.presentation.copy(inlineParents = persistentListOf())),
-                                        )
-                                ).distinctBy { it.statusKey }
-                                    .toImmutableList(),
-                        ),
-                )
-            collapsedPosts[post.key()] = collapsed
-        }
-        return collapsedPosts.getValue(startKey)
     }
 
-    val collapsedItems =
-        map { item ->
-            val post = item.asTimelinePostItem()
-            if (post != null) {
-                post.key() to collapse(post)
-            } else {
-                null to item
-            }
+    return mapNotNull { item ->
+        val key = item.asTimelinePostItem()?.key() ?: return@mapNotNull item
+        if (key in ancestorKeys) {
+            return@mapNotNull null
         }
-    return collapsedItems.mapNotNull { (key, item) ->
-        item.takeUnless { key in ancestorKeys }
+        val post = visitedPosts.getValue(key)
+        if (key !in parentKeys) {
+            return@mapNotNull post
+        }
+        val chain =
+            generateSequence(key) { parentKeys[it] }
+                .map { visitedPosts.getValue(it) }
+                .toList()
+        val inlineParents =
+            buildList {
+                chain.forEachIndexed { index, ancestor ->
+                    addAll(
+                        if (index == chain.lastIndex) {
+                            ancestor.presentation.inlineParents
+                        } else {
+                            ancestor.presentation.inlineParents.dropLast(1)
+                        },
+                    )
+                }
+                for (index in chain.lastIndex downTo 1) {
+                    val ancestor = chain[index]
+                    add(ancestor.copy(presentation = ancestor.presentation.copy(inlineParents = persistentListOf())))
+                }
+            }.distinctBy { it.statusKey }
+                .toImmutableList()
+        post.copy(presentation = post.presentation.copy(inlineParents = inlineParents))
     }
 }

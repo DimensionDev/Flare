@@ -96,7 +96,6 @@ import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimelineV2
-import dev.dimension.flare.ui.model.stableItemKey
 import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.presenter.article.ArticlePresenter
 import dev.dimension.flare.ui.presenter.invoke

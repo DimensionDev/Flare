@@ -3,7 +3,6 @@ package dev.dimension.flare.data.datasource.microblog.paging
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import dev.dimension.flare.ui.model.UiTimelineV2
-import dev.dimension.flare.ui.model.stableItemKey
 import dev.dimension.flare.ui.model.withItemKey
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock

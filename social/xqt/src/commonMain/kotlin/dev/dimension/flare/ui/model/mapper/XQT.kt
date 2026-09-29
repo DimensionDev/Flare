@@ -1468,21 +1468,19 @@ internal fun Tweet.renderContent(
             legacy
                 ?.fullText
                 ?.let {
-                    val displayText =
-                        if (legacy.displayTextRange.size == 2) {
-                            it
-                                .codePointSequence()
-                                .drop(legacy.displayTextRange[0])
-                                .take(legacy.displayTextRange[1] - legacy.displayTextRange[0])
-                                .flatMap { codePoint ->
-                                    codePoint
-                                        .toChars()
-                                        .toList()
-                                }.joinToString("")
-                        } else {
-                            it
-                        }
-                    displayText.decodeHtmlEntities()
+                    if (legacy.displayTextRange.size == 2) {
+                        it
+                            .codePointSequence()
+                            .drop(legacy.displayTextRange[0])
+                            .take(legacy.displayTextRange[1] - legacy.displayTextRange[0])
+                            .flatMap { codePoint ->
+                                codePoint
+                                    .toChars()
+                                    .toList()
+                            }.joinToString("")
+                    } else {
+                        it
+                    }
                 }.orEmpty()
         return renderRichText(text, legacy?.entities, accountKey, sourceLanguages)
     } else {
@@ -1819,7 +1817,7 @@ private fun renderRichText(
     sourceLanguages: List<String> = emptyList(),
 ): UiRichText =
     twitterParser
-        .parse(text)
+        .parse(text.decodeHtmlEntities())
         .map { token ->
             if (token is UrlToken) {
                 val actual =

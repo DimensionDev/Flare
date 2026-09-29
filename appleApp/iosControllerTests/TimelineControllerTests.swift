@@ -169,6 +169,54 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         try fixture.assertPosition(position)
     }
 
+    func testLateTopContentDuringReleasedPullRefreshStaysVisibleAfterRefresh() async throws {
+        let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first)
+        let previousKeyWindow = scene.windows.first(where: \.isKeyWindow)
+        let window = UIWindow(windowScene: scene)
+        defer {
+            window.isHidden = true
+            window.rootViewController = nil
+            previousKeyWindow?.makeKey()
+        }
+
+        for changesHeader in [true, false] {
+            let fixture = await Fixture(posts: true)
+            fixture.controller.topContentInset = 88
+            window.rootViewController = fixture.controller
+            window.makeKeyAndVisible()
+            await fixture.settle()
+            let collection = fixture.collection
+
+            fixture.controller.beginExternalScrollInteraction()
+            collection.setContentOffset(CGPoint(x: 0, y: -180), animated: false)
+            collection.refreshControl?.beginRefreshing()
+            fixture.input.isRefreshing = true
+            await fixture.apply()
+            // Release at UIKit's refresh inset while the request remains in flight.
+            collection.setContentOffset(CGPoint(x: 0, y: -collection.adjustedContentInset.top), animated: false)
+            fixture.controller.endExternalScrollInteraction()
+            await fixture.settle()
+            XCTAssertTrue(collection.refreshControl?.isRefreshing == true)
+            XCTAssertFalse(collection.shouldDeferSnapshotChanges)
+            XCTAssertLessThan(fixture.controller.effectiveContentOffsetY, -1)
+
+            if changesHeader {
+                fixture.input.header = UiStateSuccess(data: makeRow(200))
+            } else {
+                fixture.controller.accessoryItems = [
+                    UITimelineCollectionViewAccessoryItem(id: "notice", view: Header())
+                ]
+            }
+            await fixture.apply()
+            fixture.input.isRefreshing = false
+            await fixture.apply()
+            await fixture.settle()
+
+            XCTAssertFalse(collection.isPresentingRefresh)
+            XCTAssertEqual(fixture.controller.effectiveContentOffsetY, 0, accuracy: 0.5)
+        }
+    }
+
     func testSwitchingToALoadedProfileListDoesNotOverrideALaterScroll() async throws {
         let fixture = await Fixture(posts: true)
         fixture.controller.restoreEffectiveContentOffset(0, animated: false)

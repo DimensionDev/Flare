@@ -1162,7 +1162,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
            previousPlan.headerIDs != plan.headerIDs || previousPlan.accessoryIDs != plan.accessoryIDs,
            !kindChanged, !switchedContent, restoresScrollAnchorOnSnapshotChanges,
            allowsScrollAnchorRestoration, pendingEffectiveContentOffsetYAfterSnapshot == nil,
-           pendingReloadPosition == nil, abs(effectiveContentOffsetY) <= 1 {
+           pendingReloadPosition == nil, effectiveContentOffsetY <= 1 {
             // Separately loaded headers/sections belong above the list. At the top,
             // reveal them instead of anchoring the comments or posts below them.
             collectionView.restoreReadingPosition(.top)

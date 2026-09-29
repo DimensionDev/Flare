@@ -1048,7 +1048,8 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     ) {
         let switchedContent = self.contentKey != nil && contentKey != nil && self.contentKey != contentKey
         let retainedOffset = switchedContent && isViewLoaded ? max(effectiveContentOffsetY, 0) : nil
-        enqueue(columns: columnCount, isRefreshing: data?.isRefreshing_ == true, retainedOffset: retainedOffset) {
+        enqueue(columns: columnCount, isRefreshing: data?.isRefreshing_ == true,
+                contentKey: contentKey, retainedOffset: retainedOffset) {
             .timeline(data, header: headerState, key: contentKey)
         }
     }
@@ -1062,19 +1063,28 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     }
 
     func submit(_ input: TimelineContent, columns: Int) {
-        enqueue(columns: columns, isRefreshing: input.isRefreshing) { input }
+        enqueue(columns: columns, isRefreshing: input.isRefreshing, contentKey: input.key) { input }
     }
 
-    private func enqueue(columns: Int, isRefreshing: Bool, retainedOffset: CGFloat? = nil, content: @escaping () -> TimelineContent) {
+    private func enqueue(
+        columns: Int,
+        isRefreshing: Bool,
+        contentKey: AnyHashable? = nil,
+        retainedOffset: CGFloat? = nil,
+        content: @escaping () -> TimelineContent
+    ) {
         pendingInput = Input(content: content, columns: max(columns, 1), retainedOffset: retainedOffset)
         guard isViewLoaded else {
             columnCount = max(columns, 1)
             return
         }
-        // Refresh begin is a presentation event, not a snapshot. A fast refresh
-        // must not disappear when its intermediate data input is coalesced away.
-        // Ending still waits for the resulting snapshot and its measurements.
-        if isRefreshing { syncRefreshControl(isRefreshing: true) }
+        let switchedContent = self.contentKey != nil && contentKey != nil && self.contentKey != contentKey
+        // Begin refresh with the initial or replacement snapshot, so revealing the
+        // indicator cannot block it or use the previous content's suppression state.
+        // Same-content refreshes begin here even if their input is coalesced away.
+        if isRefreshing, !switchedContent, self.content.state != .unbound, !currentPagingIsInitialLoading {
+            syncRefreshControl(isRefreshing: true)
+        }
         scheduleSubmission()
     }
 

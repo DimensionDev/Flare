@@ -1158,6 +1158,15 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         }
         let plan = makeCurrentSnapshotPlan()
         let structureChanged = previousPlan?.signature != plan.signature
+        if let previousPlan,
+           previousPlan.headerIDs != plan.headerIDs || previousPlan.accessoryIDs != plan.accessoryIDs,
+           !kindChanged, !switchedContent, restoresScrollAnchorOnSnapshotChanges,
+           allowsScrollAnchorRestoration, pendingEffectiveContentOffsetYAfterSnapshot == nil,
+           pendingReloadPosition == nil, collectionView.canRestoreTopReadingPosition, effectiveContentOffsetY <= 1 {
+            // Separately loaded headers/sections belong above the list. At the top,
+            // reveal them instead of anchoring the comments or posts below them.
+            collectionView.restoreReadingPosition(.top)
+        }
         if structureChanged, previousPlan != nil, pendingReloadPosition == nil,
            pendingEffectiveContentOffsetYAfterSnapshot == nil, restoresScrollAnchorOnSnapshotChanges {
             collectionView.prepareForSnapshotChange()

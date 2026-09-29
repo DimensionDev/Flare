@@ -2691,8 +2691,7 @@ private fun storagePresenter(
                         ).diskCache
                         ?.size ?: 0
                 ) +
-                    dev.dimension.flare.media.UgoiraStore
-                        .cacheSize()
+                    presenter.ugoiraCacheSize()
             ) /
             (1024 * 1024)
     }
@@ -2714,8 +2713,7 @@ private fun storagePresenter(
                 try {
                     withContext(Dispatchers.IO) {
                         SingletonImageLoader.get(PlatformContext.INSTANCE).diskCache?.clear()
-                        dev.dimension.flare.media.UgoiraStore
-                            .clearCache()
+                        presenter.clearUgoiraCache()
                     }
                     refreshKey++
                 } finally {

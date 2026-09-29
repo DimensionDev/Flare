@@ -269,7 +269,7 @@ private fun PixivIllust.renderContent(): String =
 
 internal fun PixivIllust.toUiMedia(accountKey: MicroBlogKey): List<UiMedia> {
     val headers = persistentMapOf("Referer" to PIXIV_IMAGE_REFERER)
-    if (type == "ugoira" && dev.dimension.flare.media.UgoiraStore.supportsPlayback) {
+    if (type == "ugoira") {
         val preview = imageUrls.medium ?: imageUrls.large ?: imageUrls.squareMedium ?: return emptyList()
         return listOf(
             UiMedia.Ugoira(

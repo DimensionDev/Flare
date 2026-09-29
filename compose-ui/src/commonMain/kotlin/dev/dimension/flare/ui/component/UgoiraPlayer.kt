@@ -37,11 +37,12 @@ import dev.dimension.flare.compose.ui.status_loadmore_error_retry
 import dev.dimension.flare.compose.ui.ugoira_pause
 import dev.dimension.flare.compose.ui.ugoira_play
 import dev.dimension.flare.media.UgoiraAnimation
-import dev.dimension.flare.media.UgoiraStore
 import dev.dimension.flare.ui.component.platform.PlatformButton
 import dev.dimension.flare.ui.component.platform.PlatformCircularProgressIndicator
 import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.model.UiMedia
+import dev.dimension.flare.ui.presenter.invoke
+import dev.dimension.flare.ui.presenter.media.UgoiraPresenter
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -57,6 +58,7 @@ public fun UgoiraPlayer(
     controls: Boolean = false,
     contentScale: ContentScale = ContentScale.Fit,
 ) {
+    val presenter = remember(media) { UgoiraPresenter(media) }.invoke()
     val scope = rememberCoroutineScope()
     val playback = rememberTimelinePlayback()
     val memory = MediaPlaybackMemory.shared
@@ -81,13 +83,13 @@ public fun UgoiraPlayer(
         paused = memory.paused(media.url)
         failure = false
         try {
-            val loaded = UgoiraStore.load(media) { progress = it }
+            val loaded = presenter.load { progress = it }
             animation = loaded
             try {
                 kotlinx.coroutines.awaitCancellation()
             } finally {
                 animation = null
-                UgoiraStore.release(loaded)
+                presenter.release(loaded)
             }
         } catch (error: CancellationException) {
             throw error
@@ -172,7 +174,7 @@ public fun UgoiraPlayer(
             PlatformButton(onClick = {
                 if (failure) {
                     scope.launch {
-                        animation?.let { UgoiraStore.invalidate(it) }
+                        animation?.let { presenter.invalidate(it) }
                         retry++
                         painter = null
                     }

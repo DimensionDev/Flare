@@ -135,8 +135,10 @@ public final class UgoiraExporter {
                     let fraction = value.doubleValue
                     Task { @MainActor [weak self] in self?.progress = fraction * 0.5 }
                 }
-                let animation = try await UgoiraStore.shared.load(media: media, onProgress: onProgress)
-                defer { UgoiraStore.shared.release(animation: animation) }
+                let presenter = UgoiraPresenter(media: media)
+                defer { presenter.close() }
+                let animation = try await presenter.load(onProgress: onProgress)
+                defer { presenter.release(animation: animation) }
                 let frames = animation.frames.map { UgoiraExportFrame(path: $0.file, delay: Int64($0.delayMillis)) }
                 let directory = FileManager.default.temporaryDirectory.appendingPathComponent(
                     "ugoira-\(UUID().uuidString)", isDirectory: true)

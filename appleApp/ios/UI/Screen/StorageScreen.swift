@@ -68,7 +68,7 @@ struct StorageScreen: View {
                         }
                         KingfisherManager.shared.cache.clearDiskCache {
                             Task { @MainActor in
-                                try? await UgoiraStore.shared.clearCache()
+                                try? await storagePresenter.clearUgoiraCache()
                                 isClearingImageCache = false
                             }
                         }

@@ -23,7 +23,7 @@ public data class UgoiraMetadata(
     }
 }
 
-/** Local compressed images, in metadata order. Release through UgoiraStore when no longer in use. */
+/** Local compressed images, in metadata order. Release through UgoiraPresenter when no longer in use. */
 public class UgoiraAnimation(
     public val key: String,
     public val frames: List<UgoiraFrame>,

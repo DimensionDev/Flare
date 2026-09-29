@@ -46,7 +46,7 @@ internal fun ugoiraRepository(
 }
 
 /** Owns complete frame sequences and their playback/export leases. */
-internal class UgoiraRepository(
+internal actual class UgoiraRepository(
     private val fileStorage: OkioFileStorage,
     private val scope: CoroutineScope,
     private val downloader: UgoiraDownloader,
@@ -75,7 +75,7 @@ internal class UgoiraRepository(
         val createdAt: Long,
     )
 
-    suspend fun load(
+    actual suspend fun load(
         media: UiMedia.Ugoira,
         onProgress: (Float) -> Unit,
     ): UgoiraAnimation =
@@ -113,7 +113,7 @@ internal class UgoiraRepository(
             }
         }
 
-    suspend fun invalidate(animation: UgoiraAnimation) {
+    actual suspend fun invalidate(animation: UgoiraAnimation) {
         mutex.withLock {
             entries[animation.key]?.let {
                 it.invalidated = true
@@ -122,7 +122,7 @@ internal class UgoiraRepository(
         }
     }
 
-    fun release(animation: UgoiraAnimation) = releaseKey(animation.key)
+    actual fun release(animation: UgoiraAnimation) = releaseKey(animation.key)
 
     private fun releaseKey(key: String) {
         scope.launch {
@@ -140,7 +140,7 @@ internal class UgoiraRepository(
         }
     }
 
-    suspend fun clear() =
+    actual suspend fun clear() =
         withContext(PlatformDispatchers.IO) {
             mutex.withLock {
                 entries.values.forEach { it.removeOnRelease = true }
@@ -152,7 +152,7 @@ internal class UgoiraRepository(
             }
         }
 
-    suspend fun size(): Long = withContext(PlatformDispatchers.IO) { directorySize(root) }
+    actual suspend fun size(): Long = withContext(PlatformDispatchers.IO) { directorySize(root) }
 
     private suspend fun prepare(
         key: String,

@@ -742,6 +742,7 @@ private struct MacLocalFilterSettingsPane: View {
 }
 
 private struct MacStorageSettingsPane: View {
+    private let storagePresenter: StoragePresenter
     @State private var presenter: KotlinPresenter<StorageState>
     @State private var mediaSaveLocationStore = MacMediaSaveLocationStore.shared
     @State private var showDatabaseClearAlert = false
@@ -758,7 +759,9 @@ private struct MacStorageSettingsPane: View {
     @State private var showingAppLog = false
 
     init() {
-        _presenter = State(wrappedValue: KotlinPresenter(presenter: StoragePresenter()))
+        let storagePresenter = StoragePresenter()
+        self.storagePresenter = storagePresenter
+        _presenter = State(wrappedValue: KotlinPresenter(presenter: storagePresenter))
     }
 
     var body: some View {
@@ -985,7 +988,7 @@ private struct MacStorageSettingsPane: View {
         ) {}
         KingfisherManager.shared.cache.clearDiskCache {
             Task { @MainActor in
-                try? await UgoiraStore.shared.clearCache()
+                try? await storagePresenter.clearUgoiraCache()
                 isClearingImageCache = false
             }
         }

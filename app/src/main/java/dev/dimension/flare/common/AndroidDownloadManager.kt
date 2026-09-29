@@ -21,9 +21,9 @@ import androidx.media3.common.C
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.DataSpec
 import dev.dimension.flare.R
-import dev.dimension.flare.media.UgoiraStore
 import dev.dimension.flare.ui.component.Media3VideoCacheManager
 import dev.dimension.flare.ui.model.UiMedia
+import dev.dimension.flare.ui.presenter.media.UgoiraPresenter
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
@@ -91,7 +91,8 @@ internal class AndroidDownloadManager(
                     exportJob = currentCoroutineContext()[Job]
                     ugoiraProgress = 0f
                     try {
-                        val animation = UgoiraStore.load(media) { ugoiraProgress = it * .5f }
+                        val presenter = UgoiraPresenter(media)
+                        val animation = presenter.load { ugoiraProgress = it * .5f }
                         try {
                             val file = File.createTempFile("ugoira-", ".mp4", context.cacheDir)
                             try {
@@ -126,7 +127,7 @@ internal class AndroidDownloadManager(
                                 file.delete()
                             }
                         } finally {
-                            UgoiraStore.release(animation)
+                            presenter.release(animation)
                         }
                     } catch (error: Exception) {
                         if (error !is CancellationException) {

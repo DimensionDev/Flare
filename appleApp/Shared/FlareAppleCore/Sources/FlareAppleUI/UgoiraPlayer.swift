@@ -32,8 +32,10 @@ public final class UgoiraPlaybackSession {
                     let fraction = value.doubleValue
                     Task { @MainActor [weak self] in self?.progress = fraction }
                 }
-                let animation = try await UgoiraStore.shared.load(media: media, onProgress: onProgress)
-                defer { UgoiraStore.shared.release(animation: animation) }
+                let presenter = UgoiraPresenter(media: media)
+                defer { presenter.close() }
+                let animation = try await presenter.load(onProgress: onProgress)
+                defer { presenter.release(animation: animation) }
                 try Task.checkCancellation()
                 let frames = animation.frames
                 let duration = Double(animation.durationMillis) / 1000
@@ -81,7 +83,7 @@ public final class UgoiraPlaybackSession {
                         try await Task.sleep(for: .seconds(paused ? 0.1 : max(0.001, end - now)))
                     }
                 } catch {
-                    if !Task.isCancelled { try? await UgoiraStore.shared.invalidate(animation: animation) }
+                    if !Task.isCancelled { try? await presenter.invalidate(animation: animation) }
                     throw error
                 }
             } catch is CancellationError {

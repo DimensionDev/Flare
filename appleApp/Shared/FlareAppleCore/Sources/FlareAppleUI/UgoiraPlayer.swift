@@ -56,9 +56,10 @@ public final class UgoiraPlaybackSession {
                 var decoded: [Int: CGImage] = [:]
                 var displayed = -1
                 while !Task.isCancelled {
+                    if !paused, wasPaused { start = ProcessInfo.processInfo.systemUptime - position }
+                    let elapsed = paused ? position : ProcessInfo.processInfo.systemUptime - start
                     if !paused {
-                        if wasPaused { start = ProcessInfo.processInfo.systemUptime - position }
-                        position = (ProcessInfo.processInfo.systemUptime - start).truncatingRemainder(dividingBy: duration)
+                        position = elapsed.truncatingRemainder(dividingBy: duration)
                     }
                     wasPaused = paused
                     let index = Int(animation.frameIndex(positionMillis: Int64(position * 1000)))
@@ -88,8 +89,9 @@ public final class UgoiraPlaybackSession {
                         MediaPlaybackMemory.shared.save(position, for: media.url)
                     }
                     let end = Double(animation.frameStartMillis(index: Int32(index)) + Int64(frames[index].delayMillis)) / 1000
-                    let now = (ProcessInfo.processInfo.systemUptime - start).truncatingRemainder(dividingBy: duration)
-                    try await Task.sleep(for: .seconds(paused ? 0.1 : max(0.001, end - now)))
+                    let now = ProcessInfo.processInfo.systemUptime - start
+                    let delay = ugoiraFrameDelay(frameEnd: end, duration: duration, selectedAt: elapsed, now: now)
+                    try await Task.sleep(for: .seconds(paused ? 0.1 : delay))
                 }
             } catch is CancellationError {
             } catch {
@@ -126,6 +128,12 @@ public final class UgoiraPlaybackSession {
         presenter = nil
         if clearImage { image = nil }
     }
+}
+
+nonisolated func ugoiraFrameDelay(frameEnd: Double, duration: Double, selectedAt: Double, now: Double) -> Double {
+    // Keep the selected frame's cycle even when decoding finishes in a later one.
+    let cycleStart = selectedAt - selectedAt.truncatingRemainder(dividingBy: duration)
+    return max(0.001, cycleStart + frameEnd - now)
 }
 
 nonisolated func decodeUgoiraImage(_ path: String, maximumSize: Int? = nil) throws -> CGImage {

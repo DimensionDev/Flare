@@ -79,40 +79,44 @@ internal actual class UgoiraRepository(
     actual suspend fun load(
         media: UiMedia.Ugoira,
         onProgress: (Float) -> Unit,
-    ): UgoiraAnimation =
-        coroutineScope {
-            val key = "${media.accountKey}|${media.statusKey}|${media.originalFrameUrl}".encodeUtf8().sha256().hex()
-            val entry =
-                mutex.withLock {
-                    check(entries[key]?.invalidated != true) { "Ugoira cache is in use; retry after playback or export releases it" }
-                    if (!cleaned) {
-                        withContext(PlatformDispatchers.IO) {
-                            fileSystem
-                                .listOrNull(root)
-                                .orEmpty()
-                                .filter { it.name.endsWith(".part") }
-                                .forEach(fileSystem::deleteRecursively)
-                        }
-                        cleaned = true
+    ): UgoiraAnimation {
+        val key = "${media.accountKey}|${media.statusKey}|${media.originalFrameUrl}".encodeUtf8().sha256().hex()
+        val entry =
+            mutex.withLock {
+                check(entries[key]?.invalidated != true) { "Ugoira cache is in use; retry after playback or export releases it" }
+                if (!cleaned) {
+                    withContext(PlatformDispatchers.IO) {
+                        fileSystem
+                            .listOrNull(root)
+                            .orEmpty()
+                            .filter { it.name.endsWith(".part") }
+                            .forEach(fileSystem::deleteRecursively)
                     }
-                    entries
-                        .getOrPut(key) {
-                            val progress = MutableStateFlow(0f)
-                            // A failed transfer must not cancel the application scope or other downloads.
-                            val job = scope.async { tryRun { prepare(key, media, progress) } }
-                            Entry(job, progress)
-                        }.also { it.users++ }
+                    cleaned = true
                 }
-            val observer = launch { entry.progress.collect(onProgress) }
-            try {
-                entry.job.await().getOrThrow()
-            } catch (cause: Throwable) {
-                withContext(NonCancellable) { releaseKey(key).join() }
-                throw cause
-            } finally {
-                observer.cancel()
+                entries
+                    .getOrPut(key) {
+                        val progress = MutableStateFlow(0f)
+                        // A failed transfer must not cancel the application scope or other downloads.
+                        val job = scope.async { tryRun { prepare(key, media, progress) } }
+                        Entry(job, progress)
+                    }.also { it.users++ }
             }
+        try {
+            return coroutineScope {
+                val observer = launch { entry.progress.collect(onProgress) }
+                try {
+                    entry.job.await().getOrThrow()
+                } finally {
+                    observer.cancel()
+                }
+            }
+        } catch (cause: Throwable) {
+            // The scope can be cancelled while joining the observer, before handing off the lease.
+            withContext(NonCancellable) { releaseKey(key).join() }
+            throw cause
         }
+    }
 
     actual suspend fun invalidate(animation: UgoiraAnimation) {
         mutex.withLock {

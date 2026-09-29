@@ -21,6 +21,7 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.utils.io.ByteChannel
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
@@ -137,6 +138,47 @@ class UgoiraRepositoryTest {
             } finally {
                 playbackJob.cancelAndJoin()
                 stopKoin()
+                backgroundScope.coroutineContext[Job]?.cancelAndJoin()
+                client.close()
+                FileSystem.SYSTEM.deleteRecursively(directory)
+            }
+        }
+
+    @Test
+    fun cancellationDuringCacheHitHandoffReleasesOnlyItsOwnLease(): Unit =
+        runTest {
+            val directory = Files.createTempDirectory("ugoira-test").toString().toPath()
+            val client = HttpClient(MockEngine { respond("frame") })
+            try {
+                val repository =
+                    UgoiraRepository(
+                        OkioFileStorage(FileSystem.SYSTEM, directory),
+                        backgroundScope,
+                        UgoiraDownloader(FileSystem.SYSTEM, client),
+                    ) { info }
+                val first = repository.load(media) {}
+                // The cache hit returns from await before its cancelled progress observer finishes.
+                val second = async(start = CoroutineStart.UNDISPATCHED) { repository.load(media) {} }
+                assertFalse(second.isCompleted)
+                second.cancelAndJoin()
+
+                repository.clear()
+                assertTrue(
+                    FileSystem.SYSTEM.exists(
+                        first.frames
+                            .first()
+                            .file
+                            .toPath(),
+                    ),
+                )
+                repository.release(first).join()
+                assertEquals(0L, repository.size())
+
+                val retried = repository.load(media) {}
+                repository.release(retried).join()
+                repository.clear()
+                assertEquals(0L, repository.size())
+            } finally {
                 backgroundScope.coroutineContext[Job]?.cancelAndJoin()
                 client.close()
                 FileSystem.SYSTEM.deleteRecursively(directory)

@@ -9,11 +9,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -36,7 +33,6 @@ import dev.dimension.flare.compose.ui.Res
 import dev.dimension.flare.compose.ui.status_loadmore_error_retry
 import dev.dimension.flare.compose.ui.ugoira_pause
 import dev.dimension.flare.compose.ui.ugoira_play
-import dev.dimension.flare.media.UgoiraAnimation
 import dev.dimension.flare.ui.component.platform.PlatformButton
 import dev.dimension.flare.ui.component.platform.PlatformCircularProgressIndicator
 import dev.dimension.flare.ui.component.platform.PlatformText
@@ -45,7 +41,6 @@ import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.media.UgoiraPresenter
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import kotlin.time.TimeSource
 
@@ -59,17 +54,14 @@ public fun UgoiraPlayer(
     contentScale: ContentScale = ContentScale.Fit,
 ) {
     val presenter = remember(media) { UgoiraPresenter(media) }.invoke()
-    val scope = rememberCoroutineScope()
     val playback = rememberTimelinePlayback()
     val memory = MediaPlaybackMemory.shared
     val id = remember(media.url) { Any() }
     val foreground = platformMediaActive()
     var selected by remember(media.url) { mutableStateOf(false) }
     var paused by remember(media.url) { mutableStateOf(memory.paused(media.url)) }
-    var animation by remember(media.url) { mutableStateOf<UgoiraAnimation?>(null) }
-    var progress by remember(media.url) { mutableFloatStateOf(0f) }
-    var failure by remember(media.url) { mutableStateOf(false) }
-    var retry by remember(media.url) { mutableIntStateOf(0) }
+    val animation = presenter.animation
+    val failure = presenter.failed
     var painter by remember(media.url) { mutableStateOf<Painter?>(null) }
     val context = LocalPlatformContext.current
     val active = selected && foreground && autoplay
@@ -78,24 +70,9 @@ public fun UgoiraPlayer(
         playback.register(id) { selected = it }
         onDispose { playback.remove(id) }
     }
-    LaunchedEffect(active, retry, media) {
-        if (!active) return@LaunchedEffect
-        paused = memory.paused(media.url)
-        failure = false
-        try {
-            val loaded = presenter.load { progress = it }
-            animation = loaded
-            try {
-                kotlinx.coroutines.awaitCancellation()
-            } finally {
-                animation = null
-                presenter.release(loaded)
-            }
-        } catch (error: CancellationException) {
-            throw error
-        } catch (_: Exception) {
-            failure = true
-        }
+    LaunchedEffect(active, media) {
+        if (active) paused = memory.paused(media.url)
+        presenter.setActive(active)
     }
     LaunchedEffect(animation, active, paused) {
         val sequence = animation ?: return@LaunchedEffect
@@ -138,7 +115,7 @@ public fun UgoiraPlayer(
         } catch (error: CancellationException) {
             throw error
         } catch (_: Exception) {
-            failure = true
+            presenter.onDecodeFailure(sequence)
         } finally {
             if (!paused && generation == memory.generation(media.url)) {
                 memory.save(
@@ -167,17 +144,14 @@ public fun UgoiraPlayer(
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 PlatformCircularProgressIndicator()
-                PlatformText("${(progress * 100).toInt()}%", color = Color.White)
+                PlatformText("${(presenter.progress * 100).toInt()}%", color = Color.White)
             }
         }
         if (controls && active && (animation != null || failure)) {
             PlatformButton(onClick = {
                 if (failure) {
-                    scope.launch {
-                        animation?.let { presenter.invalidate(it) }
-                        retry++
-                        painter = null
-                    }
+                    presenter.retry()
+                    painter = null
                 } else {
                     paused = !paused
                     memory.savePaused(media.url, paused)

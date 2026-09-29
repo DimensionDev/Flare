@@ -1,3 +1,5 @@
+import Combine
+import FlareAppleCore
 import ImageIO
 @preconcurrency import KotlinSharedUI
 import SwiftUI
@@ -5,11 +7,13 @@ import SwiftUI
 @Observable @MainActor
 public final class UgoiraPlaybackSession {
     public private(set) var image: CGImage?
-    public private(set) var progress = 0.0
-    public private(set) var failed = false
+    public var progress: Double { Double(presenter?.state.progress ?? 0) }
+    public var failed: Bool { presenter?.state.failed ?? false }
     public private(set) var paused = false
     public var onFrame: ((CGImage) -> Void)?
     private var task: Task<Void, Never>?
+    private var presenter: KotlinPresenter<UgoiraPresenterState>?
+    private var subscription: AnyCancellable?
     private var media: UiMediaUgoira?
     private var generation = 0
     private var position = 0.0
@@ -19,23 +23,29 @@ public final class UgoiraPlaybackSession {
     public init() {}
 
     public func play(_ media: UiMediaUgoira) {
-        guard task == nil else { return }
+        guard presenter == nil else { return }
         self.media = media
         generation = MediaPlaybackMemory.shared.generation(for: media.url)
         paused = MediaPlaybackMemory.shared.paused(for: media.url)
         position = MediaPlaybackMemory.shared.position(for: media.url)
-        failed = false
+        let presenter = KotlinPresenter(presenter: UgoiraPresenter(media: media))
+        self.presenter = presenter
+        subscription = presenter.statePublisher.sink { [weak self] state in
+            guard let self else { return }
+            guard let animation = state.animation, !state.failed else {
+                task?.cancel()
+                task = nil
+                return
+            }
+            if task == nil { render(animation, media: media, state: state) }
+        }
+        presenter.state.setActive(value: true)
+    }
+
+    private func render(_ animation: UgoiraAnimation, media: UiMediaUgoira, state: UgoiraPresenterState) {
         task = Task { [weak self] in
             guard let self else { return }
             do {
-                let onProgress: @Sendable (KotlinFloat) -> Void = { [weak self] value in
-                    let fraction = value.doubleValue
-                    Task { @MainActor [weak self] in self?.progress = fraction }
-                }
-                let presenter = UgoiraPresenter(media: media)
-                defer { presenter.close() }
-                let animation = try await presenter.load(onProgress: onProgress)
-                defer { presenter.release(animation: animation) }
                 try Task.checkCancellation()
                 let frames = animation.frames
                 let duration = Double(animation.durationMillis) / 1000
@@ -45,50 +55,45 @@ public final class UgoiraPlaybackSession {
                 var wasPaused = paused
                 var decoded: [Int: CGImage] = [:]
                 var displayed = -1
-                do {
-                    while !Task.isCancelled {
-                        if !paused {
-                            if wasPaused { start = ProcessInfo.processInfo.systemUptime - position }
-                            position = (ProcessInfo.processInfo.systemUptime - start).truncatingRemainder(dividingBy: duration)
-                        }
-                        wasPaused = paused
-                        let index = Int(animation.frameIndex(positionMillis: Int64(position * 1000)))
-                        if displayed != index {
-                            let frame: CGImage
-                            if let cached = decoded[index] {
-                                frame = cached
-                            } else {
-                                let path = frames[index].file
-                                frame = try await Task.detached(priority: .userInitiated) { try decodeUgoiraImage(path, maximumSize: 4096) }
-                                    .value
-                            }
-                            try Task.checkCancellation()
-                            image = frame
-                            onFrame?(frame)
-                            displayed = index
-                            decoded = [index: frame]
-                            if !paused {
-                                let next = (index + 1) % frames.count
-                                let path = frames[next].file
-                                decoded[next] = try await Task.detached(priority: .userInitiated) {
-                                    try decodeUgoiraImage(path, maximumSize: 4096)
-                                }.value
-                            }
-                        }
-                        if generation == MediaPlaybackMemory.shared.generation(for: media.url) {
-                            MediaPlaybackMemory.shared.save(position, for: media.url)
-                        }
-                        let end = Double(animation.frameStartMillis(index: Int32(index)) + Int64(frames[index].delayMillis)) / 1000
-                        let now = (ProcessInfo.processInfo.systemUptime - start).truncatingRemainder(dividingBy: duration)
-                        try await Task.sleep(for: .seconds(paused ? 0.1 : max(0.001, end - now)))
+                while !Task.isCancelled {
+                    if !paused {
+                        if wasPaused { start = ProcessInfo.processInfo.systemUptime - position }
+                        position = (ProcessInfo.processInfo.systemUptime - start).truncatingRemainder(dividingBy: duration)
                     }
-                } catch {
-                    if !Task.isCancelled { try? await presenter.invalidate(animation: animation) }
-                    throw error
+                    wasPaused = paused
+                    let index = Int(animation.frameIndex(positionMillis: Int64(position * 1000)))
+                    if displayed != index {
+                        let frame: CGImage
+                        if let cached = decoded[index] {
+                            frame = cached
+                        } else {
+                            let path = frames[index].file
+                            frame = try await Task.detached(priority: .userInitiated) { try decodeUgoiraImage(path, maximumSize: 4096) }
+                                .value
+                        }
+                        try Task.checkCancellation()
+                        image = frame
+                        onFrame?(frame)
+                        displayed = index
+                        decoded = [index: frame]
+                        if !paused {
+                            let next = (index + 1) % frames.count
+                            let path = frames[next].file
+                            decoded[next] = try await Task.detached(priority: .userInitiated) {
+                                try decodeUgoiraImage(path, maximumSize: 4096)
+                            }.value
+                        }
+                    }
+                    if generation == MediaPlaybackMemory.shared.generation(for: media.url) {
+                        MediaPlaybackMemory.shared.save(position, for: media.url)
+                    }
+                    let end = Double(animation.frameStartMillis(index: Int32(index)) + Int64(frames[index].delayMillis)) / 1000
+                    let now = (ProcessInfo.processInfo.systemUptime - start).truncatingRemainder(dividingBy: duration)
+                    try await Task.sleep(for: .seconds(paused ? 0.1 : max(0.001, end - now)))
                 }
             } catch is CancellationError {
             } catch {
-                if !Task.isCancelled { failed = true }
+                if !Task.isCancelled { state.onDecodeFailure(value: animation) }
             }
         }
     }
@@ -96,8 +101,8 @@ public final class UgoiraPlaybackSession {
     public func toggle() {
         guard let media else { return }
         if failed {
-            detach()
-            play(media)
+            image = nil
+            presenter?.state.retry()
             return
         }
         let shouldPause = !paused
@@ -116,6 +121,9 @@ public final class UgoiraPlaybackSession {
         }
         task?.cancel()
         task = nil
+        subscription?.cancel()
+        subscription = nil
+        presenter = nil
         if clearImage { image = nil }
     }
 }

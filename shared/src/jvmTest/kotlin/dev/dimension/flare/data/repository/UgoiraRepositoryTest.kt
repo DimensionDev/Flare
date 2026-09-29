@@ -1,11 +1,19 @@
 package dev.dimension.flare.data.repository
 
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshots.Snapshot
+import app.cash.molecule.RecompositionMode
+import app.cash.molecule.launchMolecule
 import dev.dimension.flare.data.io.OkioFileStorage
 import dev.dimension.flare.data.network.UgoiraDownloader
+import dev.dimension.flare.di.startKoin
+import dev.dimension.flare.di.testSingle
 import dev.dimension.flare.media.UgoiraFrame
 import dev.dimension.flare.media.UgoiraMetadata
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiMedia
+import dev.dimension.flare.ui.presenter.media.UgoiraPresenter
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
@@ -19,6 +27,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -26,6 +35,8 @@ import kotlinx.coroutines.withTimeout
 import kotlinx.io.IOException
 import okio.FileSystem
 import okio.Path.Companion.toPath
+import org.koin.core.context.stopKoin
+import org.koin.dsl.module
 import java.io.ByteArrayOutputStream
 import java.nio.file.Files
 import java.util.zip.ZipEntry
@@ -34,6 +45,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
+import kotlin.test.assertNotSame
 import kotlin.test.assertNull
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
@@ -56,6 +68,80 @@ class UgoiraRepositoryTest {
             "https://i.pximg.net/img-zip-ugoira/date/123_ugoira600x600.zip",
             listOf(UgoiraFrame("000000.jpg", 40), UgoiraFrame("000001.jpg", 80)),
         )
+
+    @Test
+    fun presenterRetriesFailedLoadsAndCorruptFramesThenReleasesOnDisposal(): Unit =
+        runTest {
+            val directory = Files.createTempDirectory("ugoira-test").toString().toPath()
+            var downloads = 0
+            var metadataRequests = 0
+            val client =
+                HttpClient(
+                    MockEngine {
+                        downloads++
+                        respond("frame")
+                    },
+                )
+            val repository =
+                UgoiraRepository(
+                    OkioFileStorage(FileSystem.SYSTEM, directory),
+                    backgroundScope,
+                    UgoiraDownloader(FileSystem.SYSTEM, client),
+                ) {
+                    check(++metadataRequests > 1) { "Temporary metadata failure" }
+                    info
+                }
+            stopKoin()
+            startKoin { modules(module { testSingle { repository } }) }
+            val playbackJob = Job(coroutineContext[Job])
+            try {
+                val selectedMedia = mutableStateOf(media)
+                val states =
+                    CoroutineScope(coroutineContext + playbackJob).launchMolecule(RecompositionMode.Immediate) {
+                        remember(selectedMedia.value) { UgoiraPresenter(selectedMedia.value) }.body()
+                    }
+                states.value.setActive(true)
+                Snapshot.sendApplyNotifications()
+                states.first { it.failed }.retry()
+                Snapshot.sendApplyNotifications()
+                val first = checkNotNull(states.first { it.animation != null }.animation)
+                assertEquals(2, downloads)
+
+                states.value.onDecodeFailure(first)
+                Snapshot.sendApplyNotifications()
+                states.first { it.failed }.retry()
+                Snapshot.sendApplyNotifications()
+                val retriedState = states.first { it.animation != null && it.animation !== first }
+                assertFalse(retriedState.failed)
+                assertEquals(4, downloads)
+                assertNotSame(first, retriedState.animation)
+
+                // A late decoder callback must not invalidate the replacement sequence.
+                retriedState.onDecodeFailure(first)
+                Snapshot.sendApplyNotifications()
+                runCurrent()
+                assertFalse(states.value.failed)
+
+                selectedMedia.value = media.copy(statusKey = MicroBlogKey("456", "pixiv.net"))
+                Snapshot.sendApplyNotifications()
+                runCurrent()
+                assertNull(states.value.animation)
+                states.value.setActive(true)
+                Snapshot.sendApplyNotifications()
+                val replacement = checkNotNull(states.first { it.animation != null }.animation)
+                assertTrue(replacement.key != first.key)
+                assertEquals(6, downloads)
+                playbackJob.cancelAndJoin()
+                repository.clear()
+                assertEquals(0L, repository.size())
+            } finally {
+                playbackJob.cancelAndJoin()
+                stopKoin()
+                backgroundScope.coroutineContext[Job]?.cancelAndJoin()
+                client.close()
+                FileSystem.SYSTEM.deleteRecursively(directory)
+            }
+        }
 
     @Test
     fun deduplicatesOriginalDownloadsAndReusesCompleteCache(): Unit =
@@ -179,10 +265,8 @@ class UgoiraRepositoryTest {
                     ) { readUtf8() },
                 )
                 assertFailsWith<IllegalStateException> { cache.load(media) {} }
-                cache.release(animation)
-                withTimeout(5_000) {
-                    while (FileSystem.SYSTEM.exists(root / animation.key)) delay(10)
-                }
+                cache.release(animation).join()
+                assertFalse(FileSystem.SYSTEM.exists(root / animation.key))
                 val retried = cache.load(media) {}
                 assertEquals("original", retried.quality)
                 cache.clear()

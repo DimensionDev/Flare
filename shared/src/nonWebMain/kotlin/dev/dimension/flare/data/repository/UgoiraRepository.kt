@@ -15,6 +15,7 @@ import dev.dimension.flare.ui.model.UiMedia
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.async
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.coroutineScope
@@ -106,7 +107,7 @@ internal actual class UgoiraRepository(
             try {
                 entry.job.await().getOrThrow()
             } catch (cause: Throwable) {
-                releaseKey(key)
+                withContext(NonCancellable) { releaseKey(key).join() }
                 throw cause
             } finally {
                 observer.cancel()
@@ -124,7 +125,7 @@ internal actual class UgoiraRepository(
 
     actual fun release(animation: UgoiraAnimation) = releaseKey(animation.key)
 
-    private fun releaseKey(key: String) {
+    private fun releaseKey(key: String): Job =
         scope.launch {
             tryRun {
                 mutex.withLock {
@@ -138,7 +139,6 @@ internal actual class UgoiraRepository(
                 }
             }
         }
-    }
 
     actual suspend fun clear() =
         withContext(PlatformDispatchers.IO) {

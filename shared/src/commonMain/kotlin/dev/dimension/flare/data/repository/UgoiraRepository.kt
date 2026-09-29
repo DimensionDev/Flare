@@ -2,6 +2,7 @@ package dev.dimension.flare.data.repository
 
 import dev.dimension.flare.media.UgoiraAnimation
 import dev.dimension.flare.ui.model.UiMedia
+import kotlinx.coroutines.Job
 
 internal expect class UgoiraRepository {
     suspend fun load(
@@ -11,7 +12,7 @@ internal expect class UgoiraRepository {
 
     suspend fun invalidate(animation: UgoiraAnimation)
 
-    fun release(animation: UgoiraAnimation)
+    fun release(animation: UgoiraAnimation): Job
 
     suspend fun clear()
 

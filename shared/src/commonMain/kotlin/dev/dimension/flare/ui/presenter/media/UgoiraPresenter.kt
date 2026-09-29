@@ -30,7 +30,8 @@ public class UgoiraPresenter(
 
     @Composable
     override fun body(): State =
-        key(media) {
+        // Inferring key's result as the anonymous implementation breaks Kotlin/Native linkage.
+        key<State>(media) {
             var active by remember { mutableStateOf(false) }
             var attempt by remember { mutableIntStateOf(0) }
             var currentAnimation by remember { mutableStateOf<UgoiraAnimation?>(null) }

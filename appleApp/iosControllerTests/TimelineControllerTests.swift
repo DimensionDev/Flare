@@ -58,6 +58,42 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         XCTAssertTrue(layout === fixture.collection.collectionViewLayout)
     }
 
+    func testLateTopContentPreservesTheReadingPositionClampedByATallerViewport() async throws {
+        for changesHeader in [true, false] {
+            for offset: CGFloat in [0, 120, 600] {
+                let fixture = await Fixture(posts: true)
+                fixture.controller.topContentInset = 88
+                fixture.input.items = Array(fixture.input.items.prefix(4))
+                await fixture.apply()
+                await fixture.scroll(offset)
+                let expected = try fixture.position()
+                let originalHeight = fixture.controller.view.frame.height
+
+                // All rows fit after resizing, but a scrolled item's bookmark must survive.
+                fixture.controller.view.frame.size.height = fixture.collection.contentSize.height + 1_000
+                await fixture.settle()
+                XCTAssertEqual(fixture.controller.effectiveContentOffsetY, 0, accuracy: 0.5)
+
+                if changesHeader {
+                    fixture.input.header = UiStateSuccess(data: makeRow(200))
+                } else {
+                    fixture.controller.accessoryItems = [
+                        UITimelineCollectionViewAccessoryItem(id: "notice", view: Header())
+                    ]
+                }
+                await fixture.apply()
+                fixture.controller.view.frame.size.height = originalHeight
+                await fixture.settle()
+
+                if offset == 0 {
+                    XCTAssertEqual(fixture.controller.effectiveContentOffsetY, 0, accuracy: 0.5)
+                } else {
+                    try fixture.assertPosition(expected)
+                }
+            }
+        }
+    }
+
     func testRemovingVisibleContentRestoresTheNextItem() async throws {
         let fixture = await Fixture()
         await fixture.scroll(2_500)

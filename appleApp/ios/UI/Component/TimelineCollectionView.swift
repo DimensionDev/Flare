@@ -43,6 +43,7 @@ final class TimelineCollectionView: UICollectionView {
     // Passive across size changes: a different column may become visually first,
     // or a shorter card may temporarily clamp the original intra-item distance.
     private var geometryReadingPosition: ReadingPosition?
+    private var geometryReadingPositionWasAtTop = false
     private var readingPositionGeneration = 0
     private var isRestoringReadingPosition = false
     private var appliedTopInset: CGFloat?
@@ -55,6 +56,10 @@ final class TimelineCollectionView: UICollectionView {
     private(set) var isProgrammaticScrolling = false
 
     var hasReadingPosition: Bool { readingPosition != nil }
+    var canRestoreTopReadingPosition: Bool {
+        if geometryReadingPosition?.itemID != nil { return geometryReadingPositionWasAtTop }
+        return readingPosition?.itemID == nil
+    }
     var isPresentingRefresh: Bool { refreshRequested || isEndingRefresh || refreshControl?.isRefreshing == true }
 
     // Prepending during an elastic pull moves the offset into the normal content
@@ -268,6 +273,9 @@ final class TimelineCollectionView: UICollectionView {
         guard preservesReadingPosition, !isRestoringReadingPosition,
               allowsReadingPositionRestoration else { return }
         if geometryReadingPosition == nil {
+            // A later size change can clamp a scrolled list to zero without making it a top bookmark.
+            geometryReadingPositionWasAtTop = readingPosition?.itemID == nil &&
+                contentOffset.y + restingAdjustedTopInset <= 1
             geometryReadingPosition = captureReadingPosition()
         }
         readingPositionGeneration += 1
@@ -409,6 +417,7 @@ final class TimelineCollectionView: UICollectionView {
     func restoreReadingPosition(_ position: ReadingPosition) {
         readingPositionGeneration += 1
         geometryReadingPosition = position.itemID == nil ? nil : position
+        geometryReadingPositionWasAtTop = false
         readingPosition = position
         setNeedsLayout()
     }

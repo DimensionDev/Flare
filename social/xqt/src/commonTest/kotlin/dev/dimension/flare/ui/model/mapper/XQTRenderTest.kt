@@ -269,14 +269,14 @@ class XQTRenderTest {
     }
 
     @Test
-    fun platformTranslationUsesFullMatchingTranslationAndEntities() {
+    fun platformTranslationDecodesHtmlEntitiesOnceAndPreservesLinks() {
         val shortUrl = "https://t.co/translated"
         val expandedUrl = "https://example.com/translated"
         val status =
             createTweet(
                 id = "status-translated",
                 user = createUser("user-translated", "translated_user"),
-                text = "original content",
+                text = "original &amp; &lt;tag&gt; &amp;amp; &#39;quoted&#39;",
                 grokTranslation =
                     GrokTranslatedPostWithAvailability(
                         isAvailable = true,
@@ -284,7 +284,7 @@ class XQTRenderTest {
                             GrokTranslatedPost(
                                 destinationLanguage = Locale.language.replace('-', '_').uppercase(),
                                 previewTranslation = "truncated preview",
-                                translation = "full translation $shortUrl",
+                                translation = "full translation &amp; &lt;tag&gt; &amp;amp; &#39;quoted&#39; $shortUrl",
                                 entities =
                                     Entities(
                                         urls =
@@ -308,8 +308,8 @@ class XQTRenderTest {
                 .filterIsInstance<RenderRun.Text>()
                 .first { it.style.link != null }
 
-        assertEquals("original content", rendered.content.original.innerText)
-        assertEquals("full translation example.com/translated", translation.innerText)
+        assertEquals("original & <tag> &amp; 'quoted'", rendered.content.original.innerText)
+        assertEquals("full translation & <tag> &amp; 'quoted' example.com/translated", translation.innerText)
         assertEquals(expandedUrl, link.style.link)
     }
 

@@ -1,10 +1,8 @@
 package dev.dimension.flare.ui.component
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -18,6 +16,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import coil3.SingletonImageLoader
 import coil3.Uri
@@ -28,20 +28,22 @@ import coil3.request.ImageRequest
 import coil3.request.SuccessResult
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.solid.ArrowRotateRight
 import compose.icons.fontawesomeicons.solid.CirclePlay
 import dev.dimension.flare.compose.ui.Res
 import dev.dimension.flare.compose.ui.status_loadmore_error_retry
-import dev.dimension.flare.compose.ui.ugoira_pause
+import dev.dimension.flare.compose.ui.ugoira_loading
 import dev.dimension.flare.compose.ui.ugoira_play
-import dev.dimension.flare.ui.component.platform.PlatformButton
 import dev.dimension.flare.ui.component.platform.PlatformCircularProgressIndicator
 import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.media.UgoiraPresenter
+import dev.dimension.flare.ui.theme.PlatformTheme
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.stringResource
+import kotlin.math.roundToInt
 import kotlin.time.TimeSource
 
 /** Uses the same visibility arbitration as videos; keeps only two decoded frames. */
@@ -50,7 +52,6 @@ public fun UgoiraPlayer(
     media: UiMedia.Ugoira,
     modifier: Modifier = Modifier,
     autoplay: Boolean = true,
-    controls: Boolean = false,
     contentScale: ContentScale = ContentScale.Fit,
 ) {
     val presenter = remember(media) { UgoiraPresenter(media) }.invoke()
@@ -59,7 +60,6 @@ public fun UgoiraPlayer(
     val id = remember(media.url) { Any() }
     val foreground = platformMediaActive()
     var selected by remember(media.url) { mutableStateOf(false) }
-    var paused by remember(media.url) { mutableStateOf(memory.paused(media.url)) }
     val animation = presenter.animation
     val failure = presenter.failed
     var painter by remember(media.url) { mutableStateOf<Painter?>(null) }
@@ -71,10 +71,9 @@ public fun UgoiraPlayer(
         onDispose { playback.remove(id) }
     }
     LaunchedEffect(active, media) {
-        if (active) paused = memory.paused(media.url)
         presenter.setActive(active)
     }
-    LaunchedEffect(animation, active, paused) {
+    LaunchedEffect(animation, active) {
         val sequence = animation ?: return@LaunchedEffect
         if (!active) return@LaunchedEffect
         val frames = linkedMapOf<Int, Painter>()
@@ -103,7 +102,6 @@ public fun UgoiraPlayer(
             do {
                 val index = sequence.frameIndex(position)
                 painter = decode(index)
-                if (paused) break
                 decode((index + 1) % sequence.frames.size)
                 val elapsed = clock.elapsedNow().inWholeMilliseconds
                 val end =
@@ -117,7 +115,7 @@ public fun UgoiraPlayer(
         } catch (_: Exception) {
             presenter.onDecodeFailure(sequence)
         } finally {
-            if (!paused && generation == memory.generation(media.url)) {
+            if (generation == memory.generation(media.url)) {
                 memory.save(
                     media.url,
                     ((startPosition + clock.elapsedNow().inWholeMilliseconds) % sequence.durationMillis) / 1000.0,
@@ -138,49 +136,64 @@ public fun UgoiraPlayer(
         } else {
             Image(frame, media.accessibleDescription(), Modifier.matchParentSize(), contentScale = contentScale)
         }
-        if (active && animation == null && !failure) {
-            Column(
-                Modifier.align(Alignment.Center).background(Color.Black.copy(alpha = .6f)).padding(12.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                PlatformCircularProgressIndicator()
-                PlatformText("${(presenter.progress * 100).toInt()}%", color = Color.White)
-            }
-        }
-        if (controls && active && (animation != null || failure)) {
-            PlatformButton(onClick = {
-                if (failure) {
-                    presenter.retry()
-                    painter = null
-                } else {
-                    paused = !paused
-                    memory.savePaused(media.url, paused)
-                }
-            }, modifier = Modifier.align(Alignment.BottomStart).padding(16.dp)) {
-                PlatformText(
-                    stringResource(
-                        if (failure) {
-                            Res.string.status_loadmore_error_retry
-                        } else if (paused) {
-                            Res.string.ugoira_play
-                        } else {
-                            Res.string.ugoira_pause
-                        },
-                    ),
+        UgoiraStatusBadge(
+            active = active,
+            hasFrame = frame != null,
+            failed = failure,
+            progress = presenter.progress,
+            onRetry = {
+                painter = null
+                presenter.retry()
+            },
+            modifier = Modifier.align(Alignment.BottomStart),
+        )
+    }
+}
+
+@Composable
+internal fun UgoiraStatusBadge(
+    active: Boolean,
+    hasFrame: Boolean,
+    failed: Boolean,
+    progress: Float,
+    onRetry: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    if (active && hasFrame && !failed) return
+    MediaVideoBadge(modifier, onClick = onRetry.takeIf { failed }) {
+        when {
+            failed -> {
+                FAIcon(
+                    FontAwesomeIcons.Solid.ArrowRotateRight,
+                    contentDescription = stringResource(Res.string.status_loadmore_error_retry),
+                    tint = Color.White,
+                    modifier = Modifier.size(16.dp),
                 )
             }
-        } else if (!active || failure) {
-            FAIcon(
-                FontAwesomeIcons.Solid.CirclePlay,
-                contentDescription = stringResource(Res.string.ugoira_play),
-                tint = Color.White,
-                modifier =
-                    Modifier
-                        .align(Alignment.BottomStart)
-                        .padding(8.dp)
-                        .background(Color.Black.copy(alpha = .6f))
-                        .padding(4.dp),
-            )
+
+            active -> {
+                val loadingDescription = stringResource(Res.string.ugoira_loading)
+                PlatformCircularProgressIndicator(
+                    modifier = Modifier.size(16.dp).semantics { contentDescription = loadingDescription },
+                    color = Color.White,
+                )
+                if (progress > 0f) {
+                    PlatformText(
+                        "${(progress.coerceIn(0f, 1f) * 100).roundToInt()}%",
+                        color = Color.White,
+                        style = PlatformTheme.typography.caption,
+                    )
+                }
+            }
+
+            else -> {
+                FAIcon(
+                    FontAwesomeIcons.Solid.CirclePlay,
+                    contentDescription = stringResource(Res.string.ugoira_play),
+                    tint = Color.White,
+                    modifier = Modifier.size(16.dp),
+                )
+            }
         }
     }
 }
@@ -202,7 +215,7 @@ public fun GalleryMedia(
             MediaPlaybackMemory.shared.reset(media.url)
             true
         }
-        UgoiraPlayer(media, modifier, controls = true, contentScale = contentScale)
+        UgoiraPlayer(media, modifier, contentScale = contentScale)
     } else {
         NetworkImage(media.url, media.accessibleDescription(), modifier, contentScale = contentScale, customHeaders = media.customHeaders)
     }

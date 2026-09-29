@@ -251,6 +251,9 @@ final class TimelineAutoplay: NSObject {
             ugoiraView.clipsToBounds = true
             ugoiraView.isUserInteractionEnabled = false
             ugoiraSession.onFrame = { [weak self, weak newHost] image in
+                if self?.ugoiraView.image == nil {
+                    newHost?.setAutoplayOverlay(.idle, showsBadge: false)
+                }
                 self?.ugoiraView.image = UIImage(cgImage: image)
                 newHost?.setAutoplayFrameVisible(true)
             }
@@ -285,7 +288,17 @@ final class TimelineAutoplay: NSObject {
     private func updateAutoplayCountdown() {
         guard let host = currentAutoplayHostView as? MediaUIView else { return }
         if currentIsUgoira {
-            host.setAutoplayOverlay(ugoiraSession.failed ? .error : ugoiraSession.image == nil ? .loading : .idle, showsBadge: ugoiraSession.image == nil)
+            host.setAutoplayOverlay(
+                ugoiraSession.failed ? .error : ugoiraSession.image == nil ? .loading : .idle,
+                showsBadge: ugoiraSession.failed || ugoiraSession.image == nil,
+                progress: ugoiraSession.progress,
+                onRetry: { [weak self, weak host] in
+                    guard let self, let host, self.currentAutoplayHostView === host, self.currentIsUgoira else { return }
+                    self.ugoiraView.image = nil
+                    host.setAutoplayFrameVisible(false)
+                    self.ugoiraSession.retry()
+                }
+            )
             return
         }
         autoplaySession.refresh()

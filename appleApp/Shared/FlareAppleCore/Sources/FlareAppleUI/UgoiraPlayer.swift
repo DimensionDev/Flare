@@ -9,7 +9,7 @@ public final class UgoiraPlaybackSession {
     public private(set) var image: CGImage?
     public var progress: Double { Double(presenter?.state.progress ?? 0) }
     public var failed: Bool { presenter?.state.failed ?? false }
-    public private(set) var paused = false
+    public var isActive: Bool { presenter != nil }
     public var onFrame: ((CGImage) -> Void)?
     private var task: Task<Void, Never>?
     private var presenter: KotlinPresenter<UgoiraPresenterState>?
@@ -26,7 +26,6 @@ public final class UgoiraPlaybackSession {
         guard presenter == nil else { return }
         self.media = media
         generation = MediaPlaybackMemory.shared.generation(for: media.url)
-        paused = MediaPlaybackMemory.shared.paused(for: media.url)
         position = MediaPlaybackMemory.shared.position(for: media.url)
         let presenter = KotlinPresenter(presenter: UgoiraPresenter(media: media))
         self.presenter = presenter
@@ -50,18 +49,13 @@ public final class UgoiraPlaybackSession {
                 let frames = animation.frames
                 let duration = Double(animation.durationMillis) / 1000
                 self.duration = duration
-                var start = ProcessInfo.processInfo.systemUptime - position
+                let start = ProcessInfo.processInfo.systemUptime - position
                 startedAt = start
-                var wasPaused = paused
                 var decoded: [Int: CGImage] = [:]
                 var displayed = -1
                 while !Task.isCancelled {
-                    if !paused, wasPaused { start = ProcessInfo.processInfo.systemUptime - position }
-                    let elapsed = paused ? position : ProcessInfo.processInfo.systemUptime - start
-                    if !paused {
-                        position = elapsed.truncatingRemainder(dividingBy: duration)
-                    }
-                    wasPaused = paused
+                    let elapsed = ProcessInfo.processInfo.systemUptime - start
+                    position = elapsed.truncatingRemainder(dividingBy: duration)
                     let index = Int(animation.frameIndex(positionMillis: Int64(position * 1000)))
                     if displayed != index {
                         let frame: CGImage
@@ -77,13 +71,11 @@ public final class UgoiraPlaybackSession {
                         onFrame?(frame)
                         displayed = index
                         decoded = [index: frame]
-                        if !paused {
-                            let next = (index + 1) % frames.count
-                            let path = frames[next].file
-                            decoded[next] = try await Task.detached(priority: .userInitiated) {
-                                try decodeUgoiraImage(path, maximumSize: 4096)
-                            }.value
-                        }
+                        let next = (index + 1) % frames.count
+                        let path = frames[next].file
+                        decoded[next] = try await Task.detached(priority: .userInitiated) {
+                            try decodeUgoiraImage(path, maximumSize: 4096)
+                        }.value
                     }
                     if generation == MediaPlaybackMemory.shared.generation(for: media.url) {
                         MediaPlaybackMemory.shared.save(position, for: media.url)
@@ -91,7 +83,7 @@ public final class UgoiraPlaybackSession {
                     let end = Double(animation.frameStartMillis(index: Int32(index)) + Int64(frames[index].delayMillis)) / 1000
                     let now = ProcessInfo.processInfo.systemUptime - start
                     let delay = ugoiraFrameDelay(frameEnd: end, duration: duration, selectedAt: elapsed, now: now)
-                    try await Task.sleep(for: .seconds(paused ? 0.1 : delay))
+                    try await Task.sleep(for: .seconds(delay))
                 }
             } catch is CancellationError {
             } catch {
@@ -100,21 +92,14 @@ public final class UgoiraPlaybackSession {
         }
     }
 
-    public func toggle() {
-        guard let media else { return }
-        if failed {
-            image = nil
-            presenter?.state.retry()
-            return
-        }
-        let shouldPause = !paused
-        detach(clearImage: false)
-        MediaPlaybackMemory.shared.savePaused(shouldPause, for: media.url)
-        play(media)
+    public func retry() {
+        guard failed else { return }
+        image = nil
+        presenter?.state.retry()
     }
 
-    public func detach(clearImage: Bool = true) {
-        if !paused, let startedAt {
+    public func detach() {
+        if let startedAt {
             position = (ProcessInfo.processInfo.systemUptime - startedAt).truncatingRemainder(dividingBy: duration)
         }
         startedAt = nil
@@ -126,7 +111,7 @@ public final class UgoiraPlaybackSession {
         subscription?.cancel()
         subscription = nil
         presenter = nil
-        if clearImage { image = nil }
+        image = nil
     }
 }
 
@@ -180,21 +165,7 @@ public struct UgoiraPlayer: View {
     public var body: some View {
         ZStack(alignment: .bottomLeading) {
             UgoiraFrameView(media: media, session: session, contentMode: contentMode)
-            if session.failed || session.image != nil {
-                Button {
-                    session.toggle()
-                } label: {
-                    Image(systemName: session.failed ? "arrow.clockwise" : session.paused ? "play.fill" : "pause.fill")
-                        .padding(12).background(.black.opacity(0.6), in: Capsule()).foregroundStyle(.white)
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel(
-                    Text(
-                        LocalizedStringKey(session.failed ? "Retry" : session.paused ? "ugoira_play" : "ugoira_pause"),
-                        bundle: FlareAppleUILocalization.bundle)
-                )
-                .padding()
-            }
+            UgoiraStatusOverlay(session: session)
         }
         .onAppear {
             if presentation == nil {
@@ -222,6 +193,40 @@ public struct UgoiraPlayer: View {
 
 }
 
+struct UgoiraStatusOverlay: View {
+    let session: UgoiraPlaybackSession
+
+    var body: some View {
+        if session.failed {
+            Button(action: session.retry) {
+                Image(systemName: "arrow.clockwise").mediaVideoBadgeStyle()
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(Text("action_retry", bundle: FlareAppleUILocalization.bundle))
+        } else if session.image == nil {
+            if session.isActive {
+                HStack(spacing: 8) {
+                    ProgressView().controlSize(.small).tint(.white)
+                    if session.progress > 0 {
+                        Text("\(Int((min(session.progress, 1) * 100).rounded()))%")
+                            .font(.caption).monospacedDigit()
+                    }
+                }
+                .mediaVideoBadgeStyle()
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(Text("ugoira_loading", bundle: FlareAppleUILocalization.bundle))
+                .accessibilityValue(session.progress > 0 ? "\(Int((min(session.progress, 1) * 100).rounded()))%" : "")
+                .allowsHitTesting(false)
+            } else {
+                Image(fontAwesome: .circlePlay)
+                    .mediaVideoBadgeStyle()
+                    .accessibilityLabel(Text("ugoira_play", bundle: FlareAppleUILocalization.bundle))
+                    .allowsHitTesting(false)
+            }
+        }
+    }
+}
+
 struct UgoiraFrameView: View {
     let media: UiMediaUgoira
     let session: UgoiraPlaybackSession
@@ -232,10 +237,6 @@ struct UgoiraFrameView: View {
                 Image(decorative: image, scale: 1).resizable().aspectRatio(contentMode: contentMode)
             } else {
                 NetworkImage(data: media.previewUrl, customHeader: media.customHeaders, contentMode: contentMode)
-                if !session.failed {
-                    ProgressView(value: session.progress).padding().accessibilityLabel(
-                        Text("ugoira_loading", bundle: FlareAppleUILocalization.bundle))
-                }
             }
         }.clipped().accessibilityLabel(media.accessibleDescription)
     }

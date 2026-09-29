@@ -95,12 +95,13 @@ final class MediaUIView: UIView {
         iv.isHidden = true
         return iv
     }()
-    private let playBadgeBg: UIView = {
-        let v = UIView()
+    private let playBadgeBg: UIButton = {
+        let v = UIButton(type: .custom)
         v.backgroundColor = .black
         v.layer.cornerRadius = 16
         v.translatesAutoresizingMaskIntoConstraints = false
         v.isHidden = true
+        v.isUserInteractionEnabled = false
         return v
     }()
     private let loadingIndicator: UIActivityIndicatorView = {
@@ -124,6 +125,7 @@ final class MediaUIView: UIView {
     private var lastCornerRadius: CGFloat?
     private weak var autoplayPlayerView: UIView?
     private var autoplayPlayerConstraints: [NSLayoutConstraint] = []
+    private var onAutoplayRetry: (() -> Void)?
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -132,9 +134,19 @@ final class MediaUIView: UIView {
         addSubview(background)
         addSubview(imageView)
         addSubview(playBadgeBg)
-        playBadgeBg.addSubview(playBadge)
-        playBadgeBg.addSubview(loadingIndicator)
-        playBadgeBg.addSubview(countdownLabel)
+        playBadgeBg.addTarget(self, action: #selector(retryAutoplay), for: .touchUpInside)
+        let badgeContent = UIStackView(arrangedSubviews: [playBadge, loadingIndicator, countdownLabel])
+        badgeContent.axis = .horizontal
+        badgeContent.alignment = .center
+        badgeContent.spacing = 8
+        badgeContent.isUserInteractionEnabled = false
+        badgeContent.translatesAutoresizingMaskIntoConstraints = false
+        playBadgeBg.addSubview(badgeContent)
+        for icon in [playBadge, loadingIndicator] {
+            let width = icon.widthAnchor.constraint(equalToConstant: 16)
+            width.priority = .init(999)
+            width.isActive = true
+        }
         NSLayoutConstraint.activate([
             background.topAnchor.constraint(equalTo: topAnchor),
             background.leadingAnchor.constraint(equalTo: leadingAnchor),
@@ -148,16 +160,11 @@ final class MediaUIView: UIView {
             playBadgeBg.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -16),
             playBadgeBg.widthAnchor.constraint(greaterThanOrEqualToConstant: 32),
             playBadgeBg.heightAnchor.constraint(equalToConstant: 32),
-            playBadge.centerXAnchor.constraint(equalTo: playBadgeBg.centerXAnchor),
-            playBadge.centerYAnchor.constraint(equalTo: playBadgeBg.centerYAnchor),
-            playBadge.widthAnchor.constraint(equalToConstant: 16),
+            badgeContent.leadingAnchor.constraint(equalTo: playBadgeBg.leadingAnchor, constant: 8),
+            badgeContent.trailingAnchor.constraint(equalTo: playBadgeBg.trailingAnchor, constant: -8),
+            badgeContent.centerYAnchor.constraint(equalTo: playBadgeBg.centerYAnchor),
             playBadge.heightAnchor.constraint(equalToConstant: 16),
-            loadingIndicator.centerXAnchor.constraint(equalTo: playBadgeBg.centerXAnchor),
-            loadingIndicator.centerYAnchor.constraint(equalTo: playBadgeBg.centerYAnchor),
-            countdownLabel.topAnchor.constraint(equalTo: playBadgeBg.topAnchor),
-            countdownLabel.leadingAnchor.constraint(equalTo: playBadgeBg.leadingAnchor, constant: 8),
-            countdownLabel.trailingAnchor.constraint(equalTo: playBadgeBg.trailingAnchor, constant: -8),
-            countdownLabel.bottomAnchor.constraint(equalTo: playBadgeBg.bottomAnchor),
+            loadingIndicator.heightAnchor.constraint(equalToConstant: 16),
         ])
     }
     required init?(coder: NSCoder) { fatalError("init(coder:) not supported") }
@@ -242,8 +249,17 @@ final class MediaUIView: UIView {
         setAutoplayOverlay(.idle)
     }
 
-    func setAutoplayOverlay(_ state: VideoAutoplayOverlayState, showsBadge: Bool = true) {
+    func setAutoplayOverlay(
+        _ state: VideoAutoplayOverlayState,
+        showsBadge: Bool = true,
+        progress: Double? = nil,
+        onRetry: (() -> Void)? = nil
+    ) {
         playBadgeBg.isHidden = !showsBadge
+        playBadgeBg.isUserInteractionEnabled = false
+        onAutoplayRetry = nil
+        accessibilityCustomActions = nil
+        accessibilityValue = nil
         playBadge.isHidden = true
         countdownLabel.isHidden = true
         loadingIndicator.isHidden = true
@@ -256,13 +272,32 @@ final class MediaUIView: UIView {
         case .loading:
             loadingIndicator.isHidden = false
             loadingIndicator.startAnimating()
+            if let progress, progress > 0 {
+                countdownLabel.text = "\(Int((min(progress, 1) * 100).rounded()))%"
+                countdownLabel.isHidden = false
+                accessibilityValue = countdownLabel.text
+            }
         case .playing(let remaining):
             countdownLabel.text = Self.formatRemainingTime(remaining)
             countdownLabel.isHidden = false
         case .error:
-            playBadge.image = UIImage(systemName: "exclamationmark.triangle.fill")
+            playBadge.image = UIImage(systemName: onRetry == nil ? "exclamationmark.triangle.fill" : "arrow.clockwise")
             playBadge.isHidden = false
+            if showsBadge, let onRetry {
+                onAutoplayRetry = onRetry
+                playBadgeBg.isUserInteractionEnabled = true
+                let label = String(localized: "action_retry", bundle: .main)
+                playBadgeBg.accessibilityLabel = label
+                accessibilityCustomActions = [UIAccessibilityCustomAction(name: label) { _ in
+                    onRetry()
+                    return true
+                }]
+            }
         }
+    }
+
+    @objc private func retryAutoplay() {
+        onAutoplayRetry?()
     }
 
     private static func formatRemainingTime(_ remaining: TimeInterval) -> String {
@@ -1074,7 +1109,7 @@ private extension Int {
     }
 }
 
-private final class MediaGridCellView: UIView, UIContextMenuInteractionDelegate {
+private final class MediaGridCellView: UIView, UIContextMenuInteractionDelegate, UIGestureRecognizerDelegate {
     var onTap: ((Int) -> Void)?
     var onMenuAction: ((Int, TimelineMediaMenuAction) -> Void)?
 
@@ -1097,6 +1132,7 @@ private final class MediaGridCellView: UIView, UIContextMenuInteractionDelegate 
         ])
 
         let tap = UITapGestureRecognizer(target: self, action: #selector(onCellTapped))
+        tap.delegate = self
         isUserInteractionEnabled = true
         addGestureRecognizer(tap)
         addInteraction(UIContextMenuInteraction(delegate: self))
@@ -1217,6 +1253,15 @@ private final class MediaGridCellView: UIView, UIContextMenuInteractionDelegate 
 
     @objc private func onCellTapped() {
         onTap?(tag)
+    }
+
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
+        var view = touch.view
+        while let current = view {
+            if current is UIControl { return false }
+            view = current.superview
+        }
+        return true
     }
 }
 

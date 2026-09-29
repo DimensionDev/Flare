@@ -190,11 +190,7 @@ public struct MediaVideoView: View {
     @ViewBuilder
     private var statusOverlay: some View {
         if data is UiMediaUgoira {
-            if ugoira.image == nil, canAutoplay, !ugoira.failed {
-                ProgressView(value: ugoira.progress).mediaVideoBadgeStyle()
-            } else {
-                Image(fontAwesome: .circlePlay).mediaVideoBadgeStyle()
-            }
+            UgoiraStatusOverlay(session: ugoira)
         } else {
             switch player.state {
             case .idle, .paused:
@@ -251,7 +247,7 @@ struct InlineAVPlayerView: UIViewRepresentable {
 }
 #endif
 
-private extension View {
+extension View {
     func mediaVideoBadgeStyle() -> some View {
         padding(8)
             .background(.black, in: RoundedRectangle(cornerRadius: 16, style: .continuous))

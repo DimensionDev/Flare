@@ -111,6 +111,8 @@ final class TimelineControllerIntegrationTests: XCTestCase {
 
     func testFastRefreshBeginSurvivesCoalescingUntilItsResultCommits() async {
         let fixture = await Fixture(posts: true)
+        fixture.input.key = "comments"
+        await fixture.apply()
         fixture.input.isRefreshing = true
         fixture.controller.submit(fixture.input, columns: 1)
         fixture.input.isRefreshing = false
@@ -148,6 +150,47 @@ final class TimelineControllerIntegrationTests: XCTestCase {
                     XCTAssertTrue(fixture.collection.shouldDeferSnapshotChanges)
                     XCTAssertEqual(fixture.collection.readingItemIDs?().first, "t:case-0",
                         "Initial content must replace placeholders before the refresh reveal finishes")
+                    continuation.resume()
+                }
+            }
+            await fixture.settle()
+        }
+    }
+
+    func testRefreshingKeyedSwitchCommitsBeforeStartingRefreshPresentation() async throws {
+        let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first)
+        let previousKeyWindow = scene.windows.first(where: \.isKeyWindow)
+        let window = UIWindow(windowScene: scene)
+        defer {
+            window.isHidden = true
+            window.rootViewController = nil
+            previousKeyWindow?.makeKey()
+        }
+
+        for suppressInitialRefreshIndicator in [false, true] {
+            let fixture = await Fixture(posts: true)
+            fixture.controller.suppressInitialRefreshIndicator = suppressInitialRefreshIndicator
+            fixture.input.key = "comments"
+            await fixture.apply()
+            window.rootViewController = fixture.controller
+            window.makeKeyAndVisible()
+            await fixture.settle()
+
+            fixture.input.key = "reposts"
+            fixture.input.items = [.post(makeRow(100))]
+            fixture.input.isRefreshing = true
+            fixture.controller.submit(fixture.input, columns: 1)
+            XCTAssertFalse(fixture.collection.isPresentingRefresh,
+                "A keyed switch must not reveal refresh using the old content's state")
+
+            await withCheckedContinuation { continuation in
+                DispatchQueue.main.async {
+                    XCTAssertEqual(fixture.collection.readingItemIDs?(), ["t:case-100"],
+                        "The new tab must commit without waiting for the old tab's refresh reveal")
+                    if suppressInitialRefreshIndicator {
+                        XCTAssertFalse(fixture.collection.isPresentingRefresh,
+                            "The new content's initial refresh suppression must apply before presentation")
+                    }
                     continuation.resume()
                 }
             }

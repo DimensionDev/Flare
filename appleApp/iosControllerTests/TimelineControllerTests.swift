@@ -414,6 +414,37 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         try fixture.assertPosition(expected)
     }
 
+    func testTopContentChangingDuringPlaceholderReloadKeepsTheSavedReadingPosition() async throws {
+        for changesHeader in [true, false] {
+            let fixture = await Fixture(posts: true)
+            // The shorter placeholder list fits, temporarily clamping the viewport to the top.
+            fixture.controller.view.frame.size.height = 1_200
+            fixture.controller.topContentInset = 88
+            await fixture.scroll(2_500)
+            let expected = try fixture.position()
+            let items = fixture.input.items
+
+            fixture.input.state = .loading
+            fixture.input.items = []
+            await fixture.apply()
+            XCTAssertEqual(fixture.controller.effectiveContentOffsetY, 0, accuracy: 0.5)
+
+            if changesHeader {
+                fixture.input.header = UiStateSuccess(data: makeRow(200))
+            } else {
+                fixture.controller.accessoryItems = [
+                    UITimelineCollectionViewAccessoryItem(id: "notice", view: Header())
+                ]
+            }
+            await fixture.apply()
+
+            fixture.input.state = .loaded
+            fixture.input.items = [.post(makeRow(100))] + items
+            await fixture.apply()
+            try fixture.assertPosition(expected)
+        }
+    }
+
     func testNavigationKeepsTheLiveListButReopeningStartsAtTop() async throws {
         let fixture = await Fixture(posts: true)
         await fixture.scroll(1_500)

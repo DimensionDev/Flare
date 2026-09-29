@@ -1071,10 +1071,12 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
             columnCount = max(columns, 1)
             return
         }
-        // Refresh begin is a presentation event, not a snapshot. A fast refresh
-        // must not disappear when its intermediate data input is coalesced away.
-        // Ending still waits for the resulting snapshot and its measurements.
-        if isRefreshing { syncRefreshControl(isRefreshing: true) }
+        // Begin the initial refresh with its content snapshot, so revealing the
+        // indicator cannot block that snapshot. Later refreshes must begin here
+        // even when their intermediate input is coalesced away.
+        if isRefreshing, self.content.state != .unbound, !currentPagingIsInitialLoading {
+            syncRefreshControl(isRefreshing: true)
+        }
         scheduleSubmission()
     }
 

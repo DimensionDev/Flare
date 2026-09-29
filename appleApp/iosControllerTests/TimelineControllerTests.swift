@@ -120,6 +120,41 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         XCTAssertFalse(fixture.collection.isPresentingRefresh)
     }
 
+    func testInitialContentCommitsBeforeRefreshRevealFinishes() async throws {
+        let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first)
+        let previousKeyWindow = scene.windows.first(where: \.isKeyWindow)
+        let window = UIWindow(windowScene: scene)
+        defer {
+            window.isHidden = true
+            window.rootViewController = nil
+            previousKeyWindow?.makeKey()
+        }
+
+        for initialState in [TimelineContent.State.unbound, .loading] {
+            let fixture = await Fixture(initialState: initialState)
+            window.rootViewController = fixture.controller
+            window.makeKeyAndVisible()
+            await fixture.settle()
+
+            fixture.input.state = .loaded
+            fixture.input.items = [.post(makeRow(0))]
+            fixture.input.isRefreshing = true
+            fixture.controller.submit(fixture.input, columns: 1)
+
+            // Observe the queued submission before UIKit finishes revealing refresh.
+            await withCheckedContinuation { continuation in
+                DispatchQueue.main.async {
+                    XCTAssertTrue(fixture.collection.isPresentingRefresh)
+                    XCTAssertTrue(fixture.collection.shouldDeferSnapshotChanges)
+                    XCTAssertEqual(fixture.collection.readingItemIDs?().first, "t:case-0",
+                        "Initial content must replace placeholders before the refresh reveal finishes")
+                    continuation.resume()
+                }
+            }
+            await fixture.settle()
+        }
+    }
+
     func testPullRefreshCommitsOnlyTheLatestInputAfterTheGestureSettles() async throws {
         let fixture = await Fixture(posts: true)
         let collection = fixture.collection
@@ -322,9 +357,11 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         var input = TimelineContent()
         var columns: Int
 
-        init(posts: Bool = false, columns: Int = 1) async {
+        init(posts: Bool = false, columns: Int = 1, initialState: TimelineContent.State? = nil) async {
             self.columns = columns
-            if posts {
+            if let initialState {
+                input.state = initialState
+            } else if posts {
                 input.state = .loaded
                 input.items = (0..<60).map { .post(makeRow($0)) }
             } else {

@@ -928,6 +928,7 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
                 let preview: String? = switch onEnum(of: media) {
                 case .image(let image): image.previewUrl
                 case .video(let video): video.thumbnailUrl
+                case .ugoira(let animation): animation.previewUrl
                 case .gif(let gif): gif.previewUrl
                 case .audio: nil
                 }

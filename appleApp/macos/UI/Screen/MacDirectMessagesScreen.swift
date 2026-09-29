@@ -888,6 +888,8 @@ private extension UiMedia {
         switch onEnum(of: self) {
         case .image(let image):
             URL(string: image.url)
+        case .ugoira(let animation):
+            URL(string: animation.url)
         case .gif(let gif):
             URL(string: gif.url)
         case .video(let video):

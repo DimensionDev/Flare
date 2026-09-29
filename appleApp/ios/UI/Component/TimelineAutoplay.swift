@@ -16,6 +16,9 @@ final class TimelineAutoplay: NSObject {
     private var multipleColumns = false
     private let autoplayPlayerView = VideoPlaybackSurfaceView()
     private let autoplaySession = VideoPlaybackSession()
+    private let ugoiraSession = UgoiraPlaybackSession()
+    private let ugoiraView = UIImageView()
+    private var currentIsUgoira = false
     private var autoplayReadinessSubscription: AnyCancellable?
     private var autoplayLifecycleSubscription: AnyCancellable?
     private var autoplaySelectionTask: Task<Void, Never>?
@@ -219,7 +222,7 @@ final class TimelineAutoplay: NSObject {
     }
 
     private func playAutoplayCandidate(_ candidate: TimelineVideoAutoplayCandidate) {
-        guard autoplaySession.player == nil || currentAutoplayID != candidate.id || currentAutoplayHostView !== candidate.hostView else {
+        guard currentAutoplayID != candidate.id || currentAutoplayHostView !== candidate.hostView else {
             return
         }
         guard let newHost = candidate.hostView as? MediaUIView,
@@ -227,21 +230,36 @@ final class TimelineAutoplay: NSObject {
 
         saveAutoplayPosition()
         autoplaySession.detach()
+        ugoiraSession.detach()
+        ugoiraView.removeFromSuperview()
+        ugoiraView.image = nil
         if let oldHost = currentAutoplayHostView as? MediaUIView, oldHost !== candidate.hostView {
             oldHost.detachAutoplayPlayer()
         } else if autoplayPlayerView.superview !== candidate.hostView {
             autoplayPlayerView.removeFromSuperview()
         }
 
-        newHost.attachAutoplayPlayer(autoplayPlayerView)
+        currentIsUgoira = candidate.ugoira != nil
+        newHost.attachAutoplayPlayer(currentIsUgoira ? ugoiraView : autoplayPlayerView)
         newHost.setAutoplayOverlay(.loading)
 
         currentAutoplayID = candidate.id
         currentAutoplayURL = candidate.url
         currentAutoplayHostView = candidate.hostView
-        autoplaySession.play(url: candidate.url.absoluteString)
-        autoplayPlayerView.canDisplayFrame = autoplaySession.hasRestoredPosition
-        autoplayPlayerView.player = autoplaySession.player
+        if let animation = candidate.ugoira {
+            ugoiraView.contentMode = .scaleAspectFill
+            ugoiraView.clipsToBounds = true
+            ugoiraView.isUserInteractionEnabled = false
+            ugoiraSession.onFrame = { [weak self, weak newHost] image in
+                self?.ugoiraView.image = UIImage(cgImage: image)
+                newHost?.setAutoplayFrameVisible(true)
+            }
+            ugoiraSession.play(animation)
+        } else {
+            autoplaySession.play(url: candidate.url.absoluteString)
+            autoplayPlayerView.canDisplayFrame = autoplaySession.hasRestoredPosition
+            autoplayPlayerView.player = autoplaySession.player
+        }
         startAutoplayCountdownUpdates()
     }
 
@@ -266,6 +284,10 @@ final class TimelineAutoplay: NSObject {
 
     private func updateAutoplayCountdown() {
         guard let host = currentAutoplayHostView as? MediaUIView else { return }
+        if currentIsUgoira {
+            host.setAutoplayOverlay(ugoiraSession.failed ? .error : ugoiraSession.image == nil ? .loading : .idle, showsBadge: ugoiraSession.image == nil)
+            return
+        }
         autoplaySession.refresh()
         autoplayPlayerView.canDisplayFrame = autoplaySession.hasRestoredPosition
         switch autoplaySession.state {
@@ -301,6 +323,10 @@ final class TimelineAutoplay: NSObject {
         autoplaySelectionTask?.cancel()
         stopAutoplayCountdownUpdates()
         autoplaySession.detach()
+        ugoiraSession.detach()
+        ugoiraView.removeFromSuperview()
+        ugoiraView.image = nil
+        currentIsUgoira = false
         autoplayPlayerView.player = nil
         if let host = currentAutoplayHostView as? MediaUIView {
             host.detachAutoplayPlayer()

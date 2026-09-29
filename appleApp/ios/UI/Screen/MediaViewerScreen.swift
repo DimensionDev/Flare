@@ -186,6 +186,7 @@ struct MediaViewerScreen: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .videoPlaybackPresentation(mediaURLs: medias.map(\.url), selectedMediaURL: selectedMedia?.url)
+        .ugoiraExportStatus()
         .onAppear {
             applyInitialSelectionIfNeeded()
             postSheetPresented = shouldShowPostSheet
@@ -221,6 +222,8 @@ struct MediaViewerScreen: View {
     @ViewBuilder
     private func mediaContent(_ media: any UiMedia) -> some View {
         switch onEnum(of: media) {
+        case .ugoira(let animation):
+            UgoiraPlayer(media: animation, active: selectedMedia?.url == animation.url)
         case .image(let image):
             AdaptiveKFImage(
                 data: image.url,
@@ -290,7 +293,7 @@ struct MediaViewerScreen: View {
                         }
                         .disabled(isPreparingShare)
                         .accessibilityLabel("Share image")
-                    } else if let selectedMedia, case .video = onEnum(of: selectedMedia) {
+                    } else if let selectedMedia, selectedMedia is UiMediaVideo || selectedMedia is UiMediaUgoira {
                         topOverlayButton {
                             saveMedia(selectedMedia)
                         } label: {
@@ -566,6 +569,8 @@ struct MediaViewerScreen: View {
         completion: (@Sendable (Bool) -> Void)? = nil
     ) {
         switch onEnum(of: media) {
+        case .ugoira(let animation):
+            MediaSaver.shared.saveUgoira(animation, fileName: fileName(for: media), showsSaveResult: showsSaveResult, completion: completion)
         case .image(let image):
             MediaSaver.shared.saveImage(
                 url: image.url,

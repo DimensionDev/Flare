@@ -7,6 +7,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.repository.UgoiraRepository
 import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.web.shared.WebPresenter
@@ -15,6 +16,13 @@ import kotlinx.coroutines.launch
 @WebPresenter("storage")
 public class StoragePresenter : PresenterBase<StorageState>() {
     private val cacheDatabase by koinInject<CacheDatabase>()
+    private val ugoiraRepository by koinInject<UgoiraRepository>()
+
+    @Throws(Exception::class)
+    public suspend fun clearUgoiraCache(): Unit = ugoiraRepository.clear()
+
+    @Throws(Exception::class)
+    public suspend fun ugoiraCacheSize(): Long = ugoiraRepository.size()
 
     public suspend fun clearCacheSuspend() {
         cacheDatabase.clearAllTables()

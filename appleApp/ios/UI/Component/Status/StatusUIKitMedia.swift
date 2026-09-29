@@ -9,6 +9,7 @@ struct TimelineVideoAutoplayCandidate {
     let id: String
     let url: URL
     let hostView: UIView
+    var ugoira: UiMediaUgoira? = nil
     var groupID: String? = nil
     var isSelected = true
     var horizontalFraction: CGFloat = 1
@@ -50,6 +51,10 @@ private struct MediaItemSignature: Equatable {
             kind = "gif"
             primaryURL = gif.url
             customHeaders = gif.customHeaders
+        case .ugoira(let animation):
+            kind = "ugoira"
+            primaryURL = animation.url + "|" + animation.previewUrl
+            customHeaders = animation.customHeaders
         case .audio:
             kind = "audio"
             primaryURL = ""
@@ -172,6 +177,7 @@ final class MediaUIView: UIView {
         lastCornerRadius = cornerRadius
         layer.cornerRadius = cornerRadius
         imageView.kf.cancelDownloadTask()
+        imageView.isHidden = false
         imageView.image = nil
         setAutoplayOverlay(.idle, showsBadge: false)
 
@@ -184,6 +190,10 @@ final class MediaUIView: UIView {
             setAutoplayOverlay(.idle)
         case .gif(let gif):
             loadGif(url: gif.url, customHeaders: gif.customHeaders)
+        case .ugoira(let animation):
+            videoURL = URL(string: animation.url)
+            loadImage(url: animation.previewUrl, customHeaders: animation.customHeaders)
+            setAutoplayOverlay(.idle)
         case .audio:
             imageView.image = nil
         }
@@ -216,7 +226,12 @@ final class MediaUIView: UIView {
         NSLayoutConstraint.activate(autoplayPlayerConstraints)
     }
 
+    func setAutoplayFrameVisible(_ visible: Bool) {
+        imageView.isHidden = visible
+    }
+
     func detachAutoplayPlayer() {
+        imageView.isHidden = false
         guard let autoplayPlayerView else { return }
         NSLayoutConstraint.deactivate(autoplayPlayerConstraints)
         autoplayPlayerConstraints = []
@@ -1131,14 +1146,15 @@ private final class MediaGridCellView: UIView, UIContextMenuInteractionDelegate 
               bounds.width > 0,
               bounds.height > 0,
               let media,
-              case .video(let video) = onEnum(of: media),
-              let url = URL(string: video.url) else {
+              media is UiMediaVideo || media is UiMediaUgoira,
+              let url = URL(string: media.url) else {
             return nil
         }
         return TimelineVideoAutoplayCandidate(
-            id: "\(prefix):video:\(index):\(video.url)",
+            id: "\(prefix):video:\(index):\(media.url)",
             url: url,
-            hostView: mediaView
+            hostView: mediaView,
+            ugoira: media as? UiMediaUgoira
         )
     }
 

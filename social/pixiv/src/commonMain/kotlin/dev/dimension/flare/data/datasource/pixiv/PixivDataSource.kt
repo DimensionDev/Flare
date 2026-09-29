@@ -33,6 +33,8 @@ import dev.dimension.flare.data.network.pixiv.PixivWorkType
 import dev.dimension.flare.data.platform.CommonTimelineSpecs
 import dev.dimension.flare.data.platform.PixivCredential
 import dev.dimension.flare.data.platform.PixivPlatformSpec
+import dev.dimension.flare.media.UgoiraFrame
+import dev.dimension.flare.media.UgoiraMetadata
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.ClickEvent
@@ -324,6 +326,14 @@ internal class PixivDataSource(
             statusKey = statusKey,
         )
 
+    override suspend fun ugoiraMetadata(statusKey: MicroBlogKey): UgoiraMetadata {
+        val metadata = service.ugoiraMetadata(statusKey.id.toLong()).ugoiraMetadata
+        return UgoiraMetadata(
+            zipUrl = requireNotNull(metadata.zipUrls.medium),
+            frames = metadata.frames.map { UgoiraFrame(it.file, it.delay) },
+        )
+    }
+
     @Suppress("UNCHECKED_CAST")
     override fun galleryDetail(statusKey: MicroBlogKey): Cacheable<GalleryDetail> =
         postHandler.post(statusKey).map {
@@ -343,7 +353,7 @@ internal class PixivDataSource(
                 statusKey = post.statusKey,
                 accountType = post.accountType,
                 url = "https://www.pixiv.net/artworks/${post.statusKey.id}",
-                images = post.images.filterIsInstance<UiMedia.Image>().toImmutableList(),
+                images = post.images,
                 title =
                     post.contentWarning
                         ?.original

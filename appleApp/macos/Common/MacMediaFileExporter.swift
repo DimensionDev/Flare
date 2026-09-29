@@ -1,3 +1,4 @@
+import FlareAppleUI
 import AppKit
 import Observation
 import FlareAppleCore
@@ -139,6 +140,7 @@ struct MacMediaExportSource: Identifiable, Hashable {
         case audio
     }
 
+    let ugoira: UiMediaUgoira?
     let kind: Kind
     let url: String
     let customHeaders: [String: String]?
@@ -147,9 +149,11 @@ struct MacMediaExportSource: Identifiable, Hashable {
     init(
         kind: Kind,
         url: String,
+        ugoira: UiMediaUgoira? = nil,
         customHeaders: [String: String]?,
         shareContext: MacMediaShareContext?
     ) {
+        self.ugoira = ugoira
         self.kind = kind
         self.url = url
         self.customHeaders = customHeaders
@@ -185,6 +189,8 @@ struct MacMediaExportSource: Identifiable, Hashable {
         shareContext: MacMediaShareContext?
     ) {
         switch onEnum(of: media) {
+        case .ugoira(let animation):
+            self.init(kind: .video, url: animation.url, ugoira: animation, customHeaders: nil, shareContext: shareContext)
         case .image(let image):
             self.init(
                 kind: .image,
@@ -461,6 +467,16 @@ enum MacMediaFileExporter {
     }
 
     private static func writeSource(_ source: MacMediaExportSource, to destinationURL: URL) async throws {
+        if let animation = source.ugoira {
+            let success: Bool = await withCheckedContinuation { continuation in
+                UgoiraExporter.shared.save(animation, fileName: destinationURL.lastPathComponent, write: { url in
+                    try copyReplacingItem(at: url, to: destinationURL)
+                }, completion: { continuation.resume(returning: $0) })
+            }
+            if !success { throw MacMediaExportError.downloadFailed }
+            return
+        }
+
         let remoteURL = try makeRemoteURL(source.url)
         switch source.kind {
         case .image, .gif:
@@ -740,10 +756,14 @@ enum MacMediaFileExporter {
         }
 
         let fileManager = FileManager.default
+        let temporary = destinationURL.deletingLastPathComponent().appendingPathComponent(".\(UUID().uuidString).part")
+        defer { try? fileManager.removeItem(at: temporary) }
+        try fileManager.copyItem(at: sourceURL, to: temporary)
         if fileManager.fileExists(atPath: destinationURL.path) {
-            try fileManager.removeItem(at: destinationURL)
+            _ = try fileManager.replaceItemAt(destinationURL, withItemAt: temporary)
+        } else {
+            try fileManager.moveItem(at: temporary, to: destinationURL)
         }
-        try fileManager.copyItem(at: sourceURL, to: destinationURL)
     }
 
     private static func writeData(_ data: Data, to destinationURL: URL) throws {

@@ -2,6 +2,27 @@ package dev.dimension.flare.ui.component
 
 /** One in-memory progress record per media resource, shared by all pages and accounts. */
 internal class MediaPlaybackMemory {
+    private val generations = mutableMapOf<String, Int>()
+
+    fun generation(uri: String): Int = generations[uri] ?: 0
+
+    private val pauses = mutableMapOf<String, Boolean>()
+
+    fun paused(uri: String): Boolean = pauses[uri] ?: false
+
+    fun savePaused(
+        uri: String,
+        paused: Boolean,
+    ) {
+        pauses[uri] = paused
+    }
+
+    fun reset(uri: String) {
+        generations[uri] = generation(uri) + 1
+        positions.remove(uri)
+        pauses.remove(uri)
+    }
+
     private val positions = mutableMapOf<String, Double>()
 
     fun position(uri: String): Double = positions[uri] ?: 0.0

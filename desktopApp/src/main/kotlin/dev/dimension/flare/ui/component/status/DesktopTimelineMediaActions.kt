@@ -35,6 +35,7 @@ internal fun ProvideDesktopTimelineMediaActions(content: @Composable () -> Unit)
                     TimelineMediaActionHandler { post, media, action ->
                         when (action) {
                             TimelineMediaMenuAction.Download -> {
+                                if (media is UiMedia.Ugoira) return@TimelineMediaActionHandler
                                 val targetFile =
                                     DesktopSaveDialog.chooseFile(
                                         window = window,

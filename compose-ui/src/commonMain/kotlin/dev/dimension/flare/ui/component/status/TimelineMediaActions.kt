@@ -23,6 +23,7 @@ public fun interface TimelineMediaActionHandler {
 public data class TimelineMediaActionConfig(
     public val showShareImage: Boolean,
     public val handler: TimelineMediaActionHandler,
+    public val canSaveUgoira: Boolean = false,
 )
 
 public val LocalTimelineMediaActionConfig: ProvidableCompositionLocal<TimelineMediaActionConfig?> =

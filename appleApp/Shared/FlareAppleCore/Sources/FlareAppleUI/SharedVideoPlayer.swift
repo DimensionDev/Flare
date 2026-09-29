@@ -432,6 +432,7 @@ final class VideoPlaybackPresentation {
 
     private let arbiter: VideoPlaybackArbiter
     private weak var session: VideoPlaybackSession?
+    private var frames: (owner: AnyObject, play: () -> Void, stop: () -> Void)?
     private var request: Request?
     private var presented = false
     private var suspended = false
@@ -457,6 +458,7 @@ final class VideoPlaybackPresentation {
         stop()
         request = nil
         session = nil
+        frames = nil
         arbiter.withdraw(self, mediaURLs: mediaURLs, selectedMediaURL: selectedMediaURL)
         VideoPlaybackSession.finishHandoff()
     }
@@ -464,7 +466,7 @@ final class VideoPlaybackPresentation {
     func setSuspended(_ value: Bool) {
         suspended = value
         if value {
-            session?.detach()
+            stop()
         } else {
             activate()
         }
@@ -476,6 +478,8 @@ final class VideoPlaybackPresentation {
     }
 
     func update(_ session: VideoPlaybackSession, url: String, position: Double? = nil, playing: Bool, rate: Float) {
+        frames?.stop()
+        frames = nil
         if self.session !== session { self.session?.detach() }
         self.session = session
         request = Request(url: url, position: position, playing: playing, rate: rate)
@@ -493,13 +497,34 @@ final class VideoPlaybackPresentation {
         arbiter.release(self)
     }
 
+    func updateFrames(owner: AnyObject, play: @escaping () -> Void, stop: @escaping () -> Void) {
+        session?.detach()
+        session = nil
+        request = nil
+        if frames?.owner !== owner { frames?.stop() }
+        frames = (owner, play, stop)
+        activate()
+    }
+
+    func releaseFrames(owner: AnyObject) {
+        guard frames?.owner === owner else { return }
+        frames?.stop()
+        frames = nil
+        arbiter.release(self)
+    }
+
     private func activate() {
+        if presented, !suspended, let frames, arbiter.acquire(self) {
+            frames.play()
+            return
+        }
         guard presented, !suspended, let session, let request, arbiter.acquire(self) else { return }
         self.request?.position = nil
         session.play(url: request.url, position: request.position, muted: false, rate: request.rate, playing: request.playing)
     }
 
     private func stop() {
+        frames?.stop()
         #if os(macOS)
         // macOS also accepts pause commands through AVPlayerView's native controls.
         if let session, let player = session.player, player.currentItem?.status == .readyToPlay,

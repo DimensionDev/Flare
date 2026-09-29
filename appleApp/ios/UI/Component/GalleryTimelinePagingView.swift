@@ -1230,7 +1230,7 @@ private final class GalleryPostTileUIView: UIView, UIGestureRecognizerDelegate {
     }
 
     private func isVideo(_ media: any UiMedia) -> Bool {
-        if case .video = onEnum(of: media) {
+        if media is UiMediaVideo || media is UiMediaUgoira {
             return true
         }
         return false
@@ -1240,6 +1240,7 @@ private final class GalleryPostTileUIView: UIView, UIGestureRecognizerDelegate {
         switch onEnum(of: media) {
         case .image(let image): return image.previewUrl
         case .video(let video): return video.thumbnailUrl
+        case .ugoira(let animation): return animation.previewUrl
         case .gif(let gif): return gif.previewUrl
         case .audio: return nil
         }

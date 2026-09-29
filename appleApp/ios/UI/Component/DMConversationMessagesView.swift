@@ -1075,6 +1075,11 @@ private final class DMMediaPreviewView: UIView {
             customHeaders = image.customHeaders
             aspectRatio = boundedAspectRatio(CGFloat(image.aspectRatio))
             imageRouteURL = URL(string: DeeplinkRoute.Media.MediaImage(uri: image.url, previewUrl: image.previewUrl, customHeaders: image.customHeaders).toUri())
+        case .ugoira(let animation):
+            imageURL = animation.previewUrl
+            customHeaders = animation.customHeaders
+            aspectRatio = boundedAspectRatio(CGFloat(animation.aspectRatio))
+            playIconView.isHidden = false
         case .gif(let gif):
             imageURL = gif.url
             customHeaders = gif.customHeaders

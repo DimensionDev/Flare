@@ -299,5 +299,6 @@ private fun UiMedia.withXqtMediaAuth(
         is UiMedia.Gif -> copy(customHeaders = headers)
         is UiMedia.Image -> copy(customHeaders = headers)
         is UiMedia.Video -> copy(customHeaders = headers)
+        is UiMedia.Ugoira -> this
     }
 }

@@ -220,9 +220,9 @@ private enum GallerySideTab: String, CaseIterable, Identifiable {
 
 private struct GalleryImagesView: View {
     let detail: GalleryDetail
-    let openMedia: (UiMediaImage) -> Void
+    let openMedia: (any UiMedia) -> Void
 
-    private var images: [UiMediaImage] {
+    private var images: [any UiMedia] {
         detail.images.map { $0 }
     }
 
@@ -236,7 +236,7 @@ private struct GalleryImagesView: View {
             TabView {
                 ForEach(0..<images.count, id: \.self) { index in
                     let image = images[index]
-                    NetworkImage(data: image.url, customHeader: image.customHeaders)
+                    GalleryMedia(media: image)
                         .scaledToFit()
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .contentShape(Rectangle())
@@ -252,8 +252,8 @@ private struct GalleryImagesView: View {
             LazyVStack(spacing: 0) {
                 ForEach(0..<images.count, id: \.self) { index in
                     let image = images[index]
-                    NetworkImage(data: image.url, customHeader: image.customHeaders, contentMode: .fit)
-                        .aspectRatio(CGFloat(image.aspectRatio), contentMode: .fit)
+                    GalleryMedia(media: image, contentMode: .fit)
+                        .aspectRatio((image.aspectRatio ?? 1), contentMode: .fit)
                         .frame(maxWidth: .infinity)
                         .contentShape(Rectangle())
                         .onTapGesture {
@@ -268,9 +268,9 @@ private struct GalleryImagesView: View {
 
 private struct GalleryBigScreenImagePane: View {
     let detail: GalleryDetail
-    let onOpenMedia: (UiMediaImage) -> Void
+    let onOpenMedia: (any UiMedia) -> Void
 
-    private var images: [UiMediaImage] {
+    private var images: [any UiMedia] {
         detail.images.map { $0 }
     }
 
@@ -286,7 +286,7 @@ private struct GalleryBigScreenImagePane: View {
                 TabView {
                     ForEach(0..<images.count, id: \.self) { index in
                         let image = images[index]
-                        NetworkImage(data: image.url, customHeader: image.customHeaders)
+                        GalleryMedia(media: image)
                             .scaledToFit()
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
                             .contentShape(Rectangle())
@@ -304,8 +304,8 @@ private struct GalleryBigScreenImagePane: View {
                         LazyVStack(spacing: 0) {
                             ForEach(0..<images.count, id: \.self) { index in
                                 let image = images[index]
-                                NetworkImage(data: image.url, customHeader: image.customHeaders, contentMode: .fit)
-                                    .aspectRatio(CGFloat(image.aspectRatio), contentMode: .fit)
+                                GalleryMedia(media: image, contentMode: .fit)
+                                    .aspectRatio((image.aspectRatio ?? 1), contentMode: .fit)
                                     .frame(maxWidth: .infinity)
                                     .contentShape(Rectangle())
                                     .onTapGesture {
@@ -770,13 +770,8 @@ struct GalleryCommentsScreen: View {
 }
 
 private extension UiTimelineV2.Post {
-    var galleryImagesForRawMedia: [UiMediaImage] {
-        images.compactMap { media in
-            if case .image(let image) = onEnum(of: media) {
-                return image
-            }
-            return nil
-        }
+    var galleryImagesForRawMedia: [any UiMedia] {
+        images.filter { $0 is UiMediaImage || $0 is UiMediaUgoira }
     }
 }
 

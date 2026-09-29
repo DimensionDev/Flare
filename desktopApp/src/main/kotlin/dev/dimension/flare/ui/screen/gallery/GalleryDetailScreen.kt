@@ -62,6 +62,7 @@ import dev.dimension.flare.ui.component.DateTimeText
 import dev.dimension.flare.ui.component.ErrorContent
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScrollBar
+import dev.dimension.flare.ui.component.GalleryMedia
 import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.RichText
@@ -266,7 +267,7 @@ private fun BigScreenGalleryContent(
 @Composable
 private fun GalleryImagePane(
     detail: GalleryDetail,
-    onMediaClick: (UiMedia.Image) -> Unit,
+    onMediaClick: (UiMedia) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val images = detail.images
@@ -320,10 +321,8 @@ private fun GalleryImagePane(
                     modifier = Modifier.fillMaxSize(),
                 ) { index ->
                     val image = images[index]
-                    NetworkImage(
-                        model = image.url,
-                        contentDescription = image.description,
-                        customHeaders = image.customHeaders,
+                    GalleryMedia(
+                        media = image,
                         contentScale = ContentScale.Fit,
                         modifier =
                             Modifier
@@ -338,7 +337,7 @@ private fun GalleryImagePane(
 
 private fun LazyStaggeredGridScope.galleryImageItems(
     detail: GalleryDetail,
-    onMediaClick: (UiMedia.Image) -> Unit,
+    onMediaClick: (UiMedia) -> Unit,
 ) {
     val images = detail.images
     if (images.isEmpty()) {
@@ -386,8 +385,8 @@ private fun LazyStaggeredGridScope.galleryImageItems(
 
 @Composable
 private fun GalleryHorizontalImages(
-    images: List<UiMedia.Image>,
-    onMediaClick: (UiMedia.Image) -> Unit,
+    images: List<UiMedia>,
+    onMediaClick: (UiMedia) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val pagerState =
@@ -399,10 +398,8 @@ private fun GalleryHorizontalImages(
         modifier = modifier,
     ) { index ->
         val image = images[index]
-        NetworkImage(
-            model = image.url,
-            contentDescription = image.description,
-            customHeaders = image.customHeaders,
+        GalleryMedia(
+            media = image,
             contentScale = ContentScale.Fit,
             modifier =
                 Modifier
@@ -414,20 +411,23 @@ private fun GalleryHorizontalImages(
 
 @Composable
 private fun GalleryImage(
-    image: UiMedia.Image,
+    image: UiMedia,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    NetworkImage(
-        model = image.url,
-        contentDescription = image.description,
-        customHeaders = image.customHeaders,
+    GalleryMedia(
+        media = image,
         contentScale = ContentScale.FillWidth,
         modifier =
             modifier
                 .fillMaxWidth()
-                .aspectRatio(image.aspectRatio)
-                .clickable(onClick = onClick),
+                .aspectRatio(
+                    when (image) {
+                        is UiMedia.Image -> image.aspectRatio
+                        is UiMedia.Ugoira -> image.aspectRatio
+                        else -> 1f
+                    },
+                ).clickable(onClick = onClick),
     )
 }
 
@@ -934,6 +934,7 @@ private fun GalleryDetail.statusMediaRoute(media: UiMedia): Route.StatusMedia =
                 is UiMedia.Image -> media.previewUrl
                 is UiMedia.Video -> media.thumbnailUrl
                 is UiMedia.Gif -> media.previewUrl
+                is UiMedia.Ugoira -> media.previewUrl
                 is UiMedia.Audio -> null
             },
     )

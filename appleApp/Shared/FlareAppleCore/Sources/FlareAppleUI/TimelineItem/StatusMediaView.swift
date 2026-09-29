@@ -427,7 +427,7 @@ public extension UiMedia {
             return description
         }
         switch onEnum(of: self) {
-        case .image, .gif:
+        case .image, .gif, .ugoira:
             return FlareAppleUILocalization.string(
                 "media_image_no_alt",
                 fallback: "Image, no alternative text provided"
@@ -450,6 +450,7 @@ public extension UiMedia {
         case .image(let image): return CGFloat(image.aspectRatio)
         case .video(let video): return CGFloat(video.aspectRatio)
         case .gif(let gifv): return CGFloat(gifv.aspectRatio)
+        case .ugoira(let animation): return CGFloat(animation.aspectRatio)
         case .audio: return nil
         }
     }
@@ -459,6 +460,7 @@ public extension UiMedia {
         case .image(let image): (CGFloat(image.width), CGFloat(image.height))
         case .video(let video): (CGFloat(video.width), CGFloat(video.height))
         case .gif(let gif): (CGFloat(gif.width), CGFloat(gif.height))
+        case .ugoira(let animation): (CGFloat(animation.width), CGFloat(animation.height))
         case .audio: nil
         }
         guard let size,
@@ -476,6 +478,7 @@ public extension UiMedia {
         case .image(let image): image.previewUrl
         case .video(let video): video.thumbnailUrl
         case .gif(let gif): gif.previewUrl
+        case .ugoira(let animation): animation.previewUrl
         case .audio: nil
         }
     }

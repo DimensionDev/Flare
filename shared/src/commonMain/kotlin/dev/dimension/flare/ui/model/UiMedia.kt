@@ -2,6 +2,7 @@ package dev.dimension.flare.ui.model
 
 import androidx.compose.runtime.Immutable
 import dev.dimension.flare.common.SerializableImmutableMap
+import dev.dimension.flare.model.MicroBlogKey
 import kotlinx.serialization.Serializable
 import kotlin.native.HiddenFromObjC
 
@@ -68,6 +69,27 @@ public sealed interface UiMedia {
     ) : UiMedia {
         val aspectRatio: Float
             get() = (width / (height.takeUnless { it == 0f } ?: 1f)).takeUnless { it == 0f } ?: 1f
+    }
+
+    @Serializable
+    @Immutable
+    public data class Ugoira public constructor(
+        val statusKey: MicroBlogKey,
+        val accountKey: MicroBlogKey,
+        val previewUrl: String,
+        val originalFrameUrl: String?,
+        override val description: String?,
+        val height: Float,
+        val width: Float,
+        val sensitive: Boolean,
+        override val customHeaders: SerializableImmutableMap<String, String>? = null,
+    ) : UiMedia {
+        override val url: String get() = "https://www.pixiv.net/artworks/${statusKey.id}"
+
+        // Ugoira is a frame sequence. Saving it requires the platform MP4 encoder.
+        override val urlForDownload: String get() = error("Ugoira must be exported as MP4")
+        val aspectRatio: Float
+            get() = (width / height).takeIf { it.isFinite() && it > 0f } ?: 1f
     }
 
     @Serializable

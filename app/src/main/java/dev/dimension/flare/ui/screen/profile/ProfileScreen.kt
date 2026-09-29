@@ -768,6 +768,7 @@ private fun ProfileMediaTab(
                                                         is UiMedia.Image -> media.previewUrl
                                                         is UiMedia.Video -> media.thumbnailUrl
                                                         is UiMedia.Gif -> media.previewUrl
+                                                        is UiMedia.Ugoira -> media.previewUrl
                                                         else -> null
                                                     },
                                                 )

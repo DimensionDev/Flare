@@ -339,6 +339,13 @@ private fun storagePresenter(context: Context) =
             )
         }
 
+        LaunchedEffect(Unit) {
+            imageCacheSize =
+                (
+                    (context.imageLoader.diskCache?.size ?: 0) +
+                        presenter.ugoiraCacheSize()
+                ) / (1024 * 1024)
+        }
         object : StorageState by state {
             val imageCacheSize: Long = imageCacheSize
             val isClearingImageCache: Boolean = isClearingImageCache
@@ -354,6 +361,7 @@ private fun storagePresenter(context: Context) =
                     try {
                         withContext(Dispatchers.IO) {
                             context.imageLoader.diskCache?.clear()
+                            presenter.clearUgoiraCache()
                         }
                         imageCacheSize = 0L
                     } finally {

@@ -651,7 +651,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         guard contentKind == .profileMedia else {
             if sectionIdentifier(at: section) == Self.sectionAccessories { return .zero }
             if sectionIdentifier(at: section) == Self.sectionHeader {
-                let inset = max(TimelineUIKitLayoutMetrics.horizontalInset, (collectionView.bounds.width - 600) / 2)
+                let inset = max(appearance.isPlainTimelineDisplayMode ? 0 : TimelineUIKitLayoutMetrics.horizontalInset, (collectionView.bounds.width - 600) / 2)
                 return UIEdgeInsets(top: 0, left: inset, bottom: 0, right: inset)
             }
             return columnCount == 1 && appearance.isPlainTimelineDisplayMode ? .zero : layout.sectionInset

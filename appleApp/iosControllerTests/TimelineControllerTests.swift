@@ -79,6 +79,96 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         XCTAssertEqual(fixture.controller.effectiveContentOffsetY, 2_500, accuracy: 0.5)
     }
 
+    func testDetailHeaderAndCommentsCanLoadInEitherOrderWithoutLeavingTop() async {
+        for hasTabs in [false, true] {
+            for headerFirst in [false, true] {
+                let fixture = await Fixture(initialState: .loading)
+                fixture.controller.topContentInset = 88
+                fixture.controller.suppressInitialRefreshIndicator = true
+                fixture.controller.accessoryItems = hasTabs
+                    ? [UITimelineCollectionViewAccessoryItem(id: "tabs", view: Header())] : []
+                fixture.input.header = UiStateLoading<UiTimelineV2>()
+                await fixture.apply()
+
+                if headerFirst {
+                    fixture.input.header = UiStateSuccess(data: makeRow(100))
+                } else {
+                    fixture.input.state = .loaded
+                    fixture.input.items = (0..<20).map { .post(makeRow($0)) }
+                }
+                await fixture.apply()
+                fixture.input.header = UiStateSuccess(data: makeRow(100))
+                fixture.input.state = .loaded
+                fixture.input.items = (0..<20).map { .post(makeRow($0)) }
+                await fixture.apply()
+
+                XCTAssertEqual(fixture.controller.effectiveContentOffsetY, 0, accuracy: 0.5)
+            }
+        }
+    }
+
+    func testDetailHeaderLoadingKeepsCommentsTheUserHasScrolledTo() async throws {
+        let fixture = await Fixture(initialState: .loading)
+        fixture.input.header = UiStateLoading<UiTimelineV2>()
+        await fixture.apply()
+        fixture.input.state = .loaded
+        fixture.input.items = (0..<20).map { .post(makeRow($0)) }
+        await fixture.apply()
+        await fixture.scroll(1_200)
+        let position = try fixture.position()
+
+        fixture.input.header = UiStateSuccess(data: makeRow(100))
+        await fixture.apply()
+
+        try fixture.assertPosition(position)
+    }
+
+    func testLateTopSectionsKeepTopOrTheScrolledReadingItem() async throws {
+        // Home's notice, search users, and discover users/tags load separately from posts.
+        let scenarios: [(initial: [String], loaded: [String])] = [
+            ([], ["change_log"]),
+            (["posts_title"], ["users_title", "users", "posts_title"]),
+            (["posts_title"], ["users_title", "users", "tags_title", "tags", "posts_title"])
+        ]
+        for sections in scenarios {
+            for offset: CGFloat in [0, 1_200] {
+                let fixture = await Fixture(initialState: .loading)
+                fixture.controller.topContentInset = 88
+                func accessories(_ ids: [String]) -> [UITimelineCollectionViewAccessoryItem] {
+                    ids.map {
+                        UITimelineCollectionViewAccessoryItem(
+                            id: $0, view: Header(), pinnedView: $0.hasSuffix("_title") ? UIView() : nil
+                        )
+                    }
+                }
+                fixture.controller.accessoryItems = accessories(sections.initial)
+                fixture.input.state = .loaded
+                fixture.input.items = (0..<20).map { .post(makeRow($0)) }
+                await fixture.apply()
+                XCTAssertEqual(fixture.controller.effectiveContentOffsetY, 0, accuracy: 0.5)
+                if offset > 0 { await fixture.scroll(offset) }
+                let position = try fixture.position()
+
+                fixture.controller.accessoryItems = accessories(sections.loaded)
+                await fixture.settle()
+
+                if offset == 0 {
+                    XCTAssertEqual(fixture.controller.effectiveContentOffsetY, 0, accuracy: 0.5)
+                } else {
+                    try fixture.assertPosition(position)
+                }
+            }
+        }
+    }
+
+    func testPrependingPostsAtTopStillPreservesTheReadingItem() async throws {
+        let fixture = await Fixture(posts: true)
+        let position = try fixture.position()
+        fixture.input.items.insert(.post(makeRow(100)), at: 0)
+        await fixture.apply()
+        try fixture.assertPosition(position)
+    }
+
     func testSwitchingToALoadedProfileListDoesNotOverrideALaterScroll() async throws {
         let fixture = await Fixture(posts: true)
         fixture.controller.restoreEffectiveContentOffset(0, animated: false)

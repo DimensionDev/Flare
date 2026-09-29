@@ -1,14 +1,12 @@
 package dev.dimension.flare.ui.component
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -33,7 +31,6 @@ import compose.icons.fontawesomeicons.solid.CirclePlay
 import dev.dimension.flare.compose.ui.Res
 import dev.dimension.flare.compose.ui.media_play_video
 import dev.dimension.flare.ui.component.status.LocalIsScrollingInProgress
-import dev.dimension.flare.ui.theme.PlatformTheme
 import io.github.composefluent.component.ProgressRing
 import io.github.kdroidfilter.composemediaplayer.InitialPlayerState
 import io.github.kdroidfilter.composemediaplayer.VideoPlayerState
@@ -139,17 +136,7 @@ public fun VideoPlayer(
                                 }
                             }.fillMaxSize(),
                 )
-                Box(
-                    modifier =
-                        Modifier
-                            .padding(16.dp)
-                            .background(
-                                Color.Black.copy(alpha = 0.5f),
-                                shape = PlatformTheme.shapes.medium,
-                            ).padding(horizontal = 8.dp, vertical = 4.dp)
-                            .align(Alignment.BottomStart),
-                    contentAlignment = Alignment.Center,
-                ) {
+                MediaVideoBadge(modifier = Modifier.align(Alignment.BottomStart)) {
                     FAIcon(
                         FontAwesomeIcons.Solid.CirclePlay,
                         contentDescription = stringResource(Res.string.media_play_video),

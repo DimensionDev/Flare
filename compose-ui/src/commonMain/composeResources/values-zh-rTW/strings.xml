@@ -435,5 +435,5 @@
     <string name="fanbox_supported_title">支援中</string>
     <string name="fanbox_recommended_creators_title">推薦創作者</string>
 <string name="ugoira_play">播放動圖</string>
-<string name="ugoira_pause">暫停動圖</string>
+<string name="ugoira_loading">正在載入動圖</string>
 </resources>

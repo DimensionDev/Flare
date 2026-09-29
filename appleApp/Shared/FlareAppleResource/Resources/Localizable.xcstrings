@@ -24,29 +24,6 @@
       }
     }
   },
-  "ugoira_pause": {
-    "extractionState": "manual",
-    "localizations": {
-      "en": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "Pause animation"
-        }
-      },
-      "zh-Hans": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "暂停动图"
-        }
-      },
-      "zh-Hant": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "暫停動圖"
-        }
-      }
-    }
-  },
   "ugoira_loading": {
     "extractionState": "manual",
     "localizations": {

@@ -219,7 +219,7 @@ private fun StatusMediaContent(
                     is UiMedia.Ugoira -> {
                         val zoom = rememberZoomableState(zoomSpec = ZoomSpec(maxZoomFactor = 10f))
                         LaunchedEffect(zoom.zoomFraction) { state.setLockPager((zoom.zoomFraction ?: 0f) > .01f) }
-                        UgoiraPlayer(media, Modifier.fillMaxSize().zoomable(zoom), autoplay = pagerState.currentPage == it, controls = true)
+                        UgoiraPlayer(media, Modifier.fillMaxSize().zoomable(zoom), autoplay = pagerState.currentPage == it)
                     }
 
                     is UiMedia.Image -> {

@@ -70,6 +70,7 @@ final class TimelineControllerIntegrationTests: XCTestCase {
                 let originalHeight = fixture.controller.view.frame.height
 
                 // All rows fit after resizing, but a scrolled item's bookmark must survive.
+                fixture.collection.prepareForLayoutChange()
                 fixture.controller.view.frame.size.height = fixture.collection.contentSize.height + 1_000
                 await fixture.settle()
                 XCTAssertEqual(fixture.controller.effectiveContentOffsetY, 0, accuracy: 0.5)
@@ -157,6 +158,69 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         await fixture.apply()
 
         try fixture.assertPosition(position)
+    }
+
+    func testRepeatedInitialLoadingWithDetailTabsDoesNotRestoreAPlaceholderBookmark() async {
+        for repeatsAccessories in [false, true] {
+            let tabs = [UITimelineCollectionViewAccessoryItem(id: "vvo_status_tabs", view: Header())]
+            let fixture = await Fixture(initialState: .loading, header: UiStateLoading<UiTimelineV2>(), accessories: tabs)
+            // The real detail screen includes its header and tabs in the first snapshot.
+            if repeatsAccessories {
+                fixture.controller.accessoryItems = tabs
+                await fixture.settle()
+            } else {
+                await fixture.apply()
+            }
+            fixture.input.header = UiStateSuccess(data: makeRow(100))
+            await fixture.apply()
+            XCTAssertEqual(fixture.controller.effectiveContentOffsetY, 0, accuracy: 0.5)
+
+            fixture.input.state = .loaded
+            fixture.input.items = (0..<20).map { .post(makeRow($0)) }
+            await fixture.apply()
+            XCTAssertEqual(fixture.controller.effectiveContentOffsetY, 0, accuracy: 0.5)
+        }
+    }
+
+    func testHostedSectionsLoadingAboveAPendingLayoutBookmarkPreserveItsOriginalTopness() async throws {
+        for offset: CGFloat in [0, 120] {
+            let tags = TimelineHostedAccessoryView()
+            tags.update(AnyView(Color.clear.frame(height: 140)))
+            let accessories = [
+                UITimelineCollectionViewAccessoryItem(id: "tags_title", view: Header(), pinnedView: UIView()),
+                UITimelineCollectionViewAccessoryItem(id: "tags", view: tags),
+                UITimelineCollectionViewAccessoryItem(id: "posts_title", view: Header(), pinnedView: UIView())
+            ]
+            let fixture = await Fixture(initialState: .loading, accessories: accessories)
+            if offset > 0 { await fixture.scroll(offset) }
+            // Hosted sections report their height while the post placeholders are still visible.
+            tags.update(AnyView(Color.clear.frame(height: 160)))
+            tags.setNeedsLayout()
+            tags.layoutIfNeeded()
+            await fixture.settle()
+            XCTAssertTrue(fixture.collection.hasReadingPosition)
+            let expected = try fixture.position()
+
+            fixture.controller.accessoryItems = [
+                UITimelineCollectionViewAccessoryItem(id: "users_title", view: Header(), pinnedView: UIView()),
+                UITimelineCollectionViewAccessoryItem(id: "users", view: Header())
+            ] + accessories
+            await fixture.settle()
+            if offset == 0 {
+                XCTAssertEqual(fixture.controller.effectiveContentOffsetY, 0, accuracy: 0.5)
+            } else {
+                try fixture.assertPosition(expected)
+            }
+
+            fixture.input.state = .loaded
+            fixture.input.items = (0..<20).map { .post(makeRow($0)) }
+            await fixture.apply()
+            if offset == 0 {
+                XCTAssertEqual(fixture.controller.effectiveContentOffsetY, 0, accuracy: 0.5)
+            } else {
+                try fixture.assertPosition(expected)
+            }
+        }
     }
 
     func testLateTopSectionsKeepTopOrTheScrolledReadingItem() async throws {
@@ -605,8 +669,11 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         var input = TimelineContent()
         var columns: Int
 
-        init(posts: Bool = false, columns: Int = 1, initialState: TimelineContent.State? = nil) async {
+        init(posts: Bool = false, columns: Int = 1, initialState: TimelineContent.State? = nil,
+             header: UiState<UiTimelineV2>? = nil, accessories: [UITimelineCollectionViewAccessoryItem] = []) async {
             self.columns = columns
+            input.header = header
+            controller.accessoryItems = accessories
             if let initialState {
                 input.state = initialState
             } else if posts {

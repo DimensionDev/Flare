@@ -1171,7 +1171,8 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
            pendingEffectiveContentOffsetYAfterSnapshot == nil, restoresScrollAnchorOnSnapshotChanges {
             collectionView.prepareForSnapshotChange()
         }
-        if plan.isInitialLoading, previousPlan != nil, pendingReloadPosition == nil,
+        // Repeated first-load inputs are not reloads of an existing reading position.
+        if plan.isInitialLoading, previousPlan?.isInitialLoading == false, pendingReloadPosition == nil,
            pendingEffectiveContentOffsetYAfterSnapshot == nil, restoresScrollAnchorOnSnapshotChanges {
             pendingReloadPosition = collectionView.captureReadingPosition()
         }

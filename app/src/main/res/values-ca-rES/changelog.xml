@@ -3,10 +3,11 @@
     <string name="changelog_current"><![CDATA[
             <span>Versió %1$s:</span>
             <ul>
-                <li>S’ha millorat la reproducció de vídeo a la cronologia amb transicions més fluides, una millor selecció automàtica i la conservació del progrés en obrir o tancar el visor multimèdia.</li>
-                <li>S’ha millorat la fiabilitat de la cronologia: les respostes i el context continuen visibles durant les actualitzacions, el bàner de publicacions noves s’actualitza correctament i s’han corregit bloquejos de paginació.</li>
-                <li>S’ha millorat l’accessibilitat de les publicacions, els continguts multimèdia i la pantalla de redacció amb etiquetes, estats i controls més clars.</li>
-                <li>S’ha millorat la fiabilitat de les sessions de Bluesky, la compatibilitat amb noves respostes de la cronologia d’X i l’admissió de més formats d’enllaços d’obres i perfils de Pixiv.</li>
+                <li>S’ha afegit la reproducció d’animacions Ugoira de Pixiv i la possibilitat de desar-les com a vídeos MP4.</li>
+                <li>Arrossegueu cap amunt al visor multimèdia per veure els detalls i les accions de la publicació.</li>
+                <li>Bluesky ara permet pujar GIF i MOV. S’ha corregit el desament de vídeos i el fil d’inici amaga les respostes a comptes que no seguiu.</li>
+                <li>S’han millorat les pujades de contingut multimèdia i el reenviament d’esborranys.</li>
+                <li>Correccions d’errors i millores de rendiment.</li>
             </ul>
         ]]></string>
     <string name="changelog_title">Et donem la benvinguda de nou!</string>

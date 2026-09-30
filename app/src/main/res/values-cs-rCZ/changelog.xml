@@ -5,10 +5,11 @@
     <string name="changelog_current"><![CDATA[
             <span>Verze %1$s:</span>
             <ul>
-                <li>Vylepšeno přehrávání videí na časové ose: plynulejší přechody, lepší automatický výběr a zachování pozice při otevření či zavření prohlížeče médií.</li>
-                <li>Zvýšena spolehlivost časové osy: odpovědi a kontext konverzace zůstávají při obnovení viditelné, upozornění na nové příspěvky se správně aktualizuje a byly opraveny pády stránkování.</li>
-                <li>Vylepšeno zpřístupnění příspěvků, médií a obrazovky pro psaní díky jasnějším popiskům, stavům a ovládacím prvkům.</li>
-                <li>Zvýšena spolehlivost relací Bluesky, kompatibilita s novými odpověďmi časové osy X a podpora dalších formátů odkazů na díla a profily Pixiv.</li>
+                <li>Přidáno přehrávání animací Ugoira z Pixiv a jejich ukládání jako videí MP4.</li>
+                <li>Tažením nahoru v prohlížeči médií zobrazíte podrobnosti příspěvku a jeho akce.</li>
+                <li>Bluesky nyní podporuje nahrávání GIF a MOV. Opraveno ukládání videí; domovská časová osa skrývá odpovědi účtům, které nesledujete.</li>
+                <li>Vylepšeno nahrávání médií a opakované odesílání konceptů.</li>
+                <li>Opravy chyb a vylepšení výkonu.</li>
             </ul>
         ]]></string>
 </resources>

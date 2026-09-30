@@ -3,10 +3,11 @@
     <string name="changelog_current"><![CDATA[
             <span>Sürüm %1$s:</span>
             <ul>
-                <li>Zaman akışındaki video oynatma; daha akıcı geçişler, daha iyi otomatik video seçimi ve medya görüntüleyici açılıp kapatıldığında oynatma konumunun korunmasıyla iyileştirildi.</li>
-                <li>Zaman akışı güvenilirliği artırıldı: yenileme sırasında yanıtlar ve konuşma bağlamı görünür kalıyor, yeni gönderi bildirimi doğru güncelleniyor ve sayfalama çökmeleri düzeltildi.</li>
-                <li>Gönderilerde, medyada ve oluşturma ekranında daha anlaşılır etiketler, durumlar ve kontrollerle erişilebilirlik iyileştirildi.</li>
-                <li>Bluesky oturum güvenilirliği, yeni X zaman akışı yanıtlarıyla uyumluluk ve daha fazla Pixiv eser ve profil bağlantısı biçimi desteği iyileştirildi.</li>
+                <li>Pixiv Ugoira animasyonlarını oynatma ve MP4 video olarak kaydetme desteği eklendi.</li>
+                <li>Gönderi ayrıntılarını ve işlemlerini görmek için medya görüntüleyicide yukarı sürükleyin.</li>
+                <li>Bluesky artık GIF ve MOV yüklemelerini destekliyor. Video kaydetme düzeltildi; ana zaman akışı, takip etmediğiniz hesaplara verilen yanıtları gizliyor.</li>
+                <li>Medya yüklemeleri ve taslakları yeniden gönderme iyileştirildi.</li>
+                <li>Hata düzeltmeleri ve performans iyileştirmeleri.</li>
             </ul>
         ]]></string>
     <string name="changelog_title">Tekrar hoş geldiniz!</string>

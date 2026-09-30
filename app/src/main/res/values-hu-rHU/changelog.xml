@@ -3,10 +3,11 @@
     <string name="changelog_current"><![CDATA[
             <span>%1$s verzió:</span>
             <ul>
-                <li>Javult az idővonali videók lejátszása: simább átmenetek, jobb automatikus videóválasztás és a lejátszási pozíció megőrzése a médianézegető megnyitásakor vagy bezárásakor.</li>
-                <li>Megbízhatóbb lett az idővonal: frissítés közben is láthatók maradnak a válaszok és a beszélgetés környezete, az új bejegyzések jelzése megfelelően frissül, a lapozási összeomlások pedig megszűntek.</li>
-                <li>Egyértelműbb címkékkel, állapotokkal és vezérlőkkel javult a bejegyzések, a média és a szerkesztőképernyő akadálymentessége.</li>
-                <li>Javult a Bluesky-munkamenetek megbízhatósága, az új X-idővonalválaszokkal való kompatibilitás és több Pixiv-alkotás- és profillink-formátum támogatása.</li>
+                <li>A Pixiv Ugoira animációk most már lejátszhatók és MP4-videóként menthetők.</li>
+                <li>Húzza felfelé a médianézegetőt a bejegyzés részleteinek és műveleteinek megtekintéséhez.</li>
+                <li>A Bluesky már támogatja a GIF- és MOV-feltöltéseket. Javítottuk a videók mentését, a kezdő idővonal pedig elrejti a nem követett fiókoknak írt válaszokat.</li>
+                <li>Javult a médiafeltöltés és a piszkozatok újraküldése.</li>
+                <li>Hibajavítások és teljesítménybeli fejlesztések.</li>
             </ul>
         ]]></string>
     <string name="changelog_title">Üdv újra!</string>

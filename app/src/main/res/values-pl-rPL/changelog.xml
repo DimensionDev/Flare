@@ -5,10 +5,11 @@
     <string name="changelog_current"><![CDATA[
             <span>Wersja %1$s:</span>
             <ul>
-                <li>Ulepszono odtwarzanie filmów na osi czasu: płynniejsze przejścia, lepszy automatyczny wybór oraz zachowanie pozycji po otwarciu lub zamknięciu przeglądarki multimediów.</li>
-                <li>Zwiększono niezawodność osi czasu: odpowiedzi i kontekst rozmowy pozostają widoczne podczas odświeżania, baner nowych wpisów aktualizuje się prawidłowo, a awarie stronicowania zostały naprawione.</li>
-                <li>Ulepszono dostępność wpisów, multimediów i ekranu tworzenia dzięki czytelniejszym etykietom, stanom i elementom sterującym.</li>
-                <li>Zwiększono niezawodność sesji Bluesky, zgodność z nowymi odpowiedziami osi czasu X oraz obsługę większej liczby formatów odnośników do prac i profili Pixiv.</li>
+                <li>Dodano odtwarzanie animacji Ugoira z Pixiv i zapisywanie ich jako filmów MP4.</li>
+                <li>Przeciągnij w górę w przeglądarce multimediów, aby zobaczyć szczegóły wpisu i działania.</li>
+                <li>Bluesky obsługuje teraz przesyłanie GIF i MOV. Naprawiono zapisywanie filmów, a główna oś czasu ukrywa odpowiedzi do kont, których nie obserwujesz.</li>
+                <li>Ulepszono przesyłanie multimediów i ponawianie wysyłania szkiców.</li>
+                <li>Poprawki błędów i ulepszenia wydajności.</li>
             </ul>
         ]]></string>
 </resources>

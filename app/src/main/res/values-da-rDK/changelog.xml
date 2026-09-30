@@ -5,10 +5,11 @@
     <string name="changelog_current"><![CDATA[
             <span>Version %1$s:</span>
             <ul>
-                <li>Forbedret videoafspilning på tidslinjen med mere jævne overgange, bedre automatisk videovalg og bevaret afspilningsposition, når mediefremviseren åbnes eller lukkes.</li>
-                <li>Forbedret tidslinjens stabilitet: svar og samtalekontekst forbliver synlige under opdatering, banneret med nye indlæg opdateres korrekt, og nedbrud under sideindlæsning er rettet.</li>
-                <li>Forbedret tilgængeligheden i indlæg, medier og oprettelsesskærmen med tydeligere etiketter, tilstande og betjeningselementer.</li>
-                <li>Forbedret stabiliteten af Bluesky-sessioner, kompatibiliteten med nye X-tidslinjesvar og understøttelsen af flere linkformater til Pixiv-værker og -profiler.</li>
+                <li>Tilføjet afspilning af Pixiv Ugoira-animationer og lagring som MP4-videoer.</li>
+                <li>Træk op i medievisningen for at se opslagets detaljer og handlinger.</li>
+                <li>Bluesky understøtter nu upload af GIF og MOV. Lagring af videoer er rettet, og starttidslinjen skjuler svar til konti, du ikke følger.</li>
+                <li>Forbedret upload af medier og gensending af kladder.</li>
+                <li>Fejlrettelser og forbedret ydeevne.</li>
             </ul>
         ]]></string>
 </resources>

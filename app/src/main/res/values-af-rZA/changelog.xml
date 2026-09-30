@@ -3,10 +3,11 @@
     <string name="changelog_current"><![CDATA[
             <span>Weergawe %1$s:</span>
             <ul>
-                <li>Verbeterde videoterrugspeel op die tydlyn met gladder oorgange, beter outomatiese videokeuse en behoue terugspeelvordering wanneer die mediakyker oop- of toegemaak word.</li>
-                <li>Verbeterde tydlynbetroubaarheid: antwoorde en gesprekskonteks bly tydens herlaai sigbaar, die nuweplasingsbanier werk korrek by en blaaineerstortings is reggestel.</li>
-                <li>Verbeterde toeganklikheid vir plasings, media en die opstelskerm met duideliker etikette, toestande en kontroles.</li>
-                <li>Verbeterde Bluesky-sessiebetroubaarheid, versoenbaarheid met nuwe X-tydlynreaksies en ondersteuning vir meer Pixiv-kunswerk- en profielskakelformate.</li>
+                <li>Pixiv Ugoira-animasies kan nou gespeel en as MP4-video\'s gestoor word.</li>
+                <li>Sleep op in die mediakyker om plasingsbesonderhede en aksies te sien.</li>
+                <li>Bluesky ondersteun nou GIF- en MOV-oplaaie. Videostoor is reggestel en die tuistydlyn versteek antwoorde aan rekeninge wat jy nie volg nie.</li>
+                <li>Mediaoplaaie en herprobeer van konsepte is verbeter.</li>
+                <li>Foutregstellings en werkverrigtingverbeterings.</li>
             </ul>
         ]]></string>
     <string name="changelog_title">Welkom terug!</string>

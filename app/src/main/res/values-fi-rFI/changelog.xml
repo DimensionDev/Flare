@@ -5,10 +5,11 @@
     <string name="changelog_current"><![CDATA[
             <span>Versio %1$s:</span>
             <ul>
-                <li>Aikajanan videotoistoa parannettiin sujuvammilla siirtymillä, paremmalla automaattisella videovalinnalla ja toistokohdan säilymisellä mediaselainta avattaessa tai suljettaessa.</li>
-                <li>Aikajanan luotettavuutta parannettiin: vastaukset ja keskustelun konteksti säilyvät näkyvissä päivityksen aikana, uusien julkaisujen ilmoitus päivittyy oikein ja sivutuksen kaatumiset korjattiin.</li>
-                <li>Julkaisujen, median ja kirjoitusnäkymän saavutettavuutta parannettiin selkeämmillä nimikkeillä, tiloilla ja säätimillä.</li>
-                <li>Bluesky-istuntojen luotettavuutta, yhteensopivuutta X:n uusien aikajanavastausten kanssa ja useampien Pixiv-teos- ja profiililinkkien tukea parannettiin.</li>
+                <li>Lisätty Pixiv Ugoira -animaatioiden toisto ja tallennus MP4-videoiksi.</li>
+                <li>Vedä mediaselaimessa ylöspäin nähdäksesi julkaisun tiedot ja toiminnot.</li>
+                <li>Bluesky tukee nyt GIF- ja MOV-latauksia. Videoiden tallennus on korjattu, ja kotiaikajana piilottaa vastaukset tileille, joita et seuraa.</li>
+                <li>Parannettu median lataamista ja luonnosten uudelleenlähetystä.</li>
+                <li>Virhekorjauksia ja suorituskyvyn parannuksia.</li>
             </ul>
         ]]></string>
 </resources>

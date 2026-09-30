@@ -5,10 +5,11 @@
     <string name="changelog_current"><![CDATA[
             <span>Versiunea %1$s:</span>
             <ul>
-                <li>Redarea videoclipurilor în cronologie a fost îmbunătățită cu tranziții mai fluide, selecție automată mai bună și păstrarea poziției la deschiderea sau închiderea vizualizatorului media.</li>
-                <li>Fiabilitatea cronologiei a fost îmbunătățită: răspunsurile și contextul rămân vizibile la reîmprospătare, bannerul de postări noi se actualizează corect, iar blocările de paginare au fost remediate.</li>
-                <li>Accesibilitatea postărilor, conținutului media și ecranului de compunere a fost îmbunătățită cu etichete, stări și comenzi mai clare.</li>
-                <li>A fost îmbunătățită fiabilitatea sesiunilor Bluesky, compatibilitatea cu noile răspunsuri ale cronologiei X și suportul pentru mai multe formate de linkuri către lucrări și profiluri Pixiv.</li>
+                <li>Adăugate redarea animațiilor Ugoira de pe Pixiv și salvarea lor ca videoclipuri MP4.</li>
+                <li>Trageți în sus în vizualizatorul media pentru a vedea detaliile și acțiunile postării.</li>
+                <li>Bluesky acceptă acum încărcarea fișierelor GIF și MOV. Salvarea videoclipurilor a fost corectată, iar cronologia principală ascunde răspunsurile către conturi pe care nu le urmăriți.</li>
+                <li>Îmbunătățite încărcarea fișierelor media și retrimiterea ciornelor.</li>
+                <li>Corectări de erori și îmbunătățiri de performanță.</li>
             </ul>
         ]]></string>
 </resources>

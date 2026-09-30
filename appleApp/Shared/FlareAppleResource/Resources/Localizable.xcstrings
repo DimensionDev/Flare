@@ -32815,181 +32815,181 @@
         "af" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Weergawe %@:\n• Verbeterde videoterrugspeel op die tydlyn met gladder oorgange, beter outomatiese videokeuse en behoue terugspeelvordering wanneer die mediakyker oop- of toegemaak word.\n• Verbeterde tydlynnavigasie en plasingbesonderhede: antwoorde en rolposisies bly ná herlaai behoue, Weibo-besonderhede gebruik die inheemse tydlynervaring en navigasiebalke verklein tydens rol op iOS 27.\n• Verbeterde toeganklikheid vir plasings, media en die opstelskerm met duideliker etikette, toestande en kontroles.\n• Verbeterde Bluesky-sessiebetroubaarheid, versoenbaarheid met nuwe X-tydlynreaksies en ondersteuning vir meer Pixiv-kunswerk- en profielskakelformate."
+            "value" : "Weergawe %@:\n• Pixiv Ugoira-animasies kan nou gespeel en as MP4-video's gestoor word.\n• Sleep op in die mediakyker om plasingsbesonderhede en aksies te sien.\n• Bluesky ondersteun nou GIF- en MOV-oplaaie. Videostoor is reggestel en die tuistydlyn versteek antwoorde aan rekeninge wat jy nie volg nie.\n• Mediaoplaaie en herprobeer van konsepte is verbeter.\n• Foutregstellings en werkverrigtingverbeterings."
           }
         },
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "الإصدار %@:\n• تحسين تشغيل فيديوهات الخط الزمني بانتقالات أكثر سلاسة واختيار تلقائي أفضل للفيديو، مع الاحتفاظ بموضع التشغيل عند فتح عارض الوسائط أو إغلاقه.\n• تحسين التنقل في الخط الزمني وتفاصيل المنشورات: تبقى الردود ومواضع التمرير بعد التحديث، وتستخدم تفاصيل Weibo تجربة الخط الزمني الأصلية، وتصغر أشرطة التنقل أثناء التمرير في iOS 27.\n• تحسين إمكانية الوصول في المنشورات والوسائط وشاشة الإنشاء من خلال تسميات وحالات وعناصر تحكم أوضح.\n• تحسين موثوقية جلسات Bluesky والتوافق مع استجابات الخط الزمني الجديدة من X ودعم المزيد من صيغ روابط الأعمال الفنية والملفات الشخصية في Pixiv."
+            "value" : "الإصدار %@:\n• إضافة تشغيل رسوم Ugoira المتحركة من Pixiv وحفظها كفيديوهات MP4.\n• اسحب لأعلى في عارض الوسائط لعرض تفاصيل المنشور وإجراءاته.\n• يدعم Bluesky الآن رفع ملفات GIF وMOV. أُصلح حفظ الفيديو، وتُخفى من الخط الزمني الرئيسي الردود على الحسابات التي لا تتابعها.\n• تحسين رفع الوسائط وإعادة إرسال المسودات.\n• إصلاحات للأخطاء وتحسينات في الأداء."
           }
         },
         "bg" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Версия %@:\n• Подобрено възпроизвеждането на видео в хронологията с по-плавни преходи, по-добър автоматичен избор и запазване на позицията при отваряне или затваряне на медийния преглед.\n• Подобрени са навигацията в хронологията и подробностите за публикациите: отговорите и позицията на превъртане се запазват след обновяване, Weibo използва нативната хронология, а навигационните ленти се свиват при превъртане в iOS 27.\n• Подобрена е достъпността на публикациите, медиите и екрана за създаване с по-ясни етикети, състояния и контроли.\n• Подобрена е надеждността на сесиите в Bluesky, съвместимостта с нови отговори от хронологията на X и поддръжката на повече формати за връзки към творби и профили в Pixiv."
+            "value" : "Версия %@:\n• Добавено е възпроизвеждане на анимации Ugoira от Pixiv и запазването им като MP4 видеоклипове.\n• Плъзнете нагоре в медийния преглед, за да видите подробностите и действията за публикацията.\n• Bluesky вече поддържа качване на GIF и MOV. Поправено е запазването на видеоклипове, а началната хронология скрива отговорите към акаунти, които не следвате.\n• Подобрено е качването на медии и повторното изпращане на чернови.\n• Поправки на грешки и подобрения в производителността."
           }
         },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Versió %@:\n• S’ha millorat la reproducció de vídeo a la cronologia amb transicions més fluides, una millor selecció automàtica i la conservació del progrés en obrir o tancar el visor multimèdia.\n• S’han millorat la navegació per la cronologia i els detalls de les publicacions: les respostes i la posició es conserven en actualitzar, els detalls de Weibo utilitzen la cronologia nativa i les barres de navegació es minimitzen en desplaçar-se a iOS 27.\n• S’ha millorat l’accessibilitat de les publicacions, els continguts multimèdia i la pantalla de redacció amb etiquetes, estats i controls més clars.\n• S’ha millorat la fiabilitat de les sessions de Bluesky, la compatibilitat amb noves respostes de la cronologia d’X i l’admissió de més formats d’enllaços d’obres i perfils de Pixiv."
+            "value" : "Versió %@:\n• S’ha afegit la reproducció d’animacions Ugoira de Pixiv i la possibilitat de desar-les com a vídeos MP4.\n• Arrossegueu cap amunt al visor multimèdia per veure els detalls i les accions de la publicació.\n• Bluesky ara permet pujar GIF i MOV. S’ha corregit el desament de vídeos i el fil d’inici amaga les respostes a comptes que no seguiu.\n• S’han millorat les pujades de contingut multimèdia i el reenviament d’esborranys.\n• Correccions d’errors i millores de rendiment."
           }
         },
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Verze %@:\n• Vylepšeno přehrávání videí na časové ose: plynulejší přechody, lepší automatický výběr a zachování pozice při otevření či zavření prohlížeče médií.\n• Vylepšena navigace na časové ose a detaily příspěvků: odpovědi i pozice posunu se po obnovení zachovají, detaily Weibo používají nativní časovou osu a navigační lišty se při posouvání v iOS 27 minimalizují.\n• Vylepšeno zpřístupnění příspěvků, médií a obrazovky pro psaní díky jasnějším popiskům, stavům a ovládacím prvkům.\n• Zvýšena spolehlivost relací Bluesky, kompatibilita s novými odpověďmi časové osy X a podpora dalších formátů odkazů na díla a profily Pixiv."
+            "value" : "Verze %@:\n• Přidáno přehrávání animací Ugoira z Pixiv a jejich ukládání jako videí MP4.\n• Tažením nahoru v prohlížeči médií zobrazíte podrobnosti příspěvku a jeho akce.\n• Bluesky nyní podporuje nahrávání GIF a MOV. Opraveno ukládání videí; domovská časová osa skrývá odpovědi účtům, které nesledujete.\n• Vylepšeno nahrávání médií a opakované odesílání konceptů.\n• Opravy chyb a vylepšení výkonu."
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Version %@:\n• Forbedret videoafspilning på tidslinjen med mere jævne overgange, bedre automatisk videovalg og bevaret afspilningsposition, når mediefremviseren åbnes eller lukkes.\n• Forbedret navigation og indlægsdetaljer: svar og rullepositioner bevares efter opdatering, Weibo-detaljer bruger den indbyggede tidslinje, og navigationslinjer minimeres under rulning i iOS 27.\n• Forbedret tilgængeligheden i indlæg, medier og oprettelsesskærmen med tydeligere etiketter, tilstande og betjeningselementer.\n• Forbedret stabiliteten af Bluesky-sessioner, kompatibiliteten med nye X-tidslinjesvar og understøttelsen af flere linkformater til Pixiv-værker og -profiler."
+            "value" : "Version %@:\n• Tilføjet afspilning af Pixiv Ugoira-animationer og lagring som MP4-videoer.\n• Træk op i medievisningen for at se opslagets detaljer og handlinger.\n• Bluesky understøtter nu upload af GIF og MOV. Lagring af videoer er rettet, og starttidslinjen skjuler svar til konti, du ikke følger.\n• Forbedret upload af medier og gensending af kladder.\n• Fejlrettelser og forbedret ydeevne."
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Version %@:\n• Die Videowiedergabe in Timelines wurde mit flüssigeren Übergängen, einer besseren automatischen Videoauswahl und gespeicherter Wiedergabeposition beim Öffnen oder Schließen der Medienansicht verbessert.\n• Timeline-Navigation und Beitragsdetails wurden verbessert: Antworten und Scrollpositionen bleiben nach Aktualisierungen erhalten, Weibo-Details nutzen die native Timeline und Navigationsleisten werden unter iOS 27 beim Scrollen minimiert.\n• Die Barrierefreiheit von Beiträgen, Medien und dem Verfassen-Bildschirm wurde durch deutlichere Beschriftungen, Zustände und Steuerelemente verbessert.\n• Die Zuverlässigkeit von Bluesky-Sitzungen, die Kompatibilität mit neuen X-Timeline-Antworten und die Unterstützung weiterer Pixiv-Linkformate für Werke und Profile wurden verbessert."
+            "value" : "Version %@:\n• Wiedergabe von Pixiv-Ugoira-Animationen und Speichern als MP4-Videos hinzugefügt.\n• Im Medienbetrachter nach oben ziehen, um Beitragsdetails und Aktionen aufzurufen.\n• Bluesky unterstützt jetzt GIF- und MOV-Uploads. Das Speichern von Videos wurde korrigiert; die Start-Timeline blendet Antworten an nicht gefolgte Konten aus.\n• Medienuploads und erneutes Senden von Entwürfen verbessert.\n• Fehlerbehebungen und Leistungsverbesserungen."
           }
         },
         "el" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Έκδοση %@:\n• Βελτιώθηκε η αναπαραγωγή βίντεο στη χρονογραμμή με ομαλότερες μεταβάσεις, καλύτερη αυτόματη επιλογή και διατήρηση της θέσης κατά το άνοιγμα ή κλείσιμο της προβολής πολυμέσων.\n• Βελτιώθηκε η πλοήγηση στη χρονογραμμή και οι λεπτομέρειες αναρτήσεων: απαντήσεις και θέση κύλισης διατηρούνται μετά την ανανέωση, οι λεπτομέρειες Weibo χρησιμοποιούν την εγγενή χρονογραμμή και οι γραμμές πλοήγησης ελαχιστοποιούνται κατά την κύλιση στο iOS 27.\n• Βελτιώθηκε η προσβασιμότητα σε αναρτήσεις, πολυμέσα και στην οθόνη σύνταξης με σαφέστερες ετικέτες, καταστάσεις και στοιχεία ελέγχου.\n• Βελτιώθηκε η αξιοπιστία των συνεδριών Bluesky, η συμβατότητα με νέες αποκρίσεις χρονογραμμής του X και η υποστήριξη περισσότερων μορφών συνδέσμων έργων και προφίλ Pixiv."
+            "value" : "Έκδοση %@:\n• Προστέθηκε αναπαραγωγή κινούμενων εικόνων Ugoira του Pixiv και αποθήκευσή τους ως βίντεο MP4.\n• Σύρετε προς τα πάνω στην προβολή πολυμέσων για να δείτε λεπτομέρειες και ενέργειες της ανάρτησης.\n• Το Bluesky υποστηρίζει πλέον μεταφόρτωση GIF και MOV. Διορθώθηκε η αποθήκευση βίντεο και η αρχική χρονογραμμή αποκρύπτει απαντήσεις προς λογαριασμούς που δεν ακολουθείτε.\n• Βελτιώθηκαν οι μεταφορτώσεις πολυμέσων και η επανάληψη αποστολής προσχεδίων.\n• Διορθώσεις σφαλμάτων και βελτιώσεις απόδοσης."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Version %@:\n• Improved timeline video playback with smoother transitions, better automatic video selection, and playback progress preserved when opening or closing the media viewer.\n• Improved timeline navigation and post details: replies and scroll positions survive refreshes, Weibo details use the native timeline experience, and navigation bars minimize while scrolling on iOS 27.\n• Improved accessibility across posts, media, and the compose screen with clearer labels, states, and controls.\n• Improved Bluesky session reliability, compatibility with new X timeline responses, and support for more Pixiv artwork and profile link formats."
+            "value" : "Version %@:\n• Added Pixiv Ugoira playback and saving as MP4 videos.\n• The media viewer now lets you drag up to view post details and actions.\n• Added Bluesky GIF and MOV uploads, fixed video saving, and filtered home-timeline replies to accounts you do not follow.\n• Improved media uploads and draft retries.\n• Bug fixes and performance improvements."
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Versio %@:\n• Aikajanan videotoistoa parannettiin sujuvammilla siirtymillä, paremmalla automaattisella videovalinnalla ja toistokohdan säilymisellä mediaselainta avattaessa tai suljettaessa.\n• Aikajanan selaamista ja julkaisujen tietoja parannettiin: vastaukset ja vierityskohta säilyvät päivityksissä, Weibo-tiedot käyttävät natiivia aikajanaa ja navigointipalkit pienenevät vieritettäessä iOS 27:ssä.\n• Julkaisujen, median ja kirjoitusnäkymän saavutettavuutta parannettiin selkeämmillä nimikkeillä, tiloilla ja säätimillä.\n• Bluesky-istuntojen luotettavuutta, yhteensopivuutta X:n uusien aikajanavastausten kanssa ja useampien Pixiv-teos- ja profiililinkkien tukea parannettiin."
+            "value" : "Versio %@:\n• Lisätty Pixiv Ugoira -animaatioiden toisto ja tallennus MP4-videoiksi.\n• Vedä mediaselaimessa ylöspäin nähdäksesi julkaisun tiedot ja toiminnot.\n• Bluesky tukee nyt GIF- ja MOV-latauksia. Videoiden tallennus on korjattu, ja kotiaikajana piilottaa vastaukset tileille, joita et seuraa.\n• Parannettu median lataamista ja luonnosten uudelleenlähetystä.\n• Virhekorjauksia ja suorituskyvyn parannuksia."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Version %@ :\n• Amélioration de la lecture vidéo dans les fils avec des transitions plus fluides, une meilleure sélection automatique et la reprise à la même position après l’ouverture ou la fermeture de la visionneuse multimédia.\n• Amélioration de la navigation et des détails de publication : les réponses et positions de défilement sont conservées après actualisation, les détails Weibo utilisent le fil natif et les barres de navigation se réduisent lors du défilement sous iOS 27.\n• Amélioration de l’accessibilité des publications, des médias et de l’écran de rédaction grâce à des libellés, états et commandes plus clairs.\n• Amélioration de la fiabilité des sessions Bluesky, de la compatibilité avec les nouvelles réponses de fil X et de la prise en charge de davantage de formats de liens vers les œuvres et profils Pixiv."
+            "value" : "Version %@ :\n• Ajout de la lecture des animations Ugoira de Pixiv et de leur enregistrement en vidéos MP4.\n• Faites glisser vers le haut dans la visionneuse multimédia pour consulter les détails et les actions du post.\n• Bluesky prend en charge l’envoi de GIF et de MOV. L’enregistrement des vidéos est corrigé et le fil d’accueil masque les réponses aux comptes que vous ne suivez pas.\n• Amélioration de l’envoi des médias et du renvoi des brouillons.\n• Corrections de bugs et améliorations des performances."
           }
         },
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "גרסה %@:\n• שופרה הפעלת הסרטונים בציר הזמן עם מעברים חלקים יותר, בחירה אוטומטית טובה יותר ושמירת מיקום ההפעלה בעת פתיחה או סגירה של מציג המדיה.\n• שופרו הניווט בציר הזמן ופרטי הפוסטים: תגובות ומיקומי גלילה נשמרים לאחר רענון, פרטי Weibo משתמשים בציר הזמן המקורי וסרגלי הניווט מצטמצמים בגלילה ב-iOS 27.\n• שופרה הנגישות בפוסטים, במדיה ובמסך הכתיבה באמצעות תוויות, מצבים ופקדים ברורים יותר.\n• שופרה אמינות ההפעלות של Bluesky, התאימות לתגובות החדשות של ציר הזמן ב-X והתמיכה בתבניות נוספות של קישורים ליצירות ולפרופילים ב-Pixiv."
+            "value" : "גרסה %@:\n• נוספה אפשרות לנגן אנימציות Ugoira של Pixiv ולשמור אותן כסרטוני MP4.\n• גררו כלפי מעלה במציג המדיה כדי לראות את פרטי הפוסט ואת הפעולות.\n• Bluesky תומך כעת בהעלאת GIF ו-MOV. שמירת סרטונים תוקנה, וציר הזמן הראשי מסתיר תגובות לחשבונות שאינכם עוקבים אחריהם.\n• שופרו העלאת מדיה ושליחה חוזרת של טיוטות.\n• תיקוני באגים ושיפורי ביצועים."
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@ verzió:\n• Javult az idővonali videók lejátszása: simább átmenetek, jobb automatikus videóválasztás és a lejátszási pozíció megőrzése a médianézegető megnyitásakor vagy bezárásakor.\n• Javult az idővonal navigációja és a bejegyzésrészletek: frissítés után megmaradnak a válaszok és a görgetési helyzet, a Weibo-részletek natív idővonalat használnak, iOS 27-en pedig görgetéskor összehúzódnak a navigációs sávok.\n• Egyértelműbb címkékkel, állapotokkal és vezérlőkkel javult a bejegyzések, a média és a szerkesztőképernyő akadálymentessége.\n• Javult a Bluesky-munkamenetek megbízhatósága, az új X-idővonalválaszokkal való kompatibilitás és több Pixiv-alkotás- és profillink-formátum támogatása."
+            "value" : "%@ verzió:\n• A Pixiv Ugoira animációk most már lejátszhatók és MP4-videóként menthetők.\n• Húzza felfelé a médianézegetőt a bejegyzés részleteinek és műveleteinek megtekintéséhez.\n• A Bluesky már támogatja a GIF- és MOV-feltöltéseket. Javítottuk a videók mentését, a kezdő idővonal pedig elrejti a nem követett fiókoknak írt válaszokat.\n• Javult a médiafeltöltés és a piszkozatok újraküldése.\n• Hibajavítások és teljesítménybeli fejlesztések."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Versione %@:\n• Migliorata la riproduzione dei video nella timeline con transizioni più fluide, una migliore selezione automatica e il mantenimento della posizione quando si apre o chiude il visualizzatore multimediale.\n• Migliorati la navigazione nella timeline e i dettagli dei post: risposte e posizione di scorrimento vengono conservate dopo l’aggiornamento, i dettagli Weibo usano la timeline nativa e le barre di navigazione si riducono durante lo scorrimento su iOS 27.\n• Migliorata l’accessibilità di post, contenuti multimediali e schermata di composizione con etichette, stati e controlli più chiari.\n• Migliorata l’affidabilità delle sessioni Bluesky, la compatibilità con le nuove risposte della timeline di X e il supporto per più formati di link a opere e profili Pixiv."
+            "value" : "Versione %@:\n• Aggiunte la riproduzione delle animazioni Ugoira di Pixiv e la possibilità di salvarle come video MP4.\n• Trascina verso l’alto nel visualizzatore multimediale per vedere dettagli e azioni del post.\n• Bluesky supporta il caricamento di GIF e MOV. Corretto il salvataggio dei video; la timeline principale nasconde le risposte ad account che non segui.\n• Migliorati il caricamento dei media e il reinvio delle bozze.\n• Correzioni di bug e miglioramenti delle prestazioni."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "バージョン %@:\n• タイムラインの動画再生を改善しました。切り替えがより滑らかになり、再生する動画を適切に自動選択し、メディアビューアーを開閉しても再生位置を維持します。\n• タイムライン操作と投稿詳細を改善しました。更新後も返信とスクロール位置を維持し、Weibo の詳細画面はネイティブのタイムラインを使用します。iOS 27 ではスクロール中にナビゲーションバーが最小化されます。\n• 投稿、メディア、投稿作成画面のラベル、状態、操作を分かりやすくし、アクセシビリティを改善しました。\n• Bluesky セッションの安定性、新しい X タイムライン応答への互換性、および Pixiv の作品・プロフィールリンク形式への対応を改善しました。"
+            "value" : "バージョン %@:\n• Pixiv のうごイラ再生と MP4 動画としての保存に対応しました。\n• メディアビューアーを上にドラッグして、投稿の詳細確認や操作ができるようになりました。\n• Bluesky で GIF と MOV のアップロードに対応し、動画の保存を修正しました。ホームではフォローしていないアカウントへの返信を非表示にします。\n• メディアのアップロードと下書きの再送を改善しました。\n• 不具合修正とパフォーマンス改善。"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "버전 %@:\n• 타임라인 동영상 재생을 개선하여 전환이 더 부드러워지고 자동 동영상 선택이 향상되었으며, 미디어 뷰어를 열거나 닫아도 재생 위치가 유지됩니다.\n• 타임라인 탐색과 게시물 상세를 개선했습니다. 새로 고쳐도 답글과 스크롤 위치가 유지되고, Weibo 상세 화면은 네이티브 타임라인을 사용하며, iOS 27에서는 스크롤할 때 탐색 막대가 축소됩니다.\n• 게시물, 미디어 및 작성 화면에 더 명확한 레이블, 상태 및 컨트롤을 제공하여 접근성을 개선했습니다.\n• Bluesky 세션 안정성, 새로운 X 타임라인 응답과의 호환성 및 더 다양한 Pixiv 작품·프로필 링크 형식 지원을 개선했습니다."
+            "value" : "버전 %@:\n• Pixiv Ugoira 애니메이션 재생과 MP4 동영상 저장을 추가했습니다.\n• 미디어 뷰어를 위로 드래그해 게시물 상세 정보를 확인하고 작업할 수 있습니다.\n• Bluesky에서 GIF와 MOV 업로드를 지원하고 동영상 저장을 수정했습니다. 홈 타임라인에서는 팔로우하지 않는 계정에 대한 답글을 숨깁니다.\n• 미디어 업로드와 초안 재전송을 개선했습니다.\n• 버그 수정 및 성능 개선."
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Versjon %@:\n• Forbedret videoavspilling i tidslinjen med jevnere overganger, bedre automatisk videovalg og bevart avspillingsposisjon når medievisningen åpnes eller lukkes.\n• Forbedret navigasjon og innleggsdetaljer: svar og rulleposisjoner bevares etter oppdatering, Weibo-detaljer bruker den innebygde tidslinjen, og navigasjonslinjer minimeres ved rulling i iOS 27.\n• Forbedret tilgjengeligheten i innlegg, medier og publiseringsskjermen med tydeligere etiketter, tilstander og kontroller.\n• Forbedret stabiliteten til Bluesky-økter, kompatibiliteten med nye X-tidslinjesvar og støtten for flere lenkeformater til Pixiv-verk og -profiler."
+            "value" : "Versjon %@:\n• Lagt til avspilling av Pixiv Ugoira-animasjoner og lagring som MP4-videoer.\n• Dra opp i medievisningen for å se innleggets detaljer og handlinger.\n• Bluesky støtter nå opplasting av GIF og MOV. Videolagring er rettet, og hjemmetidslinjen skjuler svar til kontoer du ikke følger.\n• Forbedret opplasting av medier og ny sending av utkast.\n• Feilrettinger og ytelsesforbedringer."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Versie %@:\n• De videoweergave in tijdlijnen is verbeterd met soepelere overgangen, betere automatische videoselectie en behoud van de afspeelpositie bij het openen of sluiten van de mediaviewer.\n• Tijdlijnnavigatie en berichtdetails zijn verbeterd: antwoorden en scrollposities blijven na vernieuwen behouden, Weibo-details gebruiken de systeemeigen tijdlijn en navigatiebalken worden tijdens scrollen in iOS 27 geminimaliseerd.\n• De toegankelijkheid van berichten, media en het opstelscherm is verbeterd met duidelijkere labels, statussen en bedieningselementen.\n• De betrouwbaarheid van Bluesky-sessies, compatibiliteit met nieuwe X-tijdlijnreacties en ondersteuning voor meer Pixiv-linkformaten voor werken en profielen zijn verbeterd."
+            "value" : "Versie %@:\n• Afspelen van Pixiv Ugoira-animaties en opslaan als MP4-video’s toegevoegd.\n• Sleep omhoog in de mediaviewer om berichtdetails en acties te bekijken.\n• Bluesky ondersteunt nu GIF- en MOV-uploads. Het opslaan van video’s is hersteld en de starttijdlijn verbergt antwoorden aan accounts die je niet volgt.\n• Uploads van media en opnieuw verzenden van concepten verbeterd.\n• Bugfixes en prestatieverbeteringen."
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Wersja %@:\n• Ulepszono odtwarzanie filmów na osi czasu: płynniejsze przejścia, lepszy automatyczny wybór oraz zachowanie pozycji po otwarciu lub zamknięciu przeglądarki multimediów.\n• Ulepszono nawigację po osi czasu i szczegóły wpisów: odpowiedzi i pozycja przewijania są zachowywane po odświeżeniu, szczegóły Weibo korzystają z natywnej osi czasu, a paski nawigacji minimalizują się podczas przewijania w iOS 27.\n• Ulepszono dostępność wpisów, multimediów i ekranu tworzenia dzięki czytelniejszym etykietom, stanom i elementom sterującym.\n• Zwiększono niezawodność sesji Bluesky, zgodność z nowymi odpowiedziami osi czasu X oraz obsługę większej liczby formatów odnośników do prac i profili Pixiv."
+            "value" : "Wersja %@:\n• Dodano odtwarzanie animacji Ugoira z Pixiv i zapisywanie ich jako filmów MP4.\n• Przeciągnij w górę w przeglądarce multimediów, aby zobaczyć szczegóły wpisu i działania.\n• Bluesky obsługuje teraz przesyłanie GIF i MOV. Naprawiono zapisywanie filmów, a główna oś czasu ukrywa odpowiedzi do kont, których nie obserwujesz.\n• Ulepszono przesyłanie multimediów i ponawianie wysyłania szkiców.\n• Poprawki błędów i ulepszenia wydajności."
           }
         },
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Versão %@:\n• Melhorada a reprodução de vídeos na cronologia com transições mais fluidas, melhor seleção automática e preservação da posição ao abrir ou fechar o visualizador multimédia.\n• Melhoradas a navegação na cronologia e os detalhes das publicações: as respostas e posições de deslocamento mantêm-se após atualizar, os detalhes Weibo usam a cronologia nativa e as barras de navegação minimizam-se ao deslocar no iOS 27.\n• Melhorada a acessibilidade das publicações, dos conteúdos multimédia e do ecrã de composição com etiquetas, estados e controlos mais claros.\n• Melhorada a fiabilidade das sessões Bluesky, a compatibilidade com novas respostas da cronologia do X e o suporte para mais formatos de ligações de obras e perfis Pixiv."
+            "value" : "Versão %@:\n• Adicionada a reprodução de animações Ugoira do Pixiv e a possibilidade de as guardar como vídeos MP4.\n• Arraste para cima no visualizador multimédia para ver os detalhes e as ações da publicação.\n• O Bluesky permite agora enviar GIF e MOV. Corrigida a gravação de vídeos; a cronologia inicial oculta respostas a contas que não segue.\n• Melhorado o envio de conteúdos multimédia e o reenvio de rascunhos.\n• Correções de erros e melhorias de desempenho."
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Versão %@:\n• Melhoramos a reprodução de vídeos na timeline com transições mais suaves, melhor seleção automática e preservação da posição ao abrir ou fechar o visualizador de mídia.\n• Melhoramos a navegação na timeline e os detalhes dos posts: respostas e posições de rolagem são preservadas após a atualização, os detalhes do Weibo usam a timeline nativa e as barras de navegação são minimizadas ao rolar no iOS 27.\n• Melhoramos a acessibilidade de posts, mídias e da tela de composição com rótulos, estados e controles mais claros.\n• Melhoramos a confiabilidade das sessões do Bluesky, a compatibilidade com novas respostas da timeline do X e o suporte a mais formatos de links de obras e perfis do Pixiv."
+            "value" : "Versão %@:\n• Adicionadas a reprodução de animações Ugoira do Pixiv e a opção de salvá-las como vídeos MP4.\n• Arraste para cima no visualizador de mídia para ver os detalhes e as ações do post.\n• O Bluesky agora permite enviar GIF e MOV. Corrigido o salvamento de vídeos; a timeline inicial oculta respostas a contas que você não segue.\n• Melhorado o envio de mídia e o reenvio de rascunhos.\n• Correções de bugs e melhorias de desempenho."
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Versiunea %@:\n• Redarea videoclipurilor în cronologie a fost îmbunătățită cu tranziții mai fluide, selecție automată mai bună și păstrarea poziției la deschiderea sau închiderea vizualizatorului media.\n• Navigarea în cronologie și detaliile postărilor au fost îmbunătățite: răspunsurile și poziția de derulare se păstrează după reîmprospătare, detaliile Weibo folosesc cronologia nativă, iar barele de navigare se minimizează la derulare în iOS 27.\n• Accesibilitatea postărilor, conținutului media și ecranului de compunere a fost îmbunătățită cu etichete, stări și comenzi mai clare.\n• A fost îmbunătățită fiabilitatea sesiunilor Bluesky, compatibilitatea cu noile răspunsuri ale cronologiei X și suportul pentru mai multe formate de linkuri către lucrări și profiluri Pixiv."
+            "value" : "Versiunea %@:\n• Adăugate redarea animațiilor Ugoira de pe Pixiv și salvarea lor ca videoclipuri MP4.\n• Trageți în sus în vizualizatorul media pentru a vedea detaliile și acțiunile postării.\n• Bluesky acceptă acum încărcarea fișierelor GIF și MOV. Salvarea videoclipurilor a fost corectată, iar cronologia principală ascunde răspunsurile către conturi pe care nu le urmăriți.\n• Îmbunătățite încărcarea fișierelor media și retrimiterea ciornelor.\n• Corectări de erori și îmbunătățiri de performanță."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Версия %@:\n• Улучшено воспроизведение видео в ленте: более плавные переходы, точнее автоматический выбор видео и сохранение позиции при открытии или закрытии медиапросмотра.\n• Улучшены навигация по ленте и сведения о публикациях: ответы и позиция прокрутки сохраняются после обновления, страницы Weibo используют нативную ленту, а панели навигации сворачиваются при прокрутке в iOS 27.\n• Улучшена доступность публикаций, медиа и экрана создания благодаря более понятным подписям, состояниям и элементам управления.\n• Повышена надёжность сеансов Bluesky, совместимость с новыми ответами ленты X и поддержка дополнительных форматов ссылок на работы и профили Pixiv."
+            "value" : "Версия %@:\n• Добавлены воспроизведение анимаций Ugoira из Pixiv и сохранение их как видео MP4.\n• Потяните вверх в медиапросмотре, чтобы открыть сведения о публикации и действия.\n• Bluesky теперь поддерживает загрузку GIF и MOV. Исправлено сохранение видео; главная лента скрывает ответы аккаунтам, на которые вы не подписаны.\n• Улучшены загрузка медиа и повторная отправка черновиков.\n• Исправления ошибок и улучшения производительности."
           }
         },
         "sr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Верзија %@:\n• Побољшана је репродукција видеа на временској линији уз глаткије прелазе, бољи аутоматски избор и чување позиције при отварању или затварању приказивача медија.\n• Побољшана је навигација и приказ детаља објава: одговори и позиција померања остају сачувани након освежавања, Weibo детаљи користе изворну временску линију, а навигационе траке се смањују током померања у iOS-у 27.\n• Побољшана је приступачност објава, медија и екрана за састављање јаснијим ознакама, стањима и контролама.\n• Побољшана је поузданост Bluesky сесија, компатибилност са новим одговорима X временске линије и подршка за више формата веза ка Pixiv радовима и профилима."
+            "value" : "Верзија %@:\n• Додати су репродукција Pixiv Ugoira анимација и чување као MP4 видео-снимака.\n• Повуците нагоре у приказивачу медија да видите детаље објаве и радње.\n• Bluesky сада подржава отпремање GIF и MOV датотека. Исправљено је чување видеа, а почетна временска линија скрива одговоре налозима које не пратите.\n• Побољшани су отпремање медија и поновно слање нацрта.\n• Исправке грешака и побољшања перформанси."
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Version %@:\n• Förbättrad videouppspelning i tidslinjen med mjukare övergångar, bättre automatiskt videoval och sparad uppspelningsposition när medievisaren öppnas eller stängs.\n• Förbättrad tidslinjenavigering och inläggsdetaljer: svar och rullningspositioner bevaras efter uppdatering, Weibo-detaljer använder den inbyggda tidslinjen och navigeringsfält minimeras vid rullning i iOS 27.\n• Förbättrad tillgänglighet i inlägg, medier och publiceringsskärmen med tydligare etiketter, tillstånd och kontroller.\n• Förbättrad tillförlitlighet för Bluesky-sessioner, kompatibilitet med nya X-tidslinjesvar och stöd för fler länkformat till Pixiv-verk och -profiler."
+            "value" : "Version %@:\n• Stöd för uppspelning av Pixiv Ugoira-animationer och sparande som MP4-videor har lagts till.\n• Dra uppåt i medievisaren för att se inläggets detaljer och åtgärder.\n• Bluesky stöder nu uppladdning av GIF och MOV. Videosparande har rättats och hemtidslinjen döljer svar till konton du inte följer.\n• Uppladdning av medier och omsändning av utkast har förbättrats.\n• Buggfixar och prestandaförbättringar."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sürüm %@:\n• Zaman akışındaki video oynatma; daha akıcı geçişler, daha iyi otomatik video seçimi ve medya görüntüleyici açılıp kapatıldığında oynatma konumunun korunmasıyla iyileştirildi.\n• Zaman akışı gezinmesi ve gönderi ayrıntıları iyileştirildi: yenilemeden sonra yanıtlar ve kaydırma konumu korunuyor, Weibo ayrıntıları yerel zaman akışını kullanıyor ve iOS 27’de kaydırırken gezinme çubukları küçülüyor.\n• Gönderilerde, medyada ve oluşturma ekranında daha anlaşılır etiketler, durumlar ve kontrollerle erişilebilirlik iyileştirildi.\n• Bluesky oturum güvenilirliği, yeni X zaman akışı yanıtlarıyla uyumluluk ve daha fazla Pixiv eser ve profil bağlantısı biçimi desteği iyileştirildi."
+            "value" : "Sürüm %@:\n• Pixiv Ugoira animasyonlarını oynatma ve MP4 video olarak kaydetme desteği eklendi.\n• Gönderi ayrıntılarını ve işlemlerini görmek için medya görüntüleyicide yukarı sürükleyin.\n• Bluesky artık GIF ve MOV yüklemelerini destekliyor. Video kaydetme düzeltildi; ana zaman akışı, takip etmediğiniz hesaplara verilen yanıtları gizliyor.\n• Medya yüklemeleri ve taslakları yeniden gönderme iyileştirildi.\n• Hata düzeltmeleri ve performans iyileştirmeleri."
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Версія %@:\n• Покращено відтворення відео у стрічці: плавніші переходи, кращий автоматичний вибір і збереження позиції під час відкриття або закриття переглядача медіа.\n• Покращено навігацію стрічкою та подробиці дописів: відповіді й позиція прокручування зберігаються після оновлення, сторінки Weibo використовують нативну стрічку, а панелі навігації згортаються під час прокручування в iOS 27.\n• Покращено доступність дописів, медіа й екрана створення завдяки зрозумілішим міткам, станам і елементам керування.\n• Підвищено надійність сеансів Bluesky, сумісність із новими відповідями стрічки X і підтримку більшої кількості форматів посилань на роботи та профілі Pixiv."
+            "value" : "Версія %@:\n• Додано відтворення анімацій Ugoira з Pixiv і збереження їх як відео MP4.\n• Потягніть угору в переглядачі медіа, щоб відкрити подробиці допису та дії.\n• Bluesky тепер підтримує завантаження GIF і MOV. Виправлено збереження відео; головна стрічка приховує відповіді обліковим записам, на які ви не підписані.\n• Покращено завантаження медіа та повторне надсилання чернеток.\n• Виправлення помилок і покращення продуктивності."
           }
         },
         "vi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Phiên bản %@:\n• Cải thiện phát video trên dòng thời gian với chuyển cảnh mượt hơn, chọn video tự động tốt hơn và giữ nguyên vị trí phát khi mở hoặc đóng trình xem đa phương tiện.\n• Cải thiện điều hướng dòng thời gian và chi tiết bài đăng: phản hồi cùng vị trí cuộn được giữ lại sau khi làm mới, chi tiết Weibo dùng dòng thời gian gốc và thanh điều hướng thu gọn khi cuộn trên iOS 27.\n• Cải thiện khả năng hỗ trợ tiếp cận cho bài đăng, nội dung đa phương tiện và màn hình soạn thảo với nhãn, trạng thái và điều khiển rõ ràng hơn.\n• Cải thiện độ ổn định của phiên Bluesky, khả năng tương thích với phản hồi dòng thời gian mới của X và hỗ trợ thêm định dạng liên kết tác phẩm, hồ sơ Pixiv."
+            "value" : "Phiên bản %@:\n• Thêm phát ảnh động Ugoira từ Pixiv và lưu dưới dạng video MP4.\n• Kéo lên trong trình xem đa phương tiện để xem chi tiết bài đăng và các thao tác.\n• Bluesky hỗ trợ tải lên GIF và MOV. Đã sửa lỗi lưu video; dòng thời gian chính ẩn phản hồi gửi đến các tài khoản bạn không theo dõi.\n• Cải thiện tải lên nội dung đa phương tiện và gửi lại bản nháp.\n• Sửa lỗi và cải thiện hiệu suất."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "版本 %@：\n• 改进时间线视频播放：切换更流畅，可自动选择更合适的视频，并在打开或关闭媒体查看器时保留播放进度。\n• 改进时间线导航和帖子详情：刷新后会保留回复与滚动位置，微博详情使用原生时间线体验，iOS 27 上的导航栏会在滚动时自动收起。\n• 改进帖子、媒体和发帖界面的无障碍体验，提供更清晰的标签、状态说明和操作控件。\n• 提升 Bluesky 会话稳定性，兼容 X 时间线的新响应格式，并支持更多 Pixiv 作品及用户链接格式。"
+            "value" : "版本 %@：\n• 新增 Pixiv 动图播放，支持保存为 MP4 视频。\n• 媒体查看器支持上拉查看帖子详情并进行快捷操作。\n• Bluesky 支持上传 GIF 和 MOV，修复视频保存，并在首页过滤回复给未关注账号的帖子。\n• 改进媒体上传和草稿重试。\n• 修复已知问题并优化性能。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "版本 %@：\n• 改善時間軸影片播放：切換更流暢，可自動選擇更合適的影片，並在開啟或關閉媒體檢視器時保留播放進度。\n• 改善時間軸導覽和貼文詳細資料：重新整理後會保留回覆與捲動位置，微博詳細資料採用原生時間軸體驗，iOS 27 上的導覽列會在捲動時自動收合。\n• 改善貼文、媒體和發文介面的輔助使用體驗，提供更清晰的標籤、狀態說明和操作控制項。\n• 提升 Bluesky 工作階段穩定性、相容 X 時間軸的新回應格式，並支援更多 Pixiv 作品及使用者連結格式。"
+            "value" : "版本 %@：\n• 新增 Pixiv 動圖播放，支援儲存為 MP4 影片。\n• 媒體檢視器支援向上拖曳查看貼文詳情並進行快捷操作。\n• Bluesky 支援上傳 GIF 和 MOV，修正影片儲存問題，並在首頁過濾回覆給未追蹤帳號的貼文。\n• 改善媒體上傳和草稿重試。\n• 修正已知問題並最佳化效能。"
           }
         }
       }

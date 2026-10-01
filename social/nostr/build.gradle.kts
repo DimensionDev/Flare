@@ -39,7 +39,7 @@ kotlin {
                 implementation(libs.bundles.ktor)
                 implementation(libs.ktor.client.resources)
                 implementation(libs.cryptography.provider.optimal)
-                implementation(libs.nostr.sdk.kmp)
+                implementation(libs.quartz)
                 implementation(libs.paging.common)
             }
         }

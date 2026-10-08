@@ -121,9 +121,9 @@ internal class MisskeyDataSource(
     private val textLimitMutex = Mutex()
     private var resolvedTextLimit: Int? = null
 
-    private suspend fun resolveTextLimit(refresh: Boolean = false): Int =
+    private suspend fun resolveTextLimit(): Int =
         textLimitMutex.withLock {
-            (resolvedTextLimit.takeUnless { refresh }) ?: try {
+            resolvedTextLimit ?: try {
                 withTimeoutOrNull(5_000) { service.meta(MetaRequest()).maxNoteTextLength }
                     ?.takeIf { it in 1..Int.MAX_VALUE.toLong() }
                     ?.toInt()
@@ -601,15 +601,7 @@ internal class MisskeyDataSource(
             text =
                 ComposeConfig.Text.withValidation(
                     maxLength = textLimitFlow,
-                    check = { content, spoilerText, refresh ->
-                        val limitFlow =
-                            if (refresh) {
-                                flow { emit(resolveTextLimit(refresh = true)) }
-                            } else {
-                                textLimitFlow
-                            }
-                        limitFlow.map { checkText(content, spoilerText, it) }
-                    },
+                    check = { content, spoilerText -> textLimitFlow.map { checkText(content, spoilerText, it) } },
                 ),
             media =
                 ComposeConfig.Media(

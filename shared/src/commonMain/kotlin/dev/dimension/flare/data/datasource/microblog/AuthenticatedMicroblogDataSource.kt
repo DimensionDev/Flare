@@ -4,6 +4,7 @@ import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus
+import kotlinx.coroutines.flow.first
 import kotlin.native.HiddenFromObjC
 
 @HiddenFromObjC
@@ -24,18 +25,16 @@ public interface ComposeDataSource : AuthenticatedMicroblogDataSource {
         data: ComposeData,
         progress: () -> Unit,
     ) {
-        require(checkComposeText(data)?.isValid != false) { "Post text exceeds the platform limits." }
-        publish(data, progress)
-    }
-
-    public suspend fun checkComposeText(data: ComposeData): ComposeConfig.Text.Check? {
         val type =
             when (data.referenceStatus?.composeStatus) {
                 is ComposeStatus.Quote -> ComposeType.Quote
                 is ComposeStatus.Reply -> ComposeType.Reply
                 null -> ComposeType.New
             }
-        return composeConfig(type).text?.validate(data.content, data.spoilerText)
+        // ponytail: Use cached/default limits like the editor; add provider expiry if stale limits cause failures.
+        val remaining = composeConfig(type).text?.remainingLength(data.content, data.spoilerText)?.first()
+        require(remaining?.isValid != false) { "Post text exceeds the platform limits." }
+        publish(data, progress)
     }
 
     // Platform hook; callers use compose to validate before uploading media.

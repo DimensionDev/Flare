@@ -1,10 +1,8 @@
 package dev.dimension.flare.data.datasource.microblog
 
 import dev.dimension.flare.model.MicroBlogKey
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -31,22 +29,15 @@ class ComposeTextValidationTest {
         }
 
     @Test
-    fun publishingUsesResolvedLimitRatherThanFirstFallbackEmission() =
+    fun publishingUsesTheCurrentAvailableLimit() =
         runTest {
-            val limits =
-                flow {
-                    emit(500)
-                    emit(4000)
-                }
-            val rule =
-                ComposeConfig.Text.withValidation(
-                    maxLength = limits,
-                    check = { content, _, refresh ->
-                        (if (refresh) flowOf(4000) else limits).map { ComposeConfig.Text.Check(it - content.length) }
-                    },
-                )
-            assertFalse(rule.check("a".repeat(3000)).first().isValid)
+            val limits = MutableStateFlow(500)
+            val rule = ComposeConfig.Text(limits)
+            assertFalse(rule.remainingLength("a".repeat(3000)).first().isValid)
             val source = TestComposeSource(rule)
+            assertFailsWith<IllegalArgumentException> { source.compose(ComposeData("a".repeat(3000))) {} }
+            assertEquals(0, source.published)
+            limits.value = 4000
             source.compose(ComposeData("a".repeat(3000))) {}
             assertEquals(1, source.published)
         }

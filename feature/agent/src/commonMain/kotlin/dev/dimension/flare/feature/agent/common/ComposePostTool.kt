@@ -16,6 +16,7 @@ import dev.dimension.flare.ui.presenter.compose.ComposeStatus
 import dev.dimension.flare.ui.render.toUi
 import dev.dimension.flare.ui.render.toUiPlainText
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.serialization.Serializable
 import kotlin.time.Clock
@@ -111,7 +112,11 @@ internal class ComposePostTool(
                 spoilerText = args.spoilerText.trim().takeIf { it.isNotBlank() },
                 referenceStatus = reference?.toComposeReference(action),
             )
-        if (target.dataSource.checkComposeText(data)?.isValid == false) {
+        if (config.text
+                ?.remainingLength(data.content, data.spoilerText)
+                ?.first()
+                ?.isValid == false
+        ) {
             return "Post text exceeds the platform limits."
         }
         if (!args.confirmed) {

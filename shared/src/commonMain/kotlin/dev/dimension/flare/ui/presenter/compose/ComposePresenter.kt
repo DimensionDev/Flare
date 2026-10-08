@@ -315,7 +315,7 @@ public class ComposePresenter(
         combine(textFlow, spoilerTextFlow, composeConfigFlow) { text, spoilerText, config ->
             Triple(text, spoilerText, config.text)
         }.flatMapLatest { (text, spoilerText, config) ->
-            config?.check(text, spoilerText)?.map<ComposeConfig.Text.Check, ComposeConfig.Text.Check?> { it } ?: flowOf(null)
+            config?.remainingLength(text, spoilerText)?.map<ComposeConfig.Text.Check, ComposeConfig.Text.Check?> { it } ?: flowOf(null)
         }.distinctUntilChanged()
     }
 

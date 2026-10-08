@@ -12,7 +12,6 @@ import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 
@@ -29,11 +28,11 @@ public data class ComposeConfig public constructor(
     @Immutable
     public class Text private constructor(
         public val maxLength: Flow<Int>,
-        private val checkProvider: (text: String, spoilerText: String?, refresh: Boolean) -> Flow<Check>,
+        private val remainingLengthProvider: (String, String?) -> Flow<Check>,
     ) {
         public constructor(maxLength: Flow<Int>) : this(
             maxLength = maxLength,
-            checkProvider = { text, _, _ -> maxLength.map { Check(it - text.length) } },
+            remainingLengthProvider = { text, _ -> maxLength.map { Check(it - text.length) } },
         )
 
         public constructor(maxLength: Int) : this(flowOf(maxLength))
@@ -45,25 +44,18 @@ public data class ComposeConfig public constructor(
             internal fun merge(other: Check): Check = Check(minOf(remainingLength, other.remainingLength), isValid && other.isValid)
         }
 
-        public fun check(
+        public fun remainingLength(
             text: String,
             spoilerText: String? = null,
-        ): Flow<Check> = checkProvider(text, spoilerText?.takeIf(String::isNotBlank), false)
-
-        public fun remainingLength(text: String): Flow<Int> = check(text).map { it.remainingLength }
-
-        public suspend fun validate(
-            text: String,
-            spoilerText: String? = null,
-        ): Check = checkProvider(text, spoilerText?.takeIf(String::isNotBlank), true).first()
+        ): Flow<Check> = remainingLengthProvider(text, spoilerText?.takeIf(String::isNotBlank))
 
         internal fun merge(other: Text): Text =
             Text(
                 maxLength = combine(maxLength, other.maxLength) { current, candidate -> minOf(current, candidate) }.distinctUntilChanged(),
-                checkProvider = { text, spoilerText, refresh ->
+                remainingLengthProvider = { text, spoilerText ->
                     combine(
-                        checkProvider(text, spoilerText, refresh),
-                        other.checkProvider(text, spoilerText, refresh),
+                        remainingLength(text, spoilerText),
+                        other.remainingLength(text, spoilerText),
                     ) { current, candidate ->
                         current.merge(candidate)
                     }.distinctUntilChanged()
@@ -79,11 +71,11 @@ public data class ComposeConfig public constructor(
             public fun withValidation(
                 maxLength: Int,
                 check: (String, String?) -> Check,
-            ): Text = withValidation(flowOf(maxLength), { text, spoilerText, _ -> flowOf(check(text, spoilerText)) })
+            ): Text = withValidation(flowOf(maxLength), { text, spoilerText -> flowOf(check(text, spoilerText)) })
 
             public fun withValidation(
                 maxLength: Flow<Int>,
-                check: (text: String, spoilerText: String?, refresh: Boolean) -> Flow<Check>,
+                check: (String, String?) -> Flow<Check>,
             ): Text = Text(maxLength, check)
         }
     }

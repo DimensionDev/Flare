@@ -3,8 +3,6 @@ package dev.dimension.flare.data.datasource.microblog
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
@@ -22,10 +20,10 @@ class ComposeConfigTextTest {
             val invalid = ComposeConfig.Text.withValidation(300) { _, _ -> ComposeConfig.Text.Check(299, isValid = false) }
             val valid = ComposeConfig.Text(5000)
             for (rule in listOf(invalid.merge(valid), valid.merge(invalid))) {
-                val result = rule.validate("text")
+                val result = rule.remainingLength("text").first()
                 assertEquals(299, result.remainingLength)
                 assertFalse(result.isValid)
-                assertFalse(rule.check("text").first().isValid)
+                assertFalse(rule.remainingLength("text").first().isValid)
             }
         }
 
@@ -36,7 +34,7 @@ class ComposeConfigTextTest {
             val unlimited = ComposeConfig()
             for (config in listOf(limited.merge(unlimited), unlimited.merge(limited))) {
                 val text = assertNotNull(config.text)
-                assertFalse(text.validate("a".repeat(281)).isValid)
+                assertFalse(text.remainingLength("a".repeat(281)).first().isValid)
             }
         }
 
@@ -71,8 +69,8 @@ class ComposeConfigTextTest {
                     .withLength(280) { if (it.startsWith("https://")) 23 else it.length * 2 }
                     .merge(ComposeConfig.Text(500))
 
-            assertEquals(-2, merged.remainingLength("あ".repeat(141)).first())
-            assertEquals(200, merged.remainingLength("https://" + "a".repeat(292)).first())
+            assertEquals(-2, merged.remainingLength("あ".repeat(141)).first().remainingLength)
+            assertEquals(200, merged.remainingLength("https://" + "a".repeat(292)).first().remainingLength)
         }
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -88,7 +86,7 @@ class ComposeConfigTextTest {
                         text =
                             ComposeConfig.Text.withValidation(
                                 maxLength = limit,
-                                check = { text, cw, _ -> limit.map { ComposeConfig.Text.Check(it - text.length - cw.orEmpty().length) } },
+                                check = { text, cw -> limit.map { ComposeConfig.Text.Check(it - text.length - cw.orEmpty().length) } },
                             ),
                     ),
                     ComposeConfig(),
@@ -97,7 +95,7 @@ class ComposeConfigTextTest {
                 limit.value = 500
                 val merged = assertNotNull(accounts.reduce { current, other -> current.merge(other) }.text)
                 val emissions = mutableListOf<ComposeConfig.Text.Check>()
-                val collection = merged.check("a".repeat(100), "cw").onEach(emissions::add).launchIn(backgroundScope)
+                val collection = merged.remainingLength("a".repeat(100), "cw").onEach(emissions::add).launchIn(backgroundScope)
                 runCurrent()
                 limit.value = 150
                 runCurrent()
@@ -106,32 +104,8 @@ class ComposeConfigTextTest {
 
                 assertEquals(listOf(80, 48, -12), emissions.map { it.remainingLength })
                 assertFalse(emissions.last().isValid)
-                assertEquals(emissions.last(), merged.validate("a".repeat(100), "cw"))
+                assertEquals(emissions.last(), merged.remainingLength("a".repeat(100), "cw").first())
                 collection.cancel()
             }
-        }
-
-    @Test
-    fun `merged validation refreshes every platform before calculating the minimum`() =
-        runTest {
-            val refreshed = mutableListOf<Int>()
-            val merged =
-                listOf(500 to 100, 1000 to 50)
-                    .map { (cached, resolved) ->
-                        ComposeConfig.Text.withValidation(
-                            maxLength = flowOf(cached),
-                            check = { text, _, refresh ->
-                                flow {
-                                    if (refresh) refreshed.add(resolved)
-                                    emit(ComposeConfig.Text.Check((if (refresh) resolved else cached) - text.length))
-                                }
-                            },
-                        )
-                    }.reduce { current, other -> current.merge(other) }
-
-            assertEquals(496, merged.check("text").first().remainingLength)
-            assertEquals(emptyList(), refreshed)
-            assertEquals(46, merged.validate("text").remainingLength)
-            assertEquals(listOf(50, 100), refreshed.sorted())
         }
 }

@@ -71,8 +71,10 @@ packages:
     url: https://github.com/onevcat/Kingfisher.git
     exactVersion: 8.12.0
   LazyPager:
-    url: https://github.com/gh123man/LazyPager
-    exactVersion: 1.2.1
+    # Temporary 1.2.1 fork: create the selected page before the first layout.
+    # Return to upstream once it includes the initial-page flash fix.
+    url: https://github.com/Tlaster/SwiftUI-LazyPager
+    revision: e4345c0a401c8bc4556b05dd34d651c25d4a96f2
   SwiftLintPlugins:
     url: https://github.com/SimplyDanny/SwiftLintPlugins
     exactVersion: 0.62.2

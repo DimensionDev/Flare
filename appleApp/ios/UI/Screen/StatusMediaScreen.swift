@@ -177,7 +177,7 @@ struct AdaptiveKFImage: View {
     
     var kfImageView: some View {
         ZStack {
-            if data.hasSuffix(".gif") {
+            if URL(string: data)?.pathExtension.lowercased() == "gif" {
                 KFAnimatedImage(.init(string: data))
                     .requestModifier({ request in
                         if let customHeader {

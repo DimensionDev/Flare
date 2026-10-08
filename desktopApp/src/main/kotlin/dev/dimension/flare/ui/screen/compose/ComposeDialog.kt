@@ -1298,13 +1298,7 @@ private fun composePresenter(
                         )
                     },
                 sensitive = mediaState.takeSuccess()?.isMediaSensitive ?: false,
-                spoilerText =
-                    contentWarningState
-                        .takeSuccess()
-                        ?.takeIf { it.enabled }
-                        ?.textFieldState
-                        ?.text
-                        ?.toString(),
+                spoilerText = spoilerText,
                 visibility =
                     state.visibilityState.takeSuccess()?.visibility
                         ?: UiTimelineV2.Post.Visibility.Public,

@@ -4,6 +4,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -70,5 +71,41 @@ class ComposeConfigTextTest {
 
             assertEquals(-2, merged.remainingLength("あ".repeat(141)).first())
             assertEquals(200, merged.remainingLength("https://" + "a".repeat(292)).first())
+        }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun `cross posting follows the minimum remaining count as platform limits change`() =
+        runTest {
+            val limit = MutableStateFlow(500)
+            val configs =
+                listOf(
+                    ComposeConfig(text = ComposeConfig.Text.withLength(280) { it.length * 2 }),
+                    ComposeConfig(text = ComposeConfig.Text(300)),
+                    ComposeConfig(
+                        text =
+                            ComposeConfig.Text.withValidation(
+                                maxLength = limit,
+                                check = { text, cw -> limit.map { ComposeConfig.Text.Check(it - text.length - cw.orEmpty().length) } },
+                            ),
+                    ),
+                    ComposeConfig(),
+                )
+            for (accounts in listOf(configs, configs.reversed())) {
+                limit.value = 500
+                val merged = assertNotNull(accounts.reduce { current, other -> current.merge(other) }.text)
+                val emissions = mutableListOf<ComposeConfig.Text.Check>()
+                val collection = merged.check("a".repeat(100), "cw").onEach(emissions::add).launchIn(backgroundScope)
+                runCurrent()
+                limit.value = 150
+                runCurrent()
+                limit.value = 90
+                runCurrent()
+
+                assertEquals(listOf(80, 48, -12), emissions.map { it.remainingLength })
+                assertFalse(emissions.last().isValid)
+                assertEquals(emissions.last(), merged.validate("a".repeat(100), "cw"))
+                collection.cancel()
+            }
         }
 }

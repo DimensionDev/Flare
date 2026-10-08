@@ -1,11 +1,16 @@
 package dev.dimension.flare.data.datasource.mastodon
 
+import de.cketti.codepoints.codePointCount
 import dev.dimension.flare.common.graphemeCount
 import moe.tlaster.twitter.parser.TwitterParser
 import moe.tlaster.twitter.parser.UrlToken
 
 private val parser = TwitterParser(enableDomainDetection = true, enableNonAsciiInUrl = false, enableEscapeInUrl = true)
-private val remoteMention = Regex("(?<![\\w@])@([a-zA-Z0-9_]+)@[a-zA-Z0-9.-]+(?::[0-9]+)?")
+private val remoteMention =
+    Regex(
+        """(?<![=/\p{L}\p{M}\p{Nl}\p{Nd}\p{Pc}])@([a-zA-Z0-9_]+(?:[.-]+[a-zA-Z0-9_]+)*)@""" +
+            """([\p{L}\p{M}\p{Nl}\p{Nd}\p{Pc}]+(?:[.-]+[\p{L}\p{M}\p{Nl}\p{Nd}\p{Pc}]+)*)""",
+    )
 
 internal fun mastodonTextLength(
     content: String,
@@ -19,7 +24,19 @@ internal fun mastodonTextLength(
             val plain = StringBuilder()
 
             fun flushPlain() {
-                append(remoteMention.replace(plain.toString()) { "@" + it.groupValues[1] })
+                val text = plain.toString()
+                append(
+                    remoteMention.replace(text) { match ->
+                        val end = match.range.last + 1
+                        if (match.groupValues[2].codePointCount() > 253 || text.startsWith("@", end) || text.startsWith("＠", end) ||
+                            text.startsWith("://", end)
+                        ) {
+                            match.value
+                        } else {
+                            "@" + match.groupValues[1]
+                        }
+                    },
+                )
                 plain.clear()
             }
             parser.parse(content).forEach { token ->

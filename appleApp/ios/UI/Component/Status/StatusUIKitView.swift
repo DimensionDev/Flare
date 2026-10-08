@@ -816,8 +816,7 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
                     lineLimit: nil,
                     isTextSelectionEnabled: isDetail,
                     onOpenURL: openURL,
-                    preferredContentSizeCategory: appearance.preferredContentSizeCategory,
-                    contentKey: Int(data.renderHash) * 4 + contentWarning.cacheKeyOffset
+                    preferredContentSizeCategory: appearance.preferredContentSizeCategory
                 )
                 append(contentWarningText, before: 4)
             }
@@ -864,7 +863,6 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
                     isTextSelectionEnabled: bodySelectionEnabled,
                     onOpenURL: openURL,
                     preferredContentSizeCategory: appearance.preferredContentSizeCategory,
-                    contentKey: Int(data.renderHash) * 4 + 2 + content.cacheKeyOffset,
                     collapseAboveLineCount: collapseAboveLineCount
                 )
                 append(bodyText, before: visibleBodyCount == 0 ? 0 : 4)

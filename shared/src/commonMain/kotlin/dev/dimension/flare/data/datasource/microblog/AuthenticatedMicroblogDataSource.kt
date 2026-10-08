@@ -24,8 +24,7 @@ public interface ComposeDataSource : AuthenticatedMicroblogDataSource {
         data: ComposeData,
         progress: () -> Unit,
     ) {
-        val check = checkComposeText(data)
-        require(check?.isValid != false) { check?.error ?: "Post text exceeds the character limit." }
+        require(checkComposeText(data)?.isValid != false) { "Post text exceeds the platform limits." }
         publish(data, progress)
     }
 

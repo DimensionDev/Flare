@@ -30,6 +30,13 @@ class ComposeTextRulesTest {
             assertEquals(299, rule.validate(byteOverflow).remainingLength)
             assertFalse(rule.validate(byteOverflow).isValid)
             assertFalse(rule.merge(ComposeConfig.Text(5000)).validate(byteOverflow).isValid)
+            assertFalse(
+                ComposeConfig
+                    .Text(5000)
+                    .merge(rule)
+                    .validate(byteOverflow)
+                    .isValid,
+            )
         }
 
     @Test
@@ -46,6 +53,7 @@ class ComposeTextRulesTest {
         runTest {
             val source = TestComposeSource(ComposeTextRules.bluesky())
             assertFailsWith<IllegalArgumentException> { source.compose(ComposeData("a".repeat(301))) {} }
+            assertFailsWith<IllegalArgumentException> { source.compose(ComposeData("a" + "\u0301".repeat(1500))) {} }
             assertEquals(0, source.published)
             source.compose(ComposeData("a".repeat(299) + "👍🏽")) {}
             assertEquals(1, source.published)

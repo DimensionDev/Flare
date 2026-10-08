@@ -8,12 +8,8 @@ public object ComposeTextRules {
         ComposeConfig.Text.withValidation(300) { content, _ ->
             val remaining = 300 - content.graphemeCount()
             ComposeConfig.Text.Check(
-                remaining,
-                when {
-                    remaining < 0 -> "Bluesky posts must be at most 300 characters."
-                    content.encodeToByteArray().size > 3000 -> "Bluesky posts must be at most 3000 UTF-8 bytes."
-                    else -> null
-                },
+                remainingLength = remaining,
+                isValid = remaining >= 0 && content.encodeToByteArray().size <= 3000,
             )
         }
 
@@ -21,13 +17,11 @@ public object ComposeTextRules {
         content: String,
         spoilerText: String?,
         maxLength: Int,
-    ): ComposeConfig.Text.Check =
-        ComposeConfig.Text.Check(
-            maxLength - content.codePointCount(),
-            when {
-                content.codePointCount() > maxLength -> "Misskey posts exceed the instance character limit."
-                spoilerText.orEmpty().codePointCount() > 100 -> "Misskey content warnings must be at most 100 characters."
-                else -> null
-            },
+    ): ComposeConfig.Text.Check {
+        val remaining = maxLength - content.codePointCount()
+        return ComposeConfig.Text.Check(
+            remainingLength = remaining,
+            isValid = remaining >= 0 && spoilerText.orEmpty().codePointCount() <= 100,
         )
+    }
 }

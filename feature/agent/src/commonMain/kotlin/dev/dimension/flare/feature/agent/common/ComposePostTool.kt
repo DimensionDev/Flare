@@ -111,10 +111,9 @@ internal class ComposePostTool(
                 spoilerText = args.spoilerText.trim().takeIf { it.isNotBlank() },
                 referenceStatus = reference?.toComposeReference(action),
             )
-        target.dataSource
-            .checkComposeText(data)
-            ?.error
-            ?.let { return it }
+        if (target.dataSource.checkComposeText(data)?.isValid == false) {
+            return "Post text exceeds the platform limits."
+        }
         if (!args.confirmed) {
             val userPreview = target.loadUserPreview()
             val inputRequest =

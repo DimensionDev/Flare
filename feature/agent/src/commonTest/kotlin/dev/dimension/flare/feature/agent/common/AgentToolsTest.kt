@@ -6,6 +6,7 @@ import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.datasource.microblog.ComposeDataSource
+import dev.dimension.flare.data.datasource.microblog.ComposeTextRules
 import dev.dimension.flare.data.datasource.microblog.ComposeType
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
@@ -427,6 +428,29 @@ internal class AgentToolsTest {
             assertEquals(1, inputRequest.options.size)
             assertEquals("confirm", inputRequest.options.first().id)
             assertEquals("hello from agent", assertNotNull(inputRequest.postPreview).content.original.raw)
+        }
+
+    @Test
+    fun composeToolRejectsSecondaryTextLimitBeforeConfirmation() =
+        runTest {
+            val dataSource =
+                StubComposeDataSource(
+                    accountKey = MicroBlogKey("alice", "example.social"),
+                    text = ComposeTextRules.bluesky(),
+                )
+            val inputRequestStore = AgentToolInputRequestStore()
+            val result =
+                composePostTool(dataSource, inputRequestStore).execute(
+                    ComposePostTool.Args(
+                        content = "a" + "\u0301".repeat(1500),
+                        accountId = "alice",
+                        accountHost = "example.social",
+                    ),
+                )
+
+            assertTrue(result.contains("exceeds the platform limits"))
+            assertFalse(dataSource.composed)
+            assertNull(inputRequestStore.snapshot())
         }
 
     @Test
@@ -1661,6 +1685,7 @@ private class StubSubscriptionTimelineLoader(
 private class StubComposeDataSource(
     override val accountKey: MicroBlogKey,
     private val visibility: ComposeConfig.Visibility = ComposeConfig.Visibility(),
+    private val text: ComposeConfig.Text = ComposeConfig.Text(maxLength = 300),
 ) : ComposeDataSource {
     var composed: Boolean = false
     var lastData: ComposeData? = null
@@ -1675,7 +1700,7 @@ private class StubComposeDataSource(
 
     override fun composeConfig(type: ComposeType): ComposeConfig =
         ComposeConfig(
-            text = ComposeConfig.Text(maxLength = 300),
+            text = text,
             visibility = visibility,
             language = ComposeConfig.Language(maxCount = 1),
         )

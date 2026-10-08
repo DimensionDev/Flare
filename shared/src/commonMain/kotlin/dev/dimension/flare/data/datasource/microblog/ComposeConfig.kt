@@ -42,11 +42,9 @@ public data class ComposeConfig public constructor(
 
         public data class Check(
             val remainingLength: Int,
-            val error: String? = if (remainingLength < 0) "Post text exceeds the character limit." else null,
+            val isValid: Boolean = remainingLength >= 0,
         ) {
-            public val isValid: Boolean get() = remainingLength >= 0 && error == null
-
-            internal fun merge(other: Check): Check = Check(minOf(remainingLength, other.remainingLength), error ?: other.error)
+            internal fun merge(other: Check): Check = Check(minOf(remainingLength, other.remainingLength), isValid && other.isValid)
         }
 
         public fun check(

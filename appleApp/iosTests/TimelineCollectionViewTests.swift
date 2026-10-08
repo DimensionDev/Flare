@@ -448,6 +448,28 @@ final class TimelineCollectionViewTests: XCTestCase {
         XCTAssertEqual(view.contentInset.top, 52, accuracy: 0.5)
     }
 
+    func testCancellingRefreshCollapseDoesNotResumeOrHoldSnapshots() async throws {
+        let fixture = Fixture(width: 390, columns: 1)
+        let window = fixture.showInWindow()
+        defer { window.isHidden = true }
+        let view = fixture.collectionView
+        view.setTopContentInset(52)
+        fixture.scroll(to: -52)
+        view.refreshControl = UIRefreshControl()
+        view.beginRefreshing(revealingIndicator: true)
+        try await Task.sleep(for: .milliseconds(400))
+        view.endRefreshing()
+        try await Task.sleep(for: .milliseconds(50))
+        view.cancelRefresh()
+        fixture.scroll(to: 800)
+        try await Task.sleep(for: .milliseconds(400))
+
+        XCTAssertEqual(view.contentOffset.y, 800, accuracy: 0.5)
+        XCTAssertFalse(view.isPresentingRefresh)
+        XCTAssertFalse(view.shouldDeferSnapshotChanges)
+        XCTAssertFalse(view.hasReadingPosition)
+    }
+
     func testRefreshStartedBeforeWindowAttachmentRevealsItsIndicator() async throws {
         let fixture = Fixture(width: 390, columns: 1)
         let view = fixture.collectionView

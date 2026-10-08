@@ -5,11 +5,11 @@ import androidx.paging.Pager
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.map
+import de.cketti.codepoints.codePointCount
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.datasource.microblog.ComposeDataSource
-import dev.dimension.flare.data.datasource.microblog.ComposeTextRules
 import dev.dimension.flare.data.datasource.microblog.ComposeType
 import dev.dimension.flare.data.datasource.microblog.DatabaseUpdater
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
@@ -601,12 +601,12 @@ internal class MisskeyDataSource(
             text =
                 ComposeConfig.Text.withValidation(
                     maxLength = textLimitFlow,
-                    check = { content, spoilerText -> textLimitFlow.map { ComposeTextRules.misskeyCheck(content, spoilerText, it) } },
+                    check = { content, spoilerText -> textLimitFlow.map { checkText(content, spoilerText, it) } },
                     validate = {
                         content,
                         spoilerText,
                         ->
-                        ComposeTextRules.misskeyCheck(content, spoilerText, resolveTextLimit(refresh = true))
+                        checkText(content, spoilerText, resolveTextLimit(refresh = true))
                     },
                 ),
             media =
@@ -627,6 +627,18 @@ internal class MisskeyDataSource(
             contentWarning = ComposeConfig.ContentWarning,
             visibility = ComposeConfig.Visibility(),
         )
+
+    internal fun checkText(
+        content: String,
+        spoilerText: String?,
+        maxLength: Int,
+    ): ComposeConfig.Text.Check {
+        val remaining = maxLength - content.codePointCount()
+        return ComposeConfig.Text.Check(
+            remainingLength = remaining,
+            isValid = remaining >= 0 && spoilerText.orEmpty().codePointCount() <= 100,
+        )
+    }
 
     fun favouriteState(statusKey: MicroBlogKey): Flow<Boolean> =
         flow {

@@ -14,6 +14,19 @@ import kotlin.test.assertNotNull
 
 class ComposeConfigTextTest {
     @Test
+    fun `merged text retains invalidity with a positive remaining counter`() =
+        runTest {
+            val invalid = ComposeConfig.Text.withValidation(300) { _, _ -> ComposeConfig.Text.Check(299, isValid = false) }
+            val valid = ComposeConfig.Text(5000)
+            for (rule in listOf(invalid.merge(valid), valid.merge(invalid))) {
+                val result = rule.validate("text")
+                assertEquals(299, result.remainingLength)
+                assertFalse(result.isValid)
+                assertFalse(rule.check("text").first().isValid)
+            }
+        }
+
+    @Test
     fun `an unlimited platform retains other platform constraints`() =
         runTest {
             val limited = ComposeConfig(text = ComposeConfig.Text(280))

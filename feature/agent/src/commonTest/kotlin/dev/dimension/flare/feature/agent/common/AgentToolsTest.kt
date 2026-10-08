@@ -6,7 +6,6 @@ import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.datasource.microblog.ComposeDataSource
-import dev.dimension.flare.data.datasource.microblog.ComposeTextRules
 import dev.dimension.flare.data.datasource.microblog.ComposeType
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
@@ -436,13 +435,13 @@ internal class AgentToolsTest {
             val dataSource =
                 StubComposeDataSource(
                     accountKey = MicroBlogKey("alice", "example.social"),
-                    text = ComposeTextRules.bluesky(),
+                    text = ComposeConfig.Text.withValidation(300) { _, _ -> ComposeConfig.Text.Check(299, isValid = false) },
                 )
             val inputRequestStore = AgentToolInputRequestStore()
             val result =
                 composePostTool(dataSource, inputRequestStore).execute(
                     ComposePostTool.Args(
-                        content = "a" + "\u0301".repeat(1500),
+                        content = "hello from agent",
                         accountId = "alice",
                         accountHost = "example.social",
                     ),

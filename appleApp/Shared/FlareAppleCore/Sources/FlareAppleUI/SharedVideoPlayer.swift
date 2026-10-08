@@ -16,9 +16,8 @@ final class SharedVideoPlayer {
     static let shared = SharedVideoPlayer()
     private lazy var player = AVQueuePlayer()
     private weak var owner: VideoPlaybackSession?
-    private(set) var looper: AVPlayerLooper?
     private var playbackSubscription: AnyCancellable?
-    private var looperSubscription: AnyCancellable?
+    private var queueSubscription: AnyCancellable?
     private var timeObserver: Any?
     private var playbackError: (any Error)?
     private var pendingPosition: Double?
@@ -74,10 +73,8 @@ final class SharedVideoPlayer {
         generation += 1
         stopObserving()
         player.pause()
-        // Pending asset loading can retain the old looper after we release it.
-        looper?.disableLooping()
-        looper = nil
         player.removeAllItems()
+        player.actionAtItemEnd = .advance
         player.isMuted = true
         player.preventsDisplaySleepDuringVideoPlayback = false
         pendingPosition = position > 0 ? position : nil
@@ -85,19 +82,18 @@ final class SharedVideoPlayer {
         playbackError = nil
         // Observe before queuing the item: a local file can fail immediately.
         observePlayback()
-        let looper = AVPlayerLooper(player: player, templateItem: AVPlayerItem(url: url))
-        self.looper = looper
-        let generation = generation
-        looperSubscription = looper.publisher(for: \.status).sink { @Sendable [weak self] status in
-            guard status == .failed else { return }
-            let error = looper.error ?? URLError(.cannotDecodeContentData)
-            Task { @MainActor in
-                guard let self, self.generation == generation else { return }
-                self.playbackError = error
-                self.owner?.refresh()
-            }
-        }
+        replenishQueue()
         return (player, position)
+    }
+
+    private func replenishQueue() {
+        guard let loadedURL, playbackError == nil, player.error == nil,
+              player.currentItem?.status != .failed else { return }
+        while player.items().count < 3 {
+            // Looper replicas and shared assets can freeze short videos on iOS.
+            let item = AVPlayerItem(url: loadedURL)
+            player.insert(item, after: player.items().last)
+        }
     }
 
     private enum PlaybackUpdate: Sendable {
@@ -107,6 +103,12 @@ final class SharedVideoPlayer {
 
     private func observePlayback() {
         let generation = generation
+        queueSubscription = player.publisher(for: \.currentItem).sink { @Sendable [weak self] _ in
+            Task { @MainActor in
+                guard let self, self.generation == generation else { return }
+                self.replenishQueue()
+            }
+        }
         timeObserver = player.addPeriodicTimeObserver(
             forInterval: CMTime(seconds: 0.25, preferredTimescale: 600), queue: .main
         ) { [weak self] _ in
@@ -147,7 +149,7 @@ final class SharedVideoPlayer {
 
     private func stopObserving() {
         playbackSubscription = nil
-        looperSubscription = nil
+        queueSubscription = nil
         if let timeObserver {
             player.removeTimeObserver(timeObserver)
             self.timeObserver = nil
@@ -298,8 +300,6 @@ final class SharedVideoPlayer {
         generation += 1
         stopObserving()
         player.pause()
-        looper?.disableLooping()
-        looper = nil
         player.removeAllItems()
         loadedURL = nil
         pendingPosition = nil

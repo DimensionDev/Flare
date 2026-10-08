@@ -36,6 +36,7 @@ import dev.dimension.flare.ui.render.toUi
 import dev.dimension.flare.ui.render.toUiPlainText
 import dev.dimension.flare.ui.render.uiRichTextOf
 import dev.dimension.flare.ui.route.DeeplinkRoute
+import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.statement.bodyAsText
@@ -99,6 +100,7 @@ internal class NostrService(
     credential: NostrCredential,
     private val amberSignerBridge: AmberSignerBridge,
     initialRelays: List<String> = emptyList(),
+    private val relayInfoClient: HttpClient = ktorClient { expectSuccess = true },
 ) : AutoCloseable {
     companion object {
         private val HEX_KEY_REGEX = Regex("^[0-9a-fA-F]{64}\$")
@@ -353,10 +355,9 @@ internal class NostrService(
     private var connected = false
     private val relayMutex = Mutex()
     private val currentRelays = linkedMapOf<String, RustRelayUrl>()
-    private val relayInfoClient = ktorClient { expectSuccess = true }
     private val relayLimitsMutex = Mutex()
 
-    // ponytail: Cache NIP-11 for this service session; add expiry if live relay limit changes matter.
+    // ponytail: Cache NIP-11, including unavailable documents, for this session; add expiry if live changes matter.
     private val relayTextLimits = mutableMapOf<String, NostrTextLimits>()
 
     private val initialRelays = initialRelays.normalizeRelayUrls()
@@ -1278,7 +1279,7 @@ internal class NostrService(
                 .map { it.use { it.toCompatEvent() } }
         }
 
-    private suspend fun fetchTextLimits(relay: String): NostrTextLimits {
+    internal suspend fun fetchTextLimits(relay: String): NostrTextLimits {
         relayLimitsMutex.withLock { relayTextLimits[relay] }?.let { return it }
         val limits =
             try {
@@ -1307,9 +1308,9 @@ internal class NostrService(
                 throw error
             } catch (_: Exception) {
                 null
-            }
-        if (limits != null) relayLimitsMutex.withLock { relayTextLimits[relay] = limits }
-        return limits ?: NostrTextLimits()
+            } ?: NostrTextLimits()
+        relayLimitsMutex.withLock { relayTextLimits[relay] = limits }
+        return limits
     }
 
     private suspend fun sendEventBuilder(builder: RustEventBuilder): String {

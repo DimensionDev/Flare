@@ -26,6 +26,9 @@ class BlueskyComposeTextTest {
                 assertEquals(299, rule.remainingLength(text).first().remainingLength, text)
             }
             assertTrue(rule.remainingLength("a".repeat(299) + "👍🏽").first().isValid)
+            val handshakeBoundary = rule.remainingLength("a".repeat(299) + "🫱🏽‍🫲🏻").first()
+            assertEquals(0, handshakeBoundary.remainingLength)
+            assertTrue(handshakeBoundary.isValid)
             assertFalse(rule.remainingLength("a".repeat(300) + "👍🏽").first().isValid)
             assertTrue(rule.remainingLength("a" + "\u0301".repeat(1499)).first().isValid)
             val byteOverflow = "a" + "\u0301".repeat(1500)

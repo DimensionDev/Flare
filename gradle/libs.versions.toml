@@ -209,6 +209,7 @@ compose-placeholder = { module = "com.eygraber:compose-placeholder", version = "
 okio = { group = "com.squareup.okio", name = "okio", version.ref = "okio" }
 
 kotlin-codepoints-deluxe = { group = "de.cketti.unicode", name = "kotlin-codepoints-deluxe", version = "0.11.0" }
+unicode-segmentation = { module = "io.github.kotlinmania:unicode-segmentation-kotlin", version = "0.1.1" }
 
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebase-bom" }
 firebase-analytics-ktx = { group = "com.google.firebase", name = "firebase-analytics" }

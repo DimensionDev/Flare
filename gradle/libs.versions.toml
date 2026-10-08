@@ -224,7 +224,7 @@ xmlUtil = { module = "io.github.pdvrieze.xmlutil:serialization", version = "1.0.
 
 fluent-ui = { module = "io.github.compose-fluent:fluent", version = "v0.1.0" }
 
-commons-lang3 = { module = "org.apache.commons:commons-lang3", version = "3.20.0" }
+commons-lang3 = { module = "org.apache.commons:commons-lang3", version = "3.21.0" }
 
 nostr-sdk-kmp = { module = "org.rust-nostr:nostr-sdk-kmp", version.ref = "nostrSdkKmp" }
 qrose = { module = "io.github.alexzhirkevich:qrose", version.ref = "qrose" }

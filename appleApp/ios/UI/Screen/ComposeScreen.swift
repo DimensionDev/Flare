@@ -61,9 +61,6 @@ struct ComposeScreen: View {
             spacing: 8
         ) {
             accountSelectionView
-            if let error = presenter.state.textError {
-                Text(error).font(.caption).foregroundStyle(.red)
-            }
             ScrollView {
                 VStack(
                     spacing: 8

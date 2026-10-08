@@ -915,9 +915,6 @@
 				</button>
 			{/if}
 			<span class="toolbar-spacer"></span>
-			{#if compose.textError}
-				<span class="over-limit" role="status">{compose.textError}</span>
-			{/if}
 			{#if remainingLength !== null}
 				<span class:over-limit={remainingLength < 0} class="counter">{remainingLength}</span>
 			{/if}

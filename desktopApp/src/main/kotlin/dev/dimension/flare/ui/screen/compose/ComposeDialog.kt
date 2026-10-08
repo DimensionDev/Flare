@@ -1005,8 +1005,6 @@ fun ComposeDialog(
 
                 Spacer(modifier = Modifier.weight(1f))
 
-                state.textError?.let { error -> Text(error, style = FluentTheme.typography.caption) }
-
                 state.remainingLength.onSuccess {
                     Text(
                         it,
@@ -1253,7 +1251,6 @@ private fun composePresenter(
                 !(pollState is UiState.Success && pollState.data.enabled)
         }
     object {
-        val textError = state.textError
         val remainingLength =
             remainingLength.map {
                 it.toString()

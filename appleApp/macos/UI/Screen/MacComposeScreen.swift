@@ -42,9 +42,6 @@ struct MacComposeScreen: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            if let error = presenter.state.textError {
-                Text(error).font(.caption).foregroundStyle(.red)
-            }
             VStack(spacing: 0) {
                 if viewModel.enableContentWarning {
                     TextField("compose_cw_placeholder", text: $viewModel.contentWarning)

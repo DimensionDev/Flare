@@ -464,10 +464,6 @@ internal fun ComposeScreen(
                     },
                 )
 
-                state.textError?.let { error ->
-                    Text(error, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
-                }
-
                 state.remainingLength.onSuccess {
                     Text(
                         it,
@@ -1282,7 +1278,6 @@ private fun composePresenter(
     var showEmojiMenu by remember { mutableStateOf(false) }
     var showAccountSelectMenu by remember { mutableStateOf(false) }
     object {
-        val textError = state.textError
         val remainingLength =
             remainingLength.map {
                 it.toString()

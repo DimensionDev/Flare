@@ -601,12 +601,14 @@ internal class MisskeyDataSource(
             text =
                 ComposeConfig.Text.withValidation(
                     maxLength = textLimitFlow,
-                    check = { content, spoilerText -> textLimitFlow.map { checkText(content, spoilerText, it) } },
-                    validate = {
-                        content,
-                        spoilerText,
-                        ->
-                        checkText(content, spoilerText, resolveTextLimit(refresh = true))
+                    check = { content, spoilerText, refresh ->
+                        val limitFlow =
+                            if (refresh) {
+                                flow { emit(resolveTextLimit(refresh = true)) }
+                            } else {
+                                textLimitFlow
+                            }
+                        limitFlow.map { checkText(content, spoilerText, it) }
                     },
                 ),
             media =

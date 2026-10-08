@@ -3,6 +3,8 @@ package dev.dimension.flare.data.datasource.microblog
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
@@ -86,7 +88,7 @@ class ComposeConfigTextTest {
                         text =
                             ComposeConfig.Text.withValidation(
                                 maxLength = limit,
-                                check = { text, cw -> limit.map { ComposeConfig.Text.Check(it - text.length - cw.orEmpty().length) } },
+                                check = { text, cw, _ -> limit.map { ComposeConfig.Text.Check(it - text.length - cw.orEmpty().length) } },
                             ),
                     ),
                     ComposeConfig(),
@@ -107,5 +109,29 @@ class ComposeConfigTextTest {
                 assertEquals(emissions.last(), merged.validate("a".repeat(100), "cw"))
                 collection.cancel()
             }
+        }
+
+    @Test
+    fun `merged validation refreshes every platform before calculating the minimum`() =
+        runTest {
+            val refreshed = mutableListOf<Int>()
+            val merged =
+                listOf(500 to 100, 1000 to 50)
+                    .map { (cached, resolved) ->
+                        ComposeConfig.Text.withValidation(
+                            maxLength = flowOf(cached),
+                            check = { text, _, refresh ->
+                                flow {
+                                    if (refresh) refreshed.add(resolved)
+                                    emit(ComposeConfig.Text.Check((if (refresh) resolved else cached) - text.length))
+                                }
+                            },
+                        )
+                    }.reduce { current, other -> current.merge(other) }
+
+            assertEquals(496, merged.check("text").first().remainingLength)
+            assertEquals(emptyList(), refreshed)
+            assertEquals(46, merged.validate("text").remainingLength)
+            assertEquals(listOf(50, 100), refreshed.sorted())
         }
 }

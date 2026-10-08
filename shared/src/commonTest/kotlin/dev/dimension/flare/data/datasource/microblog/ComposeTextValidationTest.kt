@@ -4,6 +4,7 @@ import dev.dimension.flare.model.MicroBlogKey
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -40,8 +41,9 @@ class ComposeTextValidationTest {
             val rule =
                 ComposeConfig.Text.withValidation(
                     maxLength = limits,
-                    check = { content, _ -> flowOf(ComposeConfig.Text.Check(500 - content.length)) },
-                    validate = { content, _ -> ComposeConfig.Text.Check(4000 - content.length) },
+                    check = { content, _, refresh ->
+                        (if (refresh) flowOf(4000) else limits).map { ComposeConfig.Text.Check(it - content.length) }
+                    },
                 )
             assertFalse(rule.check("a".repeat(3000)).first().isValid)
             val source = TestComposeSource(rule)

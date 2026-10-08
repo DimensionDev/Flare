@@ -67,6 +67,7 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlin.uuid.Uuid
 
@@ -453,22 +454,20 @@ internal open class MastodonDataSource(
             text =
                 ComposeConfig.Text.withValidation(
                     maxLength = textLimitsFlow.map { it.maxCharacters },
-                    check = { content, spoilerText ->
-                        textLimitsFlow.map { limits ->
+                    check = { content, spoilerText, refresh ->
+                        val limitsFlow =
+                            if (refresh) {
+                                flow { emit(maxStatusCharactersProvider.resolveLimits(instance, service)) }
+                            } else {
+                                textLimitsFlow
+                            }
+                        limitsFlow.map { limits ->
                             ComposeConfig.Text.Check(
                                 (limits.maxCharacters - countComposeText(content, spoilerText, limits.urlCharacters))
                                     .coerceIn(Int.MIN_VALUE.toLong(), Int.MAX_VALUE.toLong())
                                     .toInt(),
                             )
                         }
-                    },
-                    validate = { content, spoilerText ->
-                        val limits = maxStatusCharactersProvider.resolveLimits(instance, service)
-                        ComposeConfig.Text.Check(
-                            (limits.maxCharacters - countComposeText(content, spoilerText, limits.urlCharacters))
-                                .coerceIn(Int.MIN_VALUE.toLong(), Int.MAX_VALUE.toLong())
-                                .toInt(),
-                        )
                     },
                 ),
             media =

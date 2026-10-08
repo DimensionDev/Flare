@@ -9,8 +9,21 @@ import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
 
 class ComposeConfigTextTest {
+    @Test
+    fun `an unlimited platform retains other platform constraints`() =
+        runTest {
+            val limited = ComposeConfig(text = ComposeConfig.Text(280))
+            val unlimited = ComposeConfig()
+            for (config in listOf(limited.merge(unlimited), unlimited.merge(limited))) {
+                val text = assertNotNull(config.text)
+                assertFalse(text.validate("a".repeat(281)).isValid)
+            }
+        }
+
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun `merged text limit follows the strictest flow`() =

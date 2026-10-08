@@ -464,6 +464,10 @@ internal fun ComposeScreen(
                     },
                 )
 
+                state.textError?.let { error ->
+                    Text(error, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+                }
+
                 state.remainingLength.onSuccess {
                     Text(
                         it,
@@ -1213,6 +1217,15 @@ private fun composePresenter(
                 contentWarningPresenter()
             }
 
+    val spoilerText =
+        contentWarningState
+            .takeSuccess()
+            ?.takeIf { it.enabled }
+            ?.textFieldState
+            ?.text
+            ?.toString()
+    LaunchedEffect(spoilerText) { state.setSpoilerText(spoilerText) }
+
     val languageState =
         state.composeConfig
             .mapNotNull {
@@ -1269,6 +1282,7 @@ private fun composePresenter(
     var showEmojiMenu by remember { mutableStateOf(false) }
     var showAccountSelectMenu by remember { mutableStateOf(false) }
     object {
+        val textError = state.textError
         val remainingLength =
             remainingLength.map {
                 it.toString()
@@ -1329,6 +1343,7 @@ private fun composePresenter(
                 spoilerText =
                     contentWarningState
                         .takeSuccess()
+                        ?.takeIf { it.enabled }
                         ?.textFieldState
                         ?.text
                         ?.toString(),

@@ -91,12 +91,6 @@ internal class ComposePostTool(
         val target = resolveComposeTarget(args) ?: return accountSelectionMessage(args, content, action, reference)
         val visibility = args.visibility.toPostVisibilityOrNull() ?: return "Unsupported visibility: ${args.visibility}."
         val config = target.dataSource.composeConfig(action.composeType)
-        val maxLength = config.text?.maxLength?.firstOrNull()
-        val remainingLength = config.text?.remainingLength(content)?.firstOrNull()
-        if (maxLength != null && remainingLength != null && remainingLength < 0) {
-            return "Post content is ${maxLength - remainingLength} characters, but ${target.platformId} allows " +
-                "at most $maxLength for ${action.label}."
-        }
         val visibilityConfig = config.visibility
         if (visibility != UiTimelineV2.Post.Visibility.Public && visibilityConfig == null) {
             return "${target.platformId} does not expose visibility selection for ${action.label} posts."
@@ -117,6 +111,10 @@ internal class ComposePostTool(
                 spoilerText = args.spoilerText.trim().takeIf { it.isNotBlank() },
                 referenceStatus = reference?.toComposeReference(action),
             )
+        target.dataSource
+            .checkComposeText(data)
+            ?.error
+            ?.let { return it }
         if (!args.confirmed) {
             val userPreview = target.loadUserPreview()
             val inputRequest =

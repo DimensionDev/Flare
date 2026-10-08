@@ -16,6 +16,20 @@ import kotlin.test.assertNull
 
 class MastodonMaxStatusCharactersProviderTest {
     @Test
+    fun resolvesReservedUrlLengthAndLegacyPleromaLimit() =
+        runTest {
+            val provider = CachedMastodonMaxStatusCharactersProvider()
+            val resources =
+                FakeInstanceResources(v2 = {
+                    InstanceData(configuration = Configuration(statuses = Statuses(maxCharacters = 1000, charactersReservedPerURL = 42)))
+                })
+            assertEquals(MastodonTextLimits(1000, 42), provider.resolveLimits("example.com", resources))
+            assertEquals(MastodonTextLimits(1000, 42), provider.snapshotLimits("example.com"))
+            val legacy = FakeInstanceResources(v1 = { InstanceInfoV1(maxTootChars = 5000) })
+            assertEquals(5000, provider.resolve("pleroma.example", legacy))
+        }
+
+    @Test
     fun resolvesFromV2AndCachesByNormalizedHost() =
         runTest {
             val provider = CachedMastodonMaxStatusCharactersProvider()

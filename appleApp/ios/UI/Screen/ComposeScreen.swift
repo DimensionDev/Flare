@@ -61,6 +61,9 @@ struct ComposeScreen: View {
             spacing: 8
         ) {
             accountSelectionView
+            if let error = presenter.state.textError {
+                Text(error).font(.caption).foregroundStyle(.red)
+            }
             ScrollView {
                 VStack(
                     spacing: 8
@@ -165,6 +168,9 @@ struct ComposeScreen: View {
             guard let newValue, case .success(let loadedDraft) = onEnum(of: newValue) else { return }
             applyDraft(loadedDraft.data)
             presenter.state.consumeLoadedDraft()
+        }
+        .onChange(of: viewModel.enableContentWarning ? viewModel.contentWarning : nil, initial: true) { _, newValue in
+            presenter.state.setSpoilerText(value: newValue)
         }
         .onChange(of: viewModel.text) { oldValue, newValue in
             presenter.state.setText(value: newValue)

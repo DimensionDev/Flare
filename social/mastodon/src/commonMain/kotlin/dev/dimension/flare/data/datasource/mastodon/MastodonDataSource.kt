@@ -44,7 +44,7 @@ import dev.dimension.flare.data.network.mastodon.api.model.PostReport
 import dev.dimension.flare.data.network.mastodon.api.model.PostStatus
 import dev.dimension.flare.data.network.mastodon.api.model.PostVote
 import dev.dimension.flare.data.network.mastodon.api.model.Visibility
-import dev.dimension.flare.data.network.mastodon.mastodonMaxStatusCharactersFlow
+import dev.dimension.flare.data.network.mastodon.mastodonTextLimitsFlow
 import dev.dimension.flare.data.platform.CommonTimelineSpecs
 import dev.dimension.flare.data.platform.MastodonCredential
 import dev.dimension.flare.data.platform.MastodonPlatformSpec
@@ -103,8 +103,8 @@ internal open class MastodonDataSource(
         )
     }
 
-    private val maxStatusCharactersFlow by lazy {
-        mastodonMaxStatusCharactersFlow(
+    private val textLimitsFlow by lazy {
+        mastodonTextLimitsFlow(
             host = instance,
             resources = service,
             provider = maxStatusCharactersProvider,
@@ -276,7 +276,7 @@ internal open class MastodonDataSource(
             statusOnly = false,
         )
 
-    override suspend fun compose(
+    override suspend fun publish(
         data: ComposeData,
         progress: () -> Unit,
     ) {
@@ -442,9 +442,35 @@ internal open class MastodonDataSource(
             host = accountKey.host,
         )
 
+    protected open fun countComposeText(
+        content: String,
+        spoilerText: String?,
+        urlCharacters: Int,
+    ): Long = mastodonTextLength(content, spoilerText, urlCharacters)
+
     override fun composeConfig(type: ComposeType): ComposeConfig =
         ComposeConfig(
-            text = ComposeConfig.Text(maxStatusCharactersFlow),
+            text =
+                ComposeConfig.Text.withValidation(
+                    maxLength = textLimitsFlow.map { it.maxCharacters },
+                    check = { content, spoilerText ->
+                        textLimitsFlow.map { limits ->
+                            ComposeConfig.Text.Check(
+                                (limits.maxCharacters - countComposeText(content, spoilerText, limits.urlCharacters))
+                                    .coerceIn(Int.MIN_VALUE.toLong(), Int.MAX_VALUE.toLong())
+                                    .toInt(),
+                            )
+                        }
+                    },
+                    validate = { content, spoilerText ->
+                        val limits = maxStatusCharactersProvider.resolveLimits(instance, service)
+                        ComposeConfig.Text.Check(
+                            (limits.maxCharacters - countComposeText(content, spoilerText, limits.urlCharacters))
+                                .coerceIn(Int.MIN_VALUE.toLong(), Int.MAX_VALUE.toLong())
+                                .toInt(),
+                        )
+                    },
+                ),
             media =
                 if (type == ComposeType.Quote) {
                     null

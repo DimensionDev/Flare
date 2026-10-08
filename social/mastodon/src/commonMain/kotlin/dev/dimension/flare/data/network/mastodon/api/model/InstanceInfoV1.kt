@@ -12,4 +12,6 @@ internal data class InstanceInfoV1(
     val description: String? = null,
     val version: String? = null,
     val configuration: Configuration? = null,
+    @SerialName("max_toot_chars")
+    val maxTootChars: Long? = null,
 )

@@ -1005,6 +1005,8 @@ fun ComposeDialog(
 
                 Spacer(modifier = Modifier.weight(1f))
 
+                state.textError?.let { error -> Text(error, style = FluentTheme.typography.caption) }
+
                 state.remainingLength.onSuccess {
                     Text(
                         it,
@@ -1187,6 +1189,15 @@ private fun composePresenter(
                 contentWarningPresenter()
             }
 
+    val spoilerText =
+        contentWarningState
+            .takeSuccess()
+            ?.takeIf { it.enabled }
+            ?.textFieldState
+            ?.text
+            ?.toString()
+    LaunchedEffect(spoilerText) { state.setSpoilerText(spoilerText) }
+
     val languageState =
         state.composeConfig
             .mapNotNull {
@@ -1242,6 +1253,7 @@ private fun composePresenter(
                 !(pollState is UiState.Success && pollState.data.enabled)
         }
     object {
+        val textError = state.textError
         val remainingLength =
             remainingLength.map {
                 it.toString()
@@ -1292,6 +1304,7 @@ private fun composePresenter(
                 spoilerText =
                     contentWarningState
                         .takeSuccess()
+                        ?.takeIf { it.enabled }
                         ?.textFieldState
                         ?.text
                         ?.toString(),

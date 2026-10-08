@@ -1665,7 +1665,7 @@ private class StubComposeDataSource(
     var composed: Boolean = false
     var lastData: ComposeData? = null
 
-    override suspend fun compose(
+    override suspend fun publish(
         data: ComposeData,
         progress: () -> Unit,
     ) {

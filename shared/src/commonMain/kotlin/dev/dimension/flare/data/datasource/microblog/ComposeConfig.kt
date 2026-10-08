@@ -12,6 +12,7 @@ import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 
@@ -28,39 +29,65 @@ public data class ComposeConfig public constructor(
     @Immutable
     public class Text private constructor(
         public val maxLength: Flow<Int>,
-        private val remainingLengthProvider: (String) -> Flow<Int>,
+        private val checkProvider: (String, String?) -> Flow<Check>,
+        private val validateProvider: suspend (String, String?) -> Check,
     ) {
         public constructor(maxLength: Flow<Int>) : this(
             maxLength = maxLength,
-            remainingLengthProvider = { text -> maxLength.map { it - text.length } },
+            checkProvider = { text, _ -> maxLength.map { Check(it - text.length) } },
+            validateProvider = { text, _ -> Check(maxLength.first() - text.length) },
         )
 
         public constructor(maxLength: Int) : this(flowOf(maxLength))
 
-        public fun remainingLength(text: String): Flow<Int> = remainingLengthProvider(text)
+        public data class Check(
+            val remainingLength: Int,
+            val error: String? = if (remainingLength < 0) "Post text exceeds the character limit." else null,
+        ) {
+            public val isValid: Boolean get() = remainingLength >= 0 && error == null
+
+            internal fun merge(other: Check): Check = Check(minOf(remainingLength, other.remainingLength), error ?: other.error)
+        }
+
+        public fun check(
+            text: String,
+            spoilerText: String? = null,
+        ): Flow<Check> = checkProvider(text, spoilerText?.takeIf(String::isNotBlank))
+
+        public fun remainingLength(text: String): Flow<Int> = check(text).map { it.remainingLength }
+
+        public suspend fun validate(
+            text: String,
+            spoilerText: String? = null,
+        ): Check = validateProvider(text, spoilerText?.takeIf(String::isNotBlank))
 
         internal fun merge(other: Text): Text =
             Text(
-                maxLength =
-                    combine(maxLength, other.maxLength) { current, candidate ->
-                        minOf(current, candidate)
-                    }.distinctUntilChanged(),
-                remainingLengthProvider = { text ->
-                    combine(remainingLength(text), other.remainingLength(text)) { current, candidate ->
-                        minOf(current, candidate)
+                maxLength = combine(maxLength, other.maxLength) { current, candidate -> minOf(current, candidate) }.distinctUntilChanged(),
+                checkProvider = { text, spoilerText ->
+                    combine(check(text, spoilerText), other.check(text, spoilerText)) { current, candidate ->
+                        current.merge(candidate)
                     }.distinctUntilChanged()
                 },
+                validateProvider = { text, spoilerText -> validate(text, spoilerText).merge(other.validate(text, spoilerText)) },
             )
 
         public companion object {
             public fun withLength(
                 maxLength: Int,
                 length: (String) -> Int,
-            ): Text =
-                Text(
-                    maxLength = flowOf(maxLength),
-                    remainingLengthProvider = { text -> flowOf(maxLength - length(text)) },
-                )
+            ): Text = withValidation(maxLength) { text, _ -> Check(maxLength - length(text)) }
+
+            public fun withValidation(
+                maxLength: Int,
+                check: (String, String?) -> Check,
+            ): Text = withValidation(flowOf(maxLength), { text, spoilerText -> flowOf(check(text, spoilerText)) })
+
+            public fun withValidation(
+                maxLength: Flow<Int>,
+                check: (String, String?) -> Flow<Check>,
+                validate: suspend (String, String?) -> Check = { text, spoilerText -> check(text, spoilerText).first() },
+            ): Text = Text(maxLength, check, validate)
         }
     }
 
@@ -390,7 +417,7 @@ public data class ComposeConfig public constructor(
             if (text != null && other.text != null) {
                 text.merge(other.text)
             } else {
-                null
+                text ?: other.text
             }
         val media =
             if (media != null && other.media != null) {

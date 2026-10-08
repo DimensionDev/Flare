@@ -42,6 +42,9 @@ struct MacComposeScreen: View {
 
     var body: some View {
         VStack(spacing: 0) {
+            if let error = presenter.state.textError {
+                Text(error).font(.caption).foregroundStyle(.red)
+            }
             VStack(spacing: 0) {
                 if viewModel.enableContentWarning {
                     TextField("compose_cw_placeholder", text: $viewModel.contentWarning)
@@ -187,6 +190,9 @@ struct MacComposeScreen: View {
             applyPrefillIfNeeded()
             presenter.state.setText(value: viewModel.text)
             presenter.state.setMediaSize(value: Int32(mediaItems.count))
+        }
+        .onChange(of: viewModel.enableContentWarning ? viewModel.contentWarning : nil, initial: true) { _, newValue in
+            presenter.state.setSpoilerText(value: newValue)
         }
         .onChange(of: viewModel.text) { _, newValue in
             presenter.state.setText(value: newValue)

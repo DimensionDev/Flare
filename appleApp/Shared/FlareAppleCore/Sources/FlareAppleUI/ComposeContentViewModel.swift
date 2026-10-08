@@ -65,7 +65,7 @@ public final class ComposeContentViewModel {
             language: languages,
             medias: medias,
             sensitive: sensitive,
-            spoilerText: contentWarning,
+            spoilerText: enableContentWarning ? contentWarning : nil,
             poll: pollViewModel.makeComposePoll(),
             localOnly: localOnly,
             referenceStatus: referenceStatus(from: composeStatus)

@@ -381,7 +381,7 @@ internal class VVODataSource(
             ),
         )
 
-    override suspend fun compose(
+    override suspend fun publish(
         data: ComposeData,
         progress: () -> Unit,
     ) {

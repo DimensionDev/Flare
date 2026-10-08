@@ -30,6 +30,7 @@ import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataS
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.datasource.microblog.ComposeDataSource
+import dev.dimension.flare.data.datasource.microblog.ComposeTextRules
 import dev.dimension.flare.data.datasource.microblog.ComposeType
 import dev.dimension.flare.data.datasource.microblog.DatabaseUpdater
 import dev.dimension.flare.data.datasource.microblog.DirectMessageDataSource
@@ -286,7 +287,7 @@ internal class BlueskyDataSource(
             statusOnly = false,
         )
 
-    override suspend fun compose(
+    override suspend fun publish(
         data: ComposeData,
         progress: () -> Unit,
     ) {
@@ -702,7 +703,7 @@ internal class BlueskyDataSource(
 
     override fun composeConfig(type: ComposeType): ComposeConfig =
         ComposeConfig(
-            text = ComposeConfig.Text(300),
+            text = ComposeTextRules.bluesky(),
             media =
                 ComposeConfig.Media(
                     maxCount = BLUESKY_GALLERY_AUTHOR_LIMIT,

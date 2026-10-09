@@ -68,9 +68,8 @@
 
 		search.setAccountKey(firstAccount.key);
 		void goto(searchUrl(query.trim(), accountSegmentFromKey(firstAccount.key)), {
-			keepFocus: true,
-			noScroll: true,
-			replaceState: true,
+			reset: false,
+			replace: true,
 		});
 	});
 
@@ -86,9 +85,8 @@
 		const next = query.trim();
 		search.search(next);
 		void goto(searchUrl(next, accountSegment), {
-			keepFocus: true,
-			noScroll: true,
-			replaceState: true,
+			reset: false,
+			replace: true,
 		});
 	}
 
@@ -96,9 +94,8 @@
 		search.setAccountKey(profile.key);
 		showAccountMenu = false;
 		void goto(searchUrl(query.trim(), accountSegmentFromKey(profile.key)), {
-			keepFocus: true,
-			noScroll: true,
-			replaceState: true,
+			reset: false,
+			replace: true,
 		});
 		if (query.trim()) {
 			search.search(query.trim());

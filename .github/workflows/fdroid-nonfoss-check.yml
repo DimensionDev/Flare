@@ -22,7 +22,7 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Check repo for non-FOSS Android dependencies
         id: check
@@ -37,7 +37,7 @@ jobs:
 
       - name: Sync PR comment
         if: github.event_name == 'pull_request'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         env:
           EXIT_CODE: ${{ steps.check.outputs.exit_code }}
           REPORT_PATH: fdroid-nonfoss-report.txt

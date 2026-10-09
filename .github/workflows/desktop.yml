@@ -25,11 +25,11 @@ jobs:
     steps:
       - uses: yumis-coconudge/clean-workspace-action@v1
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
         with:
           submodules: true
       - name: Set up JDK
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@v6
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -43,7 +43,7 @@ jobs:
         run: brew install xcodegen
       - name: import certs
         if: startsWith(github.ref, 'refs/tags/')
-        uses: apple-actions/import-codesign-certs@v6
+        uses: apple-actions/import-codesign-certs@v7
         with:
           p12-file-base64: ${{ secrets.MACOS_CERT_BASE64 }}
           p12-password: ${{ secrets.MACOS_CERT_PASSWORD }}
@@ -172,7 +172,7 @@ jobs:
           productbuild --sign "$NATIVE_MACOS_INSTALLER_SIGNING_IDENTITY" --component "$app_path" /Applications "$pkg_path"
       - name: Upload native macOS package
         if: startsWith(github.ref, 'refs/tags/')
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: Native-macOS-package
           path: appleApp/build/native-macos/pkg/*.pkg
@@ -183,11 +183,11 @@ jobs:
     steps:
       - uses: yumis-coconudge/clean-workspace-action@v1
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
         with:
           submodules: true
       - name: Set up JDK
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@v6
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -273,7 +273,7 @@ jobs:
           & $makeAppx.FullName bundle /o /bv $appxVersion /f $mapping /p $bundlePath
       - name: Upload AppxBundle package
         if: startsWith(github.ref, 'refs/tags/')
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: Windows-package
           path: desktopApp/build/compose/binaries/main-release/appx/*.appxbundle
@@ -284,11 +284,11 @@ jobs:
     steps:
       - uses: yumis-coconudge/clean-workspace-action@v1
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
         with:
           submodules: true
       - name: Set up JDK
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@v6
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -311,7 +311,7 @@ jobs:
         run: ./gradlew :desktop:packageReleaseAppImage --stacktrace
       - name: Upload AppImage package
         if: startsWith(github.ref, 'refs/tags/')
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: Linux-package
           path: |
@@ -324,10 +324,10 @@ jobs:
     needs: [build-macos, build-windows, build-linux]
     timeout-minutes: 30
     steps:
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
 
       - name: Draft a new release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v3
         with:
           files: |
             **/*.appxbundle

@@ -20,7 +20,8 @@ internal fun mastodonTextLength(
     var urlWeight = 0L
     val countable =
         buildString {
-            append(spoilerText.orEmpty())
+            // Mastodon applies Ruby's strip to each field before validation.
+            append(spoilerText.orEmpty().trim('\u0000', ' ', '\t', '\n', '\u000B', '\u000C', '\r'))
             val plain = StringBuilder()
 
             fun flushPlain() {
@@ -39,7 +40,7 @@ internal fun mastodonTextLength(
                 )
                 plain.clear()
             }
-            parser.parse(content).forEach { token ->
+            parser.parse(content.trim('\u0000', ' ', '\t', '\n', '\u000B', '\u000C', '\r')).forEach { token ->
                 if (token is UrlToken && (token.value.startsWith("https://", true) || token.value.startsWith("http://", true))) {
                     flushPlain()
                     if (urlCharacters > 0) {

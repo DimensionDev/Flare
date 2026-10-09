@@ -5,6 +5,24 @@ import kotlin.test.assertEquals
 
 class MastodonTextLengthTest {
     @Test
+    fun stripsBodyAndCWBeforeCounting() {
+        assertEquals(500L, mastodonTextLength("a".repeat(499), "x ", 23))
+        assertEquals(500L, mastodonTextLength(" \t" + "a".repeat(499) + "\r\n", "\n x \t", 23))
+        assertEquals(501L, mastodonTextLength("a".repeat(500), "x ", 23))
+        assertEquals(24L, mastodonTextLength("\t https://example.com/ \n", " x \r\n", 23))
+    }
+
+    @Test
+    fun stripsOnlyMastodonBoundaryWhitespace() {
+        for (character in listOf('\u0000', ' ', '\t', '\n', '\u000B', '\u000C', '\r')) {
+            assertEquals(2L, mastodonTextLength("${character}a$character", "${character}x$character", 23))
+            assertEquals(0L, mastodonTextLength("$character", "$character", 23))
+        }
+        assertEquals(6L, mastodonTextLength("\u00a0a\u2003", "\u2003x\u00a0", 23))
+        assertEquals(6L, mastodonTextLength(" a b ", " x y ", 23))
+    }
+
+    @Test
     fun countsGraphemesEntitiesAndCW() {
         assertEquals(1L, mastodonTextLength("👍🏽", null, 23))
         assertEquals(500L, mastodonTextLength("a".repeat(499) + "👍🏽", null, 23))

@@ -36,8 +36,12 @@ final class RichTextUIViewTests: XCTestCase {
             for category in [UIContentSizeCategory.medium, .accessibilityExtraExtraExtraLarge] {
                 for count in [5, 15, 16] {
                     let text = richText([Array(repeating: "字", count: count).joined(separator: "\n")], link: link)
+                    configure(text, expanded: true, category: category)
+                    let threshold = ceil(UIFont.preferredFont(forTextStyle: .body,
+                        compatibleWith: UITraitCollection(preferredContentSizeCategory: category)).lineHeight) * 15
+                    let expectedOverflow = view.timelineHeight(for: 340)! > threshold
                     configure(text, category: category)
-                    XCTAssertEqual(view.hasCollapsedOverflow(for: 340), count > 15)
+                    XCTAssertEqual(view.hasCollapsedOverflow(for: 340), expectedOverflow)
                 }
             }
 
@@ -93,6 +97,23 @@ final class RichTextUIViewTests: XCTestCase {
 
         let quote = RenderBlockStyle(headingLevel: nil, textAlignment: nil,
                                      isListItem: false, isBlockQuote: true, isFigCaption: false)
+        let heading = RenderBlockStyle(headingLevel: KotlinInt(int: 1), textAlignment: nil,
+                                       isListItem: false, isBlockQuote: false, isFigCaption: false)
+        let thresholdHeight = ceil(UIFont.preferredFont(forTextStyle: .body,
+            compatibleWith: UITraitCollection(preferredContentSizeCategory: .medium)).lineHeight) * 15
+        for (name, sample, shouldCollapse) in [
+            ("paragraph spacing", richText(Array(repeating: "text", count: 15), link: false), true),
+            ("quote insets", richText(Array(repeating: "text", count: 8), link: true, block: quote), true),
+            ("heading font", richText([Array(repeating: "heading", count: 10).joined(separator: "\n")], link: false, block: heading), true),
+            ("small font below threshold", richText([Array(repeating: "text", count: 18).joined(separator: "\n")], link: true, small: true), false),
+            ("small font above threshold", richText([Array(repeating: "text", count: 30).joined(separator: "\n")], link: true, small: true), true),
+        ] {
+            configure(sample, expanded: true)
+            XCTAssertEqual(view.timelineHeight(for: 340)! > thresholdHeight, shouldCollapse, name)
+            configure(sample)
+            XCTAssertEqual(view.hasCollapsedOverflow(for: 340), shouldCollapse, name)
+            if !shouldCollapse { XCTAssertEqual(renderedText(in: view), sample.innerText, name) }
+        }
         let quotedText = richText([String(repeating: "quoted 中文 👩🏽‍💻 text ", count: 200)], link: true, block: quote)
         configure(quotedText)
         XCTAssertTrue(view.hasCollapsedOverflow(for: 340))
@@ -121,10 +142,10 @@ final class RichTextUIViewTests: XCTestCase {
         }
     }
 
-    private func richText(_ paragraphs: [String], link: Bool, block: RenderBlockStyle = RenderBlockStyle()) -> UiRichText {
+    private func richText(_ paragraphs: [String], link: Bool, block: RenderBlockStyle = RenderBlockStyle(), small: Bool = false) -> UiRichText {
         let style = RenderTextStyle(link: link ? "https://example.invalid" : nil, bold: false,
                                     italic: false, strikethrough: false, monospace: false,
-                                    code: false, underline: false, small: false, time: false)
+                                    code: false, underline: false, small: small, time: false)
         let blocks = paragraphs.map {
             RenderContent.Text(runs: [RenderRun.Text(text: $0, style: style)], block: block)
         }

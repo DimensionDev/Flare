@@ -61,6 +61,7 @@ internal typealias NostrServiceManager = SwitchingServiceManager<NostrCredential
 internal class NostrDataSource(
     override val accountKey: MicroBlogKey,
     private val credentialFlow: Flow<NostrCredential>,
+    private val suppliedServiceManager: NostrServiceManager? = null,
 ) : AuthenticatedMicroblogDataSource,
     NotificationTimelineDataSource,
     ComposeDataSource,
@@ -105,7 +106,7 @@ internal class NostrDataSource(
     }
 
     private val serviceManager by lazy {
-        SwitchingServiceManager(
+        suppliedServiceManager ?: SwitchingServiceManager(
             credentialFlow.distinctUntilChangedBy { it.signerStableId(accountKey) },
             ioScope,
             {

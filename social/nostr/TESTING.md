@@ -1,0 +1,37 @@
+# Nostr migration regression coverage
+
+Run the same common tests against the JVM and the iOS simulator crypto/network implementations:
+
+```sh
+./gradlew :social:nostr:jvmTest :social:nostr:iosSimulatorArm64Test \
+  :social:nostr:compileKotlinIosArm64 :social:nostr:ktlintCheck
+```
+
+The tests use Quartz's real event builders, Schnorr signatures, NIP-46 encryption and relay pool. `QuartzTestRelays` replaces sockets with an in-memory relay. HTTP uploads and WebSocket handshakes use Ktor MockEngine. No real accounts, public relay writes or external signers are needed.
+
+Validated on 2026-09-27: 76 JVM tests and 76 iOS arm64 simulator tests passed, with no failures or skipped tests. Android and iOS arm64 compilation and Kotlin lint also passed. The existing Android/iOS `allTests` and desktop `jvmTest` CI steps include these tests.
+
+| Supported behavior | Regression coverage |
+| --- | --- |
+| Generate/import/export local accounts; restore the same key after migration | `NostrServiceTest`, `NostrLegacyCompatibilityTest`: actual Rust SDK 0.44.8 vectors for three private keys, hex/nsec imports, legacy credential JSON, persistence, npub, canonical IDs and signature verification |
+| Public-key / read-only accounts | `NostrSignerContractTest`, `NostrFeatureTest`: npub/nprofile parsing, malformed inputs, reading timelines/profiles/relations, rejecting every write and upload authorization |
+| Credential persistence and signer switching | `NostrSignerContractTest`, `SwitchingServiceManagerTest`: all signer types, relay/media settings, legacy nsec precedence, identity retention, draining old requests and closing retired services |
+| Amber / NIP-55 signing | `QuartzMigrationTest`, `NostrSignerContractTest`: saved package/identity, unavailable signer, content/time/kind/tag/author/signature tampering |
+| Bunker / NIP-46 and QR login | `QuartzMigrationTest`, `NostrSignerContractTest`: initial pairing secret, persisted transport key, distinct signer/user identities, restore without pairing again, encrypted sign request/response, identity mismatch, refusal, wrong QR secret, deadlines and cancellation |
+| Home and profile timelines | `NostrFeatureTest`, `NostrDataSourceTest`: newest contacts, self inclusion, author filtering, repost rendering, order, timestamp cursors and empty-page termination |
+| Profile metadata and cache fallback | `NostrServiceTest`, `NostrFeatureTest`: newest parsable metadata, malformed newer metadata, cached identity and npub fallback |
+| Status and profile search | `NostrFeatureTest`, `NostrDataSourceTest`: text, case/whitespace, limits, timestamps, hex/note/nevent and npub/nprofile identifiers, metadata fields, no matches |
+| Notifications | `NostrFeatureTest`, `NostrDataSourceTest`: mentions, replies, positive reactions, kind 6/16 reposts, self/unrelated/negative-reaction exclusion, filters and pagination |
+| Status detail, threads and references | `NostrServiceTest`, `NostrFeatureTest`, `NostrDataSourceTest`: ancestor chain, direct replies, root/reply/positional tags, quotes, embedded/fetched reposts, missing references and missing targets |
+| Compose notes, replies and quotes | `NostrLegacyCompatibilityTest`, `NostrFeatureTest`, `NostrDataSourceTest`: Rust output parity, nested reply root, media-only posts, imeta/r tags, alt text and content warnings |
+| Follow/unfollow, block/unblock, mute/unmute | `NostrLegacyCompatibilityTest`, `NostrFeatureTest`: Rust output parity, newest list selection, block list identifier and preservation of unrelated users |
+| Like/unlike, repost/undo, report and delete | `NostrLegacyCompatibilityTest`, `NostrFeatureTest`, `NostrDataSourceTest`: Rust parity (including addressable-event tags), counts, duplicate relay events, returned action IDs, undo deletion and report tags |
+| Blossom uploads | `NostrBlossomUploaderTest`: actual body bytes, known SHA-256, signed kind 24242 authorization, expiration, URL, MIME/size/alt metadata, retries, descriptor fallback, HTTP/JSON failure and read-only rejection |
+| Rich text and media | `NostrRichTextParserTest`, `NostrServiceTest`, `NostrFeatureTest`: URLs, hashtags, mentions, event links, attachment removal, image/video/GIF/audio types, dimensions, alt text, deduplication and warnings |
+| Relay discovery and settings | `NostrFeatureTest`: latest NIP-65, contact relay tags, legacy contact JSON, default fallback, changed relay destinations and retained signing identity |
+| Relay validation, publication and authentication | `QuartzMigrationTest`, `NostrSignerContractTest`: filters, signature validation, deduplication, partial timeout results, cancellation, distinct relay ACK quorum, invalid events, NIP-42 retry and external-signer prompting policy |
+| WebSocket lifecycle | `NostrWebSocketTest`: send/receive ordering, remote close, duplicate connect prevention, failed handshake and cancellation during handshake |
+
+`RustNostrFixtures.kt` contains immutable outputs produced offline with the pre-migration Rust SDK, not regenerated by Quartz. Production and test dependencies do not include the Rust SDK.
+
+These are deterministic unit tests of the supported module behavior. Actual Amber Android activity handoff, physical-device UI, live Bunker/relay/server availability and interoperability with individual deployments still require integration testing. Media-only profile timelines, discover/follower lists, direct messages, zaps and other unimplemented features are not claimed as supported or covered by this migration.

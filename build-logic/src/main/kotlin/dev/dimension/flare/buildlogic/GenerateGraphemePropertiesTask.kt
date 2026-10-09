@@ -1,21 +1,24 @@
 package dev.dimension.flare.buildlogic
 
 import org.gradle.api.DefaultTask
-import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.tasks.CacheableTask
-import org.gradle.api.tasks.InputFiles
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.OutputDirectory
-import org.gradle.api.tasks.PathSensitive
-import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
 import java.util.zip.ZipFile
 
 @CacheableTask
 abstract class GenerateGraphemePropertiesTask : DefaultTask() {
-    @get:InputFiles
-    @get:PathSensitive(PathSensitivity.NONE)
-    abstract val ucdArchive: ConfigurableFileCollection
+    @get:Input
+    val sourceUrl = "https://www.unicode.org/Public/16.0.0/ucd/UCD.zip"
+
+    @get:Internal
+    val archiveCache = project.gradle.gradleUserHomeDir.resolve("caches/flare-codegen")
+
+    @get:Internal
+    val offline = project.gradle.startParameter.isOffline
 
     @get:OutputDirectory
     abstract val outputDirectory: DirectoryProperty
@@ -40,7 +43,7 @@ abstract class GenerateGraphemePropertiesTask : DefaultTask() {
                 "LV",
                 "LVT",
             )
-        ZipFile(ucdArchive.singleFile).use { zip ->
+        ZipFile(downloadArchive(sourceUrl, archiveCache, offline)).use { zip ->
             fun read(name: String): String = zip.getInputStream(requireNotNull(zip.getEntry(name))).bufferedReader().use { it.readText() }
             val grapheme = read("auxiliary/GraphemeBreakProperty.txt")
             val core = read("DerivedCoreProperties.txt")

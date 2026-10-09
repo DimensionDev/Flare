@@ -16,13 +16,7 @@ plugins {
     alias(libs.plugins.room)
 }
 
-val unicodeUcd by configurations.creating {
-    isCanBeConsumed = false
-    isTransitive = false
-}
-dependencies { unicodeUcd("org.unicode:UCD:16.0.0@zip") }
 val generateGraphemeProperties by tasks.registering(GenerateGraphemePropertiesTask::class) {
-    ucdArchive.from(unicodeUcd)
     outputDirectory.set(layout.buildDirectory.dir("generated/sources/graphemeProperties/commonMain/kotlin"))
 }
 

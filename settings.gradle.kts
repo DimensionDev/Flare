@@ -24,28 +24,6 @@ dependencyResolutionManagement {
         mavenCentral()
         maven("https://central.sonatype.com/repository/maven-snapshots/")
         maven("https://jitpack.io")
-        exclusiveContent {
-            forRepository {
-                ivy {
-                    name = "unicodeUcd"
-                    url = uri("https://www.unicode.org/Public/")
-                    patternLayout { artifact("[revision]/ucd/[artifact].[ext]") }
-                    metadataSources { artifact() }
-                }
-            }
-            filter { includeModule("org.unicode", "UCD") }
-        }
-        exclusiveContent {
-            forRepository {
-                ivy {
-                    name = "twemojiParser"
-                    url = uri("https://registry.npmjs.org/")
-                    patternLayout { artifact("[module]/-/[module]-[revision].[ext]") }
-                    metadataSources { artifact() }
-                }
-            }
-            filter { includeModule("com.twitter", "twemoji-parser") }
-        }
     }
 }
 

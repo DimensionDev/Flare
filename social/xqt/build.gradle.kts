@@ -13,13 +13,7 @@ plugins {
     alias(libs.plugins.compose.compiler)
 }
 
-val twemojiParser by configurations.creating {
-    isCanBeConsumed = false
-    isTransitive = false
-}
-dependencies { twemojiParser("com.twitter:twemoji-parser:11.0.2@tgz") }
 val generateXEmojiRegex by tasks.registering(GenerateXEmojiRegexTask::class) {
-    twemojiArchive.from(twemojiParser)
     outputDirectory.set(layout.buildDirectory.dir("generated/sources/xEmojiRegex/commonMain/kotlin"))
 }
 

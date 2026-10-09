@@ -3,21 +3,24 @@ package dev.dimension.flare.buildlogic
 import groovy.json.JsonSlurper
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.ArchiveOperations
-import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.tasks.CacheableTask
-import org.gradle.api.tasks.InputFiles
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.OutputDirectory
-import org.gradle.api.tasks.PathSensitive
-import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
 import javax.inject.Inject
 
 @CacheableTask
 abstract class GenerateXEmojiRegexTask : DefaultTask() {
-    @get:InputFiles
-    @get:PathSensitive(PathSensitivity.NONE)
-    abstract val twemojiArchive: ConfigurableFileCollection
+    @get:Input
+    val sourceUrl = "https://registry.npmjs.org/twemoji-parser/-/twemoji-parser-11.0.2.tgz"
+
+    @get:Internal
+    val archiveCache = project.gradle.gradleUserHomeDir.resolve("caches/flare-codegen")
+
+    @get:Internal
+    val offline = project.gradle.startParameter.isOffline
 
     @get:OutputDirectory
     abstract val outputDirectory: DirectoryProperty
@@ -27,7 +30,7 @@ abstract class GenerateXEmojiRegexTask : DefaultTask() {
 
     @TaskAction
     fun generate() {
-        val archive = archiveOperations.tarTree(twemojiArchive.singleFile)
+        val archive = archiveOperations.tarTree(downloadArchive(sourceUrl, archiveCache, offline))
 
         fun read(name: String): String = archive.matching { include("package/$name") }.singleFile.readText()
         val metadata = JsonSlurper().parseText(read("package.json")) as Map<*, *>

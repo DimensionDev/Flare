@@ -26,6 +26,7 @@ internal open class TimelineRemoteMediator(
     private val notifyError: (Throwable) -> Unit = {},
     private val preTranslationService: PreTranslationService = NoopPreTranslationService,
     private val refreshOnInitialize: suspend () -> Boolean = { true },
+    private val isRequestValid: suspend () -> Boolean = { true },
 ) : BasePagingRemoteMediator<
         OffsetFromStartPagingKey,
         TimelinePageItem,
@@ -38,6 +39,8 @@ internal open class TimelineRemoteMediator(
 
     override val pagingKey: String
         get() = loader.pagingKey
+
+    override suspend fun canSave(): Boolean = isRequestValid()
 
     init {
         if (loader is ReportableRemoteLoader) {

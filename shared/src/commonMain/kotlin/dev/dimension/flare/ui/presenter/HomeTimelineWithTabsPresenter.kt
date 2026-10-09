@@ -1,8 +1,10 @@
 package dev.dimension.flare.ui.presenter
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.appearance.TimelineAppearance
 import dev.dimension.flare.data.model.tab.UiTimelineTabItem
@@ -11,6 +13,7 @@ import dev.dimension.flare.data.model.tab.toUiTimelineTabItem
 import dev.dimension.flare.data.platform.CommonTimelineSpecs
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.SettingsRepository
+import dev.dimension.flare.data.repository.TimelineReadingRepository
 import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiState
@@ -25,13 +28,20 @@ import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 
 @WebPresenter("homeTimelineWithTabs")
 public class HomeTimelineWithTabsPresenter : PresenterBase<HomeTimelineWithTabsPresenter.State>() {
     private val settingsRepository by koinInject<SettingsRepository>()
     private val accountRepository by koinInject<AccountRepository>()
+    private val readingRepository by koinInject<TimelineReadingRepository>()
 
     public interface State : UserState {
+        public val selectedTabId: String? get() = null
+        public val selectionLoaded: Boolean get() = true
+
+        public fun selectTab(id: String) {}
+
         public val tabState: UiState<ImmutableList<UiTimelineTabItem>>
 
         public fun resolveAppearance(
@@ -62,9 +72,17 @@ public class HomeTimelineWithTabsPresenter : PresenterBase<HomeTimelineWithTabsP
             }.body()
 
         val tabs by tabsState.collectAsUiState()
+        val selection by remember { readingRepository.selectedTab.map { Selection(it) } }.collectAsState(null)
+        val scope = rememberCoroutineScope()
 
         return object : State, UserState by accountState {
             override val tabState = tabs
+            override val selectedTabId = selection?.id
+            override val selectionLoaded = selection != null
+
+            override fun selectTab(id: String) {
+                scope.launch { readingRepository.selectTab(id) }
+            }
 
             override fun resolveAppearance(
                 tab: UiTimelineTabItem,
@@ -73,6 +91,10 @@ public class HomeTimelineWithTabsPresenter : PresenterBase<HomeTimelineWithTabsP
         }
     }
 }
+
+private data class Selection(
+    val id: String?,
+)
 
 private const val DEFAULT_GUEST_MASTODON_HOST = "mastodon.social"
 

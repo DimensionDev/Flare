@@ -760,4 +760,6 @@
 <string name="ugoira_resolution_unsupported">此设备无法导出原始尺寸。是否导出最长边不超过 1920 像素的视频？</string>
 <string name="ugoira_export_smaller">导出较小尺寸的 MP4</string>
 <string name="ugoira_export_progress">正在保存 MP4：%1$d%%</string>
+    <string name="home_timeline_new_content">有新内容</string>
+    <string name="home_timeline_view_latest">查看最新</string>
 </resources>

@@ -10,6 +10,7 @@ import FlareAppleCore
 
 struct UIGalleryTimelinePagingView: UIViewControllerRepresentable {
     let data: PagingState<UiTimelineV2>
+    var readingState: TimelineReadingState? = nil
     var suppressInitialRefreshIndicator = false
     var onIsAtTopChanged: (Bool) -> Void = { _ in }
     @Environment(\.timelineAppearance) private var timelineAppearance
@@ -29,6 +30,7 @@ struct UIGalleryTimelinePagingView: UIViewControllerRepresentable {
             { await action() }
         }
         controller.openURL = { url in openURL.callAsFunction(url) }
+        controller.readingState = readingState
         controller.onIsAtTopChanged = onIsAtTopChanged
         controller.suppressInitialRefreshIndicator = suppressInitialRefreshIndicator
         // Apply data before appearance so the appearance setter's reconfigure
@@ -49,6 +51,7 @@ struct UIGalleryTimelinePagingView: UIViewControllerRepresentable {
             showOriginalWithTranslation: translateConfig.showOriginalWithTranslation
         )
         controller.openURL = { url in openURL.callAsFunction(url) }
+        controller.readingState = readingState
         controller.onIsAtTopChanged = onIsAtTopChanged
         controller.suppressInitialRefreshIndicator = suppressInitialRefreshIndicator
     }
@@ -80,6 +83,7 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
         ].joined(separator: ":")
     }
 
+    private var pendingReadingData: PagingState<UiTimelineV2>?
     private var currentData: PagingState<UiTimelineV2>?
     private var currentSuccess: PagingStateSuccess<UiTimelineV2>?
     private var itemIndexMap: [String: Int] = [:]
@@ -88,6 +92,48 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
     private var lastLoadedItemIDs: Set<String> = []
     private var lastProcessedDataRef: AnyObject?
     private var lastProcessedUpdateSignature: UpdateSignature?
+
+    var readingState: TimelineReadingState? {
+        didSet { if isViewLoaded { view.setNeedsLayout() } }
+    }
+    private var restoredSessionRequest: Int64?
+
+    private func restoreSessionPositionIfReady() {
+        guard let readingState, let position = readingState.position,
+              restoredSessionRequest != position.requestId,
+              currentSuccess?.isRefreshing == false,
+              allowsScrollAnchorRestoration,
+              dataSource.indexPath(for: Self.itemPrefix + position.itemKey) != nil else { return }
+        pendingScrollAnchor = nil
+        if position.latest {
+            collectionView.setContentOffset(CGPoint(x: 0, y: -collectionView.adjustedContentInset.top), animated: false)
+        } else {
+            guard restoreScrollAnchorIfNeeded(ScrollAnchor(
+                itemID: Self.itemPrefix + position.itemKey, distanceFromViewportTop: CGFloat(position.offset)
+            )) else { return }
+        }
+        restoredSessionRequest = position.requestId
+        DispatchQueue.main.async { [weak self] in
+            self?.readingState?.positionRestored(requestId: position.requestId)
+            self?.reportReadingViewport()
+        }
+    }
+
+    private func reportReadingViewport() {
+        guard let readingState, isViewLoaded else { return }
+        let anchor = captureScrollAnchor(allowWhileScrolling: true)
+        readingState.updateViewport(
+            itemKey: anchor.map { String($0.itemID.dropFirst(Self.itemPrefix.count)) },
+            offset: Double(anchor?.distanceFromViewportTop ?? 0), atTop: effectiveViewportTop <= 1,
+            interacting: !allowsScrollAnchorRestoration
+        )
+    }
+
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        reportReadingViewport()
+        readingState?.savePosition()
+    }
 
     var refreshCallback: (() async -> Void)?
     var suppressInitialRefreshIndicator = false
@@ -167,7 +213,9 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         updateColumnCount()
+        restoreSessionPositionIfReady()
         reportIsAtTop()
+        reportReadingViewport()
     }
 
     // MARK: - Setup
@@ -320,6 +368,10 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
     // MARK: - State
 
     func update(data: PagingState<UiTimelineV2>) {
+        if readingState != nil, isViewLoaded, !allowsScrollAnchorRestoration {
+            pendingReadingData = data
+            return
+        }
         let dataRef = data as AnyObject
         let newUpdateSignature = updateSignature(for: data)
 
@@ -438,10 +490,10 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
         itemID.hasPrefix(Self.itemPrefix)
     }
 
-    private func captureScrollAnchor() -> ScrollAnchor? {
+    private func captureScrollAnchor(allowWhileScrolling: Bool = false) -> ScrollAnchor? {
         guard isViewLoaded,
               currentSuccess != nil,
-              allowsScrollAnchorRestoration,
+              allowWhileScrolling || allowsScrollAnchorRestoration,
               collectionView.bounds.height > 1 else {
             return nil
         }
@@ -870,28 +922,42 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
 
     // MARK: - UIScrollViewDelegate
 
+    private func finishReadingScroll() {
+        reportReadingViewport()
+        if let pendingReadingData {
+            self.pendingReadingData = nil
+            update(data: pendingReadingData)
+        }
+    }
+
     func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
         scrollingState.isScrolling = true
         pendingScrollAnchor = nil
+        readingState?.cancelRestoration()
+        reportReadingViewport()
     }
 
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         restorePendingScrollAnchorIfNeeded()
         reportIsAtTop()
+        reportReadingViewport()
     }
 
     func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
         if !decelerate {
             scrollingState.isScrolling = false
+            finishReadingScroll()
         }
     }
 
     func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
         scrollingState.isScrolling = false
+        finishReadingScroll()
     }
 
     func scrollViewDidEndScrollingAnimation(_ scrollView: UIScrollView) {
         scrollingState.isScrolling = false
+        finishReadingScroll()
     }
 }
 

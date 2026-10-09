@@ -23,11 +23,14 @@ internal class MixedRemoteMediator(
     private val database: CacheDatabase,
     private val mediators: List<CacheableRemoteLoader<UiTimelineV2>>,
     private val mergePolicy: TimelineMergePolicy = TimelineMergePolicy.TimePerPage,
+    private val sessionKey: String? = null,
+    private val isRequestValid: suspend () -> Boolean = { true },
+    private val sourceKeys: List<String> = mediators.map { it.pagingKey },
 ) : CacheableRemoteLoader<UiTimelineV2>,
     ReportableRemoteLoader,
     SortIdProvider {
     override val pagingKey =
-        buildString {
+        sessionKey ?: buildString {
             append("mixed_timeline")
             mediators.forEach { mediator ->
                 append(mediator.pagingKey)
@@ -36,10 +39,32 @@ internal class MixedRemoteMediator(
     private var currentMediators = mediators
     private val timeSources =
         mediators.mapIndexed { index, mediator ->
-            TimeSource(mediator, "$pagingKey$TIME_STAGING_SUFFIX$index")
+            TimeSource(mediator, if (sessionKey != null) "${sourcePrefix(index)}staging" else "$pagingKey$TIME_STAGING_SUFFIX$index")
         }
 
     override var reportError: ((Throwable) -> Unit)? = null
+
+    internal fun forReadingSession(
+        key: String,
+        isValid: suspend () -> Boolean,
+    ): MixedRemoteMediator =
+        MixedRemoteMediator(
+            database,
+            mediators.mapIndexed { index, loader ->
+                if (loader is MixedRemoteMediator) {
+                    loader.forReadingSession(
+                        "$key/source/${sourceKeys[index].length}:${sourceKeys[index]}/",
+                        isValid,
+                    )
+                } else {
+                    loader
+                }
+            },
+            mergePolicy,
+            key,
+            isValid,
+            sourceKeys,
+        )
 
     @OptIn(ExperimentalPagingApi::class)
     override suspend fun load(
@@ -56,7 +81,7 @@ internal class MixedRemoteMediator(
                     currentMediators = mediators
                 }
                 val response =
-                    currentMediators
+                    (if (sessionKey != null) mediators else currentMediators)
                         .mapNotNull {
                             getSubRequest(request, it)
                         }.map { subRequest ->
@@ -64,6 +89,7 @@ internal class MixedRemoteMediator(
                                 runCatching {
                                     subRequest.load(pageSize)
                                 }.getOrElse {
+                                    if (sessionKey != null || it is kotlinx.coroutines.CancellationException) throw it
                                     reportError?.invoke(it)
                                     PagingResult(endOfPaginationReached = true)
                                 }.let {
@@ -75,6 +101,7 @@ internal class MixedRemoteMediator(
                 val mixedTimelineResult = merge(response)
 
                 database.connect {
+                    checkRequestIsValid()
                     response.forEach {
                         saveSubResponse(request, it)
                     }
@@ -119,6 +146,7 @@ internal class MixedRemoteMediator(
                 }
             if (seenStatusIds.isNotEmpty()) {
                 database.connect {
+                    checkRequestIsValid()
                     timeSources.forEach { source ->
                         val committed =
                             database
@@ -162,6 +190,7 @@ internal class MixedRemoteMediator(
                                         runCatching {
                                             state.source.mediator.load(pageSize, subRequest)
                                         }.getOrElse {
+                                            if (sessionKey != null || it is kotlinx.coroutines.CancellationException) throw it
                                             reportError?.invoke(it)
                                             PagingResult(endOfPaginationReached = true)
                                         }
@@ -176,6 +205,7 @@ internal class MixedRemoteMediator(
                             }.awaitAll()
 
                     database.connect {
+                        checkRequestIsValid()
                         responses
                             .flatMap { it.stagedItems }
                             .takeIf { it.isNotEmpty() }
@@ -245,6 +275,7 @@ internal class MixedRemoteMediator(
 
     private suspend fun resetTimeStaging() {
         database.connect {
+            checkRequestIsValid()
             timeSources.forEach { source ->
                 database.pagingTimelineDao().deletePresentationReferences(source.stagingKey)
                 database.pagingTimelineDao().delete(source.stagingKey)
@@ -345,7 +376,7 @@ internal class MixedRemoteMediator(
                 pagingKey = subKey(mediator),
                 prevKey = result.previousKey,
             )
-        } else if (request is PagingRequest.Append && result.nextKey != null) {
+        } else if (request is PagingRequest.Append) {
             database.pagingTimelineDao().updatePagingKeyNextKey(
                 pagingKey = subKey(mediator),
                 nextKey = result.nextKey,
@@ -362,7 +393,14 @@ internal class MixedRemoteMediator(
         }
     }
 
-    private fun subKey(mediator: CacheableRemoteLoader<UiTimelineV2>) = "mixed_${mediator.pagingKey}"
+    private fun subKey(mediator: CacheableRemoteLoader<UiTimelineV2>) =
+        if (sessionKey != null) "${sourcePrefix(mediators.indexOf(mediator))}cursor" else "mixed_${mediator.pagingKey}"
+
+    private fun sourcePrefix(index: Int) = "$sessionKey/source/${sourceKeys[index].length}:${sourceKeys[index]}/"
+
+    private suspend fun checkRequestIsValid() {
+        if (!isRequestValid()) throw kotlinx.coroutines.CancellationException("Reading session was removed")
+    }
 
     private data class SubRequest(
         val mediator: CacheableRemoteLoader<UiTimelineV2>,

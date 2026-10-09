@@ -28,11 +28,13 @@ import dev.dimension.flare.data.model.tab.UiTimelineTabItem
 import dev.dimension.flare.data.model.tab.findById
 import dev.dimension.flare.data.model.tab.isSystemHomeMixedTimeline
 import dev.dimension.flare.data.model.tab.migrateTabSettingsV1ToV2
+import dev.dimension.flare.data.model.tab.readingSources
 import dev.dimension.flare.data.model.tab.withSystemHomeMixedTimelineEnabled
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.sync.Mutex
@@ -47,6 +49,7 @@ public class SettingsRepository internal constructor(
     private val fileStorage: FileStorage,
     private val appDataStore: AppDataStore,
     private val timelineResolver: TimelineResolver,
+    private val readingRepository: TimelineReadingRepository? = null,
 ) {
     private val appearanceBagStore by lazy {
         createDataStore(
@@ -183,6 +186,7 @@ public class SettingsRepository internal constructor(
     internal suspend fun updateTabSettingsV2(block: TabSettingsV2.() -> TabSettingsV2) {
         ensureTabSettingsMigrated()
         tabSettingsV2Store.updateData(block)
+        readingRepository?.retainTabs(homeTimelineTabs.first().readingSources())
     }
 
     public suspend fun removeHomeTimelineTabBySourceId(sourceId: String) {

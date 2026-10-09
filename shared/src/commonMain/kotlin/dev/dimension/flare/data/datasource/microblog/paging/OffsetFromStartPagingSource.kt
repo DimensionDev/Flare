@@ -12,6 +12,14 @@ internal data class PageInvalidationSubscription(
 )
 
 internal sealed interface OffsetFromStartPagingKey {
+    data class Around(
+        val itemKey: String,
+    ) : OffsetFromStartPagingKey
+
+    data class Before(
+        val offset: Int,
+    ) : OffsetFromStartPagingKey
+
     data class Append(
         val offset: Int,
     ) : OffsetFromStartPagingKey
@@ -61,6 +69,10 @@ internal class OffsetFromStartPagingSource<Item : Any>(
             is OffsetFromStartPagingKey.Refresh -> {
                 offset = 0
                 limit = maxOf(params.loadSize, key.limit)
+            }
+
+            is OffsetFromStartPagingKey.Around, is OffsetFromStartPagingKey.Before -> {
+                error("Reading-window key used by a prefix paging source")
             }
         }
 

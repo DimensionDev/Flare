@@ -3,12 +3,16 @@ import FlareAppleCore
 import FlareAppleUI
 import KotlinSharedUI
 import SwiftUI
+import SwiftUIIntrospect
 
 struct TimelinePagingView: View {
     @Environment(\.openWindow) private var openWindow
     @Environment(\.refresh) private var refreshAction: RefreshAction?
     @Environment(\.timelineAppearance.timelineDisplayMode) private var timelineDisplayMode
 
+    let readingState: TimelineReadingState?
+    @State private var readingScroll = MacTimelineReadingScroll()
+    @State private var isReadingScrollActive = false
     let data: PagingState<UiTimelineV2>
     let detailStatusKey: MicroBlogKey?
     let key: String
@@ -20,10 +24,12 @@ struct TimelinePagingView: View {
         data: PagingState<UiTimelineV2>,
         detailStatusKey: MicroBlogKey?,
         key: String,
+        readingState: TimelineReadingState? = nil,
         topContentInset: CGFloat = 0,
         allowGalleryMode: Bool = false,
         suppressInitialRefreshIndicator: Bool = false
     ) {
+        self.readingState = readingState
         self.data = data
         self.detailStatusKey = detailStatusKey
         self.key = key
@@ -34,10 +40,40 @@ struct TimelinePagingView: View {
 
     var body: some View {
         GeometryReader { proxy in
+            let presentedData = readingState == nil ? data : readingScroll.present(data, interacting: isReadingScrollActive)
 //            let columnCount = resolvedColumnCount(width: proxy.size.width)
-            ScrollView {
-                content(columnCount: 1, availableWidth: proxy.size.width)
-                    .padding(.top, topContentInset)
+            ScrollViewReader { scrollProxy in
+                ScrollView {
+                    content(data: presentedData, columnCount: 1, availableWidth: proxy.size.width)
+                        .padding(.top, topContentInset)
+                }
+                .coordinateSpace(name: "timeline-reading-viewport")
+                .environment(\.tracksTimelineReadingPosition, readingState != nil)
+                .introspect(.scrollView, on: .macOS(.v14, .v15, .v26, .v27)) { scrollView in
+                    readingScroll.scrollView = scrollView
+                }
+                .onPreferenceChange(TimelineReadingFrames.self) { frames in
+                    readingScroll.update(frames: frames, state: readingState)
+                }
+                .onChange(of: readingState?.position?.requestId, initial: true) { _, _ in
+                    restorePosition(using: scrollProxy)
+                }
+                .onChange(of: readingItemKeys) { _, _ in
+                    restorePosition(using: scrollProxy)
+                }
+                .onReceive(NotificationCenter.default.publisher(for: NSScrollView.willStartLiveScrollNotification)) { event in
+                    guard event.object as? NSScrollView === readingScroll.scrollView else { return }
+                    isReadingScrollActive = true
+                    readingScroll.isInteracting = true
+                    readingState?.cancelRestoration()
+                    readingScroll.report(state: readingState)
+                }
+                .onReceive(NotificationCenter.default.publisher(for: NSScrollView.didEndLiveScrollNotification)) { event in
+                    guard event.object as? NSScrollView === readingScroll.scrollView else { return }
+                    isReadingScrollActive = false
+                    readingScroll.isInteracting = false
+                    readingScroll.report(state: readingState)
+                }
             }
             .background(timelineDisplayMode == .card || timelineDisplayMode == .gallery ? Color(.secondarySystemFill) : Color(.windowBackgroundColor))
             .detectScrolling()
@@ -52,8 +88,22 @@ struct TimelinePagingView: View {
         }
     }
 
+    private var readingItemKeys: [String] {
+        guard readingState != nil, case .success(let success) = onEnum(of: data) else { return [] }
+        return (0..<Int(success.itemCount)).compactMap { success.peek(index: Int32($0))?.itemKey }
+    }
+
+    private func restorePosition(using proxy: ScrollViewProxy) {
+        guard let position = readingState?.position, readingItemKeys.contains(position.itemKey) else { return }
+        // Materialize the local window's anchor before applying its precise pixel offset.
+        if readingScroll.frames[position.itemKey] == nil {
+            proxy.scrollTo(position.itemKey, anchor: .top)
+        }
+        readingScroll.update(frames: readingScroll.frames, state: readingState)
+    }
+
     @ViewBuilder
-    private func content(columnCount: Int, availableWidth: CGFloat) -> some View {
+    private func content(data: PagingState<UiTimelineV2>, columnCount: Int, availableWidth: CGFloat) -> some View {
         if allowGalleryMode && timelineDisplayMode == .gallery {
             MacGalleryTimelineMasonryView(
                 data: data,
@@ -224,6 +274,7 @@ private struct MacTimelineMasonryView: View {
                             detailStatusKey: detailStatusKey,
                             onDisplay: onDisplay
                         )
+                        .timelineReadingAnchor(row.item?.itemKey)
                     }
                 }
                 .frame(maxWidth: .infinity)
@@ -350,6 +401,7 @@ private struct MacGalleryTimelineMasonryView: View {
                 LazyVStack(spacing: spacing) {
                     ForEach(column.rows) { row in
                         TimelineGalleryItemView(item: row.item, placeholderVariant: row.index)
+                            .timelineReadingAnchor(row.item?.itemKey)
                             .onAppear {
                                 onDisplay(row.index)
                             }

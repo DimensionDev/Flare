@@ -676,6 +676,67 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         XCTAssertTrue(isBlank, "A newly inserted card painted outside its estimated cell")
     }
 
+    func testSessionRestoresStablePostAndFractionalOffsetAfterLoading() async throws {
+        let fixture = await Fixture(initialState: .loading)
+        let reading = ReadingState()
+        reading.position = TimelineReadingPosition(itemKey: "case-20", offset: -37.25, requestId: 1, latest: false)
+        fixture.controller.readingState = reading
+        await fixture.settle()
+        XCTAssertNotNil(reading.position)
+        fixture.input.state = .loaded
+        fixture.input.items = (0..<60).map { .post(makeRow($0)) }
+        await fixture.apply()
+        XCTAssertNil(reading.position)
+        try fixture.assertPosition(("t:case-20", -37.25))
+        XCTAssertEqual(reading.itemKey, "case-20")
+        XCTAssertEqual(reading.offset, -37.25, accuracy: 0.5)
+    }
+
+    func testSessionAtTopCapturesAPostInsteadOfFollowLatest() async throws {
+        let fixture = await Fixture(posts: true)
+        let reading = ReadingState()
+        fixture.controller.readingState = reading
+        await fixture.settle()
+        XCTAssertEqual(reading.itemKey, "case-0")
+        XCTAssertEqual(reading.offset, 0, accuracy: 0.5)
+        fixture.input.items.insert(.post(makeRow(100)), at: 0)
+        await fixture.apply()
+        try fixture.assertPosition(("t:case-0", 0))
+    }
+
+    func testUserScrollCancelsPendingSessionRestoration() async throws {
+        let fixture = await Fixture(initialState: .loading)
+        let reading = ReadingState()
+        reading.position = TimelineReadingPosition(itemKey: "case-20", offset: -37, requestId: 2, latest: false)
+        fixture.controller.readingState = reading
+        fixture.controller.beginExternalScrollInteraction()
+        XCTAssertNil(reading.position)
+        fixture.controller.endExternalScrollInteraction()
+        fixture.input.state = .loaded
+        fixture.input.items = (0..<60).map { .post(makeRow($0)) }
+        await fixture.apply()
+        XCTAssertEqual(fixture.controller.effectiveContentOffsetY, 0, accuracy: 0.5)
+    }
+
+    private final class ReadingState: NSObject, TimelineReadingState {
+        var position: TimelineReadingPosition?
+        var hasNewContent = false
+        var isRefreshing = false
+        var itemKey: String?
+        var offset: Double = 0
+        func updateViewport(itemKey: String?, offset: Double, atTop: Bool, interacting: Bool) {
+            self.itemKey = itemKey
+            self.offset = offset
+        }
+        func positionRestored(requestId: Int64) {
+            if position?.requestId == requestId { position = nil }
+        }
+        func cancelRestoration() { position = nil }
+        func savePosition() {}
+        nonisolated func __refreshAutomatically(completionHandler: @escaping @Sendable ((any Error)?) -> Void) { completionHandler(nil) }
+        nonisolated func __showLatest(completionHandler: @escaping @Sendable ((any Error)?) -> Void) { completionHandler(nil) }
+    }
+
     private func descendants(_ view: UIView) -> [UIView] { [view] + view.subviews.flatMap(descendants) }
 
     private struct ListSwitchTestView: View {

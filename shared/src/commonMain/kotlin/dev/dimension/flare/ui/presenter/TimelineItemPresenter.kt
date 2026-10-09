@@ -26,6 +26,7 @@ public class TimelineItemPresenter(
         public suspend fun refreshSuspend()
 
         public val isRefreshing: Boolean
+        public val readingState: dev.dimension.flare.ui.model.TimelineReadingState? get() = null
     }
 
     private val timelinePresenter by lazy {
@@ -38,7 +39,8 @@ public class TimelineItemPresenter(
         val scope = rememberCoroutineScope()
         return object : State {
             override val listState = state.listState
-            override val isRefreshing = listState.isRefreshing
+            override val isRefreshing = listState.isRefreshing || state.readingState?.isRefreshing == true
+            override val readingState = state.readingState
 
             override fun refreshSync() {
                 scope.launch {

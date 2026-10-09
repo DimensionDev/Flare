@@ -42,6 +42,9 @@ The implementation has three state owners:
   Controller-local height storage retains at most two geometries per live item.
   `TimelineAutoplay` handles playback without controlling list offsets.
 
-Changing the list identity creates a fresh list at the top. Pages do not store
-reading positions for previously selected tabs or queries. The current list
-keeps its position through refreshes, loading placeholders and layout changes.
+Changing a generic list identity creates a fresh list at the top. Home timeline
+tabs additionally restore their persisted post and viewport offset through the
+shared reading session; queries and detail lists do not. The current list keeps
+its position through refreshes, loading placeholders and layout changes. Home
+session tests cover restoration after loading, a top-origin post and cancellation
+when the reader starts scrolling.

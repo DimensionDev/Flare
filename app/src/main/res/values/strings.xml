@@ -18,6 +18,7 @@
     <string name="selected">Selected</string>
 
     <string name="home_tab_home_title">Home</string>
+    <string name="home_timeline_new_content">New content</string>
     <string name="home_tab_notifications_title">Notifications</string>
     <string name="home_tab_me_title">Me</string>
     <string name="home_tab_discover_title">Discover</string>
@@ -825,4 +826,5 @@
     <string name="ugoira_resolution_unsupported">Original resolution is unsupported. Export at up to 1920 pixels?</string>
     <string name="ugoira_export_smaller">Export smaller MP4</string>
     <string name="ugoira_export_progress">Saving MP4: %1$d%%</string>
+    <string name="home_timeline_view_latest">View latest</string>
 </resources>

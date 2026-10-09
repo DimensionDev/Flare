@@ -2,6 +2,7 @@ package dev.dimension.flare.ui.presenter.home
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -30,10 +31,14 @@ import dev.dimension.flare.data.datasource.microblog.paging.NotSupportRemoteLoad
 import dev.dimension.flare.data.datasource.microblog.paging.OffsetFromStartPagingSource
 import dev.dimension.flare.data.datasource.microblog.paging.PostContextLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PostContextRemoteMediator
+import dev.dimension.flare.data.datasource.microblog.paging.ReadingSessionState
+import dev.dimension.flare.data.datasource.microblog.paging.ReadingViewport
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.TimelineDbPageCache
 import dev.dimension.flare.data.datasource.microblog.paging.TimelineDbPageLoader
 import dev.dimension.flare.data.datasource.microblog.paging.TimelinePageItem
+import dev.dimension.flare.data.datasource.microblog.paging.TimelineReadingPagingSource
+import dev.dimension.flare.data.datasource.microblog.paging.TimelineReadingSession
 import dev.dimension.flare.data.datasource.microblog.paging.TimelineRemoteMediator
 import dev.dimension.flare.data.datasource.microblog.paging.notSupported
 import dev.dimension.flare.data.datasource.microblog.paging.toTimelinePagingSource
@@ -42,21 +47,26 @@ import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.model.tab.TimelineFilterConfig
 import dev.dimension.flare.data.model.tab.TimelinePostContent
 import dev.dimension.flare.data.model.tab.TimelinePostKind
+import dev.dimension.flare.data.model.tab.readingSources
+import dev.dimension.flare.data.repository.DebugRepository
 import dev.dimension.flare.data.repository.KeywordFilterPattern
 import dev.dimension.flare.data.repository.LocalFilterRepository
 import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.data.repository.MxgaRepository
 import dev.dimension.flare.data.repository.SettingsRepository
+import dev.dimension.flare.data.repository.TimelineReadingRepository
 import dev.dimension.flare.data.repository.isMxgaMatch
 import dev.dimension.flare.data.translation.PreTranslationService
 import dev.dimension.flare.data.translation.TranslationSettingsSupport
 import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.model.PlatformRegistry
 import dev.dimension.flare.model.ReferenceType
+import dev.dimension.flare.ui.model.TimelineReadingState
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.asTimelinePostItem
 import dev.dimension.flare.ui.presenter.PresenterBase
+import dev.dimension.flare.ui.presenter.guestMastodonHomeTimelineTab
 import dev.dimension.flare.web.shared.WebPresenter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -65,9 +75,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -103,6 +115,9 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
     private val timelineTabItemId: String?
     private val isHomeTimeline: Boolean
     private val contextMediator = MutableStateFlow<PostContextRemoteMediator?>(null)
+    private val readingRepository: TimelineReadingRepository by koinInject()
+    private val readingSession = MutableStateFlow<TimelineReadingSession?>(null)
+    private val readingSourceKey: String?
 
     private val timelineFilterConfigFlow: Flow<TimelineFilterConfig> by lazy {
         observeTimelineFilterConfig(
@@ -126,11 +141,13 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
         loader: Flow<RemoteLoader<UiTimelineV2>> = flowOf(notSupported()),
         options: TimelinePresenterOptions = TimelinePresenterOptions(),
         isHomeTimeline: Boolean = false,
+        readingSourceKey: String? = null,
     ) : super() {
         this.baseLoader = loader
         this.options = options
         this.timelineTabItemId = tabId
         this.isHomeTimeline = isHomeTimeline
+        this.readingSourceKey = readingSourceKey
     }
 
     internal open fun allowLongTextTranslationDisplay(loader: RemoteLoader<UiTimelineV2>): Boolean =
@@ -141,12 +158,21 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
         loader
             .flatMapLatest { remoteLoader ->
                 contextMediator.value = null
-                when (remoteLoader) {
-                    is NotSupportRemoteLoader<UiTimelineV2> -> {
+                readingSession.value = null
+                when {
+                    remoteLoader !is NotSupportRemoteLoader<*> && readingSourceKey != null && timelineTabItemId != null -> {
+                        readingPager(remoteLoader, scope, timelineTabItemId, readingSourceKey)
+                            .cachedIn(scope)
+                            .flatMapLatest { pagingData ->
+                                translationSettingsFlow.map { options -> pagingData.map { it.toUi(options) } }
+                            }
+                    }
+
+                    remoteLoader is NotSupportRemoteLoader<UiTimelineV2> -> {
                         PagingData.emptyFlow(isError = false)
                     }
 
-                    is CacheableRemoteLoader<UiTimelineV2> -> {
+                    remoteLoader is CacheableRemoteLoader<UiTimelineV2> -> {
                         cachePager(
                             loader = remoteLoader,
                         ).cachedIn(scope).flatMapLatest { pagingData ->
@@ -186,6 +212,75 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
             }.catch {
                 emitAll(PagingData.emptyFlow(isError = true))
             }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private fun readingPager(
+        remoteLoader: RemoteLoader<UiTimelineV2>,
+        scope: CoroutineScope,
+        tabId: String,
+        sourceIdentity: String,
+    ): Flow<PagingData<TimelinePageItem>> =
+        flow {
+            fun isCurrentSource(sources: Map<String, String>): Boolean =
+                sources[tabId] == sourceIdentity || (sources.isEmpty() && tabId == guestMastodonHomeTimelineTab.id)
+            if (!isCurrentSource(settingsRepository.homeTimelineTabs.first().readingSources())) {
+                emit(PagingData.empty())
+                return@flow
+            }
+            val sourceKey = sourceIdentity
+            readingRepository.open(tabId, sourceKey)
+            emitAll(
+                database
+                    .timelineReadingSessionDao()
+                    .observe(tabId)
+                    .distinctUntilChangedBy { it?.key }
+                    .flatMapLatest { existing ->
+                        flow {
+                            val currentSources = settingsRepository.homeTimelineTabs.first().readingSources()
+                            if (!isCurrentSource(currentSources)) {
+                                readingSession.value = null
+                                emit(PagingData.empty())
+                                return@flow
+                            }
+                            val record = existing ?: readingRepository.open(tabId, sourceKey)
+                            val session =
+                                TimelineReadingSession(
+                                    record,
+                                    remoteLoader,
+                                    database,
+                                    readingRepository,
+                                    scope,
+                                    preTranslationService,
+                                    allowLongTextTranslationDisplay(remoteLoader),
+                                    refreshOnLaunch = {
+                                        settingsRepository.appSettings.first().refreshHomeTimelineOnLaunch
+                                    },
+                                    isVisible = { item ->
+                                        item.matchesKeywordFilters(filterFlow.first()) &&
+                                            item.matchesTimelineFilter(timelineFilterConfigFlow.first()) &&
+                                            (
+                                                !mxgaEnabledFlow.first() ||
+                                                    !item.isMxgaMatch(mxgaRepository.snapshot.first(), platformRegistry)
+                                            )
+                                    },
+                                    notifyError = {
+                                        DebugRepository.error(it)
+                                        if (it is LoginExpiredException) inAppNotification.onError(Message.LoginExpired, it)
+                                    },
+                                )
+                            session.prepare()
+                            readingSession.value = session
+                            emitAll(
+                                Pager(
+                                    config = offsetPagingConfig,
+                                    remoteMediator = session,
+                                    pagingSourceFactory = { TimelineReadingPagingSource(database, session) },
+                                ).flow,
+                            )
+                        }
+                    },
+            )
+        }
 
     private fun cachePager(loader: CacheableRemoteLoader<UiTimelineV2>): Flow<PagingData<TimelinePageItem>> =
         run {
@@ -262,8 +357,48 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
                 }
             }
         val listState = items.toPagingState(contextLoadStates, retry)
+        val session by readingSession.collectAsState()
+        val reading by remember {
+            readingSession.flatMapLatest { it?.state ?: flowOf(ReadingSessionState()) }
+        }.collectAsState(ReadingSessionState())
+        LaunchedEffect(reading.position?.requestId, items.itemSnapshotList, reading.refreshing, items.loadState.source.refresh) {
+            val position = reading.position ?: return@LaunchedEffect
+            if (!reading.refreshing && items.loadState.source.refresh is androidx.paging.LoadState.NotLoading &&
+                items.itemSnapshotList.items.none { it.stableItemKey == position.itemKey }
+            ) {
+                withContext(PlatformDispatchers.IO) { session?.resolveMissingPosition() }
+            }
+        }
+        val readingState =
+            session?.let { current ->
+                object : TimelineReadingState {
+                    override val position = reading.position
+                    override val hasNewContent = reading.hasNewContent
+                    override val isRefreshing = reading.refreshing
+
+                    override fun updateViewport(
+                        itemKey: String?,
+                        offset: Double,
+                        atTop: Boolean,
+                        interacting: Boolean,
+                    ) {
+                        current.updateViewport(ReadingViewport(itemKey, offset, atTop, interacting))
+                    }
+
+                    override fun positionRestored(requestId: Long) = current.positionRestored(requestId)
+
+                    override fun cancelRestoration() = current.cancelRestoration()
+
+                    override fun savePosition() = current.savePosition()
+
+                    override suspend fun refreshAutomatically() = current.refresh(automatic = true)
+
+                    override suspend fun showLatest() = current.showLatest()
+                }
+            }
         return object : TimelineState {
             override val listState = listState
+            override val readingState = readingState
 
             override fun refreshAsync() {
                 scope.launch {
@@ -272,6 +407,10 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
             }
 
             override suspend fun refresh() {
+                session?.let {
+                    it.refresh(automatic = false)
+                    return
+                }
                 listState
                     .onSuccess {
                         refreshSuspend()
@@ -293,6 +432,7 @@ internal suspend fun shouldRefreshTimelineOnInitialize(
 @Immutable
 public interface TimelineState {
     public val listState: PagingState<UiTimelineV2>
+    public val readingState: TimelineReadingState? get() = null
 
     public fun refreshAsync()
 

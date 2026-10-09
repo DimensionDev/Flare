@@ -356,6 +356,7 @@ internal class NostrService(
     private val relayMutex = Mutex()
     private val currentRelays = linkedMapOf<String, RustRelayUrl>()
     private val relayLimitsMutex = Mutex()
+    private val relayLookupMutexes = mutableMapOf<String, Mutex>()
 
     // ponytail: Cache NIP-11, including unavailable documents, for this session; add expiry if live changes matter.
     private val relayTextLimits = mutableMapOf<String, NostrTextLimits>()
@@ -1280,6 +1281,11 @@ internal class NostrService(
         }
 
     internal suspend fun fetchTextLimits(relay: String): NostrTextLimits {
+        val lookupMutex = relayLimitsMutex.withLock { relayLookupMutexes.getOrPut(relay) { Mutex() } }
+        return lookupMutex.withLock { fetchAndCacheTextLimits(relay) }
+    }
+
+    private suspend fun fetchAndCacheTextLimits(relay: String): NostrTextLimits {
         relayLimitsMutex.withLock { relayTextLimits[relay] }?.let { return it }
         val limits =
             try {

@@ -27,6 +27,10 @@ final class TimelineInteractionTests: XCTestCase {
     @MainActor func testRefiningAPartlyHiddenCardKeepsVisibleContentDuringDeceleration() { run("refine-reading-item-deceleration", gesture: true) }
     @MainActor func testPrependDuringPullRefreshKeepsTheReadingItem() { run("pull-refresh", gesture: true) }
     @MainActor func testPrependDuringRefreshRevealKeepsTheReadingItem() { run("fast-refresh-prepend") }
+    @MainActor func testHeightMeasuredDuringRefreshCollapseKeepsReadingItem() { run("refresh-late-height") }
+    @MainActor func testHeightMeasuredDuringRefreshCollapseKeepsReadingItemAcrossColumns() { run("refresh-late-height-columns") }
+    @MainActor func testHeightMeasuredAfterRefreshCollapseKeepsReadingItem() { run("refresh-height-after-collapse") }
+    @MainActor func testExplicitNavigationSupersedesRefreshCollapseBookmark() { run("refresh-collapse-navigation") }
     @MainActor func testSnapshotChangesPreserveAnActivePan() { run("snapshot-drag", gesture: true) }
     @MainActor func testSnapshotChangesPreserveDeceleration() { run("snapshot-deceleration", gesture: true) }
     @MainActor func testSnapshotChangesPreserveMultipleColumns() { run("snapshot-columns-deceleration", gesture: true) }

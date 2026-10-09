@@ -92,6 +92,8 @@ final class TimelineUIKitCollectionViewCell: UICollectionViewCell {
 
     override init(frame: CGRect) {
         super.init(frame: frame)
+        // Natural card content can exceed the cell's estimated height for one layout pass.
+        clipsToBounds = true
         backgroundColor = .clear
         contentView.backgroundColor = .clear
     }

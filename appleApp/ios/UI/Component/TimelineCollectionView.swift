@@ -53,7 +53,10 @@ final class TimelineCollectionView: UICollectionView {
     private var refreshRequested = false
     private var pendingRefreshReveal = false
     private var isEndingRefresh = false
+    private var isAnimatingRefreshCollapse = false
     private var isRevealingRefresh = false
+    // A refresh started away from the top has no visible gap to collapse.
+    private var preservesRefreshGap = false
     private(set) var isProgrammaticScrolling = false
 
     var hasReadingPosition: Bool { readingPosition != nil }
@@ -67,7 +70,7 @@ final class TimelineCollectionView: UICollectionView {
     // range, so UIKit can no longer spring back to the original reading position.
     // The owner keeps its latest input queued until the interaction ends.
     var shouldDeferSnapshotChanges: Bool {
-        preservesReadingPosition && (isRevealingRefresh ||
+        preservesReadingPosition && (isRevealingRefresh || isEndingRefresh ||
             (isPresentingRefresh && isScrollInteractionActive && contentOffset.y <= -restingAdjustedTopInset))
     }
 
@@ -90,6 +93,8 @@ final class TimelineCollectionView: UICollectionView {
         max(adjustedContentInset.top - restingAdjustedTopInset, 0)
     }
 
+    private var readingRefreshInset: CGFloat { preservesRefreshGap ? refreshInset : 0 }
+
     private func rememberRestingAutomaticInset() {
         guard !isPresentingRefresh, refreshControl?.isRefreshing != true else { return }
         restingAutomaticInset = (adjustedContentInset.top - contentInset.top, safeAreaInsets.top)
@@ -98,8 +103,7 @@ final class TimelineCollectionView: UICollectionView {
     override func adjustedContentInsetDidChange() {
         super.adjustedContentInsetDidChange()
         if isEndingRefresh, refreshInset <= 0.5 {
-            isEndingRefresh = false
-            setNeedsLayout()
+            DispatchQueue.main.async { [weak self] in self?.finishRefreshingIfReady() }
         }
         rememberRestingAutomaticInset()
     }
@@ -128,7 +132,12 @@ final class TimelineCollectionView: UICollectionView {
 
     func beginRefreshing(revealingIndicator: Bool) {
         guard preservesReadingPosition, let refreshControl, !refreshRequested else { return }
+        if isEndingRefresh {
+            super.setContentOffset(contentOffset, animated: false)
+            endProgrammaticScrolling()
+        }
         let wasAtTop = contentOffset.y + restingAdjustedTopInset <= 1 || bounds.height <= 1
+        preservesRefreshGap = wasAtTop
         if appliedTopInset == nil { appliedTopInset = contentInset.top }
         pendingRefreshReveal = revealingIndicator && wasAtTop && !refreshControl.isRefreshing && !hasScrollGesture
         refreshRequested = true
@@ -159,16 +168,29 @@ final class TimelineCollectionView: UICollectionView {
         if isRevealingRefresh {
             isRevealingRefresh = false
             super.setContentOffset(contentOffset, animated: false)
+            restoreReadingPosition(.top)
         }
-        // Preserve the reading item through UIKit's inset removal. The bookmark
-        // is consumed when the native refresh inset is gone, not on every frame.
+        // UIKit removes the model inset before its collapse animation finishes.
+        // Hand the final reading position to one native scroll animation.
         prepareForLayoutChange()
         readingPositionGeneration += 1
         refreshRequested = false
         isEndingRefresh = refreshControl?.isRefreshing == true
+        let offsetBeforeEnding = contentOffset
         withRefreshAnimations { refreshControl?.endRefreshing() }
-        if refreshInset <= 0.5 { isEndingRefresh = false }
-        setNeedsLayout()
+        // Automatic insets can already have moved the model offset to the endpoint.
+        if refreshInset <= 0.5, readingPosition != nil, allowsReadingPositionRestoration {
+            super.setContentOffset(offsetBeforeEnding, animated: false)
+        }
+        isEndingRefresh = true
+        finishRefreshingIfReady()
+    }
+
+    private func finishRefreshingIfReady() {
+        guard isEndingRefresh, !isAnimatingRefreshCollapse, refreshInset <= 0.5 else { return }
+        isEndingRefresh = false
+        restoreReadingPositionIfNeeded(animated: true)
+        isEndingRefresh = isAnimatingRefreshCollapse
     }
 
     private func withRefreshAnimations(_ action: () -> Void) {
@@ -179,12 +201,22 @@ final class TimelineCollectionView: UICollectionView {
     }
 
     func interruptRefreshForScrolling() {
+        if isAnimatingRefreshCollapse {
+            super.setContentOffset(contentOffset, animated: false)
+        }
         pendingRefreshReveal = false
         isRevealingRefresh = false
+        isEndingRefresh = false
+        isAnimatingRefreshCollapse = false
+        preservesRefreshGap = false
         resetReadingPosition()
     }
 
     func cancelRefresh() {
+        if isEndingRefresh {
+            super.setContentOffset(contentOffset, animated: false)
+            endProgrammaticScrolling()
+        }
         interruptRefreshForScrolling()
         refreshRequested = false
         isEndingRefresh = refreshControl?.isRefreshing == true
@@ -213,6 +245,7 @@ final class TimelineCollectionView: UICollectionView {
     }
 
     func beginProgrammaticScrolling() {
+        if isAnimatingRefreshCollapse { interruptRefreshForScrolling() }
         isProgrammaticScrolling = true
         onProgrammaticScrollBegan?()
     }
@@ -229,7 +262,10 @@ final class TimelineCollectionView: UICollectionView {
     }
 
     func endProgrammaticScrolling() {
+        if isAnimatingRefreshCollapse { setNeedsLayout() }
+        isAnimatingRefreshCollapse = false
         isProgrammaticScrolling = false
+        isEndingRefresh = false
         isRevealingRefresh = false
     }
 
@@ -333,7 +369,7 @@ final class TimelineCollectionView: UICollectionView {
     }
 
     private func readingViewportTop() -> CGFloat {
-        let top = contentOffset.y + (readingTopInset?() ?? restingAdjustedTopInset) + refreshInset
+        let top = contentOffset.y + (readingTopInset?() ?? restingAdjustedTopInset) + readingRefreshInset
         // Elastic pull distance is not a saved reading offset.
         return isPresentingRefresh ? max(top, 0) : top
     }
@@ -380,9 +416,16 @@ final class TimelineCollectionView: UICollectionView {
         _ updates: () -> Void
     ) {
         let viewportTop = readingViewportTop()
-        var item = preservesReadingPosition && hasScrollGesture &&
+        var item = preservesReadingPosition && (hasScrollGesture || isAnimatingRefreshCollapse) &&
             !isProgrammaticScrolling && !isExternalScrollInteractionActive && !isRevealingRefresh
             ? firstVisibleReadingItem(viewportTop: viewportTop, preferringVisibleTop: preferringVisibleTop) : nil
+        // Another column's first visible item may not move with the collapse target.
+        if isAnimatingRefreshCollapse,
+           let id = readingPosition?.itemID,
+           let path = readingIndexPath?(id),
+           let frame = collectionViewLayout.layoutAttributesForItem(at: path)?.frame {
+            item = (id, frame)
+        }
         if let anchor = item, let keepingItemIDs, !keepingItemIDs.contains(anchor.id) {
             let order = readingItemIDs?() ?? []
             let index = order.firstIndex(of: anchor.id) ?? 0
@@ -403,7 +446,7 @@ final class TimelineCollectionView: UICollectionView {
             // The estimate may have put the viewport beyond the measured card.
             // Keep that ID visible using the same clamp as an idle reading anchor.
             let distance = max(oldDistance, (readingTopOcclusion?() ?? 0) + 1 - frame.height)
-            // UIKit's invalidation delta preserves the pan/deceleration trajectory.
+            // UIKit's invalidation delta preserves the gesture or collapse trajectory.
             // Account for any offset adjustment UIKit already made at the bottom.
             var targetOffset = oldOffset + frame.minY - item.frame.minY + oldDistance - distance
             if wasWithinBounds {
@@ -455,7 +498,7 @@ final class TimelineCollectionView: UICollectionView {
         restoreReadingPositionIfNeeded()
     }
 
-    private func restoreReadingPositionIfNeeded() {
+    private func restoreReadingPositionIfNeeded(animated: Bool = false) {
         guard preservesReadingPosition, !isRestoringReadingPosition,
               bounds.width > 1, bounds.height > 1 else { return }
         if !allowsReadingPositionRestoration {
@@ -498,13 +541,19 @@ final class TimelineCollectionView: UICollectionView {
             guard let frame = collectionViewLayout.layoutAttributesForItem(at: indexPath)?.frame else { return }
             // Resizing can make a card shorter; keep the reading item visible.
             let distance = max(distanceFromTop, (readingTopOcclusion?() ?? 0) + 1 - frame.height)
-            targetY = frame.minY - distance - (readingTopInset?() ?? restingAdjustedTopInset) - refreshInset
+            targetY = frame.minY - distance - (readingTopInset?() ?? restingAdjustedTopInset) - readingRefreshInset
         }
         let minimumY = -adjustedContentInset.top
         let maximumY = max(minimumY, contentSize.height - bounds.height + adjustedContentInset.bottom)
         let offsetY = min(max(targetY, minimumY), maximumY)
         let tolerance = 0.5 / max(traitCollection.displayScale, 1)
         if abs(contentOffset.y - offsetY) > tolerance {
+            if animated, window != nil {
+                // Internal collapse retains its bookmark; explicit navigation discards it.
+                isAnimatingRefreshCollapse = true
+                super.setContentOffset(CGPoint(x: contentOffset.x, y: offsetY), animated: true)
+                return
+            }
             super.setContentOffset(CGPoint(x: contentOffset.x, y: offsetY), animated: false)
         }
         finishReadingPositionRestoration(at: targetIndexPath)

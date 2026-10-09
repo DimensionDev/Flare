@@ -644,6 +644,38 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         }
     }
 
+    func testEstimatedCellHeightDoesNotPaintOverTheFollowingItem() throws {
+        let cell = TimelineUIKitCollectionViewCell(frame: CGRect(x: 0, y: 0, width: 390, height: 240))
+        cell.configureTimeline(data: makeRow(0), index: 0, totalCount: 2,
+                               appearance: TimelineUIKitAppearance(timeline: TimelineAppearance.companion.Default), detailStatusKey: nil,
+                               aiTldrEnabled: false, isMultipleColumn: false, openURL: nil)
+        let container = UIView(frame: CGRect(x: 0, y: 0, width: 390, height: 800))
+        container.addSubview(cell)
+        container.layoutIfNeeded()
+        let card = try XCTUnwrap(descendants(cell).compactMap { $0 as? AdaptiveTimelineCardUIView }.first)
+        XCTAssertGreaterThan(try XCTUnwrap(card.timelineHeight(for: 390)), cell.bounds.height)
+
+        // Crop the actual rendered card below its temporary estimated cell boundary.
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = 1
+        format.preferredRange = .standard
+        let image = UIGraphicsImageRenderer(size: CGSize(width: 390, height: 400), format: format).image { context in
+            UIColor.white.setFill()
+            context.fill(CGRect(x: 0, y: 0, width: 390, height: 400))
+            context.cgContext.translateBy(x: 0, y: -cell.bounds.height)
+            container.layer.render(in: context.cgContext)
+        }
+        add(XCTAttachment(image: image))
+        let bitmap = try XCTUnwrap(image.cgImage)
+        XCTAssertEqual(bitmap.bitsPerPixel, 32)
+        let bytes = try XCTUnwrap(bitmap.dataProvider?.data) as Data
+        let isBlank = (0..<bitmap.height).allSatisfy { row in
+            let start = row * bitmap.bytesPerRow
+            return bytes[start..<(start + bitmap.width * 4)].allSatisfy { $0 == 255 }
+        }
+        XCTAssertTrue(isBlank, "A newly inserted card painted outside its estimated cell")
+    }
+
     private func descendants(_ view: UIView) -> [UIView] { [view] + view.subviews.flatMap(descendants) }
 
     private struct ListSwitchTestView: View {

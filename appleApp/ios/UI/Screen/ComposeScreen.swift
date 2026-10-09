@@ -166,6 +166,9 @@ struct ComposeScreen: View {
             applyDraft(loadedDraft.data)
             presenter.state.consumeLoadedDraft()
         }
+        .onChange(of: viewModel.enableContentWarning ? viewModel.contentWarning : nil, initial: true) { _, newValue in
+            presenter.state.setSpoilerText(value: newValue)
+        }
         .onChange(of: viewModel.text) { oldValue, newValue in
             presenter.state.setText(value: newValue)
         }

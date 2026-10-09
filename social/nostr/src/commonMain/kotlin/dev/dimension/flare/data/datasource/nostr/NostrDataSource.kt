@@ -470,7 +470,7 @@ internal class NostrDataSource(
         }
     }
 
-    override suspend fun compose(
+    override suspend fun publish(
         data: ComposeData,
         progress: () -> Unit,
     ) {
@@ -527,7 +527,6 @@ internal class NostrDataSource(
 
     override fun composeConfig(type: ComposeType): ComposeConfig =
         ComposeConfig(
-            text = ComposeConfig.Text(65535),
             contentWarning = ComposeConfig.ContentWarning,
             media =
                 ComposeConfig.Media(

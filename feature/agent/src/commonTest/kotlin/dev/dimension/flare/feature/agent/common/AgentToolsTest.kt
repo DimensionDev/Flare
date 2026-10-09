@@ -430,6 +430,29 @@ internal class AgentToolsTest {
         }
 
     @Test
+    fun composeToolRejectsSecondaryTextLimitBeforeConfirmation() =
+        runTest {
+            val dataSource =
+                StubComposeDataSource(
+                    accountKey = MicroBlogKey("alice", "example.social"),
+                    text = ComposeConfig.Text.withValidation(300) { _, _ -> ComposeConfig.Text.Check(299, isValid = false) },
+                )
+            val inputRequestStore = AgentToolInputRequestStore()
+            val result =
+                composePostTool(dataSource, inputRequestStore).execute(
+                    ComposePostTool.Args(
+                        content = "hello from agent",
+                        accountId = "alice",
+                        accountHost = "example.social",
+                    ),
+                )
+
+            assertTrue(result.contains("exceeds the platform limits"))
+            assertFalse(dataSource.composed)
+            assertNull(inputRequestStore.snapshot())
+        }
+
+    @Test
     fun composeToolRequestsAccountSelectionWhenMultipleAccountsMatch() =
         runTest {
             val alice = StubComposeDataSource(accountKey = MicroBlogKey("alice", "example.social"))
@@ -1661,11 +1684,12 @@ private class StubSubscriptionTimelineLoader(
 private class StubComposeDataSource(
     override val accountKey: MicroBlogKey,
     private val visibility: ComposeConfig.Visibility = ComposeConfig.Visibility(),
+    private val text: ComposeConfig.Text = ComposeConfig.Text(maxLength = 300),
 ) : ComposeDataSource {
     var composed: Boolean = false
     var lastData: ComposeData? = null
 
-    override suspend fun compose(
+    override suspend fun publish(
         data: ComposeData,
         progress: () -> Unit,
     ) {
@@ -1675,7 +1699,7 @@ private class StubComposeDataSource(
 
     override fun composeConfig(type: ComposeType): ComposeConfig =
         ComposeConfig(
-            text = ComposeConfig.Text(maxLength = 300),
+            text = text,
             visibility = visibility,
             language = ComposeConfig.Language(maxCount = 1),
         )

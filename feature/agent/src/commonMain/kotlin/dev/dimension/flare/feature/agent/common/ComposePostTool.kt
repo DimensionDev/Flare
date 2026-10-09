@@ -16,6 +16,7 @@ import dev.dimension.flare.ui.presenter.compose.ComposeStatus
 import dev.dimension.flare.ui.render.toUi
 import dev.dimension.flare.ui.render.toUiPlainText
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.serialization.Serializable
 import kotlin.time.Clock
@@ -91,12 +92,6 @@ internal class ComposePostTool(
         val target = resolveComposeTarget(args) ?: return accountSelectionMessage(args, content, action, reference)
         val visibility = args.visibility.toPostVisibilityOrNull() ?: return "Unsupported visibility: ${args.visibility}."
         val config = target.dataSource.composeConfig(action.composeType)
-        val maxLength = config.text?.maxLength?.firstOrNull()
-        val remainingLength = config.text?.remainingLength(content)?.firstOrNull()
-        if (maxLength != null && remainingLength != null && remainingLength < 0) {
-            return "Post content is ${maxLength - remainingLength} characters, but ${target.platformId} allows " +
-                "at most $maxLength for ${action.label}."
-        }
         val visibilityConfig = config.visibility
         if (visibility != UiTimelineV2.Post.Visibility.Public && visibilityConfig == null) {
             return "${target.platformId} does not expose visibility selection for ${action.label} posts."
@@ -117,6 +112,13 @@ internal class ComposePostTool(
                 spoilerText = args.spoilerText.trim().takeIf { it.isNotBlank() },
                 referenceStatus = reference?.toComposeReference(action),
             )
+        if (config.text
+                ?.remainingLength(data.content, data.spoilerText)
+                ?.first()
+                ?.isValid == false
+        ) {
+            return "Post text exceeds the platform limits."
+        }
         if (!args.confirmed) {
             val userPreview = target.loadUserPreview()
             val inputRequest =

@@ -1213,6 +1213,15 @@ private fun composePresenter(
                 contentWarningPresenter()
             }
 
+    val spoilerText =
+        contentWarningState
+            .takeSuccess()
+            ?.takeIf { it.enabled }
+            ?.textFieldState
+            ?.text
+            ?.toString()
+    LaunchedEffect(spoilerText) { state.setSpoilerText(spoilerText) }
+
     val languageState =
         state.composeConfig
             .mapNotNull {
@@ -1326,12 +1335,7 @@ private fun composePresenter(
                         )
                     },
                 sensitive = mediaState.takeSuccess()?.isMediaSensitive ?: false,
-                spoilerText =
-                    contentWarningState
-                        .takeSuccess()
-                        ?.textFieldState
-                        ?.text
-                        ?.toString(),
+                spoilerText = spoilerText,
                 visibility =
                     state.visibilityState.takeSuccess()?.visibility
                         ?: UiTimelineV2.Post.Visibility.Public,

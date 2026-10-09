@@ -5,6 +5,7 @@ import androidx.paging.Pager
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.map
+import de.cketti.codepoints.codePointCount
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
@@ -45,6 +46,7 @@ import dev.dimension.flare.data.network.misskey.api.model.AdminAccountsDeleteReq
 import dev.dimension.flare.data.network.misskey.api.model.ChannelsFeaturedRequest
 import dev.dimension.flare.data.network.misskey.api.model.ChannelsFollowRequest
 import dev.dimension.flare.data.network.misskey.api.model.IPinRequest
+import dev.dimension.flare.data.network.misskey.api.model.MetaRequest
 import dev.dimension.flare.data.network.misskey.api.model.NotesCreateRequest
 import dev.dimension.flare.data.network.misskey.api.model.NotesCreateRequestPoll
 import dev.dimension.flare.data.network.misskey.api.model.NotesPollsVoteRequest
@@ -74,11 +76,15 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toPersistentList
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withTimeoutOrNull
 
 private val MEDIA_COMPRESSION =
     ComposeConfig.Media.Compression(
@@ -111,6 +117,30 @@ internal class MisskeyDataSource(
             accessTokenFlow = credentialFlow.map { it.accessToken },
         )
     }
+
+    private val textLimitMutex = Mutex()
+    private var resolvedTextLimit: Int? = null
+
+    private suspend fun resolveTextLimit(): Int =
+        textLimitMutex.withLock {
+            resolvedTextLimit ?: try {
+                withTimeoutOrNull(5_000) { service.meta(MetaRequest()).maxNoteTextLength }
+                    ?.takeIf { it in 1..Int.MAX_VALUE.toLong() }
+                    ?.toInt()
+                    ?.also { resolvedTextLimit = it }
+                    ?: resolvedTextLimit ?: 3000
+            } catch (error: CancellationException) {
+                throw error
+            } catch (_: Exception) {
+                resolvedTextLimit ?: 3000
+            }
+        }
+
+    private val textLimitFlow =
+        flow {
+            emit(resolvedTextLimit ?: 3000)
+            emit(resolveTextLimit())
+        }
 
     private val loader by lazy {
         MisskeyLoader(
@@ -434,7 +464,7 @@ internal class MisskeyDataSource(
             statusOnly = false,
         )
 
-    override suspend fun compose(
+    override suspend fun publish(
         data: ComposeData,
         progress: () -> Unit,
     ) {
@@ -568,7 +598,11 @@ internal class MisskeyDataSource(
 
     override fun composeConfig(type: ComposeType): ComposeConfig =
         ComposeConfig(
-            text = ComposeConfig.Text(3000),
+            text =
+                ComposeConfig.Text.withValidation(
+                    maxLength = textLimitFlow,
+                    check = { content, spoilerText -> textLimitFlow.map { checkText(content, spoilerText, it) } },
+                ),
             media =
                 ComposeConfig.Media(
                     maxCount = 18,
@@ -587,6 +621,18 @@ internal class MisskeyDataSource(
             contentWarning = ComposeConfig.ContentWarning,
             visibility = ComposeConfig.Visibility(),
         )
+
+    internal fun checkText(
+        content: String,
+        spoilerText: String?,
+        maxLength: Int,
+    ): ComposeConfig.Text.Check {
+        val remaining = maxLength - content.codePointCount()
+        return ComposeConfig.Text.Check(
+            remainingLength = remaining,
+            isValid = remaining >= 0 && spoilerText.orEmpty().codePointCount() <= 100,
+        )
+    }
 
     fun favouriteState(statusKey: MicroBlogKey): Flow<Boolean> =
         flow {

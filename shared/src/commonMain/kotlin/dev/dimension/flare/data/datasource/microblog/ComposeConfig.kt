@@ -28,26 +28,36 @@ public data class ComposeConfig public constructor(
     @Immutable
     public class Text private constructor(
         public val maxLength: Flow<Int>,
-        private val remainingLengthProvider: (String) -> Flow<Int>,
+        private val remainingLengthProvider: (String, String?) -> Flow<Check>,
     ) {
         public constructor(maxLength: Flow<Int>) : this(
             maxLength = maxLength,
-            remainingLengthProvider = { text -> maxLength.map { it - text.length } },
+            remainingLengthProvider = { text, _ -> maxLength.map { Check(it - text.length) } },
         )
 
         public constructor(maxLength: Int) : this(flowOf(maxLength))
 
-        public fun remainingLength(text: String): Flow<Int> = remainingLengthProvider(text)
+        public data class Check(
+            val remainingLength: Int,
+            val isValid: Boolean = remainingLength >= 0,
+        ) {
+            internal fun merge(other: Check): Check = Check(minOf(remainingLength, other.remainingLength), isValid && other.isValid)
+        }
+
+        public fun remainingLength(
+            text: String,
+            spoilerText: String? = null,
+        ): Flow<Check> = remainingLengthProvider(text, spoilerText?.takeIf(String::isNotBlank))
 
         internal fun merge(other: Text): Text =
             Text(
-                maxLength =
-                    combine(maxLength, other.maxLength) { current, candidate ->
-                        minOf(current, candidate)
-                    }.distinctUntilChanged(),
-                remainingLengthProvider = { text ->
-                    combine(remainingLength(text), other.remainingLength(text)) { current, candidate ->
-                        minOf(current, candidate)
+                maxLength = combine(maxLength, other.maxLength) { current, candidate -> minOf(current, candidate) }.distinctUntilChanged(),
+                remainingLengthProvider = { text, spoilerText ->
+                    combine(
+                        remainingLength(text, spoilerText),
+                        other.remainingLength(text, spoilerText),
+                    ) { current, candidate ->
+                        current.merge(candidate)
                     }.distinctUntilChanged()
                 },
             )
@@ -56,11 +66,17 @@ public data class ComposeConfig public constructor(
             public fun withLength(
                 maxLength: Int,
                 length: (String) -> Int,
-            ): Text =
-                Text(
-                    maxLength = flowOf(maxLength),
-                    remainingLengthProvider = { text -> flowOf(maxLength - length(text)) },
-                )
+            ): Text = withValidation(maxLength) { text, _ -> Check(maxLength - length(text)) }
+
+            public fun withValidation(
+                maxLength: Int,
+                check: (String, String?) -> Check,
+            ): Text = withValidation(flowOf(maxLength), { text, spoilerText -> flowOf(check(text, spoilerText)) })
+
+            public fun withValidation(
+                maxLength: Flow<Int>,
+                check: (String, String?) -> Flow<Check>,
+            ): Text = Text(maxLength, check)
         }
     }
 
@@ -390,7 +406,7 @@ public data class ComposeConfig public constructor(
             if (text != null && other.text != null) {
                 text.merge(other.text)
             } else {
-                null
+                text ?: other.text
             }
         val media =
             if (media != null && other.media != null) {

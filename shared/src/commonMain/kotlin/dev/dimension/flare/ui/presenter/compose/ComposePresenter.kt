@@ -309,36 +309,27 @@ public class ComposePresenter(
         MutableStateFlow(0)
     }
 
-    private val remainingLengthFlow by lazy {
-        combine(
-            textFlow,
-            composeConfigFlow,
-        ) { text, config ->
-            text to config.text
-        }.flatMapLatest { (text, config) ->
-            config?.remainingLength(text)?.map<Int, Int?> { it } ?: flowOf(null)
+    private val spoilerTextFlow = MutableStateFlow<String?>(null)
+
+    private val textCheckFlow by lazy {
+        combine(textFlow, spoilerTextFlow, composeConfigFlow) { text, spoilerText, config ->
+            Triple(text, spoilerText, config.text)
+        }.flatMapLatest { (text, spoilerText, config) ->
+            config?.remainingLength(text, spoilerText)?.map<ComposeConfig.Text.Check, ComposeConfig.Text.Check?> { it } ?: flowOf(null)
         }.distinctUntilChanged()
     }
 
     private val canSendFlow by lazy {
-        combine(
-            textFlow,
-            mediaSizeFlow,
-            remainingLengthFlow,
-            selectedComposeAccountKeysFlow,
-            composeConfigFlow,
-        ) {
+        combine(textFlow, mediaSizeFlow, textCheckFlow, selectedComposeAccountKeysFlow, composeConfigFlow) {
             text,
             mediaSize,
-            remainingLength,
+            check,
             selectedAccountKeys,
             composeConfig,
             ->
-            (
-                text.isNotBlank() && text.isNotEmpty() && selectedAccountKeys.isNotEmpty() &&
-                    (remainingLength == null || remainingLength >= 0)
-            ) ||
-                ((text.isEmpty() || text.isBlank()) && composeConfig.media?.allowMediaOnly == true && mediaSize > 0)
+            check?.isValid != false && selectedAccountKeys.isNotEmpty() && (
+                text.isNotBlank() || (composeConfig.media?.allowMediaOnly == true && mediaSize > 0)
+            )
         }
     }
 
@@ -434,7 +425,7 @@ public class ComposePresenter(
         val emojiState by emojiFlow.flattenUiState()
         val enableCrossPost by enableCrossPostFlow.collectAsUiState()
         val composeConfig: UiState<ComposeConfig> by composeConfigFlow.collectAsUiState()
-        val remainingLength by remainingLengthFlow.collectAsState(null)
+        val textCheck by textCheckFlow.collectAsState(null)
         val canSend by canSendFlow.collectAsState(false)
         val loadedDraftState by loadedDraftStateFlow.collectAsState()
         val editingDraftGroupId by editingDraftGroupIdFlow.collectAsState()
@@ -608,7 +599,7 @@ public class ComposePresenter(
             composeStatus = composeStatus,
             showDraft = showDraft,
             directSendState = directSendState,
-            remainingLength = remainingLength,
+            remainingLength = textCheck?.remainingLength,
             pollMaxOptions = pollMaxOptions,
             contentWarningEnabled = contentWarningEnabled,
             mediaEnabled = mediaEnabled,
@@ -765,6 +756,10 @@ public class ComposePresenter(
 
             override fun setText(value: String) {
                 textFlow.value = value
+            }
+
+            override fun setSpoilerText(value: String?) {
+                spoilerTextFlow.value = value
             }
 
             override fun setMediaSize(value: Int) {
@@ -1059,6 +1054,8 @@ public abstract class ComposeState(
     public abstract fun selectAccount(accountKey: MicroBlogKey)
 
     public abstract fun setText(value: String)
+
+    public abstract fun setSpoilerText(value: String?)
 
     public abstract fun setMediaSize(value: Int)
 

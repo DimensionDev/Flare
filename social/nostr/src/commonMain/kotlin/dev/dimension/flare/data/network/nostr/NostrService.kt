@@ -7,6 +7,7 @@ import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.PostActionFamily
 import dev.dimension.flare.data.datasource.microblog.userActionsMenu
 import dev.dimension.flare.data.datasource.nostr.NostrCache
+import dev.dimension.flare.data.network.ktorClient
 import dev.dimension.flare.data.platform.NOSTR_PLATFORM_ID
 import dev.dimension.flare.data.platform.NostrCredential
 import dev.dimension.flare.data.platform.NostrSignerCredential
@@ -35,16 +36,26 @@ import dev.dimension.flare.ui.render.toUi
 import dev.dimension.flare.ui.render.toUiPlainText
 import dev.dimension.flare.ui.render.uiRichTextOf
 import dev.dimension.flare.ui.route.DeeplinkRoute
+import io.ktor.client.HttpClient
+import io.ktor.client.request.get
+import io.ktor.client.request.header
+import io.ktor.client.statement.bodyAsText
+import io.ktor.http.URLBuilder
+import io.ktor.http.URLProtocol
 import io.ktor.http.encodeURLParameter
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.intOrNull
+import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
 import rust.nostr.sdk.Client
 import kotlin.time.Clock
@@ -89,6 +100,7 @@ internal class NostrService(
     credential: NostrCredential,
     private val amberSignerBridge: AmberSignerBridge,
     initialRelays: List<String> = emptyList(),
+    private val relayInfoClient: HttpClient = ktorClient { expectSuccess = true },
 ) : AutoCloseable {
     companion object {
         private val HEX_KEY_REGEX = Regex("^[0-9a-fA-F]{64}\$")
@@ -343,6 +355,12 @@ internal class NostrService(
     private var connected = false
     private val relayMutex = Mutex()
     private val currentRelays = linkedMapOf<String, RustRelayUrl>()
+    private val relayLimitsMutex = Mutex()
+    private val relayLookupMutexes = mutableMapOf<String, Mutex>()
+
+    // ponytail: Cache NIP-11, including unavailable documents, for this session; add expiry if live changes matter.
+    private val relayTextLimits = mutableMapOf<String, NostrTextLimits>()
+
     private val initialRelays = initialRelays.normalizeRelayUrls()
     private val credential = credential.normalized(accountKey)
     private val signerHandle by lazy {
@@ -370,6 +388,7 @@ internal class NostrService(
     }
 
     override fun close() {
+        relayInfoClient.close()
         client.close()
         currentRelays.values.forEach { it.close() }
         currentRelays.clear()
@@ -1261,19 +1280,69 @@ internal class NostrService(
                 .map { it.use { it.toCompatEvent() } }
         }
 
+    internal suspend fun fetchTextLimits(relay: String): NostrTextLimits {
+        val lookupMutex = relayLimitsMutex.withLock { relayLookupMutexes.getOrPut(relay) { Mutex() } }
+        return lookupMutex.withLock { fetchAndCacheTextLimits(relay) }
+    }
+
+    private suspend fun fetchAndCacheTextLimits(relay: String): NostrTextLimits {
+        relayLimitsMutex.withLock { relayTextLimits[relay] }?.let { return it }
+        val limits =
+            try {
+                withTimeoutOrNull(5.seconds) {
+                    val url =
+                        URLBuilder(relay)
+                            .apply {
+                                protocol = if (protocol == URLProtocol.WSS) URLProtocol.HTTPS else URLProtocol.HTTP
+                            }.buildString()
+                    val document =
+                        JSON
+                            .parseToJsonElement(
+                                relayInfoClient.get(url) { header("Accept", "application/nostr+json") }.bodyAsText(),
+                            ).jsonObjectOrNull
+                    val limitation = document?.get("limitation")?.jsonObjectOrNull
+
+                    fun limit(name: String): Int? =
+                        limitation
+                            ?.get(name)
+                            ?.jsonPrimitive
+                            ?.intOrNull
+                            ?.takeIf { it >= 0 }
+                    NostrTextLimits(limit("max_content_length"), limit("max_message_length"))
+                }
+            } catch (error: CancellationException) {
+                throw error
+            } catch (_: Exception) {
+                null
+            } ?: NostrTextLimits()
+        relayLimitsMutex.withLock { relayTextLimits[relay] = limits }
+        return limits
+    }
+
     private suspend fun sendEventBuilder(builder: RustEventBuilder): String {
         requireWritable()
-        val requiredSuccessCount =
-            relayMutex.withLock {
-                minOf(PUBLISH_SUCCESS_QUORUM, currentRelays.size)
+        val relays = relayMutex.withLock { currentRelays.keys.toList() }
+        val requiredSuccessCount = minOf(PUBLISH_SUCCESS_QUORUM, relays.size)
+        require(requiredSuccessCount > 0) { "No valid relay URLs available for publishing" }
+        return client.signEventBuilder(builder).use { event ->
+            val eventJson = event.asJson()
+            val checks =
+                coroutineScope {
+                    relays.map { relay -> async { relay to fetchTextLimits(relay).error(event.content(), eventJson) } }.awaitAll()
+                }
+            val eligible = checks.filter { it.second == null }.map { RustRelayUrl.parse(it.first) }
+            try {
+                if (eligible.size < requiredSuccessCount) {
+                    val errors = checks.mapNotNull { (relay, error) -> error?.let { "$relay: $it" } }
+                    throw IllegalArgumentException(errors.joinToString("; "))
+                }
+                val output = client.sendEventTo(eligible, event)
+                ensurePublishQuorum(output, requiredSuccessCount)
+                output.id.toHex()
+            } finally {
+                eligible.forEach { it.close() }
             }
-        if (requiredSuccessCount == 0) {
-            error("No valid relay URLs available for publishing")
         }
-
-        val output = client.sendEventBuilder(builder)
-        ensurePublishQuorum(output, requiredSuccessCount)
-        return output.id.toHex()
     }
 
     private fun ensurePublishQuorum(

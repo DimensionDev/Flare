@@ -188,6 +188,9 @@ struct MacComposeScreen: View {
             presenter.state.setText(value: viewModel.text)
             presenter.state.setMediaSize(value: Int32(mediaItems.count))
         }
+        .onChange(of: viewModel.enableContentWarning ? viewModel.contentWarning : nil, initial: true) { _, newValue in
+            presenter.state.setSpoilerText(value: newValue)
+        }
         .onChange(of: viewModel.text) { _, newValue in
             presenter.state.setText(value: newValue)
         }

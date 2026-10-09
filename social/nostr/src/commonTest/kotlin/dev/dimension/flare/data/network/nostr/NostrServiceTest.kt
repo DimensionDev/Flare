@@ -1,6 +1,7 @@
 package dev.dimension.flare.data.network.nostr
 
 import dev.dimension.flare.data.datasource.nostr.NostrCache
+import dev.dimension.flare.data.network.ktorClient
 import dev.dimension.flare.data.platform.NostrCredential
 import dev.dimension.flare.data.platform.NostrSignerCredential
 import dev.dimension.flare.di.startKoin
@@ -12,7 +13,18 @@ import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.render.toUiPlainText
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.mock.MockEngine
+import io.ktor.client.engine.mock.respond
+import io.ktor.http.HttpStatusCode
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.koin.core.context.stopKoin
 import kotlin.test.AfterTest
@@ -36,6 +48,152 @@ class NostrServiceTest {
     fun tearDown() {
         stopKoin()
     }
+
+    @Test
+    fun unavailableRelayLimitsAreCached() =
+        runTest {
+            for (failure in listOf("timeout", "http", "invalid-json")) {
+                var requests = 0
+                val httpClient =
+                    HttpClient(MockEngine) {
+                        expectSuccess = true
+                        engine {
+                            dispatcher = StandardTestDispatcher(testScheduler)
+                            addHandler {
+                                requests++
+                                when (failure) {
+                                    "timeout" -> {
+                                        delay(6_000)
+                                        respond("{}")
+                                    }
+
+                                    "http" -> {
+                                        respond("", HttpStatusCode.NotFound)
+                                    }
+
+                                    else -> {
+                                        respond("invalid-json")
+                                    }
+                                }
+                            }
+                        }
+                    }
+                val service = createService(httpClient)
+                try {
+                    assertEquals(NostrTextLimits(), service.fetchTextLimits("wss://relay.example"), failure)
+                    assertEquals(NostrTextLimits(), service.fetchTextLimits("wss://relay.example"), failure)
+                    assertEquals(1, requests, failure)
+                } finally {
+                    service.close()
+                }
+            }
+        }
+
+    @Test
+    fun concurrentRelayLookupsPreserveRestrictiveLimits() =
+        runTest {
+            var requests = 0
+            val httpClient =
+                HttpClient(MockEngine) {
+                    engine {
+                        dispatcher = StandardTestDispatcher(testScheduler)
+                        addHandler {
+                            requests++
+                            if (requests == 1) {
+                                delay(1_000)
+                                respond("""{"limitation":{"max_content_length":10,"max_message_length":1000}}""")
+                            } else {
+                                delay(6_000)
+                                respond("{}")
+                            }
+                        }
+                    }
+                }
+            val service = createService(httpClient)
+            try {
+                val expected = NostrTextLimits(maxContentLength = 10, maxMessageLength = 1000)
+                val results = List(2) { async { service.fetchTextLimits("wss://relay.example") } }.awaitAll()
+                assertEquals(expected, service.fetchTextLimits("wss://relay.example"))
+                assertEquals(listOf(expected, expected), results)
+                assertEquals(1, requests)
+            } finally {
+                service.close()
+            }
+        }
+
+    @Test
+    fun cancelledRelayLookupCanBeRetriedByWaitingCaller() =
+        runTest {
+            var requests = 0
+            val started = CompletableDeferred<Unit>()
+            val httpClient =
+                HttpClient(MockEngine) {
+                    engine {
+                        dispatcher = StandardTestDispatcher(testScheduler)
+                        addHandler {
+                            requests++
+                            if (requests == 1) {
+                                started.complete(Unit)
+                                awaitCancellation()
+                            }
+                            respond("""{"limitation":{"max_content_length":10}}""")
+                        }
+                    }
+                }
+            val service = createService(httpClient)
+            try {
+                val first = async { service.fetchTextLimits("wss://relay.example") }
+                started.await()
+                val waiting = async { service.fetchTextLimits("wss://relay.example") }
+                first.cancelAndJoin()
+                val expected = NostrTextLimits(maxContentLength = 10)
+                assertEquals(expected, waiting.await())
+                assertEquals(expected, service.fetchTextLimits("wss://relay.example"))
+                assertEquals(2, requests)
+            } finally {
+                service.close()
+            }
+        }
+
+    @Test
+    fun relayLimitsAreCachedSeparately() =
+        runTest {
+            var requests = 0
+            val secondRelayStarted = CompletableDeferred<Unit>()
+            val httpClient =
+                HttpClient(MockEngine) {
+                    engine {
+                        dispatcher = StandardTestDispatcher(testScheduler)
+                        addHandler { request ->
+                            requests++
+                            assertEquals("https", request.url.protocol.name)
+                            assertEquals("application/nostr+json", request.headers["Accept"])
+                            val maxContentLength = if (request.url.host == "first.example") 10 else 20
+                            if (request.url.host == "first.example") {
+                                secondRelayStarted.await()
+                            } else {
+                                secondRelayStarted.complete(Unit)
+                            }
+                            respond("""{"limitation":{"max_content_length":$maxContentLength,"max_message_length":1000}}""")
+                        }
+                    }
+                }
+            val service = createService(httpClient)
+            try {
+                val first = NostrTextLimits(maxContentLength = 10, maxMessageLength = 1000)
+                val second = NostrTextLimits(maxContentLength = 20, maxMessageLength = 1000)
+                val results =
+                    listOf(
+                        async { service.fetchTextLimits("wss://first.example") },
+                        async { service.fetchTextLimits("wss://second.example") },
+                    ).awaitAll()
+                assertEquals(listOf(first, second), results)
+                assertEquals(first, service.fetchTextLimits("wss://first.example"))
+                assertEquals(2, requests)
+            } finally {
+                service.close()
+            }
+        }
 
     @Test
     fun exportAccountKeepsPrivateAndPublicKeysConsistent() =
@@ -388,7 +546,7 @@ class NostrServiceTest {
     }
 
     private companion object {
-        fun createService(): NostrService {
+        fun createService(relayInfoClient: HttpClient = ktorClient { expectSuccess = true }): NostrService {
             val generated = NostrService.generateAccount()
             return NostrService(
                 cache =
@@ -407,6 +565,7 @@ class NostrServiceTest {
                         signer = NostrSignerCredential.LocalKey(generated.nsec),
                     ),
                 amberSignerBridge = UnsupportedAmberSignerBridge("Amber signer is unavailable in tests."),
+                relayInfoClient = relayInfoClient,
             )
         }
 

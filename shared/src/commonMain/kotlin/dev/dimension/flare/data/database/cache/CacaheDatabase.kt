@@ -7,10 +7,12 @@ import androidx.room3.RoomDatabase
 import androidx.room3.RoomDatabaseConstructor
 import androidx.room3.withWriteTransaction
 
-internal const val CACHE_DATABASE_VERSION = 48
+internal const val CACHE_DATABASE_VERSION = 49
 
 @Database(
     entities = [
+        dev.dimension.flare.data.database.cache.model.DbTimelineReadingSession::class,
+        dev.dimension.flare.data.database.cache.model.DbHomeTimelineSelection::class,
         dev.dimension.flare.data.database.cache.model.DbEmoji::class,
         dev.dimension.flare.data.database.cache.model.DbStatusReference::class,
         dev.dimension.flare.data.database.cache.model.DbStatus::class,
@@ -44,6 +46,8 @@ internal const val CACHE_DATABASE_VERSION = 48
 )
 @ConstructedBy(CacheDatabaseConstructor::class)
 internal abstract class CacheDatabase : RoomDatabase() {
+    abstract fun timelineReadingSessionDao(): dev.dimension.flare.data.database.cache.dao.TimelineReadingSessionDao
+
     abstract fun emojiDao(): dev.dimension.flare.data.database.cache.dao.EmojiDao
 
     abstract fun statusReferenceDao(): dev.dimension.flare.data.database.cache.dao.StatusReferenceDao

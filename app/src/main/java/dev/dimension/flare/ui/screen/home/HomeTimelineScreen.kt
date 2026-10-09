@@ -62,16 +62,23 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -563,19 +570,41 @@ internal fun TimelineItemContent(
         rememberTimelineItemPresenterWithLazyListState(
             item = item,
             isHomeTimeline = isHomeTimeline,
+            leadingItemCount =
+                if ((changeLogState?.shouldShowChangeLog as? dev.dimension.flare.ui.model.UiState.Success)?.data == true &&
+                    changeLogState.changeLog != null
+                ) {
+                    1
+                } else {
+                    0
+                },
             lazyStaggeredGridState = lazyStaggeredGridState,
         )
     val latestState by rememberUpdatedState(state)
+    var isInWindow by remember { mutableStateOf(false) }
+    val windowSize = LocalWindowInfo.current.containerSize
+    val isVisible = isCurrentlyVisible && isInWindow
     val lifecycleOwner = LocalLifecycleOwner.current
-    LaunchedEffect(isHomeTimeline, autoRefreshInterval, isCurrentlyVisible, lifecycleOwner) {
-        if (!isHomeTimeline || !isCurrentlyVisible || autoRefreshInterval == TimelineAutoRefreshInterval.DISABLED) {
+    androidx.compose.runtime.DisposableEffect(lifecycleOwner) {
+        val observer =
+            androidx.lifecycle.LifecycleEventObserver { _, event ->
+                if (event == Lifecycle.Event.ON_PAUSE) latestState.readingState?.savePosition()
+            }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+            latestState.readingState?.savePosition()
+        }
+    }
+    LaunchedEffect(isHomeTimeline, autoRefreshInterval, isVisible, lifecycleOwner) {
+        if (!isHomeTimeline || !isVisible || autoRefreshInterval == TimelineAutoRefreshInterval.DISABLED) {
             return@LaunchedEffect
         }
         lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
             while (true) {
                 delay(autoRefreshInterval.minutes * 60_000L)
                 if (!latestState.isRefreshing) {
-                    latestState.refreshSuspend()
+                    latestState.readingState?.let { if (it.position == null) it.refreshAutomatically() } ?: latestState.refreshSuspend()
                 }
             }
         }
@@ -591,7 +620,10 @@ internal fun TimelineItemContent(
     }
     val scope = rememberCoroutineScope()
     RefreshContainer(
-        modifier = modifier,
+        modifier =
+            modifier.onGloballyPositioned {
+                isInWindow = it.boundsInWindow().overlaps(Rect(0f, 0f, windowSize.width.toFloat(), windowSize.height.toFloat()))
+            },
         onRefresh = {
             state.refreshSync()
             changeLogState?.dismissChangeLog()
@@ -663,11 +695,13 @@ internal fun TimelineItemContent(
                             .padding(paddingWithStatusBar)
                             .align(Alignment.TopCenter),
                 ) {
+                    val latestLabel = stringResource(R.string.home_timeline_view_latest)
                     Glassify(
+                        modifier = if (state.readingState != null) Modifier.semantics { contentDescription = latestLabel } else Modifier,
                         onClick = {
                             state.onNewTootsShown()
                             scope.launch {
-                                state.lazyListState.scrollToItem(0)
+                                state.readingState?.showLatest() ?: state.lazyListState.scrollToItem(0)
                             }
                         },
                         shape = RoundedCornerShape(50),
@@ -692,7 +726,16 @@ internal fun TimelineItemContent(
                                     state.newPostsCount,
                                     state.newPostsCount,
                                 )
-                            Text(text = newTootsText)
+                            Text(
+                                text =
+                                    if (state.readingState !=
+                                        null
+                                    ) {
+                                        stringResource(R.string.home_timeline_new_content)
+                                    } else {
+                                        newTootsText
+                                    },
+                            )
                         }
                     }
                 }
@@ -708,8 +751,26 @@ private fun timelinePresenter() =
         val loginState = remember { LoggedInPresenter() }.invoke()
 
         val pagerState =
-            state.tabState.map {
-                rememberPagerState { it.size }
+            if (!state.selectionLoaded) {
+                dev.dimension.flare.ui.model.UiState
+                    .Loading()
+            } else {
+                state.tabState.map { tabs ->
+                    val pager =
+                        rememberPagerState(initialPage = tabs.indexOfFirst { it.id == state.selectedTabId }.coerceAtLeast(0)) { tabs.size }
+                    val currentState by rememberUpdatedState(state)
+                    var previousIds by remember { mutableStateOf(tabs.map { it.id }) }
+                    LaunchedEffect(pager, tabs.map { it.id }) {
+                        val selectedId = previousIds.getOrNull(pager.settledPage)
+                        val selectedIndex = tabs.indexOfFirst { it.id == selectedId }.coerceAtLeast(0)
+                        previousIds = tabs.map { it.id }
+                        if (pager.settledPage != selectedIndex) pager.scrollToPage(selectedIndex)
+                        snapshotFlow { pager.settledPage }.collect { index ->
+                            tabs.getOrNull(index)?.let { currentState.selectTab(it.id) }
+                        }
+                    }
+                    pager
+                }
             }
 
         val changeLogState = changeLogPresenter()

@@ -33,8 +33,27 @@ struct TimelineScreen: View {
             data: presenter.state.listState,
             detailStatusKey: nil,
             key: presenter.key,
+            readingState: presenter.state.readingState,
             allowGalleryMode: allowGalleryMode
         )
+        .overlay(alignment: .top) {
+            if let reading = presenter.state.readingState, reading.hasNewContent {
+                Button {
+                    Task { try? await reading.showLatest() }
+                } label: {
+                    Label("home_timeline_new_content", systemImage: "arrow.up")
+                        .padding(.horizontal, 12).padding(.vertical, 6)
+                }
+                .buttonStyle(.plain)
+                .background(.regularMaterial, in: Capsule())
+                .accessibilityHint(Text("home_timeline_view_latest"))
+                .padding(.top, 8)
+            }
+        }
+        .onChange(of: scenePhase) { _, phase in
+            if phase != .active { presenter.state.readingState?.savePosition() }
+        }
+        .onDisappear { presenter.state.readingState?.savePosition() }
         .environment(\.timelineAppearance, tabItem.resolveTimelineAppearance(base: timelineAppearance))
         .refreshable {
             try? await presenter.state.refreshSuspend()
@@ -84,7 +103,11 @@ struct TimelineScreen: View {
         while true {
             try await Task.sleep(for: .seconds(minutes * 60))
             if !presenter.state.isRefreshing {
-                try? await presenter.state.refreshSuspend()
+                if let reading = presenter.state.readingState {
+                    if reading.position == nil { try? await reading.refreshAutomatically() }
+                } else {
+                    try? await presenter.state.refreshSuspend()
+                }
             }
         }
     }

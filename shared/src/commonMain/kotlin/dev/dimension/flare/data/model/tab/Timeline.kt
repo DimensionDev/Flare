@@ -85,6 +85,7 @@ public sealed interface UiTimelineTabItem {
     public val enabled: Boolean
     public val filterConfig: TimelineFilterConfig
     public val loaderKey: String
+    public val contentSourceKey: String get() = readingSourceKey
 
     // for iOS and Compose call sites
     public val key: String get() = id
@@ -99,6 +100,35 @@ public sealed interface UiTimelineTabItem {
 }
 
 public fun UiTimelineTabItem.resolveTimelineAppearance(base: TimelineAppearance): TimelineAppearance = base.withPatch(appearancePatch)
+
+internal val UiTimelineTabItem.readingSourceKey: String
+    get() =
+        when (this) {
+            is UiSourceTimelineTabItem -> {
+                source?.let { "${it.specId.length}:${it.specId}${it.data}" }.orEmpty()
+            }
+
+            is UiGroupTimelineTabItem -> {
+                mergePolicy.name +
+                    children
+                        .filter { it.enabled }
+                        .let { enabled ->
+                            if (isSystemHomeMixedTimeline) enabled.sortedBy { it.id } else enabled
+                        }.joinToString("") {
+                            val key = it.readingSourceKey
+                            "${key.length}:$key"
+                        }
+            }
+        }
+
+internal fun List<UiTimelineTabItem>.readingSources(): Map<String, String> = associate { it.id to it.readingSourceKey }
+
+internal val UiTimelineTabItem.supportsReadingSession: Boolean
+    get() =
+        when (this) {
+            is UiSourceTimelineTabItem -> source != null && source.specId != TimelineSpecIds.COMMON_DISCOVER
+            is UiGroupTimelineTabItem -> children.filter { it.enabled }.all { it.supportsReadingSession }
+        }
 
 private val galleryAppearancePatch: AppearancePatch =
     AppearancePatch.EMPTY.set(
@@ -725,12 +755,17 @@ internal class TimelinePresenterFactory(
         isHomeTimeline: Boolean = false,
     ): TimelinePresenter =
         if (item.isSystemHomeMixedTimeline) {
-            SystemHomeMixedTimelinePresenter(item.id, isHomeTimeline)
+            SystemHomeMixedTimelinePresenter(
+                item.id,
+                isHomeTimeline,
+                item.takeIf { isHomeTimeline && it.supportsReadingSession }?.readingSourceKey,
+            )
         } else {
             TimelinePresenter(
                 tabId = item.id,
                 loader = timelineResolver.resolveLoader(item),
                 isHomeTimeline = isHomeTimeline,
+                readingSourceKey = item.takeIf { isHomeTimeline && it.supportsReadingSession }?.readingSourceKey,
             )
         }
 }

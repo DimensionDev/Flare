@@ -8,6 +8,8 @@ struct HomeSidebarTabsSection: View {
     let title: String
     let icon: FontAwesomeIcon
     let liveTabs: [UiTimelineTabItem]
+    var savedTabId: String? = nil
+    var selectionLoaded = true
     @Binding var selectedTab: Route?
     @Binding var isExpanded: Bool
     let onEditTab: (UiTimelineTabItem, @escaping (UiTimelineTabItem) -> Void) -> Void
@@ -32,6 +34,9 @@ struct HomeSidebarTabsSection: View {
         .onAppear {
             editableTabs = liveTabs
             normalizeSelection(previousHomeTabIDs: nil)
+        }
+        .onChange(of: selectionLoaded) { _, loaded in
+            if loaded { normalizeSelection(previousHomeTabIDs: nil) }
         }
         .onChange(of: liveTabs.map(\.id)) { oldValue, _ in
             if !isCustomizing {
@@ -218,8 +223,9 @@ struct HomeSidebarTabsSection: View {
     }
 
     private func normalizeSelection(previousHomeTabIDs: [String]?) {
+        guard selectionLoaded else { return }
         guard let currentSelection = selectedTab else {
-            selectedTab = liveTabs.first.map { .timeline($0, isHome: true) }
+            selectedTab = (liveTabs.first { $0.id == savedTabId } ?? liveTabs.first).map { .timeline($0, isHome: true) }
             return
         }
 

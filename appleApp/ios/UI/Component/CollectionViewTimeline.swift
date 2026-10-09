@@ -17,6 +17,7 @@ struct UITimelineCollectionView: UIViewControllerRepresentable {
     private let data: PagingState<UiTimelineV2>?
     private let headerState: UiState<UiTimelineV2>?
     private let userData: PagingState<UiProfile>?
+    let readingState: TimelineReadingState?
     let detailStatusKey: MicroBlogKey?
     let topContentInset: CGFloat
     let columnCount: Int
@@ -36,6 +37,7 @@ struct UITimelineCollectionView: UIViewControllerRepresentable {
     init(
         data: PagingState<UiTimelineV2>? = nil,
         detailStatusKey: MicroBlogKey?,
+        readingState: TimelineReadingState? = nil,
         headerState: UiState<UiTimelineV2>? = nil,
         userData: PagingState<UiProfile>? = nil,
         topContentInset: CGFloat = 0,
@@ -45,6 +47,7 @@ struct UITimelineCollectionView: UIViewControllerRepresentable {
         contentKey: AnyHashable? = nil,
         onIsAtTopChanged: @escaping (Bool) -> Void = { _ in }
     ) {
+        self.readingState = readingState
         self.data = data
         self.headerState = headerState
         self.userData = userData
@@ -71,6 +74,7 @@ struct UITimelineCollectionView: UIViewControllerRepresentable {
         controller.refreshCallback = refreshAction.map { action in
             { await action() }
         }
+        controller.readingState = readingState
         controller.onIsAtTopChanged = onIsAtTopChanged
         controller.topContentInset = topContentInset
         controller.topScrollIndicatorInset = topContentInset
@@ -138,6 +142,44 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         // Restore only against the rows still available when loading finishes.
         collectionView.restoreReadingPosition(position)
         collectionView.setNeedsLayout()
+    }
+
+    var readingState: TimelineReadingState? {
+        didSet { if isViewLoaded { view.setNeedsLayout() } }
+    }
+    private var restoringSessionRequest: Int64?
+
+    private func restoreSessionPositionIfReady() {
+        guard let readingState, let position = readingState.position,
+              restoringSessionRequest != position.requestId,
+              isSnapshotReadyForReadingPosition, !currentPagingIsInitialLoading,
+              !collectionView.isScrollInteractionActive,
+              dataSource.indexPath(for: "t:" + position.itemKey) != nil else { return }
+        restoringSessionRequest = position.requestId
+        pendingReloadPosition = nil
+        collectionView.restoreReadingPosition(position.latest ? .top : .item(
+            id: "t:" + position.itemKey, distanceFromTop: CGFloat(position.offset), itemOrder: ["t:" + position.itemKey]
+        ))
+        collectionView.layoutIfNeeded()
+        DispatchQueue.main.async { [weak self] in
+            guard let self, self.restoringSessionRequest == position.requestId else { return }
+            self.readingState?.positionRestored(requestId: position.requestId)
+            self.reportReadingViewport()
+        }
+    }
+
+    private func reportReadingViewport() {
+        guard let readingState, isViewLoaded else { return }
+        var key: String?
+        var offset: CGFloat = 0
+        if case let .item(id, distance, _) = collectionView.captureReadingPosition(), id.hasPrefix("t:") {
+            key = String(id.dropFirst(2))
+            offset = distance
+        }
+        readingState.updateViewport(
+            itemKey: key, offset: Double(offset), atTop: effectiveContentOffsetY <= 1,
+            interacting: collectionView.isScrollInteractionActive || collectionView.isTracking
+        )
     }
 
     var refreshCallback: (() async -> Void)?
@@ -416,12 +458,14 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         updateContentInsets()
         updatePinnedHeader()
         restoreReloadPositionIfReady()
+        restoreSessionPositionIfReady()
         if profileMediaGeometryTransition?.originColumnCount == columnCount {
             restoreProfileMediaGeometryTransition(finalize: false)
         } else {
             rememberProfileMediaScrollAnchor()
         }
         reportIsAtTop()
+        reportReadingViewport()
         revealRefreshControlIfNeeded()
         // Insets or a size change can finish/cancel a refresh reveal without a
         // scroll-end delegate callback. Resume its queued input on the next layout.
@@ -458,6 +502,8 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
 
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
+        reportReadingViewport()
+        readingState?.savePosition()
         autoplay.setVisible(false)
         collectionView.endScrollInteraction()
         postRefreshPoolCleanupTask?.cancel()
@@ -1441,6 +1487,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         }
         defer { if finalize { finishPendingRefreshIfReady() } }
         restoreReloadPositionIfReady()
+        restoreSessionPositionIfReady()
         if minimumVerticalScrollDistance > 0 {
             collectionView.layoutIfNeeded()
             updateMinimumScrollableBottomInset()
@@ -1814,6 +1861,9 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     }
 
     private func beginScrollInteraction() {
+        restoringSessionRequest = nil
+        readingState?.cancelRestoration()
+        reportReadingViewport()
         pendingInput?.retainedOffset = nil
         pendingReloadPosition = nil
         collectionView.interruptRefreshForScrolling()
@@ -1838,6 +1888,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
             rememberProfileMediaScrollAnchor()
         }
         reportIsAtTop()
+        reportReadingViewport()
         onContentOffsetChanged?(effectiveContentOffsetY)
         autoplay.didScroll()
     }
@@ -1871,6 +1922,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
 
     private func endScrollInteraction() {
         collectionView.endScrollInteraction()
+        reportReadingViewport()
         scheduleSubmission()
         finishPendingRefreshIfReady()
         rememberProfileMediaScrollAnchor()

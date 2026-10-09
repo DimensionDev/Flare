@@ -19,6 +19,7 @@ import kotlinx.coroutines.sync.withLock
 internal class TimelineDbPageCache {
     private val mutex = Mutex()
     private var snapshot = Snapshot()
+    private var hasDetachedWindow = false
     private val canonicalProfiles = HashMap<MicroBlogKey, UiProfile>()
 
     suspend fun hasCurrentWindowChanged(
@@ -26,7 +27,7 @@ internal class TimelineDbPageCache {
         pagingKey: String,
     ): Boolean =
         mutex.withLock {
-            if (!snapshot.loaded) {
+            if (!snapshot.loaded || hasDetachedWindow) {
                 return@withLock true
             }
             val identities =
@@ -61,6 +62,8 @@ internal class TimelineDbPageCache {
         offset: Int,
         limit: Int,
     ): List<TimelinePageItem> {
+        // A restored window is not represented by the prefix cache's identity snapshot.
+        if (offset > snapshot.size) hasDetachedWindow = true
         val identityRows =
             dao.getTimelinePageIdentities(
                 pagingKey = pagingKey,

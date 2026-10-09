@@ -10,6 +10,7 @@ import dev.dimension.flare.data.model.tab.TimelineResolver
 import dev.dimension.flare.data.model.tab.UiGroupTimelineTabItem
 import dev.dimension.flare.data.model.tab.UiTimelineTabItem
 import dev.dimension.flare.data.model.tab.isSystemHomeMixedTimeline
+import dev.dimension.flare.data.model.tab.readingSourceKey
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.ui.model.UiTimelineV2
@@ -61,7 +62,7 @@ public class MixedTimelinePresenter(
                     ?.children
                     ?.filter { it.enabled }
             }.distinctUntilChanged { old, new ->
-                old.orEmpty().map { it.id } == new.orEmpty().map { it.id }
+                old.orEmpty().map { it.readingSourceKey } == new.orEmpty().map { it.readingSourceKey }
             }.flatMapLatest { tabs ->
                 if (tabs == null) {
                     if (fallbackSubTimelinePresenter.isEmpty()) {
@@ -95,7 +96,8 @@ public class MixedTimelinePresenter(
 public class SystemHomeMixedTimelinePresenter(
     id: String,
     isHomeTimeline: Boolean = false,
-) : TimelinePresenter(tabId = id, isHomeTimeline = isHomeTimeline) {
+    readingSourceKey: String? = null,
+) : TimelinePresenter(tabId = id, isHomeTimeline = isHomeTimeline, readingSourceKey = readingSourceKey) {
     private val groupId = id
 
     private val database: CacheDatabase by koinInject()
@@ -148,5 +150,5 @@ public class SystemHomeMixedTimelinePresenter(
 
 private fun Flow<List<UiTimelineTabItem>>.distinctUntilChangedByTabIds(): Flow<List<UiTimelineTabItem>> =
     distinctUntilChanged { old, new ->
-        old.map { it.id } == new.map { it.id }
+        old.map { it.readingSourceKey } == new.map { it.readingSourceKey }
     }

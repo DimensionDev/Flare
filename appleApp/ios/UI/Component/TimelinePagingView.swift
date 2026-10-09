@@ -6,6 +6,7 @@ import FlareAppleUI
 struct UITimelinePagingView: View {
     @Environment(\.timelineAppearance.timelineDisplayMode) private var timelineDisplayMode
     @Environment(\.refresh) private var refreshAction: RefreshAction?
+    let readingState: TimelineReadingState?
     let data: PagingState<UiTimelineV2>
     let detailStatusKey: MicroBlogKey?
     let key: String
@@ -21,6 +22,7 @@ struct UITimelinePagingView: View {
         data: PagingState<UiTimelineV2>,
         detailStatusKey: MicroBlogKey?,
         key: String,
+        readingState: TimelineReadingState? = nil,
         topContentInset: CGFloat = 0,
         allowGalleryMode: Bool = false,
         accessoryItems: [UITimelineCollectionViewAccessoryItem] = [],
@@ -28,6 +30,7 @@ struct UITimelinePagingView: View {
         columnPolicy: TimelineColumnPolicy = .adaptive,
         onIsAtTopChanged: @escaping (Bool) -> Void = { _ in }
     ) {
+        self.readingState = readingState
         self.data = data
         self.detailStatusKey = detailStatusKey
         self.key = key
@@ -43,6 +46,7 @@ struct UITimelinePagingView: View {
         if allowGalleryMode && timelineDisplayMode == .gallery {
             UIGalleryTimelinePagingView(
                 data: data,
+                readingState: readingState,
                 suppressInitialRefreshIndicator: suppressInitialRefreshIndicator,
                 onIsAtTopChanged: onIsAtTopChanged
             )
@@ -53,6 +57,7 @@ struct UITimelinePagingView: View {
                 UITimelineCollectionView(
                     data: data,
                     detailStatusKey: detailStatusKey,
+                    readingState: readingState,
                     topContentInset: topContentInset,
                     columnCount: columnPolicy.columnCount(for: proxy.size.width),
                     accessoryItems: accessoryItems,

@@ -62,6 +62,7 @@ public struct TimelinePagingContent: View {
                     }
                 )
             }
+            .timelineReadingAnchor(row.item?.itemKey)
         }
 
         switch onEnum(of: success.appendState) {

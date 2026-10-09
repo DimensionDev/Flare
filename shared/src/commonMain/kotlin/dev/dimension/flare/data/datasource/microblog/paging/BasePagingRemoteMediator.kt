@@ -66,7 +66,29 @@ internal abstract class BasePagingRemoteMediator<Key : Any, T : Any, R : Any>(
                 pageSize = state.config.pageSize,
                 request = request,
             )
+        saveResponse(request, result)
+        return MediatorResult.Success(
+            endOfPaginationReached =
+                when (loadType) {
+                    LoadType.REFRESH -> false
+                    LoadType.PREPEND -> result.previousKey == null
+                    LoadType.APPEND -> result.nextKey == null
+                },
+        )
+    }
+
+    internal suspend fun saveResponse(
+        request: PagingRequest,
+        result: PagingResult<R>,
+    ) {
         database.connect {
+            if (!canSave()) return@connect
+            val loadType =
+                when (request) {
+                    PagingRequest.Refresh -> LoadType.REFRESH
+                    is PagingRequest.Prepend -> LoadType.PREPEND
+                    is PagingRequest.Append -> LoadType.APPEND
+                }
             if (loadType == LoadType.REFRESH) {
                 database.pagingTimelineDao().deletePagingKey(pagingKey)
                 database.pagingTimelineDao().insertPagingKey(
@@ -90,15 +112,9 @@ internal abstract class BasePagingRemoteMediator<Key : Any, T : Any, R : Any>(
             // Keep paging-key and cache writes under one outer transaction.
             onSaveCache(request, result.data)
         }
-        return MediatorResult.Success(
-            endOfPaginationReached =
-                when (loadType) {
-                    LoadType.REFRESH -> false
-                    LoadType.PREPEND -> result.previousKey == null
-                    LoadType.APPEND -> result.nextKey == null
-                },
-        )
     }
+
+    protected open suspend fun canSave(): Boolean = true
 
     protected abstract suspend fun load(
         pageSize: Int,

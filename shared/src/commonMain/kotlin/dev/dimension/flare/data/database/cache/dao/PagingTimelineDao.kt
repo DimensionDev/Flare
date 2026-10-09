@@ -216,6 +216,35 @@ internal suspend fun PagingTimelineDao.getTimelinePageInCurrentTransaction(
 @Dao
 @DaoReturnTypeConverters(PagingSourceDaoReturnTypeConverter::class)
 internal interface PagingTimelineDao {
+    @Query(
+        "SELECT * FROM DbPagingTimeline WHERE pagingKey = :pagingKey AND (:pagingKey || '_' || statusId = :itemKey OR _id = :itemKey) LIMIT 1",
+    )
+    suspend fun readingItem(
+        pagingKey: String,
+        itemKey: String,
+    ): DbPagingTimeline?
+
+    @Query(
+        "SELECT DbPagingTimeline.* FROM DbPagingTimeline INNER JOIN DbStatus ON DbStatus.id = DbPagingTimeline.statusId WHERE pagingKey = :pagingKey ORDER BY ABS(CAST(sortId AS REAL) - :sortId), sortId LIMIT 1",
+    )
+    suspend fun nearestReadingItem(
+        pagingKey: String,
+        sortId: Long,
+    ): DbPagingTimeline?
+
+    @Query(
+        "SELECT COUNT(*) FROM DbPagingTimeline INNER JOIN DbStatus ON DbStatus.id = DbPagingTimeline.statusId WHERE pagingKey = :pagingKey AND sortId < :sortId",
+    )
+    suspend fun readingItemOffset(
+        pagingKey: String,
+        sortId: Long,
+    ): Int
+
+    @Query(
+        "SELECT DISTINCT pagingKey FROM DbPagingTimeline WHERE substr(pagingKey, 1, length(:prefix)) = :prefix UNION SELECT pagingKey FROM DbPagingKey WHERE substr(pagingKey, 1, length(:prefix)) = :prefix",
+    )
+    suspend fun keysWithPrefix(prefix: String): List<String>
+
     @Transaction
     @Query(
         TIMELINE_WITH_STATUS_QUERY +

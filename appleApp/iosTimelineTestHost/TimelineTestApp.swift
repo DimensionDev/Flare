@@ -89,6 +89,7 @@ private final class TimelineTestController: UIViewController, CHTCollectionViewD
             case "scroll-to-top": await checkScrollToTop()
             case "drag", "deceleration", "refine-reading-item", "refine-reading-item-deceleration": await checkGesture()
             case "pull-refresh", "fast-refresh-prepend": await checkRefreshWithPrepend()
+            case "refresh-late-height", "refresh-late-height-columns", "refresh-height-after-collapse", "refresh-collapse-navigation": await checkRefreshWithLateHeight()
             case let name where name.hasPrefix("snapshot-"): await checkSnapshotGesture()
             default: await checkRefresh()
             }
@@ -241,6 +242,52 @@ private final class TimelineTestController: UIViewController, CHTCollectionViewD
         list.refreshControl = nil
     }
 
+    private func checkRefreshWithLateHeight() async {
+        let baseline = list.restingAdjustedTopInset
+        jump(to: -baseline)
+        list.beginRefreshing(revealingIndicator: true)
+        await settle(400)
+        var measured = false
+        list.isReadingLayoutReady = { _ in measured }
+        list.prepareForSnapshotChange()
+        var snapshot = dataSource.snapshot()
+        snapshot.insertItems(scenario.contains("columns") ? [200, 201, 202] : [200], beforeItem: 0)
+        await dataSource.apply(snapshot, animatingDifferences: false)
+        await settle(100)
+
+        check(list.captureReadingPosition()?.itemID == "0", "snapshot did not retain the original reading item")
+        sampleRefreshCollapse()
+        list.endRefreshing()
+        await settle(scenario == "refresh-height-after-collapse" ? 450 : 80)
+        check(list.hasReadingPosition, "collapse discarded its unmeasured reading bookmark")
+        check(!list.isProgrammaticScrolling, "internal collapse was treated as navigation")
+        if scenario == "refresh-collapse-navigation" {
+            list.setContentOffset(CGPoint(x: 0, y: -baseline), animated: true)
+            measured = true
+        }
+        let measuredID = scenario.contains("columns") ? 201 : 200
+        heights[measuredID] = itemHeight(measuredID) + 180
+        list.invalidateMeasuredHeights()
+        await settle(500)
+        if scenario == "refresh-collapse-navigation" {
+            refreshFrames?.invalidate()
+            refreshFrames = nil
+            check(abs(list.contentOffset.y + baseline) < 1,
+                  "late measurement overrode explicit navigation: \(list.contentOffset.y) instead of \(-baseline)")
+            check(!list.hasReadingPosition && !list.isPresentingRefresh, "navigation retained the collapse bookmark")
+            return
+        }
+        let frame = layout.layoutAttributesForItem(at: dataSource.indexPath(for: 0)!)!.frame
+        check(abs(frame.minY - list.contentOffset.y - baseline) < 1,
+              "late measurement moved the reading item by \(frame.minY - list.contentOffset.y - baseline)pt")
+        check(list.hasReadingPosition, "animation completion consumed an unready bookmark")
+        measured = true
+        list.setNeedsLayout()
+        await settle(100)
+        checkRefreshCollapse()
+        check(!list.hasReadingPosition && !list.isPresentingRefresh, "ready collapse left a pending bookmark")
+    }
+
     private func applyPendingRefreshSnapshot() {
         guard let snapshot = pendingRefreshSnapshot, !list.shouldDeferSnapshotChanges else { return }
         pendingRefreshSnapshot = nil
@@ -352,7 +399,9 @@ private final class TimelineTestController: UIViewController, CHTCollectionViewD
         sampleRefreshCollapse()
         list.endRefreshing()
         check(list.shouldDeferSnapshotChanges, "refresh collapse allowed an overlapping snapshot")
-        await settle(500)
+        await settle(80)
+        check(list.hasReadingPosition, "ready layout consumed the bookmark before collapse finished")
+        await settle(420)
         checkRefreshCollapse()
         check(!list.shouldDeferSnapshotChanges && !list.isPresentingRefresh, "refresh collapse never finished")
         check(abs(list.contentOffset.y + baseline) < 1, "refresh did not return to resting top")

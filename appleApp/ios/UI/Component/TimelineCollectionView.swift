@@ -53,6 +53,7 @@ final class TimelineCollectionView: UICollectionView {
     private var refreshRequested = false
     private var pendingRefreshReveal = false
     private var isEndingRefresh = false
+    private var isAnimatingRefreshCollapse = false
     private var isRevealingRefresh = false
     // A refresh started away from the top has no visible gap to collapse.
     private var preservesRefreshGap = false
@@ -186,10 +187,10 @@ final class TimelineCollectionView: UICollectionView {
     }
 
     private func finishRefreshingIfReady() {
-        guard isEndingRefresh, !isProgrammaticScrolling, refreshInset <= 0.5 else { return }
+        guard isEndingRefresh, !isAnimatingRefreshCollapse, refreshInset <= 0.5 else { return }
         isEndingRefresh = false
         restoreReadingPositionIfNeeded(animated: true)
-        isEndingRefresh = isProgrammaticScrolling
+        isEndingRefresh = isAnimatingRefreshCollapse
     }
 
     private func withRefreshAnimations(_ action: () -> Void) {
@@ -200,9 +201,13 @@ final class TimelineCollectionView: UICollectionView {
     }
 
     func interruptRefreshForScrolling() {
+        if isAnimatingRefreshCollapse {
+            super.setContentOffset(contentOffset, animated: false)
+        }
         pendingRefreshReveal = false
         isRevealingRefresh = false
         isEndingRefresh = false
+        isAnimatingRefreshCollapse = false
         preservesRefreshGap = false
         resetReadingPosition()
     }
@@ -240,6 +245,7 @@ final class TimelineCollectionView: UICollectionView {
     }
 
     func beginProgrammaticScrolling() {
+        if isAnimatingRefreshCollapse { interruptRefreshForScrolling() }
         isProgrammaticScrolling = true
         onProgrammaticScrollBegan?()
     }
@@ -256,6 +262,8 @@ final class TimelineCollectionView: UICollectionView {
     }
 
     func endProgrammaticScrolling() {
+        if isAnimatingRefreshCollapse { setNeedsLayout() }
+        isAnimatingRefreshCollapse = false
         isProgrammaticScrolling = false
         isEndingRefresh = false
         isRevealingRefresh = false
@@ -408,9 +416,16 @@ final class TimelineCollectionView: UICollectionView {
         _ updates: () -> Void
     ) {
         let viewportTop = readingViewportTop()
-        var item = preservesReadingPosition && hasScrollGesture &&
+        var item = preservesReadingPosition && (hasScrollGesture || isAnimatingRefreshCollapse) &&
             !isProgrammaticScrolling && !isExternalScrollInteractionActive && !isRevealingRefresh
             ? firstVisibleReadingItem(viewportTop: viewportTop, preferringVisibleTop: preferringVisibleTop) : nil
+        // Another column's first visible item may not move with the collapse target.
+        if isAnimatingRefreshCollapse,
+           let id = readingPosition?.itemID,
+           let path = readingIndexPath?(id),
+           let frame = collectionViewLayout.layoutAttributesForItem(at: path)?.frame {
+            item = (id, frame)
+        }
         if let anchor = item, let keepingItemIDs, !keepingItemIDs.contains(anchor.id) {
             let order = readingItemIDs?() ?? []
             let index = order.firstIndex(of: anchor.id) ?? 0
@@ -431,7 +446,7 @@ final class TimelineCollectionView: UICollectionView {
             // The estimate may have put the viewport beyond the measured card.
             // Keep that ID visible using the same clamp as an idle reading anchor.
             let distance = max(oldDistance, (readingTopOcclusion?() ?? 0) + 1 - frame.height)
-            // UIKit's invalidation delta preserves the pan/deceleration trajectory.
+            // UIKit's invalidation delta preserves the gesture or collapse trajectory.
             // Account for any offset adjustment UIKit already made at the bottom.
             var targetOffset = oldOffset + frame.minY - item.frame.minY + oldDistance - distance
             if wasWithinBounds {
@@ -533,8 +548,10 @@ final class TimelineCollectionView: UICollectionView {
         let offsetY = min(max(targetY, minimumY), maximumY)
         let tolerance = 0.5 / max(traitCollection.displayScale, 1)
         if abs(contentOffset.y - offsetY) > tolerance {
-            if animated {
-                setContentOffset(CGPoint(x: contentOffset.x, y: offsetY), animated: true)
+            if animated, window != nil {
+                // Internal collapse retains its bookmark; explicit navigation discards it.
+                isAnimatingRefreshCollapse = true
+                super.setContentOffset(CGPoint(x: contentOffset.x, y: offsetY), animated: true)
                 return
             }
             super.setContentOffset(CGPoint(x: contentOffset.x, y: offsetY), animated: false)

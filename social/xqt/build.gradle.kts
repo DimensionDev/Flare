@@ -1,4 +1,5 @@
 import dev.dimension.flare.buildlogic.FlarePlatform
+import dev.dimension.flare.buildlogic.GenerateXEmojiRegexTask
 import dev.dimension.flare.buildlogic.flare
 
 plugins {
@@ -10,6 +11,16 @@ plugins {
     alias(libs.plugins.ktorfit)
     alias(libs.plugins.koin.compiler)
     alias(libs.plugins.compose.compiler)
+}
+
+val twemojiParser by configurations.creating {
+    isCanBeConsumed = false
+    isTransitive = false
+}
+dependencies { twemojiParser("com.twitter:twemoji-parser:11.0.2@tgz") }
+val generateXEmojiRegex by tasks.registering(GenerateXEmojiRegexTask::class) {
+    twemojiArchive.from(twemojiParser)
+    outputDirectory.set(layout.buildDirectory.dir("generated/sources/xEmojiRegex/commonMain/kotlin"))
 }
 
 kotlin {
@@ -32,6 +43,7 @@ kotlin {
             }
         }
         val commonMain by getting {
+            kotlin.srcDir(generateXEmojiRegex.flatMap { it.outputDirectory })
             dependencies {
                 api(projects.shared)
                 api(projects.feature.loginApi)
@@ -75,5 +87,3 @@ kotlin {
         }
     }
 }
-
-

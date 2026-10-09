@@ -51,7 +51,7 @@ settings:
 packages:
   ChatLayout:
     url: https://github.com/ekazaev/ChatLayout
-    exactVersion: 2.4.3
+    exactVersion: 2.5.2
   CHTCollectionViewWaterfallLayout:
     url: https://github.com/chiahsien/CHTCollectionViewWaterfallLayout
     from: 1.0.1
@@ -69,7 +69,7 @@ packages:
     exactVersion: 1.0.5
   Kingfisher:
     url: https://github.com/onevcat/Kingfisher.git
-    exactVersion: 8.12.0
+    exactVersion: 8.13.0
   LazyPager:
     # Temporary 1.2.1 fork: create the selected page before the first layout.
     # Return to upstream once it includes the initial-page flash fix.
@@ -77,10 +77,10 @@ packages:
     revision: e4345c0a401c8bc4556b05dd34d651c25d4a96f2
   SwiftLintPlugins:
     url: https://github.com/SimplyDanny/SwiftLintPlugins
-    exactVersion: 0.62.2
+    exactVersion: 0.65.1
   SwiftUI-Flow:
     url: https://github.com/tevelee/SwiftUI-Flow
-    exactVersion: 3.5.1
+    exactVersion: 3.5.3
   # Temporary fork: upstream Textual currently requires iOS 18 / macOS 15, while Flare still
   # supports iOS 17 / macOS 14. Switch back to gonzalezreal/textual when that is compatible.
   Textual:
@@ -88,7 +88,7 @@ packages:
     branch: main
   swiftui-introspect:
     url: https://github.com/siteline/swiftui-introspect
-    exactVersion: 27.0.0
+    exactVersion: 27.1.0
   VideoPlayer:
     url: https://github.com/wxxsw/VideoPlayer
     exactVersion: 1.2.5

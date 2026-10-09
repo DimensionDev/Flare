@@ -58,7 +58,6 @@ kotlin {
                 implementation(libs.bundles.ktor)
                 implementation(libs.okio)
                 implementation(libs.kotlin.codepoints.deluxe)
-                implementation(libs.unicode.segmentation)
                 implementation(libs.ksoup)
                 implementation(libs.mfm.multiplatform)
                 implementation(libs.twitter.parser)

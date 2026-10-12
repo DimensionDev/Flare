@@ -186,6 +186,7 @@ public fun CommonStatusComponent(
     handleModifier: Modifier = Modifier,
     avatarModifier: Modifier = Modifier,
     actionsModifier: Modifier = Modifier,
+    forceHideActions: Boolean = false,
 ) {
     val uriHandler = LocalUriHandler.current
     val openPostLabel = stringResource(Res.string.status_open_post)
@@ -493,7 +494,7 @@ public fun CommonStatusComponent(
                     fullTime = true,
                 )
             }
-            if (appearanceSettings.postActionStyle != PostActionStyle.Hidden || isDetail) {
+            if ((appearanceSettings.postActionStyle != PostActionStyle.Hidden || isDetail) && !forceHideActions) {
                 if (isDetail) {
                     CompositionLocalProvider(
                         PlatformContentColor provides PlatformTheme.colorScheme.text,

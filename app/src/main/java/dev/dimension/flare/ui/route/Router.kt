@@ -1,10 +1,13 @@
 package dev.dimension.flare.ui.route
 
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.foundation.shape.AbsoluteRoundedCornerShape
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.navigation3.rememberListDetailSceneStrategy
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -22,6 +25,8 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.unit.LayoutDirection
+import androidx.core.app.MultiWindowModeChangedInfo
+import androidx.core.util.Consumer
 import androidx.core.view.RoundedCornerCompat
 import androidx.core.view.ViewCompat
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
@@ -103,7 +108,8 @@ internal fun Router(
             }
         }
     val isBigScreen = isBigScreen()
-    val cornerShape = rememberDeviceCornerShape().takeUnless { isBigScreen }
+    val isInMultiWindowMode = rememberIsInMultiWindowMode()
+    val cornerShape = rememberDeviceCornerShape(isInMultiWindowMode).takeUnless { isBigScreen || isInMultiWindowMode }
     val layoutDirection = LocalLayoutDirection.current
     val slideDistance =
         with(LocalDensity.current) { androidNavigationSlideDistance.roundToPx() } *
@@ -148,7 +154,24 @@ internal fun Router(
 }
 
 @Composable
-private fun rememberDeviceCornerShape(): Shape {
+internal fun rememberIsInMultiWindowMode(): Boolean {
+    val activity = LocalActivity.current as? ComponentActivity
+    var isInMultiWindowMode by remember(activity) { mutableStateOf(activity?.isInMultiWindowMode == true) }
+
+    DisposableEffect(activity) {
+        val listener = Consumer<MultiWindowModeChangedInfo> { isInMultiWindowMode = it.isInMultiWindowMode }
+        activity?.addOnMultiWindowModeChangedListener(listener)
+        isInMultiWindowMode = activity?.isInMultiWindowMode == true
+        onDispose {
+            activity?.removeOnMultiWindowModeChangedListener(listener)
+        }
+    }
+
+    return isInMultiWindowMode
+}
+
+@Composable
+private fun rememberDeviceCornerShape(isInMultiWindowMode: Boolean): Shape {
     val view = LocalView.current
     val density = LocalDensity.current
     val configuration = LocalConfiguration.current
@@ -157,7 +180,7 @@ private fun rememberDeviceCornerShape(): Shape {
             mutableStateOf(ViewCompat.getRootWindowInsets(view))
         }
 
-    LaunchedEffect(view, configuration) {
+    LaunchedEffect(view, configuration, isInMultiWindowMode) {
         withFrameNanos { _ -> }
         rootWindowInsets = ViewCompat.getRootWindowInsets(view)
     }

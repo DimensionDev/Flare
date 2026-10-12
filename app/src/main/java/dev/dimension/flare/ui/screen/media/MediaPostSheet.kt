@@ -65,6 +65,8 @@ import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import dev.dimension.flare.data.model.PostActionStyle
+import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.status.CommonStatusComponent
 import dev.dimension.flare.ui.component.status.StatusSummaryComponent
 import dev.dimension.flare.ui.model.UiTimelineV2
@@ -277,6 +279,7 @@ private fun MediaPostContent(
                 CommonStatusComponent(
                     item = post,
                     isDetail = true,
+                    forceHideActions = LocalTimelineAppearance.current.postActionStyle == PostActionStyle.Hidden,
                     showMedia = false,
                     quotes = quotes,
                     nameModifier = nameModifier,

@@ -39,5 +39,10 @@ internal fun StatusReactionRow(
                     color = PlatformTheme.colorScheme.caption,
                 )
             },
-    ) { index -> content(index) }
+    ) { index ->
+        // Old subcompositions can recompose before a shrinking list is remeasured.
+        if (index < itemCount) {
+            content(index)
+        }
+    }
 }

@@ -455,25 +455,35 @@ internal class AndroidDownloadManager(
                 put(MediaStore.MediaColumns.IS_PENDING, 1)
             }
         val contentResolver = context.contentResolver
-        val outputUri = contentResolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values) ?: return false
-        val success =
-            try {
-                contentResolver.openOutputStream(outputUri)?.use(writer) == true
-            } catch (e: Exception) {
-                Log.e(TAG, "Failed to write MediaStore output: $outputUri", e)
-                false
+        var outputUri: Uri? = null
+        var success = false
+        return try {
+            outputUri = contentResolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values) ?: return false
+            if (contentResolver.openOutputStream(outputUri)?.use(writer) != true) {
+                return false
             }
-
-        if (success) {
             val publishValues =
                 ContentValues().apply {
                     put(MediaStore.MediaColumns.IS_PENDING, 0)
                 }
-            contentResolver.update(outputUri, publishValues, null, null)
-        } else {
-            contentResolver.delete(outputUri, null, null)
+            success = contentResolver.update(outputUri, publishValues, null, null) > 0
+            success
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to save MediaStore output: $outputUri", e)
+            false
+        } finally {
+            if (!success) {
+                outputUri?.let { uri ->
+                    runCatching {
+                        contentResolver.delete(uri, null, null)
+                    }.onFailure { error ->
+                        Log.w(TAG, "Failed to delete incomplete MediaStore output: $uri", error)
+                    }
+                }
+            }
         }
-        return success
     }
 
     private fun saveToDirectoryUri(

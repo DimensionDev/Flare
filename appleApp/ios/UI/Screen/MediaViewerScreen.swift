@@ -433,6 +433,7 @@ struct MediaViewerScreen: View {
                 }
             }
             .presentationDetents([.height(postSummaryHeight), .large], selection: $postDetent)
+            .presentationCompactAdaptation(.none)
             .presentationDragIndicator(.visible)
             .presentationContentInteraction(.resizes)
             // The viewer supplies the expanded scrim so tapping it collapses, rather than dismisses, the sheet.

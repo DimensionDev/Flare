@@ -15,6 +15,7 @@ struct MediaViewerTestFixture: View {
     private let video = ProcessInfo.processInfo.arguments.contains("--video")
     private let indicator = ProcessInfo.processInfo.arguments.contains("--indicator")
     private let withoutPost = ProcessInfo.processInfo.arguments.contains("--without-post")
+    private let hidePostActions = ProcessInfo.processInfo.arguments.contains("--hide-post-actions")
 
     var body: some View {
         VStack {
@@ -37,6 +38,10 @@ struct MediaViewerTestFixture: View {
                         post: withoutPost ? nil : makePost(medias: medias)
                     )
                     .environment(\.globalAppearance, GlobalAppearance.companion.Default)
+                    .environment(\.timelineAppearance, TimelinePresentationAppearancePatchHelper.shared.setPostActionStyle(
+                        patch: AppearancePatch.companion.EMPTY,
+                        value: hidePostActions ? .hidden : .leftAligned
+                    ).toTimelineAppearance())
                 }
             }
             .background(ClearFullScreenBackground())

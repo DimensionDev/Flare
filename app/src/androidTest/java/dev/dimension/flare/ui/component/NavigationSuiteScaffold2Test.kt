@@ -9,7 +9,6 @@ import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.material3.rememberWideNavigationRailState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.platform.testTag
@@ -19,9 +18,10 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.window.DialogProperties
 import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberDecoratedNavEntries
 import androidx.navigation3.scene.DialogSceneStrategy
-import androidx.navigation3.ui.NavDisplay
 import dev.dimension.flare.data.model.appearance.GlobalAppearance
+import dev.dimension.flare.ui.route.AndroidNavDisplay
 import dev.dimension.flare.ui.route.Route
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -55,32 +55,38 @@ class NavigationSuiteScaffold2Test {
                         layoutType = NavigationSuiteType.NavigationRail,
                         containerColor = NAVIGATION_RAIL_COLOR,
                     ) {
-                        NavDisplay(
-                            backStack = backStack,
+                        AndroidNavDisplay(
+                            cornerShape = null,
+                            onBack = { backStack.removeLastOrNull() },
                             modifier =
                                 Modifier
                                     .fillMaxSize()
-                                    .clipToBounds()
                                     .testTag(NAV_DISPLAY_TAG),
+                            sceneStrategies = emptyList(),
                             transitionSpec = { materialSharedAxisZ(true) },
                             popTransitionSpec = { materialSharedAxisZ(false) },
-                            entryProvider =
-                                entryProvider {
-                                    entry<Route.Home> {
-                                        Box(
-                                            Modifier
-                                                .fillMaxSize()
-                                                .background(Color.Red),
-                                        )
-                                    }
-                                    entry<Route.Notification> {
-                                        Box(
-                                            Modifier
-                                                .fillMaxSize()
-                                                .background(Color.Blue),
-                                        )
-                                    }
-                                },
+                            entries =
+                                rememberDecoratedNavEntries(
+                                    backStack = backStack,
+                                    entryDecorators = emptyList(),
+                                    entryProvider =
+                                        entryProvider {
+                                            entry<Route.Home> {
+                                                Box(
+                                                    Modifier
+                                                        .fillMaxSize()
+                                                        .background(Color.Red),
+                                                )
+                                            }
+                                            entry<Route.Notification> {
+                                                Box(
+                                                    Modifier
+                                                        .fillMaxSize()
+                                                        .background(Color.Blue),
+                                                )
+                                            }
+                                        },
+                                ),
                         )
                     }
                 }
@@ -131,40 +137,47 @@ class NavigationSuiteScaffold2Test {
                         layoutType = NavigationSuiteType.NavigationRail,
                         containerColor = NAVIGATION_RAIL_COLOR,
                     ) {
-                        NavDisplay(
-                            backStack = backStack,
+                        AndroidNavDisplay(
+                            cornerShape = null,
+                            onBack = { backStack.removeLastOrNull() },
                             modifier =
                                 Modifier
                                     .fillMaxSize()
-                                    .clipToBounds()
                                     .testTag(NAV_DISPLAY_TAG),
                             sceneStrategies = listOf(DialogSceneStrategy()),
-                            entryProvider =
-                                entryProvider {
-                                    entry<Route.Home> {
-                                        Box(
-                                            Modifier
-                                                .fillMaxSize()
-                                                .background(Color.Red),
-                                        )
-                                    }
-                                    entry<Route.Notification>(
-                                        metadata =
-                                            DialogSceneStrategy.dialog(
-                                                DialogProperties(
-                                                    usePlatformDefaultWidth = false,
-                                                    decorFitsSystemWindows = false,
-                                                ),
-                                            ),
-                                    ) {
-                                        Box(
-                                            Modifier
-                                                .fillMaxSize()
-                                                .background(MEDIA_OVERLAY_COLOR)
-                                                .testTag(MEDIA_OVERLAY_TAG),
-                                        )
-                                    }
-                                },
+                            transitionSpec = { materialSharedAxisZ(true) },
+                            popTransitionSpec = { materialSharedAxisZ(false) },
+                            entries =
+                                rememberDecoratedNavEntries(
+                                    backStack = backStack,
+                                    entryDecorators = emptyList(),
+                                    entryProvider =
+                                        entryProvider {
+                                            entry<Route.Home> {
+                                                Box(
+                                                    Modifier
+                                                        .fillMaxSize()
+                                                        .background(Color.Red),
+                                                )
+                                            }
+                                            entry<Route.Notification>(
+                                                metadata =
+                                                    DialogSceneStrategy.dialog(
+                                                        DialogProperties(
+                                                            usePlatformDefaultWidth = false,
+                                                            decorFitsSystemWindows = false,
+                                                        ),
+                                                    ),
+                                            ) {
+                                                Box(
+                                                    Modifier
+                                                        .fillMaxSize()
+                                                        .background(MEDIA_OVERLAY_COLOR)
+                                                        .testTag(MEDIA_OVERLAY_TAG),
+                                                )
+                                            }
+                                        },
+                                ),
                         )
                     }
                 }

@@ -90,7 +90,7 @@ class DeviceCornerNavEntryDecoratorTest {
     fun dialogEntriesAreNotClipped() {
         setPageContent(metadata = DialogSceneStrategy.dialog())
 
-        assertCorners(Color.Red)
+        assertCorners(Color.Red, OVERLAY_CONTENT_TAG)
     }
 
     @OptIn(ExperimentalMaterial3Api::class)
@@ -98,7 +98,7 @@ class DeviceCornerNavEntryDecoratorTest {
     fun bottomSheetEntriesAreNotClipped() {
         setPageContent(metadata = BottomSheetSceneStrategy.bottomSheet())
 
-        assertCorners(Color.Red)
+        assertCorners(Color.Red, OVERLAY_CONTENT_TAG)
     }
 
     private fun setPageContent(
@@ -109,28 +109,43 @@ class DeviceCornerNavEntryDecoratorTest {
             activity = activityOverride ?: LocalActivity.current as ComponentActivity
             CompositionLocalProvider(LocalActivity provides activity) {
                 val isInMultiWindowMode = rememberIsInMultiWindowMode()
-                val decorator =
-                    rememberDeviceCornerNavEntryDecorator(
-                        enabled = enabled.value && !isInMultiWindowMode,
-                        shape = shape.value,
-                    )
-                val entry =
+                val entries =
                     remember {
-                        NavEntry<NavKey>(TestRoute, metadata = metadata) {
-                            remember { pageInstances++ }
-                            Box(Modifier.fillMaxSize().background(Color.Red))
+                        buildList {
+                            add(
+                                NavEntry<NavKey>(TestRoute) {
+                                    remember { pageInstances++ }
+                                    Box(Modifier.fillMaxSize().background(Color.Red))
+                                },
+                            )
+                            if (metadata.isNotEmpty()) {
+                                add(
+                                    NavEntry<NavKey>(TestOverlay, metadata = metadata) {
+                                        Box(Modifier.size(120.dp).background(Color.Red).testTag(OVERLAY_CONTENT_TAG))
+                                    },
+                                )
+                            }
                         }
                     }
-                val decoratedEntries = rememberDecoratedNavEntries(listOf(entry), listOf(decorator))
                 Box(Modifier.size(120.dp).background(Color.Green).testTag(CORNER_HOST_TAG)) {
-                    decoratedEntries.single().Content()
+                    AndroidNavDisplay(
+                        entries = rememberDecoratedNavEntries(entries, emptyList()),
+                        sceneStrategies = remember { listOf(DialogSceneStrategy(), BottomSheetSceneStrategy()) },
+                        cornerShape = shape.value.takeIf { enabled.value && !isInMultiWindowMode },
+                        transitionSpec = { androidOpenTransition(96) },
+                        popTransitionSpec = { androidCloseTransition(96) },
+                        onBack = {},
+                    )
                 }
             }
         }
     }
 
-    private fun assertCorners(expected: Color) {
-        val pixels = composeRule.onNodeWithTag(CORNER_HOST_TAG).captureToImage().toPixelMap()
+    private fun assertCorners(
+        expected: Color,
+        tag: String = CORNER_HOST_TAG,
+    ) {
+        val pixels = composeRule.onNodeWithTag(tag).captureToImage().toPixelMap()
         listOf(
             pixels[2, 2],
             pixels[pixels.width - 3, 2],
@@ -146,7 +161,10 @@ class DeviceCornerNavEntryDecoratorTest {
 
     private object TestRoute : NavKey
 
+    private object TestOverlay : NavKey
+
     private companion object {
         const val CORNER_HOST_TAG = "corner-host"
+        const val OVERLAY_CONTENT_TAG = "overlay-content"
     }
 }

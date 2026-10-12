@@ -81,6 +81,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
 import compose.icons.FontAwesomeIcons
@@ -581,6 +582,9 @@ internal fun TimelineItemContent(
             lazyStaggeredGridState = lazyStaggeredGridState,
         )
     val latestState by rememberUpdatedState(state)
+    if (isHomeTimeline && isCurrentlyVisible) {
+        LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { latestState.onHomeEntered() }
+    }
     var isInWindow by remember { mutableStateOf(false) }
     val windowSize = LocalWindowInfo.current.containerSize
     val isVisible = isCurrentlyVisible && isInWindow

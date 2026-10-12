@@ -49,6 +49,7 @@ struct TimelineScreen: View {
             accessoryItems: accessoryItems,
             onIsAtTopChanged: { isAtTop = $0 }
         )
+            .onAppear { presenter.state.onHomeEntered() }
             .overlay(alignment: .top) {
                 if let reading = presenter.state.readingState, reading.hasNewContent {
                     Button {

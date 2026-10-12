@@ -77,6 +77,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
@@ -156,11 +157,23 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
     @OptIn(ExperimentalCoroutinesApi::class)
     internal fun createPager(scope: CoroutineScope): Flow<PagingData<UiTimelineV2>> =
         loader
-            .flatMapLatest { remoteLoader ->
+            .combine(
+                if (isHomeTimeline &&
+                    readingSourceKey != null
+                ) {
+                    readingRepository.enabled.filterNotNull()
+                } else {
+                    flowOf(false)
+                },
+            ) { loader, enabled ->
+                loader to
+                    enabled
+            }.flatMapLatest { (remoteLoader, readingEnabled) ->
                 contextMediator.value = null
                 readingSession.value = null
                 when {
-                    remoteLoader !is NotSupportRemoteLoader<*> && readingSourceKey != null && timelineTabItemId != null -> {
+                    readingEnabled && remoteLoader !is NotSupportRemoteLoader<*> &&
+                        readingSourceKey != null && timelineTabItemId != null -> {
                         readingPager(remoteLoader, scope, timelineTabItemId, readingSourceKey)
                             .cachedIn(scope)
                             .flatMapLatest { pagingData ->
@@ -228,7 +241,7 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
                 return@flow
             }
             val sourceKey = sourceIdentity
-            readingRepository.open(tabId, sourceKey)
+            readingRepository.open(tabId, sourceKey) ?: return@flow
             emitAll(
                 database
                     .timelineReadingSessionDao()
@@ -242,7 +255,8 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
                                 emit(PagingData.empty())
                                 return@flow
                             }
-                            val record = existing ?: readingRepository.open(tabId, sourceKey)
+                            val record = existing ?: readingRepository.open(tabId, sourceKey) ?: return@flow
+                            if (readingRepository.enabled.value != true) return@flow
                             val session =
                                 TimelineReadingSession(
                                     record,
@@ -400,6 +414,14 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
             override val listState = listState
             override val readingState = readingState
 
+            override fun onHomeEntered() {
+                if (isHomeTimeline) {
+                    scope.launch {
+                        readingRepository.enterHome { settingsRepository.appSettings.first().rememberHomeTimelineReadingPosition }
+                    }
+                }
+            }
+
             override fun refreshAsync() {
                 scope.launch {
                     refresh()
@@ -431,6 +453,8 @@ internal suspend fun shouldRefreshTimelineOnInitialize(
 
 @Immutable
 public interface TimelineState {
+    public fun onHomeEntered() {}
+
     public val listState: PagingState<UiTimelineV2>
     public val readingState: TimelineReadingState? get() = null
 

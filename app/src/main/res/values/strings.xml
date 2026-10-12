@@ -827,4 +827,6 @@
     <string name="ugoira_export_smaller">Export smaller MP4</string>
     <string name="ugoira_export_progress">Saving MP4: %1$d%%</string>
     <string name="home_timeline_view_latest">View latest</string>
+    <string name="settings_remember_home_timeline_reading_position">Remember home reading position</string>
+    <string name="settings_remember_home_timeline_reading_position_description">Restore your last home tab and post, and keep your place when refreshing. Changes apply the next time you enter Home. Turning this off clears saved reading records.</string>
 </resources>

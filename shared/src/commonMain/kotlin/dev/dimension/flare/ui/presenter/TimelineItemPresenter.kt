@@ -25,6 +25,8 @@ public class TimelineItemPresenter(
 
         public suspend fun refreshSuspend()
 
+        public fun onHomeEntered() {}
+
         public val isRefreshing: Boolean
         public val readingState: dev.dimension.flare.ui.model.TimelineReadingState? get() = null
     }
@@ -41,6 +43,8 @@ public class TimelineItemPresenter(
             override val listState = state.listState
             override val isRefreshing = listState.isRefreshing || state.readingState?.isRefreshing == true
             override val readingState = state.readingState
+
+            override fun onHomeEntered() = state.onHomeEntered()
 
             override fun refreshSync() {
                 scope.launch {

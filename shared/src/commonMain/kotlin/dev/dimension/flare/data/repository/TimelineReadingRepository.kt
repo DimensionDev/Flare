@@ -5,7 +5,17 @@ import dev.dimension.flare.data.database.cache.connect
 import dev.dimension.flare.data.database.cache.model.DbHomeTimelineSelection
 import dev.dimension.flare.data.database.cache.model.DbTimelineReadingSession
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import org.koin.core.annotation.Single
 import kotlin.uuid.Uuid
 
@@ -14,7 +24,29 @@ internal class TimelineReadingRepository(
     private val database: CacheDatabase,
     private val scope: CoroutineScope,
 ) {
-    val selectedTab get() = database.timelineReadingSessionDao().selectedTab()
+    private val appliedEnabled = MutableStateFlow<Boolean?>(null)
+    val enabled = appliedEnabled.asStateFlow()
+    private val entryMutex = Mutex()
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val selectedTab =
+        enabled.filterNotNull().flatMapLatest {
+            if (it == true) database.timelineReadingSessionDao().selectedTab() else flowOf(null)
+        }
+
+    suspend fun enterHome(readEnabled: suspend () -> Boolean) =
+        entryMutex.withLock {
+            val enabled = readEnabled()
+            if (!enabled) {
+                // Finish clearing even if the page's scope ends during the mode switch.
+                withContext(NonCancellable) {
+                    appliedEnabled.value = false
+                    retainTabs(emptyMap())
+                }
+            } else {
+                appliedEnabled.value = true
+            }
+        }
 
     fun savePosition(
         record: DbTimelineReadingSession,
@@ -29,14 +61,17 @@ internal class TimelineReadingRepository(
     }
 
     suspend fun selectTab(id: String) {
-        database.timelineReadingSessionDao().select(DbHomeTimelineSelection(tabId = id))
+        database.connect {
+            if (enabled.value == true) database.timelineReadingSessionDao().select(DbHomeTimelineSelection(tabId = id))
+        }
     }
 
     suspend fun open(
         tabId: String,
         sourceKey: String,
-    ): DbTimelineReadingSession =
+    ): DbTimelineReadingSession? =
         database.connect {
+            if (enabled.value != true) return@connect null
             val previous = database.timelineReadingSessionDao().get(tabId)
             if (previous?.sourceKey == sourceKey) {
                 previous

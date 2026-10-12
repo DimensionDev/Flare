@@ -5,6 +5,7 @@ import androidx.paging.PagingSource
 import androidx.room3.Room
 import dev.dimension.flare.RobolectricTest
 import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.database.cache.connect
 import dev.dimension.flare.data.database.createDatabaseDriver
 import dev.dimension.flare.data.datasource.microblog.MixedRemoteMediator
 import dev.dimension.flare.data.model.tab.TimelineMergePolicy
@@ -23,6 +24,8 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -51,6 +54,117 @@ class TimelineReadingSessionTest : RobolectricTest() {
 
     @AfterTest
     fun close() = database.close()
+
+    @Test
+    fun changingPreferenceWaitsForEntryThenClearsOnlyReadingData() =
+        runTest {
+            val repository = TimelineReadingRepository(database, backgroundScope)
+            var preference = false
+            repository.enterHome { preference }
+            assertFalse(repository.enabled.value == true)
+            assertNull(repository.open("home", "source"))
+            repository.selectTab("home")
+            assertNull(repository.selectedTab.first())
+
+            preference = true
+            assertFalse(repository.enabled.value == true)
+            repository.enterHome { preference }
+            val loader = Loader()
+            val session = session(loader, backgroundScope, repository = repository)
+            session.refresh(false, initial = true)
+            repository.selectTab("home")
+            repository.copyData(session.activeKey, "ordinary-cache")
+            val ordinaryRows = database.pagingTimelineDao().getByPagingKey("ordinary-cache")
+            loader.response = page(100..110)
+            session.refresh(false)
+            val statusCount = database.statusDao().count().first()
+
+            preference = false
+            assertTrue(repository.enabled.value == true)
+            assertEquals("home", repository.selectedTab.first())
+            assertNotNull(database.timelineReadingSessionDao().get("home"))
+            repository.enterHome { preference }
+            assertFalse(repository.enabled.value == true)
+            assertNull(database.timelineReadingSessionDao().get("home"))
+            assertNull(database.timelineReadingSessionDao().selectedTab().first())
+            assertTrue(database.pagingTimelineDao().keysWithPrefix(session.record.key).isEmpty())
+            assertEquals(ordinaryRows, database.pagingTimelineDao().getByPagingKey("ordinary-cache"))
+            assertEquals(statusCount, database.statusDao().count().first())
+            repository.selectTab("stale-tab")
+            assertNull(repository.open("home", "source"))
+            assertNull(repository.selectedTab.first())
+
+            preference = true
+            repository.enterHome { preference }
+            val fresh = assertNotNull(repository.open("home", "source"))
+            assertNotEquals(session.record.key, fresh.key)
+            assertNull(fresh.anchorId)
+            assertFalse(fresh.hasNewContent)
+            assertNull(repository.selectedTab.first())
+        }
+
+    @Test
+    fun disabledColdEntryDiscardsRecordsFromAnEarlierVersion() =
+        runTest {
+            val old = session(Loader(), backgroundScope)
+            old.refresh(false, initial = true)
+            val repository = TimelineReadingRepository(database, backgroundScope)
+            repository.enterHome { false }
+            assertTrue(database.timelineReadingSessionDao().all().isEmpty())
+            assertTrue(database.pagingTimelineDao().keysWithPrefix(old.record.key).isEmpty())
+        }
+
+    @Test
+    fun leavingThePageDuringDisableStillFinishesClearing() =
+        runTest {
+            val repository = TimelineReadingRepository(database, backgroundScope)
+            val session = session(Loader(), backgroundScope, repository = repository)
+            session.refresh(false, initial = true)
+            val locked = CompletableDeferred<Unit>()
+            val release = CompletableDeferred<Unit>()
+            val blocker =
+                launch(Dispatchers.Default) {
+                    database.connect {
+                        locked.complete(Unit)
+                        release.await()
+                    }
+                }
+            locked.await()
+            val disabling = launch { repository.enterHome { false } }
+            repository.enabled.first { it == false }
+            disabling.cancel()
+            release.complete(Unit)
+            disabling.join()
+            blocker.join()
+            assertTrue(database.timelineReadingSessionDao().all().isEmpty())
+            assertTrue(database.pagingTimelineDao().keysWithPrefix(session.record.key).isEmpty())
+        }
+
+    @Test
+    fun disablingDuringRefreshRejectsLateDataEvenAfterReenabling() =
+        runTest {
+            val repository = TimelineReadingRepository(database, backgroundScope)
+            val loader = Loader()
+            val session = session(loader, backgroundScope, repository = repository)
+            session.refresh(false, initial = true)
+            val started = CompletableDeferred<Unit>()
+            val finish = CompletableDeferred<Unit>()
+            loader.beforeLoad = {
+                started.complete(Unit)
+                finish.await()
+            }
+            loader.response = page(100..110)
+            val refresh = async { session.refresh(false) }
+            started.await()
+            repository.enterHome { false }
+            repository.enterHome { true }
+            val fresh = assertNotNull(repository.open("home", "source"))
+            finish.complete(Unit)
+            refresh.await()
+            assertEquals(fresh, database.timelineReadingSessionDao().get("home"))
+            assertTrue(database.pagingTimelineDao().keysWithPrefix(session.record.key).isEmpty())
+            assertTrue(database.pagingTimelineDao().keysWithPrefix(fresh.key).isEmpty())
+        }
 
     @Test
     fun manualRefreshRetainsDiscontinuousListAndCursorUntilLatestIsChosen() =
@@ -258,10 +372,11 @@ class TimelineReadingSessionTest : RobolectricTest() {
     fun removedTabAndSourceChangesInvalidateRowsButOpeningSameSourceDoesNot() =
         runTest {
             val repo = TimelineReadingRepository(database, backgroundScope)
+            repo.enterHome { true }
             val session = session(Loader(), backgroundScope)
             session.refresh(false, initial = true)
-            assertEquals(session.record.key, repo.open("home", "source").key)
-            val replacement = repo.open("home", "different-source")
+            assertEquals(session.record.key, assertNotNull(repo.open("home", "source")).key)
+            val replacement = assertNotNull(repo.open("home", "different-source"))
             assertNotEquals(session.record.key, replacement.key)
             assertTrue(database.pagingTimelineDao().keysWithPrefix(session.record.key).isEmpty())
             repo.retainTabs(emptyMap())
@@ -312,10 +427,11 @@ class TimelineReadingSessionTest : RobolectricTest() {
         visible: suspend (UiTimelineV2) -> Boolean = {
             true
         },
+        repository: TimelineReadingRepository = TimelineReadingRepository(database, scope),
     ): TimelineReadingSession {
-        val repository = TimelineReadingRepository(database, scope)
+        repository.enterHome { true }
         return TimelineReadingSession(
-            repository.open("home", "source"),
+            assertNotNull(repository.open("home", "source")),
             loader,
             database,
             repository,

@@ -762,4 +762,6 @@
 <string name="ugoira_export_progress">正在儲存 MP4：%1$d%%</string>
     <string name="home_timeline_new_content">有新內容</string>
     <string name="home_timeline_view_latest">查看最新</string>
+    <string name="settings_remember_home_timeline_reading_position">記住首頁閱讀位置</string>
+    <string name="settings_remember_home_timeline_reading_position_description">恢復上次瀏覽的首頁標籤和貼文，重新整理時保留閱讀位置。下次進入首頁時生效，關閉後清除閱讀紀錄。</string>
 </resources>

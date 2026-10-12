@@ -151660,6 +151660,52 @@
         }
       }
     },
+    "settings_remember_home_timeline_reading_position": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remember home reading position"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "记住首页阅读位置"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "記住首頁閱讀位置"
+          }
+        }
+      }
+    },
+    "settings_remember_home_timeline_reading_position_description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restore your last home tab and post, and keep your place when refreshing. Changes apply the next time you enter Home. Turning this off clears saved reading records."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "恢复上次浏览的首页标签和帖子，刷新时保留阅读位置。下次进入首页时生效，关闭后清除阅读记录。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "恢復上次瀏覽的首頁標籤和貼文，重新整理時保留閱讀位置。下次進入首頁時生效，關閉後清除閱讀紀錄。"
+          }
+        }
+      }
+    },
     "settings_refresh_home_timeline_on_launch" : {
       "localizations" : {
         "en" : {

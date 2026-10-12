@@ -12,6 +12,7 @@ struct TimelineScreen: View {
     @Environment(\.timelineAppearance) private var timelineAppearance
     @Environment(\.appSettings) private var appSettings
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.controlActiveState) private var controlActiveState
     @State private var canComposePresenter = KotlinPresenter(presenter: CanComposePresenter())
 
     init(tabItem: UiTimelineTabItem, allowGalleryMode: Bool = false, isHomeTimeline: Bool = false) {
@@ -36,6 +37,10 @@ struct TimelineScreen: View {
             readingState: presenter.state.readingState,
             allowGalleryMode: allowGalleryMode
         )
+        .onAppear { presenter.state.onHomeEntered() }
+        .onChange(of: controlActiveState) { _, activity in
+            if activity == .key { presenter.state.onHomeEntered() }
+        }
         .overlay(alignment: .top) {
             if let reading = presenter.state.readingState, reading.hasNewContent {
                 Button {

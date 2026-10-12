@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.presenter
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -27,6 +28,7 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
@@ -72,13 +74,19 @@ public class HomeTimelineWithTabsPresenter : PresenterBase<HomeTimelineWithTabsP
             }.body()
 
         val tabs by tabsState.collectAsUiState()
+        val readingEnabled by readingRepository.enabled.collectAsState()
+        LaunchedEffect(Unit) {
+            if (readingRepository.enabled.value == null) {
+                readingRepository.enterHome { settingsRepository.appSettings.first().rememberHomeTimelineReadingPosition }
+            }
+        }
         val selection by remember { readingRepository.selectedTab.map { Selection(it) } }.collectAsState(null)
         val scope = rememberCoroutineScope()
 
         return object : State, UserState by accountState {
             override val tabState = tabs
-            override val selectedTabId = selection?.id
-            override val selectionLoaded = selection != null
+            override val selectedTabId = selection?.id.takeIf { readingEnabled == true }
+            override val selectionLoaded = readingEnabled != null && (readingEnabled == false || selection != null)
 
             override fun selectTab(id: String) {
                 scope.launch { readingRepository.selectTab(id) }

@@ -89,9 +89,23 @@ internal fun BehaviorScreen(
         ) {
             SegmentedListItem(
                 onClick = {
-                    state.updateRefreshHomeTimelineOnLaunch(!appSettings.refreshHomeTimelineOnLaunch)
+                    state.updateRememberHomeTimelineReadingPosition(!appSettings.rememberHomeTimelineReadingPosition)
                 },
                 shapes = ListItemDefaults.first(),
+                content = { Text(stringResource(R.string.settings_remember_home_timeline_reading_position)) },
+                supportingContent = { Text(stringResource(R.string.settings_remember_home_timeline_reading_position_description)) },
+                trailingContent = {
+                    Switch(
+                        checked = appSettings.rememberHomeTimelineReadingPosition,
+                        onCheckedChange = state::updateRememberHomeTimelineReadingPosition,
+                    )
+                },
+            )
+            SegmentedListItem(
+                onClick = {
+                    state.updateRefreshHomeTimelineOnLaunch(!appSettings.refreshHomeTimelineOnLaunch)
+                },
+                shapes = ListItemDefaults.item(),
                 content = {
                     Text(text = stringResource(id = R.string.settings_refresh_home_timeline_on_launch))
                 },

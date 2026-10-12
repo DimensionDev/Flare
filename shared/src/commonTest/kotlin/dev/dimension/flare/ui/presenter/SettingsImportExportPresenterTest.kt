@@ -45,6 +45,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
 import okio.FileSystem
 import okio.Path
@@ -86,6 +87,33 @@ class SettingsImportExportPresenterTest {
         stopKoin()
         deleteTestRootPath(root)
     }
+
+    @Test
+    fun readingPreferenceIsOptInAndSurvivesSettingsExportImport() =
+        runTest {
+            assertFalse(settingsRepository.appSettings.first().rememberHomeTimelineReadingPosition)
+            settingsRepository.updateAppSettings { copy(rememberHomeTimelineReadingPosition = true) }
+            val exported = ExportSettingsPresenter().export()
+            assertTrue(json.decodeFromString<SettingsExport>(exported).appSettings.rememberHomeTimelineReadingPosition)
+            settingsRepository.updateAppSettings { copy(rememberHomeTimelineReadingPosition = false) }
+            ImportSettingsPresenter(exported).import()
+            assertTrue(settingsRepository.appSettings.first().rememberHomeTimelineReadingPosition)
+        }
+
+    @Test
+    fun importingOlderSettingsDoesNotKeepAnEnabledReadingPreference() =
+        runTest {
+            val exported = json.parseToJsonElement(ExportSettingsPresenter().export()).jsonObject
+            val oldExport =
+                JsonObject(
+                    exported +
+                        ("appSettings" to JsonObject(exported.getValue("appSettings").jsonObject - "rememberHomeTimelineReadingPosition")),
+                ).toString()
+            assertFalse("rememberHomeTimelineReadingPosition" in oldExport)
+            settingsRepository.updateAppSettings { copy(rememberHomeTimelineReadingPosition = true) }
+            ImportSettingsPresenter(oldExport).import()
+            assertFalse(settingsRepository.appSettings.first().rememberHomeTimelineReadingPosition)
+        }
 
     @Test
     fun exportUsesTabSettingsV2FieldOnly() =

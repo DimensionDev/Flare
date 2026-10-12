@@ -61,7 +61,8 @@ internal class TimelineReadingSession(
     private var active = mediator(activeKey)
     private val pending = mediator(pendingKey)
 
-    private suspend fun valid(): Boolean = database.timelineReadingSessionDao().get(record.tabId)?.key == record.key
+    private suspend fun valid(): Boolean =
+        repository.enabled.value == true && database.timelineReadingSessionDao().get(record.tabId)?.key == record.key
 
     private fun scopedLoader(key: String): CacheableRemoteLoader<UiTimelineV2> =
         if (loader is MixedRemoteMediator) {

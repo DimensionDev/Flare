@@ -11,7 +11,7 @@ repositories {
 
 dependencies {
     compileOnly("com.android.tools.build:gradle:9.4.1")
-    compileOnly("org.jetbrains.kotlin:kotlin-gradle-plugin:2.4.20")
+    compileOnly("org.jetbrains.kotlin:kotlin-gradle-plugin:2.4.21")
     implementation("org.jlleitschuh.gradle:ktlint-gradle:14.2.0")
     testImplementation(kotlin("test-junit"))
 }

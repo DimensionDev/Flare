@@ -79,7 +79,9 @@ internal fun <T : Any> AndroidNavDisplay(
         snapshotFlow { events.transitionState }.collect { state ->
             if (state is InProgress) {
                 val previous = events.backInfo.lastOrNull()?.scene
-                if (previous != null) motion.progress(events.currentInfo.scene.key, previous.key, state.latestEvent)
+                if (previous != null && events.currentInfo.scene.key != previous.key) {
+                    motion.progress(events.currentInfo.scene.key, previous.key, state.latestEvent)
+                }
             } else {
                 motion.finish(completed = false)
             }

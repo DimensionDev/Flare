@@ -6,6 +6,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import androidx.compose.material3.adaptive.layout.PaneScaffoldDirective
+import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
+import androidx.compose.material3.adaptive.navigation3.rememberListDetailSceneStrategy
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.mutableStateListOf
@@ -27,6 +31,8 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.rememberDecoratedNavEntries
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
+import androidx.navigation3.scene.Scene
+import androidx.navigation3.scene.SceneStrategy
 import androidx.navigation3.scene.SinglePaneSceneStrategy
 import androidx.navigationevent.DirectNavigationEventInput
 import androidx.navigationevent.NavigationEvent
@@ -192,7 +198,37 @@ class AndroidPredictiveBackTest {
         assertEquals(1, creations[1])
     }
 
-    private fun show() {
+    @Test
+    fun listDetailBackKeepsTheScaffoldUnscaledDuringPreviewCancelAndCommit() = sameSceneBack(listDetail = true)
+
+    @Test
+    fun sameKeySceneBackSkipsCrossSceneMotionDuringPreviewCancelAndCommit() = sameSceneBack(listDetail = false)
+
+    private fun sameSceneBack(listDetail: Boolean) {
+        val name = if (listDetail) "list-detail" else "same-key"
+        show(listDetail = listDetail, sameKey = !listDetail)
+        assertNear("Detail starts at full height", 480f, frame().blue.height.toFloat())
+        start()
+        assertNear("Same-scene preview must not apply the entering scale", 480f, frame("$name-start").blue.height.toFloat())
+        progress(0.6f, 360f, 96)
+        assertNear("Pane preview must not scale the scaffold", 480f, frame("$name-preview").blue.height.toFloat())
+        compose.runOnIdle { input.backCancelled() }
+        trace("$name-cancel", 40)
+        assertEquals(listOf(0, 1), stack.toList())
+        assertNear("Cancellation restores the detail pane", 480f, frame().blue.height.toFloat())
+        assertEquals(1, creations[1])
+        start()
+        progress(0.6f, 120f, 96)
+        compose.runOnIdle { input.backCompleted() }
+        trace("$name-commit", 40)
+        assertRoot()
+    }
+
+    @OptIn(ExperimentalMaterial3AdaptiveApi::class)
+    private fun show(
+        listDetail: Boolean = false,
+        sameKey: Boolean = false,
+    ) {
         compose.mainClock.autoAdvance = false
         val owner =
             object : NavigationEventDispatcherOwner {
@@ -207,7 +243,15 @@ class AndroidPredictiveBackTest {
                 val provider =
                     remember {
                         { route: Int ->
-                            NavEntry(route) {
+                            val metadata =
+                                if (!listDetail) {
+                                    emptyMap()
+                                } else if (route == 0) {
+                                    ListDetailSceneStrategy.listPane(sceneKey = "Lists")
+                                } else {
+                                    ListDetailSceneStrategy.detailPane(sceneKey = "Lists")
+                                }
+                            NavEntry(route, metadata = metadata) {
                                 val token = rememberSaveable { ++creations[route] }
                                 val color =
                                     when (route) {
@@ -222,7 +266,25 @@ class AndroidPredictiveBackTest {
                 Box(Modifier.requiredSize(320.dp, 480.dp).background(Color.Black).testTag("window")) {
                     AndroidNavDisplay(
                         entries = rememberDecoratedNavEntries(stack, listOf(rememberSaveableStateHolderNavEntryDecorator()), provider),
-                        sceneStrategies = remember { listOf(SinglePaneSceneStrategy()) },
+                        sceneStrategies =
+                            if (listDetail) {
+                                listOf(
+                                    rememberListDetailSceneStrategy(
+                                        shouldHandleSinglePaneLayout = true,
+                                        directive = PaneScaffoldDirective.Default,
+                                    ),
+                                )
+                            } else if (sameKey) {
+                                remember {
+                                    listOf(
+                                        SceneStrategy<Int> { entries ->
+                                            SameKeyScene(with(SinglePaneSceneStrategy<Int>()) { calculateScene(entries) })
+                                        },
+                                    )
+                                }
+                            } else {
+                                remember { listOf(SinglePaneSceneStrategy()) }
+                            },
                         cornerShape = cornerShape.value,
                         transitionSpec = { androidOpenTransition(96) },
                         popTransitionSpec = { androidCloseTransition(96) },
@@ -329,6 +391,12 @@ class AndroidPredictiveBackTest {
         val green: Bounds,
         val coloredPixels: Int,
     )
+
+    private data class SameKeyScene(
+        val scene: Scene<Int>,
+    ) : Scene<Int> by scene {
+        override val key: Any = "Lists"
+    }
 
     private class Bounds {
         var left = 320

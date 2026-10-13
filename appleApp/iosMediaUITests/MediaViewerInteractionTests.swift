@@ -3,18 +3,22 @@ import XCTest
 
 final class MediaViewerInteractionTests: XCTestCase {
     @MainActor
-    private func openMedia(video: Bool = false, withoutPost: Bool = false, indicator: Bool = false) -> XCUIApplication {
+    private func openMedia(video: Bool = false, withoutPost: Bool = false, indicator: Bool = false, hidePostActions: Bool = false) -> XCUIApplication {
         let app = XCUIApplication()
         app.launchArguments = ["--media-viewer-test", "-AppleLanguages", "(en)", "-AppleLocale", "en_US"]
         if video { app.launchArguments.append("--video") }
         if withoutPost { app.launchArguments.append("--without-post") }
         if indicator { app.launchArguments.append("--indicator") }
+        if hidePostActions { app.launchArguments.append("--hide-post-actions") }
         app.launch()
         let open = app.buttons["media-fixture-open"]
         XCTAssertTrue(open.waitForExistence(timeout: 15))
         open.tap()
         XCTAssertTrue(app.buttons["Close"].waitForExistence(timeout: 10))
-        if !withoutPost { XCTAssertTrue(app.buttons["More"].firstMatch.waitForExistence(timeout: 10)) }
+        if !withoutPost {
+            XCTAssertTrue(app.buttons["Sheet Grabber"].waitForExistence(timeout: 10))
+            if !hidePostActions { XCTAssertTrue(app.buttons["More"].firstMatch.waitForExistence(timeout: 10)) }
+        }
         return app
     }
 
@@ -116,6 +120,36 @@ final class MediaViewerInteractionTests: XCTestCase {
         }
         guard let first = rows.first, let last = rows.last else { return nil }
         return (CGFloat(first) / screenshot.image.scale)...(CGFloat(last + 1) / screenshot.image.scale)
+    }
+
+    @MainActor
+    func testHiddenPostActionsStayHiddenWhenSheetExpandsAndCollapses() {
+        let app = openMedia(hidePostActions: true)
+        defer { app.terminate() }
+        let grabber = app.buttons["Sheet Grabber"]
+        XCTAssertFalse(app.buttons["More"].exists)
+        grabber.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).press(forDuration: 0.05,
+                      thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.15)),
+                      withVelocity: .slow, thenHoldForDuration: 0)
+        XCTAssertLessThan(grabber.frame.minY, app.frame.height * 0.3)
+        app.swipeUp()
+        app.swipeUp()
+        XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label CONTAINS '1970'")).firstMatch.isHittable)
+        XCTAssertFalse(app.buttons["More"].exists)
+        let expanded = XCTAttachment(screenshot: app.screenshot())
+        expanded.name = "hidden-actions-expanded"
+        expanded.lifetime = .keepAlways
+        add(expanded)
+        grabber.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).press(forDuration: 0.05,
+                      thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.9)),
+                      withVelocity: .slow, thenHoldForDuration: 0)
+        XCTAssertGreaterThan(grabber.frame.minY, app.frame.height * 0.6)
+        XCTAssertFalse(app.buttons["More"].exists)
+        XCTAssertFalse(app.staticTexts["Media dismissed"].exists)
+        let collapsed = XCTAttachment(screenshot: app.screenshot())
+        collapsed.name = "hidden-actions-collapsed"
+        collapsed.lifetime = .keepAlways
+        add(collapsed)
     }
 
     @MainActor

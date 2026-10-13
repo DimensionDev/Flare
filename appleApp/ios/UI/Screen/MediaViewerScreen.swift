@@ -14,6 +14,7 @@ struct MediaViewerShareContext {
 
 struct MediaViewerScreen: View {
     @Environment(\.globalAppearance.showPostInMediaViewer) private var showPostInMediaViewer
+    @Environment(\.timelineAppearance.postActionStyle) private var postActionStyle
     @Environment(\.openURL) private var openURL
     @Environment(\.dismiss) private var dismiss
 
@@ -393,6 +394,7 @@ struct MediaViewerScreen: View {
                             isDetail: true,
                             isClickable: false,
                             showAttachments: false,
+                            forceHideActions: postActionStyle == .hidden,
                             showParents: false,
                             quotes: quotes
                         )
@@ -408,7 +410,9 @@ struct MediaViewerScreen: View {
                                 user.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
                             }
                         }
-                        StatusActionsView(data: Array(post.actions), useText: false)
+                        if postActionStyle != .hidden {
+                            StatusActionsView(data: Array(post.actions), useText: false)
+                        }
                     }
                     .padding(.horizontal)
                     .padding(.top, 24)
@@ -433,6 +437,7 @@ struct MediaViewerScreen: View {
                 }
             }
             .presentationDetents([.height(postSummaryHeight), .large], selection: $postDetent)
+            .presentationCompactAdaptation(.none)
             .presentationDragIndicator(.visible)
             .presentationContentInteraction(.resizes)
             // The viewer supplies the expanded scrim so tapping it collapses, rather than dismisses, the sheet.

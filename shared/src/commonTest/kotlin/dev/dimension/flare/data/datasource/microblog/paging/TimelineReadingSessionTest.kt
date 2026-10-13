@@ -1,6 +1,8 @@
 package dev.dimension.flare.data.datasource.microblog.paging
 
 import androidx.paging.ExperimentalPagingApi
+import androidx.paging.PagingDataEvent
+import androidx.paging.PagingDataPresenter
 import androidx.paging.PagingSource
 import androidx.room3.Room
 import dev.dimension.flare.RobolectricTest
@@ -23,10 +25,17 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -38,7 +47,7 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlin.time.Instant
 
-@OptIn(ExperimentalPagingApi::class)
+@OptIn(ExperimentalPagingApi::class, ExperimentalCoroutinesApi::class)
 class TimelineReadingSessionTest : RobolectricTest() {
     private lateinit var database: CacheDatabase
 
@@ -54,6 +63,178 @@ class TimelineReadingSessionTest : RobolectricTest() {
 
     @AfterTest
     fun close() = database.close()
+
+    @Test
+    fun failedRefreshDoesNotRestoreACancelledAnchor() =
+        runTest {
+            val loader = Loader()
+            val session = session(loader, backgroundScope)
+            session.refresh(false, initial = true)
+            session.prepare()
+            assertNotNull(session.state.value.position)
+            val started = CompletableDeferred<Unit>()
+            val finish = CompletableDeferred<Unit>()
+            loader.beforeLoad = {
+                started.complete(Unit)
+                finish.await()
+                error("offline")
+            }
+            val refresh = async { session.refresh(false) }
+            started.await()
+            session.cancelRestoration()
+            assertNull(session.state.value.position)
+            finish.complete(Unit)
+            refresh.await()
+            assertNull(session.state.value.position, "A failed refresh must not resurrect the cancelled scroll request")
+        }
+
+    @Test
+    fun viewLatestResetsExhaustedRemotePagination() =
+        runTest {
+            var showNewPage = false
+            val requests = mutableListOf<PagingRequest>()
+            val loader =
+                object : CacheableRemoteLoader<UiTimelineV2> {
+                    override val pagingKey = "home"
+
+                    override suspend fun load(
+                        pageSize: Int,
+                        request: PagingRequest,
+                    ): PagingResult<UiTimelineV2> {
+                        requests += request
+                        return when (request) {
+                            PagingRequest.Refresh -> if (showNewPage) page(100..139, "new-next") else page(0..9).copy(nextKey = null)
+                            is PagingRequest.Append -> page(140..179).copy(nextKey = null)
+                            is PagingRequest.Prepend -> PagingResult()
+                        }
+                    }
+                }
+            val session = session(loader, backgroundScope)
+            session.refresh(false, initial = true)
+            val snapshots = MutableStateFlow(emptyList<String>())
+            val presenter =
+                object : PagingDataPresenter<TimelinePageItem>(coroutineContext) {
+                    override suspend fun presentPagingDataEvent(event: PagingDataEvent<TimelinePageItem>) {
+                        snapshots.value = snapshot().items.map { it.baseItem.statusKey.id }
+                        if (size > 0) get(size - 1)
+                    }
+                }
+            backgroundScope.launch { session.pagingData.collectLatest(presenter::collectFrom) }
+            presenter.loadStateFlow.filterNotNull().first { it.isIdle && it.append.endOfPaginationReached && snapshots.value.size == 10 }
+            showNewPage = true
+            session.refresh(false)
+            session.showLatest()
+            session.positionRestored(assertNotNull(session.state.value.position).requestId)
+            withContext(Dispatchers.Default) {
+                withTimeoutOrNull(5_000) { snapshots.first { it.lastOrNull() == "179" } }
+            }
+            assertEquals(
+                "179",
+                snapshots.value.lastOrNull(),
+                "View latest must load beyond the first fresh page; requests=$requests",
+            )
+            assertEquals(80, rows(session).size)
+            assertEquals(listOf(PagingRequest.Refresh, PagingRequest.Refresh, PagingRequest.Append("new-next")), requests)
+        }
+
+    @Test
+    fun nestedMixedFailureDoesNotAdvanceChildCursor() = nestedMixedFailure(TimelineMergePolicy.Staggered, TimelineMergePolicy.Staggered)
+
+    @Test
+    fun timeParentFailureDoesNotAdvanceChildCursor() = nestedMixedFailure(TimelineMergePolicy.Time, TimelineMergePolicy.Staggered)
+
+    @Test
+    fun timeChildFailureDoesNotChangeStaging() = nestedMixedFailure(TimelineMergePolicy.Staggered, TimelineMergePolicy.Time)
+
+    @Test
+    fun nestedTimeFailureDoesNotChangeStaging() = nestedMixedFailure(TimelineMergePolicy.Time, TimelineMergePolicy.Time)
+
+    private fun nestedMixedFailure(
+        parentPolicy: TimelineMergePolicy,
+        childPolicy: TimelineMergePolicy,
+    ) = runTest {
+        fun chronologicalPage(
+            range: IntRange,
+            cursor: String = "old-cursor",
+        ) = page(range, cursor).copy(
+            data = range.map { post(it).copy(createdAt = Instant.fromEpochMilliseconds(1_000L - it).toUi()) },
+        )
+        val nestedRequests = mutableListOf<PagingRequest>()
+        val nestedLoader =
+            object : CacheableRemoteLoader<UiTimelineV2> {
+                override val pagingKey = "inner"
+
+                override suspend fun load(
+                    pageSize: Int,
+                    request: PagingRequest,
+                ): PagingResult<UiTimelineV2> {
+                    nestedRequests += request
+                    return when (request) {
+                        PagingRequest.Refresh -> {
+                            chronologicalPage(0..9)
+                        }
+
+                        is PagingRequest.Append -> {
+                            if (request.nextKey == "old-cursor") {
+                                chronologicalPage(100..109, "inner-next")
+                            } else {
+                                chronologicalPage(200..209).copy(nextKey = null)
+                            }
+                        }
+
+                        is PagingRequest.Prepend -> {
+                            PagingResult()
+                        }
+                    }
+                }
+            }
+        val sibling = Loader("sibling").apply { response = chronologicalPage(20..29, "sibling-old") }
+        val nested = MixedRemoteMediator(database, listOf(nestedLoader), childPolicy)
+        val outer = MixedRemoteMediator(database, listOf(nested, sibling), parentPolicy)
+        val session = session(outer, backgroundScope)
+        session.refresh(false, initial = true)
+        val before = rows(session)
+        val dao = database.pagingTimelineDao()
+
+        suspend fun mixedData() = dao.keysWithPrefix(session.activeKey).associateWith { dao.getByPagingKey(it) to dao.getPagingKey(it) }
+        val beforeMixedData = mixedData()
+        val suffix = if (childPolicy == TimelineMergePolicy.Time) "staging" else "cursor"
+        val childCursorKey = dao.keysWithPrefix(session.activeKey).single { it.endsWith("/source/5:inner/$suffix") }
+        val oldCursor = database.pagingTimelineDao().getPagingKey(childCursorKey)
+        assertEquals("old-cursor", oldCursor?.nextKey)
+        sibling.response = chronologicalPage(30..39).copy(nextKey = null)
+        val failSibling = CompletableDeferred<Unit>()
+        sibling.beforeLoad = {
+            failSibling.await()
+            error("sibling offline")
+        }
+        val mediator =
+            TimelineRemoteMediator(
+                outer.forReadingSession(session.activeKey) { true },
+                database,
+                allowLongText = false,
+            )
+        val request = PagingRequest.Append("mixed_next_key")
+        val append = async { runCatching { mediator.load(40, request) } }
+        advanceUntilIdle()
+        assertEquals(listOf(PagingRequest.Refresh, PagingRequest.Append("old-cursor")), nestedRequests)
+        failSibling.complete(Unit)
+        val failure = append.await().exceptionOrNull()
+        assertTrue(failure is IllegalStateException, "Expected sibling failure, got $failure")
+        assertEquals(before, rows(session))
+        assertEquals(beforeMixedData, mixedData(), "A sibling failure must not commit child cursors or staging rows")
+        val failedCursor = database.pagingTimelineDao().getPagingKey(childCursorKey)
+        sibling.beforeLoad = {}
+        mediator.saveResponse(request, mediator.load(40, request))
+        val actualIds = ids(session)
+        assertTrue(
+            (100..109).all {
+                it.toString() in actualIds
+            },
+            "Retry skipped a child page; cursor after failure=$failedCursor requests=$nestedRequests ids=$actualIds",
+        )
+        assertEquals(oldCursor, failedCursor)
+    }
 
     @Test
     fun changingPreferenceWaitsForEntryThenClearsOnlyReadingData() =

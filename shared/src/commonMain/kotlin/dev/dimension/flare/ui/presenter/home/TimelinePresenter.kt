@@ -37,7 +37,6 @@ import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.TimelineDbPageCache
 import dev.dimension.flare.data.datasource.microblog.paging.TimelineDbPageLoader
 import dev.dimension.flare.data.datasource.microblog.paging.TimelinePageItem
-import dev.dimension.flare.data.datasource.microblog.paging.TimelineReadingPagingSource
 import dev.dimension.flare.data.datasource.microblog.paging.TimelineReadingSession
 import dev.dimension.flare.data.datasource.microblog.paging.TimelineRemoteMediator
 import dev.dimension.flare.data.datasource.microblog.paging.notSupported
@@ -284,13 +283,7 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
                                 )
                             session.prepare()
                             readingSession.value = session
-                            emitAll(
-                                Pager(
-                                    config = offsetPagingConfig,
-                                    remoteMediator = session,
-                                    pagingSourceFactory = { TimelineReadingPagingSource(database, session) },
-                                ).flow,
-                            )
+                            emitAll(session.pagingData)
                         }
                     },
             )

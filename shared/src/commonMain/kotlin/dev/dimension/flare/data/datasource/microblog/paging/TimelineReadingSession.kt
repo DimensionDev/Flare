@@ -2,6 +2,7 @@ package dev.dimension.flare.data.datasource.microblog.paging
 
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
+import androidx.paging.Pager
 import androidx.paging.PagingState
 import dev.dimension.flare.common.BaseRemoteMediator
 import dev.dimension.flare.common.PlatformDispatchers
@@ -11,14 +12,17 @@ import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.database.cache.model.DbTimelineReadingSession
 import dev.dimension.flare.data.database.cache.model.TranslationDisplayOptions
 import dev.dimension.flare.data.datasource.microblog.MixedRemoteMediator
+import dev.dimension.flare.data.datasource.microblog.offsetPagingConfig
 import dev.dimension.flare.data.repository.TimelineReadingRepository
 import dev.dimension.flare.data.translation.PreTranslationService
 import dev.dimension.flare.ui.model.TimelineReadingPosition
 import dev.dimension.flare.ui.model.UiTimelineV2
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -60,6 +64,17 @@ internal class TimelineReadingSession(
     private var startupPending = false
     private var active = mediator(activeKey)
     private val pending = mediator(pendingKey)
+    private val pagingGeneration = MutableStateFlow(0)
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val pagingData =
+        pagingGeneration.flatMapLatest {
+            Pager(
+                config = offsetPagingConfig,
+                remoteMediator = this,
+                pagingSourceFactory = { TimelineReadingPagingSource(database, this) },
+            ).flow
+        }
 
     private suspend fun valid(): Boolean =
         repository.enabled.value == true && database.timelineReadingSessionDao().get(record.tabId)?.key == record.key
@@ -242,7 +257,6 @@ internal class TimelineReadingSession(
         mutex.withLock {
             if (!valid()) return@withLock
             state.update { it.copy(refreshing = true) }
-            val previousPosition = state.value.position
             try {
                 database.connect {
                     val latest = database.timelineReadingSessionDao().get(record.tabId)?.takeIf { it.key == record.key } ?: return@connect
@@ -260,7 +274,7 @@ internal class TimelineReadingSession(
                 val currentIds = database.pagingTimelineDao().getStatusIdsWithInlineParents(activeKey).toSet()
                 val newVisible = response.data.any { it.timeline.statusId !in currentIds && isVisible(it.asUi(pendingKey)) }
                 if (database.pagingTimelineDao().getTimelinePageIdentities(activeKey, 0, 1).isEmpty()) {
-                    publishLatest(response, requestScroll = false)
+                    publishLatest(requestScroll = false)
                 } else if (newVisible) {
                     val bridge = if (!initial) continuousNewPage(response) else null
                     if (bridge != null) {
@@ -303,7 +317,6 @@ internal class TimelineReadingSession(
             } catch (error: kotlinx.coroutines.CancellationException) {
                 throw error
             } catch (error: Exception) {
-                state.update { it.copy(position = previousPosition) }
                 notifyError(error)
                 if (initial && !database.pagingTimelineDao().anyPaging(activeKey)) throw error
             } finally {
@@ -340,13 +353,11 @@ internal class TimelineReadingSession(
             }
             mutex.withLock {
                 state.update { it.copy(refreshing = true) }
-                val previousPosition = state.value.position
                 try {
                     showLatestLocked()
                 } catch (error: kotlinx.coroutines.CancellationException) {
                     throw error
                 } catch (error: Exception) {
-                    state.update { it.copy(position = previousPosition) }
                     notifyError(error)
                 } finally {
                     state.update { it.copy(refreshing = false) }
@@ -358,8 +369,7 @@ internal class TimelineReadingSession(
         if (!valid()) return
         val ready = database.timelineReadingSessionDao().get(record.tabId)?.pendingReady == true
         if (ready) {
-            val rows = database.pagingTimelineDao().getTimelinePage(pendingKey, 0, 40)
-            publishLatest(PagingResult(rows), requestScroll = true)
+            publishLatest(requestScroll = true)
         } else if (!state.value.hasNewContent) {
             database.pagingTimelineDao().getTimelinePageIdentities(activeKey, 0, 1).firstOrNull()?.let {
                 requestPosition("${activeKey}_${it.statusId}", 0.0, latest = true)
@@ -367,37 +377,42 @@ internal class TimelineReadingSession(
         }
     }
 
-    private suspend fun publishLatest(
-        response: PagingResult<DbPagingTimelineWithStatus>,
-        requestScroll: Boolean,
-    ) {
+    private suspend fun publishLatest(requestScroll: Boolean) {
         val first = visibleRow(pendingKey, 0)?.timeline
         if (requestScroll && first == null) return
         val previousPosition = state.value.position
-        if (requestScroll && first != null) requestPosition("${activeKey}_${first.statusId}", 0.0, latest = true)
+        val requestedPosition =
+            if (requestScroll && first != null) requestPosition("${activeKey}_${first.statusId}", 0.0, latest = true) else null
         var published = false
-        database.connect {
-            val latest = database.timelineReadingSessionDao().get(record.tabId)?.takeIf { it.key == record.key } ?: return@connect
-            repository.deleteData(activeKey)
-            repository.copyData(pendingKey, activeKey)
-            database.timelineReadingSessionDao().save(
-                latest.copy(
-                    anchorId = first?.let { "${activeKey}_${it.statusId}" },
-                    anchorSortId = first?.sortId,
-                    offset = 0.0,
-                    hasNewContent = false,
-                    pendingReady = false,
-                ),
-            )
-            repository.deleteData(pendingKey)
-            published = true
+        try {
+            published =
+                database.connect {
+                    val latest =
+                        database.timelineReadingSessionDao().get(record.tabId)?.takeIf { it.key == record.key } ?: return@connect false
+                    repository.deleteData(activeKey)
+                    repository.copyData(pendingKey, activeKey)
+                    database.timelineReadingSessionDao().save(
+                        latest.copy(
+                            anchorId = first?.let { "${activeKey}_${it.statusId}" },
+                            anchorSortId = first?.sortId,
+                            offset = 0.0,
+                            hasNewContent = false,
+                            pendingReady = false,
+                        ),
+                    )
+                    repository.deleteData(pendingKey)
+                    true
+                }
+        } finally {
+            if (!published && requestedPosition != null) {
+                state.update { if (it.position == requestedPosition) it.copy(position = previousPosition) else it }
+            }
         }
-        if (!published) {
-            state.update { it.copy(position = previousPosition) }
-            return
-        }
+        if (!published) return
         // Mixed loaders also retain which sources are exhausted in memory.
         active = mediator(activeKey)
+        // A database invalidation alone does not reset Paging's exhausted remote load states.
+        if (requestScroll) pagingGeneration.update { it + 1 }
         state.update { it.copy(hasNewContent = false) }
     }
 
@@ -405,7 +420,7 @@ internal class TimelineReadingSession(
         key: String,
         offset: Double,
         latest: Boolean = false,
-    ) {
+    ): TimelineReadingPosition {
         val position =
             TimelineReadingPosition(
                 key,
@@ -415,5 +430,6 @@ internal class TimelineReadingSession(
                 latest,
             )
         state.update { it.copy(position = position) }
+        return position
     }
 }

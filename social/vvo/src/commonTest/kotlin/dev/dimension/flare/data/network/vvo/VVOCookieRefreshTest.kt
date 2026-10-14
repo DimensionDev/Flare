@@ -30,6 +30,7 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.days
+import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -187,6 +188,83 @@ class VVOCookieRefreshTest {
                 configCookies,
             )
             assertEquals(recoveredCookie, credentialFlow.value.chocolate)
+        }
+
+    @Test
+    fun refreshFollowsPassportSsoRedirectAndAdoptsNewSub() =
+        runTest {
+            val oldCookie = "MLOGIN=1; SUB=old-sub; ALF=9999999999"
+            val refreshedCookie = "MLOGIN=1; SUB=new-sub; ALF=9999999999"
+            val credentialFlow = MutableStateFlow(VVoCredential(chocolate = oldCookie))
+            val homeHops = mutableListOf<String?>()
+
+            val service =
+                VVOService(
+                    credentialFlow = credentialFlow,
+                    refreshCookieWhenStale = false,
+                    onCredentialRefreshed = { credentialFlow.value = it },
+                    httpClientFactory =
+                        mockHttpClientFactory { request ->
+                            when {
+                                request.url.host == "m.weibo.cn" && request.url.encodedPath == "/" -> {
+                                    homeHops += request.headers[HttpHeaders.Cookie]
+                                    redirectResponse("https://passport.weibo.cn/sso/login?entry=mweibo")
+                                }
+
+                                request.url.host == "passport.weibo.cn" && request.url.encodedPath == "/sso/login" -> {
+                                    setCookieResponse("SUB=new-sub; Path=/; Domain=.weibo.cn; HttpOnly")
+                                }
+
+                                request.url.encodedPath == "/api/config" -> {
+                                    val cookie = request.headers[HttpHeaders.Cookie]
+                                    configResponse(login = cookie?.contains("SUB=new-sub") == true)
+                                }
+
+                                else -> error("Unexpected request: ${request.url}")
+                            }
+                        },
+                )
+
+            val response = service.config()
+
+            assertEquals(true, response.data?.login)
+            assertEquals(refreshedCookie, credentialFlow.value.chocolate)
+            // The home hop is attempted with the stale cookie before the SSO leg re-signs it.
+            assertEquals(listOf<String?>(oldCookie), homeHops)
+        }
+
+    @Test
+    fun refreshStopsOnceTheAlfSessionWindowHasClosed() =
+        runTest {
+            val expiredCookie = "MLOGIN=1; SUB=old-sub; ALF=1000"
+            val credentialFlow = MutableStateFlow(VVoCredential(chocolate = expiredCookie))
+            var refreshHops = 0
+
+            val service =
+                VVOService(
+                    credentialFlow = credentialFlow,
+                    refreshCookieWhenStale = false,
+                    onCredentialRefreshed = { credentialFlow.value = it },
+                    httpClientFactory =
+                        mockHttpClientFactory { request ->
+                            when (request.url.encodedPath) {
+                                "/" -> {
+                                    refreshHops += 1
+                                    setCookieResponse("SUB=new-sub; Path=/; Domain=.weibo.cn; HttpOnly")
+                                }
+
+                                "/api/config" -> configResponse(login = false)
+
+                                else -> error("Unexpected request: ${request.url}")
+                            }
+                        },
+                )
+
+            val response = service.config()
+
+            assertEquals(false, response.data?.login)
+            assertEquals(0, refreshHops)
+            assertEquals(expiredCookie, credentialFlow.value.chocolate)
         }
 
     @Test
@@ -472,12 +550,56 @@ class VVOCookieRefreshTest {
     }
 
     @Test
-    fun shouldRefreshVvoCookieWhenMissingOrOlderThanOneDay() {
-        val now = 2.days.inWholeMilliseconds
+    fun shouldRefreshVvoCookieWhenMissingOrOlderThanInterval() {
+        val now = 1.days.inWholeMilliseconds
+        val interval = 6.hours.inWholeMilliseconds
 
         assertTrue(shouldRefreshVvoCookie(lastRefreshEpochMillis = null, nowEpochMillis = now))
-        assertFalse(shouldRefreshVvoCookie(lastRefreshEpochMillis = now - 1.days.inWholeMilliseconds, nowEpochMillis = now))
-        assertTrue(shouldRefreshVvoCookie(lastRefreshEpochMillis = now - 1.days.inWholeMilliseconds - 1, nowEpochMillis = now))
+        assertFalse(shouldRefreshVvoCookie(lastRefreshEpochMillis = now - interval + 1, nowEpochMillis = now))
+        assertTrue(shouldRefreshVvoCookie(lastRefreshEpochMillis = now - interval - 1, nowEpochMillis = now))
+    }
+
+    @Test
+    fun isRefreshRedirectRequiresRedirectStatusAndLocation() {
+        assertTrue(isRefreshRedirect(302, "https://passport.weibo.cn/sso/login"))
+        assertTrue(isRefreshRedirect(301, "https://passport.weibo.cn/"))
+        assertFalse(isRefreshRedirect(200, "https://passport.weibo.cn/"))
+        assertFalse(isRefreshRedirect(302, null))
+        assertFalse(isRefreshRedirect(302, ""))
+    }
+
+    @Test
+    fun resolveRefreshRedirectUrlResolvesAbsoluteAndRelativeLocations() {
+        assertEquals(
+            "https://passport.weibo.cn/sso/login?entry=mweibo",
+            resolveRefreshRedirectUrl(
+                current = "https://m.weibo.cn/",
+                location = "https://passport.weibo.cn/sso/login?entry=mweibo",
+            ),
+        )
+        assertEquals(
+            "https://m.weibo.cn/sso/crossdomain?action=login",
+            resolveRefreshRedirectUrl(
+                current = "https://m.weibo.cn/home",
+                location = "/sso/crossdomain?action=login",
+            ),
+        )
+    }
+
+    @Test
+    fun vvoSessionExpiryReadsAlfTimestampAsEpochMillis() {
+        assertEquals(1_794_367_522_000L, vvoSessionExpiryEpochMillis("MLOGIN=1; ALF=1794367522; SUB=value"))
+        assertNull(vvoSessionExpiryEpochMillis("MLOGIN=1; SUB=value"))
+        assertNull(vvoSessionExpiryEpochMillis("MLOGIN=1; ALF=0; SUB=value"))
+    }
+
+    @Test
+    fun isVvoSessionExpiredComparesAgainstAlf() {
+        val cookie = "MLOGIN=1; ALF=1000; SUB=value"
+        assertTrue(isVvoSessionExpired(cookie, nowEpochMillis = 2_000_000L))
+        assertFalse(isVvoSessionExpired(cookie, nowEpochMillis = 500_000L))
+        // Without ALF there is nothing to say the session is over.
+        assertFalse(isVvoSessionExpired("MLOGIN=1; SUB=value", nowEpochMillis = Long.MAX_VALUE))
     }
 
     @Test
@@ -609,6 +731,22 @@ class VVOCookieRefreshTest {
             status = HttpStatusCode.OK,
             headers =
                 Headers.build {
+                    setCookieHeaders.forEach { setCookie ->
+                        append(HttpHeaders.SetCookie, setCookie)
+                    }
+                },
+        )
+
+    private fun MockRequestHandleScope.redirectResponse(
+        location: String,
+        vararg setCookieHeaders: String,
+    ): HttpResponseData =
+        respond(
+            content = "",
+            status = HttpStatusCode.Found,
+            headers =
+                Headers.build {
+                    append(HttpHeaders.Location, location)
                     setCookieHeaders.forEach { setCookie ->
                         append(HttpHeaders.SetCookie, setCookie)
                     }

@@ -34,6 +34,8 @@ import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpHeaders
+import io.ktor.http.URLBuilder
+import io.ktor.http.takeFrom
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -42,14 +44,18 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlin.time.Clock
 import kotlin.time.Duration
-import kotlin.time.Duration.Companion.days
+import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
 
 private val baseUrl = "https://$vvoHost/"
-private val chocolateRefreshInterval = 1.days
+// SUB rotates well before the ALF session window ends, so refresh proactively
+// while the app is in use instead of waiting a full day.
+private val chocolateRefreshInterval = 6.hours
 private val defaultConfigLoginRetryDelay = 500.milliseconds
 private const val CONFIG_LOGIN_RETRY_LIMIT = 5
+// m.weibo.cn bounces an expired SUB through passport.weibo.cn to re-sign it.
+private const val REFRESH_REDIRECT_LIMIT = 5
 
 private typealias VVOHttpClientFactory = (HttpClientConfig<*>.() -> Unit) -> HttpClient
 
@@ -277,19 +283,17 @@ internal class VVOService private constructor(
                     .takeIf { it.isNotBlank() }
                     ?: return@withLock null
 
-            val response =
-                httpClientFactory {
-                    followRedirects = false
-                    install(VVOHeaderPlugin) {
-                        chocolateProvider = { currentChocolate }
-                    }
-                }.get("https://$vvoHost/")
+            // Once the ALF window closes the cookies can no longer be re-signed,
+            // so stop spending requests and let the caller surface a re-login.
+            if (isVvoSessionExpired(currentChocolate, refreshedAtEpochMillis)) {
+                return@withLock currentCredential
+            }
 
             val refreshedChocolate =
-                mergeVvoCookieHeader(
-                    currentCookieHeader = currentChocolate,
-                    setCookieHeaders = response.headers.getAll(HttpHeaders.SetCookie).orEmpty(),
-                ) ?: currentChocolate
+                followRefreshRedirects(
+                    startUrl = "https://$vvoHost/",
+                    initialCookieHeader = currentChocolate,
+                )
 
             currentCredential
                 .copy(
@@ -299,6 +303,35 @@ internal class VVOService private constructor(
                     onCredentialRefreshed(it)
                 }
         }
+    }
+
+    // Follows the redirect chain by hand, carrying every freshly set cookie to
+    // the next hop so the passport SSO leg can mint a new SUB from ALF/SCF.
+    private suspend fun followRefreshRedirects(
+        startUrl: String,
+        initialCookieHeader: String,
+    ): String {
+        var cookieHeader = initialCookieHeader
+        var url = startUrl
+        repeat(REFRESH_REDIRECT_LIMIT + 1) {
+            val response =
+                httpClientFactory {
+                    followRedirects = false
+                    install(VVOHeaderPlugin) {
+                        chocolateProvider = { cookieHeader }
+                    }
+                }.get(url)
+            mergeVvoCookieHeader(
+                currentCookieHeader = cookieHeader,
+                setCookieHeaders = response.headers.getAll(HttpHeaders.SetCookie).orEmpty(),
+            )?.let { cookieHeader = it }
+            val location = response.headers[HttpHeaders.Location]
+            if (!isRefreshRedirect(response.status.value, location)) {
+                return cookieHeader
+            }
+            url = resolveRefreshRedirectUrl(current = url, location = location!!)
+        }
+        return cookieHeader
     }
 
     private suspend fun currentCredential(): VVoCredential? = credentialFlow.firstOrNull()
@@ -318,6 +351,35 @@ internal fun shouldRefreshVvoCookie(
 ): Boolean =
     lastRefreshEpochMillis == null ||
         nowEpochMillis - lastRefreshEpochMillis > chocolateRefreshInterval.inWholeMilliseconds
+
+internal fun isRefreshRedirect(
+    statusCode: Int,
+    location: String?,
+): Boolean = statusCode in 300..399 && !location.isNullOrBlank()
+
+internal fun resolveRefreshRedirectUrl(
+    current: String,
+    location: String,
+): String = URLBuilder().takeFrom(current).takeFrom(location).buildString()
+
+// ALF carries the session's absolute expiry as epoch seconds.
+internal fun vvoSessionExpiryEpochMillis(cookieHeader: String): Long? =
+    cookieHeader
+        .split(';')
+        .mapNotNull { it.toCookiePairOrNull() }
+        .firstOrNull { it.first.equals("ALF", ignoreCase = true) }
+        ?.second
+        ?.toLongOrNull()
+        ?.takeIf { it > 0 }
+        ?.let { it * 1000 }
+
+internal fun isVvoSessionExpired(
+    cookieHeader: String,
+    nowEpochMillis: Long = Clock.System.now().toEpochMilliseconds(),
+): Boolean {
+    val expiry = vvoSessionExpiryEpochMillis(cookieHeader) ?: return false
+    return nowEpochMillis >= expiry
+}
 
 internal fun mergeVvoCookieHeader(
     currentCookieHeader: String,

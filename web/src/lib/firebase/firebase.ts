@@ -1,4 +1,4 @@
-import { browser } from '$app/environment';
+import { browser } from '$app/env';
 import { getApp, getApps, initializeApp, type FirebaseApp } from 'firebase/app';
 
 const firebaseConfig = {

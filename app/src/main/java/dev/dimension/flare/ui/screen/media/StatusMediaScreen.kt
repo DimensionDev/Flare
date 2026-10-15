@@ -124,10 +124,12 @@ import dev.dimension.flare.R
 import dev.dimension.flare.common.AndroidDownloadManager
 import dev.dimension.flare.common.MediaFileNamePolicy
 import dev.dimension.flare.common.shareImageMedia
+import dev.dimension.flare.data.model.PostActionStyle
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.LocalGlobalAppearance
+import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.MediaViewerPlayback
 import dev.dimension.flare.ui.component.MediaViewerSelection
 import dev.dimension.flare.ui.component.SurfaceBindingManager
@@ -734,6 +736,7 @@ internal fun MediaViewerScreen(
                                         showExpandButton = false,
                                         isQuote = false,
                                         isDetail = true,
+                                        forceHideActions = LocalTimelineAppearance.current.postActionStyle == PostActionStyle.Hidden,
                                     )
                                 }
                             }

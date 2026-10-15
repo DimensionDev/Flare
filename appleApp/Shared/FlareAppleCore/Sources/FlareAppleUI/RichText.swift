@@ -15,44 +15,104 @@ private typealias PlatformImage = NSImage
 
 public struct RichText: View {
     private let text: UiRichText
+    private let previewLineLimit: Int?
+    private let previewLineHeight: CGFloat
     @State private var images: [String: Image] = [:]
+    @State private var previewMeasurements: [Int: [Int: CGFloat]] = [:]
     @ScaledMetric(relativeTo: .body) private var imageSize = 17
     @ScaledMetric(relativeTo: .body) private var quoteBarWidth = 3
     @Environment(\.openURL) private var openURL
 
     public init(text: UiRichText) {
         self.text = text
+        previewLineLimit = nil
+        previewLineHeight = 0
+    }
+
+    init(text: UiRichText, previewLineLimit: Int?, previewLineHeight: CGFloat) {
+        self.text = text
+        self.previewLineLimit = previewLineLimit.map { max($0, 1) }
+        self.previewLineHeight = previewLineHeight
     }
 
     public var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            ForEach(Array(contents.enumerated()), id: \.offset) { _, content in
-                switch content {
-                case let textContent as PlatformTextTextContent:
-                    renderBlock(textContent: textContent)
-                case let imageContent as PlatformTextBlockImageContent:
-                    if let url = URL(string: imageContent.url) {
-                        KFImage(url)
-                            .flareBackgroundDecodeIfSupported()
-                            .loadDiskFileSynchronously(false)
-                            .resizable()
-                            .scaledToFit()
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
-                            .contentShape(Rectangle())
-                            .accessibilityLabel(
-                                Text("media_image_no_alt", bundle: FlareAppleUILocalization.bundle)
-                            )
-                            .onTapGesture {
-                                if let href = imageContent.href, let link = URL(string: href) {
-                                    openURL(link)
+            ForEach(Array(previewContents.enumerated()), id: \.offset) { index, content in
+                let remainingLines = remainingLines(before: index)
+                if remainingLines != 0 {
+                    switch content {
+                    case let textContent as PlatformTextTextContent:
+                        if let remainingLines {
+                            renderBlock(textContent: textContent)
+                                .lineLimit(remainingLines)
+                                .fixedSize(horizontal: false, vertical: true)
+                        } else {
+                            renderBlock(textContent: textContent)
+                        }
+                    case let imageContent as PlatformTextBlockImageContent:
+                        if let url = URL(string: imageContent.url) {
+                            let image = KFImage(url)
+                                .flareBackgroundDecodeIfSupported()
+                                .loadDiskFileSynchronously(false)
+                                .resizable()
+                                .scaledToFit()
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                                .contentShape(Rectangle())
+                                .accessibilityLabel(
+                                    Text("media_image_no_alt", bundle: FlareAppleUILocalization.bundle)
+                                )
+                                .onTapGesture {
+                                    if let href = imageContent.href, let link = URL(string: href) {
+                                        openURL(link)
+                                    }
                                 }
+                            if let remainingLines {
+                                image
+                                    .fixedSize(horizontal: false, vertical: true)
+                                    .background {
+                                        GeometryReader { proxy in
+                                            Color.clear.preference(key: RichTextPreviewMeasurements.self,
+                                                value: [index: [0: proxy.size.height]])
+                                        }
+                                    }
+                                    .frame(maxHeight: CGFloat(remainingLines) * previewLineHeight, alignment: .top)
+                                    .clipped()
+                            } else {
+                                image
                             }
+                        }
+                    default:
+                        EmptyView()
                     }
-                default:
-                    EmptyView()
                 }
             }
         }
+        .frame(maxWidth: previewLineLimit == nil ? nil : .infinity, alignment: .leading)
+        .background(alignment: .topLeading) {
+            if let previewLineLimit {
+                VStack(alignment: .leading, spacing: 8) {
+                    ForEach(Array(previewContents.dropLast().enumerated()), id: \.offset) { index, content in
+                        if let content = content as? PlatformTextTextContent {
+                            ZStack(alignment: .topLeading) {
+                                ForEach(1...(previewLineLimit + 1), id: \.self) { lines in
+                                    renderBlock(textContent: content)
+                                        .lineLimit(lines)
+                                        .fixedSize(horizontal: false, vertical: true)
+                                        .background {
+                                            GeometryReader { proxy in
+                                                Color.clear.preference(key: RichTextPreviewMeasurements.self,
+                                                    value: [index: [lines: proxy.size.height]])
+                                            }
+                                        }
+                                }
+                            }
+                        }
+                    }
+                }
+                .hidden()
+            }
+        }
+        .onPreferenceChange(RichTextPreviewMeasurements.self) { previewMeasurements = $0 }
         .task(id: text.raw) {
             let urls = text.imageUrls
             let targetHeight = imageSize
@@ -72,6 +132,38 @@ public struct RichText: View {
 
     private var contents: [PlatformTextContent] {
         text.platformText.compactMap { $0 as? PlatformTextContent }
+    }
+
+    private var previewContents: [PlatformTextContent] {
+        let contents = contents
+        guard let previewLineLimit else { return contents }
+        return Array(contents.lazy.filter { content in
+            if let image = content as? PlatformTextBlockImageContent {
+                return URL(string: image.url) != nil
+            }
+            return content is PlatformTextTextContent
+        }.prefix(previewLineLimit))
+    }
+
+    private func remainingLines(before index: Int) -> Int? {
+        guard let previewLineLimit else { return nil }
+        var remaining = previewLineLimit
+        for previous in 0..<index {
+            let heights = previewMeasurements[previous] ?? [:]
+            let count: Int
+            if let imageHeight = heights[0] {
+                count = max(Int(ceil(imageHeight / max(previewLineHeight, 1))), 1)
+            } else {
+                // Equal native heights at adjacent limits mean the whole block fits.
+                count = (1...previewLineLimit).first { lines in
+                    guard let height = heights[lines], let next = heights[lines + 1] else { return false }
+                    return abs(height - next) < 0.01
+                } ?? previewLineLimit
+            }
+            remaining -= count
+            if remaining <= 0 { return 0 }
+        }
+        return remaining
     }
 
     @ViewBuilder
@@ -121,6 +213,16 @@ public struct RichText: View {
             return .trailing
         default:
             return .leading
+        }
+    }
+}
+
+private struct RichTextPreviewMeasurements: PreferenceKey {
+    static let defaultValue: [Int: [Int: CGFloat]] = [:]
+
+    static func reduce(value: inout [Int: [Int: CGFloat]], nextValue: () -> [Int: [Int: CGFloat]]) {
+        for (index, heights) in nextValue() {
+            value[index, default: [:]].merge(heights) { _, new in new }
         }
     }
 }

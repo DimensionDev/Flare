@@ -1773,7 +1773,7 @@ private fun List<Token>.toUiRichText(
                                             DeeplinkRoute.Profile
                                                 .UserNameWithHost(
                                                     accountType = AccountType.Specific(accountKey),
-                                                    userName = token.value.trimStart('@'),
+                                                    userName = token.value.trimStart('@', '＠'),
                                                     host = accountKey.host,
                                                 ).toUri(),
                                     ),

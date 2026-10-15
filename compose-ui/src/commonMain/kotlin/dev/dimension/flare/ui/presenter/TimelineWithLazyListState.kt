@@ -100,7 +100,7 @@ internal fun rememberTimelineWithLazyListState(
         }
     }
     val requestedPosition = baseState.readingState?.position
-    LaunchedEffect(lazyListState, requestedPosition?.requestId, baseState.readingState != null) {
+    LaunchedEffect(lazyListState, requestedPosition?.requestId, baseState.readingState != null, leadingItemCount) {
         val position = requestedPosition ?: return@LaunchedEffect
         val (_, target) =
             snapshotFlow {

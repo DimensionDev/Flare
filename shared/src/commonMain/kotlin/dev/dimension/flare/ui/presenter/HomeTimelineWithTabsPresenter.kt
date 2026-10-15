@@ -6,20 +6,15 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.appearance.TimelineAppearance
 import dev.dimension.flare.data.model.tab.UiTimelineTabItem
+import dev.dimension.flare.data.model.tab.guestMastodonHomeTimelineTab
 import dev.dimension.flare.data.model.tab.resolveTimelineAppearance
-import dev.dimension.flare.data.model.tab.toUiTimelineTabItem
-import dev.dimension.flare.data.platform.CommonTimelineSpecs
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.data.repository.TimelineReadingRepository
 import dev.dimension.flare.di.koinInject
-import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.UiStrings
-import dev.dimension.flare.ui.model.asText
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.presenter.home.ActiveAccountPresenter
 import dev.dimension.flare.ui.presenter.home.UserState
@@ -104,20 +99,9 @@ private data class Selection(
     val id: String?,
 )
 
-private const val DEFAULT_GUEST_MASTODON_HOST = "mastodon.social"
-
 private fun List<UiTimelineTabItem>.withGuestMastodonHomeFallback(isLoggedIn: Boolean): List<UiTimelineTabItem> =
     if (!isLoggedIn && isEmpty()) {
         listOf(guestMastodonHomeTimelineTab)
     } else {
         this
     }
-
-internal val guestMastodonHomeTimelineTab: UiTimelineTabItem
-    get() =
-        CommonTimelineSpecs.guestHome
-            .candidate(
-                data = CommonTimelineSpecs.GuestHomeData(DEFAULT_GUEST_MASTODON_HOST),
-                title = UiStrings.Home.asText(),
-                icon = IconType.Material(UiIcon.Home),
-            ).toUiTimelineTabItem()

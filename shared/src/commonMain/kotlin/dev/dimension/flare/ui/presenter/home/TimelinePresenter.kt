@@ -65,7 +65,6 @@ import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.asTimelinePostItem
 import dev.dimension.flare.ui.presenter.PresenterBase
-import dev.dimension.flare.ui.presenter.guestMastodonHomeTimelineTab
 import dev.dimension.flare.web.shared.WebPresenter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -233,8 +232,7 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
         sourceIdentity: String,
     ): Flow<PagingData<TimelinePageItem>> =
         flow {
-            fun isCurrentSource(sources: Map<String, String>): Boolean =
-                sources[tabId] == sourceIdentity || (sources.isEmpty() && tabId == guestMastodonHomeTimelineTab.id)
+            fun isCurrentSource(sources: Map<String, String>): Boolean = sources[tabId] == sourceIdentity
             if (!isCurrentSource(settingsRepository.homeTimelineTabs.first().readingSources())) {
                 emit(PagingData.empty())
                 return@flow

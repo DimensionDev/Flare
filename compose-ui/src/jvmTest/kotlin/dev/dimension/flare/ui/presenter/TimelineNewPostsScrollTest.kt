@@ -106,8 +106,20 @@ class TimelineNewPostsScrollTest {
     }
 
     @Test
-    fun sessionRestoresPostOffsetWithHeaderAndPreservesItOnPrepend() {
-        val pages = MutableStateFlow(page(0..9))
+    fun sessionRestoresPostOffsetWithHeaderAndPreservesItOnPrepend() = checkSessionRestoration(leadingHeader = true)
+
+    @Test
+    fun sessionRestoresPostOffsetWithoutHeaderAndPreservesItOnPrepend() = checkSessionRestoration(leadingHeader = false)
+
+    @Test
+    fun sessionRestoresWhenHeaderAppearsBeforePostsLoad() = checkSessionRestoration(leadingHeader = false, addHeaderBeforePosts = true)
+
+    private fun checkSessionRestoration(
+        leadingHeader: Boolean,
+        addHeaderBeforePosts: Boolean = false,
+    ) {
+        var showHeader by mutableStateOf(leadingHeader)
+        val pages = MutableStateFlow(if (addHeaderBeforePosts) PagingData.empty() else page(0..9))
         val scroll = LazyStaggeredGridState()
         val reading = ReadingState(TimelineReadingPosition("post-5", -24.0, 1))
         lateinit var state: TimelineWithLazyListState
@@ -123,14 +135,16 @@ class TimelineNewPostsScrollTest {
 
                     override suspend fun refreshSuspend() = Unit
                 }
-            val timeline = rememberTimelineWithLazyListState(base, scroll, leadingItemCount = 1)
+            val timeline = rememberTimelineWithLazyListState(base, scroll, leadingItemCount = if (showHeader) 1 else 0)
             SideEffect { state = timeline }
             LazyVerticalStaggeredGrid(
                 columns = StaggeredGridCells.Fixed(1),
                 state = scroll,
                 modifier = Modifier.size(300.dp, 150.dp),
             ) {
-                item(key = "header") { Box(Modifier.fillMaxWidth().height(60.dp)) }
+                if (showHeader) {
+                    item(key = "header") { Box(Modifier.fillMaxWidth().height(60.dp)) }
+                }
                 paging.onSuccess {
                     items(itemCount, key = itemKey { it.stableItemKey }) {
                         Box(Modifier.fillMaxWidth().height(100.dp))
@@ -138,15 +152,21 @@ class TimelineNewPostsScrollTest {
                 }
             }
         }
-        composeRule.waitUntil(5_000) { reading.position == null && scroll.firstVisibleItemIndex == 6 }
+        if (addHeaderBeforePosts) {
+            composeRule.runOnIdle { showHeader = true }
+            composeRule.runOnIdle { pages.value = page(0..9) }
+        }
+        val headerCount = if (showHeader) 1 else 0
+        composeRule.waitUntil(5_000) { reading.position == null }
         composeRule.runOnIdle {
+            assertEquals(5 + headerCount, scroll.firstVisibleItemIndex)
             assertEquals(24, scroll.firstVisibleItemScrollOffset)
             assertEquals("post-5", reading.itemKey)
             pages.value = page(-3..9)
         }
         composeRule.waitUntil(5_000) { (state.listState as? PagingState.Success)?.itemCount == 13 }
         composeRule.runOnIdle {
-            assertEquals(9, scroll.firstVisibleItemIndex)
+            assertEquals(8 + headerCount, scroll.firstVisibleItemIndex)
             assertEquals(24, scroll.firstVisibleItemScrollOffset)
             assertEquals("post-5", reading.itemKey)
             reading.position = TimelineReadingPosition("post--3", 0.0, 2, latest = true)

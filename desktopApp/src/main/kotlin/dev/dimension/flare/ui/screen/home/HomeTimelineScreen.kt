@@ -217,11 +217,14 @@ internal fun HomeTimelineScreen(
     } else {
         state.tabState.onSuccess { tabState ->
             state.selectedTab.onSuccess { currentTab ->
+                val showComposeHeader =
+                    LocalGlobalAppearance.current.showComposeInHomeTimeline && canComposeState.canCompose.takeSuccess() == true
                 val currentTabTimelineState =
                     key(currentTab.id) {
                         rememberTimelineItemPresenterWithLazyListState(
                             item = currentTab,
                             isHomeTimeline = true,
+                            leadingItemCount = if (showComposeHeader) 1 else 0,
                         )
                     }
                 val autoRefreshInterval = LocalAppSettings.current.homeTimelineAutoRefreshInterval
@@ -267,9 +270,7 @@ internal fun HomeTimelineScreen(
                                 state.setTopBarExpanded(true)
                             },
                             header =
-                                if (LocalGlobalAppearance.current.showComposeInHomeTimeline &&
-                                    canComposeState.canCompose.takeSuccess() == true
-                                ) {
+                                if (showComposeHeader) {
                                     {
                                         Box(
                                             contentAlignment = Alignment.Center,

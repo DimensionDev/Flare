@@ -14,6 +14,7 @@ import dev.dimension.flare.data.model.appearance.TimelineAppearance
 import dev.dimension.flare.data.model.appearance.toBag
 import dev.dimension.flare.data.model.appearance.toPatch
 import dev.dimension.flare.data.model.appearance.withPatch
+import dev.dimension.flare.data.platform.CommonTimelineSpecs
 import dev.dimension.flare.data.repository.AccountService
 import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.model.AccountType
@@ -121,7 +122,17 @@ internal val UiTimelineTabItem.readingSourceKey: String
             }
         }
 
-internal fun List<UiTimelineTabItem>.readingSources(): Map<String, String> = associate { it.id to it.readingSourceKey }
+internal val guestMastodonHomeTimelineTab: UiTimelineTabItem
+    get() =
+        CommonTimelineSpecs.guestHome
+            .candidate(
+                data = CommonTimelineSpecs.GuestHomeData("mastodon.social"),
+                title = UiStrings.Home.asText(),
+                icon = IconType.Material(UiIcon.Home),
+            ).toUiTimelineTabItem()
+
+internal fun List<UiTimelineTabItem>.readingSources(): Map<String, String> =
+    ifEmpty { listOf(guestMastodonHomeTimelineTab) }.associate { it.id to it.readingSourceKey }
 
 internal val UiTimelineTabItem.supportsReadingSession: Boolean
     get() =

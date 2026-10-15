@@ -8,6 +8,8 @@ import dev.dimension.flare.data.database.app.model.RssDisplayMode
 import dev.dimension.flare.data.database.app.model.SubscriptionType
 import dev.dimension.flare.data.network.FaviconService
 import dev.dimension.flare.data.network.rss.RssService
+import dev.dimension.flare.data.network.rss.model.Feed
+import dev.dimension.flare.data.network.rss.toRssWebUrl
 import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.model.PlatformRegistry
 import dev.dimension.flare.ui.model.UiRssSource
@@ -20,18 +22,26 @@ import dev.dimension.flare.ui.render.toUi
 import io.ktor.http.Url
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlin.time.Instant
 
-public class CheckRssSourcePresenter(
+public class CheckRssSourcePresenter internal constructor(
     private val url: String,
+    private val fetchFeed: suspend (String) -> Feed,
+    private val fetchIcon: suspend (String) -> String?,
+    private val detectLinkSources: suspend (String) -> List<String>,
 ) : PresenterBase<CheckRssSourcePresenter.State>() {
+    public constructor(url: String) : this(url, RssService::fetch, RssService::fetchIcon, RssService::detectLinkSources)
+
+    internal val feeds: MutableMap<String, Feed> = mutableMapOf()
     private val platformRegistry: PlatformRegistry by koinInject()
 
     @Immutable
@@ -60,29 +70,24 @@ public class CheckRssSourcePresenter(
         }
     }
 
-    private val flow: Flow<UiState<RssState>> by lazy {
+    internal val flow: Flow<UiState<RssState>> by lazy {
         flow {
             emit(UiState.Loading())
-            runCatching {
+            delay(666)
+            if (url.isBlank()) return@flow
+            rssCheck {
                 if (url.startsWith("rsshub://", ignoreCase = true)) {
                     State.RssState.RssHub
                 } else {
-                    val actualUrl =
-                        if (url.startsWith("http://", ignoreCase = true)) {
-                            url.replaceFirst("http://", "https://", ignoreCase = true)
-                        } else if (!url.startsWith("https://", ignoreCase = true)) {
-                            "https://$url"
-                        } else {
-                            url
-                        }
+                    val actualUrl = url.toRssWebUrl()
                     val feed =
-                        runCatching {
-                            RssService.fetch(actualUrl)
+                        rssCheck {
+                            fetchFeed(actualUrl).also { feeds[actualUrl] = it }
                         }
                     if (feed.isSuccess) {
                         val icon =
-                            runCatching {
-                                RssService.fetchIcon(actualUrl)
+                            rssCheck {
+                                fetchIcon(actualUrl)
                             }.getOrNull()
                         RssState.RssFeed(
                             feed.getOrThrow().title.trim(),
@@ -91,27 +96,30 @@ public class CheckRssSourcePresenter(
                         )
                     } else {
                         val linkSources =
-                            runCatching {
+                            rssCheck {
                                 coroutineScope {
-                                    RssService
-                                        .detectLinkSources(actualUrl)
+                                    detectLinkSources(actualUrl)
                                         .map {
                                             async {
                                                 val icon =
-                                                    runCatching {
-                                                        RssService.fetchIcon(it)
+                                                    rssCheck {
+                                                        fetchIcon(it)
                                                     }.getOrNull()
+                                                val feed = fetchFeed(it)
                                                 UiRssSource(
                                                     id = 0,
                                                     url = it,
-                                                    title = RssService.fetch(it).title.trim(),
+                                                    title = feed.title.trim(),
                                                     lastUpdate = Instant.DISTANT_PAST.toUi(),
                                                     favIcon = icon,
                                                     displayMode = RssDisplayMode.FULL_CONTENT,
-                                                )
+                                                ) to feed
                                             }
                                         }.awaitAll()
-                                        .toImmutableList()
+                                        .map { (source, feed) ->
+                                            feeds[source.url] = feed
+                                            source
+                                        }.toImmutableList()
                                 }
                             }.getOrNull()
 
@@ -120,7 +128,7 @@ public class CheckRssSourcePresenter(
                         } else {
                             // Try to detect as a supported subscription instance.
                             val host =
-                                runCatching {
+                                rssCheck {
                                     Url(actualUrl).host
                                 }.getOrNull() ?: throw IllegalArgumentException("Invalid URL: $url")
 
@@ -177,7 +185,7 @@ public class CheckRssSourcePresenter(
                         host = host,
                         instanceName = host,
                         icon =
-                            runCatching {
+                            rssCheck {
                                 FaviconService.fetchIcon("https://$host/")
                             }.getOrNull(),
                         availableTimelines = timelines,
@@ -185,3 +193,12 @@ public class CheckRssSourcePresenter(
                 }
         }
 }
+
+private inline fun <T> rssCheck(block: () -> T): Result<T> =
+    try {
+        Result.success(block())
+    } catch (exception: CancellationException) {
+        throw exception
+    } catch (exception: Exception) {
+        Result.failure(exception)
+    }

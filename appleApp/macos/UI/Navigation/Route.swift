@@ -37,7 +37,7 @@ enum Route: Hashable, Identifiable {
     case mediaRaw([any UiMedia], Int, String?)
     case mediaStatusMedia(AccountType, MicroBlogKey, Int32, String?)
     case deepLinkAccountPicker(String, [MicroBlogKey: Route])
-    case rssDetail(String, String?, String?)
+    case rssDetail(String, String?, String?, String?)
     case article(AccountType, MicroBlogKey)
     case search(AccountType, String)
     case statusAddReaction(AccountType, MicroBlogKey)
@@ -237,8 +237,8 @@ enum Route: Hashable, Identifiable {
                 onNavigate: onNavigate
             )
             .frame(width: 300, height: 400)
-        case .rssDetail(let url, let descriptionHtml, let title):
-            RssDetailScreen(url: url, descriptionHtml: descriptionHtml, descriptionTitle: title)
+        case .rssDetail(let url, let descriptionHtml, let title, let fallbackHtml):
+            RssDetailScreen(url: url, descriptionHtml: descriptionHtml, descriptionTitle: title, fallbackHtml: fallbackHtml)
         case .article(let accountType, let articleKey):
             MacArticleScreen(
                 accountType: accountType,
@@ -586,7 +586,7 @@ extension Route {
     private static func fromRss(_ rss: DeeplinkRoute.Rss) -> Route? {
         switch onEnum(of: rss) {
         case .detail(let data):
-            .rssDetail(data.url, data.descriptionHtml, data.title)
+            .rssDetail(data.url, data.descriptionHtml, data.title, data.fallbackHtml)
         }
     }
 

@@ -120,6 +120,7 @@ public sealed class DeeplinkRoute {
             val url: String,
             val descriptionHtml: String? = null,
             val title: String? = null,
+            val fallbackHtml: String? = null,
         ) : Rss()
     }
 

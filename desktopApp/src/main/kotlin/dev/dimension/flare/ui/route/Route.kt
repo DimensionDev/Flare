@@ -226,6 +226,7 @@ internal sealed interface Route : NavKey {
         val url: String,
         val descriptionHtml: String? = null,
         val title: String? = null,
+        val fallbackHtml: String? = null,
     ) : ScreenRoute
 
     data class Article(
@@ -440,7 +441,12 @@ internal sealed interface Route : NavKey {
                 }
 
                 is DeeplinkRoute.Rss.Detail -> {
-                    RssDetail(url = deeplinkRoute.url, descriptionHtml = deeplinkRoute.descriptionHtml, title = deeplinkRoute.title)
+                    RssDetail(
+                        url = deeplinkRoute.url,
+                        descriptionHtml = deeplinkRoute.descriptionHtml,
+                        title = deeplinkRoute.title,
+                        fallbackHtml = deeplinkRoute.fallbackHtml,
+                    )
                 }
 
                 is DeeplinkRoute.Article -> {

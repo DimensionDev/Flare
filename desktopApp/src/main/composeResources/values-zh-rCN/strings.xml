@@ -434,8 +434,8 @@
     <string name="rss_sources_pinned_in_tabs">固定到主页标签页</string>
     <string name="rss_sources_display_mode">显示模式</string>
     <string name="rss_sources_open_in_browser">在浏览器中打开</string>
-    <string name="rss_sources_full_content">全文内容</string>
-    <string name="rss_sources_description_only">仅描述</string>
+    <string name="rss_sources_full_content">网页全文</string>
+    <string name="rss_sources_description_only">订阅内容</string>
     <string name="rss_detail_open_in_browser">在浏览器中打开</string>
     <string name="rss_detail_translate">翻译</string>
     <string name="rss_detail_tldr">总结</string>
@@ -680,4 +680,8 @@
     <string name="rss_source_invalid">RSS 源无效</string>
     <string name="rss_source_options_available">可用的 RSS 源选项</string>
     <string name="rss_source_valid">RSS源有效</string>
+    <string name="rss_open_mode_checking">正在推荐打开方式…</string>
+    <string name="rss_open_mode_recommended">已根据最近文章推荐，可随时修改。</string>
+    <string name="rss_open_mode_unknown">暂时无法推荐打开方式，你可以手动选择。</string>
+    <string name="rss_detail_unavailable">暂时无法加载这篇文章，你可以打开原文。</string>
 </resources>

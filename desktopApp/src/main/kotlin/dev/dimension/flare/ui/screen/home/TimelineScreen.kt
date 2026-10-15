@@ -28,6 +28,8 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
@@ -41,7 +43,9 @@ import dev.dimension.flare.common.isRefreshing
 import dev.dimension.flare.data.model.tab.UiTimelineTabItem
 import dev.dimension.flare.data.model.tab.resolveTimelineAppearance
 import dev.dimension.flare.edit_tab_title
+import dev.dimension.flare.home_timeline_new_content
 import dev.dimension.flare.home_timeline_new_toots
+import dev.dimension.flare.home_timeline_view_latest
 import dev.dimension.flare.refresh
 import dev.dimension.flare.ui.common.plus
 import dev.dimension.flare.ui.component.FAIcon
@@ -300,11 +304,13 @@ internal fun TimelineContent(
                     .padding(LocalWindowPadding.current)
                     .padding(contentPadding),
         ) {
+            val latestLabel = stringResource(Res.string.home_timeline_view_latest)
             AccentButton(
+                modifier = if (state.readingState != null) Modifier.semantics { contentDescription = latestLabel } else Modifier,
                 onClick = {
                     state.onNewTootsShown()
                     scope.launch {
-                        state.lazyListState.scrollToItem(0)
+                        state.readingState?.showLatest() ?: state.lazyListState.scrollToItem(0)
                     }
                 },
             ) {
@@ -316,11 +322,15 @@ internal fun TimelineContent(
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
                     text =
-                        pluralStringResource(
-                            Res.plurals.home_timeline_new_toots,
-                            state.newPostsCount,
-                            state.newPostsCount,
-                        ),
+                        if (state.readingState != null) {
+                            stringResource(Res.string.home_timeline_new_content)
+                        } else {
+                            pluralStringResource(
+                                Res.plurals.home_timeline_new_toots,
+                                state.newPostsCount,
+                                state.newPostsCount,
+                            )
+                        },
                 )
             }
         }

@@ -644,8 +644,8 @@
     <string name="rss_sources_pinned_in_tabs">Pin to Home tabs</string>
     <string name="rss_sources_open_in_browser">Open in browser</string>
     <string name="rss_sources_open_in_app">Open in app</string>
-    <string name="rss_sources_full_content">Full content</string>
-    <string name="rss_sources_description_only">Description only</string>
+    <string name="rss_sources_full_content">Webpage full text</string>
+    <string name="rss_sources_description_only">Feed content</string>
     <string name="mastodon_available_timelines">Available timelines</string>
     <string name="mastodon_trending_statuses">Trending Posts</string>
     <string name="mastodon_federated_timeline">Federated timeline</string>
@@ -825,4 +825,8 @@
     <string name="ugoira_resolution_unsupported">Original resolution is unsupported. Export at up to 1920 pixels?</string>
     <string name="ugoira_export_smaller">Export smaller MP4</string>
     <string name="ugoira_export_progress">Saving MP4: %1$d%%</string>
+    <string name="rss_open_mode_checking">Checking the best opening mode…</string>
+    <string name="rss_open_mode_recommended">Recommended from recent articles. You can change this.</string>
+    <string name="rss_open_mode_unknown">Could not recommend an opening mode. You can choose one.</string>
+    <string name="rss_detail_unavailable">This article could not be loaded. You can open the original page.</string>
 </resources>

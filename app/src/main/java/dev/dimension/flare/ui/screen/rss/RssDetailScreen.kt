@@ -87,10 +87,11 @@ internal fun RssDetailScreen(
     url: String,
     descriptionHtml: String? = null,
     descriptionTitle: String? = null,
+    fallbackHtml: String? = null,
     onBack: () -> Unit,
 ) {
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
-    val state by producePresenter(url) { presenter(url, descriptionHtml, descriptionTitle) }
+    val state by producePresenter(url) { presenter(url, descriptionHtml, descriptionTitle, fallbackHtml) }
     val uriHandler = LocalUriHandler.current
     val context = LocalContext.current
     val color =
@@ -256,6 +257,8 @@ internal fun RssDetailScreen(
                                 }
                             }
                         }
+                    }.onError {
+                        Text(stringResource(R.string.rss_detail_unavailable))
                     }.onLoading {
                         Text(
                             "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
@@ -376,11 +379,12 @@ private fun presenter(
     url: String,
     descriptionHtml: String? = null,
     descriptionTitle: String? = null,
+    fallbackHtml: String? = null,
     settingsRepository: SettingsRepository = koinInject(),
 ) = run {
     val state =
-        remember(url, descriptionHtml) {
-            RssDetailPresenter(url, descriptionHtml, descriptionTitle)
+        remember(url, descriptionHtml, descriptionTitle, fallbackHtml) {
+            RssDetailPresenter(url, descriptionHtml, descriptionTitle, fallbackHtml)
         }.invoke()
     val headers =
         remember(url) {

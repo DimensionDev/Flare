@@ -345,6 +345,9 @@ internal sealed interface Feed {
             @XmlElement(true)
             val description: String? = null,
             @XmlElement(true)
+            @XmlSerialName(value = "encoded", namespace = "http://purl.org/rss/1.0/modules/content/", prefix = "content")
+            val contentEncoded: String? = null,
+            @XmlElement(true)
             val author: String? = null,
             @XmlElement(true)
             val category: List<String> = emptyList(),

@@ -178,6 +178,7 @@ internal sealed interface Route : NavKey {
             val url: String,
             val descriptionHtml: String? = null,
             val title: String? = null,
+            val fallbackHtml: String? = null,
         ) : Rss
 
         @Serializable
@@ -637,6 +638,7 @@ internal sealed interface Route : NavKey {
                     Rss.Detail(
                         url = deeplinkRoute.url,
                         descriptionHtml = deeplinkRoute.descriptionHtml,
+                        fallbackHtml = deeplinkRoute.fallbackHtml,
                         title = deeplinkRoute.title,
                     )
                 }

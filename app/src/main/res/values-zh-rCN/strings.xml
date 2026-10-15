@@ -503,8 +503,8 @@
     <string name="rss_sources_pinned_in_tabs">固定到首页选项卡</string>
     <string name="rss_sources_open_in_browser">在浏览器中打开</string>
     <string name="rss_sources_open_in_app">在应用内打开</string>
-    <string name="rss_sources_full_content">全文</string>
-    <string name="rss_sources_description_only">仅描述</string>
+    <string name="rss_sources_full_content">网页全文</string>
+    <string name="rss_sources_description_only">订阅内容</string>
     <string name="mastodon_available_timelines">可用时间轴</string>
     <string name="mastodon_trending_statuses">热门动态</string>
     <string name="mastodon_federated_timeline">跨站时间轴</string>
@@ -760,4 +760,8 @@
 <string name="ugoira_resolution_unsupported">此设备无法导出原始尺寸。是否导出最长边不超过 1920 像素的视频？</string>
 <string name="ugoira_export_smaller">导出较小尺寸的 MP4</string>
 <string name="ugoira_export_progress">正在保存 MP4：%1$d%%</string>
+    <string name="rss_open_mode_checking">正在推荐打开方式…</string>
+    <string name="rss_open_mode_recommended">已根据最近文章推荐，可随时修改。</string>
+    <string name="rss_open_mode_unknown">暂时无法推荐打开方式，你可以手动选择。</string>
+    <string name="rss_detail_unavailable">暂时无法加载这篇文章，你可以打开原文。</string>
 </resources>

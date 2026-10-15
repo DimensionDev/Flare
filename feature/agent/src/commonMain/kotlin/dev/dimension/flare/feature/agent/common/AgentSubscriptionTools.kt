@@ -340,6 +340,7 @@ internal class LoadRssArticleTool(
                 url = url,
                 descriptionHtml = feed?.descriptionHtml?.takeIf { feed.agentRssDisplayMode() == RssDisplayMode.DESCRIPTION_ONLY },
                 descriptionTitle = feed?.title,
+                fallbackHtml = feed?.descriptionHtml,
             )
         return document.toRssArticleToolText(
             url = url,
@@ -885,7 +886,7 @@ private fun UiTimelineV2.Feed.agentRssDisplayMode(): RssDisplayMode =
                 }
 
                 is DeeplinkRoute.Rss.Detail -> {
-                    if (route.descriptionHtml != null || route.title != null) {
+                    if (route.descriptionHtml != null) {
                         RssDisplayMode.DESCRIPTION_ONLY
                     } else {
                         RssDisplayMode.FULL_CONTENT

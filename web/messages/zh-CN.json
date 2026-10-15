@@ -145,8 +145,8 @@
   "rssSourcesTypeLabel": "类型",
   "rssSourcesDisplayMode": "显示模式",
   "rssSourcesOpenInBrowser": "在浏览器中打开",
-  "rssSourcesFullContent": "全文",
-  "rssSourcesDescriptionOnly": "仅描述",
+  "rssSourcesFullContent": "网页全文",
+  "rssSourcesDescriptionOnly": "订阅内容",
   "rssSourcesSave": "保存",
   "subscriptionUrlHint": "输入 RSS URL 或 Mastodon 实例 URL",
   "rssSourcesRssHubHostLabel": "RSSHub 域名",
@@ -541,5 +541,8 @@
   "visibilityPublic": "公开",
   "visibilitySpecified": "指定用户",
   "secondaryFooterDownloadApp": "下载应用",
-  "secondaryFooterVersion": "版本 {version}"
+  "secondaryFooterVersion": "版本 {version}",
+  "rssOpenModeChecking": "正在推荐打开方式…",
+  "rssOpenModeRecommended": "已根据最近文章推荐，可随时修改。",
+  "rssOpenModeUnknown": "暂时无法推荐打开方式，你可以手动选择。"
 }

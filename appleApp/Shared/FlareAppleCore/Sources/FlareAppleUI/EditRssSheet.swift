@@ -19,7 +19,6 @@ public struct EditRssSheet: View {
     @State private var url: String
     @State private var title: String = ""
     @State private var rssHubHost: String = ""
-    @State private var displayMode: RssDisplayMode
     @State private var selectedRssSources: [UiRssSource] = []
     @State private var selectedMastodonTypes: [SubscriptionType] = []
     @State private var showFileImporter = false
@@ -33,9 +32,8 @@ public struct EditRssSheet: View {
         self.id = id
         self.onImportOPML = onImportOPML
         let kotlinId = id.map { KotlinInt(value: Int32($0)) }
-        _presenter = State(wrappedValue: KotlinPresenter(presenter: EditRssSourcePresenter(id: kotlinId)))
+        _presenter = State(wrappedValue: KotlinPresenter(presenter: EditRssSourcePresenter(id: kotlinId, initialDisplayMode: initialDisplayMode)))
         self.url = initialUrl ?? ""
-        self.displayMode = initialDisplayMode ?? .fullContent
     }
 
     public var body: some View {
@@ -112,6 +110,12 @@ public struct EditRssSheet: View {
                             .onTapGesture {
                                 toggleRssSource(item)
                             }
+                            if selectedRssSources.contains(where: { $0.url == item.url }),
+                               let mode = presenter.state.readingModes.first(where: { $0.url == item.url }) {
+                                RssReadingModePicker(mode: mode) {
+                                    presenter.state.setSourceDisplayMode(url: item.url, value: $0)
+                                }
+                            }
                         }
                     } header: {
                         Text("rss_sources_header")
@@ -175,15 +179,13 @@ public struct EditRssSheet: View {
                     }
                 }
 
-                if case .subscriptionInstance = onEnum(of: state) {
+                if case .rssSources = onEnum(of: state) {
                     EmptyView()
-                } else {
+                } else if case .subscriptionInstance = onEnum(of: state) {
+                    EmptyView()
+                } else if let mode = presenter.state.readingModes.first {
                     Section {
-                        Picker("rss_open_in", selection: $displayMode) {
-                            Text("rss_sources_full_content").tag(RssDisplayMode.fullContent)
-                            Text("deep_link_account_picker_open_in_browser").tag(RssDisplayMode.openInBrowser)
-                            Text("rss_sources_description_only").tag(RssDisplayMode.descriptionOnly)
-                        }
+                        RssReadingModePicker(mode: mode) { presenter.state.setDisplayMode(value: $0) }
                     }
                 }
             }
@@ -191,6 +193,7 @@ public struct EditRssSheet: View {
         .rssFormStyle()
         .onChange(of: presenter.state.checkState) { _, newValue in
             selectedRssSources = []
+            presenter.state.selectSources(urls: "")
             selectedMastodonTypes = []
             rssHubHost = ""
             if case .success(let success) = onEnum(of: newValue),
@@ -211,7 +214,6 @@ public struct EditRssSheet: View {
         .onChange(of: presenter.state.data) { _, newValue in
             if case .success(let success) = onEnum(of: newValue) {
                 title = success.data.title ?? ""
-                displayMode = success.data.displayMode
             }
         }
         .navigationTitle(id == nil ? "add_rss_title" : "edit_rss_title")
@@ -274,6 +276,7 @@ public struct EditRssSheet: View {
         } else {
             selectedRssSources.append(item)
         }
+        presenter.state.selectSources(urls: selectedRssSources.map(\.url).joined(separator: ","))
     }
 
     private func toggleSubscriptionType(_ type: SubscriptionType) {
@@ -291,11 +294,11 @@ public struct EditRssSheet: View {
 
         switch onEnum(of: success.data) {
         case .rssFeed(let feed):
-            feed.save(title: title, displayMode: displayMode)
+            feed.save(title: title, displayMode: presenter.state.displayMode)
         case .rssHub(let rssHub):
-            rssHub.save(title: title, displayMode: displayMode)
+            rssHub.save(title: title, displayMode: presenter.state.displayMode)
         case .rssSources(let rssSources):
-            rssSources.save(sources: selectedRssSources, displayMode: displayMode)
+            rssSources.save(sources: selectedRssSources)
         case .subscriptionInstance(let subscriptionInstance):
             let typeNames: [SubscriptionType: String] = [
                 SubscriptionType.mastodonTrends: String(localized: "mastodon_trending_statuses", bundle: .main),
@@ -428,5 +431,23 @@ private extension View {
         #else
             self
         #endif
+    }
+}
+
+private struct RssReadingModePicker: View {
+    let mode: RssReadingMode
+    let onSelect: (RssDisplayMode) -> Void
+
+    var body: some View {
+        Picker("rss_open_in", selection: Binding(get: { mode.displayMode }, set: onSelect)) {
+            Text("rss_sources_full_content").tag(RssDisplayMode.fullContent)
+            Text("rss_sources_description_only").tag(RssDisplayMode.descriptionOnly)
+            Text("deep_link_account_picker_open_in_browser").tag(RssDisplayMode.openInBrowser)
+        }
+        if mode.automatic {
+            Text(LocalizedStringKey(mode.checking ? "rss_open_mode_checking" : (mode.recommended != nil ? "rss_open_mode_recommended" : "rss_open_mode_unknown")))
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
     }
 }

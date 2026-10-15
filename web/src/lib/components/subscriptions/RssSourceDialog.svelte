@@ -30,15 +30,18 @@
 	} = $props();
 
 	const initialSource = untrack(() => source);
-	const editor = createEditRssSourcePresenter(initialSource?.id ?? null);
+	const editor = createEditRssSourcePresenter(initialSource?.id ?? null, null);
 	let url = $state(initialSource?.url ?? '');
 	let title = $state(initialSource?.title ?? '');
-	let displayMode = $state<RssDisplayMode>(initialSource?.displayMode ?? 'FULL_CONTENT');
+	const displayMode = $derived(editor.displayMode);
 	let rssHubServer = $state('');
 	let selectedUrls = $state<Set<string>>(new Set());
 	let selectedTypes = $state<Set<SubscriptionType>>(new Set());
 	const checkState = $derived(editor.checkState);
 	const rssState = $derived(checkState.type === 'Success' ? checkState.data : null);
+	const discoveredSourceUrls = $derived(
+		rssState?.type === 'RssSources' ? rssState.sources.map((item) => item.url).join(',') : ''
+	);
 	const rssHubCheckState = $derived(editor.rssHubCheckState);
 	const rssHubFeed = $derived(
 		rssHubCheckState?.type === 'Success' && rssHubCheckState.data.type === 'RssFeed'
@@ -48,7 +51,7 @@
 	const titleFeed = $derived(
 		rssState?.type === 'RssFeed' ? rssState : rssHubFeed
 	);
-	const showDisplayMode = $derived(rssState?.type !== 'SubscriptionInstance');
+	const showDisplayMode = $derived(rssState?.type !== 'SubscriptionInstance' && rssState?.type !== 'RssSources');
 	const canSave = $derived(canSaveCurrent());
 
 	const displayModeOptions = $derived<SelectOption<RssDisplayMode>[]>([
@@ -59,10 +62,7 @@
 
 	$effect(() => {
 		const value = url.trim();
-		const timer = window.setTimeout(() => {
-			editor.checkUrl(value);
-		}, 666);
-		return () => window.clearTimeout(timer);
+		editor.checkUrl(value);
 	});
 
 	$effect(() => {
@@ -72,22 +72,21 @@
 
 	$effect(() => {
 		const value = rssHubServer.trim();
-		const timer = window.setTimeout(() => {
-			editor.checkRssHubServer(value);
-		}, 666);
-		return () => window.clearTimeout(timer);
+		editor.checkRssHubServer(value);
 	});
 
 	$effect(() => {
-		if (rssState?.type === 'RssSources' && selectedUrls.size === 0) {
-			selectedUrls = new Set(rssState.sources.map((item) => item.url));
-		}
+		selectedUrls = new Set(discoveredSourceUrls.split(',').filter(Boolean));
 	});
 
 	$effect(() => {
 		if (rssState?.type === 'SubscriptionInstance' && selectedTypes.size === 0) {
 			selectedTypes = new Set(rssState.availableTimelines);
 		}
+	});
+
+	$effect(() => {
+		editor.selectSources(Array.from(selectedUrls).join(','));
 	});
 
 	function selectValue<T extends string>(event: Event): T {
@@ -151,7 +150,7 @@
 				editor.saveRssHub(title, displayMode);
 				break;
 			case 'RssSources':
-				editor.saveSourcesByUrl(Array.from(selectedUrls).join(','), displayMode);
+				editor.saveSourcesByUrl(Array.from(selectedUrls).join(','));
 				break;
 			case 'SubscriptionInstance':
 				editor.saveSubscriptionTypes(Array.from(selectedTypes).join(','));
@@ -254,6 +253,21 @@
 								onchange={() => toggleUrl(discovered.url)}
 							/>
 						</label>
+                        {#if selectedUrls.has(discovered.url)}
+                            {@const mode = editor.readingModes.find((item) => item.url === discovered.url)}
+                            {#if mode}
+                                <label class="form-control p-3">
+                                    <span class="label-text">{m.rssSourcesDisplayMode()}</span>
+                                    <select class="select select-bordered" value={mode.displayMode}
+                                        onchange={(event) => editor.setSourceDisplayMode(discovered.url, selectValue<RssDisplayMode>(event))}>
+                                        {#each displayModeOptions as option}<option value={option.value}>{option.label}</option>{/each}
+                                    </select>
+                                    {#if mode.automatic}
+                                        <span class="label-text-alt">{mode.checking ? m.rssOpenModeChecking() : mode.recommended ? m.rssOpenModeRecommended() : m.rssOpenModeUnknown()}</span>
+                                    {/if}
+                                </label>
+                            {/if}
+                        {/if}
 					{/each}
 				</div>
 			{/if}
@@ -285,17 +299,21 @@
 			{/if}
 
 			{#if (showDisplayMode && rssState && rssState.type !== 'RssHub') || rssHubFeed}
+                {@const mode = editor.readingModes[0]}
 				<label class="form-control">
 					<span class="label-text">{m.rssSourcesDisplayMode()}</span>
 					<select
 						class="select select-bordered w-full"
 						value={displayMode}
-						onchange={(event) => (displayMode = selectValue<RssDisplayMode>(event))}
+						onchange={(event) => editor.setDisplayMode(selectValue<RssDisplayMode>(event))}
 					>
 						{#each displayModeOptions as option}
 							<option value={option.value}>{option.label}</option>
 						{/each}
 					</select>
+                    {#if mode?.automatic}
+                        <span class="label-text-alt">{mode.checking ? m.rssOpenModeChecking() : mode.recommended ? m.rssOpenModeRecommended() : m.rssOpenModeUnknown()}</span>
+                    {/if}
 				</label>
 			{/if}
 		</div>

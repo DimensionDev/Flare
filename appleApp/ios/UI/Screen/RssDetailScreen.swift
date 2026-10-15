@@ -61,8 +61,8 @@ Maecenas fringilla vitae leo sit amet lacinia. Donec in dui a ex hendrerit volut
                     showTranslateButton: true
                 )
             }
-        } errorContent: { error in
-            Text(error.message ?? "Unknown error")
+        } errorContent: { _ in
+            Text("rss_detail_unavailable")
         } loadingContent: {
             ScrollView {
                 VStack {
@@ -263,9 +263,9 @@ private struct RssArticleContentView: View {
 }
 
 extension RssDetailScreen {
-    init(url: String, descriptionHtml: String? = nil, descriptionTitle: String? = nil) {
+    init(url: String, descriptionHtml: String? = nil, descriptionTitle: String? = nil, fallbackHtml: String? = nil) {
         self.url = url
-        self._presenter = .init(wrappedValue: .init(presenter: RssDetailPresenter(url: url, descriptionHtml: descriptionHtml, descriptionTitle: descriptionTitle)))
+        self._presenter = .init(wrappedValue: .init(presenter: RssDetailPresenter(url: url, descriptionHtml: descriptionHtml, descriptionTitle: descriptionTitle, fallbackHtml: fallbackHtml)))
     }
 }
 

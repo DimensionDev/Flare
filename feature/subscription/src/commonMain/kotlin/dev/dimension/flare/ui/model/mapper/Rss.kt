@@ -2,6 +2,7 @@ package dev.dimension.flare.ui.model.mapper
 
 import com.fleeksoft.ksoup.Ksoup
 import dev.dimension.flare.data.database.app.model.RssDisplayMode
+import dev.dimension.flare.data.network.rss.hasRssContent
 import dev.dimension.flare.data.network.rss.model.Feed
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.ClickEvent
@@ -47,13 +48,13 @@ internal fun Feed.Atom.Entry.render(
     displayMode: RssDisplayMode,
     sourceLanguage: String? = null,
 ): UiTimelineV2 {
-    val rawHtml = content?.value ?: summary?.value
+    val rawHtml = content?.value?.takeIf { it.hasRssContent() } ?: summary?.value
     val descHtml =
         rawHtml?.let {
             Ksoup.parse(it)
         }
     val img = descHtml?.select("img")?.firstOrNull()?.attr("src") ?: media?.thumbnail?.url
-    val link = links.firstOrNull()?.href?.replace("http://", "https://") ?: id
+    val link = links.firstOrNull { it.rel == null || it.rel == "alternate" }?.href ?: id
     return UiTimelineV2.Feed(
         title = title?.value?.takeIf { it.isNotEmpty() && it.isNotBlank() },
         description = descHtml?.text(),
@@ -100,9 +101,10 @@ internal fun Feed.Rss20.Item.render(
     displayMode: RssDisplayMode,
     sourceLanguage: String? = null,
 ): UiTimelineV2 {
-    val url = link.replace("http://", "https://")
+    val url = link
+    val rawHtml = contentEncoded?.takeIf { it.hasRssContent() } ?: description
     val descHtml =
-        description?.let {
+        rawHtml?.let {
             Ksoup.parse(it)
         }
     val img =
@@ -114,7 +116,7 @@ internal fun Feed.Rss20.Item.render(
     return UiTimelineV2.Feed(
         title = title,
         description = descHtml?.text(),
-        descriptionHtml = description,
+        descriptionHtml = rawHtml,
         url = url,
         sourceLanguages = listOfNotNull(sourceLanguage).toPersistentList(),
         source =
@@ -140,7 +142,7 @@ internal fun Feed.Rss20.Item.render(
         clickEvent =
             displayMode.toFeedClickEvent(
                 url = url,
-                descriptionHtml = description,
+                descriptionHtml = rawHtml,
                 title = title,
             ),
         createdAt =
@@ -157,7 +159,7 @@ internal fun Feed.RDF.Item.render(
     displayMode: RssDisplayMode,
     sourceLanguage: String? = null,
 ): UiTimelineV2 {
-    val url = link.replace("http://", "https://")
+    val url = link
     val descHtml =
         description?.let {
             Ksoup.parse(it)
@@ -215,7 +217,7 @@ private fun RssDisplayMode.toFeedClickEvent(
             }
 
             RssDisplayMode.FULL_CONTENT -> {
-                DeeplinkRoute.Rss.Detail(url)
+                DeeplinkRoute.Rss.Detail(url = url, title = title, fallbackHtml = descriptionHtml)
             }
 
             RssDisplayMode.DESCRIPTION_ONLY -> {

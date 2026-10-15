@@ -140570,6 +140570,70 @@
         }
       }
     },
+    "rss_open_mode_checking": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Checking the best opening mode…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在推荐打开方式…"
+          }
+        }
+      }
+    },
+    "rss_open_mode_recommended": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recommended from recent articles. You can change this."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已根据最近文章推荐，可随时修改。"
+          }
+        }
+      }
+    },
+    "rss_open_mode_unknown": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not recommend an opening mode. You can choose one."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "暂时无法推荐打开方式，你可以手动选择。"
+          }
+        }
+      }
+    },
+    "rss_detail_unavailable": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This article could not be loaded. You can open the original page."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "暂时无法加载这篇文章，你可以打开原文。"
+          }
+        }
+      }
+    },
     "rss_sources_description_only" : {
       "localizations" : {
         "af" : {
@@ -140623,7 +140687,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Description only"
+            "value" : "Feed content"
           }
         },
         "fi" : {
@@ -140743,7 +140807,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "仅描述"
+            "value" : "订阅内容"
           }
         },
         "zh-Hant" : {
@@ -140807,7 +140871,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Full content"
+            "value" : "Webpage full text"
           }
         },
         "fi" : {
@@ -140927,7 +140991,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "完整内容"
+            "value" : "网页全文"
           }
         },
         "zh-Hant" : {

@@ -50,9 +50,11 @@ class RssReadingRecommendationTest {
                     override fun get(index: Int): T =
                         create(
                             when (index) {
-                                0 -> "mailto:person@example.com"
-                                1, 2 -> "https://example.com/1"
-                                3 -> "https://example.com/2"
+                                0 -> ""
+                                1 -> "/article"
+                                2 -> "mailto:person@example.com"
+                                3, 4 -> "https://example.com/1"
+                                5 -> "https://example.com/2"
                                 else -> error("Entries beyond the two usable samples must not be inspected")
                             },
                         )
@@ -98,6 +100,59 @@ class RssReadingRecommendationTest {
                 )
                 assertEquals(listOf("https://example.com/1", "https://example.com/2"), visited)
             }
+        }
+
+    @Test
+    fun invalidLeadingLinksDoNotConsumeSamplesOrChangeTheRecommendation() =
+        runTest {
+            val articles = listOf("http://example.com/1", "https://example.com/2")
+            val requests = mutableListOf<String>()
+            val client =
+                mockClient { request ->
+                    val url = request.url.toString()
+                    requests += url
+                    if (url !in articles) error("Only explicit article URLs should be requested")
+                    respond("Forbidden", HttpStatusCode.Forbidden)
+                }
+            try {
+                val feed = feed(invalidArticleUrls + listOf(articles.first(), articles.first(), articles.last(), "https://example.com/3"))
+                assertEquals(
+                    RssDisplayMode.DESCRIPTION_ONLY,
+                    recommendRssDisplayMode(feed, Readability(client, StandardTestDispatcher(testScheduler))::extract),
+                )
+                assertEquals(articles, requests)
+            } finally {
+                client.close()
+            }
+        }
+
+    @Test
+    fun invalidLinksAloneDoNotTriggerExtractionOrARecommendation() =
+        runTest {
+            val visited = mutableListOf<String>()
+            assertEquals(
+                null,
+                recommendRssDisplayMode(feed(invalidArticleUrls)) {
+                    visited += it
+                    document()
+                },
+            )
+            assertEquals(emptyList(), visited)
+        }
+
+    @Test
+    fun absoluteUrlsPreserveTheirSchemeAndSupportIpv6Hosts() =
+        runTest {
+            val urls = listOf("HTTP://example.com/1", "https://[::1]:8080/2")
+            val visited = mutableListOf<String>()
+            assertEquals(
+                RssDisplayMode.DESCRIPTION_ONLY,
+                recommendRssDisplayMode(feed(urls)) {
+                    visited += it
+                    throw ArticleExtractionException()
+                },
+            )
+            assertEquals(urls, visited)
         }
 
     @Test
@@ -150,6 +205,22 @@ class RssReadingRecommendationTest {
         )
 
     private fun document() = DocumentData("Title", "<p>Body</p>", "Body", null, null, null, null, null, null, null)
+
+    private val invalidArticleUrls =
+        listOf(
+            "",
+            " ",
+            "/article",
+            "article",
+            "//example.com/article",
+            "mailto:person@example.com",
+            "http://",
+            "https:///article",
+            "https://?query=1",
+            "https://#fragment",
+            "https://user@",
+            "https://example.com:invalid",
+        )
 }
 
 private fun TestScope.mockClient(handler: MockRequestHandler): HttpClient =

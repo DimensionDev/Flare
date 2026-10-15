@@ -3,7 +3,7 @@ package dev.dimension.flare.data.network.rss
 import dev.dimension.flare.data.database.app.model.RssDisplayMode
 import dev.dimension.flare.data.network.rss.model.Feed
 import io.ktor.client.plugins.ResponseException
-import io.ktor.http.Url
+import io.ktor.http.URLBuilder
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.withTimeoutOrNull
 
@@ -17,7 +17,11 @@ internal suspend fun recommendRssDisplayMode(
                 .readingSamples()
                 .distinctBy { it.first }
                 .filter {
-                    runCatching { Url(it.first).protocol.name in setOf("http", "https") }.getOrDefault(false)
+                    absoluteArticleUrl.containsMatchIn(it.first) &&
+                        runCatching {
+                            // Url fills a missing host from the platform origin, so inspect the builder instead.
+                            URLBuilder(it.first).host.isNotBlank()
+                        }.getOrDefault(false)
                 }.take(2)
                 .toList()
         if (samples.isEmpty()) return@withTimeoutOrNull null
@@ -38,6 +42,8 @@ internal suspend fun recommendRssDisplayMode(
             else -> RssDisplayMode.OPEN_IN_BROWSER
         }
     }
+
+private val absoluteArticleUrl = Regex("""^https?://[^/?#\s\\]+""", RegexOption.IGNORE_CASE)
 
 private fun Feed.readingSamples(): Sequence<Pair<String, List<String?>>> =
     when (this) {

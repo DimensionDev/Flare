@@ -492,6 +492,70 @@ class TimelineReadingSessionTest : RobolectricTest() {
         }
 
     @Test
+    fun timerFollowsLatestFromTheFirstVisiblePostBeyondAFilteredPage() =
+        runTest {
+            val loader = Loader(prepend = true).apply { response = page(0..79) }
+            val session = session(loader, backgroundScope, visible = { it.statusKey.id.toInt() >= 45 })
+            session.refresh(false, initial = true)
+            val head = rows(session)[45]
+            session.updateViewport(ReadingViewport("${session.activeKey}_${head.statusId}", 0.0, true, false))
+            loader.response = page(100..110)
+            loader.forward = loader.response
+
+            session.refresh(true)
+
+            assertTrue(loader.requests.last() is PagingRequest.Prepend)
+            assertTrue(assertNotNull(session.state.value.position).latest)
+            assertFalse(session.state.value.hasNewContent)
+            assertEquals((100..110).map(Int::toString), ids(session))
+        }
+
+    @Test
+    fun timerDoesNotFollowLatestFromTheTopOfAnOlderWindow() =
+        runTest {
+            val loader = Loader(prepend = true).apply { response = page(0..99) }
+            val session = session(loader, backgroundScope, visible = { it.statusKey.id.toInt() >= 45 })
+            session.refresh(false, initial = true)
+            val source = TimelineReadingPagingSource(database, session)
+            try {
+                val window =
+                    source.load(PagingSource.LoadParams.Refresh(OffsetFromStartPagingKey.Append(60), 40, false)) as
+                        PagingSource.LoadResult.Page
+                val first = window.data.first().baseItem
+                assertEquals("60", first.statusKey.id)
+                assertNotNull(window.prevKey)
+                session.updateViewport(ReadingViewport(first.stableItemKey, 0.0, true, false))
+                loader.response = page(100..110)
+                loader.forward = loader.response
+
+                session.refresh(true)
+
+                assertNull(session.state.value.position)
+                assertTrue(session.state.value.hasNewContent)
+                assertEquals((100..110).map(Int::toString) + (0..99).map(Int::toString), ids(session))
+            } finally {
+                source.invalidate()
+            }
+        }
+
+    @Test
+    fun timerDoesNotRequestAScrollWhenTheActivePostsAreAllFiltered() =
+        runTest {
+            val loader = Loader(prepend = true)
+            val session = session(loader, backgroundScope, visible = { it.statusKey.id.toInt() >= 100 })
+            session.refresh(false, initial = true)
+            session.updateViewport(ReadingViewport(null, 0.0, true, false))
+            loader.response = page(100..110)
+            loader.forward = loader.response
+
+            session.refresh(true)
+
+            assertNull(session.state.value.position)
+            assertTrue(session.state.value.hasNewContent)
+            assertEquals((100..110).map(Int::toString) + (0..9).map(Int::toString), ids(session))
+        }
+
+    @Test
     fun timerFollowsLatestOnlyWhenStillIdleAtTheRealHead() =
         runTest {
             val loader = Loader(prepend = true)

@@ -283,10 +283,10 @@ internal class TimelineReadingSession(
                 } else if (newVisible) {
                     val bridge = if (!initial) continuousNewPage(response) else null
                     if (bridge != null) {
-                        val head = database.pagingTimelineDao().getTimelinePageIdentities(activeKey, 0, 1).firstOrNull()
                         val followLatest =
                             automatic && position.atTop && !position.interacting && state.value.position == null &&
-                                position.itemKey == head?.let { "${activeKey}_${it.statusId}" }
+                                position.itemKey != null &&
+                                position.itemKey == visibleRow(activeKey, 0)?.timeline?.let { "${activeKey}_${it.statusId}" }
                         database.connect {
                             if (!valid()) return@connect
                             // An overlap must update content without moving rows already being read.

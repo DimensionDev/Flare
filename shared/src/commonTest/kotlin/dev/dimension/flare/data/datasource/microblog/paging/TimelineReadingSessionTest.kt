@@ -22,6 +22,7 @@ import dev.dimension.flare.ui.model.UiTranslatableText
 import dev.dimension.flare.ui.render.toUi
 import dev.dimension.flare.ui.render.toUiPlainText
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -40,6 +41,7 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
@@ -600,6 +602,89 @@ class TimelineReadingSessionTest : RobolectricTest() {
             session.refresh(false, initial = true)
             assertEquals(10, rows(session).size)
             assertEquals("old-cursor", database.pagingTimelineDao().getPagingKey(session.activeKey)?.nextKey)
+        }
+
+    @Test
+    fun continuityFailureStillOffersSuccessfullyFetchedLatest() =
+        runTest {
+            val loader = Loader(prepend = true)
+            val session = session(loader, backgroundScope)
+            session.refresh(false, initial = true)
+            val original = rows(session)
+            val anchorKey = "${session.activeKey}_${original[4].statusId}"
+            session.updateViewport(ReadingViewport(anchorKey, -12.0, false, false))
+            loader.response = page(100..110, "fresh-cursor")
+            loader.beforeLoad = {
+                if (loader.requests.last() is PagingRequest.Prepend) error("continuity request offline")
+            }
+            session.refresh(false)
+            assertEquals(original, rows(session))
+            assertEquals("old-cursor", database.pagingTimelineDao().getPagingKey(session.activeKey)?.nextKey)
+            assertNull(session.state.value.position)
+            val record = assertNotNull(database.timelineReadingSessionDao().get("home"))
+            assertTrue(record.pendingReady)
+            assertTrue(record.hasNewContent)
+            assertTrue(session.state.value.hasNewContent)
+            session.showLatest()
+            assertEquals((100..110).map(Int::toString), ids(session))
+            assertEquals("fresh-cursor", database.pagingTimelineDao().getPagingKey(session.activeKey)?.nextKey)
+            assertTrue(assertNotNull(session.state.value.position).latest)
+            assertFalse(session.state.value.hasNewContent)
+            assertEquals(3, loader.requests.size)
+        }
+
+    @Test
+    fun continuityCancellationPropagatesWithoutPublishingLatest() =
+        runTest {
+            val loader = Loader(prepend = true)
+            val session = session(loader, backgroundScope)
+            session.refresh(false, initial = true)
+            val original = rows(session)
+            loader.response = page(100..110)
+            loader.beforeLoad = {
+                if (loader.requests.last() is PagingRequest.Prepend) throw CancellationException("cancelled continuity request")
+            }
+            assertFailsWith<CancellationException> { session.refresh(false) }
+            assertEquals(original, rows(session))
+            assertFalse(session.state.value.hasNewContent)
+            assertFalse(session.state.value.refreshing)
+            assertNull(session.state.value.position)
+        }
+
+    @Test
+    fun completedGestureDuringTimerFetchDoesNotFollowLatest() = completedGestureDuringRefresh(waitForPrepend = false)
+
+    @Test
+    fun completedGestureDuringContinuityCheckDoesNotFollowLatest() = completedGestureDuringRefresh(waitForPrepend = true)
+
+    private fun completedGestureDuringRefresh(waitForPrepend: Boolean) =
+        runTest {
+            val loader = Loader(prepend = true)
+            val session = session(loader, backgroundScope)
+            session.refresh(false, initial = true)
+            val head = rows(session).first()
+            val key = "${session.activeKey}_${head.statusId}"
+            session.updateViewport(ReadingViewport(key, 0.0, true, false))
+            val started = CompletableDeferred<Unit>()
+            val finish = CompletableDeferred<Unit>()
+            loader.beforeLoad = {
+                if ((loader.requests.last() is PagingRequest.Prepend) == waitForPrepend) {
+                    started.complete(Unit)
+                    finish.await()
+                }
+            }
+            loader.response = page(10..20)
+            loader.forward = loader.response
+            val refresh = async { session.refresh(true) }
+            started.await()
+            session.updateViewport(ReadingViewport(key, -18.0, false, true))
+            session.cancelRestoration()
+            session.updateViewport(ReadingViewport(key, 0.0, true, false))
+            finish.complete(Unit)
+            refresh.await()
+            assertNull(session.state.value.position)
+            assertTrue(session.state.value.hasNewContent)
+            assertEquals(21, rows(session).size)
         }
 
     private suspend fun session(

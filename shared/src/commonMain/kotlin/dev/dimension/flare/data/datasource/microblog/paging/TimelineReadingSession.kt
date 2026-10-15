@@ -59,6 +59,7 @@ internal class TimelineReadingSession(
     private val pendingKey = "${record.key}pending/"
     val state = MutableStateFlow(ReadingSessionState(hasNewContent = record.hasNewContent))
     private val viewport = MutableStateFlow(ReadingViewport(null, 0.0, atTop = false, interacting = false))
+    private val interactionGeneration = MutableStateFlow(0L)
     private val mutex = Mutex()
     private var checkpoint: Job? = null
     private var startupPending = false
@@ -218,6 +219,7 @@ internal class TimelineReadingSession(
 
     fun updateViewport(value: ReadingViewport) {
         val wasInteracting = viewport.value.interacting
+        if (value.interacting && !wasInteracting) interactionGeneration.update { it + 1 }
         viewport.value = value
         if (value.interacting && !wasInteracting) scope.launch { repository.selectTab(record.tabId) }
         checkpoint?.cancel()
@@ -238,6 +240,7 @@ internal class TimelineReadingSession(
     }
 
     fun cancelRestoration() {
+        interactionGeneration.update { it + 1 }
         state.update { it.copy(position = null) }
         finishStartup()
     }
@@ -256,6 +259,8 @@ internal class TimelineReadingSession(
     ) = withContext(PlatformDispatchers.IO) {
         mutex.withLock {
             if (!valid()) return@withLock
+            val generation = interactionGeneration.value
+            val position = viewport.value
             state.update { it.copy(refreshing = true) }
             try {
                 database.connect {
@@ -278,7 +283,6 @@ internal class TimelineReadingSession(
                 } else if (newVisible) {
                     val bridge = if (!initial) continuousNewPage(response) else null
                     if (bridge != null) {
-                        val position = viewport.value
                         val head = database.pagingTimelineDao().getTimelinePageIdentities(activeKey, 0, 1).firstOrNull()
                         val followLatest =
                             automatic && position.atTop && !position.interacting && state.value.position == null &&
@@ -300,7 +304,8 @@ internal class TimelineReadingSession(
                             database.timelineReadingSessionDao().save(latest.copy(hasNewContent = true, pendingReady = true))
                         }
                         state.update { it.copy(hasNewContent = true) }
-                        if (followLatest && !viewport.value.interacting && viewport.value.itemKey == position.itemKey &&
+                        if (followLatest && interactionGeneration.value == generation &&
+                            !viewport.value.interacting && viewport.value.itemKey == position.itemKey &&
                             kotlin.math.abs(viewport.value.offset - position.offset) < 1.0
                         ) {
                             showLatestLocked()
@@ -332,7 +337,15 @@ internal class TimelineReadingSession(
         if ((loader as? CacheableRemoteLoader<*>)?.supportPrepend != true) return null
         val cursor = database.pagingTimelineDao().getPagingKey(activeKey)?.prevKey ?: return null
         val request = PagingRequest.Prepend(cursor)
-        val forward = active.load(40, request)
+        val forward =
+            try {
+                active.load(40, request)
+            } catch (error: kotlinx.coroutines.CancellationException) {
+                throw error
+            } catch (error: Exception) {
+                notifyError(error)
+                return null
+            }
         if (forward.data.isEmpty() || forward.data
                 .first()
                 .timeline.statusId !=

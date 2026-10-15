@@ -494,9 +494,11 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
                 // Keep lookahead for wrapping, but cap the renderer as well so
                 // tall glyphs on the next line cannot peek into the preview.
                 let attributedText = layout.prefix(throughLine: visibleLines + 1)
-                addTextContent(content, attributedText: attributedText,
-                               visibleLineLimit: isCollapsed ? visibleLines : nil)
-                previewHeight += layout.lines[visibleLines - 1].bottom
+                let renderer = addTextContent(content, attributedText: attributedText,
+                                              visibleLineLimit: isCollapsed ? visibleLines : nil)
+                let textWidth = max(width - (content.isBlockQuote ? RichTextQuoteBlockView.horizontalInset : 0), 1)
+                // Line-fragment metrics can be shorter than the renderer's CJK lines.
+                previewHeight += renderer.measuredSize(for: textWidth).height
                 if content.isBlockQuote {
                     previewHeight += RichTextQuoteBlockView.verticalInset
                     if visibleLines == layout.lines.count {
@@ -531,8 +533,9 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
         }
     }
 
+    @discardableResult
     private func addTextContent(_ content: PlatformTextTextContent, attributedText: NSAttributedString? = nil,
-                                visibleLineLimit: Int? = nil) {
+                                visibleLineLimit: Int? = nil) -> RichTextTextRendering {
         let attributedText = attributedText ?? attributedString(for: content)
         attributedText.enumerateAttribute(.richTextInlineImageURL, in: NSRange(location: 0, length: attributedText.length)) { value, _, _ in
             if let url = value as? String { renderedInlineImageURLs.insert(url) }
@@ -559,6 +562,7 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
             stack.addArrangedSubview(renderer.renderedView)
             measurementBlocks.append(.text(measurement, renderer: renderer))
         }
+        return renderer
     }
 
     private func addTextContent(_ content: RenderContent.Text) {
@@ -1046,7 +1050,6 @@ private enum RichTextCollapsedBlock {
 private struct RichTextLineLayout {
     struct Line {
         let characterEnd: Int
-        let bottom: CGFloat
     }
 
     let text: NSAttributedString
@@ -1065,12 +1068,12 @@ private struct RichTextLineLayout {
         manager.addTextContainer(container)
         storage.addLayoutManager(manager)
         var lines: [Line] = []
-        manager.enumerateLineFragments(forGlyphRange: manager.glyphRange(for: container)) { rect, _, _, glyphRange, _ in
+        manager.enumerateLineFragments(forGlyphRange: manager.glyphRange(for: container)) { _, _, _, glyphRange, _ in
             let range = manager.characterRange(forGlyphRange: glyphRange, actualGlyphRange: nil)
-            lines.append(Line(characterEnd: NSMaxRange(range), bottom: rect.maxY))
+            lines.append(Line(characterEnd: NSMaxRange(range)))
         }
         if manager.extraLineFragmentTextContainer === container {
-            lines.append(Line(characterEnd: text.length, bottom: manager.extraLineFragmentRect.maxY))
+            lines.append(Line(characterEnd: text.length))
         }
         self.lines = lines
     }

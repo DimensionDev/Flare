@@ -40,6 +40,7 @@ import androidx.navigation3.scene.SceneDecoratorStrategy
 import androidx.navigation3.scene.SceneStrategy
 import androidx.navigation3.scene.rememberNavigationEventState
 import androidx.navigation3.scene.rememberSceneState
+import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import androidx.navigation3.ui.NavDisplay
 import androidx.navigationevent.NavigationEvent
 import androidx.navigationevent.NavigationEventTransitionState.InProgress
@@ -184,6 +185,8 @@ private class AndroidBackGesture(
     var completed = false
     val settle = Animatable(0f)
     val fling = Animatable(1f)
+    val isInProgress: Boolean
+        get() = dragging || settle.value < 1f || fling.isRunning
     private var tracker: VelocityTracker? = VelocityTracker.obtain()
     private val startTime = event.frameTimeMillis.takeIf { it > 0 } ?: SystemClock.uptimeMillis()
 
@@ -217,10 +220,11 @@ private data class AndroidBackScene<T : Any>(
     override val key: Any = scene::class to scene.key
 
     override val content: @Composable () -> Unit = {
+        val transition = LocalNavAnimatedContentScope.current.transition
         val layer = remember { AndroidBackLayer() }
         val latest = motion.gesture
         if (latest != null && (latest.exiting == key || latest.entering == key) && layer.gesture !== latest) {
-            val continuing = layer.gesture?.let { it.dragging || it.settle.value < 1f || it.fling.isRunning } == true
+            val continuing = layer.gesture?.isInProgress == true
             layer.startScale = if (latest.entering == key && !continuing) ANDROID_PREDICTIVE_BACK_ENTERING_START_SCALE else layer.scale
             layer.startY = layer.y
             layer.gesture = latest
@@ -255,7 +259,9 @@ private data class AndroidBackScene<T : Any>(
                     translationY = layer.y / if (entering) 1f else lerp(closingScale, 1f, settled)
                 }
                 shape = cornerShape.value ?: RectangleShape
-                clip = cornerShape.value != null
+                clip =
+                    cornerShape.value != null &&
+                    (transition.currentState != transition.targetState || transition.isRunning || gesture?.isInProgress == true)
             },
         ) { scene.content() }
     }

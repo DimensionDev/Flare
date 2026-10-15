@@ -101,6 +101,7 @@ internal open class TimelineRemoteMediator(
             data = data,
             nextKey = result.nextKey,
             previousKey = result.previousKey,
+            saveInTransaction = result.saveInTransaction,
         )
     }
 

@@ -9,7 +9,7 @@ import dev.dimension.flare.common.PlatformDispatchers
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.connect
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
-import dev.dimension.flare.data.database.cache.model.DbTimelineReadingSession
+import dev.dimension.flare.data.database.cache.model.DbTimelineReadingSnapshot
 import dev.dimension.flare.data.database.cache.model.TranslationDisplayOptions
 import dev.dimension.flare.data.datasource.microblog.MixedRemoteMediator
 import dev.dimension.flare.data.datasource.microblog.offsetPagingConfig
@@ -20,7 +20,10 @@ import dev.dimension.flare.ui.model.UiTimelineV2
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.update
@@ -46,7 +49,7 @@ internal data class ReadingViewport(
 
 @OptIn(ExperimentalPagingApi::class)
 internal class TimelineReadingSession(
-    val record: DbTimelineReadingSession,
+    val record: DbTimelineReadingSnapshot,
     private val loader: RemoteLoader<UiTimelineV2>,
     private val database: CacheDatabase,
     private val repository: TimelineReadingRepository,
@@ -57,8 +60,9 @@ internal class TimelineReadingSession(
     private val isVisible: suspend (UiTimelineV2) -> Boolean,
     private val notifyError: (Throwable) -> Unit,
 ) : BaseRemoteMediator<OffsetFromStartPagingKey, TimelinePageItem>() {
-    val activeKey = "${requireNotNull(record.snapshotKey)}active/"
-    private val pendingKey = "${requireNotNull(record.snapshotKey)}pending/"
+    var activeKey = record.activeKey
+        private set
+    private var pendingKey = record.pendingKey
     val state = MutableStateFlow(ReadingSessionState(hasNewContent = record.hasNewContent))
     private val viewport = MutableStateFlow(ReadingViewport(null, 0.0, atTop = false, interacting = false))
     private val mutex = Mutex()
@@ -66,7 +70,6 @@ internal class TimelineReadingSession(
     private var checkpoint: Job? = null
     private var startupPending = false
     private var active = mediator(activeKey)
-    private val pending = mediator(pendingKey)
     private val pagingGeneration = MutableStateFlow(0)
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -120,7 +123,7 @@ internal class TimelineReadingSession(
                 }
         val start = saved?.let { dao.readingItemOffset(activeKey, it.sortId) } ?: 0
         val anchor = visibleRow(activeKey, start) ?: visibleRow(activeKey, 0)
-        startupPending = dao.anyPaging(activeKey)
+        startupPending = dao.getPagingKey(activeKey) != null
         if (anchor != null) {
             requestPosition(
                 "${activeKey}_${anchor.timeline.statusId}",
@@ -154,14 +157,7 @@ internal class TimelineReadingSession(
         TimelinePagingMapper.toUi(this, key, TranslationDisplayOptions(false, false, ""))
 
     override suspend fun initialize(): InitializeAction =
-        if (database
-                .pagingTimelineDao()
-                .getTimelinePageIdentities(
-                    activeKey,
-                    0,
-                    1,
-                ).isNotEmpty()
-        ) {
+        if (database.pagingTimelineDao().getPagingKey(activeKey) != null) {
             InitializeAction.SKIP_INITIAL_REFRESH
         } else {
             InitializeAction.LAUNCH_INITIAL_REFRESH
@@ -280,6 +276,7 @@ internal class TimelineReadingSession(
                     repository.saveSnapshot(record, latest.copy(pendingReady = false))
                     repository.deleteData(pendingKey)
                 }
+                val pending = mediator(pendingKey)
                 val response = pending.load(40, PagingRequest.Refresh)
                 if (!valid()) return@withLock
                 pending.saveResponse(PagingRequest.Refresh, response)
@@ -409,56 +406,64 @@ internal class TimelineReadingSession(
     ) {
         val first = visibleRow(pendingKey, 0)?.timeline
         if ((requestScroll && first == null) || state.value.interactionGeneration != generation) return
-        val previousPosition = state.value.position
-        var requestedPosition: TimelineReadingPosition? = null
-        var published = false
-        try {
-            published =
-                database.connect {
-                    val latest =
-                        repository.current(record) ?: return@connect false
-                    if (state.value.interactionGeneration != generation) return@connect false
-                    repository.deleteData(activeKey)
-                    repository.copyData(pendingKey, activeKey)
-                    repository.saveSnapshot(
-                        record,
-                        latest.copy(
-                            anchorId = first?.let { "${activeKey}_${it.statusId}" },
-                            anchorSortId = first?.sortId,
-                            offset = 0.0,
-                            hasNewContent = false,
-                            pendingReady = false,
-                        ),
-                        remember = requestScroll,
-                    )
-                    repository.deleteData(pendingKey)
-                    if (requestScroll && first != null) {
-                        requestedPosition = requestPosition("${activeKey}_${first.statusId}", 0.0, latest = true, generation = generation)
-                        if (requestedPosition == null) throw PublicationCancelled()
-                    } else if (state.value.interactionGeneration != generation) {
-                        throw PublicationCancelled()
+        currentCoroutineContext().ensureActive()
+        // Once committed, the in-memory references must adopt the same generation even if the caller stops.
+        withContext(NonCancellable) {
+            val previousPosition = state.value.position
+            var requestedPosition: TimelineReadingPosition? = null
+            var published = false
+            try {
+                published =
+                    database.connect {
+                        val latest =
+                            repository.current(record) ?: return@connect false
+                        if (state.value.interactionGeneration != generation) return@connect false
+                        repository.saveSnapshot(
+                            record,
+                            latest.copy(
+                                activeKey = pendingKey,
+                                pendingKey = activeKey,
+                                anchorId = first?.let { "${pendingKey}_${it.statusId}" },
+                                anchorSortId = first?.sortId,
+                                offset = 0.0,
+                                hasNewContent = false,
+                                pendingReady = false,
+                            ),
+                            remember = requestScroll,
+                        )
+                        repository.deleteData(activeKey)
+                        if (requestScroll && first != null) {
+                            requestedPosition =
+                                requestPosition("${pendingKey}_${first.statusId}", 0.0, latest = true, generation = generation)
+                            if (requestedPosition == null) throw PublicationCancelled()
+                        } else if (state.value.interactionGeneration != generation) {
+                            throw PublicationCancelled()
+                        }
+                        true
                     }
-                    true
-                }
-        } catch (_: PublicationCancelled) {
-            // Roll back the interrupted publication while letting the refresh finish normally.
-        } finally {
-            if (!published && requestedPosition != null) {
-                state.update {
-                    if (it.position == requestedPosition) {
-                        it.copy(position = if (it.interactionGeneration == generation) previousPosition else null)
-                    } else {
-                        it
+            } catch (_: PublicationCancelled) {
+                // Roll back the interrupted publication while letting the refresh finish normally.
+            } finally {
+                if (!published && requestedPosition != null) {
+                    state.update {
+                        if (it.position == requestedPosition) {
+                            it.copy(position = if (it.interactionGeneration == generation) previousPosition else null)
+                        } else {
+                            it
+                        }
                     }
                 }
             }
+            if (!published) return@withContext
+            val previousKey = activeKey
+            activeKey = pendingKey
+            pendingKey = previousKey
+            // Mixed loaders also retain which sources are exhausted in memory.
+            active = mediator(activeKey)
+            // A database invalidation alone does not reset Paging's exhausted remote load states.
+            pagingGeneration.update { it + 1 }
+            state.update { it.copy(hasNewContent = false) }
         }
-        if (!published) return
-        // Mixed loaders also retain which sources are exhausted in memory.
-        active = mediator(activeKey)
-        // A database invalidation alone does not reset Paging's exhausted remote load states.
-        if (requestScroll) pagingGeneration.update { it + 1 }
-        state.update { it.copy(hasNewContent = false) }
     }
 
     private suspend fun requestPosition(

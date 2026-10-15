@@ -2,11 +2,62 @@ import XCTest
 import UIKit
 import SwiftUI
 import KotlinSharedUI
+import FlareAppleCore
 import FlareAppleUI
 @testable import Flare
 
 @MainActor
 final class TimelineControllerIntegrationTests: XCTestCase {
+    func testRenamingHomeTabKeepsTheNativeListAndReadingPosition() async throws {
+        let home = KotlinPresenter(presenter: HomeTimelineWithTabsPresenter())
+        var firstTab: UiTimelineTabItem?
+        for _ in 0..<100 {
+            if case .success(let success) = onEnum(of: home.state.tabState) {
+                firstTab = success.data.cast(UiTimelineTabItem.self).first
+                if firstTab != nil { break }
+            }
+            try await Task.sleep(for: .milliseconds(10))
+        }
+        let tab = try XCTUnwrap(firstTab)
+        let renamed = tab.withPresentationOverrides(title: "Renamed reading tab", icon: tab.icon,
+            appearancePatch: tab.appearancePatch, enabled: tab.enabled, filterConfig: tab.filterConfig)
+        XCTAssertEqual(tab.contentSourceKey, renamed.contentSourceKey)
+        XCTAssertNotEqual(tab.loaderKey, renamed.loaderKey)
+        let accessories = (0..<80).map { UITimelineCollectionViewAccessoryItem(id: String($0), view: Header()) }
+        let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first)
+        let previousKeyWindow = scene.windows.first(where: \.isKeyWindow)
+        let host = UIHostingController(rootView: TimelineScreen(tabItem: tab, allowGalleryMode: false,
+            isHomeTimeline: true, accessoryItems: accessories))
+        let window = UIWindow(windowScene: scene)
+        window.rootViewController = host
+        window.makeKeyAndVisible()
+        defer {
+            window.isHidden = true
+            window.rootViewController = nil
+            previousKeyWindow?.makeKey()
+        }
+        func settle() async {
+            for _ in 0..<25 {
+                host.view.setNeedsLayout()
+                host.view.layoutIfNeeded()
+                try? await Task.sleep(for: .milliseconds(10))
+            }
+        }
+        await settle()
+        let list = try XCTUnwrap(descendants(host.view).compactMap { $0 as? TimelineCollectionView }.first)
+        let controller = try XCTUnwrap(list.delegate as? UITimelineCollectionViewController)
+        controller.restoreEffectiveContentOffset(800, animated: false)
+        await settle()
+        let position = try XCTUnwrap(list.captureReadingPosition())
+        let offset = list.contentOffset.y
+        XCTAssertGreaterThan(offset, 500)
+        host.rootView = TimelineScreen(tabItem: renamed, allowGalleryMode: false, isHomeTimeline: true, accessoryItems: accessories)
+        await settle()
+        XCTAssertTrue(descendants(host.view).contains { $0 === list })
+        XCTAssertEqual(list.captureReadingPosition()?.itemID, position.itemID)
+        XCTAssertEqual(list.contentOffset.y, offset, accuracy: 0.5)
+    }
+
     func testSwitchingListsAlwaysStartsAtTopButUpdatingTheSameListKeepsPosition() async throws {
         let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first)
         let previousKeyWindow = scene.windows.first(where: \.isKeyWindow)
@@ -702,6 +753,20 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         fixture.input.items.insert(.post(makeRow(100)), at: 0)
         await fixture.apply()
         try fixture.assertPosition(("t:case-0", 0))
+    }
+
+    func testSessionAtTopSkipsTheChangelogAndCheckpointsTheFirstVisiblePost() async throws {
+        let fixture = await Fixture(posts: true, accessories: [UITimelineCollectionViewAccessoryItem(id: "change_log", view: Header())])
+        let reading = ReadingState()
+        fixture.controller.readingState = reading
+        await fixture.scroll(1_500)
+        XCTAssertNotEqual(reading.itemKey, "case-0")
+        await fixture.scroll(0)
+        XCTAssertEqual(try fixture.position().id, "a:change_log", "Transient layout anchoring must still include accessories")
+        XCTAssertEqual(reading.itemKey, "case-0")
+        let path = try XCTUnwrap(fixture.collection.readingIndexPath?("t:case-0"))
+        let frame = try XCTUnwrap(fixture.collection.layoutAttributesForItem(at: path)?.frame)
+        XCTAssertEqual(reading.offset, Double(frame.minY - fixture.collection.contentOffset.y), accuracy: 0.5)
     }
 
     func testSessionViewLatestWaitsForThePublishedHead() async throws {

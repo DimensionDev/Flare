@@ -13,7 +13,7 @@ internal interface TimelineReadingSessionDao {
     @Query("SELECT * FROM DbTimelineReadingSnapshot WHERE `key` = :key")
     suspend fun snapshot(key: String): DbTimelineReadingSnapshot?
 
-    @Query("SELECT * FROM DbTimelineReadingSnapshot WHERE session_key = :sessionKey")
+    @Query("SELECT * FROM DbTimelineReadingSnapshot WHERE sessionKey = :sessionKey")
     suspend fun snapshots(sessionKey: String): List<DbTimelineReadingSnapshot>
 
     @Upsert
@@ -22,7 +22,7 @@ internal interface TimelineReadingSessionDao {
     @Query("DELETE FROM DbTimelineReadingSnapshot WHERE `key` = :key")
     suspend fun deleteSnapshot(key: String)
 
-    @Query("DELETE FROM DbTimelineReadingSnapshot WHERE session_key = :sessionKey")
+    @Query("DELETE FROM DbTimelineReadingSnapshot WHERE sessionKey = :sessionKey")
     suspend fun deleteSnapshots(sessionKey: String)
 
     @Query("SELECT * FROM DbTimelineReadingSession WHERE tabId = :tabId")
@@ -40,15 +40,10 @@ internal interface TimelineReadingSessionDao {
     @Query("DELETE FROM DbTimelineReadingSession WHERE tabId = :tabId")
     suspend fun delete(tabId: String)
 
-    @Query(
-        "UPDATE DbTimelineReadingSession SET anchorId = :anchorId, anchorSortId = :sortId, offset = :offset WHERE tabId = :tabId AND `key` = :key",
-    )
-    suspend fun savePosition(
+    @Query("UPDATE DbTimelineReadingSession SET snapshotKey = :snapshotKey WHERE tabId = :tabId")
+    suspend fun retainSnapshot(
         tabId: String,
-        key: String,
-        anchorId: String,
-        sortId: Long,
-        offset: Double,
+        snapshotKey: String,
     )
 
     @Query("SELECT tabId FROM DbHomeTimelineSelection WHERE id = 0")

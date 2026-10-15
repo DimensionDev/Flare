@@ -348,12 +348,14 @@ final class TimelineCollectionView: UICollectionView {
         return captureReadingPosition(preferringVisibleTop: preferringVisibleTop)
     }
 
-    func captureReadingPosition(preferringVisibleTop: Bool = false) -> ReadingPosition? {
-        if let readingPosition { return readingPosition }
-        if let geometryReadingPosition, geometryReadingPosition.itemID != nil { return geometryReadingPosition }
+    func captureReadingPosition(preferringVisibleTop: Bool = false, matchingItem: ((String) -> Bool)? = nil) -> ReadingPosition? {
+        if let readingPosition,
+           matchingItem == nil || readingPosition.itemID.map({ matchingItem?($0) == true }) == true { return readingPosition }
+        if let geometryReadingPosition, let id = geometryReadingPosition.itemID,
+           matchingItem?(id) != false { return geometryReadingPosition }
         guard bounds.width > 1, bounds.height > 1 else { return nil }
         let viewportTop = readingViewportTop()
-        if let firstItem = firstVisibleReadingItem(viewportTop: viewportTop, preferringVisibleTop: preferringVisibleTop) {
+        if let firstItem = firstVisibleReadingItem(viewportTop: viewportTop, preferringVisibleTop: preferringVisibleTop, matchingItem: matchingItem) {
             return .item(
                 id: firstItem.id,
                 distanceFromTop: firstItem.frame.minY - viewportTop,
@@ -374,11 +376,12 @@ final class TimelineCollectionView: UICollectionView {
         return isPresentingRefresh ? max(top, 0) : top
     }
 
-    private func firstVisibleReadingItem(viewportTop: CGFloat, preferringVisibleTop: Bool = false) -> (id: String, frame: CGRect)? {
+    private func firstVisibleReadingItem(viewportTop: CGFloat, preferringVisibleTop: Bool = false, matchingItem: ((String) -> Bool)? = nil) -> (id: String, frame: CGRect)? {
         let visibleTop = viewportTop + max(readingTopOcclusion?() ?? 0, 0)
         let viewportBottom = contentOffset.y + bounds.height - adjustedContentInset.bottom
         let candidates = indexPathsForVisibleItems.compactMap { indexPath -> (id: String, frame: CGRect)? in
             guard let id = readingItemID?(indexPath),
+                  matchingItem?(id) != false,
                   let frame = layoutAttributesForItem(at: indexPath)?.frame,
                   frame.maxY > visibleTop,
                   frame.minY < viewportBottom else { return nil }

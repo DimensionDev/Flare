@@ -30,7 +30,7 @@ internal class TimelineReadingRepository(
     private val entryMutex = Mutex()
 
     // Identity distinguishes successive readers that reuse the same retained snapshot.
-    private val liveSnapshots = mutableMapOf<String, DbTimelineReadingSession>()
+    private val liveSnapshots = mutableMapOf<String, DbTimelineReadingSnapshot>()
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val selectedTab =
@@ -53,7 +53,7 @@ internal class TimelineReadingRepository(
         }
 
     fun savePosition(
-        record: DbTimelineReadingSession,
+        record: DbTimelineReadingSnapshot,
         pagingKey: String,
         itemKey: String,
         offset: Double,
@@ -64,18 +64,19 @@ internal class TimelineReadingRepository(
     }
 
     suspend fun checkpoint(
-        record: DbTimelineReadingSession,
+        record: DbTimelineReadingSnapshot,
         pagingKey: String,
         itemKey: String,
         offset: Double,
     ) = database.connect {
         val latest = current(record) ?: return@connect
+        if (pagingKey != latest.activeKey) return@connect
         val row = database.pagingTimelineDao().readingItem(pagingKey, itemKey) ?: return@connect
         saveSnapshot(record, latest.copy(anchorId = itemKey, anchorSortId = row.sortId, offset = offset), remember = true)
     }
 
-    suspend fun acquire(record: DbTimelineReadingSession): DbTimelineReadingSession? {
-        var acquired: DbTimelineReadingSession? = null
+    suspend fun acquire(record: DbTimelineReadingSession): DbTimelineReadingSnapshot? {
+        var acquired: DbTimelineReadingSnapshot? = null
         try {
             return database.connect {
                 val latest =
@@ -83,16 +84,24 @@ internal class TimelineReadingRepository(
                         .timelineReadingSessionDao()
                         .get(record.tabId)
                         ?.takeIf { enabled.value == true && it.key == record.key } ?: return@connect null
-                val previousKey = latest.snapshotKey
+                val dao = database.timelineReadingSessionDao()
+                val previous = latest.snapshotKey?.let { dao.snapshot(it) }
+                val previousKey = previous?.key
                 val key = previousKey?.takeIf { it !in liveSnapshots } ?: "${record.key}${Uuid.random()}/"
-                val previousPrefix = previousKey ?: record.key
-                if (key != previousPrefix) copyData(previousPrefix, key)
                 val snapshot =
-                    latest.copy(
-                        snapshotKey = key,
-                        anchorId = latest.anchorId?.let { key + it.removePrefix(previousPrefix) },
-                    )
-                database.timelineReadingSessionDao().saveSnapshot(DbTimelineReadingSnapshot(key, snapshot))
+                    if (previous != null) {
+                        if (key != previous.key) copyData(previous.key, key)
+                        previous.copy(
+                            key = key,
+                            activeKey = key + previous.activeKey.removePrefix(previous.key),
+                            pendingKey = key + previous.pendingKey.removePrefix(previous.key),
+                            anchorId = previous.anchorId?.let { key + it.removePrefix(previous.key) },
+                        )
+                    } else {
+                        DbTimelineReadingSnapshot(key, record.tabId, record.key)
+                    }
+                dao.saveSnapshot(snapshot)
+                if (previous == null) dao.retainSnapshot(record.tabId, key)
                 liveSnapshots[key] = snapshot
                 acquired = snapshot
                 removeUnusedSnapshots(record.key)
@@ -104,41 +113,38 @@ internal class TimelineReadingRepository(
         }
     }
 
-    suspend fun current(record: DbTimelineReadingSession): DbTimelineReadingSession? =
+    suspend fun current(record: DbTimelineReadingSnapshot): DbTimelineReadingSnapshot? =
         database.connect {
-            if (enabled.value != true || liveSnapshots[record.snapshotKey] !== record ||
-                database.timelineReadingSessionDao().get(record.tabId)?.key != record.key
+            if (enabled.value != true || liveSnapshots[record.key] !== record ||
+                database.timelineReadingSessionDao().get(record.tabId)?.key != record.sessionKey
             ) {
                 return@connect null
             }
-            record.snapshotKey?.let { database.timelineReadingSessionDao().snapshot(it)?.session }
+            database.timelineReadingSessionDao().snapshot(record.key)
         }
 
     suspend fun saveSnapshot(
-        lease: DbTimelineReadingSession,
-        record: DbTimelineReadingSession,
+        lease: DbTimelineReadingSnapshot,
+        record: DbTimelineReadingSnapshot,
         remember: Boolean = false,
     ) = database.connect {
         if (current(lease) == null) return@connect
         val dao = database.timelineReadingSessionDao()
-        dao.saveSnapshot(DbTimelineReadingSnapshot(requireNotNull(record.snapshotKey), record))
-        val previous = dao.get(record.tabId) ?: return@connect
-        if (remember || previous.snapshotKey == null || previous.snapshotKey == record.snapshotKey) {
-            dao.save(record)
-        }
-        removeUnusedSnapshots(record.key)
+        dao.saveSnapshot(record)
+        if (remember) dao.retainSnapshot(record.tabId, record.key)
+        removeUnusedSnapshots(record.sessionKey)
     }
 
-    suspend fun release(record: DbTimelineReadingSession) =
+    suspend fun release(record: DbTimelineReadingSnapshot) =
         database.connect {
-            if (liveSnapshots[record.snapshotKey] === record) record.snapshotKey?.let { liveSnapshots.remove(it) }
-            removeUnusedSnapshots(record.key)
+            if (liveSnapshots[record.key] === record) liveSnapshots.remove(record.key)
+            removeUnusedSnapshots(record.sessionKey)
         }
 
     private suspend fun removeUnusedSnapshots(sessionKey: String) {
         val dao = database.timelineReadingSessionDao()
         dao.snapshots(sessionKey).forEach { snapshot ->
-            if (snapshot.key !in liveSnapshots && dao.get(snapshot.session.tabId)?.snapshotKey != snapshot.key) {
+            if (snapshot.key !in liveSnapshots && dao.get(snapshot.tabId)?.snapshotKey != snapshot.key) {
                 deleteData(snapshot.key)
                 dao.deleteSnapshot(snapshot.key)
             }

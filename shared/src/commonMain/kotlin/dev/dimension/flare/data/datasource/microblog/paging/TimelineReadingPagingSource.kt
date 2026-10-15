@@ -8,7 +8,8 @@ internal class TimelineReadingPagingSource(
     private val database: CacheDatabase,
     private val session: TimelineReadingSession,
 ) : BasePagingSource<OffsetFromStartPagingKey, TimelinePageItem>() {
-    private val loader = TimelineDbPageLoader(database, session.activeKey, TimelineDbPageCache())
+    private val pagingKey = session.activeKey
+    private val loader = TimelineDbPageLoader(database, pagingKey, TimelineDbPageCache())
     private val subscription = loader.observeInvalidations(::invalidate)
 
     init {
@@ -31,8 +32,7 @@ internal class TimelineReadingPagingSource(
                 ?: params.key
                 ?: database
                     .timelineReadingSessionDao()
-                    .snapshot(requireNotNull(session.record.snapshotKey))
-                    ?.session
+                    .snapshot(session.record.key)
                     ?.anchorId
                     ?.let(OffsetFromStartPagingKey::Around)
         val offset =
@@ -46,8 +46,8 @@ internal class TimelineReadingPagingSource(
                 }
 
                 is OffsetFromStartPagingKey.Around -> {
-                    dao.readingItem(session.activeKey, key.itemKey)?.let {
-                        (dao.readingItemOffset(session.activeKey, it.sortId) - params.loadSize / 2).coerceAtLeast(0)
+                    dao.readingItem(pagingKey, key.itemKey)?.let {
+                        (dao.readingItemOffset(pagingKey, it.sortId) - params.loadSize / 2).coerceAtLeast(0)
                     } ?: 0
                 }
 

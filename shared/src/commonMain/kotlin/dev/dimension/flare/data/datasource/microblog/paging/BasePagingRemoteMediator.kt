@@ -83,6 +83,7 @@ internal abstract class BasePagingRemoteMediator<Key : Any, T : Any, R : Any>(
     ) {
         database.connect {
             if (!canSave()) return@connect
+            result.saveInTransaction?.invoke()
             val loadType =
                 when (request) {
                     PagingRequest.Refresh -> LoadType.REFRESH

@@ -77,12 +77,12 @@ internal class MixedRemoteMediator(
         try {
             val result = load(pageSize, request, pendingWrites)
             pendingWrites.close()
-            // Nested cursors and staging rows belong to the whole successful batch.
-            database.connect {
+            val writes = buildList { for (write in pendingWrites) add(write) }
+            // Child cursors, staging and the outer page must commit together.
+            return result.copy(saveInTransaction = {
                 checkRequestIsValid()
-                for (write in pendingWrites) write()
-            }
-            return result
+                writes.forEach { it() }
+            })
         } finally {
             pendingWrites.cancel()
         }

@@ -49,14 +49,14 @@ class GuestReadingRetentionTest : RobolectricTest() {
                 assertTrue(settings.homeTimelineTabs.first().isEmpty())
                 reading.enterHome { true }
                 val guest = guestMastodonHomeTimelineTab
-                val record = assertNotNull(reading.open(guest.id, guest.readingSourceKey))
+                val record = assertNotNull(reading.acquire(assertNotNull(reading.open(guest.id, guest.readingSourceKey))))
                 val saved = record.copy(anchorId = "saved-post", anchorSortId = 42L, offset = -25.0)
-                database.timelineReadingSessionDao().save(saved)
+                reading.saveSnapshot(record, saved, remember = true)
                 reading.selectTab(guest.id)
 
                 // Startup account cleanup also updates settings when no home slots changed.
                 settings.updateTabSettingsV2 { copy(homeSlots = homeSlots) }
-                assertEquals(saved, database.timelineReadingSessionDao().get(guest.id))
+                assertEquals(saved, database.timelineReadingSessionDao().snapshot(record.key))
                 assertEquals(guest.id, reading.selectedTab.first())
 
                 settings.updateTabSettingsV2 {

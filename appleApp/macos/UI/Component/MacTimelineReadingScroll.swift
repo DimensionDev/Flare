@@ -27,11 +27,12 @@ final class MacTimelineReadingScroll {
     private var anchor: (key: String, offset: CGFloat)?
     private var restoredRequest: Int64?
 
-    func update(frames: [String: CGRect], state: TimelineReadingState?) {
+    func update(frames: [String: CGRect], firstItemKey: String?, state: TimelineReadingState?) {
         self.frames = frames
         guard let state, let scrollView else { return }
         if let position = state.position {
             guard restoredRequest != position.requestId, !isInteracting,
+                  !position.latest || firstItemKey == position.itemKey,
                   let frame = frames[position.itemKey] else { return }
             let delta = position.latest ? -scrollView.contentView.bounds.minY : frame.minY - CGFloat(position.offset)
             adjust(by: delta)

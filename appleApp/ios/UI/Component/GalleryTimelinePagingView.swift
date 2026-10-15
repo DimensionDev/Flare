@@ -103,7 +103,8 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
               restoredSessionRequest != position.requestId,
               currentSuccess?.isRefreshing == false,
               allowsScrollAnchorRestoration,
-              dataSource.indexPath(for: Self.itemPrefix + position.itemKey) != nil else { return }
+              let indexPath = dataSource.indexPath(for: Self.itemPrefix + position.itemKey),
+              !position.latest || indexPath.item == 0 else { return }
         pendingScrollAnchor = nil
         if position.latest {
             collectionView.setContentOffset(CGPoint(x: 0, y: -collectionView.adjustedContentInset.top), animated: false)

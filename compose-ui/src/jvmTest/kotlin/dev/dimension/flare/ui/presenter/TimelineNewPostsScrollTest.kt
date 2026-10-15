@@ -12,7 +12,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.junit4.v2.createComposeRule
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.swipeUp
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.LoadStates
@@ -32,6 +36,8 @@ import org.junit.Rule
 import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.time.Instant
 
 class TimelineNewPostsScrollTest {
@@ -175,12 +181,98 @@ class TimelineNewPostsScrollTest {
         composeRule.runOnIdle { assertEquals(0, scroll.firstVisibleItemScrollOffset) }
     }
 
+    @Test
+    fun viewLatestWaitsForThePublishedHeadBeforeScrolling() = checkViewLatestPublication()
+
+    @Test
+    fun viewLatestWaitsForThePublishedHeadWithHeader() = checkViewLatestPublication(leadingHeader = true)
+
+    @Test
+    fun scrollingCancelsViewLatestWhileWaitingForThePublishedHead() = checkViewLatestPublication(cancelBeforePublication = true)
+
+    private fun checkViewLatestPublication(
+        leadingHeader: Boolean = false,
+        cancelBeforePublication: Boolean = false,
+    ) {
+        val headerCount = if (leadingHeader) 1 else 0
+        val pages = MutableStateFlow(page(0..9))
+        val scroll = LazyStaggeredGridState(initialFirstVisibleItemIndex = 5 + headerCount)
+        val reading = ReadingState(null)
+        lateinit var state: TimelineWithLazyListState
+        composeRule.setContent {
+            val paging = pages.collectAsLazyPagingItems().toPagingState()
+            val base =
+                object : TimelineItemPresenter.State {
+                    override val listState = paging
+                    override val readingState = reading
+                    override val isRefreshing = paging.isRefreshing || reading.isRefreshing
+
+                    override fun refreshSync() = Unit
+
+                    override suspend fun refreshSuspend() = Unit
+                }
+            val timeline = rememberTimelineWithLazyListState(base, scroll, leadingItemCount = headerCount)
+            SideEffect { state = timeline }
+            LazyVerticalStaggeredGrid(
+                columns = StaggeredGridCells.Fixed(1),
+                state = scroll,
+                modifier = Modifier.size(300.dp, 150.dp).testTag("timeline"),
+            ) {
+                if (leadingHeader) {
+                    item(key = "header") { Box(Modifier.fillMaxWidth().height(60.dp)) }
+                }
+                paging.onSuccess {
+                    items(itemCount, key = itemKey { it.stableItemKey }) {
+                        Box(Modifier.fillMaxWidth().height(100.dp))
+                    }
+                }
+            }
+        }
+        composeRule.runOnIdle {
+            assertEquals("post-5", reading.itemKey)
+            reading.isRefreshing = true
+            reading.position = TimelineReadingPosition("post-5", 0.0, 100, latest = true)
+        }
+        composeRule.runOnIdle {
+            assertNotNull(reading.position, "The old snapshot must not acknowledge View latest")
+            assertEquals(5 + headerCount, scroll.firstVisibleItemIndex)
+            reading.isRefreshing = false
+        }
+        composeRule.runOnIdle {
+            assertNotNull(reading.position, "Refresh completion does not mean the new paging data is presented")
+            assertEquals(5 + headerCount, scroll.firstVisibleItemIndex)
+        }
+        if (cancelBeforePublication) {
+            composeRule.onNodeWithTag("timeline").performTouchInput {
+                swipeUp(startY = 110f, endY = 40f, durationMillis = 200)
+            }
+        }
+        var expectedKey = "post-5"
+        composeRule.runOnIdle {
+            if (cancelBeforePublication) {
+                assertNull(reading.position, "The user's drag must cancel the pending scroll request")
+                expectedKey = assertNotNull(reading.itemKey)
+            }
+            pages.value = page(listOf(5, 10, 6, 7, 8, 9, 0, 1, 2, 3, 4))
+        }
+        composeRule.waitUntil(5_000) {
+            (state.listState as? PagingState.Success)?.itemCount == 11 && reading.position == null
+        }
+        composeRule.runOnIdle {
+            assertEquals(expectedKey, reading.itemKey)
+            if (!cancelBeforePublication) {
+                assertEquals(0, scroll.firstVisibleItemIndex)
+                assertEquals(0, scroll.firstVisibleItemScrollOffset)
+            }
+        }
+    }
+
     private class ReadingState(
-        position: TimelineReadingPosition,
+        position: TimelineReadingPosition?,
     ) : TimelineReadingState {
         override var position by mutableStateOf<TimelineReadingPosition?>(position)
         override val hasNewContent = false
-        override val isRefreshing = false
+        override var isRefreshing by mutableStateOf(false)
         var itemKey: String? = null
 
         override fun updateViewport(
@@ -207,7 +299,7 @@ class TimelineNewPostsScrollTest {
         override suspend fun showLatest() = Unit
     }
 
-    private fun page(indices: IntRange): PagingData<UiTimelineV2> =
+    private fun page(indices: Iterable<Int>): PagingData<UiTimelineV2> =
         PagingData.from(
             data =
                 indices.map { index ->

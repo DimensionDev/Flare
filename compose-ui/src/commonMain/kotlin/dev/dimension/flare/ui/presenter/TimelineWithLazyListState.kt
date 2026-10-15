@@ -106,7 +106,8 @@ internal fun rememberTimelineWithLazyListState(
             snapshotFlow {
                 val data = paging as? PagingState.Success
                 val index = data?.let { (0 until it.itemCount).firstOrNull { index -> it.peek(index)?.stableItemKey == position.itemKey } }
-                if (data != null && index != null && !data.isRefreshing) data to index else null
+                // An overlapping old snapshot may already contain the requested new head.
+                if (data != null && index != null && !data.isRefreshing && (!position.latest || index == 0)) data to index else null
             }.first { it != null }!!
         lazyListState.scrollToItem(
             if (position.latest) 0 else target + leadingItemCount,

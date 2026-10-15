@@ -704,6 +704,24 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         try fixture.assertPosition(("t:case-0", 0))
     }
 
+    func testSessionViewLatestWaitsForThePublishedHead() async throws {
+        let fixture = await Fixture(posts: true)
+        await fixture.scroll(1_500)
+        let previousPosition = try fixture.position()
+        let reading = ReadingState()
+        reading.position = TimelineReadingPosition(itemKey: "case-20", offset: 0, requestId: 3, latest: true)
+        fixture.controller.readingState = reading
+        await fixture.settle()
+        XCTAssertNotNil(reading.position)
+        try fixture.assertPosition(previousPosition)
+
+        fixture.input.items = ([20, 100] + Array(21..<60) + Array(0..<20)).map { .post(makeRow($0)) }
+        await fixture.apply()
+        XCTAssertNil(reading.position)
+        XCTAssertEqual(fixture.controller.effectiveContentOffsetY, 0, accuracy: 0.5)
+        XCTAssertEqual(reading.itemKey, "case-20")
+    }
+
     func testUserScrollCancelsPendingSessionRestoration() async throws {
         let fixture = await Fixture(initialState: .loading)
         let reading = ReadingState()

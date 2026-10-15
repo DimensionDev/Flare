@@ -53,7 +53,7 @@ struct TimelinePagingView: View {
                     readingScroll.scrollView = scrollView
                 }
                 .onPreferenceChange(TimelineReadingFrames.self) { frames in
-                    readingScroll.update(frames: frames, state: readingState)
+                    readingScroll.update(frames: frames, firstItemKey: readingItemKeys.first, state: readingState)
                 }
                 .onChange(of: readingState?.position?.requestId, initial: true) { _, _ in
                     restorePosition(using: scrollProxy)
@@ -94,12 +94,13 @@ struct TimelinePagingView: View {
     }
 
     private func restorePosition(using proxy: ScrollViewProxy) {
-        guard let position = readingState?.position, readingItemKeys.contains(position.itemKey) else { return }
+        guard let position = readingState?.position, readingItemKeys.contains(position.itemKey),
+              !position.latest || readingItemKeys.first == position.itemKey else { return }
         // Materialize the local window's anchor before applying its precise pixel offset.
         if readingScroll.frames[position.itemKey] == nil {
             proxy.scrollTo(position.itemKey, anchor: .top)
         }
-        readingScroll.update(frames: readingScroll.frames, state: readingState)
+        readingScroll.update(frames: readingScroll.frames, firstItemKey: readingItemKeys.first, state: readingState)
     }
 
     @ViewBuilder

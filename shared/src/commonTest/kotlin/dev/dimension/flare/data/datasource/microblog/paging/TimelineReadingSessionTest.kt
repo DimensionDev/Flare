@@ -5,6 +5,9 @@ import androidx.paging.PagingDataEvent
 import androidx.paging.PagingDataPresenter
 import androidx.paging.PagingSource
 import androidx.room3.Room
+import androidx.sqlite.SQLiteConnection
+import androidx.sqlite.SQLiteDriver
+import androidx.sqlite.SQLiteStatement
 import dev.dimension.flare.RobolectricTest
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.connect
@@ -52,14 +55,40 @@ import kotlin.time.Instant
 @OptIn(ExperimentalPagingApi::class, ExperimentalCoroutinesApi::class)
 class TimelineReadingSessionTest : RobolectricTest() {
     private lateinit var database: CacheDatabase
+    private var afterPagingDelete: (String) -> Unit = {}
 
     @BeforeTest
     fun setup() {
+        val driver = createDatabaseDriver()
         database =
             Room
                 .memoryDatabaseBuilder<CacheDatabase>()
-                .setDriver(createDatabaseDriver())
-                .setQueryCoroutineContext(Dispatchers.Unconfined)
+                .setDriver(
+                    object : SQLiteDriver by driver {
+                        override fun open(fileName: String): SQLiteConnection {
+                            val connection = driver.open(fileName)
+                            return object : SQLiteConnection by connection {
+                                override fun prepare(sql: String): SQLiteStatement {
+                                    val statement = connection.prepare(sql)
+                                    if (sql != "DELETE FROM DbPagingTimeline WHERE pagingKey = ?") return statement
+                                    return object : SQLiteStatement by statement {
+                                        private var pagingKey = ""
+
+                                        override fun bindText(
+                                            index: Int,
+                                            value: String,
+                                        ) {
+                                            if (index == 1) pagingKey = value
+                                            statement.bindText(index, value)
+                                        }
+
+                                        override fun step(): Boolean = statement.step().also { afterPagingDelete(pagingKey) }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                ).setQueryCoroutineContext(Dispatchers.Unconfined)
                 .build()
     }
 
@@ -685,6 +714,93 @@ class TimelineReadingSessionTest : RobolectricTest() {
             assertNull(session.state.value.position)
             assertTrue(session.state.value.hasNewContent)
             assertEquals(21, rows(session).size)
+        }
+
+    @Test
+    fun gestureDuringAutomaticPublicationDoesNotJump() = gestureDuringPublication(automatic = true)
+
+    @Test
+    fun gestureDuringViewLatestPublicationDoesNotJump() = gestureDuringPublication(automatic = false)
+
+    private fun gestureDuringPublication(automatic: Boolean) =
+        runTest {
+            val started = CompletableDeferred<Unit>()
+            val finish = CompletableDeferred<Unit>()
+            var resolvingLatest = false
+            val loader = Loader(prepend = automatic)
+            val session =
+                session(loader, backgroundScope, visible = {
+                    if (resolvingLatest) {
+                        started.complete(Unit)
+                        finish.await()
+                    }
+                    true
+                })
+            session.refresh(false, initial = true)
+            val original = rows(session)
+            val key = "${session.activeKey}_${original.first().statusId}"
+            session.updateViewport(ReadingViewport(key, 0.0, true, false))
+            loader.response = page(10..20, "fresh-cursor")
+            loader.forward = loader.response
+            if (automatic) {
+                loader.beforeLoad = {
+                    if (loader.requests.last() is PagingRequest.Prepend) resolvingLatest = true
+                }
+            } else {
+                session.refresh(false)
+                resolvingLatest = true
+            }
+            val publication = async { if (automatic) session.refresh(true) else session.showLatest() }
+            started.await()
+            session.updateViewport(ReadingViewport(key, -18.0, false, true))
+            session.cancelRestoration()
+            session.updateViewport(ReadingViewport(key, -18.0, false, false))
+            finish.complete(Unit)
+            publication.await()
+            assertNull(session.state.value.position)
+            assertTrue(session.state.value.hasNewContent)
+            assertEquals(original, rows(session).takeLast(original.size))
+            assertEquals(if (automatic) 21 else 10, rows(session).size)
+            assertEquals("old-cursor", database.pagingTimelineDao().getPagingKey(session.activeKey)?.nextKey)
+            assertTrue(assertNotNull(database.timelineReadingSessionDao().get("home")).pendingReady)
+
+            session.showLatest()
+            assertTrue(assertNotNull(session.state.value.position).latest)
+            assertEquals((10..20).map(Int::toString), ids(session))
+            assertEquals("fresh-cursor", database.pagingTimelineDao().getPagingKey(session.activeKey)?.nextKey)
+            assertFalse(session.state.value.hasNewContent)
+        }
+
+    @Test
+    fun gestureDuringPublicationWritesRollsBackRowsAndCursors() =
+        runTest {
+            val loader = Loader()
+            val session = session(loader, backgroundScope)
+            session.refresh(false, initial = true)
+            val original = rows(session)
+            loader.response = page(100..110, "fresh-cursor")
+            session.refresh(false)
+            val staged = assertNotNull(database.timelineReadingSessionDao().get("home"))
+            var interrupted = false
+            afterPagingDelete = { key ->
+                if (key == session.activeKey && !interrupted) {
+                    interrupted = true
+                    session.cancelRestoration()
+                }
+            }
+            session.showLatest()
+            assertTrue(interrupted, "Cancel after the active rows have been deleted inside the transaction")
+            assertNull(session.state.value.position)
+            assertEquals(original, rows(session))
+            assertEquals("old-cursor", database.pagingTimelineDao().getPagingKey(session.activeKey)?.nextKey)
+            assertEquals(staged, database.timelineReadingSessionDao().get("home"))
+            assertTrue(session.state.value.hasNewContent)
+            assertFalse(session.state.value.refreshing)
+
+            session.showLatest()
+            assertTrue(assertNotNull(session.state.value.position).latest)
+            assertEquals((100..110).map(Int::toString), ids(session))
+            assertEquals("fresh-cursor", database.pagingTimelineDao().getPagingKey(session.activeKey)?.nextKey)
         }
 
     private suspend fun session(

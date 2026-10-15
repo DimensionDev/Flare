@@ -24,6 +24,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -33,6 +34,7 @@ internal data class ReadingSessionState(
     val position: TimelineReadingPosition? = null,
     val hasNewContent: Boolean = false,
     val refreshing: Boolean = false,
+    val interactionGeneration: Long = 0,
 )
 
 internal data class ReadingViewport(
@@ -59,7 +61,6 @@ internal class TimelineReadingSession(
     private val pendingKey = "${record.key}pending/"
     val state = MutableStateFlow(ReadingSessionState(hasNewContent = record.hasNewContent))
     private val viewport = MutableStateFlow(ReadingViewport(null, 0.0, atTop = false, interacting = false))
-    private val interactionGeneration = MutableStateFlow(0L)
     private val mutex = Mutex()
     private var checkpoint: Job? = null
     private var startupPending = false
@@ -219,7 +220,7 @@ internal class TimelineReadingSession(
 
     fun updateViewport(value: ReadingViewport) {
         val wasInteracting = viewport.value.interacting
-        if (value.interacting && !wasInteracting) interactionGeneration.update { it + 1 }
+        if (value.interacting && !wasInteracting) state.update { it.copy(interactionGeneration = it.interactionGeneration + 1) }
         viewport.value = value
         if (value.interacting && !wasInteracting) scope.launch { repository.selectTab(record.tabId) }
         checkpoint?.cancel()
@@ -240,8 +241,7 @@ internal class TimelineReadingSession(
     }
 
     fun cancelRestoration() {
-        interactionGeneration.update { it + 1 }
-        state.update { it.copy(position = null) }
+        state.update { it.copy(position = null, interactionGeneration = it.interactionGeneration + 1) }
         finishStartup()
     }
 
@@ -259,7 +259,7 @@ internal class TimelineReadingSession(
     ) = withContext(PlatformDispatchers.IO) {
         mutex.withLock {
             if (!valid()) return@withLock
-            val generation = interactionGeneration.value
+            val generation = state.value.interactionGeneration
             val position = viewport.value
             state.update { it.copy(refreshing = true) }
             try {
@@ -304,11 +304,11 @@ internal class TimelineReadingSession(
                             database.timelineReadingSessionDao().save(latest.copy(hasNewContent = true, pendingReady = true))
                         }
                         state.update { it.copy(hasNewContent = true) }
-                        if (followLatest && interactionGeneration.value == generation &&
+                        if (followLatest && state.value.interactionGeneration == generation &&
                             !viewport.value.interacting && viewport.value.itemKey == position.itemKey &&
                             kotlin.math.abs(viewport.value.offset - position.offset) < 1.0
                         ) {
-                            showLatestLocked()
+                            showLatestLocked(generation)
                         }
                     } else {
                         database.connect {
@@ -361,13 +361,14 @@ internal class TimelineReadingSession(
 
     suspend fun showLatest() =
         withContext(PlatformDispatchers.IO) {
+            val generation = state.value.interactionGeneration
             if (state.value.hasNewContent && database.timelineReadingSessionDao().get(record.tabId)?.pendingReady != true) {
                 refresh(automatic = false)
             }
             mutex.withLock {
                 state.update { it.copy(refreshing = true) }
                 try {
-                    showLatestLocked()
+                    showLatestLocked(generation)
                 } catch (error: kotlinx.coroutines.CancellationException) {
                     throw error
                 } catch (error: Exception) {
@@ -378,30 +379,33 @@ internal class TimelineReadingSession(
             }
         }
 
-    private suspend fun showLatestLocked() {
-        if (!valid()) return
+    private suspend fun showLatestLocked(generation: Long) {
+        if (!valid() || state.value.interactionGeneration != generation) return
         val ready = database.timelineReadingSessionDao().get(record.tabId)?.pendingReady == true
         if (ready) {
-            publishLatest(requestScroll = true)
+            publishLatest(requestScroll = true, generation = generation)
         } else if (!state.value.hasNewContent) {
             database.pagingTimelineDao().getTimelinePageIdentities(activeKey, 0, 1).firstOrNull()?.let {
-                requestPosition("${activeKey}_${it.statusId}", 0.0, latest = true)
+                requestPosition("${activeKey}_${it.statusId}", 0.0, latest = true, generation = generation)
             }
         }
     }
 
-    private suspend fun publishLatest(requestScroll: Boolean) {
+    private suspend fun publishLatest(
+        requestScroll: Boolean,
+        generation: Long = state.value.interactionGeneration,
+    ) {
         val first = visibleRow(pendingKey, 0)?.timeline
-        if (requestScroll && first == null) return
+        if ((requestScroll && first == null) || state.value.interactionGeneration != generation) return
         val previousPosition = state.value.position
-        val requestedPosition =
-            if (requestScroll && first != null) requestPosition("${activeKey}_${first.statusId}", 0.0, latest = true) else null
+        var requestedPosition: TimelineReadingPosition? = null
         var published = false
         try {
             published =
                 database.connect {
                     val latest =
                         database.timelineReadingSessionDao().get(record.tabId)?.takeIf { it.key == record.key } ?: return@connect false
+                    if (state.value.interactionGeneration != generation) return@connect false
                     repository.deleteData(activeKey)
                     repository.copyData(pendingKey, activeKey)
                     database.timelineReadingSessionDao().save(
@@ -414,11 +418,25 @@ internal class TimelineReadingSession(
                         ),
                     )
                     repository.deleteData(pendingKey)
+                    if (requestScroll && first != null) {
+                        requestedPosition = requestPosition("${activeKey}_${first.statusId}", 0.0, latest = true, generation = generation)
+                        if (requestedPosition == null) throw PublicationCancelled()
+                    } else if (state.value.interactionGeneration != generation) {
+                        throw PublicationCancelled()
+                    }
                     true
                 }
+        } catch (_: PublicationCancelled) {
+            // Roll back the interrupted publication while letting the refresh finish normally.
         } finally {
             if (!published && requestedPosition != null) {
-                state.update { if (it.position == requestedPosition) it.copy(position = previousPosition) else it }
+                state.update {
+                    if (it.position == requestedPosition) {
+                        it.copy(position = if (it.interactionGeneration == generation) previousPosition else null)
+                    } else {
+                        it
+                    }
+                }
             }
         }
         if (!published) return
@@ -433,7 +451,8 @@ internal class TimelineReadingSession(
         key: String,
         offset: Double,
         latest: Boolean = false,
-    ): TimelineReadingPosition {
+        generation: Long = state.value.interactionGeneration,
+    ): TimelineReadingPosition? {
         val position =
             TimelineReadingPosition(
                 key,
@@ -442,7 +461,12 @@ internal class TimelineReadingSession(
                     .nextId(),
                 latest,
             )
-        state.update { it.copy(position = position) }
-        return position
+        return state
+            .updateAndGet {
+                if (it.interactionGeneration == generation) it.copy(position = position) else it
+            }.position
+            ?.takeIf { it == position }
     }
+
+    private class PublicationCancelled : Exception()
 }

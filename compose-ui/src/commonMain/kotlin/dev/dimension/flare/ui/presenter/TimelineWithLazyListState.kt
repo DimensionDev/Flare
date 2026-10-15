@@ -10,6 +10,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
@@ -61,6 +62,7 @@ internal fun rememberTimelineWithLazyListState(
     leadingItemCount: Int = 0,
 ): TimelineWithLazyListState {
     var newPostCount by remember { mutableIntStateOf(0) }
+    var restoringPosition by remember(lazyListState) { mutableStateOf(false) }
     val reading by rememberUpdatedState(baseState.readingState)
     val paging by rememberUpdatedState(baseState.listState)
     val density = if (baseState.readingState != null) LocalDensity.current.density else 1f
@@ -93,9 +95,10 @@ internal fun rememberTimelineWithLazyListState(
                 visible?.key as? String,
                 (visible?.offset?.y ?: 0).toDouble() / density,
                 lazyListState.firstVisibleItemIndex == 0 && lazyListState.firstVisibleItemScrollOffset == 0,
-                lazyListState.isScrollInProgress,
+                lazyListState.isScrollInProgress && !restoringPosition,
             )
         }.collect { viewport ->
+            if (viewport.interacting) reading?.cancelRestoration()
             reading?.updateViewport(viewport.key, viewport.offset, viewport.atTop, viewport.interacting)
         }
     }
@@ -109,11 +112,16 @@ internal fun rememberTimelineWithLazyListState(
                 // An overlapping old snapshot may already contain the requested new head.
                 if (data != null && index != null && !data.isRefreshing && (!position.latest || index == 0)) data to index else null
             }.first { it != null }!!
-        lazyListState.scrollToItem(
-            if (position.latest) 0 else target + leadingItemCount,
-            if (position.latest) 0 else (-position.offset * density).roundToInt(),
-        )
-        reading?.positionRestored(position.requestId)
+        restoringPosition = true
+        try {
+            lazyListState.scrollToItem(
+                if (position.latest) 0 else target + leadingItemCount,
+                if (position.latest) 0 else (-position.offset * density).roundToInt(),
+            )
+            reading?.positionRestored(position.requestId)
+        } finally {
+            restoringPosition = false
+        }
     }
     val isAtTheTop by remember(lazyListState) {
         derivedStateOf {

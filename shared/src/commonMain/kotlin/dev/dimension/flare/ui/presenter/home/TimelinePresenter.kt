@@ -68,6 +68,7 @@ import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.web.shared.WebPresenter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch
@@ -256,7 +257,7 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
                             if (readingRepository.enabled.value != true) return@flow
                             val session =
                                 TimelineReadingSession(
-                                    record,
+                                    readingRepository.acquire(record) ?: return@flow,
                                     remoteLoader,
                                     database,
                                     readingRepository,
@@ -279,9 +280,13 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
                                         if (it is LoginExpiredException) inAppNotification.onError(Message.LoginExpired, it)
                                     },
                                 )
-                            session.prepare()
-                            readingSession.value = session
-                            emitAll(session.pagingData)
+                            try {
+                                session.prepare()
+                                readingSession.value = session
+                                emitAll(session.pagingData)
+                            } finally {
+                                withContext(NonCancellable) { session.close() }
+                            }
                         }
                     },
             )

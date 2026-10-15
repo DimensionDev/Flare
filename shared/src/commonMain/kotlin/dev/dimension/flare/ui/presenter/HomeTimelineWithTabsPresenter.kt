@@ -4,8 +4,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import dev.dimension.flare.data.model.appearance.TimelineAppearance
 import dev.dimension.flare.data.model.tab.UiTimelineTabItem
 import dev.dimension.flare.data.model.tab.guestMastodonHomeTimelineTab
@@ -77,6 +79,10 @@ public class HomeTimelineWithTabsPresenter : PresenterBase<HomeTimelineWithTabsP
         }
         val selection by remember { readingRepository.selectedTab.map { Selection(it) } }.collectAsState(null)
         val scope = rememberCoroutineScope()
+        var currentTabId by remember { mutableStateOf<String?>(null) }
+        LaunchedEffect(readingEnabled) {
+            if (readingEnabled == true) currentTabId?.let { readingRepository.selectTab(it) }
+        }
 
         return object : State, UserState by accountState {
             override val tabState = tabs
@@ -84,6 +90,7 @@ public class HomeTimelineWithTabsPresenter : PresenterBase<HomeTimelineWithTabsP
             override val selectionLoaded = readingEnabled != null && (readingEnabled == false || selection != null)
 
             override fun selectTab(id: String) {
+                currentTabId = id
                 scope.launch { readingRepository.selectTab(id) }
             }
 

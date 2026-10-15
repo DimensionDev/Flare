@@ -1,5 +1,6 @@
 package dev.dimension.flare.data.database.cache.model
 
+import androidx.room3.Embedded
 import androidx.room3.Entity
 import androidx.room3.PrimaryKey
 
@@ -13,6 +14,13 @@ internal data class DbTimelineReadingSession(
     val offset: Double = 0.0,
     val hasNewContent: Boolean = false,
     val pendingReady: Boolean = false,
+    val snapshotKey: String? = null,
+)
+
+@Entity
+internal data class DbTimelineReadingSnapshot(
+    @PrimaryKey val key: String,
+    @Embedded(prefix = "session_") val session: DbTimelineReadingSession,
 )
 
 @Entity

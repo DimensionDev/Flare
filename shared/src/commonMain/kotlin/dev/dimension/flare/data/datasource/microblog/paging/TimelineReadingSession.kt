@@ -57,11 +57,12 @@ internal class TimelineReadingSession(
     private val isVisible: suspend (UiTimelineV2) -> Boolean,
     private val notifyError: (Throwable) -> Unit,
 ) : BaseRemoteMediator<OffsetFromStartPagingKey, TimelinePageItem>() {
-    val activeKey = "${record.key}active/"
-    private val pendingKey = "${record.key}pending/"
+    val activeKey = "${requireNotNull(record.snapshotKey)}active/"
+    private val pendingKey = "${requireNotNull(record.snapshotKey)}pending/"
     val state = MutableStateFlow(ReadingSessionState(hasNewContent = record.hasNewContent))
     private val viewport = MutableStateFlow(ReadingViewport(null, 0.0, atTop = false, interacting = false))
     private val mutex = Mutex()
+    private val closed = MutableStateFlow(false)
     private var checkpoint: Job? = null
     private var startupPending = false
     private var active = mediator(activeKey)
@@ -78,8 +79,7 @@ internal class TimelineReadingSession(
             ).flow
         }
 
-    private suspend fun valid(): Boolean =
-        repository.enabled.value == true && database.timelineReadingSessionDao().get(record.tabId)?.key == record.key
+    private suspend fun valid(): Boolean = !closed.value && repository.current(record) != null
 
     private fun scopedLoader(key: String): CacheableRemoteLoader<UiTimelineV2> =
         if (loader is MixedRemoteMediator) {
@@ -211,6 +211,7 @@ internal class TimelineReadingSession(
     }
 
     fun savePosition() {
+        if (closed.value) return
         val value = viewport.value
         if (state.value.position == null && value.itemKey != null && value.offset.isFinite()) {
             checkpoint?.cancel()
@@ -218,7 +219,19 @@ internal class TimelineReadingSession(
         }
     }
 
+    suspend fun close() {
+        closed.value = true
+        state.update { it.copy(interactionGeneration = it.interactionGeneration + 1) }
+        checkpoint?.cancel()
+        val value = viewport.value
+        if (state.value.position == null && value.itemKey != null && value.offset.isFinite()) {
+            repository.checkpoint(record, activeKey, value.itemKey, value.offset)
+        }
+        repository.release(record)
+    }
+
     fun updateViewport(value: ReadingViewport) {
+        if (closed.value) return
         val wasInteracting = viewport.value.interacting
         if (value.interacting && !wasInteracting) state.update { it.copy(interactionGeneration = it.interactionGeneration + 1) }
         viewport.value = value
@@ -228,8 +241,7 @@ internal class TimelineReadingSession(
             checkpoint =
                 scope.launch(PlatformDispatchers.IO) {
                     delay(200)
-                    val row = database.pagingTimelineDao().readingItem(activeKey, value.itemKey) ?: return@launch
-                    database.timelineReadingSessionDao().savePosition(record.tabId, record.key, value.itemKey, row.sortId, value.offset)
+                    repository.checkpoint(record, activeKey, value.itemKey, value.offset)
                 }
         }
     }
@@ -264,8 +276,8 @@ internal class TimelineReadingSession(
             state.update { it.copy(refreshing = true) }
             try {
                 database.connect {
-                    val latest = database.timelineReadingSessionDao().get(record.tabId)?.takeIf { it.key == record.key } ?: return@connect
-                    database.timelineReadingSessionDao().save(latest.copy(pendingReady = false))
+                    val latest = repository.current(record) ?: return@connect
+                    repository.saveSnapshot(record, latest.copy(pendingReady = false))
                     repository.deleteData(pendingKey)
                 }
                 val response = pending.load(40, PagingRequest.Refresh)
@@ -273,8 +285,8 @@ internal class TimelineReadingSession(
                 pending.saveResponse(PagingRequest.Refresh, response)
                 val hasVisibleRows = response.data.any { isVisible(it.asUi(pendingKey)) }
                 database.connect {
-                    val latest = database.timelineReadingSessionDao().get(record.tabId)?.takeIf { it.key == record.key } ?: return@connect
-                    database.timelineReadingSessionDao().save(latest.copy(pendingReady = hasVisibleRows))
+                    val latest = repository.current(record) ?: return@connect
+                    repository.saveSnapshot(record, latest.copy(pendingReady = hasVisibleRows))
                 }
                 val currentIds = database.pagingTimelineDao().getStatusIdsWithInlineParents(activeKey).toSet()
                 val newVisible = response.data.any { it.timeline.statusId !in currentIds && isVisible(it.asUi(pendingKey)) }
@@ -300,8 +312,8 @@ internal class TimelineReadingSession(
                                         },
                                 ),
                             )
-                            val latest = database.timelineReadingSessionDao().get(record.tabId) ?: return@connect
-                            database.timelineReadingSessionDao().save(latest.copy(hasNewContent = true, pendingReady = true))
+                            val latest = repository.current(record) ?: return@connect
+                            repository.saveSnapshot(record, latest.copy(hasNewContent = true, pendingReady = true))
                         }
                         state.update { it.copy(hasNewContent = true) }
                         if (followLatest && state.value.interactionGeneration == generation &&
@@ -313,8 +325,8 @@ internal class TimelineReadingSession(
                     } else {
                         database.connect {
                             val latest =
-                                database.timelineReadingSessionDao().get(record.tabId)?.takeIf { it.key == record.key } ?: return@connect
-                            database.timelineReadingSessionDao().save(latest.copy(hasNewContent = true, pendingReady = true))
+                                repository.current(record) ?: return@connect
+                            repository.saveSnapshot(record, latest.copy(hasNewContent = true, pendingReady = true))
                         }
                         state.update { it.copy(hasNewContent = true) }
                     }
@@ -362,7 +374,7 @@ internal class TimelineReadingSession(
     suspend fun showLatest() =
         withContext(PlatformDispatchers.IO) {
             val generation = state.value.interactionGeneration
-            if (state.value.hasNewContent && database.timelineReadingSessionDao().get(record.tabId)?.pendingReady != true) {
+            if (state.value.hasNewContent && repository.current(record)?.pendingReady != true) {
                 refresh(automatic = false)
             }
             mutex.withLock {
@@ -381,7 +393,7 @@ internal class TimelineReadingSession(
 
     private suspend fun showLatestLocked(generation: Long) {
         if (!valid() || state.value.interactionGeneration != generation) return
-        val ready = database.timelineReadingSessionDao().get(record.tabId)?.pendingReady == true
+        val ready = repository.current(record)?.pendingReady == true
         if (ready) {
             publishLatest(requestScroll = true, generation = generation)
         } else if (!state.value.hasNewContent) {
@@ -404,11 +416,12 @@ internal class TimelineReadingSession(
             published =
                 database.connect {
                     val latest =
-                        database.timelineReadingSessionDao().get(record.tabId)?.takeIf { it.key == record.key } ?: return@connect false
+                        repository.current(record) ?: return@connect false
                     if (state.value.interactionGeneration != generation) return@connect false
                     repository.deleteData(activeKey)
                     repository.copyData(pendingKey, activeKey)
-                    database.timelineReadingSessionDao().save(
+                    repository.saveSnapshot(
+                        record,
                         latest.copy(
                             anchorId = first?.let { "${activeKey}_${it.statusId}" },
                             anchorSortId = first?.sortId,
@@ -416,6 +429,7 @@ internal class TimelineReadingSession(
                             hasNewContent = false,
                             pendingReady = false,
                         ),
+                        remember = requestScroll,
                     )
                     repository.deleteData(pendingKey)
                     if (requestScroll && first != null) {

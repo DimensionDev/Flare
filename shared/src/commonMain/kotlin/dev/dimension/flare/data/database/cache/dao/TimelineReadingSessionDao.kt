@@ -5,10 +5,26 @@ import androidx.room3.Query
 import androidx.room3.Upsert
 import dev.dimension.flare.data.database.cache.model.DbHomeTimelineSelection
 import dev.dimension.flare.data.database.cache.model.DbTimelineReadingSession
+import dev.dimension.flare.data.database.cache.model.DbTimelineReadingSnapshot
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 internal interface TimelineReadingSessionDao {
+    @Query("SELECT * FROM DbTimelineReadingSnapshot WHERE `key` = :key")
+    suspend fun snapshot(key: String): DbTimelineReadingSnapshot?
+
+    @Query("SELECT * FROM DbTimelineReadingSnapshot WHERE session_key = :sessionKey")
+    suspend fun snapshots(sessionKey: String): List<DbTimelineReadingSnapshot>
+
+    @Upsert
+    suspend fun saveSnapshot(snapshot: DbTimelineReadingSnapshot)
+
+    @Query("DELETE FROM DbTimelineReadingSnapshot WHERE `key` = :key")
+    suspend fun deleteSnapshot(key: String)
+
+    @Query("DELETE FROM DbTimelineReadingSnapshot WHERE session_key = :sessionKey")
+    suspend fun deleteSnapshots(sessionKey: String)
+
     @Query("SELECT * FROM DbTimelineReadingSession WHERE tabId = :tabId")
     suspend fun get(tabId: String): DbTimelineReadingSession?
 

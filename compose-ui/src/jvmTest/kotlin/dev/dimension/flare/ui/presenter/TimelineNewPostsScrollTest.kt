@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performMouseInput
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeUp
 import androidx.compose.ui.unit.dp
@@ -190,9 +191,14 @@ class TimelineNewPostsScrollTest {
     @Test
     fun scrollingCancelsViewLatestWhileWaitingForThePublishedHead() = checkViewLatestPublication(cancelBeforePublication = true)
 
+    @Test
+    fun mouseWheelCancelsViewLatestWhileWaitingForThePublishedHead() =
+        checkViewLatestPublication(cancelBeforePublication = true, mouseWheel = true)
+
     private fun checkViewLatestPublication(
         leadingHeader: Boolean = false,
         cancelBeforePublication: Boolean = false,
+        mouseWheel: Boolean = false,
     ) {
         val headerCount = if (leadingHeader) 1 else 0
         val pages = MutableStateFlow(page(0..9))
@@ -243,15 +249,24 @@ class TimelineNewPostsScrollTest {
             assertEquals(5 + headerCount, scroll.firstVisibleItemIndex)
         }
         if (cancelBeforePublication) {
-            composeRule.onNodeWithTag("timeline").performTouchInput {
-                swipeUp(startY = 110f, endY = 40f, durationMillis = 200)
+            if (mouseWheel) {
+                composeRule.onNodeWithTag("timeline").performMouseInput {
+                    moveTo(center)
+                    scroll(3f)
+                }
+            } else {
+                composeRule.onNodeWithTag("timeline").performTouchInput {
+                    swipeUp(startY = 110f, endY = 40f, durationMillis = 200)
+                }
             }
         }
         var expectedKey = "post-5"
+        var expectedOffset = 0
         composeRule.runOnIdle {
             if (cancelBeforePublication) {
-                assertNull(reading.position, "The user's drag must cancel the pending scroll request")
+                assertNull(reading.position, "The user's scroll must cancel the pending scroll request")
                 expectedKey = assertNotNull(reading.itemKey)
+                expectedOffset = scroll.firstVisibleItemScrollOffset
             }
             pages.value = page(listOf(5, 10, 6, 7, 8, 9, 0, 1, 2, 3, 4))
         }
@@ -260,7 +275,9 @@ class TimelineNewPostsScrollTest {
         }
         composeRule.runOnIdle {
             assertEquals(expectedKey, reading.itemKey)
-            if (!cancelBeforePublication) {
+            if (cancelBeforePublication) {
+                assertEquals(expectedOffset, scroll.firstVisibleItemScrollOffset)
+            } else {
                 assertEquals(0, scroll.firstVisibleItemIndex)
                 assertEquals(0, scroll.firstVisibleItemScrollOffset)
             }

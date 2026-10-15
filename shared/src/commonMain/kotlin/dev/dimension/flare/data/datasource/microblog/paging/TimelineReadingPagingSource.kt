@@ -29,7 +29,12 @@ internal class TimelineReadingPagingSource(
                 }
             )
                 ?: params.key
-                ?: (database.timelineReadingSessionDao().get(session.record.tabId)?.anchorId)?.let(OffsetFromStartPagingKey::Around)
+                ?: database
+                    .timelineReadingSessionDao()
+                    .snapshot(requireNotNull(session.record.snapshotKey))
+                    ?.session
+                    ?.anchorId
+                    ?.let(OffsetFromStartPagingKey::Around)
         val offset =
             when (key) {
                 is OffsetFromStartPagingKey.Append -> {

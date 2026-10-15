@@ -29,6 +29,12 @@ class CacheDatabaseDestructiveMigrationTest {
             assertCacheIsRebuilt(fromVersion = 47)
         }
 
+    @Test
+    fun version49CacheIsRebuiltWithIndependentReadingSnapshots() =
+        runTest {
+            assertCacheIsRebuilt(fromVersion = 49)
+        }
+
     private suspend fun assertCacheIsRebuilt(fromVersion: Int) {
         val databasePath = Files.createTempFile("flare-cache-v$fromVersion", ".db")
         val path = databasePath.toAbsolutePath().toString()

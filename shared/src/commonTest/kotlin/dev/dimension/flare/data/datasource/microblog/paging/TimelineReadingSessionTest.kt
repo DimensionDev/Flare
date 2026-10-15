@@ -396,7 +396,7 @@ class TimelineReadingSessionTest : RobolectricTest() {
             assertEquals("new-cursor", database.pagingTimelineDao().getPagingKey(session.activeKey)?.nextKey)
             assertTrue(assertNotNull(session.state.value.position).latest)
             assertFalse(session.state.value.hasNewContent)
-            assertTrue(database.pagingTimelineDao().keysWithPrefix("${session.record.key}pending/").isEmpty())
+            assertTrue(database.pagingTimelineDao().keysWithPrefix("${session.record.snapshotKey}pending/").isEmpty())
         }
 
     @Test
@@ -411,7 +411,7 @@ class TimelineReadingSessionTest : RobolectricTest() {
             val restored = session(loader, backgroundScope)
             restored.prepare()
             assertEquals(
-                key,
+                "${restored.activeKey}_${head.statusId}",
                 restored.state.value.position
                     ?.itemKey,
             )
@@ -450,7 +450,7 @@ class TimelineReadingSessionTest : RobolectricTest() {
                         .first()
                         .baseItem.statusKey.id,
                 )
-                assertEquals(key, page.data[20].baseItem.stableItemKey)
+                assertEquals("${restored.activeKey}_${anchor.statusId}", page.data[20].baseItem.stableItemKey)
                 assertNotNull(page.prevKey)
                 assertNotNull(page.nextKey)
             } finally {
@@ -469,7 +469,7 @@ class TimelineReadingSessionTest : RobolectricTest() {
             val restored = session(loader, backgroundScope)
             restored.prepare()
             restored.refresh(false, initial = true)
-            assertEquals(oldRows, rows(restored))
+            assertEquals(oldRows.map { it.statusId to it.sortId }, rows(restored).map { it.statusId to it.sortId })
             assertTrue(restored.state.value.hasNewContent)
             assertFalse(loader.requests.any { it is PagingRequest.Prepend })
         }
@@ -867,6 +867,193 @@ class TimelineReadingSessionTest : RobolectricTest() {
             assertEquals("fresh-cursor", database.pagingTimelineDao().getPagingKey(session.activeKey)?.nextKey)
         }
 
+    @Test
+    fun deletedBookmarkUsesTheNearestSurvivingPrependPost() =
+        runTest {
+            val loader = Loader(prepend = true).apply { response = page(0..39) }
+            val initial = session(loader, backgroundScope)
+            initial.refresh(false, initial = true)
+            loader.response = page(100..139)
+            loader.forward = loader.response
+            initial.refresh(false)
+            val prepended = rows(initial).take(40)
+            assertTrue(prepended.first().sortId > (1L shl 53), "Use production Snowflake ranks")
+            assertEquals(List(40) { it.toLong() }, prepended.map { it.sortId - prepended.first().sortId })
+            val bucket = prepended.groupBy { it.sortId.toDouble() }.values.maxBy { it.size }
+            assertTrue(bucket.size > 10, "Production contiguous ranks lose precision in REAL")
+            val deleted = bucket[bucket.size - 2]
+            val expected = bucket[bucket.size - 3]
+            database.timelineReadingSessionDao().savePosition(
+                "home",
+                initial.record.key,
+                "${initial.activeKey}_${deleted.statusId}",
+                deleted.sortId,
+                -24.0,
+            )
+            database.pagingTimelineDao().delete(listOf(deleted))
+
+            val restored = session(loader, backgroundScope)
+            restored.prepare()
+
+            val actual = assertNotNull(restored.state.value.position).itemKey
+            assertEquals(
+                "${restored.activeKey}_${expected.statusId}",
+                actual,
+                "A deleted bookmark must restore the immediately preceding survivor rather than the beginning of a rounded REAL bucket",
+            )
+        }
+
+    @Test
+    fun secondSceneKeepsItsCurrentPostWhenFirstSceneViewsLatest() =
+        runTest {
+            val repository = TimelineReadingRepository(database, backgroundScope)
+            val firstLoader = Loader().apply { response = page(0..99) }
+            val firstScene = session(firstLoader, backgroundScope, repository = repository)
+            firstScene.refresh(false, initial = true)
+            val secondScene = session(Loader(), backgroundScope, repository = repository)
+            assertEquals(firstScene.record.key, secondScene.record.key)
+            val source = TimelineReadingPagingSource(database, secondScene)
+            try {
+                val oldPage =
+                    source.load(PagingSource.LoadParams.Refresh(OffsetFromStartPagingKey.Append(60), 40, false)) as
+                        PagingSource.LoadResult.Page
+                val oldAnchor = oldPage.data[20].baseItem
+                assertEquals("80", oldAnchor.statusKey.id)
+                secondScene.updateViewport(ReadingViewport(oldAnchor.stableItemKey, -30.0, false, true))
+                repository.checkpoint(secondScene.record, secondScene.activeKey, oldAnchor.stableItemKey, -30.0)
+                val refreshKey =
+                    source.getRefreshKey(
+                        androidx.paging.PagingState(
+                            listOf(oldPage),
+                            20,
+                            dev.dimension.flare.data.datasource.microblog.offsetPagingConfig,
+                            0,
+                        ),
+                    )
+                assertEquals(OffsetFromStartPagingKey.Around(oldAnchor.stableItemKey), refreshKey)
+
+                firstLoader.response = page(100..139)
+                firstScene.refresh(false)
+                assertTrue(firstScene.state.value.hasNewContent)
+                assertFalse(secondScene.state.value.hasNewContent)
+                firstScene.showLatest()
+                assertNull(secondScene.state.value.position, "Second scene did not request a scroll")
+                val replacement = TimelineReadingPagingSource(database, secondScene)
+                try {
+                    val page = replacement.load(PagingSource.LoadParams.Refresh(refreshKey, 40, false)) as PagingSource.LoadResult.Page
+                    val actual = page.data.map { it.baseItem.statusKey.id }
+                    assertTrue("80" in actual, "Viewing latest in the first scene removed the second scene's current post: $actual")
+                    val resumed = replacement.load(PagingSource.LoadParams.Refresh(null, 40, false)) as PagingSource.LoadResult.Page
+                    assertTrue(
+                        resumed.data.any { it.baseItem.statusKey.id == "80" },
+                        "A null refresh key must use this window's saved anchor",
+                    )
+                } finally {
+                    replacement.invalidate()
+                }
+            } finally {
+                source.invalidate()
+            }
+        }
+
+    @Test
+    fun windowsKeepIndependentPendingPagesAndPersistTheLastReadWindow() =
+        runTest {
+            val repository = TimelineReadingRepository(database, backgroundScope)
+            val firstLoader = Loader().apply { response = page(0..99) }
+            val first = session(firstLoader, backgroundScope, repository = repository)
+            first.refresh(false, initial = true)
+            val secondLoader = Loader()
+            val second = session(secondLoader, backgroundScope, repository = repository)
+            val secondRows = rows(second)
+            firstLoader.response = page(100..139, "first-next")
+            secondLoader.response = page(200..239, "second-next")
+            first.refresh(false)
+            second.refresh(false)
+            first.showLatest()
+            assertEquals((100..139).map(Int::toString), ids(first))
+            assertEquals(secondRows, rows(second))
+            assertTrue(second.state.value.hasNewContent)
+            second.showLatest()
+            assertEquals((200..239).map(Int::toString), ids(second))
+            assertEquals("first-next", database.pagingTimelineDao().getPagingKey(first.activeKey)?.nextKey)
+            assertEquals("second-next", database.pagingTimelineDao().getPagingKey(second.activeKey)?.nextKey)
+            second.positionRestored(assertNotNull(second.state.value.position).requestId)
+            val anchor = rows(second)[20]
+            second.updateViewport(ReadingViewport("${second.activeKey}_${anchor.statusId}", -30.0, false, true))
+            second.close()
+            first.close()
+            assertTrue(database.pagingTimelineDao().keysWithPrefix(requireNotNull(first.record.snapshotKey)).isEmpty())
+            assertEquals(40, rows(second).size)
+            val reopened = session(Loader(), backgroundScope, repository = repository)
+            assertEquals(second.activeKey, reopened.activeKey, "An unoccupied retained snapshot must be reused without copying history")
+            reopened.prepare()
+            assertEquals("${reopened.activeKey}_${anchor.statusId}", assertNotNull(reopened.state.value.position).itemKey)
+            assertEquals(
+                -30.0,
+                reopened.state.value.position
+                    ?.offset,
+            )
+            assertEquals("second-next", database.pagingTimelineDao().getPagingKey(reopened.activeKey)?.nextKey)
+            // A disposed reader must not overwrite the bookmark of its successor.
+            repository.checkpoint(second.record, second.activeKey, "${second.activeKey}_${rows(second).first().statusId}", 0.0)
+            assertEquals(-30.0, database.timelineReadingSessionDao().get("home")?.offset)
+            repository.enterHome { false }
+            assertTrue(database.pagingTimelineDao().keysWithPrefix(first.record.key).isEmpty())
+            assertTrue(database.timelineReadingSessionDao().snapshots(first.record.key).isEmpty())
+        }
+
+    @Test
+    fun mixedWindowsKeepChildCursorsIndependentOnPublication() =
+        runTest {
+            val repository = TimelineReadingRepository(database, backgroundScope)
+            val a = Loader("first")
+            val b = Loader("second").apply { response = page(20..29, "second-old") }
+            val first =
+                session(
+                    MixedRemoteMediator(database, listOf(a, b), TimelineMergePolicy.Staggered),
+                    backgroundScope,
+                    repository = repository,
+                )
+            first.refresh(false, initial = true)
+            val second =
+                session(
+                    MixedRemoteMediator(database, listOf(Loader("first"), Loader("second")), TimelineMergePolicy.Staggered),
+                    backgroundScope,
+                    repository = repository,
+                )
+            val dao = database.pagingTimelineDao()
+            val old = dao.keysWithPrefix(second.activeKey).associateWith { dao.getByPagingKey(it) to dao.getPagingKey(it) }
+            a.response = page(100..109, "first-new")
+            b.response = page(120..129, "second-new")
+            first.refresh(false)
+            first.showLatest()
+            assertEquals(old, dao.keysWithPrefix(second.activeKey).associateWith { dao.getByPagingKey(it) to dao.getPagingKey(it) })
+            assertEquals("first-new", dao.getPagingKey("${first.activeKey}/source/5:first/cursor")?.nextKey)
+            assertEquals("second-new", dao.getPagingKey("${first.activeKey}/source/6:second/cursor")?.nextKey)
+        }
+
+    @Test
+    fun nearestBookmarkKeepsIntegerPrecisionAcrossTheSignedBoundary() =
+        runTest {
+            val session = session(Loader(), backgroundScope)
+            session.refresh(false, initial = true)
+            val dao = database.pagingTimelineDao()
+            val original = rows(session)
+            dao.delete(session.activeKey)
+            val low = original[0].copy(sortId = Long.MIN_VALUE)
+            val high = original[1].copy(sortId = Long.MAX_VALUE)
+            dao.insertAll(listOf(low, high))
+            assertEquals(low, dao.nearestReadingItem(session.activeKey, -1))
+            assertEquals(high, dao.nearestReadingItem(session.activeKey, 0))
+            assertEquals(low, dao.nearestReadingItem(session.activeKey, Long.MIN_VALUE))
+            assertEquals(high, dao.nearestReadingItem(session.activeKey, Long.MAX_VALUE))
+            dao.delete(listOf(high))
+            assertEquals(low, dao.nearestReadingItem(session.activeKey, Long.MAX_VALUE))
+            dao.delete(listOf(low))
+            assertNull(dao.nearestReadingItem(session.activeKey, 0))
+        }
+
     private suspend fun session(
         loader: RemoteLoader<UiTimelineV2>,
         scope: CoroutineScope,
@@ -877,7 +1064,7 @@ class TimelineReadingSessionTest : RobolectricTest() {
     ): TimelineReadingSession {
         repository.enterHome { true }
         return TimelineReadingSession(
-            assertNotNull(repository.open("home", "source")),
+            assertNotNull(repository.acquire(assertNotNull(repository.open("home", "source")))),
             loader,
             database,
             repository,

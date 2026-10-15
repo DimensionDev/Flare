@@ -224,10 +224,29 @@ internal interface PagingTimelineDao {
         itemKey: String,
     ): DbPagingTimeline?
 
-    @Query(
-        "SELECT DbPagingTimeline.* FROM DbPagingTimeline INNER JOIN DbStatus ON DbStatus.id = DbPagingTimeline.statusId WHERE pagingKey = :pagingKey ORDER BY ABS(CAST(sortId AS REAL) - :sortId), sortId LIMIT 1",
-    )
+    @Transaction
     suspend fun nearestReadingItem(
+        pagingKey: String,
+        sortId: Long,
+    ): DbPagingTimeline? {
+        val before = readingItemBefore(pagingKey, sortId) ?: return readingItemAfter(pagingKey, sortId)
+        val after = readingItemAfter(pagingKey, sortId) ?: return before
+        // Unsigned differences retain all 64 bits even across the signed boundary.
+        return if (sortId.toULong() - before.sortId.toULong() <= after.sortId.toULong() - sortId.toULong()) before else after
+    }
+
+    @Query(
+        "SELECT DbPagingTimeline.* FROM DbPagingTimeline INNER JOIN DbStatus ON DbStatus.id = DbPagingTimeline.statusId WHERE pagingKey = :pagingKey AND sortId <= :sortId ORDER BY sortId DESC LIMIT 1",
+    )
+    suspend fun readingItemBefore(
+        pagingKey: String,
+        sortId: Long,
+    ): DbPagingTimeline?
+
+    @Query(
+        "SELECT DbPagingTimeline.* FROM DbPagingTimeline INNER JOIN DbStatus ON DbStatus.id = DbPagingTimeline.statusId WHERE pagingKey = :pagingKey AND sortId >= :sortId ORDER BY sortId LIMIT 1",
+    )
+    suspend fun readingItemAfter(
         pagingKey: String,
         sortId: Long,
     ): DbPagingTimeline?

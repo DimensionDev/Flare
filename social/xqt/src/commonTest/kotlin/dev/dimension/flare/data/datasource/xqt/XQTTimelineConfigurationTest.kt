@@ -1,5 +1,6 @@
 package dev.dimension.flare.data.datasource.xqt
 
+import dev.dimension.flare.data.datasource.microblog.NotificationFilter
 import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.tab.ShortcutSpec
 import dev.dimension.flare.data.platform.XQTCredential
@@ -11,6 +12,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
+import kotlin.test.assertIs
 
 class XQTTimelineConfigurationTest {
     private val dataSource =
@@ -42,6 +44,12 @@ class XQTTimelineConfigurationTest {
         assertContains(timelineSpecIds, XqtPlatformSpec.followRequestsTimelineSpec.id)
         assertContains(XqtPlatformSpec.timelineSpecs, XqtPlatformSpec.followRequestsTimelineSpec)
         assertContains(dataSource.builtInTimelineTabs.map { it.target.spec.id }, XqtPlatformSpec.followRequestsTimelineSpec.id)
+    }
+
+    @Test
+    fun allNotificationsIncludeFollowRequestsWhileMentionsStaySeparate() {
+        assertIs<FollowRequestsNotificationLoader>(dataSource.notification(NotificationFilter.All))
+        assertIs<MentionRemoteMediator>(dataSource.notification(NotificationFilter.Mention))
     }
 
     @Test

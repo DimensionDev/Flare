@@ -70,11 +70,22 @@ internal class FollowRequestsRemoteMediator(
     private fun User.renderFollowRequest(): UiTimelineV2.User {
         val user = render(accountKey)
         val key = MicroBlogKey("follow_request_${accountKey.id}_$restId", accountKey.host)
+        val createdAt = Instant.DISTANT_PAST.toUi()
         return UiTimelineV2.User(
             value = user,
             statusKey = key,
             accountType = AccountType.Specific(accountKey),
-            createdAt = Instant.DISTANT_PAST.toUi(),
+            createdAt = createdAt,
+            message =
+                UiTimelineV2.Message(
+                    user = user,
+                    statusKey = key,
+                    icon = UiIcon.Follow,
+                    type = UiTimelineV2.Message.Type.Localized(UiTimelineV2.Message.Type.Localized.MessageId.FollowRequest),
+                    createdAt = createdAt,
+                    clickEvent = user.clickEvent,
+                    accountType = AccountType.Specific(accountKey),
+                ),
             button =
                 persistentListOf(
                     ActionMenu.Item(

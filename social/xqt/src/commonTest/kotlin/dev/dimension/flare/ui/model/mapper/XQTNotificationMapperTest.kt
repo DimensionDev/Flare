@@ -83,6 +83,7 @@ class XQTNotificationMapperTest {
         assertEquals("Actor", followedUser.value.name.raw)
         assertEquals("actor_handle", followedUser.value.handle.raw)
         assertEquals("follow-notification", followedUser.statusKey.id)
+        assertTrue(followedUser.button.isEmpty())
         assertEquals("like-notification", likedPost.presentation.notificationKey?.id)
     }
 
@@ -248,7 +249,7 @@ class XQTNotificationMapperTest {
     }
 }
 
-private val GRAPHQL_NOTIFICATIONS =
+internal val GRAPHQL_NOTIFICATIONS =
     """
     {
       "data": {

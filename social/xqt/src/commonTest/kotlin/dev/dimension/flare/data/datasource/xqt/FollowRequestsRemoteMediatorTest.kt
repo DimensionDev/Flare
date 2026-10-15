@@ -2,16 +2,23 @@ package dev.dimension.flare.data.datasource.xqt
 
 import de.jensklingenberg.ktorfit.converter.ResponseConverterFactory
 import de.jensklingenberg.ktorfit.ktorfit
+import dev.dimension.flare.common.decodeJson
+import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.datasource.microblog.PostEvent
+import dev.dimension.flare.data.datasource.microblog.paging.NotificationTimelineLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
+import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.network.xqt.XQT_JSON
 import dev.dimension.flare.data.network.xqt.api.FollowRequestsApi
 import dev.dimension.flare.data.network.xqt.api.createFollowRequestsApi
 import dev.dimension.flare.data.network.xqt.api.respondToFollowRequest
+import dev.dimension.flare.data.network.xqt.model.NotificationsTimelineResponse
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.mapper.GRAPHQL_NOTIFICATIONS
 import dev.dimension.flare.ui.model.mapper.XqtRenderTestModule
+import dev.dimension.flare.ui.model.mapper.renderNotifications
 import dev.dimension.flare.ui.model.postEventOrNull
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
@@ -86,6 +93,12 @@ class FollowRequestsRemoteMediatorTest {
             assertTrue(users.all { it.statusKey != it.value.key })
             assertEquals(listOf("First", "Second"), users.map { it.value.name.raw })
             for (user in users) {
+                assertEquals(
+                    UiTimelineV2.Message.Type.Localized.MessageId.FollowRequest,
+                    assertIs<UiTimelineV2.Message.Type.Localized>(user.message?.type).data,
+                )
+                assertEquals(user.value, user.message?.user)
+                assertEquals(user.statusKey, user.message?.statusKey)
                 val accept = user.button[0].clickEvent.postEventOrNull()!!
                 val reject = user.button[1].clickEvent.postEventOrNull()!!
                 assertEquals(accountKey, accept.accountKey)
@@ -99,6 +112,55 @@ class FollowRequestsRemoteMediatorTest {
             assertTrue(loader.load(20, PagingRequest.Prepend("previous")).data.isEmpty())
             assertEquals(2, cursors.size)
             assertNotEquals(loader.pagingKey, FollowRequestsRemoteMediator(api, MicroBlogKey("other", "x.com")).pagingKey)
+        }
+
+    @Test
+    fun notificationPageUsesTheSameRequestIdentityAndActionsAsTheDedicatedList() =
+        runTest {
+            val requests =
+                FollowRequestsRemoteMediator(
+                    api { request ->
+                        if (request.url.encodedPath.endsWith("incoming.json")) {
+                            """{"ids":["pending"],"next_cursor_str":"0"}"""
+                        } else {
+                            """[{"id_str":"pending","name":"Pending","screen_name":"pending"}]"""
+                        }
+                    },
+                    accountKey,
+                )
+            val ordinaryNotifications =
+                GRAPHQL_NOTIFICATIONS
+                    .decodeJson<NotificationsTimelineResponse>()
+                    .data.viewerV2.userResults.result.notificationTimeline.timeline!!
+                    .instructions
+                    .renderNotifications(accountKey)
+            val notifications =
+                object : NotificationTimelineLoader {
+                    override val pagingKey = "notification_$accountKey"
+
+                    override suspend fun load(
+                        pageSize: Int,
+                        request: PagingRequest,
+                    ) = PagingResult(ordinaryNotifications)
+                }
+            val items = FollowRequestsNotificationLoader(notifications, requests).load(20, PagingRequest.Refresh).data
+            val pending = assertIs<UiTimelineV2.User>(items.first())
+            val dedicated = assertIs<UiTimelineV2.User>(requests.load(20, PagingRequest.Refresh).data.single())
+            assertEquals(dedicated.statusKey, pending.statusKey)
+            assertEquals(dedicated.button, pending.button)
+            assertEquals(ordinaryNotifications, items.drop(1))
+            assertTrue(assertIs<UiTimelineV2.User>(items.last()).button.isEmpty())
+            val cached = assertIs<UiTimelineV2.User>(pending.encodeJson().decodeJson<UiTimelineV2.User>())
+            assertEquals(pending.button, cached.button)
+            assertEquals(
+                accountKey,
+                cached.button
+                    .first()
+                    .clickEvent
+                    .postEventOrNull()
+                    ?.accountKey,
+            )
+            assertEquals(pending.message?.type, cached.message?.type)
         }
 
     @Test

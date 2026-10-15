@@ -505,12 +505,16 @@ internal class XQTDataSource(
 
     override fun notification(type: NotificationFilter): RemoteLoader<UiTimelineV2> =
         if (type == NotificationFilter.All) {
-            NotificationPagingSource(
-                service = service,
-                accountKey = accountKey,
-                onClearMarker = {
-                    notificationHandler.clear()
-                },
+            FollowRequestsNotificationLoader(
+                notifications =
+                    NotificationPagingSource(
+                        service = service,
+                        accountKey = accountKey,
+                        onClearMarker = {
+                            notificationHandler.clear()
+                        },
+                    ),
+                followRequests = followRequestsTimelineLoader(),
             )
         } else {
             MentionRemoteMediator(

@@ -17,6 +17,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.MotionDurationScale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.asAndroidBitmap
@@ -48,8 +49,13 @@ import java.io.File
 import kotlin.math.abs
 
 class AndroidPredictiveBackTest {
+    private val motionDurationScale =
+        object : MotionDurationScale {
+            override var scaleFactor = 1f
+        }
+
     @get:Rule
-    val compose = createComposeRule()
+    val compose = createComposeRule(effectContext = motionDurationScale)
     private val stack = mutableStateListOf(0, 1)
     private val input = DirectNavigationEventInput()
     private var eventTime = 1_000L
@@ -58,6 +64,59 @@ class AndroidPredictiveBackTest {
     private var threePages = false
     private val creations = IntArray(3)
     private val cornerShape = mutableStateOf<Shape?>(RoundedCornerShape(24.dp))
+
+    @Test
+    fun ordinaryPushAndButtonBackClipOnlyDuringAnimation() {
+        stack.removeLast()
+        show()
+        assertEquals(Color.Red, frame().corner)
+        compose.runOnIdle { stack.add(1) }
+        advance(180)
+        assertEquals(0f, frame("push-active").corner.blue, 0.01f)
+        advance(800)
+        assertEquals(Color.Blue, frame("push-idle").corner)
+
+        compose.runOnIdle { stack.removeLast() }
+        advance(180)
+        assertEquals(0f, frame("pop-active").corner.red, 0.01f)
+        assertRoot()
+    }
+
+    @Test
+    fun disabledAnimationsDoNotLeaveClippingAfterNavigationOrCancellation() {
+        motionDurationScale.scaleFactor = 0f
+        show()
+        compose.runOnIdle { stack.removeLast() }
+        advance(64)
+        assertEquals(Color.Red, frame().corner)
+        compose.runOnIdle { stack.add(1) }
+        advance(64)
+        assertEquals(Color.Blue, frame().corner)
+
+        start()
+        progress(0.6f, 360f, 32)
+        compose.runOnIdle { input.backCancelled() }
+        advance(64)
+        assertEquals(Color.Blue, frame().corner)
+
+        start()
+        progress(0.6f, 360f, 32)
+        compose.runOnIdle { input.backCompleted() }
+        assertRoot()
+    }
+
+    @Test
+    fun disabledCornersStaySquareDuringPreviewAndRebound() {
+        cornerShape.value = null
+        show()
+        start()
+        progress(0.6f, 360f, 96)
+        assertEquals(Color.Blue, frame().blueCorner)
+        compose.runOnIdle { input.backCancelled() }
+        val frames = trace("unclipped-cancel", 40)
+        assertTrue("Every rebound frame keeps square corners", frames.all { it.blueCorner == Color.Blue })
+        assertEquals(Color.Blue, frame().corner)
+    }
 
     @Test
     fun slowDragFromLeftKeepsExitingPageOpaqueAndTracksVerticalMotion() = slowDrag(NavigationEvent.EDGE_LEFT)
@@ -71,6 +130,7 @@ class AndroidPredictiveBackTest {
         for (p in listOf(0.1f, 0.3f, 0.6f)) progress(p, 360f, 96)
         advance(160)
         val down = frame("slow-$swipeEdge-preview-down")
+        assertEquals("Preview keeps rounded corners", 0f, down.blueCorner.blue, 0.01f)
         assertEquals("Preview must remain opaque", 1f, down.center.blue, 0.01f)
         assertEquals("No previous-page bleed-through", 0f, down.center.red, 0.01f)
         val eased = androidPredictiveBackEasing.transform(0.6f)
@@ -135,6 +195,8 @@ class AndroidPredictiveBackTest {
                 .toFloat(),
         )
         assertNear("Cancelled Y", 240f, frames.last().blue.centerY)
+        assertEquals("Rebound keeps rounded corners", 0f, frames.first().blueCorner.blue, 0.01f)
+        assertEquals("Idle after cancellation fills the corner", Color.Blue, frame("cancel-idle").corner)
     }
 
     @Test
@@ -174,6 +236,7 @@ class AndroidPredictiveBackTest {
         trace("cancel-takeover", 40)
         assertEquals(listOf(0, 1), stack.toList())
         assertNear("Second cancellation restores the page", 480f, frame().blue.height.toFloat())
+        assertEquals(Color.Blue, frame().corner)
     }
 
     @Test
@@ -188,13 +251,19 @@ class AndroidPredictiveBackTest {
     @Test
     fun deviceCornerUpdatesDoNotRecreateTheCurrentEntry() {
         show()
-        assertEquals(0f, frame().corner.blue, 0.01f)
+        assertEquals(Color.Blue, frame().corner)
+        start()
+        progress(0.6f, 240f, 96)
+        assertEquals(0f, frame().blueCorner.blue, 0.01f)
         compose.runOnIdle { cornerShape.value = null }
         advance(16)
-        assertEquals(1f, frame().corner.blue, 0.01f)
+        assertEquals(1f, frame().blueCorner.blue, 0.01f)
         compose.runOnIdle { cornerShape.value = RoundedCornerShape(24.dp) }
         advance(16)
-        assertEquals(0f, frame().corner.blue, 0.01f)
+        assertEquals(0f, frame().blueCorner.blue, 0.01f)
+        compose.runOnIdle { input.backCancelled() }
+        advance(800)
+        assertEquals(Color.Blue, frame().corner)
         assertEquals(1, creations[1])
     }
 
@@ -212,6 +281,8 @@ class AndroidPredictiveBackTest {
         assertNear("Same-scene preview must not apply the entering scale", 480f, frame("$name-start").blue.height.toFloat())
         progress(0.6f, 360f, 96)
         assertNear("Pane preview must not scale the scaffold", 480f, frame("$name-preview").blue.height.toFloat())
+        val previewCorner = frame().corner
+        assertEquals("Same-scene preview keeps the panes filling the corner", 1f, previewCorner.red + previewCorner.blue, 0.01f)
         compose.runOnIdle { input.backCancelled() }
         trace("$name-cancel", 40)
         assertEquals(listOf(0, 1), stack.toList())
@@ -339,6 +410,7 @@ class AndroidPredictiveBackTest {
         val root = frame()
         assertNear("Previous page restored to full height", 480f, root.red.height.toFloat())
         assertEquals(1f, root.center.red, 0.01f)
+        assertEquals("Idle root fills the corner", Color.Red, root.corner)
     }
 
     private fun assertNear(
@@ -380,12 +452,14 @@ class AndroidPredictiveBackTest {
                 }
             }
         }
-        return Frame(pixels[160, 240], pixels[1, 1], red, blue, green, count)
+        val blueCorner = pixels[(blue.left + 2).coerceAtMost(319), (blue.top + 2).coerceAtMost(479)]
+        return Frame(pixels[160, 240], pixels[1, 1], blueCorner, red, blue, green, count)
     }
 
     private data class Frame(
         val center: Color,
         val corner: Color,
+        val blueCorner: Color,
         val red: Bounds,
         val blue: Bounds,
         val green: Bounds,

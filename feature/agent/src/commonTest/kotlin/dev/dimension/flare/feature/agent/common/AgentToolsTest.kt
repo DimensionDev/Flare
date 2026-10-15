@@ -1129,6 +1129,32 @@ internal class AgentToolsTest {
         }
 
     @Test
+    fun fullContentArticleKeepsFeedHtmlAsFallbackEvenWhenTitleIsPresent() =
+        runTest {
+            val url = "https://example.com/article"
+            val feed =
+                createFeed(url, "Article title", "<p>Feed body</p>").copy(
+                    clickEvent =
+                        ClickEvent.Deeplink(
+                            DeeplinkRoute.Rss.Detail(url = url, title = "Article title", fallbackHtml = "<p>Feed body</p>"),
+                        ),
+                )
+            val dataSource =
+                StubSubscriptionDataSource(
+                    timelineItems = mapOf(SubscriptionType.RSS to "https://example.com/feed.xml" to listOf(feed)),
+                )
+            val session = subscriptionSession(dataSource)
+            val timeline =
+                LoadSubscriptionTimelineTool(session).execute(
+                    LoadSubscriptionTimelineTool.Args(type = "RSS", url = "https://example.com/feed.xml"),
+                )
+            assertTrue(timeline.contains("displayMode: FULL_CONTENT"))
+            LoadRssArticleTool(session).execute(LoadRssArticleTool.Args(articleRef = "[[rss:$url]]"))
+            assertEquals(null, dataSource.lastArticleDescriptionHtml)
+            assertEquals("<p>Feed body</p>", dataSource.lastArticleFallbackHtml)
+        }
+
+    @Test
     fun saveSubscriptionSourceRequestsConfirmationBeforeSavingDetectedRssFeed() =
         runTest {
             val dataSource =
@@ -1633,6 +1659,7 @@ private class StubSubscriptionDataSource(
     var lastArticleUrl: String? = null
     var lastArticleDescriptionHtml: String? = null
     var lastArticleDescriptionTitle: String? = null
+    var lastArticleFallbackHtml: String? = null
 
     override suspend fun listSources(): List<UiRssSource> = sources
 
@@ -1658,10 +1685,12 @@ private class StubSubscriptionDataSource(
         url: String,
         descriptionHtml: String?,
         descriptionTitle: String?,
+        fallbackHtml: String?,
     ): DocumentData {
         lastArticleUrl = url
         lastArticleDescriptionHtml = descriptionHtml
         lastArticleDescriptionTitle = descriptionTitle
+        lastArticleFallbackHtml = fallbackHtml
         return article
     }
 }

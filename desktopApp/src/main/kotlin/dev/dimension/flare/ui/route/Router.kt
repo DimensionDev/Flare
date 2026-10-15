@@ -261,6 +261,7 @@ internal fun Router(
                     dev.dimension.flare.ui.screen.rss.RssDetailScreen(
                         url = args.url,
                         descriptionHtml = args.descriptionHtml,
+                        fallbackHtml = args.fallbackHtml,
                         descriptionTitle = args.title,
                         onBack = onBack,
                     )

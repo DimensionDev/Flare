@@ -164,8 +164,8 @@ enum Route: Hashable, Identifiable {
             TranslationConfigScreen()
         case .tabSettings:
             TabSettingsScreen()
-        case .rssDetail(let url, let descriptionHtml, let title):
-            RssDetailScreen(url: url, descriptionHtml: descriptionHtml, descriptionTitle: title)
+        case .rssDetail(let url, let descriptionHtml, let title, let fallbackHtml):
+            RssDetailScreen(url: url, descriptionHtml: descriptionHtml, descriptionTitle: title, fallbackHtml: fallbackHtml)
         case .article(let accountType, let articleKey):
             ArticleScreen(
                 accountType: accountType,
@@ -307,7 +307,7 @@ enum Route: Hashable, Identifiable {
     case profileUser(AccountType, MicroBlogKey)
     case profileUserNameWithHost(AccountType, String, String)
     case profileInsight(AccountType, MicroBlogKey)
-    case rssDetail(String, String?, String?)
+    case rssDetail(String, String?, String?, String?)
     case article(AccountType, MicroBlogKey)
     case search(AccountType, String)
     case statusAddReaction(AccountType, MicroBlogKey)
@@ -473,7 +473,7 @@ enum Route: Hashable, Identifiable {
         case .rss(let rss):
             switch onEnum(of: rss) {
             case .detail(let data):
-                return Route.rssDetail(data.url, data.descriptionHtml, data.title)
+                return Route.rssDetail(data.url, data.descriptionHtml, data.title, data.fallbackHtml)
             }
         case .article(let data):
             return Route.article(data.accountType, data.articleKey)

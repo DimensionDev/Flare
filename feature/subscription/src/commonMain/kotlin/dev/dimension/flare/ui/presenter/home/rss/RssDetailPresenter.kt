@@ -13,13 +13,15 @@ import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.mapper.fromRss
 import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.ui.presenter.status.LogStatusHistoryPresenter
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.onStart
 
 public class RssDetailPresenter(
     private val url: String,
     private val descriptionHtml: String? = null,
     private val descriptionTitle: String? = null,
+    private val fallbackHtml: String? = null,
 ) : PresenterBase<RssDetailPresenter.State>() {
     private val readability = Readability()
 
@@ -36,36 +38,18 @@ public class RssDetailPresenter(
                 statusKey = MicroBlogKey.fromRss(url),
             )
         }.body()
-        val data by remember(url, descriptionHtml) {
-            if (descriptionHtml != null) {
-                kotlinx.coroutines.flow.flowOf(
-                    UiState.Success(
-                        DocumentData(
-                            title = descriptionTitle ?: "",
-                            content = descriptionHtml,
-                            textContent = descriptionHtml,
-                            length = null,
-                            excerpt = null,
-                            byline = null,
-                            dir = null,
-                            siteName = null,
-                            lang = null,
-                            publishedTime = null,
-                        ),
-                    ),
-                )
-            } else {
-                readability
-                    .parse(url)
-                    .map {
-                        it.fold(
-                            onSuccess = { UiState.Success(it) },
-                            onFailure = { UiState.Error(it) },
-                        )
-                    }.onStart {
-                        emit(UiState.Loading())
+        val data by remember(url, descriptionHtml, descriptionTitle, fallbackHtml) {
+            flow<UiState<DocumentData>> {
+                val result =
+                    try {
+                        UiState.Success(readability.load(url, descriptionHtml, descriptionTitle, fallbackHtml))
+                    } catch (exception: CancellationException) {
+                        throw exception
+                    } catch (exception: Exception) {
+                        UiState.Error(exception)
                     }
-            }
+                emit(result)
+            }.onStart { emit(UiState.Loading()) }
         }.collectAsState(UiState.Loading())
         return object : State {
             override val data = data

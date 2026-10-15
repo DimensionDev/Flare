@@ -11,6 +11,7 @@ import dev.dimension.flare.data.network.FaviconService
 import dev.dimension.flare.data.network.rss.DocumentData
 import dev.dimension.flare.data.network.rss.Readability
 import dev.dimension.flare.data.network.rss.RssService
+import dev.dimension.flare.data.network.rss.toRssWebUrl
 import dev.dimension.flare.data.platform.RssTimelineSpecs
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.data.repository.SubscriptionRepository
@@ -48,6 +49,7 @@ public interface SubscriptionDataSource {
         url: String,
         descriptionHtml: String? = null,
         descriptionTitle: String? = null,
+        fallbackHtml: String? = null,
     ): DocumentData
 }
 
@@ -96,7 +98,7 @@ public object KoinSubscriptionDataSource :
             return SubscriptionSourceDetection.RssHub
         }
 
-        val actualUrl = url.toWebUrl()
+        val actualUrl = url.toRssWebUrl()
         val feed =
             runCatching {
                 RssService.fetch(actualUrl)
@@ -185,23 +187,8 @@ public object KoinSubscriptionDataSource :
         url: String,
         descriptionHtml: String?,
         descriptionTitle: String?,
-    ): DocumentData =
-        if (descriptionHtml != null) {
-            DocumentData(
-                title = descriptionTitle ?: "",
-                content = descriptionHtml,
-                textContent = descriptionHtml,
-                length = null,
-                excerpt = null,
-                byline = null,
-                dir = null,
-                siteName = null,
-                lang = null,
-                publishedTime = null,
-            )
-        } else {
-            readability.parse(url).first().getOrThrow()
-        }
+        fallbackHtml: String?,
+    ): DocumentData = readability.load(url, descriptionHtml, descriptionTitle, fallbackHtml)
 
     private suspend fun detectSubscriptionInstance(host: String): SubscriptionSourceDetection.SubscriptionInstance? =
         coroutineScope {
@@ -234,13 +221,6 @@ public object KoinSubscriptionDataSource :
             )
         }
 }
-
-private fun String.toWebUrl(): String =
-    when {
-        startsWith("http://", ignoreCase = true) -> replaceFirst("http://", "https://", ignoreCase = true)
-        startsWith("https://", ignoreCase = true) -> this
-        else -> "https://$this"
-    }
 
 private fun UiRssSource.timelineSourceId(): String =
     when (type) {

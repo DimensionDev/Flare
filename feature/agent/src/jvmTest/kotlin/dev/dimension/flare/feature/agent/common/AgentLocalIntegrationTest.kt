@@ -278,6 +278,7 @@ internal class AgentLocalIntegrationTest {
             url: String,
             descriptionHtml: String?,
             descriptionTitle: String?,
+            fallbackHtml: String?,
         ): DocumentData =
             DocumentData(
                 title = descriptionTitle.orEmpty(),

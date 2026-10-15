@@ -145,8 +145,8 @@
   "rssSourcesTypeLabel": "Type",
   "rssSourcesDisplayMode": "Display mode",
   "rssSourcesOpenInBrowser": "Open in browser",
-  "rssSourcesFullContent": "Full content",
-  "rssSourcesDescriptionOnly": "Description only",
+  "rssSourcesFullContent": "Webpage full text",
+  "rssSourcesDescriptionOnly": "Feed content",
   "rssSourcesSave": "Save",
   "subscriptionUrlHint": "Type an RSS feed URL or a Mastodon instance URL",
   "rssSourcesRssHubHostLabel": "RSSHub Host",
@@ -541,5 +541,8 @@
   "visibilityPublic": "Public",
   "visibilitySpecified": "Specified users",
   "secondaryFooterDownloadApp": "Download app",
-  "secondaryFooterVersion": "Version {version}"
+  "secondaryFooterVersion": "Version {version}",
+  "rssOpenModeChecking": "Checking the best opening mode…",
+  "rssOpenModeRecommended": "Recommended from recent articles. You can change this.",
+  "rssOpenModeUnknown": "Could not recommend an opening mode. You can choose one."
 }

@@ -1,4 +1,5 @@
 {
+  "followRequestsTitle": "Follow requests",
   "$schema": "https://inlang.com/schema/inlang-message-format",
   "actionAccept": "Accept",
   "actionAdd": "Add",

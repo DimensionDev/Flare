@@ -39,6 +39,7 @@ import dev.dimension.flare.data.model.tab.ShortcutSpec
 import dev.dimension.flare.data.model.tab.TimelineSpec
 import dev.dimension.flare.data.network.xqt.XQTMediaUploader
 import dev.dimension.flare.data.network.xqt.XQTService
+import dev.dimension.flare.data.network.xqt.api.respondToFollowRequest
 import dev.dimension.flare.data.network.xqt.model.CreateBookmarkRequest
 import dev.dimension.flare.data.network.xqt.model.CreateBookmarkRequestVariables
 import dev.dimension.flare.data.network.xqt.model.DeleteBookmarkRequest
@@ -232,6 +233,18 @@ internal class XQTDataSource(
     ) {
         require(event is PostEvent.XQT)
         when (event) {
+            is PostEvent.XQT.AcceptFollowRequest -> {
+                service.respondToFollowRequest(event.userKey.id, accept = true)
+                updater.deleteFromCache(event.postKey)
+                relationHandler.approveFollowRequest(event.userKey)
+            }
+
+            is PostEvent.XQT.RejectFollowRequest -> {
+                service.respondToFollowRequest(event.userKey.id, accept = false)
+                updater.deleteFromCache(event.postKey)
+                relationHandler.rejectFollowRequest(event.userKey)
+            }
+
             is PostEvent.XQT.Retweet -> {
                 if (event.retweeted) {
                     service.postDeleteRetweet(
@@ -371,6 +384,7 @@ internal class XQTDataSource(
             XqtPlatformSpec.bookmarkTimelineSpec.candidate(TimelineSpec.AccountBasedData(accountKey)),
             XqtPlatformSpec.likedTimelineSpec.candidate(TimelineSpec.AccountBasedData(accountKey)),
             XqtPlatformSpec.deviceFollowTimelineSpec.candidate(TimelineSpec.AccountBasedData(accountKey)),
+            XqtPlatformSpec.followRequestsTimelineSpec.candidate(TimelineSpec.AccountBasedData(accountKey)),
         )
     }
 
@@ -406,6 +420,14 @@ internal class XQTDataSource(
                 target =
                     ShortcutSpec.Target.Timeline(
                         XqtPlatformSpec.likedTimelineSpec.candidate(TimelineSpec.AccountBasedData(accountKey)),
+                    ),
+            ),
+            ShortcutSpec(
+                title = UiStrings.FollowRequests,
+                icon = UiIcon.Follow,
+                target =
+                    ShortcutSpec.Target.Timeline(
+                        XqtPlatformSpec.followRequestsTimelineSpec.candidate(TimelineSpec.AccountBasedData(accountKey)),
                     ),
             ),
             ShortcutSpec(
@@ -478,6 +500,8 @@ internal class XQTDataSource(
             service,
             accountKey,
         )
+
+    internal fun followRequestsTimelineLoader(): RemoteLoader<UiTimelineV2> = FollowRequestsRemoteMediator(service, accountKey)
 
     override fun notification(type: NotificationFilter): RemoteLoader<UiTimelineV2> =
         if (type == NotificationFilter.All) {

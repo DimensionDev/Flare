@@ -39,6 +39,8 @@ export function localizedUiString(value: UiStrings): string {
 			return m.homeTabMixedTimelineTitle();
 		case 'Social':
 			return m.homeTabSocialTimelineTitle();
+		case 'FollowRequests':
+			return m.followRequestsTitle();
 		case 'Liked':
 			return m.likedTitle();
 		case 'AllRssFeeds':

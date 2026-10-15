@@ -1,4 +1,5 @@
 {
+  "followRequestsTitle": "关注申请",
   "$schema": "https://inlang.com/schema/inlang-message-format",
   "actionAccept": "接受",
   "actionAdd": "添加",

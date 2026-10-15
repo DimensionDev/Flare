@@ -278,6 +278,18 @@ public sealed interface PostEvent {
     @Serializable
     public sealed interface XQT : PostEvent {
         @Serializable
+        public data class AcceptFollowRequest(
+            public override val postKey: MicroBlogKey,
+            public val userKey: MicroBlogKey,
+        ) : XQT
+
+        @Serializable
+        public data class RejectFollowRequest(
+            public override val postKey: MicroBlogKey,
+            public val userKey: MicroBlogKey,
+        ) : XQT
+
+        @Serializable
         public data class Retweet(
             public override val postKey: MicroBlogKey,
             public val retweeted: Boolean,

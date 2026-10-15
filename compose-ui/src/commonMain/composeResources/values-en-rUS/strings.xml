@@ -428,4 +428,5 @@
     <string name="bluesky_login_fix_delegation_scopes_button">Fix Tranquil permissions</string>
     <string name="fanbox_supported_title">Supporting</string>
     <string name="fanbox_recommended_creators_title">Recommended creators</string>
+    <string name="follow_requests_title">Follow requests</string>
 </resources>

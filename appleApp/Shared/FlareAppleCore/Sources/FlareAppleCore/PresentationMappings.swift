@@ -94,6 +94,8 @@ public extension UiStrings {
             localizedPresentationString("mixed_timeline_title", fallback: "Mixed")
         case .social:
             localizedPresentationString("social_title", fallback: "Social")
+        case .followRequests:
+            localizedPresentationString("follow_requests_title", fallback: "Follow requests")
         case .liked:
             localizedPresentationString("liked_tab_title", fallback: "Liked")
         case .allRssFeeds:

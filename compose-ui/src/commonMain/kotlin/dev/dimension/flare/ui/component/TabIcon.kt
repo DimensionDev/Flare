@@ -32,6 +32,7 @@ import dev.dimension.flare.compose.ui.channel_title
 import dev.dimension.flare.compose.ui.dm_list_title
 import dev.dimension.flare.compose.ui.fanbox_recommended_creators_title
 import dev.dimension.flare.compose.ui.fanbox_supported_title
+import dev.dimension.flare.compose.ui.follow_requests_title
 import dev.dimension.flare.compose.ui.home_tab_bookmarks_title
 import dev.dimension.flare.compose.ui.home_tab_discover_title
 import dev.dimension.flare.compose.ui.home_tab_favorite_title
@@ -344,6 +345,8 @@ internal val UiStrings.res: StringResource
             UiStrings.Reposts -> Res.string.tab_settings_filter_repost
 
             UiStrings.Articles -> Res.string.profile_tab_articles
+
+            UiStrings.FollowRequests -> Res.string.follow_requests_title
 
             UiStrings.Media -> Res.string.media_title
 

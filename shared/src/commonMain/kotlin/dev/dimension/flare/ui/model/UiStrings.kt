@@ -65,6 +65,7 @@ public enum class UiStrings {
     Popular,
     Reposts,
     Articles,
+    FollowRequests,
 }
 
 public fun UiStrings.asText(): UiText = UiText.Localized(this)

@@ -5,6 +5,7 @@ import dev.dimension.flare.data.network.ktorClient
 import dev.dimension.flare.data.network.ktorfit
 import dev.dimension.flare.data.network.xqt.api.DefaultApi
 import dev.dimension.flare.data.network.xqt.api.DmApi
+import dev.dimension.flare.data.network.xqt.api.FollowRequestsApi
 import dev.dimension.flare.data.network.xqt.api.GuestApi
 import dev.dimension.flare.data.network.xqt.api.ListsApi
 import dev.dimension.flare.data.network.xqt.api.MediaApi
@@ -21,6 +22,7 @@ import dev.dimension.flare.data.network.xqt.api.V20GetApi
 import dev.dimension.flare.data.network.xqt.api.VDmPostJsonPostApi
 import dev.dimension.flare.data.network.xqt.api.createDefaultApi
 import dev.dimension.flare.data.network.xqt.api.createDmApi
+import dev.dimension.flare.data.network.xqt.api.createFollowRequestsApi
 import dev.dimension.flare.data.network.xqt.api.createGuestApi
 import dev.dimension.flare.data.network.xqt.api.createListsApi
 import dev.dimension.flare.data.network.xqt.api.createMediaApi
@@ -86,6 +88,10 @@ internal class XQTService(
         accountKey = accountKey,
         chocolateFlow = chocolateFlow,
     ).createDefaultApi(),
+    FollowRequestsApi by config(
+        accountKey = accountKey,
+        chocolateFlow = chocolateFlow,
+    ).createFollowRequestsApi(),
     OtherApi by config(
         accountKey = accountKey,
         chocolateFlow = chocolateFlow,

@@ -436,4 +436,5 @@
     <string name="fanbox_recommended_creators_title">推薦創作者</string>
 <string name="ugoira_play">播放動圖</string>
 <string name="ugoira_loading">正在載入動圖</string>
+    <string name="follow_requests_title">關注申請</string>
 </resources>

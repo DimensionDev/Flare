@@ -149,6 +149,19 @@ public data object XqtPlatformSpec :
                 },
         )
 
+    internal val followRequestsTimelineSpec =
+        TimelineSpec(
+            id = "xqt.followRequests",
+            title = UiStrings.FollowRequests,
+            icon = UiIcon.Follow.asType(),
+            serializer = TimelineSpec.AccountBasedData.serializer(),
+            targetId = { it.accountKey.toString() },
+            loaderFactory =
+                accountLoader<XQTDataSource, TimelineSpec.AccountBasedData> {
+                    followRequestsTimelineLoader()
+                },
+        )
+
     override val timelineSpecs: ImmutableList<TimelineSpec<out TimelineSpec.Data>> =
         persistentListOf(
             CommonTimelineSpecs.home,
@@ -159,6 +172,7 @@ public data object XqtPlatformSpec :
             bookmarkTimelineSpec,
             likedTimelineSpec,
             deviceFollowTimelineSpec,
+            followRequestsTimelineSpec,
         )
 
     override fun createDataSource(context: PlatformDataSourceContext): MicroblogDataSource =

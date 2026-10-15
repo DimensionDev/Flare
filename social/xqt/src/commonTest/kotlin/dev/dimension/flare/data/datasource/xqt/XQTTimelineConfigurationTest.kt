@@ -26,6 +26,7 @@ class XQTTimelineConfigurationTest {
         assertContains(shortcuts.map { it.title }, UiStrings.ForYou)
         assertContains(shortcuts.map { it.title }, UiStrings.Popular)
         assertContains(shortcuts.map { it.title }, UiStrings.Liked)
+        assertContains(shortcuts.map { it.title }, UiStrings.FollowRequests)
 
         val timelineSpecIds =
             shortcuts.mapNotNull {
@@ -38,6 +39,9 @@ class XQTTimelineConfigurationTest {
         assertContains(timelineSpecIds, XqtPlatformSpec.featuredTimelineSpec.id)
         assertContains(timelineSpecIds, XqtPlatformSpec.popularTimelineSpec.id)
         assertContains(timelineSpecIds, XqtPlatformSpec.likedTimelineSpec.id)
+        assertContains(timelineSpecIds, XqtPlatformSpec.followRequestsTimelineSpec.id)
+        assertContains(XqtPlatformSpec.timelineSpecs, XqtPlatformSpec.followRequestsTimelineSpec)
+        assertContains(dataSource.builtInTimelineTabs.map { it.target.spec.id }, XqtPlatformSpec.followRequestsTimelineSpec.id)
     }
 
     @Test

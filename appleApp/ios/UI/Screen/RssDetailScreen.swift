@@ -170,6 +170,7 @@ private struct RssArticleContentView: View {
                     Text(translatedTitle ?? document.title)
                         .font(.title2)
                         .bold()
+                        .textSelection(.enabled)
                     
                     if document.siteName != nil || document.byline != nil || document.publishDateTime != nil {
                         VStack(alignment: .leading, spacing: 4) {

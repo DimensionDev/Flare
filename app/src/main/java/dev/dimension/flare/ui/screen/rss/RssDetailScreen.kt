@@ -204,12 +204,12 @@ internal fun RssDetailScreen(
                                     else -> documentData.title
                                 }
                             } ?: documentData.title
-                        Text(
-                            text = displayTitle,
-                            style = MaterialTheme.typography.titleLarge,
-                            modifier =
-                            Modifier,
-                        )
+                        SelectionContainer {
+                            Text(
+                                text = displayTitle,
+                                style = MaterialTheme.typography.titleLarge,
+                            )
+                        }
                         if (documentData.siteName != null || documentData.byline != null || documentData.publishDateTime != null) {
                             Column(
                                 verticalArrangement = Arrangement.spacedBy(4.dp),

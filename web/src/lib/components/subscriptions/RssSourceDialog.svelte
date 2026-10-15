@@ -40,7 +40,7 @@
 	const checkState = $derived(editor.checkState);
 	const rssState = $derived(checkState.type === 'Success' ? checkState.data : null);
 	const discoveredSourceUrls = $derived(
-		rssState?.type === 'RssSources' ? rssState.sources.map((item) => item.url).join(',') : ''
+		JSON.stringify(rssState?.type === 'RssSources' ? rssState.sources.map((item) => item.url) : [])
 	);
 	const rssHubCheckState = $derived(editor.rssHubCheckState);
 	const rssHubFeed = $derived(
@@ -76,17 +76,16 @@
 	});
 
 	$effect(() => {
-		selectedUrls = new Set(discoveredSourceUrls.split(',').filter(Boolean));
+		const urls: string[] = JSON.parse(discoveredSourceUrls);
+		selectedUrls = new Set(urls);
+		editor.clearSelectedSources();
+		for (const value of urls) editor.selectSource(value, true);
 	});
 
 	$effect(() => {
 		if (rssState?.type === 'SubscriptionInstance' && selectedTypes.size === 0) {
 			selectedTypes = new Set(rssState.availableTimelines);
 		}
-	});
-
-	$effect(() => {
-		editor.selectSources(Array.from(selectedUrls).join(','));
 	});
 
 	function selectValue<T extends string>(event: Event): T {
@@ -101,6 +100,7 @@
 			next.add(value);
 		}
 		selectedUrls = next;
+		editor.selectSource(value, next.has(value));
 	}
 
 	function toggleType(value: SubscriptionType): void {
@@ -150,7 +150,7 @@
 				editor.saveRssHub(title, displayMode);
 				break;
 			case 'RssSources':
-				editor.saveSourcesByUrl(Array.from(selectedUrls).join(','));
+				editor.saveSelectedSources();
 				break;
 			case 'SubscriptionInstance':
 				editor.saveSubscriptionTypes(Array.from(selectedTypes).join(','));

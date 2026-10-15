@@ -160,15 +160,16 @@ internal fun Feed.RDF.Item.render(
     sourceLanguage: String? = null,
 ): UiTimelineV2 {
     val url = link
+    val rawHtml = contentEncoded?.takeIf { it.hasRssContent() } ?: description
     val descHtml =
-        description?.let {
+        rawHtml?.let {
             Ksoup.parse(it)
         }
     val img = descHtml?.select("img")?.firstOrNull()?.attr("src")
     return UiTimelineV2.Feed(
         title = title,
         description = descHtml?.text(),
-        descriptionHtml = description,
+        descriptionHtml = rawHtml,
         url = url,
         sourceLanguages = listOfNotNull(sourceLanguage).toPersistentList(),
         source =
@@ -194,7 +195,7 @@ internal fun Feed.RDF.Item.render(
         clickEvent =
             displayMode.toFeedClickEvent(
                 url = url,
-                descriptionHtml = description,
+                descriptionHtml = rawHtml,
                 title = title,
             ),
         createdAt =

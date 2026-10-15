@@ -195,7 +195,8 @@ class EditRssRecommendationTest {
             advanceTimeBy(667)
             runCurrent()
             assertFalse(observed.state.readingModes.any { it.checking })
-            observed.state.selectSources("https://first.example/feed,https://second.example/feed")
+            observed.state.selectSource("https://first.example/feed", true)
+            observed.state.selectSource("https://second.example/feed", true)
             runCurrent()
             advanceTimeBy(1_001)
             runCurrent()
@@ -205,13 +206,48 @@ class EditRssRecommendationTest {
             )
             observed.state.setSourceDisplayMode("https://second.example/feed", RssDisplayMode.FULL_CONTENT)
             runCurrent()
-            observed.state.saveSourcesByUrl("https://first.example/feed,https://second.example/feed")
+            observed.state.saveSelectedSources()
             observed.state.setSourceDisplayMode("https://first.example/feed", RssDisplayMode.OPEN_IN_BROWSER)
             persistenceScope.testScheduler.advanceUntilIdle()
             assertEquals(
                 listOf(RssDisplayMode.DESCRIPTION_ONLY, RssDisplayMode.FULL_CONTENT),
                 repository.currentSources.map { it.displayMode },
             )
+        }
+
+    @Test
+    fun commaContainingSourcesCanBeSelectedRecommendedAndSaved() =
+        runTest {
+            val urls = listOf("https://example.com/feed?tags=a,b", "https://example.com/feed?tags=c,d")
+            val visited = mutableListOf<String>()
+            val observed =
+                observe(
+                    presenter(
+                        fetch = { if (it.endsWith("discover")) error("Not XML") else feed(it) },
+                        sources = urls,
+                    ) {
+                        visited += it
+                        throw ArticleExtractionException()
+                    },
+                )
+            observed.state.checkUrl("https://example.com/discover")
+            advanceTimeBy(667)
+            runCurrent()
+            urls.forEach { observed.state.selectSource(it, true) }
+            runCurrent()
+            assertEquals(urls.map { "$it/article" }, visited)
+            assertTrue(observed.state.readingModes.all { it.displayMode == RssDisplayMode.DESCRIPTION_ONLY && !it.checking })
+
+            observed.state.selectSource(urls.last(), false)
+            observed.state.saveSelectedSources()
+            observed.state.clearSelectedSources()
+            persistenceScope.testScheduler.advanceUntilIdle()
+            assertEquals(listOf(urls.first()), repository.currentSources.map { it.url })
+            assertEquals(RssDisplayMode.DESCRIPTION_ONLY, repository.currentSources.single().displayMode)
+
+            observed.state.saveSelectedSources()
+            persistenceScope.testScheduler.advanceUntilIdle()
+            assertEquals(1, repository.currentSources.size)
         }
 
     @Test
@@ -243,9 +279,10 @@ class EditRssRecommendationTest {
         id: Int? = null,
         initial: RssDisplayMode? = null,
         fetch: suspend (String) -> Feed = { feed(it) },
+        sources: List<String> = listOf("https://first.example/feed", "https://second.example/feed"),
         extract: suspend (String) -> DocumentData,
     ) = EditRssSourcePresenter(id, initial, { url ->
-        CheckRssSourcePresenter(url, fetch, { null }, { listOf("https://first.example/feed", "https://second.example/feed") })
+        CheckRssSourcePresenter(url, fetch, { null }, { sources })
     }, extract)
 
     private fun feed(

@@ -173,6 +173,50 @@ class RssArticleLoadingTest {
     }
 
     @Test
+    fun rdfEncodedContentSurvivesNavigationRecommendationAndFailedExtraction() =
+        runTest {
+            val feed =
+                parseFeedText(
+                    """
+                    <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+                             xmlns="http://purl.org/rss/1.0/" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+                      <channel rdf:about="http://example.com/feed"><title>Feed</title><link>http://example.com</link></channel>
+                      <item rdf:about="http://example.com/a"><title>Title</title><link>http://example.com/a</link>
+                        <content:encoded><![CDATA[<p>Full RDF article</p>]]></content:encoded>
+                      </item>
+                    </rdf:RDF>
+                    """.trimIndent(),
+                ) as Feed.RDF
+            val item = feed.items.single().render("Feed", null, RssDisplayMode.FULL_CONTENT) as UiTimelineV2.Feed
+            val route = DeeplinkRoute.parse((item.clickEvent as ClickEvent.Deeplink).url) as DeeplinkRoute.Rss.Detail
+            assertEquals("<p>Full RDF article</p>", item.descriptionHtml)
+            assertEquals(item.descriptionHtml, route.fallbackHtml)
+            assertEquals("http://example.com/a", route.url)
+
+            val client = mockClient { respond("Not found", HttpStatusCode.NotFound) }
+            try {
+                val reader = Readability(client, StandardTestDispatcher(testScheduler))
+                assertEquals(RssDisplayMode.DESCRIPTION_ONLY, recommendRssDisplayMode(feed, reader::extract))
+                assertEquals("Full RDF article", reader.load(route.url, fallbackHtml = route.fallbackHtml).textContent)
+            } finally {
+                client.close()
+            }
+        }
+
+    @Test
+    fun rdfPrefersUsableEncodedContentAndFallsBackToDescription() =
+        runTest {
+            for ((encoded, expected) in listOf("<p>Full article</p>" to "<p>Full article</p>", "<p> </p>" to "Summary")) {
+                val entry = Feed.RDF.Item("Title", "https://example.com/a", description = "Summary", contentEncoded = encoded)
+                val feed = Feed.RDF(Feed.RDF.Channel("Feed", "https://example.com"), listOf(entry))
+                val item = entry.render("Feed", null, RssDisplayMode.DESCRIPTION_ONLY) as UiTimelineV2.Feed
+                val route = DeeplinkRoute.parse((item.clickEvent as ClickEvent.Deeplink).url) as DeeplinkRoute.Rss.Detail
+                assertEquals(expected, route.descriptionHtml)
+                assertEquals(RssDisplayMode.DESCRIPTION_ONLY, recommendRssDisplayMode(feed) { throw ArticleExtractionException() })
+            }
+        }
+
+    @Test
     fun atomAndRdfAlsoPreserveOriginalProtocol() {
         val atom =
             parseFeedText(

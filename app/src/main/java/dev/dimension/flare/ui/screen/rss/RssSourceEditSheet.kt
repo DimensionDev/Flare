@@ -585,7 +585,7 @@ private fun presenter(
     }
     LaunchedEffect(state.checkState) {
         selectedSource.clear()
-        state.selectSources("")
+        state.clearSelectedSources()
     }
     LaunchedEffect(Unit) {
         snapshotFlow { urlText.text }
@@ -609,7 +609,7 @@ private fun presenter(
             } else {
                 selectedSource.add(source)
             }
-            state.selectSources(selectedSource.joinToString(",") { it.url })
+            state.selectSource(source.url, selectedSource.contains(source))
         }
 
         fun toggleMastodonType(type: SubscriptionType) {

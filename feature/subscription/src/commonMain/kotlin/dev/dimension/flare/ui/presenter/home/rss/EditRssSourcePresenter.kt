@@ -124,7 +124,12 @@ public class EditRssSourcePresenter(
             value: RssDisplayMode,
         )
 
-        public fun selectSources(urls: String)
+        public fun selectSource(
+            url: String,
+            selected: Boolean,
+        )
+
+        public fun clearSelectedSources()
 
         public fun checkRssHubServer(value: String)
 
@@ -138,7 +143,7 @@ public class EditRssSourcePresenter(
             displayMode: RssDisplayMode,
         )
 
-        public fun saveSourcesByUrl(selectedUrls: String)
+        public fun saveSelectedSources()
 
         public fun saveSubscriptionTypes(selectedTypes: String)
     }
@@ -361,8 +366,15 @@ public class EditRssSourcePresenter(
                 modeSelection.select(url, value)
             }
 
-            override fun selectSources(urls: String) {
-                selectedUrls = urls.splitCsv().toSet()
+            override fun selectSource(
+                url: String,
+                selected: Boolean,
+            ) {
+                selectedUrls = if (selected) selectedUrls + url else selectedUrls - url
+            }
+
+            override fun clearSelectedSources() {
+                selectedUrls = emptySet()
             }
 
             override fun checkUrl(value: String) {
@@ -414,11 +426,10 @@ public class EditRssSourcePresenter(
                 }
             }
 
-            override fun saveSourcesByUrl(selectedUrls: String) {
+            override fun saveSelectedSources() {
                 val rssState = (checkState as? UiState.Success)?.data as? RssState.RssSources ?: return
-                val selected = selectedUrls.splitCsv().toSet()
                 val inputs =
-                    rssState.sources.filter { it.url in selected }.map { source ->
+                    rssState.sources.filter { it.url in selectedUrls }.map { source ->
                         SubscriptionSourceInput(
                             id = source.id,
                             url = source.url,

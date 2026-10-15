@@ -70,7 +70,7 @@ public class CheckRssSourcePresenter internal constructor(
         }
     }
 
-    private val flow: Flow<UiState<RssState>> by lazy {
+    internal val flow: Flow<UiState<RssState>> by lazy {
         flow {
             emit(UiState.Loading())
             delay(666)
@@ -105,17 +105,21 @@ public class CheckRssSourcePresenter internal constructor(
                                                     rssCheck {
                                                         fetchIcon(it)
                                                     }.getOrNull()
+                                                val feed = fetchFeed(it)
                                                 UiRssSource(
                                                     id = 0,
                                                     url = it,
-                                                    title = fetchFeed(it).also { feed -> feeds[it] = feed }.title.trim(),
+                                                    title = feed.title.trim(),
                                                     lastUpdate = Instant.DISTANT_PAST.toUi(),
                                                     favIcon = icon,
                                                     displayMode = RssDisplayMode.FULL_CONTENT,
-                                                )
+                                                ) to feed
                                             }
                                         }.awaitAll()
-                                        .toImmutableList()
+                                        .map { (source, feed) ->
+                                            feeds[source.url] = feed
+                                            source
+                                        }.toImmutableList()
                                 }
                             }.getOrNull()
 

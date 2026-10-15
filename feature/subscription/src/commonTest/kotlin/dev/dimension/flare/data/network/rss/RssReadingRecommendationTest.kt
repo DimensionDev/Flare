@@ -41,6 +41,66 @@ class RssReadingRecommendationTest {
         }
 
     @Test
+    fun samplingStopsReadingEntriesAfterTwoDistinctWebArticlesForEveryFeedFormat() =
+        runTest {
+            fun <T> entries(create: (String) -> T): List<T> =
+                object : AbstractList<T>() {
+                    override val size = 1_000
+
+                    override fun get(index: Int): T =
+                        create(
+                            when (index) {
+                                0 -> "mailto:person@example.com"
+                                1, 2 -> "https://example.com/1"
+                                3 -> "https://example.com/2"
+                                else -> error("Entries beyond the two usable samples must not be inspected")
+                            },
+                        )
+                }
+
+            val feeds =
+                listOf(
+                    Feed.Rss20(
+                        "2.0",
+                        Feed.Rss20.Channel(
+                            "Feed",
+                            "https://example.com",
+                            items =
+                                entries {
+                                    Feed.Rss20.Item(link = it, contentEncoded = "<p>RSS body</p>")
+                                },
+                        ),
+                    ),
+                    Feed.Atom(
+                        "feed",
+                        Feed.Atom.Text("Feed"),
+                        null,
+                        entries =
+                            entries {
+                                Feed.Atom.Entry(it, content = Feed.Atom.Content("<p>Atom body</p>"))
+                            },
+                    ),
+                    Feed.RDF(
+                        Feed.RDF.Channel("Feed", "https://example.com"),
+                        entries {
+                            Feed.RDF.Item("Title", it, contentEncoded = "<p>RDF body</p>")
+                        },
+                    ),
+                )
+            for (feed in feeds) {
+                val visited = mutableListOf<String>()
+                assertEquals(
+                    RssDisplayMode.DESCRIPTION_ONLY,
+                    recommendRssDisplayMode(feed) {
+                        visited += it
+                        throw ArticleExtractionException()
+                    },
+                )
+                assertEquals(listOf("https://example.com/1", "https://example.com/2"), visited)
+            }
+        }
+
+    @Test
     fun permanentFailureChoosesFeedOrBrowserAndTransientFailureIsUnknown() =
         runTest {
             for (status in listOf(301, 403, 404, 408, 429, 500, 503)) {

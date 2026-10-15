@@ -193,7 +193,7 @@ public struct EditRssSheet: View {
         .rssFormStyle()
         .onChange(of: presenter.state.checkState) { _, newValue in
             selectedRssSources = []
-            presenter.state.selectSources(urls: "")
+            presenter.state.clearSelectedSources()
             selectedMastodonTypes = []
             rssHubHost = ""
             if case .success(let success) = onEnum(of: newValue),
@@ -276,7 +276,7 @@ public struct EditRssSheet: View {
         } else {
             selectedRssSources.append(item)
         }
-        presenter.state.selectSources(urls: selectedRssSources.map(\.url).joined(separator: ","))
+        presenter.state.selectSource(url: item.url, selected: selectedRssSources.contains { $0.url == item.url })
     }
 
     private func toggleSubscriptionType(_ type: SubscriptionType) {

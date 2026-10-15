@@ -436,6 +436,9 @@ internal sealed interface Feed {
             @XmlElement(true)
             @XmlSerialName(value = "date", namespace = "http://purl.org/dc/elements/1.1/", prefix = "dc")
             val date: String? = null,
+            @XmlElement(true)
+            @XmlSerialName(value = "encoded", namespace = "http://purl.org/rss/1.0/modules/content/", prefix = "content")
+            val contentEncoded: String? = null,
         )
     }
 }

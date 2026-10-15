@@ -19,6 +19,7 @@ internal suspend fun recommendRssDisplayMode(
                 .filter {
                     runCatching { Url(it.first).protocol.name in setOf("http", "https") }.getOrDefault(false)
                 }.take(2)
+                .toList()
         if (samples.isEmpty()) return@withTimeoutOrNull null
         var uncertain = false
         for ((url, _) in samples) {
@@ -33,26 +34,26 @@ internal suspend fun recommendRssDisplayMode(
         }
         when {
             uncertain -> null
-            samples.all { it.second.hasRssContent() } -> RssDisplayMode.DESCRIPTION_ONLY
+            samples.all { (_, contents) -> contents.any { it.hasRssContent() } } -> RssDisplayMode.DESCRIPTION_ONLY
             else -> RssDisplayMode.OPEN_IN_BROWSER
         }
     }
 
-private fun Feed.readingSamples(): List<Pair<String, String?>> =
+private fun Feed.readingSamples(): Sequence<Pair<String, List<String?>>> =
     when (this) {
         is Feed.Rss20 -> {
-            channel.items.map { it.link to (it.contentEncoded?.takeIf { html -> html.hasRssContent() } ?: it.description) }
+            channel.items.asSequence().map { it.link to listOf(it.contentEncoded, it.description) }
         }
 
         is Feed.Atom -> {
-            entries.map {
+            entries.asSequence().map {
                 (it.links.firstOrNull { link -> link.rel == null || link.rel == "alternate" }?.href ?: it.id) to
-                    (it.content?.value?.takeIf { html -> html.hasRssContent() } ?: it.summary?.value)
+                    listOf(it.content?.value, it.summary?.value)
             }
         }
 
         is Feed.RDF -> {
-            items.map { it.link to it.description }
+            items.asSequence().map { it.link to listOf(it.contentEncoded, it.description) }
         }
     }
 

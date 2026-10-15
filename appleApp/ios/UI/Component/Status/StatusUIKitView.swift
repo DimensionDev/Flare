@@ -1504,6 +1504,7 @@ private final class QuotesContainerView: UIView, ManualLayoutMeasurable, Timelin
         layer.cornerRadius = 16
         layer.borderWidth = 1
         layer.borderColor = UIColor.separator.cgColor
+        clipsToBounds = true
     }
     required init?(coder: NSCoder) { fatalError("init(coder:) not supported") }
 

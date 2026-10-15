@@ -676,6 +676,74 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         XCTAssertTrue(isBlank, "A newly inserted card painted outside its estimated cell")
     }
 
+    func testQuotedCarouselClipsImagesToTheCardCornersAfterScrollingAndResizing() throws {
+        let post = try XCTUnwrap(makeRow(1) as? UiTimelineV2.TimelinePostItem).post
+        let helper = TimelinePresentationAppearancePatchHelper.shared
+        let appearance = StatusUIKitAppearance(timeline: helper.resolve(
+            base: TimelineAppearance.companion.Default,
+            patch: helper.setMediaLayout(patch: helper.empty, value: .carousel)
+        ))
+        let status = StatusUIKitView()
+        status.configure(data: post, appearance: appearance, showMedia: false,
+                         forceHideActions: true, quotes: [post], allowsMediaCarousel: true)
+        let quotedStatus = try XCTUnwrap(descendants(status).compactMap { $0 as? StatusUIKitView }
+            .first { $0 !== status })
+        let card = try XCTUnwrap(quotedStatus.superview)
+        let carousel = try XCTUnwrap(descendants(quotedStatus).compactMap { $0 as? UICollectionView }.first)
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = 3
+        format.preferredRange = .standard
+        let image = UIGraphicsImageRenderer(size: CGSize(width: 8, height: 8), format: format).image { context in
+            UIColor.magenta.setFill()
+            context.fill(CGRect(x: 0, y: 0, width: 8, height: 8))
+        }
+
+        for width: CGFloat in [336, 280, 336] {
+            status.prepareForFitting(width: width)
+            status.frame = CGRect(x: 0, y: 0, width: width, height: try XCTUnwrap(status.timelineHeight(for: width)))
+            status.layoutIfNeeded()
+            XCTAssertGreaterThan(carousel.contentSize.width, carousel.bounds.width)
+            let viewport = carousel.convert(carousel.bounds, to: card)
+            XCTAssertEqual(viewport.minX, 0, accuracy: 0.5)
+            XCTAssertEqual(viewport.maxX, card.bounds.maxX, accuracy: 0.5)
+
+            for offset: CGFloat in [0, 40, 100] {
+                carousel.setContentOffset(CGPoint(x: offset, y: 0), animated: false)
+                carousel.layoutIfNeeded()
+                // Supply decoded pixels at the image leaf; retain the real media cells and clipping hierarchy.
+                let imageViews = carousel.visibleCells.flatMap(descendants).compactMap { $0 as? UIImageView }
+                    .filter { $0.contentMode == .scaleAspectFill }
+                XCTAssertFalse(imageViews.isEmpty)
+                imageViews.forEach { $0.image = image }
+
+                let screenshot = UIGraphicsImageRenderer(bounds: card.bounds, format: format).image { context in
+                    UIColor.black.setFill()
+                    context.fill(card.bounds)
+                    card.layer.render(in: context.cgContext)
+                }
+                let bitmap = try XCTUnwrap(screenshot.cgImage)
+                XCTAssertEqual(bitmap.bitsPerPixel, 32)
+                let bytes = try XCTUnwrap(bitmap.dataProvider?.data) as Data
+                let boundary = UIBezierPath(roundedRect: card.bounds, cornerRadius: card.layer.cornerRadius)
+                var insidePixels = 0
+                var outsidePixels = 0
+                for y in Int((card.bounds.maxY - card.layer.cornerRadius) * format.scale)..<bitmap.height {
+                    for x in 0..<bitmap.width {
+                        let index = y * bitmap.bytesPerRow + x * 4
+                        guard bytes[index] > 192, bytes[index + 1] < 64, bytes[index + 2] > 192 else { continue }
+                        let point = CGPoint(x: (CGFloat(x) + 0.5) / format.scale, y: (CGFloat(y) + 0.5) / format.scale)
+                        if boundary.contains(point) { insidePixels += 1 } else { outsidePixels += 1 }
+                    }
+                }
+                XCTAssertGreaterThan(insidePixels, 100, "The media must actually render beside the bottom corners")
+                XCTAssertEqual(outsidePixels, 0, "Quoted media escaped its card at width \(width), offset \(offset)")
+                if outsidePixels > 0 {
+                    add(XCTAttachment(image: screenshot))
+                }
+            }
+        }
+    }
+
     private func descendants(_ view: UIView) -> [UIView] { [view] + view.subviews.flatMap(descendants) }
 
     private struct ListSwitchTestView: View {

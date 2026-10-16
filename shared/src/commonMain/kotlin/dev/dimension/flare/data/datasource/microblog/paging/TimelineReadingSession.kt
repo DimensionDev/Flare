@@ -700,10 +700,12 @@ internal class TimelineReadingSession(
         val dao = database.pagingTimelineDao()
         return dao.keysWithPrefix(prefix).associate { source ->
             val cursor = dao.getPagingKey(source)
-            source.removePrefix(prefix) to Triple(
-                cursor?.nextKey, cursor?.prevKey,
-                if (source == prefix) emptyList() else dao.getByPagingKey(source).map { it.statusId },
-            )
+            source.removePrefix(prefix) to
+                Triple(
+                    cursor?.nextKey,
+                    cursor?.prevKey,
+                    if (source == prefix) emptyList() else dao.getByPagingKey(source).map { it.statusId },
+                )
         }
     }
 

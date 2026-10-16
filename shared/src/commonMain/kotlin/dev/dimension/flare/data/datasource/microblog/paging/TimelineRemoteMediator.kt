@@ -149,9 +149,12 @@ internal open class TimelineRemoteMediator(
                     }
                     data
                 }
-            } else if (request is PagingRequest.Append && data.isNotEmpty()) {
+            } else if ((request is PagingRequest.Append || (request is PagingRequest.Prepend && preservePrependSortIds)) &&
+                data.isNotEmpty()
+            ) {
                 // Repeated posts may have fresh content, but moving them to the end
                 // shifts the items being read while the next page is loading.
+                // A later insertion in a reading page may also have rebased an earlier row.
                 val existing =
                     data
                         .map { it.timeline.statusId }

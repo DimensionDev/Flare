@@ -2525,6 +2525,28 @@ class TimelineReadingSessionTest : RobolectricTest() {
         }
 
     @Test
+    fun forwardPageKeepsFinalRanksWhenALaterHoleRebasesEarlierInsertions() =
+        runTest {
+            val loader = Loader(prepend = true).apply { response = page(0..4).copy(data = listOf(post(0), post(2), post(4))) }
+            val session = session(loader, backgroundScope)
+            session.refresh(false, initial = true)
+            val dao = database.pagingTimelineDao()
+            dao.insertAll(rows(session).mapIndexed { index, row -> row.copy(sortId = index.toLong()) })
+            val anchor = rows(session)[1]
+            savePosition(session, "${session.activeKey}_${anchor.statusId}", anchor.sortId, -18.75)
+            loader.response = page(-1..2)
+            loader.forward = loader.response
+            session.refresh(false)
+            val after = rows(session)
+            assertEquals(listOf("-1", "0", "1", "2", "4"), ids(session))
+            assertEquals(after.size, after.map { it.sortId }.toSet().size)
+            assertEquals("${session.activeKey}_${anchor.statusId}", snapshot(session).anchorId)
+            assertEquals(after.single { it._id == anchor._id }.sortId, snapshot(session).anchorSortId)
+            assertEquals(-18.75, snapshot(session).offset)
+            assertNull(session.state.value.position)
+        }
+
+    @Test
     fun denseHoleRebasesOnlyItsNeighboursAndKeepsTheBookmark() =
         runTest {
             val loader = Loader().apply { response = page(0..399) }
@@ -2619,23 +2641,24 @@ class TimelineReadingSessionTest : RobolectricTest() {
         }
 
     @Test
-    fun consumingNestedStagingCountsAsProgressEvenWhenOuterPageAndCursorsRepeat() = runTest {
-        val loader = Loader(timelineOrder = TimelineOrder.Ranked).apply { response = page(0..39, "old") }
-        val session = session(loader, backgroundScope)
-        session.refresh(false, initial = true)
-        loader.response = page(0..39, "fresh")
-        session.refresh(false)
-        val segment = database.timelineReadingSessionDao().segments(session.record.key).single()
-        val staging = "${segment.key}source/staging"
-        val dao = database.pagingTimelineDao()
-        dao.insertPagingKey(DbPagingKey(staging, "child-next"))
-        dao.insertAll(rows(session).map { it.copy(pagingKey = staging, _id = DbPagingTimeline.createId(staging, it.statusId)) })
-        loader.response = loader.response.copy(saveInTransaction = { dao.delete(staging) })
-        assertNull(session.loadGap(segment.key))
-        assertEquals((0..39).map(Int::toString), ids(session))
-        assertEquals("fresh", dao.getPagingKey(segment.key)?.nextKey)
-        assertNotNull(session.loadGap(segment.key), "Once staging also stops changing, the page really is stalled")
-    }
+    fun consumingNestedStagingCountsAsProgressEvenWhenOuterPageAndCursorsRepeat() =
+        runTest {
+            val loader = Loader(timelineOrder = TimelineOrder.Ranked).apply { response = page(0..39, "old") }
+            val session = session(loader, backgroundScope)
+            session.refresh(false, initial = true)
+            loader.response = page(0..39, "fresh")
+            session.refresh(false)
+            val segment = database.timelineReadingSessionDao().segments(session.record.key).single()
+            val staging = "${segment.key}source/staging"
+            val dao = database.pagingTimelineDao()
+            dao.insertPagingKey(DbPagingKey(staging, "child-next"))
+            dao.insertAll(rows(session).map { it.copy(pagingKey = staging, _id = DbPagingTimeline.createId(staging, it.statusId)) })
+            loader.response = loader.response.copy(saveInTransaction = { dao.delete(staging) })
+            assertNull(session.loadGap(segment.key))
+            assertEquals((0..39).map(Int::toString), ids(session))
+            assertEquals("fresh", dao.getPagingKey(segment.key)?.nextKey)
+            assertNotNull(session.loadGap(segment.key), "Once staging also stops changing, the page really is stalled")
+        }
 
     private suspend fun append(session: TimelineReadingSession) =
         session.load(

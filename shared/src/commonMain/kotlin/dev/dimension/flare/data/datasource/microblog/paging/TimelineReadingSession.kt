@@ -93,7 +93,6 @@ internal class TimelineReadingSession(
     private val closed = MutableStateFlow(false)
     private var checkpoint: Job? = null
     private var startupPending = false
-    private var rankedCursorsReady = false
     private var cursorIndexReady = false
     private val cursorStates = mutableMapOf<String, ReadingCursorState>()
     private val equivalentCursors = mutableMapOf<ReadingCursorState, MutableSet<String>>()
@@ -218,17 +217,6 @@ internal class TimelineReadingSession(
         )
 
     suspend fun prepare() {
-        database.connect {
-            if (valid()) {
-                database
-                    .timelineReadingSessionDao()
-                    .segments(
-                        record.key,
-                    ).filter { it.exhausted }
-                    .forEach { discardSegment(it.key) }
-            }
-        }
-        ensureRankedCursors()
         val dao = database.pagingTimelineDao()
         val saved =
             record.anchorId?.let { dao.readingItem(activeKey, it) }
@@ -298,7 +286,6 @@ internal class TimelineReadingSession(
                     val cursor =
                         withContext(PlatformDispatchers.IO) {
                             mutex.withLock {
-                                ensureRankedCursors()
                                 database.timelineReadingSessionDao().nextCursor(record.key)
                             }
                         } ?: return MediatorResult.Success(true)
@@ -704,26 +691,6 @@ internal class TimelineReadingSession(
         }
     }
 
-    private suspend fun ensureRankedCursors() {
-        if (continuous || rankedCursorsReady) return
-        rankedCursorsReady =
-            database.connect {
-                if (!valid()) return@connect false
-                val dao = database.timelineReadingSessionDao()
-                // Older snapshots have no checkpoint; their active history is not a raw source page.
-                reclaimPublishedStaging(activeKey)
-                if (dao.cursor(activeKey) == null) rememberRankedCursor(activeKey, null)
-                dao.segments(record.key).filterNot { it.exhausted }.forEach { segment ->
-                    reclaimPublishedStaging(segment.key)
-                    if (dao.cursor(segment.key) == null) {
-                        rememberRankedCursor(segment.key, database.pagingTimelineDao().getByPagingKey(segment.key).map { it.statusId })
-                        clearConsumedPage(segment.key)
-                    }
-                }
-                true
-            }
-    }
-
     private fun invalidateCursorState(key: String) {
         cursorStates.remove(key)?.let { previous ->
             equivalentCursors[previous]?.let { keys ->
@@ -922,7 +889,7 @@ internal class TimelineReadingSession(
             mutex.withLock {
                 if (!valid()) return@withLock null
                 val readingDao = database.timelineReadingSessionDao()
-                var segment = readingDao.segments(record.key).firstOrNull { it.key == key && !it.exhausted }
+                var segment = readingDao.segment(record.key, key)
                 val original = !continuous && key == activeKey
                 if (segment == null && !original) return@withLock null
                 if (!continuous) {
@@ -933,6 +900,16 @@ internal class TimelineReadingSession(
                 gapLoads.update { it + (key to true) }
                 gapGeneration.update { it + 1 }
                 try {
+                    if (loader is MixedRemoteMediator) {
+                        val maintained =
+                            database.connect {
+                                if (!valid()) return@connect false
+                                // Other cursors may have published these rows since this cursor's last turn.
+                                reclaimPublishedStaging(key)
+                                true
+                            }
+                        if (!maintained) return@withLock null
+                    }
                     // Continuous gaps get two pages per visit; ranked cursors each get one page per turn.
                     repeat(if (continuous) 2 else 1) {
                         val dao = database.pagingTimelineDao()
@@ -1031,10 +1008,11 @@ internal class TimelineReadingSession(
             val version = boundaryVersion.value
             boundaryCache?.takeIf { it.first == version }?.let { return@withLock it.second }
             val dao = database.pagingTimelineDao()
-            val segments = database.timelineReadingSessionDao().segments(record.key).filterNot { it.exhausted }
-            val first = if (continuous && segments.isNotEmpty()) visibleRow(activeKey, 0)?.timeline else null
+            val readingDao = database.timelineReadingSessionDao()
             val boundaries =
                 if (continuous) {
+                    val segments = readingDao.segments(record.key)
+                    val first = if (segments.isNotEmpty()) visibleRow(activeKey, 0)?.timeline else null
                     segments.mapNotNull { segment ->
                         val boundary =
                             dao.readingItem(activeKey, "${activeKey}_${segment.boundaryId}")
@@ -1046,13 +1024,12 @@ internal class TimelineReadingSession(
                         ReadingBoundary(segment, visible, dao.readingItemOffset(activeKey, visible.sortId), after = false)
                     }
                 } else {
-                    val readingDao = database.timelineReadingSessionDao()
                     val failed =
                         gapLoads.value.entries
                             .firstOrNull { !it.value }
                             ?.key
                             ?.let { readingDao.cursor(it) }
-                    val cursor = failed ?: if (segments.isNotEmpty()) readingDao.nextCursor(record.key) else null
+                    val cursor = failed ?: if (readingDao.hasSegments(record.key)) readingDao.nextCursor(record.key) else null
                     val tail = dao.readingTail(activeKey)
                     if (cursor != null && tail != null) {
                         val segment = DbTimelineReadingSegment(cursor.key, record.key, tail.statusId, tail.sortId)

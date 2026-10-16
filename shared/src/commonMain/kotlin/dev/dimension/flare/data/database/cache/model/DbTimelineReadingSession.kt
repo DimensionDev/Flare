@@ -33,7 +33,6 @@ internal data class DbTimelineReadingSegment(
     val snapshotKey: String,
     val boundaryId: String,
     val boundarySortId: Long,
-    val exhausted: Boolean = false,
 )
 
 @Entity(indices = [Index(value = ["snapshotKey", "lastAttempt"])])

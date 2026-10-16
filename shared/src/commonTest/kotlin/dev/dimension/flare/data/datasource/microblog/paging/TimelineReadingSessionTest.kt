@@ -288,16 +288,16 @@ class TimelineReadingSessionTest : RobolectricTest() {
         }
 
     @Test
-    fun nestedMixedFailureDoesNotAdvanceChildCursor() = nestedMixedFailure(TimelineMergePolicy.Staggered, TimelineMergePolicy.Staggered)
+    fun nestedMixedFailureCommitsOnlySuccessfulSources() = nestedMixedFailure(TimelineMergePolicy.Staggered, TimelineMergePolicy.Staggered)
 
     @Test
-    fun timeParentFailureDoesNotAdvanceChildCursor() = nestedMixedFailure(TimelineMergePolicy.Time, TimelineMergePolicy.Staggered)
+    fun timeParentFailureCommitsOnlySuccessfulSources() = nestedMixedFailure(TimelineMergePolicy.Time, TimelineMergePolicy.Staggered)
 
     @Test
-    fun timeChildFailureDoesNotChangeStaging() = nestedMixedFailure(TimelineMergePolicy.Staggered, TimelineMergePolicy.Time)
+    fun timeChildFailureCommitsOnlySuccessfulSources() = nestedMixedFailure(TimelineMergePolicy.Staggered, TimelineMergePolicy.Time)
 
     @Test
-    fun nestedTimeFailureDoesNotChangeStaging() = nestedMixedFailure(TimelineMergePolicy.Time, TimelineMergePolicy.Time)
+    fun nestedTimeFailureCommitsOnlySuccessfulSources() = nestedMixedFailure(TimelineMergePolicy.Time, TimelineMergePolicy.Time)
 
     private fun nestedMixedFailure(
         parentPolicy: TimelineMergePolicy,
@@ -352,6 +352,9 @@ class TimelineReadingSessionTest : RobolectricTest() {
         val childCursorKey = dao.keysWithPrefix(session.activeKey).single { it.endsWith("/source/5:inner/$suffix") }
         val oldCursor = database.pagingTimelineDao().getPagingKey(childCursorKey)
         assertEquals("old-cursor", oldCursor?.nextKey)
+        val siblingSuffix = if (parentPolicy == TimelineMergePolicy.Time) "staging" else "cursor"
+        val siblingCursorKey = dao.keysWithPrefix(session.activeKey).single { it.endsWith("/source/7:sibling/$siblingSuffix") }
+        val siblingCursor = dao.getPagingKey(siblingCursorKey)
         sibling.response = chronologicalPage(30..39).copy(nextKey = null)
         val failSibling = CompletableDeferred<Unit>()
         sibling.beforeLoad = {
@@ -365,25 +368,28 @@ class TimelineReadingSessionTest : RobolectricTest() {
                 allowLongText = false,
             )
         val request = PagingRequest.Append("mixed_next_key")
-        val append = async { runCatching { mediator.load(40, request) } }
+        val append = async { mediator.load(40, request) }
         advanceUntilIdle()
         assertEquals(listOf(PagingRequest.Refresh, PagingRequest.Append("old-cursor")), nestedRequests)
         failSibling.complete(Unit)
-        val failure = append.await().exceptionOrNull()
-        assertTrue(failure is IllegalStateException, "Expected sibling failure, got $failure")
+        val partial = append.await()
         assertEquals(before, rows(session))
-        assertEquals(beforeMixedData, mixedData(), "A sibling failure must not commit child cursors or staging rows")
-        val failedCursor = database.pagingTimelineDao().getPagingKey(childCursorKey)
+        assertEquals(beforeMixedData, mixedData(), "Fetching must not commit child cursors or staging rows")
+        mediator.saveResponse(request, partial)
+        assertTrue((100..109).all { it.toString() in ids(session) }, "Healthy child page must remain available")
+        assertEquals("inner-next", dao.getPagingKey(childCursorKey)?.nextKey)
+        assertEquals(siblingCursor, dao.getPagingKey(siblingCursorKey), "Failed source must retain its cursor")
+        assertEquals(before, rows(session).take(before.size), "Partial append must preserve existing list order")
         sibling.beforeLoad = {}
         mediator.saveResponse(request, mediator.load(40, request))
         val actualIds = ids(session)
-        assertTrue(
-            (100..109).all {
-                it.toString() in actualIds
-            },
-            "Retry skipped a child page; cursor after failure=$failedCursor requests=$nestedRequests ids=$actualIds",
+        assertTrue((30..39).all { it.toString() in actualIds }, "Recovered sibling must resume its failed page")
+        assertTrue((100..109).all { it.toString() in actualIds }, "Recovery must retain the earlier successful page")
+        assertEquals(
+            listOf(PagingRequest.Refresh, PagingRequest.Append("old-cursor"), PagingRequest.Append("inner-next")),
+            nestedRequests,
         )
-        assertEquals(oldCursor, failedCursor)
+        assertEquals(List(2) { PagingRequest.Append("sibling-old") }, sibling.requests.takeLast(2))
     }
 
     @Test
@@ -439,44 +445,53 @@ class TimelineReadingSessionTest : RobolectricTest() {
     @Test
     fun timeMixedAppendCommitsStagingAndOuterRowsTogether() = mixedAppendCancellation(TimelineMergePolicy.Time)
 
-    private fun mixedAppendCancellation(policy: TimelineMergePolicy) =
-        runTest {
-            val first = Loader("first")
-            val second = Loader("second").apply { response = page(20..29) }
-            val mixed = MixedRemoteMediator(database, listOf(first, second), policy)
-            val session = session(mixed, backgroundScope)
-            session.refresh(false, initial = true)
-            val dao = database.pagingTimelineDao()
+    @Test
+    fun partialMixedAppendCommitsChildCursorsAndOuterRowsTogether() = mixedAppendCancellation(TimelineMergePolicy.Staggered, true)
 
-            suspend fun stored() = dao.keysWithPrefix(session.activeKey).associateWith { dao.getByPagingKey(it) to dao.getPagingKey(it) }
-            val before = stored()
-            first.response = page(100..109, "first-next")
-            second.response = page(120..129, "second-next")
-            var cancelSave = true
-            val mediator =
-                object : TimelineRemoteMediator(mixed.forReadingSession(session.activeKey) { true }, database, false) {
-                    override suspend fun onSaveCache(
-                        request: PagingRequest,
-                        data: List<dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus>,
-                    ) {
-                        super.onSaveCache(request, data)
-                        if (cancelSave) throw CancellationException("Page cancelled before commit")
-                    }
+    @Test
+    fun partialTimeAppendCommitsStagingAndOuterRowsTogether() = mixedAppendCancellation(TimelineMergePolicy.Time, true)
+
+    private fun mixedAppendCancellation(
+        policy: TimelineMergePolicy,
+        failingSibling: Boolean = false,
+    ) = runTest {
+        val first = Loader("first")
+        val second = Loader("second").apply { response = page(20..29) }
+        val mixed = MixedRemoteMediator(database, listOf(first, second), policy)
+        val session = session(mixed, backgroundScope)
+        session.refresh(false, initial = true)
+        val dao = database.pagingTimelineDao()
+
+        suspend fun stored() = dao.keysWithPrefix(session.activeKey).associateWith { dao.getByPagingKey(it) to dao.getPagingKey(it) }
+        val before = stored()
+        first.response = page(100..109, "first-next")
+        second.response = page(120..129, "second-next")
+        if (failingSibling) second.beforeLoad = { error("offline") }
+        var cancelSave = true
+        val mediator =
+            object : TimelineRemoteMediator(mixed.forReadingSession(session.activeKey) { true }, database, false) {
+                override suspend fun onSaveCache(
+                    request: PagingRequest,
+                    data: List<dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus>,
+                ) {
+                    super.onSaveCache(request, data)
+                    if (cancelSave) throw CancellationException("Page cancelled before commit")
                 }
-            val request = PagingRequest.Append("mixed_next_key")
-            val response = mediator.load(40, request)
-            assertEquals(before, stored(), "Fetching a page must not advance child cursors or staging")
-            assertFailsWith<CancellationException> { mediator.saveResponse(request, response) }
-            assertEquals(before, stored(), "Cancellation must roll back the complete mixed page")
-            cancelSave = false
-            val retry = mediator.load(40, request)
-            val expectedIds = response.data.map { it.statusData.statusKey.id }
-            assertTrue(expectedIds.isNotEmpty())
-            assertEquals(expectedIds, retry.data.map { it.statusData.statusKey.id }, "Retry must fetch the cancelled page again")
-            mediator.saveResponse(request, retry)
-            assertTrue(expectedIds.all { it in ids(session) })
-            assertEquals(listOf(request.copy(nextKey = "old-cursor"), request.copy(nextKey = "old-cursor")), first.requests.takeLast(2))
-        }
+            }
+        val request = PagingRequest.Append("mixed_next_key")
+        val response = mediator.load(40, request)
+        assertEquals(before, stored(), "Fetching a page must not advance child cursors or staging")
+        assertFailsWith<CancellationException> { mediator.saveResponse(request, response) }
+        assertEquals(before, stored(), "Cancellation must roll back the complete mixed page")
+        cancelSave = false
+        val retry = mediator.load(40, request)
+        val expectedIds = response.data.map { it.statusData.statusKey.id }
+        assertTrue(expectedIds.isNotEmpty())
+        assertEquals(expectedIds, retry.data.map { it.statusData.statusKey.id }, "Retry must fetch the cancelled page again")
+        mediator.saveResponse(request, retry)
+        assertTrue(expectedIds.all { it in ids(session) })
+        assertEquals(listOf(request.copy(nextKey = "old-cursor"), request.copy(nextKey = "old-cursor")), first.requests.takeLast(2))
+    }
 
     @Test
     fun viewLatestSwitchesTheStoredReferenceWithoutRekeyingThePage() =
@@ -902,14 +917,32 @@ class TimelineReadingSessionTest : RobolectricTest() {
         }
 
     @Test
+    fun emptyMixedSessionPublishesHealthySource() =
+        runTest {
+            val failing = Loader("failing").apply { beforeLoad = { error("offline") } }
+            val healthy = Loader("healthy")
+            val mixed = MixedRemoteMediator(database, listOf(failing, healthy), TimelineMergePolicy.Time)
+            val session = session(mixed, backgroundScope)
+            session.refresh(false, initial = true)
+            assertEquals((0..9).map(Int::toString).toSet(), ids(session).toSet())
+            assertNotNull(database.pagingTimelineDao().getPagingKey(session.activeKey)?.nextKey)
+            assertFalse(session.state.value.hasNewContent)
+            assertNull(session.state.value.position)
+        }
+
+    @Test
     fun mixedPendingCursorsAreIndependentAndPartialFailurePreservesActiveData() =
         runTest {
             val first = Loader("first")
             val second = Loader("second").apply { response = page(20..29, "second-old") }
             val mixed = MixedRemoteMediator(database, listOf(first, second), TimelineMergePolicy.Staggered)
-            val session = session(mixed, backgroundScope)
+            val repository = TimelineReadingRepository(database, backgroundScope)
+            val session = session(mixed, backgroundScope, repository = repository)
             session.refresh(false, initial = true)
             val original = rows(session)
+            val anchor = "${session.activeKey}_${original[5].statusId}"
+            session.updateViewport(ReadingViewport(anchor, -37.25, atTop = false, interacting = false))
+            repository.checkpoint(session.record, session.activeKey, anchor, -37.25)
             val cursorKeys = database.pagingTimelineDao().keysWithPrefix(session.activeKey)
             val cursors = cursorKeys.map { database.pagingTimelineDao().getPagingKey(it) }
             first.response = page(100..110, "first-new")
@@ -917,7 +950,13 @@ class TimelineReadingSessionTest : RobolectricTest() {
             session.refresh(false)
             assertEquals(original, rows(session))
             assertEquals(cursors, cursorKeys.map { database.pagingTimelineDao().getPagingKey(it) })
-            assertFalse(session.state.value.hasNewContent)
+            assertTrue(session.state.value.hasNewContent)
+            val pending = snapshot(session)
+            assertTrue(pending.pendingReady)
+            assertEquals(11, database.pagingTimelineDao().getByPagingKey(pending.pendingKey).size)
+            assertEquals(anchor, pending.anchorId)
+            assertEquals(-37.25, pending.offset)
+            assertNull(session.state.value.position)
             second.beforeLoad = {}
             second.response = page(120..130, "second-new")
             session.refresh(false)

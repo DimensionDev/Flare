@@ -67,6 +67,7 @@ import dev.dimension.flare.ui.render.toUi
 import dev.dimension.flare.ui.render.toUiPlainText
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -88,6 +89,7 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertIs
 import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
@@ -235,13 +237,126 @@ class MixedRemoteMediatorTest : RobolectricTest() {
             val mediator = MixedRemoteMediator(db, listOf(failing, healthy))
             val result = mediator.load(pageSize = 20, request = PagingRequest.Refresh)
 
-            assertNull(result.nextKey)
+            assertNotNull(result.nextKey)
             assertEquals(1, failing.requests.size)
             assertEquals(1, healthy.requests.size)
             assertEquals(1, result.data.size)
             assertEquals("https://example.com/healthy", (result.data.first() as UiTimelineV2.Feed).url)
-            assertNotNull(db.pagingTimelineDao().getPagingKey("mixed_failing"))
+            assertNull(db.pagingTimelineDao().getPagingKey("mixed_failing"))
             assertNotNull(db.pagingTimelineDao().getPagingKey("mixed_healthy"))
+        }
+
+    @Test
+    fun timePartialFailureCanRecoverAfterRecreation() = partialFailureCanRecover(TimelineMergePolicy.Time)
+
+    @Test
+    fun timePerPagePartialFailureCanRecoverAfterRecreation() = partialFailureCanRecover(TimelineMergePolicy.TimePerPage)
+
+    @Test
+    fun staggeredPartialFailureCanRecoverAfterRecreation() = partialFailureCanRecover(TimelineMergePolicy.Staggered)
+
+    @OptIn(ExperimentalPagingApi::class)
+    private fun partialFailureCanRecover(policy: TimelineMergePolicy) =
+        runTest {
+            for (reading in listOf(false, true)) {
+                var offline = true
+                val failing =
+                    FakeLoader("failing-$reading") {
+                        if (offline) error("offline")
+                        PagingResult(data = listOf(feed("https://example.com/recovered", 4000L)))
+                    }
+                val healthy =
+                    FakeLoader("healthy-$reading") {
+                        PagingResult(data = listOf(feed("https://example.com/healthy", 3000L)))
+                    }
+                val errors = mutableListOf<Throwable>()
+
+                fun mediator(): TimelineRemoteMediator {
+                    val mixed = MixedRemoteMediator(db, listOf(failing, healthy), policy)
+                    return TimelineRemoteMediator(
+                        if (reading) mixed.forReadingSession("reading") { true } else mixed,
+                        db,
+                        allowLongText = false,
+                        notifyError = errors::add,
+                    )
+                }
+                val initial = mediator()
+                val refresh = initial.load(20, PagingRequest.Refresh)
+                assertNotNull(refresh.nextKey, "A failed source must remain retryable")
+                initial.saveResponse(PagingRequest.Refresh, refresh)
+                val original = db.pagingTimelineDao().getByPagingKey(initial.pagingKey)
+                assertEquals(1, original.size)
+                assertEquals(1, errors.size)
+                val request = PagingRequest.Append("mixed_next_key")
+                assertFailsWith<IllegalStateException> { mediator().load(20, request) }
+                assertEquals(original, db.pagingTimelineDao().getByPagingKey(initial.pagingKey))
+                assertNotNull(db.pagingTimelineDao().getPagingKey(initial.pagingKey)?.nextKey)
+
+                offline = false
+                val recovered = mediator()
+                val append = recovered.load(20, request)
+                recovered.saveResponse(request, append)
+                assertNull(append.nextKey)
+                assertEquals(List<PagingRequest>(3) { PagingRequest.Refresh }, failing.requests)
+                assertEquals(listOf<PagingRequest>(PagingRequest.Refresh), healthy.requests)
+                val rows = db.pagingTimelineDao().getByPagingKey(initial.pagingKey)
+                assertEquals(2, rows.size)
+                assertEquals(original.single(), rows.single { it._id == original.single()._id })
+                if (reading) assertEquals(original.single(), rows.first(), "Recovery must not insert ahead of the reader")
+
+                offline = true
+                val allFailing = FakeLoader(healthy.pagingKey) { error("also offline") }
+                val mixed = MixedRemoteMediator(db, listOf(failing, allFailing), policy)
+                val failedRefresh = if (reading) mixed.forReadingSession("reading") { true } else mixed
+                val keys = db.pagingTimelineDao().keysWithPrefix(initial.pagingKey)
+                val cursors = keys.map { db.pagingTimelineDao().getPagingKey(it) }
+                assertFailsWith<IllegalStateException> { failedRefresh.load(20, PagingRequest.Refresh) }
+                assertEquals(rows, db.pagingTimelineDao().getByPagingKey(initial.pagingKey))
+                assertEquals(cursors, keys.map { db.pagingTimelineDao().getPagingKey(it) })
+
+                val cancelled = FakeLoader("cancelled") { throw CancellationException("cancelled") }
+                val cancellingMixed = MixedRemoteMediator(db, listOf(healthy, cancelled), policy)
+                val cancelling = if (reading) cancellingMixed.forReadingSession("reading") { true } else cancellingMixed
+                assertFailsWith<CancellationException> { cancelling.load(20, PagingRequest.Refresh) }
+                assertEquals(rows, db.pagingTimelineDao().getByPagingKey(initial.pagingKey))
+                assertEquals(cursors, keys.map { db.pagingTimelineDao().getPagingKey(it) })
+            }
+        }
+
+    @OptIn(ExperimentalPagingApi::class)
+    @Test
+    fun failedTimeSourceDoesNotBlockBufferedItemsOrReplayConsumedPages() =
+        runTest {
+            val buffered =
+                FakeLoader("buffered") {
+                    PagingResult(data = listOf(feed("https://example.com/new", 4000L), feed("https://example.com/old", 1000L)))
+                }
+            val failing =
+                FakeLoader("failing") { request ->
+                    if (request != PagingRequest.Refresh) error("offline")
+                    PagingResult(data = listOf(feed("https://example.com/middle", 3000L)), nextKey = "retry")
+                }
+            val nested = MixedRemoteMediator(db, listOf(buffered, failing), TimelineMergePolicy.Time)
+            val outer = MixedRemoteMediator(db, listOf(nested), TimelineMergePolicy.Time).forReadingSession("nested") { true }
+            val mediator = TimelineRemoteMediator(outer, db, allowLongText = false)
+            var request: PagingRequest = PagingRequest.Refresh
+            for (expected in listOf("new", "middle", "old")) {
+                val response = mediator.load(1, request)
+                assertEquals(
+                    "https://example.com/$expected",
+                    (
+                        response.data
+                            .single()
+                            .status.status.data.content as UiTimelineV2.Feed
+                    ).url,
+                )
+                mediator.saveResponse(request, response)
+                request = PagingRequest.Append(assertNotNull(response.nextKey))
+            }
+            assertFailsWith<IllegalStateException> { mediator.load(1, request) }
+            assertEquals(3, db.pagingTimelineDao().getByPagingKey("nested").size)
+            assertEquals(listOf<PagingRequest>(PagingRequest.Refresh), buffered.requests)
+            assertEquals(List<PagingRequest>(2) { PagingRequest.Append("retry") }, failing.requests.takeLast(2))
         }
 
     @OptIn(ExperimentalPagingApi::class)

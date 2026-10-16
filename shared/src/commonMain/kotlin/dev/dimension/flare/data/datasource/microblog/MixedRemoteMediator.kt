@@ -15,9 +15,9 @@ import dev.dimension.flare.data.datasource.microblog.paging.SortIdProvider
 import dev.dimension.flare.data.datasource.microblog.paging.TimelinePagingMapper
 import dev.dimension.flare.data.model.tab.TimelineMergePolicy
 import dev.dimension.flare.ui.model.UiTimelineV2
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.coroutineScope
 
 internal class MixedRemoteMediator(
@@ -37,7 +37,6 @@ internal class MixedRemoteMediator(
                 append(mediator.pagingKey)
             }
         }
-    private var currentMediators = mediators
     private val timeSources =
         mediators.mapIndexed { index, mediator ->
             TimeSource(mediator, if (sessionKey != null) "${sourcePrefix(index)}staging" else "$pagingKey$TIME_STAGING_SUFFIX$index")
@@ -72,26 +71,28 @@ internal class MixedRemoteMediator(
         pageSize: Int,
         request: PagingRequest,
     ): PagingResult<UiTimelineV2> {
-        if (sessionKey == null) return load(pageSize, request, pendingWrites = null)
-        val pendingWrites = Channel<suspend () -> Unit>(Channel.UNLIMITED)
-        try {
-            val result = load(pageSize, request, pendingWrites)
-            pendingWrites.close()
-            val writes = buildList { for (write in pendingWrites) add(write) }
-            // Child cursors, staging and the outer page must commit together.
-            return result.copy(saveInTransaction = {
-                checkRequestIsValid()
-                writes.forEach { it() }
+        val pendingWrites = mutableListOf<suspend () -> Unit>()
+        val result = load(pageSize, request, pendingWrites)
+        val saveInTransaction: suspend () -> Unit = {
+            checkRequestIsValid()
+            pendingWrites.forEach { it() }
+        }
+        // Child cursors, staging and the outer reading page must commit together.
+        return if (sessionKey != null) {
+            result.copy(saveInTransaction = {
+                saveInTransaction()
+                result.saveInTransaction?.invoke()
             })
-        } finally {
-            pendingWrites.cancel()
+        } else {
+            database.connect { saveInTransaction() }
+            result
         }
     }
 
     private suspend fun load(
         pageSize: Int,
         request: PagingRequest,
-        pendingWrites: Channel<suspend () -> Unit>?,
+        pendingWrites: MutableList<suspend () -> Unit>,
     ): PagingResult<UiTimelineV2> =
         coroutineScope {
             if (request is PagingRequest.Prepend) {
@@ -99,48 +100,38 @@ internal class MixedRemoteMediator(
             } else if (mergePolicy == TimelineMergePolicy.Time) {
                 loadTimeOrdered(pageSize, request, pendingWrites)
             } else {
-                if (request is PagingRequest.Refresh) {
-                    currentMediators = mediators
-                }
-                val response =
-                    (if (sessionKey != null) mediators else currentMediators)
+                val results =
+                    mediators
                         .mapNotNull {
                             getSubRequest(request, it)
                         }.map { subRequest ->
                             async {
-                                runCatching {
-                                    loadSource(subRequest.mediator, pageSize, subRequest.request, pendingWrites)
-                                }.getOrElse {
-                                    if (sessionKey != null || it is kotlinx.coroutines.CancellationException) throw it
-                                    reportError?.invoke(it)
-                                    PagingResult(endOfPaginationReached = true)
-                                }.let {
-                                    SubResponse(subRequest.mediator, it)
+                                loadSource(subRequest.mediator, pageSize, subRequest.request).map {
+                                    SubResponse(subRequest, it)
                                 }
                             }
                         }.awaitAll()
 
+                val response = results.mapNotNull { it.getOrNull() }
+                if (response.isEmpty()) results.firstOrNull()?.getOrThrow()
+                results.mapNotNull { it.exceptionOrNull() }.forEach { reportError?.invoke(it) }
                 val mixedTimelineResult = merge(response)
 
-                save(pendingWrites) {
+                pendingWrites.add {
+                    if (request is PagingRequest.Refresh) {
+                        mediators.forEach { database.pagingTimelineDao().deletePagingKey(subKey(it)) }
+                    }
                     response.forEach {
-                        saveSubResponse(request, it)
+                        it.result.saveInTransaction?.invoke()
+                        saveSubResponse(it)
                     }
                 }
 
-                currentMediators =
-                    response.mapNotNull {
-                        if (it.result.nextKey == null) {
-                            null
-                        } else {
-                            it.mediator
-                        }
-                    }
+                val hasMore = results.any { it.isFailure } || response.any { it.result.nextKey != null }
 
                 PagingResult(
-                    endOfPaginationReached = currentMediators.isEmpty(),
                     data = mixedTimelineResult,
-                    nextKey = if (currentMediators.isEmpty()) null else MIXED_NEXT_KEY,
+                    nextKey = if (hasMore) MIXED_NEXT_KEY else null,
                     previousKey = null,
                 )
             }
@@ -149,7 +140,7 @@ internal class MixedRemoteMediator(
     private suspend fun loadTimeOrdered(
         pageSize: Int,
         request: PagingRequest,
-        pendingWrites: Channel<suspend () -> Unit>?,
+        pendingWrites: MutableList<suspend () -> Unit>,
     ): PagingResult<UiTimelineV2> =
         coroutineScope {
             if (request is PagingRequest.Refresh) {
@@ -168,7 +159,7 @@ internal class MixedRemoteMediator(
                 }
             if (seenStatusIds.isNotEmpty()) {
                 val previouslySeenStatusIds = seenStatusIds.toSet()
-                save(pendingWrites) {
+                pendingWrites.add {
                     timeSources.forEach { source ->
                         val committed =
                             database
@@ -186,17 +177,19 @@ internal class MixedRemoteMediator(
             }
 
             val timeSourceStates =
-                if (request is PagingRequest.Refresh && pendingWrites != null) {
+                if (request is PagingRequest.Refresh) {
                     timeSources.map { TimeSourceState(it, ArrayDeque(), initialized = false, nextKey = null) }
                 } else {
                     loadTimeSourceStates()
                 }
             val loadedStates = mutableListOf<TimeSourceState>()
+            val failedStates = mutableSetOf<TimeSourceState>()
+            val failures = mutableListOf<Throwable>()
             val selected = mutableListOf<DbPagingTimelineWithStatus>()
             while (selected.size < pageSize) {
                 val blockedStates =
                     timeSourceStates.filter {
-                        it.pending.isEmpty() && it.canLoad
+                        it.pending.isEmpty() && it.canLoad && it !in failedStates
                     }
                 if (blockedStates.isNotEmpty()) {
                     val statesToLoad =
@@ -208,30 +201,32 @@ internal class MixedRemoteMediator(
                         break
                     }
 
-                    val responses =
+                    val results =
                         statesToLoad
                             .map { state ->
                                 val subRequest = state.nextRequest()
                                 async {
-                                    val result =
-                                        runCatching {
-                                            loadSource(state.source.mediator, pageSize, subRequest, pendingWrites)
-                                        }.getOrElse {
-                                            if (sessionKey != null || it is kotlinx.coroutines.CancellationException) throw it
-                                            reportError?.invoke(it)
-                                            PagingResult(endOfPaginationReached = true)
-                                        }
-                                    val stagedItems =
-                                        TimelinePagingMapper.toDb(
-                                            data = result.data,
-                                            pagingKey = state.source.stagingKey,
-                                            sortIds = result.data.map(::timeSortId),
-                                        )
-                                    TimeSubResponse(state, result, stagedItems)
+                                    loadSource(state.source.mediator, pageSize, subRequest).map { result ->
+                                        val stagedItems =
+                                            TimelinePagingMapper.toDb(
+                                                data = result.data,
+                                                pagingKey = state.source.stagingKey,
+                                                sortIds = result.data.map(::timeSortId),
+                                            )
+                                        TimeSubResponse(state, result, stagedItems)
+                                    }
                                 }
                             }.awaitAll()
 
-                    save(pendingWrites) {
+                    val responses = results.mapNotNull { it.getOrNull() }
+                    results.forEachIndexed { index, result ->
+                        result.exceptionOrNull()?.let {
+                            failedStates += statesToLoad[index]
+                            failures += it
+                        }
+                    }
+                    pendingWrites.add {
+                        responses.forEach { it.result.saveInTransaction?.invoke() }
                         responses
                             .flatMap { it.stagedItems }
                             .takeIf { it.isNotEmpty() }
@@ -270,6 +265,10 @@ internal class MixedRemoteMediator(
                 }
             }
 
+            if (selected.isEmpty() && failures.isNotEmpty() && loadedStates.size == failedStates.size) {
+                throw failures.first()
+            }
+            failures.forEach { reportError?.invoke(it) }
             val hasMore =
                 timeSourceStates.any {
                     it.pending.any { item -> item.timeline.statusId !in seenStatusIds } || it.canLoad
@@ -278,6 +277,13 @@ internal class MixedRemoteMediator(
                 data = selected.map(::timeStagingToUi),
                 nextKey = if (hasMore) MIXED_NEXT_KEY else null,
                 previousKey = null,
+                saveInTransaction = {
+                    // Nested sources have no outer timeline rows of their own to mark these as seen.
+                    selected.map { it.timeline }.groupBy { it.pagingKey }.forEach { (key, rows) ->
+                        database.pagingTimelineDao().deletePresentationReferences(key, rows.map { it._id })
+                        database.pagingTimelineDao().delete(rows)
+                    }
+                },
             )
         }
 
@@ -299,8 +305,8 @@ internal class MixedRemoteMediator(
             )
         }
 
-    private suspend fun resetTimeStaging(pendingWrites: Channel<suspend () -> Unit>?) {
-        save(pendingWrites) {
+    private fun resetTimeStaging(pendingWrites: MutableList<suspend () -> Unit>) {
+        pendingWrites.add {
             timeSources.forEach { source ->
                 database.pagingTimelineDao().deletePresentationReferences(source.stagingKey)
                 database.pagingTimelineDao().delete(source.stagingKey)
@@ -318,7 +324,8 @@ internal class MixedRemoteMediator(
         )
 
     override suspend fun sortId(data: UiTimelineV2): Long? =
-        if (mergePolicy == TimelineMergePolicy.Time) {
+        // Reading pages keep their arrival order when a recovering source returns newer posts.
+        if (mergePolicy == TimelineMergePolicy.Time && sessionKey == null) {
             timeSortId(data)
         } else {
             null
@@ -369,11 +376,8 @@ internal class MixedRemoteMediator(
     ): SubRequest? =
         when (request) {
             is PagingRequest.Append -> {
-                database
-                    .pagingTimelineDao()
-                    .getPagingKey(subKey(mediator))
-                    ?.nextKey
-                    ?.let(PagingRequest::Append)
+                val key = database.pagingTimelineDao().getPagingKey(subKey(mediator))
+                if (key == null) PagingRequest.Refresh else key.nextKey?.let(PagingRequest::Append)
             }
 
             is PagingRequest.Prepend -> {
@@ -391,11 +395,9 @@ internal class MixedRemoteMediator(
             SubRequest(mediator, it)
         }
 
-    private suspend fun saveSubResponse(
-        request: PagingRequest,
-        subResponse: SubResponse,
-    ) {
-        val (mediator, result) = subResponse
+    private suspend fun saveSubResponse(subResponse: SubResponse) {
+        val (subRequest, result) = subResponse
+        val (mediator, request) = subRequest
         if (request is PagingRequest.Prepend && result.previousKey != null) {
             database.pagingTimelineDao().updatePagingKeyPrevKey(
                 pagingKey = subKey(mediator),
@@ -424,32 +426,17 @@ internal class MixedRemoteMediator(
     private fun sourcePrefix(index: Int) = "$sessionKey/source/${sourceKeys[index].length}:${sourceKeys[index]}/"
 
     private suspend fun checkRequestIsValid() {
-        if (!isRequestValid()) throw kotlinx.coroutines.CancellationException("Reading session was removed")
+        if (!isRequestValid()) throw CancellationException("Reading session was removed")
     }
 
     private suspend fun loadSource(
         source: CacheableRemoteLoader<UiTimelineV2>,
         pageSize: Int,
         request: PagingRequest,
-        pendingWrites: Channel<suspend () -> Unit>?,
-    ): PagingResult<UiTimelineV2> =
-        if (source is MixedRemoteMediator && pendingWrites != null) {
-            source.load(pageSize, request, pendingWrites)
-        } else {
-            source.load(pageSize, request)
-        }
-
-    private suspend fun save(
-        pendingWrites: Channel<suspend () -> Unit>?,
-        block: suspend () -> Unit,
-    ) {
-        if (pendingWrites != null) {
-            pendingWrites.send(block)
-        } else {
-            database.connect {
-                checkRequestIsValid()
-                block()
-            }
+    ): Result<PagingResult<UiTimelineV2>> {
+        if (source is ReportableRemoteLoader) source.reportError = reportError
+        return runCatching { source.load(pageSize, request) }.onFailure {
+            if (it is CancellationException) throw it
         }
     }
 
@@ -459,7 +446,7 @@ internal class MixedRemoteMediator(
     )
 
     private data class SubResponse(
-        val mediator: CacheableRemoteLoader<UiTimelineV2>,
+        val subRequest: SubRequest,
         val result: PagingResult<UiTimelineV2>,
     )
 

@@ -19,7 +19,6 @@ import kotlinx.coroutines.sync.withLock
 internal class TimelineDbPageCache {
     private val mutex = Mutex()
     private var snapshot = Snapshot()
-    private var hasDetachedWindow = false
     private val canonicalProfiles = HashMap<MicroBlogKey, UiProfile>()
 
     suspend fun hasCurrentWindowChanged(
@@ -27,13 +26,13 @@ internal class TimelineDbPageCache {
         pagingKey: String,
     ): Boolean =
         mutex.withLock {
-            if (!snapshot.loaded || hasDetachedWindow) {
+            if (!snapshot.loaded) {
                 return@withLock true
             }
             val identities =
                 dao.getTimelinePageIdentities(
                     pagingKey = pagingKey,
-                    offset = 0,
+                    offset = snapshot.offset,
                     limit = snapshot.size + 1,
                 )
             !snapshot.matches(identities)
@@ -62,8 +61,6 @@ internal class TimelineDbPageCache {
         offset: Int,
         limit: Int,
     ): List<TimelinePageItem> {
-        // A restored window is not represented by the prefix cache's identity snapshot.
-        if (offset > snapshot.size) hasDetachedWindow = true
         val identityRows =
             dao.getTimelinePageIdentities(
                 pagingKey = pagingKey,
@@ -74,14 +71,14 @@ internal class TimelineDbPageCache {
         val pageIdentities = ArrayList<DbTimelinePageIdentity>(pageSize)
         repeat(pageSize) { pageIdentities += identityRows[it] }
         if (pageIdentities.isEmpty()) {
-            if (offset == 0) {
-                snapshot.replace(emptyList(), emptyList(), identityRows.firstOrNull())
+            if (!snapshot.loaded || offset == snapshot.offset) {
+                snapshot.replace(offset, emptyList(), emptyList(), identityRows.firstOrNull())
                 canonicalProfiles.clear()
             }
             return emptyList()
         }
 
-        if (offset == 0) {
+        if (!snapshot.loaded || offset == snapshot.offset) {
             var firstDirty = -1
             var lastDirty = -1
             pageIdentities.forEachIndexed { index, identity ->
@@ -101,7 +98,7 @@ internal class TimelineDbPageCache {
                         loadProjectedPage(
                             dao = dao,
                             pagingKey = pagingKey,
-                            offset = firstDirty,
+                            offset = offset + firstDirty,
                             limit = lastDirty - firstDirty + 1,
                             identities = pageIdentities.subList(firstDirty, lastDirty + 1),
                         )
@@ -119,6 +116,7 @@ internal class TimelineDbPageCache {
             val retainedIdentities =
                 if (data.size == pageIdentities.size) pageIdentities else pageIdentities.take(data.size)
             snapshot.replace(
+                offset = offset,
                 identities = retainedIdentities,
                 data = data,
                 nextIdentity = identityRows.getOrNull(data.size),
@@ -135,12 +133,20 @@ internal class TimelineDbPageCache {
                 limit = limit,
                 identities = pageIdentities,
             )
-        if (snapshot.size == offset && data.size == pageIdentities.size) {
-            snapshot.append(
-                identities = pageIdentities,
-                data = data,
-                nextIdentity = identityRows.getOrNull(pageIdentities.size),
-            )
+        if (data.size == pageIdentities.size) {
+            when {
+                snapshot.offset + snapshot.size == offset -> {
+                    snapshot.append(pageIdentities, data, identityRows.getOrNull(data.size))
+                }
+
+                offset + data.size == snapshot.offset -> {
+                    snapshot.prepend(pageIdentities, data)
+                }
+
+                else -> {
+                    snapshot.replace(offset, pageIdentities, data, identityRows.getOrNull(data.size))
+                }
+            }
         }
         return data
     }
@@ -162,6 +168,8 @@ internal class TimelineDbPageCache {
     private class Snapshot {
         var loaded: Boolean = false
             private set
+        var offset: Int = 0
+            private set
         var size: Int = 0
             private set
         private var nextIdentity: DbTimelinePageIdentity? = null
@@ -171,11 +179,13 @@ internal class TimelineDbPageCache {
         operator fun get(identity: DbTimelinePageIdentity): TimelinePageItem? = itemByIdentity[identity]
 
         fun replace(
+            offset: Int,
             identities: List<DbTimelinePageIdentity>,
             data: List<TimelinePageItem>,
             nextIdentity: DbTimelinePageIdentity?,
         ) {
             loaded = true
+            this.offset = offset
             segments = ArrayList(1)
             itemByIdentity = HashMap(data.size * 4 / 3 + 1)
             size = 0
@@ -198,6 +208,17 @@ internal class TimelineDbPageCache {
                 size += data.size
             }
             this.nextIdentity = nextIdentity
+        }
+
+        fun prepend(
+            identities: List<DbTimelinePageIdentity>,
+            data: List<TimelinePageItem>,
+        ) {
+            require(identities.size == data.size)
+            segments.add(0, Segment(identities))
+            identities.forEachIndexed { index, identity -> itemByIdentity[identity] = data[index] }
+            offset -= data.size
+            size += data.size
         }
 
         fun matches(identityRows: List<DbTimelinePageIdentity>): Boolean {

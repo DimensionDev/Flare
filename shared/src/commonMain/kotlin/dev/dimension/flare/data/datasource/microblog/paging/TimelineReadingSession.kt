@@ -257,7 +257,15 @@ internal class TimelineReadingSession(
         if (!startupPending) return
         startupPending = false
         scope.launch {
-            if (refreshOnLaunch()) refresh(automatic = false, initial = true)
+            if (refreshOnLaunch()) {
+                try {
+                    refresh(automatic = false, initial = true)
+                } catch (error: kotlinx.coroutines.CancellationException) {
+                    throw error
+                } catch (_: Exception) {
+                    // refresh already reported the failure; keep the pager alive for manual retry.
+                }
+            }
         }
     }
 
@@ -405,7 +413,7 @@ internal class TimelineReadingSession(
         generation: Long = state.value.interactionGeneration,
     ) {
         val first = visibleRow(pendingKey, 0)?.timeline
-        if (state.value.interactionGeneration != generation) return
+        if (requestScroll && state.value.interactionGeneration != generation) return
         if (requestScroll && first == null) {
             updatePendingVisibility(hasVisibleRows = false)
             return
@@ -421,7 +429,7 @@ internal class TimelineReadingSession(
                     database.connect {
                         val latest =
                             repository.current(record) ?: return@connect false
-                        if (state.value.interactionGeneration != generation) return@connect false
+                        if (requestScroll && state.value.interactionGeneration != generation) return@connect false
                         repository.saveSnapshot(
                             record,
                             latest.copy(
@@ -440,8 +448,6 @@ internal class TimelineReadingSession(
                             requestedPosition =
                                 requestPosition("${pendingKey}_${first.statusId}", 0.0, latest = true, generation = generation)
                             if (requestedPosition == null) throw PublicationCancelled()
-                        } else if (state.value.interactionGeneration != generation) {
-                            throw PublicationCancelled()
                         }
                         true
                     }

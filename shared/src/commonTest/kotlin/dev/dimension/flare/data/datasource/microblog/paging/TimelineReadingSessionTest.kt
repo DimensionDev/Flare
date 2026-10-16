@@ -11,6 +11,8 @@ import androidx.sqlite.SQLiteStatement
 import dev.dimension.flare.RobolectricTest
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.connect
+import dev.dimension.flare.data.database.cache.model.DbPagingKey
+import dev.dimension.flare.data.database.cache.model.DbPagingTimeline
 import dev.dimension.flare.data.database.createDatabaseDriver
 import dev.dimension.flare.data.datasource.microblog.MixedRemoteMediator
 import dev.dimension.flare.data.model.tab.TimelineMergePolicy
@@ -50,6 +52,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.test.assertSame
 import kotlin.test.assertTrue
 import kotlin.time.Instant
 
@@ -120,6 +123,67 @@ class TimelineReadingSessionTest : RobolectricTest() {
             assertEquals(listOf<PagingRequest>(PagingRequest.Refresh), loader.requests)
             assertEquals(0, presenter.size)
             assertEquals(session.activeKey, snapshot(session).activeKey)
+        }
+
+    @Test
+    fun gestureDuringInitialPublicationStillDisplaysTheFirstPage() = initialPublicationSurvivesGesture(duringWrite = false)
+
+    @Test
+    fun gestureDuringInitialPublicationWritesStillDisplaysTheFirstPage() = initialPublicationSurvivesGesture(duringWrite = true)
+
+    private fun initialPublicationSurvivesGesture(duringWrite: Boolean) =
+        runTest {
+            val resolvingFirst = CompletableDeferred<Unit>()
+            val resume = CompletableDeferred<Unit>()
+            var visibilityCalls = 0
+            val loader = Loader().apply { response = page(0..9).copy(nextKey = null) }
+            val session =
+                session(loader, backgroundScope, visible = {
+                    visibilityCalls += 1
+                    // The third lookup resolves the first pending row during publication.
+                    if (!duringWrite && visibilityCalls == 3) {
+                        resolvingFirst.complete(Unit)
+                        resume.await()
+                    }
+                    true
+                })
+            var interrupted = false
+            if (duringWrite) {
+                database.pagingTimelineDao().insertPagingKey(DbPagingKey(session.activeKey))
+                afterPagingDelete = { key ->
+                    if (key == session.activeKey && !interrupted) {
+                        interrupted = true
+                        session.cancelRestoration()
+                    }
+                }
+            }
+            val paging =
+                object : PagingDataPresenter<TimelinePageItem>(coroutineContext) {
+                    override suspend fun presentPagingDataEvent(event: PagingDataEvent<TimelinePageItem>) = Unit
+                }
+            val refresh = if (duringWrite) async { session.refresh(false, initial = true) } else null
+            backgroundScope.launch { session.pagingData.collectLatest(paging::collectFrom) }
+            if (!duringWrite) {
+                resolvingFirst.await()
+                session.cancelRestoration()
+                resume.complete(Unit)
+            }
+            refresh?.await()
+            withContext(Dispatchers.Default) {
+                assertNotNull(
+                    withTimeoutOrNull(5_000) {
+                        paging.loadStateFlow.filterNotNull().first { it.isIdle && it.append.endOfPaginationReached }
+                    },
+                )
+            }
+            if (duringWrite) assertTrue(interrupted)
+            assertEquals(10, paging.size)
+            assertEquals((0..9).map(Int::toString), ids(session))
+            assertEquals(listOf<PagingRequest>(PagingRequest.Refresh), loader.requests)
+            assertEquals(session.activeKey, snapshot(session).activeKey)
+            assertFalse(snapshot(session).pendingReady)
+            assertFalse(session.state.value.hasNewContent)
+            assertNull(session.state.value.position, "Filling an empty list must not request a scroll")
         }
 
     @Test
@@ -595,6 +659,86 @@ class TimelineReadingSessionTest : RobolectricTest() {
             } finally {
                 source.invalidate()
             }
+        }
+
+    @Test
+    fun restoredWindowIgnoresPendingRefreshAndOtherTimelines() =
+        runTest {
+            val loader = Loader().apply { response = page(0..199) }
+            val initial = session(loader, backgroundScope)
+            initial.refresh(false, initial = true)
+            val anchor = rows(initial)[100]
+            savePosition(initial, "${initial.activeKey}_${anchor.statusId}", anchor.sortId, -51.5)
+            val restored = session(loader, backgroundScope)
+            restored.prepare()
+            val position = assertNotNull(restored.state.value.position)
+            val original = rows(restored)
+            val cursor = database.pagingTimelineDao().getPagingKey(restored.activeKey)
+            val cache = TimelineDbPageCache()
+            val pageLoader = TimelineDbPageLoader(database, restored.activeKey, cache)
+            val window = pageLoader.load(80, 40)
+            assertFalse(cache.hasCurrentWindowChanged(database.pagingTimelineDao(), restored.activeKey))
+            val invalidations = MutableStateFlow(0)
+            val subscription = pageLoader.observeInvalidations { invalidations.value += 1 }
+            try {
+                subscription.ready?.await()
+                loader.response = page(1000..1039)
+                restored.refresh(false)
+                database.pagingTimelineDao().insertNew(
+                    listOf(DbPagingTimeline("unrelated-home", anchor.statusId, anchor.sortId)),
+                )
+                assertFalse(cache.hasCurrentWindowChanged(database.pagingTimelineDao(), restored.activeKey))
+                withContext(Dispatchers.Default) {
+                    assertNull(withTimeoutOrNull(250) { invalidations.first { it > 0 } })
+                }
+                assertEquals(window.map { it.identity }, pageLoader.load(80, 40).map { it.identity })
+                assertEquals(original, rows(restored))
+                assertEquals(cursor, database.pagingTimelineDao().getPagingKey(restored.activeKey))
+                assertEquals(position, restored.state.value.position)
+                assertEquals(position.itemKey, snapshot(restored).anchorId)
+                assertEquals(-51.5, snapshot(restored).offset)
+
+                database.pagingTimelineDao().insertAll(listOf(anchor.copy(contentRevision = anchor.contentRevision + 1)))
+                withContext(Dispatchers.Default) {
+                    assertNotNull(withTimeoutOrNull(5_000) { invalidations.first { it > 0 } })
+                }
+                val updated = pageLoader.load(80, 40)
+                assertEquals(window.map { it.statusId }, updated.map { it.statusId })
+                assertEquals(anchor.contentRevision + 1, updated[20].identity.contentRevision)
+                assertSame(window.first(), updated.first())
+                assertFalse(cache.hasCurrentWindowChanged(database.pagingTimelineDao(), restored.activeKey))
+                assertEquals(position, restored.state.value.position)
+            } finally {
+                subscription.job.cancel()
+            }
+        }
+
+    @Test
+    fun restoredWindowTracksBothPagingDirectionsAndBoundaryChanges() =
+        runTest {
+            val session = session(Loader().apply { response = page(0..199) }, backgroundScope)
+            session.refresh(false, initial = true)
+            val dao = database.pagingTimelineDao()
+            val cache = TimelineDbPageCache()
+            val loader = TimelineDbPageLoader(database, session.activeKey, cache)
+            for (offset in listOf(80, 120, 40, 0)) {
+                assertEquals(40, loader.load(offset, 40).size)
+                assertFalse(cache.hasCurrentWindowChanged(dao, session.activeKey))
+            }
+            val original = rows(session)
+            // Include the row just beyond the loaded window so newly available pages are detected.
+            for (index in listOf(0, 40, 80, 120, 160)) {
+                val row = original[index]
+                dao.insertAll(listOf(row.copy(contentRevision = row.contentRevision + 1)))
+                assertTrue(cache.hasCurrentWindowChanged(dao, session.activeKey), "Missed a change at offset $index")
+                loader.load(0, 160)
+                assertFalse(cache.hasCurrentWindowChanged(dao, session.activeKey))
+            }
+            val outside = original[190]
+            dao.insertAll(listOf(outside.copy(contentRevision = outside.contentRevision + 1)))
+            assertFalse(cache.hasCurrentWindowChanged(dao, session.activeKey))
+            dao.delete(listOf(original.first()))
+            assertTrue(cache.hasCurrentWindowChanged(dao, session.activeKey))
         }
 
     @Test

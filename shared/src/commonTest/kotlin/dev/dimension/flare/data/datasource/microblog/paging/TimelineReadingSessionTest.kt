@@ -894,6 +894,25 @@ class TimelineReadingSessionTest : RobolectricTest() {
         }
 
     @Test
+    fun filteredActivePostsKeepVisibleNewContentPendingUntilViewLatest() =
+        runTest {
+            val loader = Loader().apply { response = page(0..9).copy(nextKey = null) }
+            val session = session(loader, backgroundScope, visible = { it.statusKey.id.toInt() >= 100 })
+            session.refresh(false, initial = true)
+            loader.response = page(100..110).copy(nextKey = null)
+
+            session.refresh(false)
+
+            assertEquals((0..9).map(Int::toString), ids(session))
+            assertTrue(session.state.value.hasNewContent)
+            assertTrue(snapshot(session).pendingReady)
+            session.showLatest()
+            assertEquals((100..110).map(Int::toString), ids(session))
+            assertFalse(session.state.value.hasNewContent)
+            assertTrue(assertNotNull(session.state.value.position).latest)
+        }
+
+    @Test
     fun continuityFailureStillOffersSuccessfullyFetchedLatest() =
         runTest {
             val loader = Loader(prepend = true)

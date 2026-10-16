@@ -92,7 +92,7 @@ import compose.icons.fontawesomeicons.solid.CaretDown
 import compose.icons.fontawesomeicons.solid.Check
 import compose.icons.fontawesomeicons.solid.Sliders
 import dev.dimension.flare.R
-import dev.dimension.flare.common.onSuccess
+import dev.dimension.flare.common.isSuccess
 import dev.dimension.flare.data.datastore.model.TimelineAutoRefreshInterval
 import dev.dimension.flare.data.model.BottomBarBehavior
 import dev.dimension.flare.data.model.TimelineDisplayMode
@@ -123,6 +123,7 @@ import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.presenter.HomeTimelineWithTabsPresenter
+import dev.dimension.flare.ui.presenter.TimelineWithLazyListState
 import dev.dimension.flare.ui.presenter.home.DeepLinkPresenter
 import dev.dimension.flare.ui.presenter.home.LoggedInPresenter
 import dev.dimension.flare.ui.presenter.home.LoggedInState
@@ -620,7 +621,6 @@ internal fun TimelineItemContent(
             },
         )
     }
-    val scope = rememberCoroutineScope()
     RefreshContainer(
         modifier =
             modifier.onGloballyPositioned {
@@ -687,63 +687,73 @@ internal fun TimelineItemContent(
 
                 status(state.listState)
             }
-            state.listState.onSuccess {
-                AnimatedVisibility(
-                    state.showNewToots,
-                    enter = slideInVertically { -it },
-                    exit = slideOutVertically { -it },
-                    modifier =
-                        Modifier
-                            .padding(paddingWithStatusBar)
-                            .align(Alignment.TopCenter),
-                ) {
-                    val latestLabel = stringResource(R.string.home_timeline_view_latest)
-                    Glassify(
-                        modifier = if (state.readingState != null) Modifier.semantics { contentDescription = latestLabel } else Modifier,
-                        onClick = {
-                            state.onNewTootsShown()
-                            scope.launch {
-                                state.readingState?.showLatest() ?: state.lazyListState.scrollToItem(0)
-                            }
-                        },
-                        shape = RoundedCornerShape(50),
-                        color = MaterialTheme.colorScheme.primaryContainer,
-                    ) {
-                        Row(
-                            modifier =
-                                Modifier
-                                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        ) {
-                            FAIcon(
-                                imageVector = FontAwesomeIcons.Solid.AnglesUp,
-                                contentDescription = null,
-                                modifier = Modifier.size(16.dp),
-                            )
-                            val ctx = LocalContext.current
-                            val newTootsText =
-                                ctx.resources.getQuantityString(
-                                    R.plurals.home_timeline_new_toots,
-                                    state.newPostsCount,
-                                    state.newPostsCount,
-                                )
-                            Text(
-                                text =
-                                    if (state.readingState !=
-                                        null
-                                    ) {
-                                        stringResource(R.string.home_timeline_new_content)
-                                    } else {
-                                        newTootsText
-                                    },
-                            )
-                        }
-                    }
-                }
-            }
+            TimelineNewContentNotice(
+                state = state,
+                modifier =
+                    Modifier
+                        .padding(paddingWithStatusBar)
+                        .align(Alignment.TopCenter),
+            )
         },
     )
+}
+
+@Composable
+internal fun TimelineNewContentNotice(
+    state: TimelineWithLazyListState,
+    modifier: Modifier = Modifier,
+) {
+    val scope = rememberCoroutineScope()
+    if (state.readingState != null || state.listState.isSuccess()) {
+        AnimatedVisibility(
+            state.showNewToots,
+            enter = slideInVertically { -it },
+            exit = slideOutVertically { -it },
+            modifier = modifier,
+        ) {
+            val latestLabel = stringResource(R.string.home_timeline_view_latest)
+            Glassify(
+                modifier = if (state.readingState != null) Modifier.semantics { contentDescription = latestLabel } else Modifier,
+                onClick = {
+                    state.onNewTootsShown()
+                    scope.launch {
+                        state.readingState?.showLatest() ?: state.lazyListState.scrollToItem(0)
+                    }
+                },
+                shape = RoundedCornerShape(50),
+                color = MaterialTheme.colorScheme.primaryContainer,
+            ) {
+                Row(
+                    modifier =
+                        Modifier
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    FAIcon(
+                        imageVector = FontAwesomeIcons.Solid.AnglesUp,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp),
+                    )
+                    val ctx = LocalContext.current
+                    val newTootsText =
+                        ctx.resources.getQuantityString(
+                            R.plurals.home_timeline_new_toots,
+                            state.newPostsCount,
+                            state.newPostsCount,
+                        )
+                    Text(
+                        text =
+                            if (state.readingState != null) {
+                                stringResource(R.string.home_timeline_new_content)
+                            } else {
+                                newTootsText
+                            },
+                    )
+                }
+            }
+        }
+    }
 }
 
 @Composable

@@ -7,6 +7,7 @@ import dev.dimension.flare.data.database.cache.mapper.tweets
 import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
+import dev.dimension.flare.data.datasource.microblog.paging.TimelineOrder
 import dev.dimension.flare.data.network.xqt.XQTService
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiTimelineV2
@@ -20,6 +21,7 @@ internal class HomeTimelineRemoteMediator(
     private val accountKey: MicroBlogKey,
     private val enableRanking: Boolean = false,
 ) : CacheableRemoteLoader<UiTimelineV2> {
+    override val timelineOrder = if (enableRanking) TimelineOrder.Ranked else TimelineOrder.Continuous
     override val pagingKey: String = if (enableRanking) "popular_$accountKey" else "home_$accountKey"
 
     override suspend fun load(

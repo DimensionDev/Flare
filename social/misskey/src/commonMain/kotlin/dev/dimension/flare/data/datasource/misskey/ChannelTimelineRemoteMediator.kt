@@ -3,6 +3,7 @@ package dev.dimension.flare.data.datasource.misskey
 import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
+import dev.dimension.flare.data.datasource.microblog.paging.TimelineOrder
 import dev.dimension.flare.data.network.misskey.MisskeyService
 import dev.dimension.flare.data.network.misskey.api.model.ChannelsTimelineRequest
 import dev.dimension.flare.model.MicroBlogKey
@@ -14,6 +15,7 @@ internal class ChannelTimelineRemoteMediator(
     private val accountKey: MicroBlogKey,
     private val id: String,
 ) : CacheableRemoteLoader<UiTimelineV2> {
+    override val timelineOrder = TimelineOrder.Continuous
     override val pagingKey = "channel_${id}_$accountKey"
 
     override suspend fun load(

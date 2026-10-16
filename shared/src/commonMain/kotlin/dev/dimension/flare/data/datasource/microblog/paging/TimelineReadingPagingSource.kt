@@ -36,6 +36,7 @@ internal class TimelineReadingPagingSource(
             gapSubscription.cancel()
             positionSubscription.cancel()
         }
+        session.registerPagingSource(this)
     }
 
     override suspend fun doLoad(params: LoadParams<OffsetFromStartPagingKey>): LoadResult<OffsetFromStartPagingKey, TimelinePageItem> {
@@ -92,12 +93,10 @@ internal class TimelineReadingPagingSource(
         val item = state.anchorPosition?.let(state::closestItemToPosition)?.baseItem ?: return null
         val anchor =
             if (item.isReadingGap) {
-                state.pages
-                    .asSequence()
-                    .flatMap { it.data }
-                    .map { it.baseItem }
-                    .dropWhile { it.stableItemKey != item.stableItemKey }
-                    .firstOrNull { !it.isReadingGap }
+                val items = state.pages.flatMap { it.data }.map { it.baseItem }
+                val index = items.indexOfFirst { it.stableItemKey == item.stableItemKey }
+                items.drop(index + 1).firstOrNull { !it.isReadingGap }
+                    ?: items.take(index).lastOrNull { !it.isReadingGap }
             } else {
                 item
             }

@@ -578,8 +578,8 @@
     <string name="fanbox_recommended_creators_title">Recommended creators</string>
     <string name="ugoira_play">Play animation</string>
     <string name="ugoira_loading">Loading animation</string>
-    <string name="reading_gap">More posts between these updates · load more</string>
-    <string name="reading_gap_loading">Loading posts between updates…</string>
+    <string name="reading_gap">More posts · load more</string>
+    <string name="reading_gap_loading">Loading more posts…</string>
     <string name="reading_gap_failed">Could not load these posts · retry</string>
     <string name="reading_batch_boundary">Previous refresh</string>
 </resources>

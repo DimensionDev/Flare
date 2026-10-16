@@ -142,31 +142,13 @@ internal class MixedRemoteMediator(
                 resetTimeStaging(pendingWrites)
             }
 
-            val seenStatusIds =
+            val seenStatusIds = mutableSetOf<String>()
+
+            suspend fun markCommitted(items: List<DbPagingTimelineWithStatus>) {
                 if (request is PagingRequest.Append) {
-                    // Collapsed parents have already been displayed, even without their own timeline row.
-                    database
-                        .pagingTimelineDao()
-                        .getStatusIdsWithInlineParents(pagingKey)
-                        .toMutableSet()
-                } else {
-                    mutableSetOf()
-                }
-            if (seenStatusIds.isNotEmpty()) {
-                val previouslySeenStatusIds = seenStatusIds.toSet()
-                pendingWrites.add {
-                    timeSources.forEach { source ->
-                        val committed =
-                            database
-                                .pagingTimelineDao()
-                                .getByPagingKey(source.stagingKey)
-                                .filter { it.statusId in previouslySeenStatusIds }
-                        if (committed.isNotEmpty()) {
-                            database
-                                .pagingTimelineDao()
-                                .deletePresentationReferences(source.stagingKey, committed.map { it._id })
-                            database.pagingTimelineDao().delete(committed)
-                        }
+                    // Check only candidates, including collapsed parents, rather than the retained history.
+                    items.map { it.timeline.statusId }.distinct().chunked(500).forEach {
+                        seenStatusIds += database.pagingTimelineDao().existingReadingStatusIds(pagingKey, it)
                     }
                 }
             }
@@ -177,10 +159,12 @@ internal class MixedRemoteMediator(
                 } else {
                     loadTimeSourceStates()
                 }
+            markCommitted(timeSourceStates.flatMap { it.pending })
             val loadedStates = mutableListOf<TimeSourceState>()
             val failedStates = mutableSetOf<TimeSourceState>()
             val failures = mutableListOf<Throwable>()
             val selected = mutableListOf<DbPagingTimelineWithStatus>()
+            val consumed = mutableListOf<DbPagingTimelineWithStatus>()
             while (selected.size < pageSize) {
                 val blockedStates =
                     timeSourceStates.filter {
@@ -214,6 +198,7 @@ internal class MixedRemoteMediator(
                             }.awaitAll()
 
                     val responses = results.mapNotNull { it.getOrNull() }
+                    markCommitted(responses.flatMap { it.stagedItems })
                     results.forEachIndexed { index, result ->
                         result.exceptionOrNull()?.let {
                             val state = statesToLoad[index]
@@ -258,6 +243,7 @@ internal class MixedRemoteMediator(
                                 .sortId
                         } ?: break
                 val item = source.pending.removeFirst()
+                consumed += item
                 if (seenStatusIds.add(item.timeline.statusId)) {
                     selected += item
                 }
@@ -274,13 +260,14 @@ internal class MixedRemoteMediator(
                 timeSourceStates.any {
                     it.pending.any { item -> item.timeline.statusId !in seenStatusIds } || it.canLoad
                 }
+            val completed = consumed + timeSourceStates.flatMap { it.pending.filter { item -> item.timeline.statusId in seenStatusIds } }
             PagingResult(
                 data = selected.map(::timeStagingToUi),
                 nextKey = if (hasMore) MIXED_NEXT_KEY else null,
                 previousKey = null,
                 saveInTransaction = {
                     // Nested sources have no outer timeline rows of their own to mark these as seen.
-                    selected.map { it.timeline }.groupBy { it.pagingKey }.forEach { (key, rows) ->
+                    completed.map { it.timeline }.groupBy { it.pagingKey }.forEach { (key, rows) ->
                         database.pagingTimelineDao().deletePresentationReferences(key, rows.map { it._id })
                         database.pagingTimelineDao().delete(rows)
                     }

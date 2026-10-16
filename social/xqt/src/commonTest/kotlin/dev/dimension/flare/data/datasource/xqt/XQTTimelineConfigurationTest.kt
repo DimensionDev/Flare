@@ -1,5 +1,6 @@
 package dev.dimension.flare.data.datasource.xqt
 
+import dev.dimension.flare.data.datasource.microblog.paging.TimelineOrder
 import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.tab.ShortcutSpec
 import dev.dimension.flare.data.platform.XQTCredential
@@ -18,6 +19,13 @@ class XQTTimelineConfigurationTest {
             accountKey = MicroBlogKey(id = "account", host = "x.com"),
             sourceCredentialFlow = flowOf(XQTCredential(chocolate = "")),
         )
+
+    @Test
+    fun readingContinuityIsIndependentOfForwardPagingAndRankingIsExplicit() {
+        assertEquals(TimelineOrder.Continuous, dataSource.homeTimeline().timelineOrder)
+        assertEquals(TimelineOrder.Ranked, dataSource.popularTimelineLoader().timelineOrder)
+        assertEquals(TimelineOrder.Ranked, dataSource.featuredTimelineLoader().timelineOrder)
+    }
 
     @Test
     fun newTimelinesAreAvailableInSidebar() {

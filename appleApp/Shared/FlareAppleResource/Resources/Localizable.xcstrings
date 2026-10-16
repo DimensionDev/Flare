@@ -7,19 +7,19 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "More posts between these updates · load more"
+            "value" : "More posts · load more"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "两次刷新之间还有内容 · 加载更多"
+            "value" : "更多内容 · 加载更多"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "兩次重新整理之間還有內容 · 載入更多"
+            "value" : "更多內容 · 載入更多"
           }
         }
       }
@@ -30,19 +30,19 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Loading posts between updates…"
+            "value" : "Loading more posts…"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "正在加载两次刷新之间的内容…"
+            "value" : "正在加载更多内容…"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "正在載入兩次重新整理之間的內容…"
+            "value" : "正在載入更多內容…"
           }
         }
       }

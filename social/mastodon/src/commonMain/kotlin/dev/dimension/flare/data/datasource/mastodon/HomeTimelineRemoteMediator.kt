@@ -4,6 +4,7 @@ import androidx.paging.ExperimentalPagingApi
 import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
+import dev.dimension.flare.data.datasource.microblog.paging.TimelineOrder
 import dev.dimension.flare.data.network.mastodon.MastodonService
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiTimelineV2
@@ -14,6 +15,7 @@ internal class HomeTimelineRemoteMediator(
     private val service: MastodonService,
     private val accountKey: MicroBlogKey,
 ) : CacheableRemoteLoader<UiTimelineV2> {
+    override val timelineOrder = TimelineOrder.Continuous
     override val pagingKey: String = "home_$accountKey"
 
     override val supportPrepend: Boolean

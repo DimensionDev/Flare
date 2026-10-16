@@ -469,15 +469,38 @@ internal interface PagingTimelineDao {
     )
     suspend fun getByPagingKey(pagingKey: String): List<DbPagingTimeline>
 
+    @Query("SELECT * FROM DbPagingTimeline WHERE pagingKey = :pagingKey ORDER BY sortId LIMIT 1")
+    suspend fun readingHead(pagingKey: String): DbPagingTimeline?
+
+    @Query("SELECT * FROM DbPagingTimeline WHERE pagingKey = :pagingKey ORDER BY sortId DESC LIMIT 1")
+    suspend fun readingTail(pagingKey: String): DbPagingTimeline?
+
+    @Query("SELECT * FROM DbPagingTimeline WHERE pagingKey = :pagingKey AND sortId < :sortId ORDER BY sortId DESC LIMIT 1")
+    suspend fun readingPredecessor(
+        pagingKey: String,
+        sortId: Long,
+    ): DbPagingTimeline?
+
+    @Query("SELECT * FROM DbPagingTimeline WHERE pagingKey = :pagingKey AND sortId > :sortId ORDER BY sortId LIMIT 1")
+    suspend fun readingSuccessor(
+        pagingKey: String,
+        sortId: Long,
+    ): DbPagingTimeline?
+
+    // Keep UNION's inline-parent lookup on candidate IDs instead of SQLite's namespace-scan plan.
     @Query(
-        "SELECT statusId FROM DbPagingTimeline WHERE pagingKey = :pagingKey " +
-            "UNION " +
-            "SELECT presentation.referenceStatusId FROM timeline_item_presentation_reference AS presentation " +
+        "SELECT statusId FROM DbPagingTimeline WHERE pagingKey = :pagingKey AND statusId IN (:statusIds) " +
+            "UNION SELECT presentation.referenceStatusId FROM timeline_item_presentation_reference AS presentation " +
+            "INDEXED BY index_timeline_item_presentation_reference_referenceStatusId_pagingKey_timelineId " +
             "INNER JOIN DbPagingTimeline AS timeline " +
             "ON timeline.pagingKey = presentation.pagingKey AND timeline._id = presentation.timelineId " +
-            "WHERE timeline.pagingKey = :pagingKey AND presentation.presentationType = 'InlineParent'",
+            "WHERE presentation.pagingKey = :pagingKey AND presentation.presentationType = 'InlineParent' " +
+            "AND presentation.referenceStatusId IN (:statusIds)",
     )
-    suspend fun getStatusIdsWithInlineParents(pagingKey: String): List<String>
+    suspend fun existingReadingStatusIds(
+        pagingKey: String,
+        statusIds: List<String>,
+    ): List<String>
 
     @Query("SELECT MIN(sortId) FROM DbPagingTimeline WHERE pagingKey = :pagingKey")
     suspend fun getMinSortId(pagingKey: String): Long?

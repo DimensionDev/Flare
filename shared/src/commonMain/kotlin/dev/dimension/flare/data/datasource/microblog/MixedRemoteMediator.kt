@@ -293,6 +293,26 @@ internal class MixedRemoteMediator(
             )
         }
 
+    // The reading session publishes into a different namespace from each continuation's staging.
+    internal suspend fun reclaimPublishedStaging(publishedKey: String) {
+        checkRequestIsValid()
+        val dao = database.pagingTimelineDao()
+        if (ordersByTime) {
+            timeSources.forEach { source ->
+                dao.getByPagingKey(source.stagingKey).chunked(500).forEach { candidates ->
+                    val published = dao.existingReadingStatusIds(publishedKey, candidates.map { it.statusId }.distinct()).toSet()
+                    val consumed = candidates.filter { it.statusId in published }
+                    if (consumed.isNotEmpty()) {
+                        val ids = consumed.map { it._id }
+                        dao.deletePresentationReferences(source.stagingKey, ids)
+                        dao.deleteTimelineRows(source.stagingKey, ids)
+                    }
+                }
+            }
+        }
+        mediators.filterIsInstance<MixedRemoteMediator>().forEach { it.reclaimPublishedStaging(publishedKey) }
+    }
+
     private fun resetTimeStaging(pendingWrites: MutableList<suspend () -> Unit>) {
         pendingWrites.add {
             timeSources.forEach { source ->

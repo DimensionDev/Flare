@@ -5,6 +5,30 @@ import CHTCollectionViewWaterfallLayout
 
 @MainActor
 final class TimelineCollectionViewTests: XCTestCase {
+    func testViewportCaptureDoesNotEnumerateItemsButRestorationStillKeepsTheOrder() throws {
+        let fixture = Fixture(width: 390, columns: 1)
+        fixture.scroll(to: 3_000)
+        let view = fixture.collectionView
+        let itemIDs = view.readingItemIDs
+        var fullOrderReads = 0
+        view.readingItemIDs = {
+            fullOrderReads += 1
+            return itemIDs?() ?? []
+        }
+        for _ in 0..<100 {
+            XCTAssertNotNil(view.captureReadingViewport())
+        }
+        XCTAssertEqual(fullOrderReads, 0)
+        let anchor = try XCTUnwrap(view.captureReadingViewport())
+        guard case let .item(id, distance, order) = view.captureReadingPosition() else {
+            return XCTFail("Expected a restoration bookmark")
+        }
+        XCTAssertEqual(id, anchor.id)
+        XCTAssertEqual(distance, anchor.offset, accuracy: 0.5)
+        XCTAssertEqual(order, (0..<120).map(String.init))
+        XCTAssertEqual(fullOrderReads, 1)
+    }
+
     func testRoundTripKeepsTheOriginalItemWhenAnotherColumnStartsEarlier() throws {
         let fixture = Fixture(width: 390, columns: 1)
         let frame = try XCTUnwrap(fixture.collectionView.layoutAttributesForItem(at: IndexPath(item: 1, section: 0))).frame

@@ -769,6 +769,34 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         XCTAssertEqual(reading.offset, -37.25, accuracy: 0.5)
     }
 
+    func testReadingViewportReportsDoNotReadTheWholeSnapshotAndPrependKeepsPosition() async throws {
+        let fixture = await Fixture(posts: true)
+        let reading = ReadingState()
+        fixture.controller.readingState = reading
+        await fixture.scroll(1_500)
+        let position = try fixture.position()
+        let itemIDs = fixture.collection.readingItemIDs
+        var fullOrderReads = 0
+        fixture.collection.readingItemIDs = {
+            fullOrderReads += 1
+            return itemIDs?() ?? []
+        }
+        fixture.controller.beginExternalScrollInteraction()
+        for _ in 0..<100 {
+            fixture.collection.resetReadingPosition()
+            fixture.controller.scrollViewDidScroll(fixture.collection)
+        }
+        fixture.controller.endExternalScrollInteraction()
+        XCTAssertEqual(fullOrderReads, 0, "Continuous viewport reports must only inspect visible items")
+        XCTAssertEqual(reading.itemKey, String(position.id.dropFirst(2)))
+        XCTAssertEqual(reading.offset, Double(position.offset), accuracy: 0.5)
+        fixture.collection.readingItemIDs = itemIDs
+
+        fixture.input.items.insert(.post(makeRow(100)), at: 0)
+        await fixture.apply()
+        try fixture.assertPosition(position)
+    }
+
     func testSessionAtTopCapturesAPostInsteadOfFollowLatest() async throws {
         let fixture = await Fixture(posts: true)
         let reading = ReadingState()

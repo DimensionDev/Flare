@@ -64,6 +64,8 @@ internal data class ReadingViewport(
     val interacting: Boolean,
 )
 
+private typealias ReadingCursorState = Map<String, Triple<String?, String?, List<String>>>
+
 @OptIn(ExperimentalPagingApi::class)
 internal class TimelineReadingSession(
     val record: DbTimelineReadingSnapshot,
@@ -87,6 +89,10 @@ internal class TimelineReadingSession(
     private var checkpoint: Job? = null
     private var startupPending = false
     private var rankedCursorsReady = false
+    private var cursorIndexReady = false
+    private val cursorStates = mutableMapOf<String, ReadingCursorState>()
+    private val equivalentCursors = mutableMapOf<ReadingCursorState, MutableSet<String>>()
+    private val dirtyCursors = mutableSetOf<String>()
     private var active = mediator(activeKey)
     private val pagingGeneration = MutableStateFlow(0)
     val gapGeneration = MutableStateFlow(0)
@@ -429,6 +435,7 @@ internal class TimelineReadingSession(
                 database.connect {
                     val latest = repository.current(record) ?: return@connect
                     repository.saveSnapshot(record, latest.copy(pendingReady = false))
+                    invalidateCursorState(pendingKey)
                     repository.deleteData(pendingKey)
                 }
                 val pending = mediator(pendingKey)
@@ -601,6 +608,7 @@ internal class TimelineReadingSession(
                     if ((loader as? MixedRemoteMediator)?.ordersByTime != true) {
                         dao.insertAll(dao.getByPagingKey(pendingKey).mapIndexed { index, row -> row.copy(sortId = index * 1_000_000L) })
                     }
+                    reclaimPublishedStaging(pendingKey, pendingKey)
                     if (!continuous) rememberRankedCursor(pendingKey, data.map { it.timeline.statusId })
                     repository.saveSnapshot(
                         record,
@@ -615,6 +623,7 @@ internal class TimelineReadingSession(
                             newContentBoundaryId = null,
                         ),
                     )
+                    invalidateCursorState(activeKey)
                     repository.deleteData(activeKey)
                     true
                 }
@@ -647,6 +656,7 @@ internal class TimelineReadingSession(
             }.associateBy { it.statusId }
 
     private suspend fun discardSegment(key: String) {
+        invalidateCursorState(key)
         database.timelineReadingSessionDao().deleteSegment(key)
         repository.deleteData(key)
         visitedGaps -= key
@@ -657,6 +667,7 @@ internal class TimelineReadingSession(
         key: String,
         ids: List<String>?,
     ) {
+        invalidateCursorState(key)
         val dao = database.timelineReadingSessionDao()
         if (database.pagingTimelineDao().getPagingKey(key)?.nextKey == null) {
             dao.deleteCursors(key)
@@ -678,6 +689,16 @@ internal class TimelineReadingSession(
         dao.delete(key)
     }
 
+    private suspend fun reclaimPublishedStaging(
+        key: String,
+        publishedKey: String = activeKey,
+    ) {
+        if (loader is MixedRemoteMediator) {
+            invalidateCursorState(key)
+            loader.forReadingSession(key, ::valid).reclaimPublishedStaging(publishedKey)
+        }
+    }
+
     private suspend fun ensureRankedCursors() {
         if (continuous || rankedCursorsReady) return
         rankedCursorsReady =
@@ -685,8 +706,10 @@ internal class TimelineReadingSession(
                 if (!valid()) return@connect false
                 val dao = database.timelineReadingSessionDao()
                 // Older snapshots have no checkpoint; their active history is not a raw source page.
+                reclaimPublishedStaging(activeKey)
                 if (dao.cursor(activeKey) == null) rememberRankedCursor(activeKey, null)
                 dao.segments(record.key).filterNot { it.exhausted }.forEach { segment ->
+                    reclaimPublishedStaging(segment.key)
                     if (dao.cursor(segment.key) == null) {
                         rememberRankedCursor(segment.key, database.pagingTimelineDao().getByPagingKey(segment.key).map { it.statusId })
                         clearConsumedPage(segment.key)
@@ -696,7 +719,18 @@ internal class TimelineReadingSession(
             }
     }
 
-    private suspend fun cursorState(prefix: String): Map<String, Triple<String?, String?, List<String>>> {
+    private fun invalidateCursorState(key: String) {
+        cursorStates.remove(key)?.let { previous ->
+            equivalentCursors[previous]?.let { keys ->
+                keys.remove(key)
+                if (keys.isEmpty()) equivalentCursors.remove(previous)
+            }
+        }
+        // Re-read after the transaction, including after rollback; never cache uncommitted state.
+        dirtyCursors += key
+    }
+
+    private suspend fun cursorState(prefix: String): ReadingCursorState {
         val dao = database.pagingTimelineDao()
         return dao.keysWithPrefix(prefix).associate { source ->
             val cursor = dao.getPagingKey(source)
@@ -710,9 +744,21 @@ internal class TimelineReadingSession(
     }
 
     private suspend fun hasEquivalentCursor(key: String): Boolean {
-        val pending = cursorState(key)
-        return (listOf(activeKey) + database.timelineReadingSessionDao().segments(record.key).map { it.key })
-            .any { it != key && cursorState(it) == pending }
+        val dao = database.timelineReadingSessionDao()
+        if (!cursorIndexReady) {
+            dirtyCursors += dao.cursors(record.key).map { it.key }
+            cursorIndexReady = true
+        }
+        dirtyCursors.toList().forEach { changed ->
+            if (dao.cursor(changed) != null) {
+                val value = cursorState(changed)
+                cursorStates[changed] = value
+                equivalentCursors.getOrPut(value) { mutableSetOf() }.add(changed)
+            }
+            dirtyCursors.remove(changed)
+        }
+        // Map equality checks every child cursor and ordered row list, including on hash collisions.
+        return equivalentCursors[cursorState(key)]?.any { it != key } == true
     }
 
     private suspend fun attachSegment(response: PagingResult<DbPagingTimelineWithStatus>) {
@@ -724,6 +770,7 @@ internal class TimelineReadingSession(
         } else {
             insertSegmentRows(response.data, boundary.statusId)
         }
+        reclaimPublishedStaging(pendingKey)
         if (joined || response.nextKey == null || (!continuous && hasEquivalentCursor(pendingKey))) {
             discardSegment(pendingKey)
         } else {
@@ -900,8 +947,11 @@ internal class TimelineReadingSession(
                         withContext(NonCancellable) {
                             database.connect {
                                 if (!valid()) return@connect
+                                invalidateCursorState(key)
                                 val saved = if (original) response.copy(data = insertSegmentRows(response.data, null)) else response
                                 source.saveResponse(request, saved)
+                                if (!continuous && !original) insertSegmentRows(response.data, null)
+                                reclaimPublishedStaging(key)
                                 val nextCursors = cursorState(key)
                                 check(
                                     response.nextKey == null || oldCursors != nextCursors || oldIds == null ||
@@ -927,8 +977,6 @@ internal class TimelineReadingSession(
                                             response.data,
                                             boundaryId,
                                         )
-                                    } else {
-                                        insertSegmentRows(response.data, null)
                                     }
                                     if (response.nextKey == null || overlaps) {
                                         discardSegment(key)

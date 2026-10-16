@@ -349,6 +349,19 @@ final class TimelineCollectionView: UICollectionView {
     }
 
     func captureReadingPosition(preferringVisibleTop: Bool = false, matchingItem: ((String) -> Bool)? = nil) -> ReadingPosition? {
+        captureReadingPosition(preferringVisibleTop: preferringVisibleTop, matchingItem: matchingItem, includeItemOrder: true)
+    }
+
+    func captureReadingViewport(matchingItem: ((String) -> Bool)? = nil) -> (id: String, offset: CGFloat)? {
+        if case let .item(id, distance, _) = captureReadingPosition(
+            preferringVisibleTop: false, matchingItem: matchingItem, includeItemOrder: false
+        ) {
+            return (id, distance)
+        }
+        return nil
+    }
+
+    private func captureReadingPosition(preferringVisibleTop: Bool, matchingItem: ((String) -> Bool)?, includeItemOrder: Bool) -> ReadingPosition? {
         if let readingPosition,
            matchingItem == nil || readingPosition.itemID.map({ matchingItem?($0) == true }) == true { return readingPosition }
         if let geometryReadingPosition, let id = geometryReadingPosition.itemID,
@@ -359,7 +372,8 @@ final class TimelineCollectionView: UICollectionView {
             return .item(
                 id: firstItem.id,
                 distanceFromTop: firstItem.frame.minY - viewportTop,
-                itemOrder: readingItemIDs?() ?? [firstItem.id]
+                // The full order is only needed if a later layout must replace a removed anchor.
+                itemOrder: includeItemOrder ? (readingItemIDs?() ?? [firstItem.id]) : []
             )
         }
         // Without a visible item (for example during initial loading), keep the

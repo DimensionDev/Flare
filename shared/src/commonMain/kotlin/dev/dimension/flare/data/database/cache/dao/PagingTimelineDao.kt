@@ -536,6 +536,12 @@ internal interface PagingTimelineDao {
     @Delete
     suspend fun delete(timeline: List<DbPagingTimeline>)
 
+    @Query("DELETE FROM DbPagingTimeline WHERE pagingKey = :pagingKey AND _id IN (:timelineIds)")
+    suspend fun deleteTimelineRows(
+        pagingKey: String,
+        timelineIds: List<String>,
+    )
+
     @Query(
         "DELETE FROM DbPagingTimeline WHERE pagingKey = :pagingKey " +
             "AND EXISTS(" +

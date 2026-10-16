@@ -291,13 +291,13 @@ internal class TimelineReadingSession(
                     publishLatest(requestScroll = false)
                 } else if (newVisible) {
                     val bridge = if (!initial) continuousNewPage(response) else null
-                    if (bridge != null) {
-                        val followLatest =
-                            automatic && position.atTop && !position.interacting && state.value.position == null &&
-                                position.itemKey != null &&
-                                position.itemKey == visibleRow(activeKey, 0)?.timeline?.let { "${activeKey}_${it.statusId}" }
-                        database.connect {
-                            if (!valid()) return@connect
+                    val followLatest =
+                        bridge != null && automatic && position.atTop && !position.interacting && state.value.position == null &&
+                            position.itemKey != null &&
+                            position.itemKey == visibleRow(activeKey, 0)?.timeline?.let { "${activeKey}_${it.statusId}" }
+                    database.connect {
+                        if (!valid()) return@connect
+                        if (bridge != null) {
                             // An overlap must update content without moving rows already being read.
                             active.saveResponse(
                                 bridge.first,
@@ -309,23 +309,16 @@ internal class TimelineReadingSession(
                                         },
                                 ),
                             )
-                            val latest = repository.current(record) ?: return@connect
-                            repository.saveSnapshot(record, latest.copy(hasNewContent = true, pendingReady = true))
                         }
-                        state.update { it.copy(hasNewContent = true) }
-                        if (followLatest && state.value.interactionGeneration == generation &&
-                            !viewport.value.interacting && viewport.value.itemKey == position.itemKey &&
-                            kotlin.math.abs(viewport.value.offset - position.offset) < 1.0
-                        ) {
-                            showLatestLocked(generation)
-                        }
-                    } else {
-                        database.connect {
-                            val latest =
-                                repository.current(record) ?: return@connect
-                            repository.saveSnapshot(record, latest.copy(hasNewContent = true, pendingReady = true))
-                        }
-                        state.update { it.copy(hasNewContent = true) }
+                        val latest = repository.current(record) ?: return@connect
+                        repository.saveSnapshot(record, latest.copy(hasNewContent = true, pendingReady = true))
+                    }
+                    state.update { it.copy(hasNewContent = true) }
+                    if (followLatest && state.value.interactionGeneration == generation &&
+                        !viewport.value.interacting && viewport.value.itemKey == position.itemKey &&
+                        kotlin.math.abs(viewport.value.offset - position.offset) < 1.0
+                    ) {
+                        showLatestLocked(generation)
                     }
                 }
             } catch (error: kotlinx.coroutines.CancellationException) {

@@ -103,13 +103,7 @@ struct TimelineScreen: View {
         guard isHomeTimeline, isVisible, minutes > 0, scenePhase == .active else { return }
         while true {
             try await Task.sleep(for: .seconds(minutes * 60))
-            if !presenter.state.isRefreshing {
-                if let reading = presenter.state.readingState {
-                    if reading.position == nil { try? await reading.refreshAutomatically() }
-                } else {
-                    try? await presenter.state.refreshSuspend()
-                }
-            }
+            try? await presenter.state.refreshAutomatically()
         }
     }
 }

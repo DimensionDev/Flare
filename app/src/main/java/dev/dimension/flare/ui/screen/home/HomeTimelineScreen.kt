@@ -607,9 +607,7 @@ internal fun TimelineItemContent(
         lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
             while (true) {
                 delay(autoRefreshInterval.minutes * 60_000L)
-                if (!latestState.isRefreshing) {
-                    latestState.readingState?.let { if (it.position == null) it.refreshAutomatically() } ?: latestState.refreshSuspend()
-                }
+                latestState.refreshAutomatically()
             }
         }
     }

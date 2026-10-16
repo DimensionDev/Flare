@@ -25,6 +25,16 @@ public class TimelineItemPresenter(
 
         public suspend fun refreshSuspend()
 
+        public suspend fun refreshAutomatically() {
+            if (isRefreshing) return
+            val reading = readingState
+            if (reading == null) {
+                refreshSuspend()
+            } else if (reading.position == null) {
+                reading.refreshAutomatically()
+            }
+        }
+
         public fun onHomeEntered() {}
 
         public val isRefreshing: Boolean

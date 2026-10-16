@@ -69,6 +69,7 @@ import dev.dimension.flare.web.shared.WebPresenter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch
@@ -173,11 +174,18 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
                 when {
                     readingEnabled && remoteLoader !is NotSupportRemoteLoader<*> &&
                         readingSourceKey != null && timelineTabItemId != null -> {
-                        readingPager(remoteLoader, scope, timelineTabItemId, readingSourceKey)
-                            .cachedIn(scope)
-                            .flatMapLatest { pagingData ->
-                                translationSettingsFlow.map { options -> pagingData.map { it.toUi(options) } }
+                        flow {
+                            coroutineScope {
+                                // cachedIn must stop its upstream when this reading branch ends.
+                                emitAll(
+                                    readingPager(remoteLoader, this, timelineTabItemId, readingSourceKey)
+                                        .cachedIn(this)
+                                        .flatMapLatest { pagingData ->
+                                            translationSettingsFlow.map { options -> pagingData.map { it.toUi(options) } }
+                                        },
+                                )
                             }
+                        }
                     }
 
                     remoteLoader is NotSupportRemoteLoader<UiTimelineV2> -> {

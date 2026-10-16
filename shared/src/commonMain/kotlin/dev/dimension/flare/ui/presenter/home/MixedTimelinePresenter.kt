@@ -8,7 +8,6 @@ import dev.dimension.flare.data.datasource.microblog.paging.notSupported
 import dev.dimension.flare.data.model.tab.TimelineMergePolicy
 import dev.dimension.flare.data.model.tab.TimelineResolver
 import dev.dimension.flare.data.model.tab.UiGroupTimelineTabItem
-import dev.dimension.flare.data.model.tab.UiTimelineTabItem
 import dev.dimension.flare.data.model.tab.isSystemHomeMixedTimeline
 import dev.dimension.flare.data.model.tab.readingSourceKey
 import dev.dimension.flare.data.repository.SettingsRepository
@@ -18,6 +17,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
@@ -61,8 +61,8 @@ public class MixedTimelinePresenter(
                 group
                     ?.children
                     ?.filter { it.enabled }
-            }.distinctUntilChanged { old, new ->
-                old.orEmpty().map { it.readingSourceKey } == new.orEmpty().map { it.readingSourceKey }
+            }.distinctUntilChangedBy { tabs ->
+                tabs.orEmpty().map { it.readingSourceKey }
             }.flatMapLatest { tabs ->
                 if (tabs == null) {
                     if (fallbackSubTimelinePresenter.isEmpty()) {
@@ -123,7 +123,7 @@ public class SystemHomeMixedTimelinePresenter(
                 tabs
                     .filterNot { it.isSystemHomeMixedTimeline }
                     .filter { it.enabled }
-            }.distinctUntilChangedByTabIds()
+            }.distinctUntilChangedBy { tabs -> tabs.map { it.readingSourceKey } }
             .flatMapLatest { tabs ->
                 if (tabs.isEmpty()) {
                     flowOf(emptyList())
@@ -147,8 +147,3 @@ public class SystemHomeMixedTimelinePresenter(
                 }
             }
 }
-
-private fun Flow<List<UiTimelineTabItem>>.distinctUntilChangedByTabIds(): Flow<List<UiTimelineTabItem>> =
-    distinctUntilChanged { old, new ->
-        old.map { it.readingSourceKey } == new.map { it.readingSourceKey }
-    }

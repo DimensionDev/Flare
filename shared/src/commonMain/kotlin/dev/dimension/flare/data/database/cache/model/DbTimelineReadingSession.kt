@@ -1,6 +1,7 @@
 package dev.dimension.flare.data.database.cache.model
 
 import androidx.room3.Entity
+import androidx.room3.Index
 import androidx.room3.PrimaryKey
 
 @Entity
@@ -33,6 +34,14 @@ internal data class DbTimelineReadingSegment(
     val boundaryId: String,
     val boundarySortId: Long,
     val exhausted: Boolean = false,
+)
+
+@Entity(indices = [Index(value = ["snapshotKey", "lastAttempt"])])
+internal data class DbTimelineReadingCursor(
+    @PrimaryKey val key: String,
+    val snapshotKey: String,
+    val lastAttempt: Long,
+    val lastPageIds: String?,
 )
 
 @Entity

@@ -95,6 +95,9 @@ internal class TimelineReadingRepository(
                             dao.segments(previous.key).forEach { segment ->
                                 dao.saveSegment(segment.copy(key = key + segment.key.removePrefix(previous.key), snapshotKey = key))
                             }
+                            dao.cursors(previous.key).forEach { cursor ->
+                                dao.saveCursor(cursor.copy(key = key + cursor.key.removePrefix(previous.key), snapshotKey = key))
+                            }
                         }
                         previous.copy(
                             key = key,
@@ -201,6 +204,7 @@ internal class TimelineReadingRepository(
     }
 
     suspend fun deleteData(prefix: String) {
+        database.timelineReadingSessionDao().deleteCursors(prefix)
         val dao = database.pagingTimelineDao()
         dao.keysWithPrefix(prefix).forEach { key ->
             dao.deletePresentationReferences(key)

@@ -27,6 +27,7 @@ internal open class TimelineRemoteMediator(
     private val preTranslationService: PreTranslationService = NoopPreTranslationService,
     private val refreshOnInitialize: suspend () -> Boolean = { true },
     private val isRequestValid: suspend () -> Boolean = { true },
+    private val preservePrependSortIds: Boolean = false,
 ) : BasePagingRemoteMediator<
         OffsetFromStartPagingKey,
         TimelinePageItem,
@@ -129,7 +130,7 @@ internal open class TimelineRemoteMediator(
         data: List<DbPagingTimelineWithStatus>,
     ) {
         val dataToSave =
-            if (request is PagingRequest.Prepend && loader.supportPrepend && data.isNotEmpty()) {
+            if (request is PagingRequest.Prepend && loader.supportPrepend && !preservePrependSortIds && data.isNotEmpty()) {
                 val minimumSortId = database.pagingTimelineDao().getMinSortId(pagingKey)
                 if (minimumSortId != null && minimumSortId >= Long.MIN_VALUE + data.size) {
                     val firstSortId = minimumSortId - data.size

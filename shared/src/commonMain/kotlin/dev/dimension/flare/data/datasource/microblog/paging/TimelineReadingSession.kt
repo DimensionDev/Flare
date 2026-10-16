@@ -6,12 +6,14 @@ import androidx.paging.Pager
 import androidx.paging.PagingState
 import dev.dimension.flare.common.BaseRemoteMediator
 import dev.dimension.flare.common.PlatformDispatchers
+import dev.dimension.flare.common.SnowflakeIdGenerator
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.connect
 import dev.dimension.flare.data.database.cache.dao.DbTimelinePageIdentity
 import dev.dimension.flare.data.database.cache.mapper.saveToDatabase
 import dev.dimension.flare.data.database.cache.model.DbPagingTimeline
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
+import dev.dimension.flare.data.database.cache.model.DbTimelineReadingCursor
 import dev.dimension.flare.data.database.cache.model.DbTimelineReadingSegment
 import dev.dimension.flare.data.database.cache.model.DbTimelineReadingSnapshot
 import dev.dimension.flare.data.database.cache.model.TranslationDisplayOptions
@@ -43,6 +45,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import kotlin.time.Instant
 import kotlin.uuid.Uuid
 
@@ -82,6 +86,7 @@ internal class TimelineReadingSession(
     private val closed = MutableStateFlow(false)
     private var checkpoint: Job? = null
     private var startupPending = false
+    private var rankedCursorsReady = false
     private var active = mediator(activeKey)
     private val pagingGeneration = MutableStateFlow(0)
     val gapGeneration = MutableStateFlow(0)
@@ -108,8 +113,13 @@ internal class TimelineReadingSession(
     private val boundaryInvalidation =
         launchIo {
             database.invalidationTracker
-                .createFlow("DbPagingTimeline", "DbStatus", "timeline_item_presentation_reference", "DbTimelineReadingSegment")
-                .collect { boundaryVersion.update { it + 1 } }
+                .createFlow(
+                    "DbPagingTimeline",
+                    "DbStatus",
+                    "timeline_item_presentation_reference",
+                    "DbTimelineReadingSegment",
+                    "DbTimelineReadingCursor",
+                ).collect { boundaryVersion.update { it + 1 } }
         }
 
     private data class ReadingBoundary(
@@ -193,6 +203,7 @@ internal class TimelineReadingSession(
             preTranslationService,
             refreshOnInitialize = { false },
             isRequestValid = ::valid,
+            preservePrependSortIds = true,
         )
 
     suspend fun prepare() {
@@ -206,6 +217,7 @@ internal class TimelineReadingSession(
                     .forEach { discardSegment(it.key) }
             }
         }
+        ensureRankedCursors()
         val dao = database.pagingTimelineDao()
         val saved =
             record.anchorId?.let { dao.readingItem(activeKey, it) }
@@ -271,19 +283,20 @@ internal class TimelineReadingSession(
             }
 
             LoadType.APPEND -> {
-                val continuation =
-                    if (!continuous) {
-                        database
-                            .timelineReadingSessionDao()
-                            .segments(
-                                record.key,
-                            ).lastOrNull { !it.exhausted }
+                if (!continuous) {
+                    val cursor =
+                        withContext(PlatformDispatchers.IO) {
+                            mutex.withLock {
+                                ensureRankedCursors()
+                                database.timelineReadingSessionDao().nextCursor(record.key)
+                            }
+                        } ?: return MediatorResult.Success(true)
+                    val error = loadGap(cursor.key)
+                    return if (error != null) {
+                        MediatorResult.Error(error)
                     } else {
-                        null
+                        MediatorResult.Success(database.timelineReadingSessionDao().nextCursor(record.key) == null)
                     }
-                if (continuation != null) {
-                    val error = loadGap(continuation.key)
-                    return if (error != null) MediatorResult.Error(error) else MediatorResult.Success(false)
                 }
                 withContext(PlatformDispatchers.IO) {
                     mutex.withLock {
@@ -429,7 +442,7 @@ internal class TimelineReadingSession(
                 val hasNewRows = response.data.any { it.timeline.statusId !in currentIds }
                 val newVisible = response.data.any { it.timeline.statusId !in currentIds && isVisible(it.asUi(pendingKey)) }
                 if (database.pagingTimelineDao().getTimelinePageIdentities(activeKey, 0, 1).isEmpty()) {
-                    publishInitial()
+                    publishInitial(response.data)
                 } else if (hasNewRows || (!continuous && response.nextKey != null)) {
                     val bridge = if (!initial) continuousNewPage(response) else null
                     val followLatest =
@@ -443,11 +456,12 @@ internal class TimelineReadingSession(
                             database.connect {
                                 if (!valid()) return@connect false
                                 if (bridge != null) {
-                                    val known = existingIds(bridge.second.data)
-                                    active.saveResponse(
-                                        bridge.first,
-                                        bridge.second.copy(data = bridge.second.data.filter { it.timeline.statusId !in known }),
-                                    )
+                                    val rows =
+                                        insertContinuousRows(
+                                            bridge.second.data,
+                                            database.pagingTimelineDao().readingHead(activeKey)?.statusId,
+                                        )
+                                    active.saveResponse(bridge.first, bridge.second.copy(data = rows))
                                     // The forward probe can be shorter than the fetched refresh page.
                                     attachSegment(response)
                                 } else {
@@ -575,7 +589,7 @@ internal class TimelineReadingSession(
         }
     }
 
-    private suspend fun publishInitial() {
+    private suspend fun publishInitial(data: List<DbPagingTimelineWithStatus>) {
         val first = visibleRow(pendingKey, 0)?.timeline
         currentCoroutineContext().ensureActive()
         // Commit the first page and its in-memory namespace together, even if refresh is cancelled.
@@ -583,13 +597,18 @@ internal class TimelineReadingSession(
             val published =
                 database.connect {
                     val latest = repository.current(record) ?: return@connect false
+                    val dao = database.pagingTimelineDao()
+                    if ((loader as? MixedRemoteMediator)?.ordersByTime != true) {
+                        dao.insertAll(dao.getByPagingKey(pendingKey).mapIndexed { index, row -> row.copy(sortId = index * 1_000_000L) })
+                    }
+                    if (!continuous) rememberRankedCursor(pendingKey, data.map { it.timeline.statusId })
                     repository.saveSnapshot(
                         record,
                         latest.copy(
                             activeKey = pendingKey,
                             pendingKey = activeKey,
                             anchorId = first?.let { "${pendingKey}_${it.statusId}" },
-                            anchorSortId = first?.sortId,
+                            anchorSortId = first?.let { dao.readingItem(pendingKey, "${pendingKey}_${it.statusId}")?.sortId },
                             offset = 0.0,
                             hasNewContent = false,
                             pendingReady = false,
@@ -634,22 +653,64 @@ internal class TimelineReadingSession(
         gapLoads.update { it - key }
     }
 
-    private suspend fun hasEquivalentCursor(key: String): Boolean {
-        val dao = database.pagingTimelineDao()
+    private suspend fun rememberRankedCursor(
+        key: String,
+        ids: List<String>?,
+    ) {
+        val dao = database.timelineReadingSessionDao()
+        if (database.pagingTimelineDao().getPagingKey(key)?.nextKey == null) {
+            dao.deleteCursors(key)
+        } else {
+            dao.saveCursor(
+                DbTimelineReadingCursor(
+                    key,
+                    record.key,
+                    dao.cursor(key)?.lastAttempt ?: SnowflakeIdGenerator.nextId(),
+                    ids?.let { Json.encodeToString(it.distinct()) },
+                ),
+            )
+        }
+    }
 
-        suspend fun cursors(prefix: String) =
-            dao.keysWithPrefix(prefix).associate { source ->
-                val cursor = dao.getPagingKey(source)
-                source.removePrefix(prefix) to
-                    Triple(
-                        cursor?.nextKey,
-                        cursor?.prevKey,
-                        if (source == prefix) emptyList() else dao.getByPagingKey(source).map { it.statusId },
-                    )
+    private suspend fun clearConsumedPage(key: String) {
+        val dao = database.pagingTimelineDao()
+        dao.deletePresentationReferences(key)
+        dao.delete(key)
+    }
+
+    private suspend fun ensureRankedCursors() {
+        if (continuous || rankedCursorsReady) return
+        rankedCursorsReady =
+            database.connect {
+                if (!valid()) return@connect false
+                val dao = database.timelineReadingSessionDao()
+                // Older snapshots have no checkpoint; their active history is not a raw source page.
+                if (dao.cursor(activeKey) == null) rememberRankedCursor(activeKey, null)
+                dao.segments(record.key).filterNot { it.exhausted }.forEach { segment ->
+                    if (dao.cursor(segment.key) == null) {
+                        rememberRankedCursor(segment.key, database.pagingTimelineDao().getByPagingKey(segment.key).map { it.statusId })
+                        clearConsumedPage(segment.key)
+                    }
+                }
+                true
             }
-        val pending = cursors(key)
+    }
+
+    private suspend fun cursorState(prefix: String): Map<String, Triple<String?, String?, List<String>>> {
+        val dao = database.pagingTimelineDao()
+        return dao.keysWithPrefix(prefix).associate { source ->
+            val cursor = dao.getPagingKey(source)
+            source.removePrefix(prefix) to Triple(
+                cursor?.nextKey, cursor?.prevKey,
+                if (source == prefix) emptyList() else dao.getByPagingKey(source).map { it.statusId },
+            )
+        }
+    }
+
+    private suspend fun hasEquivalentCursor(key: String): Boolean {
+        val pending = cursorState(key)
         return (listOf(activeKey) + database.timelineReadingSessionDao().segments(record.key).map { it.key })
-            .any { it != key && cursors(it) == pending }
+            .any { it != key && cursorState(it) == pending }
     }
 
     private suspend fun attachSegment(response: PagingResult<DbPagingTimelineWithStatus>) {
@@ -672,6 +733,10 @@ internal class TimelineReadingSession(
                     dao.readingItem(activeKey, "${activeKey}_${boundary.statusId}")?.sortId ?: boundary.sortId,
                 ),
             )
+            if (!continuous) {
+                rememberRankedCursor(pendingKey, response.data.map { it.timeline.statusId })
+                clearConsumedPage(pendingKey)
+            }
         }
     }
 
@@ -699,6 +764,49 @@ internal class TimelineReadingSession(
         updated += insertSegmentRows(additions, tailBoundary)
         updated += insertSegmentRows(data.filter { it.timeline.statusId in existing }, beforeId)
         return updated
+    }
+
+    private suspend fun rebaseAround(
+        beforeId: String?,
+        additions: Int,
+    ) {
+        val dao = database.pagingTimelineDao()
+        val boundary = beforeId?.let { dao.readingItem(activeKey, "${activeKey}_$it") }
+        val pivot = boundary ?: dao.readingTail(activeKey) ?: return
+        var count = 32
+        while (true) {
+            val window =
+                dao.readingRowsBefore(activeKey, pivot.sortId, count).asReversed() +
+                    dao.readingRowsFrom(activeKey, pivot.sortId, count)
+            val predecessor = dao.readingPredecessor(activeKey, window.first().sortId)
+            val successor = dao.readingSuccessor(activeKey, window.last().sortId)
+            val slots = window.size + additions + 1L
+            val space = slots * 1_000_000L
+            val left = predecessor?.sortId ?: ((successor?.sortId ?: 0L) - space)
+            val right = successor?.sortId ?: (left + space)
+            if (left >= Long.MIN_VALUE / 2 && right <= Long.MAX_VALUE / 2 && right > left && (right - left) / slots > 0) {
+                val step = (right - left) / slots
+                val rebased =
+                    window.mapIndexed { index, row ->
+                        val reserved = if (boundary != null && row.sortId >= boundary.sortId) additions else 0
+                        row.copy(sortId = left + step * (index + reserved + 1L))
+                    }
+                dao.insertAll(rebased)
+                val byId = rebased.associateBy { it.statusId }
+                database.timelineReadingSessionDao().segments(record.key).forEach { segment ->
+                    byId[segment.boundaryId]?.let { row ->
+                        database.timelineReadingSessionDao().saveSegment(segment.copy(boundarySortId = row.sortId))
+                    }
+                }
+                repository.current(record)?.let { snapshot ->
+                    rebased.firstOrNull { "${activeKey}_${it.statusId}" == snapshot.anchorId }?.let { anchor ->
+                        repository.saveSnapshot(record, snapshot.copy(anchorSortId = anchor.sortId))
+                    }
+                }
+                return
+            }
+            count *= 2
+        }
     }
 
     private suspend fun insertSegmentRows(
@@ -729,18 +837,7 @@ internal class TimelineReadingSession(
                 if (right <= left || (right - left) / (additions.size + 1L) <= 0 || left < Long.MIN_VALUE / 2 ||
                     right > Long.MAX_VALUE / 2
                 ) {
-                    val rebased = dao.getByPagingKey(activeKey).mapIndexed { index, row -> row.copy(sortId = index * 1_000_000L) }
-                    dao.insertAll(rebased)
-                    val byId = rebased.associateBy { it.statusId }
-                    database.timelineReadingSessionDao().segments(record.key).forEach { segment ->
-                        byId[segment.boundaryId]?.let { boundary ->
-                            database.timelineReadingSessionDao().saveSegment(segment.copy(boundarySortId = boundary.sortId))
-                        }
-                    }
-                    repository.current(record)?.let { snapshot ->
-                        val anchor = snapshot.anchorId?.let { dao.readingItem(activeKey, it) }
-                        repository.saveSnapshot(record, snapshot.copy(anchorSortId = anchor?.sortId))
-                    }
+                    rebaseAround(beforeId, additions.size)
                     existing = existingRows(data)
                     val bounds = bounds()
                     left = bounds.first
@@ -770,63 +867,89 @@ internal class TimelineReadingSession(
         withContext(PlatformDispatchers.IO) {
             mutex.withLock {
                 if (!valid()) return@withLock null
-                var segment =
-                    database.timelineReadingSessionDao().segments(record.key).firstOrNull { it.key == key && !it.exhausted }
-                        ?: return@withLock null
+                val readingDao = database.timelineReadingSessionDao()
+                var segment = readingDao.segments(record.key).firstOrNull { it.key == key && !it.exhausted }
+                val original = !continuous && key == activeKey
+                if (segment == null && !original) return@withLock null
+                if (!continuous) {
+                    val checkpoint = readingDao.cursor(key) ?: return@withLock null
+                    // Persist the turn before fetching: failed or infinite cursors cannot starve other batches after reopening.
+                    readingDao.saveCursor(checkpoint.copy(lastAttempt = SnowflakeIdGenerator.nextId()))
+                }
                 gapLoads.update { it + (key to true) }
                 gapGeneration.update { it + 1 }
                 try {
-                    // A viewport visit loads at most two pages; long gaps never block reading either side.
-                    repeat(2) {
+                    // Continuous gaps get two pages per visit; ranked cursors each get one page per turn.
+                    repeat(if (continuous) 2 else 1) {
                         val dao = database.pagingTimelineDao()
                         val cursor = dao.getPagingKey(key)?.nextKey ?: return@repeat
                         val request = PagingRequest.Append(cursor)
-                        val source = mediator(key)
+                        val source = if (original) active else mediator(key)
+                        val oldIds =
+                            if (continuous) {
+                                dao.getByPagingKey(key).map { it.statusId }.toSet()
+                            } else {
+                                readingDao.cursor(key)?.lastPageIds?.let { Json.decodeFromString<List<String>>(it).toSet() }
+                            }
+                        val oldCursors = cursorState(key)
                         val response = source.load(40, request)
                         if (!valid()) return@withLock null
-                        val oldIds = dao.getByPagingKey(key).map { it.statusId }.toSet()
-                        val oldCursors = dao.keysWithPrefix(key).associateWith { dao.getPagingKey(it) }
                         currentCoroutineContext().ensureActive()
                         withContext(NonCancellable) {
                             database.connect {
                                 if (!valid()) return@connect
-                                source.saveResponse(request, response)
-                                val nextCursors = dao.keysWithPrefix(key).associateWith { dao.getPagingKey(it) }
+                                val saved = if (original) response.copy(data = insertSegmentRows(response.data, null)) else response
+                                source.saveResponse(request, saved)
+                                val nextCursors = cursorState(key)
                                 check(
-                                    response.nextKey == null || oldCursors != nextCursors ||
+                                    response.nextKey == null || oldCursors != nextCursors || oldIds == null ||
                                         response.data.any { it.timeline.statusId !in oldIds },
                                 ) {
                                     "Timeline pagination did not advance"
                                 }
-                                val boundary =
-                                    dao.readingItem(activeKey, "${activeKey}_${segment.boundaryId}")
-                                        ?: dao.nearestReadingItem(activeKey, segment.boundarySortId)
-                                val boundaryId = boundary?.statusId ?: segment.boundaryId
-                                val overlaps =
-                                    continuous &&
-                                        existingRows(response.data).values.any {
-                                            it.sortId >= (boundary?.sortId ?: segment.boundarySortId)
-                                        }
-                                if (continuous) {
-                                    insertContinuousRows(response.data, boundaryId)
+                                if (original) {
+                                    rememberRankedCursor(key, response.data.map { it.timeline.statusId })
                                 } else {
-                                    // Ranked cursors do not identify missing posts between two cached rows.
-                                    insertSegmentRows(response.data, null)
-                                }
-                                if (response.nextKey == null || overlaps) {
-                                    discardSegment(key)
-                                } else {
-                                    segment =
-                                        segment.copy(
-                                            boundaryId = boundaryId,
-                                            boundarySortId =
-                                                dao.readingItem(activeKey, "${activeKey}_$boundaryId")?.sortId ?: segment.boundarySortId,
+                                    val current = requireNotNull(segment)
+                                    val boundary =
+                                        dao.readingItem(activeKey, "${activeKey}_${current.boundaryId}")
+                                            ?: dao.nearestReadingItem(activeKey, current.boundarySortId)
+                                    val boundaryId = boundary?.statusId ?: current.boundaryId
+                                    val overlaps =
+                                        continuous &&
+                                            existingRows(response.data).values.any {
+                                                it.sortId >= (boundary?.sortId ?: current.boundarySortId)
+                                            }
+                                    if (continuous) {
+                                        insertContinuousRows(
+                                            response.data,
+                                            boundaryId,
                                         )
-                                    database.timelineReadingSessionDao().saveSegment(segment)
-                                    val keep = response.data.map { it.timeline.statusId }.toSet()
-                                    val stale = dao.getByPagingKey(key).filter { it.statusId !in keep }
-                                    dao.deletePresentationReferences(key, stale.map { it._id })
-                                    dao.delete(stale)
+                                    } else {
+                                        insertSegmentRows(response.data, null)
+                                    }
+                                    if (response.nextKey == null || overlaps) {
+                                        discardSegment(key)
+                                    } else if (!continuous) {
+                                        rememberRankedCursor(key, response.data.map { it.timeline.statusId })
+                                        clearConsumedPage(key)
+                                    } else {
+                                        segment =
+                                            current.copy(
+                                                boundaryId = boundaryId,
+                                                boundarySortId =
+                                                    dao
+                                                        .readingItem(
+                                                            activeKey,
+                                                            "${activeKey}_$boundaryId",
+                                                        )?.sortId ?: current.boundarySortId,
+                                            )
+                                        readingDao.saveSegment(requireNotNull(segment))
+                                        val keep = response.data.map { it.timeline.statusId }.toSet()
+                                        val stale = dao.getByPagingKey(key).filter { it.statusId !in keep }
+                                        dao.deletePresentationReferences(key, stale.map { it._id })
+                                        dao.delete(stale)
+                                    }
                                 }
                             }
                             boundaryVersion.update { it + 1 }
@@ -842,6 +965,7 @@ internal class TimelineReadingSession(
                     error
                 } finally {
                     gapLoads.update { if (it[key] == true) it - key else it }
+                    boundaryVersion.update { it + 1 }
                     gapGeneration.update { it + 1 }
                 }
             }
@@ -867,10 +991,16 @@ internal class TimelineReadingSession(
                         ReadingBoundary(segment, visible, dao.readingItemOffset(activeKey, visible.sortId), after = false)
                     }
                 } else {
-                    // Finish one ranked batch at a time; overlaps never discard another batch's unseen results.
-                    val segment = segments.lastOrNull()
+                    val readingDao = database.timelineReadingSessionDao()
+                    val failed =
+                        gapLoads.value.entries
+                            .firstOrNull { !it.value }
+                            ?.key
+                            ?.let { readingDao.cursor(it) }
+                    val cursor = failed ?: if (segments.isNotEmpty()) readingDao.nextCursor(record.key) else null
                     val tail = dao.readingTail(activeKey)
-                    if (segment != null && tail != null) {
+                    if (cursor != null && tail != null) {
+                        val segment = DbTimelineReadingSegment(cursor.key, record.key, tail.statusId, tail.sortId)
                         var offset = dao.readingItemOffset(activeKey, tail.sortId)
                         var visibleOffset = offset
                         while (offset >= 0) {

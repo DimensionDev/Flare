@@ -4,6 +4,7 @@ import androidx.room3.Dao
 import androidx.room3.Query
 import androidx.room3.Upsert
 import dev.dimension.flare.data.database.cache.model.DbHomeTimelineSelection
+import dev.dimension.flare.data.database.cache.model.DbTimelineReadingCursor
 import dev.dimension.flare.data.database.cache.model.DbTimelineReadingSegment
 import dev.dimension.flare.data.database.cache.model.DbTimelineReadingSession
 import dev.dimension.flare.data.database.cache.model.DbTimelineReadingSnapshot
@@ -11,6 +12,21 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 internal interface TimelineReadingSessionDao {
+    @Query("SELECT * FROM DbTimelineReadingCursor WHERE snapshotKey = :snapshotKey ORDER BY lastAttempt, `key`")
+    suspend fun cursors(snapshotKey: String): List<DbTimelineReadingCursor>
+
+    @Query("SELECT * FROM DbTimelineReadingCursor WHERE snapshotKey = :snapshotKey ORDER BY lastAttempt, `key` LIMIT 1")
+    suspend fun nextCursor(snapshotKey: String): DbTimelineReadingCursor?
+
+    @Query("SELECT * FROM DbTimelineReadingCursor WHERE `key` = :key")
+    suspend fun cursor(key: String): DbTimelineReadingCursor?
+
+    @Upsert
+    suspend fun saveCursor(cursor: DbTimelineReadingCursor)
+
+    @Query("DELETE FROM DbTimelineReadingCursor WHERE substr(`key`, 1, length(:prefix)) = :prefix")
+    suspend fun deleteCursors(prefix: String)
+
     @Query("SELECT * FROM DbTimelineReadingSegment WHERE snapshotKey = :snapshotKey ORDER BY boundarySortId")
     suspend fun segments(snapshotKey: String): List<DbTimelineReadingSegment>
 

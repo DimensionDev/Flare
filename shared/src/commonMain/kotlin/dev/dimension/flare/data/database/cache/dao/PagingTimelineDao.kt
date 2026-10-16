@@ -487,6 +487,20 @@ internal interface PagingTimelineDao {
         sortId: Long,
     ): DbPagingTimeline?
 
+    @Query("SELECT * FROM DbPagingTimeline WHERE pagingKey = :pagingKey AND sortId < :sortId ORDER BY sortId DESC LIMIT :count")
+    suspend fun readingRowsBefore(
+        pagingKey: String,
+        sortId: Long,
+        count: Int,
+    ): List<DbPagingTimeline>
+
+    @Query("SELECT * FROM DbPagingTimeline WHERE pagingKey = :pagingKey AND sortId >= :sortId ORDER BY sortId LIMIT :count")
+    suspend fun readingRowsFrom(
+        pagingKey: String,
+        sortId: Long,
+        count: Int,
+    ): List<DbPagingTimeline>
+
     // Keep UNION's inline-parent lookup on candidate IDs instead of SQLite's namespace-scan plan.
     @Query(
         "SELECT statusId FROM DbPagingTimeline WHERE pagingKey = :pagingKey AND statusId IN (:statusIds) " +

@@ -4,6 +4,7 @@ import androidx.paging.ExperimentalPagingApi
 import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
+import dev.dimension.flare.data.datasource.microblog.paging.TimelineOrder
 import dev.dimension.flare.data.network.vvo.VVOService
 import dev.dimension.flare.data.platform.VVO_PLATFORM_ID
 import dev.dimension.flare.data.repository.LoginExpiredException
@@ -16,6 +17,8 @@ internal class HomeTimelineRemoteMediator(
     private val service: VVOService,
     private val accountKey: MicroBlogKey,
 ) : CacheableRemoteLoader<UiTimelineV2> {
+    // No stable status-order contract is available for this opaque max_id cursor.
+    override val timelineOrder = TimelineOrder.Ranked
     override val pagingKey: String = "home_$accountKey"
 
     override suspend fun load(

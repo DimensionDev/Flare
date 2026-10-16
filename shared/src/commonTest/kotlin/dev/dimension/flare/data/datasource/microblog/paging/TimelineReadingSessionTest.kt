@@ -1027,7 +1027,7 @@ class TimelineReadingSessionTest : RobolectricTest() {
             val pending = snapshot(session)
             assertFalse(pending.pendingReady)
             assertEquals(
-                11,
+                0,
                 database
                     .pagingTimelineDao()
                     .getByPagingKey(
@@ -1377,8 +1377,10 @@ class TimelineReadingSessionTest : RobolectricTest() {
             loader.response = page(100..139)
             loader.forward = loader.response
             initial.refresh(false)
+            // Retained snapshots from older versions can still contain dense Snowflake ranks.
+            database.pagingTimelineDao().insertAll(rows(initial).mapIndexed { index, row -> row.copy(sortId = (1L shl 60) + index) })
             val prepended = rows(initial).take(40)
-            assertTrue(prepended.first().sortId > (1L shl 53), "Use production Snowflake ranks")
+            assertTrue(prepended.first().sortId > (1L shl 53), "Cover legacy Snowflake ranks")
             assertEquals(List(40) { it.toLong() }, prepended.map { it.sortId - prepended.first().sortId })
             val bucket = prepended.groupBy { it.sortId.toDouble() }.values.maxBy { it.size }
             assertTrue(bucket.size > 10, "Production contiguous ranks lose precision in REAL")
@@ -2166,7 +2168,7 @@ class TimelineReadingSessionTest : RobolectricTest() {
         }
 
     @Test
-    fun rankedAppendDrainsEachCursorAndThenResumesTheOriginalTimeline() =
+    fun rankedAppendInterleavesTheOriginalAndRefreshedTimeline() =
         runTest {
             val loader = Loader(timelineOrder = TimelineOrder.Ranked).apply { response = page(0..1, "original") }
             val session = session(loader, backgroundScope)
@@ -2190,11 +2192,13 @@ class TimelineReadingSessionTest : RobolectricTest() {
                     0,
                 )
             session.load(androidx.paging.LoadType.APPEND, state)
-            assertEquals(listOf("4", "0", "1", "5", "6"), ids(session))
+            assertEquals(listOf("4", "0", "1", "2", "3"), ids(session))
             session.load(androidx.paging.LoadType.APPEND, state)
-            assertEquals(listOf("4", "0", "1", "5", "6", "2", "3"), ids(session))
+            assertEquals(listOf("4", "0", "1", "2", "3", "5"), ids(session))
+            session.load(androidx.paging.LoadType.APPEND, state)
+            assertEquals(listOf("4", "0", "1", "2", "3", "5", "6"), ids(session))
             assertEquals(
-                listOf("fresh", "fresh-2", "original"),
+                listOf("original", "fresh", "fresh-2"),
                 loader.requests.filterIsInstance<PagingRequest.Append>().map { it.nextKey },
             )
             assertTrue(database.timelineReadingSessionDao().segments(session.record.key).isEmpty())
@@ -2325,6 +2329,321 @@ class TimelineReadingSessionTest : RobolectricTest() {
             assertTrue(database.timelineReadingSessionDao().segments(session.record.key).isEmpty())
             assertNull(session.state.value.position)
         }
+
+    @Test
+    fun rotatingRankedCursorsKeepAllContinuationsWithoutDuplicatingStoredPages() =
+        runTest {
+            val loader = Loader(timelineOrder = TimelineOrder.Ranked).apply { response = page(0..39, "original") }
+            val session = session(loader, backgroundScope)
+            session.refresh(false, initial = true)
+            val original = rows(session)
+            val anchor = "${session.activeKey}_${original[20].statusId}"
+            savePosition(session, anchor, original[20].sortId, -17.25)
+            repeat(5) { index ->
+                loader.response = page(0..39, "refresh-$index")
+                session.refresh(false)
+            }
+            assertEquals(5, database.timelineReadingSessionDao().segments(session.record.key).size)
+            assertEquals(
+                40,
+                database.pagingTimelineDao().keysWithPrefix(session.record.key).sumOf {
+                    database.pagingTimelineDao().getByPagingKey(it).size
+                },
+            )
+            var page = 100
+            loader.beforeLoad = {
+                loader.response = PagingResult(listOf(post(page++)), nextKey = "continued-$page")
+            }
+            repeat(6) { append(session) }
+            assertEquals(listOf("original") + (0..4).map { "refresh-$it" }, appendCursors(loader))
+            assertEquals(((0..39) + (100..105)).map(Int::toString), ids(session))
+            assertEquals(anchor, snapshot(session).anchorId)
+            assertEquals(-17.25, snapshot(session).offset)
+            assertNull(session.state.value.position)
+            assertEquals(original, rows(session).take(40))
+            assertEquals(
+                46,
+                database.pagingTimelineDao().keysWithPrefix(session.record.key).sumOf {
+                    database.pagingTimelineDao().getByPagingKey(it).size
+                },
+            )
+        }
+
+    @Test
+    fun rankedRotationSurvivesReopeningAndConcurrentReaders() =
+        runTest {
+            val repository = TimelineReadingRepository(database, backgroundScope)
+            val loader = Loader(timelineOrder = TimelineOrder.Ranked).apply { response = page(0..1, "original") }
+            val first = session(loader, backgroundScope, repository = repository)
+            first.refresh(false, initial = true)
+            loader.response = page(10..11, "first")
+            first.refresh(false)
+            loader.response = page(20..21, "second")
+            first.refresh(false)
+            loader.beforeLoad = {
+                loader.response =
+                    PagingResult(listOf(post(100 + appendCursors(loader).size)), nextKey = "continued-${appendCursors(loader).size}")
+            }
+            append(first)
+            first.close()
+            val restored = session(loader, backgroundScope, repository = repository)
+            restored.prepare()
+            val other = session(loader, backgroundScope, repository = repository)
+            append(restored)
+            append(other)
+            append(restored)
+            assertEquals(listOf("original", "first", "first", "second"), appendCursors(loader))
+            assertEquals(listOf("20", "21", "10", "11", "0", "1", "101", "102", "104"), ids(restored))
+            assertEquals(listOf("20", "21", "10", "11", "0", "1", "101", "103"), ids(other))
+        }
+
+    @Test
+    fun newRankedRefreshesAndFailuresDoNotStarveExistingCursors() =
+        runTest {
+            val loader = Loader(timelineOrder = TimelineOrder.Ranked).apply { response = page(0..1, "original") }
+            val session = session(loader, backgroundScope)
+            session.refresh(false, initial = true)
+            repeat(3) { index ->
+                loader.beforeLoad = {}
+                loader.response = page(0..1, "refresh-$index")
+                session.refresh(false)
+                loader.beforeLoad = { error("offline") }
+                assertTrue(append(session) is androidx.paging.RemoteMediator.MediatorResult.Error)
+            }
+            assertEquals(listOf("original", "refresh-0", "original"), appendCursors(loader))
+            loader.beforeLoad = { loader.response = PagingResult(listOf(post(99))) }
+            append(session)
+            assertEquals("refresh-1", appendCursors(loader).last())
+            assertEquals(listOf("0", "1", "99"), ids(session))
+            val source = TimelineReadingPagingSource(database, session)
+            try {
+                val page =
+                    source.load(
+                        PagingSource.LoadParams.Refresh(OffsetFromStartPagingKey.Append(0), 100, false),
+                    ) as PagingSource.LoadResult.Page
+                assertTrue((page.data.last().baseItem as UiTimelineV2.Message).readingGap?.failed == true)
+            } finally {
+                source.invalidate()
+            }
+            assertEquals(3, database.timelineReadingSessionDao().cursors(session.record.key).size)
+        }
+
+    @Test
+    fun rankedStalledPageIsDetectedAfterItsRawRowsAreReclaimed() =
+        runTest {
+            val loader = Loader(timelineOrder = TimelineOrder.Ranked).apply { response = page(0..1, "original") }
+            val session = session(loader, backgroundScope)
+            session.refresh(false, initial = true)
+            loader.response = page(0..1, "fresh")
+            session.refresh(false)
+            val segment = database.timelineReadingSessionDao().segments(session.record.key).single()
+            assertTrue(database.pagingTimelineDao().getByPagingKey(segment.key).isEmpty())
+            assertNotNull(session.loadGap(segment.key))
+            assertEquals("fresh", database.pagingTimelineDao().getPagingKey(segment.key)?.nextKey)
+            loader.response = PagingResult(listOf(post(2)), nextKey = "fresh")
+            assertNull(session.loadGap(segment.key))
+            assertEquals(listOf("0", "1", "2"), ids(session))
+            assertNotNull(session.loadGap(segment.key))
+            assertEquals(3, rows(session).size)
+        }
+
+    @Test
+    fun rankedReorderedCollectionRetainsUnseenPostsBehindAnOverlappingPage() =
+        runTest {
+            val loader = Loader(timelineOrder = TimelineOrder.Ranked).apply { response = page(0..1, "old") }
+            val session = session(loader, backgroundScope)
+            session.refresh(false, initial = true)
+            val original = rows(session)
+            val anchor = "${session.activeKey}_${original[1].statusId}"
+            savePosition(session, anchor, original[1].sortId, -8.5)
+            loader.response = PagingResult(listOf(post(1), post(0)), nextKey = "new-collection")
+            session.refresh(false)
+            loader.beforeLoad = {
+                loader.response =
+                    if ((loader.requests.last() as PagingRequest.Append).nextKey == "new-collection") {
+                        PagingResult(listOf(post(99)))
+                    } else {
+                        PagingResult()
+                    }
+            }
+            repeat(2) { append(session) }
+            assertEquals(listOf("old", "new-collection"), appendCursors(loader))
+            assertEquals(listOf("0", "1", "99"), ids(session))
+            assertEquals(original, rows(session).take(2))
+            assertEquals(anchor, snapshot(session).anchorId)
+            assertEquals(-8.5, snapshot(session).offset)
+        }
+
+    @Test
+    fun rankedMixedCursorsRetainUnconsumedStagingAfterRawPagesAreReclaimed() =
+        runTest {
+            fun timed(range: IntRange) = range.map { post(it).copy(createdAt = Instant.fromEpochMilliseconds(it.toLong()).toUi()) }
+            val loader = Loader().apply { response = PagingResult(timed(0..49), nextKey = "old") }
+            val session = session(MixedRemoteMediator(database, listOf(loader), TimelineMergePolicy.Time), backgroundScope)
+            session.refresh(false, initial = true)
+            loader.response = PagingResult(timed(0..49), nextKey = "fresh")
+            session.refresh(false)
+            val segment = database.timelineReadingSessionDao().segments(session.record.key).single()
+            assertTrue(database.pagingTimelineDao().getByPagingKey(segment.key).isEmpty())
+            val staging = database.pagingTimelineDao().keysWithPrefix(segment.key).filter { it.endsWith("staging") }
+            assertEquals(10, staging.sumOf { database.pagingTimelineDao().getByPagingKey(it).size })
+            loader.beforeLoad = {
+                val cursor = (loader.requests.last() as PagingRequest.Append).nextKey
+                loader.response = PagingResult(timed(if (cursor == "old") 50..59 else 100..109))
+            }
+            repeat(2) { append(session) }
+            assertEquals(listOf("old", "fresh"), appendCursors(loader))
+            assertEquals(((109 downTo 100) + (59 downTo 0)).map(Int::toString), ids(session))
+            assertTrue(database.pagingTimelineDao().keysWithPrefix(segment.key).isEmpty())
+        }
+
+    @Test
+    fun initialAndForwardPagesLeaveRoomForHolesWithoutRewritingHistory() =
+        runTest {
+            val loader = Loader(prepend = true).apply { response = page(0..399) }
+            val session = session(loader, backgroundScope)
+            session.refresh(false, initial = true)
+            loader.response = page(-40..-1)
+            loader.forward = loader.response
+            session.refresh(false)
+            val before = rows(session)
+            val anchor = before[240]
+            savePosition(session, "${session.activeKey}_${anchor.statusId}", anchor.sortId, -16.25)
+            var fullScans = 0
+            onPagingRowsRead = { if (it == session.activeKey) fullScans++ }
+            loader.forward = PagingResult()
+            loader.response = PagingResult(listOf(post(-20), post(998), post(-19), post(199), post(999), post(200)))
+            session.refresh(false)
+            onPagingRowsRead = {}
+            val after = rows(session).associateBy { it._id }
+            assertEquals(0, fullScans)
+            assertTrue(before.all { after[it._id]?.sortId == it.sortId })
+            assertEquals(((-40..-20) + listOf(998) + (-19..199) + listOf(999) + (200..399)).map(Int::toString), ids(session))
+            assertEquals("${session.activeKey}_${anchor.statusId}", snapshot(session).anchorId)
+            assertEquals(-16.25, snapshot(session).offset)
+            assertNull(session.state.value.position)
+        }
+
+    @Test
+    fun denseHoleRebasesOnlyItsNeighboursAndKeepsTheBookmark() =
+        runTest {
+            val loader = Loader().apply { response = page(0..399) }
+            val session = session(loader, backgroundScope)
+            session.refresh(false, initial = true)
+            val dao = database.pagingTimelineDao()
+            val initial = rows(session)
+            dao.insertAll(initial.slice(190..210).mapIndexed { index, row -> row.copy(sortId = initial[190].sortId + index) })
+            val before = rows(session)
+            val anchor = before[200]
+            savePosition(session, "${session.activeKey}_${anchor.statusId}", anchor.sortId, -19.75)
+            var fullScans = 0
+            onPagingRowsRead = { if (it == session.activeKey) fullScans++ }
+            loader.response = PagingResult(listOf(post(199), post(999), post(200)))
+            session.refresh(false)
+            onPagingRowsRead = {}
+            val after = rows(session).associateBy { it._id }
+            assertEquals(0, fullScans)
+            assertTrue(before.count { after[it._id]?.sortId != it.sortId } in 1..64)
+            assertEquals(((0..199) + listOf(999) + (200..399)).map(Int::toString), ids(session))
+            assertEquals("${session.activeKey}_${anchor.statusId}", snapshot(session).anchorId)
+            assertEquals(after.getValue(anchor._id).sortId, snapshot(session).anchorSortId)
+            assertEquals(-19.75, snapshot(session).offset)
+        }
+
+    @Test
+    fun distinctRankedRefreshesRetainOnlyVisibleRowsAndCursorCheckpoints() =
+        runTest {
+            val loader = Loader(timelineOrder = TimelineOrder.Ranked).apply { response = page(0..39, "original") }
+            val session = session(loader, backgroundScope)
+            session.refresh(false, initial = true)
+            repeat(5) { index ->
+                val start = -(index + 1) * 40
+                loader.response = page(start..start + 39, "refresh-$index")
+                session.refresh(false)
+            }
+            assertEquals((-200..39).map(Int::toString), ids(session))
+            assertEquals(5, database.timelineReadingSessionDao().segments(session.record.key).size)
+            assertEquals(6, database.timelineReadingSessionDao().cursors(session.record.key).size)
+            assertEquals(
+                240,
+                database.pagingTimelineDao().keysWithPrefix(session.record.key).sumOf {
+                    database.pagingTimelineDao().getByPagingKey(it).size
+                },
+            )
+        }
+
+    @Test
+    fun legacyRankedSnapshotReclaimsRawCopiesWithoutScanningItsActiveHistory() =
+        runTest {
+            val repository = TimelineReadingRepository(database, backgroundScope)
+            val loader = Loader(timelineOrder = TimelineOrder.Ranked).apply { response = page(0..39, "original") }
+            val first = session(loader, backgroundScope, repository = repository)
+            first.refresh(false, initial = true)
+            loader.response = page(0..39, "fresh")
+            first.refresh(false)
+            val segment = database.timelineReadingSessionDao().segments(first.record.key).single()
+            val original = rows(first)
+            val anchor = "${first.activeKey}_${original[20].statusId}"
+            savePosition(first, anchor, original[20].sortId, -25.5)
+            database.pagingTimelineDao().insertAll(
+                original.map {
+                    it.copy(pagingKey = segment.key, _id = DbPagingTimeline.createId(segment.key, it.statusId))
+                },
+            )
+            database.timelineReadingSessionDao().deleteCursors(first.record.key)
+            first.close()
+            val restored = session(loader, backgroundScope, repository = repository)
+            var fullScans = 0
+            onPagingRowsRead = { if (it == restored.activeKey) fullScans++ }
+            restored.prepare()
+            onPagingRowsRead = {}
+            assertEquals(0, fullScans)
+            assertTrue(database.pagingTimelineDao().getByPagingKey(segment.key).isEmpty())
+            assertEquals(original, rows(restored))
+            assertEquals(
+                anchor,
+                restored.state.value.position
+                    ?.itemKey,
+            )
+            assertEquals(
+                -25.5,
+                restored.state.value.position
+                    ?.offset,
+            )
+            loader.beforeLoad = {
+                loader.response = PagingResult(listOf(post(100 + appendCursors(loader).size)))
+            }
+            repeat(2) { append(restored) }
+            assertEquals(listOf("original", "fresh"), appendCursors(loader))
+            assertEquals(((0..39) + listOf(101, 102)).map(Int::toString), ids(restored))
+        }
+
+    @Test
+    fun consumingNestedStagingCountsAsProgressEvenWhenOuterPageAndCursorsRepeat() = runTest {
+        val loader = Loader(timelineOrder = TimelineOrder.Ranked).apply { response = page(0..39, "old") }
+        val session = session(loader, backgroundScope)
+        session.refresh(false, initial = true)
+        loader.response = page(0..39, "fresh")
+        session.refresh(false)
+        val segment = database.timelineReadingSessionDao().segments(session.record.key).single()
+        val staging = "${segment.key}source/staging"
+        val dao = database.pagingTimelineDao()
+        dao.insertPagingKey(DbPagingKey(staging, "child-next"))
+        dao.insertAll(rows(session).map { it.copy(pagingKey = staging, _id = DbPagingTimeline.createId(staging, it.statusId)) })
+        loader.response = loader.response.copy(saveInTransaction = { dao.delete(staging) })
+        assertNull(session.loadGap(segment.key))
+        assertEquals((0..39).map(Int::toString), ids(session))
+        assertEquals("fresh", dao.getPagingKey(segment.key)?.nextKey)
+        assertNotNull(session.loadGap(segment.key), "Once staging also stops changing, the page really is stalled")
+    }
+
+    private suspend fun append(session: TimelineReadingSession) =
+        session.load(
+            androidx.paging.LoadType.APPEND,
+            PagingState(emptyList(), null, dev.dimension.flare.data.datasource.microblog.offsetPagingConfig, 0),
+        )
+
+    private fun appendCursors(loader: Loader) = loader.requests.filterIsInstance<PagingRequest.Append>().map { it.nextKey }
 
     private suspend fun session(
         loader: RemoteLoader<UiTimelineV2>,

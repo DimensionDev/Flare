@@ -2,15 +2,20 @@ package dev.dimension.flare.data.datasource.microblog.handler
 
 import androidx.paging.LoadState
 import androidx.room3.Room
+import app.cash.molecule.RecompositionMode
+import app.cash.molecule.moleculeFlow
 import dev.dimension.flare.RobolectricTest
 import dev.dimension.flare.common.CacheState
 import dev.dimension.flare.common.Locale
 import dev.dimension.flare.common.OnDeviceAI
 import dev.dimension.flare.common.TestFormatter
+import dev.dimension.flare.common.collectAsState
 import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.createTestFileSystem
 import dev.dimension.flare.createTestRootPath
 import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.database.cache.mapper.toDbUser
+import dev.dimension.flare.data.database.cache.mapper.upsertUser
 import dev.dimension.flare.data.database.cache.model.DbTranslation
 import dev.dimension.flare.data.database.cache.model.DbUser
 import dev.dimension.flare.data.database.cache.model.TranslationEntityType
@@ -43,19 +48,29 @@ import dev.dimension.flare.ui.humanizer.PlatformFormatter
 import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiHandle
 import dev.dimension.flare.ui.model.UiProfile
+import dev.dimension.flare.ui.model.UiState
+import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.render.TranslationDocument
 import dev.dimension.flare.ui.render.TranslationTokenKind
 import dev.dimension.flare.ui.render.toUiPlainText
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
 import okio.FileSystem
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
@@ -63,6 +78,7 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertIs
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -158,6 +174,111 @@ class UserHandlerTest : RobolectricTest() {
         }
 
     @Test
+    fun userByHandleResolvesCanonicalNameAndKeepsObservingUser() =
+        runTest {
+            val expected = createProfile(id = "2100560390937833472", host = "x.com", handle = "NSJunXiu")
+            loader.nextByHandleAndHost = expected
+            val cacheable = handler.userByHandleAndHost(UiHandle("nsjunxiu", "x.com"))
+            val states = Channel<UiState<UiProfile>>(Channel.UNLIMITED)
+            backgroundScope.launch { cacheable.toUi().collect { states.send(it) } }
+
+            val resolved = states.receiveAsFlow().first { it !is UiState.Loading }
+            assertEquals(expected, assertIs<UiState.Success<UiProfile>>(resolved).data)
+            assertEquals(1, loader.byHandleCallCount)
+            assertEquals(0, loader.byIdCallCount)
+
+            val updated = expected.copy(handle = UiHandle("JunRenamed", "x.com"))
+            db.upsertUser(updated.toDbUser())
+
+            val changed = states.receiveAsFlow().first { it !is UiState.Loading && it != resolved }
+            assertEquals(updated, assertIs<UiState.Success<UiProfile>>(changed).data)
+        }
+
+    @Test
+    fun userByHandleCacheSwitchPublishesNoErrorThroughCompose() =
+        runTest {
+            Dispatchers.setMain(StandardTestDispatcher(testScheduler))
+            try {
+                val expected = createProfile(id = "2100560390937833472", host = "x.com", handle = "NSJunXiu")
+                loader.nextByHandleAndHost = expected
+                val cacheable = handler.userByHandleAndHost(UiHandle("nsjunxiu", "x.com"))
+                val resolved =
+                    moleculeFlow(RecompositionMode.Immediate) {
+                        cacheable.collectAsState().toUi()
+                    }.first { it !is UiState.Loading }
+
+                assertEquals(expected, assertIs<UiState.Success<UiProfile>>(resolved).data)
+            } finally {
+                Dispatchers.resetMain()
+            }
+        }
+
+    @Test
+    fun userByHandleRefreshFailureKeepsResolvedUser() =
+        runTest {
+            Dispatchers.setMain(StandardTestDispatcher(testScheduler))
+            val expected = createProfile(id = "2100560390937833472", host = "x.com", handle = "NSJunXiu")
+            loader.nextByHandleAndHost = expected
+            val cacheable = handler.userByHandleAndHost(UiHandle("nsjunxiu", "x.com"))
+            val states = Channel<Pair<LoadState, UiState<UiProfile>>>(Channel.UNLIMITED)
+            val job =
+                launch {
+                    moleculeFlow(RecompositionMode.Immediate) {
+                        val state = cacheable.collectAsState()
+                        state.refreshState to state.toUi()
+                    }.collect { states.send(it) }
+                }
+            try {
+                val resolved = states.receiveAsFlow().first { it.first is LoadState.NotLoading && it.second !is UiState.Loading }
+                assertEquals(expected, assertIs<UiState.Success<UiProfile>>(resolved.second).data)
+
+                loader.loadByHandle = { error("user lookup failed") }
+                cacheable.refresh()
+                val failed = states.receiveAsFlow().first { it.first is LoadState.Error }
+
+                assertEquals(expected, assertIs<UiState.Success<UiProfile>>(failed.second).data)
+                assertEquals(2, loader.byHandleCallCount)
+            } finally {
+                job.cancelAndJoin()
+                Dispatchers.resetMain()
+            }
+        }
+
+    @Test
+    fun userByHandleQueriesResolveIndependently() =
+        runTest {
+            val alice = createProfile(id = "alice-id", host = "test.social", handle = "Alice")
+            val bob = createProfile(id = "bob-id", host = "test.social", handle = "Bob")
+            val aliceResponse = CompletableDeferred<UiProfile>()
+            val bobResponse = CompletableDeferred<UiProfile>()
+            loader.loadByHandle = {
+                when (it.normalizedRaw) {
+                    "alice" -> aliceResponse.await()
+                    "bob" -> bobResponse.await()
+                    else -> error("Unexpected handle: $it")
+                }
+            }
+            val aliceCache = handler.userByHandleAndHost(UiHandle("alice", "test.social"))
+            val bobCache = handler.userByHandleAndHost(UiHandle("bob", "test.social"))
+            val aliceStates = Channel<UiState<UiProfile>>(Channel.UNLIMITED)
+            val bobStates = Channel<UiState<UiProfile>>(Channel.UNLIMITED)
+            backgroundScope.launch { aliceCache.toUi().collect { aliceStates.send(it) } }
+            backgroundScope.launch { bobCache.toUi().collect { bobStates.send(it) } }
+            assertIs<UiState.Loading<UiProfile>>(aliceStates.receive())
+            assertIs<UiState.Loading<UiProfile>>(bobStates.receive())
+
+            bobResponse.complete(bob)
+            val resolvedBob = bobStates.receiveAsFlow().first { it !is UiState.Loading }
+            assertEquals(bob, assertIs<UiState.Success<UiProfile>>(resolvedBob).data)
+            aliceResponse.complete(alice)
+            val resolvedAlice = aliceStates.receiveAsFlow().first { it !is UiState.Loading }
+            assertEquals(alice, assertIs<UiState.Success<UiProfile>>(resolvedAlice).data)
+
+            val cachedBob = bobCache.data.filterIsInstance<CacheState.Success<UiProfile>>().first()
+            assertEquals(bob, cachedBob.data)
+        }
+
+    @Test
     fun userByIdRefreshStoresAndEmitsUser() =
         runTest {
             val expected = createProfile(id = "bob", host = "test.social", handle = "@bob@test.social")
@@ -235,7 +356,7 @@ class UserHandlerTest : RobolectricTest() {
         }
 
     @Test
-    fun userByIdUsesTranslatedDescriptionWhenPreTranslationEnabled() =
+    fun resolvedUsersUseTranslatedDescriptionWhenPreTranslationEnabled() =
         runTest {
             val profile =
                 createProfile(id = "eve", host = "test.social", handle = "@eve@test.social").copy(
@@ -279,6 +400,14 @@ class UserHandlerTest : RobolectricTest() {
                     .data
 
             assertEquals("翻译后的简介", latest.description?.raw)
+
+            loader.nextByHandleAndHost = profile
+            val resolved =
+                handler
+                    .userByHandleAndHost(UiHandle("EVE", "test.social"))
+                    .toUi()
+                    .first { it !is UiState.Loading }
+            assertEquals("翻译后的简介", assertIs<UiState.Success<UiProfile>>(resolved).data.description?.raw)
         }
 
     @Test
@@ -482,6 +611,7 @@ class UserHandlerTest : RobolectricTest() {
 
     private class FakeUserLoader : UserLoader {
         var nextByHandleAndHost: UiProfile? = null
+        var loadByHandle: suspend (UiHandle) -> UiProfile = { requireNotNull(nextByHandleAndHost) }
         var nextById: UiProfile? = null
         var failById: Boolean = false
         var byHandleCallCount: Int = 0
@@ -489,7 +619,7 @@ class UserHandlerTest : RobolectricTest() {
 
         override suspend fun userByHandleAndHost(uiHandle: UiHandle): UiProfile {
             byHandleCallCount++
-            return requireNotNull(nextByHandleAndHost)
+            return loadByHandle(uiHandle)
         }
 
         override suspend fun userById(id: String): UiProfile {

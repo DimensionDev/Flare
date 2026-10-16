@@ -213,8 +213,11 @@ public fun <T : Any> CacheableState<T>.toUi(): UiState<T> =
     } ?: run {
         when (val state = refreshState) {
             is LoadState.Error -> UiState.Error(state.error)
+
             LoadState.Loading -> UiState.Loading()
-            is LoadState.NotLoading -> UiState.Error(IllegalStateException("Data is null"))
+
+            // Fetch completion can precede the first cache emission.
+            is LoadState.NotLoading -> UiState.Loading()
         }
     }
 
@@ -225,8 +228,11 @@ public fun <T : Any> CacheData<T>.toUi(): Flow<UiState<T>> =
         } else {
             when (refresh) {
                 is LoadState.Error -> UiState.Error(refresh.error)
+
                 LoadState.Loading -> UiState.Loading()
-                is LoadState.NotLoading -> UiState.Error(IllegalStateException("Data is null"))
+
+                // Fetch completion can precede the first cache emission.
+                is LoadState.NotLoading -> UiState.Loading()
             }
         }
     }

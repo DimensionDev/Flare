@@ -76,6 +76,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.distinctUntilChangedBy
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
@@ -221,9 +222,11 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
                     ) { filterList, timelineFilterConfig, mxgaEnabled, mxgaSnapshot ->
                         pager
                             .filter { item ->
-                                item.matchesKeywordFilters(filterList) &&
-                                    item.matchesTimelineFilter(timelineFilterConfig) &&
-                                    (!mxgaEnabled || !item.isMxgaMatch(mxgaSnapshot, platformRegistry))
+                                item.isReadingGap || (
+                                    item.matchesKeywordFilters(filterList) &&
+                                        item.matchesTimelineFilter(timelineFilterConfig) &&
+                                        (!mxgaEnabled || !item.isMxgaMatch(mxgaSnapshot, platformRegistry))
+                                )
                             }.map {
                                 transform(it)
                             }
@@ -288,11 +291,23 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
                                         if (it is LoginExpiredException) inAppNotification.onError(Message.LoginExpired, it)
                                     },
                                 )
+                            val filterUpdates =
+                                scope.launch {
+                                    combine(
+                                        filterFlow,
+                                        timelineFilterConfigFlow,
+                                        mxgaEnabledFlow,
+                                        mxgaRepository.snapshot,
+                                    ) { _, _, _, _ -> Unit }
+                                        .drop(1)
+                                        .collect { session.filtersChanged() }
+                                }
                             try {
                                 session.prepare()
                                 readingSession.value = session
                                 emitAll(session.pagingData)
                             } finally {
+                                filterUpdates.cancel()
                                 withContext(NonCancellable) { session.close() }
                             }
                         }

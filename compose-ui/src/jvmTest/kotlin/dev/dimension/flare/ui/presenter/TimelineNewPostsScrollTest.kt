@@ -28,8 +28,11 @@ import dev.dimension.flare.common.isRefreshing
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.common.toPagingState
 import dev.dimension.flare.model.AccountType
+import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.TimelineReadingPosition
 import dev.dimension.flare.ui.model.TimelineReadingState
+import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.render.toUi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -121,9 +124,14 @@ class TimelineNewPostsScrollTest {
     @Test
     fun sessionRestoresWhenHeaderAppearsBeforePostsLoad() = checkSessionRestoration(leadingHeader = false, addHeaderBeforePosts = true)
 
+    @Test
+    fun refreshedPostsAndGapInsertionKeepThePostAndCanBeScrolledToDirectly() =
+        checkSessionRestoration(leadingHeader = true, gapDuringRefresh = true)
+
     private fun checkSessionRestoration(
         leadingHeader: Boolean,
         addHeaderBeforePosts: Boolean = false,
+        gapDuringRefresh: Boolean = false,
     ) {
         var showHeader by mutableStateOf(leadingHeader)
         val pages = MutableStateFlow(if (addHeaderBeforePosts) PagingData.empty() else page(0..9))
@@ -169,17 +177,26 @@ class TimelineNewPostsScrollTest {
             assertEquals(5 + headerCount, scroll.firstVisibleItemIndex)
             assertEquals(24, scroll.firstVisibleItemScrollOffset)
             assertEquals("post-5", reading.itemKey)
-            pages.value = page(-3..9)
+            pages.value = page(-3..9, gapBefore = if (gapDuringRefresh) 0 else null)
         }
-        composeRule.waitUntil(5_000) { (state.listState as? PagingState.Success)?.itemCount == 13 }
+        composeRule.waitUntil(5_000) { (state.listState as? PagingState.Success)?.itemCount == if (gapDuringRefresh) 14 else 13 }
         composeRule.runOnIdle {
-            assertEquals(8 + headerCount, scroll.firstVisibleItemIndex)
+            assertEquals(8 + headerCount + (if (gapDuringRefresh) 1 else 0), scroll.firstVisibleItemIndex)
             assertEquals(24, scroll.firstVisibleItemScrollOffset)
             assertEquals("post-5", reading.itemKey)
-            reading.position = TimelineReadingPosition("post--3", 0.0, 2, latest = true)
+            if (gapDuringRefresh) {
+                scroll.requestScrollToItem(headerCount)
+            } else {
+                reading.position = TimelineReadingPosition("post--3", 0.0, 2, latest = true)
+            }
         }
-        composeRule.waitUntil(5_000) { reading.position == null && scroll.firstVisibleItemIndex == 0 }
-        composeRule.runOnIdle { assertEquals(0, scroll.firstVisibleItemScrollOffset) }
+        composeRule.waitUntil(
+            5_000,
+        ) { reading.position == null && scroll.firstVisibleItemIndex == if (gapDuringRefresh) headerCount else 0 }
+        composeRule.runOnIdle {
+            assertEquals(0, scroll.firstVisibleItemScrollOffset)
+            if (gapDuringRefresh) assertEquals("post--3", reading.itemKey)
+        }
     }
 
     @Test
@@ -316,19 +333,39 @@ class TimelineNewPostsScrollTest {
         override suspend fun showLatest() = Unit
     }
 
-    private fun page(indices: Iterable<Int>): PagingData<UiTimelineV2> =
+    private fun page(
+        indices: Iterable<Int>,
+        gapBefore: Int? = null,
+    ): PagingData<UiTimelineV2> =
         PagingData.from(
             data =
-                indices.map { index ->
-                    UiTimelineV2.Feed(
-                        title = "post-$index",
-                        description = null,
-                        url = "https://example.com/posts/$index",
-                        createdAt = Instant.fromEpochMilliseconds(0).toUi(),
-                        source = UiTimelineV2.Feed.Source(name = "test", icon = null),
-                        accountType = AccountType.Guest,
-                        itemKey = "post-$index",
-                    )
+                indices.flatMap { index ->
+                    val post =
+                        UiTimelineV2.Feed(
+                            title = "post-$index",
+                            description = null,
+                            url = "https://example.com/posts/$index",
+                            createdAt = Instant.fromEpochMilliseconds(0).toUi(),
+                            source = UiTimelineV2.Feed.Source(name = "test", icon = null),
+                            accountType = AccountType.Guest,
+                            itemKey = "post-$index",
+                        )
+                    if (index == gapBefore) {
+                        listOf(
+                            UiTimelineV2.Message(
+                                statusKey = MicroBlogKey("gap", "test"),
+                                icon = UiIcon.Info,
+                                type = UiTimelineV2.Message.Type.Localized(UiTimelineV2.Message.Type.Localized.MessageId.ReadingGap),
+                                createdAt = Instant.fromEpochMilliseconds(0).toUi(),
+                                clickEvent = ClickEvent.Noop,
+                                accountType = AccountType.Guest,
+                                itemKey = "reading-gap:test",
+                            ),
+                            post,
+                        )
+                    } else {
+                        listOf(post)
+                    }
                 },
             sourceLoadStates =
                 LoadStates(

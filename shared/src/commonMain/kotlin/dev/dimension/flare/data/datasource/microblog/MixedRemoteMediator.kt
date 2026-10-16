@@ -42,6 +42,8 @@ internal class MixedRemoteMediator(
 
     override var reportError: ((Throwable) -> Unit)? = null
 
+    internal val ordersByTime: Boolean get() = mergePolicy == TimelineMergePolicy.Time
+
     internal fun forReadingSession(
         key: String,
         isValid: suspend () -> Boolean,
@@ -323,8 +325,7 @@ internal class MixedRemoteMediator(
         )
 
     override suspend fun sortId(data: UiTimelineV2): Long? =
-        // Reading pages keep their arrival order so appends cannot move the reader.
-        if (mergePolicy == TimelineMergePolicy.Time && sessionKey == null) {
+        if (ordersByTime) {
             timeSortId(data)
         } else {
             null

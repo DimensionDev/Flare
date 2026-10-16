@@ -90,7 +90,12 @@ internal class TimelineReadingRepository(
                 val key = previousKey?.takeIf { it !in liveSnapshots } ?: "${record.key}${Uuid.random()}/"
                 val snapshot =
                     if (previous != null) {
-                        if (key != previous.key) copyData(previous.key, key)
+                        if (key != previous.key) {
+                            copyData(previous.key, key)
+                            dao.segments(previous.key).forEach { segment ->
+                                dao.saveSegment(segment.copy(key = key + segment.key.removePrefix(previous.key), snapshotKey = key))
+                            }
+                        }
                         previous.copy(
                             key = key,
                             activeKey = key + previous.activeKey.removePrefix(previous.key),
@@ -146,6 +151,7 @@ internal class TimelineReadingRepository(
         dao.snapshots(sessionKey).forEach { snapshot ->
             if (snapshot.key !in liveSnapshots && dao.get(snapshot.tabId)?.snapshotKey != snapshot.key) {
                 deleteData(snapshot.key)
+                dao.deleteSegments(snapshot.key)
                 dao.deleteSnapshot(snapshot.key)
             }
         }
@@ -186,6 +192,9 @@ internal class TimelineReadingRepository(
 
     private suspend fun deleteSession(session: DbTimelineReadingSession) {
         deleteData(session.key)
+        database.timelineReadingSessionDao().snapshots(session.key).forEach {
+            database.timelineReadingSessionDao().deleteSegments(it.key)
+        }
         database.timelineReadingSessionDao().deleteSnapshots(session.key)
         database.timelineReadingSessionDao().delete(session.tabId)
         liveSnapshots.keys.removeAll { it.startsWith(session.key) }

@@ -11,6 +11,18 @@ public data class TimelineReadingPosition(
 )
 
 @Immutable
+public class TimelineReadingGap internal constructor(
+    public val loading: Boolean,
+    public val failed: Boolean,
+    public val canLoad: Boolean,
+    private val onLoad: () -> Unit,
+) {
+    public fun load() {
+        if (canLoad && !loading) onLoad()
+    }
+}
+
+@Immutable
 public interface TimelineReadingState {
     public val position: TimelineReadingPosition?
     public val hasNewContent: Boolean

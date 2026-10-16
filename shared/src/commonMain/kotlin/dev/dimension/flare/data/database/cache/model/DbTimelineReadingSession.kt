@@ -23,6 +23,16 @@ internal data class DbTimelineReadingSnapshot(
     val offset: Double = 0.0,
     val hasNewContent: Boolean = false,
     val pendingReady: Boolean = false,
+    val newContentBoundaryId: String? = null,
+)
+
+@Entity
+internal data class DbTimelineReadingSegment(
+    @PrimaryKey val key: String,
+    val snapshotKey: String,
+    val boundaryId: String,
+    val boundarySortId: Long,
+    val exhausted: Boolean = false,
 )
 
 @Entity

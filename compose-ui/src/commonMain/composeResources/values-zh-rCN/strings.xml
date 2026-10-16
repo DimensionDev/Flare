@@ -436,4 +436,8 @@
     <string name="fanbox_recommended_creators_title">推荐创作者</string>
 <string name="ugoira_play">播放动图</string>
 <string name="ugoira_loading">正在加载动图</string>
+    <string name="reading_gap">两次刷新之间还有内容 · 加载更多</string>
+    <string name="reading_gap_loading">正在加载两次刷新之间的内容…</string>
+    <string name="reading_gap_failed">这部分内容加载失败 · 重试</string>
+    <string name="reading_batch_boundary">上次刷新</string>
 </resources>

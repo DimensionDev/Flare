@@ -9,17 +9,24 @@ final class MacTimelineReadingScroll {
     var preserveAnchor = false
     private var presentedData: PagingState<UiTimelineV2>?
     private var presentedKeys: [String] = []
+    private var presentedHashes: [Int32] = []
 
     func present(_ data: PagingState<UiTimelineV2>, interacting: Bool) -> PagingState<UiTimelineV2> {
         if interacting, let presentedData { return presentedData }
         let keys: [String]
+        let hashes: [Int32]
         if case .success(let success) = onEnum(of: data) {
-            keys = (0..<Int(success.itemCount)).compactMap { success.peek(index: Int32($0))?.itemKey }
+            let items = (0..<Int(success.itemCount)).compactMap { success.peek(index: Int32($0)) }
+            keys = items.compactMap(\.itemKey)
+            hashes = items.map(\.renderHash)
         } else {
             keys = []
+            hashes = []
         }
-        if keys != presentedKeys { preserveAnchor = true }
+        // Gap loading and retry labels can change height without changing their item keys.
+        if keys != presentedKeys || hashes != presentedHashes { preserveAnchor = true }
         presentedKeys = keys
+        presentedHashes = hashes
         presentedData = data
         return data
     }

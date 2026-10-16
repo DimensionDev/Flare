@@ -70,7 +70,7 @@ internal fun rememberTimelineWithLazyListState(
         remember(baseState.listState) {
             (baseState.listState as? PagingState.Success)
                 ?.let { data ->
-                    (0 until data.itemCount).mapNotNull { data.peek(it)?.stableItemKey }.toSet()
+                    (0 until data.itemCount).mapNotNull { data.peek(it)?.takeUnless { it.isReadingGap }?.stableItemKey }.toSet()
                 }.orEmpty()
         },
     )

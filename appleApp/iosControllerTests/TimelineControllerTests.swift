@@ -312,6 +312,32 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         }
     }
 
+    func testManualRefreshWithGapKeepsFractionalPositionAndNewPostsRemainScrollable() async throws {
+        let fixture = await Fixture(posts: true)
+        let reading = ReadingState()
+        reading.position = TimelineReadingPosition(itemKey: "case-20", offset: -37.25, requestId: 1, latest: false)
+        fixture.controller.readingState = reading
+        await fixture.settle()
+        let original = fixture.input.items
+        let gap = UiTimelineV2.Message(user: nil, statusKey: MicroBlogKey(id: "gap", host: "test"), icon: .info,
+            type: UiTimelineV2.MessageTypeLocalized(data: .readingGap, args: []),
+            createdAt: KotlinInstant.companion.fromEpochMilliseconds(epochMilliseconds: 0).toUi(),
+            clickEvent: ClickEventNoop.shared, accountType: AccountType.Guest.shared,
+            itemKey: "reading-gap:test", readingGap: nil)
+        fixture.input.isRefreshing = true
+        await fixture.apply()
+        fixture.input.items = (100..<110).map { .post(makeRow($0)) } + [.post(gap)] + original
+        fixture.input.isRefreshing = false
+        await fixture.apply()
+        try fixture.assertPosition(("t:case-20", -37.25))
+        XCTAssertEqual(reading.itemKey, "case-20")
+        XCTAssertEqual(reading.offset, -37.25, accuracy: 0.5)
+        XCTAssertNil(reading.position)
+        await fixture.scroll(0)
+        XCTAssertEqual(reading.itemKey, "case-100")
+        XCTAssertTrue(fixture.collection.readingItemIDs?().contains("t:case-20") == true)
+    }
+
     func testPrependingPostsAtTopStillPreservesTheReadingItem() async throws {
         let fixture = await Fixture(posts: true)
         let position = try fixture.position()

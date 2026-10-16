@@ -46,6 +46,19 @@ struct TimelineReadingScrollCheck {
         assertY(937.25)
         precondition(abs(state.offset + 37.25) < 0.01)
 
+        // A gap label above the viewport changes height while its source is loading.
+        bridge.preserveAnchor = true
+        bridge.update(frames: ["post": frame(-13.25)], firstItemKey: "new-head", state: state)
+        assertY(961.25)
+        precondition(state.itemKey == "post" && abs(state.offset + 37.25) < 0.01)
+        precondition(state.position == nil)
+        scroll.contentView.scroll(to: CGPoint(x: 0, y: 0))
+        bridge.update(frames: ["new-head": frame(0), "post": frame(924)], firstItemKey: "new-head", state: state)
+        assertY(0)
+        precondition(state.itemKey == "new-head" && state.position == nil)
+
+        scroll.contentView.scroll(to: CGPoint(x: 0, y: 937.25))
+        bridge.update(frames: ["post": frame(-37.25)], firstItemKey: "new-head", state: state)
         bridge.isInteracting = true
         bridge.preserveAnchor = true
         bridge.update(frames: ["post": frame(62.75)], firstItemKey: "old-head", state: state)
@@ -59,6 +72,6 @@ struct TimelineReadingScrollCheck {
         precondition(state.position?.requestId == 2)
         bridge.update(frames: ["post": frame(62.75)], firstItemKey: "post", state: state)
         assertY(0)
-        print("PASS: exact offset, insertion preservation, active-scroll protection, latest waits for published head")
+        print("PASS: exact offset, insertion and gap-height preservation, direct scroll to new posts, active-scroll protection, latest waits for published head")
     }
 }

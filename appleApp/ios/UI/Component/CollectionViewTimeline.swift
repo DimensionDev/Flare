@@ -173,7 +173,9 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         guard let readingState, isViewLoaded else { return }
         var key: String?
         var offset: CGFloat = 0
-        if case let .item(id, distance, _) = collectionView.captureReadingPosition(matchingItem: { $0.hasPrefix(Self.timelinePrefix) }) {
+        if case let .item(id, distance, _) = collectionView.captureReadingPosition(matchingItem: {
+            $0.hasPrefix(Self.timelinePrefix) && !$0.hasPrefix("t:reading-gap:")
+        }) {
             key = String(id.dropFirst(2))
             offset = distance
         }

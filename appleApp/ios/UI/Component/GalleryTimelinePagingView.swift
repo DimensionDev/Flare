@@ -504,7 +504,7 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
         return collectionView.indexPathsForVisibleItems
             .compactMap { indexPath -> (itemID: String, frame: CGRect)? in
                 guard let itemID = dataSource.itemIdentifier(for: indexPath),
-                      isGalleryDataItemID(itemID) else {
+                      isGalleryDataItemID(itemID), !itemID.hasPrefix(Self.itemPrefix + "reading-gap:") else {
                     return nil
                 }
                 let frame = collectionView.layoutAttributesForItem(at: indexPath)?.frame

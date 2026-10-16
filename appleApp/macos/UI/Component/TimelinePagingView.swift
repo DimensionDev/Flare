@@ -90,7 +90,10 @@ struct TimelinePagingView: View {
 
     private var readingItemKeys: [String] {
         guard readingState != nil, case .success(let success) = onEnum(of: data) else { return [] }
-        return (0..<Int(success.itemCount)).compactMap { success.peek(index: Int32($0))?.itemKey }
+        return (0..<Int(success.itemCount)).compactMap { index in
+            guard let item = success.peek(index: Int32(index)), !item.isReadingGap else { return nil }
+            return item.itemKey
+        }
     }
 
     private func restorePosition(using proxy: ScrollViewProxy) {
@@ -275,7 +278,7 @@ private struct MacTimelineMasonryView: View {
                             detailStatusKey: detailStatusKey,
                             onDisplay: onDisplay
                         )
-                        .timelineReadingAnchor(row.item?.itemKey)
+                        .timelineReadingAnchor(row.item?.isReadingGap == true ? nil : row.item?.itemKey)
                     }
                 }
                 .frame(maxWidth: .infinity)
@@ -402,7 +405,7 @@ private struct MacGalleryTimelineMasonryView: View {
                 LazyVStack(spacing: spacing) {
                     ForEach(column.rows) { row in
                         TimelineGalleryItemView(item: row.item, placeholderVariant: row.index)
-                            .timelineReadingAnchor(row.item?.itemKey)
+                            .timelineReadingAnchor(row.item?.isReadingGap == true ? nil : row.item?.itemKey)
                             .onAppear {
                                 onDisplay(row.index)
                             }

@@ -4,12 +4,25 @@ import androidx.room3.Dao
 import androidx.room3.Query
 import androidx.room3.Upsert
 import dev.dimension.flare.data.database.cache.model.DbHomeTimelineSelection
+import dev.dimension.flare.data.database.cache.model.DbTimelineReadingSegment
 import dev.dimension.flare.data.database.cache.model.DbTimelineReadingSession
 import dev.dimension.flare.data.database.cache.model.DbTimelineReadingSnapshot
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 internal interface TimelineReadingSessionDao {
+    @Query("SELECT * FROM DbTimelineReadingSegment WHERE snapshotKey = :snapshotKey ORDER BY boundarySortId")
+    suspend fun segments(snapshotKey: String): List<DbTimelineReadingSegment>
+
+    @Upsert
+    suspend fun saveSegment(segment: DbTimelineReadingSegment)
+
+    @Query("DELETE FROM DbTimelineReadingSegment WHERE `key` = :key")
+    suspend fun deleteSegment(key: String)
+
+    @Query("DELETE FROM DbTimelineReadingSegment WHERE snapshotKey = :snapshotKey")
+    suspend fun deleteSegments(snapshotKey: String)
+
     @Query("SELECT * FROM DbTimelineReadingSnapshot WHERE `key` = :key")
     suspend fun snapshot(key: String): DbTimelineReadingSnapshot?
 

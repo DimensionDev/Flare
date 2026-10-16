@@ -32,6 +32,18 @@ public sealed class UiTimelineV2 {
     public abstract val stableItemKey: String
     public abstract val renderHash: Int
 
+    public val isReadingGap: Boolean
+        get() =
+            when (((this as? Message)?.type as? Message.Type.Localized)?.data) {
+                Message.Type.Localized.MessageId.ReadingGap,
+                Message.Type.Localized.MessageId.ReadingGapLoading,
+                Message.Type.Localized.MessageId.ReadingGapFailed,
+                Message.Type.Localized.MessageId.ReadingBatchBoundary,
+                -> true
+
+                else -> false
+            }
+
     @Transient
     public val itemType: String =
         when (this) {
@@ -76,12 +88,14 @@ public sealed class UiTimelineV2 {
         override val accountType: AccountType,
         @Transient
         override val itemKey: String? = null,
+        @Transient
+        val readingGap: TimelineReadingGap? = null,
     ) : UiTimelineV2() {
         @Transient
         override val stableItemKey: String = calculateStableItemKey()
         override val searchText: String? = null
         val onClicked: ClickContext.() -> Unit by lazy {
-            clickEvent.onClicked
+            readingGap?.let { gap -> { gap.load() } } ?: clickEvent.onClicked
         }
         override val renderHash: Int by lazy {
             renderHashBuilder()
@@ -92,6 +106,9 @@ public sealed class UiTimelineV2 {
                 .add(type.renderSummaryHash())
                 .add(createdAt.value.toEpochMilliseconds())
                 .add(clickEvent)
+                .add(readingGap?.loading)
+                .add(readingGap?.failed)
+                .add(readingGap?.canLoad)
                 .add(accountType)
                 .build()
         }
@@ -145,6 +162,10 @@ public sealed class UiTimelineV2 {
                     StarterpackJoined,
                     Pinned,
                     Like,
+                    ReadingGap,
+                    ReadingGapLoading,
+                    ReadingGapFailed,
+                    ReadingBatchBoundary,
                 }
             }
         }

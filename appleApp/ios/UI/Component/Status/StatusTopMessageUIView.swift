@@ -89,6 +89,11 @@ final class StatusTopMessageUIView: UIView, ManualLayoutMeasurable, TimelineHeig
             .compactMap { $0?.trimmingCharacters(in: .whitespacesAndNewlines) }
             .filter { !$0.isEmpty }
             .joined(separator: ", ")
+        if let gap = message.readingGap {
+            accessibilityTraits = gap.canLoad ? (gap.loading ? [.button, .notEnabled] : .button) : .staticText
+        } else {
+            accessibilityTraits = []
+        }
         invalidateIntrinsicContentSize()
         setNeedsLayout()
     }
@@ -233,6 +238,13 @@ final class StatusTopMessageUIView: UIView, ManualLayoutMeasurable, TimelineHeig
             self?.onOpenURL?(url)
             return .handled
         })))
+    }
+
+    override func accessibilityActivate() -> Bool {
+        guard let topMessage else { return false }
+        if let gap = topMessage.readingGap, !gap.canLoad || gap.loading { return false }
+        onTapped()
+        return true
     }
 }
 

@@ -208,6 +208,10 @@ import dev.dimension.flare.compose.ui.misskey_notification_item_scheduled_note_p
 import dev.dimension.flare.compose.ui.misskey_notification_item_test
 import dev.dimension.flare.compose.ui.notification_item_accept_follow_request
 import dev.dimension.flare.compose.ui.notification_item_reject_follow_request
+import dev.dimension.flare.compose.ui.reading_batch_boundary
+import dev.dimension.flare.compose.ui.reading_gap
+import dev.dimension.flare.compose.ui.reading_gap_failed
+import dev.dimension.flare.compose.ui.reading_gap_loading
 import dev.dimension.flare.compose.ui.vvo_notification_like
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.model.PostActionStyle
@@ -719,6 +723,22 @@ private fun TopMessageComponent(
                         stringResource(resource = Res.string.mastodon_item_pinned)
                     }
 
+                    UiTimelineV2.Message.Type.Localized.MessageId.ReadingGap -> {
+                        stringResource(Res.string.reading_gap)
+                    }
+
+                    UiTimelineV2.Message.Type.Localized.MessageId.ReadingGapLoading -> {
+                        stringResource(Res.string.reading_gap_loading)
+                    }
+
+                    UiTimelineV2.Message.Type.Localized.MessageId.ReadingGapFailed -> {
+                        stringResource(Res.string.reading_gap_failed)
+                    }
+
+                    UiTimelineV2.Message.Type.Localized.MessageId.ReadingBatchBoundary -> {
+                        stringResource(Res.string.reading_batch_boundary)
+                    }
+
                     UiTimelineV2.Message.Type.Localized.MessageId.Like -> {
                         stringResource(resource = Res.string.vvo_notification_like)
                     }
@@ -745,14 +765,23 @@ private fun TopMessageComponent(
                 },
             modifier =
                 Modifier
-                    .clickable {
-                        data.onClicked.invoke(
-                            ClickContext(
-                                launcher = {
-                                    uriHandler.openUri(it)
-                                },
-                            ),
-                        )
+                    .let { target ->
+                        if (data.isReadingGap && data.readingGap?.canLoad != true) {
+                            target
+                        } else {
+                            target.clickable(
+                                enabled = data.readingGap?.loading != true,
+                                role = if (data.isReadingGap) androidx.compose.ui.semantics.Role.Button else null,
+                            ) {
+                                data.onClicked.invoke(
+                                    ClickContext(
+                                        launcher = {
+                                            uriHandler.openUri(it)
+                                        },
+                                    ),
+                                )
+                            }
+                        }
                     }.let {
                         if (!appearance.fullWidthPost && !topMessageOnly) {
                             it.padding(

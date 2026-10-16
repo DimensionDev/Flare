@@ -37,7 +37,9 @@ import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.flow.updateAndGet
@@ -83,6 +85,9 @@ internal class TimelineReadingSession(
         private set
     private var pendingKey = record.pendingKey
     val state = MutableStateFlow(ReadingSessionState(hasNewContent = record.hasNewContent))
+
+    // Keep the atomic generation guard internal; gestures alone do not change the UI.
+    val presentation = state.map { it.copy(interactionGeneration = 0) }.distinctUntilChanged()
     private val viewport = MutableStateFlow(ReadingViewport(null, 0.0, atTop = false, interacting = false))
     private val mutex = Mutex()
     private val closed = MutableStateFlow(false)
@@ -381,8 +386,8 @@ internal class TimelineReadingSession(
         if (closed.value) return
         if (value.itemKey?.startsWith("reading-gap:") == true) return
         val wasInteracting = viewport.value.interacting
-        if (value.interacting && !wasInteracting) state.update { it.copy(interactionGeneration = it.interactionGeneration + 1) }
         viewport.value = value
+        if (value.interacting && (!wasInteracting || state.value.position != null)) cancelRestoration()
         requestBoundaryCheck()
         if (value.interacting && !wasInteracting) launchIo { repository.selectTab(record.tabId) }
         checkpoint?.cancel()
@@ -566,14 +571,14 @@ internal class TimelineReadingSession(
         }
 
     private suspend fun showLatestLocked(generation: Long) {
-        if (!valid() || state.value.interactionGeneration != generation || !state.value.hasNewContent) return
+        if (!valid() || state.value.interactionGeneration != generation || !state.value.hasNewContent || viewport.value.interacting) return
         val first = visibleRow(activeKey, 0)?.timeline
         val latest = repository.current(record) ?: return
         val boundary = latest.newContentBoundaryId?.let { database.pagingTimelineDao().readingItem(activeKey, "${activeKey}_$it") }
         val hasNew = first != null && (boundary == null || first.sortId < boundary.sortId)
         if (state.value.interactionGeneration != generation || !valid()) return
         if (hasNew && state.value.interactionGeneration == generation) {
-            requestPosition("${activeKey}_${first.statusId}", 0.0, latest = true, generation = generation)
+            if (requestPosition("${activeKey}_${first.statusId}", 0.0, latest = true, generation = generation) == null) return
         }
         dismissReadNotice(force = true)
     }
@@ -1161,7 +1166,7 @@ internal class TimelineReadingSession(
             )
         return state
             .updateAndGet {
-                if (it.interactionGeneration == generation) it.copy(position = position) else it
+                if (it.interactionGeneration == generation && !viewport.value.interacting) it.copy(position = position) else it
             }.position
             ?.takeIf { it == position }
     }

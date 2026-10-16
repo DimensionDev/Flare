@@ -155,7 +155,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
               isSnapshotReadyForReadingPosition, !currentPagingIsInitialLoading,
               !collectionView.isScrollInteractionActive,
               let indexPath = dataSource.indexPath(for: "t:" + position.itemKey),
-              !position.latest || indexPath.item == 0 else { return }
+              position.canRestore(index: Int32(indexPath.item), refreshing: currentPagingIsRefreshing) else { return }
         restoringSessionRequest = position.requestId
         pendingReloadPosition = nil
         collectionView.restoreReadingPosition(position.latest ? .top : .item(

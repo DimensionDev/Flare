@@ -8,7 +8,12 @@ public data class TimelineReadingPosition(
     public val offset: Double,
     public val requestId: Long,
     public val latest: Boolean = false,
-)
+) {
+    public fun canRestore(
+        index: Int,
+        refreshing: Boolean,
+    ): Boolean = index >= 0 && !refreshing && (!latest || index == 0) && !itemKey.startsWith("reading-gap:")
+}
 
 @Immutable
 public class TimelineReadingGap internal constructor(

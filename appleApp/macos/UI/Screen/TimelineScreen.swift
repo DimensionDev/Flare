@@ -35,6 +35,7 @@ struct TimelineScreen: View {
             detailStatusKey: nil,
             key: presenter.key,
             readingState: presenter.state.readingState,
+            snapshot: presenter.state.snapshot,
             allowGalleryMode: allowGalleryMode
         )
         .onAppear { presenter.state.onHomeEntered() }

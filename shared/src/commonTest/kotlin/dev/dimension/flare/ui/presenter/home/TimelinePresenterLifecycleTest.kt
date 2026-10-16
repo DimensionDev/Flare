@@ -65,11 +65,62 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.test.assertSame
 import kotlin.test.assertTrue
 import kotlin.time.Instant
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class TimelinePresenterLifecycleTest : RobolectricTest() {
+    @Test
+    fun scrollingAndRepeatedCancellationDoNotRepublishUnchangedPresentation() =
+        runPresenterTest { _, _, sourceKey ->
+            val loader = Loader()
+            val presenter = TimelinePresenter("home", flowOf(loader), isHomeTimeline = true, readingSourceKey = sourceKey)
+            val states = MutableStateFlow<TimelineState?>(null)
+            launch {
+                moleculeFlow(RecompositionMode.Immediate) { presenter.body() }.collect { states.value = it }
+            }
+            withContext(Dispatchers.Default) {
+                withTimeout(5_000) {
+                    states.filterNotNull().first {
+                        it.listState is PagingState.Success && it.readingState?.isRefreshing == false &&
+                            it.readingState?.position == null
+                    }
+                }
+                kotlinx.coroutines.delay(250)
+            }
+            val stable = assertNotNull(states.value)
+            val reading = assertNotNull(stable.readingState)
+            val key = (stable.listState as PagingState.Success).peek(0)!!.stableItemKey
+            val requests = loader.requests.value
+            repeat(100) { offset ->
+                reading.cancelRestoration()
+                reading.updateViewport(key, -offset.toDouble(), atTop = false, interacting = true)
+                kotlinx.coroutines.yield()
+            }
+            withContext(Dispatchers.Default) { kotlinx.coroutines.delay(100) }
+            assertSame(stable, states.value)
+            assertEquals(requests, loader.requests.value)
+            val started = kotlinx.coroutines.CompletableDeferred<Unit>()
+            val finish = kotlinx.coroutines.CompletableDeferred<Unit>()
+            loader.beforeLoad = {
+                started.complete(Unit)
+                finish.await()
+            }
+            val refresh = launch { stable.refresh() }
+            started.await()
+            try {
+                val refreshing =
+                    withContext(Dispatchers.Default) {
+                        withTimeout(5_000) { states.filterNotNull().first { it.readingState?.isRefreshing == true } }
+                    }
+                assertSame(stable.snapshot, refreshing.snapshot, "Refresh flags must not recreate the item index")
+            } finally {
+                finish.complete(Unit)
+            }
+            refresh.join()
+        }
+
     @Test
     fun readingObserversEndWhenTheModeOrPagerCollectionChanges() =
         runPresenterTest { database, repository, sourceKey ->

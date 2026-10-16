@@ -11,6 +11,7 @@ struct TimelinePagingView: View {
     @Environment(\.timelineAppearance.timelineDisplayMode) private var timelineDisplayMode
 
     let readingState: TimelineReadingState?
+    let snapshot: TimelineSnapshot?
     @State private var readingScroll = MacTimelineReadingScroll()
     @State private var isReadingScrollActive = false
     let data: PagingState<UiTimelineV2>
@@ -25,11 +26,13 @@ struct TimelinePagingView: View {
         detailStatusKey: MicroBlogKey?,
         key: String,
         readingState: TimelineReadingState? = nil,
+        snapshot: TimelineSnapshot? = nil,
         topContentInset: CGFloat = 0,
         allowGalleryMode: Bool = false,
         suppressInitialRefreshIndicator: Bool = false
     ) {
         self.readingState = readingState
+        self.snapshot = snapshot
         self.data = data
         self.detailStatusKey = detailStatusKey
         self.key = key
@@ -40,7 +43,8 @@ struct TimelinePagingView: View {
 
     var body: some View {
         GeometryReader { proxy in
-            let presentedData = readingState == nil ? data : readingScroll.present(data, interacting: isReadingScrollActive)
+            let presentedData = readingState == nil ? data : readingScroll.present(data, snapshot: snapshot, interacting: isReadingScrollActive)
+            let presentedSnapshot = readingScroll.presentedSnapshot
 //            let columnCount = resolvedColumnCount(width: proxy.size.width)
             ScrollViewReader { scrollProxy in
                 ScrollView {
@@ -53,13 +57,16 @@ struct TimelinePagingView: View {
                     readingScroll.scrollView = scrollView
                 }
                 .onPreferenceChange(TimelineReadingFrames.self) { frames in
-                    readingScroll.update(frames: frames, firstItemKey: readingItemKeys.first, state: readingState)
+                    updateReadingFrames(frames, snapshot: presentedSnapshot, refreshing: presentedData.isRefreshing_)
                 }
                 .onChange(of: readingState?.position?.requestId, initial: true) { _, _ in
-                    restorePosition(using: scrollProxy)
+                    restorePosition(using: scrollProxy, snapshot: presentedSnapshot, refreshing: presentedData.isRefreshing_)
                 }
-                .onChange(of: readingItemKeys) { _, _ in
-                    restorePosition(using: scrollProxy)
+                .onChange(of: presentedSnapshot.map(ObjectIdentifier.init)) { _, _ in
+                    restorePosition(using: scrollProxy, snapshot: presentedSnapshot, refreshing: presentedData.isRefreshing_)
+                }
+                .onChange(of: presentedData.isRefreshing_) { _, _ in
+                    restorePosition(using: scrollProxy, snapshot: presentedSnapshot, refreshing: presentedData.isRefreshing_)
                 }
                 .onReceive(NotificationCenter.default.publisher(for: NSScrollView.willStartLiveScrollNotification)) { event in
                     guard event.object as? NSScrollView === readingScroll.scrollView else { return }
@@ -88,22 +95,19 @@ struct TimelinePagingView: View {
         }
     }
 
-    private var readingItemKeys: [String] {
-        guard readingState != nil, case .success(let success) = onEnum(of: data) else { return [] }
-        return (0..<Int(success.itemCount)).compactMap { index in
-            guard let item = success.peek(index: Int32(index)), !item.isReadingGap else { return nil }
-            return item.itemKey
-        }
+    private func updateReadingFrames(_ frames: [String: CGRect], snapshot: TimelineSnapshot?, refreshing: Bool) {
+        let index = readingState?.position.map { snapshot?.restorationIndex(position: $0, refreshing: refreshing) ?? -1 } ?? -1
+        readingScroll.update(frames: frames, restorationIndex: index, state: readingState)
     }
 
-    private func restorePosition(using proxy: ScrollViewProxy) {
-        guard let position = readingState?.position, readingItemKeys.contains(position.itemKey),
-              !position.latest || readingItemKeys.first == position.itemKey else { return }
+    private func restorePosition(using proxy: ScrollViewProxy, snapshot: TimelineSnapshot?, refreshing: Bool) {
+        guard let position = readingState?.position, let snapshot,
+              snapshot.restorationIndex(position: position, refreshing: refreshing) >= 0 else { return }
         // Materialize the local window's anchor before applying its precise pixel offset.
         if readingScroll.frames[position.itemKey] == nil {
             proxy.scrollTo(position.itemKey, anchor: .top)
         }
-        readingScroll.update(frames: readingScroll.frames, firstItemKey: readingItemKeys.first, state: readingState)
+        updateReadingFrames(readingScroll.frames, snapshot: snapshot, refreshing: refreshing)
     }
 
     @ViewBuilder

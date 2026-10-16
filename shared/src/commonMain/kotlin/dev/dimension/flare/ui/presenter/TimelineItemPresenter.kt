@@ -8,6 +8,7 @@ import dev.dimension.flare.data.model.tab.TimelinePresenterFactory
 import dev.dimension.flare.data.model.tab.TimelineResolver
 import dev.dimension.flare.data.model.tab.UiTimelineTabItem
 import dev.dimension.flare.di.koinInject
+import dev.dimension.flare.ui.model.TimelineSnapshot
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.web.shared.WebPresenter
 import kotlinx.coroutines.launch
@@ -20,6 +21,7 @@ public class TimelineItemPresenter(
 
     public interface State {
         public val listState: PagingState<UiTimelineV2>
+        public val snapshot: TimelineSnapshot? get() = null
 
         public fun refreshSync()
 
@@ -51,6 +53,7 @@ public class TimelineItemPresenter(
         val scope = rememberCoroutineScope()
         return object : State {
             override val listState = state.listState
+            override val snapshot = state.snapshot
             override val isRefreshing = listState.isRefreshing || state.readingState?.isRefreshing == true
             override val readingState = state.readingState
 

@@ -61,6 +61,7 @@ import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.model.PlatformRegistry
 import dev.dimension.flare.model.ReferenceType
 import dev.dimension.flare.ui.model.TimelineReadingState
+import dev.dimension.flare.ui.model.TimelineSnapshot
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.asTimelinePostItem
@@ -390,14 +391,15 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
                 }
             }
         val listState = items.toPagingState(contextLoadStates, retry)
+        val snapshot = remember((listState as? PagingState.Success)?.snapshotIdentity) { TimelineSnapshot(listState) }
         val session by readingSession.collectAsState()
         val reading by remember {
-            readingSession.flatMapLatest { it?.state ?: flowOf(ReadingSessionState()) }
+            readingSession.flatMapLatest { it?.presentation ?: flowOf(ReadingSessionState()) }
         }.collectAsState(ReadingSessionState())
         LaunchedEffect(reading.position?.requestId, items.itemSnapshotList, reading.refreshing, items.loadState.source.refresh) {
             val position = reading.position ?: return@LaunchedEffect
             if (!reading.refreshing && items.loadState.source.refresh is androidx.paging.LoadState.NotLoading &&
-                items.itemSnapshotList.items.none { it.stableItemKey == position.itemKey }
+                snapshot.readingIndexOf(position.itemKey) < 0
             ) {
                 withContext(PlatformDispatchers.IO) { session?.resolveMissingPosition() }
             }
@@ -431,6 +433,7 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
             }
         return object : TimelineState {
             override val listState = listState
+            override val snapshot = snapshot
             override val readingState = readingState
 
             override fun onHomeEntered() {
@@ -475,6 +478,7 @@ public interface TimelineState {
     public fun onHomeEntered() {}
 
     public val listState: PagingState<UiTimelineV2>
+    public val snapshot: TimelineSnapshot? get() = null
     public val readingState: TimelineReadingState? get() = null
 
     public fun refreshAsync()

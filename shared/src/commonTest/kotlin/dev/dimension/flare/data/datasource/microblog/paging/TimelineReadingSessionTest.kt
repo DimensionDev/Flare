@@ -1270,6 +1270,45 @@ class TimelineReadingSessionTest : RobolectricTest() {
     fun completedGestureDuringTimerFetchDoesNotFollowLatest() = completedGestureDuringRefresh(waitForPrepend = false)
 
     @Test
+    fun viewportInteractionCancelsRestorationAndKeepsTheFinalOffset() =
+        runTest {
+            val loader = Loader()
+            val session = session(loader, backgroundScope)
+            session.refresh(false, initial = true)
+            loader.response = page(10..20)
+            session.refresh(false)
+            session.showLatest()
+            val position = assertNotNull(session.state.value.position)
+            repeat(100) {
+                session.updateViewport(ReadingViewport(position.itemKey, -it - 0.25, false, true))
+            }
+            assertNull(session.state.value.position)
+            session.positionRestored(position.requestId)
+            session.updateViewport(ReadingViewport(position.itemKey, -99.25, false, false))
+            session.close()
+            assertEquals(position.itemKey, snapshot(session).anchorId)
+            assertEquals(-99.25, snapshot(session).offset)
+        }
+
+    @Test
+    fun viewLatestDoesNotPublishARestorationDuringAnActiveGesture() =
+        runTest {
+            val loader = Loader()
+            val session = session(loader, backgroundScope)
+            session.refresh(false, initial = true)
+            val anchor = rows(session)[5]._id
+            session.updateViewport(ReadingViewport(anchor, -37.25, false, true))
+            loader.response = page(10..20)
+            session.refresh(false)
+            session.showLatest()
+            assertNull(session.state.value.position)
+            assertTrue(session.state.value.hasNewContent)
+            session.updateViewport(ReadingViewport(anchor, -37.25, false, false))
+            session.showLatest()
+            assertTrue(assertNotNull(session.state.value.position).latest)
+        }
+
+    @Test
     fun completedGestureDuringContinuityCheckDoesNotFollowLatest() = completedGestureDuringRefresh(waitForPrepend = true)
 
     private fun completedGestureDuringRefresh(waitForPrepend: Boolean) =

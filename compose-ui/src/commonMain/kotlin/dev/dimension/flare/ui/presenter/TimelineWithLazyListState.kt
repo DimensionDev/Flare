@@ -19,6 +19,7 @@ import androidx.compose.ui.platform.LocalDensity
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.data.model.tab.UiTimelineTabItem
+import dev.dimension.flare.ui.model.TimelineSnapshot
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.first
 import moe.tlaster.precompose.molecule.producePresenter
@@ -61,18 +62,13 @@ internal fun rememberTimelineWithLazyListState(
     lazyListState: LazyStaggeredGridState,
     leadingItemCount: Int = 0,
 ): TimelineWithLazyListState {
-    var newPostCount by remember { mutableIntStateOf(0) }
+    var newPostCount by remember(baseState.readingState != null) { mutableIntStateOf(0) }
     var restoringPosition by remember(lazyListState) { mutableStateOf(false) }
     val reading by rememberUpdatedState(baseState.readingState)
     val paging by rememberUpdatedState(baseState.listState)
     val density = if (baseState.readingState != null) LocalDensity.current.density else 1f
-    val loadedKeys by rememberUpdatedState(
-        remember(baseState.listState) {
-            (baseState.listState as? PagingState.Success)
-                ?.let { data ->
-                    (0 until data.itemCount).mapNotNull { data.peek(it)?.takeUnless { it.isReadingGap }?.stableItemKey }.toSet()
-                }.orEmpty()
-        },
+    val snapshot by rememberUpdatedState(
+        baseState.snapshot ?: remember(baseState.listState) { TimelineSnapshot(baseState.listState) },
     )
     DisposableEffect(lazyListState) {
         onDispose { reading?.savePosition() }
@@ -89,7 +85,8 @@ internal fun rememberTimelineWithLazyListState(
             val visible =
                 layout.visibleItemsInfo
                     .filter {
-                        it.key in loadedKeys && it.offset.y + it.size.height > layout.viewportStartOffset
+                        (it.key as? String)?.let { key -> snapshot.readingIndexOf(key) >= 0 } == true &&
+                            it.offset.y + it.size.height > layout.viewportStartOffset
                     }.minWithOrNull(compareBy({ it.offset.y }, { it.offset.x }))
             TimelineViewport(
                 visible?.key as? String,
@@ -98,7 +95,6 @@ internal fun rememberTimelineWithLazyListState(
                 lazyListState.isScrollInProgress && !restoringPosition,
             )
         }.collect { viewport ->
-            if (viewport.interacting) reading?.cancelRestoration()
             reading?.updateViewport(viewport.key, viewport.offset, viewport.atTop, viewport.interacting)
         }
     }
@@ -108,9 +104,9 @@ internal fun rememberTimelineWithLazyListState(
         val (_, target) =
             snapshotFlow {
                 val data = paging as? PagingState.Success
-                val index = data?.let { (0 until it.itemCount).firstOrNull { index -> it.peek(index)?.stableItemKey == position.itemKey } }
+                val index = snapshot.restorationIndex(position, refreshing = data?.isRefreshing != false)
                 // An overlapping old snapshot may already contain the requested new head.
-                if (data != null && index != null && !data.isRefreshing && (!position.latest || index == 0)) data to index else null
+                if (data != null && index >= 0) data to index else null
             }.first { it != null }!!
         restoringPosition = true
         try {
@@ -129,47 +125,47 @@ internal fun rememberTimelineWithLazyListState(
                 lazyListState.firstVisibleItemScrollOffset == 0
         }
     }
-    baseState.listState.onSuccess {
-        val currentPagingState by rememberUpdatedState(this)
-        LaunchedEffect(lazyListState) {
-            var previousKeys = emptySet<String>()
-            snapshotFlow {
-                val pagingState = currentPagingState
-                (0 until pagingState.itemCount).mapNotNull { pagingState.peek(it)?.itemKey }
-            }.collect { keys ->
-                if (keys.isNotEmpty()) {
-                    // Count the new prefix before the first previously loaded post.
-                    // Scroll indices can already have moved by the time this snapshot arrives.
-                    if (previousKeys.isNotEmpty() && !isAtTheTop) {
-                        newPostCount += keys.takeWhile { it !in previousKeys }.size
+    if (baseState.readingState == null) {
+        baseState.listState.onSuccess {
+            LaunchedEffect(lazyListState) {
+                var previousKeys = emptySet<String>()
+                snapshotFlow {
+                    snapshot.noticeKeys
+                }.collect { keys ->
+                    if (keys.isNotEmpty()) {
+                        // Count the new prefix before the first previously loaded post.
+                        // Scroll indices can already have moved by the time this snapshot arrives.
+                        if (previousKeys.isNotEmpty() && !isAtTheTop) {
+                            newPostCount += keys.takeWhile { it !in previousKeys }.size
+                        }
+                        previousKeys = keys.toSet()
                     }
-                    previousKeys = keys.toSet()
                 }
             }
-        }
-        LaunchedEffect(lazyListState) {
-            snapshotFlow {
-                val index = lazyListState.firstVisibleItemIndex
-                index to
-                    lazyListState.layoutInfo.visibleItemsInfo
-                        .firstOrNull { it.index == index }
-                        ?.key
-            }.drop(1)
-                .collect { (index, key) ->
-                    // Consume posts on viewport changes, not paging updates whose
-                    // new indices may arrive before the grid preserves its position.
-                    // A measured item's key also excludes any leading header cards.
-                    val pagingState = currentPagingState
-                    val postIndex =
-                        if (key == null) {
-                            index
-                        } else {
-                            (0 until pagingState.itemCount).indexOfFirst { pagingState.peek(it)?.itemKey == key }
+            LaunchedEffect(lazyListState) {
+                snapshotFlow {
+                    val index = lazyListState.firstVisibleItemIndex
+                    index to
+                        lazyListState.layoutInfo.visibleItemsInfo
+                            .firstOrNull { it.index == index }
+                            ?.key
+                }.drop(1)
+                    .collect { (index, key) ->
+                        // Consume posts on viewport changes, not paging updates whose
+                        // new indices may arrive before the grid preserves its position.
+                        // A measured item's key also excludes any leading header cards.
+                        if (newPostCount == 0) return@collect
+                        val postIndex =
+                            if (key == null) {
+                                index
+                            } else {
+                                (key as? String)?.let(snapshot::noticeIndexOf) ?: -1
+                            }
+                        if (postIndex >= 0) {
+                            newPostCount = minOf(newPostCount, postIndex)
                         }
-                    if (postIndex >= 0) {
-                        newPostCount = minOf(newPostCount, postIndex)
                     }
-                }
+            }
         }
     }
     LaunchedEffect(isAtTheTop) {
@@ -182,7 +178,7 @@ internal fun rememberTimelineWithLazyListState(
         TimelineItemPresenter.State by baseState {
         override val showNewToots = baseState.readingState?.hasNewContent ?: (newPostCount > 0)
         override val lazyListState = lazyListState
-        override val newPostsCount = newPostCount
+        override val newPostsCount = if (baseState.readingState != null) 0 else newPostCount
 
         override fun onNewTootsShown() {
             newPostCount = 0

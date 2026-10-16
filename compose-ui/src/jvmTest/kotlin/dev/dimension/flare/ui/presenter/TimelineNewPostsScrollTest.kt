@@ -316,6 +316,7 @@ class TimelineNewPostsScrollTest {
             interacting: Boolean,
         ) {
             this.itemKey = itemKey
+            if (interacting) position = null
         }
 
         override fun positionRestored(requestId: Long) {

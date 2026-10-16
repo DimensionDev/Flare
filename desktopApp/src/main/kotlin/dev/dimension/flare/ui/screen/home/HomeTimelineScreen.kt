@@ -236,7 +236,7 @@ internal fun HomeTimelineScreen(
                     while (true) {
                         delay(autoRefreshInterval.minutes * 60_000L)
                         if (!latestTimelineState.isRefreshing) {
-                            latestTimelineState.refreshSuspend()
+                            latestTimelineState.refreshAutomatically()
                         }
                     }
                 }

@@ -8,25 +8,14 @@ final class MacTimelineReadingScroll {
     var isInteracting = false
     var preserveAnchor = false
     private var presentedData: PagingState<UiTimelineV2>?
-    private var presentedKeys: [String] = []
-    private var presentedHashes: [Int32] = []
+    private(set) var presentedSnapshot: TimelineSnapshot?
 
-    func present(_ data: PagingState<UiTimelineV2>, interacting: Bool) -> PagingState<UiTimelineV2> {
+    func present(_ data: PagingState<UiTimelineV2>, snapshot: TimelineSnapshot?, interacting: Bool) -> PagingState<UiTimelineV2> {
         if interacting, let presentedData { return presentedData }
-        let keys: [String]
-        let hashes: [Int32]
-        if case .success(let success) = onEnum(of: data) {
-            let items = (0..<Int(success.itemCount)).compactMap { success.peek(index: Int32($0)) }
-            keys = items.compactMap(\.itemKey)
-            hashes = items.map(\.renderHash)
-        } else {
-            keys = []
-            hashes = []
-        }
-        // Gap loading and retry labels can change height without changing their item keys.
-        if keys != presentedKeys || hashes != presentedHashes { preserveAnchor = true }
-        presentedKeys = keys
-        presentedHashes = hashes
+        let snapshot = snapshot ?? TimelineSnapshot(data: data)
+        // Content changes (including gap labels) can change height without changing keys.
+        if !snapshot.hasSameContent(other: presentedSnapshot) { preserveAnchor = true }
+        presentedSnapshot = snapshot
         presentedData = data
         return data
     }
@@ -34,12 +23,12 @@ final class MacTimelineReadingScroll {
     private var anchor: (key: String, offset: CGFloat)?
     private var restoredRequest: Int64?
 
-    func update(frames: [String: CGRect], firstItemKey: String?, state: TimelineReadingState?) {
+    func update(frames: [String: CGRect], restorationIndex: Int32 = -1, state: TimelineReadingState?) {
         self.frames = frames
         guard let state, let scrollView else { return }
         if let position = state.position {
             guard restoredRequest != position.requestId, !isInteracting,
-                  !position.latest || firstItemKey == position.itemKey,
+                  restorationIndex >= 0,
                   let frame = frames[position.itemKey] else { return }
             let delta = position.latest ? -scrollView.contentView.bounds.minY : frame.minY - CGFloat(position.offset)
             adjust(by: delta)

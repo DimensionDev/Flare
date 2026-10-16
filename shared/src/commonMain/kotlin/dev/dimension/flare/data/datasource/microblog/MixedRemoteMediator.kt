@@ -1,8 +1,6 @@
 package dev.dimension.flare.data.datasource.microblog
 
-import androidx.paging.ExperimentalPagingApi
 import dev.dimension.flare.data.database.cache.CacheDatabase
-import dev.dimension.flare.data.database.cache.connect
 import dev.dimension.flare.data.database.cache.mapper.saveToDatabase
 import dev.dimension.flare.data.database.cache.model.DbPagingKey
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
@@ -66,27 +64,18 @@ internal class MixedRemoteMediator(
             sourceKeys,
         )
 
-    @OptIn(ExperimentalPagingApi::class)
     override suspend fun load(
         pageSize: Int,
         request: PagingRequest,
     ): PagingResult<UiTimelineV2> {
         val pendingWrites = mutableListOf<suspend () -> Unit>()
         val result = load(pageSize, request, pendingWrites)
-        val saveInTransaction: suspend () -> Unit = {
+        // Child cursors, staging and the outer page must commit together in both modes.
+        return result.copy(saveInTransaction = {
             checkRequestIsValid()
             pendingWrites.forEach { it() }
-        }
-        // Child cursors, staging and the outer reading page must commit together.
-        return if (sessionKey != null) {
-            result.copy(saveInTransaction = {
-                saveInTransaction()
-                result.saveInTransaction?.invoke()
-            })
-        } else {
-            database.connect { saveInTransaction() }
-            result
-        }
+            result.saveInTransaction?.invoke()
+        })
     }
 
     private suspend fun load(
@@ -100,11 +89,10 @@ internal class MixedRemoteMediator(
             } else if (mergePolicy == TimelineMergePolicy.Time) {
                 loadTimeOrdered(pageSize, request, pendingWrites)
             } else {
+                val subRequests = mediators.mapNotNull { getSubRequest(request, it) }
                 val results =
-                    mediators
-                        .mapNotNull {
-                            getSubRequest(request, it)
-                        }.map { subRequest ->
+                    subRequests
+                        .map { subRequest ->
                             async {
                                 loadSource(subRequest.mediator, pageSize, subRequest.request).map {
                                     SubResponse(subRequest, it)
@@ -125,9 +113,14 @@ internal class MixedRemoteMediator(
                         it.result.saveInTransaction?.invoke()
                         saveSubResponse(it)
                     }
+                    results.forEachIndexed { index, result ->
+                        if (result.isFailure) {
+                            database.pagingTimelineDao().insertPagingKey(DbPagingKey(subKey(subRequests[index].mediator)))
+                        }
+                    }
                 }
 
-                val hasMore = results.any { it.isFailure } || response.any { it.result.nextKey != null }
+                val hasMore = response.any { it.result.nextKey != null }
 
                 PagingResult(
                     data = mixedTimelineResult,
@@ -189,7 +182,7 @@ internal class MixedRemoteMediator(
             while (selected.size < pageSize) {
                 val blockedStates =
                     timeSourceStates.filter {
-                        it.pending.isEmpty() && it.canLoad && it !in failedStates
+                        it.pending.isEmpty() && it.canLoad
                     }
                 if (blockedStates.isNotEmpty()) {
                     val statesToLoad =
@@ -221,7 +214,10 @@ internal class MixedRemoteMediator(
                     val responses = results.mapNotNull { it.getOrNull() }
                     results.forEachIndexed { index, result ->
                         result.exceptionOrNull()?.let {
-                            failedStates += statesToLoad[index]
+                            val state = statesToLoad[index]
+                            state.initialized = true
+                            state.nextKey = null
+                            failedStates += state
                             failures += it
                         }
                     }
@@ -267,6 +263,9 @@ internal class MixedRemoteMediator(
 
             if (selected.isEmpty() && failures.isNotEmpty() && loadedStates.size == failedStates.size) {
                 throw failures.first()
+            }
+            pendingWrites.add {
+                failedStates.forEach { database.pagingTimelineDao().insertPagingKey(DbPagingKey(it.source.stagingKey)) }
             }
             failures.forEach { reportError?.invoke(it) }
             val hasMore =
@@ -324,7 +323,7 @@ internal class MixedRemoteMediator(
         )
 
     override suspend fun sortId(data: UiTimelineV2): Long? =
-        // Reading pages keep their arrival order when a recovering source returns newer posts.
+        // Reading pages keep their arrival order so appends cannot move the reader.
         if (mergePolicy == TimelineMergePolicy.Time && sessionKey == null) {
             timeSortId(data)
         } else {

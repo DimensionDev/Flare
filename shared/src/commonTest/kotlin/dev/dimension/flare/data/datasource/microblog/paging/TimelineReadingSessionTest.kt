@@ -341,9 +341,13 @@ class TimelineReadingSessionTest : RobolectricTest() {
         val sibling = Loader("sibling").apply { response = chronologicalPage(20..29, "sibling-old") }
         val nested = MixedRemoteMediator(database, listOf(nestedLoader), childPolicy)
         val outer = MixedRemoteMediator(database, listOf(nested, sibling), parentPolicy)
-        val session = session(outer, backgroundScope)
+        val repository = TimelineReadingRepository(database, backgroundScope)
+        val session = session(outer, backgroundScope, repository = repository)
         session.refresh(false, initial = true)
         val before = rows(session)
+        val anchor = "${session.activeKey}_${before[5].statusId}"
+        session.updateViewport(ReadingViewport(anchor, -37.25, atTop = false, interacting = false))
+        repository.checkpoint(session.record, session.activeKey, anchor, -37.25)
         val dao = database.pagingTimelineDao()
 
         suspend fun mixedData() = dao.keysWithPrefix(session.activeKey).associateWith { dao.getByPagingKey(it) to dao.getPagingKey(it) }
@@ -354,7 +358,6 @@ class TimelineReadingSessionTest : RobolectricTest() {
         assertEquals("old-cursor", oldCursor?.nextKey)
         val siblingSuffix = if (parentPolicy == TimelineMergePolicy.Time) "staging" else "cursor"
         val siblingCursorKey = dao.keysWithPrefix(session.activeKey).single { it.endsWith("/source/7:sibling/$siblingSuffix") }
-        val siblingCursor = dao.getPagingKey(siblingCursorKey)
         sibling.response = chronologicalPage(30..39).copy(nextKey = null)
         val failSibling = CompletableDeferred<Unit>()
         sibling.beforeLoad = {
@@ -378,18 +381,34 @@ class TimelineReadingSessionTest : RobolectricTest() {
         mediator.saveResponse(request, partial)
         assertTrue((100..109).all { it.toString() in ids(session) }, "Healthy child page must remain available")
         assertEquals("inner-next", dao.getPagingKey(childCursorKey)?.nextKey)
-        assertEquals(siblingCursor, dao.getPagingKey(siblingCursorKey), "Failed source must retain its cursor")
+        assertNull(assertNotNull(dao.getPagingKey(siblingCursorKey)).nextKey, "Failed source must pause until refresh")
         assertEquals(before, rows(session).take(before.size), "Partial append must preserve existing list order")
         sibling.beforeLoad = {}
         mediator.saveResponse(request, mediator.load(40, request))
         val actualIds = ids(session)
-        assertTrue((30..39).all { it.toString() in actualIds }, "Recovered sibling must resume its failed page")
-        assertTrue((100..109).all { it.toString() in actualIds }, "Recovery must retain the earlier successful page")
+        assertTrue((30..39).none { it.toString() in actualIds }, "Append must not retry the recovered sibling")
+        assertTrue((100..109).all { it.toString() in actualIds }, "Append must retain the earlier successful page")
+        assertTrue((200..209).all { it.toString() in actualIds }, "Healthy nested source must keep paging")
         assertEquals(
             listOf(PagingRequest.Refresh, PagingRequest.Append("old-cursor"), PagingRequest.Append("inner-next")),
             nestedRequests,
         )
-        assertEquals(List(2) { PagingRequest.Append("sibling-old") }, sibling.requests.takeLast(2))
+        assertEquals(listOf(PagingRequest.Refresh, PagingRequest.Append("sibling-old")), sibling.requests)
+        val beforeRefresh = rows(session)
+        sibling.response = chronologicalPage(-20..-11).copy(nextKey = null)
+        session.refresh(false)
+        assertEquals(listOf(PagingRequest.Refresh, PagingRequest.Append("sibling-old"), PagingRequest.Refresh), sibling.requests)
+        assertEquals(
+            beforeRefresh.map { it._id to it.sortId },
+            rows(session).map { it._id to it.sortId },
+            "Recovered posts must wait in a fresh snapshot without changing the active rows or their order",
+        )
+        assertEquals(anchor, snapshot(session).anchorId)
+        assertEquals(-37.25, snapshot(session).offset)
+        assertTrue(session.state.value.hasNewContent)
+        assertNull(session.state.value.position, "Recovery must not move the reader")
+        session.showLatest()
+        assertTrue((-20..-11).all { it.toString() in ids(session) })
     }
 
     @Test

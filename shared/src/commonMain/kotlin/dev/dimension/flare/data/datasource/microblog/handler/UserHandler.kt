@@ -15,7 +15,9 @@ import dev.dimension.flare.data.translation.TranslationSettingsSupport
 import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiHandle
+import dev.dimension.flare.ui.model.UiProfile
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
@@ -36,27 +38,36 @@ public class UserHandler(
         TranslationSettingsSupport.displayOptionsFlow(appDataStore)
     }
 
-    public fun userByHandleAndHost(uiHandle: UiHandle): Cacheable<dev.dimension.flare.ui.model.UiProfile> =
-        Cacheable(
+    @OptIn(ExperimentalCoroutinesApi::class)
+    public fun userByHandleAndHost(uiHandle: UiHandle): Cacheable<UiProfile> {
+        val resolvedKey = MutableStateFlow<MicroBlogKey?>(null)
+        return Cacheable(
             fetchSource = {
                 val user = loader.userByHandleAndHost(uiHandle)
                 val dbUser = user.toDbUser()
                 database.upsertUser(
                     dbUser,
                 )
+                resolvedKey.value = user.key
                 preTranslationService.enqueueProfile(dbUser)
             },
             cacheSource = {
                 translatedUserFlow(
-                    database
-                        .userDao()
-                        .findByCanonicalHandleAndHost(
-                            canonicalHandle = uiHandle.canonical,
-                            host = uiHandle.normalizedHost,
-                        ).distinctUntilChanged(),
+                    resolvedKey
+                        .flatMapLatest { key ->
+                            if (key != null) {
+                                database.userDao().findByKey(key)
+                            } else {
+                                database.userDao().findByCanonicalHandleAndHost(
+                                    canonicalHandle = uiHandle.canonical,
+                                    host = uiHandle.normalizedHost,
+                                )
+                            }
+                        }.distinctUntilChanged(),
                 )
             },
         )
+    }
 
     public fun userById(id: String): Cacheable<dev.dimension.flare.ui.model.UiProfile> =
         Cacheable(

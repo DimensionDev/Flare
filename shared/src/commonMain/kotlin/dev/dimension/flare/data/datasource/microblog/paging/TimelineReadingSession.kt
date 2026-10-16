@@ -281,10 +281,7 @@ internal class TimelineReadingSession(
                 if (!valid()) return@withLock
                 pending.saveResponse(PagingRequest.Refresh, response)
                 val hasVisibleRows = response.data.any { isVisible(it.asUi(pendingKey)) }
-                database.connect {
-                    val latest = repository.current(record) ?: return@connect
-                    repository.saveSnapshot(record, latest.copy(pendingReady = hasVisibleRows))
-                }
+                updatePendingVisibility(hasVisibleRows)
                 val currentIds = database.pagingTimelineDao().getStatusIdsWithInlineParents(activeKey).toSet()
                 val newVisible = response.data.any { it.timeline.statusId !in currentIds && isVisible(it.asUi(pendingKey)) }
                 if (database.pagingTimelineDao().getTimelinePageIdentities(activeKey, 0, 1).isEmpty()) {
@@ -329,6 +326,20 @@ internal class TimelineReadingSession(
             } finally {
                 state.update { it.copy(refreshing = false) }
             }
+        }
+    }
+
+    private suspend fun updatePendingVisibility(hasVisibleRows: Boolean) {
+        currentCoroutineContext().ensureActive()
+        withContext(NonCancellable) {
+            val snapshot =
+                database.connect {
+                    val latest = repository.current(record) ?: return@connect null
+                    latest
+                        .copy(hasNewContent = latest.hasNewContent && hasVisibleRows, pendingReady = hasVisibleRows)
+                        .also { repository.saveSnapshot(record, it) }
+                } ?: return@withContext
+            state.update { it.copy(hasNewContent = snapshot.hasNewContent) }
         }
     }
 
@@ -382,14 +393,10 @@ internal class TimelineReadingSession(
         }
 
     private suspend fun showLatestLocked(generation: Long) {
-        if (!valid() || state.value.interactionGeneration != generation) return
+        if (!valid() || state.value.interactionGeneration != generation || !state.value.hasNewContent) return
         val ready = repository.current(record)?.pendingReady == true
         if (ready) {
             publishLatest(requestScroll = true, generation = generation)
-        } else if (!state.value.hasNewContent) {
-            database.pagingTimelineDao().getTimelinePageIdentities(activeKey, 0, 1).firstOrNull()?.let {
-                requestPosition("${activeKey}_${it.statusId}", 0.0, latest = true, generation = generation)
-            }
         }
     }
 
@@ -398,7 +405,11 @@ internal class TimelineReadingSession(
         generation: Long = state.value.interactionGeneration,
     ) {
         val first = visibleRow(pendingKey, 0)?.timeline
-        if ((requestScroll && first == null) || state.value.interactionGeneration != generation) return
+        if (state.value.interactionGeneration != generation) return
+        if (requestScroll && first == null) {
+            updatePendingVisibility(hasVisibleRows = false)
+            return
+        }
         currentCoroutineContext().ensureActive()
         // Once committed, the in-memory references must adopt the same generation even if the caller stops.
         withContext(NonCancellable) {

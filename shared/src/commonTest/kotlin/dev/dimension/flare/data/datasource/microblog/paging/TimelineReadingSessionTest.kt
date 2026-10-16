@@ -812,6 +812,63 @@ class TimelineReadingSessionTest : RobolectricTest() {
         }
 
     @Test
+    fun filteringPendingPostsDismissesTheNoticeWithoutMovingTheReader() = dismissFilteredPendingPosts(refreshBeforeClick = false)
+
+    @Test
+    fun refreshingFilteredPendingPostsDismissesTheNoticeWithoutMovingTheReader() = dismissFilteredPendingPosts(refreshBeforeClick = true)
+
+    private fun dismissFilteredPendingPosts(refreshBeforeClick: Boolean) =
+        runTest {
+            var hideLatest = false
+            val loader = Loader()
+            val repository = TimelineReadingRepository(database, backgroundScope)
+            val session =
+                session(
+                    loader,
+                    backgroundScope,
+                    visible = { !hideLatest || it.statusKey.id.toInt() < 100 },
+                    repository = repository,
+                )
+            session.refresh(false, initial = true)
+            val originalRows = rows(session)
+            val originalKey = session.activeKey
+            val originalCursor = database.pagingTimelineDao().getPagingKey(originalKey)
+            val anchorKey = "${originalKey}_${originalRows[5].statusId}"
+            session.updateViewport(ReadingViewport(anchorKey, -37.25, atTop = false, interacting = false))
+            repository.checkpoint(session.record, originalKey, anchorKey, -37.25)
+            loader.response = page(100..110, "fresh-cursor")
+            session.refresh(false)
+            val pending = snapshot(session)
+            val retained = database.timelineReadingSessionDao().get("home")
+            assertTrue(session.state.value.hasNewContent)
+            assertTrue(pending.hasNewContent && pending.pendingReady)
+
+            hideLatest = true
+            if (refreshBeforeClick) session.refresh(false)
+            val requestCount = loader.requests.size
+            repeat(2) { session.showLatest() }
+
+            assertFalse(session.state.value.hasNewContent)
+            assertEquals(pending.copy(hasNewContent = false, pendingReady = false), snapshot(session))
+            assertEquals(originalKey, session.activeKey)
+            assertEquals(originalRows, rows(session))
+            assertEquals(originalCursor, database.pagingTimelineDao().getPagingKey(originalKey))
+            assertEquals(retained, database.timelineReadingSessionDao().get("home"))
+            assertNull(session.state.value.position, "Repeated clicks must not request a scroll after the notice is dismissed")
+            assertEquals(requestCount, loader.requests.size, "Dismissing filtered content must not fetch another page")
+            session.close()
+
+            val reopened = session(Loader(), backgroundScope, repository = repository)
+            reopened.prepare()
+            assertFalse(reopened.state.value.hasNewContent)
+            val position = assertNotNull(reopened.state.value.position)
+            assertEquals(anchorKey, position.itemKey)
+            assertEquals(-37.25, position.offset)
+            assertFalse(position.latest)
+            reopened.close()
+        }
+
+    @Test
     fun repeatedRefreshStillAllowsViewingTheAlreadyInsertedNewPosts() =
         runTest {
             val loader = Loader(prepend = true)

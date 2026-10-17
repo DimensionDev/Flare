@@ -45,6 +45,7 @@ struct TimelineScreen: View {
             data: presenter.state.listState,
             detailStatusKey: nil,
             key: "timeline:\(tabItem.id):\(isHomeTimeline ? tabItem.contentSourceKey : tabItem.loaderKey)",
+            isRefreshing: presenter.state.isRefreshing,
             readingState: presenter.state.readingState,
             allowGalleryMode: allowGalleryMode,
             accessoryItems: accessoryItems,

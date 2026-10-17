@@ -1133,7 +1133,7 @@ final class TimelineControllerIntegrationTests: XCTestCase {
 }
 
 @MainActor
-private func makeRow(_ index: Int, liked: Bool = false, media: Bool = true) -> UiTimelineV2 {
+func makeRow(_ index: Int, liked: Bool = false, media: Bool = true) -> UiTimelineV2 {
     let text = "Post \(index): " + String(repeating: "Rotation should preserve this reading item while text wraps and media resizes. ", count: index % 4 + 1)
     let style = RenderTextStyle(link: nil, bold: false, italic: false, strikethrough: false, monospace: false, code: false, underline: false, small: false, time: false)
     let rich = UiRichText(renderRuns: [RenderContent.Text(runs: [RenderRun.Text(text: text, style: style)], block: RenderBlockStyle())], isRtl: false, raw: text, innerText: text, imageUrls: [])

@@ -237,7 +237,8 @@ final class TimelineCollectionView: UICollectionView {
             endProgrammaticScrolling()
         }
         let wasAtTop = contentOffset.y + restingAdjustedTopInset <= 1 || bounds.height <= 1
-        preservesRefreshGap = wasAtTop
+        // Restoring cached content does not create a visible refresh gap.
+        preservesRefreshGap = wasAtTop && (revealingIndicator || isScrollInteractionActive || refreshControl.isRefreshing)
         if appliedTopInset == nil { appliedTopInset = contentInset.top }
         pendingRefreshReveal = revealingIndicator && wasAtTop && !refreshControl.isRefreshing && !hasScrollGesture
         refreshRequested = true

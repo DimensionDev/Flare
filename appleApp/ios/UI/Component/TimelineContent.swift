@@ -85,6 +85,8 @@ struct TimelineContent {
     var header: UiState<UiTimelineV2>?
     var key: AnyHashable?
     var isRefreshing = false
+    // A reading-session refresh must not block restoration from already presented cache.
+    var isPagingRefreshing = false
     var footer: Footer = .none
     var failure: Failure?
     var appendFailure: Failure?
@@ -97,8 +99,10 @@ struct TimelineContent {
     }
     var hasPosts: Bool { kind == .timeline && (state == .loaded || header != nil) }
 
-    static func timeline(_ data: PagingState<UiTimelineV2>?, header: UiState<UiTimelineV2>?, key: AnyHashable?) -> Self {
+    static func timeline(_ data: PagingState<UiTimelineV2>?, header: UiState<UiTimelineV2>?, key: AnyHashable?,
+                         isRefreshing: Bool? = nil) -> Self {
         var content = adapt(data, kind: .timeline, item: Item.post)
+        if let isRefreshing { content.isRefreshing = isRefreshing }
         content.header = header
         content.key = key
         return content
@@ -118,6 +122,7 @@ struct TimelineContent {
         case .success(let success):
             content.state = .loaded
             content.isRefreshing = success.isRefreshing
+            content.isPagingRefreshing = success.isRefreshing
             content.items = (0..<Int(success.itemCount)).map { index in
                 success.peek(index: Int32(index)).map(item)
             }

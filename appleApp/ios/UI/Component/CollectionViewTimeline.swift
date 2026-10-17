@@ -17,6 +17,7 @@ struct UITimelineCollectionView: UIViewControllerRepresentable {
     private let data: PagingState<UiTimelineV2>?
     private let headerState: UiState<UiTimelineV2>?
     private let userData: PagingState<UiProfile>?
+    private let isRefreshing: Bool?
     let readingState: TimelineReadingState?
     let detailStatusKey: MicroBlogKey?
     let topContentInset: CGFloat
@@ -37,6 +38,7 @@ struct UITimelineCollectionView: UIViewControllerRepresentable {
     init(
         data: PagingState<UiTimelineV2>? = nil,
         detailStatusKey: MicroBlogKey?,
+        isRefreshing: Bool? = nil,
         readingState: TimelineReadingState? = nil,
         headerState: UiState<UiTimelineV2>? = nil,
         userData: PagingState<UiProfile>? = nil,
@@ -49,6 +51,7 @@ struct UITimelineCollectionView: UIViewControllerRepresentable {
     ) {
         self.readingState = readingState
         self.data = data
+        self.isRefreshing = isRefreshing
         self.headerState = headerState
         self.userData = userData
         self.detailStatusKey = detailStatusKey
@@ -93,7 +96,8 @@ struct UITimelineCollectionView: UIViewControllerRepresentable {
         if let userData {
             controller.update(userData: userData, columnCount: columnCount)
         } else {
-            controller.update(data: data, columnCount: columnCount, headerState: headerState, contentKey: contentKey)
+            controller.update(data: data, columnCount: columnCount, headerState: headerState, contentKey: contentKey,
+                              isRefreshing: isRefreshing)
         }
     }
 }
@@ -155,7 +159,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
               isSnapshotReadyForReadingPosition, !currentPagingIsInitialLoading,
               !collectionView.isScrollInteractionActive,
               let indexPath = dataSource.indexPath(for: "t:" + position.itemKey),
-              position.canRestore(index: Int32(indexPath.item), refreshing: currentPagingIsRefreshing) else { return }
+              position.canRestore(index: Int32(indexPath.item), refreshing: content.isPagingRefreshing) else { return }
         restoringSessionRequest = position.requestId
         pendingReloadPosition = nil
         collectionView.restoreReadingPosition(position.latest ? .top : .item(
@@ -1042,6 +1046,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     // MARK: - Refresh
 
     @objc private func handleRefresh() {
+        hasCompletedInitialRefreshCycle = true
         isUserRefreshing = true
         if collectionView.preservesReadingPosition {
             collectionView.beginRefreshing(revealingIndicator: false)
@@ -1054,7 +1059,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
             }
             guard generation == refreshRequestGeneration else { return }
             isUserRefreshing = false
-            if !currentPagingIsRefreshing {
+            if !currentIsRefreshing {
                 if collectionView.preservesReadingPosition {
                     pendingRefreshEnd = true
                     finishPendingRefreshIfReady()
@@ -1065,7 +1070,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         }
     }
 
-    private var currentPagingIsRefreshing: Bool { content.isRefreshing }
+    private var currentIsRefreshing: Bool { content.isRefreshing }
     private var currentPagingIsInitialLoading: Bool { content.isInitialLoading }
 
     func resetInitialRefreshIndicatorSuppression() {
@@ -1083,13 +1088,14 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         data: PagingState<UiTimelineV2>?,
         columnCount: Int,
         headerState: UiState<UiTimelineV2>? = nil,
-        contentKey: AnyHashable? = nil
+        contentKey: AnyHashable? = nil,
+        isRefreshing: Bool? = nil
     ) {
         let switchedContent = self.contentKey != nil && contentKey != nil && self.contentKey != contentKey
         let retainedOffset = switchedContent && isViewLoaded ? max(effectiveContentOffsetY, 0) : nil
-        enqueue(columns: columnCount, isRefreshing: data?.isRefreshing_ == true,
+        enqueue(columns: columnCount, isRefreshing: isRefreshing ?? (data?.isRefreshing_ == true),
                 contentKey: contentKey, retainedOffset: retainedOffset) {
-            .timeline(data, header: headerState, key: contentKey)
+            .timeline(data, header: headerState, key: contentKey, isRefreshing: isRefreshing)
         }
     }
 
@@ -1165,7 +1171,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         let kindChanged = previousKind != input.content.kind
         let columnsChanged = columnCount != input.columns
         let switchedContent = contentKey != nil && input.content.key != nil && contentKey != input.content.key
-        let wasRefreshing = currentPagingIsRefreshing
+        let wasRefreshing = currentIsRefreshing
 
         if switchedContent {
             let offsetY = input.retainedOffset ?? max(effectiveContentOffsetY, 0)
@@ -1304,7 +1310,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
             if collectionView.preservesReadingPosition {
                 pendingRefreshEnd = false
                 collectionView.beginRefreshing(
-                    revealingIndicator: !isUserRefreshing && pendingReloadPosition?.itemID == nil
+                    revealingIndicator: !isUserRefreshing && pendingReloadPosition?.itemID == nil && readingState?.position == nil
                 )
                 return
             }

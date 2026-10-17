@@ -10,6 +10,7 @@ struct UITimelinePagingView: View {
     let data: PagingState<UiTimelineV2>
     let detailStatusKey: MicroBlogKey?
     let key: String
+    let isRefreshing: Bool?
     @Environment(\.timelineAccountID) private var accountID
     let topContentInset: CGFloat
     let allowGalleryMode: Bool
@@ -22,6 +23,7 @@ struct UITimelinePagingView: View {
         data: PagingState<UiTimelineV2>,
         detailStatusKey: MicroBlogKey?,
         key: String,
+        isRefreshing: Bool? = nil,
         readingState: TimelineReadingState? = nil,
         topContentInset: CGFloat = 0,
         allowGalleryMode: Bool = false,
@@ -34,6 +36,7 @@ struct UITimelinePagingView: View {
         self.data = data
         self.detailStatusKey = detailStatusKey
         self.key = key
+        self.isRefreshing = isRefreshing
         self.topContentInset = topContentInset
         self.allowGalleryMode = allowGalleryMode
         self.accessoryItems = accessoryItems
@@ -46,6 +49,7 @@ struct UITimelinePagingView: View {
         if allowGalleryMode && timelineDisplayMode == .gallery {
             UIGalleryTimelinePagingView(
                 data: data,
+                isRefreshing: isRefreshing,
                 readingState: readingState,
                 suppressInitialRefreshIndicator: suppressInitialRefreshIndicator,
                 onIsAtTopChanged: onIsAtTopChanged
@@ -57,6 +61,7 @@ struct UITimelinePagingView: View {
                 UITimelineCollectionView(
                     data: data,
                     detailStatusKey: detailStatusKey,
+                    isRefreshing: isRefreshing,
                     readingState: readingState,
                     topContentInset: topContentInset,
                     columnCount: columnPolicy.columnCount(for: proxy.size.width),

@@ -72,3 +72,13 @@ shared reading session; queries and detail lists do not. The current list keeps
 its position through refreshes, loading placeholders and layout changes. Home
 session tests cover restoration after loading, a top-origin post and cancellation
 when the reader starts scrolling.
+
+`TimelineRefreshIndicatorTests` hosts the production `TimelineScreen` in a window
+with controlled shared refresh responses. Home double taps and native pull events
+must drive the indicator in both ordinary and Gallery lists while the paging-only
+refresh flag stays false. Controller cases cover initial suppression, explicit
+pulls, fast completion with queued data, error recovery and current retry callbacks.
+They compare the reading post and pixel offset through refresh reveal/collapse,
+prepends away from the top and cached position restoration during network refresh.
+Cached restoration still waits for paging to commit. Gallery uses the same
+`TimelineCollectionView` refresh and reading-coordinate handling as ordinary lists.

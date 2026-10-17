@@ -72,6 +72,53 @@ import kotlin.time.Instant
 @OptIn(ExperimentalCoroutinesApi::class)
 class TimelinePresenterLifecycleTest : RobolectricTest() {
     @Test
+    fun readingRefreshFailureFinishesAndAllowsAnotherRequestWithoutLosingTheSnapshot() =
+        runPresenterTest { _, _, sourceKey ->
+            val loader = Loader()
+            val presenter = TimelinePresenter("home", flowOf(loader), isHomeTimeline = true, readingSourceKey = sourceKey)
+            val states = MutableStateFlow<TimelineState?>(null)
+            launch {
+                moleculeFlow(RecompositionMode.Immediate) { presenter.body() }.collect { states.value = it }
+            }
+
+            suspend fun awaitRefresh(refreshing: Boolean): TimelineState =
+                withContext(Dispatchers.Default) {
+                    withTimeout(5_000) {
+                        states.filterNotNull().first {
+                            it.listState is PagingState.Success && it.readingState?.isRefreshing == refreshing
+                        }
+                    }
+                }
+
+            val initial = awaitRefresh(false)
+            val key = (initial.listState as PagingState.Success).peek(0)!!.stableItemKey
+            initial.readingState!!.updateViewport(key, -23.5, atTop = false, interacting = false)
+            for (fails in listOf(true, false)) {
+                val started = kotlinx.coroutines.CompletableDeferred<Unit>()
+                val finish = kotlinx.coroutines.CompletableDeferred<Unit>()
+                loader.beforeLoad = {
+                    started.complete(Unit)
+                    finish.await()
+                    if (fails) error("offline")
+                }
+                val request = launch { states.value!!.refresh() }
+                started.await()
+                try {
+                    val refreshing = awaitRefresh(true)
+                    assertEquals(key, (refreshing.listState as PagingState.Success).peek(0)!!.stableItemKey)
+                    assertSame(initial.snapshot, refreshing.snapshot, "The refresh flag must not replace the item index")
+                } finally {
+                    finish.complete(Unit)
+                }
+                request.join()
+                val completed = awaitRefresh(false)
+                assertEquals(key, (completed.listState as PagingState.Success).peek(0)!!.stableItemKey)
+                assertNull(completed.readingState?.position, "Refresh completion must not request a scroll")
+            }
+            assertEquals(3, loader.requests.value)
+        }
+
+    @Test
     fun scrollingAndRepeatedCancellationDoNotRepublishUnchangedPresentation() =
         runPresenterTest { _, _, sourceKey ->
             val loader = Loader()

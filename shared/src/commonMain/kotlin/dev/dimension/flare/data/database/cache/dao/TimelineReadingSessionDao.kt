@@ -24,8 +24,10 @@ internal interface TimelineReadingSessionDao {
     @Upsert
     suspend fun saveCursor(cursor: DbTimelineReadingCursor)
 
-    @Query("DELETE FROM DbTimelineReadingCursor WHERE substr(`key`, 1, length(:prefix)) = :prefix")
-    suspend fun deleteCursors(prefix: String)
+    suspend fun deleteCursors(prefix: String) = deleteCursorsMatchingPrefix(prefix.toPagingKeyPrefixGlob())
+
+    @Query("DELETE FROM DbTimelineReadingCursor WHERE `key` GLOB :pattern")
+    suspend fun deleteCursorsMatchingPrefix(pattern: String)
 
     @Query("SELECT * FROM DbTimelineReadingSegment WHERE snapshotKey = :snapshotKey ORDER BY boundarySortId")
     suspend fun segments(snapshotKey: String): List<DbTimelineReadingSegment>

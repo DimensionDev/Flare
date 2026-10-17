@@ -24,6 +24,9 @@ class CacheDatabaseReadingCacheResetTest {
     @Test
     fun previousDevelopmentCacheIsDiscarded() = resetCache(53)
 
+    @Test
+    fun cacheWithoutSegmentIndexIsDiscarded() = resetCache(54)
+
     private fun resetCache(version: Int) =
         runTest {
             val path = Files.createTempFile("flare-cache-v$version", ".db")
@@ -52,7 +55,8 @@ class CacheDatabaseReadingCacheResetTest {
                 }
                 // Older development caches kept an exhausted flag; version 52 also lacked cursor checkpoints.
                 BundledSQLiteDriver().open(path.toString()).use {
-                    it.execSQL("ALTER TABLE DbTimelineReadingSegment ADD COLUMN exhausted INTEGER NOT NULL DEFAULT 0")
+                    it.execSQL("DROP INDEX index_DbTimelineReadingSegment_snapshotKey_boundarySortId")
+                    if (version <= 53) it.execSQL("ALTER TABLE DbTimelineReadingSegment ADD COLUMN exhausted INTEGER NOT NULL DEFAULT 0")
                     if (version == 52) it.execSQL("DROP TABLE DbTimelineReadingCursor")
                     it.execSQL("PRAGMA user_version = $version")
                 }

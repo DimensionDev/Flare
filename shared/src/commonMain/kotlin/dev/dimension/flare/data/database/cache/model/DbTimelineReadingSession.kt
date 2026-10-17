@@ -27,7 +27,7 @@ internal data class DbTimelineReadingSnapshot(
     val newContentBoundaryId: String? = null,
 )
 
-@Entity
+@Entity(indices = [Index(value = ["snapshotKey", "boundarySortId"])])
 internal data class DbTimelineReadingSegment(
     @PrimaryKey val key: String,
     val snapshotKey: String,

@@ -61,6 +61,7 @@ import kotlin.time.Instant
 class TimelineReadingSessionTest : RobolectricTest() {
     private lateinit var database: CacheDatabase
     private var afterPagingDelete: (String) -> Unit = {}
+    private var afterPagingRowsDelete: (String) -> Unit = {}
     private var afterCommit: () -> Unit = {}
     private var onPagingRowsRead: (String) -> Unit = {}
     private var onSelect: () -> Unit = {}
@@ -115,7 +116,8 @@ class TimelineReadingSessionTest : RobolectricTest() {
                                             override fun step(): Boolean = statement.step().also { afterCommit() }
                                         }
                                     }
-                                    if (sql != "DELETE FROM DbPagingTimeline WHERE pagingKey = ?") return statement
+                                    val partialDelete = sql.startsWith("DELETE FROM DbPagingTimeline WHERE pagingKey = ? AND _id IN")
+                                    if (!partialDelete && sql != "DELETE FROM DbPagingTimeline WHERE pagingKey = ?") return statement
                                     return object : SQLiteStatement by statement {
                                         private var pagingKey = ""
 
@@ -127,7 +129,10 @@ class TimelineReadingSessionTest : RobolectricTest() {
                                             statement.bindText(index, value)
                                         }
 
-                                        override fun step(): Boolean = statement.step().also { afterPagingDelete(pagingKey) }
+                                        override fun step(): Boolean =
+                                            statement.step().also {
+                                                if (partialDelete) afterPagingRowsDelete(pagingKey) else afterPagingDelete(pagingKey)
+                                            }
                                     }
                                 }
                             }
@@ -2861,73 +2866,104 @@ class TimelineReadingSessionTest : RobolectricTest() {
         }
 
     @Test
-    fun reopeningMixedSessionReclaimsOnlyTheSelectedCursorBeforeContinuing() = mixedReopenContinuesFairly(failMaintenance = false)
+    fun reopeningMixedSessionReclaimsOnlyTheSelectedCursorBeforeContinuing() = mixedReopenContinuesFairly()
 
     @Test
-    fun failedMaintenanceAfterReopeningDoesNotLoseRowsOrStarveOtherCursors() = mixedReopenContinuesFairly(failMaintenance = true)
+    fun failedMaintenanceAfterReopeningDoesNotLoseRowsOrStarveOtherCursors() =
+        mixedReopenContinuesFairly(IllegalStateException("Staging read failed"))
 
-    private fun mixedReopenContinuesFairly(failMaintenance: Boolean) =
-        runTest {
-            fun timed(range: IntRange) = range.map { post(it).copy(createdAt = Instant.fromEpochMilliseconds(-it.toLong()).toUi()) }
-            val loader = Loader().apply { response = PagingResult(timed(0..49), nextKey = "original") }
-            val mixed = MixedRemoteMediator(database, listOf(loader), TimelineMergePolicy.Time)
-            val repository = TimelineReadingRepository(database, backgroundScope)
-            val first = session(mixed, backgroundScope, repository = repository)
-            first.refresh(false, initial = true)
-            loader.response = PagingResult(timed(0..49), nextKey = "fresh")
-            first.refresh(false)
-            val original = rows(first)
-            val anchor = "${first.activeKey}_${original[20].statusId}"
-            savePosition(first, anchor, original[20].sortId, -15.25)
-            val dao = database.pagingTimelineDao()
-            val staging = dao.keysWithPrefix(first.record.key).filter { it.endsWith("staging") }
-            staging.forEach { key ->
-                dao.insertAll(original.map { it.copy(pagingKey = key, _id = DbPagingTimeline.createId(key, it.statusId)) })
-            }
-            val stagedRows = staging.associateWith { dao.getByPagingKey(it) }
-            first.close()
-            val restored = session(mixed, backgroundScope, repository = repository)
-            restored.prepare()
-            assertEquals(stagedRows, staging.associateWith { dao.getByPagingKey(it) }, "First paint must not maintain staging")
-            assertEquals(original.map { it._id to it.sortId }, rows(restored).map { it._id to it.sortId })
-            assertEquals(
-                anchor,
-                restored.state.value.position
-                    ?.itemKey,
-            )
-            assertEquals(
-                -15.25,
-                restored.state.value.position
-                    ?.offset,
-            )
-            loader.beforeLoad = {
-                val cursor = (loader.requests.last() as PagingRequest.Append).nextKey
-                loader.response = PagingResult(timed(if (cursor == "original") 100..109 else 200..209))
-            }
-            if (failMaintenance) {
-                onPagingRowsRead = { if (it.endsWith("staging")) error("Staging read failed") }
-                assertTrue(append(restored) is androidx.paging.RemoteMediator.MediatorResult.Error)
-                onPagingRowsRead = {}
-                assertEquals(stagedRows, staging.associateWith { dao.getByPagingKey(it) })
-                assertEquals(emptyList(), appendCursors(loader))
-            }
-            val selected = assertNotNull(database.timelineReadingSessionDao().nextCursor(restored.record.key)).key
-            val reads = mutableListOf<String>()
-            onPagingRowsRead = { reads += it }
-            append(restored)
-            onPagingRowsRead = {}
-            val untouched = staging.single { !it.startsWith(selected) }
-            assertFalse(untouched in reads, "Continuing one cursor must not maintain another cursor's staging")
-            assertEquals(
-                stagedRows.getValue(untouched).map { it._id to it.sortId },
-                dao.getByPagingKey(untouched).map { it._id to it.sortId },
-            )
-            append(restored)
-            assertEquals(if (failMaintenance) listOf("fresh", "original") else listOf("original", "fresh"), appendCursors(loader))
-            assertEquals(((0..49) + (100..109) + (200..209)).map(Int::toString), ids(restored))
-            assertEquals(anchor, snapshot(restored).anchorId)
-            assertEquals(-15.25, snapshot(restored).offset)
+    @Test
+    fun maintenanceFailureAfterDeletingStagingRollsBackBeforeContinuing() =
+        mixedReopenContinuesFairly(IllegalStateException("Staging deletion failed"), afterDelete = true)
+
+    @Test
+    fun maintenanceCancellationAfterDeletingStagingRollsBackBeforeContinuing() =
+        mixedReopenContinuesFairly(CancellationException("Staging deletion cancelled"), afterDelete = true)
+
+    private fun mixedReopenContinuesFairly(
+        maintenanceFailure: Exception? = null,
+        afterDelete: Boolean = false,
+    ) = runTest {
+        fun timed(range: IntRange) = range.map { post(it).copy(createdAt = Instant.fromEpochMilliseconds(-it.toLong()).toUi()) }
+        val loader = Loader().apply { response = PagingResult(timed(0..49), nextKey = "original") }
+        val mixed = MixedRemoteMediator(database, listOf(loader), TimelineMergePolicy.Time)
+        val repository = TimelineReadingRepository(database, backgroundScope)
+        val first = session(mixed, backgroundScope, repository = repository)
+        first.refresh(false, initial = true)
+        loader.response = PagingResult(timed(0..49), nextKey = "fresh")
+        first.refresh(false)
+        val original = rows(first)
+        val anchor = "${first.activeKey}_${original[20].statusId}"
+        savePosition(first, anchor, original[20].sortId, -15.25)
+        val dao = database.pagingTimelineDao()
+        val staging = dao.keysWithPrefix(first.record.key).filter { it.endsWith("staging") }
+        staging.forEach { key ->
+            dao.insertAll(original.map { it.copy(pagingKey = key, _id = DbPagingTimeline.createId(key, it.statusId)) })
         }
+        val stagedRows = staging.associateWith { dao.getByPagingKey(it) }
+        val stagedCursors = staging.associateWith { dao.getPagingKey(it) }
+        first.close()
+        val restored = session(mixed, backgroundScope, repository = repository)
+        restored.prepare()
+        assertEquals(stagedRows, staging.associateWith { dao.getByPagingKey(it) }, "First paint must not maintain staging")
+        assertEquals(original.map { it._id to it.sortId }, rows(restored).map { it._id to it.sortId })
+        assertEquals(
+            anchor,
+            restored.state.value.position
+                ?.itemKey,
+        )
+        assertEquals(
+            -15.25,
+            restored.state.value.position
+                ?.offset,
+        )
+        loader.beforeLoad = {
+            val cursor = (loader.requests.last() as PagingRequest.Append).nextKey
+            loader.response = PagingResult(timed(if (cursor == "original") 100..109 else 200..209))
+        }
+        if (maintenanceFailure != null) {
+            var reachedFailure = false
+            val fail: (String) -> Unit = {
+                if (it.endsWith("staging")) {
+                    reachedFailure = true
+                    throw maintenanceFailure
+                }
+            }
+            if (afterDelete) afterPagingRowsDelete = fail else onPagingRowsRead = fail
+            try {
+                if (maintenanceFailure is CancellationException) {
+                    assertFailsWith<CancellationException> { append(restored) }
+                } else {
+                    assertTrue(append(restored) is androidx.paging.RemoteMediator.MediatorResult.Error)
+                }
+            } finally {
+                onPagingRowsRead = {}
+                afterPagingRowsDelete = {}
+            }
+            assertTrue(reachedFailure)
+            assertEquals(stagedRows, staging.associateWith { dao.getByPagingKey(it) })
+            assertEquals(stagedCursors, staging.associateWith { dao.getPagingKey(it) })
+            assertEquals(original, rows(restored))
+            assertEquals(emptyList(), appendCursors(loader))
+        }
+        val selected = assertNotNull(database.timelineReadingSessionDao().nextCursor(restored.record.key)).key
+        val reads = mutableListOf<String>()
+        onPagingRowsRead = { reads += it }
+        append(restored)
+        onPagingRowsRead = {}
+        val untouched = staging.single { !it.startsWith(selected) }
+        assertFalse(untouched in reads, "Continuing one cursor must not maintain another cursor's staging")
+        assertEquals(
+            stagedRows.getValue(untouched).map { it._id to it.sortId },
+            dao.getByPagingKey(untouched).map { it._id to it.sortId },
+        )
+        append(restored)
+        val expectedCursors = if (maintenanceFailure != null) listOf("fresh", "original") else listOf("original", "fresh")
+        assertEquals(expectedCursors, appendCursors(loader))
+        assertEquals(((0..49) + (100..109) + (200..209)).map(Int::toString), ids(restored))
+        assertEquals(anchor, snapshot(restored).anchorId)
+        assertEquals(-15.25, snapshot(restored).offset)
+    }
 
     private suspend fun append(session: TimelineReadingSession) =
         session.load(

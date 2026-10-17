@@ -5,6 +5,7 @@ import dev.dimension.flare.data.database.cache.connect
 import dev.dimension.flare.data.database.cache.model.DbHomeTimelineSelection
 import dev.dimension.flare.data.database.cache.model.DbTimelineReadingSession
 import dev.dimension.flare.data.database.cache.model.DbTimelineReadingSnapshot
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.NonCancellable
@@ -59,7 +60,13 @@ internal class TimelineReadingRepository(
         offset: Double,
     ) {
         scope.launch {
-            checkpoint(record, pagingKey, itemKey, offset)
+            try {
+                checkpoint(record, pagingKey, itemKey, offset)
+            } catch (error: CancellationException) {
+                throw error
+            } catch (error: Exception) {
+                DebugRepository.error(error)
+            }
         }
     }
 

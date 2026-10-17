@@ -259,10 +259,12 @@ internal interface PagingTimelineDao {
         sortId: Long,
     ): Int
 
+    suspend fun keysWithPrefix(prefix: String): List<String> = keysMatchingPrefix(prefix.toPagingKeyPrefixGlob())
+
     @Query(
-        "SELECT DISTINCT pagingKey FROM DbPagingTimeline WHERE substr(pagingKey, 1, length(:prefix)) = :prefix UNION SELECT pagingKey FROM DbPagingKey WHERE substr(pagingKey, 1, length(:prefix)) = :prefix",
+        "SELECT DISTINCT pagingKey FROM DbPagingTimeline WHERE pagingKey GLOB :pattern UNION SELECT pagingKey FROM DbPagingKey WHERE pagingKey GLOB :pattern",
     )
-    suspend fun keysWithPrefix(prefix: String): List<String>
+    suspend fun keysMatchingPrefix(pattern: String): List<String>
 
     @Transaction
     @Query(

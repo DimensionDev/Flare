@@ -94,17 +94,59 @@ final class MediaViewerDismissGesturePolicyTests: XCTestCase {
         XCTAssertFalse(
             MediaViewerDismissGesturePolicy.shouldDismiss(
                 translationY: 100,
-                velocityY: 500,
+                velocityY: 100,
                 containerHeight: 800
             )
         )
         XCTAssertFalse(
             MediaViewerDismissGesturePolicy.shouldDismiss(
                 translationY: -100,
-                velocityY: -500,
+                velocityY: -100,
                 containerHeight: 800
             )
         )
+    }
+
+    func testSlowDragPastThresholdDismissesWithoutAFlick() {
+        XCTAssertTrue(
+            MediaViewerDismissGesturePolicy.shouldDismiss(
+                translationY: 220,
+                velocityY: 0,
+                containerHeight: 800
+            )
+        )
+    }
+
+    func testPushingBackBeforeReleaseCancelsDismiss() {
+        XCTAssertFalse(
+            MediaViewerDismissGesturePolicy.shouldDismiss(
+                translationY: 300,
+                velocityY: -800,
+                containerHeight: 800
+            )
+        )
+    }
+
+    func testDismissTransformFollowsFingerAndShrinksWithDistance() {
+        let transform = MediaViewerDismissGesturePolicy.transform(
+            translation: CGPoint(x: -30, y: 200),
+            startLocation: CGPoint(x: 100, y: 300),
+            containerSize: CGSize(width: 400, height: 800)
+        )
+
+        XCTAssertEqual(transform.offset, CGSize(width: -30, height: 200))
+        XCTAssertEqual(transform.scale, 0.9, accuracy: 0.0001)
+        XCTAssertEqual(transform.anchor, CGPoint(x: 0.25, y: 0.375))
+    }
+
+    func testDismissTransformScaleBottomsOutAtMinimum() {
+        let transform = MediaViewerDismissGesturePolicy.transform(
+            translation: CGPoint(x: 0, y: -1_200),
+            startLocation: CGPoint(x: 200, y: 400),
+            containerSize: CGSize(width: 400, height: 800)
+        )
+
+        XCTAssertEqual(transform.scale, MediaViewerDismissGesturePolicy.minimumScale, accuracy: 0.0001)
     }
 
     func testProgressIsDirectionIndependent() {

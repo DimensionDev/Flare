@@ -57,6 +57,7 @@ import dev.dimension.flare.gallery_engagement
 import dev.dimension.flare.gallery_views
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.status_share
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.DateTimeText
 import dev.dimension.flare.ui.component.ErrorContent
@@ -634,6 +635,20 @@ private fun GalleryAuthorCard(
                     },
                 onClicked = {
                     detail.onBookmark.invoke(ClickContext(uriHandler::openUri))
+                },
+            )
+            StatusActionButton(
+                icon = UiIcon.Share.toImageVector(),
+                number = null,
+                contentDescription = stringResource(Res.string.status_share),
+                onClicked = {
+                    navigate(
+                        Route.StatusShareSheet(
+                            statusKey = detail.statusKey,
+                            accountType = detail.accountType,
+                            shareUrl = detail.url,
+                        ),
+                    )
                 },
             )
         }

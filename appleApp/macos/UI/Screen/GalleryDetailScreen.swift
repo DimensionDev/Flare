@@ -34,6 +34,26 @@ struct GalleryDetailScreen: View {
         }
         .background(Color.flareSystemGroupedBackground)
         .navigationTitle("")
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                if case .success(let success) = onEnum(of: presenter.state.detail) {
+                    let detail = success.data
+                    MacStatusShareMenu(
+                        data: MacStatusShareData(
+                            statusKey: detail.statusKey,
+                            accountType: detail.accountType,
+                            shareUrl: detail.url
+                        ),
+                        onShareScreenshot: {
+                            onNavigate(.statusShareSheet(detail.accountType, detail.statusKey, detail.url, nil, nil))
+                        }
+                    ) {
+                        Image(fontAwesome: .shareNodes)
+                    }
+                    .accessibilityLabel(Text("fx_share"))
+                }
+            }
+        }
     }
 
     private func compatBody(detail: GalleryDetail) -> some View {

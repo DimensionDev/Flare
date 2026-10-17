@@ -1,4 +1,104 @@
 import UIKit
+import CHTCollectionViewWaterfallLayout
+
+// Timeline headers and footers are ordinary full-width sections, so the layout only needs cells.
+final class TimelineCollectionViewLayout: UICollectionViewLayout {
+    var columnCount = 2 { didSet { if columnCount != oldValue { invalidateLayout() } } }
+    var minimumColumnSpacing: CGFloat = 10 { didSet { if minimumColumnSpacing != oldValue { invalidateLayout() } } }
+    var minimumInteritemSpacing: CGFloat = 10 { didSet { if minimumInteritemSpacing != oldValue { invalidateLayout() } } }
+    var sectionInset = UIEdgeInsets.zero { didSet { if sectionInset != oldValue { invalidateLayout() } } }
+    private var sections: [[UICollectionViewLayoutAttributes]] = []
+    private var widths: [CGFloat] = []
+    private var groups: [(bounds: CGRect, attributes: [UICollectionViewLayoutAttributes])] = []
+    private var contentHeight: CGFloat = 0
+
+    override var collectionViewContentSize: CGSize {
+        CGSize(width: collectionView?.bounds.width ?? 0, height: contentHeight)
+    }
+
+    override func shouldInvalidateLayout(forBoundsChange newBounds: CGRect) -> Bool {
+        newBounds.width != collectionView?.bounds.width
+    }
+
+    func itemWidth(inSection section: Int) -> CGFloat {
+        if !needsGeometry, widths.indices.contains(section) { return widths[section] }
+        guard let view = collectionView, let delegate = view.delegate as? CHTCollectionViewDelegateWaterfallLayout else { return 0 }
+        let count = max(delegate.collectionView?(view, layout: self, columnCountFor: section) ?? columnCount, 1)
+        let inset = delegate.collectionView?(view, layout: self, insetsFor: section) ?? sectionInset
+        let spacing = delegate.collectionView?(view, layout: self, minimumColumnSpacingFor: section) ?? minimumColumnSpacing
+        let width = view.bounds.width - view.contentInset.left - view.contentInset.right - inset.left - inset.right
+        let scale = max(view.traitCollection.displayScale, 1)
+        return floor((width - CGFloat(count - 1) * spacing) / CGFloat(count) * scale) / scale
+    }
+
+    override func layoutAttributesForItem(at indexPath: IndexPath) -> UICollectionViewLayoutAttributes? {
+        guard sections.indices.contains(indexPath.section), sections[indexPath.section].indices.contains(indexPath.item) else { return nil }
+        return sections[indexPath.section][indexPath.item]
+    }
+
+    override func layoutAttributesForElements(in rect: CGRect) -> [UICollectionViewLayoutAttributes]? {
+        groups.filter { $0.bounds.intersects(rect) }.flatMap { $0.attributes.filter { $0.frame.intersects(rect) } }
+    }
+    var readingOffset: (() -> CGFloat?)?
+    private var needsGeometry = true
+
+    private final class OffsetInvalidationContext: UICollectionViewLayoutInvalidationContext {}
+
+    override func invalidateLayout() {
+        needsGeometry = true
+        super.invalidateLayout()
+    }
+
+    override func invalidateLayout(with context: UICollectionViewLayoutInvalidationContext) {
+        if !(context is OffsetInvalidationContext) { needsGeometry = true }
+        super.invalidateLayout(with: context)
+    }
+
+    override func prepare() {
+        guard needsGeometry else { return }
+        needsGeometry = false
+        super.prepare()
+        sections.removeAll(keepingCapacity: true)
+        widths.removeAll(keepingCapacity: true)
+        groups.removeAll(keepingCapacity: true)
+        contentHeight = 0
+        guard let collectionView, let delegate = collectionView.delegate as? CHTCollectionViewDelegateWaterfallLayout else { return }
+        let scale = max(collectionView.traitCollection.displayScale, 1)
+        for section in 0..<collectionView.numberOfSections {
+            let count = max(delegate.collectionView?(collectionView, layout: self, columnCountFor: section) ?? columnCount, 1)
+            let inset = delegate.collectionView?(collectionView, layout: self, insetsFor: section) ?? sectionInset
+            let spacing = delegate.collectionView?(collectionView, layout: self, minimumInteritemSpacingFor: section) ?? minimumInteritemSpacing
+            let columnSpacing = delegate.collectionView?(collectionView, layout: self, minimumColumnSpacingFor: section) ?? minimumColumnSpacing
+            let width = itemWidth(inSection: section)
+            widths.append(width)
+            var heights = Array(repeating: contentHeight + inset.top, count: count)
+            var attributes: [UICollectionViewLayoutAttributes] = []
+            for item in 0..<collectionView.numberOfItems(inSection: section) {
+                let path = IndexPath(item: item, section: section)
+                let size = delegate.collectionView(collectionView, layout: self, sizeForItemAt: path)
+                let height = size.width > 0 && size.height > 0 ? floor(size.height * width / size.width * scale) / scale : 0
+                let column = heights.indices.min { heights[$0] < heights[$1] } ?? 0
+                let attribute = UICollectionViewLayoutAttributes(forCellWith: path)
+                attribute.frame = CGRect(x: inset.left + CGFloat(column) * (width + columnSpacing), y: heights[column], width: width, height: height)
+                attributes.append(attribute)
+                heights[column] = attribute.frame.maxY + spacing
+            }
+            sections.append(attributes)
+            contentHeight = (heights.max() ?? contentHeight) - (attributes.isEmpty ? 0 : spacing) + inset.bottom
+            for start in stride(from: 0, to: attributes.count, by: 20) {
+                let chunk = Array(attributes[start..<min(start + 20, attributes.count)])
+                groups.append((chunk.reduce(CGRect.null) { $0.union($1.frame) }, chunk))
+            }
+        }
+        guard let offset = readingOffset?() else { return }
+        let delta = offset - collectionView.contentOffset.y
+        guard abs(delta) > 0.5 / max(collectionView.traitCollection.displayScale, 1) else { return }
+        // Correct the viewport before UIKit asks for cells, reusing the geometry just computed.
+        let context = OffsetInvalidationContext()
+        context.contentOffsetAdjustment.y = delta
+        invalidateLayout(with: context)
+    }
+}
 
 /// Applies bookmarks only while a snapshot or geometry change is being laid out.
 /// UIKit owns scrolling and refresh animations.
@@ -454,12 +554,10 @@ final class TimelineCollectionView: UICollectionView {
         let oldOffset = contentOffset.y
         let wasWithinBounds = oldOffset >= -adjustedContentInset.top &&
             oldOffset <= max(-adjustedContentInset.top, contentSize.height - bounds.height + adjustedContentInset.bottom)
-        updates()
-        guard let item, preservesReadingPosition, !isProgrammaticScrolling, !isRevealingRefresh else { return }
-        UIView.performWithoutAnimation {
-            layoutIfNeeded()
-            guard let path = readingIndexPath?(item.id),
-                  let frame = collectionViewLayout.layoutAttributesForItem(at: path)?.frame else { return }
+        let readingOffset: () -> CGFloat? = { [unowned self] in
+            guard let item, preservesReadingPosition, !isProgrammaticScrolling, !isRevealingRefresh,
+                  let path = readingIndexPath?(item.id),
+                  let frame = collectionViewLayout.layoutAttributesForItem(at: path)?.frame else { return nil }
             let oldDistance = item.frame.minY - viewportTop
             // The estimate may have put the viewport beyond the measured card.
             // Keep that ID visible using the same clamp as an idle reading anchor.
@@ -469,9 +567,19 @@ final class TimelineCollectionView: UICollectionView {
             var targetOffset = oldOffset + frame.minY - item.frame.minY + oldDistance - distance
             if wasWithinBounds {
                 let minimum = -adjustedContentInset.top
-                let maximum = max(minimum, contentSize.height - bounds.height + adjustedContentInset.bottom)
+                let maximum = max(minimum, collectionViewLayout.collectionViewContentSize.height - bounds.height + adjustedContentInset.bottom)
                 targetOffset = min(max(targetOffset, minimum), maximum)
             }
+            return targetOffset
+        }
+        let layout = collectionViewLayout as? TimelineCollectionViewLayout
+        layout?.readingOffset = readingOffset
+        defer { layout?.readingOffset = nil }
+        updates()
+        guard item != nil, preservesReadingPosition, !isProgrammaticScrolling, !isRevealingRefresh else { return }
+        UIView.performWithoutAnimation {
+            layoutIfNeeded()
+            guard let targetOffset = readingOffset() else { return }
             let delta = targetOffset - contentOffset.y
             guard abs(delta) > 0.5 / max(traitCollection.displayScale, 1) else { return }
             let context = UICollectionViewLayoutInvalidationContext()

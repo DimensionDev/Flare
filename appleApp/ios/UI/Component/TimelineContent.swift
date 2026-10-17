@@ -11,6 +11,14 @@ struct TimelineContent {
         case user(UiProfile)
         case media(ProfileMedia)
 
+        fileprivate var identity: ObjectIdentifier {
+            switch self {
+            case .post(let item): ObjectIdentifier(item)
+            case .user(let item): ObjectIdentifier(item)
+            case .media(let item): ObjectIdentifier(item)
+            }
+        }
+
         var id: String {
             switch self {
             case .post(let item):
@@ -39,6 +47,30 @@ struct TimelineContent {
         var media: ProfileMedia? {
             if case .media(let item) = self { return item }
             return nil
+        }
+    }
+
+    struct ItemMetadataCache {
+        struct Metadata {
+            // Retain the immutable input so its address cannot be reused by another item.
+            fileprivate let item: Item
+            let id: String
+            let renderHash: Int32
+        }
+
+        private(set) var entries: [ObjectIdentifier: Metadata] = [:]
+
+        mutating func update(_ items: [Item?]) -> [Metadata?] {
+            var next: [ObjectIdentifier: Metadata] = .init(minimumCapacity: items.count)
+            let result = items.map { item -> Metadata? in
+                guard let item else { return nil }
+                let identity = item.identity
+                let metadata = entries[identity] ?? Metadata(item: item, id: item.id, renderHash: item.renderHash)
+                next[identity] = metadata
+                return metadata
+            }
+            entries = next
+            return result
         }
     }
     struct Failure {

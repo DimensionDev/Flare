@@ -355,6 +355,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     private var hasCompletedInitialRefreshCycle = false
     private var lastReportedIsAtTop: Bool?
     private var renderedPlan: SnapshotPlan?
+    private var itemMetadataCache = TimelineContent.ItemMetadataCache()
     private var lastRenderHashMap: [String: Int32] { renderedPlan?.renderHashMap ?? [:] }
     private struct Input {
         let content: () -> TimelineContent
@@ -573,7 +574,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     }
 
     private func makeWaterfallLayout(columns: Int) -> UICollectionViewLayout {
-        let layout = CHTCollectionViewWaterfallLayout()
+        let layout = TimelineCollectionViewLayout()
         layout.columnCount = columns
         layout.minimumColumnSpacing = TimelineUIKitLayoutMetrics.columnSpacing
         layout.minimumInteritemSpacing = 0
@@ -583,7 +584,6 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
             bottom: 0,
             right: TimelineUIKitLayoutMetrics.horizontalInset
         )
-        layout.itemRenderDirection = .shortestFirst
         return layout
     }
 
@@ -691,7 +691,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
 
     private var mainSectionUsesFullWidth: Bool { content.state == .empty || content.state == .error }
 
-    private func waterfallInsets(for section: Int, layout: CHTCollectionViewWaterfallLayout) -> UIEdgeInsets {
+    private func waterfallInsets(for section: Int, layout: TimelineCollectionViewLayout) -> UIEdgeInsets {
         guard contentKind == .profileMedia else {
             if sectionIdentifier(at: section) == Self.sectionAccessories { return .zero }
             if sectionIdentifier(at: section) == Self.sectionHeader {
@@ -748,7 +748,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
 
     private func applyLayoutForColumnCount() {
         guard collectionView != nil else { return }
-        if let layout = collectionView.collectionViewLayout as? CHTCollectionViewWaterfallLayout {
+        if let layout = collectionView.collectionViewLayout as? TimelineCollectionViewLayout {
             layout.columnCount = columnCount
         } else {
             collectionView.setCollectionViewLayout(makeWaterfallLayout(columns: columnCount), animated: false)
@@ -1518,8 +1518,9 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     }
 
     private func makeCurrentSnapshotPlan() -> SnapshotPlan {
-        var indexMap: [String: Int] = [:]
-        var renderHashMap: [String: Int32] = [:]
+        var indexMap: [String: Int] = .init(minimumCapacity: content.items.count)
+        var renderHashMap: [String: Int32] = .init(minimumCapacity: content.items.count)
+        let metadata = itemMetadataCache.update(content.state == .loaded ? content.items : [])
         var headerIDs: [String] = []
         let accessoryIDs = accessoryItems.map { "\(Self.accessoryPrefix)\($0.id)" }
         var itemIDs: [String] = []
@@ -1550,7 +1551,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         case .empty: itemIDs = [Self.emptyID]
         case .loaded:
             itemIDs.reserveCapacity(content.items.count)
-            for (index, item) in content.items.enumerated() {
+            for (index, item) in metadata.enumerated() {
                 let id = item?.id ?? "\(placeholderPrefix)\(index)"
                 // Page overlap can repeat an ID. Keep its first occurrence and
                 // paging index together; UIKit requires unique identifiers.
@@ -1713,7 +1714,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         layout collectionViewLayout: UICollectionViewLayout,
         sizeForItemAt indexPath: IndexPath
     ) -> CGSize {
-        guard let layout = collectionViewLayout as? CHTCollectionViewWaterfallLayout else {
+        guard let layout = collectionViewLayout as? TimelineCollectionViewLayout else {
             return CGSize(width: collectionView.bounds.width, height: 200)
         }
         let section = indexPath.section
@@ -1801,7 +1802,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         layout collectionViewLayout: UICollectionViewLayout,
         insetsFor section: Int
     ) -> UIEdgeInsets {
-        guard let layout = collectionViewLayout as? CHTCollectionViewWaterfallLayout else { return .zero }
+        guard let layout = collectionViewLayout as? TimelineCollectionViewLayout else { return .zero }
         return waterfallInsets(for: section, layout: layout)
     }
 

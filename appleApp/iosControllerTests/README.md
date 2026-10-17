@@ -36,6 +36,12 @@ checks use actual cell positions, finger-relative motion and continuing inertia.
 Controller regressions use real text posts in a window: 70 upward scroll steps
 interleave ten pages and stop at the first unexpected displacement. Both dragging
 and deceleration paths verify the final post order and completed restoration.
+Layout regressions also reject cell configuration for a temporary viewport and
+require one geometry calculation per prepend or height update. The same checks
+run during real pan and deceleration gestures. Geometry is compared against the
+previous waterfall layout, including fractional widths and tall overlapping rows.
+Metadata checks cover reused immutable inputs, changed payloads with the same ID,
+reordering, placeholders and pruning of removed items.
 The fixtures yield the main actor while settling: a nested synchronous run loop
 cannot drain the controller's serialized main-queue submissions reliably.
 
@@ -44,9 +50,14 @@ The implementation has three state owners:
 - The controller installs one content/snapshot generation at a time, retaining
   only the latest pending input. It builds full snapshots for structural changes;
   payload changes only reconfigure affected IDs. Accessories use the same commit.
+  Unchanged immutable objects reuse their native ID and render hash; the metadata
+  cache retains only the current input.
 - `TimelineCollectionView` owns native scrolling, refresh presentation and
   transient layout bookmarks. Explicit scrolling supersedes restoration; passive
   geometry bookmarks preserve the original offset through a width roundtrip.
+  Its layout applies the active reading anchor before UIKit requests cells and
+  reuses geometry for the resulting offset-only invalidation. Timeline headers
+  and footers remain ordinary full-width sections.
 - Cells measure their current width and report once per fresh measurement.
   Controller-local height storage stages the latest measurement per item until
   the collection captures its viewport. Geometry is published inside that

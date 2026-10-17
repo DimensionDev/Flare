@@ -9,6 +9,25 @@ import FlareAppleUI
 
 @MainActor
 final class TimelineControllerIntegrationTests: XCTestCase {
+    func testItemMetadataCacheTracksPayloadChangesReorderingAndRemoval() {
+        var cache = TimelineContent.ItemMetadataCache()
+        let original = makeRow(0, media: false)
+        let unchanged = makeRow(1, media: false)
+        let first = cache.update([.post(original), nil, .post(unchanged)])
+        XCTAssertEqual(first.map { $0?.id }, ["t:case-0", nil, "t:case-1"])
+        let changed = makeRow(0, liked: true, media: false)
+        let second = cache.update([.post(unchanged), .post(changed), .post(changed), nil])
+        XCTAssertEqual(second.map { $0?.id }, ["t:case-1", "t:case-0", "t:case-0", nil])
+        XCTAssertEqual(second[0]?.renderHash, first[2]?.renderHash)
+        XCTAssertEqual(second[1]?.renderHash, changed.renderHash)
+        XCTAssertNotEqual(second[1]?.renderHash, first[0]?.renderHash)
+        XCTAssertEqual(Set(cache.entries.keys), [ObjectIdentifier(unchanged), ObjectIdentifier(changed)])
+        XCTAssertTrue(cache.update([]).isEmpty)
+        XCTAssertTrue(cache.entries.isEmpty)
+        XCTAssertEqual(cache.update([.post(changed)])[0]?.renderHash, changed.renderHash)
+        XCTAssertEqual(cache.entries.count, 1)
+    }
+
     func testCellMeasurementsDuringPrependPreserveDraggingPost() async throws {
         try await assertPrependMeasurementsPreservePost(scrollFlag: #selector(getter: UIScrollView.isDragging))
     }

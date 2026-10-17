@@ -35,6 +35,8 @@ final class TimelineInteractionTests: XCTestCase {
     @MainActor func testSnapshotChangesPreserveDeceleration() { run("snapshot-deceleration", gesture: true) }
     @MainActor func testSnapshotChangesPreserveMultipleColumns() { run("snapshot-columns-deceleration", gesture: true) }
     @MainActor func testConsecutivePrependsPreserveAnActivePan() { run("consecutive-prepend-drag", gesture: true) }
+    @MainActor func testConsecutivePrependsAvoidTemporaryCellsDuringPan() { run("efficient-prepend-drag", gesture: true) }
+    @MainActor func testConsecutivePrependsAvoidTemporaryCellsDuringDeceleration() { run("efficient-prepend-deceleration", gesture: true) }
     @MainActor func testConsecutivePrependsPreserveDeceleration() { run("consecutive-prepend-deceleration", gesture: true) }
     @MainActor func testConsecutivePrependsPreserveMultipleColumnsDuringPan() { run("consecutive-prepend-columns-drag", gesture: true) }
     @MainActor func testConsecutivePrependsPreserveMultipleColumnsDuringDeceleration() { run("consecutive-prepend-columns-deceleration", gesture: true) }

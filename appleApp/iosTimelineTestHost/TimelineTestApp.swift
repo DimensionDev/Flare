@@ -34,7 +34,7 @@ private final class MeasuringTimelineTestCell: UICollectionViewCell {
 /// A real application window is required for native scroll/refresh animations and
 /// pan/deceleration. A hostless XCTest window does not exercise those lifecycles.
 private final class TimelineTestController: UIViewController, CHTCollectionViewDelegateWaterfallLayout {
-    private let layout = CHTCollectionViewWaterfallLayout()
+    private let layout = TimelineCollectionViewLayout()
     private lazy var list = TimelineCollectionView(frame: .zero, collectionViewLayout: layout)
     private var dataSource: UICollectionViewDiffableDataSource<Int, Int>!
     private var heights: [Int: CGFloat] = [:]
@@ -49,6 +49,8 @@ private final class TimelineTestController: UIViewController, CHTCollectionViewD
     private var refreshPositions: [CGFloat] = []
     private var measuredHeights = TimelineItemHeightCache()
     private var measurementScheduled = false
+    private var configuredIDs = Set<Int>()
+    private var sizeRequests = 0
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -71,6 +73,7 @@ private final class TimelineTestController: UIViewController, CHTCollectionViewD
             list.bottomAnchor.constraint(equalTo: view.bottomAnchor),
         ])
         let registration = UICollectionView.CellRegistration<MeasuringTimelineTestCell, Int> { [weak self] cell, _, id in
+            self?.configuredIDs.insert(id)
             cell.onLayout = { [weak self] width in self?.measure(id, width: width) }
             var content = UIListContentConfiguration.cell()
             content.text = "Item \(id)"
@@ -101,7 +104,7 @@ private final class TimelineTestController: UIViewController, CHTCollectionViewD
             case "drag", "deceleration", "refine-reading-item", "refine-reading-item-deceleration": await checkGesture()
             case "pull-refresh", "fast-refresh-prepend": await checkRefreshWithPrepend()
             case "refresh-late-height", "refresh-late-height-columns", "refresh-height-after-collapse", "refresh-collapse-navigation": await checkRefreshWithLateHeight()
-            case let name where name.hasPrefix("consecutive-prepend-"): await checkConsecutivePrependGesture()
+            case let name where name.hasPrefix("consecutive-prepend-") || name.hasPrefix("efficient-prepend-"): await checkConsecutivePrependGesture()
             case let name where name.hasPrefix("measured-prepend-"): await checkMeasuredPrependGesture()
             case let name where name.hasPrefix("snapshot-"): await checkSnapshotGesture()
             default: await checkRefresh()
@@ -341,6 +344,9 @@ private final class TimelineTestController: UIViewController, CHTCollectionViewD
             return
         }
         for page in 0..<10 {
+            let visibleIDs = Set(list.indexPathsForVisibleItems.compactMap { dataSource.itemIdentifier(for: $0) })
+            configuredIDs.removeAll()
+            sizeRequests = 0
             var snapshot = dataSource.snapshot()
             let newIDs = Array(200 + page * 20..<220 + page * 20)
             for id in newIDs { heights[id] = 240 }
@@ -348,6 +354,10 @@ private final class TimelineTestController: UIViewController, CHTCollectionViewD
             list.prepareForSnapshotChange()
             list.performUpdatesPreservingReadingPosition(keepingItemIDs: Set(snapshot.itemIdentifiers.map(String.init))) {
                 dataSource.apply(snapshot, animatingDifferences: false, completion: nil)
+            }
+            if scenario.hasPrefix("efficient-prepend-") {
+                check(configuredIDs.isSubset(of: visibleIDs), "page \(page) configured temporary cells: \(configuredIDs.subtracting(visibleIDs))")
+                check(sizeRequests == snapshot.numberOfItems, "page \(page) repeated geometry: \(sizeRequests) size requests")
             }
             // No caller-side layout or run-loop turn between pages and delayed measurements.
             for id in newIDs { heights[id] = 280 }
@@ -573,7 +583,8 @@ private final class TimelineTestController: UIViewController, CHTCollectionViewD
 
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout,
                         sizeForItemAt indexPath: IndexPath) -> CGSize {
-        CGSize(width: layout.itemWidth(inSection: indexPath.section), height: itemHeight(dataSource.itemIdentifier(for: indexPath)!))
+        sizeRequests += 1
+        return CGSize(width: layout.itemWidth(inSection: indexPath.section), height: itemHeight(dataSource.itemIdentifier(for: indexPath)!))
     }
 
     func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {

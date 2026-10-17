@@ -6,6 +6,90 @@ import CHTCollectionViewWaterfallLayout
 
 @MainActor
 final class TimelineCollectionViewTests: XCTestCase {
+    func testTimelineGeometryMatchesTheExistingWaterfallLayout() throws {
+        for columns in [1, 2, 3] {
+            let legacyLayout = CHTCollectionViewWaterfallLayout()
+            legacyLayout.columnCount = columns
+            legacyLayout.minimumColumnSpacing = 8
+            legacyLayout.minimumInteritemSpacing = 2
+            let legacy = Fixture(width: 703, columns: columns, layout: legacyLayout)
+            let current = Fixture(width: 703, columns: columns)
+            for fixture in [legacy, current] {
+                fixture.collectionView.contentInset = UIEdgeInsets(top: 0, left: 9.5, bottom: 0, right: 12)
+                fixture.heightOverride = { id, _ in id == 10 ? 4_000 : CGFloat(100 + id % 7 * 31) }
+                fixture.collectionView.collectionViewLayout.invalidateLayout()
+                fixture.settle()
+            }
+            let layout = current.collectionView.collectionViewLayout
+            XCTAssertEqual(layout.collectionViewContentSize, legacyLayout.collectionViewContentSize)
+            for item in 0..<120 {
+                let path = IndexPath(item: item, section: 0)
+                XCTAssertEqual(layout.layoutAttributesForItem(at: path)?.frame, legacyLayout.layoutAttributesForItem(at: path)?.frame)
+            }
+            for y in stride(from: 0, to: Int(layout.collectionViewContentSize.height), by: 137) {
+                let rect = CGRect(x: 0, y: y, width: 703, height: 600)
+                XCTAssertEqual(Set(layout.layoutAttributesForElements(in: rect)?.map(\.indexPath) ?? []),
+                               Set(legacyLayout.layoutAttributesForElements(in: rect)?.map(\.indexPath) ?? []))
+            }
+        }
+    }
+
+    func testPrependLaysOutOnlyThePreservedViewportWhileDragging() throws {
+        try assertPrependLaysOutOnlyThePreservedViewport(scrollFlag: #selector(getter: UIScrollView.isDragging))
+    }
+
+    func testPrependLaysOutOnlyThePreservedViewportWhileDecelerating() throws {
+        try assertPrependLaysOutOnlyThePreservedViewport(scrollFlag: #selector(getter: UIScrollView.isDecelerating))
+    }
+
+    private func assertPrependLaysOutOnlyThePreservedViewport(scrollFlag: Selector) throws {
+        for columns in [1, 2] {
+            let fixture = Fixture(width: columns == 1 ? 390 : 900, columns: columns)
+            let view = fixture.collectionView
+            fixture.heightOverride = { _, _ in 240 }
+            view.invalidateMeasuredHeights()
+            fixture.scroll(to: 3_000)
+            let method = try XCTUnwrap(class_getInstanceMethod(UIScrollView.self, scrollFlag))
+            let original = method_getImplementation(method)
+            let getter = unsafeBitCast(original, to: (@convention(c) (UIScrollView, Selector) -> Bool).self)
+            let override: @convention(block) (UIScrollView) -> Bool = { $0 === view || getter($0, scrollFlag) }
+            let implementation = imp_implementationWithBlock(override)
+            method_setImplementation(method, implementation)
+            defer {
+                method_setImplementation(method, original)
+                imp_removeBlock(implementation)
+            }
+            for page in 0..<10 {
+                let position = try fixture.readingPosition()
+                let visibleIDs = Set(view.indexPathsForVisibleItems.compactMap { fixture.dataSource.itemIdentifier(for: $0) })
+                fixture.configuredIDs.removeAll()
+                fixture.sizeRequests = 0
+                var snapshot = fixture.dataSource.snapshot()
+                snapshot.insertItems((200 + page * 20..<220 + page * 20).map(String.init), beforeItem: snapshot.itemIdentifiers[0])
+                view.prepareForSnapshotChange()
+                view.performUpdatesPreservingReadingPosition(keepingItemIDs: Set(snapshot.itemIdentifiers)) {
+                    fixture.dataSource.apply(snapshot, animatingDifferences: false)
+                }
+                try fixture.assertPosition(position)
+                XCTAssertTrue(Set(fixture.configuredIDs).isSubset(of: visibleIDs), "Configured a temporary viewport: \(fixture.configuredIDs)")
+                XCTAssertEqual(fixture.sizeRequests, snapshot.numberOfItems, "A prepend must calculate geometry only once")
+                fixture.sizeRequests = 0
+                view.invalidateMeasuredHeights { false }
+                XCTAssertEqual(fixture.sizeRequests, 0, "An unchanged measurement must reuse geometry")
+                try fixture.assertPosition(position)
+                fixture.sizeRequests = 0
+                view.invalidateMeasuredHeights {
+                    fixture.heightOverride = { id, _ in id >= 200 ? CGFloat(240 + page * 5) : 240 }
+                    return true
+                }
+                XCTAssertEqual(fixture.sizeRequests, snapshot.numberOfItems, "A height change must calculate geometry only once")
+                try fixture.assertPosition(position)
+            }
+            let expected = (0..<10).reversed().flatMap { Array(200 + $0 * 20..<220 + $0 * 20) } + Array(0..<120)
+            XCTAssertEqual(fixture.dataSource.snapshot().itemIdentifiers, expected.map(String.init))
+        }
+    }
+
     func testUnchangedMeasurementsCompleteTheReadingTransaction() throws {
         let fixture = Fixture(width: 390, columns: 1)
         fixture.scroll(to: 3_000)
@@ -855,17 +939,20 @@ final class TimelineCollectionViewTests: XCTestCase {
         var columns: Int
         var extraHeight: CGFloat = 0
         var heightOverride: ((Int, CGFloat) -> CGFloat)?
+        var configuredIDs: [String] = []
+        var sizeRequests = 0
 
-        init(width: CGFloat, columns: Int) {
+        init(width: CGFloat, columns: Int, layout: UICollectionViewLayout? = nil) {
             self.columns = columns
             collectionView = TimelineCollectionView(
                 frame: CGRect(x: 0, y: 0, width: width, height: 600),
-                collectionViewLayout: Self.layout(columns: columns)
+                collectionViewLayout: layout ?? Self.layout(columns: columns)
             )
             super.init()
             collectionView.delegate = self
             collectionView.contentInsetAdjustmentBehavior = .never
-            let registration = UICollectionView.CellRegistration<Cell, String> { cell, _, id in
+            let registration = UICollectionView.CellRegistration<Cell, String> { [weak self] cell, _, id in
+                self?.configuredIDs.append(id)
                 cell.index = Int(id)!
             }
             dataSource = UICollectionViewDiffableDataSource<Int, String>(collectionView: collectionView) { view, path, id in
@@ -903,7 +990,7 @@ final class TimelineCollectionViewTests: XCTestCase {
             if self.columns != columns {
                 collectionView.prepareForGeometryChange()
                 self.columns = columns
-                (collectionView.collectionViewLayout as! CHTCollectionViewWaterfallLayout).columnCount = columns
+                (collectionView.collectionViewLayout as! TimelineCollectionViewLayout).columnCount = columns
                 collectionView.collectionViewLayout.invalidateLayout()
             }
             collectionView.frame.size.width = width
@@ -939,6 +1026,7 @@ final class TimelineCollectionViewTests: XCTestCase {
         }
 
         func collectionView(_ view: UICollectionView, layout: UICollectionViewLayout, sizeForItemAt path: IndexPath) -> CGSize {
+            sizeRequests += 1
             let width = (view.bounds.width - CGFloat(columns - 1) * 8) / CGFloat(columns)
             let index = Int(dataSource.itemIdentifier(for: path)!)!
             return CGSize(width: width, height: heightOverride?(index, width) ?? (Cell.height(index: index, width: width) + extraHeight))
@@ -949,7 +1037,7 @@ final class TimelineCollectionViewTests: XCTestCase {
         }
 
         static func layout(columns: Int) -> UICollectionViewLayout {
-            let layout = CHTCollectionViewWaterfallLayout()
+            let layout = TimelineCollectionViewLayout()
             layout.columnCount = columns
             layout.minimumColumnSpacing = 8
             layout.minimumInteritemSpacing = 2

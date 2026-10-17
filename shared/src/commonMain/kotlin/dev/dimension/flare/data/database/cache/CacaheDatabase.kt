@@ -5,9 +5,12 @@ import androidx.room3.ConstructedBy
 import androidx.room3.Database
 import androidx.room3.RoomDatabase
 import androidx.room3.RoomDatabaseConstructor
+import androidx.room3.migration.Migration
 import androidx.room3.withWriteTransaction
+import androidx.sqlite.SQLiteConnection
+import androidx.sqlite.async.executeSQL
 
-internal const val CACHE_DATABASE_VERSION = 55
+internal const val CACHE_DATABASE_VERSION = 56
 
 @Database(
     entities = [
@@ -49,6 +52,16 @@ internal const val CACHE_DATABASE_VERSION = 55
 )
 @ConstructedBy(CacheDatabaseConstructor::class)
 internal abstract class CacheDatabase : RoomDatabase() {
+    companion object {
+        val MIGRATION_55_56 =
+            object : Migration(55, 56) {
+                override suspend fun migrate(connection: SQLiteConnection) {
+                    connection.executeSQL("ALTER TABLE DbPagingKey ADD COLUMN readingState TEXT")
+                    connection.executeSQL("ALTER TABLE DbTimelineReadingSegment ADD COLUMN failed INTEGER NOT NULL DEFAULT 0")
+                }
+            }
+    }
+
     abstract fun timelineReadingSessionDao(): dev.dimension.flare.data.database.cache.dao.TimelineReadingSessionDao
 
     abstract fun emojiDao(): dev.dimension.flare.data.database.cache.dao.EmojiDao

@@ -32,6 +32,15 @@ internal interface TimelineReadingSessionDao {
     @Query("SELECT * FROM DbTimelineReadingSegment WHERE snapshotKey = :snapshotKey ORDER BY boundarySortId")
     suspend fun segments(snapshotKey: String): List<DbTimelineReadingSegment>
 
+    @Query(
+        "SELECT * FROM DbTimelineReadingSegment WHERE snapshotKey = :snapshotKey AND boundarySortId >= :first AND boundarySortId <= :last ORDER BY boundarySortId",
+    )
+    suspend fun segmentsInWindow(
+        snapshotKey: String,
+        first: Long,
+        last: Long,
+    ): List<DbTimelineReadingSegment>
+
     @Query("SELECT EXISTS(SELECT 1 FROM DbTimelineReadingSegment WHERE snapshotKey = :snapshotKey)")
     suspend fun hasSegments(snapshotKey: String): Boolean
 

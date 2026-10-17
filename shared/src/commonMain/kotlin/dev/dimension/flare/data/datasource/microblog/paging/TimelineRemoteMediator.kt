@@ -103,6 +103,7 @@ internal open class TimelineRemoteMediator(
             nextKey = result.nextKey,
             previousKey = result.previousKey,
             saveInTransaction = result.saveInTransaction,
+            continuationError = result.continuationError,
         )
     }
 

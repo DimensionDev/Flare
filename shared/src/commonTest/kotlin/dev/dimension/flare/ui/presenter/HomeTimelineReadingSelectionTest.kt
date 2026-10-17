@@ -23,6 +23,7 @@ import dev.dimension.flare.memoryDatabaseBuilder
 import dev.dimension.flare.testPlatformRegistry
 import dev.dimension.flare.testPlatformRuntimeData
 import dev.dimension.flare.unavailableAccountService
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
@@ -86,8 +87,15 @@ class HomeTimelineReadingSelectionTest : RobolectricTest() {
             try {
                 val presenter = HomeTimelineWithTabsPresenter()
                 var state: HomeTimelineWithTabsPresenter.State? = null
-                job = launch { moleculeFlow(RecompositionMode.Immediate) { presenter.body() }.collect { state = it } }
-                advanceUntilIdle()
+                val selectionLoaded = CompletableDeferred<Unit>()
+                job =
+                    launch {
+                        moleculeFlow(RecompositionMode.Immediate) { presenter.body() }.collect {
+                            state = it
+                            if (it.selectionLoaded) selectionLoaded.complete(Unit)
+                        }
+                    }
+                selectionLoaded.await()
                 assertTrue(assertNotNull(state).selectionLoaded)
                 if (!initiallyEnabled) {
                     assertEquals(false, reading.enabled.value)

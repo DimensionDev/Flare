@@ -75,6 +75,7 @@ internal data class DbPagingKey(
     val pagingKey: String,
     val nextKey: String? = null,
     val prevKey: String? = null,
+    val readingState: String? = null,
 )
 
 internal data class DbPagingTimelineWithStatus(

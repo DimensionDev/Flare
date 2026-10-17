@@ -82,3 +82,5 @@ They compare the reading post and pixel offset through refresh reveal/collapse,
 prepends away from the top and cached position restoration during network refresh.
 Cached restoration still waits for paging to commit. Gallery uses the same
 `TimelineCollectionView` refresh and reading-coordinate handling as ordinary lists.
+Removing a visible paging gap must retain the adjacent reading post and its offset;
+gap rows are excluded from both native anchors and their fallback order.

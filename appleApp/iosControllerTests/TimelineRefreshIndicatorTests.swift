@@ -232,6 +232,40 @@ final class TimelineRefreshIndicatorTests: XCTestCase {
         }
     }
 
+    func testGalleryGapRemovalPreservesTheVisiblePostDuringRefresh() async throws {
+        let fixture = try await Fixture(gallery: true)
+        defer { fixture.close() }
+        let gap = UiTimelineV2.Message(user: nil, statusKey: MicroBlogKey(id: "gap", host: "test"), icon: .info,
+            type: UiTimelineV2.MessageTypeLocalized(data: .readingGap, args: []),
+            createdAt: KotlinInstant.companion.fromEpochMilliseconds(epochMilliseconds: 0).toUi(),
+            clickEvent: ClickEventNoop.shared, accountType: AccountType.Guest.shared,
+            itemKey: "reading-gap:test", readingGap: nil)
+        fixture.input.items.insert(.post(gap), at: 0)
+        fixture.submit()
+        await settle(fixture.controller)
+        let path = try XCTUnwrap(fixture.dataSource.indexPath(for: "g:case-1"))
+        let frame = try XCTUnwrap(fixture.list.layoutAttributesForItem(at: path)).frame
+        fixture.beginInteraction()
+        fixture.list.setContentOffset(CGPoint(x: 0, y: frame.minY + 10), animated: false)
+        fixture.endInteraction()
+        await settle(fixture.controller)
+        let anchor = "g:" + (try XCTUnwrap(fixture.reading.itemKey))
+        XCTAssertFalse(anchor.contains("reading-gap:"))
+        let anchorPath = try XCTUnwrap(fixture.dataSource.indexPath(for: anchor))
+        let before = try XCTUnwrap(fixture.list.layoutAttributesForItem(at: anchorPath)).frame.minY - fixture.list.contentOffset.y
+        fixture.input.isRefreshing = true
+        fixture.submit()
+        await settle(fixture.controller)
+        fixture.input.items.removeFirst()
+        fixture.input.isRefreshing = false
+        fixture.submit()
+        await settle(fixture.controller)
+        let afterPath = try XCTUnwrap(fixture.dataSource.indexPath(for: anchor))
+        let after = try XCTUnwrap(fixture.list.layoutAttributesForItem(at: afterPath)).frame.minY - fixture.list.contentOffset.y
+        XCTAssertEqual(after, before, accuracy: 0.5, "A disappearing gap must not replace the visible post as the refresh anchor")
+        XCTAssertEqual(fixture.ids, (0..<60).map { "g:case-\($0)" })
+    }
+
     func testCachedPositionRestoresWhileTheReadingSessionRefreshesInBothListStyles() async throws {
         for gallery in [false, true] {
             let fixture = try await Fixture(gallery: gallery, initialRefresh: true,

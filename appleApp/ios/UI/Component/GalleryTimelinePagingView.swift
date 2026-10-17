@@ -206,12 +206,15 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
 
         collectionView = TimelineCollectionView(frame: .zero, collectionViewLayout: layout)
         collectionView.readingItemID = { [weak self] path in
-            guard let id = self?.dataSource?.itemIdentifier(for: path), id.hasPrefix(Self.itemPrefix) else { return nil }
+            guard let id = self?.dataSource?.itemIdentifier(for: path), id.hasPrefix(Self.itemPrefix),
+                  !id.hasPrefix(Self.itemPrefix + "reading-gap:") else { return nil }
             return id
         }
         collectionView.readingIndexPath = { [weak self] id in self?.dataSource?.indexPath(for: id) }
         collectionView.readingItemIDs = { [weak self] in
-            self?.dataSource?.snapshot().itemIdentifiers.filter { $0.hasPrefix(Self.itemPrefix) } ?? []
+            self?.dataSource?.snapshot().itemIdentifiers.filter {
+                $0.hasPrefix(Self.itemPrefix) && !$0.hasPrefix(Self.itemPrefix + "reading-gap:")
+            } ?? []
         }
         collectionView.isReadingLayoutReady = { [weak self] _ in self?.isApplyingSnapshot == false }
         collectionView.onProgrammaticScrollBegan = { [weak self] in self?.scrollingState.isScrolling = true }

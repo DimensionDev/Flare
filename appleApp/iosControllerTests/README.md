@@ -30,6 +30,12 @@ without caller-side layout passes between updates. They check the current item,
 offset, complete item order and ongoing native pan/deceleration in one and two columns.
 They also verify that fractional column widths use measured cell heights instead
 of retaining the 240pt estimate when layout and cache widths round differently.
+Measured-prepend cases let real cell layout report fresh heights while snapshots
+and offset compensation are running. Pages arrive on separate scroll frames;
+checks use actual cell positions, finger-relative motion and continuing inertia.
+Controller regressions use real text posts in a window: 70 upward scroll steps
+interleave ten pages and stop at the first unexpected displacement. Both dragging
+and deceleration paths verify the final post order and completed restoration.
 The fixtures yield the main actor while settling: a nested synchronous run loop
 cannot drain the controller's serialized main-queue submissions reliably.
 
@@ -42,7 +48,11 @@ The implementation has three state owners:
   transient layout bookmarks. Explicit scrolling supersedes restoration; passive
   geometry bookmarks preserve the original offset through a width roundtrip.
 - Cells measure their current width and report once per fresh measurement.
-  Controller-local height storage retains at most two geometries per live item.
+  Controller-local height storage stages the latest measurement per item until
+  the collection captures its viewport. Geometry is published inside that
+  preserved layout transaction, retaining at most two committed geometries per item.
+  Cells reuse pending measurements without exposing them to the layout or measuring again.
+  Snapshot measurements join the same update; unchanged reports do not schedule another layout.
   `TimelineAutoplay` handles playback without controlling list offsets.
 
 Changing a generic list identity creates a fresh list at the top. Home timeline

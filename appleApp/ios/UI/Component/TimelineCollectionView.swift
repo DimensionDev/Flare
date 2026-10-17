@@ -415,11 +415,12 @@ final class TimelineCollectionView: UICollectionView {
 
     /// Apply measured geometry without moving content under an active gesture.
     /// Called from the controller's coalesced flush, outside cell measurement/layout.
-    func invalidateMeasuredHeights() {
+    func invalidateMeasuredHeights(updating updateHeights: () -> Bool = { true }) {
         prepareForLayoutChange(preferringVisibleTop: true)
         UIView.performWithoutAnimation {
             performUpdatesPreservingReadingPosition(preferringVisibleTop: true) {
-                collectionViewLayout.invalidateLayout()
+                if updateHeights() { collectionViewLayout.invalidateLayout() }
+                setNeedsLayout()
                 layoutIfNeeded()
             }
         }

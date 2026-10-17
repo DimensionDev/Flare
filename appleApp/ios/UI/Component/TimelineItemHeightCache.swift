@@ -14,11 +14,44 @@ struct TimelineItemHeightCache {
     }
 
     private var items: [String: [Measurement]] = [:]
+    private var pending: [String: Measurement] = [:]
+
+    var hasPendingMeasurements: Bool { !pending.isEmpty }
+
+    // Cell layout must not change geometry used by an in-flight offset compensation.
+    @discardableResult
+    mutating func stage(_ height: CGFloat, for id: String, geometry: Geometry, renderHash: Int32) -> Bool {
+        if let previous = self.height(for: id, geometry: geometry, renderHash: renderHash), abs(previous - height) <= 1 {
+            pending.removeValue(forKey: id)
+            return false
+        }
+        pending[id] = Measurement(geometry: geometry, renderHash: renderHash, height: height)
+        return true
+    }
+
+    mutating func applyPendingMeasurements() -> Bool {
+        var changed = false
+        for (id, measurement) in pending {
+            if store(measurement.height, for: id, geometry: measurement.geometry, renderHash: measurement.renderHash) {
+                changed = true
+            }
+        }
+        pending.removeAll(keepingCapacity: true)
+        return changed
+    }
 
     func height(for id: String, geometry: Geometry, renderHash: Int32? = nil) -> CGFloat? {
         items[id]?.first {
             $0.geometry == geometry && (renderHash == nil || $0.renderHash == renderHash)
         }?.height
+    }
+
+    // Cells can reuse their latest measurement without publishing layout geometry.
+    func measuredHeight(for id: String, geometry: Geometry, renderHash: Int32) -> CGFloat? {
+        if let measurement = pending[id], measurement.geometry == geometry, measurement.renderHash == renderHash {
+            return measurement.height
+        }
+        return height(for: id, geometry: geometry, renderHash: renderHash)
     }
 
     /// Returns whether the layout needs an update, independently of render state.
@@ -37,7 +70,11 @@ struct TimelineItemHeightCache {
 
     mutating func keep(_ ids: Set<String>) {
         items = items.filter { ids.contains($0.key) }
+        pending = pending.filter { ids.contains($0.key) }
     }
 
-    mutating func removeAll() { items.removeAll(keepingCapacity: true) }
+    mutating func removeAll() {
+        items.removeAll(keepingCapacity: true)
+        pending.removeAll(keepingCapacity: true)
+    }
 }

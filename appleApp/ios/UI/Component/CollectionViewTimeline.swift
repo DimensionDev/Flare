@@ -625,19 +625,17 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     }()
     private var heightCache: [String: CGFloat] = [:]
     private var itemHeightCache = TimelineItemHeightCache()
-    private var hasPendingHeightCorrections = false
     private var isHeightCorrectionFlushScheduled = false
 
     private func clearHeightCache(keepingItemMeasurements: Bool = false) {
         heightCache.removeAll(keepingCapacity: true)
         if !keepingItemMeasurements {
             itemHeightCache.removeAll()
-            hasPendingHeightCorrections = false
         }
     }
 
     private func isReadingLayoutReady(at indexPath: IndexPath?) -> Bool {
-        guard isSnapshotReadyForReadingPosition, !hasPendingHeightCorrections else { return false }
+        guard isSnapshotReadyForReadingPosition, !itemHeightCache.hasPendingMeasurements else { return false }
         guard let indexPath else { return true }
         // Only the target and already visible cells participate. Never measure the
         // offscreen feed merely to finish a rotation or a prepend.
@@ -680,10 +678,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     }
 
     private func sectionIdentifier(at index: Int) -> Int? {
-        guard dataSource != nil else { return nil }
-        let identifiers = dataSource.snapshot().sectionIdentifiers
-        guard identifiers.indices.contains(index) else { return nil }
-        return identifiers[index]
+        dataSource?.sectionIdentifier(for: index)
     }
 
     private func isFullWidthSection(at index: Int) -> Bool {
@@ -730,10 +725,8 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         // An unchanged measured height can still replace an estimate/stale render
         // and complete a pending restore, without requiring a layout invalidation.
         if collectionView.hasReadingPosition { collectionView.setNeedsLayout() }
-        guard itemHeightCache.store(correctedHeight, for: itemID,
-                                    geometry: heightGeometry(itemID: itemID, width: width),
-                                    renderHash: renderHash) else { return }
-        hasPendingHeightCorrections = true
+        guard itemHeightCache.stage(correctedHeight, for: itemID,
+                                    geometry: heightGeometry(itemID: itemID, width: width), renderHash: renderHash) else { return }
         scheduleHeightCorrectionFlush()
     }
 
@@ -747,13 +740,10 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
 
     private func flushPendingHeightCorrections() {
         isHeightCorrectionFlushScheduled = false
-        guard isViewLoaded, hasPendingHeightCorrections else {
-            hasPendingHeightCorrections = false
-            return
+        guard isViewLoaded, itemHeightCache.hasPendingMeasurements else { return }
+        collectionView.invalidateMeasuredHeights {
+            itemHeightCache.applyPendingMeasurements()
         }
-
-        hasPendingHeightCorrections = false
-        collectionView.invalidateMeasuredHeights()
     }
 
     private func applyLayoutForColumnCount() {
@@ -939,7 +929,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
             let item = row.data
             cell.cachedPreferredHeight = { [weak self] width in
                 guard let self else { return nil }
-                return self.itemHeightCache.height(for: itemID,
+                return self.itemHeightCache.measuredHeight(for: itemID,
                     geometry: self.heightGeometry(itemID: itemID, width: width), renderHash: item.renderHash)
             }
             cell.onPreferredHeightChanged = { [weak self] width, height in
@@ -1281,6 +1271,10 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
                 pendingEffectiveContentOffsetYAfterSnapshot == nil && mediaAnchor == nil &&
                 !collectionView.hasReadingPosition && allowsScrollAnchorRestoration
             dataSource.apply(snapshot, animatingDifferences: animate, completion: completion)
+            // Reuse this snapshot's preserved layout for measurements reported during apply.
+            if itemHeightCache.applyPendingMeasurements() {
+                collectionView.collectionViewLayout.invalidateLayout()
+            }
             restorePendingContentOffsetIfNeeded(finalize: false)
         }
     }

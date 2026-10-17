@@ -6,6 +6,16 @@ import CHTCollectionViewWaterfallLayout
 
 @MainActor
 final class TimelineCollectionViewTests: XCTestCase {
+    func testUnchangedMeasurementsCompleteTheReadingTransaction() throws {
+        let fixture = Fixture(width: 390, columns: 1)
+        fixture.scroll(to: 3_000)
+        let position = try fixture.readingPosition()
+        fixture.collectionView.invalidateMeasuredHeights(updating: { false })
+        fixture.settle()
+        try fixture.assertPosition(position)
+        XCTAssertFalse(fixture.collectionView.hasReadingPosition)
+    }
+
     func testConsecutivePrependPagesPreserveDraggingViewport() throws {
         try assertConsecutivePrependsPreserveViewport(scrollFlag: #selector(getter: UIScrollView.isDragging))
     }

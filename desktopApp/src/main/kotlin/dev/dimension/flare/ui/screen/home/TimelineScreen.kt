@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
+import androidx.compose.foundation.progressSemantics
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -39,7 +40,6 @@ import compose.icons.fontawesomeicons.solid.Sliders
 import dev.dimension.flare.LocalWindowPadding
 import dev.dimension.flare.RegisterTabCallback
 import dev.dimension.flare.Res
-import dev.dimension.flare.common.isRefreshing
 import dev.dimension.flare.data.model.tab.UiTimelineTabItem
 import dev.dimension.flare.data.model.tab.resolveTimelineAppearance
 import dev.dimension.flare.edit_tab_title
@@ -281,7 +281,7 @@ internal fun TimelineContent(
             }
         }
         AnimatedVisibility(
-            state.listState.isRefreshing,
+            state.isRefreshing,
             enter = slideInVertically { -it },
             exit = slideOutVertically { -it },
             modifier =
@@ -291,6 +291,7 @@ internal fun TimelineContent(
             ProgressBar(
                 modifier =
                     Modifier
+                        .progressSemantics()
                         .fillMaxWidth(),
             )
         }

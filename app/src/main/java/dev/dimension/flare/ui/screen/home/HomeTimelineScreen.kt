@@ -36,7 +36,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenuItem
@@ -62,7 +61,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
@@ -128,6 +126,7 @@ import dev.dimension.flare.ui.presenter.home.DeepLinkPresenter
 import dev.dimension.flare.ui.presenter.home.LoggedInPresenter
 import dev.dimension.flare.ui.presenter.home.LoggedInState
 import dev.dimension.flare.ui.presenter.invoke
+import dev.dimension.flare.ui.presenter.rememberHomeTimelinePagerState
 import dev.dimension.flare.ui.presenter.rememberTimelineItemPresenterWithLazyListState
 import dev.dimension.flare.ui.route.Route
 import dev.dimension.flare.ui.route.Router
@@ -768,20 +767,7 @@ private fun timelinePresenter() =
                     .Loading()
             } else {
                 state.tabState.map { tabs ->
-                    val pager =
-                        rememberPagerState(initialPage = tabs.indexOfFirst { it.id == state.selectedTabId }.coerceAtLeast(0)) { tabs.size }
-                    val currentState by rememberUpdatedState(state)
-                    var previousIds by remember { mutableStateOf(tabs.map { it.id }) }
-                    LaunchedEffect(pager, tabs.map { it.id }) {
-                        val selectedId = previousIds.getOrNull(pager.settledPage)
-                        val selectedIndex = tabs.indexOfFirst { it.id == selectedId }.coerceAtLeast(0)
-                        previousIds = tabs.map { it.id }
-                        if (pager.settledPage != selectedIndex) pager.scrollToPage(selectedIndex)
-                        snapshotFlow { pager.settledPage }.collect { index ->
-                            tabs.getOrNull(index)?.let { currentState.selectTab(it.id) }
-                        }
-                    }
-                    pager
+                    rememberHomeTimelinePagerState(tabs.map { it.id }, state.selectedTabId, state::selectTab)
                 }
             }
 

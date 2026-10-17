@@ -305,6 +305,12 @@ internal class TimelineReadingSession(
                         val response = active.load(state.config.pageSize, request)
                         database.connect {
                             if (!valid()) return@connect
+                            if (response.nextKey == cursor) {
+                                val existing = existingIds(response.data)
+                                check(response.data.any { it.timeline.statusId !in existing }) {
+                                    "Timeline pagination did not advance"
+                                }
+                            }
                             val rows =
                                 if (continuous) {
                                     insertContinuousRows(response.data, null)

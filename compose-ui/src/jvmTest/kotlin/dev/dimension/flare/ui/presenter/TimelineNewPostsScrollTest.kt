@@ -1,5 +1,6 @@
 package dev.dimension.flare.ui.presenter
 
+import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -10,8 +11,10 @@ import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -35,18 +38,137 @@ import dev.dimension.flare.ui.model.TimelineReadingState
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.render.toUi
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 import org.junit.Rule
 import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 import kotlin.time.Instant
 
 class TimelineNewPostsScrollTest {
     @get:Rule
     val composeRule = createComposeRule()
+
+    @Test fun readingAnchorSurvivesMultiColumnPrepend() = checkPrepend(columns = 2)
+
+    @Test fun readingAnchorSurvivesSingleColumnPrepend() = checkPrepend(columns = 1)
+
+    @Test fun readingAnchorSurvivesMultiColumnPrependWithHeader() = checkPrepend(columns = 2, leadingHeader = true)
+
+    @Test fun readingAnchorSurvivesPrependWhenRefreshDismissesHeader() =
+        checkPrepend(
+            columns = 2,
+            leadingHeader = true,
+            dismissHeader = true,
+        )
+
+    @Test fun readingAnchorSurvivesHeaderReplacementByOnePost() =
+        checkPrepend(columns = 2, leadingHeader = true, dismissHeader = true, prependCount = 1)
+
+    @Test fun readingAnchorSurvivesPrependDuringDrag() = checkPrepend(columns = 2, duringDrag = true)
+
+    private fun checkPrepend(
+        columns: Int,
+        leadingHeader: Boolean = false,
+        duringDrag: Boolean = false,
+        dismissHeader: Boolean = false,
+        prependCount: Int = 3,
+    ) {
+        var showHeader by mutableStateOf(leadingHeader)
+        val pages = MutableStateFlow(page(0..49))
+        val scroll = LazyStaggeredGridState()
+        lateinit var scope: CoroutineScope
+        val reading = ReadingState(null)
+        lateinit var state: TimelineWithLazyListState
+        composeRule.setContent {
+            scope = rememberCoroutineScope()
+            val paging = pages.collectAsLazyPagingItems().toPagingState()
+            val base =
+                object : TimelineItemPresenter.State {
+                    override val listState = paging
+                    override val readingState = reading
+                    override val isRefreshing = false
+
+                    override fun refreshSync() = Unit
+
+                    override suspend fun refreshSuspend() = Unit
+                }
+            val timeline = rememberTimelineWithLazyListState(base, scroll, leadingItemCount = if (showHeader) 1 else 0)
+            SideEffect { state = timeline }
+            LazyVerticalStaggeredGrid(
+                columns = StaggeredGridCells.Fixed(columns),
+                state = scroll,
+                modifier = Modifier.size(350.dp, 420.dp).testTag("prepend-grid"),
+            ) {
+                if (showHeader) {
+                    item(key = "header", span = androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan.FullLine) {
+                        Box(Modifier.fillMaxWidth().height(60.dp))
+                    }
+                }
+                paging.onSuccess {
+                    items(itemCount, key = itemKey { it.stableItemKey }) { index ->
+                        val number = peek(index)!!.stableItemKey.removePrefix("post-").toInt()
+                        Box(Modifier.fillMaxWidth().height((100 + Math.floorMod(number, 5) * 47).dp))
+                    }
+                }
+            }
+        }
+        composeRule.waitUntil(5_000) { reading.itemKey != null }
+        composeRule.runOnIdle { scope.launch { scroll.scrollBy(1250f) } }
+        composeRule.waitForIdle()
+        if (duringDrag) {
+            composeRule.onNodeWithTag("prepend-grid").performTouchInput {
+                down(center)
+                moveBy(Offset(0f, -40f))
+            }
+            composeRule.waitForIdle()
+        }
+        var anchor: String? = null
+        var offset = 0
+        composeRule.runOnIdle {
+            anchor = reading.itemKey
+            offset =
+                scroll.layoutInfo.visibleItemsInfo
+                    .single { it.key == anchor }
+                    .offset.y
+            pages.value = page(-prependCount..49)
+            if (dismissHeader) showHeader = false
+            if (duringDrag) {
+                scroll.dispatchRawDelta(10f)
+                offset -= 10
+            }
+        }
+        composeRule.waitUntil(5_000) { (state.listState as? PagingState.Success)?.itemCount == 50 + prependCount }
+        composeRule.runOnIdle {
+            val after =
+                scroll.layoutInfo.visibleItemsInfo
+                    .single { it.key == anchor }
+                    .offset.y
+            assertEquals(offset, after, "The same post must remain at the same offset after prepend")
+            if (duringDrag) assertTrue(scroll.isScrollInProgress, "Refresh must not cancel the drag")
+        }
+        if (duringDrag) {
+            composeRule.onNodeWithTag("prepend-grid").performTouchInput { moveBy(Offset(0f, -10f)) }
+            composeRule.runOnIdle {
+                assertEquals(
+                    offset - 10,
+                    scroll.layoutInfo.visibleItemsInfo
+                        .single { it.key == anchor }
+                        .offset.y,
+                )
+            }
+            composeRule.onNodeWithTag("prepend-grid").performTouchInput { up() }
+        } else {
+            composeRule.runOnIdle { reading.position = TimelineReadingPosition("post-${-prependCount}", 0.0, 2, latest = true) }
+            composeRule.waitUntil(5_000) { reading.position == null && scroll.firstVisibleItemIndex == 0 }
+            composeRule.runOnIdle { assertEquals(0, scroll.firstVisibleItemScrollOffset) }
+        }
+    }
 
     @Test
     fun scrollingRenderedPostsConsumesTheCount() = checkScrolling(leadingHeader = false)

@@ -66,6 +66,7 @@ internal fun rememberTimelineWithLazyListState(
     var restoringPosition by remember(lazyListState) { mutableStateOf(false) }
     val reading by rememberUpdatedState(baseState.readingState)
     val paging by rememberUpdatedState(baseState.listState)
+    val leadingItems by rememberUpdatedState(leadingItemCount)
     val density = if (baseState.readingState != null) LocalDensity.current.density else 1f
     val snapshot by rememberUpdatedState(
         baseState.snapshot ?: remember(baseState.listState) { TimelineSnapshot(baseState.listState) },
@@ -80,23 +81,56 @@ internal fun rememberTimelineWithLazyListState(
     }
     LaunchedEffect(lazyListState, baseState.readingState != null, density) {
         if (reading == null) return@LaunchedEffect
-        snapshotFlow {
-            val layout = lazyListState.layoutInfo
-            val visible =
-                layout.visibleItemsInfo
-                    .filter {
-                        (it.key as? String)?.let { key -> snapshot.readingIndexOf(key) >= 0 } == true &&
-                            it.offset.y + it.size.height > layout.viewportStartOffset
-                    }.minWithOrNull(compareBy({ it.offset.y }, { it.offset.x }))
-            TimelineViewport(
-                visible?.key as? String,
-                (visible?.offset?.y ?: 0).toDouble() / density,
-                lazyListState.firstVisibleItemIndex == 0 && lazyListState.firstVisibleItemScrollOffset == 0,
-                lazyListState.isScrollInProgress && !restoringPosition,
-            )
-        }.collect { viewport ->
-            reading?.updateViewport(viewport.key, viewport.offset, viewport.atTop, viewport.interacting)
-        }
+        var previousSnapshot: TimelineSnapshot? = null
+        var previousLeadingItems = leadingItems
+        var previousViewport: TimelineViewport? = null
+        var pendingAnchor: TimelineViewport? = null
+        snapshotFlow { Triple(snapshot, lazyListState.layoutInfo, lazyListState.isScrollInProgress) }
+            .collect { (currentSnapshot, measuredLayout, scrolling) ->
+                val previous = pendingAnchor ?: previousViewport
+                if ((currentSnapshot !== previousSnapshot || leadingItems != previousLeadingItems) && previous != null) {
+                    val index = previous.key?.let(currentSnapshot::readingIndexOf) ?: -1
+                    if (index >= 0 && index + leadingItems != previous.index) pendingAnchor = previous
+                }
+                previousSnapshot = currentSnapshot
+                previousLeadingItems = leadingItems
+                if (reading?.position != null || restoringPosition) pendingAnchor = null
+                pendingAnchor?.let { anchor ->
+                    val index = anchor.key?.let(currentSnapshot::readingIndexOf) ?: -1
+                    val item = measuredLayout.visibleItemsInfo.firstOrNull { it.key == anchor.key }
+                    if (index < 0 || item == null) {
+                        pendingAnchor = null
+                    } else if (item.index == index + leadingItems) {
+                        pendingAnchor = null
+                        // Key preservation can change staggered-grid lanes and lose the pixel offset.
+                        val delta = item.offset.y - (anchor.offset * density).roundToInt()
+                        if (delta != 0) lazyListState.dispatchRawDelta(delta.toFloat())
+                    }
+                }
+                val layout = lazyListState.layoutInfo
+                val visible =
+                    layout.visibleItemsInfo
+                        .filter {
+                            (it.key as? String)?.let { key -> currentSnapshot.readingIndexOf(key) >= 0 } == true &&
+                                it.offset.y + it.size.height > layout.viewportStartOffset
+                        }.minWithOrNull(compareBy({ it.offset.y }, { it.offset.x }))
+                val key = visible?.key as? String
+                if (visible != null && key != null && currentSnapshot.readingIndexOf(key) + leadingItems != visible.index) {
+                    return@collect
+                }
+                val viewport =
+                    TimelineViewport(
+                        key,
+                        (visible?.offset?.y ?: 0).toDouble() / density,
+                        lazyListState.firstVisibleItemIndex == 0 && lazyListState.firstVisibleItemScrollOffset == 0,
+                        scrolling && !restoringPosition,
+                        visible?.index ?: -1,
+                    )
+                if (viewport != previousViewport) {
+                    previousViewport = viewport
+                    reading?.updateViewport(viewport.key, viewport.offset, viewport.atTop, viewport.interacting)
+                }
+            }
     }
     val requestedPosition = baseState.readingState?.position
     LaunchedEffect(lazyListState, requestedPosition?.requestId, baseState.readingState != null, leadingItemCount) {
@@ -191,4 +225,5 @@ private data class TimelineViewport(
     val offset: Double,
     val atTop: Boolean,
     val interacting: Boolean,
+    val index: Int,
 )

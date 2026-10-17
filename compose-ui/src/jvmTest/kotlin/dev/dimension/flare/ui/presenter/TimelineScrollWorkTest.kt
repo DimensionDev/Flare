@@ -13,6 +13,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -44,9 +45,14 @@ class TimelineScrollWorkTest {
 
     @Test fun currentReadingLarge() = probe(2400, true)
 
+    @Test fun currentReadingLargeTwoColumns() = probe(2400, true, columns = 2)
+
+    @Test fun currentNormalLargeTwoColumns() = probe(2400, false, columns = 2)
+
     private fun probe(
         size: Int,
         enabled: Boolean,
+        columns: Int = 1,
     ) {
         val rows =
             CountingList(
@@ -83,6 +89,8 @@ class TimelineScrollWorkTest {
             ) as PagingState.Success<UiTimelineV2>
         val scroll = LazyStaggeredGridState(initialFirstVisibleItemIndex = size / 2, initialFirstVisibleItemOffset = 10)
         val reading = Reading()
+        var measures = 0
+        var placements = 0
         var presentations = 0
         var observedGeneration = 0
         composeRule.setContent {
@@ -104,9 +112,17 @@ class TimelineScrollWorkTest {
                 observedGeneration = generation
             }
             LazyVerticalStaggeredGrid(
-                columns = StaggeredGridCells.Fixed(1),
+                columns = StaggeredGridCells.Fixed(columns),
                 state = scroll,
-                modifier = Modifier.size(300.dp, 150.dp).testTag("audit"),
+                modifier =
+                    Modifier.size(300.dp, 150.dp).testTag("audit").layout { measurable, constraints ->
+                        measures++
+                        val placeable = measurable.measure(constraints)
+                        layout(placeable.width, placeable.height) {
+                            placements++
+                            placeable.place(0, 0)
+                        }
+                    },
             ) {
                 items(paging.itemCount, key = paging.itemKey { it.stableItemKey }) {
                     Box(Modifier.fillMaxWidth().height(100.dp))
@@ -115,7 +131,7 @@ class TimelineScrollWorkTest {
         }
         composeRule.waitForIdle()
         assertTrue(rows.reads <= size * 2 + 64, "Initialization must not build unused reading or notice indices")
-        println("COMPOSE_AUDIT revision=current rows=$size reading=$enabled phase=initial peek_calls=${rows.reads}")
+        println("COMPOSE_AUDIT revision=current rows=$size reading=$enabled columns=$columns phase=initial peek_calls=${rows.reads}")
         composeRule.onNodeWithTag("audit").performTouchInput {
             down(center)
             moveBy(Offset(0f, -22f))
@@ -132,6 +148,8 @@ class TimelineScrollWorkTest {
             rows.reads = 0
             beforeCancels = reading.generation
             beforePresentations = presentations
+            measures = 0
+            placements = 0
         }
         repeat(20) {
             composeRule.onNodeWithTag("audit").performTouchInput { moveBy(Offset(0f, -1f)) }
@@ -141,11 +159,12 @@ class TimelineScrollWorkTest {
             assertEquals(startIndex, scroll.firstVisibleItemIndex, "Measure pixels within one post")
             assertTrue(scroll.firstVisibleItemScrollOffset > startOffset)
             println(
-                "COMPOSE_AUDIT revision=current rows=$size reading=$enabled phase=20_pixel_moves peek_calls=${rows.reads} cancel_calls=${reading.generation - beforeCancels} presentations=${presentations - beforePresentations} viewport_reports=${reading.reports} observed_generation=$observedGeneration",
+                "COMPOSE_AUDIT revision=current rows=$size reading=$enabled columns=$columns phase=20_pixel_moves peek_calls=${rows.reads} cancel_calls=${reading.generation - beforeCancels} presentations=${presentations - beforePresentations} viewport_reports=${reading.reports} observed_generation=$observedGeneration measures=$measures placements=$placements",
             )
             assertTrue(rows.reads < 100, "Pixel-only scroll must not enumerate the loaded list")
             assertEquals(0, reading.generation - beforeCancels, "Pixel updates must not repeat the interaction-start command")
             assertEquals(0, presentations - beforePresentations)
+            assertEquals(0, measures, "Pixel scroll must not remeasure the grid container")
         }
         composeRule.onNodeWithTag("audit").performTouchInput { up() }
         composeRule.waitForIdle()
@@ -155,7 +174,9 @@ class TimelineScrollWorkTest {
             composeRule.waitForIdle()
         }
         composeRule.runOnIdle {
-            println("COMPOSE_AUDIT revision=current rows=$size reading=$enabled phase=10_post_moves peek_calls=${rows.reads}")
+            println(
+                "COMPOSE_AUDIT revision=current rows=$size reading=$enabled columns=$columns phase=10_post_moves peek_calls=${rows.reads}",
+            )
             assertTrue(rows.reads < 200, "Crossing posts must not scan from the beginning of the loaded list")
         }
     }

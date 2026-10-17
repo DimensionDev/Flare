@@ -148,6 +148,72 @@ class TimelineReadingSessionTest : RobolectricTest() {
     fun close() = database.close()
 
     @Test
+    fun originalContinuousCursorStopsOnRepeatedPostsAndCanRetry() =
+        runTest {
+            val loader =
+                Loader().apply {
+                    response = page(0..9, "stalled").copy(previousKey = null)
+                    beforeLoad = { check(requests.size <= 8) { "Repeated request for a stalled page" } }
+                }
+            val session = session(loader, backgroundScope)
+            val presenter =
+                object : PagingDataPresenter<TimelinePageItem>(coroutineContext) {
+                    override suspend fun presentPagingDataEvent(event: PagingDataEvent<TimelinePageItem>) {
+                        if (size > 0) get(size - 1)
+                    }
+                }
+            backgroundScope.launch { session.pagingData.collectLatest(presenter::collectFrom) }
+            val failure = presenter.loadStateFlow.filterNotNull().first { it.hasError }
+            assertTrue(failure.append is androidx.paging.LoadState.Error)
+            assertEquals(listOf("stalled"), appendCursors(loader), "A stalled page must stop after one request")
+            assertEquals(10, presenter.size)
+            loader.response = page(10..19).copy(nextKey = null, previousKey = null)
+            presenter.retry()
+            presenter.loadStateFlow.filterNotNull().first { it.isIdle && it.append.endOfPaginationReached }
+            assertEquals(listOf("stalled", "stalled"), appendCursors(loader))
+            if (presenter.size != 20) presenter.onPagesUpdatedFlow.first { presenter.size == 20 }
+            assertEquals(20, presenter.size)
+        }
+
+    @Test
+    fun originalContinuousCursorCanRepeatWhileAddingPosts() =
+        runTest {
+            val loader = Loader().apply { response = page(0..9, "same").copy(previousKey = null) }
+            val session = session(loader, backgroundScope)
+            session.refresh(false, initial = true)
+            loader.response = page(10..19, "same").copy(previousKey = null)
+            assertTrue(append(session) is androidx.paging.RemoteMediator.MediatorResult.Success)
+            assertEquals((0..19).map(Int::toString), ids(session))
+            assertTrue(append(session) is androidx.paging.RemoteMediator.MediatorResult.Error)
+            assertEquals(listOf("same", "same"), appendCursors(loader))
+        }
+
+    @Test
+    fun advancingContinuousAppendHasBoundedDatabaseWork() =
+        runTest {
+            val loader = Loader().apply { response = page(0..39, "page-0").copy(previousKey = null) }
+            val session = session(loader, backgroundScope)
+            session.refresh(false, initial = true)
+            val selects = mutableListOf<Int>()
+            var fullScans = 0
+            onPagingRowsRead = { if (it == session.activeKey) fullScans++ }
+            repeat(25) { page ->
+                val first = (page + 1) * 40
+                loader.response = page(first..first + 39, "page-${page + 1}").copy(previousKey = null)
+                var queries = 0
+                onSelect = { queries++ }
+                assertTrue(append(session) is androidx.paging.RemoteMediator.MediatorResult.Success)
+                onSelect = {}
+                selects += queries
+            }
+            onPagingRowsRead = {}
+            println("CONTINUOUS_APPEND_AUDIT history=40..1040 rows_per_page=40 selects=$selects full_scans=$fullScans")
+            assertEquals(0, fullScans, "Append must not enumerate retained history")
+            assertTrue(selects.max() <= 21, "Append must stay within the existing query budget regardless of history: $selects")
+            assertEquals(1040, rows(session).size)
+        }
+
+    @Test
     fun emptyInitialPageSettlesWithoutRepeatedRefresh() =
         runTest {
             val loader =

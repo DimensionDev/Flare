@@ -890,6 +890,101 @@ class TimelineReadingSessionTest : RobolectricTest() {
         }
 
     @Test
+    fun reachingContinuousHeadWhileScrollingDismissesNoticeWithoutChangingPositionOrCursors() =
+        dismissNoticeWhileScrolling(TimelineOrder.Continuous)
+
+    @Test
+    fun reachingRankedHeadWhileScrollingDismissesNoticeWithoutChangingPositionOrCursors() =
+        dismissNoticeWhileScrolling(TimelineOrder.Ranked)
+
+    private fun dismissNoticeWhileScrolling(order: TimelineOrder) =
+        runTest {
+            val loader = Loader(timelineOrder = order)
+            val session = session(loader, backgroundScope, visible = { it.statusKey.id.toInt() % 2 == 0 })
+            session.refresh(false, initial = true)
+            val anchor = rows(session)[4]
+            savePosition(session, "${session.activeKey}_${anchor.statusId}", anchor.sortId, -12.5)
+            loader.response = page(11..20, "new-cursor")
+            session.refresh(false)
+            assertTrue(session.state.value.hasNewContent)
+            val before = snapshot(session)
+            val beforeRows = rows(session)
+            val beforeCursors = database.timelineReadingSessionDao().cursors(session.record.key)
+            val beforeSegments = database.timelineReadingSessionDao().segments(session.record.key)
+            val requests = loader.requests.toList()
+
+            // 11 is filtered out; 12 is the actual visible head even while the gesture continues.
+            assertEquals(listOf("11", "12"), ids(session).take(2))
+            session.updateViewport(
+                ReadingViewport("${session.activeKey}_${beforeRows[1].statusId}", 0.0, atTop = true, interacting = true),
+            )
+            withContext(Dispatchers.Default) {
+                assertNotNull(withTimeoutOrNull(2_000) { session.state.first { !it.hasNewContent } })
+            }
+
+            assertNull(session.state.value.position)
+            assertEquals(before.copy(hasNewContent = false, newContentBoundaryId = null), snapshot(session))
+            assertEquals(beforeRows, rows(session))
+            assertEquals(beforeCursors, database.timelineReadingSessionDao().cursors(session.record.key))
+            assertEquals(beforeSegments, database.timelineReadingSessionDao().segments(session.record.key))
+            assertEquals(requests, loader.requests, "Dismissing the notice must not start gap loading during a gesture")
+
+            session.updateViewport(
+                ReadingViewport("${session.activeKey}_${beforeRows[3].statusId}", -8.0, atTop = false, interacting = true),
+            )
+            assertFalse(session.state.value.hasNewContent)
+            loader.response = page(21..30, "next-cursor")
+            session.refresh(false)
+            assertTrue(session.state.value.hasNewContent, "A later refresh must still offer its new content")
+        }
+
+    @Test
+    fun olderWindowTopKeepsNoticeWithoutRepeatingQueriesForOffsetUpdates() =
+        runTest {
+            var headChecked: CompletableDeferred<Unit>? = null
+            val loader = Loader().apply { response = page(0..99) }
+            val repository = TimelineReadingRepository(database, backgroundScope)
+            val session =
+                session(
+                    loader,
+                    backgroundScope,
+                    repository = repository,
+                    visible = {
+                        headChecked?.complete(Unit)
+                        true
+                    },
+                )
+            session.refresh(false, initial = true)
+            val key = "${session.activeKey}_${rows(session)[60].statusId}"
+            loader.response = page(100..110)
+            session.refresh(false)
+            val checked = CompletableDeferred<Unit>()
+            headChecked = checked
+
+            session.updateViewport(ReadingViewport(key, 0.0, atTop = true, interacting = true))
+            withContext(Dispatchers.Default) {
+                assertNotNull(withTimeoutOrNull(2_000) { checked.await() })
+                repository.selectedTab.first { it == "home" }
+            }
+            session.filtersChanged()
+            assertTrue(session.state.value.hasNewContent)
+
+            var queries = 0
+            onSelect = { queries++ }
+            try {
+                repeat(60) { offset ->
+                    session.updateViewport(ReadingViewport(key, offset.toDouble(), atTop = true, interacting = true))
+                    testScheduler.runCurrent()
+                }
+                assertEquals(0, queries)
+            } finally {
+                onSelect = {}
+            }
+            assertTrue(session.state.value.hasNewContent)
+            assertNull(session.state.value.position)
+        }
+
+    @Test
     fun timerFollowsLatestFromTheFirstVisiblePostBeyondAFilteredPage() =
         runTest {
             val loader = Loader(prepend = true).apply { response = page(0..79) }

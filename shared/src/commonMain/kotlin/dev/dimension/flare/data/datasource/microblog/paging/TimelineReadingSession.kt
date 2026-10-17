@@ -372,11 +372,21 @@ internal class TimelineReadingSession(
     fun updateViewport(value: ReadingViewport) {
         if (closed.value) return
         if (value.itemKey?.startsWith("reading-gap:") == true) return
-        val wasInteracting = viewport.value.interacting
+        val previous = viewport.value
         viewport.value = value
-        if (value.interacting && (!wasInteracting || state.value.position != null)) cancelRestoration()
+        if (value.interacting && (!previous.interacting || state.value.position != null)) cancelRestoration()
+        if (value.atTop && value.itemKey != null && state.value.hasNewContent &&
+            (!previous.atTop || previous.itemKey != value.itemKey || previous.interacting != value.interacting)
+        ) {
+            // Reaching the head consumes the notice even before the gesture or momentum ends.
+            launchIo {
+                mutex.withLock {
+                    if (valid()) dismissReadNoticeAtTop(value)
+                }
+            }
+        }
         requestBoundaryCheck()
-        if (value.interacting && !wasInteracting) launchIo { repository.selectTab(record.tabId) }
+        if (value.interacting && !previous.interacting) launchIo { repository.selectTab(record.tabId) }
         checkpoint?.cancel()
         if (!value.interacting && value.itemKey != null && state.value.position == null && value.offset.isFinite()) {
             val version = repository.nextPositionVersion(record)
@@ -587,6 +597,14 @@ internal class TimelineReadingSession(
                 }
                 state.update { it.copy(hasNewContent = false) }
             }
+        }
+    }
+
+    private suspend fun dismissReadNoticeAtTop(value: ReadingViewport) {
+        if (value.atTop && value.itemKey != null && state.value.position == null && state.value.hasNewContent &&
+            value.itemKey == visibleRow(activeKey, 0)?.timeline?.let { "${activeKey}_${it.statusId}" }
+        ) {
+            dismissReadNotice(force = true)
         }
     }
 
@@ -1063,9 +1081,7 @@ internal class TimelineReadingSession(
                 val dao = database.pagingTimelineDao()
                 val row = value.itemKey?.let { dao.readingItem(activeKey, it) } ?: return@withLock null
                 val offset = dao.readingItemOffset(activeKey, row.sortId)
-                if (value.atTop && state.value.position == null && visibleRow(activeKey, 0)?.timeline?.statusId == row.statusId) {
-                    dismissReadNotice(force = true)
-                }
+                dismissReadNoticeAtTop(value)
                 val boundaries = readingBoundaries()
                 boundaries.filter { kotlin.math.abs(it.offset - offset) > 8 }.forEach { visitedGaps -= it.segment.key }
                 boundaries

@@ -12,6 +12,7 @@ struct TimelineScreen: View {
     @Environment(\.timelineAppearance) private var timelineAppearance
     @Environment(\.appSettings) private var appSettings
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.controlActiveState) private var controlActiveState
     @State private var canComposePresenter = KotlinPresenter(presenter: CanComposePresenter())
 
@@ -43,18 +44,22 @@ struct TimelineScreen: View {
             if activity == .key { presenter.state.onHomeEntered() }
         }
         .overlay(alignment: .top) {
-            if let reading = presenter.state.readingState, reading.hasNewContent {
-                Button {
-                    Task { try? await reading.showLatest() }
-                } label: {
-                    Label("home_timeline_new_content", systemImage: "arrow.up")
-                        .padding(.horizontal, 12).padding(.vertical, 6)
+            ZStack {
+                if let reading = presenter.state.readingState, reading.hasNewContent {
+                    Button {
+                        Task { try? await reading.showLatest() }
+                    } label: {
+                        Label("home_timeline_new_content", systemImage: "arrow.up")
+                            .padding(.horizontal, 12).padding(.vertical, 6)
+                    }
+                    .buttonStyle(.plain)
+                    .background(.regularMaterial, in: Capsule())
+                    .accessibilityHint(Text("home_timeline_view_latest"))
+                    .padding(.top, 8)
+                    .transition(reduceMotion ? .opacity : .move(edge: .top).combined(with: .opacity))
                 }
-                .buttonStyle(.plain)
-                .background(.regularMaterial, in: Capsule())
-                .accessibilityHint(Text("home_timeline_view_latest"))
-                .padding(.top, 8)
             }
+            .animation(.easeInOut(duration: 0.2), value: presenter.state.readingState?.hasNewContent == true)
         }
         .onChange(of: scenePhase) { _, phase in
             if phase != .active { presenter.state.readingState?.savePosition() }

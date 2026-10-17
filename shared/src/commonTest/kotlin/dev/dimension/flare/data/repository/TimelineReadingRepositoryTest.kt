@@ -10,14 +10,17 @@ import dev.dimension.flare.data.database.cache.model.DbPagingTimeline
 import dev.dimension.flare.data.database.createDatabaseDriver
 import dev.dimension.flare.memoryDatabaseBuilder
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
+import kotlin.coroutines.CoroutineContext
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -25,6 +28,91 @@ import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class TimelineReadingRepositoryTest : RobolectricTest() {
+    @Test
+    fun reversedBackgroundSavesRestoreTheNewestPostAndOffset() = orderedSaves(synchronous = false)
+
+    @Test
+    fun queuedBackgroundSaveCannotOverwriteTheFinalCheckpoint() = orderedSaves(synchronous = true)
+
+    private fun orderedSaves(synchronous: Boolean) =
+        runTest {
+            val database =
+                Room
+                    .memoryDatabaseBuilder<CacheDatabase>()
+                    .setDriver(createDatabaseDriver())
+                    .setQueryCoroutineContext(Dispatchers.Unconfined)
+                    .build()
+            val lifetime = Job()
+            val dispatcher = QueuedPositionSaveDispatcher()
+            val repository = TimelineReadingRepository(database, CoroutineScope(lifetime + dispatcher))
+            try {
+                repository.enterHome { true }
+                val session = assertNotNull(repository.open("home", "source"))
+                val snapshot = assertNotNull(repository.acquire(session))
+                database.pagingTimelineDao().insertAll(
+                    listOf(DbPagingTimeline(snapshot.activeKey, "old", 2), DbPagingTimeline(snapshot.activeKey, "new", 1)),
+                )
+                repository.savePosition(snapshot, snapshot.activeKey, "${snapshot.activeKey}_old", -1.25)
+                if (synchronous) {
+                    repository.checkpoint(snapshot, snapshot.activeKey, "${snapshot.activeKey}_new", -2.5)
+                } else {
+                    repository.savePosition(snapshot, snapshot.activeKey, "${snapshot.activeKey}_new", -2.5)
+                }
+                dispatcher.runAllNewestFirst()
+                assertTrue(lifetime.children.none(), "Both saves must have completed")
+                repository.release(snapshot)
+                val reopened = assertNotNull(repository.acquire(session))
+                assertEquals("${snapshot.activeKey}_new", reopened.anchorId)
+                assertEquals(-2.5, reopened.offset)
+                repository.release(reopened)
+            } finally {
+                lifetime.cancel()
+                database.close()
+            }
+        }
+
+    @Test
+    fun positionVersionsAreIndependentAcrossConcurrentAndReusedLeases() =
+        runTest {
+            val database =
+                Room
+                    .memoryDatabaseBuilder<CacheDatabase>()
+                    .setDriver(createDatabaseDriver())
+                    .setQueryCoroutineContext(Dispatchers.Unconfined)
+                    .build()
+            val lifetime = Job()
+            val dispatcher = QueuedPositionSaveDispatcher()
+            val repository = TimelineReadingRepository(database, CoroutineScope(lifetime + dispatcher))
+            try {
+                repository.enterHome { true }
+                val session = assertNotNull(repository.open("home", "source"))
+                val first = assertNotNull(repository.acquire(session))
+                database.pagingTimelineDao().insertAll(listOf(DbPagingTimeline(first.activeKey, "post", 1)))
+                repeat(3) { repository.checkpoint(first, first.activeKey, "${first.activeKey}_post", -1.25) }
+                val second = assertNotNull(repository.acquire(session))
+                repository.savePosition(first, first.activeKey, "${first.activeKey}_post", -2.5)
+                repository.savePosition(second, second.activeKey, "${second.activeKey}_post", -10.25)
+                dispatcher.runAllNewestFirst()
+                assertEquals(-2.5, repository.current(first)?.offset)
+                assertEquals(-10.25, repository.current(second)?.offset)
+                repository.release(second)
+
+                repository.savePosition(first, first.activeKey, "${first.activeKey}_post", -99.0)
+                repository.release(first)
+                val reopened = assertNotNull(repository.acquire(session))
+                assertEquals(first.key, reopened.key)
+                repository.savePosition(reopened, reopened.activeKey, "${reopened.activeKey}_post", -30.25)
+                repository.savePosition(first, first.activeKey, "${first.activeKey}_post", -100.0)
+                dispatcher.runAllNewestFirst()
+                repository.release(first)
+                assertEquals(-30.25, repository.current(reopened)?.offset)
+                repository.release(reopened)
+            } finally {
+                lifetime.cancel()
+                database.close()
+            }
+        }
+
     @Test
     fun failedBackgroundCheckpointKeepsApplicationScopeAndLaterSavesAlive() =
         checkpointAfterFailure(IllegalStateException("Checkpoint failed"))
@@ -78,10 +166,12 @@ class TimelineReadingRepositoryTest : RobolectricTest() {
                 database.pagingTimelineDao().insertAll(listOf(row))
                 val anchor = "${snapshot.activeKey}_${row.statusId}"
                 repository.checkpoint(snapshot, snapshot.activeKey, anchor, -10.0)
+                repository.savePosition(snapshot, snapshot.activeKey, anchor, -15.0)
+                val olderSave = lifetime.children.single()
                 failure = injected
                 repository.savePosition(snapshot, snapshot.activeKey, anchor, -20.0)
                 var completionFailure: Throwable? = null
-                lifetime.children.single().invokeOnCompletion { completionFailure = it }
+                lifetime.children.single { it !== olderSave }.invokeOnCompletion { completionFailure = it }
                 advanceUntilIdle()
                 assertEquals(injected is CancellationException, completionFailure is CancellationException)
                 assertTrue(lifetime.isActive, "One checkpoint failure must not cancel the application's ordinary Job")
@@ -100,4 +190,19 @@ class TimelineReadingRepositoryTest : RobolectricTest() {
                 database.close()
             }
         }
+}
+
+internal class QueuedPositionSaveDispatcher : CoroutineDispatcher() {
+    private val tasks = mutableListOf<Runnable>()
+
+    override fun dispatch(
+        context: CoroutineContext,
+        block: Runnable,
+    ) {
+        tasks += block
+    }
+
+    fun runAllNewestFirst() {
+        while (tasks.isNotEmpty()) tasks.removeLast().run()
+    }
 }

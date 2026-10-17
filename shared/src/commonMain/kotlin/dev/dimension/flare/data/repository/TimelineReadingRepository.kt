@@ -14,6 +14,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -31,7 +33,19 @@ internal class TimelineReadingRepository(
     private val entryMutex = Mutex()
 
     // Identity distinguishes successive readers that reuse the same retained snapshot.
-    private val liveSnapshots = mutableMapOf<String, DbTimelineReadingSnapshot>()
+    private val liveSnapshots = MutableStateFlow<Map<String, ReadingLease>>(emptyMap())
+
+    private class ReadingLease(
+        val snapshot: DbTimelineReadingSnapshot,
+    ) {
+        val positionVersion = MutableStateFlow(0L)
+    }
+
+    fun nextPositionVersion(record: DbTimelineReadingSnapshot): Long? =
+        liveSnapshots.value[record.key]
+            ?.takeIf { it.snapshot === record }
+            ?.positionVersion
+            ?.updateAndGet { it + 1 }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val selectedTab =
@@ -59,9 +73,10 @@ internal class TimelineReadingRepository(
         itemKey: String,
         offset: Double,
     ) {
+        val version = nextPositionVersion(record) ?: return
         scope.launch {
             try {
-                checkpoint(record, pagingKey, itemKey, offset)
+                checkpoint(record, pagingKey, itemKey, offset, version)
             } catch (error: CancellationException) {
                 throw error
             } catch (error: Exception) {
@@ -75,7 +90,10 @@ internal class TimelineReadingRepository(
         pagingKey: String,
         itemKey: String,
         offset: Double,
+        version: Long? = nextPositionVersion(record),
     ) = database.connect {
+        // Capture before dispatch or debounce; transaction arrival order need not match viewport order.
+        if (version == null || liveSnapshots.value[record.key]?.positionVersion?.value != version) return@connect
         val latest = current(record) ?: return@connect
         if (pagingKey != latest.activeKey) return@connect
         val row = database.pagingTimelineDao().readingItem(pagingKey, itemKey) ?: return@connect
@@ -94,7 +112,7 @@ internal class TimelineReadingRepository(
                 val dao = database.timelineReadingSessionDao()
                 val previous = latest.snapshotKey?.let { dao.snapshot(it) }
                 val previousKey = previous?.key
-                val key = previousKey?.takeIf { it !in liveSnapshots } ?: "${record.key}${Uuid.random()}/"
+                val key = previousKey?.takeIf { it !in liveSnapshots.value } ?: "${record.key}${Uuid.random()}/"
                 val snapshot =
                     if (previous != null) {
                         if (key != previous.key) {
@@ -117,7 +135,7 @@ internal class TimelineReadingRepository(
                     }
                 dao.saveSnapshot(snapshot)
                 if (previous == null) dao.retainSnapshot(record.tabId, key)
-                liveSnapshots[key] = snapshot
+                liveSnapshots.update { it + (key to ReadingLease(snapshot)) }
                 acquired = snapshot
                 removeUnusedSnapshots(record.key)
                 snapshot
@@ -130,7 +148,7 @@ internal class TimelineReadingRepository(
 
     suspend fun current(record: DbTimelineReadingSnapshot): DbTimelineReadingSnapshot? =
         database.connect {
-            if (enabled.value != true || liveSnapshots[record.key] !== record ||
+            if (enabled.value != true || liveSnapshots.value[record.key]?.snapshot !== record ||
                 database.timelineReadingSessionDao().get(record.tabId)?.key != record.sessionKey
             ) {
                 return@connect null
@@ -152,14 +170,14 @@ internal class TimelineReadingRepository(
 
     suspend fun release(record: DbTimelineReadingSnapshot) =
         database.connect {
-            if (liveSnapshots[record.key] === record) liveSnapshots.remove(record.key)
+            liveSnapshots.update { if (it[record.key]?.snapshot === record) it - record.key else it }
             removeUnusedSnapshots(record.sessionKey)
         }
 
     private suspend fun removeUnusedSnapshots(sessionKey: String) {
         val dao = database.timelineReadingSessionDao()
         dao.snapshots(sessionKey).forEach { snapshot ->
-            if (snapshot.key !in liveSnapshots && dao.get(snapshot.tabId)?.snapshotKey != snapshot.key) {
+            if (snapshot.key !in liveSnapshots.value && dao.get(snapshot.tabId)?.snapshotKey != snapshot.key) {
                 deleteData(snapshot.key)
                 dao.deleteSegments(snapshot.key)
                 dao.deleteSnapshot(snapshot.key)
@@ -207,7 +225,7 @@ internal class TimelineReadingRepository(
         }
         database.timelineReadingSessionDao().deleteSnapshots(session.key)
         database.timelineReadingSessionDao().delete(session.tabId)
-        liveSnapshots.keys.removeAll { it.startsWith(session.key) }
+        liveSnapshots.update { snapshots -> snapshots.filterKeys { !it.startsWith(session.key) } }
     }
 
     suspend fun deleteData(prefix: String) {

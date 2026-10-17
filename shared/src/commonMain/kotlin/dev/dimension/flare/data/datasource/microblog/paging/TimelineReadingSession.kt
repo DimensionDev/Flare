@@ -379,10 +379,12 @@ internal class TimelineReadingSession(
         if (value.interacting && !wasInteracting) launchIo { repository.selectTab(record.tabId) }
         checkpoint?.cancel()
         if (!value.interacting && value.itemKey != null && state.value.position == null && value.offset.isFinite()) {
+            val version = repository.nextPositionVersion(record)
+            val key = activeKey
             checkpoint =
                 launchIo {
                     delay(200)
-                    repository.checkpoint(record, activeKey, value.itemKey, value.offset)
+                    repository.checkpoint(record, key, value.itemKey, value.offset, version)
                 }
         }
     }

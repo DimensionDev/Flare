@@ -17,6 +17,7 @@ import dev.dimension.flare.data.database.cache.model.DbPagingTimeline
 import dev.dimension.flare.data.database.createDatabaseDriver
 import dev.dimension.flare.data.datasource.microblog.MixedRemoteMediator
 import dev.dimension.flare.data.model.tab.TimelineMergePolicy
+import dev.dimension.flare.data.repository.QueuedPositionSaveDispatcher
 import dev.dimension.flare.data.repository.TimelineReadingRepository
 import dev.dimension.flare.data.translation.NoopPreTranslationService
 import dev.dimension.flare.memoryDatabaseBuilder
@@ -34,6 +35,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -1273,6 +1275,58 @@ class TimelineReadingSessionTest : RobolectricTest() {
 
     @Test
     fun completedGestureDuringTimerFetchDoesNotFollowLatest() = completedGestureDuringRefresh(waitForPrepend = false)
+
+    @Test
+    fun closeKeepsItsFinalViewportDespiteQueuedBackgroundAndDebouncedSaves() =
+        runTest {
+            val lifetime = Job()
+            val dispatcher = QueuedPositionSaveDispatcher()
+            val repository = TimelineReadingRepository(database, CoroutineScope(lifetime + dispatcher))
+            val session = session(Loader(), backgroundScope, repository = repository)
+            try {
+                session.refresh(false, initial = true)
+                val before = rows(session)
+                val oldAnchor = "${session.activeKey}_${before[0].statusId}"
+                val newAnchor = "${session.activeKey}_${before[1].statusId}"
+                session.updateViewport(ReadingViewport(oldAnchor, -1.25, atTop = false, interacting = false))
+                session.savePosition()
+                session.updateViewport(ReadingViewport(newAnchor, -2.5, atTop = false, interacting = false))
+                session.close()
+                dispatcher.runAllNewestFirst()
+                val reopened = session(Loader(), backgroundScope, repository = repository)
+                reopened.prepare()
+                val position = assertNotNull(reopened.state.value.position)
+                assertEquals(newAnchor, position.itemKey)
+                assertEquals(-2.5, position.offset)
+                reopened.close()
+            } finally {
+                lifetime.cancel()
+            }
+        }
+
+    @Test
+    fun pendingDebounceCannotReplaceANewerCheckpoint() =
+        runTest {
+            val repository = TimelineReadingRepository(database, backgroundScope)
+            val session = session(Loader(), backgroundScope, repository = repository)
+            session.refresh(false, initial = true)
+            val before = rows(session)
+            val oldAnchor = "${session.activeKey}_${before[0].statusId}"
+            val newAnchor = "${session.activeKey}_${before[1].statusId}"
+            try {
+                val lifetime = requireNotNull(backgroundScope.coroutineContext[Job])
+                val existingJobs = lifetime.children.toSet()
+                session.updateViewport(ReadingViewport(oldAnchor, -1.25, atTop = false, interacting = false))
+                val debounce = lifetime.children.single { it !in existingJobs }
+                repository.checkpoint(session.record, session.activeKey, newAnchor, -2.5)
+                debounce.join()
+                val saved = assertNotNull(repository.current(session.record))
+                assertEquals(newAnchor, saved.anchorId)
+                assertEquals(-2.5, saved.offset)
+            } finally {
+                session.close()
+            }
+        }
 
     @Test
     fun viewportInteractionCancelsRestorationAndKeepsTheFinalOffset() =

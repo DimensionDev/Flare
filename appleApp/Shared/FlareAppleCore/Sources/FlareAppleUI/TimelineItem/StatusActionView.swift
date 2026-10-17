@@ -624,14 +624,14 @@ public extension EnvironmentValues {
     @Entry var macCrossPostAction: MacCrossPostAction? = nil
 }
 
-struct MacStatusShareMenu<LabelContent: View>: View {
+public struct MacStatusShareMenu<LabelContent: View>: View {
     let data: MacStatusShareData
     let onShareScreenshot: () -> Void
     @ViewBuilder let label: () -> LabelContent
     @Environment(\.openURL) private var openURL
     @Environment(\.macCrossPostAction) private var crossPost
 
-    init(
+    public init(
         data: MacStatusShareData,
         onShareScreenshot: @escaping () -> Void,
         @ViewBuilder label: @escaping () -> LabelContent

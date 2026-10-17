@@ -52,28 +52,30 @@ struct GalleryDetailScreen: View {
                         navigateToProfile($0)
                     }
                 }
+            }
 
-                ToolbarItemGroup(placement: .primaryAction) {
-                    Button {
-                        switch onEnum(of: presenter.state.detail) {
-                        case .success(let success):
-                            navigateToShare(success.data)
-                        case .loading, .error:
-                            break
-                        }
-                    } label: {
-                        Image(fontAwesome: .shareNodes)
+            ToolbarItemGroup(placement: .primaryAction) {
+                Button {
+                    switch onEnum(of: presenter.state.detail) {
+                    case .success(let success):
+                        navigateToShare(success.data)
+                    case .loading, .error:
+                        break
                     }
-                    .accessibilityLabel(Text("fx_share"))
-                    .disabled({
-                        switch onEnum(of: presenter.state.detail) {
-                        case .success:
-                            return false
-                        case .loading, .error:
-                            return true
-                        }
-                    }())
+                } label: {
+                    Image(fontAwesome: .shareNodes)
+                }
+                .accessibilityLabel(Text("fx_share"))
+                .disabled({
+                    switch onEnum(of: presenter.state.detail) {
+                    case .success:
+                        return false
+                    case .loading, .error:
+                        return true
+                    }
+                }())
 
+                if !isBigScreen {
                     Button {
                         switch onEnum(of: presenter.state.detail) {
                         case .success:

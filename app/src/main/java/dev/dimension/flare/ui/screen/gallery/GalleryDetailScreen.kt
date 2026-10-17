@@ -956,24 +956,17 @@ private fun GalleryTopAppBar(
             BackButton(onBack = onBack)
         },
         actions = {
+            val detailLoaded = detailState is UiState.Success
+            IconButton(
+                enabled = detailLoaded,
+                onClick = onShare,
+            ) {
+                FAIcon(
+                    imageVector = FontAwesomeIcons.Solid.ShareNodes,
+                    contentDescription = stringResource(R.string.gallery_detail_share_content_description),
+                )
+            }
             if (isBigScreen) {
-                val shareEnabled =
-                    when (detailState) {
-                        is UiState.Success -> true
-
-                        is UiState.Loading,
-                        is UiState.Error,
-                        -> false
-                    }
-                IconButton(
-                    enabled = shareEnabled,
-                    onClick = onShare,
-                ) {
-                    FAIcon(
-                        imageVector = FontAwesomeIcons.Solid.ShareNodes,
-                        contentDescription = stringResource(R.string.gallery_detail_share_content_description),
-                    )
-                }
                 IconButton(onClick = {}) {
                     FAIcon(
                         imageVector = FontAwesomeIcons.Solid.EllipsisVertical,
@@ -981,16 +974,8 @@ private fun GalleryTopAppBar(
                     )
                 }
             } else {
-                val expandEnabled =
-                    when (detailState) {
-                        is UiState.Success -> true
-
-                        is UiState.Loading,
-                        is UiState.Error,
-                        -> false
-                    }
                 IconButton(
-                    enabled = expandEnabled,
+                    enabled = detailLoaded,
                     onClick = onExpand,
                 ) {
                     FAIcon(

@@ -1,12 +1,162 @@
 import XCTest
 import UIKit
 import SwiftUI
+import ObjectiveC
 import KotlinSharedUI
+import FlareAppleCore
 import FlareAppleUI
 @testable import Flare
 
 @MainActor
 final class TimelineControllerIntegrationTests: XCTestCase {
+    func testItemMetadataCacheTracksPayloadChangesReorderingAndRemoval() {
+        var cache = TimelineContent.ItemMetadataCache()
+        let original = makeRow(0, media: false)
+        let unchanged = makeRow(1, media: false)
+        let first = cache.update([.post(original), nil, .post(unchanged)])
+        XCTAssertEqual(first.map { $0?.id }, ["t:case-0", nil, "t:case-1"])
+        let changed = makeRow(0, liked: true, media: false)
+        let second = cache.update([.post(unchanged), .post(changed), .post(changed), nil])
+        XCTAssertEqual(second.map { $0?.id }, ["t:case-1", "t:case-0", "t:case-0", nil])
+        XCTAssertEqual(second[0]?.renderHash, first[2]?.renderHash)
+        XCTAssertEqual(second[1]?.renderHash, changed.renderHash)
+        XCTAssertNotEqual(second[1]?.renderHash, first[0]?.renderHash)
+        XCTAssertEqual(Set(cache.entries.keys), [ObjectIdentifier(unchanged), ObjectIdentifier(changed)])
+        XCTAssertTrue(cache.update([]).isEmpty)
+        XCTAssertTrue(cache.entries.isEmpty)
+        XCTAssertEqual(cache.update([.post(changed)])[0]?.renderHash, changed.renderHash)
+        XCTAssertEqual(cache.entries.count, 1)
+    }
+
+    func testCellMeasurementsDuringPrependPreserveDraggingPost() async throws {
+        try await assertPrependMeasurementsPreservePost(scrollFlag: #selector(getter: UIScrollView.isDragging))
+    }
+
+    func testCellMeasurementsDuringPrependPreserveDeceleratingPost() async throws {
+        try await assertPrependMeasurementsPreservePost(scrollFlag: #selector(getter: UIScrollView.isDecelerating))
+    }
+
+    private func assertPrependMeasurementsPreservePost(scrollFlag: Selector) async throws {
+        let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first)
+        let previousKeyWindow = scene.windows.first(where: \.isKeyWindow)
+        let controller = UITimelineCollectionViewController(detailStatusKey: nil)
+        let host = UIViewController()
+        host.addChild(controller)
+        host.view.addSubview(controller.view)
+        controller.view.frame = host.view.bounds
+        controller.view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        controller.didMove(toParent: host)
+        var input = TimelineContent()
+        input.state = .loaded
+        input.items = (0..<120).map { .post(makeRow($0, media: false)) }
+        controller.submit(input, columns: 1)
+        let window = UIWindow(windowScene: scene)
+        window.rootViewController = host
+        window.makeKeyAndVisible()
+        defer {
+            window.isHidden = true
+            window.rootViewController = nil
+            previousKeyWindow?.makeKey()
+        }
+        try await Task.sleep(for: .milliseconds(500))
+        let list = try XCTUnwrap(controller.view.subviews.compactMap { $0 as? TimelineCollectionView }.first)
+        list.layoutIfNeeded()
+        let path = try XCTUnwrap(list.readingIndexPath?("t:case-20"))
+        let frame = try XCTUnwrap(list.layoutAttributesForItem(at: path)).frame
+        controller.restoreEffectiveContentOffset(frame.minY + 40, animated: false)
+        try await Task.sleep(for: .milliseconds(300))
+
+        let method = try XCTUnwrap(class_getInstanceMethod(UIScrollView.self, scrollFlag))
+        let original = method_getImplementation(method)
+        let getter = unsafeBitCast(original, to: (@convention(c) (UIScrollView, Selector) -> Bool).self)
+        let override: @convention(block) (UIScrollView) -> Bool = { $0 === list || getter($0, scrollFlag) }
+        let implementation = imp_implementationWithBlock(override)
+        method_setImplementation(method, implementation)
+        defer {
+            method_setImplementation(method, original)
+            imp_removeBlock(implementation)
+        }
+        controller.scrollViewWillBeginDragging(list)
+        for step in 0..<70 {
+            let anchor = try XCTUnwrap(list.captureReadingViewport())
+            let path = try XCTUnwrap(list.readingIndexPath?(anchor.id))
+            let cell = try XCTUnwrap(list.cellForItem(at: path))
+            let screenY = cell.convert(.zero, to: window).y
+            list.setContentOffset(CGPoint(x: 0, y: list.contentOffset.y - 15), animated: false)
+            if step.isMultiple(of: 7) {
+                input.items.insert(contentsOf: (200 + step * 20..<220 + step * 20).map {
+                    .post(makeRow($0, media: false))
+                }, at: 0)
+                controller.submit(input, columns: 1)
+            }
+            // Real cells report heights during both the snapshot and offset-compensation layouts.
+            try await Task.sleep(for: .milliseconds(25))
+            let currentPath = try XCTUnwrap(list.readingIndexPath?(anchor.id))
+            let currentCell = try XCTUnwrap(list.cellForItem(at: currentPath))
+            let drift = currentCell.convert(.zero, to: window).y - screenY - 15
+            guard abs(drift) <= 0.5 else {
+                throw NSError(domain: "TimelineReadingPosition", code: step,
+                              userInfo: [NSLocalizedDescriptionKey: "\(anchor.id) moved \(drift)pt at step \(step)"])
+            }
+        }
+        try await Task.sleep(for: .milliseconds(100))
+        guard !list.hasReadingPosition else { throw NSError(domain: "Unfinished reading restoration", code: 1) }
+        let expected = (0..<10).reversed().flatMap { Array(200 + $0 * 140..<220 + $0 * 140) } + Array(0..<120)
+        guard list.readingItemIDs?() == expected.map({ "t:case-\($0)" }) else {
+            throw NSError(domain: "Missing or reordered reading posts", code: 1)
+        }
+    }
+
+    func testRenamingHomeTabKeepsTheNativeListAndReadingPosition() async throws {
+        let home = KotlinPresenter(presenter: HomeTimelineWithTabsPresenter())
+        var firstTab: UiTimelineTabItem?
+        for _ in 0..<100 {
+            if case .success(let success) = onEnum(of: home.state.tabState) {
+                firstTab = success.data.cast(UiTimelineTabItem.self).first
+                if firstTab != nil { break }
+            }
+            try await Task.sleep(for: .milliseconds(10))
+        }
+        let tab = try XCTUnwrap(firstTab)
+        let renamed = tab.withPresentationOverrides(title: "Renamed reading tab", icon: tab.icon,
+            appearancePatch: tab.appearancePatch, enabled: tab.enabled, filterConfig: tab.filterConfig)
+        XCTAssertEqual(tab.contentSourceKey, renamed.contentSourceKey)
+        XCTAssertNotEqual(tab.loaderKey, renamed.loaderKey)
+        let accessories = (0..<80).map { UITimelineCollectionViewAccessoryItem(id: String($0), view: Header()) }
+        let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first)
+        let previousKeyWindow = scene.windows.first(where: \.isKeyWindow)
+        let host = UIHostingController(rootView: TimelineScreen(tabItem: tab, allowGalleryMode: false,
+            isHomeTimeline: true, accessoryItems: accessories))
+        let window = UIWindow(windowScene: scene)
+        window.rootViewController = host
+        window.makeKeyAndVisible()
+        defer {
+            window.isHidden = true
+            window.rootViewController = nil
+            previousKeyWindow?.makeKey()
+        }
+        func settle() async {
+            for _ in 0..<25 {
+                host.view.setNeedsLayout()
+                host.view.layoutIfNeeded()
+                try? await Task.sleep(for: .milliseconds(10))
+            }
+        }
+        await settle()
+        let list = try XCTUnwrap(descendants(host.view).compactMap { $0 as? TimelineCollectionView }.first)
+        let controller = try XCTUnwrap(list.delegate as? UITimelineCollectionViewController)
+        controller.restoreEffectiveContentOffset(800, animated: false)
+        await settle()
+        let position = try XCTUnwrap(list.captureReadingPosition())
+        let offset = list.contentOffset.y
+        XCTAssertGreaterThan(offset, 500)
+        host.rootView = TimelineScreen(tabItem: renamed, allowGalleryMode: false, isHomeTimeline: true, accessoryItems: accessories)
+        await settle()
+        XCTAssertTrue(descendants(host.view).contains { $0 === list })
+        XCTAssertEqual(list.captureReadingPosition()?.itemID, position.itemID)
+        XCTAssertEqual(list.contentOffset.y, offset, accuracy: 0.5)
+    }
+
     func testSwitchingListsAlwaysStartsAtTopButUpdatingTheSameListKeepsPosition() async throws {
         let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first)
         let previousKeyWindow = scene.windows.first(where: \.isKeyWindow)
@@ -259,6 +409,32 @@ final class TimelineControllerIntegrationTests: XCTestCase {
                 }
             }
         }
+    }
+
+    func testManualRefreshWithGapKeepsFractionalPositionAndNewPostsRemainScrollable() async throws {
+        let fixture = await Fixture(posts: true)
+        let reading = ReadingState()
+        reading.position = TimelineReadingPosition(itemKey: "case-20", offset: -37.25, requestId: 1, latest: false)
+        fixture.controller.readingState = reading
+        await fixture.settle()
+        let original = fixture.input.items
+        let gap = UiTimelineV2.Message(user: nil, statusKey: MicroBlogKey(id: "gap", host: "test"), icon: .info,
+            type: UiTimelineV2.MessageTypeLocalized(data: .readingGap, args: []),
+            createdAt: KotlinInstant.companion.fromEpochMilliseconds(epochMilliseconds: 0).toUi(),
+            clickEvent: ClickEventNoop.shared, accountType: AccountType.Guest.shared,
+            itemKey: "reading-gap:test", readingGap: nil)
+        fixture.input.isRefreshing = true
+        await fixture.apply()
+        fixture.input.items = (100..<110).map { .post(makeRow($0)) } + [.post(gap)] + original
+        fixture.input.isRefreshing = false
+        await fixture.apply()
+        try fixture.assertPosition(("t:case-20", -37.25))
+        XCTAssertEqual(reading.itemKey, "case-20")
+        XCTAssertEqual(reading.offset, -37.25, accuracy: 0.5)
+        XCTAssertNil(reading.position)
+        await fixture.scroll(0)
+        XCTAssertEqual(reading.itemKey, "case-100")
+        XCTAssertTrue(fixture.collection.readingItemIDs?().contains("t:case-20") == true)
     }
 
     func testPrependingPostsAtTopStillPreservesTheReadingItem() async throws {
@@ -676,6 +852,127 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         XCTAssertTrue(isBlank, "A newly inserted card painted outside its estimated cell")
     }
 
+    func testSessionRestoresStablePostAndFractionalOffsetAfterLoading() async throws {
+        let fixture = await Fixture(initialState: .loading)
+        let reading = ReadingState()
+        reading.position = TimelineReadingPosition(itemKey: "case-20", offset: -37.25, requestId: 1, latest: false)
+        fixture.controller.readingState = reading
+        await fixture.settle()
+        XCTAssertNotNil(reading.position)
+        fixture.input.state = .loaded
+        fixture.input.items = (0..<60).map { .post(makeRow($0)) }
+        await fixture.apply()
+        XCTAssertNil(reading.position)
+        try fixture.assertPosition(("t:case-20", -37.25))
+        XCTAssertEqual(reading.itemKey, "case-20")
+        XCTAssertEqual(reading.offset, -37.25, accuracy: 0.5)
+    }
+
+    func testReadingViewportReportsDoNotReadTheWholeSnapshotAndPrependKeepsPosition() async throws {
+        let fixture = await Fixture(posts: true)
+        let reading = ReadingState()
+        fixture.controller.readingState = reading
+        await fixture.scroll(1_500)
+        let position = try fixture.position()
+        let itemIDs = fixture.collection.readingItemIDs
+        var fullOrderReads = 0
+        fixture.collection.readingItemIDs = {
+            fullOrderReads += 1
+            return itemIDs?() ?? []
+        }
+        fixture.controller.beginExternalScrollInteraction()
+        for _ in 0..<100 {
+            fixture.collection.resetReadingPosition()
+            fixture.controller.scrollViewDidScroll(fixture.collection)
+        }
+        fixture.controller.endExternalScrollInteraction()
+        XCTAssertEqual(fullOrderReads, 0, "Continuous viewport reports must only inspect visible items")
+        XCTAssertEqual(reading.itemKey, String(position.id.dropFirst(2)))
+        XCTAssertEqual(reading.offset, Double(position.offset), accuracy: 0.5)
+        fixture.collection.readingItemIDs = itemIDs
+
+        fixture.input.items.insert(.post(makeRow(100)), at: 0)
+        await fixture.apply()
+        try fixture.assertPosition(position)
+    }
+
+    func testSessionAtTopCapturesAPostInsteadOfFollowLatest() async throws {
+        let fixture = await Fixture(posts: true)
+        let reading = ReadingState()
+        fixture.controller.readingState = reading
+        await fixture.settle()
+        XCTAssertEqual(reading.itemKey, "case-0")
+        XCTAssertEqual(reading.offset, 0, accuracy: 0.5)
+        fixture.input.items.insert(.post(makeRow(100)), at: 0)
+        await fixture.apply()
+        try fixture.assertPosition(("t:case-0", 0))
+    }
+
+    func testSessionAtTopSkipsTheChangelogAndCheckpointsTheFirstVisiblePost() async throws {
+        let fixture = await Fixture(posts: true, accessories: [UITimelineCollectionViewAccessoryItem(id: "change_log", view: Header())])
+        let reading = ReadingState()
+        fixture.controller.readingState = reading
+        await fixture.scroll(1_500)
+        XCTAssertNotEqual(reading.itemKey, "case-0")
+        await fixture.scroll(0)
+        XCTAssertEqual(try fixture.position().id, "a:change_log", "Transient layout anchoring must still include accessories")
+        XCTAssertEqual(reading.itemKey, "case-0")
+        let path = try XCTUnwrap(fixture.collection.readingIndexPath?("t:case-0"))
+        let frame = try XCTUnwrap(fixture.collection.layoutAttributesForItem(at: path)?.frame)
+        XCTAssertEqual(reading.offset, Double(frame.minY - fixture.collection.contentOffset.y), accuracy: 0.5)
+    }
+
+    func testSessionViewLatestWaitsForThePublishedHead() async throws {
+        let fixture = await Fixture(posts: true)
+        await fixture.scroll(1_500)
+        let previousPosition = try fixture.position()
+        let reading = ReadingState()
+        reading.position = TimelineReadingPosition(itemKey: "case-20", offset: 0, requestId: 3, latest: true)
+        fixture.controller.readingState = reading
+        await fixture.settle()
+        XCTAssertNotNil(reading.position)
+        try fixture.assertPosition(previousPosition)
+
+        fixture.input.items = ([20, 100] + Array(21..<60) + Array(0..<20)).map { .post(makeRow($0)) }
+        await fixture.apply()
+        XCTAssertNil(reading.position)
+        XCTAssertEqual(fixture.controller.effectiveContentOffsetY, 0, accuracy: 0.5)
+        XCTAssertEqual(reading.itemKey, "case-20")
+    }
+
+    func testUserScrollCancelsPendingSessionRestoration() async throws {
+        let fixture = await Fixture(initialState: .loading)
+        let reading = ReadingState()
+        reading.position = TimelineReadingPosition(itemKey: "case-20", offset: -37, requestId: 2, latest: false)
+        fixture.controller.readingState = reading
+        fixture.controller.beginExternalScrollInteraction()
+        XCTAssertNil(reading.position)
+        fixture.controller.endExternalScrollInteraction()
+        fixture.input.state = .loaded
+        fixture.input.items = (0..<60).map { .post(makeRow($0)) }
+        await fixture.apply()
+        XCTAssertEqual(fixture.controller.effectiveContentOffsetY, 0, accuracy: 0.5)
+    }
+
+    private final class ReadingState: NSObject, TimelineReadingState {
+        var position: TimelineReadingPosition?
+        var hasNewContent = false
+        var isRefreshing = false
+        var itemKey: String?
+        var offset: Double = 0
+        func updateViewport(itemKey: String?, offset: Double, atTop: Bool, interacting: Bool) {
+            self.itemKey = itemKey
+            self.offset = offset
+        }
+        func positionRestored(requestId: Int64) {
+            if position?.requestId == requestId { position = nil }
+        }
+        func cancelRestoration() { position = nil }
+        func savePosition() {}
+        nonisolated func __refreshAutomatically(completionHandler: @escaping @Sendable ((any Error)?) -> Void) { completionHandler(nil) }
+        nonisolated func __showLatest(completionHandler: @escaping @Sendable ((any Error)?) -> Void) { completionHandler(nil) }
+    }
+
     func testQuotedCarouselClipsImagesToTheCardCornersAfterScrollingAndResizing() throws {
         let post = try XCTUnwrap(makeRow(1) as? UiTimelineV2.TimelinePostItem).post
         let helper = TimelinePresentationAppearancePatchHelper.shared
@@ -836,12 +1133,12 @@ final class TimelineControllerIntegrationTests: XCTestCase {
 }
 
 @MainActor
-private func makeRow(_ index: Int, liked: Bool = false) -> UiTimelineV2 {
+func makeRow(_ index: Int, liked: Bool = false, media: Bool = true) -> UiTimelineV2 {
     let text = "Post \(index): " + String(repeating: "Rotation should preserve this reading item while text wraps and media resizes. ", count: index % 4 + 1)
     let style = RenderTextStyle(link: nil, bold: false, italic: false, strikethrough: false, monospace: false, code: false, underline: false, small: false, time: false)
     let rich = UiRichText(renderRuns: [RenderContent.Text(runs: [RenderRun.Text(text: text, style: style)], block: RenderBlockStyle())], isRtl: false, raw: text, innerText: text, imageUrls: [])
     let action = ActionMenu.Item(updateKey: "like", icon: liked ? .unlike : .like, text: nil, count: UiNumber(value: liked ? 2 : 1), color: liked ? .red : .contentColor, clickEvent: ClickEventNoop.shared, actionFamily: .like, enabled: true)
-    let images: [UiMedia] = (0..<(index % 3 == 0 ? 1 : 4)).map { i in UiMediaImage(url: "https://example.invalid/fixture-\(i).png", previewUrl: "https://example.invalid/fixture-\(i).png", description: nil, height: 600, width: 800, sensitive: false, customHeaders: nil) }
+    let images: [UiMedia] = media ? (0..<(index % 3 == 0 ? 1 : 4)).map { i in UiMediaImage(url: "https://example.invalid/fixture-\(i).png", previewUrl: "https://example.invalid/fixture-\(i).png", description: nil, height: 600, width: 800, sensitive: false, customHeaders: nil) } : []
     let profile = UiProfile(key: MicroBlogKey(id: "user", host: "example.invalid"), handle: UiHandle(raw: "reader", host: "example.invalid"), avatar: nil as UiMediaImage?, nameInternal: rich, platformId: "mastodon", platformIcon: .world, clickEvent: ClickEventNoop.shared, banner: nil, description: nil, sourceLanguages: [], translationDisplayState: .hidden, matrices: UiProfile.Matrices(fansCount: 0, followsCount: 0, statusesCount: 0, platformFansCount: nil), mark: [], bottomContent: nil)
     let post = UiTimelineV2.Post(platformId: "mastodon", images: images, sensitive: false, contentWarning: nil, user: profile, platformIcon: .world, sourceLanguages: [], translationDisplayState: .hidden, content: UiTranslatableText(original: rich, translation: nil), actions: [action], poll: nil, statusKey: MicroBlogKey(id: "case-\(index)", host: "example.invalid"), card: nil, createdAt: KotlinInstant.companion.fromEpochMilliseconds(epochMilliseconds: 0).toUi(), emojiReactions: [], sourceChannel: nil, visibility: nil, replyToHandle: nil, references: [], clickEvent: ClickEventNoop.shared, mediaClickPolicy: .openStatusMedia, accountType: AccountType.Guest.shared, itemKey: "case-\(index)")
     return UiTimelineV2.TimelinePostItem(post: post, presentation: UiTimelineV2.PostPresentation(message: nil, inlineParents: [], quotes: [], repost: nil, notificationKey: nil), itemKey: "case-\(index)")

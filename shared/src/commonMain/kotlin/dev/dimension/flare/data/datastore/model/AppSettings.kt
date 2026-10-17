@@ -14,6 +14,7 @@ public data class AppSettings(
     val mxgaEnabled: Boolean = false,
     val refreshHomeTimelineOnLaunch: Boolean = true,
     val homeTimelineAutoRefreshInterval: TimelineAutoRefreshInterval = TimelineAutoRefreshInterval.DISABLED,
+    val rememberHomeTimelineReadingPosition: Boolean = false,
 ) {
     public companion object {
         // for SwiftUI environment defaults

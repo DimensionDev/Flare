@@ -105,6 +105,7 @@ kotlin {
         val jvmTest by getting {
             dependencies {
                 implementation(compose("org.jetbrains.compose.ui:ui-test-junit4"))
+                implementation(libs.lifecycle.viewmodel.compose)
                 runtimeOnly(compose.desktop.currentOs)
             }
         }

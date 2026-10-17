@@ -2,11 +2,13 @@ package dev.dimension.flare.data.datasource.misskey
 
 import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
+import dev.dimension.flare.data.datasource.microblog.paging.TimelineOrder
 import dev.dimension.flare.data.network.misskey.MisskeyService
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiTimelineV2
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -14,6 +16,13 @@ import kotlin.test.assertTrue
 class MisskeyTimelinePrependTest {
     private val accountKey = MicroBlogKey("account", "example.com")
     private val service = MisskeyService(baseUrl = "https://example.com/api/")
+
+    @Test
+    fun `home timeline is continuous without a forward cursor`() {
+        val loader = HomeTimelineRemoteMediator(accountKey = accountKey, service = service)
+        assertEquals(TimelineOrder.Continuous, loader.timelineOrder)
+        assertFalse(loader.supportPrepend)
+    }
 
     @Test
     fun `home timeline prepend is disabled`() =

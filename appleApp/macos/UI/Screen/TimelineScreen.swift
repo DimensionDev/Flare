@@ -12,6 +12,8 @@ struct TimelineScreen: View {
     @Environment(\.timelineAppearance) private var timelineAppearance
     @Environment(\.appSettings) private var appSettings
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.controlActiveState) private var controlActiveState
     @State private var canComposePresenter = KotlinPresenter(presenter: CanComposePresenter())
 
     init(tabItem: UiTimelineTabItem, allowGalleryMode: Bool = false, isHomeTimeline: Bool = false) {
@@ -33,8 +35,36 @@ struct TimelineScreen: View {
             data: presenter.state.listState,
             detailStatusKey: nil,
             key: presenter.key,
+            readingState: presenter.state.readingState,
+            snapshot: presenter.state.snapshot,
             allowGalleryMode: allowGalleryMode
         )
+        .onAppear { presenter.state.onHomeEntered() }
+        .onChange(of: controlActiveState) { _, activity in
+            if activity == .key { presenter.state.onHomeEntered() }
+        }
+        .overlay(alignment: .top) {
+            ZStack {
+                if let reading = presenter.state.readingState, reading.hasNewContent {
+                    Button {
+                        Task { try? await reading.showLatest() }
+                    } label: {
+                        Label("home_timeline_new_content", systemImage: "arrow.up")
+                            .padding(.horizontal, 12).padding(.vertical, 6)
+                    }
+                    .buttonStyle(.plain)
+                    .background(.regularMaterial, in: Capsule())
+                    .accessibilityHint(Text("home_timeline_view_latest"))
+                    .padding(.top, 8)
+                    .transition(reduceMotion ? .opacity : .move(edge: .top).combined(with: .opacity))
+                }
+            }
+            .animation(.easeInOut(duration: 0.2), value: presenter.state.readingState?.hasNewContent == true)
+        }
+        .onChange(of: scenePhase) { _, phase in
+            if phase != .active { presenter.state.readingState?.savePosition() }
+        }
+        .onDisappear { presenter.state.readingState?.savePosition() }
         .environment(\.timelineAppearance, tabItem.resolveTimelineAppearance(base: timelineAppearance))
         .refreshable {
             try? await presenter.state.refreshSuspend()
@@ -83,9 +113,7 @@ struct TimelineScreen: View {
         guard isHomeTimeline, minutes > 0, scenePhase == .active else { return }
         while true {
             try await Task.sleep(for: .seconds(minutes * 60))
-            if !presenter.state.isRefreshing {
-                try? await presenter.state.refreshSuspend()
-            }
+            try? await presenter.state.refreshAutomatically()
         }
     }
 }

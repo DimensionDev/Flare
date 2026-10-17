@@ -4,6 +4,7 @@ import androidx.paging.ExperimentalPagingApi
 import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
+import dev.dimension.flare.data.datasource.microblog.paging.TimelineOrder
 import dev.dimension.flare.data.network.mastodon.MastodonService
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiTimelineV2
@@ -14,6 +15,8 @@ internal class BookmarkTimelineRemoteMediator(
     private val service: MastodonService,
     private val accountKey: MicroBlogKey,
 ) : CacheableRemoteLoader<UiTimelineV2> {
+    // Re-bookmarking changes collection order without changing the status ID.
+    override val timelineOrder = TimelineOrder.Ranked
     override val pagingKey: String = "bookmark_$accountKey"
 
     override val supportPrepend: Boolean

@@ -11,6 +11,14 @@ struct TimelineContent {
         case user(UiProfile)
         case media(ProfileMedia)
 
+        fileprivate var identity: ObjectIdentifier {
+            switch self {
+            case .post(let item): ObjectIdentifier(item)
+            case .user(let item): ObjectIdentifier(item)
+            case .media(let item): ObjectIdentifier(item)
+            }
+        }
+
         var id: String {
             switch self {
             case .post(let item):
@@ -41,6 +49,30 @@ struct TimelineContent {
             return nil
         }
     }
+
+    struct ItemMetadataCache {
+        struct Metadata {
+            // Retain the immutable input so its address cannot be reused by another item.
+            fileprivate let item: Item
+            let id: String
+            let renderHash: Int32
+        }
+
+        private(set) var entries: [ObjectIdentifier: Metadata] = [:]
+
+        mutating func update(_ items: [Item?]) -> [Metadata?] {
+            var next: [ObjectIdentifier: Metadata] = .init(minimumCapacity: items.count)
+            let result = items.map { item -> Metadata? in
+                guard let item else { return nil }
+                let identity = item.identity
+                let metadata = entries[identity] ?? Metadata(item: item, id: item.id, renderHash: item.renderHash)
+                next[identity] = metadata
+                return metadata
+            }
+            entries = next
+            return result
+        }
+    }
     struct Failure {
         let error: KotlinThrowable
         let retry: () -> Void
@@ -53,6 +85,8 @@ struct TimelineContent {
     var header: UiState<UiTimelineV2>?
     var key: AnyHashable?
     var isRefreshing = false
+    // A reading-session refresh must not block restoration from already presented cache.
+    var isPagingRefreshing = false
     var footer: Footer = .none
     var failure: Failure?
     var appendFailure: Failure?
@@ -65,8 +99,10 @@ struct TimelineContent {
     }
     var hasPosts: Bool { kind == .timeline && (state == .loaded || header != nil) }
 
-    static func timeline(_ data: PagingState<UiTimelineV2>?, header: UiState<UiTimelineV2>?, key: AnyHashable?) -> Self {
+    static func timeline(_ data: PagingState<UiTimelineV2>?, header: UiState<UiTimelineV2>?, key: AnyHashable?,
+                         isRefreshing: Bool? = nil) -> Self {
         var content = adapt(data, kind: .timeline, item: Item.post)
+        if let isRefreshing { content.isRefreshing = isRefreshing }
         content.header = header
         content.key = key
         return content
@@ -86,6 +122,7 @@ struct TimelineContent {
         case .success(let success):
             content.state = .loaded
             content.isRefreshing = success.isRefreshing
+            content.isPagingRefreshing = success.isRefreshing
             content.items = (0..<Int(success.itemCount)).map { index in
                 success.peek(index: Int32(index)).map(item)
             }

@@ -128,6 +128,12 @@ public class SettingsPresenter : PresenterBase<SettingsPresenter.State>() {
                 }
             }
 
+            override fun updateRememberHomeTimelineReadingPosition(value: Boolean) {
+                updateAppSettings {
+                    copy(rememberHomeTimelineReadingPosition = value)
+                }
+            }
+
             override fun updateAppSettings(block: AppSettings.() -> AppSettings) {
                 scope.launch {
                     withContext(Dispatchers.Main) {
@@ -139,6 +145,8 @@ public class SettingsPresenter : PresenterBase<SettingsPresenter.State>() {
     }
 
     public interface State {
+        public fun updateRememberHomeTimelineReadingPosition(value: Boolean)
+
         @WebIgnore
         public val appearance: UiState<AppearancePatch>
 

@@ -1,21 +1,22 @@
 package dev.dimension.flare.ui.presenter
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import dev.dimension.flare.data.model.IconType
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import dev.dimension.flare.data.model.appearance.TimelineAppearance
 import dev.dimension.flare.data.model.tab.UiTimelineTabItem
+import dev.dimension.flare.data.model.tab.guestMastodonHomeTimelineTab
 import dev.dimension.flare.data.model.tab.resolveTimelineAppearance
-import dev.dimension.flare.data.model.tab.toUiTimelineTabItem
-import dev.dimension.flare.data.platform.CommonTimelineSpecs
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.SettingsRepository
+import dev.dimension.flare.data.repository.TimelineReadingRepository
 import dev.dimension.flare.di.koinInject
-import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.UiStrings
-import dev.dimension.flare.ui.model.asText
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.presenter.home.ActiveAccountPresenter
 import dev.dimension.flare.ui.presenter.home.UserState
@@ -24,14 +25,22 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 
 @WebPresenter("homeTimelineWithTabs")
 public class HomeTimelineWithTabsPresenter : PresenterBase<HomeTimelineWithTabsPresenter.State>() {
     private val settingsRepository by koinInject<SettingsRepository>()
     private val accountRepository by koinInject<AccountRepository>()
+    private val readingRepository by koinInject<TimelineReadingRepository>()
 
     public interface State : UserState {
+        public val selectedTabId: String? get() = null
+        public val selectionLoaded: Boolean get() = true
+
+        public fun selectTab(id: String) {}
+
         public val tabState: UiState<ImmutableList<UiTimelineTabItem>>
 
         public fun resolveAppearance(
@@ -62,9 +71,28 @@ public class HomeTimelineWithTabsPresenter : PresenterBase<HomeTimelineWithTabsP
             }.body()
 
         val tabs by tabsState.collectAsUiState()
+        val readingEnabled by readingRepository.enabled.collectAsState()
+        LaunchedEffect(Unit) {
+            if (readingRepository.enabled.value == null) {
+                readingRepository.enterHome { settingsRepository.appSettings.first().rememberHomeTimelineReadingPosition }
+            }
+        }
+        val selection by remember { readingRepository.selectedTab.map { Selection(it) } }.collectAsState(null)
+        val scope = rememberCoroutineScope()
+        var currentTabId by remember { mutableStateOf<String?>(null) }
+        LaunchedEffect(readingEnabled) {
+            if (readingEnabled == true) currentTabId?.let { readingRepository.selectTab(it) }
+        }
 
         return object : State, UserState by accountState {
             override val tabState = tabs
+            override val selectedTabId = selection?.id.takeIf { readingEnabled == true }
+            override val selectionLoaded = readingEnabled != null && (readingEnabled == false || selection != null)
+
+            override fun selectTab(id: String) {
+                currentTabId = id
+                scope.launch { readingRepository.selectTab(id) }
+            }
 
             override fun resolveAppearance(
                 tab: UiTimelineTabItem,
@@ -74,7 +102,9 @@ public class HomeTimelineWithTabsPresenter : PresenterBase<HomeTimelineWithTabsP
     }
 }
 
-private const val DEFAULT_GUEST_MASTODON_HOST = "mastodon.social"
+private data class Selection(
+    val id: String?,
+)
 
 private fun List<UiTimelineTabItem>.withGuestMastodonHomeFallback(isLoggedIn: Boolean): List<UiTimelineTabItem> =
     if (!isLoggedIn && isEmpty()) {
@@ -82,12 +112,3 @@ private fun List<UiTimelineTabItem>.withGuestMastodonHomeFallback(isLoggedIn: Bo
     } else {
         this
     }
-
-internal val guestMastodonHomeTimelineTab: UiTimelineTabItem
-    get() =
-        CommonTimelineSpecs.guestHome
-            .candidate(
-                data = CommonTimelineSpecs.GuestHomeData(DEFAULT_GUEST_MASTODON_HOST),
-                title = UiStrings.Home.asText(),
-                icon = IconType.Material(UiIcon.Home),
-            ).toUiTimelineTabItem()

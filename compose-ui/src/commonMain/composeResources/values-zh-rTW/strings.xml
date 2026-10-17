@@ -436,4 +436,8 @@
     <string name="fanbox_recommended_creators_title">推薦創作者</string>
 <string name="ugoira_play">播放動圖</string>
 <string name="ugoira_loading">正在載入動圖</string>
+    <string name="reading_gap">更多內容 · 載入更多</string>
+    <string name="reading_gap_loading">正在載入更多內容…</string>
+    <string name="reading_gap_failed">這部分內容載入失敗 · 重試</string>
+    <string name="reading_batch_boundary">上次重新整理</string>
 </resources>

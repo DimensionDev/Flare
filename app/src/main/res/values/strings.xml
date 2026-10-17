@@ -18,6 +18,7 @@
     <string name="selected">Selected</string>
 
     <string name="home_tab_home_title">Home</string>
+    <string name="home_timeline_new_content">New content</string>
     <string name="home_tab_notifications_title">Notifications</string>
     <string name="home_tab_me_title">Me</string>
     <string name="home_tab_discover_title">Discover</string>
@@ -825,6 +826,9 @@
     <string name="ugoira_resolution_unsupported">Original resolution is unsupported. Export at up to 1920 pixels?</string>
     <string name="ugoira_export_smaller">Export smaller MP4</string>
     <string name="ugoira_export_progress">Saving MP4: %1$d%%</string>
+    <string name="home_timeline_view_latest">View latest</string>
+    <string name="settings_remember_home_timeline_reading_position">Remember home reading position</string>
+    <string name="settings_remember_home_timeline_reading_position_description">Restore your last home tab and post, and keep your place when refreshing. Changes apply the next time you enter Home. Turning this off clears saved reading records.</string>
     <string name="rss_open_mode_checking">Checking the best opening mode…</string>
     <string name="rss_open_mode_recommended">Recommended from recent articles. You can change this.</string>
     <string name="rss_open_mode_unknown">Could not recommend an opening mode. You can choose one.</string>

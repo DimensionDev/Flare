@@ -30,6 +30,8 @@
     <string name="home_tab_list_title">Lists</string>
     <string name="home_tab_feeds_title">Feeds</string>
     <string name="dm_list_title">Direct Messages</string>
+    <string name="home_timeline_new_content">New content</string>
+    <string name="home_timeline_view_latest">View latest</string>
     <plurals name="home_timeline_new_toots">
         <item quantity="one">%1$d New Post</item>
         <item quantity="other">%1$d New Posts</item>

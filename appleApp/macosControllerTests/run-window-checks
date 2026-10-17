@@ -1,0 +1,16 @@
+#!/bin/sh
+set -eu
+TASK_ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)
+TASK_BUILD=$(mktemp -d "${TMPDIR:-/tmp}/flare-reading-window.XXXXXX")
+trap 'rm -rf "$TASK_BUILD"' EXIT
+xcrun swiftc -parse-as-library -swift-version 5 -target arm64-apple-macos14.0 \
+  -emit-library -emit-module -module-name KotlinSharedUI \
+  "$TASK_ROOT/appleApp/macosControllerTests/Fixtures/KotlinSharedUI.swift" \
+  -emit-module-path "$TASK_BUILD/KotlinSharedUI.swiftmodule" -o "$TASK_BUILD/libKotlinSharedUI.dylib"
+xcrun swiftc -parse-as-library -swift-version 5 -target arm64-apple-macos14.0 \
+  -I "$TASK_BUILD" -L "$TASK_BUILD" -lKotlinSharedUI -Xlinker -rpath -Xlinker "$TASK_BUILD" \
+  "$TASK_ROOT/appleApp/macos/UI/Component/MacTimelineReadingScroll.swift" \
+  "$TASK_ROOT/appleApp/Shared/FlareAppleCore/Sources/FlareAppleUI/TimelineReadingAnchor.swift" \
+  "$TASK_ROOT/appleApp/macosControllerTests/TimelineReadingWindowCheck.swift" \
+  -o "$TASK_BUILD/TimelineReadingWindowCheck"
+"$TASK_BUILD/TimelineReadingWindowCheck" "$@"

@@ -216,6 +216,56 @@ internal suspend fun PagingTimelineDao.getTimelinePageInCurrentTransaction(
 @Dao
 @DaoReturnTypeConverters(PagingSourceDaoReturnTypeConverter::class)
 internal interface PagingTimelineDao {
+    @Query(
+        "SELECT * FROM DbPagingTimeline WHERE pagingKey = :pagingKey AND (:pagingKey || '_' || statusId = :itemKey OR _id = :itemKey) LIMIT 1",
+    )
+    suspend fun readingItem(
+        pagingKey: String,
+        itemKey: String,
+    ): DbPagingTimeline?
+
+    @Transaction
+    suspend fun nearestReadingItem(
+        pagingKey: String,
+        sortId: Long,
+    ): DbPagingTimeline? {
+        val before = readingItemBefore(pagingKey, sortId) ?: return readingItemAfter(pagingKey, sortId)
+        val after = readingItemAfter(pagingKey, sortId) ?: return before
+        // Unsigned differences retain all 64 bits even across the signed boundary.
+        return if (sortId.toULong() - before.sortId.toULong() <= after.sortId.toULong() - sortId.toULong()) before else after
+    }
+
+    @Query(
+        "SELECT DbPagingTimeline.* FROM DbPagingTimeline INNER JOIN DbStatus ON DbStatus.id = DbPagingTimeline.statusId WHERE pagingKey = :pagingKey AND sortId <= :sortId ORDER BY sortId DESC LIMIT 1",
+    )
+    suspend fun readingItemBefore(
+        pagingKey: String,
+        sortId: Long,
+    ): DbPagingTimeline?
+
+    @Query(
+        "SELECT DbPagingTimeline.* FROM DbPagingTimeline INNER JOIN DbStatus ON DbStatus.id = DbPagingTimeline.statusId WHERE pagingKey = :pagingKey AND sortId >= :sortId ORDER BY sortId LIMIT 1",
+    )
+    suspend fun readingItemAfter(
+        pagingKey: String,
+        sortId: Long,
+    ): DbPagingTimeline?
+
+    @Query(
+        "SELECT COUNT(*) FROM DbPagingTimeline INNER JOIN DbStatus ON DbStatus.id = DbPagingTimeline.statusId WHERE pagingKey = :pagingKey AND sortId < :sortId",
+    )
+    suspend fun readingItemOffset(
+        pagingKey: String,
+        sortId: Long,
+    ): Int
+
+    suspend fun keysWithPrefix(prefix: String): List<String> = keysMatchingPrefix(prefix.toPagingKeyPrefixGlob())
+
+    @Query(
+        "SELECT DISTINCT pagingKey FROM DbPagingTimeline WHERE pagingKey GLOB :pattern UNION SELECT pagingKey FROM DbPagingKey WHERE pagingKey GLOB :pattern",
+    )
+    suspend fun keysMatchingPrefix(pattern: String): List<String>
+
     @Transaction
     @Query(
         TIMELINE_WITH_STATUS_QUERY +
@@ -421,15 +471,52 @@ internal interface PagingTimelineDao {
     )
     suspend fun getByPagingKey(pagingKey: String): List<DbPagingTimeline>
 
+    @Query("SELECT * FROM DbPagingTimeline WHERE pagingKey = :pagingKey ORDER BY sortId LIMIT 1")
+    suspend fun readingHead(pagingKey: String): DbPagingTimeline?
+
+    @Query("SELECT * FROM DbPagingTimeline WHERE pagingKey = :pagingKey ORDER BY sortId DESC LIMIT 1")
+    suspend fun readingTail(pagingKey: String): DbPagingTimeline?
+
+    @Query("SELECT * FROM DbPagingTimeline WHERE pagingKey = :pagingKey AND sortId < :sortId ORDER BY sortId DESC LIMIT 1")
+    suspend fun readingPredecessor(
+        pagingKey: String,
+        sortId: Long,
+    ): DbPagingTimeline?
+
+    @Query("SELECT * FROM DbPagingTimeline WHERE pagingKey = :pagingKey AND sortId > :sortId ORDER BY sortId LIMIT 1")
+    suspend fun readingSuccessor(
+        pagingKey: String,
+        sortId: Long,
+    ): DbPagingTimeline?
+
+    @Query("SELECT * FROM DbPagingTimeline WHERE pagingKey = :pagingKey AND sortId < :sortId ORDER BY sortId DESC LIMIT :count")
+    suspend fun readingRowsBefore(
+        pagingKey: String,
+        sortId: Long,
+        count: Int,
+    ): List<DbPagingTimeline>
+
+    @Query("SELECT * FROM DbPagingTimeline WHERE pagingKey = :pagingKey AND sortId >= :sortId ORDER BY sortId LIMIT :count")
+    suspend fun readingRowsFrom(
+        pagingKey: String,
+        sortId: Long,
+        count: Int,
+    ): List<DbPagingTimeline>
+
+    // Keep UNION's inline-parent lookup on candidate IDs instead of SQLite's namespace-scan plan.
     @Query(
-        "SELECT statusId FROM DbPagingTimeline WHERE pagingKey = :pagingKey " +
-            "UNION " +
-            "SELECT presentation.referenceStatusId FROM timeline_item_presentation_reference AS presentation " +
+        "SELECT statusId FROM DbPagingTimeline WHERE pagingKey = :pagingKey AND statusId IN (:statusIds) " +
+            "UNION SELECT presentation.referenceStatusId FROM timeline_item_presentation_reference AS presentation " +
+            "INDEXED BY index_timeline_item_presentation_reference_referenceStatusId_pagingKey_timelineId " +
             "INNER JOIN DbPagingTimeline AS timeline " +
             "ON timeline.pagingKey = presentation.pagingKey AND timeline._id = presentation.timelineId " +
-            "WHERE timeline.pagingKey = :pagingKey AND presentation.presentationType = 'InlineParent'",
+            "WHERE presentation.pagingKey = :pagingKey AND presentation.presentationType = 'InlineParent' " +
+            "AND presentation.referenceStatusId IN (:statusIds)",
     )
-    suspend fun getStatusIdsWithInlineParents(pagingKey: String): List<String>
+    suspend fun existingReadingStatusIds(
+        pagingKey: String,
+        statusIds: List<String>,
+    ): List<String>
 
     @Query("SELECT MIN(sortId) FROM DbPagingTimeline WHERE pagingKey = :pagingKey")
     suspend fun getMinSortId(pagingKey: String): Long?
@@ -450,6 +537,12 @@ internal interface PagingTimelineDao {
 
     @Delete
     suspend fun delete(timeline: List<DbPagingTimeline>)
+
+    @Query("DELETE FROM DbPagingTimeline WHERE pagingKey = :pagingKey AND _id IN (:timelineIds)")
+    suspend fun deleteTimelineRows(
+        pagingKey: String,
+        timelineIds: List<String>,
+    )
 
     @Query(
         "DELETE FROM DbPagingTimeline WHERE pagingKey = :pagingKey " +

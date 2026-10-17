@@ -26,9 +26,7 @@
 		() => createTimelineItemPresenterController(tab.loaderKey),
 		{ ttlMs: Infinity }
 	);
-	const isRefreshing = $derived(
-		timeline.listState.type === 'Success' ? timeline.listState.isRefreshing : false
-	);
+	const isRefreshing = $derived(timeline.isRefreshing);
 	let handledRefreshRequestId = $state<number | null>(null);
 
 	$effect(() => {

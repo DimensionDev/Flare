@@ -11,6 +11,22 @@ public struct StatusTopMessageView: View {
     }
 
     public var body: some View {
+        if let gap = topMessage.readingGap {
+            if gap.canLoad {
+                Button(action: gap.load) { content }
+                    .buttonStyle(.plain)
+                    .disabled(gap.loading)
+            } else {
+                content.accessibilityElement(children: .combine)
+            }
+        } else {
+            content.onTapGesture {
+                topMessage.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
+            }
+        }
+    }
+
+    private var content: some View {
         HStack(spacing: 8) {
             topMessage.icon.image
             if let user = topMessage.user {
@@ -21,9 +37,6 @@ public struct StatusTopMessageView: View {
                 Text(text)
                     .fixedSize(horizontal: false, vertical: true)
             }
-        }
-        .onTapGesture {
-            topMessage.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
@@ -106,6 +119,14 @@ public extension UiTimelineV2.MessageType {
                 FlareAppleUILocalization.string("bluesky_notification_starterpackJoined")
             case .pinned:
                 FlareAppleUILocalization.string("bluesky_notification_item_pin")
+            case .readingGap:
+                FlareAppleUILocalization.string("reading_gap")
+            case .readingGapLoading:
+                FlareAppleUILocalization.string("reading_gap_loading")
+            case .readingGapFailed:
+                FlareAppleUILocalization.string("reading_gap_failed")
+            case .readingBatchBoundary:
+                FlareAppleUILocalization.string("reading_batch_boundary")
             case .like:
                 FlareAppleUILocalization.string("bluesky_notification_like")
             }

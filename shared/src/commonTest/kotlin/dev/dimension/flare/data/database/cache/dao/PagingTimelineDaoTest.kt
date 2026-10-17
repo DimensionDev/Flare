@@ -1,6 +1,9 @@
 package dev.dimension.flare.data.database.cache.dao
 
 import androidx.room3.Room
+import androidx.sqlite.SQLiteConnection
+import androidx.sqlite.SQLiteDriver
+import androidx.sqlite.SQLiteStatement
 import dev.dimension.flare.RobolectricTest
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.model.DbPagingTimeline
@@ -14,17 +17,36 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class PagingTimelineDaoTest : RobolectricTest() {
     private lateinit var db: CacheDatabase
+    private var lookupPlan = emptyList<String>()
 
     @BeforeTest
     fun setup() {
+        val driver = createDatabaseDriver()
         db =
             Room
                 .memoryDatabaseBuilder<CacheDatabase>()
-                .setDriver(createDatabaseDriver())
-                .setQueryCoroutineContext(Dispatchers.Unconfined)
+                .setDriver(
+                    object : SQLiteDriver by driver {
+                        override fun open(fileName: String): SQLiteConnection {
+                            val connection = driver.open(fileName)
+                            return object : SQLiteConnection by connection {
+                                override fun prepare(sql: String): SQLiteStatement {
+                                    if (sql.startsWith("SELECT statusId FROM DbPagingTimeline WHERE pagingKey = ? AND statusId IN")) {
+                                        lookupPlan =
+                                            connection.prepare("EXPLAIN QUERY PLAN $sql").use { statement ->
+                                                buildList { while (statement.step()) add(statement.getText(3)) }
+                                            }
+                                    }
+                                    return connection.prepare(sql)
+                                }
+                            }
+                        }
+                    },
+                ).setQueryCoroutineContext(Dispatchers.Unconfined)
                 .build()
     }
 
@@ -34,7 +56,7 @@ class PagingTimelineDaoTest : RobolectricTest() {
     }
 
     @Test
-    fun statusIdsWithInlineParentsIncludeOnlyCurrentTimelineRootsAndParents() =
+    fun existingReadingStatusIdsIncludeOnlyRequestedCurrentRootsAndInlineParents() =
         runTest {
             val dao = db.pagingTimelineDao()
             dao.insertAll(
@@ -72,13 +94,19 @@ class PagingTimelineDaoTest : RobolectricTest() {
                 ),
             )
 
+            val candidates = listOf("leaf", "parent", "ancestor", "quote", "repost", "other-parent", "orphaned-parent", "missing")
             assertEquals(
                 listOf("ancestor", "leaf", "parent"),
-                dao.getStatusIdsWithInlineParents("mixed").sorted(),
+                dao.existingReadingStatusIds("mixed", candidates).sorted(),
             )
             assertEquals(
                 listOf("leaf", "other-parent"),
-                dao.getStatusIdsWithInlineParents("other").sorted(),
+                dao.existingReadingStatusIds("other", candidates).sorted(),
+            )
+            assertEquals(listOf("ancestor"), dao.existingReadingStatusIds("mixed", listOf("ancestor", "missing")))
+            assertTrue(
+                lookupPlan.any { it.contains("referenceStatusId=? AND pagingKey=?") },
+                "Inline-parent lookup must seek candidate IDs rather than scan the retained namespace: $lookupPlan",
             )
         }
 }

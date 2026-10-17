@@ -233,6 +233,14 @@ public struct BehaviorSettingsSection<LinkOpenDefaultsLink: View>: View {
     public var body: some View {
         Section {
             Toggle(isOn: Binding(get: {
+                appSettings.rememberHomeTimelineReadingPosition
+            }, set: { newValue in
+                presenter.state.updateRememberHomeTimelineReadingPosition(value: newValue)
+            })) {
+                Text("settings_remember_home_timeline_reading_position", bundle: FlareAppleUILocalization.bundle)
+                Text("settings_remember_home_timeline_reading_position_description", bundle: FlareAppleUILocalization.bundle)
+            }
+            Toggle(isOn: Binding(get: {
                 appSettings.refreshHomeTimelineOnLaunch
             }, set: { newValue in
                 presenter.state.updateRefreshHomeTimelineOnLaunch(value: newValue)

@@ -40,6 +40,7 @@ public sealed class PagingState<T> {
 
     @Immutable
     public sealed class Success<T : Any> : PagingState<T>() {
+        internal abstract val snapshotIdentity: Any
         public abstract val itemCount: Int
         public abstract val isRefreshing: Boolean
         public abstract val appendState: LoadState
@@ -65,6 +66,8 @@ public sealed class PagingState<T> {
             private val onRefresh: suspend () -> Unit = {},
             private val onRetry: () -> Unit = {},
         ) : Success<T>() {
+            override val snapshotIdentity: Any get() = data
+
             override fun get(index: Int): T? = data.getOrNull(index)
 
             override fun peek(index: Int): T? = data.getOrNull(index)
@@ -92,6 +95,7 @@ public sealed class PagingState<T> {
             override val appendState: LoadState,
             private val onRetry: () -> Unit = data::retry,
         ) : Success<T>() {
+            override val snapshotIdentity: Any get() = items
             override val itemCount: Int
                 get() = items.size
 

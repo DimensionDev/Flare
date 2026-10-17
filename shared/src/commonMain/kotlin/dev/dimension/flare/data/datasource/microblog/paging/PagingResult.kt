@@ -6,6 +6,7 @@ public data class PagingResult<T : Any>(
     val data: List<T> = emptyList(),
     val nextKey: String? = null,
     val previousKey: String? = null,
+    internal val saveInTransaction: (suspend () -> Unit)? = null,
 ) {
     public constructor(
         endOfPaginationReached: Boolean,

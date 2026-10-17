@@ -39,6 +39,8 @@ struct RootView: View {
                                     title: tab.macOSTitle,
                                     icon: tab.macOSIcon,
                                     liveTabs: tabs,
+                                    savedTabId: homeTimelineWithTabsPresenter.state.selectedTabId,
+                                    selectionLoaded: homeTimelineWithTabsPresenter.state.selectionLoaded,
                                     selectedTab: $selectedTab,
                                     isExpanded: $homeExpanded,
                                     onEditTab: { tab, onSave in
@@ -48,6 +50,11 @@ struct RootView: View {
                                         )
                                     }
                                 )
+                                .onChange(of: selectedTab) { _, route in
+                                    if case .timeline(let item, isHome: true) = route {
+                                        homeTimelineWithTabsPresenter.state.selectTab(id: item.id)
+                                    }
+                                }
                             } else if tab == .notifications {
                                 DisclosureGroup {
                                     ForEach(notificationAccountsPresenter.state.notifications, id: \.profile.key) { item in
@@ -174,7 +181,7 @@ struct RootView: View {
                     externalNavigationRequest: mainNavigationRequest
                 )
                 .navigationSplitViewColumnWidth(min: 280, ideal: 400, max: 500)
-                    .id(selectedTab)
+                    .id(routeWithLatestTimelinePresentation(selectedTab))
                     .toolbar {
                         if case .success(let data) = onEnum(of: loggedInPresenter.state.isLoggedIn), !data.data.boolValue {
                             ToolbarItem(placement: .primaryAction) {

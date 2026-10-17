@@ -22,6 +22,8 @@
     <string name="home_tab_list_title">列表</string>
     <string name="home_tab_feeds_title">订阅源</string>
     <string name="dm_list_title">私信</string>
+    <string name="home_timeline_new_content">有新内容</string>
+    <string name="home_timeline_view_latest">查看最新</string>
     <plurals name="home_timeline_new_toots">
         <item quantity="other">%1$d 条新内容</item>
     </plurals>

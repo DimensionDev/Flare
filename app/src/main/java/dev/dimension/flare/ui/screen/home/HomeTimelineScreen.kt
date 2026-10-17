@@ -36,7 +36,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenuItem
@@ -64,16 +63,23 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
 import compose.icons.FontAwesomeIcons
@@ -84,7 +90,7 @@ import compose.icons.fontawesomeicons.solid.CaretDown
 import compose.icons.fontawesomeicons.solid.Check
 import compose.icons.fontawesomeicons.solid.Sliders
 import dev.dimension.flare.R
-import dev.dimension.flare.common.onSuccess
+import dev.dimension.flare.common.isSuccess
 import dev.dimension.flare.data.datastore.model.TimelineAutoRefreshInterval
 import dev.dimension.flare.data.model.BottomBarBehavior
 import dev.dimension.flare.data.model.TimelineDisplayMode
@@ -115,10 +121,12 @@ import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.presenter.HomeTimelineWithTabsPresenter
+import dev.dimension.flare.ui.presenter.TimelineWithLazyListState
 import dev.dimension.flare.ui.presenter.home.DeepLinkPresenter
 import dev.dimension.flare.ui.presenter.home.LoggedInPresenter
 import dev.dimension.flare.ui.presenter.home.LoggedInState
 import dev.dimension.flare.ui.presenter.invoke
+import dev.dimension.flare.ui.presenter.rememberHomeTimelinePagerState
 import dev.dimension.flare.ui.presenter.rememberTimelineItemPresenterWithLazyListState
 import dev.dimension.flare.ui.route.Route
 import dev.dimension.flare.ui.route.Router
@@ -563,20 +571,43 @@ internal fun TimelineItemContent(
         rememberTimelineItemPresenterWithLazyListState(
             item = item,
             isHomeTimeline = isHomeTimeline,
+            leadingItemCount =
+                if ((changeLogState?.shouldShowChangeLog as? dev.dimension.flare.ui.model.UiState.Success)?.data == true &&
+                    changeLogState.changeLog != null
+                ) {
+                    1
+                } else {
+                    0
+                },
             lazyStaggeredGridState = lazyStaggeredGridState,
         )
     val latestState by rememberUpdatedState(state)
+    if (isHomeTimeline && isCurrentlyVisible) {
+        LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { latestState.onHomeEntered() }
+    }
+    var isInWindow by remember { mutableStateOf(false) }
+    val windowSize = LocalWindowInfo.current.containerSize
+    val isVisible = isCurrentlyVisible && isInWindow
     val lifecycleOwner = LocalLifecycleOwner.current
-    LaunchedEffect(isHomeTimeline, autoRefreshInterval, isCurrentlyVisible, lifecycleOwner) {
-        if (!isHomeTimeline || !isCurrentlyVisible || autoRefreshInterval == TimelineAutoRefreshInterval.DISABLED) {
+    androidx.compose.runtime.DisposableEffect(lifecycleOwner) {
+        val observer =
+            androidx.lifecycle.LifecycleEventObserver { _, event ->
+                if (event == Lifecycle.Event.ON_PAUSE) latestState.readingState?.savePosition()
+            }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+            latestState.readingState?.savePosition()
+        }
+    }
+    LaunchedEffect(isHomeTimeline, autoRefreshInterval, isVisible, lifecycleOwner) {
+        if (!isHomeTimeline || !isVisible || autoRefreshInterval == TimelineAutoRefreshInterval.DISABLED) {
             return@LaunchedEffect
         }
         lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
             while (true) {
                 delay(autoRefreshInterval.minutes * 60_000L)
-                if (!latestState.isRefreshing) {
-                    latestState.refreshSuspend()
-                }
+                latestState.refreshAutomatically()
             }
         }
     }
@@ -589,9 +620,11 @@ internal fun TimelineItemContent(
             },
         )
     }
-    val scope = rememberCoroutineScope()
     RefreshContainer(
-        modifier = modifier,
+        modifier =
+            modifier.onGloballyPositioned {
+                isInWindow = it.boundsInWindow().overlaps(Rect(0f, 0f, windowSize.width.toFloat(), windowSize.height.toFloat()))
+            },
         onRefresh = {
             state.refreshSync()
             changeLogState?.dismissChangeLog()
@@ -653,52 +686,73 @@ internal fun TimelineItemContent(
 
                 status(state.listState)
             }
-            state.listState.onSuccess {
-                AnimatedVisibility(
-                    state.showNewToots,
-                    enter = slideInVertically { -it },
-                    exit = slideOutVertically { -it },
-                    modifier =
-                        Modifier
-                            .padding(paddingWithStatusBar)
-                            .align(Alignment.TopCenter),
-                ) {
-                    Glassify(
-                        onClick = {
-                            state.onNewTootsShown()
-                            scope.launch {
-                                state.lazyListState.scrollToItem(0)
-                            }
-                        },
-                        shape = RoundedCornerShape(50),
-                        color = MaterialTheme.colorScheme.primaryContainer,
-                    ) {
-                        Row(
-                            modifier =
-                                Modifier
-                                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        ) {
-                            FAIcon(
-                                imageVector = FontAwesomeIcons.Solid.AnglesUp,
-                                contentDescription = null,
-                                modifier = Modifier.size(16.dp),
-                            )
-                            val ctx = LocalContext.current
-                            val newTootsText =
-                                ctx.resources.getQuantityString(
-                                    R.plurals.home_timeline_new_toots,
-                                    state.newPostsCount,
-                                    state.newPostsCount,
-                                )
-                            Text(text = newTootsText)
-                        }
-                    }
-                }
-            }
+            TimelineNewContentNotice(
+                state = state,
+                modifier =
+                    Modifier
+                        .padding(paddingWithStatusBar)
+                        .align(Alignment.TopCenter),
+            )
         },
     )
+}
+
+@Composable
+internal fun TimelineNewContentNotice(
+    state: TimelineWithLazyListState,
+    modifier: Modifier = Modifier,
+) {
+    val scope = rememberCoroutineScope()
+    if (state.readingState != null || state.listState.isSuccess()) {
+        AnimatedVisibility(
+            state.showNewToots,
+            enter = slideInVertically { -it },
+            exit = slideOutVertically { -it },
+            modifier = modifier,
+        ) {
+            val latestLabel = stringResource(R.string.home_timeline_view_latest)
+            Glassify(
+                modifier = if (state.readingState != null) Modifier.semantics { contentDescription = latestLabel } else Modifier,
+                onClick = {
+                    state.onNewTootsShown()
+                    scope.launch {
+                        state.readingState?.showLatest() ?: state.lazyListState.scrollToItem(0)
+                    }
+                },
+                shape = RoundedCornerShape(50),
+                color = MaterialTheme.colorScheme.primaryContainer,
+            ) {
+                Row(
+                    modifier =
+                        Modifier
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    FAIcon(
+                        imageVector = FontAwesomeIcons.Solid.AnglesUp,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp),
+                    )
+                    val ctx = LocalContext.current
+                    val newTootsText =
+                        ctx.resources.getQuantityString(
+                            R.plurals.home_timeline_new_toots,
+                            state.newPostsCount,
+                            state.newPostsCount,
+                        )
+                    Text(
+                        text =
+                            if (state.readingState != null) {
+                                stringResource(R.string.home_timeline_new_content)
+                            } else {
+                                newTootsText
+                            },
+                    )
+                }
+            }
+        }
+    }
 }
 
 @Composable
@@ -708,8 +762,13 @@ private fun timelinePresenter() =
         val loginState = remember { LoggedInPresenter() }.invoke()
 
         val pagerState =
-            state.tabState.map {
-                rememberPagerState { it.size }
+            if (!state.selectionLoaded) {
+                dev.dimension.flare.ui.model.UiState
+                    .Loading()
+            } else {
+                state.tabState.map { tabs ->
+                    rememberHomeTimelinePagerState(tabs.map { it.id }, state.selectedTabId, state::selectTab)
+                }
             }
 
         val changeLogState = changeLogPresenter()

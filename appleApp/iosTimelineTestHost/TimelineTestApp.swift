@@ -23,10 +23,18 @@ final class TimelineTestScene: UIResponder, UIWindowSceneDelegate {
     }
 }
 
+private final class MeasuringTimelineTestCell: UICollectionViewCell {
+    var onLayout: ((CGFloat) -> Void)?
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        onLayout?(contentView.bounds.width)
+    }
+}
+
 /// A real application window is required for native scroll/refresh animations and
 /// pan/deceleration. A hostless XCTest window does not exercise those lifecycles.
 private final class TimelineTestController: UIViewController, CHTCollectionViewDelegateWaterfallLayout {
-    private let layout = CHTCollectionViewWaterfallLayout()
+    private let layout = TimelineCollectionViewLayout()
     private lazy var list = TimelineCollectionView(frame: .zero, collectionViewLayout: layout)
     private var dataSource: UICollectionViewDiffableDataSource<Int, Int>!
     private var heights: [Int: CGFloat] = [:]
@@ -39,6 +47,10 @@ private final class TimelineTestController: UIViewController, CHTCollectionViewD
     private var didCommitRefreshSnapshot = false
     private var refreshFrames: CADisplayLink?
     private var refreshPositions: [CGFloat] = []
+    private var measuredHeights = TimelineItemHeightCache()
+    private var measurementScheduled = false
+    private var configuredIDs = Set<Int>()
+    private var sizeRequests = 0
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -60,7 +72,9 @@ private final class TimelineTestController: UIViewController, CHTCollectionViewD
             list.topAnchor.constraint(equalTo: view.topAnchor),
             list.bottomAnchor.constraint(equalTo: view.bottomAnchor),
         ])
-        let registration = UICollectionView.CellRegistration<UICollectionViewCell, Int> { cell, _, id in
+        let registration = UICollectionView.CellRegistration<MeasuringTimelineTestCell, Int> { [weak self] cell, _, id in
+            self?.configuredIDs.insert(id)
+            cell.onLayout = { [weak self] width in self?.measure(id, width: width) }
             var content = UIListContentConfiguration.cell()
             content.text = "Item \(id)"
             cell.contentConfiguration = content
@@ -90,6 +104,8 @@ private final class TimelineTestController: UIViewController, CHTCollectionViewD
             case "drag", "deceleration", "refine-reading-item", "refine-reading-item-deceleration": await checkGesture()
             case "pull-refresh", "fast-refresh-prepend": await checkRefreshWithPrepend()
             case "refresh-late-height", "refresh-late-height-columns", "refresh-height-after-collapse", "refresh-collapse-navigation": await checkRefreshWithLateHeight()
+            case let name where name.hasPrefix("consecutive-prepend-") || name.hasPrefix("efficient-prepend-"): await checkConsecutivePrependGesture()
+            case let name where name.hasPrefix("measured-prepend-"): await checkMeasuredPrependGesture()
             case let name where name.hasPrefix("snapshot-"): await checkSnapshotGesture()
             default: await checkRefresh()
             }
@@ -314,6 +330,133 @@ private final class TimelineTestController: UIViewController, CHTCollectionViewD
         }
     }
 
+    private func checkConsecutivePrependGesture() async {
+        for id in 0..<120 { heights[id] = 240 }
+        list.invalidateMeasuredHeights()
+        let frame = layout.layoutAttributesForItem(at: dataSource.indexPath(for: 20)!)!.frame
+        jump(to: frame.minY + 40 - list.restingAdjustedTopInset)
+        await settle(100)
+        await waitForGesture()
+        let decelerating = scenario.contains("deceleration")
+        check(decelerating ? list.isDecelerating : list.isDragging, "native gesture was not observed")
+        guard let anchor = list.captureReadingViewport(), let id = Int(anchor.id) else {
+            failures.append("missing reading item before consecutive prepends")
+            return
+        }
+        for page in 0..<10 {
+            let visibleIDs = Set(list.indexPathsForVisibleItems.compactMap { dataSource.itemIdentifier(for: $0) })
+            configuredIDs.removeAll()
+            sizeRequests = 0
+            var snapshot = dataSource.snapshot()
+            let newIDs = Array(200 + page * 20..<220 + page * 20)
+            for id in newIDs { heights[id] = 240 }
+            snapshot.insertItems(newIDs, beforeItem: snapshot.itemIdentifiers[0])
+            list.prepareForSnapshotChange()
+            list.performUpdatesPreservingReadingPosition(keepingItemIDs: Set(snapshot.itemIdentifiers.map(String.init))) {
+                dataSource.apply(snapshot, animatingDifferences: false, completion: nil)
+            }
+            if scenario.hasPrefix("efficient-prepend-") {
+                check(configuredIDs.isSubset(of: visibleIDs), "page \(page) configured temporary cells: \(configuredIDs.subtracting(visibleIDs))")
+                check(sizeRequests == snapshot.numberOfItems, "page \(page) repeated geometry: \(sizeRequests) size requests")
+            }
+            // No caller-side layout or run-loop turn between pages and delayed measurements.
+            for id in newIDs { heights[id] = 280 }
+            list.invalidateMeasuredHeights()
+            let path = dataSource.indexPath(for: id)!
+            let frame = layout.layoutAttributesForItem(at: path)!.frame
+            let offset = frame.minY - list.contentOffset.y - list.restingAdjustedTopInset
+            check(abs(offset - anchor.offset) < 1, "page \(page) moved reading item by \(offset - anchor.offset)pt")
+            check(list.indexPathsForVisibleItems.contains(path), "page \(page) lost the visible reading item")
+            check(decelerating ? list.isDecelerating : list.isDragging, "page \(page) cancelled gesture")
+            check(!list.hasReadingPosition, "page \(page) left a stale bookmark")
+        }
+        let expected = (0..<10).reversed().flatMap { Array(200 + $0 * 20..<220 + $0 * 20) } + Array(0..<120)
+        check(dataSource.snapshot().itemIdentifiers == expected, "consecutive prepends lost or reordered items")
+        if decelerating {
+            let offset = list.contentOffset.y
+            await settle(40)
+            check(abs(list.contentOffset.y - offset) > 1, "consecutive prepends stopped momentum")
+        }
+    }
+
+    private func measurementGeometry(width: CGFloat) -> TimelineItemHeightCache.Geometry {
+        .init(widthInPixels: Int((width * traitCollection.displayScale).rounded()), multipleColumns: layout.columnCount > 1)
+    }
+
+    private func measure(_ id: Int, width: CGFloat) {
+        guard scenario.hasPrefix("measured-prepend-"), width > 1 else { return }
+        let geometry = measurementGeometry(width: width)
+        guard measuredHeights.height(for: String(id), geometry: geometry, renderHash: 1) == nil else { return }
+        measuredHeights.stage(600, for: String(id), geometry: geometry, renderHash: 1)
+        guard !measurementScheduled else { return }
+        measurementScheduled = true
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+            self.measurementScheduled = false
+            self.checkMeasuredUpdate(preferringVisibleTop: true) {
+                self.list.invalidateMeasuredHeights { self.measuredHeights.applyPendingMeasurements() }
+            }
+        }
+    }
+
+    private func checkMeasuredUpdate(preferringVisibleTop: Bool = false, _ update: () -> Void) {
+        let id = list.captureReadingPosition(preferringVisibleTop: preferringVisibleTop)?.itemID.flatMap(Int.init)
+        let cell = id.flatMap { dataSource.indexPath(for: $0) }.flatMap { list.cellForItem(at: $0) }
+        let screenY = cell?.convert(.zero, to: view).y
+        update()
+        guard list.isDragging || list.isDecelerating, let id, let screenY else { return }
+        guard let path = dataSource.indexPath(for: id), let cell = list.cellForItem(at: path) else {
+            failures.append("measuring during prepend lost visible item \(id)")
+            return
+        }
+        check(abs(cell.convert(.zero, to: view).y - screenY) < 1, "measuring during prepend moved item \(id)")
+    }
+
+    private func checkMeasuredPrependGesture() async {
+        for id in 0..<120 { heights[id] = 240 }
+        list.invalidateMeasuredHeights()
+        let frame = layout.layoutAttributesForItem(at: dataSource.indexPath(for: 20)!)!.frame
+        jump(to: frame.minY + 40 - list.restingAdjustedTopInset)
+        await settle(100)
+        await waitForGesture()
+        let decelerating = scenario.contains("deceleration")
+        check(decelerating ? list.isDecelerating : list.isDragging, "native gesture was not observed")
+        guard let anchor = list.captureReadingViewport(), let id = Int(anchor.id),
+              let cell = list.cellForItem(at: dataSource.indexPath(for: id)!) else {
+            failures.append("missing item before measured prepends")
+            return
+        }
+        let fingerRelativeY = cell.convert(.zero, to: view).y - list.panGestureRecognizer.translation(in: view).y
+        for page in 0..<10 {
+            var snapshot = dataSource.snapshot()
+            snapshot.insertItems(Array(200 + page * 20..<220 + page * 20), beforeItem: snapshot.itemIdentifiers[0])
+            checkMeasuredUpdate {
+                list.prepareForSnapshotChange()
+                list.performUpdatesPreservingReadingPosition(keepingItemIDs: Set(snapshot.itemIdentifiers.map(String.init))) {
+                    dataSource.apply(snapshot, animatingDifferences: false, completion: nil)
+                }
+            }
+            // Let cell measurement, the next scroll frame and the coalesced flush interleave.
+            try? await Task.sleep(for: .milliseconds(20))
+            if !decelerating, list.isDragging {
+                let cell = dataSource.indexPath(for: id).flatMap { list.cellForItem(at: $0) }
+                check(cell != nil, "page \(page) pushed the reading post out of view")
+                if let cell {
+                    let current = cell.convert(.zero, to: view).y - list.panGestureRecognizer.translation(in: view).y
+                    check(abs(current - fingerRelativeY) < 1, "page \(page) moved the post relative to the finger")
+                }
+            }
+            check(decelerating ? list.isDecelerating : list.isDragging, "page \(page) cancelled the gesture")
+        }
+        let expected = (0..<10).reversed().flatMap { Array(200 + $0 * 20..<220 + $0 * 20) } + Array(0..<120)
+        check(dataSource.snapshot().itemIdentifiers == expected, "measured prepends lost or reordered items")
+        if decelerating {
+            let offset = list.contentOffset.y
+            await settle(40)
+            check(abs(list.contentOffset.y - offset) > 1, "measured prepends stopped momentum")
+        }
+    }
+
     private func checkSnapshotGesture() async {
         let frame = layout.layoutAttributesForItem(at: dataSource.indexPath(for: 80)!)!.frame
         jump(to: frame.minY + 40 - list.restingAdjustedTopInset)
@@ -433,11 +576,15 @@ private final class TimelineTestController: UIViewController, CHTCollectionViewD
         check(largestStep < 20, "refresh collapse jumped \(largestStep)pt in one frame")
     }
 
-    private func itemHeight(_ id: Int) -> CGFloat { heights[id] ?? CGFloat(120 + id % 7 * 17) }
+    private func itemHeight(_ id: Int) -> CGFloat {
+        measuredHeights.height(for: String(id), geometry: measurementGeometry(width: layout.itemWidth(inSection: 0)))
+            ?? heights[id] ?? CGFloat(120 + id % 7 * 17)
+    }
 
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout,
                         sizeForItemAt indexPath: IndexPath) -> CGSize {
-        CGSize(width: layout.itemWidth(inSection: indexPath.section), height: itemHeight(dataSource.itemIdentifier(for: indexPath)!))
+        sizeRequests += 1
+        return CGSize(width: layout.itemWidth(inSection: indexPath.section), height: itemHeight(dataSource.itemIdentifier(for: indexPath)!))
     }
 
     func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {

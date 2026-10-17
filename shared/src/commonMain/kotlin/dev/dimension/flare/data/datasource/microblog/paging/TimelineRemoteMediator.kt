@@ -26,6 +26,8 @@ internal open class TimelineRemoteMediator(
     private val notifyError: (Throwable) -> Unit = {},
     private val preTranslationService: PreTranslationService = NoopPreTranslationService,
     private val refreshOnInitialize: suspend () -> Boolean = { true },
+    private val isRequestValid: suspend () -> Boolean = { true },
+    private val preservePrependSortIds: Boolean = false,
 ) : BasePagingRemoteMediator<
         OffsetFromStartPagingKey,
         TimelinePageItem,
@@ -38,6 +40,8 @@ internal open class TimelineRemoteMediator(
 
     override val pagingKey: String
         get() = loader.pagingKey
+
+    override suspend fun canSave(): Boolean = isRequestValid()
 
     init {
         if (loader is ReportableRemoteLoader) {
@@ -98,6 +102,7 @@ internal open class TimelineRemoteMediator(
             data = data,
             nextKey = result.nextKey,
             previousKey = result.previousKey,
+            saveInTransaction = result.saveInTransaction,
         )
     }
 
@@ -125,7 +130,7 @@ internal open class TimelineRemoteMediator(
         data: List<DbPagingTimelineWithStatus>,
     ) {
         val dataToSave =
-            if (request is PagingRequest.Prepend && loader.supportPrepend && data.isNotEmpty()) {
+            if (request is PagingRequest.Prepend && loader.supportPrepend && !preservePrependSortIds && data.isNotEmpty()) {
                 val minimumSortId = database.pagingTimelineDao().getMinSortId(pagingKey)
                 if (minimumSortId != null && minimumSortId >= Long.MIN_VALUE + data.size) {
                     val firstSortId = minimumSortId - data.size
@@ -144,9 +149,12 @@ internal open class TimelineRemoteMediator(
                     }
                     data
                 }
-            } else if (request is PagingRequest.Append && data.isNotEmpty()) {
+            } else if ((request is PagingRequest.Append || (request is PagingRequest.Prepend && preservePrependSortIds)) &&
+                data.isNotEmpty()
+            ) {
                 // Repeated posts may have fresh content, but moving them to the end
                 // shifts the items being read while the next page is loading.
+                // A later insertion in a reading page may also have rebased an earlier row.
                 val existing =
                     data
                         .map { it.timeline.statusId }

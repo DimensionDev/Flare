@@ -119,6 +119,8 @@ internal fun DeckTimelineScreen(
             ) {
                 TimelineItemContent(
                     item = tabItem,
+                    isHomeTimeline = true,
+                    autoRefreshInterval = dev.dimension.flare.ui.component.LocalAppSettings.current.homeTimelineAutoRefreshInterval,
                     contentPadding = contentPadding,
                     modifier = Modifier.fillMaxSize(),
                 )

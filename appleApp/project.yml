@@ -300,6 +300,7 @@ targets:
     sources:
       - path: iosTimelineTestHost
       - path: ios/UI/Component/TimelineCollectionView.swift
+      - path: ios/UI/Component/TimelineItemHeightCache.swift
     dependencies:
       - package: CHTCollectionViewWaterfallLayout
     settings:

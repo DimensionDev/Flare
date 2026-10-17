@@ -39,6 +39,8 @@ jobs:
         uses: maxim-lobanov/setup-xcode@v1
         with:
           xcode-version: latest-stable
+      - name: Test native macOS reading position
+        run: sh appleApp/macosControllerTests/run-window-checks
       - name: Install XcodeGen
         run: brew install xcodegen
       - name: import certs

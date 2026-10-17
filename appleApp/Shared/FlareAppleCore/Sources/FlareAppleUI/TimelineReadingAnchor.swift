@@ -29,7 +29,7 @@ private struct TimelineReadingAnchor: ViewModifier {
                 GeometryReader { proxy in
                     Color.clear.preference(
                         key: TimelineReadingFrames.self,
-                        value: [key: proxy.frame(in: .named("timeline-reading-viewport"))]
+                        value: [key: proxy.frame(in: .named("timeline-reading-content"))]
                     )
                 }
             }

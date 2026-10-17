@@ -27,7 +27,15 @@ private final class Document: NSView { override var isFlipped: Bool { true } }
 @main
 struct TimelineReadingScrollCheck {
     @MainActor
-    static func main() async {
+    static func main() {
+        let app = NSApplication.shared
+        app.setActivationPolicy(.accessory)
+        Task { await check(); exit(0) }
+        app.run()
+    }
+
+    @MainActor
+    private static func check() async {
         let scroll = NSScrollView(frame: CGRect(x: 0, y: 0, width: 400, height: 400))
         scroll.documentView = Document(frame: CGRect(x: 0, y: 0, width: 400, height: 4000))
         let bridge = MacTimelineReadingScroll()
@@ -35,44 +43,70 @@ struct TimelineReadingScrollCheck {
         let state = ReadingState()
         func frame(_ y: CGFloat) -> CGRect { CGRect(x: 0, y: y, width: 400, height: 200) }
         func assertY(_ expected: CGFloat) { precondition(abs(scroll.contentView.bounds.minY - expected) < 0.01) }
+        func settle() async { try? await Task.sleep(for: .milliseconds(10)) }
 
         state.position = TimelineReadingPosition(itemKey: "post", offset: -37.25, requestId: 1, latest: false)
         bridge.update(frames: ["post": frame(600)], restorationIndex: 1, state: state)
+        await settle()
         assertY(637.25)
         state.position = nil
         bridge.report(state: state)
         precondition(state.itemKey == "post" && abs(state.offset + 37.25) < 0.01)
 
         bridge.preserveAnchor = true
-        bridge.update(frames: ["post": frame(262.75)], restorationIndex: 1, state: state)
+        bridge.update(frames: ["post": frame(900)], restorationIndex: 1, state: state)
+        await settle()
         assertY(937.25)
         precondition(abs(state.offset + 37.25) < 0.01)
 
         // A gap label above the viewport changes height while its source is loading.
         bridge.preserveAnchor = true
-        bridge.update(frames: ["post": frame(-13.25)], restorationIndex: -1, state: state)
+        bridge.update(frames: ["post": frame(924)], restorationIndex: -1, state: state)
+        await settle()
         assertY(961.25)
         precondition(state.itemKey == "post" && abs(state.offset + 37.25) < 0.01)
         precondition(state.position == nil)
         scroll.contentView.scroll(to: CGPoint(x: 0, y: 0))
         bridge.update(frames: ["new-head": frame(0), "post": frame(924)], restorationIndex: -1, state: state)
+        await settle()
         assertY(0)
         precondition(state.itemKey == "new-head" && state.position == nil)
 
         scroll.contentView.scroll(to: CGPoint(x: 0, y: 937.25))
-        bridge.update(frames: ["post": frame(-37.25)], restorationIndex: -1, state: state)
+        bridge.update(frames: ["post": frame(900)], restorationIndex: -1, state: state)
         bridge.isInteracting = true
         bridge.preserveAnchor = true
-        bridge.update(frames: ["post": frame(62.75)], restorationIndex: 1, state: state)
+        bridge.update(frames: ["post": frame(1000)], restorationIndex: 1, state: state)
+        await settle()
         assertY(937.25)
         precondition(state.interacting)
 
         bridge.isInteracting = false
+        bridge.update(frames: ["post": frame(900)], state: state)
+        await settle()
+        bridge.preserveAnchor = true
+        bridge.update(frames: [:], state: state)
+        await settle()
+        precondition(bridge.preserveAnchor && state.itemKey == "post")
+        bridge.update(frames: ["post": frame(1200)], state: state)
+        await settle()
+        assertY(1237.25)
+        precondition(!bridge.preserveAnchor && abs(state.offset + 37.25) < 0.01)
+
+        bridge.preserveAnchor = true
+        bridge.update(frames: ["post": frame(1600)], state: state)
+        bridge.isInteracting = true
+        await settle()
+        assertY(1237.25)
+        bridge.isInteracting = false
+        scroll.contentView.scroll(to: CGPoint(x: 0, y: 937.25))
         state.position = TimelineReadingPosition(itemKey: "post", offset: 0, requestId: 2, latest: true)
-        bridge.update(frames: ["post": frame(62.75)], restorationIndex: -1, state: state)
+        bridge.update(frames: ["post": frame(1000)], restorationIndex: -1, state: state)
+        await settle()
         assertY(937.25)
         precondition(state.position?.requestId == 2)
-        bridge.update(frames: ["post": frame(62.75)], restorationIndex: 0, state: state)
+        bridge.update(frames: ["post": frame(1000)], restorationIndex: 0, state: state)
+        await settle()
         assertY(0)
         try? await Task.sleep(for: .milliseconds(20))
         precondition(state.position == nil)

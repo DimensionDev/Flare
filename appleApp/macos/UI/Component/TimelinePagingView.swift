@@ -50,23 +50,34 @@ struct TimelinePagingView: View {
                 ScrollView {
                     content(data: presentedData, columnCount: 1, availableWidth: proxy.size.width)
                         .padding(.top, topContentInset)
+                        .coordinateSpace(name: "timeline-reading-content")
                 }
-                .coordinateSpace(name: "timeline-reading-viewport")
                 .environment(\.tracksTimelineReadingPosition, readingState != nil)
                 .introspect(.scrollView, on: .macOS(.v14, .v15, .v26, .v27)) { scrollView in
                     readingScroll.scrollView = scrollView
+                    readingScroll.materializeAnchor = { key in scrollProxy.scrollTo(key, anchor: .top) }
                 }
                 .onPreferenceChange(TimelineReadingFrames.self) { frames in
                     updateReadingFrames(frames, snapshot: presentedSnapshot, refreshing: presentedData.isRefreshing_)
                 }
                 .onChange(of: readingState?.position?.requestId, initial: true) { _, _ in
-                    restorePosition(using: scrollProxy, snapshot: presentedSnapshot, refreshing: presentedData.isRefreshing_)
+                    restorePosition(snapshot: presentedSnapshot, refreshing: presentedData.isRefreshing_)
                 }
                 .onChange(of: presentedSnapshot.map(ObjectIdentifier.init)) { _, _ in
-                    restorePosition(using: scrollProxy, snapshot: presentedSnapshot, refreshing: presentedData.isRefreshing_)
+                    restorePosition(snapshot: presentedSnapshot, refreshing: presentedData.isRefreshing_)
                 }
                 .onChange(of: presentedData.isRefreshing_) { _, _ in
-                    restorePosition(using: scrollProxy, snapshot: presentedSnapshot, refreshing: presentedData.isRefreshing_)
+                    restorePosition(snapshot: presentedSnapshot, refreshing: presentedData.isRefreshing_)
+                }
+                .onReceive(NotificationCenter.default.publisher(for: NSView.boundsDidChangeNotification, object: readingScroll.scrollView?.contentView)) { event in
+                    guard event.object as? NSClipView === readingScroll.scrollView?.contentView else { return }
+                    restorePosition(snapshot: presentedSnapshot, refreshing: presentedData.isRefreshing_)
+                }
+                .onDisappear {
+                    readingScroll.cancelPreservation()
+                    readingScroll.materializeAnchor = nil
+                    isReadingScrollActive = false
+                    readingScroll.isInteracting = false
                 }
                 .onReceive(NotificationCenter.default.publisher(for: NSScrollView.willStartLiveScrollNotification)) { event in
                     guard event.object as? NSScrollView === readingScroll.scrollView else { return }
@@ -100,14 +111,9 @@ struct TimelinePagingView: View {
         readingScroll.update(frames: frames, restorationIndex: index, state: readingState)
     }
 
-    private func restorePosition(using proxy: ScrollViewProxy, snapshot: TimelineSnapshot?, refreshing: Bool) {
-        guard let position = readingState?.position, let snapshot,
-              snapshot.restorationIndex(position: position, refreshing: refreshing) >= 0 else { return }
-        // Materialize the local window's anchor before applying its precise pixel offset.
-        if readingScroll.frames[position.itemKey] == nil {
-            proxy.scrollTo(position.itemKey, anchor: .top)
-        }
-        updateReadingFrames(readingScroll.frames, snapshot: snapshot, refreshing: refreshing)
+    private func restorePosition(snapshot: TimelineSnapshot?, refreshing: Bool) {
+        let index = readingState?.position.map { snapshot?.restorationIndex(position: $0, refreshing: refreshing) ?? -1 } ?? -1
+        readingScroll.restorePosition(restorationIndex: index, state: readingState)
     }
 
     @ViewBuilder

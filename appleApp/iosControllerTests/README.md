@@ -25,6 +25,9 @@ Pull-refresh results stay queued until the elastic gesture settles, and only the
 latest input commits. Native interaction tests also cover prepends during refresh
 reveal and measured height changes to a partly hidden card while dragging or
 decelerating; the next visible card must keep its screen position.
+Consecutive-prepend cases insert ten pages with intervening height refinements,
+without caller-side layout passes between updates. They check the current item,
+offset, complete item order and ongoing native pan/deceleration in one and two columns.
 They also verify that fractional column widths use measured cell heights instead
 of retaining the 240pt estimate when layout and cache widths round differently.
 The fixtures yield the main actor while settling: a nested synchronous run loop

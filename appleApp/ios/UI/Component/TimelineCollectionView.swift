@@ -476,6 +476,8 @@ final class TimelineCollectionView: UICollectionView {
             let context = UICollectionViewLayoutInvalidationContext()
             context.contentOffsetAdjustment.y = delta
             collectionViewLayout.invalidateLayout(with: context)
+            // The next snapshot or height update must capture visible cells at the compensated offset.
+            layoutIfNeeded()
         }
     }
 

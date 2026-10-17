@@ -1,10 +1,70 @@
 import XCTest
 import UIKit
 import SwiftUI
+import ObjectiveC
 import CHTCollectionViewWaterfallLayout
 
 @MainActor
 final class TimelineCollectionViewTests: XCTestCase {
+    func testConsecutivePrependPagesPreserveDraggingViewport() throws {
+        try assertConsecutivePrependsPreserveViewport(scrollFlag: #selector(getter: UIScrollView.isDragging))
+    }
+
+    func testConsecutivePrependPagesPreserveDeceleratingViewport() throws {
+        try assertConsecutivePrependsPreserveViewport(scrollFlag: #selector(getter: UIScrollView.isDecelerating))
+    }
+
+    func testConsecutivePrependsAndHeightCorrectionsPreserveScrollingViewport() throws {
+        for flag in [#selector(getter: UIScrollView.isDragging), #selector(getter: UIScrollView.isDecelerating)] {
+            try assertConsecutivePrependsPreserveViewport(scrollFlag: flag, refineHeights: true)
+        }
+    }
+
+    private func assertConsecutivePrependsPreserveViewport(scrollFlag: Selector, refineHeights: Bool = false) throws {
+        for columns in [1, 2] {
+            let fixture = Fixture(width: columns == 1 ? 390 : 900, columns: columns)
+            let view = fixture.collectionView
+            fixture.heightOverride = { _, _ in 240 }
+            view.invalidateMeasuredHeights()
+            fixture.scroll(to: 400)
+            let position = try fixture.readingPosition()
+            let method = try XCTUnwrap(class_getInstanceMethod(UIScrollView.self, scrollFlag))
+            let original = method_getImplementation(method)
+            let getter = unsafeBitCast(original, to: (@convention(c) (UIScrollView, Selector) -> Bool).self)
+            let override: @convention(block) (UIScrollView) -> Bool = { $0 === view || getter($0, scrollFlag) }
+            let implementation = imp_implementationWithBlock(override)
+            method_setImplementation(method, implementation)
+            defer {
+                method_setImplementation(method, original)
+                imp_removeBlock(implementation)
+            }
+            XCTAssertTrue(view.isScrollInteractionActive)
+
+            for page in 0..<10 {
+                let currentPosition = try fixture.readingPosition()
+                var snapshot = fixture.dataSource.snapshot()
+                snapshot.insertItems((200 + page * 20..<220 + page * 20).map(String.init), beforeItem: snapshot.itemIdentifiers[0])
+                view.prepareForSnapshotChange()
+                view.performUpdatesPreservingReadingPosition(keepingItemIDs: Set(snapshot.itemIdentifiers)) {
+                    fixture.dataSource.apply(snapshot, animatingDifferences: false)
+                }
+                if refineHeights {
+                    fixture.heightOverride = { id, _ in id >= 200 ? CGFloat(100 + id % 5 * 80) : 240 }
+                    view.invalidateMeasuredHeights()
+                }
+                try fixture.assertPosition(currentPosition)
+                // The next page can arrive before UIKit's next layout pass.
+            }
+            fixture.settle()
+            try fixture.assertPosition(position)
+            XCTAssertTrue(view.indexPathsForVisibleItems.contains(try XCTUnwrap(fixture.dataSource.indexPath(for: position.id))))
+            let expected = (0..<10).reversed().flatMap { Array(200 + $0 * 20..<220 + $0 * 20) } + Array(0..<120)
+            XCTAssertEqual(fixture.dataSource.snapshot().itemIdentifiers, expected.map(String.init))
+            XCTAssertTrue(view.isScrollInteractionActive)
+            XCTAssertFalse(view.hasReadingPosition)
+        }
+    }
+
     func testViewportCaptureDoesNotEnumerateItemsButRestorationStillKeepsTheOrder() throws {
         let fixture = Fixture(width: 390, columns: 1)
         fixture.scroll(to: 3_000)

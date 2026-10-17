@@ -90,6 +90,7 @@ private final class TimelineTestController: UIViewController, CHTCollectionViewD
             case "drag", "deceleration", "refine-reading-item", "refine-reading-item-deceleration": await checkGesture()
             case "pull-refresh", "fast-refresh-prepend": await checkRefreshWithPrepend()
             case "refresh-late-height", "refresh-late-height-columns", "refresh-height-after-collapse", "refresh-collapse-navigation": await checkRefreshWithLateHeight()
+            case let name where name.hasPrefix("consecutive-prepend-"): await checkConsecutivePrependGesture()
             case let name where name.hasPrefix("snapshot-"): await checkSnapshotGesture()
             default: await checkRefresh()
             }
@@ -311,6 +312,48 @@ private final class TimelineTestController: UIViewController, CHTCollectionViewD
         for _ in 0..<1500 {
             if decelerating ? list.isDecelerating : list.isDragging { break }
             try? await Task.sleep(for: .milliseconds(10))
+        }
+    }
+
+    private func checkConsecutivePrependGesture() async {
+        for id in 0..<120 { heights[id] = 240 }
+        list.invalidateMeasuredHeights()
+        let frame = layout.layoutAttributesForItem(at: dataSource.indexPath(for: 20)!)!.frame
+        jump(to: frame.minY + 40 - list.restingAdjustedTopInset)
+        await settle(100)
+        await waitForGesture()
+        let decelerating = scenario.contains("deceleration")
+        check(decelerating ? list.isDecelerating : list.isDragging, "native gesture was not observed")
+        guard let anchor = list.captureReadingViewport(), let id = Int(anchor.id) else {
+            failures.append("missing reading item before consecutive prepends")
+            return
+        }
+        for page in 0..<10 {
+            var snapshot = dataSource.snapshot()
+            let newIDs = Array(200 + page * 20..<220 + page * 20)
+            for id in newIDs { heights[id] = 240 }
+            snapshot.insertItems(newIDs, beforeItem: snapshot.itemIdentifiers[0])
+            list.prepareForSnapshotChange()
+            list.performUpdatesPreservingReadingPosition(keepingItemIDs: Set(snapshot.itemIdentifiers.map(String.init))) {
+                dataSource.apply(snapshot, animatingDifferences: false, completion: nil)
+            }
+            // No caller-side layout or run-loop turn between pages and delayed measurements.
+            for id in newIDs { heights[id] = 280 }
+            list.invalidateMeasuredHeights()
+            let path = dataSource.indexPath(for: id)!
+            let frame = layout.layoutAttributesForItem(at: path)!.frame
+            let offset = frame.minY - list.contentOffset.y - list.restingAdjustedTopInset
+            check(abs(offset - anchor.offset) < 1, "page \(page) moved reading item by \(offset - anchor.offset)pt")
+            check(list.indexPathsForVisibleItems.contains(path), "page \(page) lost the visible reading item")
+            check(decelerating ? list.isDecelerating : list.isDragging, "page \(page) cancelled gesture")
+            check(!list.hasReadingPosition, "page \(page) left a stale bookmark")
+        }
+        let expected = (0..<10).reversed().flatMap { Array(200 + $0 * 20..<220 + $0 * 20) } + Array(0..<120)
+        check(dataSource.snapshot().itemIdentifiers == expected, "consecutive prepends lost or reordered items")
+        if decelerating {
+            let offset = list.contentOffset.y
+            await settle(40)
+            check(abs(list.contentOffset.y - offset) > 1, "consecutive prepends stopped momentum")
         }
     }
 

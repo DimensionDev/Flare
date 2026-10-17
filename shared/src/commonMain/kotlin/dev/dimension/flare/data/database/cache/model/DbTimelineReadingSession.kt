@@ -35,6 +35,7 @@ internal data class DbTimelineReadingSegment(
     val boundaryId: String,
     val boundarySortId: Long,
     @ColumnInfo(defaultValue = "0") val failed: Boolean = false,
+    @ColumnInfo(defaultValue = "1") val confirmed: Boolean = true,
 )
 
 @Entity(indices = [Index(value = ["snapshotKey", "lastAttempt"])])
@@ -43,6 +44,8 @@ internal data class DbTimelineReadingCursor(
     val snapshotKey: String,
     val lastAttempt: Long,
     val lastPageIds: String?,
+    @ColumnInfo(defaultValue = "0") val paused: Boolean = false,
+    @ColumnInfo(defaultValue = "0") val retryFailed: Boolean = false,
 )
 
 @Entity

@@ -387,6 +387,7 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
             remember(items) {
                 {
                     contextMediator.value?.prepareRetry()
+                    readingSession.value?.prepareRetry()
                     items.retry()
                 }
             }

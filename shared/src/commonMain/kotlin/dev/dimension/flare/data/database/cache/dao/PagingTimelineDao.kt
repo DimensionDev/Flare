@@ -261,6 +261,11 @@ internal interface PagingTimelineDao {
 
     suspend fun keysWithPrefix(prefix: String): List<String> = keysMatchingPrefix(prefix.toPagingKeyPrefixGlob())
 
+    suspend fun pagingKeysWithPrefix(prefix: String): List<DbPagingKey> = pagingKeysMatchingPrefix(prefix.toPagingKeyPrefixGlob())
+
+    @Query("SELECT * FROM DbPagingKey WHERE pagingKey GLOB :pattern")
+    suspend fun pagingKeysMatchingPrefix(pattern: String): List<DbPagingKey>
+
     @Query(
         "SELECT DISTINCT pagingKey FROM DbPagingTimeline WHERE pagingKey GLOB :pattern UNION SELECT pagingKey FROM DbPagingKey WHERE pagingKey GLOB :pattern",
     )

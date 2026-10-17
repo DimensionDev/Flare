@@ -18,6 +18,8 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -30,6 +32,8 @@ internal class MixedRemoteMediator(
     private val isRequestValid: suspend () -> Boolean = { true },
     private val sourceKeys: List<String> = mediators.map { it.pagingKey },
     private val readingHeadKey: String? = null,
+    private val retryFailed: Boolean = false,
+    private val refreshCache: RefreshCache? = null,
 ) : CacheableRemoteLoader<UiTimelineV2>,
     ReportableRemoteLoader,
     SortIdProvider {
@@ -49,9 +53,19 @@ internal class MixedRemoteMediator(
 
     internal val ordersByTime: Boolean get() = mergePolicy == TimelineMergePolicy.Time
 
+    internal suspend fun canRecoverHeadOnRefresh(): Boolean =
+        mediators.withIndex().all { (index, source) ->
+            val key = database.pagingTimelineDao().getPagingKey(if (ordersByTime) timeSources[index].stagingKey else subKey(source))
+            val state = key?.readingState?.let { Json.decodeFromString<ReadingSourceState>(it) }
+            state?.joined == true || key == null || state?.refreshPending == true || key.nextKey == null ||
+                (source is MixedRemoteMediator && source.canRecoverHeadOnRefresh())
+        }
+
     internal fun forReadingSession(
         key: String,
         readingHeadKey: String? = null,
+        retryFailed: Boolean = false,
+        refreshCache: RefreshCache? = null,
         isValid: suspend () -> Boolean,
     ): MixedRemoteMediator =
         MixedRemoteMediator(
@@ -61,6 +75,8 @@ internal class MixedRemoteMediator(
                     loader.forReadingSession(
                         "$key/source/${sourceKeys[index].length}:${sourceKeys[index]}/",
                         readingHeadKey?.let { "$it/source/${sourceKeys[index].length}:${sourceKeys[index]}/" },
+                        retryFailed,
+                        refreshCache,
                         isValid,
                     )
                 } else {
@@ -72,6 +88,8 @@ internal class MixedRemoteMediator(
             isValid,
             sourceKeys,
             readingHeadKey,
+            retryFailed,
+            refreshCache,
         )
 
     override suspend fun load(
@@ -79,6 +97,18 @@ internal class MixedRemoteMediator(
         request: PagingRequest,
     ): PagingResult<UiTimelineV2> {
         val pendingWrites = mutableListOf<suspend () -> Unit>()
+        if (retryFailed && readingHeadKey != null) {
+            pendingWrites.add {
+                // Buffered children may not load this turn; persist their retry before this turn's failures.
+                val dao = database.pagingTimelineDao()
+                for (key in dao.pagingKeysWithPrefix("$pagingKey/source/")) {
+                    val state = key.readingState?.let { Json.decodeFromString<ReadingSourceState>(it) } ?: continue
+                    if (state.failed || !state.canContinue) {
+                        dao.insertPagingKey(key.copy(readingState = Json.encodeToString(state.copy(failed = false, canContinue = true))))
+                    }
+                }
+            }
+        }
         val result = load(pageSize, request, pendingWrites)
         // Child cursors, staging and the outer page must commit together in both modes.
         return result.copy(saveInTransaction = {
@@ -99,49 +129,85 @@ internal class MixedRemoteMediator(
             } else if (mergePolicy == TimelineMergePolicy.Time) {
                 loadTimeOrdered(pageSize, request, pendingWrites)
             } else {
-                val subRequests = mediators.mapNotNull { getSubRequest(request, it) }
+                val cursors = mediators.associateWith { database.pagingTimelineDao().getPagingKey(subKey(it)) }.toMutableMap()
+                val reading =
+                    cursors
+                        .mapValues { (_, key) ->
+                            key?.readingState?.let { Json.decodeFromString<ReadingSourceState>(it) }
+                                ?: readingHeadKey?.let { ReadingSourceState(headPending = request is PagingRequest.Refresh || key == null) }
+                        }.toMutableMap()
+                val subRequests =
+                    mediators.mapNotNull { source ->
+                        val state = reading[source]
+                        if (request is PagingRequest.Append && !retryFailed && (state?.failed == true || state?.canContinue == false)) {
+                            null
+                        } else {
+                            getSubRequest(request, source, cursors[source], state?.refreshPending == true)
+                        }
+                    }
                 val results =
                     subRequests
                         .map { subRequest ->
-                            async {
-                                loadSource(subRequest.mediator, pageSize, subRequest.request).map {
-                                    SubResponse(subRequest, it)
-                                }
-                            }
+                            async { loadSource(subRequest.mediator, pageSize, subRequest.request).map { SubResponse(subRequest, it) } }
                         }.awaitAll()
-
-                val response = results.mapNotNull { it.getOrNull() }
-                if (response.isEmpty()) results.firstOrNull()?.getOrThrow()
-                results.mapNotNull { it.exceptionOrNull() }.forEach { reportError?.invoke(it) }
-                val mixedTimelineResult = merge(response)
-
+                val responses = results.mapNotNull { it.getOrNull() }
+                if (responses.isEmpty() && (readingHeadKey == null || request is PagingRequest.Refresh)) {
+                    results.firstOrNull()?.getOrThrow()
+                }
+                results.forEachIndexed { index, result ->
+                    val subRequest = subRequests[index]
+                    val source = subRequest.mediator
+                    val response = result.getOrNull()?.result
+                    val previous = cursors[source] ?: DbPagingKey(subKey(source))
+                    val state = reading[source]
+                    reading[source] =
+                        if (response != null) {
+                            state?.copy(
+                                refreshPending = false,
+                                headPending = (state.headPending || state.refreshPending) && response.data.isEmpty(),
+                                failed = false,
+                                canContinue = response.canContinue,
+                                hasConfirmedGap = response.hasConfirmedGap,
+                            )
+                        } else {
+                            state?.copy(refreshPending = subRequest.request is PagingRequest.Refresh, failed = true)
+                        }
+                    cursors[source] =
+                        if (response != null) {
+                            previous.copy(
+                                nextKey = response.nextKey,
+                                prevKey = if (subRequest.request is PagingRequest.Refresh) response.previousKey else previous.prevKey,
+                            )
+                        } else if (state != null) {
+                            previous
+                        } else {
+                            DbPagingKey(subKey(source))
+                        }.copy(readingState = reading[source]?.let { Json.encodeToString(it) })
+                }
                 pendingWrites.add {
                     if (request is PagingRequest.Refresh) {
                         mediators.forEach { database.pagingTimelineDao().deletePagingKey(subKey(it)) }
                     }
-                    response.forEach {
-                        it.result.saveInTransaction?.invoke()
-                        saveSubResponse(it)
-                    }
-                    results.forEachIndexed { index, result ->
-                        if (result.isFailure && readingHeadKey == null) {
-                            database.pagingTimelineDao().insertPagingKey(DbPagingKey(subKey(subRequests[index].mediator)))
-                        }
-                    }
+                    responses.forEach { it.result.saveInTransaction?.invoke() }
+                    subRequests.forEach { cursors[it.mediator]?.let { key -> database.pagingTimelineDao().insertPagingKey(key) } }
                 }
-
-                val hasMore = response.any { it.result.nextKey != null } || (readingHeadKey != null && results.any { it.isFailure })
-
+                results.mapNotNull { it.exceptionOrNull() }.forEach { reportError?.invoke(it) }
+                val remaining = mediators.filter { cursors[it]?.nextKey != null || reading[it]?.refreshPending == true }
                 PagingResult(
-                    data = mixedTimelineResult,
+                    data = merge(responses),
+                    hasConfirmedGap =
+                        remaining.any {
+                            reading[it]?.refreshPending != true && reading[it]?.headPending != true && reading[it]?.hasConfirmedGap != false
+                        },
+                    canContinue = remaining.any { reading[it]?.failed != true && reading[it]?.canContinue != false },
                     continuationError =
-                        if (readingHeadKey != null) {
+                        if (readingHeadKey != null && responses.none { it.result.continuationError == null }) {
                             results.firstNotNullOfOrNull { it.exceptionOrNull() as? Exception }
-                                ?: response.firstNotNullOfOrNull { it.result.continuationError }
+                                ?: responses.firstNotNullOfOrNull { it.result.continuationError }
                         } else {
                             null
                         },
-                    nextKey = if (hasMore) MIXED_NEXT_KEY else null,
+                    nextKey = if (remaining.isNotEmpty()) MIXED_NEXT_KEY else null,
                     previousKey = null,
                 )
             }
@@ -185,17 +251,28 @@ internal class MixedRemoteMediator(
                             ArrayDeque(),
                             initialized = false,
                             nextKey = null,
-                            reading = if (readingHeadKey != null) ReadingSourceState(boundaryIds = previous?.headIds.orEmpty()) else null,
+                            reading =
+                                if (readingHeadKey !=
+                                    null
+                                ) {
+                                    ReadingSourceState(boundaryIds = previous?.headIds.orEmpty(), headPending = true)
+                                } else {
+                                    null
+                                },
                         )
                     }
                 } else {
                     loadTimeSourceStates()
                 }
+            if (retryFailed) {
+                timeSourceStates.forEach { state -> state.reading = state.reading?.copy(failed = false, canContinue = true) }
+            }
             markCommitted(timeSourceStates.flatMap { it.pending })
             val loadedStates = mutableListOf<TimeSourceState>()
             val failedStates = mutableSetOf<TimeSourceState>()
             val failures = mutableListOf<Throwable>()
             var childFailure: Exception? = null
+            var healthyResponse = false
             var learnedHead = false
             val selected = mutableListOf<DbPagingTimelineWithStatus>()
             val consumed = mutableListOf<DbPagingTimelineWithStatus>()
@@ -248,7 +325,7 @@ internal class MixedRemoteMediator(
                                 state.initialized = true
                                 state.nextKey = null
                             } else {
-                                state.reading = state.reading?.copy(refreshPending = !state.initialized)
+                                state.reading = state.reading?.copy(refreshPending = !state.initialized, failed = true)
                             }
                             failedStates += state
                             failures += it
@@ -273,6 +350,7 @@ internal class MixedRemoteMediator(
                     }
                     responses.forEach { response ->
                         childFailure = childFailure ?: response.result.continuationError
+                        healthyResponse = healthyResponse || response.result.continuationError == null
                         val state = response.state
                         state.reading =
                             state.reading?.let { reading ->
@@ -280,7 +358,11 @@ internal class MixedRemoteMediator(
                                 learnedHead = learnedHead || (reading.headIds.isEmpty() && ids.isNotEmpty())
                                 reading.copy(
                                     headIds = reading.headIds.ifEmpty { ids.take(pageSize) },
+                                    headPending = (reading.headPending || reading.refreshPending) && ids.isEmpty(),
                                     refreshPending = false,
+                                    failed = false,
+                                    canContinue = response.result.canContinue,
+                                    hasConfirmedGap = response.result.hasConfirmedGap,
                                     joined =
                                         reading.joined ||
                                             (
@@ -313,7 +395,9 @@ internal class MixedRemoteMediator(
                 }
             }
 
-            if (selected.isEmpty() && failures.isNotEmpty() && loadedStates.size == failedStates.size) {
+            if (selected.isEmpty() && failures.isNotEmpty() && loadedStates.size == failedStates.size &&
+                (readingHeadKey == null || request is PagingRequest.Refresh)
+            ) {
                 throw failures.first()
             }
             pendingWrites.add {
@@ -329,15 +413,25 @@ internal class MixedRemoteMediator(
             failures.forEach { reportError?.invoke(it) }
             val hasMore =
                 timeSourceStates.any {
-                    it.pending.any { item -> item.timeline.statusId !in seenStatusIds } || it.canLoad
+                    it.pending.any { item -> item.timeline.statusId !in seenStatusIds } || it.hasMore
                 }
             val completed = consumed + timeSourceStates.flatMap { it.pending.filter { item -> item.timeline.statusId in seenStatusIds } }
             PagingResult(
                 data = selected.map(::timeStagingToUi),
+                hasConfirmedGap =
+                    timeSourceStates.any { state ->
+                        state.pending.any { it.timeline.statusId !in seenStatusIds } ||
+                            (
+                                state.initialized && state.hasMore && state.reading?.headPending != true &&
+                                    state.reading?.hasConfirmedGap != false
+                            )
+                    },
+                canContinue =
+                    timeSourceStates.any { state ->
+                        state.pending.any { it.timeline.statusId !in seenStatusIds } || state.canLoad
+                    },
                 continuationError =
-                    if (readingHeadKey !=
-                        null
-                    ) {
+                    if (readingHeadKey != null && !healthyResponse && selected.isEmpty() && consumed.isEmpty()) {
                         failures.filterIsInstance<Exception>().firstOrNull() ?: childFailure
                     } else {
                         null
@@ -398,6 +492,27 @@ internal class MixedRemoteMediator(
             if (child is MixedRemoteMediator) {
                 child.publishReadingHeads("$targetKey/source/${sourceKeys[index].length}:${sourceKeys[index]}/")
             }
+        }
+    }
+
+    internal fun readingCursor(key: DbPagingKey): DbPagingKey? {
+        val state = key.readingState?.let { Json.decodeFromString<ReadingSourceState>(it) } ?: return key
+        if (state.joined || (key.nextKey == null && !state.refreshPending)) return null
+        // Retry eligibility is not content progress; unresolved children own a nested source's boundaries.
+        return if (!state.hasConfirmedGap || state.failed || !state.canContinue) {
+            key.copy(
+                readingState =
+                    Json.encodeToString(
+                        state.copy(
+                            headIds = if (state.hasConfirmedGap) state.headIds else emptyList(),
+                            boundaryIds = if (state.hasConfirmedGap) state.boundaryIds else emptyList(),
+                            failed = false,
+                            canContinue = true,
+                        ),
+                    ),
+            )
+        } else {
+            key
         }
     }
 
@@ -485,55 +600,25 @@ internal class MixedRemoteMediator(
 
     private fun itemIdentity(item: UiTimelineV2): String = item.itemKey ?: "${item.accountType}_${item.statusKey}"
 
-    private suspend fun getSubRequest(
+    private fun getSubRequest(
         request: PagingRequest,
         mediator: CacheableRemoteLoader<UiTimelineV2>,
+        key: DbPagingKey?,
+        refreshPending: Boolean,
     ): SubRequest? =
         when (request) {
             is PagingRequest.Append -> {
-                val key = database.pagingTimelineDao().getPagingKey(subKey(mediator))
-                if (key == null) PagingRequest.Refresh else key.nextKey?.let(PagingRequest::Append)
+                if (key == null || refreshPending) PagingRequest.Refresh else key.nextKey?.let(PagingRequest::Append)
             }
 
             is PagingRequest.Prepend -> {
-                database
-                    .pagingTimelineDao()
-                    .getPagingKey(subKey(mediator))
-                    ?.prevKey
-                    ?.let(PagingRequest::Prepend)
+                key?.prevKey?.let(PagingRequest::Prepend)
             }
 
             is PagingRequest.Refresh -> {
                 PagingRequest.Refresh
             }
-        }?.let {
-            SubRequest(mediator, it)
-        }
-
-    private suspend fun saveSubResponse(subResponse: SubResponse) {
-        val (subRequest, result) = subResponse
-        val (mediator, request) = subRequest
-        if (request is PagingRequest.Prepend && result.previousKey != null) {
-            database.pagingTimelineDao().updatePagingKeyPrevKey(
-                pagingKey = subKey(mediator),
-                prevKey = result.previousKey,
-            )
-        } else if (request is PagingRequest.Append) {
-            database.pagingTimelineDao().updatePagingKeyNextKey(
-                pagingKey = subKey(mediator),
-                nextKey = result.nextKey,
-            )
-        } else if (request is PagingRequest.Refresh) {
-            database.pagingTimelineDao().deletePagingKey(subKey(mediator))
-            database.pagingTimelineDao().insertPagingKey(
-                dev.dimension.flare.data.database.cache.model.DbPagingKey(
-                    pagingKey = subKey(mediator),
-                    nextKey = result.nextKey,
-                    prevKey = result.previousKey,
-                ),
-            )
-        }
-    }
+        }?.let { SubRequest(mediator, it) }
 
     private fun subKey(mediator: CacheableRemoteLoader<UiTimelineV2>) =
         if (sessionKey != null) "${sourcePrefix(mediators.indexOf(mediator))}cursor" else "mixed_${mediator.pagingKey}"
@@ -550,9 +635,25 @@ internal class MixedRemoteMediator(
         request: PagingRequest,
     ): Result<PagingResult<UiTimelineV2>> {
         if (source is ReportableRemoteLoader) source.reportError = reportError
-        return runCatching { source.load(pageSize, request) }.onFailure {
-            if (it is CancellationException) throw it
-        }
+        val cache = refreshCache.takeIf { request is PagingRequest.Refresh && source !is MixedRemoteMediator }
+        cache?.get(source)?.let { return it }
+        return runCatching { source.load(pageSize, request) }
+            .onFailure {
+                if (it is CancellationException) throw it
+            }.also { cache?.put(source, it) }
+    }
+
+    // Recovering an unknown head and refreshing the current head share the same remote response.
+    internal class RefreshCache {
+        private val mutex = Mutex()
+        private val results = mutableMapOf<CacheableRemoteLoader<UiTimelineV2>, Result<PagingResult<UiTimelineV2>>>()
+
+        suspend fun get(source: CacheableRemoteLoader<UiTimelineV2>) = mutex.withLock { results[source] }
+
+        suspend fun put(
+            source: CacheableRemoteLoader<UiTimelineV2>,
+            result: Result<PagingResult<UiTimelineV2>>,
+        ) = mutex.withLock { results[source] = result }
     }
 
     private data class SubRequest(
@@ -571,6 +672,10 @@ internal class MixedRemoteMediator(
         val boundaryIds: List<String> = emptyList(),
         val joined: Boolean = false,
         val refreshPending: Boolean = false,
+        val headPending: Boolean = false,
+        val failed: Boolean = false,
+        val canContinue: Boolean = true,
+        val hasConfirmedGap: Boolean = true,
     )
 
     private data class TimeSource(
@@ -585,8 +690,11 @@ internal class MixedRemoteMediator(
         var nextKey: String?,
         var reading: ReadingSourceState? = null,
     ) {
-        val canLoad: Boolean
+        val hasMore: Boolean
             get() = reading?.joined != true && (!initialized || nextKey != null)
+
+        val canLoad: Boolean
+            get() = hasMore && reading?.failed != true && reading?.canContinue != false
 
         fun nextRequest(): PagingRequest =
             if (initialized) {

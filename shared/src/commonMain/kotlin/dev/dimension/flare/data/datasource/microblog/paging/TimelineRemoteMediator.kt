@@ -104,6 +104,8 @@ internal open class TimelineRemoteMediator(
             previousKey = result.previousKey,
             saveInTransaction = result.saveInTransaction,
             continuationError = result.continuationError,
+            hasConfirmedGap = result.hasConfirmedGap,
+            canContinue = result.canContinue,
         )
     }
 

@@ -7,6 +7,8 @@ public data class PagingResult<T : Any>(
     val nextKey: String? = null,
     val previousKey: String? = null,
     internal val continuationError: Exception? = null,
+    internal val hasConfirmedGap: Boolean = true,
+    internal val canContinue: Boolean = true,
     internal val saveInTransaction: (suspend () -> Unit)? = null,
 ) {
     public constructor(

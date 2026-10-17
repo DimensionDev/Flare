@@ -15,8 +15,22 @@ internal interface TimelineReadingSessionDao {
     @Query("SELECT * FROM DbTimelineReadingCursor WHERE snapshotKey = :snapshotKey ORDER BY lastAttempt, `key`")
     suspend fun cursors(snapshotKey: String): List<DbTimelineReadingCursor>
 
-    @Query("SELECT * FROM DbTimelineReadingCursor WHERE snapshotKey = :snapshotKey ORDER BY lastAttempt, `key` LIMIT 1")
+    @Query("SELECT * FROM DbTimelineReadingCursor WHERE snapshotKey = :snapshotKey AND paused = 0 ORDER BY lastAttempt, `key` LIMIT 1")
     suspend fun nextCursor(snapshotKey: String): DbTimelineReadingCursor?
+
+    @Query("SELECT * FROM DbTimelineReadingCursor WHERE snapshotKey = :snapshotKey AND paused = 1 ORDER BY lastAttempt, `key`")
+    suspend fun pausedCursors(snapshotKey: String): List<DbTimelineReadingCursor>
+
+    @Query(
+        "SELECT c.* FROM DbTimelineReadingCursor c JOIN DbTimelineReadingSegment s ON s.`key` = c.`key` WHERE c.snapshotKey = :snapshotKey AND c.paused = 1 AND s.confirmed = 0 ORDER BY c.lastAttempt, c.`key`",
+    )
+    suspend fun unknownHeadCursors(snapshotKey: String): List<DbTimelineReadingCursor>
+
+    @Query("UPDATE DbTimelineReadingCursor SET paused = 0, retryFailed = 1 WHERE snapshotKey = :snapshotKey")
+    suspend fun retrySourcesOnNextLoad(snapshotKey: String)
+
+    @Query("UPDATE DbTimelineReadingSegment SET failed = 0 WHERE snapshotKey = :snapshotKey AND confirmed = 1 AND failed = 1")
+    suspend fun resumeSegments(snapshotKey: String)
 
     @Query("SELECT * FROM DbTimelineReadingCursor WHERE `key` = :key")
     suspend fun cursor(key: String): DbTimelineReadingCursor?
@@ -33,7 +47,7 @@ internal interface TimelineReadingSessionDao {
     suspend fun segments(snapshotKey: String): List<DbTimelineReadingSegment>
 
     @Query(
-        "SELECT * FROM DbTimelineReadingSegment WHERE snapshotKey = :snapshotKey AND boundarySortId >= :first AND boundarySortId <= :last ORDER BY boundarySortId",
+        "SELECT * FROM DbTimelineReadingSegment WHERE snapshotKey = :snapshotKey AND confirmed = 1 AND boundarySortId >= :first AND boundarySortId <= :last ORDER BY boundarySortId",
     )
     suspend fun segmentsInWindow(
         snapshotKey: String,

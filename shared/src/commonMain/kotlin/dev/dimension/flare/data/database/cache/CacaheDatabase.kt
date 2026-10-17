@@ -10,7 +10,7 @@ import androidx.room3.withWriteTransaction
 import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.async.executeSQL
 
-internal const val CACHE_DATABASE_VERSION = 56
+internal const val CACHE_DATABASE_VERSION = 57
 
 @Database(
     entities = [
@@ -53,6 +53,15 @@ internal const val CACHE_DATABASE_VERSION = 56
 @ConstructedBy(CacheDatabaseConstructor::class)
 internal abstract class CacheDatabase : RoomDatabase() {
     companion object {
+        val MIGRATION_56_57 =
+            object : Migration(56, 57) {
+                override suspend fun migrate(connection: SQLiteConnection) {
+                    connection.executeSQL("ALTER TABLE DbTimelineReadingSegment ADD COLUMN confirmed INTEGER NOT NULL DEFAULT 1")
+                    connection.executeSQL("ALTER TABLE DbTimelineReadingCursor ADD COLUMN paused INTEGER NOT NULL DEFAULT 0")
+                    connection.executeSQL("ALTER TABLE DbTimelineReadingCursor ADD COLUMN retryFailed INTEGER NOT NULL DEFAULT 0")
+                }
+            }
+
         val MIGRATION_55_56 =
             object : Migration(55, 56) {
                 override suspend fun migrate(connection: SQLiteConnection) {

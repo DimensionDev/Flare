@@ -95,7 +95,7 @@ struct HomeTimelineScreen: View {
                             }
                         }
                     } else {
-                        let tab = selectedTabId.flatMap { id in
+                        let tab = (selectedTabId ?? presenter.state.initialSelectedTabId).flatMap { id in
                             tabs.first { $0.id == id }
                         } ?? tabs[0]
                         let resolvedTimelineAppearance =
@@ -124,7 +124,10 @@ struct HomeTimelineScreen: View {
                             if let selectedTabId, tabIds.contains(selectedTabId) {
                                 return
                             }
-                            selectedTabId = tabIds.first
+                            selectedTabId = tabIds.first(where: { $0 == presenter.state.initialSelectedTabId }) ?? tabIds.first
+                        }
+                        .onChange(of: selectedTabId) { _, id in
+                            if let id { presenter.state.selectTab(tabId: id) }
                         }
                         .toolbar {
                             leadingToolbarContent
@@ -136,6 +139,7 @@ struct HomeTimelineScreen: View {
                                         TabIcon(tabItem: tab)
                                     }
                                     .labelStyle(.titleAndIcon)
+                                    .accessibilityIdentifier("home-timeline-title")
                                     .id(tab.id)
                                 }
                                 ToolbarTitleMenu {

@@ -25,6 +25,8 @@ private enum FlareEnvironmentDefaults {
 }
 
 public extension EnvironmentValues {
+    @Entry var timelineReading: TimelineReadingState? = nil
+    @Entry var timelineGapWillLoad: ((UiTimelineV2.Message) -> Void)? = nil
     @Entry var globalAppearance: GlobalAppearance = FlareEnvironmentDefaults.globalAppearance
     @Entry var timelineAppearance: TimelineAppearance = FlareEnvironmentDefaults.timelineAppearance
     @Entry var aiConfig: AppSettings.AiConfig = FlareEnvironmentDefaults.aiConfig

@@ -7,6 +7,7 @@ import SwiftUI
 struct TimelinePagingView: View {
     @Environment(\.openWindow) private var openWindow
     @Environment(\.refresh) private var refreshAction: RefreshAction?
+    @Environment(\.timelineReading) private var reading
     @Environment(\.timelineAppearance.timelineDisplayMode) private var timelineDisplayMode
 
     let data: PagingState<UiTimelineV2>
@@ -35,9 +36,18 @@ struct TimelinePagingView: View {
     var body: some View {
         GeometryReader { proxy in
 //            let columnCount = resolvedColumnCount(width: proxy.size.width)
-            ScrollView {
-                content(columnCount: 1, availableWidth: proxy.size.width)
-                    .padding(.top, topContentInset)
+            Group {
+                if reading != nil {
+                    TimelineReadingScrollView(itemKeys: readingItemKeys, gaps: readingGaps) {
+                        content(columnCount: 1, availableWidth: proxy.size.width)
+                            .padding(.top, topContentInset)
+                    }
+                } else {
+                    ScrollView {
+                        content(columnCount: 1, availableWidth: proxy.size.width)
+                            .padding(.top, topContentInset)
+                    }
+                }
             }
             .background(timelineDisplayMode == .card || timelineDisplayMode == .gallery ? Color(.secondarySystemFill) : Color(.windowBackgroundColor))
             .detectScrolling()
@@ -50,6 +60,16 @@ struct TimelinePagingView: View {
             .environment(\.timelineMediaOpenAction, timelineMediaOpenAction)
             .environment(\.timelineMediaActionHandler, timelineMediaActionHandler)
         }
+    }
+
+    private var readingItemKeys: [String] {
+        guard let success = data as? PagingStateSuccess<UiTimelineV2> else { return [] }
+        return (0..<Int(success.itemCount)).compactMap { success.peek(index: Int32($0))?.stableItemKey }
+    }
+
+    private var readingGaps: [UiTimelineV2.Message] {
+        guard let success = data as? PagingStateSuccess<UiTimelineV2> else { return [] }
+        return (0..<Int(success.itemCount)).compactMap { success.peek(index: Int32($0)) as? UiTimelineV2.Message }.filter(\.isPaginationGap)
     }
 
     @ViewBuilder
@@ -273,6 +293,7 @@ private struct MacTimelineMasonryRowView: View {
         }
         .padding(.horizontal, 2)
         .padding(.vertical, 6)
+        .timelineReadingItem(row.item)
         .onAppear {
             onDisplay(row.index)
         }
@@ -350,6 +371,7 @@ private struct MacGalleryTimelineMasonryView: View {
                 LazyVStack(spacing: spacing) {
                     ForEach(column.rows) { row in
                         TimelineGalleryItemView(item: row.item, placeholderVariant: row.index)
+                            .timelineReadingItem(row.item)
                             .onAppear {
                                 onDisplay(row.index)
                             }

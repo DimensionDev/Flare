@@ -201,7 +201,7 @@ final class TimelineCollectionView: UICollectionView {
     }
 
     func interruptRefreshForScrolling() {
-        if isAnimatingRefreshCollapse {
+        if isAnimatingRefreshCollapse || isRevealingRefresh {
             super.setContentOffset(contentOffset, animated: false)
         }
         pendingRefreshReveal = false

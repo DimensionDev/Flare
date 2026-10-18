@@ -4,6 +4,7 @@ import FlareAppleCore
 
 public struct StatusTopMessageView: View {
     @Environment(\.openURL) private var openURL
+    @Environment(\.timelineGapWillLoad) private var gapWillLoad
     private let topMessage: UiTimelineV2.Message
 
     public init(topMessage: UiTimelineV2.Message) {
@@ -23,6 +24,7 @@ public struct StatusTopMessageView: View {
             }
         }
         .onTapGesture {
+            if topMessage.isPaginationGap { gapWillLoad?(topMessage) }
             topMessage.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -104,6 +106,12 @@ public extension UiTimelineV2.MessageType {
                 FlareAppleUILocalization.string("misskey_notification_create_token")
             case .starterpackJoined:
                 FlareAppleUILocalization.string("bluesky_notification_starterpackJoined")
+            case .loadMissingPosts:
+                FlareAppleUILocalization.string("timeline_load_missing_posts")
+            case .loadingMissingPosts:
+                FlareAppleUILocalization.string("timeline_loading_missing_posts")
+            case .retryMissingPosts:
+                FlareAppleUILocalization.string("timeline_retry_missing_posts")
             case .pinned:
                 FlareAppleUILocalization.string("bluesky_notification_item_pin")
             case .like:

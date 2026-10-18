@@ -337,6 +337,20 @@ targets:
         TEST_TARGET_NAME: iOS
         SWIFT_DEFAULT_ACTOR_ISOLATION: nonisolated
 
+  HomeTimelineInteractionTests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: iosHomeUITests
+    dependencies:
+      - target: iOS
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        PRODUCT_BUNDLE_IDENTIFIER: dev.dimension.flare.home-interaction-tests
+        TEST_TARGET_NAME: iOS
+        SWIFT_DEFAULT_ACTOR_ISOLATION: nonisolated
+
   macOS:
     templates: [FirebaseOptionalApp]
     type: application
@@ -520,6 +534,15 @@ schemes:
       config: Debug
       targets:
         - MediaViewerInteractionTests
+
+  HomeTimelineInteractionTests:
+    build:
+      targets:
+        HomeTimelineInteractionTests: all
+    test:
+      config: Debug
+      targets:
+        - HomeTimelineInteractionTests
 
   macOS:
     build:

@@ -3,6 +3,10 @@ import KotlinSharedUI
 import FlareAppleCore
 import FlareAppleUI
 
+protocol TimelineGapActionObserver: AnyObject {
+    func willLoadTimelineGap(_ message: UiTimelineV2.Message)
+}
+
 /// UIKit port of StatusTopMessageView: icon + user name + localized text.
 final class StatusTopMessageUIView: UIView, ManualLayoutMeasurable, TimelineHeightProviding {
     var onOpenURL: ((URL) -> Void)? {
@@ -229,6 +233,16 @@ final class StatusTopMessageUIView: UIView, ManualLayoutMeasurable, TimelineHeig
 
     @objc private func onTapped() {
         guard let topMessage = topMessage else { return }
+        if topMessage.isPaginationGap {
+            var responder: UIResponder? = self
+            while let current = responder {
+                if let observer = current as? TimelineGapActionObserver {
+                    observer.willLoadTimelineGap(topMessage)
+                    break
+                }
+                responder = current.next
+            }
+        }
         topMessage.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: SwiftUI.OpenURLAction { [weak self] url in
             self?.onOpenURL?(url)
             return .handled

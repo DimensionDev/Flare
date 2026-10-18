@@ -32,6 +32,9 @@ public sealed class UiTimelineV2 {
     public abstract val stableItemKey: String
     public abstract val renderHash: Int
 
+    public val isPaginationGap: Boolean
+        get() = itemKey?.startsWith("timeline-gap:") == true
+
     @Transient
     public val itemType: String =
         when (this) {
@@ -76,12 +79,14 @@ public sealed class UiTimelineV2 {
         override val accountType: AccountType,
         @Transient
         override val itemKey: String? = null,
+        @Transient
+        val onActivate: (() -> Unit)? = null,
     ) : UiTimelineV2() {
         @Transient
         override val stableItemKey: String = calculateStableItemKey()
         override val searchText: String? = null
         val onClicked: ClickContext.() -> Unit by lazy {
-            clickEvent.onClicked
+            onActivate?.let { action -> { action() } } ?: clickEvent.onClicked
         }
         override val renderHash: Int by lazy {
             renderHashBuilder()
@@ -145,6 +150,9 @@ public sealed class UiTimelineV2 {
                     StarterpackJoined,
                     Pinned,
                     Like,
+                    LoadMissingPosts,
+                    LoadingMissingPosts,
+                    RetryMissingPosts,
                 }
             }
         }

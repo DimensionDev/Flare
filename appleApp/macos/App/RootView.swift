@@ -39,6 +39,7 @@ struct RootView: View {
                                     title: tab.macOSTitle,
                                     icon: tab.macOSIcon,
                                     liveTabs: tabs,
+                                    initialSelectedTabId: homeTimelineWithTabsPresenter.state.initialSelectedTabId,
                                     selectedTab: $selectedTab,
                                     isExpanded: $homeExpanded,
                                     onEditTab: { tab, onSave in
@@ -225,6 +226,11 @@ struct RootView: View {
                 }
             )
             .frame(minWidth: 820, idealWidth: 860, minHeight: 600, idealHeight: 660)
+        }
+        .onChange(of: selectedTab) { _, route in
+            if case .timeline(let tab, isHome: true) = route {
+                homeTimelineWithTabsPresenter.state.selectTab(tabId: tab.id)
+            }
         }
         .onAppear {
             handleMainWindowNavigationRequest(mainWindowCoordinator.navigationRequest)

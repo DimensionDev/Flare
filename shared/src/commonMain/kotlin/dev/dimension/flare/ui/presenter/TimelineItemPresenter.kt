@@ -20,6 +20,7 @@ public class TimelineItemPresenter(
 
     public interface State {
         public val listState: PagingState<UiTimelineV2>
+        public val reading: TimelineReadingState? get() = null
 
         public fun refreshSync()
 
@@ -38,6 +39,7 @@ public class TimelineItemPresenter(
         val scope = rememberCoroutineScope()
         return object : State {
             override val listState = state.listState
+            override val reading = state.reading
             override val isRefreshing = listState.isRefreshing
 
             override fun refreshSync() {

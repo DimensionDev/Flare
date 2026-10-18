@@ -91,6 +91,7 @@ public sealed class PagingState<T> {
             override val isRefreshing: Boolean,
             override val appendState: LoadState,
             private val onRetry: () -> Unit = data::retry,
+            private val onRefresh: (suspend () -> Unit)? = null,
         ) : Success<T>() {
             override val itemCount: Int
                 get() = items.size
@@ -110,7 +111,7 @@ public sealed class PagingState<T> {
             override fun peek(index: Int): T? = items.getOrNull(index)
 
             override suspend fun refreshSuspend() {
-                data.refreshSuspend()
+                onRefresh?.invoke() ?: data.refreshSuspend()
             }
 
             override fun retry() {
@@ -240,6 +241,9 @@ public fun <T : Any> UiState<LazyPagingItems<T>>.toPagingState(): PagingState<T>
 public fun <T : Any> LazyPagingItems<T>.toPagingState(
     contextLoadStates: LoadStates? = null,
     onRetry: () -> Unit = this::retry,
+    refreshing: Boolean = isRefreshing,
+    onRefresh: (suspend () -> Unit)? = null,
+    onEmptyRefresh: () -> Unit = this::refresh,
 ): PagingState<T> {
     val snapshot = snapshot()
     if (itemCount > 0) {
@@ -248,9 +252,10 @@ public fun <T : Any> LazyPagingItems<T>.toPagingState(
             // LazyPagingItems is reused across updates. Include the presented items and
             // refresh state so equal load states cannot hide changes from UI consumers.
             items = itemSnapshotList,
-            isRefreshing = isRefreshing,
+            isRefreshing = refreshing,
             appendState = contextLoadStates?.contextFooterState() ?: loadState.append,
             onRetry = onRetry,
+            onRefresh = onRefresh,
         )
     } else if (snapshot.initialErrorOrNull() != null) {
         return PagingState.Error(
@@ -260,7 +265,7 @@ public fun <T : Any> LazyPagingItems<T>.toPagingState(
     } else if (!snapshot.isResolvedEmpty()) {
         return PagingState.Loading()
     } else {
-        return PagingState.Empty(this::refresh)
+        return PagingState.Empty(onEmptyRefresh)
     }
 }
 

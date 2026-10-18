@@ -1,8 +1,14 @@
 package dev.dimension.flare.ui.presenter
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import dev.dimension.flare.data.datastore.AppDataStore
+import dev.dimension.flare.data.datastore.model.HomeTimelinePreferences
 import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.appearance.TimelineAppearance
 import dev.dimension.flare.data.model.tab.UiTimelineTabItem
@@ -17,6 +23,7 @@ import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.model.asText
 import dev.dimension.flare.ui.model.collectAsUiState
+import dev.dimension.flare.ui.model.takeSuccessOr
 import dev.dimension.flare.ui.presenter.home.ActiveAccountPresenter
 import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.web.shared.WebPresenter
@@ -24,15 +31,22 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 
 @WebPresenter("homeTimelineWithTabs")
 public class HomeTimelineWithTabsPresenter : PresenterBase<HomeTimelineWithTabsPresenter.State>() {
     private val settingsRepository by koinInject<SettingsRepository>()
     private val accountRepository by koinInject<AccountRepository>()
+    private val appDataStore by koinInject<AppDataStore>()
 
     public interface State : UserState {
         public val tabState: UiState<ImmutableList<UiTimelineTabItem>>
+        public val initialSelectedTabId: String? get() = null
+        public val selectionReady: Boolean get() = true
+
+        public fun selectTab(tabId: String) {}
 
         public fun resolveAppearance(
             tab: UiTimelineTabItem,
@@ -54,6 +68,13 @@ public class HomeTimelineWithTabsPresenter : PresenterBase<HomeTimelineWithTabsP
         }
     }
 
+    private val initialSelection by lazy {
+        flow {
+            val enabled = settingsRepository.appSettings.first().rememberHomeTimelinePosition
+            emit(if (enabled) appDataStore.homeTimelinePreferences.data.first() else HomeTimelinePreferences())
+        }
+    }
+
     @Composable
     override fun body(): State {
         val accountState =
@@ -62,9 +83,27 @@ public class HomeTimelineWithTabsPresenter : PresenterBase<HomeTimelineWithTabsP
             }.body()
 
         val tabs by tabsState.collectAsUiState()
+        val selection by initialSelection.collectAsUiState()
+        var selectedTab by remember { mutableStateOf<String?>(null) }
+        val rememberPosition by remember {
+            settingsRepository.appSettings.map { it.rememberHomeTimelinePosition }.distinctUntilChanged()
+        }.collectAsState(false)
+        LaunchedEffect(rememberPosition, selectedTab) {
+            if (rememberPosition) {
+                selectedTab?.let { id ->
+                    appDataStore.homeTimelinePreferences.updateData { it.copy(selectedTabId = id) }
+                }
+            }
+        }
 
         return object : State, UserState by accountState {
-            override val tabState = tabs
+            override val tabState = if (selection is UiState.Success) tabs else UiState.Loading()
+            override val initialSelectedTabId = selection.takeSuccessOr(HomeTimelinePreferences()).selectedTabId
+            override val selectionReady = selection is UiState.Success
+
+            override fun selectTab(tabId: String) {
+                selectedTab = tabId
+            }
 
             override fun resolveAppearance(
                 tab: UiTimelineTabItem,

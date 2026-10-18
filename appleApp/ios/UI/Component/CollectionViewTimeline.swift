@@ -32,6 +32,7 @@ struct UITimelineCollectionView: UIViewControllerRepresentable {
     @Environment(\.networkKind) private var networkKind
     @Environment(\.openURL) private var openURL
     @Environment(\.refresh) private var refreshAction: RefreshAction?
+    @Environment(\.timelineReading) private var reading
 
     init(
         data: PagingState<UiTimelineV2>? = nil,
@@ -72,6 +73,7 @@ struct UITimelineCollectionView: UIViewControllerRepresentable {
             { await action() }
         }
         controller.onIsAtTopChanged = onIsAtTopChanged
+        controller.reading = reading
         controller.topContentInset = topContentInset
         controller.topScrollIndicatorInset = topContentInset
         controller.appearance = TimelineUIKitAppearance(
@@ -110,7 +112,7 @@ struct UITimelineCollectionViewAccessoryItem {
 
 // MARK: - Controller
 
-final class UITimelineCollectionViewController: UIViewController, UICollectionViewDelegate, UIScrollViewDelegate, CHTCollectionViewDelegateWaterfallLayout {
+final class UITimelineCollectionViewController: UIViewController, UICollectionViewDelegate, UIScrollViewDelegate, CHTCollectionViewDelegateWaterfallLayout, TimelineGapActionObserver {
 
     // Use Int for section and String for item to avoid Sendable issues
     private static let sectionAccessories = 0
@@ -138,6 +140,52 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         // Restore only against the rows still available when loading finishes.
         collectionView.restoreReadingPosition(position)
         collectionView.setNeedsLayout()
+    }
+
+    private var gapBookmark: (key: String, hash: Int32, position: TimelineCollectionView.ReadingPosition)?
+
+    func willLoadTimelineGap(_ message: UiTimelineV2.Message) {
+        guard let gapIndex = content.items.firstIndex(where: { $0?.post?.stableItemKey == message.stableItemKey }),
+              let index = (0..<gapIndex).reversed().first(where: { content.items[$0]?.post?.isPaginationGap == false }),
+              let item = content.items[index]?.post,
+              let id = itemIndexMap.first(where: { $0.value == index })?.key,
+              let path = dataSource.indexPath(for: id),
+              let frame = collectionView.layoutAttributesForItem(at: path)?.frame else { return }
+        let offset = frame.minY - collectionView.contentOffset.y - (collectionView.readingTopInset?() ?? collectionView.restingAdjustedTopInset)
+        gapBookmark = (message.stableItemKey, message.renderHash, .item(id: id, distanceFromTop: offset, itemOrder: [id]))
+        reading?.positionChanged(itemKey: item.stableItemKey, offset: offset)
+    }
+
+    var reading: TimelineReadingState?
+    private var restoredBookmark: TimelineReadingPosition?
+    private var didScrollForReading = false
+
+    private func restoreBookmarkIfReady() {
+        guard let target = reading?.restorePosition, target !== restoredBookmark,
+              isViewLoaded, isSnapshotReadyForReadingPosition, !isApplyingSnapshot,
+              pendingInput == nil, !collectionView.isScrollInteractionActive,
+              let id = itemIndexMap.keys.first(where: { timelineItem(for: $0)?.data.stableItemKey == target.itemKey })
+        else { return }
+        restoredBookmark = target
+        // The stored position takes precedence over a launch refresh's spinner
+        // animation; that animation would otherwise discard the pending bookmark.
+        collectionView.interruptRefreshForScrolling()
+        collectionView.restoreReadingPosition(.item(id: id, distanceFromTop: target.offset,
+            itemOrder: collectionView.readingItemIDs?() ?? [id]))
+        collectionView.setNeedsLayout()
+        DispatchQueue.main.async { [weak self] in
+            guard self?.reading?.restorePosition === target else { return }
+            self?.reading?.restorationFinished()
+        }
+    }
+
+    @objc private func saveReadingBookmark() {
+        guard didScrollForReading, reading?.restorePosition == nil, isViewLoaded,
+              view.window?.isKeyWindow == true,
+              !collectionView.hasReadingPosition,
+              case .item(let id, let offset, _) = collectionView.captureReadingPosition(),
+              let item = timelineItem(for: id)?.data, !item.isPaginationGap else { return }
+        reading?.positionChanged(itemKey: item.stableItemKey, offset: offset)
     }
 
     var refreshCallback: (() async -> Void)?
@@ -422,6 +470,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
             rememberProfileMediaScrollAnchor()
         }
         reportIsAtTop()
+        restoreBookmarkIfReady()
         revealRefreshControlIfNeeded()
         // Insets or a size change can finish/cancel a refresh reveal without a
         // scroll-end delegate callback. Resume its queued input on the next layout.
@@ -457,6 +506,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     }
 
     override func viewWillDisappear(_ animated: Bool) {
+        saveReadingBookmark()
         super.viewWillDisappear(animated)
         autoplay.setVisible(false)
         collectionView.endScrollInteraction()
@@ -474,10 +524,13 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
 
     private func setupCollectionView() {
         collectionView = TimelineCollectionView(frame: .zero, collectionViewLayout: makeWaterfallLayout(columns: columnCount))
+        collectionView.accessibilityIdentifier = "timeline-list"
         collectionView.preservesReadingPosition = contentKind != .profileMedia
+        NotificationCenter.default.addObserver(self, selector: #selector(saveReadingBookmark),
+            name: UIApplication.willResignActiveNotification, object: nil)
         collectionView.readingItemID = { [weak self] indexPath in
             guard let self, let id = self.dataSource?.itemIdentifier(for: indexPath),
-                  self.isDataItemID(id) else { return nil }
+                  self.isDataItemID(id), !id.hasPrefix(Self.timelinePrefix + "timeline-gap:") else { return nil }
             return id
         }
         collectionView.readingIndexPath = { [weak self] id in
@@ -485,7 +538,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         }
         collectionView.readingItemIDs = { [weak self] in
             guard let self else { return [] }
-            return self.dataSource?.snapshot().itemIdentifiers.filter(self.isDataItemID) ?? []
+            return self.dataSource?.snapshot().itemIdentifiers.filter { self.isDataItemID($0) && !$0.hasPrefix(Self.timelinePrefix + "timeline-gap:") } ?? []
         }
         collectionView.readingTopInset = { [weak self] in
             guard let self else { return 0 }
@@ -888,6 +941,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     private func configureTimelineCell(_ cell: TimelineUIKitCollectionViewCell, itemID: String) {
         if let row = timelineItem(for: itemID) {
             let item = row.data
+            cell.accessibilityIdentifier = "timeline-item:\(item.stableItemKey)"
             cell.cachedPreferredHeight = { [weak self] width in
                 guard let self else { return nil }
                 return self.itemHeightCache.height(for: itemID,
@@ -912,6 +966,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
                 openURL: openURL
             )
         } else {
+            cell.accessibilityIdentifier = nil
             cell.cachedPreferredHeight = nil
             cell.onPreferredHeightChanged = nil
             cell.configurePlaceholder(
@@ -1180,6 +1235,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
             pendingReloadPosition == nil && pendingEffectiveContentOffsetYAfterSnapshot == nil &&
             restoresScrollAnchorOnSnapshotChanges
         let survivingIDs = keepsReadingPosition ? Set(plan.headerIDs + plan.accessoryIDs + plan.itemIDs) : []
+        if let gapBookmark { collectionView.restoreReadingPosition(gapBookmark.position) }
         collectionView.performUpdatesPreservingReadingPosition(keepingItemIDs: survivingIDs) {
             if columnsChanged || kindChanged {
                 clearHeightCache(keepingItemMeasurements: !kindChanged && contentKind != .profileMedia)
@@ -1216,6 +1272,12 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
                 self.updateAutoplayConfiguration()
                 if wasRefreshing && !plan.isRefreshing { self.schedulePostRefreshPoolCleanup() }
                 self.isApplyingSnapshot = false
+                if let gap = self.gapBookmark {
+                    let message = self.content.items.compactMap { $0?.post as? UiTimelineV2.Message }.first { $0.stableItemKey == gap.key }
+                    let loading = (message?.type as? UiTimelineV2.MessageTypeLocalized)?.data == .loadingMissingPosts
+                    if message == nil || (!loading && message?.renderHash != gap.hash) { self.gapBookmark = nil }
+                }
+                self.restoreBookmarkIfReady()
                 if self.pendingInput != nil || !self.pendingReconfigureIDs.isEmpty { self.scheduleSubmission() }
             }
             guard structureChanged || !changedIDs.isEmpty else {
@@ -1808,6 +1870,9 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     // MARK: - UIScrollViewDelegate
 
     func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
+        didScrollForReading = true
+        gapBookmark = nil
+        reading?.restorationFinished()
         collectionView.endProgrammaticScrolling()
         onScrollInteractionBegan?()
         beginScrollInteraction()
@@ -1827,6 +1892,11 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     }
 
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        if collectionView.isScrollInteractionActive,
+           case .item(let id, let offset, _) = collectionView.captureReadingPosition(),
+           let item = timelineItem(for: id)?.data, !item.isPaginationGap {
+            reading?.viewportChanged(itemKey: item.stableItemKey, offset: offset)
+        }
         updatePinnedHeader()
         if contentKey != nil, collectionView.isScrollInteractionActive {
             let requiredDistance = min(minimumVerticalScrollDistance, max(effectiveContentOffsetY, 0))
@@ -1871,6 +1941,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
 
     private func endScrollInteraction() {
         collectionView.endScrollInteraction()
+        saveReadingBookmark()
         scheduleSubmission()
         finishPendingRefreshIfReady()
         rememberProfileMediaScrollAnchor()

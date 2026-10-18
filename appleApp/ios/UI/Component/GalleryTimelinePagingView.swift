@@ -16,6 +16,7 @@ struct UIGalleryTimelinePagingView: UIViewControllerRepresentable {
     @Environment(\.translateConfig) private var translateConfig
     @Environment(\.openURL) private var openURL
     @Environment(\.refresh) private var refreshAction: RefreshAction?
+    @Environment(\.timelineReading) private var reading
 
     func makeUIViewController(context: Context) -> UIGalleryTimelineController {
         let controller = UIGalleryTimelineController()
@@ -30,6 +31,7 @@ struct UIGalleryTimelinePagingView: UIViewControllerRepresentable {
         }
         controller.openURL = { url in openURL.callAsFunction(url) }
         controller.onIsAtTopChanged = onIsAtTopChanged
+        controller.reading = reading
         controller.suppressInitialRefreshIndicator = suppressInitialRefreshIndicator
         // Apply data before appearance so the appearance setter's reconfigure
         // sees a coherent itemIndexMap / currentSuccess pair.
@@ -50,13 +52,14 @@ struct UIGalleryTimelinePagingView: UIViewControllerRepresentable {
         )
         controller.openURL = { url in openURL.callAsFunction(url) }
         controller.onIsAtTopChanged = onIsAtTopChanged
+        controller.reading = reading
         controller.suppressInitialRefreshIndicator = suppressInitialRefreshIndicator
     }
 }
 
 // MARK: - Controller
 
-final class UIGalleryTimelineController: UIViewController, UICollectionViewDelegate, CHTCollectionViewDelegateWaterfallLayout {
+final class UIGalleryTimelineController: UIViewController, UICollectionViewDelegate, CHTCollectionViewDelegateWaterfallLayout, TimelineGapActionObserver {
 
     private static let sectionMain = 0
     private static let sectionFooter = 1
@@ -88,6 +91,55 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
     private var lastLoadedItemIDs: Set<String> = []
     private var lastProcessedDataRef: AnyObject?
     private var lastProcessedUpdateSignature: UpdateSignature?
+
+    private var gapBookmark: (key: String, hash: Int32, anchor: ScrollAnchor)?
+
+    func willLoadTimelineGap(_ message: UiTimelineV2.Message) {
+        guard let success = currentSuccess,
+              let gapIndex = (0..<Int(success.itemCount)).first(where: { success.peek(index: Int32($0))?.stableItemKey == message.stableItemKey }),
+              let index = (0..<gapIndex).reversed().first(where: { success.peek(index: Int32($0))?.isPaginationGap == false }),
+              let item = success.peek(index: Int32(index)),
+              let id = itemIndexMap.first(where: { $0.value == index })?.key,
+              let path = dataSource.indexPath(for: id),
+              let frame = collectionView.layoutAttributesForItem(at: path)?.frame else { return }
+        let offset = frame.minY - effectiveViewportTop
+        gapBookmark = (message.stableItemKey, message.renderHash, ScrollAnchor(itemID: id, distanceFromViewportTop: offset))
+        reading?.positionChanged(itemKey: item.stableItemKey, offset: offset)
+    }
+
+    var reading: TimelineReadingState?
+    private var restoredBookmark: TimelineReadingPosition?
+    private var didScrollForReading = false
+
+    private func restoreBookmarkIfReady() {
+        guard let target = reading?.restorePosition, target !== restoredBookmark,
+              isViewLoaded, allowsScrollAnchorRestoration,
+              let success = currentSuccess,
+              let id = itemIndexMap.keys.first(where: { id in
+                  guard let index = itemIndexMap[id] else { return false }
+                  return success.peek(index: Int32(index))?.stableItemKey == target.itemKey
+              }) else { return }
+        if restoreScrollAnchorIfNeeded(ScrollAnchor(itemID: id, distanceFromViewportTop: target.offset)) {
+            restoredBookmark = target
+            DispatchQueue.main.async { [weak self] in
+                guard self?.reading?.restorePosition === target else { return }
+                self?.reading?.restorationFinished()
+            }
+        }
+    }
+
+    @objc private func saveReadingBookmark() {
+        guard didScrollForReading, reading?.restorePosition == nil,
+              isViewLoaded, view.window?.isKeyWindow == true, !isRestoringScrollAnchor,
+              let anchor = captureScrollAnchor(requireIdle: false), let index = itemIndexMap[anchor.itemID],
+              let item = currentSuccess?.peek(index: Int32(index)), !item.isPaginationGap else { return }
+        reading?.positionChanged(itemKey: item.stableItemKey, offset: anchor.distanceFromViewportTop)
+    }
+
+    override func viewWillDisappear(_ animated: Bool) {
+        saveReadingBookmark()
+        super.viewWillDisappear(animated)
+    }
 
     var refreshCallback: (() async -> Void)?
     var suppressInitialRefreshIndicator = false
@@ -152,6 +204,8 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        NotificationCenter.default.addObserver(self, selector: #selector(saveReadingBookmark),
+            name: UIApplication.willResignActiveNotification, object: nil)
         view.backgroundColor = .systemGroupedBackground
         setupCollectionView()
         setupDataSource()
@@ -167,6 +221,7 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         updateColumnCount()
+        restoreBookmarkIfReady()
         reportIsAtTop()
     }
 
@@ -341,8 +396,17 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
         }
 
         applySnapshot(data: data)
+        finishGapIfReady()
         lastProcessedDataRef = dataRef
         lastProcessedUpdateSignature = newUpdateSignature
+    }
+
+    private func finishGapIfReady() {
+        if let gap = gapBookmark, let success = currentSuccess {
+            let message = (0..<Int(success.itemCount)).compactMap { success.peek(index: Int32($0)) as? UiTimelineV2.Message }.first { $0.stableItemKey == gap.key }
+            let loading = (message?.type as? UiTimelineV2.MessageTypeLocalized)?.data == .loadingMissingPosts
+            if message == nil || (!loading && message?.renderHash != gap.hash) { gapBookmark = nil }
+        }
     }
 
     private func updateSignature(for data: PagingState<UiTimelineV2>) -> UpdateSignature {
@@ -435,13 +499,13 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
     }
 
     private func isGalleryDataItemID(_ itemID: String) -> Bool {
-        itemID.hasPrefix(Self.itemPrefix)
+        itemID.hasPrefix(Self.itemPrefix) && !itemID.hasPrefix(Self.itemPrefix + "timeline-gap:")
     }
 
-    private func captureScrollAnchor() -> ScrollAnchor? {
+    private func captureScrollAnchor(requireIdle: Bool = true) -> ScrollAnchor? {
         guard isViewLoaded,
               currentSuccess != nil,
-              allowsScrollAnchorRestoration,
+              !requireIdle || allowsScrollAnchorRestoration,
               collectionView.bounds.height > 1 else {
             return nil
         }
@@ -556,11 +620,11 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
 
         let newSignature = SnapshotSignature(itemIDs: itemIDs, footerIDs: footerIDs)
         let previousSignature = lastAppliedSignature
-        let scrollAnchor = previousSignature != nil &&
+        let scrollAnchor = gapBookmark?.anchor ?? (previousSignature != nil &&
             previousSignature?.itemIDs != newSignature.itemIDs &&
             allowsScrollAnchorRestoration
             ? captureScrollAnchor()
-            : nil
+            : nil)
 
         itemIndexMap = newIndexMap
         pruneHeightCache(keepingItemIDs: Set(newIndexMap.keys))
@@ -629,6 +693,7 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
         lastAppliedSignature = newSignature
         lastRenderHashMap = newRenderHashMap
         lastLoadedItemIDs = newLoadedItemIDs
+        restoreBookmarkIfReady()
     }
 
     private func changedItemIDs(
@@ -871,11 +936,18 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
     // MARK: - UIScrollViewDelegate
 
     func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
+        didScrollForReading = true
+        gapBookmark = nil
+        reading?.restorationFinished()
         scrollingState.isScrolling = true
         pendingScrollAnchor = nil
     }
 
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        if scrollingState.isScrolling, let anchor = captureScrollAnchor(requireIdle: false),
+           let index = itemIndexMap[anchor.itemID], let item = currentSuccess?.peek(index: Int32(index)), !item.isPaginationGap {
+            reading?.viewportChanged(itemKey: item.stableItemKey, offset: anchor.distanceFromViewportTop)
+        }
         restorePendingScrollAnchorIfNeeded()
         reportIsAtTop()
     }
@@ -883,11 +955,13 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
     func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
         if !decelerate {
             scrollingState.isScrolling = false
+            saveReadingBookmark()
         }
     }
 
     func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
         scrollingState.isScrolling = false
+        saveReadingBookmark()
     }
 
     func scrollViewDidEndScrollingAnimation(_ scrollView: UIScrollView) {
@@ -965,9 +1039,11 @@ private final class GalleryTimelineTileUIView: UIView {
         didSet {
             postTile.onOpenURL = onOpenURL
             feedTile.onOpenURL = onOpenURL
+            messageView.onOpenURL = onOpenURL
         }
     }
 
+    private let messageView = StatusTopMessageUIView()
     private let postTile = GalleryPostTileUIView()
     private let feedTile = GalleryFeedTileUIView()
     private var installedTile: UIView?
@@ -995,6 +1071,9 @@ private final class GalleryTimelineTileUIView: UIView {
         case .feed(let feed):
             feedTile.configure(feed: feed, appearance: appearance)
             setInstalledTile(feedTile)
+        case .message(let message):
+            messageView.configure(message: message, topMessageOnly: true)
+            setInstalledTile(messageView)
         default:
             setInstalledTile(nil)
         }

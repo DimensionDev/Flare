@@ -41,6 +41,14 @@ internal class MixedRemoteMediator(
 
     override var reportError: ((Throwable) -> Unit)? = null
 
+    // Retained batches must commit every source's progress with their visible entries.
+    // Keeping the bounded pending page in the cursor makes that commit atomic.
+    internal fun historyLoader(): CacheableRemoteLoader<UiTimelineV2> =
+        MixedTimelinePageLoader(
+            mediators.map { if (it is MixedRemoteMediator) it.historyLoader() else it },
+            mergePolicy,
+        )
+
     @OptIn(ExperimentalPagingApi::class)
     override suspend fun load(
         pageSize: Int,

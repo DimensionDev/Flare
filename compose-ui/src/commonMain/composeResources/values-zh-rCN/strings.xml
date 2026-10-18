@@ -436,4 +436,7 @@
     <string name="fanbox_recommended_creators_title">推荐创作者</string>
 <string name="ugoira_play">播放动图</string>
 <string name="ugoira_loading">正在加载动图</string>
+    <string name="timeline_load_missing_posts">加载缺失的内容</string>
+    <string name="timeline_loading_missing_posts">正在加载缺失的内容…</string>
+    <string name="timeline_retry_missing_posts">加载失败，点击重试。</string>
 </resources>

@@ -90,8 +90,15 @@ internal suspend fun PagingTimelineDao.getTimelinePageInCurrentTransaction(
     pagingKey: String,
     offset: Int,
     limit: Int,
+    timelineIds: List<String>? = null,
 ): List<DbPagingTimelineWithStatus> {
-    val roots = getTimelineRootRows(pagingKey, offset, limit)
+    val roots =
+        if (timelineIds == null) {
+            getTimelineRootRows(pagingKey, offset, limit)
+        } else {
+            val byId = getTimelineRootRowsByIds(pagingKey, timelineIds).associateBy { it.timeline._id }
+            timelineIds.mapNotNull(byId::get)
+        }
     if (roots.isEmpty()) {
         return emptyList()
     }
@@ -216,6 +223,24 @@ internal suspend fun PagingTimelineDao.getTimelinePageInCurrentTransaction(
 @Dao
 @DaoReturnTypeConverters(PagingSourceDaoReturnTypeConverter::class)
 internal interface PagingTimelineDao {
+    @Query(TIMELINE_WITH_STATUS_QUERY + "WHERE DbPagingTimeline.pagingKey = :pagingKey AND DbPagingTimeline._id IN (:ids)")
+    suspend fun getTimelineRootRowsByIds(
+        pagingKey: String,
+        ids: List<String>,
+    ): List<DbTimelineRootRow>
+
+    @Query("DELETE FROM timeline_item_presentation_reference WHERE pagingKey >= :prefix AND pagingKey < :end")
+    suspend fun deleteNamespaceReferences(
+        prefix: String,
+        end: String = prefix + '\uffff',
+    )
+
+    @Query("DELETE FROM DbPagingTimeline WHERE pagingKey >= :prefix AND pagingKey < :end")
+    suspend fun deleteNamespaceRows(
+        prefix: String,
+        end: String = prefix + '\uffff',
+    )
+
     @Transaction
     @Query(
         TIMELINE_WITH_STATUS_QUERY +

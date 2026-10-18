@@ -7,6 +7,93 @@ import FlareAppleUI
 
 @MainActor
 final class TimelineControllerIntegrationTests: XCTestCase {
+    func testReadingBookmarkArrivingDuringRefreshRevealSurvivesTheAnimation() async throws {
+        let fixture = await Fixture(posts: true)
+        let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first)
+        let previousKeyWindow = scene.windows.first(where: \.isKeyWindow)
+        let window = UIWindow(windowScene: scene)
+        window.rootViewController = fixture.controller
+        window.makeKeyAndVisible()
+        defer {
+            window.isHidden = true
+            window.rootViewController = nil
+            previousKeyWindow?.makeKey()
+        }
+        await fixture.settle()
+
+        // On cold launch the remote refresh can reveal its spinner before the
+        // saved bookmark and its cached rows have reached the native controller.
+        fixture.collection.beginRefreshing(revealingIndicator: true)
+        let reading = ReadingState(position: TimelineReadingPosition(itemKey: "case-30", offset: -37))
+        fixture.controller.reading = reading
+        await fixture.settle()
+        fixture.collection.endRefreshing()
+        await fixture.settle()
+        await fixture.settle()
+
+        try fixture.assertPosition(("t:case-30", -37))
+        XCTAssertNil(reading.restorePosition)
+        XCTAssertTrue(reading.saved.isEmpty)
+    }
+
+    func testRestoringAReadingBookmarkDoesNotSaveAProgrammaticScroll() async throws {
+        let fixture = await Fixture(posts: true)
+        let reading = ReadingState(position: TimelineReadingPosition(itemKey: "case-30", offset: -37))
+        fixture.controller.reading = reading
+        await fixture.settle()
+
+        try fixture.assertPosition(("t:case-30", -37))
+        XCTAssertNil(reading.restorePosition)
+        XCTAssertTrue(reading.saved.isEmpty)
+
+        fixture.input.items.insert(.post(makeRow(100)), at: 0)
+        await fixture.apply()
+        try fixture.assertPosition(("t:case-30", -37))
+        XCTAssertTrue(reading.saved.isEmpty)
+    }
+
+    func testLoadingAGapFillsDownwardEvenWhenItsPredecessorIsAboveTheViewport() async throws {
+        let fixture = await Fixture(posts: true)
+        let reading = ReadingState()
+        fixture.controller.reading = reading
+        let gap = makeGap()
+        fixture.input.items.insert(.post(gap), at: 4)
+        await fixture.apply()
+        let gapPath = try XCTUnwrap(fixture.collection.readingIndexPath?("t:\(gap.stableItemKey)"))
+        // Start at the gap itself: preserving the first visible row would move the reader down.
+        let frame = try XCTUnwrap(fixture.collection.layoutAttributesForItem(at: gapPath)?.frame)
+        await fixture.scroll(frame.minY)
+        let precedingPath = try XCTUnwrap(fixture.collection.readingIndexPath?("t:case-3"))
+        let precedingFrame = try XCTUnwrap(fixture.collection.layoutAttributesForItem(at: precedingPath)?.frame)
+        let expected = precedingFrame.minY - fixture.collection.contentOffset.y - fixture.collection.adjustedContentInset.top
+
+        fixture.controller.willLoadTimelineGap(gap)
+        fixture.input.items.insert(contentsOf: [.post(makeRow(100)), .post(makeRow(101))], at: 4)
+        fixture.input.items[6] = .post(makeGap(revision: 1))
+        await fixture.apply()
+
+        try fixture.assertPosition(("t:case-3", expected))
+        XCTAssertEqual(reading.saved.last?.itemKey, "case-3")
+        XCTAssertFalse(fixture.collection.readingItemIDs?().contains("t:\(gap.stableItemKey)") ?? true)
+        let insertedPath = try XCTUnwrap(fixture.collection.readingIndexPath?("t:case-100"))
+        let insertedFrame = try XCTUnwrap(fixture.collection.layoutAttributesForItem(at: insertedPath)?.frame)
+        XCTAssertLessThan(insertedFrame.minY - fixture.collection.contentOffset.y, fixture.collection.bounds.height)
+    }
+
+    private final class ReadingState: NSObject, TimelineReadingState {
+        var restorePosition: TimelineReadingPosition?
+        var hasNewContent = false
+        var saved: [TimelineReadingPosition] = []
+
+        init(position: TimelineReadingPosition? = nil) { restorePosition = position }
+        func viewportChanged(itemKey: String, offset: Double) {}
+        func positionChanged(itemKey: String, offset: Double) {
+            saved.append(TimelineReadingPosition(itemKey: itemKey, offset: offset))
+        }
+        func restorationFinished() { restorePosition = nil }
+        func showLatest() {}
+    }
+
     func testSwitchingListsAlwaysStartsAtTopButUpdatingTheSameListKeepsPosition() async throws {
         let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first)
         let previousKeyWindow = scene.windows.first(where: \.isKeyWindow)
@@ -833,6 +920,15 @@ final class TimelineControllerIntegrationTests: XCTestCase {
             CGSize(width: targetSize.width, height: 100 + ceil(1_000 / max(targetSize.width, 1)) * 20)
         }
     }
+}
+
+@MainActor
+private func makeGap(revision: Int64 = 0) -> UiTimelineV2.Message {
+    UiTimelineV2.Message(user: nil, statusKey: MicroBlogKey(id: "gap", host: "example.invalid"),
+        icon: .world, type: UiTimelineV2.MessageTypeLocalized(data: .loadMissingPosts),
+        createdAt: KotlinInstant.companion.fromEpochMilliseconds(epochMilliseconds: revision).toUi(),
+        clickEvent: ClickEventNoop.shared, accountType: AccountType.Guest.shared,
+        itemKey: "timeline-gap:test", onActivate: nil)
 }
 
 @MainActor

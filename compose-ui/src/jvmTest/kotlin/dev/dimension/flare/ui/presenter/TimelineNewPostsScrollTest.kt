@@ -1,13 +1,18 @@
 package dev.dimension.flare.ui.presenter
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.unit.dp
@@ -20,6 +25,10 @@ import dev.dimension.flare.common.isRefreshing
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.common.toPagingState
 import dev.dimension.flare.model.AccountType
+import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.model.ClickEvent
+import dev.dimension.flare.ui.model.TimelineReadingPosition
+import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.render.toUi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -38,6 +47,324 @@ class TimelineNewPostsScrollTest {
 
     @Test
     fun scrollingRenderedPostsExcludesTheLeadingHeader() = checkScrolling(leadingHeader = true)
+
+    @Test
+    fun returningToADisposedTabRestoresItsItemAfterThePagingWindowMoves() = checkReturningTab(PaddingValues(0.dp))
+
+    @Test
+    fun returningToADisposedTabKeepsItsOffsetWithContentPadding() = checkReturningTab(PaddingValues(top = 40.dp))
+
+    @Test
+    fun restoringAtFractionalDensityKeepsTheExactPixelOffset() {
+        val pages = MutableStateFlow(page(0..19))
+        val scroll = LazyStaggeredGridState()
+        val reading = Reading(TimelineReadingPosition("post-5", -246.0 / 2.625))
+        composeRule.setContent {
+            val paging = pages.collectAsLazyPagingItems().toPagingState()
+            val base =
+                object : TimelineItemPresenter.State {
+                    override val listState = paging
+                    override val reading = reading
+                    override val isRefreshing = false
+
+                    override fun refreshSync() = Unit
+
+                    override suspend fun refreshSuspend() = Unit
+                }
+            rememberTimelineWithLazyListState(base, scroll, density = 2.625f)
+            LazyVerticalStaggeredGrid(StaggeredGridCells.Fixed(1), Modifier.size(300.dp, 150.dp), state = scroll) {
+                paging.onSuccess {
+                    items(itemCount, key = itemKey { it.stableItemKey }) { Box(Modifier.fillMaxWidth().height(300.dp)) }
+                }
+            }
+        }
+        composeRule.waitUntil { reading.restorePosition == null }
+        composeRule.runOnIdle {
+            assertEquals(
+                -246,
+                scroll.layoutInfo.visibleItemsInfo
+                    .first { it.key == "post-5" }
+                    .offset.y,
+            )
+        }
+    }
+
+    @Test
+    fun showingLatestRestoresTheHeadWhenThePagingWindowChanges() {
+        val pages = MutableStateFlow(page(20..49))
+        val scroll = LazyStaggeredGridState()
+        val reading = Reading(TimelineReadingPosition("post-25", -25.0))
+        composeRule.setContent {
+            val paging = pages.collectAsLazyPagingItems().toPagingState()
+            val base =
+                object : TimelineItemPresenter.State {
+                    override val listState = paging
+                    override val reading = reading
+                    override val isRefreshing = false
+
+                    override fun refreshSync() = Unit
+
+                    override suspend fun refreshSuspend() = Unit
+                }
+            rememberTimelineWithLazyListState(base, scroll)
+            LazyVerticalStaggeredGrid(StaggeredGridCells.Fixed(1), Modifier.size(300.dp, 150.dp), state = scroll) {
+                paging.onSuccess {
+                    items(itemCount, key = itemKey { it.stableItemKey }) { Box(Modifier.fillMaxWidth().height(100.dp)) }
+                }
+            }
+        }
+        composeRule.waitUntil { reading.restorePosition == null }
+        composeRule.runOnIdle {
+            reading.restorePosition = TimelineReadingPosition("post-0", 0.0)
+            pages.value = page(0..29)
+        }
+        composeRule.waitUntil { reading.restorePosition == null }
+        composeRule.runOnIdle {
+            assertEquals(
+                "post-0",
+                scroll.layoutInfo.visibleItemsInfo
+                    .first()
+                    .key,
+            )
+            assertEquals(
+                0,
+                scroll.layoutInfo.visibleItemsInfo
+                    .first()
+                    .offset.y,
+            )
+        }
+    }
+
+    private fun checkReturningTab(contentPadding: PaddingValues) {
+        val pages = MutableStateFlow(page(0..29))
+        val reading = Reading(TimelineReadingPosition("post-5", -25.0))
+        var visible by mutableStateOf(true)
+        var expectedOffset = 0
+        lateinit var scroll: LazyStaggeredGridState
+        composeRule.setContent {
+            val paging = pages.collectAsLazyPagingItems().toPagingState()
+            if (visible) {
+                val nativeScroll = rememberLazyStaggeredGridState()
+                val base =
+                    object : TimelineItemPresenter.State {
+                        override val listState = paging
+                        override val reading = reading
+                        override val isRefreshing = false
+
+                        override fun refreshSync() = Unit
+
+                        override suspend fun refreshSuspend() = Unit
+                    }
+                rememberTimelineWithLazyListState(base, nativeScroll)
+                SideEffect { scroll = nativeScroll }
+                LazyVerticalStaggeredGrid(
+                    StaggeredGridCells.Fixed(1),
+                    Modifier.size(300.dp, 150.dp),
+                    state = nativeScroll,
+                    contentPadding = contentPadding,
+                ) {
+                    paging.onSuccess {
+                        items(itemCount, key = itemKey { it.stableItemKey }) { Box(Modifier.fillMaxWidth().height(100.dp)) }
+                    }
+                }
+            }
+        }
+        composeRule.waitUntil { reading.restorePosition == null }
+        composeRule.runOnIdle {
+            expectedOffset =
+                scroll.layoutInfo.visibleItemsInfo
+                    .first { it.key == "post-5" }
+                    .offset.y
+            visible = false
+        }
+        composeRule.runOnIdle { pages.value = page(3..29) }
+        composeRule.runOnIdle { visible = true }
+        composeRule.waitForIdle()
+        composeRule.runOnIdle {
+            assertEquals(
+                expectedOffset,
+                scroll.layoutInfo.visibleItemsInfo
+                    .first { it.key == "post-5" }
+                    .offset.y,
+            )
+        }
+    }
+
+    @Test
+    fun restoringARealItemWithAHeaderKeepsItsOffsetAcrossRefresh() {
+        val pages = MutableStateFlow(page(0..19))
+        val scroll = LazyStaggeredGridState()
+        val reading = Reading(TimelineReadingPosition("post-5", -25.0))
+        lateinit var state: TimelineWithLazyListState
+        composeRule.setContent {
+            val paging = pages.collectAsLazyPagingItems().toPagingState()
+            val base =
+                object : TimelineItemPresenter.State {
+                    override val listState = paging
+                    override val reading = reading
+                    override val isRefreshing = false
+
+                    override fun refreshSync() = Unit
+
+                    override suspend fun refreshSuspend() = Unit
+                }
+            val timeline = rememberTimelineWithLazyListState(base, scroll, leadingItemCount = 1)
+            SideEffect { state = timeline }
+            LazyVerticalStaggeredGrid(StaggeredGridCells.Fixed(1), Modifier.size(300.dp, 150.dp), state = scroll) {
+                item(key = "header") { Box(Modifier.fillMaxWidth().height(100.dp)) }
+                paging.onSuccess {
+                    items(itemCount, key = itemKey { it.stableItemKey }) { Box(Modifier.fillMaxWidth().height(100.dp)) }
+                }
+            }
+        }
+        composeRule.waitUntil { reading.restorePosition == null }
+        composeRule.runOnIdle {
+            assertEquals(
+                "post-5",
+                scroll.layoutInfo.visibleItemsInfo
+                    .first()
+                    .key,
+            )
+            assertEquals(
+                -25,
+                scroll.layoutInfo.visibleItemsInfo
+                    .first()
+                    .offset.y,
+            )
+            assertEquals(0, reading.saved, "Restoring must not overwrite the durable bookmark")
+            pages.value = page(-3..19)
+        }
+        composeRule.waitUntil { (state.listState as? PagingState.Success)?.itemCount == 23 }
+        composeRule.runOnIdle {
+            assertEquals(
+                "post-5",
+                scroll.layoutInfo.visibleItemsInfo
+                    .first()
+                    .key,
+            )
+            assertEquals(
+                -25,
+                scroll.layoutInfo.visibleItemsInfo
+                    .first()
+                    .offset.y,
+            )
+        }
+    }
+
+    @Test
+    fun fillingAGapAtTheViewportTopRevealsTheInsertedPostsWithoutFollowingTheGapDown() = checkGap(PaddingValues(0.dp))
+
+    @Test
+    fun fillingAGapKeepsItsPredecessorWithContentPadding() = checkGap(PaddingValues(top = 40.dp))
+
+    private fun checkGap(contentPadding: PaddingValues) {
+        fun post(index: Int): UiTimelineV2 =
+            UiTimelineV2.Feed(
+                title = "post-$index",
+                description = null,
+                url = "https://example.com/$index",
+                source = UiTimelineV2.Feed.Source("test", null),
+                createdAt = Instant.fromEpochMilliseconds(0).toUi(),
+                accountType = AccountType.Guest,
+                itemKey = "post-$index",
+            )
+
+        fun gap(revision: Long) =
+            UiTimelineV2.Message(
+                statusKey = MicroBlogKey("gap", "local"),
+                icon = UiIcon.More,
+                type = UiTimelineV2.Message.Type.Localized(UiTimelineV2.Message.Type.Localized.MessageId.LoadMissingPosts),
+                createdAt = Instant.fromEpochMilliseconds(revision).toUi(),
+                clickEvent = ClickEvent.Noop,
+                accountType = AccountType.Guest,
+                itemKey = "timeline-gap:test",
+                onActivate = {},
+            )
+
+        fun data(items: List<UiTimelineV2>) =
+            PagingData.from(
+                items,
+                LoadStates(LoadState.NotLoading(false), LoadState.NotLoading(true), LoadState.NotLoading(true)),
+            )
+        val firstGap = gap(0)
+        val pages = MutableStateFlow(data(listOf(post(0), post(1), firstGap, post(8), post(9), post(10))))
+        val scroll = LazyStaggeredGridState(initialFirstVisibleItemIndex = 2)
+        lateinit var state: TimelineWithLazyListState
+        composeRule.setContent {
+            val paging = pages.collectAsLazyPagingItems().toPagingState()
+            val base =
+                object : TimelineItemPresenter.State {
+                    override val listState = paging
+                    override val isRefreshing = false
+
+                    override fun refreshSync() = Unit
+
+                    override suspend fun refreshSuspend() = Unit
+                }
+            val timeline = rememberTimelineWithLazyListState(base, scroll)
+            SideEffect { state = timeline }
+            LazyVerticalStaggeredGrid(
+                StaggeredGridCells.Fixed(1),
+                Modifier.size(300.dp, 150.dp),
+                state = scroll,
+                contentPadding = contentPadding,
+            ) {
+                paging.onSuccess {
+                    items(itemCount, key = itemKey { it.stableItemKey }) { Box(Modifier.fillMaxWidth().height(100.dp)) }
+                }
+            }
+        }
+        composeRule.runOnIdle {
+            state.loadGap(firstGap)
+            pages.value = data(listOf(post(0), post(1), post(2), post(3), gap(1), post(8), post(9), post(10)))
+        }
+        composeRule.waitUntil { (state.listState as? PagingState.Success)?.itemCount == 8 }
+        composeRule.runOnIdle {
+            assertEquals(
+                "post-2",
+                scroll.layoutInfo.visibleItemsInfo
+                    .first { it.key == "post-2" }
+                    .key,
+            )
+            assertEquals(
+                0,
+                scroll.layoutInfo.visibleItemsInfo
+                    .first { it.key == "post-2" }
+                    .offset.y,
+            )
+        }
+    }
+
+    private class Reading(
+        private var target: TimelineReadingPosition,
+    ) : TimelineReadingState {
+        override var restorePosition by mutableStateOf<TimelineReadingPosition?>(target)
+        override val hasNewContent = false
+        var saved = 0
+
+        override fun viewportChanged(
+            itemKey: String,
+            offset: Double,
+        ) = Unit
+
+        override fun positionChanged(
+            itemKey: String,
+            offset: Double,
+        ) {
+            saved++
+            target = TimelineReadingPosition(itemKey, offset)
+        }
+
+        override fun restorationFinished() {
+            restorePosition = null
+        }
+
+        override fun restoreCurrentPosition() {
+            if (restorePosition == null) restorePosition = target
+        }
+
+        override fun showLatest() = Unit
+    }
 
     private fun checkScrolling(leadingHeader: Boolean) {
         val pages = MutableStateFlow(page(0..9))

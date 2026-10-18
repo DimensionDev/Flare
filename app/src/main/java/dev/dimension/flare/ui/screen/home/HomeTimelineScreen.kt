@@ -51,6 +51,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.VerticalDivider
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -64,6 +65,9 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -114,6 +118,7 @@ import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.takeSuccess
+import dev.dimension.flare.ui.model.takeSuccessOr
 import dev.dimension.flare.ui.presenter.HomeTimelineWithTabsPresenter
 import dev.dimension.flare.ui.presenter.home.DeepLinkPresenter
 import dev.dimension.flare.ui.presenter.home.LoggedInPresenter
@@ -485,6 +490,8 @@ private fun HomeTabDropdown(
                 modifier =
                     Modifier
                         .clickable { expanded = true }
+                        .testTag("home-timeline-title")
+                        .semantics { testTagsAsResourceId = true }
                         .padding(horizontal = 12.dp, vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -564,6 +571,7 @@ internal fun TimelineItemContent(
             item = item,
             isHomeTimeline = isHomeTimeline,
             lazyStaggeredGridState = lazyStaggeredGridState,
+            leadingItemCount = if (changeLogState?.changeLog != null && changeLogState.shouldShowChangeLog.takeSuccessOr(false)) 1 else 0,
         )
     val latestState by rememberUpdatedState(state)
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -583,6 +591,8 @@ internal fun TimelineItemContent(
     if (isCurrentlyVisible) {
         RegisterTabCallback(
             lazyListState = state.lazyListState,
+            onScrollToTop = state.reading?.let { { it.showLatest() } },
+            canRefreshAtTop = state.reading?.hasNewContent != true,
             onRefresh = {
                 state.refreshSync()
                 changeLogState?.dismissChangeLog()
@@ -605,7 +615,9 @@ internal fun TimelineItemContent(
                 allowGalleryMode = true,
                 modifier =
                     Modifier
-                        .fillMaxSize(),
+                        .fillMaxSize()
+                        .semantics { testTagsAsResourceId = true }
+                        .then(if (isCurrentlyVisible) Modifier.testTag("home-timeline-list") else Modifier),
             ) {
                 changeLogState?.shouldShowChangeLog?.onSuccess {
                     changeLogState.changeLog?.let { changelog ->
@@ -651,7 +663,7 @@ internal fun TimelineItemContent(
                     }
                 }
 
-                status(state.listState)
+                status(state.listState, onLoadGap = state::loadGap)
             }
             state.listState.onSuccess {
                 AnimatedVisibility(
@@ -666,7 +678,7 @@ internal fun TimelineItemContent(
                     Glassify(
                         onClick = {
                             state.onNewTootsShown()
-                            scope.launch {
+                            if (state.reading != null) state.reading?.showLatest() else scope.launch {
                                 state.lazyListState.scrollToItem(0)
                             }
                         },
@@ -686,7 +698,9 @@ internal fun TimelineItemContent(
                                 modifier = Modifier.size(16.dp),
                             )
                             val ctx = LocalContext.current
-                            val newTootsText =
+                            val newTootsText = if (state.reading != null) {
+                                stringResource(R.string.home_timeline_view_latest)
+                            } else
                                 ctx.resources.getQuantityString(
                                     R.plurals.home_timeline_new_toots,
                                     state.newPostsCount,
@@ -708,8 +722,14 @@ private fun timelinePresenter() =
         val loginState = remember { LoggedInPresenter() }.invoke()
 
         val pagerState =
-            state.tabState.map {
-                rememberPagerState { it.size }
+            state.tabState.map { tabs ->
+                val pager = rememberPagerState(initialPage = tabs.indexOfFirst { it.id == state.initialSelectedTabId }.coerceAtLeast(0)) { tabs.size }
+                LaunchedEffect(pager, tabs) {
+                    snapshotFlow { pager.settledPage }.collect { index ->
+                        tabs.getOrNull(index)?.let { state.selectTab(it.id) }
+                    }
+                }
+                pager
             }
 
         val changeLogState = changeLogPresenter()

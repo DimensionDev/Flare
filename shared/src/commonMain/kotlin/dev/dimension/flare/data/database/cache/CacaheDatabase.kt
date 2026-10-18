@@ -6,8 +6,9 @@ import androidx.room3.Database
 import androidx.room3.RoomDatabase
 import androidx.room3.RoomDatabaseConstructor
 import androidx.room3.withWriteTransaction
+import androidx.sqlite.async.executeSQL
 
-internal const val CACHE_DATABASE_VERSION = 48
+internal const val CACHE_DATABASE_VERSION = 49
 
 @Database(
     entities = [
@@ -29,6 +30,10 @@ internal const val CACHE_DATABASE_VERSION = 48
         dev.dimension.flare.data.database.cache.model.DbListMember::class,
         dev.dimension.flare.data.database.cache.model.DbUserRelation::class,
         dev.dimension.flare.data.database.cache.model.DbTranslation::class,
+        dev.dimension.flare.data.database.cache.model.DbTimelineHistory::class,
+        dev.dimension.flare.data.database.cache.model.DbTimelineBatch::class,
+        dev.dimension.flare.data.database.cache.model.DbTimelineEntry::class,
+        dev.dimension.flare.data.database.cache.model.DbTimelineBookmark::class,
     ],
     version = CACHE_DATABASE_VERSION,
     exportSchema = false,
@@ -44,6 +49,40 @@ internal const val CACHE_DATABASE_VERSION = 48
 )
 @ConstructedBy(CacheDatabaseConstructor::class)
 internal abstract class CacheDatabase : RoomDatabase() {
+    companion object {
+        val MIGRATION_48_49 =
+            object : androidx.room3.migration.Migration(48, 49) {
+                override suspend fun migrate(connection: androidx.sqlite.SQLiteConnection) {
+                    connection.executeSQL(
+                        "CREATE TABLE IF NOT EXISTS `DbTimelineHistory` (`key` TEXT NOT NULL, `generation` TEXT NOT NULL, PRIMARY KEY(`key`))",
+                    )
+                    connection.executeSQL(
+                        "CREATE TABLE IF NOT EXISTS `DbTimelineBatch` (`id` TEXT NOT NULL, `historyKey` TEXT NOT NULL, " +
+                            "`ordinal` INTEGER NOT NULL, `nextKey` TEXT, `manual` INTEGER NOT NULL, `lowerItemKey` TEXT, PRIMARY KEY(`id`))",
+                    )
+                    connection.executeSQL(
+                        "CREATE INDEX IF NOT EXISTS `index_DbTimelineBatch_historyKey_ordinal` ON `DbTimelineBatch` (`historyKey`, `ordinal`)",
+                    )
+                    connection.executeSQL(
+                        "CREATE TABLE IF NOT EXISTS `DbTimelineEntry` (`historyKey` TEXT NOT NULL, `itemKey` TEXT NOT NULL, " +
+                            "`timelineId` TEXT NOT NULL, `batchId` TEXT NOT NULL, `position` INTEGER NOT NULL, " +
+                            "PRIMARY KEY(`historyKey`, `itemKey`))",
+                    )
+                    connection.executeSQL(
+                        "CREATE INDEX IF NOT EXISTS `index_DbTimelineEntry_batchId_position` ON `DbTimelineEntry` (`batchId`, `position`)",
+                    )
+                    connection.executeSQL(
+                        "CREATE INDEX IF NOT EXISTS `index_DbTimelineEntry_timelineId` ON `DbTimelineEntry` (`timelineId`)",
+                    )
+                    connection.executeSQL(
+                        "CREATE TABLE IF NOT EXISTS `DbTimelineBookmark` (`tabId` TEXT NOT NULL, `historyKey` TEXT NOT NULL, " +
+                            "`itemKey` TEXT NOT NULL, `batchOrdinal` INTEGER NOT NULL, `position` INTEGER NOT NULL, " +
+                            "`offset` REAL NOT NULL, PRIMARY KEY(`tabId`))",
+                    )
+                }
+            }
+    }
+
     abstract fun emojiDao(): dev.dimension.flare.data.database.cache.dao.EmojiDao
 
     abstract fun statusReferenceDao(): dev.dimension.flare.data.database.cache.dao.StatusReferenceDao
@@ -59,6 +98,8 @@ internal abstract class CacheDatabase : RoomDatabase() {
     abstract fun listDao(): dev.dimension.flare.data.database.cache.dao.ListDao
 
     abstract fun translationDao(): dev.dimension.flare.data.database.cache.dao.TranslationDao
+
+    abstract fun timelineHistoryDao(): dev.dimension.flare.data.database.cache.dao.TimelineHistoryDao
 }
 
 // The Room compiler generates the `actual` implementations.

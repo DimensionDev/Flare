@@ -1,6 +1,103 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "settings_remember_home_timeline_position": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Remember Home reading position"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "记住首页阅读位置"
+        }
+      }
+    }
+  },
+  "settings_remember_home_timeline_position_description": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Keep your place when refreshing and restore your last tab and position when opening the app."
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "刷新时保留当前位置，启动时恢复上次的标签页和阅读位置。"
+        }
+      }
+    }
+  },
+  "home_timeline_view_latest": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "View latest posts"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "查看最新内容"
+        }
+      }
+    }
+  },
+  "timeline_load_missing_posts": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Load missing posts"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "加载缺失的内容"
+        }
+      }
+    }
+  },
+  "timeline_loading_missing_posts": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Loading missing posts…"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "正在加载缺失的内容…"
+        }
+      }
+    }
+  },
+  "timeline_retry_missing_posts": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Could not load posts. Tap to retry."
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "加载失败，点击重试。"
+        }
+      }
+    }
+  },
+
   "ugoira_play": {
     "extractionState": "manual",
     "localizations": {

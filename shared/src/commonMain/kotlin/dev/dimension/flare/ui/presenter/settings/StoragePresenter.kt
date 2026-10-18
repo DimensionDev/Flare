@@ -7,6 +7,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.datasource.microblog.paging.TimelineHistoryStore
 import dev.dimension.flare.data.repository.UgoiraRepository
 import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.ui.presenter.PresenterBase
@@ -16,6 +17,7 @@ import kotlinx.coroutines.launch
 @WebPresenter("storage")
 public class StoragePresenter : PresenterBase<StorageState>() {
     private val cacheDatabase by koinInject<CacheDatabase>()
+    private val historyStore by koinInject<TimelineHistoryStore>()
     private val ugoiraRepository by koinInject<UgoiraRepository>()
 
     @Throws(Exception::class)
@@ -26,6 +28,7 @@ public class StoragePresenter : PresenterBase<StorageState>() {
 
     public suspend fun clearCacheSuspend() {
         cacheDatabase.clearAllTables()
+        historyStore.cacheCleared()
     }
 
     @Composable

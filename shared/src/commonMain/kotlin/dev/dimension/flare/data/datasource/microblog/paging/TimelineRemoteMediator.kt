@@ -98,6 +98,7 @@ internal open class TimelineRemoteMediator(
             data = data,
             nextKey = result.nextKey,
             previousKey = result.previousKey,
+            continuationFailure = result.continuationFailure,
         )
     }
 
@@ -193,7 +194,7 @@ internal open class TimelineRemoteMediator(
         enqueuePreTranslation(dataToSave)
     }
 
-    protected fun enqueuePreTranslation(dataToSave: List<DbPagingTimelineWithStatus>) {
+    internal fun enqueuePreTranslation(dataToSave: List<DbPagingTimelineWithStatus>) {
         preTranslationService.enqueueStatuses(
             dataToSave
                 .flatMap { item ->

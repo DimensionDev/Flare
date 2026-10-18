@@ -208,6 +208,9 @@ import dev.dimension.flare.compose.ui.misskey_notification_item_scheduled_note_p
 import dev.dimension.flare.compose.ui.misskey_notification_item_test
 import dev.dimension.flare.compose.ui.notification_item_accept_follow_request
 import dev.dimension.flare.compose.ui.notification_item_reject_follow_request
+import dev.dimension.flare.compose.ui.timeline_load_missing_posts
+import dev.dimension.flare.compose.ui.timeline_loading_missing_posts
+import dev.dimension.flare.compose.ui.timeline_retry_missing_posts
 import dev.dimension.flare.compose.ui.vvo_notification_like
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.model.PostActionStyle
@@ -610,6 +613,18 @@ private fun TopMessageComponent(
 
             is UiTimelineV2.Message.Type.Localized -> {
                 when (type.data) {
+                    UiTimelineV2.Message.Type.Localized.MessageId.LoadMissingPosts -> {
+                        stringResource(Res.string.timeline_load_missing_posts)
+                    }
+
+                    UiTimelineV2.Message.Type.Localized.MessageId.LoadingMissingPosts -> {
+                        stringResource(Res.string.timeline_loading_missing_posts)
+                    }
+
+                    UiTimelineV2.Message.Type.Localized.MessageId.RetryMissingPosts -> {
+                        stringResource(Res.string.timeline_retry_missing_posts)
+                    }
+
                     UiTimelineV2.Message.Type.Localized.MessageId.Mention -> {
                         stringResource(resource = Res.string.mastodon_notification_item_mentioned_you)
                     }

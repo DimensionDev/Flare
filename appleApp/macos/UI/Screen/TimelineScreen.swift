@@ -36,6 +36,14 @@ struct TimelineScreen: View {
             allowGalleryMode: allowGalleryMode
         )
         .environment(\.timelineAppearance, tabItem.resolveTimelineAppearance(base: timelineAppearance))
+        .environment(\.timelineReading, presenter.state.reading)
+        .overlay(alignment: .top) {
+            if presenter.state.reading?.hasNewContent == true {
+                Button("home_timeline_view_latest") { presenter.state.reading?.showLatest() }
+                    .buttonStyle(.borderedProminent)
+                    .padding(.top, 8)
+            }
+        }
         .refreshable {
             try? await presenter.state.refreshSuspend()
         }

@@ -5,12 +5,9 @@ import androidx.room3.ConstructedBy
 import androidx.room3.Database
 import androidx.room3.RoomDatabase
 import androidx.room3.RoomDatabaseConstructor
-import androidx.room3.migration.Migration
 import androidx.room3.withWriteTransaction
-import androidx.sqlite.SQLiteConnection
-import androidx.sqlite.async.executeSQL
 
-internal const val CACHE_DATABASE_VERSION = 57
+internal const val CACHE_DATABASE_VERSION = 58
 
 @Database(
     entities = [
@@ -52,25 +49,6 @@ internal const val CACHE_DATABASE_VERSION = 57
 )
 @ConstructedBy(CacheDatabaseConstructor::class)
 internal abstract class CacheDatabase : RoomDatabase() {
-    companion object {
-        val MIGRATION_56_57 =
-            object : Migration(56, 57) {
-                override suspend fun migrate(connection: SQLiteConnection) {
-                    connection.executeSQL("ALTER TABLE DbTimelineReadingSegment ADD COLUMN confirmed INTEGER NOT NULL DEFAULT 1")
-                    connection.executeSQL("ALTER TABLE DbTimelineReadingCursor ADD COLUMN paused INTEGER NOT NULL DEFAULT 0")
-                    connection.executeSQL("ALTER TABLE DbTimelineReadingCursor ADD COLUMN retryFailed INTEGER NOT NULL DEFAULT 0")
-                }
-            }
-
-        val MIGRATION_55_56 =
-            object : Migration(55, 56) {
-                override suspend fun migrate(connection: SQLiteConnection) {
-                    connection.executeSQL("ALTER TABLE DbPagingKey ADD COLUMN readingState TEXT")
-                    connection.executeSQL("ALTER TABLE DbTimelineReadingSegment ADD COLUMN failed INTEGER NOT NULL DEFAULT 0")
-                }
-            }
-    }
-
     abstract fun timelineReadingSessionDao(): dev.dimension.flare.data.database.cache.dao.TimelineReadingSessionDao
 
     abstract fun emojiDao(): dev.dimension.flare.data.database.cache.dao.EmojiDao

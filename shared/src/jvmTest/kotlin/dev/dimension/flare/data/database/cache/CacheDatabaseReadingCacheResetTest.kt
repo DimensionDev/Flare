@@ -27,6 +27,15 @@ class CacheDatabaseReadingCacheResetTest {
     @Test
     fun cacheWithoutSegmentIndexIsDiscarded() = resetCache(54)
 
+    @Test
+    fun cacheBeforeSourceProgressIsDiscarded() = resetCache(55)
+
+    @Test
+    fun cacheBeforeGapConfirmationIsDiscarded() = resetCache(56)
+
+    @Test
+    fun cacheWithOldFalseGapEvidenceIsDiscarded() = resetCache(57)
+
     private fun resetCache(version: Int) =
         runTest {
             val path = Files.createTempFile("flare-cache-v$version", ".db")
@@ -55,9 +64,18 @@ class CacheDatabaseReadingCacheResetTest {
                 }
                 // Older development caches kept an exhausted flag; version 52 also lacked cursor checkpoints.
                 BundledSQLiteDriver().open(path.toString()).use {
-                    it.execSQL("DROP INDEX index_DbTimelineReadingSegment_snapshotKey_boundarySortId")
+                    if (version <= 54) it.execSQL("DROP INDEX index_DbTimelineReadingSegment_snapshotKey_boundarySortId")
                     if (version <= 53) it.execSQL("ALTER TABLE DbTimelineReadingSegment ADD COLUMN exhausted INTEGER NOT NULL DEFAULT 0")
                     if (version == 52) it.execSQL("DROP TABLE DbTimelineReadingCursor")
+                    if (version in 55..56) {
+                        it.execSQL("ALTER TABLE DbTimelineReadingSegment DROP COLUMN confirmed")
+                        it.execSQL("ALTER TABLE DbTimelineReadingCursor DROP COLUMN paused")
+                        it.execSQL("ALTER TABLE DbTimelineReadingCursor DROP COLUMN retryFailed")
+                    }
+                    if (version == 55) {
+                        it.execSQL("ALTER TABLE DbPagingKey DROP COLUMN readingState")
+                        it.execSQL("ALTER TABLE DbTimelineReadingSegment DROP COLUMN failed")
+                    }
                     it.execSQL("PRAGMA user_version = $version")
                 }
                 open().also { db ->

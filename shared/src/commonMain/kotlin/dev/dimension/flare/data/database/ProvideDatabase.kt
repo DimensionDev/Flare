@@ -25,7 +25,6 @@ internal const val CACHE_DATABASE_NAME = "cache.db"
 internal fun provideCacheDatabase(driverFactory: DriverFactory): CacheDatabase =
     driverFactory
         .createBuilder<CacheDatabase>(CACHE_DATABASE_NAME, isCache = true)
-        .addMigrations(CacheDatabase.MIGRATION_55_56, CacheDatabase.MIGRATION_56_57)
         .fallbackToDestructiveMigration(dropAllTables = true)
         .addCallback(TimelineRevisionCallback)
         .setDriver(createDatabaseDriver())

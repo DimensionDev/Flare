@@ -35,6 +35,7 @@ internal class MixedRemoteMediator(
     private val retryFailed: Boolean = false,
     private val refreshCache: RefreshCache? = null,
     private val readingTimelineKey: String? = readingHeadKey,
+    private val readingGap: ReadingGap? = null,
 ) : CacheableRemoteLoader<UiTimelineV2>,
     ReportableRemoteLoader,
     SortIdProvider {
@@ -68,6 +69,7 @@ internal class MixedRemoteMediator(
         retryFailed: Boolean = false,
         refreshCache: RefreshCache? = null,
         readingTimelineKey: String? = readingHeadKey,
+        readingGap: ReadingGap? = null,
         isValid: suspend () -> Boolean,
     ): MixedRemoteMediator =
         MixedRemoteMediator(
@@ -80,6 +82,7 @@ internal class MixedRemoteMediator(
                         retryFailed,
                         refreshCache,
                         readingTimelineKey,
+                        readingGap,
                         isValid,
                     )
                 } else {
@@ -94,6 +97,7 @@ internal class MixedRemoteMediator(
             retryFailed,
             refreshCache,
             readingTimelineKey,
+            readingGap,
         )
 
     override suspend fun load(
@@ -172,11 +176,12 @@ internal class MixedRemoteMediator(
                                 failed = false,
                                 canContinue = response.canContinue,
                                 hasConfirmedGap = response.hasConfirmedGap,
+                                oldestFetchedSortId = response.data.maxOfOrNull(::timeSortId) ?: state.oldestFetchedSortId,
                             )
                         } else {
                             state?.copy(refreshPending = subRequest.request is PagingRequest.Refresh, failed = true)
                         }
-                    cursors[source] =
+                    val nextCursor =
                         if (response != null) {
                             previous.copy(
                                 nextKey = response.nextKey,
@@ -186,7 +191,8 @@ internal class MixedRemoteMediator(
                             previous
                         } else {
                             DbPagingKey(subKey(source))
-                        }.copy(readingState = reading[source]?.let { Json.encodeToString(it) })
+                        }
+                    cursors[source] = nextCursor.copy(readingState = reading[source]?.let { Json.encodeToString(it) })
                 }
                 pendingWrites.add {
                     if (request is PagingRequest.Refresh) {
@@ -201,8 +207,7 @@ internal class MixedRemoteMediator(
                     data = merge(responses),
                     hasConfirmedGap =
                         remaining.any {
-                            it.canConfirmGap && reading[it]?.refreshPending != true && reading[it]?.headPending != true &&
-                                reading[it]?.hasConfirmedGap != false
+                            confirmsRemoteGap(it, cursors[it], reading[it])
                         },
                     canContinue = remaining.any { reading[it]?.failed != true && reading[it]?.canContinue != false },
                     continuationError =
@@ -363,6 +368,7 @@ internal class MixedRemoteMediator(
                                 learnedHead = learnedHead || (reading.headIds.isEmpty() && ids.isNotEmpty())
                                 reading.copy(
                                     headIds = reading.headIds.ifEmpty { ids.take(pageSize) },
+                                    oldestFetchedSortId = response.result.data.maxOfOrNull(::timeSortId) ?: reading.oldestFetchedSortId,
                                     headPending = (reading.headPending || reading.refreshPending) && ids.isEmpty(),
                                     refreshPending = false,
                                     failed = false,
@@ -438,11 +444,14 @@ internal class MixedRemoteMediator(
                 data = selected.map(::timeStagingToUi),
                 hasConfirmedGap =
                     timeSourceStates.any { state ->
-                        state.pending.any { it.timeline.statusId !in seenStatusIds } ||
+                        state.pending.any { it.timeline.statusId !in seenStatusIds && isInReadingGap(it) } ||
                             (
-                                state.source.mediator.canConfirmGap && state.initialized && state.hasMore &&
-                                    state.reading?.headPending != true &&
-                                    state.reading?.hasConfirmedGap != false
+                                state.initialized && state.hasMore &&
+                                    confirmsRemoteGap(
+                                        state.source.mediator,
+                                        DbPagingKey(state.source.stagingKey, nextKey = state.nextKey),
+                                        state.reading,
+                                    )
                             )
                     },
                 canContinue =
@@ -466,6 +475,71 @@ internal class MixedRemoteMediator(
                 },
             )
         }
+
+    // Fetching records candidate intervals independently of filters. Projection rechecks
+    // their visibility, so changing filters can reveal a retained buffer without refetching.
+    internal class ReadingGap(
+        val boundarySortId: Long,
+        val isVisible: suspend (UiTimelineV2) -> Boolean,
+    )
+
+    private fun isInReadingGap(item: DbPagingTimelineWithStatus): Boolean =
+        readingGap?.let { item.timeline.sortId < it.boundarySortId } ?: true
+
+    private fun confirmsRemoteGap(
+        source: CacheableRemoteLoader<UiTimelineV2>,
+        key: DbPagingKey?,
+        state: ReadingSourceState?,
+    ): Boolean {
+        if (!source.canConfirmGap || key?.nextKey == null || state?.joined == true || state?.refreshPending == true ||
+            state?.headPending == true || state?.hasConfirmedGap == false
+        ) {
+            return false
+        }
+        if (source is MixedRemoteMediator || readingGap == null) return true
+        val frontier = state?.oldestFetchedSortId
+        // headIds describe the first page, not later cursor progress. Only a successful
+        // nonempty page can place the current continuation inside the missing interval.
+        return frontier != null && frontier < readingGap.boundarySortId
+    }
+
+    internal suspend fun hasVisibleReadingGap(): Boolean {
+        checkNotNull(readingGap)
+        val dao = database.pagingTimelineDao()
+        for ((index, source) in mediators.withIndex()) {
+            val stagingKey = if (ordersByTime) timeSources[index].stagingKey else subKey(source)
+            val key = dao.getPagingKey(stagingKey)
+            val state = key?.readingState?.let { Json.decodeFromString<ReadingSourceState>(it) }
+            if (ordersByTime) {
+                // Inspect only this cursor's bounded buffer. Hydrate posts only when their
+                // time belongs to the interval, and check publication against the root.
+                val candidates = dao.getByPagingKey(stagingKey).filter { it.sortId < readingGap.boundarySortId }
+                if (candidates.isNotEmpty()) {
+                    val published =
+                        candidates
+                            .map { it.statusId }
+                            .chunked(500)
+                            .flatMap {
+                                dao.existingReadingStatusIds(checkNotNull(readingTimelineKey), it)
+                            }.toSet()
+                    if (candidates.any { it.statusId !in published }) {
+                        if (dao.getTimelinePage(stagingKey, 0, Int.MAX_VALUE).any {
+                                it.timeline.statusId !in published && isInReadingGap(it) && readingGap.isVisible(timeStagingToUi(it))
+                            }
+                        ) {
+                            return true
+                        }
+                    }
+                }
+            }
+            if (source is MixedRemoteMediator) {
+                if (source.hasVisibleReadingGap()) return true
+            } else if (confirmsRemoteGap(source, key, state)) {
+                return true
+            }
+        }
+        return false
+    }
 
     private suspend fun loadTimeSourceStates(): List<TimeSourceState> =
         timeSources.map { source ->
@@ -504,7 +578,11 @@ internal class MixedRemoteMediator(
                 val reading = previous.readingState?.let { Json.decodeFromString<ReadingSourceState>(it) } ?: ReadingSourceState()
                 // A late recovery must not replace the head published by a newer refresh.
                 if (reading.headIds != incoming.boundaryIds || reading.headIds == incoming.headIds) continue
-                dao.insertPagingKey(previous.copy(readingState = Json.encodeToString(reading.copy(headIds = incoming.headIds))))
+                dao.insertPagingKey(
+                    previous.copy(
+                        readingState = Json.encodeToString(reading.copy(headIds = incoming.headIds)),
+                    ),
+                )
             }
         }
         mediators.forEachIndexed { index, child ->
@@ -517,7 +595,8 @@ internal class MixedRemoteMediator(
     internal fun readingCursor(key: DbPagingKey): DbPagingKey? {
         val state = key.readingState?.let { Json.decodeFromString<ReadingSourceState>(it) } ?: return key
         if (state.joined || (key.nextKey == null && !state.refreshPending)) return null
-        // Retry eligibility is not content progress; unresolved children own a nested source's boundaries.
+        // Retry eligibility and temporal evidence are not cursor progress;
+        // unresolved children own a nested source's boundaries.
         return if (!state.hasConfirmedGap || state.failed || !state.canContinue) {
             key.copy(
                 readingState =
@@ -525,13 +604,14 @@ internal class MixedRemoteMediator(
                         state.copy(
                             headIds = if (state.hasConfirmedGap) state.headIds else emptyList(),
                             boundaryIds = if (state.hasConfirmedGap) state.boundaryIds else emptyList(),
+                            oldestFetchedSortId = null,
                             failed = false,
                             canContinue = true,
                         ),
                     ),
             )
         } else {
-            key
+            key.copy(readingState = Json.encodeToString(state.copy(oldestFetchedSortId = null)))
         }
     }
 
@@ -693,6 +773,7 @@ internal class MixedRemoteMediator(
     @Serializable
     private data class ReadingSourceState(
         val headIds: List<String> = emptyList(),
+        val oldestFetchedSortId: Long? = null,
         val boundaryIds: List<String> = emptyList(),
         val joined: Boolean = false,
         val refreshPending: Boolean = false,

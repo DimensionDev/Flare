@@ -728,6 +728,70 @@ class TimelineReadingSessionTest : RobolectricTest() {
             assertEquals(20, presenter.size)
         }
 
+    @Test
+    fun timeMixedFailedTailKeepsThePresentedPageUntilRetryPublishesContent() =
+        runTest {
+            val loader = Loader().apply { response = timedPage(0..9, "older") }
+            val current = session(MixedRemoteMediator(database, listOf(loader), TimelineMergePolicy.Time), backgroundScope)
+            current.refresh(false, initial = true)
+            val source = TimelineReadingPagingSource(database, current)
+            val invalidated = CompletableDeferred<Unit>()
+            source.registerInvalidatedCallback { invalidated.complete(Unit) }
+            try {
+                source.load(PagingSource.LoadParams.Refresh(null, 40, false))
+                loader.beforeLoad = { error("offline") }
+                assertTrue(append(current) is androidx.paging.RemoteMediator.MediatorResult.Error)
+                withContext(Dispatchers.Default) {
+                    assertNull(
+                        withTimeoutOrNull(250) { invalidated.await() },
+                        "A tail error changes Paging load state, not gap rows; rebuilding the page can drop an immediate retry",
+                    )
+                }
+                loader.beforeLoad = {}
+                loader.response = timedPage(-10..-1)
+                current.prepareRetry()
+                assertTrue(append(current) is androidx.paging.RemoteMediator.MediatorResult.Success)
+                withContext(Dispatchers.Default) {
+                    assertNotNull(withTimeoutOrNull(5_000) { invalidated.await() })
+                }
+                assertEquals(20, readingPage(current).size, "A successful retry must still invalidate the page through its database writes")
+                assertEquals(listOf("older", "older"), appendCursors(loader))
+            } finally {
+                source.invalidate()
+            }
+        }
+
+    @Test
+    fun rankedTailFailureUpdatesItsVisibleGap() = tailGapFailureInvalidatesPage(null)
+
+    @Test
+    fun pageMixedTailFailureUpdatesItsVisibleGap() = tailGapFailureInvalidatesPage(TimelineMergePolicy.TimePerPage)
+
+    private fun tailGapFailureInvalidatesPage(mergePolicy: TimelineMergePolicy?) =
+        runTest {
+            val loader = Loader(timelineOrder = TimelineOrder.Ranked).apply { response = timedPage(0..9, "older") }
+            val root = mergePolicy?.let { MixedRemoteMediator(database, listOf(loader), it) } ?: loader
+            val current = session(root, backgroundScope)
+            current.refresh(false, initial = true)
+            val source = TimelineReadingPagingSource(database, current)
+            val invalidated = CompletableDeferred<Unit>()
+            source.registerInvalidatedCallback { invalidated.complete(Unit) }
+            try {
+                source.load(PagingSource.LoadParams.Refresh(null, 40, false))
+                loader.beforeLoad = { error("offline") }
+                assertNotNull(current.loadGap(current.activeKey))
+                withContext(Dispatchers.Default) {
+                    assertNotNull(
+                        withTimeoutOrNull(1_000) { invalidated.await() },
+                        "Ranked tail markers must publish loading and error changes",
+                    )
+                }
+                assertEquals("gap", readingPage(current).last())
+            } finally {
+                source.invalidate()
+            }
+        }
+
     @AfterTest
     fun close() = database.close()
 
@@ -846,6 +910,30 @@ class TimelineReadingSessionTest : RobolectricTest() {
         }
 
     @Test
+    fun timeMixedUnconfirmedCursorsDoNotIncreaseProjectionWorkAfterPrepending() =
+        runTest {
+            val loader = Loader(timelineOrder = TimelineOrder.Ranked).apply { response = timedPage(0..3, "initial") }
+            val session = session(MixedRemoteMediator(database, listOf(loader), TimelineMergePolicy.Time), backgroundScope)
+            session.refresh(false, initial = true)
+            val counts = mutableListOf<Int>()
+            repeat(24) { index ->
+                loader.response = timedPage(0..3, "refresh-$index")
+                session.refresh(false)
+                if (index == 3 || index == 23) {
+                    loader.response = timedPage(0..if (index == 3) 4 else 5, "prepend-$index")
+                    session.refresh(false)
+                    var queries = 0
+                    onSelect = { queries++ }
+                    assertFalse("gap" in readingPage(session, 60))
+                    onSelect = {}
+                    counts += queries
+                }
+            }
+            assertTrue(counts.last() <= counts.first() + 4, "Unknown cursors at a previous head must not increase projection work: $counts")
+            assertEquals(27, database.timelineReadingSessionDao().cursors(session.record.key).size)
+        }
+
+    @Test
     fun timeMixedRefreshFailureRetriesTheUninitializedSource() =
         runTest {
             val first = Loader("first").apply { response = timedPage(10..11, "old-first") }
@@ -933,7 +1021,11 @@ class TimelineReadingSessionTest : RobolectricTest() {
             first.response = timedPage(10..11, "first-still-missing")
             second.response = timedPage(10..11, "second-joined")
             assertNull(session.loadGap(gap))
-            assertTrue("gap" in readingPage(session), "The second source's cached posts cannot prove continuity of the first source")
+            assertFalse("gap" in readingPage(session), "The remaining source range is now below the old global head")
+            assertNotNull(
+                database.timelineReadingSessionDao().cursor(gap),
+                "Another source's posts must not close this source's continuation",
+            )
             first.response = timedPage(0..1, "first-joined")
             repeat(3) { assertNull(session.loadGap(gap)) }
             assertFalse("gap" in readingPage(session))
@@ -1106,7 +1198,7 @@ class TimelineReadingSessionTest : RobolectricTest() {
                     .single()
                     .failed,
             )
-            assertTrue("gap" in readingPage(session))
+            assertTrue("gap" in readingPage(session), "Previously confirmed nested intervals must retain retry markers")
             session.close()
             session = session(mixed, backgroundScope, repository = repository)
             session.prepare()
@@ -1116,43 +1208,6 @@ class TimelineReadingSessionTest : RobolectricTest() {
             repeat(3) { assertNull(session.loadGap(gap)) }
             assertEquals(listOf("new-first", "new-first"), appendCursors(first))
             assertEquals(secondRequests, second.requests.size)
-            assertFalse("gap" in readingPage(session))
-            assertTrue(readingPage(session).containsAll(listOf("40", "41", "50", "51")))
-        }
-
-    @Test
-    fun timeMixedMigratedGapRetainsFailedSourcesWithoutReadingMetadata() =
-        runTest {
-            val first = Loader("first").apply { response = timedPage(0..1, "old-first") }
-            val second = Loader("second").apply { response = timedPage(10..11, "old-second") }
-            val mixed = MixedRemoteMediator(database, listOf(first, second), TimelineMergePolicy.Time)
-            val repository = TimelineReadingRepository(database, backgroundScope)
-            var session = session(mixed, backgroundScope, repository = repository)
-            session.refresh(false, initial = true)
-            first.response = timedPage(100..101, "new-first")
-            second.response = timedPage(110..111, "new-second")
-            session.refresh(false)
-            val gap =
-                database
-                    .timelineReadingSessionDao()
-                    .segments(session.record.key)
-                    .single()
-                    .key
-            val dao = database.pagingTimelineDao()
-            for (key in dao.keysWithPrefix(session.record.key)) {
-                dao.getPagingKey(key)?.let { dao.insertPagingKey(it.copy(readingState = null)) }
-            }
-            session.close()
-            session = session(mixed, backgroundScope, repository = repository)
-            session.prepare()
-            first.beforeLoad = { error("offline") }
-            second.response = timedPage(50..51)
-            assertNull(session.loadGap(gap), "Migrated continuations must also accept healthy-source progress")
-            assertTrue("gap" in readingPage(session))
-            first.beforeLoad = {}
-            first.response = timedPage(40..41)
-            repeat(3) { assertNull(session.loadGap(gap)) }
-            assertEquals(listOf("new-first", "new-first"), appendCursors(first))
             assertFalse("gap" in readingPage(session))
             assertTrue(readingPage(session).containsAll(listOf("40", "41", "50", "51")))
         }

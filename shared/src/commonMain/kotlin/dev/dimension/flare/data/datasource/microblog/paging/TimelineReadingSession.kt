@@ -116,6 +116,8 @@ internal class TimelineReadingSession(
     private val boundaryVersion = MutableStateFlow(0)
     private val boundaryMutex = Mutex()
     private var boundaryCache: Triple<Int, LongRange?, List<ReadingBoundary>>? = null
+    private var gapEvidenceVersion = -1
+    private val gapEvidenceCache = mutableMapOf<String, Boolean>()
     private val boundaryRequests = MutableStateFlow<Pair<ReadingViewport, Int>?>(null)
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -134,6 +136,7 @@ internal class TimelineReadingSession(
             database.invalidationTracker
                 .createFlow(
                     "DbPagingTimeline",
+                    "DbPagingKey",
                     "DbStatus",
                     "timeline_item_presentation_reference",
                     "DbTimelineReadingSegment",
@@ -198,6 +201,7 @@ internal class TimelineReadingSession(
         key: String,
         retryFailed: Boolean = false,
         refreshCache: MixedRemoteMediator.RefreshCache? = null,
+        gapBoundarySortId: Long? = null,
     ): CacheableRemoteLoader<UiTimelineV2> =
         if (loader is MixedRemoteMediator) {
             loader.forReadingSession(
@@ -205,6 +209,7 @@ internal class TimelineReadingSession(
                 readingHeadKey = activeKey.takeIf { loader.ordersByTime },
                 retryFailed = retryFailed,
                 refreshCache = refreshCache,
+                readingGap = gapBoundarySortId?.takeIf { loader.ordersByTime }?.let { MixedRemoteMediator.ReadingGap(it, isVisible) },
                 isValid = ::valid,
             )
         } else {
@@ -227,8 +232,9 @@ internal class TimelineReadingSession(
         key: String,
         retryFailed: Boolean = false,
         refreshCache: MixedRemoteMediator.RefreshCache? = null,
+        gapBoundarySortId: Long? = null,
     ) = TimelineRemoteMediator(
-        scopedLoader(key, retryFailed, refreshCache),
+        scopedLoader(key, retryFailed, refreshCache, gapBoundarySortId),
         database,
         allowLongText,
         notifyError,
@@ -484,7 +490,7 @@ internal class TimelineReadingSession(
                     if (paused.isEmpty()) {
                         emptyList()
                     } else {
-                        database.timelineReadingSessionDao().unknownHeadCursors(record.key).filter {
+                        paused.filter {
                             (scopedLoader(it.key) as MixedRemoteMediator).canRecoverHeadOnRefresh()
                         }
                     }
@@ -506,7 +512,19 @@ internal class TimelineReadingSession(
                 val refreshCache = if (unknownHeads.isEmpty()) null else MixedRemoteMediator.RefreshCache()
                 // Only unknown heads are part of refresh; historical gap pages retain their normal per-load budget.
                 for (cursor in unknownHeads) loadGapLocked(cursor.key, retryFailed = true, refreshCache)
-                val pending = mediator(pendingKey, refreshCache = refreshCache)
+                val pending =
+                    mediator(
+                        pendingKey,
+                        refreshCache = refreshCache,
+                        gapBoundarySortId =
+                            if ((loader as? MixedRemoteMediator)?.ordersByTime ==
+                                true
+                            ) {
+                                database.pagingTimelineDao().readingHead(activeKey)?.sortId
+                            } else {
+                                null
+                            },
+                    )
                 val response = pending.load(40, PagingRequest.Refresh)
                 if (!valid()) return@withLock
                 pending.saveResponse(PagingRequest.Refresh, response)
@@ -1008,6 +1026,7 @@ internal class TimelineReadingSession(
         val readingDao = database.timelineReadingSessionDao()
         var segment = readingDao.segment(record.key, key)
         val original = !continuous && key == activeKey
+        val usesGapLoadState = !original || !gapsAtBoundaries
         if (segment == null && !original) return null
         var retrySources = retryFailed
         if (!continuous) {
@@ -1016,8 +1035,10 @@ internal class TimelineReadingSession(
             // Persist the turn before fetching: failed or infinite cursors cannot starve other batches after reopening.
             readingDao.saveCursor(checkpoint.copy(lastAttempt = SnowflakeIdGenerator.nextId()))
         }
+        // The original time-mixed tail uses Paging load states and database invalidations.
+        // Rebuilding its page for loading/error can drop a retry during the generation handoff.
         gapLoads.update { it + (key to true) }
-        gapGeneration.update { it + 1 }
+        if (usesGapLoadState) gapGeneration.update { it + 1 }
         return try {
             if (loader is MixedRemoteMediator) {
                 val maintained =
@@ -1034,7 +1055,7 @@ internal class TimelineReadingSession(
                 val dao = database.pagingTimelineDao()
                 val cursor = dao.getPagingKey(key)?.nextKey ?: return@repeat
                 val request = PagingRequest.Append(cursor)
-                val source = if (original && !retrySources) active else mediator(key, retrySources, refreshCache)
+                val source = if (original && !retrySources) active else mediator(key, retrySources, refreshCache, segment?.boundarySortId)
                 val oldIds =
                     if (continuous) {
                         dao.getByPagingKey(key).map { it.statusId }.toSet()
@@ -1125,7 +1146,7 @@ internal class TimelineReadingSession(
                         }
                     }
                     boundaryVersion.update { it + 1 }
-                    gapGeneration.update { it + 1 }
+                    if (usesGapLoadState) gapGeneration.update { it + 1 }
                     if (recoveredHead) state.update { it.copy(hasNewContent = true) }
                 }
                 response.continuationError?.let { error ->
@@ -1144,7 +1165,7 @@ internal class TimelineReadingSession(
         } finally {
             gapLoads.update { if (it[key] == true) it - key else it }
             boundaryVersion.update { it + 1 }
-            gapGeneration.update { it + 1 }
+            if (usesGapLoadState) gapGeneration.update { it + 1 }
         }
     }
 
@@ -1152,6 +1173,10 @@ internal class TimelineReadingSession(
         boundaryMutex.withLock {
             val version = boundaryVersion.value
             boundaryCache?.takeIf { it.first == version && it.second == window }?.let { return@withLock it.third }
+            if (gapEvidenceVersion != version) {
+                gapEvidenceCache.clear()
+                gapEvidenceVersion = version
+            }
             val dao = database.pagingTimelineDao()
             val readingDao = database.timelineReadingSessionDao()
             val boundaries =
@@ -1189,6 +1214,16 @@ internal class TimelineReadingSession(
                                 )?.sortId ?: return@mapNotNull null
                             }
                         if (first == null || first.sortId >= sortId) return@mapNotNull null
+                        // Persisted confirmation predates this page's publication and filters.
+                        // Recheck only candidate boundaries, without deleting their retry cursors.
+                        if (!continuous) {
+                            val confirmed =
+                                gapEvidenceCache.getOrPut(segment.key) {
+                                    if (gapEvidenceCache.size >= 64) gapEvidenceCache.remove(gapEvidenceCache.keys.first())
+                                    (scopedLoader(segment.key, gapBoundarySortId = sortId) as MixedRemoteMediator).hasVisibleReadingGap()
+                                }
+                            if (!confirmed) return@mapNotNull null
+                        }
                         val visible =
                             visibleRow(activeKey, dao.readingItemOffset(activeKey, sortId))?.timeline
                                 ?: return@mapNotNull null

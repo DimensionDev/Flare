@@ -95,7 +95,7 @@ internal class TimelineHistoryPagingSource(
                         history.key,
                         mutableMapOf(),
                     ).associateBy { it.baseItem.stableItemKey }
-            reader.head.value = dao.head(history.key)?.itemKey
+            reader.headChanged(dao.head(history.key))
             if (reader.current.value == null) {
                 window.firstOrNull { it.timelineId != null }?.let {
                     reader.current.value = TimelineReadingPosition(it.itemKey, 0.0)

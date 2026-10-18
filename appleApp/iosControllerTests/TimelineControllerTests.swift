@@ -82,6 +82,7 @@ final class TimelineControllerIntegrationTests: XCTestCase {
 
     private final class ReadingState: NSObject, TimelineReadingState {
         var restorePosition: TimelineReadingPosition?
+        var isAtLatest = true
         var hasNewContent = false
         var saved: [TimelineReadingPosition] = []
 

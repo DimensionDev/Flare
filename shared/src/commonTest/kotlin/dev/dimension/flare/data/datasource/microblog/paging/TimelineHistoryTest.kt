@@ -6,7 +6,9 @@ import dev.dimension.flare.RobolectricTest
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.model.DbTimelineBookmark
 import dev.dimension.flare.data.database.createDatabaseDriver
+import dev.dimension.flare.data.datasource.microblog.MixedTimelinePageLoader
 import dev.dimension.flare.data.datasource.microblog.paging.TimelineReader
+import dev.dimension.flare.data.model.tab.TimelineMergePolicy
 import dev.dimension.flare.data.translation.NoopPreTranslationService
 import dev.dimension.flare.memoryDatabaseBuilder
 import dev.dimension.flare.model.AccountType
@@ -21,6 +23,7 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -50,6 +53,136 @@ class TimelineHistoryTest : RobolectricTest() {
 
     @AfterTest
     fun close() = database.close()
+
+    @Test
+    fun aFailedMixedSourceDoesNotCreateAGapWhenSuccessfulSourcesHaveNoContinuation() =
+        runTest {
+            for (policy in TimelineMergePolicy.entries) {
+                var fail = false
+                var response = page(3)
+                val good = source { response }
+                val bad =
+                    object : CacheableRemoteLoader<UiTimelineV2> {
+                        override val pagingKey = "failing"
+
+                        override suspend fun load(
+                            pageSize: Int,
+                            request: PagingRequest,
+                        ): PagingResult<UiTimelineV2> {
+                            if (fail) error("offline")
+                            return page(2)
+                        }
+                    }
+                val history = store.open(MixedTimelinePageLoader(listOf(good, bad), policy), false)
+                assertTrue(history.refresh())
+                val before = rows(history)
+                fail = true
+                assertTrue(history.refresh())
+                assertEquals(before, rows(history), "A failed source is not a missing page ($policy)")
+                response = page(4, 3)
+                assertTrue(history.refresh())
+                assertEquals(listOf("4", "3", "2"), order(history), "Successful new posts remain visible without an error gap ($policy)")
+            }
+        }
+
+    @Test
+    fun theNewContentNoticeOnlyAppearsAfterAPrependAndStaysDismissedAfterReadingIt() =
+        runTest {
+            var response = page(3, 2, 1)
+            val history = store.open(source { response }, false)
+            history.refresh()
+            val reader = TimelineReader("tab", history, database, store, backgroundScope)
+            reader.restore()
+            loadWindow(reader)
+            val oldHead = rows(history).first().itemKey
+            val olderPost = rows(history).last().itemKey
+            assertFalse(reader.hasNewContent.first())
+            assertTrue(reader.isAtLatest.first())
+            reader.viewportChanged(olderPost, -10.0)
+            assertFalse(reader.hasNewContent.first(), "Scrolling into old posts must not announce new content")
+            assertFalse(reader.isAtLatest.first(), "The banner and actual head position have different meanings")
+
+            response = page(5, 4, 3)
+            history.refresh()
+            loadWindow(reader)
+            assertTrue(reader.hasNewContent.first())
+            reader.viewportChanged(oldHead, 0.0)
+            assertTrue(reader.hasNewContent.first(), "Keeping the old visible post does not consume new posts")
+            reader.viewportChanged(rows(history).first().itemKey, -10.0)
+            assertFalse(reader.hasNewContent.first(), "Reaching the new head consumes the notice")
+            assertTrue(reader.isAtLatest.first())
+            reader.viewportChanged(olderPost, 0.0)
+            assertFalse(reader.hasNewContent.first(), "Scrolling away must not bring the notice back")
+
+            response = page(6, 5)
+            history.refresh()
+            loadWindow(reader)
+            assertTrue(reader.hasNewContent.first(), "A later prepend can announce new content again")
+            reader.showLatest()
+            reader.target.first { it?.itemKey == rows(history).first().itemKey }
+            assertFalse(reader.hasNewContent.first())
+            val latest = rows(history).first().itemKey
+            // Bookmark writes intentionally outlive the view. Await the durable
+            // write before this test closes its database.
+            database.invalidationTracker.createFlow("DbTimelineBookmark").first {
+                database.timelineHistoryDao().bookmark("tab", history.key)?.itemKey == latest
+            }
+        }
+
+    @Test
+    fun removingTheHeadDoesNotAnnounceOldContentOrConsumeOtherUnreadPosts() =
+        runTest {
+            var response = page(3, 2, 1)
+            val history = store.open(source { response }, false)
+            history.refresh()
+            val reader = TimelineReader("tab", history, database, store, backgroundScope)
+            reader.restore()
+            loadWindow(reader)
+            reader.viewportChanged(rows(history).last().itemKey, 0.0)
+
+            suspend fun removeHead() {
+                val head = rows(history).first()
+                val row = database.pagingTimelineDao().getTimelineRootRowsByIds(history.key, listOf(checkNotNull(head.timelineId))).single()
+                database.pagingTimelineDao().delete(listOf(row.timeline))
+                loadWindow(reader)
+            }
+            removeHead()
+            assertFalse(reader.hasNewContent.first(), "Deleting the head is not a prepend")
+            response = page(5, 4)
+            history.refresh()
+            loadWindow(reader)
+            assertTrue(reader.hasNewContent.first())
+            removeHead()
+            assertTrue(reader.hasNewContent.first(), "The other prepended item is still unread")
+            removeHead()
+            assertFalse(reader.hasNewContent.first(), "No prepended posts remain")
+        }
+
+    @Test
+    fun aRestoredBookmarkDoesNotAnnounceOldContentButALaunchRefreshDoes() =
+        runTest {
+            var response = page(3, 2, 1)
+            val loader = source { response }
+            val history = store.open(loader, false)
+            history.refresh()
+            val anchor = rows(history).last()
+            database.timelineHistoryDao().save(
+                DbTimelineBookmark("tab", history.key, anchor.itemKey, anchor.ordinal, anchor.position, -30.0),
+            )
+            val reader = TimelineReader("tab", history, database, store, backgroundScope)
+            reader.restore()
+            loadWindow(reader)
+            assertFalse(reader.hasNewContent.first(), "Restoring an older bookmark is not a new-content event")
+            val beforeFirstPage = TimelineReader("tab", history, database, store, backgroundScope)
+            beforeFirstPage.restore()
+            response = page(5, 4)
+            history.refresh()
+            loadWindow(reader)
+            assertTrue(reader.hasNewContent.first())
+            assertEquals(anchor.itemKey, reader.current.value?.itemKey)
+            loadWindow(beforeFirstPage)
+            assertTrue(beforeFirstPage.hasNewContent.first(), "A launch refresh can finish before the first local page")
+        }
 
     @Test
     fun refreshKeepsHistoryAndOnlyClickingAGapAdvancesItsOwnCursor() =
@@ -282,6 +415,17 @@ class TimelineHistoryTest : RobolectricTest() {
         }
 
     private suspend fun rows(history: TimelineHistory) = database.timelineHistoryDao().page(history.key, 0, 100)
+
+    private suspend fun loadWindow(reader: TimelineReader) {
+        val paging = TimelineHistoryPagingSource(database, reader) { error("A local read cannot activate a gap") }
+        try {
+            assertIs<PagingSource.LoadResult.Page<TimelineHistoryPagingKey, TimelinePageItem>>(
+                paging.load(PagingSource.LoadParams.Refresh(null, 20, false)),
+            )
+        } finally {
+            paging.invalidate()
+        }
+    }
 
     private suspend fun order(history: TimelineHistory): List<String> =
         rows(history).map { row ->

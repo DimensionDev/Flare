@@ -10,6 +10,7 @@ import dev.dimension.flare.ui.model.UiTimelineV2
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 
@@ -39,10 +40,10 @@ class MixedTimelinePageLoaderTest : RobolectricTest() {
         }
 
     @Test
-    fun failedSourceCanRetryWithoutRepeatingTheSuccessfulSourceOrDiscardingItsPosts() =
+    fun aFailedRefreshDoesNotBecomeAContinuationAndRetriesOnTheNextRefresh() =
         runTest {
             for (policy in TimelineMergePolicy.entries) {
-                val good = Source("good", listOf(page(4, 2)))
+                val good = Source("good", listOf(page(4, 2), page(4, 2)))
                 var failed = true
                 val bad =
                     object : CacheableRemoteLoader<UiTimelineV2> {
@@ -60,13 +61,126 @@ class MixedTimelinePageLoaderTest : RobolectricTest() {
                 val mixed = MixedTimelinePageLoader(listOf(good, bad), policy)
                 val first = mixed.load(20, PagingRequest.Refresh)
                 assertEquals(listOf("4", "2"), first.data.map { it.statusKey.id })
-                assertNotNull(first.continuationFailure)
+                assertNull(first.continuationFailure)
+                assertNull(first.nextKey, "Failure alone cannot advertise a missing page ($policy)")
                 failed = false
-                val retry = mixed.load(20, PagingRequest.Append(assertNotNull(first.nextKey)))
-                assertEquals(listOf("3", "1"), retry.data.map { it.statusKey.id })
+                val retry = mixed.load(20, PagingRequest.Refresh)
+                assertEquals(setOf("4", "3", "2", "1"), retry.data.map { it.statusKey.id }.toSet())
                 assertNull(retry.continuationFailure)
                 assertNull(retry.nextKey)
-                assertEquals(1, good.requests.size)
+                assertEquals(2, good.requests.size)
+            }
+        }
+
+    @Test
+    fun partialRefreshRetainsRealContinuationsWithoutRetryingFailedInitialRequests() =
+        runTest {
+            for (policy in TimelineMergePolicy.entries) {
+                val good = Source("good", listOf(page(4, next = "good-next"), page(2)))
+                var failedRequests = 0
+                val bad =
+                    object : CacheableRemoteLoader<UiTimelineV2> {
+                        override val pagingKey = "bad"
+
+                        override suspend fun load(
+                            pageSize: Int,
+                            request: PagingRequest,
+                        ): PagingResult<UiTimelineV2> {
+                            failedRequests++
+                            error("offline")
+                        }
+                    }
+                val first = MixedTimelinePageLoader(listOf(good, bad), policy).load(20, PagingRequest.Refresh)
+                assertEquals(listOf("4"), first.data.map { it.statusKey.id })
+                assertNull(first.continuationFailure, "A failed initial request does not make a healthy continuation fail")
+                val reopened = MixedTimelinePageLoader(listOf(good, bad), policy)
+                val next = reopened.load(20, PagingRequest.Append(assertNotNull(first.nextKey)))
+                assertEquals(listOf("2"), next.data.map { it.statusKey.id })
+                assertNull(next.nextKey)
+                assertEquals(listOf(PagingRequest.Refresh, PagingRequest.Append("good-next")), good.requests)
+                assertEquals(1, failedRequests)
+            }
+        }
+
+    @Test
+    fun anActualFailedContinuationStaysRetryableAfterOtherSourcesSucceed() =
+        runTest {
+            for (policy in TimelineMergePolicy.entries) {
+                var fail = true
+                val good = Source("good", listOf(page(next = "good-next"), page(2)))
+                val bad =
+                    object : CacheableRemoteLoader<UiTimelineV2> {
+                        override val pagingKey = "bad"
+
+                        override suspend fun load(
+                            pageSize: Int,
+                            request: PagingRequest,
+                        ): PagingResult<UiTimelineV2> =
+                            when (request) {
+                                PagingRequest.Refresh -> {
+                                    page(next = "bad-next")
+                                }
+
+                                else -> {
+                                    assertEquals(PagingRequest.Append("bad-next"), request)
+                                    if (fail) error("offline")
+                                    page(1)
+                                }
+                            }
+                    }
+                val mixed = MixedTimelinePageLoader(listOf(good, bad), policy)
+                val first = mixed.load(20, PagingRequest.Refresh)
+                val next = mixed.load(20, PagingRequest.Append(assertNotNull(first.nextKey)))
+                assertEquals(listOf("2"), next.data.map { it.statusKey.id })
+                assertNotNull(next.continuationFailure)
+                fail = false
+                val retry = mixed.load(20, PagingRequest.Append(assertNotNull(next.nextKey)))
+                assertEquals(listOf("1"), retry.data.map { it.statusKey.id })
+                assertNull(retry.nextKey)
+                assertEquals(2, good.requests.size)
+            }
+        }
+
+    @Test
+    fun aPreviouslyPersistedFailedFirstPageCanCloseWithoutLoadingCompletedSources() =
+        runTest {
+            val good = Source("good", emptyList())
+            val bad =
+                object : CacheableRemoteLoader<UiTimelineV2> {
+                    override val pagingKey = "bad"
+
+                    override suspend fun load(
+                        pageSize: Int,
+                        request: PagingRequest,
+                    ): PagingResult<UiTimelineV2> = error("offline")
+                }
+            for (policy in TimelineMergePolicy.entries) {
+                // Cursor persisted by the old implementation: successful source
+                // exhausted, failed initial source incorrectly left unstarted.
+                val result = MixedTimelinePageLoader(listOf(good, bad), policy).load(20, PagingRequest.Append("""[{"started":true},{}]"""))
+                assertEquals(emptyList(), result.data)
+                assertNull(result.nextKey)
+                assertNull(result.continuationFailure)
+                assertEquals(emptyList(), good.requests)
+            }
+        }
+
+    @Test
+    fun aCompleteFailureDoesNotReturnAPageOrContinuation() =
+        runTest {
+            val bad =
+                object : CacheableRemoteLoader<UiTimelineV2> {
+                    override val pagingKey = "bad"
+
+                    override suspend fun load(
+                        pageSize: Int,
+                        request: PagingRequest,
+                    ): PagingResult<UiTimelineV2> = error("offline")
+                }
+            for (policy in TimelineMergePolicy.entries) {
+                assertFailsWith<IllegalStateException> {
+                    MixedTimelinePageLoader(listOf(bad), policy).load(20, PagingRequest.Refresh)
+                }
             }
         }
 

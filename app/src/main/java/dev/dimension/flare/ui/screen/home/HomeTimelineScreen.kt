@@ -51,7 +51,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.VerticalDivider
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -63,11 +62,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -75,7 +72,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -592,7 +592,7 @@ internal fun TimelineItemContent(
         RegisterTabCallback(
             lazyListState = state.lazyListState,
             onScrollToTop = state.reading?.let { { it.showLatest() } },
-            canRefreshAtTop = state.reading?.hasNewContent != true,
+            canRefreshAtTop = state.reading?.isAtLatest != false,
             onRefresh = {
                 state.refreshSync()
                 changeLogState?.dismissChangeLog()
@@ -678,8 +678,12 @@ internal fun TimelineItemContent(
                     Glassify(
                         onClick = {
                             state.onNewTootsShown()
-                            if (state.reading != null) state.reading?.showLatest() else scope.launch {
-                                state.lazyListState.scrollToItem(0)
+                            if (state.reading != null) {
+                                state.reading?.showLatest()
+                            } else {
+                                scope.launch {
+                                    state.lazyListState.scrollToItem(0)
+                                }
                             }
                         },
                         shape = RoundedCornerShape(50),
@@ -698,14 +702,16 @@ internal fun TimelineItemContent(
                                 modifier = Modifier.size(16.dp),
                             )
                             val ctx = LocalContext.current
-                            val newTootsText = if (state.reading != null) {
-                                stringResource(R.string.home_timeline_view_latest)
-                            } else
-                                ctx.resources.getQuantityString(
-                                    R.plurals.home_timeline_new_toots,
-                                    state.newPostsCount,
-                                    state.newPostsCount,
-                                )
+                            val newTootsText =
+                                if (state.reading != null) {
+                                    stringResource(R.string.home_timeline_view_latest)
+                                } else {
+                                    ctx.resources.getQuantityString(
+                                        R.plurals.home_timeline_new_toots,
+                                        state.newPostsCount,
+                                        state.newPostsCount,
+                                    )
+                                }
                             Text(text = newTootsText)
                         }
                     }
@@ -723,7 +729,10 @@ private fun timelinePresenter() =
 
         val pagerState =
             state.tabState.map { tabs ->
-                val pager = rememberPagerState(initialPage = tabs.indexOfFirst { it.id == state.initialSelectedTabId }.coerceAtLeast(0)) { tabs.size }
+                val pager =
+                    rememberPagerState(
+                        initialPage = tabs.indexOfFirst { it.id == state.initialSelectedTabId }.coerceAtLeast(0),
+                    ) { tabs.size }
                 LaunchedEffect(pager, tabs) {
                     snapshotFlow { pager.settledPage }.collect { index ->
                         tabs.getOrNull(index)?.let { state.selectTab(it.id) }

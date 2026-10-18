@@ -345,6 +345,21 @@ class LiveHomeTimelineTest {
         val after = historyItems(kind)
         assertEquals("Pull refresh must preserve existing order", existing, after.filter { it in existing.toSet() })
         Log.i("HOME-ACCEPTANCE", "$kind-pull-refresh retained=${existing.size} added=${after.size - existing.size}")
+        assertTrue("The live feed must prepend content to exercise its new-content notice", after.first() != existing.first())
+        find(latest)
+        screenshot("$kind-new-content-notice-visible")
+        click(latest)
+        waitUntil {
+            instrumentation.uiAutomation.clearCache()
+            !device.hasObject(latest) && device.hasObject(By.res("timeline-item:${after.first()}"))
+        }
+        screenshot("$kind-new-content-notice-dismissed")
+        dragList(.75, .3)
+        SystemClock.sleep(1000)
+        instrumentation.uiAutomation.clearCache()
+        assertTrue("Scrolling away from the latest post must not announce it again", !device.hasObject(latest))
+        screenshot("$kind-no-notice-after-scrolling-away")
+        Log.i("HOME-ACCEPTANCE", "$kind-new-content-notice shown, clicked, dismissed, and stayed dismissed after scrolling")
     }
 
     private data class Batch(

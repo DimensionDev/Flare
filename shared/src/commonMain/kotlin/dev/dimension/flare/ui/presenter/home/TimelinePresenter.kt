@@ -355,10 +355,8 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
             } else {
                 requestedPosition
             }
-        val head by remember(activeReader) { activeReader?.head ?: flowOf(null) }.collectAsState(null)
-        val currentKey by remember(activeReader) {
-            activeReader?.current?.map { it?.itemKey }?.distinctUntilChanged() ?: flowOf(null)
-        }.collectAsState(null)
+        val hasNewContent by remember(activeReader) { activeReader?.hasNewContent ?: flowOf(false) }.collectAsState(false)
+        val isAtLatest by remember(activeReader) { activeReader?.isAtLatest ?: flowOf(true) }.collectAsState(true)
         val retry =
             remember(items) {
                 {
@@ -387,7 +385,8 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
                 activeReader?.let { value ->
                     object : TimelineReadingState {
                         override val restorePosition = restorePosition
-                        override val hasNewContent = head != null && currentKey != null && head != currentKey
+                        override val hasNewContent = hasNewContent
+                        override val isAtLatest = isAtLatest
 
                         override fun viewportChanged(
                             itemKey: String,

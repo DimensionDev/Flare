@@ -285,7 +285,17 @@ final class HomeTimelineInteractionTests: XCTestCase {
     }
 
     @MainActor
-    private func verifyPullRefresh(tab: String, name: String) throws {
+    func testLiveRecommendedNewContentNotice() throws {
+        try verifyPullRefresh(tab: ProcessInfo.processInfo.environment["FLARE_RANKED_TAB"] ?? "Featured", name: "ranked", verifyNotice: true)
+    }
+
+    @MainActor
+    func testLiveMixedNewContentNotice() throws {
+        try verifyPullRefresh(tab: ProcessInfo.processInfo.environment["FLARE_MIXED_TAB"] ?? "Mixed", name: "mixed", verifyNotice: true)
+    }
+
+    @MainActor
+    private func verifyPullRefresh(tab: String, name: String, verifyNotice: Bool = false) throws {
         continueAfterFailure = false
         let app = liveApp()
         launch(app)
@@ -302,6 +312,26 @@ final class HomeTimelineInteractionTests: XCTestCase {
         )
         Thread.sleep(forTimeInterval: 15)
         assertRestored(bookmark, in: app, name: "\(name)-after-pull-refresh")
+        if verifyNotice {
+            let notice = app.buttons["home-new-content"]
+            XCTAssertTrue(notice.waitForExistence(timeout: 15), "The live feed must prepend content to exercise the notice")
+            attachScreenshot(in: app, name: "\(name)-new-content-notice-visible")
+            notice.tap()
+            XCTAssertEqual(XCTWaiter.wait(for: [XCTNSPredicateExpectation(predicate: NSPredicate(format: "exists == false"), object: notice)], timeout: 10), .completed)
+            attachScreenshot(in: app, name: "\(name)-new-content-notice-dismissed")
+            _ = try scrollAndRemember(in: app, swipes: 1, name: "\(name)-scrolled-away-after-notice")
+            XCTAssertFalse(notice.exists, "Scrolling away from the latest post must not announce it again")
+            attachScreenshot(in: app, name: "\(name)-no-notice-after-scrolling-away")
+            print("HOME-NOTICE \(name): shown, clicked, dismissed, and stayed dismissed after scrolling")
+        }
+    }
+
+    @MainActor
+    private func attachScreenshot(in app: XCUIApplication, name: String) {
+        let attachment = XCTAttachment(screenshot: app.screenshot())
+        attachment.name = name
+        attachment.lifetime = .keepAlways
+        add(attachment)
     }
 
     @MainActor

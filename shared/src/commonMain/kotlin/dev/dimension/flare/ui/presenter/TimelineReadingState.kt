@@ -5,6 +5,7 @@ import dev.dimension.flare.ui.model.TimelineReadingPosition
 public interface TimelineReadingState {
     public val restorePosition: TimelineReadingPosition?
     public val hasNewContent: Boolean
+    public val isAtLatest: Boolean get() = !hasNewContent
 
     public fun viewportChanged(
         itemKey: String,

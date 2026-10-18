@@ -45,6 +45,7 @@ internal class MixedTimelinePageLoader(
             require(pages.size == sources.size) { "Mixed timeline sources changed" }
             val attempted = mutableSetOf<Int>()
             val failures = mutableListOf<Throwable>()
+            var continuationFailure: Throwable? = null
 
             suspend fun fetch(indices: List<Int>) {
                 indices
@@ -72,9 +73,22 @@ internal class MixedTimelinePageLoader(
                         attempted += index
                         if (result != null) {
                             pages[index] = SourcePage(true, result.nextKey, pages[index].pending + result.data)
-                            result.continuationFailure?.let(failures::add)
+                            result.continuationFailure?.let {
+                                failures += it
+                                continuationFailure = continuationFailure ?: it
+                            }
                         }
-                        error?.let(failures::add)
+                        if (error != null) {
+                            // A failed first page has no continuation. Retry it on
+                            // the next refresh, not through a fabricated gap. An
+                            // already issued continuation stays available for retry.
+                            if (!pages[index].started) {
+                                pages[index] = pages[index].copy(started = true)
+                            } else {
+                                continuationFailure = continuationFailure ?: error
+                            }
+                            failures += error
+                        }
                     }
             }
 
@@ -122,11 +136,15 @@ internal class MixedTimelinePageLoader(
                     }.distinctBy { it.stableItemKey }
                 pages.indices.forEach { pages[it] = pages[it].copy(pending = emptyList()) }
             }
-            if (selected.isEmpty() && failures.size == attempted.size && failures.isNotEmpty()) throw failures.first()
+            if (selected.isEmpty() && failures.size == attempted.size && failures.isNotEmpty() &&
+                (request is PagingRequest.Refresh || pages.any { it.canLoad })
+            ) {
+                throw failures.first()
+            }
             PagingResult(
                 data = selected,
                 nextKey = if (pages.any { it.canLoad || it.pending.isNotEmpty() }) Json.encodeToString(pages) else null,
-                continuationFailure = failures.firstOrNull(),
+                continuationFailure = continuationFailure,
             )
         }
 }

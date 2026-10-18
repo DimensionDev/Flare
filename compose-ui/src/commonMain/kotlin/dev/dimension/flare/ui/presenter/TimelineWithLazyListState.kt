@@ -1,6 +1,8 @@
 package dev.dimension.flare.ui.presenter
 
+import androidx.compose.foundation.gestures.ScrollScope
 import androidx.compose.foundation.interaction.DragInteraction
+import androidx.compose.foundation.lazy.staggeredgrid.LazyLayoutScrollScope
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.runtime.Composable
@@ -81,6 +83,13 @@ internal fun rememberTimelineWithLazyListState(
     }
     LaunchedEffect(lazyListState, baseState.readingState != null, density) {
         if (reading == null) return@LaunchedEffect
+        val anchorLayout =
+            LazyLayoutScrollScope(
+                lazyListState,
+                object : ScrollScope {
+                    override fun scrollBy(pixels: Float): Float = lazyListState.dispatchRawDelta(pixels)
+                },
+            )
         var previousSnapshot: TimelineSnapshot? = null
         var previousLeadingItems = leadingItems
         var previousViewport: TimelineViewport? = null
@@ -98,8 +107,20 @@ internal fun rememberTimelineWithLazyListState(
                 pendingAnchor?.let { anchor ->
                     val index = anchor.key?.let(currentSnapshot::readingIndexOf) ?: -1
                     val item = measuredLayout.visibleItemsInfo.firstOrNull { it.key == anchor.key }
-                    if (index < 0 || item == null) {
+                    if (index < 0) {
                         pendingAnchor = null
+                    } else if (item == null) {
+                        // The grid's nearest-key map can miss a large prepend or a
+                        // replacement Paging window even though the post still exists.
+                        restoringPosition = true
+                        try {
+                            // Correct layout synchronously, like the pixel delta below.
+                            // Starting a new scroll mutation would cancel an active drag/fling.
+                            anchorLayout.snapToItem(index + leadingItems, (-anchor.offset * density).roundToInt())
+                        } finally {
+                            restoringPosition = false
+                        }
+                        return@collect
                     } else if (item.index == index + leadingItems) {
                         pendingAnchor = null
                         // Key preservation can change staggered-grid lanes and lose the pixel offset.
@@ -115,16 +136,19 @@ internal fun rememberTimelineWithLazyListState(
                                 it.offset.y + it.size.height > layout.viewportStartOffset
                         }.minWithOrNull(compareBy({ it.offset.y }, { it.offset.x }))
                 val key = visible?.key as? String
-                if (visible != null && key != null && currentSnapshot.readingIndexOf(key) + leadingItems != visible.index) {
+                // A reload can briefly expose no rows. Keep the last real bookmark
+                // until a post is laid out instead of publishing an empty viewport.
+                if (key == null) return@collect
+                if (currentSnapshot.readingIndexOf(key) + leadingItems != visible.index) {
                     return@collect
                 }
                 val viewport =
                     TimelineViewport(
                         key,
-                        (visible?.offset?.y ?: 0).toDouble() / density,
+                        visible.offset.y.toDouble() / density,
                         lazyListState.firstVisibleItemIndex == 0 && lazyListState.firstVisibleItemScrollOffset == 0,
                         scrolling && !restoringPosition,
-                        visible?.index ?: -1,
+                        visible.index,
                     )
                 if (viewport != previousViewport) {
                     previousViewport = viewport

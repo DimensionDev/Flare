@@ -72,19 +72,39 @@ class TimelineNewPostsScrollTest {
 
     @Test fun readingAnchorSurvivesPrependDuringDrag() = checkPrepend(columns = 2, duringDrag = true)
 
+    @Test fun readingAnchorSurvivesPrependBeyondTheNearestKeyRange() = checkPrepend(columns = 1, prependCount = 1000)
+
+    @Test fun readingAnchorSurvivesLargeMultiColumnPrependWithHeader() =
+        checkPrepend(
+            columns = 2,
+            leadingHeader = true,
+            prependCount = 1000,
+        )
+
+    @Test fun readingAnchorSurvivesLargePrependDuringDrag() = checkPrepend(columns = 1, duringDrag = true, prependCount = 1000)
+
+    @Test fun readingAnchorSurvivesPagingWindowReplacement() = checkPrepend(columns = 1, windowAt = 600)
+
+    @Test fun readingAnchorSurvivesMultiColumnPagingWindowReplacement() = checkPrepend(columns = 2, leadingHeader = true, windowAt = 600)
+
+    @Test fun readingAnchorSurvivesAnEmptyReloadBeforeWindowReplacement() = checkPrepend(columns = 1, windowAt = 600, emptyReload = true)
+
     private fun checkPrepend(
         columns: Int,
         leadingHeader: Boolean = false,
         duringDrag: Boolean = false,
         dismissHeader: Boolean = false,
         prependCount: Int = 3,
+        windowAt: Int? = null,
+        emptyReload: Boolean = false,
     ) {
         var showHeader by mutableStateOf(leadingHeader)
-        val pages = MutableStateFlow(page(0..49))
+        val pages = MutableStateFlow(page(0..if (windowAt == null) 49 else 999))
         val scroll = LazyStaggeredGridState()
         lateinit var scope: CoroutineScope
         val reading = ReadingState(null)
         lateinit var state: TimelineWithLazyListState
+        var composedPosts = 0
         composeRule.setContent {
             scope = rememberCoroutineScope()
             val paging = pages.collectAsLazyPagingItems().toPagingState()
@@ -112,6 +132,7 @@ class TimelineNewPostsScrollTest {
                 }
                 paging.onSuccess {
                     items(itemCount, key = itemKey { it.stableItemKey }) { index ->
+                        SideEffect { composedPosts++ }
                         val number = peek(index)!!.stableItemKey.removePrefix("post-").toInt()
                         Box(Modifier.fillMaxWidth().height((100 + Math.floorMod(number, 5) * 47).dp))
                     }
@@ -119,7 +140,11 @@ class TimelineNewPostsScrollTest {
             }
         }
         composeRule.waitUntil(5_000) { reading.itemKey != null }
-        composeRule.runOnIdle { scope.launch { scroll.scrollBy(1250f) } }
+        composeRule.runOnIdle {
+            scope.launch {
+                if (windowAt == null) scroll.scrollBy(1250f) else scroll.scrollToItem(windowAt, 33)
+            }
+        }
         composeRule.waitForIdle()
         if (duringDrag) {
             composeRule.onNodeWithTag("prepend-grid").performTouchInput {
@@ -136,21 +161,38 @@ class TimelineNewPostsScrollTest {
                 scroll.layoutInfo.visibleItemsInfo
                     .single { it.key == anchor }
                     .offset.y
-            pages.value = page(-prependCount..49)
+            composedPosts = 0
+        }
+        if (emptyReload) {
+            composeRule.runOnIdle { pages.value = page(emptyList()) }
+            composeRule.waitUntil(5_000) { scroll.layoutInfo.totalItemsCount == 0 }
+            composeRule.runOnIdle { assertEquals(anchor, reading.itemKey, "Empty transitional layout must retain the bookmark") }
+        }
+        composeRule.runOnIdle {
+            val number = assertNotNull(anchor).removePrefix("post-").toInt()
+            pages.value = if (windowAt == null) page(-prependCount..49) else page((number - 10)..(number + 9))
             if (dismissHeader) showHeader = false
             if (duringDrag) {
                 scroll.dispatchRawDelta(10f)
                 offset -= 10
             }
         }
-        composeRule.waitUntil(5_000) { (state.listState as? PagingState.Success)?.itemCount == 50 + prependCount }
+        composeRule.waitUntil(5_000) {
+            (state.listState as? PagingState.Success)?.itemCount ==
+                if (windowAt == null) 50 + prependCount else 20
+        }
         composeRule.runOnIdle {
             val after =
-                scroll.layoutInfo.visibleItemsInfo
-                    .single { it.key == anchor }
-                    .offset.y
+                assertNotNull(
+                    scroll.layoutInfo.visibleItemsInfo.firstOrNull {
+                        it.key == anchor
+                    },
+                    "The reading post left the viewport",
+                ).offset.y
             assertEquals(offset, after, "The same post must remain at the same offset after prepend")
+            if (columns == 1) assertEquals(anchor, reading.itemKey, "Transient layout must not replace the reading bookmark")
             if (duringDrag) assertTrue(scroll.isScrollInProgress, "Refresh must not cancel the drag")
+            assertTrue(composedPosts < 80, "Restoration must not compose the intervening history: $composedPosts")
         }
         if (duringDrag) {
             composeRule.onNodeWithTag("prepend-grid").performTouchInput { moveBy(Offset(0f, -10f)) }
@@ -163,7 +205,7 @@ class TimelineNewPostsScrollTest {
                 )
             }
             composeRule.onNodeWithTag("prepend-grid").performTouchInput { up() }
-        } else {
+        } else if (windowAt == null) {
             composeRule.runOnIdle { reading.position = TimelineReadingPosition("post-${-prependCount}", 0.0, 2, latest = true) }
             composeRule.waitUntil(5_000) { reading.position == null && scroll.firstVisibleItemIndex == 0 }
             composeRule.runOnIdle { assertEquals(0, scroll.firstVisibleItemScrollOffset) }

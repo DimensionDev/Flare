@@ -116,6 +116,14 @@ final class TimelineCollectionView: UICollectionView {
     var isScrollInteractionActive: Bool { hasScrollGesture || isProgrammaticScrolling || isExternalScrollInteractionActive }
     var onProgrammaticScrollBegan: (() -> Void)?
     var onProgrammaticScrollEnded: (() -> Void)?
+    var onReadingViewportSettled: (() -> Void)?
+    private var readingUpdateDepth = 0
+    // Native display/scroll callbacks also fire while a snapshot is still at its
+    // temporary numeric offset. Only settled geometry may supply Paging hints.
+    var isReadingViewportStable: Bool {
+        readingUpdateDepth == 0 && !isRestoringReadingPosition && !isRevealingRefresh &&
+            !isAnimatingRefreshCollapse && (readingPosition == nil || hasScrollGesture)
+    }
     var preservesReadingPosition = true {
         didSet {
             if !preservesReadingPosition {
@@ -534,6 +542,11 @@ final class TimelineCollectionView: UICollectionView {
         preferringVisibleTop: Bool = false,
         _ updates: () -> Void
     ) {
+        readingUpdateDepth += 1
+        defer {
+            readingUpdateDepth -= 1
+            if isReadingViewportStable { onReadingViewportSettled?() }
+        }
         let viewportTop = readingViewportTop()
         var item = preservesReadingPosition && (hasScrollGesture || isAnimatingRefreshCollapse) &&
             !isProgrammaticScrolling && !isExternalScrollInteractionActive && !isRevealingRefresh
@@ -613,11 +626,13 @@ final class TimelineCollectionView: UICollectionView {
         let generation = readingPositionGeneration
         DispatchQueue.main.async { [weak self] in
             guard let self, self.readingPositionGeneration == generation,
+                  self.readingPosition != nil,
                   !self.isEndingRefresh, self.allowsReadingPositionRestoration,
                   self.isReadingLayoutReady?(indexPath) != false else { return }
             self.readingPosition = nil
             self.readingPositionWasAtTop = false
             if self.geometryReadingPosition?.itemID == nil { self.geometryReadingPosition = nil }
+            if self.isReadingViewportStable { self.onReadingViewportSettled?() }
         }
     }
 

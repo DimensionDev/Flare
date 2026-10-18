@@ -45,9 +45,14 @@ internal class TimelineReadingPagingSource(
         val key =
             (
                 if (params is LoadParams.Refresh) {
-                    session.state.value.position
-                        ?.itemKey
-                        ?.let(OffsetFromStartPagingKey::Around)
+                    // An explicit numeric window remains addressable (e.g. the head).
+                    // Rebuilding around a bookmark uses the latest trusted viewport.
+                    (
+                        session.state.value.position
+                            ?.itemKey ?: session.refreshAnchor.takeIf {
+                            params.key == null || params.key is OffsetFromStartPagingKey.Around
+                        }
+                    )?.let(OffsetFromStartPagingKey::Around)
                 } else {
                     null
                 }
@@ -88,8 +93,7 @@ internal class TimelineReadingPagingSource(
     }
 
     override fun getRefreshKey(state: PagingState<OffsetFromStartPagingKey, TimelinePageItem>): OffsetFromStartPagingKey? {
-        session.state.value.position
-            ?.let { return OffsetFromStartPagingKey.Around(it.itemKey) }
+        session.refreshAnchor?.let { return OffsetFromStartPagingKey.Around(it) }
         val item = state.anchorPosition?.let(state::closestItemToPosition)?.baseItem ?: return null
         val anchor =
             if (item.isReadingGap) {

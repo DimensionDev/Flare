@@ -34,6 +34,7 @@ internal class MixedRemoteMediator(
     private val readingHeadKey: String? = null,
     private val retryFailed: Boolean = false,
     private val refreshCache: RefreshCache? = null,
+    private val readingTimelineKey: String? = readingHeadKey,
 ) : CacheableRemoteLoader<UiTimelineV2>,
     ReportableRemoteLoader,
     SortIdProvider {
@@ -66,6 +67,7 @@ internal class MixedRemoteMediator(
         readingHeadKey: String? = null,
         retryFailed: Boolean = false,
         refreshCache: RefreshCache? = null,
+        readingTimelineKey: String? = readingHeadKey,
         isValid: suspend () -> Boolean,
     ): MixedRemoteMediator =
         MixedRemoteMediator(
@@ -77,6 +79,7 @@ internal class MixedRemoteMediator(
                         readingHeadKey?.let { "$it/source/${sourceKeys[index].length}:${sourceKeys[index]}/" },
                         retryFailed,
                         refreshCache,
+                        readingTimelineKey,
                         isValid,
                     )
                 } else {
@@ -90,6 +93,7 @@ internal class MixedRemoteMediator(
             readingHeadKey,
             retryFailed,
             refreshCache,
+            readingTimelineKey,
         )
 
     override suspend fun load(
@@ -197,7 +201,8 @@ internal class MixedRemoteMediator(
                     data = merge(responses),
                     hasConfirmedGap =
                         remaining.any {
-                            reading[it]?.refreshPending != true && reading[it]?.headPending != true && reading[it]?.hasConfirmedGap != false
+                            it.canConfirmGap && reading[it]?.refreshPending != true && reading[it]?.headPending != true &&
+                                reading[it]?.hasConfirmedGap != false
                         },
                     canContinue = remaining.any { reading[it]?.failed != true && reading[it]?.canContinue != false },
                     continuationError =
@@ -411,6 +416,19 @@ internal class MixedRemoteMediator(
                 pendingWrites.add { publishReadingHeads(readingHeadKey) }
             }
             failures.forEach { reportError?.invoke(it) }
+            // A mixed refresh can leave only old recommendations in staging after
+            // selecting its first page. Those rows are not a gap. Nested sources
+            // compare against the same published timeline, not their private cursors.
+            if (readingTimelineKey != null) {
+                timeSourceStates
+                    .flatMap { it.pending.map { item -> item.timeline.statusId } }
+                    .distinct()
+                    .filterNot { it in seenStatusIds }
+                    .chunked(500)
+                    .forEach { ids ->
+                        seenStatusIds += database.pagingTimelineDao().existingReadingStatusIds(readingTimelineKey, ids)
+                    }
+            }
             val hasMore =
                 timeSourceStates.any {
                     it.pending.any { item -> item.timeline.statusId !in seenStatusIds } || it.hasMore
@@ -422,7 +440,8 @@ internal class MixedRemoteMediator(
                     timeSourceStates.any { state ->
                         state.pending.any { it.timeline.statusId !in seenStatusIds } ||
                             (
-                                state.initialized && state.hasMore && state.reading?.headPending != true &&
+                                state.source.mediator.canConfirmGap && state.initialized && state.hasMore &&
+                                    state.reading?.headPending != true &&
                                     state.reading?.hasConfirmedGap != false
                             )
                     },
@@ -655,6 +674,11 @@ internal class MixedRemoteMediator(
             result: Result<PagingResult<UiTimelineV2>>,
         ) = mutex.withLock { results[source] = result }
     }
+
+    // A ranked cursor can return only already-seen recommendations. Keep loading it,
+    // but only ordered sources or a child's explicit gap evidence confirm an interval.
+    private val CacheableRemoteLoader<UiTimelineV2>.canConfirmGap: Boolean
+        get() = timelineOrder == TimelineOrder.Continuous || this is MixedRemoteMediator
 
     private data class SubRequest(
         val mediator: CacheableRemoteLoader<UiTimelineV2>,

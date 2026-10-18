@@ -168,13 +168,17 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         collectionView.layoutIfNeeded()
         DispatchQueue.main.async { [weak self] in
             guard let self, self.restoringSessionRequest == position.requestId else { return }
-            self.readingState?.positionRestored(requestId: position.requestId)
             self.reportReadingViewport()
         }
     }
 
     private func reportReadingViewport() {
         guard let readingState, isViewLoaded else { return }
+        guard canReportReadingViewport else {
+            needsReadingViewportReport = true
+            return
+        }
+        needsReadingViewportReport = false
         var key: String?
         var offset: CGFloat = 0
         if let anchor = collectionView.captureReadingViewport(matchingItem: {
@@ -183,10 +187,19 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
             key = String(anchor.id.dropFirst(2))
             offset = anchor.offset
         }
-        readingState.updateViewport(
-            itemKey: key, offset: Double(offset), atTop: effectiveContentOffsetY <= 1,
-            interacting: collectionView.isScrollInteractionActive || collectionView.isTracking
-        )
+        func updateViewport() {
+            readingState.updateViewport(
+                itemKey: key, offset: Double(offset), atTop: effectiveContentOffsetY <= 1,
+                interacting: collectionView.isScrollInteractionActive || collectionView.isTracking
+            )
+        }
+        if let request = restoringSessionRequest, readingState.position?.requestId == request {
+            // Publish the settled post before releasing the shared restoration anchor.
+            updateViewport()
+            readingState.positionRestored(requestId: request)
+        }
+        // Once restoration is acknowledged, this also resumes idle checkpointing.
+        updateViewport()
     }
 
     var refreshCallback: (() async -> Void)?
@@ -369,6 +382,11 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     private var pendingInput: Input?
     private var pendingReconfigureIDs = Set<String>()
     private var isApplyingSnapshot = false
+    private var needsVisiblePagingAccess = false
+    private var needsReadingViewportReport = false
+    private var canReportReadingViewport: Bool {
+        !isApplyingSnapshot && pendingReloadPosition == nil && collectionView.isReadingViewportStable
+    }
     private var isSubmissionScheduled = false
     private var autoplay: TimelineAutoplay!
     let mediaSelections = TimelineMediaSelections()
@@ -556,6 +574,11 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         }
         collectionView.isReadingLayoutReady = { [weak self] indexPath in
             self?.isReadingLayoutReady(at: indexPath) == true
+        }
+        collectionView.onReadingViewportSettled = { [weak self] in
+            guard let self else { return }
+            if self.needsVisiblePagingAccess { self.accessVisiblePagingItems() }
+            if self.needsReadingViewportReport { self.reportReadingViewport() }
         }
         collectionView.onProgrammaticScrollBegan = { [weak self] in
             guard let self else { return }
@@ -1257,10 +1280,11 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
                 guard let self else { return }
                 if let mediaAnchor { self.restoreScrollAnchorIfNeeded(mediaAnchor) }
                 self.restorePendingContentOffsetIfNeeded(finalize: !plan.isInitialLoading)
+                self.isApplyingSnapshot = false
                 self.accessVisiblePagingItems()
+                if self.needsReadingViewportReport { self.reportReadingViewport() }
                 self.updateAutoplayConfiguration()
                 if wasRefreshing && !plan.isRefreshing { self.schedulePostRefreshPoolCleanup() }
-                self.isApplyingSnapshot = false
                 if self.pendingInput != nil || !self.pendingReconfigureIDs.isEmpty { self.scheduleSubmission() }
             }
             guard structureChanged || !changedIDs.isEmpty else {
@@ -1828,6 +1852,11 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     // MARK: - UICollectionViewDelegate
 
     private func accessVisiblePagingItems() {
+        guard canReportReadingViewport else {
+            needsVisiblePagingAccess = true
+            return
+        }
+        needsVisiblePagingAccess = false
         for path in collectionView.indexPathsForVisibleItems {
             guard let id = dataSource.itemIdentifier(for: path), let index = itemIndexMap[id] else { continue }
             content.access(index)
@@ -1839,7 +1868,11 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         if let accessory = accessoryItemMap[itemID] {
             accessory.onVisibilityChanged?(true)
         } else {
-            if let index = itemIndexMap[itemID] { content.access(index) }
+            if canReportReadingViewport {
+                if let index = itemIndexMap[itemID] { content.access(index) }
+            } else {
+                needsVisiblePagingAccess = true
+            }
             autoplay.reconsider()
         }
     }

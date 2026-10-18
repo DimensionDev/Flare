@@ -693,6 +693,29 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         }
     }
 
+    func testRefreshWindowDoesNotReportTemporaryPostsToPagingOrReadingSession() async throws {
+        let fixture = await Fixture(posts: true)
+        let reading = ReadingState()
+        fixture.controller.readingState = reading
+        await fixture.scroll(0)
+        let expected = try fixture.position()
+        var accessed: [Int] = []
+        fixture.input.isRefreshing = true
+        await fixture.apply()
+        let ids = Array(200..<210) + Array(0..<10)
+        fixture.input.items = ids.map { .post(makeRow($0)) }
+        fixture.input.access = { accessed.append(ids[$0]) }
+        fixture.input.isRefreshing = false
+        await fixture.apply()
+        try fixture.assertPosition(expected)
+        XCTAssertEqual(reading.itemKey, "case-0")
+        XCTAssertFalse(accessed.isEmpty, "Restored visible rows must resume Paging access")
+        XCTAssertFalse(accessed.contains { (200..<209).contains($0) }, "Transient leading cells must not supply refresh anchors")
+        accessed.removeAll()
+        await fixture.scroll(fixture.controller.effectiveContentOffsetY + 500)
+        XCTAssertFalse(accessed.isEmpty)
+    }
+
     func testRapidInputsCommitOnlyTheLatestRowsAndPagingSource() async throws {
         let fixture = await Fixture(posts: true)
         var accessed: [Int] = []
@@ -868,6 +891,29 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         XCTAssertEqual(reading.offset, -37.25, accuracy: 0.5)
     }
 
+    func testSessionKeepsItsRequestedPostUntilNativeMeasurementSettles() async throws {
+        let fixture = await Fixture(posts: true)
+        let reading = ReadingState()
+        fixture.controller.readingState = reading
+        await fixture.settle()
+        XCTAssertEqual(reading.itemKey, "case-0")
+        let layoutReady = fixture.collection.isReadingLayoutReady
+        fixture.collection.isReadingLayoutReady = { _ in false }
+        reading.position = TimelineReadingPosition(itemKey: "case-20", offset: -37.25, requestId: 4, latest: false)
+        await fixture.settle()
+        XCTAssertTrue(fixture.collection.hasReadingPosition)
+        XCTAssertNotNil(reading.position, "A temporary native position must not release the shared restoration target")
+        XCTAssertEqual(reading.itemKey, "case-0")
+        XCTAssertTrue(reading.acknowledgedItemKeys.isEmpty)
+
+        fixture.collection.isReadingLayoutReady = layoutReady
+        fixture.collection.setNeedsLayout()
+        await fixture.settle()
+        XCTAssertNil(reading.position)
+        XCTAssertEqual(reading.acknowledgedItemKeys, ["case-20"], "Publish the settled viewport before acknowledging restoration")
+        try fixture.assertPosition(("t:case-20", -37.25))
+    }
+
     func testReadingViewportReportsDoNotReadTheWholeSnapshotAndPrependKeepsPosition() async throws {
         let fixture = await Fixture(posts: true)
         let reading = ReadingState()
@@ -960,12 +1006,16 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         var isRefreshing = false
         var itemKey: String?
         var offset: Double = 0
+        var acknowledgedItemKeys: [String?] = []
         func updateViewport(itemKey: String?, offset: Double, atTop: Bool, interacting: Bool) {
             self.itemKey = itemKey
             self.offset = offset
         }
         func positionRestored(requestId: Int64) {
-            if position?.requestId == requestId { position = nil }
+            if position?.requestId == requestId {
+                acknowledgedItemKeys.append(itemKey)
+                position = nil
+            }
         }
         func cancelRestoration() { position = nil }
         func savePosition() {}

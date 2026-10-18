@@ -90,6 +90,11 @@ internal class TimelineReadingSession(
     // Keep the atomic generation guard internal; gestures alone do not change the UI.
     val presentation = state.map { it.copy(interactionGeneration = 0) }.distinctUntilChanged()
     private val viewport = MutableStateFlow(ReadingViewport(null, 0.0, atTop = false, interacting = false))
+
+    // Paging access hints include prefetch and transient cells during native layout.
+    // They must not move the window away from the post the reader actually sees.
+    internal val refreshAnchor: String?
+        get() = state.value.position?.itemKey ?: viewport.value.itemKey
     private val mutex = Mutex()
     private val closed = MutableStateFlow(false)
     private var checkpoint: Job? = null

@@ -145,6 +145,192 @@ class TimelineReadingSessionTest : RobolectricTest() {
     }
 
     @Test
+    fun timeMixedRankedContinuationDoesNotCreateAGapAfterSourceFailure() = rankedContinuationGap(fails = true)
+
+    @Test
+    fun timeMixedRankedContinuationDoesNotCreateAGapWhenEverySourceSucceeds() = rankedContinuationGap(fails = false)
+
+    @Test
+    fun timeMixedNestedRankedContinuationDoesNotCreateAGap() = rankedContinuationGap(fails = true, nested = true)
+
+    private fun rankedContinuationGap(
+        fails: Boolean,
+        nested: Boolean = false,
+    ) = runTest {
+        val ranked = Loader("ranked", timelineOrder = TimelineOrder.Ranked).apply { response = timedPage(10..11) }
+        val other = Loader("other").apply { response = timedPage(0..1) }
+        val sources =
+            if (nested) {
+                listOf(MixedRemoteMediator(database, listOf(ranked), TimelineMergePolicy.TimePerPage), other)
+            } else {
+                listOf(ranked, other)
+            }
+        val mixed = MixedRemoteMediator(database, sources, TimelineMergePolicy.Time)
+        val repository = TimelineReadingRepository(database, backgroundScope)
+        var current = session(mixed, backgroundScope, repository = repository)
+        current.refresh(false, initial = true)
+        ranked.response = timedPage(10..12, "ranked-continuation")
+        if (fails) other.beforeLoad = { error("expired session") }
+        current.refresh(false)
+        assertTrue("12" in ids(current))
+        assertFalse("gap" in readingPage(current), "A recommended-feed cursor does not prove a missing interval")
+        current.close()
+        current = session(mixed, backgroundScope, repository = repository)
+        current.prepare()
+        assertFalse("gap" in readingPage(current), "The distinction must survive reopening")
+        val attempts = other.requests.size
+        ranked.response = timedPage(8..10)
+        repeat(3) { append(current) }
+        assertTrue("ranked-continuation" in appendCursors(ranked), "Hiding an unknown gap must retain its cursor")
+        assertTrue(ids(current).containsAll(listOf("8", "9")), "A ranked overlap must not discard later unseen rows")
+        if (fails) assertEquals(attempts, other.requests.size, "Automatic continuation must not retry expired credentials")
+    }
+
+    @Test
+    fun timeMixedAlreadyPublishedRankedBufferDoesNotConfirmAGap() = publishedRankedBuffer(nested = false)
+
+    @Test
+    fun timeMixedNestedPublishedBufferDoesNotConfirmAGap() = publishedRankedBuffer(nested = true)
+
+    private fun publishedRankedBuffer(nested: Boolean) =
+        runTest {
+            val first = Loader("first", timelineOrder = TimelineOrder.Ranked).apply { response = timedPage(0..39) }
+            val second = Loader("second", timelineOrder = TimelineOrder.Ranked).apply { response = timedPage(100..139) }
+            val failing = Loader("expired").apply { response = PagingResult() }
+            val healthy = listOf(first, second)
+            val sources =
+                if (nested) {
+                    listOf(MixedRemoteMediator(database, healthy, TimelineMergePolicy.Time), failing)
+                } else {
+                    healthy +
+                        failing
+                }
+            val current = session(MixedRemoteMediator(database, sources, TimelineMergePolicy.Time), backgroundScope)
+            current.refresh(false, initial = true)
+            repeat(3) { append(current) }
+            assertEquals(80, ids(current).size)
+            second.response = timedPage(101..140, "ranked-continuation")
+            failing.beforeLoad = { error("expired session") }
+            current.refresh(false)
+            assertEquals(81, ids(current).size)
+            assertFalse("gap" in readingPage(current, 100), "Buffered rows already in the reading timeline are not missing content")
+            assertEquals(2, second.requests.size, "Gap classification must not probe extra remote pages")
+        }
+
+    @Test
+    fun timeMixedBufferedPostsStillHaveAGapWithoutExtraNetworkRequests() =
+        runTest {
+            val ranked = Loader("ranked", timelineOrder = TimelineOrder.Ranked).apply { response = timedPage(0..39) }
+            val other = Loader("other").apply { response = PagingResult() }
+            val current = session(MixedRemoteMediator(database, listOf(ranked, other), TimelineMergePolicy.Time), backgroundScope)
+            current.refresh(false, initial = true)
+            ranked.response = timedPage(40..119)
+            other.beforeLoad = { error("expired session") }
+            current.refresh(false)
+            assertTrue("gap" in readingPage(current, 100), "Already fetched unseen rows are a real gap")
+            val requests = ranked.requests.size
+            val segment = database.timelineReadingSessionDao().segments(current.record.key).single()
+            assertNull(current.loadGap(segment.key, retryFailed = false))
+            assertEquals(requests, ranked.requests.size)
+            assertEquals((0..119).reversed().map(Int::toString), ids(current))
+            assertFalse("gap" in readingPage(current, 150))
+        }
+
+    @Test
+    fun timeMixedRefreshAndGapFillKeepTheReadingPostDespiteTemporaryPagingHints() =
+        runTest {
+            val ranked = Loader("ranked", timelineOrder = TimelineOrder.Ranked).apply { response = timedPage(0..39) }
+            val other = Loader("other").apply { response = PagingResult() }
+            val current = session(MixedRemoteMediator(database, listOf(ranked, other), TimelineMergePolicy.Time), backgroundScope)
+            current.refresh(false, initial = true)
+            val sources = mutableListOf<TimelineReadingPagingSource>()
+
+            fun source() = TimelineReadingPagingSource(database, current).also { sources += it }
+            val config = dev.dimension.flare.data.datasource.microblog.offsetPagingConfig
+            try {
+                val initial = source()
+                val oldPage = initial.load(PagingSource.LoadParams.Refresh(null, 20, false)) as PagingSource.LoadResult.Page
+                val anchor =
+                    oldPage.data
+                        .first()
+                        .baseItem.stableItemKey
+                current.updateViewport(ReadingViewport(anchor, -12.5, true, false))
+                ranked.response = timedPage(40..119)
+                other.beforeLoad = { error("expired session") }
+                current.refresh(false)
+                val first = source()
+                val firstKey = initial.getRefreshKey(PagingState(listOf(oldPage), 2, config, 0))
+                assertEquals(OffsetFromStartPagingKey.Around(anchor), firstKey)
+                val firstPage = first.load(PagingSource.LoadParams.Refresh(firstKey, 20, false)) as PagingSource.LoadResult.Page
+                // UIKit/Compose can access a temporary leading cell before restoring the bookmark.
+                assertTrue(
+                    firstPage.data
+                        .first()
+                        .baseItem.stableItemKey != anchor,
+                )
+                val nextKey = first.getRefreshKey(PagingState(listOf(firstPage), 1, config, 0))
+                val segment = database.timelineReadingSessionDao().segments(current.record.key).single()
+                current.loadGap(segment.key, retryFailed = false)
+                val second = source()
+                val secondPage = second.load(PagingSource.LoadParams.Refresh(nextKey, 20, false)) as PagingSource.LoadResult.Page
+                assertTrue(
+                    secondPage.data.any { it.baseItem.stableItemKey == anchor },
+                    "The reading post must remain in the replacement window",
+                )
+                assertEquals(OffsetFromStartPagingKey.Around(anchor), nextKey)
+
+                // Real user movement must immediately replace the retained anchor.
+                val moved =
+                    secondPage.data
+                        .last()
+                        .baseItem.stableItemKey
+                current.updateViewport(ReadingViewport(moved, -5.0, false, true))
+                assertEquals(OffsetFromStartPagingKey.Around(moved), second.getRefreshKey(PagingState(listOf(secondPage), 0, config, 0)))
+                current.updateViewport(ReadingViewport(moved, -5.0, false, false))
+                current.showLatest()
+                val requested = assertNotNull(current.state.value.position).itemKey
+                assertEquals(
+                    OffsetFromStartPagingKey.Around(requested),
+                    second.getRefreshKey(PagingState(listOf(secondPage), 0, config, 0)),
+                )
+            } finally {
+                sources.forEach { it.invalidate() }
+            }
+        }
+
+    @Test
+    fun timeMixedPagerKeepsReadingPostThroughTransientAccessAndBufferedGapFill() =
+        runTest {
+            val ranked = Loader("ranked", timelineOrder = TimelineOrder.Ranked).apply { response = timedPage(0..39) }
+            val other = Loader("other").apply { response = PagingResult() }
+            val current = session(MixedRemoteMediator(database, listOf(ranked, other), TimelineMergePolicy.Time), backgroundScope)
+            current.refresh(false, initial = true)
+            val windows = kotlinx.coroutines.flow.MutableStateFlow<List<List<String>>>(emptyList())
+            val presenter =
+                object : PagingDataPresenter<TimelinePageItem>(coroutineContext) {
+                    override suspend fun presentPagingDataEvent(event: PagingDataEvent<TimelinePageItem>) {
+                        if (event is PagingDataEvent.Refresh) {
+                            windows.value += listOf(snapshot().items.map { it.baseItem.stableItemKey })
+                            if (size > 1) get(1) // A native temporary cell, not the reading viewport.
+                        }
+                    }
+                }
+            backgroundScope.launch { current.pagingData.collectLatest(presenter::collectFrom) }
+            val anchor = windows.first { it.isNotEmpty() }.first().first()
+            // Keep auto-fill out of the schedule so both invalidations are driven below.
+            current.updateViewport(ReadingViewport(anchor, -12.5, true, true))
+            ranked.response = timedPage(40..119)
+            other.beforeLoad = { error("expired session") }
+            current.refresh(false)
+            windows.first { it.size >= 2 }
+            val before = windows.value.size
+            val segment = database.timelineReadingSessionDao().segments(current.record.key).single()
+            assertNull(current.loadGap(segment.key, retryFailed = false))
+            windows.first { it.size > before }
+            assertTrue(windows.value.all { anchor in it }, "Every Pager generation must retain the reading post: ${windows.value}")
+        }
+
+    @Test
     fun timeMixedRefreshFailureAloneDoesNotCreateAContentGap() =
         runTest {
             val healthy = Loader("healthy").apply { response = timedPage(10..11, "old-healthy") }
@@ -685,7 +871,7 @@ class TimelineReadingSessionTest : RobolectricTest() {
         }
 
     @Test
-    fun timeMixedRankedSourceDoesNotCloseGapAtAnOverlappingPost() =
+    fun timeMixedRankedSourceRetainsUnknownContinuationAtAnOverlappingPost() =
         runTest {
             val loader = Loader(timelineOrder = TimelineOrder.Ranked).apply { response = timedPage(0..1, "old") }
             val session = session(MixedRemoteMediator(database, listOf(loader), TimelineMergePolicy.Time), backgroundScope)
@@ -700,7 +886,7 @@ class TimelineReadingSessionTest : RobolectricTest() {
                     .key
             loader.response = timedPage(0..1, "reordered")
             assertNull(session.loadGap(gap))
-            assertTrue("gap" in readingPage(session))
+            assertFalse("gap" in readingPage(session), "A ranked cursor alone cannot confirm a missing interval")
             loader.response = timedPage(50..51)
             assertNull(session.loadGap(gap))
             assertFalse("gap" in readingPage(session))
@@ -715,7 +901,7 @@ class TimelineReadingSessionTest : RobolectricTest() {
             session.refresh(false, initial = true)
             loader.response = timedPage(100..101, "page-2")
             session.refresh(false)
-            assertEquals(listOf("101", "100", "gap", "1", "0"), readingPage(session))
+            assertEquals(listOf("101", "100", "1", "0"), readingPage(session))
             val gap =
                 database
                     .timelineReadingSessionDao()

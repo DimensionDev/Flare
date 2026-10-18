@@ -933,6 +933,61 @@ final class TimelineCollectionViewTests: XCTestCase {
         let distance: CGFloat
     }
 
+    func testIdlePagingWindowReplacementDoesNotPublishTemporaryViewportHints() async throws {
+        try await checkPagingWindowHints(pullToRefresh: false)
+    }
+
+    func testTopPullRefreshPublishesOnlyTheRestoredPagingViewport() async throws {
+        try await checkPagingWindowHints(pullToRefresh: true)
+    }
+
+    private func checkPagingWindowHints(pullToRefresh: Bool) async throws {
+        let fixture = Fixture(width: 390, columns: 1)
+        let view = fixture.collectionView
+        let window = fixture.showInWindow()
+        defer { window.isHidden = true }
+        view.setTopContentInset(52)
+        fixture.scroll(to: -52)
+        let before = try fixture.readingPosition()
+        if pullToRefresh {
+            view.refreshControl = UIRefreshControl()
+            view.beginExternalScrollInteraction()
+            view.setContentOffset(CGPoint(x: 0, y: -180), animated: false)
+            view.refreshControl?.beginRefreshing()
+            view.beginRefreshing(revealingIndicator: false)
+            try await Task.sleep(for: .milliseconds(100))
+            view.setContentOffset(CGPoint(x: 0, y: -view.adjustedContentInset.top), animated: false)
+            view.endScrollInteraction()
+        }
+        fixture.recordPagingAccess = true
+        fixture.acceptedPagingIDs.removeAll()
+        // Successive generations can arrive before the old bookmark has been laid out.
+        for start in [200, 300] {
+            var snapshot = NSDiffableDataSourceSnapshot<Int, String>()
+            snapshot.appendSections([0])
+            snapshot.appendItems((start..<start + 10).map(String.init) + (0..<10).map(String.init))
+            view.prepareForSnapshotChange()
+            view.performUpdatesPreservingReadingPosition(keepingItemIDs: Set(snapshot.itemIdentifiers)) {
+                fixture.dataSource.apply(snapshot, animatingDifferences: false)
+            }
+        }
+        XCTAssertTrue(fixture.acceptedPagingIDs.isEmpty, "Temporary cells must not update Paging before restoration")
+        if pullToRefresh { view.endRefreshing() }
+        for _ in 0..<100 {
+            fixture.settle()
+            if view.isReadingViewportStable && !fixture.acceptedPagingIDs.isEmpty { break }
+            try await Task.sleep(for: .milliseconds(10))
+        }
+        XCTAssertTrue(view.isReadingViewportStable)
+        try fixture.assertPosition(before)
+        XCTAssertFalse(fixture.acceptedPagingIDs.isEmpty, "Settled visible rows must resume prefetch")
+        XCTAssertFalse(fixture.acceptedPagingIDs.contains { (200..<209).contains(Int($0)!) || (300..<309).contains(Int($0)!) })
+        // Ordinary scrolling must continue producing access hints after restoration.
+        fixture.acceptedPagingIDs.removeAll()
+        fixture.scroll(to: view.contentOffset.y + 350)
+        XCTAssertFalse(fixture.acceptedPagingIDs.isEmpty)
+    }
+
     private final class Fixture: NSObject, @preconcurrency CHTCollectionViewDelegateWaterfallLayout {
         let collectionView: TimelineCollectionView
         var dataSource: UICollectionViewDiffableDataSource<Int, String>!
@@ -941,6 +996,8 @@ final class TimelineCollectionViewTests: XCTestCase {
         var heightOverride: ((Int, CGFloat) -> CGFloat)?
         var configuredIDs: [String] = []
         var sizeRequests = 0
+        var recordPagingAccess = false
+        var acceptedPagingIDs: [String] = []
 
         init(width: CGFloat, columns: Int, layout: UICollectionViewLayout? = nil) {
             self.columns = columns
@@ -961,6 +1018,12 @@ final class TimelineCollectionViewTests: XCTestCase {
             collectionView.readingItemIDs = { [weak self] in self?.dataSource.snapshot().itemIdentifiers ?? [] }
             collectionView.readingItemID = { [weak self] in self?.dataSource.itemIdentifier(for: $0) }
             collectionView.readingIndexPath = { [weak self] in self?.dataSource.indexPath(for: $0) }
+            collectionView.onReadingViewportSettled = { [weak self] in
+                guard let self, self.recordPagingAccess, self.collectionView.isReadingViewportStable else { return }
+                self.acceptedPagingIDs += self.collectionView.indexPathsForVisibleItems.compactMap {
+                    self.dataSource.itemIdentifier(for: $0)
+                }
+            }
             var snapshot = NSDiffableDataSourceSnapshot<Int, String>()
             snapshot.appendSections([0])
             snapshot.appendItems((0..<120).map(String.init))
@@ -1034,6 +1097,12 @@ final class TimelineCollectionViewTests: XCTestCase {
 
         func scrollViewDidEndScrollingAnimation(_ scrollView: UIScrollView) {
             collectionView.endProgrammaticScrolling()
+        }
+
+        func collectionView(_ view: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt path: IndexPath) {
+            if recordPagingAccess, collectionView.isReadingViewportStable, let id = dataSource.itemIdentifier(for: path) {
+                acceptedPagingIDs.append(id)
+            }
         }
 
         static func layout(columns: Int) -> UICollectionViewLayout {

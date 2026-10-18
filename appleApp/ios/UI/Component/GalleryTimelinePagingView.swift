@@ -83,27 +83,31 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
         ].joined(separator: ":")
     }
 
-    private var currentData: PagingState<UiTimelineV2>?
-    private var currentSuccess: PagingStateSuccess<UiTimelineV2>?
+    private var pendingContent: TimelineContent?
+    private var needsAppearanceReconfigure = false
+    private var currentData: TimelineContent?
+    private var currentSuccess: TimelineContent? {
+        currentData?.state == .loaded ? currentData : nil
+    }
     private var itemIndexMap: [String: Int] = [:]
     private var lastAppliedSignature: SnapshotSignature?
     private var lastRenderHashMap: [String: Int32] = [:]
     private var lastLoadedItemIDs: Set<String> = []
-    private var lastProcessedDataRef: AnyObject?
-    private var lastProcessedUpdateSignature: UpdateSignature?
 
-    private var gapBookmark: (key: String, hash: Int32, anchor: ScrollAnchor)?
+    // Filling a gap can replace the local paging window several times. Keep its
+    // predecessor until the reader moves, even while the gap is outside the window.
+    private var gapScrollAnchor: ScrollAnchor?
 
     func willLoadTimelineGap(_ message: UiTimelineV2.Message) {
         guard let success = currentSuccess,
-              let gapIndex = (0..<Int(success.itemCount)).first(where: { success.peek(index: Int32($0))?.stableItemKey == message.stableItemKey }),
-              let index = (0..<gapIndex).reversed().first(where: { success.peek(index: Int32($0))?.isPaginationGap == false }),
-              let item = success.peek(index: Int32(index)),
+              let gapIndex = (0..<success.items.count).first(where: { success.post(at: Int32($0))?.stableItemKey == message.stableItemKey }),
+              let index = (0..<gapIndex).reversed().first(where: { success.post(at: Int32($0))?.isPaginationGap == false }),
+              let item = success.post(at: Int32(index)),
               let id = itemIndexMap.first(where: { $0.value == index })?.key,
               let path = dataSource.indexPath(for: id),
               let frame = collectionView.layoutAttributesForItem(at: path)?.frame else { return }
         let offset = frame.minY - effectiveViewportTop
-        gapBookmark = (message.stableItemKey, message.renderHash, ScrollAnchor(itemID: id, distanceFromViewportTop: offset))
+        gapScrollAnchor = ScrollAnchor(itemID: id, distanceFromViewportTop: offset, keepVisible: false)
         reading?.positionChanged(itemKey: item.stableItemKey, offset: offset)
     }
 
@@ -113,12 +117,14 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
 
     private func restoreBookmarkIfReady() {
         guard let target = reading?.restorePosition, target !== restoredBookmark,
-              isViewLoaded, allowsScrollAnchorRestoration,
+              isViewLoaded, !isApplyingSnapshot, !isRestoringScrollAnchor, pendingScrollAnchor == nil, allowsScrollAnchorRestoration,
               let success = currentSuccess,
               let id = itemIndexMap.keys.first(where: { id in
                   guard let index = itemIndexMap[id] else { return false }
-                  return success.peek(index: Int32(index))?.stableItemKey == target.itemKey
+                  return success.post(at: Int32(index))?.stableItemKey == target.itemKey
               }) else { return }
+        gapScrollAnchor = nil
+        collectionView.interruptRefreshForScrolling()
         if restoreScrollAnchorIfNeeded(ScrollAnchor(itemID: id, distanceFromViewportTop: target.offset)) {
             restoredBookmark = target
             DispatchQueue.main.async { [weak self] in
@@ -132,7 +138,7 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
         guard didScrollForReading, reading?.restorePosition == nil,
               isViewLoaded, view.window?.isKeyWindow == true, !isRestoringScrollAnchor,
               let anchor = captureScrollAnchor(requireIdle: false), let index = itemIndexMap[anchor.itemID],
-              let item = currentSuccess?.peek(index: Int32(index)), !item.isPaginationGap else { return }
+              let item = currentSuccess?.post(at: Int32(index)), !item.isPaginationGap else { return }
         reading?.positionChanged(itemKey: item.stableItemKey, offset: anchor.distanceFromViewportTop)
     }
 
@@ -151,13 +157,12 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
             guard oldValue != appearance else {
                 return
             }
-            removeAllHeightCache()
-            collectionView.collectionViewLayout.invalidateLayout()
-            reconfigureVisibleCells()
+            needsAppearanceReconfigure = true
+            if let content = pendingContent ?? currentData { submit(content) }
         }
     }
 
-    private var collectionView: UICollectionView!
+    private var collectionView: TimelineCollectionView!
     private var dataSource: UICollectionViewDiffableDataSource<Int, String>!
     private let refreshControl = UIRefreshControl()
     private let sizingPostTile = GalleryPostTileUIView()
@@ -168,6 +173,7 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
     private var isUserRefreshing = false
     private var hasCompletedInitialRefreshCycle = false
     private var pendingScrollAnchor: ScrollAnchor?
+    private var isApplyingSnapshot = false
     private var isRestoringScrollAnchor = false
     private var scrollingState = IsScrollingState()
     private var lastReportedIsAtTop: Bool?
@@ -184,22 +190,10 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
         let loadedItemIDs: Set<String>
     }
 
-    private struct ScrollAnchor {
+    private struct ScrollAnchor: Equatable {
         let itemID: String
         let distanceFromViewportTop: CGFloat
-    }
-
-    private enum UpdateSignature: Equatable {
-        case loading
-        case error
-        case empty
-        case success(
-            itemIDs: [String],
-            renderHashMap: [String: Int32],
-            loadedItemIDs: Set<String>,
-            isRefreshing: Bool,
-            footerIDs: [String]
-        )
+        var keepVisible = true
     }
 
     override func viewDidLoad() {
@@ -213,8 +207,6 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
         syncRefreshControl()
         if let data = currentData {
             applySnapshot(data: data)
-            lastProcessedDataRef = data as AnyObject
-            lastProcessedUpdateSignature = updateSignature(for: data)
         }
     }
 
@@ -222,6 +214,7 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
         super.viewDidLayoutSubviews()
         updateColumnCount()
         restoreBookmarkIfReady()
+        scheduleVisiblePagingAccess()
         reportIsAtTop()
     }
 
@@ -235,7 +228,8 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
         layout.sectionInset = UIEdgeInsets(top: 16, left: 16, bottom: 16, right: 16)
         layout.itemRenderDirection = .shortestFirst
 
-        collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        collectionView = TimelineCollectionView(frame: .zero, collectionViewLayout: layout)
+        collectionView.accessibilityIdentifier = "timeline-list"
         collectionView.backgroundColor = .systemGroupedBackground
         collectionView.delegate = self
         collectionView.translatesAutoresizingMaskIntoConstraints = false
@@ -258,6 +252,17 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
             collectionView: collectionView
         ) { (collectionView: UICollectionView, indexPath: IndexPath, itemID: String) -> UICollectionViewCell? in
             collectionView.dequeueConfiguredReusableCell(using: cellReg, for: indexPath, item: itemID)
+        }
+        collectionView.readingItemID = { [weak self] path in
+            guard let self, let id = dataSource.itemIdentifier(for: path), isGalleryDataItemID(id) else { return nil }
+            return id
+        }
+        collectionView.isReadingLayoutReady = { [weak self] _ in self?.isApplyingSnapshot == false }
+        collectionView.onReadingLayoutChanged = { [weak self] in self?.scheduleVisiblePagingAccess() }
+        collectionView.readingIndexPath = { [weak self] id in self?.dataSource.indexPath(for: id) }
+        collectionView.readingItemIDs = { [weak self] in
+            guard let self else { return [] }
+            return dataSource.snapshot().itemIdentifiers.filter(isGalleryDataItemID)
         }
     }
 
@@ -283,12 +288,15 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
     // MARK: - Cell configuration
 
     private func configureCell(_ cell: GalleryTimelineCollectionViewCell, itemID: String) {
+        cell.accessibilityIdentifier = itemIndexMap[itemID].flatMap {
+            currentSuccess?.post(at: Int32($0)).map { "timeline-item:\($0.stableItemKey)" }
+        }
         if itemID.hasPrefix(Self.itemPrefix) {
             if let index = itemIndexMap[itemID],
                let success = currentSuccess,
                index >= 0,
-               index < Int(success.itemCount),
-               let item = success.peek(index: Int32(index)) {
+               index < success.items.count,
+               let item = success.post(at: Int32(index)) {
                 cell.configureTile(item: item, appearance: appearance, openURL: openURL)
             } else {
                 cell.configurePlaceholder()
@@ -297,146 +305,98 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
             cell.configurePlaceholder()
         } else if itemID == Self.emptyID {
             cell.setHostedView(ListEmptyUIView())
-        } else if itemID == Self.errorID, let data = currentData,
-                  case .error(let errorState) = onEnum(of: data) {
+        } else if itemID == Self.errorID, let errorState = currentData?.failure {
             let view = ListErrorUIView()
             view.onOpenURL = openURL
-            view.configure(error: errorState.error) { errorState.onRetry() }
+            view.configure(error: errorState.error) { errorState.retry() }
             cell.setHostedView(view)
         } else if itemID == Self.footerLoadingID {
             cell.setHostedView(GalleryLoadingFooterUIView())
-        } else if itemID == Self.footerErrorID, let success = currentSuccess,
-                  case .error(let error) = onEnum(of: success.appendState) {
+        } else if itemID == Self.footerErrorID, let error = currentData?.appendFailure {
             let view = ListErrorUIView()
             view.onOpenURL = openURL
-            view.configure(error: error.error) { success.retry() }
+            view.configure(error: error.error) { error.retry() }
             cell.setHostedView(view)
         } else if itemID == Self.footerEndID {
             cell.setHostedView(GalleryEndFooterUIView())
         }
     }
 
-    private func reconfigureVisibleCells() {
-        let visibleIDs = collectionView.indexPathsForVisibleItems.compactMap {
-            dataSource.itemIdentifier(for: $0)
-        }
-        guard !visibleIDs.isEmpty else { return }
-        var snapshot = dataSource.snapshot()
-        snapshot.reconfigureItems(visibleIDs)
-        dataSource.apply(snapshot, animatingDifferences: false)
-    }
-
     // MARK: - Refresh
 
     @objc private func handleRefresh() {
         isUserRefreshing = true
+        collectionView.beginRefreshing(revealingIndicator: false)
         Task { @MainActor in
             if let refreshCallback {
                 await refreshCallback()
             }
             isUserRefreshing = false
             if let data = currentData, !pagingIsRefreshing(data) {
-                refreshControl.endRefreshing()
+                collectionView.endRefreshing()
             }
         }
     }
 
-    private func pagingIsRefreshing(_ data: PagingState<UiTimelineV2>) -> Bool {
-        data.isRefreshing_
+    private func pagingIsRefreshing(_ data: TimelineContent) -> Bool {
+        data.isRefreshing || data.state == .loading
     }
 
     private func syncRefreshControl() {
         guard let data = currentData else { return }
         let isRefreshing = pagingIsRefreshing(data)
         if !isRefreshing {
-            switch onEnum(of: data) {
-            case .loading:
-                break
-            case .success, .empty, .error:
-                hasCompletedInitialRefreshCycle = true
-            }
+            if data.state != .loading && data.state != .unbound { hasCompletedInitialRefreshCycle = true }
         }
 
         if isRefreshing {
             guard !suppressInitialRefreshIndicator || hasCompletedInitialRefreshCycle || isUserRefreshing else {
                 if refreshControl.isRefreshing {
-                    refreshControl.endRefreshing()
+                    collectionView.cancelRefresh()
                 }
                 return
             }
             if !refreshControl.isRefreshing, !isUserRefreshing {
-                refreshControl.beginRefreshing()
+                collectionView.beginRefreshing(revealingIndicator: false)
             }
         } else if !isUserRefreshing, refreshControl.isRefreshing {
-            refreshControl.endRefreshing()
+            collectionView.endRefreshing()
         }
     }
 
     // MARK: - State
 
     func update(data: PagingState<UiTimelineV2>) {
-        let dataRef = data as AnyObject
-        let newUpdateSignature = updateSignature(for: data)
+        submit(.timeline(data, header: nil, key: nil))
+    }
 
-        currentData = data
-        if case .success(let success) = onEnum(of: data) {
-            currentSuccess = success
-        } else {
-            currentSuccess = nil
-        }
-        guard isViewLoaded else { return }
-
-        syncRefreshControl()
-
-        if let lastRef = lastProcessedDataRef,
-           lastRef === dataRef,
-           lastProcessedUpdateSignature == newUpdateSignature,
-           lastAppliedSignature != nil {
+    func submit(_ content: TimelineContent) {
+        guard !isViewLoaded || (allowsScrollAnchorRestoration && !isApplyingSnapshot) else {
+            pendingContent = content
             return
         }
-
-        applySnapshot(data: data)
-        finishGapIfReady()
-        lastProcessedDataRef = dataRef
-        lastProcessedUpdateSignature = newUpdateSignature
+        pendingContent = nil
+        currentData = content
+        guard isViewLoaded else { return }
+        syncRefreshControl()
+        applySnapshot(data: content)
     }
 
-    private func finishGapIfReady() {
-        if let gap = gapBookmark, let success = currentSuccess {
-            let message = (0..<Int(success.itemCount)).compactMap { success.peek(index: Int32($0)) as? UiTimelineV2.Message }.first { $0.stableItemKey == gap.key }
-            let loading = (message?.type as? UiTimelineV2.MessageTypeLocalized)?.data == .loadingMissingPosts
-            if message == nil || (!loading && message?.renderHash != gap.hash) { gapBookmark = nil }
-        }
+    private func finishScrollInteraction() {
+        scrollingState.isScrolling = false
+        collectionView.endScrollInteraction()
+        saveReadingBookmark()
+        if let pendingContent { submit(pendingContent) }
     }
 
-    private func updateSignature(for data: PagingState<UiTimelineV2>) -> UpdateSignature {
-        switch onEnum(of: data) {
-        case .loading:
-            return .loading
-        case .error:
-            return .error
-        case .empty:
-            return .empty
-        case .success(let success):
-            let itemState = makeItemSnapshotState(for: success)
-            return .success(
-                itemIDs: itemState.itemIDs,
-                renderHashMap: itemState.renderHashMap,
-                loadedItemIDs: itemState.loadedItemIDs,
-                isRefreshing: success.isRefreshing,
-                footerIDs: footerItemIDs(for: success)
-            )
-        }
-    }
-
-    private func makeItemSnapshotState(for success: PagingStateSuccess<UiTimelineV2>) -> ItemSnapshotState {
-        let itemCount = Int(success.itemCount)
+    private func makeItemSnapshotState(for success: TimelineContent) -> ItemSnapshotState {
+        let itemCount = success.items.count
         var loadedIDsByIndex: [Int: String] = [:]
         var loadedRenderHashByItemID: [String: Int32] = [:]
         var loadedItemIDs = Set<String>()
 
         for i in 0..<itemCount {
-            guard let peeked = success.peek(index: Int32(i)) else {
+            guard let peeked = success.post(at: Int32(i)) else {
                 continue
             }
             let itemKey = Self.itemIdentityKey(for: peeked)
@@ -472,7 +432,7 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
     }
 
     private var effectiveViewportTop: CGFloat {
-        collectionView.contentOffset.y + collectionView.adjustedContentInset.top
+        collectionView.contentOffset.y + collectionView.restingAdjustedTopInset
     }
 
     private func reportIsAtTop() {
@@ -489,15 +449,6 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
             !scrollingState.isScrolling
     }
 
-    private func clampedContentOffsetY(_ offsetY: CGFloat) -> CGFloat {
-        let minY = -collectionView.adjustedContentInset.top
-        let maxY = max(
-            minY,
-            collectionView.contentSize.height - collectionView.bounds.height + collectionView.adjustedContentInset.bottom
-        )
-        return min(max(offsetY, minY), maxY)
-    }
-
     private func isGalleryDataItemID(_ itemID: String) -> Bool {
         itemID.hasPrefix(Self.itemPrefix) && !itemID.hasPrefix(Self.itemPrefix + "timeline-gap:")
     }
@@ -506,65 +457,42 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
         guard isViewLoaded,
               currentSuccess != nil,
               !requireIdle || allowsScrollAnchorRestoration,
-              collectionView.bounds.height > 1 else {
+              let position = collectionView.captureViewportPosition() else {
             return nil
         }
+        return ScrollAnchor(itemID: position.itemID, distanceFromViewportTop: position.offset)
+    }
 
-        let viewportTop = effectiveViewportTop
-        let viewportBottom = collectionView.contentOffset.y + collectionView.bounds.height - collectionView.adjustedContentInset.bottom
-        return collectionView.indexPathsForVisibleItems
-            .compactMap { indexPath -> (itemID: String, frame: CGRect)? in
-                guard let itemID = dataSource.itemIdentifier(for: indexPath),
-                      isGalleryDataItemID(itemID) else {
-                    return nil
-                }
-                let frame = collectionView.layoutAttributesForItem(at: indexPath)?.frame
-                    ?? collectionView.cellForItem(at: indexPath)?.frame
-                    ?? .null
-                guard !frame.isNull,
-                      frame.maxY > viewportTop,
-                      frame.minY < viewportBottom else {
-                    return nil
-                }
-                return (itemID, frame)
-            }
-            .min { lhs, rhs in
-                if abs(lhs.frame.minY - rhs.frame.minY) > 0.5 {
-                    return lhs.frame.minY < rhs.frame.minY
-                }
-                return lhs.frame.minX < rhs.frame.minX
-            }
-            .map {
-                ScrollAnchor(
-                    itemID: $0.itemID,
-                    distanceFromViewportTop: $0.frame.minY - viewportTop
-                )
-            }
+    private func captureSnapshotAnchor(keepingItemIDs: Set<String>) -> ScrollAnchor? {
+        collectionView.prepareForSnapshotChange()
+        if case .item(let id, let offset, _, let keepVisible) = collectionView.captureReadingPosition(),
+           keepingItemIDs.contains(id) {
+            return ScrollAnchor(itemID: id, distanceFromViewportTop: offset, keepVisible: keepVisible)
+        }
+        collectionView.resetReadingPosition()
+        return captureScrollAnchor()
     }
 
     @discardableResult
     private func restoreScrollAnchorIfNeeded(_ anchor: ScrollAnchor?) -> Bool {
         guard let anchor,
-              isViewLoaded,
+              isViewLoaded, !isRestoringScrollAnchor,
               allowsScrollAnchorRestoration,
               let indexPath = dataSource.indexPath(for: anchor.itemID) else {
             return false
         }
 
+        isRestoringScrollAnchor = true
+        defer { isRestoringScrollAnchor = false }
         view.layoutIfNeeded()
         collectionView.layoutIfNeeded()
 
-        guard let attributes = collectionView.layoutAttributesForItem(at: indexPath) else {
+        guard collectionView.layoutAttributesForItem(at: indexPath) != nil else {
             return false
         }
-
-        let targetOffsetY = attributes.frame.minY - anchor.distanceFromViewportTop - collectionView.adjustedContentInset.top
-        let targetOffset = CGPoint(x: collectionView.contentOffset.x, y: clampedContentOffsetY(targetOffsetY))
-        if abs(collectionView.contentOffset.y - targetOffset.y) > 0.5 {
-            isRestoringScrollAnchor = true
-            collectionView.setContentOffset(targetOffset, animated: false)
-            isRestoringScrollAnchor = false
-        }
+        collectionView.restoreReadingPosition(.item(id: anchor.itemID, distanceFromTop: anchor.distanceFromViewportTop,
+            itemOrder: collectionView.readingItemIDs?() ?? [anchor.itemID], keepVisible: anchor.keepVisible))
+        collectionView.layoutIfNeeded()
         return true
     }
 
@@ -579,7 +507,7 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
         }
     }
 
-    private func applySnapshot(data: PagingState<UiTimelineV2>) {
+    private func applySnapshot(data: TimelineContent) {
         var snapshot = NSDiffableDataSourceSnapshot<Int, String>()
         var newIndexMap: [String: Int] = [:]
         var newRenderHashMap: [String: Int32] = [:]
@@ -587,8 +515,8 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
         var itemIDs: [String] = []
         var footerIDs: [String] = []
 
-        switch onEnum(of: data) {
-        case .loading:
+        switch data.state {
+        case .unbound, .loading:
             snapshot.appendSections([Self.sectionMain])
             let items = (0..<8).map { "\(Self.placeholderPrefix)\($0)" }
             itemIDs = items
@@ -601,7 +529,8 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
             snapshot.appendSections([Self.sectionMain])
             itemIDs = [Self.emptyID]
             snapshot.appendItems(itemIDs, toSection: Self.sectionMain)
-        case .success(let success):
+        case .loaded:
+            let success = data
             snapshot.appendSections([Self.sectionMain])
             let itemState = makeItemSnapshotState(for: success)
             itemIDs = itemState.itemIDs
@@ -620,93 +549,64 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
 
         let newSignature = SnapshotSignature(itemIDs: itemIDs, footerIDs: footerIDs)
         let previousSignature = lastAppliedSignature
-        let scrollAnchor = gapBookmark?.anchor ?? (previousSignature != nil &&
-            previousSignature?.itemIDs != newSignature.itemIDs &&
-            allowsScrollAnchorRestoration
-            ? captureScrollAnchor()
-            : nil)
-
-        itemIndexMap = newIndexMap
-        pruneHeightCache(keepingItemIDs: Set(newIndexMap.keys))
-
-        if previousSignature == newSignature {
-            let changedIDs = changedItemIDs(
-                in: itemIDs,
-                newRenderHashMap: newRenderHashMap,
-                newLoadedItemIDs: newLoadedItemIDs
-            )
-            lastRenderHashMap = newRenderHashMap
-            lastLoadedItemIDs = newLoadedItemIDs
-            reconfigureItems(changedIDs)
-            return
-        }
-
-        if previousSignature?.itemIDs == newSignature.itemIDs {
-            let changedIDs = changedItemIDs(
-                in: itemIDs,
-                newRenderHashMap: newRenderHashMap,
-                newLoadedItemIDs: newLoadedItemIDs
-            )
-            applyFooterSnapshot(footerIDs: footerIDs, reconfigureIDs: changedIDs, data: data)
-            lastAppliedSignature = newSignature
-            lastRenderHashMap = newRenderHashMap
-            lastLoadedItemIDs = newLoadedItemIDs
-            return
-        }
-
-        let existing = dataSource.snapshot().itemIdentifiers
-        let newSet = Set(snapshot.itemIdentifiers)
-        let toReconfigure = existing.filter {
-            newSet.contains($0) && itemNeedsReconfigure(
+        let existing = Set(dataSource.snapshot().itemIdentifiers)
+        let toReconfigure = snapshot.itemIdentifiers.filter {
+            existing.contains($0) && (needsAppearanceReconfigure || itemNeedsReconfigure(
                 $0,
                 newRenderHashMap: newRenderHashMap,
                 newLoadedItemIDs: newLoadedItemIDs
-            )
+            ))
         }
-        if !toReconfigure.isEmpty {
-            snapshot.reconfigureItems(toReconfigure)
+        if data.state == .loaded || data.state == .empty,
+           let anchor = gapScrollAnchor, !newLoadedItemIDs.contains(anchor.itemID) {
+            gapScrollAnchor = nil
         }
-
-        let shouldAnimate =
-            !pagingIsRefreshing(data) &&
-            !refreshControl.isRefreshing &&
-            scrollAnchor == nil &&
-            !collectionView.isDragging &&
-            !collectionView.isDecelerating
+        itemIndexMap = newIndexMap
+        pruneHeightCache(keepingItemIDs: Set(newIndexMap.keys))
+        lastAppliedSignature = newSignature
+        lastRenderHashMap = newRenderHashMap
+        lastLoadedItemIDs = newLoadedItemIDs
+        guard previousSignature != newSignature || !toReconfigure.isEmpty || needsAppearanceReconfigure else {
+            restoreBookmarkIfReady()
+            scheduleVisiblePagingAccess()
+            return
+        }
+        let scrollAnchor = gapScrollAnchor ?? (previousSignature != nil
+            ? captureSnapshotAnchor(keepingItemIDs: newLoadedItemIDs) : nil)
+        snapshot.reconfigureItems(toReconfigure)
+        // Content-only and footer changes can also reflow the waterfall. Use the
+        // same restoration/completion path for every actual snapshot update.
+        let shouldAnimate = !pagingIsRefreshing(data) && !refreshControl.isRefreshing &&
+            scrollAnchor == nil && allowsScrollAnchorRestoration
+        isApplyingSnapshot = true
+        if needsAppearanceReconfigure {
+            needsAppearanceReconfigure = false
+            removeAllHeightCache()
+            collectionView.collectionViewLayout.invalidateLayout()
+        }
+        pendingScrollAnchor = scrollAnchor
+        let completion = { [weak self] in
+            guard let self else { return }
+            self.isApplyingSnapshot = false
+            if self.pendingScrollAnchor == scrollAnchor {
+                self.restoreScrollAnchorIfNeeded(scrollAnchor)
+                self.pendingScrollAnchor = nil
+            }
+            self.restoreBookmarkIfReady()
+            self.scheduleVisiblePagingAccess()
+            if let pendingContent = self.pendingContent { self.submit(pendingContent) }
+        }
         if let scrollAnchor {
-            pendingScrollAnchor = scrollAnchor
             UIView.performWithoutAnimation {
                 CATransaction.begin()
                 CATransaction.setDisableActions(true)
-                dataSource.apply(snapshot, animatingDifferences: false) { [weak self] in
-                    guard let self else { return }
-                    self.restoreScrollAnchorIfNeeded(scrollAnchor)
-                    self.pendingScrollAnchor = nil
-                }
+                dataSource.apply(snapshot, animatingDifferences: false, completion: completion)
                 restoreScrollAnchorIfNeeded(scrollAnchor)
                 collectionView.layer.removeAllAnimations()
                 CATransaction.commit()
             }
         } else {
-            dataSource.apply(snapshot, animatingDifferences: shouldAnimate)
-        }
-        lastAppliedSignature = newSignature
-        lastRenderHashMap = newRenderHashMap
-        lastLoadedItemIDs = newLoadedItemIDs
-        restoreBookmarkIfReady()
-    }
-
-    private func changedItemIDs(
-        in itemIDs: [String],
-        newRenderHashMap: [String: Int32],
-        newLoadedItemIDs: Set<String>
-    ) -> [String] {
-        itemIDs.filter {
-            itemNeedsReconfigure(
-                $0,
-                newRenderHashMap: newRenderHashMap,
-                newLoadedItemIDs: newLoadedItemIDs
-            )
+            dataSource.apply(snapshot, animatingDifferences: shouldAnimate, completion: completion)
         }
     }
 
@@ -715,53 +615,17 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
         newRenderHashMap: [String: Int32],
         newLoadedItemIDs: Set<String>
     ) -> Bool {
-        lastRenderHashMap[itemID] != newRenderHashMap[itemID] ||
+        itemID == Self.errorID || itemID == Self.footerErrorID ||
+            lastRenderHashMap[itemID] != newRenderHashMap[itemID] ||
             lastLoadedItemIDs.contains(itemID) != newLoadedItemIDs.contains(itemID)
     }
 
-    private func reconfigureItems(_ itemIDs: [String]) {
-        guard !itemIDs.isEmpty else { return }
-        var snapshot = dataSource.snapshot()
-        let existingItems = Set(snapshot.itemIdentifiers)
-        let reconfigureIDs = itemIDs.filter { existingItems.contains($0) }
-        guard !reconfigureIDs.isEmpty else { return }
-        snapshot.reconfigureItems(reconfigureIDs)
-        dataSource.apply(snapshot, animatingDifferences: false)
-    }
-
-    private func applyFooterSnapshot(footerIDs: [String], reconfigureIDs: [String], data: PagingState<UiTimelineV2>) {
-        var snapshot = dataSource.snapshot()
-        let hasFooterSection = snapshot.sectionIdentifiers.contains(Self.sectionFooter)
-
-        if hasFooterSection {
-            snapshot.deleteSections([Self.sectionFooter])
-        }
-
-        if !footerIDs.isEmpty {
-            snapshot.appendSections([Self.sectionFooter])
-            snapshot.appendItems(footerIDs, toSection: Self.sectionFooter)
-        }
-
-        let existingItems = Set(snapshot.itemIdentifiers)
-        let intersectedReconfigureIDs = reconfigureIDs.filter { existingItems.contains($0) }
-        if !intersectedReconfigureIDs.isEmpty {
-            snapshot.reconfigureItems(intersectedReconfigureIDs)
-        }
-
-        let shouldAnimate =
-            !pagingIsRefreshing(data) &&
-            !refreshControl.isRefreshing &&
-            !collectionView.isDragging &&
-            !collectionView.isDecelerating
-        dataSource.apply(snapshot, animatingDifferences: shouldAnimate)
-    }
-
-    private func footerItemIDs(for success: PagingStateSuccess<UiTimelineV2>) -> [String] {
-        switch onEnum(of: success.appendState) {
+    private func footerItemIDs(for success: TimelineContent) -> [String] {
+        switch success.footer {
         case .error: return [Self.footerErrorID]
         case .loading: return [Self.footerLoadingID]
-        case .notLoading(let notLoading):
-            return notLoading.endOfPaginationReached ? [Self.footerEndID] : []
+        case .end: return [Self.footerEndID]
+        case .none: return []
         }
     }
 
@@ -802,8 +666,8 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
            let index = itemIndexMap[itemID],
            let success = currentSuccess,
            index >= 0,
-           index < Int(success.itemCount),
-           let item = success.peek(index: Int32(index)) {
+           index < success.items.count,
+           let item = success.post(at: Int32(index)) {
             return CGSize(width: width, height: estimatedHeight(for: item, itemID: itemID, width: width))
         }
 
@@ -909,8 +773,8 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
               let index = itemIndexMap[itemID],
               let success = currentSuccess,
               index >= 0,
-              index < Int(success.itemCount),
-              let post = success.peek(index: Int32(index))?.timelineContentPost,
+              index < success.items.count,
+              let post = success.post(at: Int32(index))?.timelineContentPost,
               !post.actions.isEmpty else {
             return nil
         }
@@ -924,20 +788,36 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
         }
     }
 
+    private var isPagingAccessScheduled = false
+
+    private func scheduleVisiblePagingAccess() {
+        guard !isPagingAccessScheduled else { return }
+        isPagingAccessScheduled = true
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+            self.isPagingAccessScheduled = false
+            guard !self.isApplyingSnapshot, self.pendingContent == nil,
+                  self.pendingScrollAnchor == nil, self.reading?.restorePosition == nil,
+                  !self.collectionView.hasReadingPosition,
+                  let success = self.currentSuccess else { return }
+            for path in self.collectionView.indexPathsForVisibleItems {
+                guard let id = self.dataSource.itemIdentifier(for: path),
+                      let index = self.itemIndexMap[id], index < success.items.count else { continue }
+                success.access(index)
+            }
+        }
+    }
+
     func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
-        guard let success = currentSuccess,
-              let itemID = dataSource.itemIdentifier(for: indexPath),
-              let index = itemIndexMap[itemID],
-              index >= 0,
-              index < Int(success.itemCount) else { return }
-        _ = success.get(index: Int32(index))
+        scheduleVisiblePagingAccess()
     }
 
     // MARK: - UIScrollViewDelegate
 
     func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
         didScrollForReading = true
-        gapBookmark = nil
+        collectionView.beginExternalScrollInteraction()
+        gapScrollAnchor = nil
         reading?.restorationFinished()
         scrollingState.isScrolling = true
         pendingScrollAnchor = nil
@@ -945,7 +825,7 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
 
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         if scrollingState.isScrolling, let anchor = captureScrollAnchor(requireIdle: false),
-           let index = itemIndexMap[anchor.itemID], let item = currentSuccess?.peek(index: Int32(index)), !item.isPaginationGap {
+           let index = itemIndexMap[anchor.itemID], let item = currentSuccess?.post(at: Int32(index)), !item.isPaginationGap {
             reading?.viewportChanged(itemKey: item.stableItemKey, offset: anchor.distanceFromViewportTop)
         }
         restorePendingScrollAnchorIfNeeded()
@@ -954,18 +834,24 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
 
     func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
         if !decelerate {
-            scrollingState.isScrolling = false
-            saveReadingBookmark()
+            finishScrollInteraction()
         }
     }
 
     func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
-        scrollingState.isScrolling = false
-        saveReadingBookmark()
+        finishScrollInteraction()
     }
 
     func scrollViewDidEndScrollingAnimation(_ scrollView: UIScrollView) {
-        scrollingState.isScrolling = false
+        finishScrollInteraction()
+    }
+
+    func scrollViewShouldScrollToTop(_ scrollView: UIScrollView) -> Bool {
+        guard let reading else { return true }
+        gapScrollAnchor = nil
+        pendingScrollAnchor = nil
+        reading.showLatest()
+        return false
     }
 }
 
@@ -1606,5 +1492,12 @@ private extension UIFont {
     func bold() -> UIFont {
         guard let descriptor = fontDescriptor.withSymbolicTraits(.traitBold) else { return self }
         return UIFont(descriptor: descriptor, size: pointSize)
+    }
+}
+
+private extension TimelineContent {
+    func post(at index: Int32) -> UiTimelineV2? {
+        guard items.indices.contains(Int(index)) else { return nil }
+        return items[Int(index)]?.post
     }
 }

@@ -12,6 +12,7 @@ final class TimelineCollectionView: UICollectionView {
     // The owner knows when the snapshot and measurements for this layout are ready.
     // A nil path denotes a restore to the top, without a target item.
     var isReadingLayoutReady: ((IndexPath?) -> Bool)?
+    var onReadingLayoutChanged: (() -> Void)?
     private var isExternalScrollInteractionActive = false
     var isScrollInteractionActive: Bool { hasScrollGesture || isProgrammaticScrolling || isExternalScrollInteractionActive }
     var onProgrammaticScrollBegan: (() -> Void)?
@@ -30,10 +31,10 @@ final class TimelineCollectionView: UICollectionView {
 
     enum ReadingPosition {
         case top
-        case item(id: String, distanceFromTop: CGFloat, itemOrder: [String])
+        case item(id: String, distanceFromTop: CGFloat, itemOrder: [String], keepVisible: Bool = true)
 
         var itemID: String? {
-            if case .item(let id, _, _) = self { return id }
+            if case .item(let id, _, _, _) = self { return id }
             return nil
         }
     }
@@ -338,14 +339,21 @@ final class TimelineCollectionView: UICollectionView {
 
     private func captureCurrentLayoutPosition(preferringVisibleTop: Bool = false) -> ReadingPosition? {
         if let readingPosition { return readingPosition }
-        if case .item(let id, _, let itemOrder) = geometryReadingPosition,
+        if case .item(let id, _, let itemOrder, let keepVisible) = geometryReadingPosition,
            let path = readingIndexPath?(id),
            let frame = layoutAttributesForItem(at: path)?.frame {
             // A later content/inset update preserves the displayed distance. Keep
             // the unclamped geometry bookmark only for the next size change.
-            return .item(id: id, distanceFromTop: frame.minY - readingViewportTop(), itemOrder: itemOrder)
+            return .item(id: id, distanceFromTop: frame.minY - readingViewportTop(), itemOrder: itemOrder, keepVisible: keepVisible)
         }
         return captureReadingPosition(preferringVisibleTop: preferringVisibleTop)
+    }
+
+    func captureViewportPosition() -> (itemID: String, offset: CGFloat)? {
+        guard bounds.width > 1, bounds.height > 1 else { return nil }
+        let top = readingViewportTop()
+        guard let item = firstVisibleReadingItem(viewportTop: top, preferringVisibleTop: false) else { return nil }
+        return (item.id, item.frame.minY - top)
     }
 
     func captureReadingPosition(preferringVisibleTop: Bool = false) -> ReadingPosition? {
@@ -489,6 +497,7 @@ final class TimelineCollectionView: UICollectionView {
             self.readingPosition = nil
             self.readingPositionWasAtTop = false
             if self.geometryReadingPosition?.itemID == nil { self.geometryReadingPosition = nil }
+            self.onReadingLayoutChanged?()
         }
     }
 
@@ -496,6 +505,7 @@ final class TimelineCollectionView: UICollectionView {
         super.layoutSubviews()
         startRefreshIfReady()
         restoreReadingPositionIfNeeded()
+        onReadingLayoutChanged?()
     }
 
     private func restoreReadingPositionIfNeeded(animated: Bool = false) {
@@ -516,7 +526,7 @@ final class TimelineCollectionView: UICollectionView {
         case .top:
             targetIndexPath = nil
             targetY = -adjustedContentInset.top
-        case .item(let id, let distanceFromTop, let itemOrder):
+        case .item(let id, let distanceFromTop, let itemOrder, let keepVisible):
             let indexPath = readingIndexPath?(id) ?? {
                 let index = itemOrder.firstIndex(of: id) ?? 0
                 let candidates = Array(itemOrder.dropFirst(index + 1)) + Array(itemOrder.prefix(index).reversed())
@@ -534,13 +544,14 @@ final class TimelineCollectionView: UICollectionView {
             targetIndexPath = indexPath
             if let replacementID = readingItemID?(indexPath), replacementID != id {
                 let replacement = ReadingPosition.item(id: replacementID, distanceFromTop: distanceFromTop,
-                                                       itemOrder: readingItemIDs?() ?? [replacementID])
+                                                       itemOrder: readingItemIDs?() ?? [replacementID], keepVisible: keepVisible)
                 self.readingPosition = replacement
                 if geometryReadingPosition != nil { geometryReadingPosition = replacement }
             }
             guard let frame = collectionViewLayout.layoutAttributesForItem(at: indexPath)?.frame else { return }
             // Resizing can make a card shorter; keep the reading item visible.
-            let distance = max(distanceFromTop, (readingTopOcclusion?() ?? 0) + 1 - frame.height)
+            // Gap filling keeps its predecessor's exact offset even above the viewport.
+            let distance = keepVisible ? max(distanceFromTop, (readingTopOcclusion?() ?? 0) + 1 - frame.height) : distanceFromTop
             targetY = frame.minY - distance - (readingTopInset?() ?? restingAdjustedTopInset) - readingRefreshInset
         }
         let minimumY = -adjustedContentInset.top

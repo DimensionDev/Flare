@@ -41,6 +41,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromHexString
 import kotlinx.serialization.encodeToHexString
+import kotlinx.serialization.json.Json
 import kotlinx.serialization.protobuf.ProtoBuf
 import org.koin.core.annotation.Single
 import kotlin.native.HiddenFromObjC
@@ -85,6 +86,23 @@ public sealed interface UiTimelineTabItem {
     public val enabled: Boolean
     public val filterConfig: TimelineFilterConfig
     public val loaderKey: String
+    public val contentSourceKey: String
+        get() =
+            when (this) {
+                is UiSourceTimelineTabItem -> {
+                    source?.let { Json.encodeToString(listOf(it.specId, it.data)) } ?: loaderKey
+                }
+
+                is UiGroupTimelineTabItem -> {
+                    Json.encodeToString(
+                        listOf(mergePolicy.name) +
+                            children
+                                .filter { it.enabled }
+                                .let { if (isSystemHomeMixedTimeline) it.sortedBy { child -> child.id } else it }
+                                .map { it.contentSourceKey },
+                    )
+                }
+            }
 
     // for iOS and Compose call sites
     public val key: String get() = id
@@ -730,7 +748,8 @@ internal class TimelinePresenterFactory(
             TimelinePresenter(
                 tabId = item.id,
                 loader = timelineResolver.resolveLoader(item),
-                isHomeTimeline = isHomeTimeline,
+                isHomeTimeline = isHomeTimeline && (item as? UiSourceTimelineTabItem)?.source?.specId != TimelineSpecIds.COMMON_DISCOVER,
+                historySourceKey = item.contentSourceKey,
             )
         }
 }

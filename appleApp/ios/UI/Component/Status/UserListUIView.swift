@@ -31,6 +31,7 @@ final class UserListUIView: UIView, ManualLayoutMeasurable, TimelineHeightProvid
         super.init(frame: frame)
 
         scroll.showsHorizontalScrollIndicator = false
+        scroll.scrollsToTop = false
         scroll.translatesAutoresizingMaskIntoConstraints = false
 
         row.axis = .horizontal

@@ -45,9 +45,9 @@ internal open class TimelineRemoteMediator(
         }
     }
 
-    override fun onError(e: Throwable) {
-        notifyError(e)
-    }
+    override fun onError(e: Throwable) = reportFailure(e)
+
+    internal fun reportFailure(error: Throwable) = notifyError(error)
 
     override suspend fun initialize(): InitializeAction {
         val hasCache = database.pagingTimelineDao().anyPaging(loader.pagingKey)
@@ -87,6 +87,11 @@ internal open class TimelineRemoteMediator(
                 pageSize = pageSize,
                 request = request,
             )
+        return mapResult(result)
+    }
+
+    internal suspend fun mapResult(result: PagingResult<UiTimelineV2>): PagingResult<DbPagingTimelineWithStatus> {
+        result.sourceFailures.distinct().forEach(notifyError)
         val sortIdProvider = loader as? SortIdProvider
         val data =
             TimelinePagingMapper.toDb(
@@ -99,6 +104,8 @@ internal open class TimelineRemoteMediator(
             nextKey = result.nextKey,
             previousKey = result.previousKey,
             continuationFailure = result.continuationFailure,
+            sourceFailures = result.sourceFailures,
+            sourceHeads = result.sourceHeads,
         )
     }
 

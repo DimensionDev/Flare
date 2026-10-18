@@ -116,6 +116,7 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
 
     private val timelineTabItemId: String?
     private val isHomeTimeline: Boolean
+    private val historySourceKey: String?
     private val contextMediator = MutableStateFlow<PostContextRemoteMediator?>(null)
 
     private val timelineFilterConfigFlow: Flow<TimelineFilterConfig> by lazy {
@@ -131,6 +132,20 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
             .distinctUntilChanged()
     }
 
+    private data class Visibility(
+        val key: List<Any?>,
+        val matches: (UiTimelineV2) -> Boolean,
+    )
+
+    private val visibilityFlow by lazy {
+        combine(filterFlow, timelineFilterConfigFlow, mxgaEnabledFlow, mxgaRepository.snapshot) { filters, config, mxgaEnabled, snapshot ->
+            Visibility(listOf(filters, config, mxgaEnabled, snapshot)) { item ->
+                item.matchesKeywordFilters(filters) && item.matchesTimelineFilter(config) &&
+                    (!mxgaEnabled || !item.isMxgaMatch(snapshot, platformRegistry))
+            }
+        }
+    }
+
     private val translationSettingsFlow: Flow<TranslationDisplayOptions> by lazy {
         TranslationSettingsSupport.displayOptionsFlow(appDataStore)
     }
@@ -140,11 +155,13 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
         loader: Flow<RemoteLoader<UiTimelineV2>> = flowOf(notSupported()),
         options: TimelinePresenterOptions = TimelinePresenterOptions(),
         isHomeTimeline: Boolean = false,
+        historySourceKey: String? = null,
     ) : super() {
         this.baseLoader = loader
         this.options = options
         this.timelineTabItemId = tabId
         this.isHomeTimeline = isHomeTimeline
+        this.historySourceKey = historySourceKey
     }
 
     internal open fun allowLongTextTranslationDisplay(loader: RemoteLoader<UiTimelineV2>): Boolean =
@@ -187,27 +204,9 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
                         ).cachedIn(scope)
                     }
                 }.flatMapLatest { pager ->
-                    combine(
-                        filterFlow,
-                        timelineFilterConfigFlow,
-                        mxgaEnabledFlow,
-                        mxgaRepository.snapshot,
-                    ) { filterList, timelineFilterConfig, mxgaEnabled, mxgaSnapshot ->
-                        pager
-                            .filter { item ->
-                                val visible =
-                                    item.isPaginationGap || (
-                                        item.matchesKeywordFilters(filterList) &&
-                                            item.matchesTimelineFilter(timelineFilterConfig) &&
-                                            (!mxgaEnabled || !item.isMxgaMatch(mxgaSnapshot, platformRegistry))
-                                    )
-                                reader.value?.let { reading ->
-                                    if (reading.target.value?.itemKey == item.stableItemKey) reading.targetHidden.value = !visible
-                                }
-                                visible
-                            }.map {
-                                transform(it)
-                            }
+                    visibilityFlow.map { visibility ->
+                        reader.value?.setVisibility(visibility.key, visibility.matches)
+                        pager.filter { item -> item.isPaginationGap || visibility.matches(item) }.map { transform(it) }
                     }
                 }
             }.catch {
@@ -219,8 +218,11 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
         scope: CoroutineScope,
     ): Flow<PagingData<TimelinePageItem>> =
         flow {
-            val history = historyStore.open(loader, allowLongTextTranslationDisplay(loader))
+            val history =
+                historyStore.open(loader, allowLongTextTranslationDisplay(loader), historySourceKey, preTranslationService)
+                    ?: return@flow
             val reading = TimelineReader(checkNotNull(timelineTabItemId), history, database, historyStore, scope)
+            visibilityFlow.first().let { reading.setVisibility(it.key, it.matches) }
             reading.restore()
             reader.value = reading
             emitAll(

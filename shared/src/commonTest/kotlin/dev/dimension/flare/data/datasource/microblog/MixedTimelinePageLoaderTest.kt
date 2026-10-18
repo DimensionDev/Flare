@@ -16,6 +16,38 @@ import kotlin.test.assertNull
 
 class MixedTimelinePageLoaderTest : RobolectricTest() {
     @Test
+    fun nestedPartialFailureWithASuccessfulEmptySourceIsNotTotalFailure() =
+        runTest {
+            val bad =
+                object : CacheableRemoteLoader<UiTimelineV2> {
+                    override val pagingKey = "bad"
+
+                    override suspend fun load(
+                        pageSize: Int,
+                        request: PagingRequest,
+                    ): PagingResult<UiTimelineV2> = error("offline")
+                }
+            val inner = MixedTimelinePageLoader(listOf(bad, Source("empty", listOf(page()))), TimelineMergePolicy.Time)
+            val result = MixedTimelinePageLoader(listOf(inner), TimelineMergePolicy.Time).load(20, PagingRequest.Refresh)
+            assertEquals(emptyList(), result.data)
+            assertNull(result.nextKey)
+            assertEquals(1, result.sourceFailures.size)
+        }
+
+    @Test
+    fun timePolicySortsEachRankedPageBeforeMergingAndBuffering() =
+        runTest {
+            val mixed =
+                MixedTimelinePageLoader(
+                    listOf(Source("ranked", listOf(page(2, 9, 5))), Source("other", listOf(page(8, 3)))),
+                    TimelineMergePolicy.Time,
+                )
+            val first = mixed.load(3, PagingRequest.Refresh)
+            val second = mixed.load(3, PagingRequest.Append(assertNotNull(first.nextKey)))
+            assertEquals(listOf("9", "8", "5", "3", "2"), (first.data + second.data).map { it.statusKey.id })
+        }
+
+    @Test
     fun timeMergeRetainsPendingPostsAcrossReopeningAndOnlyFetchesOncePerSourcePerClick() =
         runTest {
             val first = Source("a", listOf(page(9, 6, next = "a2"), page(3)))

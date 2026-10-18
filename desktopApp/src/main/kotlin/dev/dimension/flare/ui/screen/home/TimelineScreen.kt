@@ -42,6 +42,7 @@ import dev.dimension.flare.data.model.tab.UiTimelineTabItem
 import dev.dimension.flare.data.model.tab.resolveTimelineAppearance
 import dev.dimension.flare.edit_tab_title
 import dev.dimension.flare.home_timeline_new_toots
+import dev.dimension.flare.home_timeline_view_latest
 import dev.dimension.flare.refresh
 import dev.dimension.flare.ui.common.plus
 import dev.dimension.flare.ui.component.FAIcon
@@ -273,7 +274,7 @@ internal fun TimelineContent(
                         header.invoke()
                     }
                 }
-                status(state.listState)
+                status(state.listState, onLoadGap = state::loadGap)
             }
         }
         AnimatedVisibility(
@@ -302,9 +303,11 @@ internal fun TimelineContent(
         ) {
             AccentButton(
                 onClick = {
-                    state.onNewTootsShown()
-                    scope.launch {
-                        state.lazyListState.scrollToItem(0)
+                    if (state.reading != null) {
+                        state.reading?.showLatest()
+                    } else {
+                        state.onNewTootsShown()
+                        scope.launch { state.lazyListState.scrollToItem(0) }
                     }
                 },
             ) {
@@ -316,11 +319,15 @@ internal fun TimelineContent(
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
                     text =
-                        pluralStringResource(
-                            Res.plurals.home_timeline_new_toots,
-                            state.newPostsCount,
-                            state.newPostsCount,
-                        ),
+                        if (state.reading != null) {
+                            stringResource(Res.string.home_timeline_view_latest)
+                        } else {
+                            pluralStringResource(
+                                Res.plurals.home_timeline_new_toots,
+                                state.newPostsCount,
+                                state.newPostsCount,
+                            )
+                        },
                 )
             }
         }

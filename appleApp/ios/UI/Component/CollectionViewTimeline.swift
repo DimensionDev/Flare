@@ -142,7 +142,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         collectionView.setNeedsLayout()
     }
 
-    private var gapBookmark: (key: String, hash: Int32, position: TimelineCollectionView.ReadingPosition)?
+    private var gapReadingPosition: TimelineCollectionView.ReadingPosition?
 
     func willLoadTimelineGap(_ message: UiTimelineV2.Message) {
         guard let gapIndex = content.items.firstIndex(where: { $0?.post?.stableItemKey == message.stableItemKey }),
@@ -152,7 +152,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
               let path = dataSource.indexPath(for: id),
               let frame = collectionView.layoutAttributesForItem(at: path)?.frame else { return }
         let offset = frame.minY - collectionView.contentOffset.y - (collectionView.readingTopInset?() ?? collectionView.restingAdjustedTopInset)
-        gapBookmark = (message.stableItemKey, message.renderHash, .item(id: id, distanceFromTop: offset, itemOrder: [id]))
+        gapReadingPosition = .item(id: id, distanceFromTop: offset, itemOrder: [id], keepVisible: false)
         reading?.positionChanged(itemKey: item.stableItemKey, offset: offset)
     }
 
@@ -167,6 +167,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
               let id = itemIndexMap.keys.first(where: { timelineItem(for: $0)?.data.stableItemKey == target.itemKey })
         else { return }
         restoredBookmark = target
+        gapReadingPosition = nil
         // The stored position takes precedence over a launch refresh's spinner
         // animation; that animation would otherwise discard the pending bookmark.
         collectionView.interruptRefreshForScrolling()
@@ -183,7 +184,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         guard didScrollForReading, reading?.restorePosition == nil, isViewLoaded,
               view.window?.isKeyWindow == true,
               !collectionView.hasReadingPosition,
-              case .item(let id, let offset, _) = collectionView.captureReadingPosition(),
+              let (id, offset) = collectionView.captureViewportPosition(),
               let item = timelineItem(for: id)?.data, !item.isPaginationGap else { return }
         reading?.positionChanged(itemKey: item.stableItemKey, offset: offset)
     }
@@ -555,6 +556,9 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         }
         collectionView.isReadingLayoutReady = { [weak self] indexPath in
             self?.isReadingLayoutReady(at: indexPath) == true
+        }
+        collectionView.onReadingLayoutChanged = { [weak self] in
+            self?.scheduleVisiblePagingAccess()
         }
         collectionView.onProgrammaticScrollBegan = { [weak self] in
             guard let self else { return }
@@ -1182,6 +1186,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         let columnsChanged = columnCount != input.columns
         let switchedContent = contentKey != nil && input.content.key != nil && contentKey != input.content.key
         let wasRefreshing = currentPagingIsRefreshing
+        if switchedContent || kindChanged { gapReadingPosition = nil }
 
         if switchedContent {
             let offsetY = input.retainedOffset ?? max(effectiveContentOffsetY, 0)
@@ -1235,7 +1240,11 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
             pendingReloadPosition == nil && pendingEffectiveContentOffsetYAfterSnapshot == nil &&
             restoresScrollAnchorOnSnapshotChanges
         let survivingIDs = keepsReadingPosition ? Set(plan.headerIDs + plan.accessoryIDs + plan.itemIDs) : []
-        if let gapBookmark { collectionView.restoreReadingPosition(gapBookmark.position) }
+        if content.state == .loaded || content.state == .empty,
+           let id = gapReadingPosition?.itemID, !plan.itemIDs.contains(id) {
+            gapReadingPosition = nil
+        }
+        if let gapReadingPosition { collectionView.restoreReadingPosition(gapReadingPosition) }
         collectionView.performUpdatesPreservingReadingPosition(keepingItemIDs: survivingIDs) {
             if columnsChanged || kindChanged {
                 clearHeightCache(keepingItemMeasurements: !kindChanged && contentKind != .profileMedia)
@@ -1268,16 +1277,11 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
                 guard let self else { return }
                 if let mediaAnchor { self.restoreScrollAnchorIfNeeded(mediaAnchor) }
                 self.restorePendingContentOffsetIfNeeded(finalize: !plan.isInitialLoading)
-                self.accessVisiblePagingItems()
                 self.updateAutoplayConfiguration()
                 if wasRefreshing && !plan.isRefreshing { self.schedulePostRefreshPoolCleanup() }
                 self.isApplyingSnapshot = false
-                if let gap = self.gapBookmark {
-                    let message = self.content.items.compactMap { $0?.post as? UiTimelineV2.Message }.first { $0.stableItemKey == gap.key }
-                    let loading = (message?.type as? UiTimelineV2.MessageTypeLocalized)?.data == .loadingMissingPosts
-                    if message == nil || (!loading && message?.renderHash != gap.hash) { self.gapBookmark = nil }
-                }
                 self.restoreBookmarkIfReady()
+                self.scheduleVisiblePagingAccess()
                 if self.pendingInput != nil || !self.pendingReconfigureIDs.isEmpty { self.scheduleSubmission() }
             }
             guard structureChanged || !changedIDs.isEmpty else {
@@ -1838,7 +1842,26 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
 
     // MARK: - UICollectionViewDelegate
 
+    private var isPagingAccessScheduled = false
+
+    private func scheduleVisiblePagingAccess() {
+        guard !isPagingAccessScheduled else { return }
+        isPagingAccessScheduled = true
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+            self.isPagingAccessScheduled = false
+            self.accessVisiblePagingItems()
+        }
+    }
+
     private func accessVisiblePagingItems() {
+        // Estimated frames during a prepend or restore can briefly expose the
+        // wrong end of the list. Only the settled viewport may advance Paging.
+        guard isViewLoaded, !isApplyingSnapshot, pendingInput == nil,
+              reading?.restorePosition == nil, pendingReloadPosition == nil,
+              !collectionView.hasReadingPosition,
+              collectionView.bounds.width > 1, collectionView.bounds.height > 1,
+              isReadingLayoutReady(at: collectionView.indexPathsForVisibleItems.first) else { return }
         for path in collectionView.indexPathsForVisibleItems {
             guard let id = dataSource.itemIdentifier(for: path), let index = itemIndexMap[id] else { continue }
             content.access(index)
@@ -1850,7 +1873,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         if let accessory = accessoryItemMap[itemID] {
             accessory.onVisibilityChanged?(true)
         } else {
-            if let index = itemIndexMap[itemID] { content.access(index) }
+            scheduleVisiblePagingAccess()
             autoplay.reconsider()
         }
     }
@@ -1871,7 +1894,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
 
     func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
         didScrollForReading = true
-        gapBookmark = nil
+        gapReadingPosition = nil
         reading?.restorationFinished()
         collectionView.endProgrammaticScrolling()
         onScrollInteractionBegan?()
@@ -1893,7 +1916,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
 
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         if collectionView.isScrollInteractionActive,
-           case .item(let id, let offset, _) = collectionView.captureReadingPosition(),
+           let (id, offset) = collectionView.captureViewportPosition(),
            let item = timelineItem(for: id)?.data, !item.isPaginationGap {
             reading?.viewportChanged(itemKey: item.stableItemKey, offset: offset)
         }
@@ -1927,6 +1950,11 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     }
 
     func scrollViewShouldScrollToTop(_ scrollView: UIScrollView) -> Bool {
+        if let reading {
+            gapReadingPosition = nil
+            reading.showLatest()
+            return false
+        }
         if abs(scrollView.contentOffset.y + scrollView.adjustedContentInset.top) > 0.5 {
             collectionView.beginProgrammaticScrolling()
         } else {

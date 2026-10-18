@@ -5,9 +5,11 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.core.DataStoreFactory
 import androidx.datastore.core.okio.OkioSerializer
 import dev.dimension.flare.common.protobufSerializer
+import dev.dimension.flare.data.datasource.microblog.paging.TimelineHistoryStore
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.datastore.createDataStoreStorage
 import dev.dimension.flare.data.datastore.model.AppSettings
+import dev.dimension.flare.data.datastore.model.HomeTimelinePreferences
 import dev.dimension.flare.data.io.FileStorage
 import dev.dimension.flare.data.model.AppearanceSettings
 import dev.dimension.flare.data.model.appearance.AppearanceBag
@@ -24,6 +26,7 @@ import dev.dimension.flare.data.model.tab.TabSettingsV2
 import dev.dimension.flare.data.model.tab.TimelineResolver
 import dev.dimension.flare.data.model.tab.TimelineSlot
 import dev.dimension.flare.data.model.tab.TimelineSlotContent
+import dev.dimension.flare.data.model.tab.UiGroupTimelineTabItem
 import dev.dimension.flare.data.model.tab.UiTimelineTabItem
 import dev.dimension.flare.data.model.tab.findById
 import dev.dimension.flare.data.model.tab.isSystemHomeMixedTimeline
@@ -47,6 +50,7 @@ public class SettingsRepository internal constructor(
     private val fileStorage: FileStorage,
     private val appDataStore: AppDataStore,
     private val timelineResolver: TimelineResolver,
+    private val timelineHistoryStore: TimelineHistoryStore? = null,
 ) {
     private val appearanceBagStore by lazy {
         createDataStore(
@@ -182,7 +186,17 @@ public class SettingsRepository internal constructor(
 
     internal suspend fun updateTabSettingsV2(block: TabSettingsV2.() -> TabSettingsV2) {
         ensureTabSettingsMigrated()
-        tabSettingsV2Store.updateData(block)
+        tabSettingsV2Store.updateData { previous ->
+            val updated = previous.block()
+            val before = historySources(previous)
+            val after = historySources(updated)
+            val changed = before.keys.filterTo(mutableSetOf()) { before[it] != after[it] }
+            timelineHistoryStore?.invalidateTabs(changed)
+            appDataStore.homeTimelinePreferences.updateData {
+                if (it.selectedTabId in changed) HomeTimelinePreferences() else it
+            }
+            updated
+        }
     }
 
     public suspend fun removeHomeTimelineTabBySourceId(sourceId: String) {
@@ -224,7 +238,37 @@ public class SettingsRepository internal constructor(
     }
 
     public suspend fun updateAppSettings(block: AppSettings.() -> AppSettings) {
-        appSettingsStore.updateData(block)
+        appSettingsStore.updateData { previous ->
+            val updated = previous.block()
+            if (previous.rememberHomeTimelinePosition != updated.rememberHomeTimelinePosition) {
+                timelineHistoryStore?.setEnabled(updated.rememberHomeTimelinePosition)
+                if (!updated.rememberHomeTimelinePosition) {
+                    appDataStore.homeTimelinePreferences.updateData { HomeTimelinePreferences() }
+                }
+            }
+            updated
+        }
+    }
+
+    private fun historySources(settings: TabSettingsV2): Map<String, String> {
+        val tabs = settings.homeSlots.map { timelineResolver.toTabItem(it) }
+        val result = mutableMapOf<String, String>()
+
+        fun add(tab: UiTimelineTabItem) {
+            result[tab.id] =
+                if (tab.isSystemHomeMixedTimeline) {
+                    tab.contentSourceKey +
+                        tabs
+                            .filter { it.enabled && !it.isSystemHomeMixedTimeline }
+                            .sortedBy { it.id }
+                            .joinToString { it.contentSourceKey }
+                } else {
+                    tab.contentSourceKey
+                }
+            if (tab is UiGroupTimelineTabItem) tab.children.forEach(::add)
+        }
+        tabs.forEach(::add)
+        return result
     }
 
     private inline fun <reified T> createDataStore(

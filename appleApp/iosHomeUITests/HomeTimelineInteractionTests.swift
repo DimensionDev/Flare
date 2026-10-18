@@ -146,30 +146,56 @@ final class HomeTimelineInteractionTests: XCTestCase {
         defer { app.terminate() }
         try selectTab(tab, in: app)
         showLatestIfAvailable(in: app)
+        // XCTest deliberately leaves app animations enabled. Wait for View latest
+        // to finish before choosing a gap and its predecessor as the baseline.
+        let posts = app.cells.matching(NSPredicate(format: "identifier BEGINSWITH 'timeline-item:' AND NOT identifier BEGINSWITH 'timeline-item:timeline-gap:'"))
+        _ = stableTop(of: posts.firstMatch)
         let gaps = app.cells.matching(NSPredicate(format: "identifier BEGINSWITH 'timeline-item:timeline-gap:'"))
         var found: XCUIElement?
         for _ in 0..<180 {
-            found = gaps.allElementsBoundByIndex.first { $0.frame.minY > app.frame.height * 0.2 && $0.frame.maxY < app.frame.height * 0.82 }
+            found = gaps.allElementsBoundByAccessibilityElement.first { element in
+                guard element.exists else { return false }
+                let frame = element.frame
+                return frame.minY > app.frame.height * 0.2 && frame.maxY < app.frame.height * 0.82
+            }
             if found != nil { break }
             scrollGapSearch(in: app)
         }
         let gap = try XCTUnwrap(found, "A real refresh must leave a manual gap in this feed")
         let gapID = gap.identifier
-        let gapTop = gap.frame.minY
-        let predecessor = try XCTUnwrap(app.cells.matching(NSPredicate(format: "identifier BEGINSWITH 'timeline-item:' AND NOT identifier BEGINSWITH 'timeline-item:timeline-gap:'"))
-            .allElementsBoundByIndex.filter { $0.frame.minY < gapTop }.max { $0.frame.minY < $1.frame.minY })
+        let gapTop = stableTop(of: gap)
+        let predecessor = try XCTUnwrap(posts
+            .allElementsBoundByAccessibilityElement.filter { $0.exists && $0.frame.minY < gapTop }.max { $0.frame.minY < $1.frame.minY })
         let anchor = Bookmark(identifier: predecessor.identifier, top: predecessor.frame.minY)
         assertRestored(anchor, in: app, name: "\(name)-gap-before-click")
         // Merely reaching the gap must not advance it.
         Thread.sleep(forTimeInterval: 5)
         XCTAssertTrue(gap.exists)
         XCTAssertEqual(gap.frame.minY, gapTop, accuracy: 1)
-        print("HOME-GAP \(name) waiting: \(gapID), top=\(gapTop)")
-        gap.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
-        let advanced = NSPredicate { _, _ in !gap.exists || gap.frame.minY > gapTop + 20 }
-        XCTAssertEqual(XCTWaiter.wait(for: [XCTNSPredicateExpectation(predicate: advanced, object: nil)], timeout: 45), .completed,
-                       "One explicit click must fill this real gap downward")
-        assertRestored(anchor, in: app, name: "\(name)-gap-after-click")
+        print("HOME-GAP \(name) waiting: top=\(gapTop)")
+        var filledDownward = false
+        for page in 1...5 {
+            let loading = gap.descendants(matching: .any).matching(NSPredicate(format: "label == %@", "Loading missing posts…")).firstMatch
+            gap.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
+            let observedLoading = loading.waitForExistence(timeout: 3)
+            if observedLoading {
+                XCTAssertEqual(XCTWaiter.wait(for: [XCTNSPredicateExpectation(predicate: NSPredicate(format: "exists == false"), object: loading)], timeout: 45), .completed)
+            }
+            let advanced = NSPredicate { _, _ in !gap.exists || gap.frame.minY > gapTop + 20 }
+            filledDownward = XCTWaiter.wait(for: [XCTNSPredicateExpectation(predicate: advanced, object: nil)], timeout: 5) == .completed
+            assertRestored(anchor, in: app, name: "\(name)-gap-after-click-\(page)")
+            if filledDownward { break }
+            XCTAssertTrue(observedLoading, "Each explicit click must start a page load")
+            let retry = gap.descendants(matching: .any).matching(NSPredicate(format: "label == %@", "Could not load posts. Tap to retry.")).firstMatch
+            XCTAssertFalse(retry.exists, "The live page must load successfully")
+            // Recommended sources can return an entire page of already-seen posts.
+            // That page keeps the gap in place and still requires another click.
+            Thread.sleep(forTimeInterval: 5)
+            XCTAssertTrue(gap.exists)
+            XCTAssertEqual(gap.frame.minY, gapTop, accuracy: 1)
+            print("HOME-GAP \(name) page \(page) kept its position and still waits for a click")
+        }
+        XCTAssertTrue(filledDownward, "Explicit page loads must eventually fill this live gap downward")
         // Scroll to the same remaining gap, proving it moved after the newly inserted items.
         let sameGap = app.cells.matching(NSPredicate(format: "identifier == %@", gapID)).firstMatch
         for _ in 0..<180 {
@@ -182,11 +208,8 @@ final class HomeTimelineInteractionTests: XCTestCase {
         Thread.sleep(forTimeInterval: 5)
         XCTAssertTrue(sameGap.exists)
         XCTAssertEqual(sameGap.frame.minY, remainingTop, accuracy: 1, "The remaining gap must also wait for a click")
-        let screenshot = XCTAttachment(screenshot: app.screenshot())
-        screenshot.name = "\(name)-remaining-gap-below-inserted-items"
-        screenshot.lifetime = .keepAlways
-        add(screenshot)
-        print("HOME-GAP \(name) remaining: \(gapID)")
+        attachScreenshot(in: app, name: "\(name)-remaining-gap-below-inserted-items")
+        print("HOME-GAP \(name) remaining gap still waits for a click")
     }
 
     @MainActor
@@ -214,7 +237,7 @@ final class HomeTimelineInteractionTests: XCTestCase {
     }
 
     @MainActor
-    private func openBehaviorSettings(in app: XCUIApplication) {
+    private func openSettings(in app: XCUIApplication) {
         let menu = app.descendants(matching: .any).matching(NSPredicate(format: "label == %@", "Open navigation menu")).firstMatch
         XCTAssertTrue(menu.waitForExistence(timeout: 20))
         menu.tap()
@@ -231,10 +254,56 @@ final class HomeTimelineInteractionTests: XCTestCase {
         let settings = app.buttons.matching(NSPredicate(format: "label == %@", "Settings")).firstMatch
         XCTAssertTrue(settings.waitForExistence(timeout: 5))
         settings.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
+    }
+
+    @MainActor
+    private func openBehaviorSettings(in app: XCUIApplication) {
+        openSettings(in: app)
         let behavior = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Behavior")).firstMatch
         XCTAssertTrue(behavior.waitForExistence(timeout: 10))
         behavior.tap()
         Thread.sleep(forTimeInterval: 1)
+    }
+
+    @MainActor
+    func testEnableLiveGallery() {
+        setLiveDisplayMode("Gallery (home timeline only)", rememberPrevious: true)
+    }
+
+    @MainActor
+    func testRestoreLiveDisplayMode() throws {
+        let mode = try XCTUnwrap(ProcessInfo.processInfo.environment["FLARE_RESTORE_DISPLAY_MODE"]
+            ?? UserDefaults.standard.string(forKey: "acceptance.originalDisplayMode"))
+        XCTAssertTrue(displayModes.contains(mode), "The original display mode must be known before restoring it")
+        setLiveDisplayMode(mode)
+    }
+
+    private let displayModes = ["Card", "Plain (single column only)", "Gallery (home timeline only)"]
+
+    @MainActor
+    private func setLiveDisplayMode(_ mode: String, rememberPrevious: Bool = false) {
+        continueAfterFailure = false
+        let app = liveApp()
+        launch(app)
+        defer { app.terminate() }
+        openSettings(in: app)
+        let layout = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Layout")).firstMatch
+        XCTAssertTrue(layout.waitForExistence(timeout: 10))
+        layout.tap()
+        let picker = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Timeline display mode")).firstMatch
+        XCTAssertTrue(picker.waitForExistence(timeout: 10))
+        let current = displayModes.first { picker.label.hasSuffix($0) }
+        XCTAssertNotNil(current, "Read the selected mode from the native picker label")
+        if rememberPrevious {
+            UserDefaults.standard.set(current, forKey: "acceptance.originalDisplayMode")
+        }
+        if current == mode { return }
+        picker.tap()
+        let choice = app.buttons.matching(NSPredicate(format: "label == %@", mode)).firstMatch
+        XCTAssertTrue(choice.waitForExistence(timeout: 5))
+        choice.tap()
+        let applied = NSPredicate { _, _ in picker.exists && picker.label.hasSuffix(mode) }
+        XCTAssertEqual(XCTWaiter.wait(for: [XCTNSPredicateExpectation(predicate: applied, object: nil)], timeout: 5), .completed)
     }
 
     @MainActor
@@ -301,8 +370,22 @@ final class HomeTimelineInteractionTests: XCTestCase {
         launch(app)
         defer { app.terminate() }
         try selectTab(tab, in: app)
+        // Launch refresh runs independently of selecting the tab. Let it settle
+        // before navigating to the latest head that the pull must start from.
+        Thread.sleep(forTimeInterval: 15)
         showLatestIfAvailable(in: app)
+        // A read notice may already be dismissed while the restored viewport is
+        // farther down. Use the native status-bar action before pulling, otherwise
+        // this gesture merely scrolls existing content instead of refreshing it.
+        app.coordinate(withNormalizedOffset: CGVector(dx: 0.1, dy: 0.025)).tap()
         Thread.sleep(forTimeInterval: 2)
+        // Latest aligns the first post, while Gallery has padding above that post.
+        // Settle at the natural scroll boundary before recording the pull's anchor;
+        // otherwise the gesture itself scrolls through that padding before refreshing.
+        let top = app.coordinate(withNormalizedOffset: CGVector(dx: 0.98, dy: 0.3))
+        top.press(forDuration: 0.05, thenDragTo: top.withOffset(CGVector(dx: 0, dy: 40)),
+                  withVelocity: .slow, thenHoldForDuration: 0)
+        Thread.sleep(forTimeInterval: 1)
         let bookmark = try scrollAndRemember(in: app, swipes: 0, name: "\(name)-before-pull-refresh")
         print("HOME-PULL \(name) starting")
         app.coordinate(withNormalizedOffset: CGVector(dx: 0.98, dy: 0.25)).press(
@@ -328,6 +411,7 @@ final class HomeTimelineInteractionTests: XCTestCase {
 
     @MainActor
     private func attachScreenshot(in app: XCUIApplication, name: String) {
+        guard ProcessInfo.processInfo.environment["FLARE_UI_SCREENSHOTS"] == "1" else { return }
         let attachment = XCTAttachment(screenshot: app.screenshot())
         attachment.name = name
         attachment.lifetime = .keepAlways
@@ -373,8 +457,9 @@ final class HomeTimelineInteractionTests: XCTestCase {
     @MainActor
     private func assertSelectedTab(_ name: String, in app: XCUIApplication) {
         let selected = title(in: app)
-        XCTAssertTrue(selected.waitForExistence(timeout: 20), "Home title must exist")
-        XCTAssertTrue(selected.label.contains(name), "Expected \(name), found \(selected.label)\n\(app.debugDescription)")
+        let matches = NSPredicate { _, _ in selected.exists && selected.label.contains(name) }
+        XCTAssertEqual(XCTWaiter.wait(for: [XCTNSPredicateExpectation(predicate: matches, object: nil)], timeout: 20), .completed,
+                       "Home title must become \(name)")
     }
 
     @MainActor
@@ -382,6 +467,11 @@ final class HomeTimelineInteractionTests: XCTestCase {
         let selected = title(in: app)
         XCTAssertTrue(selected.waitForExistence(timeout: 20), "Home title must exist")
         if !selected.label.contains(name) {
+            let loginNotice = app.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", "Login session expired")).firstMatch
+            if loginNotice.exists {
+                print("HOME-NAV waiting for login notification")
+                XCTAssertEqual(XCTWaiter.wait(for: [XCTNSPredicateExpectation(predicate: NSPredicate(format: "exists == false"), object: loginNotice)], timeout: 20), .completed)
+            }
             selected.tap()
             let option = app.buttons.matching(NSPredicate(format: "label == %@", name)).firstMatch
             XCTAssertTrue(option.waitForExistence(timeout: 5), "Configured Home tab must exist: \(name)")
@@ -395,27 +485,40 @@ final class HomeTimelineInteractionTests: XCTestCase {
 
     @MainActor
     private func showLatestIfAvailable(in app: XCUIApplication) {
-        let latest = app.buttons["View latest posts"]
+        let latest = app.buttons["home-new-content"]
         if latest.waitForExistence(timeout: 10) { latest.tap() }
     }
 
     @MainActor
     private func scrollAndRemember(in app: XCUIApplication, swipes: Int, name: String) throws -> Bookmark {
         for _ in 0..<swipes {
-            app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.78)).press(
+            app.coordinate(withNormalizedOffset: CGVector(dx: 0.1, dy: 0.78)).press(
                 forDuration: 0.05,
-                thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.32)),
+                thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.1, dy: 0.32)),
                 withVelocity: .slow,
                 thenHoldForDuration: 0
             )
         }
+        let posts = app.cells.matching(NSPredicate(format: "identifier BEGINSWITH 'timeline-item:' AND NOT identifier BEGINSWITH 'timeline-item:timeline-gap:'"))
+        _ = stableTop(of: posts.firstMatch)
         let navigationBottom = app.navigationBars.firstMatch.frame.maxY
-        let visible = app.cells.matching(NSPredicate(format: "identifier BEGINSWITH 'timeline-item:' AND NOT identifier BEGINSWITH 'timeline-item:timeline-gap:'"))
-            .allElementsBoundByIndex
-            .filter { $0.frame.maxY > navigationBottom + 30 && $0.frame.minY < app.frame.height * 0.75 }
-            .sorted { $0.frame.minY < $1.frame.minY }
-        let item = try XCTUnwrap(visible.first, "A real item must intersect the reading viewport")
-        let bookmark = Bookmark(identifier: item.identifier, top: item.frame.minY)
+        // Match the native reading anchor, including a card with only a small
+        // visible portion below the bar. Picking another column's next card can
+        // report a false drift when a restored paging window reflows the grid.
+        let visible = posts
+            .allElementsBoundByAccessibilityElement
+            .compactMap { element -> (item: XCUIElement, frame: CGRect)? in
+                guard element.exists else { return nil }
+                let frame = element.frame
+                guard frame.maxY > navigationBottom, frame.minY < app.frame.height * 0.75 else { return nil }
+                return (element, frame)
+            }
+            .sorted {
+                abs($0.frame.minY - $1.frame.minY) > 0.5
+                    ? $0.frame.minY < $1.frame.minY : $0.frame.minX < $1.frame.minX
+            }
+        let selected = try XCTUnwrap(visible.first, "A real item must intersect the reading viewport")
+        let bookmark = Bookmark(identifier: selected.item.identifier, top: stableTop(of: selected.item))
         assertRestored(bookmark, in: app, name: name)
         return bookmark
     }
@@ -430,12 +533,9 @@ final class HomeTimelineInteractionTests: XCTestCase {
             return matchingSamples >= 3
         }
         let result = XCTWaiter.wait(for: [XCTNSPredicateExpectation(predicate: restored, object: nil)], timeout: 20)
-        let screenshot = XCTAttachment(screenshot: app.screenshot())
-        screenshot.name = name
-        screenshot.lifetime = .keepAlways
-        add(screenshot)
+        attachScreenshot(in: app, name: name)
         let actual = item.exists ? item.frame.minY : .nan
-        print("HOME-RESTORE \(name): \(bookmark.identifier), expected=\(bookmark.top), actual=\(actual)")
+        print("HOME-RESTORE \(name): sameItem=\(item.exists), expected=\(bookmark.top), actual=\(actual)")
         XCTAssertEqual(result, .completed, "\(name): expected the same item at \(bookmark.top) pt, found \(actual) pt")
     }
 }

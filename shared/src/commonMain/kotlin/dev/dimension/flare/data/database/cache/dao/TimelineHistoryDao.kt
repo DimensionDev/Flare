@@ -4,6 +4,7 @@ import androidx.room3.Dao
 import androidx.room3.Query
 import androidx.room3.Upsert
 import dev.dimension.flare.data.database.cache.model.DbTimelineBatch
+import dev.dimension.flare.data.database.cache.model.DbTimelineBinding
 import dev.dimension.flare.data.database.cache.model.DbTimelineBookmark
 import dev.dimension.flare.data.database.cache.model.DbTimelineEntry
 import dev.dimension.flare.data.database.cache.model.DbTimelineHistory
@@ -22,9 +23,11 @@ private const val HISTORY_ROWS =
     "SELECT e.itemKey, e.timelineId, b.id AS batchId, b.ordinal, e.position " +
         "FROM DbTimelineEntry e INNER JOIN DbTimelineBatch b ON b.id = e.batchId " +
         "INNER JOIN DbPagingTimeline t ON t._id = e.timelineId WHERE e.historyKey = :historyKey " +
-        "UNION ALL SELECT 'timeline-gap:' || id AS itemKey, NULL AS timelineId, id AS batchId, ordinal, " +
-        "9223372036854775807 AS position FROM DbTimelineBatch " +
-        "WHERE historyKey = :historyKey AND manual = 1 AND nextKey IS NOT NULL"
+        "UNION ALL SELECT 'timeline-gap:' || b.id AS itemKey, NULL AS timelineId, b.id AS batchId, COALESCE(a.ordinal, b.ordinal), " +
+        "COALESCE(e.position + 1, 9223372036854775807) AS position FROM DbTimelineBatch b " +
+        "LEFT JOIN DbTimelineEntry e ON e.historyKey = b.historyKey AND e.itemKey = b.gapAfterItemKey " +
+        "LEFT JOIN DbTimelineBatch a ON a.id = e.batchId " +
+        "WHERE b.historyKey = :historyKey AND b.manual = 1 AND b.nextKey IS NOT NULL"
 
 @Dao
 internal interface TimelineHistoryDao {
@@ -46,6 +49,12 @@ internal interface TimelineHistoryDao {
     @Query("SELECT * FROM DbTimelineBatch WHERE historyKey = :historyKey ORDER BY ordinal")
     suspend fun batches(historyKey: String): List<DbTimelineBatch>
 
+    @Query("SELECT sourceHeads FROM DbTimelineBatch WHERE historyKey = :historyKey AND ordinal > :ordinal AND sourceHeads IS NOT NULL")
+    suspend fun olderSourceHeads(
+        historyKey: String,
+        ordinal: Long,
+    ): List<String>
+
     @Query("SELECT * FROM DbTimelineBatch WHERE id = :id")
     suspend fun batch(id: String): DbTimelineBatch?
 
@@ -57,6 +66,55 @@ internal interface TimelineHistoryDao {
 
     @Query("SELECT MAX(position) FROM DbTimelineEntry WHERE batchId = :batchId")
     suspend fun lastPosition(batchId: String): Long?
+
+    @Query("SELECT * FROM DbTimelineEntry WHERE batchId = :batchId ORDER BY position")
+    suspend fun batchEntries(batchId: String): List<DbTimelineEntry>
+
+    @Query("SELECT * FROM DbTimelineEntry WHERE batchId = :batchId AND position < :position ORDER BY position DESC LIMIT 1")
+    suspend fun entryBefore(
+        batchId: String,
+        position: Long,
+    ): DbTimelineEntry?
+
+    @Query("SELECT * FROM DbTimelineEntry WHERE batchId = :batchId AND position > :position ORDER BY position LIMIT 1")
+    suspend fun entryAfter(
+        batchId: String,
+        position: Long,
+    ): DbTimelineEntry?
+
+    @Query(
+        "SELECT * FROM DbTimelineBatch WHERE historyKey = :historyKey AND id != :id AND nextKey IS NOT NULL AND pageKeys = :pageKeys LIMIT 1",
+    )
+    suspend fun equivalentBatch(
+        historyKey: String,
+        id: String,
+        pageKeys: String,
+    ): DbTimelineBatch?
+
+    @Query(
+        "DELETE FROM DbTimelineBatch WHERE id = :id AND manual = 1 AND nextKey IS NULL " +
+            "AND NOT EXISTS (SELECT 1 FROM DbTimelineEntry WHERE batchId = :id) " +
+            "AND (sourceHeads IS NULL OR sourceHeads = '{}' OR EXISTS (" +
+            "SELECT 1 FROM DbTimelineBatch b WHERE b.historyKey = DbTimelineBatch.historyKey " +
+            "AND b.id != :id AND b.sourceHeads = DbTimelineBatch.sourceHeads))",
+    )
+    suspend fun deleteEmptyBatch(id: String)
+
+    @Query(
+        "SELECT e.* FROM DbTimelineEntry e INNER JOIN DbTimelineBatch b ON b.id = e.batchId INNER JOIN DbPagingTimeline t ON t._id = e.timelineId WHERE e.historyKey = :historyKey AND e.createdAt <= :createdAt ORDER BY b.ordinal, e.position LIMIT 1",
+    )
+    suspend fun entryAtOrBeforeTime(
+        historyKey: String,
+        createdAt: Long,
+    ): DbTimelineEntry?
+
+    @Query(
+        "SELECT e.* FROM DbTimelineEntry e INNER JOIN DbTimelineBatch b ON b.id = e.batchId INNER JOIN DbPagingTimeline t ON t._id = e.timelineId WHERE e.historyKey = :historyKey ORDER BY b.ordinal DESC, e.position DESC LIMIT 1",
+    )
+    suspend fun lastEntry(historyKey: String): DbTimelineEntry?
+
+    @Query("SELECT * FROM DbTimelineEntry WHERE historyKey = :historyKey AND createdAt IS NULL LIMIT 100")
+    suspend fun undatedEntries(historyKey: String): List<DbTimelineEntry>
 
     @Query("SELECT * FROM DbTimelineEntry WHERE historyKey = :historyKey AND itemKey IN (:keys)")
     suspend fun entries(
@@ -117,6 +175,33 @@ internal interface TimelineHistoryDao {
         tabId: String,
         historyKey: String,
     ): DbTimelineBookmark?
+
+    @Upsert
+    suspend fun save(binding: DbTimelineBinding)
+
+    @Query("SELECT * FROM DbTimelineBinding WHERE tabId = :tabId")
+    suspend fun binding(tabId: String): DbTimelineBinding?
+
+    @Query("SELECT COUNT(*) FROM DbTimelineBinding WHERE historyKey = :historyKey")
+    suspend fun bindingCount(historyKey: String): Int
+
+    @Query("DELETE FROM DbTimelineBinding WHERE tabId IN (:tabIds)")
+    suspend fun deleteBindings(tabIds: Set<String>)
+
+    @Query("DELETE FROM DbTimelineBookmark WHERE tabId IN (:tabIds)")
+    suspend fun deleteBookmarks(tabIds: Set<String>)
+
+    @Query("DELETE FROM DbTimelineHistory WHERE `key` = :historyKey")
+    suspend fun deleteHistory(historyKey: String)
+
+    @Query("DELETE FROM DbTimelineEntry WHERE historyKey = :historyKey")
+    suspend fun deleteEntries(historyKey: String)
+
+    @Query("DELETE FROM DbTimelineBatch WHERE historyKey = :historyKey")
+    suspend fun deleteBatches(historyKey: String)
+
+    @Query("DELETE FROM DbTimelineBinding")
+    suspend fun clearBindings()
 
     @Query("DELETE FROM DbTimelineBookmark WHERE tabId NOT IN (:tabIds)")
     suspend fun retainBookmarks(tabIds: List<String>)

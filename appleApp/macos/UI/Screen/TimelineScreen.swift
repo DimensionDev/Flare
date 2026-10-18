@@ -12,6 +12,7 @@ struct TimelineScreen: View {
     @Environment(\.timelineAppearance) private var timelineAppearance
     @Environment(\.appSettings) private var appSettings
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var canComposePresenter = KotlinPresenter(presenter: CanComposePresenter())
 
     init(tabItem: UiTimelineTabItem, allowGalleryMode: Bool = false, isHomeTimeline: Bool = false) {
@@ -42,8 +43,10 @@ struct TimelineScreen: View {
                 Button("home_timeline_view_latest") { presenter.state.reading?.showLatest() }
                     .buttonStyle(.borderedProminent)
                     .padding(.top, 8)
+                    .transition(reduceMotion ? .opacity : .move(edge: .top).combined(with: .opacity))
             }
         }
+        .animation(.easeInOut(duration: 0.2), value: presenter.state.reading?.hasNewContent)
         .refreshable {
             try? await presenter.state.refreshSuspend()
         }

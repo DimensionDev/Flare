@@ -40,6 +40,7 @@ internal class TimelineHistoryPagingSource(
     private val observers = CoroutineScope(SupervisorJob() + PlatformDispatchers.IO)
 
     init {
+        reader.invalidateVisibleHead()
         observers.launch(start = CoroutineStart.UNDISPATCHED) {
             database.invalidationTracker
                 .createFlow(
@@ -52,10 +53,23 @@ internal class TimelineHistoryPagingSource(
                     "timeline_item_presentation_reference",
                     "DbTranslation",
                     emitInitialState = false,
-                ).collect { invalidate() }
+                ).collect {
+                    reader.invalidateVisibleHead()
+                    invalidate()
+                }
         }
-        observers.launch(start = CoroutineStart.UNDISPATCHED) { history.activity.drop(1).collect { invalidate() } }
-        observers.launch(start = CoroutineStart.UNDISPATCHED) { reader.navigation.drop(1).collect { invalidate() } }
+        observers.launch(start = CoroutineStart.UNDISPATCHED) {
+            history.activity.drop(1).collect {
+                reader.invalidateVisibleHead()
+                invalidate()
+            }
+        }
+        observers.launch(start = CoroutineStart.UNDISPATCHED) {
+            reader.navigation.drop(1).collect {
+                reader.invalidateVisibleHead()
+                invalidate()
+            }
+        }
         registerInvalidatedCallback { observers.cancel() }
     }
 
@@ -77,34 +91,26 @@ internal class TimelineHistoryPagingSource(
             if (params is LoadParams.Refresh && reader.target.value != null) {
                 reader.restorationWindow.value = window.filter { it.timelineId != null }.map { it.itemKey }
             }
-            val ids = window.mapNotNull { it.timelineId }
-            val hydrated = database.pagingTimelineDao().getTimelinePageInCurrentTransaction(history.key, 0, limit, ids)
-            val items =
-                TimelinePagingMapper
-                    .toPageItems(
-                        hydrated,
-                        hydrated.map { item ->
-                            DbTimelinePageIdentity(
-                                item.timeline.statusId,
-                                item.timeline.sortId,
-                                item.timeline.messageRenderHash,
-                                item.timeline.contentRevision,
-                                item.timeline._id,
-                            )
-                        },
-                        history.key,
-                        mutableMapOf(),
-                    ).associateBy { it.baseItem.stableItemKey }
-            reader.headChanged(dao.head(history.key))
+            val items = reader.pageItems(window).filterValues { reader.isVisible(it.baseItem) }
+            reader.refreshHead()
+            reader.target.value?.let { target ->
+                if (window.any { it.itemKey == target.itemKey }) reader.targetHidden.value = target.itemKey !in items
+            }
             if (reader.current.value == null) {
-                window.firstOrNull { it.timelineId != null }?.let {
+                window.firstOrNull { it.itemKey in items }?.let {
                     reader.current.value = TimelineReadingPosition(it.itemKey, 0.0)
                 }
             }
             LoadResult.Page(
                 data =
                     window.mapNotNull { row ->
-                        if (row.timelineId != null) items[row.itemKey] else gap(row.itemKey, row.batchId)
+                        if (row.timelineId != null) {
+                            items[row.itemKey]
+                        } else if (reader.isGapVisible(row)) {
+                            gap(row.itemKey, row.batchId)
+                        } else {
+                            null
+                        }
                     },
                 prevKey =
                     window.firstOrNull()?.takeIf { offset > 0 }?.let {

@@ -731,4 +731,5 @@
     <string name="rss_open_mode_recommended">Recommended from recent articles. You can change this.</string>
     <string name="rss_open_mode_unknown">Could not recommend an opening mode. You can choose one.</string>
     <string name="rss_detail_unavailable">This article could not be loaded. You can open the original page.</string>
+    <string name="home_timeline_view_latest">View latest</string>
 </resources>

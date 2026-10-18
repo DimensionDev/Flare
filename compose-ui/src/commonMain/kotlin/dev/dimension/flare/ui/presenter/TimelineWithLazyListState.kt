@@ -52,8 +52,8 @@ public fun rememberTimelineItemPresenterWithLazyListState(
     lazyStaggeredGridState: LazyStaggeredGridState = rememberLazyStaggeredGridState(),
     leadingItemCount: Int = 0,
 ): TimelineWithLazyListState {
-    val baseState by producePresenter("timeline_${item.id}_$isHomeTimeline") {
-        remember(item, isHomeTimeline) { TimelineItemPresenter(item, isHomeTimeline) }.invoke()
+    val baseState by producePresenter("timeline_${item.id}_${item.contentSourceKey}_$isHomeTimeline") {
+        remember(item.id, item.contentSourceKey, isHomeTimeline) { TimelineItemPresenter(item, isHomeTimeline) }.invoke()
     }
     return rememberTimelineWithLazyListState(baseState, lazyStaggeredGridState, leadingItemCount, LocalDensity.current.density)
 }

@@ -41,8 +41,15 @@ public fun String.graphemeCount(): Int {
                 indicConsonant = true
                 indicLinker = false
             }
-            INDIC_LINKER -> indicLinker = indicConsonant
-            INDIC_EXTEND -> Unit
+
+            INDIC_LINKER -> {
+                indicLinker = indicConsonant
+            }
+
+            INDIC_EXTEND -> {
+                // Keep the pending Indic consonant/linker sequence.
+            }
+
             else -> {
                 indicConsonant = false
                 indicLinker = false

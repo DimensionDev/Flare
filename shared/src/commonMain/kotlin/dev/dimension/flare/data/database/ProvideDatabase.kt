@@ -26,7 +26,7 @@ internal fun provideCacheDatabase(driverFactory: DriverFactory): CacheDatabase =
     driverFactory
         .createBuilder<CacheDatabase>(CACHE_DATABASE_NAME, isCache = true)
         .fallbackToDestructiveMigration(dropAllTables = true)
-        .addMigrations(CacheDatabase.MIGRATION_48_49)
+        .addMigrations(CacheDatabase.MIGRATION_48_49, CacheDatabase.MIGRATION_49_50, CacheDatabase.MIGRATION_50_51)
         .addCallback(TimelineRevisionCallback)
         .setDriver(createDatabaseDriver())
         .setQueryCoroutineContext(PlatformDispatchers.IO)

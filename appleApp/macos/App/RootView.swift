@@ -170,12 +170,13 @@ struct RootView: View {
             .navigationSplitViewColumnWidth(min: 100, ideal: 200, max: 280)
         } detail: {
             if let selectedTab {
+                let displayedRoute = routeWithLatestTimelinePresentation(selectedTab)
                 Router(
-                    initialRoute: routeWithLatestTimelinePresentation(selectedTab),
+                    initialRoute: displayedRoute,
                     externalNavigationRequest: mainNavigationRequest
                 )
                 .navigationSplitViewColumnWidth(min: 280, ideal: 400, max: 500)
-                    .id(selectedTab)
+                    .id(HomeRouteIdentity(route: selectedTab, contentSourceKey: contentSourceKey(displayedRoute)))
                     .toolbar {
                         if case .success(let data) = onEnum(of: loggedInPresenter.state.isLoggedIn), !data.data.boolValue {
                             ToolbarItem(placement: .primaryAction) {
@@ -253,6 +254,11 @@ struct RootView: View {
                 selectedTab = route
             }
         }
+    }
+
+    private func contentSourceKey(_ route: Route) -> String? {
+        if case .timeline(let tab, isHome: true) = route { return tab.contentSourceKey }
+        return nil
     }
 
     private func routeWithLatestTimelinePresentation(_ route: Route) -> Route {
@@ -495,4 +501,9 @@ private func route(for tab: SecondaryTabsPresenter.Tab) -> Route? {
     case .timeline(let destination):
         return .timeline(destination.tabItem)
     }
+}
+
+private struct HomeRouteIdentity: Hashable {
+    let route: Route
+    let contentSourceKey: String?
 }

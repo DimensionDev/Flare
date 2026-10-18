@@ -61,10 +61,30 @@ class LiveHomeTimelineTest {
         // explicit item/geometry conditions below instead of global animation idle.
         Configurator.getInstance().waitForIdleTimeout = 500
         Log.i("HOME-ACCEPTANCE", "begin $phase")
+        readCache { db ->
+            db.prepare("PRAGMA user_version").use {
+                it.step()
+                println("HOME-CACHE version=${it.getLong(0)}")
+            }
+            db.prepare("SELECT count(*) FROM DbStatus").use {
+                it.step()
+                println("HOME-CACHE cachedPosts=${it.getLong(0)}")
+            }
+        }
         SystemClock.sleep(3000)
         when (phase) {
             "configure" -> {
                 configure()
+            }
+
+            "toggle-memory" -> {
+                select(ranked)
+                setRememberPosition(false)
+                select(ranked)
+                waitUntil { items().isNotEmpty() && items().all { !it.resourceName.contains("home-history/") } }
+                setRememberPosition(true)
+                select(ranked)
+                waitUntil { items().any { it.resourceName.contains("home-history/") } }
             }
 
             "capture" -> {
@@ -134,7 +154,12 @@ class LiveHomeTimelineTest {
 
     private fun find(selector: BySelector): UiObject2 =
         device.wait(Until.findObject(selector), 30_000)
-            ?: error("Required UI element missing: $selector")
+            ?: error(
+                "Required UI element missing: $selector; " +
+                    "homeList=${device.hasObject(By.res("home-timeline-list"))}, " +
+                    "navigation=${device.hasObject(By.desc(context.getString(R.string.open_navigation_menu)))}, " +
+                    "loginPrompt=${device.hasObject(By.text(context.getString(R.string.login_expired_relogin)))}",
+            )
 
     private fun click(selector: BySelector) {
         repeat(5) {
@@ -168,6 +193,7 @@ class LiveHomeTimelineTest {
     }
 
     private fun configure() {
+        revealToolbar()
         click(By.desc(context.getString(R.string.open_navigation_menu)))
         clickText(context.getString(R.string.settings_title))
         clickText(context.getString(R.string.settings_behavior_title))
@@ -184,20 +210,43 @@ class LiveHomeTimelineTest {
         device.pressBack()
     }
 
-    private fun selected(): String =
-        device
-            .findObject(By.res("home-timeline-title"))
-            ?.let { title ->
-                title.findObjects(By.text(Pattern.compile(".+"))).joinToString { it.text }
-            }.orEmpty()
+    private fun setRememberPosition(enabled: Boolean) {
+        revealToolbar()
+        click(By.desc(context.getString(R.string.open_navigation_menu)))
+        clickText(context.getString(R.string.settings_title))
+        clickText(context.getString(R.string.settings_behavior_title))
+        find(By.text(context.getString(R.string.settings_remember_home_timeline_position)))
+        waitUntil { device.findObjects(By.checkable(true)).size >= 2 }
+        val toggle = device.findObjects(By.checkable(true))[1]
+        if (toggle.isChecked != enabled) toggle.click()
+        waitUntil { device.findObjects(By.checkable(true))[1].isChecked == enabled }
+        device.pressBack()
+        device.pressBack()
+    }
+
+    private fun selected(): String {
+        instrumentation.uiAutomation.clearCache()
+        val title = device.findObject(By.res("home-timeline-title")) ?: return ""
+        return (listOfNotNull(title.text) + title.findObjects(By.text(Pattern.compile(".+"))).map { it.text }).joinToString()
+    }
 
     private fun waitForTitle(name: String) {
-        waitUntil { selected().contains(name) }
+        try {
+            waitUntil { selected().contains(name) }
+        } finally {
+            println("HOME-NAV expected=$name selected=${selected()} list=${device.hasObject(By.res("home-timeline-list"))}")
+        }
         assertTrue("Selected Home tab must be $name", selected().contains(name))
     }
 
     private fun select(name: String) {
-        find(By.res("home-timeline-title"))
+        val loginPrompt = By.text(context.getString(R.string.login_expired_relogin))
+        if (device.hasObject(loginPrompt)) {
+            println("HOME-NAV waiting for login notification")
+            assertTrue("Login notification must finish before using the toolbar", device.wait(Until.gone(loginPrompt), 20_000))
+            SystemClock.sleep(1500)
+        }
+        revealToolbar()
         if (!selected().contains(name)) {
             click(By.res("home-timeline-title"))
             clickText(name)
@@ -205,6 +254,21 @@ class LiveHomeTimelineTest {
         waitForTitle(name)
         waitUntil { items().isNotEmpty() }
         SystemClock.sleep(1500)
+    }
+
+    private fun revealToolbar() {
+        repeat(8) {
+            instrumentation.uiAutomation.clearCache()
+            val bounds = device.findObject(By.res("home-timeline-title"))?.visibleBounds
+            if (bounds != null && bounds.height() > 0) {
+                SystemClock.sleep(500)
+                instrumentation.uiAutomation.clearCache()
+                if (device.findObject(By.res("home-timeline-title"))?.visibleBounds == bounds) return
+            } else {
+                dragList(.32, .6)
+            }
+        }
+        find(By.res("home-timeline-title"))
     }
 
     private data class VisibleItem(
@@ -232,13 +296,14 @@ class LiveHomeTimelineTest {
 
     private fun scrollAndRemember(name: String): Bookmark {
         repeat(2) {
-            device.swipe(device.displayWidth / 2, device.displayHeight * 3 / 4, device.displayWidth / 2, device.displayHeight / 3, 75)
+            device.swipe(60, device.displayHeight * 3 / 4, 60, device.displayHeight / 3, 75)
+            SystemClock.sleep(1000)
         }
         // Use the outer list margin so a post's media gestures do not consume the drag.
         repeat(5) {
+            instrumentation.uiAutomation.clearCache()
             if (!device.hasObject(By.res("home-timeline-title"))) {
-                device.swipe(device.displayWidth - 12, device.displayHeight / 3, device.displayWidth - 12, device.displayHeight * 3 / 5, 75)
-                SystemClock.sleep(800)
+                dragList(.32, .6)
             }
         }
         find(By.res("home-timeline-title"))
@@ -269,11 +334,33 @@ class LiveHomeTimelineTest {
     }
 
     private fun setAutomaticRefresh(enabled: Boolean) {
+        revealToolbar()
         click(By.desc(context.getString(R.string.open_navigation_menu)))
         clickText(context.getString(R.string.settings_title))
         clickText(context.getString(R.string.settings_behavior_title))
-        clickText(context.getString(R.string.settings_home_timeline_auto_refresh_interval))
-        clickText(context.getString(if (enabled) R.string.settings_auto_refresh_one_minute else R.string.settings_auto_refresh_disabled))
+        val choices =
+            listOf(
+                R.string.settings_auto_refresh_disabled,
+                R.string.settings_auto_refresh_one_minute,
+                R.string.settings_auto_refresh_five_minutes,
+                R.string.settings_auto_refresh_fifteen_minutes,
+                R.string.settings_auto_refresh_thirty_minutes,
+                R.string.settings_auto_refresh_one_hour,
+            ).map(context::getString)
+        val choiceSelector = By.text(Pattern.compile(choices.joinToString("|") { Pattern.quote(it) }))
+        val headline = find(By.text(context.getString(R.string.settings_home_timeline_auto_refresh_interval)))
+        var row = headline.parent
+        while (row.findObjects(choiceSelector).isEmpty()) row = row.parent
+        val current = row.findObjects(choiceSelector).single()
+        val target = context.getString(if (enabled) R.string.settings_auto_refresh_one_minute else R.string.settings_auto_refresh_disabled)
+        if (current.text != target) {
+            current.click()
+            click(By.text(target))
+        }
+        waitUntil {
+            instrumentation.uiAutomation.clearCache()
+            device.hasObject(By.text(target)) && !device.hasObject(By.text(context.getString(R.string.settings_auto_refresh_five_minutes)))
+        }
         screenshot(if (enabled) "auto-refresh-enabled" else "auto-refresh-restored-off")
         device.pressBack()
         device.pressBack()
@@ -281,11 +368,15 @@ class LiveHomeTimelineTest {
 
     private fun newestBatch(kind: String): String =
         readCache { db ->
-            val prefix = if (kind == "ranked") "home-history/featured_%" else "home-history/mixed:%"
-            db.rawQuery("SELECT id FROM DbTimelineBatch WHERE historyKey LIKE ? ORDER BY ordinal LIMIT 1", arrayOf(prefix)).use {
-                check(it.step())
-                it.getText(0)
-            }
+            val key = historyKey(db, kind)
+            db
+                .rawQuery(
+                    "SELECT id FROM DbTimelineBatch WHERE historyKey = ? ORDER BY ordinal LIMIT 1",
+                    arrayOf(key),
+                ).use {
+                    check(it.step())
+                    it.getText(0)
+                }
         }
 
     private fun verifyAutomaticRefresh(
@@ -391,15 +482,35 @@ class LiveHomeTimelineTest {
 
     private fun historyItems(kind: String): List<String> =
         readCache { db ->
-            val prefix = if (kind == "ranked") "home-history/featured_%" else "home-history/mixed:%"
+            val key = historyKey(db, kind)
             db
                 .rawQuery(
-                    "SELECT e.itemKey FROM DbTimelineEntry e JOIN DbTimelineBatch b ON b.id=e.batchId WHERE e.historyKey LIKE ? ORDER BY b.ordinal,e.position",
-                    arrayOf(prefix),
+                    "SELECT e.itemKey FROM DbTimelineEntry e JOIN DbTimelineBatch b ON b.id=e.batchId WHERE e.historyKey = ? ORDER BY b.ordinal,e.position",
+                    arrayOf(key),
                 ).use {
                     buildList { while (it.step()) add(it.getText(0)) }
                 }
         }
+
+    private fun historyKey(
+        db: SQLiteConnection,
+        kind: String,
+    ): String {
+        val tabId = args.getString("${kind}TabId") ?: "mixed_timeline_system_home".takeIf { kind == "mixed" }
+        val keys =
+            if (tabId != null) {
+                db.rawQuery("SELECT historyKey FROM DbTimelineBinding WHERE tabId = ?", arrayOf(tabId))
+            } else {
+                // A mixed namespace also contains its featured child key. Match a
+                // bound leaf rather than accidentally combining both histories.
+                db.rawQuery(
+                    "SELECT DISTINCT historyKey FROM DbTimelineBinding WHERE historyKey LIKE ? AND historyKey NOT LIKE ?",
+                    arrayOf("home-history/%featured_%", "%mixed:%"),
+                )
+            }.use { statement -> buildList { while (statement.step()) add(statement.getText(0)) } }
+        check(keys.size == 1) { "Expected one $kind binding; provide -e ${kind}TabId for a custom fixture" }
+        return keys.single()
+    }
 
     private fun dragList(
         start: Double,
@@ -491,11 +602,15 @@ class LiveHomeTimelineTest {
         screenshot("$kind-gap-after-click")
         Log.i("HOME-ACCEPTANCE", "$kind-gap anchor before=$anchorBounds after=$actualAnchor")
         assertEquals("Gap predecessor top", anchorBounds.top, actualAnchor.top)
-        assertTrue("A clicked page must add real content", after.count > before.count)
         val following = historyItems(kind)
+        assertTrue("A clicked page must add real content", following.size > existing.size)
         val retained = existing.toSet()
         assertEquals("Existing items must retain their order", existing, following.filter { it in retained })
-        assertTrue("This live gap still has a continuation", after.cursor != null)
+        if (after.cursor == null) {
+            assertTrue("A completed gap must disappear", !device.hasObject(By.res(tag)))
+            Log.i("HOME-ACCEPTANCE", "$kind-gap joined old content; retained=${existing.size}")
+            return
+        }
         screenshot("$kind-gap-after-click")
         Log.i(
             "HOME-ACCEPTANCE",
@@ -572,6 +687,8 @@ class LiveHomeTimelineTest {
     }
 
     private fun screenshot(name: String) {
-        device.takeScreenshot(File(directory, "$name.png"))
+        if (args.getString("screenshots") == "true") {
+            device.takeScreenshot(File(directory, "$name.png"))
+        }
     }
 }

@@ -14,6 +14,7 @@ internal class ChannelTimelineRemoteMediator(
     private val accountKey: MicroBlogKey,
     private val id: String,
 ) : CacheableRemoteLoader<UiTimelineV2> {
+    override val canJoinHistory: Boolean = true
     override val pagingKey = "channel_${id}_$accountKey"
 
     override suspend fun load(

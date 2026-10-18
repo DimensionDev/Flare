@@ -8,7 +8,7 @@ import androidx.room3.RoomDatabaseConstructor
 import androidx.room3.withWriteTransaction
 import androidx.sqlite.async.executeSQL
 
-internal const val CACHE_DATABASE_VERSION = 49
+internal const val CACHE_DATABASE_VERSION = 51
 
 @Database(
     entities = [
@@ -34,6 +34,7 @@ internal const val CACHE_DATABASE_VERSION = 49
         dev.dimension.flare.data.database.cache.model.DbTimelineBatch::class,
         dev.dimension.flare.data.database.cache.model.DbTimelineEntry::class,
         dev.dimension.flare.data.database.cache.model.DbTimelineBookmark::class,
+        dev.dimension.flare.data.database.cache.model.DbTimelineBinding::class,
     ],
     version = CACHE_DATABASE_VERSION,
     exportSchema = false,
@@ -50,6 +51,32 @@ internal const val CACHE_DATABASE_VERSION = 49
 @ConstructedBy(CacheDatabaseConstructor::class)
 internal abstract class CacheDatabase : RoomDatabase() {
     companion object {
+        val MIGRATION_50_51 =
+            object : androidx.room3.migration.Migration(50, 51) {
+                override suspend fun migrate(connection: androidx.sqlite.SQLiteConnection) {
+                    connection.executeSQL("ALTER TABLE `DbTimelineBatch` ADD COLUMN `sourceHeads` TEXT DEFAULT NULL")
+                }
+            }
+
+        val MIGRATION_49_50 =
+            object : androidx.room3.migration.Migration(49, 50) {
+                override suspend fun migrate(connection: androidx.sqlite.SQLiteConnection) {
+                    connection.executeSQL("ALTER TABLE `DbTimelineBatch` ADD COLUMN `pageKeys` TEXT DEFAULT NULL")
+                    connection.executeSQL("ALTER TABLE `DbTimelineBatch` ADD COLUMN `gapAfterItemKey` TEXT DEFAULT NULL")
+                    connection.executeSQL("ALTER TABLE `DbTimelineEntry` ADD COLUMN `createdAt` INTEGER DEFAULT NULL")
+                    connection.executeSQL("ALTER TABLE `DbTimelineBookmark` ADD COLUMN `seenItemKey` TEXT DEFAULT NULL")
+                    connection.executeSQL("ALTER TABLE `DbTimelineBookmark` ADD COLUMN `seenOrdinal` INTEGER DEFAULT NULL")
+                    connection.executeSQL("ALTER TABLE `DbTimelineBookmark` ADD COLUMN `seenPosition` INTEGER DEFAULT NULL")
+                    connection.executeSQL(
+                        "CREATE TABLE IF NOT EXISTS `DbTimelineBinding` (`tabId` TEXT NOT NULL, `historyKey` TEXT NOT NULL, `generation` TEXT NOT NULL, PRIMARY KEY(`tabId`))",
+                    )
+                    connection.executeSQL(
+                        "CREATE INDEX IF NOT EXISTS `index_DbTimelineBinding_historyKey` ON `DbTimelineBinding` (`historyKey`)",
+                    )
+                    connection.executeSQL("INSERT INTO `DbTimelineBinding` SELECT tabId, historyKey, tabId FROM `DbTimelineBookmark`")
+                }
+            }
+
         val MIGRATION_48_49 =
             object : androidx.room3.migration.Migration(48, 49) {
                 override suspend fun migrate(connection: androidx.sqlite.SQLiteConnection) {

@@ -766,6 +766,51 @@ class TimelineHistoryTest : RobolectricTest() {
         }
 
     @Test
+    fun aThousandNewPostsKeepTheRefreshWindowCenteredOnTheCurrentItem() =
+        runTest {
+            var response: PagingResult<UiTimelineV2> = PagingResult((1..200).map(::historyTestPost), nextKey = "older")
+            var requests = 0
+            val history =
+                assertNotNull(
+                    store.open(
+                        source {
+                            requests++
+                            response
+                        },
+                        false,
+                    ),
+                )
+            history.refresh()
+            val reader = TimelineReader("tab", history, database, store, backgroundScope)
+            reader.restore()
+            val dao = database.timelineHistoryDao()
+            val before = dao.page(history.key, 0, 200)
+            val anchor = before[160]
+            reader.viewportChanged(anchor.itemKey, -42.5)
+            response = PagingResult((201..1200).map(::historyTestPost), nextKey = "newer")
+            history.refresh()
+            val refreshedRows = dao.page(history.key, 0, 2000)
+            assertEquals(1200, refreshedRows.count { it.timelineId != null })
+            assertEquals(before, refreshedRows.takeLast(before.size))
+            val paging = TimelineHistoryPagingSource(database, reader) { error("A local page cannot click a gap") }
+            try {
+                val refreshed =
+                    assertIs<PagingSource.LoadResult.Page<TimelineHistoryPagingKey, TimelinePageItem>>(
+                        paging.load(PagingSource.LoadParams.Refresh(null, 20, false)),
+                    )
+                assertEquals(20, refreshed.data.size)
+                assertEquals(anchor.itemKey, refreshed.data[6].baseItem.stableItemKey)
+                assertEquals(anchor.itemKey, reader.current.value?.itemKey)
+                assertEquals(-42.5, reader.current.value?.offset)
+                assertNotNull(refreshed.prevKey)
+                assertNotNull(refreshed.nextKey)
+                assertEquals(2, requests, "Rebuilding the reading window must not fetch remote pages")
+            } finally {
+                paging.invalidate()
+            }
+        }
+
+    @Test
     fun aDeletedBookmarkFallsForwardAndAnUnrelatedSourceDoesNotInheritIt() =
         runTest {
             val loader = source { page(4, 3, 2, 1) }

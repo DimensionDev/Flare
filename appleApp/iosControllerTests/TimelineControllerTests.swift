@@ -1038,6 +1038,29 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         }
     }
 
+    func testAThousandPrependedPostsKeepTheReadingItemInOneAndTwoColumns() async throws {
+        for columns in [1, 2] {
+            let fixture = await Fixture(posts: true, columns: columns)
+            await fixture.scroll(2_500)
+            let expected = try fixture.position()
+            fixture.input.items.insert(contentsOf: (1_000..<2_000).map { .post(makeRow($0)) }, at: 0)
+            await fixture.apply()
+            try fixture.assertPosition(expected)
+            XCTAssertFalse(fixture.collection.hasReadingPosition)
+        }
+    }
+
+    func testAThousandPrependedGalleryPostsKeepTheReadingItem() async throws {
+        let fixture = await GalleryFixture()
+        fixture.collection.setContentOffset(CGPoint(x: 0, y: 2_500), animated: false)
+        await fixture.settle()
+        let expected = try fixture.position()
+        fixture.content.items.insert(contentsOf: (1_000..<2_000).map { .post(makeRow($0)) }, at: 0)
+        fixture.controller.submit(fixture.content)
+        await fixture.settle()
+        try fixture.assertPosition(expected)
+    }
+
     func testReplacementAfterRefreshRespectsTheAppBarInset() async {
         let fixture = await Fixture(posts: true)
         fixture.controller.topContentInset = 74

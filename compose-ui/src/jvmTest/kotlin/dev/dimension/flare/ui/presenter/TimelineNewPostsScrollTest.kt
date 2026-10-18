@@ -55,6 +55,61 @@ class TimelineNewPostsScrollTest {
     fun returningToADisposedTabKeepsItsOffsetWithContentPadding() = checkReturningTab(PaddingValues(top = 40.dp))
 
     @Test
+    fun refreshingADeepWindowKeepsTheReadingItemAfterTheWindowShrinks() = checkShrinkingWindow(columns = 1)
+
+    @Test
+    fun refreshingADeepTwoColumnWindowKeepsTheReadingItemAfterTheWindowShrinks() = checkShrinkingWindow(columns = 2)
+
+    private fun checkShrinkingWindow(columns: Int) {
+        val pages = MutableStateFlow(page(0..199))
+        val scroll = LazyStaggeredGridState()
+        val reading = Reading(TimelineReadingPosition("post-160", -25.0))
+        lateinit var state: TimelineWithLazyListState
+        composeRule.setContent {
+            val paging = pages.collectAsLazyPagingItems().toPagingState()
+            val base =
+                object : TimelineItemPresenter.State {
+                    override val listState = paging
+                    override val reading = reading
+                    override val isRefreshing = false
+
+                    override fun refreshSync() = Unit
+
+                    override suspend fun refreshSuspend() = Unit
+                }
+            val timeline = rememberTimelineWithLazyListState(base, scroll)
+            SideEffect { state = timeline }
+            LazyVerticalStaggeredGrid(StaggeredGridCells.Fixed(columns), Modifier.size(300.dp, 150.dp), state = scroll) {
+                paging.onSuccess {
+                    items(itemCount, key = itemKey { it.stableItemKey }) { Box(Modifier.fillMaxWidth().height(100.dp)) }
+                }
+            }
+        }
+        composeRule.waitUntil { reading.restorePosition == null }
+        composeRule.runOnIdle {
+            assertEquals(
+                -25,
+                scroll.layoutInfo.visibleItemsInfo
+                    .first { it.key == "post-160" }
+                    .offset.y,
+            )
+            // A history refresh reloads a bounded page around the stable item,
+            // even when a large number of newly fetched posts precedes it in DB.
+            pages.value = page(154..173)
+        }
+        composeRule.waitUntil { (state.listState as? PagingState.Success)?.itemCount == 20 }
+        composeRule.runOnIdle {
+            assertEquals(
+                -25,
+                scroll.layoutInfo.visibleItemsInfo
+                    .firstOrNull { it.key == "post-160" }
+                    ?.offset
+                    ?.y,
+            )
+        }
+    }
+
+    @Test
     fun restoringAtFractionalDensityKeepsTheExactPixelOffset() {
         val pages = MutableStateFlow(page(0..19))
         val scroll = LazyStaggeredGridState()

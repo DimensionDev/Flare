@@ -5,6 +5,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.core.DataStoreFactory
 import androidx.datastore.core.okio.OkioSerializer
 import dev.dimension.flare.common.protobufSerializer
+import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.datastore.createDataStoreStorage
 import dev.dimension.flare.data.datastore.model.AppSettings
@@ -33,6 +34,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.sync.Mutex
@@ -47,6 +49,7 @@ public class SettingsRepository internal constructor(
     private val fileStorage: FileStorage,
     private val appDataStore: AppDataStore,
     private val timelineResolver: TimelineResolver,
+    private val cacheDatabase: CacheDatabase,
 ) {
     private val appearanceBagStore by lazy {
         createDataStore(
@@ -182,7 +185,17 @@ public class SettingsRepository internal constructor(
 
     internal suspend fun updateTabSettingsV2(block: TabSettingsV2.() -> TabSettingsV2) {
         ensureTabSettingsMigrated()
-        tabSettingsV2Store.updateData(block)
+        val before =
+            tabSettingsV2Store.data
+                .first()
+                .homeSlots
+                .map(timelineResolver::toTabItem)
+        val after = tabSettingsV2Store.updateData(block).homeSlots.map(timelineResolver::toTabItem)
+        before.forEach { previous ->
+            if (after.findById(previous.id)?.contentSourceKey != previous.contentSourceKey) {
+                cacheDatabase.pagingTimelineDao().deleteTabPosition(previous.id)
+            }
+        }
     }
 
     public suspend fun removeHomeTimelineTabBySourceId(sourceId: String) {

@@ -20,6 +20,7 @@ internal class ListTimelineRemoteMediator(
     private val service: XQTService,
     private val accountKey: MicroBlogKey,
 ) : CacheableRemoteLoader<UiTimelineV2> {
+    override val canJoinTimeline: Boolean = true
     override val pagingKey: String = "list_${listId}_$accountKey"
 
     @Serializable

@@ -39,6 +39,7 @@ struct RootView: View {
                                     title: tab.macOSTitle,
                                     icon: tab.macOSIcon,
                                     liveTabs: tabs,
+                                    initialSelectedTabId: homeTimelineWithTabsPresenter.state.initialSelectedTabId,
                                     selectedTab: $selectedTab,
                                     isExpanded: $homeExpanded,
                                     onEditTab: { tab, onSave in
@@ -169,12 +170,13 @@ struct RootView: View {
             .navigationSplitViewColumnWidth(min: 100, ideal: 200, max: 280)
         } detail: {
             if let selectedTab {
+                let displayedRoute = routeWithLatestTimelinePresentation(selectedTab)
                 Router(
-                    initialRoute: routeWithLatestTimelinePresentation(selectedTab),
+                    initialRoute: displayedRoute,
                     externalNavigationRequest: mainNavigationRequest
                 )
                 .navigationSplitViewColumnWidth(min: 280, ideal: 400, max: 500)
-                    .id(selectedTab)
+                    .id(HomeRouteIdentity(route: selectedTab, contentSourceKey: contentSourceKey(displayedRoute)))
                     .toolbar {
                         if case .success(let data) = onEnum(of: loggedInPresenter.state.isLoggedIn), !data.data.boolValue {
                             ToolbarItem(placement: .primaryAction) {
@@ -226,6 +228,11 @@ struct RootView: View {
             )
             .frame(minWidth: 820, idealWidth: 860, minHeight: 600, idealHeight: 660)
         }
+        .onChange(of: selectedTab) { _, route in
+            if case .timeline(let tab, isHome: true) = route {
+                homeTimelineWithTabsPresenter.state.selectTab(tabId: tab.id)
+            }
+        }
         .onAppear {
             handleMainWindowNavigationRequest(mainWindowCoordinator.navigationRequest)
         }
@@ -247,6 +254,11 @@ struct RootView: View {
                 selectedTab = route
             }
         }
+    }
+
+    private func contentSourceKey(_ route: Route) -> String? {
+        if case .timeline(let tab, isHome: true) = route { return tab.contentSourceKey }
+        return nil
     }
 
     private func routeWithLatestTimelinePresentation(_ route: Route) -> Route {
@@ -489,4 +501,9 @@ private func route(for tab: SecondaryTabsPresenter.Tab) -> Route? {
     case .timeline(let destination):
         return .timeline(destination.tabItem)
     }
+}
+
+private struct HomeRouteIdentity: Hashable {
+    let route: Route
+    let contentSourceKey: String?
 }

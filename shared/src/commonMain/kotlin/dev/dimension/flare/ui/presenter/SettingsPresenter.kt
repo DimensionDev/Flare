@@ -116,6 +116,10 @@ public class SettingsPresenter : PresenterBase<SettingsPresenter.State>() {
 
             override fun updateShowNumbers(value: Boolean) = update(AppearanceKeys.ShowNumbers, value)
 
+            override fun updateRememberHomeTimelinePosition(value: Boolean) {
+                updateAppSettings { copy(rememberHomeTimelinePosition = value) }
+            }
+
             override fun updateRefreshHomeTimelineOnLaunch(value: Boolean) {
                 updateAppSettings {
                     copy(refreshHomeTimelineOnLaunch = value)
@@ -203,6 +207,8 @@ public class SettingsPresenter : PresenterBase<SettingsPresenter.State>() {
         public fun updatePostActionFixedWidth(value: Boolean)
 
         public fun updateShowNumbers(value: Boolean)
+
+        public fun updateRememberHomeTimelinePosition(value: Boolean)
 
         public fun updateRefreshHomeTimelineOnLaunch(value: Boolean)
 

@@ -1,10 +1,110 @@
 import XCTest
 import UIKit
 import SwiftUI
-import CHTCollectionViewWaterfallLayout
+import CHTCollectionViewWaterfallLayoutObjC
 
 @MainActor
 final class TimelineCollectionViewTests: XCTestCase {
+    func testHeightPublicationDuringTopRefreshCollapseKeepsReadingPosition() async throws {
+        let fixture = Fixture(width: 402, columns: 1)
+        let window = fixture.showInWindow()
+        defer { window.isHidden = true }
+        let view = fixture.collectionView
+        view.alwaysBounceVertical = true
+        view.contentInsetAdjustmentBehavior = .automatic
+        window.rootViewController?.additionalSafeAreaInsets.top = 100
+        view.setTopContentInset(39)
+        window.layoutIfNeeded()
+        fixture.settle()
+        let restingInset = view.adjustedContentInset.top
+        fixture.scroll(to: -restingInset)
+        view.refreshControl = UIRefreshControl()
+        view.beginRefreshing(revealingIndicator: true)
+        try await Task.sleep(for: .milliseconds(400))
+        fixture.settle()
+
+        view.endRefreshing()
+        try await Task.sleep(for: .milliseconds(30))
+        XCTAssertLessThan(view.contentOffset.y, -view.adjustedContentInset.top - 1)
+        XCTAssertTrue(view.shouldDeferSnapshotChanges)
+        let oldOffset = view.contentOffset.y
+        view.invalidateMeasuredHeights {
+            fixture.heightOverride = { id, width in
+                Cell.height(index: id, width: width) + (id == 0 ? 35 : 0)
+            }
+            return true
+        }
+        XCTAssertEqual(view.contentOffset.y, oldOffset, accuracy: 0.5, "Height publication must preserve the in-flight collapse position")
+        try await Task.sleep(for: .milliseconds(400))
+        fixture.settle()
+        // Bookmark cleanup is dispatched outside the collection's layout pass.
+        try await Task.sleep(for: .milliseconds(10))
+        XCTAssertEqual(view.contentOffset.y, -restingInset, accuracy: 0.5)
+        XCTAssertFalse(view.isPresentingRefresh)
+        XCTAssertFalse(view.hasReadingPosition)
+    }
+
+    func testMeasuringAnotherColumnDoesNotMoveTheCurrentReadingItem() throws {
+        let fixture = Fixture(width: 900, columns: 2)
+        var otherColumnHeight: CGFloat = 100
+        fixture.heightOverride = { index, _ in
+            index == 0 ? 600 : (index == 1 ? otherColumnHeight : 100)
+        }
+        fixture.collectionView.collectionViewLayout.invalidateLayout()
+        fixture.settle()
+        fixture.scroll(to: 350)
+        let position = try fixture.readingPosition()
+        XCTAssertEqual(position.id, "0")
+        fixture.collectionView.invalidateMeasuredHeights {
+            otherColumnHeight += 41
+            return true
+        }
+        fixture.settle()
+        try fixture.assertPosition(position)
+    }
+
+    func testOffsetCompensationReusesGeometryButDoesNotHideTheNextInvalidation() throws {
+        let fixture = Fixture(width: 390, columns: 1)
+        let layout = try XCTUnwrap(fixture.collectionView.collectionViewLayout as? TimelineWaterfallLayout)
+        fixture.sizingQueries = 0
+        layout.readingOffset = { 150 }
+        layout.prepare()
+        fixture.settle()
+        XCTAssertEqual(fixture.collectionView.contentOffset.y, 150, accuracy: 0.5)
+        XCTAssertEqual(fixture.sizingQueries, 0, "An offset adjustment must reuse the committed geometry")
+        layout.readingOffset = nil
+
+        let before = try XCTUnwrap(layout.layoutAttributesForItem(at: IndexPath(item: 10, section: 0))).frame
+        fixture.extraHeight = 20
+        layout.invalidateLayout()
+        fixture.settle()
+        XCTAssertEqual(fixture.sizingQueries, 120, "A later height change still requires one complete layout")
+        let after = try XCTUnwrap(layout.layoutAttributesForItem(at: IndexPath(item: 10, section: 0))).frame
+        XCTAssertGreaterThan(after.minY, before.minY)
+    }
+
+    func testPrependResolvesTheViewportBeforeConfiguringCells() throws {
+        let fixture = Fixture(width: 390, columns: 1)
+        fixture.scroll(to: 2_500)
+        let position = try fixture.readingPosition()
+        let layout = try XCTUnwrap(fixture.collectionView.collectionViewLayout as? TimelineWaterfallLayout)
+        layout.readingOffset = {
+            guard let path = fixture.dataSource.indexPath(for: position.id),
+                  let frame = layout.layoutAttributesForItem(at: path)?.frame else { return nil }
+            return frame.minY - position.distance
+        }
+        defer { layout.readingOffset = nil }
+        fixture.configuredItems = []
+        var snapshot = fixture.dataSource.snapshot()
+        snapshot.insertItems((-20..<0).map(String.init), beforeItem: "0")
+        fixture.dataSource.apply(snapshot, animatingDifferences: false)
+        fixture.settle()
+        try fixture.assertPosition(position)
+        XCTAssertNotNil(fixture.collectionView.cellForItem(at: try XCTUnwrap(fixture.dataSource.indexPath(for: position.id))))
+        XCTAssertFalse(fixture.configuredItems.contains { $0.hasPrefix("-") },
+                       "The old offset must not materialize prepended cells outside the final viewport")
+    }
+
     func testRoundTripKeepsTheOriginalItemWhenAnotherColumnStartsEarlier() throws {
         let fixture = Fixture(width: 390, columns: 1)
         let frame = try XCTUnwrap(fixture.collectionView.layoutAttributesForItem(at: IndexPath(item: 1, section: 0))).frame
@@ -208,6 +308,37 @@ final class TimelineCollectionViewTests: XCTestCase {
         fixture.settle()
 
         try fixture.assertPosition(position)
+    }
+
+    func testPublishingMeasuredHeightsCapturesTheOldLayoutBeforeCommit() throws {
+        let fixture = Fixture(width: 390, columns: 1)
+        fixture.scroll(to: 3_000)
+        let path = try XCTUnwrap(fixture.collectionView.indexPathsForVisibleItems
+            .sorted().first { fixture.collectionView.layoutAttributesForItem(at: $0)!.frame.minY >= 3_000 })
+        let id = try XCTUnwrap(fixture.dataSource.itemIdentifier(for: path))
+        let offset = try XCTUnwrap(fixture.collectionView.layoutAttributesForItem(at: path)).frame.minY - 3_000
+        fixture.collectionView.invalidateMeasuredHeights {
+            fixture.extraHeight = 224
+            return true
+        }
+        fixture.settle()
+        try fixture.assertPosition(Position(id: id, distance: offset))
+    }
+
+    func testDiscardedMeasurementsAllowThePendingReadingPositionToFinish() {
+        let fixture = Fixture(width: 390, columns: 1)
+        fixture.scroll(to: 3_000)
+        var ready = false
+        fixture.collectionView.isReadingLayoutReady = { _ in ready }
+        fixture.collectionView.prepareForLayoutChange(preferringVisibleTop: true)
+        XCTAssertTrue(fixture.collectionView.hasReadingPosition)
+        fixture.collectionView.invalidateMeasuredHeights {
+            ready = true
+            return false
+        }
+        fixture.collectionView.layoutIfNeeded()
+        RunLoop.main.run(until: Date().addingTimeInterval(0.01))
+        XCTAssertFalse(fixture.collectionView.hasReadingPosition)
     }
 
     func testRemovedReadingItemFallsForwardToTheNextSurvivingItem() throws {
@@ -761,6 +892,8 @@ final class TimelineCollectionViewTests: XCTestCase {
         var columns: Int
         var extraHeight: CGFloat = 0
         var heightOverride: ((Int, CGFloat) -> CGFloat)?
+        var sizingQueries = 0
+        var configuredItems: [String] = []
 
         init(width: CGFloat, columns: Int) {
             self.columns = columns
@@ -771,7 +904,8 @@ final class TimelineCollectionViewTests: XCTestCase {
             super.init()
             collectionView.delegate = self
             collectionView.contentInsetAdjustmentBehavior = .never
-            let registration = UICollectionView.CellRegistration<Cell, String> { cell, _, id in
+            let registration = UICollectionView.CellRegistration<Cell, String> { [weak self] cell, _, id in
+                self?.configuredItems.append(id)
                 cell.index = Int(id)!
             }
             dataSource = UICollectionViewDiffableDataSource<Int, String>(collectionView: collectionView) { view, path, id in
@@ -845,6 +979,7 @@ final class TimelineCollectionViewTests: XCTestCase {
         }
 
         func collectionView(_ view: UICollectionView, layout: UICollectionViewLayout, sizeForItemAt path: IndexPath) -> CGSize {
+            sizingQueries += 1
             let width = (view.bounds.width - CGFloat(columns - 1) * 8) / CGFloat(columns)
             let index = Int(dataSource.itemIdentifier(for: path)!)!
             return CGSize(width: width, height: heightOverride?(index, width) ?? (Cell.height(index: index, width: width) + extraHeight))
@@ -855,7 +990,7 @@ final class TimelineCollectionViewTests: XCTestCase {
         }
 
         static func layout(columns: Int) -> UICollectionViewLayout {
-            let layout = CHTCollectionViewWaterfallLayout()
+            let layout = TimelineWaterfallLayout()
             layout.columnCount = columns
             layout.minimumColumnSpacing = 8
             layout.minimumInteritemSpacing = 2

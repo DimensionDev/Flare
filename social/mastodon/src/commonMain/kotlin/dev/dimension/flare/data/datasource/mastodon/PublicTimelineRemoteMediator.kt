@@ -15,6 +15,7 @@ internal class PublicTimelineRemoteMediator(
     private val accountKey: MicroBlogKey,
     private val local: Boolean,
 ) : CacheableRemoteLoader<UiTimelineV2> {
+    override val canJoinTimeline: Boolean = true
     override val pagingKey: String =
         buildString {
             append("public_timeline")

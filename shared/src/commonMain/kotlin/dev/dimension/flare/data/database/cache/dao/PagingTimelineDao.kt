@@ -24,6 +24,7 @@ import dev.dimension.flare.data.database.cache.model.DbStatusWithUser
 import dev.dimension.flare.data.database.cache.model.DbTimelineItemPresentationReference
 import dev.dimension.flare.data.database.cache.model.DbTimelineItemPresentationReferenceWithStatus
 import dev.dimension.flare.data.database.cache.model.DbTimelineItemPresentationType
+import dev.dimension.flare.data.database.cache.model.DbTimelinePosition
 import dev.dimension.flare.data.database.cache.model.DbTranslation
 import dev.dimension.flare.data.database.cache.model.TranslationEntityType
 import dev.dimension.flare.model.AccountType
@@ -63,6 +64,7 @@ private const val TIMELINE_WITH_STATUS_QUERY =
         "DbPagingTimeline.pagingKey AS pagingKey, " +
         "DbPagingTimeline.statusId AS statusId, " +
         "DbPagingTimeline.sortId AS sortId, " +
+        "DbPagingTimeline.isGap AS isGap, " +
         "DbPagingTimeline.message AS message, " +
         "DbPagingTimeline.notificationKey AS notificationKey, " +
         "DbPagingTimeline.messageRenderHash AS messageRenderHash, " +
@@ -434,6 +436,67 @@ internal interface PagingTimelineDao {
     @Query("SELECT MIN(sortId) FROM DbPagingTimeline WHERE pagingKey = :pagingKey")
     suspend fun getMinSortId(pagingKey: String): Long?
 
+    @Query("SELECT MAX(sortId) FROM DbPagingTimeline WHERE pagingKey = :pagingKey AND (:before IS NULL OR sortId < :before)")
+    suspend fun getPreviousSortId(
+        pagingKey: String,
+        before: Long?,
+    ): Long?
+
+    @Query("SELECT * FROM DbPagingTimeline WHERE pagingKey = :pagingKey AND _id = :id LIMIT 1")
+    suspend fun getRow(
+        pagingKey: String,
+        id: String,
+    ): DbPagingTimeline?
+
+    @Query("SELECT * FROM DbPagingTimeline WHERE pagingKey = :pagingKey ORDER BY sortId LIMIT 1")
+    suspend fun getFirstRow(pagingKey: String): DbPagingTimeline?
+
+    @Query("SELECT * FROM DbPagingTimeline WHERE pagingKey = :pagingKey AND pagingKey || '_' || statusId = :itemKey LIMIT 1")
+    suspend fun getRowByItemKey(
+        pagingKey: String,
+        itemKey: String,
+    ): DbPagingTimeline?
+
+    @Query("SELECT COUNT(*) FROM DbPagingTimeline WHERE pagingKey = :pagingKey AND sortId < :sortId")
+    suspend fun getOffset(
+        pagingKey: String,
+        sortId: Long,
+    ): Int
+
+    @Query("SELECT * FROM DbTimelinePosition WHERE tabId = :tabId LIMIT 1")
+    suspend fun getPosition(tabId: String): DbTimelinePosition?
+
+    @Query("DELETE FROM DbTimelinePosition WHERE pagingKey = :pagingKey")
+    suspend fun deletePositions(pagingKey: String)
+
+    @Query("DELETE FROM DbTimelinePosition WHERE tabId = :tabId")
+    suspend fun deleteTabPosition(tabId: String)
+
+    @Query(
+        "UPDATE DbTimelinePosition SET sortId = COALESCE(" +
+            "(SELECT sortId FROM DbPagingTimeline WHERE pagingKey = :pagingKey AND pagingKey || '_' || statusId = itemKey), sortId) " +
+            "WHERE pagingKey = :pagingKey",
+    )
+    suspend fun refreshPositionRanks(pagingKey: String)
+
+    @Query("SELECT * FROM DbPagingKey WHERE pagingKey LIKE 'home:%'")
+    suspend fun getHomeKeys(): List<DbPagingKey>
+
+    @Query("DELETE FROM DbStatus WHERE id IN (SELECT statusId FROM DbPagingTimeline WHERE pagingKey = :pagingKey AND isGap = 1)")
+    suspend fun deleteGaps(pagingKey: String)
+
+    @Transaction
+    suspend fun clearHomeTimeline(pagingKey: String) {
+        deleteGaps(pagingKey)
+        deletePresentationReferences(pagingKey)
+        delete(pagingKey)
+        deletePagingKey(pagingKey)
+        deletePositions(pagingKey)
+    }
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertPosition(position: DbTimelinePosition)
+
     @Transaction
     @Query(
         TIMELINE_WITH_STATUS_QUERY +
@@ -531,6 +594,21 @@ internal interface PagingTimelineDao {
 
     @Query("SELECT EXISTS(SELECT 1 FROM DbPagingTimeline WHERE pagingKey = :pagingKey)")
     suspend fun anyPaging(pagingKey: String): Boolean
+
+    @Query("DELETE FROM DbTimelinePosition")
+    suspend fun clearPositions()
+
+    @Query("DELETE FROM DbStatus WHERE id IN (SELECT statusId FROM DbPagingTimeline WHERE pagingKey LIKE 'home:%' AND isGap = 1)")
+    suspend fun clearHomeGaps()
+
+    @Query("DELETE FROM timeline_item_presentation_reference WHERE pagingKey LIKE 'home:%'")
+    suspend fun clearHomePresentationReferences()
+
+    @Query("DELETE FROM DbPagingTimeline WHERE pagingKey LIKE 'home:%'")
+    suspend fun clearHomeRows()
+
+    @Query("DELETE FROM DbPagingKey WHERE pagingKey LIKE 'home:%'")
+    suspend fun clearHomeKeys()
 
     @Query("SELECT * FROM DbPagingKey WHERE pagingKey = :pagingKey LIMIT 1")
     suspend fun getPagingKey(pagingKey: String): DbPagingKey?

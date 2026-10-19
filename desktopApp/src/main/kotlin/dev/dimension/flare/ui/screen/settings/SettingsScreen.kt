@@ -237,6 +237,8 @@ import dev.dimension.flare.settings_post_action_fixed_width_description
 import dev.dimension.flare.settings_privacy_policy
 import dev.dimension.flare.settings_refresh_home_timeline_on_launch
 import dev.dimension.flare.settings_refresh_home_timeline_on_launch_description
+import dev.dimension.flare.settings_remember_home_timeline_position
+import dev.dimension.flare.settings_remember_home_timeline_position_description
 import dev.dimension.flare.settings_rss_management_description
 import dev.dimension.flare.settings_rss_management_title
 import dev.dimension.flare.settings_services_title
@@ -1296,6 +1298,18 @@ internal fun SettingsScreen(
             }
 
             Header(stringResource(Res.string.settings_behavior_title))
+            CardExpanderItem(
+                icon = null,
+                heading = { Text(stringResource(Res.string.settings_remember_home_timeline_position)) },
+                caption = { Text(stringResource(Res.string.settings_remember_home_timeline_position_description)) },
+                trailing = {
+                    Switcher(
+                        checked = appSettings.rememberHomeTimelinePosition,
+                        onCheckStateChange = { value -> state.updateAppSettings { copy(rememberHomeTimelinePosition = value) } },
+                        textBefore = true,
+                    )
+                },
+            )
             CardExpanderItem(
                 icon = null,
                 heading = {

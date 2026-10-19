@@ -1,7 +1,11 @@
 package dev.dimension.flare.ui.presenter
 
+import androidx.room3.Room
+import dev.dimension.flare.RobolectricTest
 import dev.dimension.flare.createTestFileSystem
 import dev.dimension.flare.createTestRootPath
+import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.database.createDatabaseDriver
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.datastore.model.AppSettings
 import dev.dimension.flare.data.io.OkioFileStorage
@@ -34,11 +38,13 @@ import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.deleteTestRootPath
 import dev.dimension.flare.di.startKoin
 import dev.dimension.flare.di.testSingle
+import dev.dimension.flare.memoryDatabaseBuilder
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.testPlatformRuntimeData
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.unavailableAccountService
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.first
@@ -57,18 +63,27 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
-class SettingsImportExportPresenterTest {
+class SettingsImportExportPresenterTest : RobolectricTest() {
+    private lateinit var cacheDatabase: CacheDatabase
     private val json = Json { ignoreUnknownKeys = true }
     private lateinit var root: Path
     private lateinit var settingsRepository: SettingsRepository
 
     @BeforeTest
     fun setup() {
+        cacheDatabase =
+            Room
+                .memoryDatabaseBuilder<CacheDatabase>()
+                .setDriver(
+                    createDatabaseDriver(),
+                ).setQueryCoroutineContext(Dispatchers.Unconfined)
+                .build()
         root = createTestRootPath()
         val fileStorage = OkioFileStorage(createTestFileSystem(), root)
         settingsRepository =
             SettingsRepository(
                 fileStorage = fileStorage,
+                cacheDatabase = cacheDatabase,
                 appDataStore = AppDataStore(fileStorage),
                 timelineResolver = TimelineResolver(testPlatformRuntimeData(), unavailableAccountService()),
             )
@@ -83,6 +98,7 @@ class SettingsImportExportPresenterTest {
 
     @AfterTest
     fun tearDown() {
+        cacheDatabase.close()
         stopKoin()
         deleteTestRootPath(root)
     }

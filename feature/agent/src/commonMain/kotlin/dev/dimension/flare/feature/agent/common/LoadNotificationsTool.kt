@@ -96,7 +96,7 @@ internal class LoadNotificationsTool(
                             listOfNotNull(item.user)
                         }
 
-                        is UiTimelineV2.Feed -> {
+                        is UiTimelineV2.Gap, is UiTimelineV2.Feed -> {
                             emptyList()
                         }
                     }
@@ -212,6 +212,7 @@ private fun String.toNotificationFilterOrNull(): NotificationFilter? {
 
 private fun UiTimelineV2.toNotificationItemToolText(): String =
     when (this) {
+        is UiTimelineV2.Gap -> ""
         is UiTimelineV2.TimelinePostItem -> toNotificationPostToolText()
         is UiTimelineV2.Post -> toNotificationPostToolText()
         is UiTimelineV2.Message -> toNotificationMessageToolText()

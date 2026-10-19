@@ -185,6 +185,7 @@ private struct TimelinePagingRowView: View {
                 }
             }
         }
+        .timelineReadingItem(row.item)
         .onAppear {
             onDisplay(row.index)
         }

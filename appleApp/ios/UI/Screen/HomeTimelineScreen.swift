@@ -95,7 +95,7 @@ struct HomeTimelineScreen: View {
                             }
                         }
                     } else {
-                        let tab = selectedTabId.flatMap { id in
+                        let tab = (selectedTabId ?? presenter.state.initialSelectedTabId).flatMap { id in
                             tabs.first { $0.id == id }
                         } ?? tabs[0]
                         let resolvedTimelineAppearance =
@@ -109,7 +109,7 @@ struct HomeTimelineScreen: View {
                                     ? []
                                     : changeLogAccessoryItems
                             )
-                                .id(tab.id)
+                                .id("\(tab.id):\(tab.contentSourceKey)")
                         }
                         .safeAreaInset(edge: .top, spacing: 0) {
                             if resolvedTimelineAppearance.timelineDisplayMode == .gallery,
@@ -124,7 +124,10 @@ struct HomeTimelineScreen: View {
                             if let selectedTabId, tabIds.contains(selectedTabId) {
                                 return
                             }
-                            selectedTabId = tabIds.first
+                            selectedTabId = tabIds.first(where: { $0 == presenter.state.initialSelectedTabId }) ?? tabIds.first
+                        }
+                        .onChange(of: selectedTabId) { _, id in
+                            if let id { presenter.state.selectTab(tabId: id) }
                         }
                         .toolbar {
                             leadingToolbarContent
@@ -136,7 +139,8 @@ struct HomeTimelineScreen: View {
                                         TabIcon(tabItem: tab)
                                     }
                                     .labelStyle(.titleAndIcon)
-                                    .id(tab.id)
+                                    .accessibilityIdentifier("home-timeline-title")
+                                    .id("\(tab.id):\(tab.contentSourceKey)")
                                 }
                                 ToolbarTitleMenu {
                                     ForEach(tabs, id: \.id) { item in
@@ -446,7 +450,7 @@ private struct DeckTimelineColumnRoot: View {
     let toTabSetting: () -> Void
 
     var body: some View {
-        TimelineScreen(tabItem: tabItem, allowGalleryMode: true)
+        TimelineScreen(tabItem: tabItem, allowGalleryMode: true, isHomeTimeline: true)
             .safeAreaInset(edge: .bottom) {
                 Label {
                     TimelineTabTitle(title: tabItem.title)
@@ -458,6 +462,6 @@ private struct DeckTimelineColumnRoot: View {
                 .glassEffect()
             }
             .environment(\.timelineAppearance, baseTimelineAppearance)
-            .id(tabItem.id)
+            .id("\(tabItem.id):\(tabItem.contentSourceKey)")
     }
 }

@@ -1,7 +1,11 @@
 package dev.dimension.flare.ui.presenter.home
 
+import androidx.room3.Room
+import dev.dimension.flare.RobolectricTest
 import dev.dimension.flare.createTestFileSystem
 import dev.dimension.flare.createTestRootPath
+import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.database.createDatabaseDriver
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.io.OkioFileStorage
 import dev.dimension.flare.data.model.HomeTimelineTabItem
@@ -21,10 +25,12 @@ import dev.dimension.flare.data.model.tab.isSystemHomeMixedTimeline
 import dev.dimension.flare.data.model.tab.toTimelineSlotOrNull
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.deleteTestRootPath
+import dev.dimension.flare.memoryDatabaseBuilder
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.testPlatformRuntimeData
 import dev.dimension.flare.unavailableAccountService
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -43,19 +49,28 @@ import kotlin.test.assertIs
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 
-class TimelinePresenterBindingTest {
+class TimelinePresenterBindingTest : RobolectricTest() {
+    private lateinit var cacheDatabase: CacheDatabase
     private lateinit var root: Path
     private lateinit var timelineResolver: TimelineResolver
     private lateinit var settingsRepository: SettingsRepository
 
     @BeforeTest
     fun setup() {
+        cacheDatabase =
+            Room
+                .memoryDatabaseBuilder<CacheDatabase>()
+                .setDriver(
+                    createDatabaseDriver(),
+                ).setQueryCoroutineContext(Dispatchers.Unconfined)
+                .build()
         root = createTestRootPath()
         val fileStorage = OkioFileStorage(createTestFileSystem(), root)
         timelineResolver = TimelineResolver(testPlatformRuntimeData(), unavailableAccountService())
         settingsRepository =
             SettingsRepository(
                 fileStorage = fileStorage,
+                cacheDatabase = cacheDatabase,
                 appDataStore = AppDataStore(fileStorage),
                 timelineResolver = timelineResolver,
             )
@@ -63,8 +78,45 @@ class TimelinePresenterBindingTest {
 
     @AfterTest
     fun tearDown() {
+        cacheDatabase.close()
         deleteTestRootPath(root)
     }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun deletingAHomeTabInvalidatesItsPresenterAndBookmark() =
+        runTest {
+            val slot = homeSlot(id = "home:first", filterConfig = TimelineFilterConfig())
+            settingsRepository.updateTabSettingsV2 { TabSettingsV2(homeSlots = listOf(slot)) }
+            val resolver =
+                TimelineResolver(
+                    testPlatformRuntimeData(),
+                    object : dev.dimension.flare.data.repository.AccountService by unavailableAccountService() {
+                        override fun accountServiceFlow(
+                            accountType: AccountType,
+                        ): kotlinx.coroutines.flow.Flow<dev.dimension.flare.data.datasource.microblog.MicroblogDataSource> =
+                            kotlinx.coroutines.flow.emptyFlow()
+                    },
+                )
+            val presenter = TimelinePresenterFactory(resolver, settingsRepository).create(resolver.toTabItem(slot), true)
+            val active = mutableListOf<Boolean>()
+            backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { presenter.sourceActive.collect { active += it } }
+            cacheDatabase.pagingTimelineDao().insertPosition(
+                dev.dimension.flare.data.database.cache.model.DbTimelinePosition(
+                    "home:first",
+                    "home:source",
+                    "post",
+                    1,
+                    0.0,
+                    1,
+                ),
+            )
+            settingsRepository.updateTabSettingsV2 { TabSettingsV2() }
+            advanceUntilIdle()
+            assertEquals(listOf(true, false), active)
+            assertFalse(presenter.sourceActive.first(), "A queued save must recheck the deleted tab, even in a new collection")
+            assertEquals(null, cacheDatabase.pagingTimelineDao().getPosition("home:first"))
+        }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test
@@ -209,7 +261,7 @@ class TimelinePresenterBindingTest {
             }
 
             val presenter =
-                TimelinePresenterFactory(timelineResolver)
+                TimelinePresenterFactory(timelineResolver, settingsRepository)
                     .create(systemHomeMixedTab())
 
             assertIs<SystemHomeMixedTimelinePresenter>(presenter)

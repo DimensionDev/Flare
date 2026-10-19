@@ -764,4 +764,7 @@
     <string name="rss_open_mode_recommended">已根据最近文章推荐，可随时修改。</string>
     <string name="rss_open_mode_unknown">暂时无法推荐打开方式，你可以手动选择。</string>
     <string name="rss_detail_unavailable">暂时无法加载这篇文章，你可以打开原文。</string>
+    <string name="settings_remember_home_timeline_position">记住首页阅读位置</string>
+    <string name="settings_remember_home_timeline_position_description">刷新时保留当前位置，启动时恢复上次的标签页和阅读位置。</string>
+    <string name="home_timeline_view_latest">查看最新内容</string>
 </resources>

@@ -71,6 +71,7 @@ final class TimelineUIView: UIView, ManualLayoutMeasurable, TimelineHeightProvid
 
     private let messageView = StatusTopMessageUIView()
     private lazy var messageContainer = MutablePaddingContainerView(content: messageView)
+    private let gapView = TimelineGapUIView()
     private let feedView = FeedUIView()
     private let statusView = StatusUIKitView()
     private let userView = TimelineUserUIView()
@@ -194,6 +195,9 @@ final class TimelineUIView: UIView, ManualLayoutMeasurable, TimelineHeightProvid
 
         var desired: [UIView] = []
         switch onEnum(of: data) {
+        case .gap(let gap):
+            gapView.configure(gap: gap)
+            desired.append(gapView)
         case .feed(let feed):
             feedView.onOpenURL = onOpenURL
             feedView.configure(data: feed)

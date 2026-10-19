@@ -755,6 +755,7 @@ private fun List<UiTimelineV2>.toSubscriptionTimelineToolText(
 
 private fun UiTimelineV2.toSubscriptionTimelineItemToolText(): String =
     when (this) {
+        is UiTimelineV2.Gap -> ""
         is UiTimelineV2.Feed -> toSubscriptionFeedToolText()
         is UiTimelineV2.TimelinePostItem -> displayPost.toSubscriptionPostToolText()
         is UiTimelineV2.Post -> toSubscriptionPostToolText()

@@ -15,6 +15,7 @@ internal class ListTimelineRemoteMediator(
     private val service: MastodonService,
     private val accountKey: MicroBlogKey,
 ) : CacheableRemoteLoader<UiTimelineV2> {
+    override val canJoinTimeline: Boolean = true
     override val pagingKey = "list_${accountKey}_$listId"
 
     override val supportPrepend: Boolean

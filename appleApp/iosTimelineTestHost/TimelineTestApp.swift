@@ -1,5 +1,5 @@
 import UIKit
-import CHTCollectionViewWaterfallLayout
+import CHTCollectionViewWaterfallLayoutObjC
 
 @main
 final class TimelineTestApp: UIResponder, UIApplicationDelegate {
@@ -17,7 +17,18 @@ final class TimelineTestScene: UIResponder, UIWindowSceneDelegate {
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options: UIScene.ConnectionOptions) {
         guard let scene = scene as? UIWindowScene else { return }
         let window = UIWindow(windowScene: scene)
-        window.rootViewController = TimelineTestController()
+        if ProcessInfo.processInfo.arguments.contains("tab-refresh-late-height") {
+            let tabs = UITabBarController()
+            let other = UIViewController()
+            other.view.backgroundColor = .systemBackground
+            other.tabBarItem = UITabBarItem(title: "Other", image: nil, tag: 0)
+            let timeline = TimelineTestController()
+            timeline.tabBarItem = UITabBarItem(title: "Timeline", image: nil, tag: 1)
+            tabs.viewControllers = [other, timeline]
+            window.rootViewController = tabs
+        } else {
+            window.rootViewController = TimelineTestController()
+        }
         self.window = window
         window.makeKeyAndVisible()
     }
@@ -26,7 +37,7 @@ final class TimelineTestScene: UIResponder, UIWindowSceneDelegate {
 /// A real application window is required for native scroll/refresh animations and
 /// pan/deceleration. A hostless XCTest window does not exercise those lifecycles.
 private final class TimelineTestController: UIViewController, CHTCollectionViewDelegateWaterfallLayout {
-    private let layout = CHTCollectionViewWaterfallLayout()
+    private let layout = TimelineWaterfallLayout()
     private lazy var list = TimelineCollectionView(frame: .zero, collectionViewLayout: layout)
     private var dataSource: UICollectionViewDiffableDataSource<Int, Int>!
     private var heights: [Int: CGFloat] = [:]
@@ -39,6 +50,7 @@ private final class TimelineTestController: UIViewController, CHTCollectionViewD
     private var didCommitRefreshSnapshot = false
     private var refreshFrames: CADisplayLink?
     private var refreshPositions: [CGFloat] = []
+    private var largestRefreshStep: CGFloat?
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -76,7 +88,7 @@ private final class TimelineTestController: UIViewController, CHTCollectionViewD
         list.onProgrammaticScrollEnded = { [weak self] in self?.scrolling = false }
         list.refreshControl = UIRefreshControl()
         list.refreshControl?.addTarget(self, action: #selector(pullRefreshBegan), for: .valueChanged)
-        if scenario != "initial-refresh" { loadItems() }
+        if !scenario.hasPrefix("initial-refresh") { loadItems() }
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -90,6 +102,7 @@ private final class TimelineTestController: UIViewController, CHTCollectionViewD
             case "drag", "deceleration", "refine-reading-item", "refine-reading-item-deceleration": await checkGesture()
             case "pull-refresh", "fast-refresh-prepend": await checkRefreshWithPrepend()
             case "refresh-late-height", "refresh-late-height-columns", "refresh-height-after-collapse", "refresh-collapse-navigation": await checkRefreshWithLateHeight()
+            case "initial-refresh-late-height", "tab-refresh-late-height": await checkTopRefreshWithLateHeight()
             case let name where name.hasPrefix("snapshot-"): await checkSnapshotGesture()
             default: await checkRefresh()
             }
@@ -97,6 +110,7 @@ private final class TimelineTestController: UIViewController, CHTCollectionViewD
             result.accessibilityIdentifier = "timeline-result"
             result.numberOfLines = 0
             result.text = failures.isEmpty ? "PASS" : failures.joined(separator: "; ")
+            if let largestRefreshStep { result.accessibilityValue = "maxStep=\(largestRefreshStep)pt" }
             view.addSubview(result)
         }
     }
@@ -174,12 +188,14 @@ private final class TimelineTestController: UIViewController, CHTCollectionViewD
         let oldScreenY = oldFrame.minY - list.contentOffset.y
         let nextPath = dataSource.indexPath(for: id + 1)!
         let nextScreenY = layout.layoutAttributesForItem(at: nextPath)!.frame.minY - list.contentOffset.y
-        if refineReadingItem {
-            heights[id] = 120
-        } else {
-            heights[id - 1] = itemHeight(id - 1) + 120
+        list.invalidateMeasuredHeights {
+            if refineReadingItem {
+                self.heights[id] = 120
+            } else {
+                self.heights[id - 1] = self.itemHeight(id - 1) + 120
+            }
+            return true
         }
-        list.invalidateMeasuredHeights()
         list.layoutIfNeeded()
         let newScreenY = layout.layoutAttributesForItem(at: path)!.frame.minY - list.contentOffset.y
         if refineReadingItem {
@@ -240,6 +256,32 @@ private final class TimelineTestController: UIViewController, CHTCollectionViewD
         check(!list.hasReadingPosition, "refresh left a stale bookmark")
         // Remove the native spinner after sampling so XCTest can finish quiescing.
         list.refreshControl = nil
+    }
+
+    private func checkTopRefreshWithLateHeight() async {
+        let baseline = list.restingAdjustedTopInset
+        jump(to: -baseline)
+        list.beginRefreshing(revealingIndicator: true)
+        if scenario.hasPrefix("initial-refresh") {
+            await settle(100)
+            loadItems()
+        }
+        await settle(400)
+        sampleRefreshCollapse()
+        list.endRefreshing()
+        await settle(30)
+        check(list.shouldDeferSnapshotChanges, "measurement missed the refresh collapse")
+        check(list.contentOffset.y < -list.adjustedContentInset.top - 1, "measurement missed the elastic top boundary")
+        let before = list.contentOffset.y
+        list.invalidateMeasuredHeights {
+            heights[0] = itemHeight(0) + 35
+            return true
+        }
+        check(abs(list.contentOffset.y - before) < 1, "height publication moved the in-flight collapse position")
+        await settle(500)
+        checkRefreshCollapse()
+        check(abs(list.contentOffset.y + baseline) < 1, "refresh lost its top reading position")
+        check(!list.hasReadingPosition && !list.isPresentingRefresh, "refresh left a pending bookmark")
     }
 
     private func checkRefreshWithLateHeight() async {
@@ -430,6 +472,7 @@ private final class TimelineTestController: UIViewController, CHTCollectionViewD
         }
         check(first - last > 30, "refresh collapse did not move the reading item")
         let largestStep = zip(refreshPositions, refreshPositions.dropFirst()).map { abs($1 - $0) }.max() ?? 0
+        largestRefreshStep = largestStep
         check(largestStep < 20, "refresh collapse jumped \(largestStep)pt in one frame")
     }
 
@@ -437,7 +480,7 @@ private final class TimelineTestController: UIViewController, CHTCollectionViewD
 
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout,
                         sizeForItemAt indexPath: IndexPath) -> CGSize {
-        CGSize(width: layout.itemWidth(inSection: indexPath.section), height: itemHeight(dataSource.itemIdentifier(for: indexPath)!))
+        CGSize(width: layout.itemWidthInSection(at: indexPath.section), height: itemHeight(dataSource.itemIdentifier(for: indexPath)!))
     }
 
     func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {

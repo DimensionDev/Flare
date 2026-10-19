@@ -16,7 +16,7 @@ internal class FeedTimelineRemoteMediator(
     private val accountKey: MicroBlogKey,
     private val uri: String,
 ) : CacheableRemoteLoader<UiTimelineV2> {
-    override val pagingKey = "feed_timeline_$uri"
+    override val pagingKey = "feed_timeline_${accountKey}_$uri"
 
     override suspend fun load(
         pageSize: Int,

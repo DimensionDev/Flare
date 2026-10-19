@@ -19,9 +19,58 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.test.assertSame
 import kotlin.time.Instant
 
 class MixedTimelinePageLoaderTest : RobolectricTest() {
+    @Test
+    fun cachedNestedSuccessDoesNotCloseAnotherSourcesFailedContinuation() =
+        runTest {
+            val good = Source("good", listOf(page(30, next = "good-tail"), page(30, next = "unused-tail")))
+            val failure = IllegalStateException("offline")
+            var fail = true
+            val retryable =
+                object : CacheableRemoteLoader<UiTimelineV2> {
+                    override val pagingKey = "retryable"
+
+                    override suspend fun load(
+                        pageSize: Int,
+                        request: PagingRequest,
+                    ): PagingResult<UiTimelineV2> =
+                        when {
+                            request is PagingRequest.Refresh -> page(20, next = "retryable-tail")
+                            fail -> throw failure
+                            else -> page(10)
+                        }
+                }
+            val inner = MixedTimelinePageLoader(listOf(good, retryable), TimelineMergePolicy.TimePerPage)
+            val outer = MixedTimelinePageLoader(listOf(inner), TimelineMergePolicy.TimePerPage)
+            val first = outer.load(20, PagingRequest.Refresh)
+            val cached: suspend (
+                List<UiTimelineV2>,
+            ) -> Set<String> = { setOf(mixedTestPost(30).stableItemKey, mixedTestPost(20).stableItemKey) }
+            val partial = outer.loadPage(20, PagingRequest.Append(assertNotNull(first.nextKey)), cached) { _, _ -> false }
+            assertEquals(listOf("30"), partial.data.map { it.statusKey.id })
+            assertSame(failure, partial.continuationFailure)
+            fail = false
+            val retry = outer.loadPage(20, PagingRequest.Append(assertNotNull(partial.nextKey)), cached) { _, _ -> false }
+            assertEquals(listOf("10"), retry.data.map { it.statusKey.id })
+            assertNull(retry.nextKey)
+            assertEquals(2, good.requests.size)
+        }
+
+    @Test
+    fun emptyRankedPageWithACursorIsNotAnEntirelyCachedPage() =
+        runTest {
+            val source = Source("sparse", listOf(page(next = "more"), page(30, next = "unused")))
+            val mixed = MixedTimelinePageLoader(listOf(source), TimelineMergePolicy.Time)
+            val cached: suspend (List<UiTimelineV2>) -> Set<String> = { setOf(mixedTestPost(30).stableItemKey) }
+            val first = mixed.loadPage(20, PagingRequest.Refresh, cached) { _, _ -> false }
+            val next = mixed.loadPage(20, PagingRequest.Append(assertNotNull(first.nextKey)), cached) { _, _ -> false }
+            assertEquals(listOf("30"), next.data.map { it.statusKey.id })
+            assertNull(next.nextKey)
+        }
+
     @Test
     fun nestedPartialFailureWithASuccessfulEmptySourceIsNotTotalFailure() =
         runTest {

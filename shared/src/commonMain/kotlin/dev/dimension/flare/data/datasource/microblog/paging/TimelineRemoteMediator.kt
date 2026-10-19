@@ -114,13 +114,14 @@ internal open class TimelineRemoteMediator(
                 LoadType.APPEND -> PagingRequest.Append(dao.getNextKey(pagingKey) ?: return MediatorResult.Success(true))
                 LoadType.PREPEND -> PagingRequest.Prepend(before.prevKey ?: return MediatorResult.Success(true))
             }
+        val sourceHeads = Json.decodeFromString<Map<String, List<String>>>(before.sourceHeads)
         val boundary =
             if (loadType == LoadType.REFRESH && retainHistory == true) {
-                Json.decodeFromString<Map<String, List<String>>>(before.sourceHeads)
+                sourceHeads
             } else {
                 emptyMap()
             }
-        val result = fetchPage(pageSize, request, boundary)
+        val result = fetchPage(pageSize, request, boundary, checkCachedItems = retainHistory == true && loadType == LoadType.REFRESH)
         val mapped =
             TimelinePagingMapper.toDb(
                 result.data,
@@ -181,7 +182,10 @@ internal open class TimelineRemoteMediator(
                 nextKey = result.nextKey,
                 keepNextKey = loadType == LoadType.PREPEND || (loadType == LoadType.REFRESH && retainHistory == true && first != null),
                 prevKey = if (loadType == LoadType.APPEND) before.prevKey else result.previousKey,
-                sourceHeads = if (loadType == LoadType.REFRESH) Json.encodeToString(boundary + result.sourceHeads) else before.sourceHeads,
+                sourceHeads =
+                    Json.encodeToString(
+                        if (loadType == LoadType.REFRESH) boundary + result.sourceHeads else result.sourceHeads + sourceHeads,
+                    ),
                 accountKeys = Json.encodeToString(accountKeys),
             )
             enqueuePreTranslation(mapped)
@@ -202,7 +206,7 @@ internal open class TimelineRemoteMediator(
         if (dao.getRow(pagingKey, gapRow._id) == null) return GapLoadResult()
         val result =
             try {
-                fetchPage(pageSize, PagingRequest.Append(gap.nextKey), gap.lowerBound)
+                fetchPage(pageSize, PagingRequest.Append(gap.nextKey), gap.lowerBound, checkCachedItems = true)
             } catch (error: kotlinx.coroutines.CancellationException) {
                 throw error
             } catch (error: Exception) {
@@ -213,7 +217,8 @@ internal open class TimelineRemoteMediator(
         var insertedKeys = emptyList<String>()
         database.connect {
             currentCoroutineContext().ensureActive()
-            if (dao.getPagingKeyMetadata(pagingKey)?.generation != key.generation) return@connect
+            val currentKey = dao.getPagingKeyMetadata(pagingKey) ?: return@connect
+            if (currentKey.generation != key.generation) return@connect
             val row = dao.getRow(pagingKey, gapRow._id) ?: return@connect
             val current =
                 database
@@ -242,6 +247,18 @@ internal open class TimelineRemoteMediator(
                     listOf(nextRow.copy(timeline = nextRow.timeline.copy(sortId = checkNotNull(dao.getRow(pagingKey, row._id)).sortId))),
                 )
             }
+            val sourceHeads = Json.decodeFromString<Map<String, List<String>>>(currentKey.sourceHeads)
+            val updatedHeads = result.sourceHeads + sourceHeads
+            if (updatedHeads != sourceHeads) {
+                dao.updatePage(
+                    pagingKey = pagingKey,
+                    nextKey = null,
+                    keepNextKey = true,
+                    prevKey = currentKey.prevKey,
+                    sourceHeads = Json.encodeToString(updatedHeads),
+                    accountKeys = currentKey.accountKeys,
+                )
+            }
             enqueuePreTranslation(mapped)
         }
         result.sourceFailures.forEach(notifyError)
@@ -252,10 +269,15 @@ internal open class TimelineRemoteMediator(
         pageSize: Int,
         request: PagingRequest,
         boundary: Map<String, List<String>>,
+        checkCachedItems: Boolean,
     ): PagingResult<UiTimelineV2> {
         val result =
             if (loader is MixedRemoteMediator) {
-                loader.pageLoader().loadPage(pageSize, request) { source, items ->
+                loader.pageLoader().loadPage(
+                    pageSize,
+                    request,
+                    cachedItemKeys = { if (checkCachedItems) cachedItemKeys(it) else emptySet() },
+                ) { source, items ->
                     items.any { it.stableItemKey in boundary[source].orEmpty() }
                 }
             } else {
@@ -295,6 +317,13 @@ internal open class TimelineRemoteMediator(
             .flatMap {
                 database.pagingTimelineDao().getByPagingKeyAndStatusIds(pagingKey, it)
             }.associateBy { it._id }
+
+    private suspend fun cachedItemKeys(items: List<UiTimelineV2>): Set<String> {
+        if (items.isEmpty()) return emptySet()
+        val mapped = TimelinePagingMapper.toDb(items, pagingKey)
+        val existing = existingRows(mapped)
+        return items.filterIndexed { index, _ -> mapped[index].timeline._id in existing }.mapTo(hashSetOf()) { it.stableItemKey }
+    }
 
     private suspend fun savePreservingOrder(
         data: List<DbPagingTimelineWithStatus>,

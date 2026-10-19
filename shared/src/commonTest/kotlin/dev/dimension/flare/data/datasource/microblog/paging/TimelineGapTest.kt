@@ -10,7 +10,9 @@ import dev.dimension.flare.RobolectricTest
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.clearHomeTimelinesForAccount
 import dev.dimension.flare.data.database.createDatabaseDriver
+import dev.dimension.flare.data.datasource.microblog.MixedRemoteMediator
 import dev.dimension.flare.data.model.tab.TimelineFilterConfig
+import dev.dimension.flare.data.model.tab.TimelineMergePolicy
 import dev.dimension.flare.data.repository.KeywordFilterPattern
 import dev.dimension.flare.data.repository.MxgaSnapshot
 import dev.dimension.flare.memoryDatabaseBuilder
@@ -31,11 +33,14 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.Json
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
+import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 import kotlin.time.Instant
 
 @OptIn(ExperimentalPagingApi::class, kotlinx.coroutines.ExperimentalCoroutinesApi::class)
@@ -57,6 +62,173 @@ class TimelineGapTest : RobolectricTest() {
     fun tearDown() {
         database.close()
     }
+
+    @Test
+    fun mixedRankedCachedPageDoesNotCreateAGapForAnotherSourcesNewHead() =
+        runTest {
+            for (policy in TimelineMergePolicy.entries) {
+                for (nested in listOf(false, true)) {
+                    var fresh = false
+                    val ranked =
+                        source("ranked-$nested", ordered = false) { request ->
+                            if (request is PagingRequest.Append) {
+                                PagingResult(listOf(datedPost(5)))
+                            } else {
+                                PagingResult(listOf(datedPost(20), datedPost(10)), nextKey = "ranked-tail")
+                            }
+                        }
+                    val chronological =
+                        source("chronological") {
+                            PagingResult(if (fresh) listOf(datedPost(40), datedPost(30)) else listOf(datedPost(30)))
+                        }
+                    val sources =
+                        if (nested) {
+                            listOf(MixedRemoteMediator(database, listOf(ranked, chronological), policy))
+                        } else {
+                            listOf(ranked, chronological)
+                        }
+                    val home = TimelineRemoteMediator(MixedRemoteMediator(database, sources, policy), database, false, retainHistory = true)
+                    assertIs<RemoteMediator.MediatorResult.Success>(home.load(LoadType.REFRESH, state))
+                    val tail = assertNotNull(database.pagingTimelineDao().getNextKey(home.pagingKey))
+                    fresh = true
+                    assertIs<RemoteMediator.MediatorResult.Success>(home.load(LoadType.REFRESH, state))
+                    assertEquals(0, contents(home).filterIsInstance<UiTimelineV2.Gap>().size, "$policy nested=$nested")
+                    assertEquals(tail, database.pagingTimelineDao().getNextKey(home.pagingKey))
+                    assertIs<RemoteMediator.MediatorResult.Success>(home.load(LoadType.APPEND, state))
+                    assertTrue(contents(home).any { it.statusKey.id == "5" })
+                }
+            }
+        }
+
+    @Test
+    fun mixedCachedPendingRowsDoNotCreateGapsWithOrWithoutAFailedSource() =
+        runTest {
+            for (fail in listOf(false, true)) {
+                var fresh = false
+                val primary =
+                    source("primary-$fail") { PagingResult(if (fresh) listOf(datedPost(40), datedPost(30)) else listOf(datedPost(30))) }
+                val secondary =
+                    source("secondary") {
+                        PagingResult(
+                            (20 downTo 2).map { datedPost(it).copy(content = UiTranslatableText("updated=$fresh".toUiPlainText())) },
+                        )
+                    }
+                val failing =
+                    source("failing") {
+                        check(!fresh || !fail) { "offline" }
+                        PagingResult()
+                    }
+                val home = mixed(primary, secondary, failing)
+                assertIs<RemoteMediator.MediatorResult.Success>(home.load(LoadType.REFRESH, state))
+                fresh = true
+                assertIs<RemoteMediator.MediatorResult.Success>(home.load(LoadType.REFRESH, state))
+                val rows = contents(home)
+                assertEquals(listOf("40", "30") + (20 downTo 2).map(Int::toString), rows.map { it.statusKey.id })
+                assertEquals(UiTranslatableText("updated=true".toUiPlainText()), (rows.last() as UiTimelineV2.Post).content)
+            }
+        }
+
+    @Test
+    fun mixedUncachedPendingRowsRemainLoadableThroughTheGap() =
+        runTest {
+            var fresh = false
+            val primary = source("primary") { PagingResult(if (fresh) (120 downTo 101).map(::datedPost) else listOf(datedPost(100))) }
+            val secondary = source("secondary") { PagingResult(((if (fresh) 21 else 20) downTo 2).map(::datedPost)) }
+            val home = mixed(primary, secondary)
+            home.load(LoadType.REFRESH, state)
+            fresh = true
+            home.load(LoadType.REFRESH, state)
+            val gap = contents(home).filterIsInstance<UiTimelineV2.Gap>().single()
+            assertEquals(1, home.loadGap(gap).insertedKeys.size)
+            assertEquals(0, contents(home).filterIsInstance<UiTimelineV2.Gap>().size)
+            assertEquals((120 downTo 100).map(Int::toString) + (21 downTo 2).map(Int::toString), contents(home).map { it.statusKey.id })
+        }
+
+    @Test
+    fun mixedAppendPublishesMissingSourceBoundaryWithoutReplacingKnownHeads() =
+        runTest {
+            var fresh = false
+            val healthy =
+                source("healthy") { request ->
+                    when {
+                        request is PagingRequest.Append -> PagingResult(listOf(datedPost(1)))
+                        fresh -> PagingResult(listOf(datedPost(70)) + (20 downTo 2).map(::datedPost), nextKey = "tail")
+                        else -> PagingResult((20 downTo 1).map(::datedPost), nextKey = "tail")
+                    }
+                }
+            val failing =
+                source("failing") {
+                    check(!fresh) { "offline" }
+                    PagingResult((60 downTo 41).map(::datedPost))
+                }
+            val home = mixed(healthy, failing)
+            home.load(LoadType.REFRESH, state)
+            val before =
+                Json.decodeFromString<Map<String, List<String>>>(
+                    checkNotNull(database.pagingTimelineDao().getPagingKeyMetadata(home.pagingKey)).sourceHeads,
+                )
+            assertEquals(setOf("failing"), before.keys)
+            home.load(LoadType.APPEND, state)
+            val after =
+                Json.decodeFromString<Map<String, List<String>>>(
+                    checkNotNull(database.pagingTimelineDao().getPagingKeyMetadata(home.pagingKey)).sourceHeads,
+                )
+            assertEquals(before.getValue("failing"), after.getValue("failing"))
+            assertEquals((20 downTo 1).map { datedPost(it).stableItemKey }, after["healthy"])
+            fresh = true
+            home.load(LoadType.REFRESH, state)
+            assertEquals(0, contents(home).filterIsInstance<UiTimelineV2.Gap>().size)
+            assertEquals("70", contents(home).first().statusKey.id)
+        }
+
+    @Test
+    fun mixedRankedGapKeepsNewItemsAfterDuplicatesAndClosesOnlyOnAFullCachedPage() =
+        runTest {
+            var response = PagingResult<UiTimelineV2>(listOf(datedPost(30), datedPost(20)), nextKey = "tail")
+            val home = mixed(source("ranked", ordered = false) { response })
+            home.load(LoadType.REFRESH, state)
+            val tail = database.pagingTimelineDao().getNextKey(home.pagingKey)
+            response = PagingResult(listOf(datedPost(30), datedPost(40)), nextKey = "gap-one")
+            home.load(LoadType.REFRESH, state)
+            val gap = contents(home).filterIsInstance<UiTimelineV2.Gap>().single()
+            response = PagingResult(listOf(datedPost(30), datedPost(35)), nextKey = "gap-two")
+            assertEquals(1, home.loadGap(gap).insertedKeys.size)
+            val nextGap = contents(home).filterIsInstance<UiTimelineV2.Gap>().single()
+            response = PagingResult(listOf(datedPost(30), datedPost(20)), nextKey = "unused-tail")
+            assertEquals(emptyList(), home.loadGap(nextGap).insertedKeys)
+            assertEquals(listOf("40", "35", "30", "20"), contents(home).map { it.statusKey.id })
+            assertEquals(tail, database.pagingTimelineDao().getNextKey(home.pagingKey))
+        }
+
+    @Test
+    fun mixedGapPublishesMissingSourceBoundaryWithoutChangingTheTailOrKnownHeads() =
+        runTest {
+            var fresh = false
+            val home =
+                mixed(
+                    source("primary") { PagingResult(listOf(datedPost(if (fresh) 40 else 30))) },
+                    source("secondary") { PagingResult(listOf(datedPost(20))) },
+                )
+            val singleRow = PagingState<OffsetFromStartPagingKey, TimelinePageItem>(emptyList(), null, PagingConfig(1), 0)
+            home.load(LoadType.REFRESH, singleRow)
+            val tail = database.pagingTimelineDao().getNextKey(home.pagingKey)
+            fresh = true
+            home.load(LoadType.REFRESH, singleRow)
+            val before =
+                Json.decodeFromString<Map<String, List<String>>>(
+                    checkNotNull(database.pagingTimelineDao().getPagingKeyMetadata(home.pagingKey)).sourceHeads,
+                )
+            assertEquals(setOf("primary"), before.keys)
+            val gap = contents(home).filterIsInstance<UiTimelineV2.Gap>().single()
+            assertEquals(1, home.loadGap(gap).insertedKeys.size)
+            val after =
+                Json.decodeFromString<Map<String, List<String>>>(
+                    checkNotNull(database.pagingTimelineDao().getPagingKeyMetadata(home.pagingKey)).sourceHeads,
+                )
+            assertEquals(before.getValue("primary"), after.getValue("primary"))
+            assertEquals(listOf(datedPost(20).stableItemKey), after["secondary"])
+            assertEquals(tail, database.pagingTimelineDao().getNextKey(home.pagingKey))
+        }
 
     @Test
     fun rankedDuplicateRefreshDoesNotAddLeadingGaps() =
@@ -523,6 +695,33 @@ class TimelineGapTest : RobolectricTest() {
     )
 
     private suspend fun contents() = database.pagingTimelineDao().getTimelinePage("home", 0, 300).map { it.statusData.content }
+
+    private suspend fun contents(home: TimelineRemoteMediator) =
+        database.pagingTimelineDao().getTimelinePage(home.pagingKey, 0, 300).map { it.statusData.content }
+
+    private fun datedPost(id: Int) = post(id).copy(createdAt = Instant.fromEpochMilliseconds(id.toLong()).toUi())
+
+    private fun source(
+        name: String,
+        ordered: Boolean = true,
+        response: suspend (PagingRequest) -> PagingResult<UiTimelineV2>,
+    ) = object : CacheableRemoteLoader<UiTimelineV2> {
+        override val pagingKey = name
+        override val canJoinTimeline = ordered
+
+        override suspend fun load(
+            pageSize: Int,
+            request: PagingRequest,
+        ) = response(request)
+    }
+
+    private fun mixed(vararg sources: CacheableRemoteLoader<UiTimelineV2>) =
+        TimelineRemoteMediator(
+            MixedRemoteMediator(database, sources.toList(), TimelineMergePolicy.Time),
+            database,
+            false,
+            retainHistory = true,
+        )
 
     private fun post(
         id: Int,

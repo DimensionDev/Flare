@@ -168,6 +168,9 @@ targets:
         product: SwiftUIBackports
       - package: VideoPlayer
       - package: CHTCollectionViewWaterfallLayout
+      - package: CHTCollectionViewWaterfallLayout
+        # The Swift product is not subclassable; reading compensation needs layout hooks.
+        product: CHTCollectionViewWaterfallLayoutObjC
       - package: GSPlayer
       - package: ChatLayout
       - package: Textual
@@ -237,6 +240,7 @@ targets:
     platform: iOS
     dependencies:
       - package: CHTCollectionViewWaterfallLayout
+        product: CHTCollectionViewWaterfallLayoutObjC
       - package: swiftui-introspect
         product: SwiftUIIntrospect
       - target: TimelineUnitTestHost
@@ -302,6 +306,7 @@ targets:
       - path: ios/UI/Component/TimelineCollectionView.swift
     dependencies:
       - package: CHTCollectionViewWaterfallLayout
+        product: CHTCollectionViewWaterfallLayoutObjC
     settings:
       base:
         GENERATE_INFOPLIST_FILE: YES

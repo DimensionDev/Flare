@@ -1,4 +1,5 @@
 import UIKit
+import CHTCollectionViewWaterfallLayoutObjC
 
 /// Applies bookmarks only while a snapshot or geometry change is being laid out.
 /// UIKit owns scrolling and refresh animations.
@@ -48,6 +49,7 @@ final class TimelineCollectionView: UICollectionView {
     private var geometryReadingPositionWasAtTop = false
     private var readingPositionGeneration = 0
     private var isRestoringReadingPosition = false
+    private var gestureReadingItemID: String?
     private var appliedTopInset: CGFloat?
     private var restingAutomaticInset: (amount: CGFloat, safeAreaTop: CGFloat)?
 
@@ -202,6 +204,7 @@ final class TimelineCollectionView: UICollectionView {
     }
 
     func interruptRefreshForScrolling() {
+        gestureReadingItemID = nil
         if isAnimatingRefreshCollapse || isRevealingRefresh {
             super.setContentOffset(contentOffset, animated: false)
         }
@@ -260,6 +263,7 @@ final class TimelineCollectionView: UICollectionView {
     func endScrollInteraction() {
         endProgrammaticScrolling()
         isExternalScrollInteractionActive = false
+        gestureReadingItemID = nil
     }
 
     func endProgrammaticScrolling() {
@@ -392,10 +396,18 @@ final class TimelineCollectionView: UICollectionView {
                   frame.minY < viewportBottom else { return nil }
             return (id, frame)
         }
+        // Capture and compensation must agree on the same still-visible item.
+        if hasScrollGesture, let id = gestureReadingItemID,
+           let item = candidates.first(where: { $0.id == id }) {
+            return item
+        }
         // A partly hidden estimate can shrink without moving its own top edge,
         // while every card below it moves. Anchor an edge the reader can see.
         // Fall back to the partly visible card when it fills the whole viewport.
-        let visibleTops = preferringVisibleTop ? candidates.filter { $0.frame.minY >= visibleTop } : []
+        // Masonry columns can shift independently; keep the current reading item
+        // instead of choosing a visible edge from another column.
+        let singleColumn = ((collectionViewLayout as? CHTCollectionViewWaterfallLayout)?.columnCount ?? 1) == 1
+        let visibleTops = preferringVisibleTop && singleColumn ? candidates.filter { $0.frame.minY >= visibleTop } : []
         return (visibleTops.isEmpty ? candidates : visibleTops).min { lhs, rhs in
             if abs(lhs.frame.minY - rhs.frame.minY) > 0.5 {
                 return lhs.frame.minY < rhs.frame.minY
@@ -434,6 +446,8 @@ final class TimelineCollectionView: UICollectionView {
         var item = preservesReadingPosition && (hasScrollGesture || isAnimatingRefreshCollapse) &&
             !isProgrammaticScrolling && !isExternalScrollInteractionActive && !isRevealingRefresh
             ? firstVisibleReadingItem(viewportTop: viewportTop, preferringVisibleTop: preferringVisibleTop) : nil
+        let keepsGestureItem = hasScrollGesture &&
+            ((collectionViewLayout as? TimelineWaterfallLayout)?.columnCount ?? 1) > 1
         // Another column's first visible item may not move with the collapse target.
         if isAnimatingRefreshCollapse,
            let id = readingPosition?.itemID,
@@ -448,15 +462,14 @@ final class TimelineCollectionView: UICollectionView {
                 ?? order.prefix(index).reversed().first(where: keepingItemIDs.contains)
             item = replacement.map { (id: $0, frame: anchor.frame) }
         }
+        gestureReadingItemID = keepsGestureItem ? item?.id : nil
         let oldOffset = contentOffset.y
         let wasWithinBounds = oldOffset >= -adjustedContentInset.top &&
             oldOffset <= max(-adjustedContentInset.top, contentSize.height - bounds.height + adjustedContentInset.bottom)
-        updates()
-        guard let item, preservesReadingPosition, !isProgrammaticScrolling, !isRevealingRefresh else { return }
-        UIView.performWithoutAnimation {
-            layoutIfNeeded()
+        let readingOffset = { [unowned self] () -> CGFloat? in
+            guard let item, preservesReadingPosition, !isProgrammaticScrolling, !isRevealingRefresh else { return nil }
             guard let path = readingIndexPath?(item.id),
-                  let frame = collectionViewLayout.layoutAttributesForItem(at: path)?.frame else { return }
+                  let frame = collectionViewLayout.layoutAttributesForItem(at: path)?.frame else { return nil }
             let oldDistance = item.frame.minY - viewportTop
             // The estimate may have put the viewport beyond the measured card.
             // Keep that ID visible using the same clamp as an idle reading anchor.
@@ -466,9 +479,24 @@ final class TimelineCollectionView: UICollectionView {
             var targetOffset = oldOffset + frame.minY - item.frame.minY + oldDistance - distance
             if wasWithinBounds {
                 let minimum = -adjustedContentInset.top
-                let maximum = max(minimum, contentSize.height - bounds.height + adjustedContentInset.bottom)
+                let maximum = max(minimum, collectionViewLayout.collectionViewContentSize.height - bounds.height + adjustedContentInset.bottom)
                 targetOffset = min(max(targetOffset, minimum), maximum)
             }
+            return targetOffset
+        }
+        if let layout = collectionViewLayout as? TimelineWaterfallLayout, item != nil {
+            let previous = layout.readingOffset
+            layout.readingOffset = readingOffset
+            defer { layout.readingOffset = previous }
+            updates()
+            layoutIfNeeded()
+            return
+        }
+        updates()
+        guard item != nil else { return }
+        UIView.performWithoutAnimation {
+            layoutIfNeeded()
+            guard let targetOffset = readingOffset() else { return }
             let delta = targetOffset - contentOffset.y
             guard abs(delta) > 0.5 / max(traitCollection.displayScale, 1) else { return }
             let context = UICollectionViewLayoutInvalidationContext()
@@ -576,4 +604,41 @@ final class TimelineCollectionView: UICollectionView {
         }
         finishReadingPositionRestoration(at: targetIndexPath)
     }
+}
+
+/// Resolve the reading offset before UICollectionView chooses visible cells.
+final class TimelineWaterfallLayout: CHTCollectionViewWaterfallLayout {
+    var readingOffset: (() -> CGFloat?)?
+    private var needsGeometryUpdate = true
+
+    override func invalidateLayout() {
+        needsGeometryUpdate = true
+        super.invalidateLayout()
+    }
+
+    override func invalidateLayout(with context: UICollectionViewLayoutInvalidationContext) {
+        if !(context is ReadingOffsetInvalidationContext) { needsGeometryUpdate = true }
+        super.invalidateLayout(with: context)
+    }
+
+    override func prepare() {
+        if needsGeometryUpdate {
+            needsGeometryUpdate = false
+            super.prepare()
+        }
+        guard let collectionView, let target = readingOffset?() else { return }
+        let delta = target - collectionView.contentOffset.y
+        guard abs(delta) > 0.5 / max(collectionView.traitCollection.displayScale, 1) else { return }
+        // Offset compensation changes the pan trajectory, not the item geometry.
+        let context = ReadingOffsetInvalidationContext()
+        context.contentOffsetAdjustment.y = delta
+        super.invalidateLayout(with: context)
+    }
+
+    override func targetContentOffset(forProposedContentOffset proposedContentOffset: CGPoint) -> CGPoint {
+        guard let target = readingOffset?() else { return super.targetContentOffset(forProposedContentOffset: proposedContentOffset) }
+        return CGPoint(x: proposedContentOffset.x, y: target)
+    }
+
+    private final class ReadingOffsetInvalidationContext: UICollectionViewLayoutInvalidationContext {}
 }

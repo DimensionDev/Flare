@@ -1,5 +1,5 @@
 import UIKit
-import CHTCollectionViewWaterfallLayout
+import CHTCollectionViewWaterfallLayoutObjC
 
 @main
 final class TimelineTestApp: UIResponder, UIApplicationDelegate {
@@ -26,7 +26,7 @@ final class TimelineTestScene: UIResponder, UIWindowSceneDelegate {
 /// A real application window is required for native scroll/refresh animations and
 /// pan/deceleration. A hostless XCTest window does not exercise those lifecycles.
 private final class TimelineTestController: UIViewController, CHTCollectionViewDelegateWaterfallLayout {
-    private let layout = CHTCollectionViewWaterfallLayout()
+    private let layout = TimelineWaterfallLayout()
     private lazy var list = TimelineCollectionView(frame: .zero, collectionViewLayout: layout)
     private var dataSource: UICollectionViewDiffableDataSource<Int, Int>!
     private var heights: [Int: CGFloat] = [:]
@@ -439,7 +439,7 @@ private final class TimelineTestController: UIViewController, CHTCollectionViewD
 
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout,
                         sizeForItemAt indexPath: IndexPath) -> CGSize {
-        CGSize(width: layout.itemWidth(inSection: indexPath.section), height: itemHeight(dataSource.itemIdentifier(for: indexPath)!))
+        CGSize(width: layout.itemWidthInSection(at: indexPath.section), height: itemHeight(dataSource.itemIdentifier(for: indexPath)!))
     }
 
     func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {

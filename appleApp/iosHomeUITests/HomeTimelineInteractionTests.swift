@@ -266,6 +266,11 @@ final class HomeTimelineInteractionTests: XCTestCase {
     }
 
     @MainActor
+    func testEnableLiveCards() {
+        setLiveDisplayMode("Card", rememberPrevious: true)
+    }
+
+    @MainActor
     func testEnableLiveGallery() {
         setLiveDisplayMode("Gallery (home timeline only)", rememberPrevious: true)
     }
@@ -296,6 +301,7 @@ final class HomeTimelineInteractionTests: XCTestCase {
         XCTAssertNotNil(current, "Read the selected mode from the native picker label")
         if rememberPrevious {
             UserDefaults.standard.set(current, forKey: "acceptance.originalDisplayMode")
+            print("HOME-DISPLAY original=\(current ?? "unknown")")
         }
         if current == mode { return }
         picker.tap()

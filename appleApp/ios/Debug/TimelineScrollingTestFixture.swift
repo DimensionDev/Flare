@@ -16,6 +16,22 @@ private final class TimelineScrollingTestController: UIViewController {
     private let columns = ProcessInfo.processInfo.arguments.contains("--two-columns") ? 2 : 1
     private let prependCount = ProcessInfo.processInfo.arguments
         .first { $0.hasPrefix("--prepend-count=") }.flatMap { Int($0.dropFirst("--prepend-count=".count)) } ?? 2
+    private let initialCount = ProcessInfo.processInfo.arguments
+        .first { $0.hasPrefix("--initial-count=") }.flatMap { Int($0.dropFirst("--initial-count=".count)) } ?? 60
+    private var frameTimes: [CFTimeInterval] = []
+    private var frameLink: CADisplayLink?
+    private var waitingForInsertion = false
+    private var insertionFrameGap: Double?
+
+    @objc private func sampleFrame() {
+        let now = CACurrentMediaTime()
+        if waitingForInsertion, let previous = frameTimes.last,
+           prependCount == 0 || collection.readingIndexPath?("t:case-10000") != nil {
+            insertionFrameGap = (now - previous) * 1000
+            waitingForInsertion = false
+        }
+        frameTimes.append(now)
+    }
     private var started = false
     private var collection: TimelineCollectionView {
         timeline.view.subviews.compactMap { $0 as? TimelineCollectionView }.first!
@@ -27,7 +43,7 @@ private final class TimelineScrollingTestController: UIViewController {
         view.addSubview(timeline.view)
         timeline.didMove(toParent: self)
         content.state = .loaded
-        content.items = (0..<60).map { .post(makeScrollingTestRow($0)) }
+        content.items = (0..<initialCount).map { .post(makeScrollingTestRow($0)) }
         timeline.submit(content, columns: columns)
         collection.accessibilityIdentifier = "scrolling-test-list"
     }
@@ -65,6 +81,15 @@ private final class TimelineScrollingTestController: UIViewController {
         await settle(40)
         timeline.restoreEffectiveContentOffset(2_500, animated: false)
         await settle(30)
+        // Model construction is outside the timed gesture; only list insertion is measured.
+        let newItems = (10000..<(10000 + prependCount)).map { TimelineContent.Item.post(makeScrollingTestRow($0)) }
+        frameLink = CADisplayLink(target: self, selector: #selector(sampleFrame))
+        frameLink?.preferredFrameRateRange = CAFrameRateRange(minimum: 60, maximum: 60, preferred: 60)
+        frameLink?.add(to: .main, forMode: .common)
+        defer {
+            frameLink?.invalidate()
+            frameLink = nil
+        }
         show("Ready", id: "scrolling-test-ready")
         for _ in 0..<1_500 {
             if collection.isDragging { break }
@@ -78,15 +103,15 @@ private final class TimelineScrollingTestController: UIViewController {
         var largestResidual: CGFloat = 0
         var samples = 0
         var insertedDuringPan = false
-        content.items.insert(contentsOf: (100..<(100 + prependCount)).map { .post(makeScrollingTestRow($0)) }, at: 0)
+        let prependTime = CACurrentMediaTime()
+        waitingForInsertion = true
+        content.items.insert(contentsOf: newItems, at: 0)
         timeline.submit(content, columns: columns)
         for _ in 0..<50 {
-            view.layoutIfNeeded()
-            collection.layoutIfNeeded()
             if collection.isDragging,
                let path = collection.readingIndexPath?(anchor.itemID),
                let frame = collection.layoutAttributesForItem(at: path)?.frame {
-                insertedDuringPan = insertedDuringPan || collection.readingIndexPath?("t:case-100") != nil
+                insertedDuringPan = insertedDuringPan || collection.readingIndexPath?("t:case-10000") != nil
                 let screenY = frame.minY - collection.contentOffset.y - collection.restingAdjustedTopInset
                 let fingerMovement = collection.panGestureRecognizer.translation(in: collection).y - translation
                 largestResidual = max(largestResidual, abs(screenY - anchor.offset - fingerMovement))
@@ -94,8 +119,10 @@ private final class TimelineScrollingTestController: UIViewController {
             }
             try? await Task.sleep(for: .milliseconds(10))
         }
-        let passed = largestResidual <= 1 && samples >= 5 && insertedDuringPan
-        show("\(passed ? "PASS" : "FAIL"): residual=\(largestResidual) samples=\(samples) insertedDuringPan=\(insertedDuringPan)",
+        let maxFrameGap = zip(frameTimes, frameTimes.dropFirst())
+            .filter { $0.1 >= prependTime }.map { ($0.1 - $0.0) * 1000 }.max() ?? .infinity
+        let passed = largestResidual <= 1 && samples >= 5 && (insertedDuringPan || prependCount == 0)
+        show("\(passed ? "PASS" : "FAIL"): residual=\(largestResidual) samples=\(samples) insertedDuringPan=\(insertedDuringPan) insertionFrameMS=\(insertionFrameGap ?? .infinity) frameGapMS=\(maxFrameGap)",
              id: "scrolling-test-result")
     }
 }

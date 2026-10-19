@@ -2,7 +2,7 @@ import SwiftUI
 import FlareAppleCore
 import FlareAppleUI
 import KotlinSharedUI
-import CHTCollectionViewWaterfallLayout
+import CHTCollectionViewWaterfallLayoutObjC
 
 enum TimelineUIKitLayoutMetrics {
     static let horizontalInset: CGFloat = 16
@@ -581,7 +581,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     }
 
     private func makeWaterfallLayout(columns: Int) -> UICollectionViewLayout {
-        let layout = CHTCollectionViewWaterfallLayout()
+        let layout = TimelineWaterfallLayout()
         layout.columnCount = columns
         layout.minimumColumnSpacing = TimelineUIKitLayoutMetrics.columnSpacing
         layout.minimumInteritemSpacing = 0
@@ -686,10 +686,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     }
 
     private func sectionIdentifier(at index: Int) -> Int? {
-        guard dataSource != nil else { return nil }
-        let identifiers = dataSource.snapshot().sectionIdentifiers
-        guard identifiers.indices.contains(index) else { return nil }
-        return identifiers[index]
+        dataSource?.sectionIdentifier(for: index)
     }
 
     private func isFullWidthSection(at index: Int) -> Bool {
@@ -759,7 +756,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
                 guard self.lastRenderHashMap[id] == renderHash,
                       let path = self.dataSource.indexPath(for: id),
                       let layout = self.collectionView.collectionViewLayout as? CHTCollectionViewWaterfallLayout else { return false }
-                return geometry == self.heightGeometry(itemID: id, width: max(layout.itemWidth(inSection: path.section), 1))
+                return geometry == self.heightGeometry(itemID: id, width: max(layout.itemWidthInSection(at: path.section), 1))
             }
         }
     }
@@ -1742,7 +1739,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         }
         let section = indexPath.section
         // Match the pixel-aligned cell width used when storing measured heights.
-        let width = max(layout.itemWidth(inSection: section), 1)
+        let width = max(layout.itemWidthInSection(at: section), 1)
 
         guard let itemID = dataSource.itemIdentifier(for: indexPath) else {
             return CGSize(width: width, height: 200)
@@ -1815,7 +1812,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     func collectionView(
         _ collectionView: UICollectionView,
         layout collectionViewLayout: UICollectionViewLayout,
-        columnCountFor section: Int
+        columnCountForSection section: Int
     ) -> Int {
         isFullWidthSection(at: section) ? 1 : max(columnCount, 1)
     }
@@ -1823,7 +1820,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     func collectionView(
         _ collectionView: UICollectionView,
         layout collectionViewLayout: UICollectionViewLayout,
-        insetsFor section: Int
+        insetForSectionAt section: Int
     ) -> UIEdgeInsets {
         guard let layout = collectionViewLayout as? CHTCollectionViewWaterfallLayout else { return .zero }
         return waterfallInsets(for: section, layout: layout)
@@ -1832,7 +1829,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     func collectionView(
         _ collectionView: UICollectionView,
         layout collectionViewLayout: UICollectionViewLayout,
-        minimumInteritemSpacingFor section: Int
+        minimumInteritemSpacingForSectionAt section: Int
     ) -> CGFloat {
         guard contentKind == .profileMedia else { return columnCount == 1 ? TimelineUIKitLayoutMetrics.rowSpacing : 0 }
         switch sectionIdentifier(at: section) {

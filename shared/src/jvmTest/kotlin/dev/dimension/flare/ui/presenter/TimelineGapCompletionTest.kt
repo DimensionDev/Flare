@@ -54,7 +54,9 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.job
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
@@ -204,7 +206,7 @@ class TimelineGapCompletionTest {
             }
         } finally {
             release.complete(Unit)
-            scope.cancel()
+            scope.coroutineContext.job.cancelAndJoin()
             stopKoin()
             cache.close()
             app.close()

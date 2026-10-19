@@ -1,15 +1,19 @@
 @file:OptIn(kotlin.concurrent.atomics.ExperimentalAtomicApi::class)
 
-package dev.dimension.flare.data.datasource.microblog.paging
+package dev.dimension.flare.ui.presenter.home
 
 import dev.dimension.flare.data.database.cache.CacheDatabase
-import dev.dimension.flare.data.database.cache.connect
 import dev.dimension.flare.data.database.cache.model.DbTimelinePosition
+import dev.dimension.flare.data.datasource.microblog.paging.OffsetFromStartPagingKey
+import dev.dimension.flare.data.datasource.microblog.paging.TimelineDbPageCache
+import dev.dimension.flare.data.datasource.microblog.paging.TimelineDbPageLoader
+import dev.dimension.flare.data.datasource.microblog.paging.TimelinePageItem
 import dev.dimension.flare.ui.model.TimelineReadingPosition
 import dev.dimension.flare.ui.model.UiTimelineV2
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlin.time.Clock
 
@@ -23,11 +27,16 @@ internal class TimelineViewport(
     private val pageCache: TimelineDbPageCache = TimelineDbPageCache(),
     private val canSave: suspend () -> Boolean = { true },
 ) {
-    val target = MutableStateFlow<TimelineReadingPosition?>(null)
-    val current = MutableStateFlow<TimelineReadingPosition?>(null)
-    val navigation = MutableStateFlow(0)
-    val hasNewContent = MutableStateFlow(false)
-    val isAtLatest = MutableStateFlow(true)
+    private val mutableTarget = MutableStateFlow<TimelineReadingPosition?>(null)
+    private val mutableCurrent = MutableStateFlow<TimelineReadingPosition?>(null)
+    private val mutableNavigation = MutableStateFlow(0)
+    private val mutableHasNewContent = MutableStateFlow(false)
+    private val mutableIsAtLatest = MutableStateFlow(true)
+    val target = mutableTarget.asStateFlow()
+    val current = mutableCurrent.asStateFlow()
+    val navigation = mutableNavigation.asStateFlow()
+    val hasNewContent = mutableHasNewContent.asStateFlow()
+    val isAtLatest = mutableIsAtLatest.asStateFlow()
     private var sortId = 0L
     private var generation: String? = null
     private var headKey: String? = null
@@ -35,8 +44,7 @@ internal class TimelineViewport(
     private var dirtyAt = 0L
     private var savedAt = -1L
     private var active = true
-    private var visibility: ((UiTimelineV2) -> Boolean)? = null
-    private var visibilityKey: Any? = null
+    private var visibility: TimelineVisibility? = null
 
     fun anchor(): OffsetFromStartPagingKey.Window? =
         (target.value ?: current.value)?.let { OffsetFromStartPagingKey.Window(it.itemKey, sortId) }
@@ -49,9 +57,9 @@ internal class TimelineViewport(
         if (saved == null) {
             val first = visibleItem(0) ?: return
             sortId = first.sortId
-            current.value = TimelineReadingPosition(first.baseItem.stableItemKey, 0.0)
-            target.value = current.value
-            isAtLatest.value = true
+            mutableCurrent.value = TimelineReadingPosition(first.baseItem.stableItemKey, 0.0)
+            mutableTarget.value = current.value
+            mutableIsAtLatest.value = true
             return
         }
         val row = dao.getRowByItemKey(pagingKey, saved.itemKey)
@@ -63,26 +71,22 @@ internal class TimelineViewport(
                 item.baseItem.stableItemKey,
                 if (item.baseItem.stableItemKey == saved.itemKey) saved.offset else 0.0,
             )
-        current.value = position
-        target.value = position
+        mutableCurrent.value = position
+        mutableTarget.value = position
         dirtyAt = saved.updatedAt
         savedAt = saved.updatedAt
-        isAtLatest.value = position.itemKey == headKey
+        mutableIsAtLatest.value = position.itemKey == headKey
     }
 
-    fun setVisibility(
-        key: Any,
-        predicate: (UiTimelineV2) -> Boolean,
-    ) {
-        if (visibilityKey == key) return
-        visibilityKey = key
-        visibility = predicate
+    fun setVisibility(visibility: TimelineVisibility) {
+        if (this.visibility == visibility) return
+        this.visibility = visibility
         if (current.value != null) {
             scope.launch { refreshHead() }
         }
     }
 
-    private fun TimelinePageItem.isVisible(): Boolean = baseItem !is UiTimelineV2.Gap && visibility?.invoke(baseItem) != false
+    private fun TimelinePageItem.isVisible(): Boolean = baseItem !is UiTimelineV2.Gap && visibility?.isVisible(baseItem) != false
 
     private suspend fun nearestVisibleItem(start: Int): TimelinePageItem? {
         val loader = TimelineDbPageLoader(database, pagingKey, pageCache, windowed = true, preserveWindow = true)
@@ -115,9 +119,9 @@ internal class TimelineViewport(
             return
         }
         sortId = item?.sortId ?: 0
-        current.value = item?.let { TimelineReadingPosition(it.baseItem.stableItemKey, 0.0) }
-        target.value = current.value
-        navigation.value += 1
+        mutableCurrent.value = item?.let { TimelineReadingPosition(it.baseItem.stableItemKey, 0.0) }
+        mutableTarget.value = current.value
+        mutableNavigation.value += 1
     }
 
     private suspend fun visibleItem(start: Int): TimelinePageItem? {
@@ -142,10 +146,10 @@ internal class TimelineViewport(
             // Removing the old head is not new content.
             val old = database.pagingTimelineDao().getRowByItemKey(pagingKey, previous)
             val new = first?.let { database.pagingTimelineDao().getRowByItemKey(pagingKey, it) }
-            if (old != null && new != null && new.sortId < old.sortId) hasNewContent.value = true
+            if (old != null && new != null && new.sortId < old.sortId) mutableHasNewContent.value = true
         }
-        if (first == seenHead) hasNewContent.value = false
-        isAtLatest.value = current.value == null || current.value?.itemKey == first
+        if (first == seenHead) mutableHasNewContent.value = false
+        mutableIsAtLatest.value = current.value == null || current.value?.itemKey == first
     }
 
     fun viewportChanged(
@@ -161,12 +165,12 @@ internal class TimelineViewport(
                 if (current.value?.itemKey == itemKey && row != null) sortId = row.sortId
             }
         }
-        current.value = position
+        mutableCurrent.value = position
         if (itemKey == headKey) {
             seenHead = itemKey
-            hasNewContent.value = false
+            mutableHasNewContent.value = false
         }
-        isAtLatest.value = itemKey == headKey
+        mutableIsAtLatest.value = itemKey == headKey
     }
 
     fun positionChanged(
@@ -174,13 +178,21 @@ internal class TimelineViewport(
         offset: Double,
     ) {
         if (!offset.isFinite()) return
-        target.value = null
+        mutableTarget.value = null
         viewportChanged(itemKey, offset)
         dirtyAt = nextPositionTime()
     }
 
     fun deactivate() {
         active = false
+    }
+
+    fun restorationFinished(expected: TimelineReadingPosition?) {
+        if (target.value == expected) mutableTarget.value = null
+    }
+
+    fun restoreCurrentPosition() {
+        if (target.value == null) mutableTarget.value = current.value
     }
 
     fun savePosition() {
@@ -190,13 +202,11 @@ internal class TimelineViewport(
         val timestamp = dirtyAt
         appScope.launch {
             try {
-                database.connect {
-                    val dao = database.pagingTimelineDao()
-                    if (!active || !canSave() || dao.getPagingKey(pagingKey)?.generation != generation) return@connect
-                    val row = dao.getRowByItemKey(pagingKey, position.itemKey) ?: return@connect
-                    val previous = dao.getPosition(tabId)
-                    if (previous != null && previous.updatedAt > timestamp) return@connect
-                    dao.insertPosition(DbTimelinePosition(tabId, pagingKey, position.itemKey, row.sortId, position.offset, timestamp))
+                database.pagingTimelineDao().savePositionIfCurrent(
+                    DbTimelinePosition(tabId, pagingKey, position.itemKey, sortId, position.offset, timestamp),
+                    generation,
+                ) {
+                    active && canSave()
                 }
                 savedAt = maxOf(savedAt, timestamp)
             } catch (error: CancellationException) {
@@ -214,11 +224,11 @@ internal class TimelineViewport(
             if (request != dirtyAt) return@launch
             sortId = item.sortId
             positionChanged(item.baseItem.stableItemKey, 0.0)
-            target.value = current.value
+            mutableTarget.value = current.value
             seenHead = item.baseItem.stableItemKey
-            hasNewContent.value = false
-            isAtLatest.value = true
-            navigation.value += 1
+            mutableHasNewContent.value = false
+            mutableIsAtLatest.value = true
+            mutableNavigation.value += 1
         }
     }
 }

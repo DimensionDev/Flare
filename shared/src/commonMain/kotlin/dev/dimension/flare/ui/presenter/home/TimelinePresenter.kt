@@ -39,7 +39,6 @@ import dev.dimension.flare.data.datasource.microblog.paging.TimelineDbPageCache
 import dev.dimension.flare.data.datasource.microblog.paging.TimelineDbPageLoader
 import dev.dimension.flare.data.datasource.microblog.paging.TimelinePageItem
 import dev.dimension.flare.data.datasource.microblog.paging.TimelineRemoteMediator
-import dev.dimension.flare.data.datasource.microblog.paging.TimelineViewport
 import dev.dimension.flare.data.datasource.microblog.paging.notSupported
 import dev.dimension.flare.data.datasource.microblog.paging.toTimelinePagingSource
 import dev.dimension.flare.data.datasource.microblog.pagingConfig
@@ -52,7 +51,6 @@ import dev.dimension.flare.data.repository.LocalFilterRepository
 import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.data.repository.MxgaRepository
 import dev.dimension.flare.data.repository.SettingsRepository
-import dev.dimension.flare.data.repository.isMxgaMatch
 import dev.dimension.flare.data.translation.PreTranslationService
 import dev.dimension.flare.data.translation.TranslationSettingsSupport
 import dev.dimension.flare.di.koinInject
@@ -71,6 +69,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -81,6 +80,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -176,6 +176,15 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
                 flow {
                     coroutineScope {
                         val sourceScope = this
+                        val visibility =
+                            combine(
+                                filterFlow,
+                                timelineFilterConfigFlow,
+                                mxgaEnabledFlow,
+                                mxgaRepository.snapshot,
+                            ) { filters, config, mxgaEnabled, snapshot ->
+                                TimelineVisibility(filters, config, mxgaEnabled, snapshot, platformRegistry)
+                            }.shareIn(sourceScope, SharingStarted.Lazily, replay = 1)
                         viewport.value?.deactivate()
                         viewport.value = null
                         gapActivity.value = emptyMap()
@@ -193,6 +202,7 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
                                         loader = remoteLoader,
                                         scope = sourceScope,
                                         rememberPosition = isHomeTimeline && timelineTabItemId != null && enabled,
+                                        visibility = visibility,
                                     ).cachedIn(sourceScope).flatMapLatest { pagingData ->
                                         translationSettingsFlow
                                             .combine(gapActivity) { translationDisplayOptions, activity ->
@@ -223,24 +233,11 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
                                     ).cachedIn(sourceScope)
                                 }
                             }.flatMapLatest { pager ->
-                                combine(
-                                    filterFlow,
-                                    timelineFilterConfigFlow,
-                                    mxgaEnabledFlow,
-                                    mxgaRepository.snapshot,
-                                ) { filterList, timelineFilterConfig, mxgaEnabled, mxgaSnapshot ->
-                                    val visible: (UiTimelineV2) -> Boolean = { item ->
-                                        item.matchesKeywordFilters(filterList) && item.matchesTimelineFilter(timelineFilterConfig) &&
-                                            (!mxgaEnabled || !item.isMxgaMatch(mxgaSnapshot, platformRegistry))
-                                    }
-                                    viewport.value?.setVisibility(
-                                        listOf(filterList, timelineFilterConfig, mxgaEnabled, mxgaSnapshot),
-                                        visible,
-                                    )
+                                visibility.map { visible ->
+                                    viewport.value?.setVisibility(visible)
                                     pager
-                                        .filter { item ->
-                                            item is UiTimelineV2.Gap || visible(item)
-                                        }.map {
+                                        .filter(visible::isVisible)
+                                        .map {
                                             if (it is UiTimelineV2.Gap) it else transform(it)
                                         }
                                 }
@@ -256,6 +253,7 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
         loader: CacheableRemoteLoader<UiTimelineV2>,
         scope: CoroutineScope,
         rememberPosition: Boolean,
+        visibility: Flow<TimelineVisibility>,
     ): Flow<PagingData<TimelinePageItem>> =
         flow {
             val preferences = settingsRepository.appSettings.first()
@@ -308,14 +306,7 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
                         canSave = { sourceActive.first() },
                         pageCache = pageCache,
                     ).also { value ->
-                        val filters = filterFlow.first()
-                        val config = timelineFilterConfigFlow.first()
-                        val mxgaEnabled = mxgaEnabledFlow.first()
-                        val snapshot = mxgaRepository.snapshot.first()
-                        value.setVisibility(listOf(filters, config, mxgaEnabled, snapshot)) { item ->
-                            item.matchesKeywordFilters(filters) && item.matchesTimelineFilter(config) &&
-                                (!mxgaEnabled || !item.isMxgaMatch(snapshot, platformRegistry))
-                        }
+                        value.setVisibility(visibility.first())
                         value.restore()
                     }
                 } else {
@@ -351,14 +342,18 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
                         ).also { source = it }
                     },
                 ).flow
-            coroutineScope {
-                if (reading != null) {
-                    launch { reading.navigation.drop(1).collect { source?.invalidate() } }
-                    launch {
-                        database.invalidationTracker.createFlow("DbPagingTimeline", "DbStatus").collect { reading.refreshHead() }
+            try {
+                coroutineScope {
+                    if (reading != null) {
+                        launch { reading.navigation.drop(1).collect { source?.invalidate() } }
+                        launch {
+                            database.invalidationTracker.createFlow("DbPagingTimeline", "DbStatus").collect { reading.refreshHead() }
+                        }
                     }
+                    emitAll(pager)
                 }
-                emitAll(pager)
+            } finally {
+                source?.invalidate()
             }
         }
 
@@ -456,13 +451,9 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
 
                         override fun savePosition() = value.savePosition()
 
-                        override fun restorationFinished() {
-                            if (value.target.value == target) value.target.value = null
-                        }
+                        override fun restorationFinished() = value.restorationFinished(target)
 
-                        override fun restoreCurrentPosition() {
-                            if (value.target.value == null) value.target.value = value.current.value
-                        }
+                        override fun restoreCurrentPosition() = value.restoreCurrentPosition()
 
                         override fun showLatest() = value.showLatest()
                     }

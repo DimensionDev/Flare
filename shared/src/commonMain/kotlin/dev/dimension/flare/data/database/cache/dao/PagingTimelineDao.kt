@@ -498,6 +498,20 @@ internal interface PagingTimelineDao {
     suspend fun insertPosition(position: DbTimelinePosition)
 
     @Transaction
+    suspend fun savePositionIfCurrent(
+        position: DbTimelinePosition,
+        generation: String?,
+        canSave: suspend () -> Boolean,
+    ) {
+        // Recheck after acquiring the writer: tab deletion may have removed its bookmark while this save waited.
+        if (!canSave() || getPagingKey(position.pagingKey)?.generation != generation) return
+        val row = getRowByItemKey(position.pagingKey, position.itemKey) ?: return
+        val previous = getPosition(position.tabId)
+        if (previous != null && previous.updatedAt > position.updatedAt) return
+        insertPosition(position.copy(sortId = row.sortId))
+    }
+
+    @Transaction
     @Query(
         TIMELINE_WITH_STATUS_QUERY +
             "WHERE DbStatus.accountType = :accountType " +

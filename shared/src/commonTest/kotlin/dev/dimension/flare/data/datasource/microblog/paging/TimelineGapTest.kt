@@ -10,12 +10,18 @@ import dev.dimension.flare.RobolectricTest
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.clearHomeTimelinesForAccount
 import dev.dimension.flare.data.database.createDatabaseDriver
+import dev.dimension.flare.data.model.tab.TimelineFilterConfig
+import dev.dimension.flare.data.repository.KeywordFilterPattern
+import dev.dimension.flare.data.repository.MxgaSnapshot
 import dev.dimension.flare.memoryDatabaseBuilder
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.testPlatformRegistry
 import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.UiTranslatableText
+import dev.dimension.flare.ui.presenter.home.TimelineViewport
+import dev.dimension.flare.ui.presenter.home.TimelineVisibility
 import dev.dimension.flare.ui.render.toUi
 import dev.dimension.flare.ui.render.toUiPlainText
 import kotlinx.collections.immutable.persistentListOf
@@ -420,7 +426,7 @@ class TimelineGapTest : RobolectricTest() {
             mediator.load(LoadType.REFRESH, state)
             val viewport = TimelineViewport(database, "home:home", "tab", this, this)
             viewport.restore()
-            viewport.target.value = null
+            viewport.restorationFinished(viewport.target.value)
             val original = viewport.current.value
             response = PagingResult(listOf(post(0)))
             mediator.load(LoadType.REFRESH, state)
@@ -431,6 +437,67 @@ class TimelineGapTest : RobolectricTest() {
             runCurrent()
             kotlin.test.assertFalse(viewport.hasNewContent.value)
             kotlin.test.assertNotEquals(original?.itemKey, viewport.target.value?.itemKey)
+        }
+
+    @Test
+    fun staleRestorationCannotCompleteANewerTargetOrOverwriteItsPosition() =
+        runTest {
+            mediator { PagingResult((0..5).map { post(it) }) }.load(LoadType.REFRESH, state)
+            val items = TimelineDbPageLoader(database, "home:home", TimelineDbPageCache()).load(0, 6)
+            val viewport = TimelineViewport(database, "home:home", "tab", this, this)
+            viewport.restore()
+            val initialTarget = checkNotNull(viewport.target.value)
+            viewport.positionChanged(items[3].baseItem.stableItemKey, -17.0)
+            assertEquals(null, viewport.target.value)
+            viewport.restoreCurrentPosition()
+            val recreatedTarget = checkNotNull(viewport.target.value)
+            viewport.restorationFinished(initialTarget)
+            viewport.viewportChanged(items[0].baseItem.stableItemKey, 0.0)
+            viewport.restoreCurrentPosition()
+            assertEquals(recreatedTarget, viewport.target.value)
+            assertEquals(recreatedTarget, viewport.current.value)
+
+            viewport.restorationFinished(recreatedTarget)
+            assertEquals(null, viewport.target.value)
+            viewport.viewportChanged(items[4].baseItem.stableItemKey, -9.0)
+            viewport.savePosition()
+            runCurrent()
+            val reopened = TimelineViewport(database, "home:home", "tab", this, this)
+            reopened.restore()
+            assertEquals(viewport.current.value, reopened.target.value)
+        }
+
+    @Test
+    fun visibilityKeepsGapsInTheListButRestoresOnlyVisiblePosts() =
+        runTest {
+            var response = PagingResult<UiTimelineV2>(listOf(post(10)))
+            val home = mediator { response }
+            home.load(LoadType.REFRESH, state)
+            response = PagingResult(listOf(post(0)), nextKey = "gap")
+            home.load(LoadType.REFRESH, state)
+            val items = TimelineDbPageLoader(database, "home:home", TimelineDbPageCache()).load(0, 20)
+            val visible =
+                TimelineVisibility(
+                    filters = listOf(KeywordFilterPattern("Post 0", isRegex = false)),
+                    config = TimelineFilterConfig(),
+                    mxgaEnabled = false,
+                    mxgaSnapshot = MxgaSnapshot(),
+                    platformRegistry = testPlatformRegistry(),
+                )
+            val displayed = items.map { it.baseItem }.filter(visible::isVisible)
+            assertIs<UiTimelineV2.Gap>(displayed.first())
+            val viewport = TimelineViewport(database, "home:home", "tab", this, this)
+            viewport.setVisibility(visible)
+            viewport.restore()
+            assertEquals(displayed.last().stableItemKey, viewport.target.value?.itemKey)
+            viewport.restorationFinished(viewport.target.value)
+
+            val changed = visible.copy(filters = listOf(KeywordFilterPattern("Post 10", isRegex = false)))
+            viewport.setVisibility(changed)
+            runCurrent()
+            val updated = items.map { it.baseItem }.filter(changed::isVisible)
+            assertEquals(updated.first().stableItemKey, viewport.target.value?.itemKey)
+            assertIs<UiTimelineV2.Gap>(updated.last())
         }
 
     @Test
@@ -479,11 +546,15 @@ class TimelineGapTest : RobolectricTest() {
             original.savePosition()
             runCurrent()
             val filtered = TimelineViewport(database, "home:home", "tab", this, this)
-            filtered.setVisibility("filter") {
-                it.statusKey.id
-                    .toIntOrNull()
-                    ?.let { id -> id < 50 } == true
-            }
+            val visibility =
+                TimelineVisibility(
+                    filters = listOf(KeywordFilterPattern("Post [5-9]\\d", isRegex = true, regex = Regex("Post [5-9]\\d"))),
+                    config = TimelineFilterConfig(),
+                    mxgaEnabled = false,
+                    mxgaSnapshot = MxgaSnapshot(),
+                    platformRegistry = testPlatformRegistry(),
+                )
+            filtered.setVisibility(visibility)
             filtered.restore()
             assertEquals(items[49].baseItem.stableItemKey, filtered.target.value?.itemKey)
             assertEquals(0.0, filtered.target.value?.offset)
@@ -493,7 +564,7 @@ class TimelineGapTest : RobolectricTest() {
             val deleted = TimelineViewport(database, "home:home", "tab", this, this)
             deleted.restore()
             assertEquals(items[51].baseItem.stableItemKey, deleted.target.value?.itemKey)
-            filtered.setVisibility("all-hidden") { false }
+            filtered.setVisibility(visibility.copy(filters = listOf(KeywordFilterPattern("Post", isRegex = false))))
             runCurrent()
             assertEquals(null, filtered.target.value)
             assertEquals(null, filtered.current.value)

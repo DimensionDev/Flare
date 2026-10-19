@@ -66,6 +66,7 @@ import dev.dimension.flare.ui.presenter.TimelineReadingState
 import dev.dimension.flare.web.shared.WebPresenter
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -262,7 +263,9 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
             val pageCache = TimelineDbPageCache()
             val notifyError: (Throwable) -> Unit = { e ->
                 if (e is LoginExpiredException) {
-                    inAppNotification.onError(Message.LoginExpired, e)
+                    scope.launch(Dispatchers.Main.immediate) {
+                        inAppNotification.onError(Message.LoginExpired, e)
+                    }
                 }
             }
             val mediator =
@@ -303,6 +306,7 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
                         scope,
                         appScope,
                         canSave = { sourceActive.first() },
+                        pageCache = pageCache,
                     ).also { value ->
                         val filters = filterFlow.first()
                         val config = timelineFilterConfigFlow.first()
@@ -364,20 +368,22 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
         scope: CoroutineScope,
         onInserted: (List<String>) -> Unit,
     ) {
-        if (mediator == null || mediator !== homeMediator.value || gapActivity.value[gap.stableItemKey] is LoadState.Loading) {
-            onInserted(emptyList())
-            return
-        }
-        gapActivity.update { it + (gap.stableItemKey to LoadState.Loading) }
-        scope.launch {
+        scope.launch(Dispatchers.Main.immediate) {
+            if (gapActivity.value[gap.stableItemKey] is LoadState.Loading) return@launch
+            if (mediator == null || mediator !== homeMediator.value) {
+                onInserted(emptyList())
+                return@launch
+            }
+            gapActivity.update { it + (gap.stableItemKey to LoadState.Loading) }
             try {
-                val result = mediator.loadGap(gap)
+                val result = withContext(PlatformDispatchers.IO) { mediator.loadGap(gap) }
                 onInserted(result.insertedKeys)
                 gapActivity.update {
                     if (result.failure != null) it + (gap.stableItemKey to LoadState.Error(result.failure)) else it - gap.stableItemKey
                 }
             } catch (error: CancellationException) {
-                gapActivity.update { it - gap.stableItemKey }
+                onInserted(emptyList())
+                if (mediator === homeMediator.value) gapActivity.update { it - gap.stableItemKey }
                 throw error
             } catch (error: Exception) {
                 onInserted(emptyList())

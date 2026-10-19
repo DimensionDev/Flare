@@ -105,14 +105,18 @@ public struct TimelineGapView: View {
     public let gap: UiTimelineV2.Gap
     @Environment(\.timelineGapWillLoad) private var willLoad
     @Environment(\.timelineGapDidLoad) private var didLoad
+    @State private var activating = false
 
     public init(gap: UiTimelineV2.Gap) { self.gap = gap }
 
     public var body: some View {
         Button {
+            guard let activate = gap.onActivate, !activating, !gap.loading else { return }
+            activating = true
             willLoad?(gap)
-            gap.onActivate? { keys in
-                DispatchQueue.main.async { didLoad?(gap, keys) }
+            activate { keys in
+                activating = false
+                didLoad?(gap, keys)
                 return KotlinUnit.shared
             }
         } label: {
@@ -123,7 +127,8 @@ public struct TimelineGapView: View {
             }
             .frame(maxWidth: .infinity, minHeight: 44)
         }
-        .disabled(gap.loading)
+        .disabled(gap.loading || activating)
+        .onChange(of: gap.renderHash) { activating = false }
         .buttonStyle(.plain)
         .accessibilityIdentifier("timeline-gap")
     }

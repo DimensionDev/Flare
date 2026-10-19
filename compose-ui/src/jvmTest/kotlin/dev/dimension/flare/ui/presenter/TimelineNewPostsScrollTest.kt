@@ -331,6 +331,9 @@ class TimelineNewPostsScrollTest {
     @Test
     fun gapCompletionAfterThePageIsRenderedStillRevealsItsPosts() = checkGap(PaddingValues(0.dp), leading = true, callbackAfterPage = true)
 
+    @Test
+    fun doubleClickingALeadingGapKeepsTheFirstInsertionAnchor() = checkGap(PaddingValues(0.dp), leading = true, doubleClick = true)
+
     private fun checkGap(
         contentPadding: PaddingValues,
         leading: Boolean = false,
@@ -339,8 +342,10 @@ class TimelineNewPostsScrollTest {
         refreshDuringLoad: Boolean = false,
         coalesced: Boolean = false,
         callbackAfterPage: Boolean = false,
+        doubleClick: Boolean = false,
     ) {
         lateinit var onInserted: (List<String>) -> Unit
+        var activations = 0
 
         fun post(index: Int): UiTimelineV2 =
             UiTimelineV2.Feed(
@@ -360,7 +365,10 @@ class TimelineNewPostsScrollTest {
                 revision = revision,
                 createdAt = Instant.fromEpochMilliseconds(revision).toUi(),
                 itemKey = "timeline-gap:test",
-                onActivate = { onInserted = it },
+                onActivate = {
+                    activations++
+                    if (activations == 1) onInserted = it else it(emptyList())
+                },
             )
 
         fun data(items: List<UiTimelineV2>) =
@@ -399,6 +407,8 @@ class TimelineNewPostsScrollTest {
         }
         composeRule.runOnIdle {
             state.loadGap(firstGap)
+            if (doubleClick) state.loadGap(firstGap)
+            assertEquals(1, activations)
             if (failed || partialFailure) pages.value = data(listOf(firstGap.copy(failed = true), post(8), post(9), post(10)))
             if (failed) onInserted(emptyList())
             if (refreshDuringLoad &&

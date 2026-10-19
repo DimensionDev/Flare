@@ -9,6 +9,7 @@ import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.datastore.createDataStoreStorage
 import dev.dimension.flare.data.datastore.model.AppSettings
+import dev.dimension.flare.data.datastore.model.HomeTimelinePreferences
 import dev.dimension.flare.data.io.FileStorage
 import dev.dimension.flare.data.model.AppearanceSettings
 import dev.dimension.flare.data.model.appearance.AppearanceBag
@@ -30,6 +31,7 @@ import dev.dimension.flare.data.model.tab.findById
 import dev.dimension.flare.data.model.tab.isSystemHomeMixedTimeline
 import dev.dimension.flare.data.model.tab.migrateTabSettingsV1ToV2
 import dev.dimension.flare.data.model.tab.withSystemHomeMixedTimelineEnabled
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.distinctUntilChangedBy
@@ -237,7 +239,21 @@ public class SettingsRepository internal constructor(
     }
 
     public suspend fun updateAppSettings(block: AppSettings.() -> AppSettings) {
-        appSettingsStore.updateData(block)
+        var previous = false
+        val updated =
+            appSettingsStore.updateData {
+                previous = it.rememberHomeTimelinePosition
+                block(it)
+            }
+        if (previous && !updated.rememberHomeTimelinePosition) {
+            try {
+                appDataStore.homeTimelinePreferences.updateData { HomeTimelinePreferences() }
+            } catch (error: CancellationException) {
+                throw error
+            } catch (error: Exception) {
+                error.printStackTrace()
+            }
+        }
     }
 
     private inline fun <reified T> createDataStore(

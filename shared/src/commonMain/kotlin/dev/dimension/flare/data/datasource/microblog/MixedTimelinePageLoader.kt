@@ -106,7 +106,17 @@ internal class MixedTimelinePageLoader(
                                     }
                                 val result =
                                     if (boundaryIndex >= 0) {
-                                        response.copy(data = response.data.take(boundaryIndex + 1), nextKey = null)
+                                        response.copy(
+                                            data =
+                                                if (subRequest is PagingRequest.Append) {
+                                                    response.data.take(
+                                                        boundaryIndex + 1,
+                                                    )
+                                                } else {
+                                                    response.data
+                                                },
+                                            nextKey = null,
+                                        )
                                     } else {
                                         response
                                     }
@@ -205,12 +215,21 @@ internal class MixedTimelinePageLoader(
             ) {
                 throw failures.first()
             }
+            val published = selected.mapTo(hashSetOf()) { it.stableItemKey }
             PagingResult(
                 data = selected,
                 nextKey = if (pages.any { it.canLoad || it.pending.isNotEmpty() }) Json.encodeToString(pages) else null,
                 continuationFailure = continuationFailure,
                 sourceFailures = failures.distinct(),
-                sourceHeads = pages.flatMap { it.sourceHeads.entries }.associate { it.toPair() },
+                sourceHeads =
+                    pages
+                        .flatMap { it.sourceHeads.entries }
+                        .associate {
+                            it.key to
+                                it.value.filter { key ->
+                                    key in published
+                                }
+                        }.filterValues { it.isNotEmpty() },
             )
         }
 }

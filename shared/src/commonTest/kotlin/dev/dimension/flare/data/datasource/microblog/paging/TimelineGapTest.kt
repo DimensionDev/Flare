@@ -54,6 +54,155 @@ class TimelineGapTest : RobolectricTest() {
     }
 
     @Test
+    fun rankedDuplicateRefreshDoesNotAddLeadingGaps() =
+        runTest {
+            val response = PagingResult<UiTimelineV2>(listOf(post(30), post(10)), nextKey = "ranked-tail")
+            val home = mediator { response }
+            home.load(LoadType.REFRESH, state)
+            repeat(3) { home.load(LoadType.REFRESH, state) }
+            val rows = contents()
+            assertEquals(0, rows.filterIsInstance<UiTimelineV2.Gap>().size)
+        }
+
+    @Test
+    fun timeMixedPartialFailureDoesNotAddLeadingGaps() =
+        runTest {
+            for (ranked in listOf(false, true)) {
+                var offline = false
+                val healthy =
+                    object : CacheableRemoteLoader<UiTimelineV2> {
+                        override val pagingKey = "healthy-$ranked"
+                        override val canJoinTimeline = !ranked
+
+                        override suspend fun load(
+                            pageSize: Int,
+                            request: PagingRequest,
+                        ) = PagingResult<UiTimelineV2>(
+                            listOf(
+                                post(30).copy(createdAt = Instant.fromEpochMilliseconds(30).toUi()),
+                                post(10).copy(createdAt = Instant.fromEpochMilliseconds(10).toUi()),
+                            ),
+                            nextKey = "tail",
+                        )
+                    }
+                val failing =
+                    object : CacheableRemoteLoader<UiTimelineV2> {
+                        override val pagingKey = "failing-$ranked"
+                        override val canJoinTimeline = true
+
+                        override suspend fun load(
+                            pageSize: Int,
+                            request: PagingRequest,
+                        ): PagingResult<UiTimelineV2> {
+                            check(!offline) { "offline" }
+                            return PagingResult(listOf(post(20).copy(createdAt = Instant.fromEpochMilliseconds(20).toUi())))
+                        }
+                    }
+                val mixed =
+                    dev.dimension.flare.data.datasource.microblog.MixedRemoteMediator(
+                        database,
+                        listOf(healthy, failing),
+                        dev.dimension.flare.data.model.tab.TimelineMergePolicy.Time,
+                    )
+                val home = TimelineRemoteMediator(mixed, database, false, rememberPosition = true)
+                home.load(LoadType.REFRESH, state)
+                offline = true
+                repeat(3) { home.load(LoadType.REFRESH, state) }
+                val rows = database.pagingTimelineDao().getTimelinePage(home.pagingKey, 0, 50).map { it.statusData.content }
+                assertEquals(0, rows.filterIsInstance<UiTimelineV2.Gap>().size, "ranked=$ranked")
+            }
+        }
+
+    @Test
+    fun timeMixedRecommendedRefreshKeepsGlobalTimeOrder() =
+        runTest {
+            var fresh = false
+            var tail = false
+
+            fun dated(id: Int): UiTimelineV2 = post(id).copy(createdAt = Instant.fromEpochMilliseconds(id.toLong()).toUi())
+            val ranked =
+                object : CacheableRemoteLoader<UiTimelineV2> {
+                    override val pagingKey = "ranked"
+
+                    override suspend fun load(
+                        pageSize: Int,
+                        request: PagingRequest,
+                    ) = if (request is PagingRequest.Append) {
+                        PagingResult(if (tail) listOf(dated(5)) else listOf(dated(50), dated(25)))
+                    } else {
+                        PagingResult(if (fresh) listOf(dated(40), dated(10)) else listOf(dated(30)), nextKey = "ranked-tail")
+                    }
+                }
+            val chronological =
+                object : CacheableRemoteLoader<UiTimelineV2> {
+                    override val pagingKey = "chronological"
+                    override val canJoinTimeline = true
+
+                    override suspend fun load(
+                        pageSize: Int,
+                        request: PagingRequest,
+                    ) = PagingResult(listOf(dated(20)))
+                }
+            val mixed =
+                dev.dimension.flare.data.datasource.microblog.MixedRemoteMediator(
+                    database,
+                    listOf(ranked, chronological),
+                    dev.dimension.flare.data.model.tab.TimelineMergePolicy.Time,
+                )
+            val home = TimelineRemoteMediator(mixed, database, false, rememberPosition = true)
+            home.load(LoadType.REFRESH, state)
+            fresh = true
+            home.load(LoadType.REFRESH, state)
+            val ids =
+                database
+                    .pagingTimelineDao()
+                    .getTimelinePage(home.pagingKey, 0, 50)
+                    .map {
+                        it.statusData.content
+                    }.filterNot { it.isPaginationGap }
+                    .map { it.statusKey.id }
+            assertEquals(listOf("40", "30", "20", "10"), ids)
+            val gap =
+                database
+                    .pagingTimelineDao()
+                    .getTimelinePage(home.pagingKey, 0, 50)
+                    .map { it.statusData.content }
+                    .filterIsInstance<UiTimelineV2.Gap>()
+                    .single()
+            home.loadGap(gap)
+            val filled = database.pagingTimelineDao().getTimelinePage(home.pagingKey, 0, 50).map { it.statusData.content }
+            assertEquals(listOf("50", "40", "30", "25", "20", "10"), filled.map { it.statusKey.id })
+            tail = true
+            home.load(LoadType.APPEND, state)
+            assertEquals(
+                listOf("50", "40", "30", "25", "20", "10", "5"),
+                database.pagingTimelineDao().getTimelinePage(home.pagingKey, 0, 50).map { it.statusData.content.statusKey.id },
+            )
+        }
+
+    @Test
+    fun refreshOverlapDoesNotDropNewPostsFollowingADuplicate() =
+        runTest {
+            var response = PagingResult<UiTimelineV2>(listOf(post(30), post(20), post(10)), nextKey = "tail")
+            val loader =
+                object : CacheableRemoteLoader<UiTimelineV2> {
+                    override val pagingKey = "home"
+                    override val canJoinTimeline = true
+
+                    override suspend fun load(
+                        pageSize: Int,
+                        request: PagingRequest,
+                    ) = response
+                }
+            val home = TimelineRemoteMediator(loader, database, false, rememberPosition = true)
+            home.load(LoadType.REFRESH, state)
+            response = PagingResult(listOf(post(40), post(20), post(35), post(30)), nextKey = "refresh-tail")
+            home.load(LoadType.REFRESH, state)
+            val keys = contents().filterNot { it.isPaginationGap }.map { it.statusKey.id }
+            kotlin.test.assertTrue("35" in keys)
+        }
+
+    @Test
     fun refreshAndGapKeepOldRowsAndTailCursor() =
         runTest {
             var response = PagingResult<UiTimelineV2>(listOf(post(10), post(11)), nextKey = "tail")
@@ -214,6 +363,7 @@ class TimelineGapTest : RobolectricTest() {
             restored.restore()
             assertEquals(items[20].baseItem.stableItemKey, restored.target.value?.itemKey)
             assertEquals(-27.0, restored.target.value?.offset)
+            kotlin.test.assertFalse(restored.isAtLatest.value)
             val otherTab = TimelineViewport(database, "home:home", "other", this, this)
             otherTab.restore()
             assertEquals(items.first().baseItem.stableItemKey, otherTab.target.value?.itemKey)
@@ -294,7 +444,11 @@ class TimelineGapTest : RobolectricTest() {
             val originalKey = contents().filterIsInstance<UiTimelineV2.Gap>().single().statusKey
             val reader = TimelineViewport(database, "home:home", "ranked-tab", this, this)
             reader.restore()
-            val lastKey = contents().last().stableItemKey
+            val lastKey =
+                TimelineDbPageLoader(database, "home:home", TimelineDbPageCache())
+                    .load(0, 40)
+                    .last()
+                    .baseItem.stableItemKey
             reader.positionChanged(lastKey, -9.0)
             reader.savePosition()
             runCurrent()
@@ -309,8 +463,8 @@ class TimelineGapTest : RobolectricTest() {
             val rows = database.pagingTimelineDao().getByPagingKey("home:home")
             assertEquals(rows.size, rows.map { it.sortId }.toSet().size)
             assertEquals(
-                database.pagingTimelineDao().getRowByItemKey("home:home", lastKey)?.sortId,
-                database.pagingTimelineDao().getPosition("ranked-tab")?.sortId,
+                kotlin.test.assertNotNull(database.pagingTimelineDao().getRowByItemKey("home:home", lastKey)).sortId,
+                kotlin.test.assertNotNull(database.pagingTimelineDao().getPosition("ranked-tab")).sortId,
             )
         }
 

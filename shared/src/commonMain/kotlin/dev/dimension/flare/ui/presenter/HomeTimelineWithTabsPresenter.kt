@@ -29,6 +29,8 @@ import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.web.shared.WebPresenter
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
@@ -75,9 +77,12 @@ public class HomeTimelineWithTabsPresenter : PresenterBase<HomeTimelineWithTabsP
                 if (enabled) {
                     appDataStore.homeTimelinePreferences.data.first()
                 } else {
-                    appDataStore.homeTimelinePreferences.updateData { HomeTimelinePreferences() }
+                    HomeTimelinePreferences()
                 },
             )
+        }.catch { error ->
+            if (error is CancellationException) throw error
+            emit(HomeTimelinePreferences())
         }
     }
 
@@ -97,10 +102,14 @@ public class HomeTimelineWithTabsPresenter : PresenterBase<HomeTimelineWithTabsP
         LaunchedEffect(rememberPosition, selectedTab) {
             if (rememberPosition == true) {
                 selectedTab?.let { id ->
-                    appDataStore.homeTimelinePreferences.updateData { it.copy(selectedTabId = id) }
+                    try {
+                        appDataStore.homeTimelinePreferences.updateData { it.copy(selectedTabId = id) }
+                    } catch (error: CancellationException) {
+                        throw error
+                    } catch (error: Exception) {
+                        error.printStackTrace()
+                    }
                 }
-            } else if (rememberPosition == false) {
-                appDataStore.homeTimelinePreferences.updateData { HomeTimelinePreferences() }
             }
         }
 

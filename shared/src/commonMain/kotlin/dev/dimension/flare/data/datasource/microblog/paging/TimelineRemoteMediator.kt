@@ -4,6 +4,7 @@ import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator.MediatorResult
+import androidx.room3.withReadTransaction
 import dev.dimension.flare.common.SnowflakeIdGenerator
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.connect
@@ -53,6 +54,7 @@ internal open class TimelineRemoteMediator(
     RemoteLoader<DbPagingTimelineWithStatus> {
     private var suppressInitialPrepend = false
     private var generation: String? = null
+    private val ordersByTime = (loader as? MixedRemoteMediator)?.pageLoader()?.ordersByTime == true
 
     override val pagingKey: String
         get() = if (rememberPosition != null) "home:${loader.pagingKey}" else loader.pagingKey
@@ -99,6 +101,20 @@ internal open class TimelineRemoteMediator(
 
     internal suspend fun prepareHomeTimeline() {
         if (rememberPosition == null || generation != null) return
+        val accounts = Json.encodeToString(accountKeys)
+        val prepared =
+            database.withReadTransaction {
+                val dao = database.pagingTimelineDao()
+                val mode = dao.getPagingKey("home:mode")
+                dao.getPagingKey(pagingKey)?.takeIf {
+                    mode?.rememberPosition == rememberPosition && it.rememberPosition == rememberPosition &&
+                        Json.decodeFromString<Set<MicroBlogKey>>(it.accountKeys) == accountKeys
+                }
+            }
+        if (prepared != null) {
+            generation = prepared.generation
+            return
+        }
         database.connect {
             currentCoroutineContext().ensureActive()
             val dao = database.pagingTimelineDao()
@@ -123,7 +139,7 @@ internal open class TimelineRemoteMediator(
                 } else {
                     previous
                 }
-            dao.insertPagingKey(key.copy(accountKeys = Json.encodeToString(accountKeys)))
+            if (key.accountKeys != accounts) dao.insertPagingKey(key.copy(accountKeys = accounts))
             generation = key.generation
         }
     }
@@ -156,7 +172,7 @@ internal open class TimelineRemoteMediator(
             TimelinePagingMapper.toDb(
                 result.data,
                 pagingKey,
-                sortIds = if (rememberPosition == true) emptyList() else result.data.map { (loader as? SortIdProvider)?.sortId(it) },
+                sortIds = result.data.map { item -> homeSortId(item) },
             )
         database.connect {
             currentCoroutineContext().ensureActive()
@@ -172,8 +188,13 @@ internal open class TimelineRemoteMediator(
                 }
             }
             if (rememberPosition == true) {
+                val existing = existingRows(mapped)
+                val hasNewHead =
+                    mapped.any {
+                        it.timeline._id !in existing && (!ordersByTime || first == null || it.timeline.sortId < first.sortId)
+                    }
                 val gap =
-                    if (loadType == LoadType.REFRESH && first != null && result.nextKey != null) {
+                    if (loadType == LoadType.REFRESH && first != null && hasNewHead && result.nextKey != null) {
                         UiTimelineV2.Gap(
                             statusKey = MicroBlogKey(Uuid.random().toString(), "timeline-gap"),
                             createdAt = Clock.System.now().toUi(),
@@ -183,10 +204,22 @@ internal open class TimelineRemoteMediator(
                     } else {
                         null
                     }
-                savePreservingOrder(
-                    mapped + if (gap != null) TimelinePagingMapper.toDb(listOf(gap), pagingKey) else emptyList(),
-                    beforeId = first?.takeIf { loadType == LoadType.REFRESH }?._id,
-                )
+                val gapRows = if (gap != null) TimelinePagingMapper.toDb(listOf(gap), pagingKey) else emptyList()
+                if (ordersByTime) {
+                    // Post ranks are even; a Gap occupies the slot just before its old lower neighbour.
+                    saveToDatabase(
+                        database,
+                        mapped +
+                            gapRows.map {
+                                it.copy(timeline = it.timeline.copy(sortId = checkNotNull(first).sortId - 1))
+                            },
+                    )
+                } else {
+                    savePreservingOrder(
+                        mapped + gapRows,
+                        beforeId = first?.takeIf { loadType == LoadType.REFRESH }?._id,
+                    )
+                }
             } else {
                 onSaveCache(request, mapped)
             }
@@ -202,7 +235,14 @@ internal open class TimelineRemoteMediator(
                         },
                     prevKey = if (loadType == LoadType.APPEND) before.prevKey else result.previousKey,
                     revision = before.revision + 1,
-                    sourceHeads = if (loadType == LoadType.REFRESH) Json.encodeToString(result.sourceHeads) else before.sourceHeads,
+                    sourceHeads =
+                        if (loadType ==
+                            LoadType.REFRESH
+                        ) {
+                            Json.encodeToString(boundary + result.sourceHeads)
+                        } else {
+                            before.sourceHeads
+                        },
                 ),
             )
             enqueuePreTranslation(mapped)
@@ -222,8 +262,16 @@ internal open class TimelineRemoteMediator(
         val key = dao.getPagingKey(pagingKey)?.takeIf { it.generation == generation } ?: return GapLoadResult()
         val gapRow = TimelinePagingMapper.toDb(listOf(gap), pagingKey).single().timeline
         if (dao.getRow(pagingKey, gapRow._id) == null) return GapLoadResult()
-        val result = fetchPage(pageSize, PagingRequest.Append(gap.nextKey), gap.lowerBound)
-        val mapped = TimelinePagingMapper.toDb(result.data, pagingKey)
+        val result =
+            try {
+                fetchPage(pageSize, PagingRequest.Append(gap.nextKey), gap.lowerBound)
+            } catch (error: kotlinx.coroutines.CancellationException) {
+                throw error
+            } catch (error: Exception) {
+                notifyError(error)
+                throw error
+            }
+        val mapped = TimelinePagingMapper.toDb(result.data, pagingKey, sortIds = result.data.map { homeSortId(it) })
         var insertedKeys = emptyList<String>()
         database.connect {
             currentCoroutineContext().ensureActive()
@@ -243,7 +291,7 @@ internal open class TimelineRemoteMediator(
             ) {
                 "Timeline continuation did not advance"
             }
-            savePreservingOrder(mapped, row._id)
+            if (ordersByTime) saveToDatabase(database, mapped) else savePreservingOrder(mapped, row._id)
             insertedKeys = mapped.filter { it.timeline._id !in existing }.map { "${pagingKey}_${it.timeline.statusId}" }.distinct()
             if (result.nextKey == null) {
                 dao.delete(listOf(row))
@@ -280,10 +328,11 @@ internal open class TimelineRemoteMediator(
                         } else {
                             -1
                         }
+                    val data = if (join >= 0 && request is PagingRequest.Append) response.data.take(join + 1) else response.data
                     response.copy(
-                        data = if (join >= 0) response.data.take(join + 1) else response.data,
+                        data = data,
                         nextKey = if (join >= 0) null else response.nextKey,
-                        sourceHeads = mapOf(loader.pagingKey to response.data.map { it.stableItemKey }),
+                        sourceHeads = mapOf(loader.pagingKey to data.map { it.stableItemKey }),
                     )
                 }
             }
@@ -292,6 +341,13 @@ internal open class TimelineRemoteMediator(
 
     private fun continuationIdentity(cursor: String?): String? =
         cursor?.let { if (loader is MixedRemoteMediator) loader.pageLoader().continuationIdentity(it) else it }
+
+    private suspend fun homeSortId(item: UiTimelineV2): Long? =
+        if (rememberPosition == true && !ordersByTime) {
+            null
+        } else {
+            (loader as? SortIdProvider)?.sortId(item)?.let { if (rememberPosition == true) it * 2 else it }
+        }
 
     private suspend fun existingRows(data: List<DbPagingTimelineWithStatus>): Map<String, DbPagingTimeline> =
         data

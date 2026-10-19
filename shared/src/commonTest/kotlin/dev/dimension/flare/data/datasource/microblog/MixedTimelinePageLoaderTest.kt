@@ -62,6 +62,14 @@ class MixedTimelinePageLoaderTest : RobolectricTest() {
             var result = MixedTimelinePageLoader(listOf(first, second), TimelineMergePolicy.Time).load(3, PagingRequest.Refresh)
             val ids = result.data.map { it.statusKey.id }.toMutableList()
             assertEquals(listOf("9", "8", "7"), ids)
+            assertEquals(
+                mapOf(
+                    "a" to listOf(mixedTestPost(9).stableItemKey),
+                    "b" to listOf(mixedTestPost(8).stableItemKey, mixedTestPost(7).stableItemKey),
+                ),
+                result.sourceHeads,
+                "Buffered posts cannot become a cached lower boundary before they are published",
+            )
             assertEquals(listOf<PagingRequest>(PagingRequest.Refresh), first.requests)
             assertEquals(listOf<PagingRequest>(PagingRequest.Refresh), second.requests)
 

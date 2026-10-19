@@ -9,6 +9,7 @@ protocol TimelineGapActionObserver: AnyObject {
 
 final class TimelineGapUIView: UIView, ManualLayoutMeasurable, TimelineHeightProviding {
     private let button = UIButton(type: .system)
+    private var activating = false
     private var gap: UiTimelineV2.Gap?
 
     override init(frame: CGRect) {
@@ -21,13 +22,14 @@ final class TimelineGapUIView: UIView, ManualLayoutMeasurable, TimelineHeightPro
     required init?(coder: NSCoder) { fatalError("init(coder:) not supported") }
 
     func configure(gap: UiTimelineV2.Gap) {
+        if self.gap?.renderHash != gap.renderHash { activating = false }
         self.gap = gap
         var configuration = UIButton.Configuration.plain()
         configuration.title = gap.loading ? String(localized: "timeline_loading_missing_posts") :
             gap.failed ? String(localized: "timeline_retry_missing_posts") : String(localized: "timeline_load_missing_posts")
         configuration.showsActivityIndicator = gap.loading
         button.configuration = configuration
-        button.isEnabled = !gap.loading
+        button.isEnabled = !gap.loading && !activating
         invalidateIntrinsicContentSize()
         setNeedsLayout()
     }
@@ -40,7 +42,9 @@ final class TimelineGapUIView: UIView, ManualLayoutMeasurable, TimelineHeightPro
     func timelineHeight(for width: CGFloat) -> CGFloat? { sizeThatFits(CGSize(width: width, height: .greatestFiniteMagnitude)).height }
 
     @objc private func loadGap() {
-        guard let gap, !gap.loading else { return }
+        guard let gap, let activate = gap.onActivate, !gap.loading, !activating else { return }
+        activating = true
+        button.isEnabled = false
         var responder: UIResponder? = self
         var observer: TimelineGapActionObserver?
         while let current = responder {
@@ -48,8 +52,12 @@ final class TimelineGapUIView: UIView, ManualLayoutMeasurable, TimelineHeightPro
             responder = current.next
         }
         observer?.willLoadTimelineGap(gap)
-        gap.onActivate? { [weak observer] keys in
-            DispatchQueue.main.async { observer?.didLoadTimelineGap(gap, insertedKeys: keys) }
+        activate { [weak self, weak observer] keys in
+            if self?.gap?.stableItemKey == gap.stableItemKey {
+                self?.activating = false
+                self?.button.isEnabled = self?.gap?.loading != true
+            }
+            observer?.didLoadTimelineGap(gap, insertedKeys: keys)
             return KotlinUnit.shared
         }
     }

@@ -112,7 +112,7 @@ internal fun rememberTimelineWithLazyListState(
         }
         val target = baseState.reading?.restorePosition
         // A replacement page can contain the target without changing itemCount.
-        LaunchedEffect(target, this, lazyListState) {
+        LaunchedEffect(target, this, lazyListState, leadingItemCount) {
             if (target == null || lazyListState.isScrollInProgress) return@LaunchedEffect
             val index =
                 (0 until itemCount).firstOrNull { peek(it)?.stableItemKey == target.itemKey }
@@ -252,6 +252,12 @@ internal fun rememberTimelineWithLazyListState(
         }
 
         override fun loadGap(message: UiTimelineV2.Gap) {
+            val activate = message.onActivate ?: return
+            if (message.loading ||
+                gapAnchor?.let { it.gapKey == message.stableItemKey && it.renderHash == message.renderHash } == true
+            ) {
+                return
+            }
             baseState.listState.onSuccess {
                 val gapIndex = (0 until itemCount).firstOrNull { peek(it)?.stableItemKey == message.stableItemKey } ?: return@onSuccess
                 val previous = (gapIndex - 1 downTo 0).firstOrNull { peek(it)?.isPaginationGap == false }
@@ -283,7 +289,7 @@ internal fun rememberTimelineWithLazyListState(
                 }
             }
             val requestAnchor = gapAnchor
-            message.onActivate?.invoke { keys ->
+            activate { keys ->
                 if (gapAnchor === requestAnchor && requestAnchor?.itemKey == null) {
                     gapAnchor = requestAnchor?.takeIf { keys.isNotEmpty() }?.copy(insertedKeys = keys.toSet())
                 }

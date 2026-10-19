@@ -20,6 +20,7 @@ internal class TimelineViewport(
     private val tabId: String,
     private val scope: CoroutineScope,
     private val appScope: CoroutineScope,
+    private val pageCache: TimelineDbPageCache = TimelineDbPageCache(),
     private val canSave: suspend () -> Boolean = { true },
 ) {
     val target = MutableStateFlow<TimelineReadingPosition?>(null)
@@ -50,6 +51,7 @@ internal class TimelineViewport(
             sortId = first.sortId
             current.value = TimelineReadingPosition(first.baseItem.stableItemKey, 0.0)
             target.value = current.value
+            isAtLatest.value = true
             return
         }
         val row = dao.getRowByItemKey(pagingKey, saved.itemKey)
@@ -65,6 +67,7 @@ internal class TimelineViewport(
         target.value = position
         dirtyAt = saved.updatedAt
         savedAt = saved.updatedAt
+        isAtLatest.value = position.itemKey == headKey
     }
 
     fun setVisibility(
@@ -75,17 +78,15 @@ internal class TimelineViewport(
         visibilityKey = key
         visibility = predicate
         if (current.value != null) {
-            scope.launch {
-                reanchorIfHidden()
-                refreshHead()
-            }
+            scope.launch { refreshHead() }
         }
     }
 
     private fun TimelinePageItem.isVisible(): Boolean = baseItem !is UiTimelineV2.Gap && visibility?.invoke(baseItem) != false
 
     private suspend fun nearestVisibleItem(start: Int): TimelinePageItem? {
-        val loader = TimelineDbPageLoader(database, pagingKey, TimelineDbPageCache(), windowed = true)
+        val loader = TimelineDbPageLoader(database, pagingKey, pageCache, windowed = true, preserveWindow = true)
+        loader.load(start, 1).firstOrNull { it.isVisible() }?.let { return it }
         var before = start
         var after = start
         var reachedEnd = false
@@ -120,7 +121,7 @@ internal class TimelineViewport(
     }
 
     private suspend fun visibleItem(start: Int): TimelinePageItem? {
-        val loader = TimelineDbPageLoader(database, pagingKey, TimelineDbPageCache(), windowed = true)
+        val loader = TimelineDbPageLoader(database, pagingKey, pageCache, windowed = true, preserveWindow = true)
         var offset = start
         while (true) {
             val page = loader.load(offset, 40)

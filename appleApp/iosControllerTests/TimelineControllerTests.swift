@@ -7,6 +7,29 @@ import FlareAppleUI
 
 @MainActor
 final class TimelineControllerIntegrationTests: XCTestCase {
+    func testGapButtonRejectsAnotherTapBeforeLoadingStateIsPublished() async throws {
+        var activations = 0
+        var finish: (([String]) -> KotlinUnit)?
+        let gap = UiTimelineV2.Gap(statusKey: MicroBlogKey(id: "button-gap", host: "example.invalid"),
+            createdAt: KotlinInstant.companion.fromEpochMilliseconds(epochMilliseconds: 0).toUi(),
+            nextKey: "cursor", lowerBound: [:], revision: 0,
+            itemKey: "button-gap", loading: false, failed: false,
+            onActivate: { completion in
+                activations += 1
+                finish = completion
+            })
+        let view = TimelineGapUIView(frame: CGRect(x: 0, y: 0, width: 320, height: 44))
+        view.configure(gap: gap)
+        let button = try XCTUnwrap(view.subviews.compactMap { $0 as? UIButton }.first)
+        button.sendActions(for: .touchUpInside)
+        view.configure(gap: gap)
+        button.sendActions(for: .touchUpInside)
+        XCTAssertEqual(activations, 1)
+        _ = try XCTUnwrap(finish)([])
+        button.sendActions(for: .touchUpInside)
+        XCTAssertEqual(activations, 2)
+    }
+
     func testCellReusesItsMeasurementBeforeTheCoalescedHeightCommit() async throws {
         let fixture = await Fixture(posts: true)
         let cell = try XCTUnwrap(fixture.collection.visibleCells.compactMap { $0 as? TimelineUIKitCollectionViewCell }.first)

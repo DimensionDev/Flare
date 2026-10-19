@@ -33,6 +33,7 @@ class CacheDatabaseDestructiveMigrationTest {
     fun currentAndExperimentalCachesAreRebuiltWithoutMigration() =
         runTest {
             assertCacheIsRebuilt(fromVersion = 48)
+            assertCacheIsRebuilt(fromVersion = 49)
             assertCacheIsRebuilt(fromVersion = 58)
         }
 

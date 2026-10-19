@@ -17,6 +17,7 @@ import dev.dimension.flare.data.database.cache.mapper.saveToDatabase
 import dev.dimension.flare.data.database.cache.model.DbPagingKey
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.database.cache.model.DbStatus
+import dev.dimension.flare.data.database.cache.model.DbTimelineBookmark
 import dev.dimension.flare.data.database.cache.model.DbTranslation
 import dev.dimension.flare.data.database.cache.model.TranslationDisplayOptions
 import dev.dimension.flare.data.database.cache.model.TranslationEntityType
@@ -32,8 +33,12 @@ import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.datasource.microblog.paging.TimelineDbPageCache
 import dev.dimension.flare.data.datasource.microblog.paging.TimelineDbPageLoader
+import dev.dimension.flare.data.datasource.microblog.paging.TimelineHistoryPagingKey
+import dev.dimension.flare.data.datasource.microblog.paging.TimelineHistoryPagingSource
+import dev.dimension.flare.data.datasource.microblog.paging.TimelineHistoryStore
 import dev.dimension.flare.data.datasource.microblog.paging.TimelinePageItem
 import dev.dimension.flare.data.datasource.microblog.paging.TimelinePagingMapper
+import dev.dimension.flare.data.datasource.microblog.paging.TimelineReader
 import dev.dimension.flare.data.datasource.microblog.paging.TimelineRemoteMediator
 import dev.dimension.flare.memoryDatabaseBuilder
 import dev.dimension.flare.model.AccountType
@@ -71,6 +76,99 @@ import kotlin.time.measureTime
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class TimelineDatabaseBenchmarkTest : RobolectricTest() {
+    /** Compares fresh reading sessions with the cache path used before persistent Home history. */
+    @Test
+    fun benchmarkHistoryColdStart() =
+        runTest(timeout = 5.minutes) {
+            val database =
+                Room
+                    .memoryDatabaseBuilder<CacheDatabase>()
+                    .setDriver(createDatabaseDriver())
+                    .addCallback(TimelineRevisionCallback)
+                    .setQueryCoroutineContext(PlatformDispatchers.IO)
+                    .build()
+            try {
+                val items = createRealisticTimelineItems(0, 150, 0)
+                var requests = 0
+                val loader =
+                    object : CacheableRemoteLoader<UiTimelineV2> {
+                        override val pagingKey = "cold-history-benchmark"
+
+                        override suspend fun load(
+                            pageSize: Int,
+                            request: PagingRequest,
+                        ): PagingResult<UiTimelineV2> {
+                            requests++
+                            return PagingResult(items, nextKey = "older")
+                        }
+                    }
+                val history = checkNotNull(TimelineHistoryStore(database).open(loader, false))
+                assertTrue(history.refresh())
+                val dao = database.timelineHistoryDao()
+                val modes = listOf("legacy", "top", "deep", "filtered")
+                val expected =
+                    modes.associateWith { mode ->
+                        val index = if (mode == "deep") 120 else 0
+                        val row = dao.page(history.key, index, 1).single()
+                        dao.save(DbTimelineBookmark(mode, history.key, row.itemKey, row.ordinal, row.position, -42.5))
+                        dao.page(history.key, (index - 20 / 3).coerceAtLeast(0), 20).map { it.itemKey }
+                    }
+                val timings = modes.associateWith { mutableListOf<Long>() }
+                repeat(11) { iteration ->
+                    val start = iteration % modes.size
+                    (modes.drop(start) + modes.take(start)).forEach { mode ->
+                        val elapsed =
+                            measureTime {
+                                val data =
+                                    if (mode == "legacy") {
+                                        val paging =
+                                            OffsetFromStartPagingSource(TimelineDbPageLoader(database, history.key, TimelineDbPageCache()))
+                                        try {
+                                            assertIs<PagingSource.LoadResult.Page<OffsetFromStartPagingKey, TimelinePageItem>>(
+                                                paging.load(PagingSource.LoadParams.Refresh(null, 20, false)),
+                                            ).data
+                                        } finally {
+                                            paging.invalidate()
+                                        }
+                                    } else {
+                                        val store = TimelineHistoryStore(database)
+                                        val reader =
+                                            TimelineReader(mode, checkNotNull(store.open(loader, false)), database, store, backgroundScope)
+                                        if (mode == "filtered") reader.setVisibility("filter") { it.statusKey.id != "hidden" }
+                                        reader.restore()
+                                        assertEquals(-42.5, reader.target.value?.offset)
+                                        val paging =
+                                            TimelineHistoryPagingSource(database, reader) { error("Cache reads cannot load a gap") }
+                                        try {
+                                            assertIs<PagingSource.LoadResult.Page<TimelineHistoryPagingKey, TimelinePageItem>>(
+                                                paging.load(PagingSource.LoadParams.Refresh(null, 20, false)),
+                                            ).data
+                                        } finally {
+                                            paging.invalidate()
+                                        }
+                                    }
+                                assertEquals(expected.getValue(mode), data.map { it.baseItem.stableItemKey })
+                            }
+                        if (iteration >= 2) timings.getValue(mode).add(elapsed.inWholeNanoseconds)
+                    }
+                    withContext(PlatformDispatchers.IO) { delay(25) }
+                }
+                assertEquals(1, requests)
+                println("TIMELINE_COLD_START_BENCHMARK version=1 platform=$benchmarkPlatform retained_rows=150 page_size=20")
+                val samples = timings.mapValues { (_, values) -> BenchmarkSamples(values.toLongArray(), 1L) }
+                samples.forEach { (mode, sample) -> printMetric("cold_$mode", sample) }
+                val budget = samples.getValue("legacy").medianMillis * 1.5 + 2.0
+                samples.filterKeys { it != "legacy" }.forEach { (mode, sample) ->
+                    assertTrue(
+                        sample.medianMillis <= budget,
+                        "$mode cache startup ${sample.medianMillis} ms exceeds baseline-relative budget $budget ms",
+                    )
+                }
+            } finally {
+                database.close()
+            }
+        }
+
     /**
      * Production-shaped benchmark for the complete timeline lifecycle.
      *

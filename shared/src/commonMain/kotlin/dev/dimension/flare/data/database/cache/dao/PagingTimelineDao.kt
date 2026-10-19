@@ -327,6 +327,16 @@ internal interface PagingTimelineDao {
         limit: Int,
     ): List<DbTimelinePageIdentity>
 
+    @Query(
+        "SELECT t.statusId, t._id AS timelineId, t.sortId, t.messageRenderHash, t.contentRevision " +
+            "FROM DbPagingTimeline t INNER JOIN DbStatus s ON s.id = t.statusId " +
+            "WHERE t.pagingKey = :pagingKey AND t._id IN (:timelineIds)",
+    )
+    suspend fun getTimelinePageIdentitiesByIds(
+        pagingKey: String,
+        timelineIds: List<String>,
+    ): List<DbTimelinePageIdentity>
+
     @Transaction
     @RewriteQueriesToDropUnusedColumns
     @Query(

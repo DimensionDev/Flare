@@ -2,10 +2,10 @@ package dev.dimension.flare.data.datasource.microblog.paging
 
 import androidx.room3.withReadTransaction
 import dev.dimension.flare.data.database.cache.CacheDatabase
-import dev.dimension.flare.data.database.cache.dao.DbTimelinePageIdentity
 import dev.dimension.flare.data.database.cache.dao.TimelineHistoryRow
-import dev.dimension.flare.data.database.cache.dao.getTimelinePageInCurrentTransaction
+import dev.dimension.flare.data.datasource.microblog.pagingConfig
 import dev.dimension.flare.ui.model.TimelineReadingPosition
+import dev.dimension.flare.ui.model.UiTimelineV2
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
@@ -34,16 +34,18 @@ internal class TimelineReader(
     private var visibleHeadLoaded = false
     private var cachedVisibleHead: TimelineHistoryRow? = null
     private var visibilityKey: Any? = null
-    var isVisible: (dev.dimension.flare.ui.model.UiTimelineV2) -> Boolean = { true }
-        private set
+    private var visibilityPredicate: ((UiTimelineV2) -> Boolean)? = null
+    private val pageCache = TimelineDbPageCache()
+
+    fun isVisible(item: UiTimelineV2): Boolean = visibilityPredicate?.invoke(item) != false
 
     fun setVisibility(
         key: Any,
-        predicate: (dev.dimension.flare.ui.model.UiTimelineV2) -> Boolean,
+        predicate: ((UiTimelineV2) -> Boolean)?,
     ) {
         if (visibilityKey == key) return
         visibilityKey = key
-        isVisible = predicate
+        visibilityPredicate = predicate
         invalidateVisibleHead()
         navigation.value += 1
     }
@@ -72,37 +74,21 @@ internal class TimelineReader(
         visibleHeadLoaded = false
     }
 
-    suspend fun pageItems(rows: List<TimelineHistoryRow>): Map<String, TimelinePageItem> {
-        val ids = rows.mapNotNull { it.timelineId }
-        if (ids.isEmpty()) return emptyMap()
-        val hydrated = database.pagingTimelineDao().getTimelinePageInCurrentTransaction(history.key, 0, ids.size, ids)
-        return TimelinePagingMapper
-            .toPageItems(
-                hydrated,
-                hydrated.map { item ->
-                    DbTimelinePageIdentity(
-                        item.timeline.statusId,
-                        item.timeline.sortId,
-                        item.timeline.messageRenderHash,
-                        item.timeline.contentRevision,
-                        item.timeline._id,
-                    )
-                },
-                history.key,
-                mutableMapOf(),
-            ).associateBy { it.baseItem.stableItemKey }
-    }
+    suspend fun pageItems(rows: List<TimelineHistoryRow>): Map<String, TimelinePageItem> =
+        pageCache.loadByIds(database, history.key, rows.mapNotNull { it.timelineId }).associateBy { it.baseItem.stableItemKey }
 
     suspend fun visibleHead(): TimelineHistoryRow? =
         database.withReadTransaction {
+            if (visibilityPredicate == null) return@withReadTransaction database.timelineHistoryDao().head(history.key)
             if (!visibleHeadLoaded) {
                 cachedVisibleHead = null
                 var offset = 0
                 while (true) {
-                    val rows = database.timelineHistoryDao().page(history.key, offset, 100)
+                    val limit = if (offset == 0) pagingConfig.pageSize else 100
+                    val rows = database.timelineHistoryDao().page(history.key, offset, limit)
                     val items = pageItems(rows)
-                    val visible = rows.firstOrNull { row -> items[row.itemKey]?.baseItem?.let(isVisible) == true }
-                    if (visible != null || rows.size < 100) {
+                    val visible = rows.firstOrNull { row -> items[row.itemKey]?.baseItem?.let(::isVisible) == true }
+                    if (visible != null || rows.size < limit) {
                         cachedVisibleHead = visible
                         break
                     }

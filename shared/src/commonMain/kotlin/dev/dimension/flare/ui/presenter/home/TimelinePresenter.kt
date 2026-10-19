@@ -134,15 +134,23 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
 
     private data class Visibility(
         val key: List<Any?>,
-        val matches: (UiTimelineV2) -> Boolean,
+        val matches: ((UiTimelineV2) -> Boolean)?,
     )
 
     private val visibilityFlow by lazy {
         combine(filterFlow, timelineFilterConfigFlow, mxgaEnabledFlow, mxgaRepository.snapshot) { filters, config, mxgaEnabled, snapshot ->
-            Visibility(listOf(filters, config, mxgaEnabled, snapshot)) { item ->
-                item.matchesKeywordFilters(filters) && item.matchesTimelineFilter(config) &&
-                    (!mxgaEnabled || !item.isMxgaMatch(snapshot, platformRegistry))
-            }
+            Visibility(
+                key = listOf(filters, config, mxgaEnabled, snapshot),
+                matches =
+                    if (filters.isEmpty() && config.excludedKinds.isEmpty() && config.excludedContents.isEmpty() && !mxgaEnabled) {
+                        null
+                    } else {
+                        { item ->
+                            item.matchesKeywordFilters(filters) && item.matchesTimelineFilter(config) &&
+                                (!mxgaEnabled || !item.isMxgaMatch(snapshot, platformRegistry))
+                        }
+                    },
+            )
         }
     }
 
@@ -206,7 +214,7 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
                 }.flatMapLatest { pager ->
                     visibilityFlow.map { visibility ->
                         reader.value?.setVisibility(visibility.key, visibility.matches)
-                        pager.filter { item -> item.isPaginationGap || visibility.matches(item) }.map { transform(it) }
+                        pager.filter { item -> item.isPaginationGap || visibility.matches?.invoke(item) != false }.map { transform(it) }
                     }
                 }
             }.catch {

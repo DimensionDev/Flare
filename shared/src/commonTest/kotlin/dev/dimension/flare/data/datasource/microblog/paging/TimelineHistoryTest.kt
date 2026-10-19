@@ -4,6 +4,7 @@ import androidx.paging.PagingSource
 import androidx.room3.Room
 import dev.dimension.flare.RobolectricTest
 import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.database.cache.TimelineRevisionCallback
 import dev.dimension.flare.data.database.cache.model.DbTimelineBookmark
 import dev.dimension.flare.data.database.createDatabaseDriver
 import dev.dimension.flare.data.datasource.microblog.MixedTimelinePageLoader
@@ -47,6 +48,7 @@ class TimelineHistoryTest : RobolectricTest() {
             Room
                 .memoryDatabaseBuilder<CacheDatabase>()
                 .setDriver(createDatabaseDriver())
+                .addCallback(TimelineRevisionCallback)
                 .setQueryCoroutineContext(Dispatchers.Unconfined)
                 .build()
         store = TimelineHistoryStore(database)
@@ -270,7 +272,7 @@ class TimelineHistoryTest : RobolectricTest() {
             reader.target.first { it != null }
             assertEquals(originalHead, reader.target.value?.itemKey)
             assertTrue(reader.isAtLatest.first())
-            reader.setVisibility("show-all") { true }
+            reader.setVisibility("show-all", null)
             loadWindow(reader)
             assertTrue(reader.hasNewContent.first(), "Changing filters must re-evaluate the visible head")
             database.invalidationTracker.createFlow("DbTimelineBookmark").first {

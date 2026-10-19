@@ -55,6 +55,36 @@ internal class TimelineDbPageCache {
             }
         }
 
+    suspend fun loadByIds(
+        database: CacheDatabase,
+        pagingKey: String,
+        timelineIds: List<String>,
+    ): List<TimelinePageItem> =
+        mutex.withLock {
+            if (timelineIds.isEmpty()) return@withLock emptyList()
+            database.withReadTransaction {
+                val dao = database.pagingTimelineDao()
+                val byId = dao.getTimelinePageIdentitiesByIds(pagingKey, timelineIds).associateBy { it.timelineId }
+                val identities = timelineIds.mapNotNull(byId::get)
+                val missing = identities.filter { snapshot[it] == null }
+                val fetched =
+                    if (missing.isEmpty()) {
+                        emptyMap()
+                    } else {
+                        TimelinePagingMapper
+                            .toPageItems(
+                                dao.getTimelinePageInCurrentTransaction(pagingKey, 0, missing.size, missing.map { it.timelineId }),
+                                missing,
+                                pagingKey,
+                                canonicalProfiles,
+                            ).associateBy { it.identity }
+                    }
+                val data = identities.mapNotNull { snapshot[it] ?: fetched[it] }
+                TimelinePagingMapper.rebuildCanonicalProfiles(snapshot.retain(data, 200), canonicalProfiles)
+                data
+            }
+        }
+
     private suspend fun loadPage(
         dao: PagingTimelineDao,
         pagingKey: String,
@@ -166,6 +196,20 @@ internal class TimelineDbPageCache {
         private var itemByIdentity = HashMap<DbTimelinePageIdentity, TimelinePageItem>()
 
         operator fun get(identity: DbTimelinePageIdentity): TimelinePageItem? = itemByIdentity[identity]
+
+        fun retain(
+            data: List<TimelinePageItem>,
+            limit: Int,
+        ): List<TimelinePageItem> {
+            val previous = segments.asSequence().flatMap { it.identities }.mapNotNull(itemByIdentity::get)
+            val retained =
+                (data.asSequence() + previous)
+                    .distinctBy { it.identity.timelineId }
+                    .take(limit)
+                    .toList()
+            replace(retained.map { it.identity }, retained, null)
+            return retained
+        }
 
         fun replace(
             identities: List<DbTimelinePageIdentity>,

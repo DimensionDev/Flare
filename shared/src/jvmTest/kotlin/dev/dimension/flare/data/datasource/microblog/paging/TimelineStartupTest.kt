@@ -59,6 +59,8 @@ class TimelineStartupTest {
                         driver.largeTextReads.get(),
                         "Cached Home must not materialize a continuation before displaying posts",
                     )
+                    kotlin.test.assertEquals(20L, driver.blobs.get(), "Cold starts must decode only the ordinary first page")
+                    kotlin.test.assertEquals(0L, driver.anchorLookups.get(), "Cold starts must not locate a refresh anchor")
                 } finally {
                     db.close()
                     listOf("", "-wal", "-shm").forEach { Files.deleteIfExists(path.resolveSibling(path.fileName.toString() + it)) }
@@ -134,6 +136,7 @@ class TimelineStartupTest {
                     source.load(PagingSource.LoadParams.Refresh(null, 20, false))
                     source.load(PagingSource.LoadParams.Refresh(OffsetFromStartPagingKey.Refresh(100), 20, false))
                     kotlin.test.assertEquals(100L, driver.blobs.get(), "Extending a normal prefix must not decode its existing posts again")
+                    kotlin.test.assertEquals(0L, driver.anchorLookups.get(), "Index restoration must not locate a refresh anchor")
                 } finally {
                     source.invalidate()
                 }
@@ -226,16 +229,19 @@ class TimelineStartupTest {
     ) : SQLiteDriver by delegate {
         val blobs = AtomicLong()
         val largeTextReads = AtomicLong()
+        val anchorLookups = AtomicLong()
 
         fun reset() {
             blobs.set(0)
             largeTextReads.set(0)
+            anchorLookups.set(0)
         }
 
         override fun open(fileName: String): SQLiteConnection {
             val connection = delegate.open(fileName)
             return object : SQLiteConnection by connection {
                 override fun prepare(sql: String): SQLiteStatement {
+                    if (sql.startsWith("SELECT COUNT(*) FROM DbPagingTimeline")) anchorLookups.incrementAndGet()
                     val statement = connection.prepare(sql)
                     return object : SQLiteStatement by statement {
                         override fun getText(index: Int): String =

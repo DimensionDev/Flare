@@ -303,6 +303,19 @@ internal interface PagingTimelineDao {
         limit: Int,
     ): List<DbTimelinePageIdentity>
 
+    @Query(
+        "SELECT COUNT(*) FROM DbPagingTimeline " +
+            "INNER JOIN DbStatus ON DbStatus.id = DbPagingTimeline.statusId " +
+            "WHERE DbPagingTimeline.pagingKey = :pagingKey AND DbPagingTimeline.sortId <= (" +
+            "SELECT anchor.sortId FROM DbPagingTimeline AS anchor " +
+            "INNER JOIN DbStatus AS status ON status.id = anchor.statusId " +
+            "WHERE anchor.pagingKey = :pagingKey AND anchor._id = :timelineId)",
+    )
+    suspend fun getTimelineSizeThrough(
+        pagingKey: String,
+        timelineId: String,
+    ): Int
+
     @Transaction
     @RewriteQueriesToDropUnusedColumns
     @Query(

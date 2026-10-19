@@ -61,7 +61,18 @@ class TimelineNewPostsScrollTest {
     @Test
     fun refreshingAtTheTopKeepsTheOldHeadAndRecordsItsNewIndex() = checkPrepend(columns = 1, targetIndex = 0, offset = 0.0)
 
-    private fun checkPrepend(columns: Int, targetIndex: Int = 160, offset: Double = -25.0) {
+    @Test
+    fun refreshingAfterALargePrependKeepsTheOldHeadAndOffset() = checkPrepend(columns = 1, targetIndex = 0, prependCount = 40)
+
+    @Test
+    fun refreshingAfterALargePrependKeepsBothColumnsInPlace() = checkPrepend(columns = 2, prependCount = 40)
+
+    private fun checkPrepend(
+        columns: Int,
+        targetIndex: Int = 160,
+        offset: Double = -25.0,
+        prependCount: Int = 10,
+    ) {
         val pages = MutableStateFlow(page(0..199))
         val scroll = LazyStaggeredGridState()
         val reading = Reading(TimelineReadingPosition(targetIndex, offset))
@@ -94,9 +105,9 @@ class TimelineNewPostsScrollTest {
                     .first { it.key == "post-$targetIndex" }
                     .offset.y,
             )
-            pages.value = page(-10..199)
+            pages.value = page(-prependCount..199)
         }
-        composeRule.waitUntil { (state.listState as? PagingState.Success)?.itemCount == 210 }
+        composeRule.waitUntil { (state.listState as? PagingState.Success)?.itemCount == 200 + prependCount }
         composeRule.runOnIdle {
             assertEquals(
                 offset.toInt(),
@@ -105,7 +116,7 @@ class TimelineNewPostsScrollTest {
                     ?.offset
                     ?.y,
             )
-            assertEquals(targetIndex + 10, reading.currentPosition.index)
+            assertEquals(targetIndex + prependCount, reading.currentPosition.index)
         }
     }
 

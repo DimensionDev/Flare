@@ -43,14 +43,26 @@ internal class TimelineDbPageCache {
         pagingKey: String,
         offset: Int,
         limit: Int,
+        refreshKey: OffsetFromStartPagingKey.Refresh? = null,
     ): List<TimelinePageItem> =
         mutex.withLock {
             database.withReadTransaction {
+                val dao = database.pagingTimelineDao()
+                // Relocate only refreshes, in the same snapshot as the page read; cold starts keep their normal limit.
+                val refreshLimit =
+                    if (refreshKey?.anchorId != null) {
+                        maxOf(
+                            limit,
+                            dao.getTimelineSizeThrough(pagingKey, refreshKey.anchorId) + limit - refreshKey.anchorPosition - 1,
+                        )
+                    } else {
+                        limit
+                    }
                 loadPage(
-                    dao = database.pagingTimelineDao(),
+                    dao = dao,
                     pagingKey = pagingKey,
                     offset = offset,
-                    limit = limit,
+                    limit = refreshLimit,
                 )
             }
         }
@@ -226,6 +238,11 @@ internal class TimelineDbPageLoader(
     private val pagingKey: String,
     private val pageCache: TimelineDbPageCache,
 ) : OffsetFromStartPageLoader<TimelinePageItem> {
+    override fun refreshAnchorId(item: TimelinePageItem): String = item.identity.timelineId
+
+    override suspend fun loadRefresh(key: OffsetFromStartPagingKey.Refresh): List<TimelinePageItem> =
+        pageCache.load(database, pagingKey, offset = 0, limit = key.limit, refreshKey = key)
+
     override suspend fun load(
         offset: Int,
         limit: Int,

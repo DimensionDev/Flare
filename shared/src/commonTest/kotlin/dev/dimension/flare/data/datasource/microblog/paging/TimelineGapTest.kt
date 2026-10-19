@@ -3,14 +3,19 @@ package dev.dimension.flare.data.datasource.microblog.paging
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingConfig
+import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import androidx.room3.Room
 import dev.dimension.flare.RobolectricTest
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.clearHomeTimelinesForAccount
+import dev.dimension.flare.data.database.cache.connect
+import dev.dimension.flare.data.database.cache.mapper.saveToDatabase
+import dev.dimension.flare.data.database.cache.model.DbPagingKey
 import dev.dimension.flare.data.database.createDatabaseDriver
 import dev.dimension.flare.data.datasource.microblog.MixedRemoteMediator
+import dev.dimension.flare.data.datasource.microblog.offsetPagingConfig
 import dev.dimension.flare.data.model.tab.TimelineFilterConfig
 import dev.dimension.flare.data.model.tab.TimelineMergePolicy
 import dev.dimension.flare.data.repository.KeywordFilterPattern
@@ -61,6 +66,135 @@ class TimelineGapTest : RobolectricTest() {
     @AfterTest
     fun tearDown() {
         database.close()
+    }
+
+    @Test
+    fun rankedRefreshKeepsTheOldAnchorAndItsTrailingWindowAfterALargePrepend() =
+        runTest {
+            for (anchor in listOf(0, 35)) checkRefreshWindow(anchor = anchor)
+        }
+
+    @Test
+    fun mixedRefreshKeepsTheOldAnchorAndItsTrailingWindowAfterALargePrepend() =
+        runTest {
+            for (policy in TimelineMergePolicy.entries) checkRefreshWindow(policy)
+        }
+
+    @Test
+    fun coalescedChronologicalRefreshesKeepTheOldAnchorAfterMultipleNewPages() =
+        runTest {
+            checkRefreshWindow(TimelineMergePolicy.Time, refreshes = 3)
+        }
+
+    @Test
+    fun refreshingAfterTheAnchorIsDeletedFallsBackToTheOrdinaryWindow() =
+        runTest {
+            checkRefreshWindow(deleteAnchor = true)
+        }
+
+    @Test
+    fun refreshingWithoutRememberingPositionKeepsAnOverlappingAnchor() =
+        runTest {
+            checkRefreshWindow(remember = false)
+        }
+
+    private suspend fun checkRefreshWindow(
+        policy: TimelineMergePolicy? = null,
+        anchor: Int = 12,
+        refreshes: Int = 1,
+        deleteAnchor: Boolean = false,
+        remember: Boolean = true,
+    ) {
+        var generation = 0
+        val old = (80 downTo 1).map(::datedPost)
+        val ranked =
+            source("ranked-$policy-$anchor", ordered = false) {
+                PagingResult(
+                    (generation * 100 + 40 downTo generation * 100 + 1).map(::datedPost) + if (remember) emptyList() else old,
+                    nextKey = "ranked-$generation",
+                )
+            }
+        val loader =
+            if (policy == null) {
+                ranked
+            } else {
+                MixedRemoteMediator(
+                    database,
+                    listOf(
+                        ranked,
+                        source("ordered") {
+                            PagingResult(listOf(datedPost(generation * 100 + 41)), nextKey = "ordered-$generation")
+                        },
+                    ),
+                    policy,
+                )
+            }
+        database.connect {
+            saveToDatabase(
+                database,
+                TimelinePagingMapper.toDb(
+                    old,
+                    loader.pagingKey,
+                    old.mapIndexed { index, item ->
+                        (loader as? SortIdProvider)?.sortId(item)?.times(2) ?: index * 1_000_000L
+                    },
+                ),
+            )
+            database.pagingTimelineDao().insertPagingKey(DbPagingKey(loader.pagingKey, nextKey = "old-tail"))
+        }
+        val home = TimelineRemoteMediator(loader, database, false, retainHistory = remember)
+        val cache = TimelineDbPageCache()
+
+        fun newSource() = OffsetFromStartPagingSource(TimelineDbPageLoader(database, loader.pagingKey, cache))
+        val before = newSource()
+        val after = newSource()
+        val cold = OffsetFromStartPagingSource(TimelineDbPageLoader(database, loader.pagingKey, TimelineDbPageCache()))
+        try {
+            val initial =
+                assertIs<PagingSource.LoadResult.Page<OffsetFromStartPagingKey, TimelinePageItem>>(
+                    before.doLoad(PagingSource.LoadParams.Refresh(null, maxOf(20, anchor + 1), false)),
+                )
+            val key =
+                assertIs<OffsetFromStartPagingKey.Refresh>(
+                    before.getRefreshKey(PagingState(listOf(initial), anchor, offsetPagingConfig, 0)),
+                )
+            val anchorId = initial.data[anchor].identity.timelineId
+            repeat(refreshes) {
+                generation++
+                assertIs<RemoteMediator.MediatorResult.Success>(home.load(LoadType.REFRESH, state))
+            }
+            if (deleteAnchor) {
+                val row = assertNotNull(database.pagingTimelineDao().getRow(loader.pagingKey, anchorId))
+                database.pagingTimelineDao().delete(listOf(row))
+            }
+            val all = database.pagingTimelineDao().getTimelinePageIdentities(loader.pagingKey, 0, 300)
+            val expectedSize =
+                if (deleteAnchor) key.limit else maxOf(key.limit, all.indexOfFirst { it.timelineId == anchorId } + key.limit - anchor)
+            val refreshed =
+                assertIs<PagingSource.LoadResult.Page<OffsetFromStartPagingKey, TimelinePageItem>>(
+                    after.doLoad(PagingSource.LoadParams.Refresh(key, 20, false)),
+                )
+            assertEquals(
+                all.take(expectedSize),
+                refreshed.data.map { it.identity },
+                "Refresh must retain the anchor and its trailing window",
+            )
+            assertEquals(OffsetFromStartPagingKey.Append(expectedSize), refreshed.nextKey)
+            val appended =
+                assertIs<PagingSource.LoadResult.Page<OffsetFromStartPagingKey, TimelinePageItem>>(
+                    after.doLoad(PagingSource.LoadParams.Append(assertNotNull(refreshed.nextKey), 20, false)),
+                )
+            assertEquals(all.drop(expectedSize).take(20), appended.data.map { it.identity }, "Append must start after the extended prefix")
+            val restarted =
+                assertIs<PagingSource.LoadResult.Page<OffsetFromStartPagingKey, TimelinePageItem>>(
+                    cold.doLoad(PagingSource.LoadParams.Refresh(null, 20, false)),
+                )
+            assertEquals(all.take(20), restarted.data.map { it.identity }, "Cold starts must still read only the normal first page")
+        } finally {
+            before.invalidate()
+            after.invalidate()
+            cold.invalidate()
+        }
     }
 
     @Test

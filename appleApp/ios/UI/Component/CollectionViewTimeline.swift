@@ -633,19 +633,17 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     }()
     private var heightCache: [String: CGFloat] = [:]
     private var itemHeightCache = TimelineItemHeightCache()
-    private var hasPendingHeightCorrections = false
     private var isHeightCorrectionFlushScheduled = false
 
     private func clearHeightCache(keepingItemMeasurements: Bool = false) {
         heightCache.removeAll(keepingCapacity: true)
         if !keepingItemMeasurements {
             itemHeightCache.removeAll()
-            hasPendingHeightCorrections = false
         }
     }
 
     private func isReadingLayoutReady(at indexPath: IndexPath?) -> Bool {
-        guard isSnapshotReadyForReadingPosition, !hasPendingHeightCorrections else { return false }
+        guard isSnapshotReadyForReadingPosition, !itemHeightCache.hasPendingMeasurements else { return false }
         guard let indexPath else { return true }
         // Only the target and already visible cells participate. Never measure the
         // offscreen feed merely to finish a rotation or a prepend.
@@ -733,20 +731,20 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         width: CGFloat,
         height: CGFloat
     ) {
-        guard width > 1, height.isFinite else { return }
+        guard width > 1, height.isFinite, lastRenderHashMap[itemID] == renderHash else { return }
         let correctedHeight = max(ceil(height), 1)
         // An unchanged measured height can still replace an estimate/stale render
         // and complete a pending restore, without requiring a layout invalidation.
         if collectionView.hasReadingPosition { collectionView.setNeedsLayout() }
-        guard itemHeightCache.store(correctedHeight, for: itemID,
-                                    geometry: heightGeometry(itemID: itemID, width: width),
-                                    renderHash: renderHash) else { return }
-        hasPendingHeightCorrections = true
+        itemHeightCache.stage(correctedHeight, for: itemID,
+                              geometry: heightGeometry(itemID: itemID, width: width),
+                              renderHash: renderHash)
         scheduleHeightCorrectionFlush()
     }
 
     private func scheduleHeightCorrectionFlush() {
-        guard !isHeightCorrectionFlushScheduled else { return }
+        guard !isHeightCorrectionFlushScheduled, !isApplyingSnapshot,
+              itemHeightCache.hasPendingMeasurements else { return }
         isHeightCorrectionFlushScheduled = true
         DispatchQueue.main.async { [weak self] in
             self?.flushPendingHeightCorrections()
@@ -755,13 +753,15 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
 
     private func flushPendingHeightCorrections() {
         isHeightCorrectionFlushScheduled = false
-        guard isViewLoaded, hasPendingHeightCorrections else {
-            hasPendingHeightCorrections = false
-            return
+        guard isViewLoaded, !isApplyingSnapshot, itemHeightCache.hasPendingMeasurements else { return }
+        collectionView.invalidateMeasuredHeights {
+            self.itemHeightCache.commitPendingMeasurements { id, geometry, renderHash in
+                guard self.lastRenderHashMap[id] == renderHash,
+                      let path = self.dataSource.indexPath(for: id),
+                      let layout = self.collectionView.collectionViewLayout as? CHTCollectionViewWaterfallLayout else { return false }
+                return geometry == self.heightGeometry(itemID: id, width: max(layout.itemWidth(inSection: path.section), 1))
+            }
         }
-
-        hasPendingHeightCorrections = false
-        collectionView.invalidateMeasuredHeights()
     }
 
     private func applyLayoutForColumnCount() {
@@ -948,7 +948,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
             cell.accessibilityIdentifier = "timeline-item:\(item.stableItemKey)"
             cell.cachedPreferredHeight = { [weak self] width in
                 guard let self else { return nil }
-                return self.itemHeightCache.height(for: itemID,
+                return self.itemHeightCache.measuredHeight(for: itemID,
                     geometry: self.heightGeometry(itemID: itemID, width: width), renderHash: item.renderHash)
             }
             cell.onPreferredHeightChanged = { [weak self] width, height in
@@ -1189,6 +1189,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         if switchedContent || kindChanged { gapReadingPosition = nil }
 
         if switchedContent {
+            itemHeightCache.discardPendingMeasurements()
             let offsetY = input.retainedOffset ?? max(effectiveContentOffsetY, 0)
             collectionView.resetReadingPosition()
             minimumVerticalScrollDistance = offsetY
@@ -1280,6 +1281,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
                 self.updateAutoplayConfiguration()
                 if wasRefreshing && !plan.isRefreshing { self.schedulePostRefreshPoolCleanup() }
                 self.isApplyingSnapshot = false
+                self.scheduleHeightCorrectionFlush()
                 self.restoreBookmarkIfReady()
                 self.scheduleVisiblePagingAccess()
                 if self.pendingInput != nil || !self.pendingReconfigureIDs.isEmpty { self.scheduleSubmission() }

@@ -174,12 +174,14 @@ private final class TimelineTestController: UIViewController, CHTCollectionViewD
         let oldScreenY = oldFrame.minY - list.contentOffset.y
         let nextPath = dataSource.indexPath(for: id + 1)!
         let nextScreenY = layout.layoutAttributesForItem(at: nextPath)!.frame.minY - list.contentOffset.y
-        if refineReadingItem {
-            heights[id] = 120
-        } else {
-            heights[id - 1] = itemHeight(id - 1) + 120
+        list.invalidateMeasuredHeights {
+            if refineReadingItem {
+                self.heights[id] = 120
+            } else {
+                self.heights[id - 1] = self.itemHeight(id - 1) + 120
+            }
+            return true
         }
-        list.invalidateMeasuredHeights()
         list.layoutIfNeeded()
         let newScreenY = layout.layoutAttributesForItem(at: path)!.frame.minY - list.contentOffset.y
         if refineReadingItem {

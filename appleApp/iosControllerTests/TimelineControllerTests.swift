@@ -7,6 +7,25 @@ import FlareAppleUI
 
 @MainActor
 final class TimelineControllerIntegrationTests: XCTestCase {
+    func testCellReusesItsMeasurementBeforeTheCoalescedHeightCommit() async throws {
+        let fixture = await Fixture(posts: true)
+        let cell = try XCTUnwrap(fixture.collection.visibleCells.compactMap { $0 as? TimelineUIKitCollectionViewCell }.first)
+        let report = try XCTUnwrap(cell.onPreferredHeightChanged)
+        var measurements = 0
+        cell.onPreferredHeightChanged = { width, height in
+            measurements += 1
+            report(width, height)
+        }
+        // A new width has no cached measurement. All of these cell layouts occur
+        // before the main queue can commit the reported height to the list.
+        cell.bounds.size.width += 13
+        for _ in 0..<10 {
+            cell.setNeedsLayout()
+            cell.layoutIfNeeded()
+        }
+        XCTAssertEqual(measurements, 1, "Pending measurements must also suppress repeated rich-text sizing")
+    }
+
     func testGalleryNewReadingTargetWinsOverThePreviousSnapshotAnchor() async throws {
         let fixture = await GalleryFixture()
         fixture.collection.setContentOffset(CGPoint(x: 0, y: 1_500), animated: false)

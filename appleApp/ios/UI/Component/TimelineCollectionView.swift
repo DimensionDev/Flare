@@ -405,11 +405,18 @@ final class TimelineCollectionView: UICollectionView {
     }
 
     /// Apply measured geometry without moving content under an active gesture.
-    /// Called from the controller's coalesced flush, outside cell measurement/layout.
-    func invalidateMeasuredHeights() {
+    /// Publish heights after capturing the old anchor, outside cell measurement.
+    /// Layouts triggered by offset compensation must see the same committed batch.
+    func invalidateMeasuredHeights(applying measurements: () -> Bool = { true }) {
         prepareForLayoutChange(preferringVisibleTop: true)
         UIView.performWithoutAnimation {
             performUpdatesPreservingReadingPosition(preferringVisibleTop: true) {
+                guard measurements() else {
+                    // Discarding an obsolete batch can make an existing bookmark
+                    // ready without invalidating any item geometry.
+                    if hasReadingPosition { setNeedsLayout() }
+                    return
+                }
                 collectionViewLayout.invalidateLayout()
                 layoutIfNeeded()
             }

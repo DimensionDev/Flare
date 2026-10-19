@@ -210,6 +210,37 @@ final class TimelineCollectionViewTests: XCTestCase {
         try fixture.assertPosition(position)
     }
 
+    func testPublishingMeasuredHeightsCapturesTheOldLayoutBeforeCommit() throws {
+        let fixture = Fixture(width: 390, columns: 1)
+        fixture.scroll(to: 3_000)
+        let path = try XCTUnwrap(fixture.collectionView.indexPathsForVisibleItems
+            .sorted().first { fixture.collectionView.layoutAttributesForItem(at: $0)!.frame.minY >= 3_000 })
+        let id = try XCTUnwrap(fixture.dataSource.itemIdentifier(for: path))
+        let offset = try XCTUnwrap(fixture.collectionView.layoutAttributesForItem(at: path)).frame.minY - 3_000
+        fixture.collectionView.invalidateMeasuredHeights {
+            fixture.extraHeight = 224
+            return true
+        }
+        fixture.settle()
+        try fixture.assertPosition(Position(id: id, distance: offset))
+    }
+
+    func testDiscardedMeasurementsAllowThePendingReadingPositionToFinish() {
+        let fixture = Fixture(width: 390, columns: 1)
+        fixture.scroll(to: 3_000)
+        var ready = false
+        fixture.collectionView.isReadingLayoutReady = { _ in ready }
+        fixture.collectionView.prepareForLayoutChange(preferringVisibleTop: true)
+        XCTAssertTrue(fixture.collectionView.hasReadingPosition)
+        fixture.collectionView.invalidateMeasuredHeights {
+            ready = true
+            return false
+        }
+        fixture.collectionView.layoutIfNeeded()
+        RunLoop.main.run(until: Date().addingTimeInterval(0.01))
+        XCTAssertFalse(fixture.collectionView.hasReadingPosition)
+    }
+
     func testRemovedReadingItemFallsForwardToTheNextSurvivingItem() throws {
         let fixture = Fixture(width: 390, columns: 1)
         fixture.scroll(to: 3_000)

@@ -966,6 +966,60 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         }
     }
 
+    func testInitialRefreshCollapseAcceptsLateCellMeasurements() async throws {
+        try await checkTopRefreshCollapseWithLateCellMeasurement(switchedContent: false)
+    }
+
+    func testKeyedTabRefreshCollapseAcceptsLateCellMeasurements() async throws {
+        try await checkTopRefreshCollapseWithLateCellMeasurement(switchedContent: true)
+    }
+
+    private func checkTopRefreshCollapseWithLateCellMeasurement(switchedContent: Bool) async throws {
+        let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first)
+        let previousKeyWindow = scene.windows.first(where: \.isKeyWindow)
+        let window = UIWindow(windowScene: scene)
+        defer {
+            window.isHidden = true
+            window.rootViewController = nil
+            previousKeyWindow?.makeKey()
+        }
+        let fixture = await Fixture(posts: switchedContent, initialState: switchedContent ? nil : .loading)
+        fixture.input.key = "previous"
+        await fixture.apply()
+        fixture.collection.contentInsetAdjustmentBehavior = .automatic
+        window.rootViewController = fixture.controller
+        window.makeKeyAndVisible()
+        await fixture.settle()
+
+        fixture.input.key = switchedContent ? "next" : "previous"
+        fixture.input.state = .loaded
+        fixture.input.items = (100..<160).map { .post(makeRow($0)) }
+        await fixture.apply()
+        fixture.input.isRefreshing = true
+        await fixture.apply()
+        try await Task.sleep(for: .milliseconds(250))
+        let view = fixture.collection
+        let restingInset = view.restingAdjustedTopInset
+        fixture.input.isRefreshing = false
+        fixture.controller.submit(fixture.input, columns: 1)
+        try await Task.sleep(for: .milliseconds(40))
+        XCTAssertTrue(view.shouldDeferSnapshotChanges)
+        XCTAssertLessThan(view.contentOffset.y, -view.adjustedContentInset.top - 1)
+
+        let path = try XCTUnwrap(view.readingIndexPath?("t:case-100"))
+        let cell = try XCTUnwrap(view.cellForItem(at: path) as? TimelineUIKitCollectionViewCell)
+        let report = try XCTUnwrap(cell.onPreferredHeightChanged)
+        let frame = try XCTUnwrap(view.layoutAttributesForItem(at: path)?.frame)
+        // Use the cell callback so the controller stages and commits the measurement.
+        report(frame.width, frame.height + 35)
+        try await Task.sleep(for: .milliseconds(500))
+        await fixture.settle()
+        XCTAssertEqual(view.contentOffset.y, -restingInset, accuracy: 0.5)
+        XCTAssertEqual(view.captureViewportPosition()?.itemID, "t:case-100")
+        XCTAssertFalse(view.isPresentingRefresh)
+        XCTAssertFalse(view.hasReadingPosition)
+    }
+
     func testRefreshingKeyedSwitchCommitsBeforeStartingRefreshPresentation() async throws {
         let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first)
         let previousKeyWindow = scene.windows.first(where: \.isKeyWindow)

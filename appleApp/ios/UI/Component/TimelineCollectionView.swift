@@ -484,7 +484,9 @@ final class TimelineCollectionView: UICollectionView {
             }
             return targetOffset
         }
-        if let layout = collectionViewLayout as? TimelineWaterfallLayout, item != nil {
+        // UIKit can clamp an elastic offset when content size changes. Compensate
+        // it once after layout instead of replaying it against every clamp.
+        if let layout = collectionViewLayout as? TimelineWaterfallLayout, item != nil, wasWithinBounds {
             let previous = layout.readingOffset
             layout.readingOffset = readingOffset
             defer { layout.readingOffset = previous }

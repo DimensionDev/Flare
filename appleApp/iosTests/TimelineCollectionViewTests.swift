@@ -5,6 +5,45 @@ import CHTCollectionViewWaterfallLayoutObjC
 
 @MainActor
 final class TimelineCollectionViewTests: XCTestCase {
+    func testHeightPublicationDuringTopRefreshCollapseKeepsReadingPosition() async throws {
+        let fixture = Fixture(width: 402, columns: 1)
+        let window = fixture.showInWindow()
+        defer { window.isHidden = true }
+        let view = fixture.collectionView
+        view.alwaysBounceVertical = true
+        view.contentInsetAdjustmentBehavior = .automatic
+        window.rootViewController?.additionalSafeAreaInsets.top = 100
+        view.setTopContentInset(39)
+        window.layoutIfNeeded()
+        fixture.settle()
+        let restingInset = view.adjustedContentInset.top
+        fixture.scroll(to: -restingInset)
+        view.refreshControl = UIRefreshControl()
+        view.beginRefreshing(revealingIndicator: true)
+        try await Task.sleep(for: .milliseconds(400))
+        fixture.settle()
+
+        view.endRefreshing()
+        try await Task.sleep(for: .milliseconds(30))
+        XCTAssertLessThan(view.contentOffset.y, -view.adjustedContentInset.top - 1)
+        XCTAssertTrue(view.shouldDeferSnapshotChanges)
+        let oldOffset = view.contentOffset.y
+        view.invalidateMeasuredHeights {
+            fixture.heightOverride = { id, width in
+                Cell.height(index: id, width: width) + (id == 0 ? 35 : 0)
+            }
+            return true
+        }
+        XCTAssertEqual(view.contentOffset.y, oldOffset, accuracy: 0.5, "Height publication must preserve the in-flight collapse position")
+        try await Task.sleep(for: .milliseconds(400))
+        fixture.settle()
+        // Bookmark cleanup is dispatched outside the collection's layout pass.
+        try await Task.sleep(for: .milliseconds(10))
+        XCTAssertEqual(view.contentOffset.y, -restingInset, accuracy: 0.5)
+        XCTAssertFalse(view.isPresentingRefresh)
+        XCTAssertFalse(view.hasReadingPosition)
+    }
+
     func testMeasuringAnotherColumnDoesNotMoveTheCurrentReadingItem() throws {
         let fixture = Fixture(width: 900, columns: 2)
         var otherColumnHeight: CGFloat = 100

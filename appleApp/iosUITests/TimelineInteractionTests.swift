@@ -6,6 +6,11 @@ final class TimelineInteractionTests: XCTestCase {
         app.launchArguments = [scenario]
         app.launch()
         defer { app.terminate() }
+        if scenario == "tab-refresh-late-height" {
+            let tab = app.tabBars.buttons["Timeline"]
+            XCTAssertTrue(tab.waitForExistence(timeout: 10))
+            tab.tap()
+        }
         if gesture {
             XCTAssertTrue(app.staticTexts["gesture-ready"].waitForExistence(timeout: 10))
             let list = app.collectionViews["timeline-list"]
@@ -18,6 +23,7 @@ final class TimelineInteractionTests: XCTestCase {
         let result = app.staticTexts["timeline-result"]
         XCTAssertTrue(result.waitForExistence(timeout: 20))
         XCTAssertEqual(result.label, "PASS")
+        if let metrics = result.value as? String { print("TIMELINE-REFRESH \(scenario) \(metrics)") }
     }
 
     @MainActor func testHeightRefinementDoesNotInterruptScrollToTop() { run("scroll-to-top") }
@@ -28,6 +34,8 @@ final class TimelineInteractionTests: XCTestCase {
     @MainActor func testPrependDuringPullRefreshKeepsTheReadingItem() { run("pull-refresh", gesture: true) }
     @MainActor func testPrependDuringRefreshRevealKeepsTheReadingItem() { run("fast-refresh-prepend") }
     @MainActor func testHeightMeasuredDuringRefreshCollapseKeepsReadingItem() { run("refresh-late-height") }
+    @MainActor func testInitialRefreshCollapseWithLateHeightDoesNotCrashOrJump() { run("initial-refresh-late-height") }
+    @MainActor func testTabSwitchRefreshCollapseWithLateHeightDoesNotCrashOrJump() { run("tab-refresh-late-height") }
     @MainActor func testHeightMeasuredDuringRefreshCollapseKeepsReadingItemAcrossColumns() { run("refresh-late-height-columns") }
     @MainActor func testHeightMeasuredAfterRefreshCollapseKeepsReadingItem() { run("refresh-height-after-collapse") }
     @MainActor func testExplicitNavigationSupersedesRefreshCollapseBookmark() { run("refresh-collapse-navigation") }

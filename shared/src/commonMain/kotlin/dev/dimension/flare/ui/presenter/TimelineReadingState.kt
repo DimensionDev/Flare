@@ -8,12 +8,12 @@ public interface TimelineReadingState {
     public val isAtLatest: Boolean get() = !hasNewContent
 
     public fun viewportChanged(
-        itemKey: String,
+        index: Int,
         offset: Double,
     )
 
     public fun positionChanged(
-        itemKey: String,
+        index: Int,
         offset: Double,
     )
 

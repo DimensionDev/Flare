@@ -10,8 +10,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadState
+import androidx.paging.LoadType
 import androidx.paging.Pager
 import androidx.paging.PagingData
+import androidx.paging.RemoteMediator
 import androidx.paging.cachedIn
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.filter
@@ -73,7 +75,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
@@ -202,7 +203,6 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
                                         loader = remoteLoader,
                                         scope = sourceScope,
                                         rememberPosition = isHomeTimeline && timelineTabItemId != null && enabled,
-                                        visibility = visibility,
                                     ).cachedIn(sourceScope).flatMapLatest { pagingData ->
                                         translationSettingsFlow
                                             .combine(gapActivity) { translationDisplayOptions, activity ->
@@ -234,9 +234,8 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
                                 }
                             }.flatMapLatest { pager ->
                                 visibility.map { visible ->
-                                    viewport.value?.setVisibility(visible)
                                     pager
-                                        .filter(visible::isVisible)
+                                        .filter { visible.isVisible(it) && (enabled || it !is UiTimelineV2.Gap) }
                                         .map {
                                             if (it is UiTimelineV2.Gap) it else transform(it)
                                         }
@@ -253,10 +252,8 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
         loader: CacheableRemoteLoader<UiTimelineV2>,
         scope: CoroutineScope,
         rememberPosition: Boolean,
-        visibility: Flow<TimelineVisibility>,
     ): Flow<PagingData<TimelinePageItem>> =
         flow {
-            val preferences = settingsRepository.appSettings.first()
             val allowLongText = allowLongTextTranslationDisplay(loader)
             val pageCache = TimelineDbPageCache()
             val notifyError: (Throwable) -> Unit = { e ->
@@ -281,7 +278,7 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
                         allowLongText = allowLongText,
                         preTranslationService = preTranslationService,
                         notifyError = notifyError,
-                        rememberPosition = if (isHomeTimeline) rememberPosition else null,
+                        retainHistory = if (isHomeTimeline) rememberPosition else null,
                         accountKeys = sourceAccounts,
                         refreshOnInitialize = {
                             !rememberPosition &&
@@ -291,67 +288,52 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
                         },
                     )
                 }
-            val timelineMediator = mediator
-            timelineMediator.prepareHomeTimeline()
-            homeMediator.value = timelineMediator
-            val key = timelineMediator.pagingKey
+            homeMediator.value = mediator
             val reading =
                 if (rememberPosition) {
                     TimelineViewport(
-                        database,
-                        key,
+                        appDataStore.homeTimelinePreferences,
+                        loader.pagingKey,
                         checkNotNull(timelineTabItemId),
-                        scope,
                         appScope,
-                        canSave = { sourceActive.first() },
-                        pageCache = pageCache,
-                    ).also { value ->
-                        value.setVisibility(visibility.first())
-                        value.restore()
-                    }
+                        canSave = { sourceActive.first() && settingsRepository.appSettings.first().rememberHomeTimelinePosition },
+                    )
                 } else {
                     null
                 }
             viewport.value = reading
-            startupRefresh.value = reading != null && preferences.refreshHomeTimelineOnLaunch && database.pagingTimelineDao().anyPaging(key)
+            startupRefresh.value = reading != null && settingsRepository.appSettings.first().refreshHomeTimelineOnLaunch
             var source: OffsetFromStartPagingSource<TimelinePageItem>? = null
-            val pager =
-                Pager(
-                    config =
-                        if (reading == null) {
-                            offsetPagingConfig
-                        } else {
-                            androidx.paging.PagingConfig(
-                                pageSize = offsetPagingConfig.pageSize,
-                                initialLoadSize = offsetPagingConfig.initialLoadSize,
-                                prefetchDistance = offsetPagingConfig.prefetchDistance,
-                                enablePlaceholders = false,
-                                maxSize = 200,
-                            )
-                        },
-                    remoteMediator = mediator,
-                    pagingSourceFactory = {
-                        OffsetFromStartPagingSource(
-                            TimelineDbPageLoader(
-                                database = database,
-                                pagingKey = key,
-                                pageCache = pageCache,
-                                windowed = reading != null,
-                            ),
-                            anchor = reading?.let { { it.anchor() } },
-                        ).also { source = it }
-                    },
-                ).flow
             try {
-                coroutineScope {
-                    if (reading != null) {
-                        launch { reading.navigation.drop(1).collect { source?.invalidate() } }
-                        launch {
-                            database.invalidationTracker.createFlow("DbPagingTimeline", "DbStatus").collect { reading.refreshHead() }
-                        }
-                    }
-                    emitAll(pager)
-                }
+                emitAll(
+                    Pager(
+                        config = offsetPagingConfig,
+                        remoteMediator =
+                            if (reading ==
+                                null
+                            ) {
+                                mediator
+                            } else {
+                                object : RemoteMediator<OffsetFromStartPagingKey, TimelinePageItem>() {
+                                    override suspend fun initialize(): InitializeAction =
+                                        mediator.initialize().also {
+                                            if (it == InitializeAction.LAUNCH_INITIAL_REFRESH) startupRefresh.value = false
+                                        }
+
+                                    override suspend fun load(
+                                        loadType: LoadType,
+                                        state: androidx.paging.PagingState<OffsetFromStartPagingKey, TimelinePageItem>,
+                                    ): MediatorResult {
+                                        reading.awaitRestoration()
+                                        return mediator.load(loadType, state)
+                                    }
+                                }
+                            },
+                        pagingSourceFactory = {
+                            OffsetFromStartPagingSource(TimelineDbPageLoader(database, loader.pagingKey, pageCache)).also { source = it }
+                        },
+                    ).flow,
+                )
             } finally {
                 source?.invalidate()
             }
@@ -413,10 +395,25 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
         val newContent by remember(reading) { reading?.hasNewContent ?: flowOf(false) }.collectAsState(false)
         val atLatest by remember(reading) { reading?.isAtLatest ?: flowOf(true) }.collectAsState(true)
         val refreshOnLaunch by startupRefresh.collectAsState()
+        LaunchedEffect(reading) { reading?.restore() }
+        LaunchedEffect(reading, target, items.itemSnapshotList, items.loadState.source) {
+            val source = items.loadState.source
+            if (source.refresh is LoadState.NotLoading) {
+                reading
+                    ?.cacheChanged(
+                        items.itemSnapshotList.items.map { it.stableItemKey },
+                        endOfCache = source.append.endOfPaginationReached,
+                        firstPostKey =
+                            items.itemSnapshotList.items
+                                .firstOrNull { !it.isPaginationGap }
+                                ?.stableItemKey,
+                    )?.let { items[it] }
+            }
+        }
         LaunchedEffect(reading, target, refreshOnLaunch) {
-            if (reading != null && target == null && refreshOnLaunch) {
-                startupRefresh.value = false
-                items.refresh()
+            if (reading != null && refreshOnLaunch) {
+                reading?.awaitRestoration()
+                if (startupRefresh.compareAndSet(expect = true, update = false)) items.refresh()
             }
         }
         DisposableEffect(reading) {
@@ -440,14 +437,14 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
                         override val isAtLatest = atLatest
 
                         override fun viewportChanged(
-                            itemKey: String,
+                            index: Int,
                             offset: Double,
-                        ) = value.viewportChanged(itemKey, offset)
+                        ) = value.viewportChanged(index, offset)
 
                         override fun positionChanged(
-                            itemKey: String,
+                            index: Int,
                             offset: Double,
-                        ) = value.positionChanged(itemKey, offset)
+                        ) = value.positionChanged(index, offset)
 
                         override fun savePosition() = value.savePosition()
 

@@ -7,7 +7,7 @@ import androidx.room3.RoomDatabase
 import androidx.room3.RoomDatabaseConstructor
 import androidx.room3.withWriteTransaction
 
-internal const val CACHE_DATABASE_VERSION = 50
+internal const val CACHE_DATABASE_VERSION = 51
 
 @Database(
     entities = [
@@ -24,7 +24,6 @@ internal const val CACHE_DATABASE_VERSION = 50
         dev.dimension.flare.data.database.cache.model.DbUserHistory::class,
         dev.dimension.flare.data.database.cache.model.DbEmojiHistory::class,
         dev.dimension.flare.data.database.cache.model.DbPagingKey::class,
-        dev.dimension.flare.data.database.cache.model.DbTimelinePosition::class,
         dev.dimension.flare.data.database.cache.model.DbList::class,
         dev.dimension.flare.data.database.cache.model.DbListPaging::class,
         dev.dimension.flare.data.database.cache.model.DbListMember::class,
@@ -68,12 +67,12 @@ internal suspend fun CacheDatabase.clearHomeTimelinesForAccount(accountKey: dev.
     connect {
         val dao = pagingTimelineDao()
         dao
-            .getHomeKeys()
+            .getAccountTimelineKeys()
             .filter {
                 accountKey in
                     kotlinx.serialization.json.Json
-                        .decodeFromString<Set<dev.dimension.flare.model.MicroBlogKey>>(it.accountKeys)
-            }.forEach { dao.clearHomeTimeline(it.pagingKey) }
+                        .decodeFromString<Set<dev.dimension.flare.model.MicroBlogKey>>(dao.getAccountKeys(it) ?: "[]")
+            }.forEach { dao.clearHomeTimeline(it) }
     }
 }
 

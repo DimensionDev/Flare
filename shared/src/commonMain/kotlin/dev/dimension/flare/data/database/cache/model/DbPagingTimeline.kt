@@ -79,19 +79,8 @@ internal data class DbPagingKey(
     val prevKey: String? = null,
     val generation: String = Uuid.random().toString(),
     val revision: Long = 0,
-    val rememberPosition: Boolean = false,
     val sourceHeads: String = "{}",
     val accountKeys: String = "[]",
-)
-
-@Entity
-internal data class DbTimelinePosition(
-    @PrimaryKey val tabId: String,
-    val pagingKey: String,
-    val itemKey: String,
-    val sortId: Long,
-    val offset: Double,
-    val updatedAt: Long,
 )
 
 internal data class DbPagingTimelineWithStatus(

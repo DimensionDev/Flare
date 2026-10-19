@@ -3,7 +3,7 @@ import SwiftUI
 import KotlinSharedUI
 import FlareAppleUI
 
-/// Keeps the measured item fixed while SwiftUI replaces a local paging window.
+/// Restores UI coordinates once, then keeps the native item fixed across list updates.
 struct TimelineReadingScrollView<Content: View>: View {
     @Environment(\.timelineReading) private var reading
     @State private var viewport = TimelineReadingViewport()
@@ -20,7 +20,7 @@ struct TimelineReadingScrollView<Content: View>: View {
             .environment(\.timelineGapWillLoad) { message in viewport.willLoadGap(message, itemKeys: itemKeys) }
             .environment(\.timelineGapDidLoad) { message, keys in viewport.didLoadGap(message, insertedKeys: keys) }
             .onPreferenceChange(TimelineReadingFrames.self) { frames in
-                viewport.update(frames: frames, gapKeys: Set(gaps.map(\.stableItemKey)), reading: reading)
+                viewport.update(frames: frames, itemKeys: itemKeys, gapKeys: Set(gaps.map(\.stableItemKey)), reading: reading)
             }
             .onChange(of: itemKeys) { _, _ in
                 viewport.preserveCurrentItem()
@@ -37,23 +37,26 @@ struct TimelineReadingScrollView<Content: View>: View {
     }
 
     private func restore(using proxy: ScrollViewProxy) {
-        guard let target = reading?.restorePosition, itemKeys.contains(target.itemKey) else { return }
-        viewport.beginRestore(target, reading: reading)
-        proxy.scrollTo(target.itemKey, anchor: .top)
+        guard let target = reading?.restorePosition, itemKeys.indices.contains(Int(target.index)) else { return }
+        let key = itemKeys[Int(target.index)]
+        viewport.beginRestore(key: key, offset: target.offset, reading: reading)
+        proxy.scrollTo(key, anchor: .top)
     }
 }
 
 @MainActor
 private final class TimelineReadingViewport {
+    private struct Anchor { let itemKey: String; let offset: Double }
+    private var itemKeys: [String] = []
     private weak var scrollView: NSScrollView?
     private var reading: TimelineReadingState?
     private var frames: [String: CGRect] = [:]
-    private var anchor: TimelineReadingPosition?
-    private var pending: TimelineReadingPosition?
+    private var anchor: Anchor?
+    private var pending: Anchor?
     private var restoringBookmark = false
     private var userScrolling = false
     private var hasUserScrolled = false
-    private var gapBookmark: (key: String, hash: Int32, anchor: TimelineReadingPosition)?
+    private var gapBookmark: (key: String, hash: Int32, anchor: Anchor)?
     private var leadingGap: (key: String, revision: Int64, insertedKeys: [String]?, offset: CGFloat)?
     private var gapKeys: Set<String> = []
     private var observers: [NSObjectProtocol] = []
@@ -92,7 +95,7 @@ private final class TimelineReadingViewport {
         guard leadingGap?.key == message.stableItemKey, leadingGap?.revision == message.revision else { return }
         guard !insertedKeys.isEmpty else { leadingGap = nil; return }
         leadingGap?.insertedKeys = insertedKeys
-        update(frames: frames, gapKeys: gapKeys, reading: reading)
+        update(frames: frames, itemKeys: itemKeys, gapKeys: gapKeys, reading: reading)
     }
 
     func willLoadGap(_ message: UiTimelineV2.Gap, itemKeys: [String]) {
@@ -104,9 +107,9 @@ private final class TimelineReadingViewport {
             }
             return
         }
-        let position = TimelineReadingPosition(itemKey: key, offset: frame.minY)
+        let position = Anchor(itemKey: key, offset: frame.minY)
         gapBookmark = (message.stableItemKey, message.renderHash, position)
-        reading?.positionChanged(itemKey: key, offset: frame.minY)
+        if let index = itemKeys.firstIndex(of: key) { reading?.positionChanged(index: Int32(index), offset: frame.minY) }
     }
 
     func updateGaps(_ messages: [UiTimelineV2.Gap]) {
@@ -119,20 +122,21 @@ private final class TimelineReadingViewport {
         }
     }
 
-    func beginRestore(_ target: TimelineReadingPosition, reading: TimelineReadingState?) {
+    func beginRestore(key: String, offset: Double, reading: TimelineReadingState?) {
         self.reading = reading
         leadingGap = nil
         gapBookmark = nil
-        pending = target
+        pending = Anchor(itemKey: key, offset: offset)
         restoringBookmark = true
     }
 
-    func update(frames: [String: CGRect], gapKeys: Set<String>, reading: TimelineReadingState?) {
+    func update(frames: [String: CGRect], itemKeys: [String], gapKeys: Set<String>, reading: TimelineReadingState?) {
         self.frames = frames
+        self.itemKeys = itemKeys
         self.gapKeys = gapKeys
         self.reading = reading
         if let leadingGap, let key = leadingGap.insertedKeys?.first(where: { frames[$0] != nil }) {
-            pending = TimelineReadingPosition(itemKey: key, offset: leadingGap.offset)
+            pending = Anchor(itemKey: key, offset: leadingGap.offset)
             self.leadingGap = nil
         }
         if let pending, let frame = frames[pending.itemKey], let scrollView, !userScrolling {
@@ -146,6 +150,10 @@ private final class TimelineReadingViewport {
             }
             self.pending = nil
             anchor = pending
+            if !restoringBookmark, scrollView.window?.isKeyWindow == true,
+               let index = itemKeys.firstIndex(of: pending.itemKey) {
+                reading?.viewportChanged(index: Int32(index), offset: pending.offset)
+            }
             if restoringBookmark {
                 restoringBookmark = false
                 DispatchQueue.main.async { reading?.restorationFinished() }
@@ -157,8 +165,10 @@ private final class TimelineReadingViewport {
             .min(by: { a, b in
                 abs(a.value.minY - b.value.minY) > 0.5 ? a.value.minY < b.value.minY : a.value.minX < b.value.minX
             }) {
-            anchor = TimelineReadingPosition(itemKey: first.key, offset: first.value.minY)
-            if userScrolling { reading?.viewportChanged(itemKey: first.key, offset: first.value.minY) }
+            anchor = Anchor(itemKey: first.key, offset: first.value.minY)
+            if scrollView?.window?.isKeyWindow == true, let index = itemKeys.firstIndex(of: first.key) {
+                reading?.viewportChanged(index: Int32(index), offset: first.value.minY)
+            }
         }
     }
 
@@ -169,8 +179,8 @@ private final class TimelineReadingViewport {
 
     private func updatePosition() {
         guard hasUserScrolled, pending == nil, reading?.restorePosition == nil,
-              scrollView?.window?.isKeyWindow == true, let anchor else { return }
-        reading?.positionChanged(itemKey: anchor.itemKey, offset: anchor.offset)
+              scrollView?.window?.isKeyWindow == true, let anchor, let index = itemKeys.firstIndex(of: anchor.itemKey) else { return }
+        reading?.positionChanged(index: Int32(index), offset: anchor.offset)
         hasUserScrolled = false
     }
 

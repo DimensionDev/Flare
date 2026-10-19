@@ -11,13 +11,12 @@ import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.TimelineRevisionCallback
 import dev.dimension.flare.data.database.cache.connect
 import dev.dimension.flare.data.database.cache.mapper.saveToDatabase
-import dev.dimension.flare.data.database.cache.model.DbTimelinePosition
+import dev.dimension.flare.data.database.cache.model.DbPagingKey
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.UiTranslatableText
-import dev.dimension.flare.ui.presenter.home.TimelineViewport
 import dev.dimension.flare.ui.render.toUi
 import dev.dimension.flare.ui.render.toUiPlainText
 import kotlinx.collections.immutable.persistentListOf
@@ -36,6 +35,38 @@ import kotlin.time.Instant
 @OptIn(ExperimentalPagingApi::class)
 class TimelineStartupTest {
     @Test
+    fun cachedHomeInitializeDoesNotReadContinuation() =
+        runBlocking {
+            for (remember in listOf(false, true)) {
+                val path = Files.createTempFile("flare-startup-cursor", ".db")
+                val driver = CountingDriver()
+                val db =
+                    Room
+                        .databaseBuilder<CacheDatabase>(name = path.toString())
+                        .setDriver(driver)
+                        .setQueryCoroutineContext(Dispatchers.IO)
+                        .build()
+                try {
+                    val initial = mediator(db, remember)
+                    val dao = db.pagingTimelineDao()
+                    dao.insertPagingKey(DbPagingKey(initial.pagingKey, nextKey = "x".repeat(1_000_000)))
+                    db.connect { saveToDatabase(db, TimelinePagingMapper.toDb((0..39).map(::post), initial.pagingKey)) }
+                    driver.reset()
+                    mediator(db, remember).initialize()
+                    TimelineDbPageLoader(db, initial.pagingKey, TimelineDbPageCache()).load(0, 20)
+                    kotlin.test.assertEquals(
+                        0L,
+                        driver.largeTextReads.get(),
+                        "Cached Home must not materialize a continuation before displaying posts",
+                    )
+                } finally {
+                    db.close()
+                    listOf("", "-wal", "-shm").forEach { Files.deleteIfExists(path.resolveSibling(path.fileName.toString() + it)) }
+                }
+            }
+        }
+
+    @Test
     fun cachedHomeDoesNotWaitForAnUnrelatedWriter() =
         runBlocking {
             val outcomes = mutableListOf<Boolean>()
@@ -51,7 +82,6 @@ class TimelineStartupTest {
                 val release = CompletableDeferred<Unit>()
                 try {
                     val initial = mediator(db, remember)
-                    initial.prepareHomeTimeline()
                     db.connect { saveToDatabase(db, TimelinePagingMapper.toDb((0..59).map(::post), initial.pagingKey)) }
                     // Open the reader before taking the writer, so schema initialization is not part of this contention test.
                     TimelineDbPageLoader(db, initial.pagingKey, TimelineDbPageCache()).load(0, 20)
@@ -67,7 +97,7 @@ class TimelineStartupTest {
                     TimelineDbPageLoader(db, initial.pagingKey, TimelineDbPageCache()).load(0, 20)
                     val home =
                         async(Dispatchers.IO) {
-                            mediator(db, remember).prepareHomeTimeline()
+                            mediator(db, remember).initialize()
                             TimelineDbPageLoader(db, initial.pagingKey, TimelineDbPageCache()).load(0, 20)
                         }
                     val ready = withTimeoutOrNull(1_000) { home.await() } != null
@@ -85,14 +115,9 @@ class TimelineStartupTest {
         }
 
     @Test
-    fun restoringTheHeadReusesContentAcrossVisibilityChecks() = checkRestoredWindow(deep = false)
-
-    @Test
-    fun checkingTheHeadDoesNotEvictTheRestoredDeepWindow() = checkRestoredWindow(deep = true)
-
-    private fun checkRestoredWindow(deep: Boolean) =
+    fun normalPagingReusesTheCachedPrefix() =
         runBlocking {
-            val path = Files.createTempFile("flare-startup-projection", ".db")
+            val path = Files.createTempFile("flare-startup-prefix", ".db")
             val driver = CountingDriver()
             val db =
                 Room
@@ -102,34 +127,57 @@ class TimelineStartupTest {
                     .setQueryCoroutineContext(Dispatchers.IO)
                     .build()
             try {
-                val initial = mediator(db, true)
-                initial.prepareHomeTimeline()
-                db.connect { saveToDatabase(db, TimelinePagingMapper.toDb((0..999).map(::post), initial.pagingKey)) }
-                if (deep) {
-                    val item = TimelineDbPageLoader(db, initial.pagingKey, TimelineDbPageCache()).load(500, 1).single()
-                    db.pagingTimelineDao().insertPosition(
-                        DbTimelinePosition("startup", initial.pagingKey, item.baseItem.stableItemKey, item.sortId, 12.0, 1),
-                    )
-                }
+                db.connect { saveToDatabase(db, TimelinePagingMapper.toDb((0..199).map(::post), "startup")) }
                 driver.reset()
-                val pageCache = TimelineDbPageCache()
-                val reader = TimelineViewport(db, initial.pagingKey, "startup", this, this, pageCache = pageCache)
-                reader.restore()
-                val source =
-                    OffsetFromStartPagingSource(
-                        TimelineDbPageLoader(db, initial.pagingKey, pageCache, windowed = true),
-                        anchor = { reader.anchor() },
-                    )
-                source.load(PagingSource.LoadParams.Refresh(null, 40, false))
-                if (deep) driver.reset()
-                reader.refreshHead()
-                source.load(PagingSource.LoadParams.Refresh(null, 40, false))
-                kotlin.test.assertEquals(40L, driver.blobs.get(), "Head checks must not decode the visible window again")
-                db.pagingTimelineDao().delete(initial.pagingKey)
-                reader.refreshHead()
-                assertTrue(
-                    pageCache.hasCurrentWindowChanged(db.pagingTimelineDao(), initial.pagingKey),
-                    "Visibility probes must leave changes for the paging source's invalidation observer",
+                val source = OffsetFromStartPagingSource(TimelineDbPageLoader(db, "startup", TimelineDbPageCache()))
+                try {
+                    source.load(PagingSource.LoadParams.Refresh(null, 20, false))
+                    source.load(PagingSource.LoadParams.Refresh(OffsetFromStartPagingKey.Refresh(100), 20, false))
+                    kotlin.test.assertEquals(100L, driver.blobs.get(), "Extending a normal prefix must not decode its existing posts again")
+                } finally {
+                    source.invalidate()
+                }
+            } finally {
+                db.close()
+                listOf("", "-wal", "-shm").forEach { Files.deleteIfExists(path.resolveSibling(path.fileName.toString() + it)) }
+            }
+        }
+
+    @Test
+    fun refreshingAndFillingAGapDoNotMaterializeTheStoredTailCursor() =
+        runBlocking {
+            val path = Files.createTempFile("flare-refresh-cursor", ".db")
+            val driver = CountingDriver()
+            val db =
+                Room
+                    .databaseBuilder<CacheDatabase>(name = path.toString())
+                    .setDriver(driver)
+                    .setQueryCoroutineContext(Dispatchers.IO)
+                    .build()
+            try {
+                val dao = db.pagingTimelineDao()
+                dao.insertPagingKey(DbPagingKey("startup", nextKey = "x".repeat(1_000_000)))
+                db.connect { saveToDatabase(db, TimelinePagingMapper.toDb((0..39).map(::post), "startup")) }
+                var response = PagingResult<UiTimelineV2>(listOf(post(-1)), nextKey = "gap")
+                val remote = mediator(db, true) { response }
+                driver.reset()
+                remote.load(
+                    androidx.paging.LoadType.REFRESH,
+                    androidx.paging.PagingState(emptyList(), null, androidx.paging.PagingConfig(20), 0),
+                )
+                val gap =
+                    TimelineDbPageLoader(db, "startup", TimelineDbPageCache())
+                        .load(0, 20)
+                        .map { it.baseItem }
+                        .filterIsInstance<UiTimelineV2.Gap>()
+                        .single()
+                response = PagingResult(listOf(post(-2)))
+                remote.loadGap(gap)
+                kotlin.test.assertEquals(0L, driver.largeTextReads.get())
+                kotlin.test.assertEquals(
+                    1_000_000,
+                    dao.getNextKey("startup")?.length,
+                    "Refresh must preserve the old tail without decoding it",
                 )
             } finally {
                 db.close()
@@ -140,6 +188,7 @@ class TimelineStartupTest {
     private fun mediator(
         db: CacheDatabase,
         remember: Boolean,
+        response: () -> PagingResult<UiTimelineV2> = { error("Network must not be needed") },
     ) = TimelineRemoteMediator(
         object : CacheableRemoteLoader<UiTimelineV2> {
             override val pagingKey = "startup"
@@ -147,11 +196,11 @@ class TimelineStartupTest {
             override suspend fun load(
                 pageSize: Int,
                 request: PagingRequest,
-            ): PagingResult<UiTimelineV2> = error("Network must not be needed")
+            ): PagingResult<UiTimelineV2> = response()
         },
         db,
         false,
-        rememberPosition = remember,
+        retainHistory = remember,
     )
 
     private fun post(id: Int) =
@@ -176,9 +225,11 @@ class TimelineStartupTest {
         private val delegate: SQLiteDriver = BundledSQLiteDriver(),
     ) : SQLiteDriver by delegate {
         val blobs = AtomicLong()
+        val largeTextReads = AtomicLong()
 
         fun reset() {
             blobs.set(0)
+            largeTextReads.set(0)
         }
 
         override fun open(fileName: String): SQLiteConnection {
@@ -187,6 +238,11 @@ class TimelineStartupTest {
                 override fun prepare(sql: String): SQLiteStatement {
                     val statement = connection.prepare(sql)
                     return object : SQLiteStatement by statement {
+                        override fun getText(index: Int): String =
+                            statement.getText(index).also {
+                                if (it.length >= 1_000_000) largeTextReads.incrementAndGet()
+                            }
+
                         override fun getBlob(index: Int): ByteArray = statement.getBlob(index).also { blobs.incrementAndGet() }
                     }
                 }

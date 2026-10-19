@@ -43,7 +43,8 @@ The implementation has three state owners:
   `TimelineAutoplay` handles playback without controlling list offsets.
 
 With Home reading position enabled, the shared presenter restores the selected tab
-and a real post key/offset from the cache. The controller cases cover applying that
-bookmark, Gap insertion (including a Gap at the start of a paging window), and user
-scrolling taking precedence over pending restoration. Persistence and cursor
-transactions are tested separately in the shared `TimelineGapTest` suite.
+and an index/offset from device-local UI preferences after ordinary cache paging.
+The controller cases cover applying that bookmark, waiting for native layout before
+launch refresh, Gap insertion (including a Gap at the start of the list), and user
+scrolling taking precedence over pending restoration. UI preference restoration is
+tested in `TimelineViewportTest`; cursor transactions stay in `TimelineGapTest`.

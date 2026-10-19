@@ -53,6 +53,7 @@ class TimelinePresenterBindingTest : RobolectricTest() {
     private lateinit var cacheDatabase: CacheDatabase
     private lateinit var root: Path
     private lateinit var timelineResolver: TimelineResolver
+    private lateinit var appDataStore: AppDataStore
     private lateinit var settingsRepository: SettingsRepository
 
     @BeforeTest
@@ -67,11 +68,12 @@ class TimelinePresenterBindingTest : RobolectricTest() {
         root = createTestRootPath()
         val fileStorage = OkioFileStorage(createTestFileSystem(), root)
         timelineResolver = TimelineResolver(testPlatformRuntimeData(), unavailableAccountService())
+        appDataStore = AppDataStore(fileStorage)
         settingsRepository =
             SettingsRepository(
                 fileStorage = fileStorage,
                 cacheDatabase = cacheDatabase,
-                appDataStore = AppDataStore(fileStorage),
+                appDataStore = appDataStore,
                 timelineResolver = timelineResolver,
             )
     }
@@ -101,21 +103,30 @@ class TimelinePresenterBindingTest : RobolectricTest() {
             val presenter = TimelinePresenterFactory(resolver, settingsRepository).create(resolver.toTabItem(slot), true)
             val active = mutableListOf<Boolean>()
             backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { presenter.sourceActive.collect { active += it } }
-            cacheDatabase.pagingTimelineDao().insertPosition(
-                dev.dimension.flare.data.database.cache.model.DbTimelinePosition(
-                    "home:first",
-                    "home:source",
-                    "post",
-                    1,
-                    0.0,
-                    1,
-                ),
-            )
+            appDataStore.homeTimelinePreferences.updateData {
+                it.copy(
+                    positions =
+                        mapOf(
+                            "home:first" to
+                                dev.dimension.flare.data.datastore.model.HomeTimelinePosition(
+                                    "source",
+                                    dev.dimension.flare.ui.model
+                                        .TimelineReadingPosition(1, 0.0),
+                                    1,
+                                ),
+                        ),
+                )
+            }
             settingsRepository.updateTabSettingsV2 { TabSettingsV2() }
             advanceUntilIdle()
             assertEquals(listOf(true, false), active)
             assertFalse(presenter.sourceActive.first(), "A queued save must recheck the deleted tab, even in a new collection")
-            assertEquals(null, cacheDatabase.pagingTimelineDao().getPosition("home:first"))
+            assertEquals(
+                null,
+                appDataStore.homeTimelinePreferences.data
+                    .first()
+                    .positions["home:first"],
+            )
         }
 
     @OptIn(ExperimentalCoroutinesApi::class)

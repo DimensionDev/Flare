@@ -195,7 +195,7 @@ public class SettingsRepository internal constructor(
         val after = tabSettingsV2Store.updateData(block).homeSlots.map(timelineResolver::toTabItem)
         before.forEach { previous ->
             if (after.findById(previous.id)?.contentSourceKey != previous.contentSourceKey) {
-                cacheDatabase.pagingTimelineDao().deleteTabPosition(previous.id)
+                appDataStore.homeTimelinePreferences.updateData { it.copy(positions = it.positions - previous.id) }
             }
         }
     }

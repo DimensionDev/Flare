@@ -4,11 +4,13 @@ import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingConfig
 import androidx.paging.PagingState
-import androidx.paging.testing.asSnapshot
 import androidx.room3.Room
+import app.cash.molecule.RecompositionMode
+import app.cash.molecule.moleculeFlow
 import dev.dimension.flare.common.InAppNotification
 import dev.dimension.flare.common.Message
 import dev.dimension.flare.common.TestFormatter
+import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.createTestFileSystem
 import dev.dimension.flare.createTestRootPath
 import dev.dimension.flare.data.database.app.AppDatabase
@@ -57,6 +59,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.job
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
@@ -170,20 +173,25 @@ class TimelineGapCompletionTest {
                         return response
                     }
                 }
-            val seed = TimelineRemoteMediator(loader, cache, false, rememberPosition = true)
+            val seed = TimelineRemoteMediator(loader, cache, false, retainHistory = true)
             val state = PagingState<OffsetFromStartPagingKey, TimelinePageItem>(emptyList(), null, PagingConfig(20), 0)
             seed.load(LoadType.REFRESH, state)
             response = PagingResult(listOf(post(1)), nextKey = "gap")
             seed.load(LoadType.REFRESH, state)
             val presenter = TimelinePresenter(tabId = "home", loader = flowOf(loader), isHomeTimeline = true)
-            val gap =
-                withTimeout(10_000) {
-                    presenter
-                        .createPager(scope)
-                        .asSnapshot()
-                        .filterIsInstance<UiTimelineV2.Gap>()
-                        .single()
+            val displayedGap = CompletableDeferred<UiTimelineV2.Gap>()
+            scope.launch {
+                moleculeFlow(RecompositionMode.Immediate) { presenter.body() }.collect { model ->
+                    model.listState.onSuccess {
+                        model.reading
+                            ?.restorePosition
+                            ?.takeIf { it.index < itemCount }
+                            ?.let { model.reading?.restorationFinished() }
+                        (0 until itemCount).mapNotNull { peek(it) as? UiTimelineV2.Gap }.firstOrNull()?.let { displayedGap.complete(it) }
+                    }
                 }
+            }
+            val gap = withTimeout(10_000) { displayedGap.await() }
             filling = true
             val uiThread = withContext(Dispatchers.Main) { Thread.currentThread() }
             val callback = CompletableDeferred<Pair<Thread, List<String>>>()

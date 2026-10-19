@@ -104,7 +104,7 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
               let gapIndex = (0..<success.items.count).first(where: { success.post(at: Int32($0))?.stableItemKey == message.stableItemKey }) else { return }
         let predecessor = (0..<gapIndex).reversed().first(where: { success.post(at: Int32($0))?.isPaginationGap == false })
         let index = predecessor ?? gapIndex
-        guard let item = success.post(at: Int32(index)),
+        guard success.post(at: Int32(index)) != nil,
               let id = itemIndexMap.first(where: { $0.value == index })?.key,
               let path = dataSource.indexPath(for: id),
               let frame = collectionView.layoutAttributesForItem(at: path)?.frame else { return }
@@ -113,7 +113,7 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
             leadingGap = (message.stableItemKey, message.revision, nil, offset)
         } else {
             gapScrollAnchor = ScrollAnchor(itemID: id, distanceFromViewportTop: offset, keepVisible: false)
-            reading?.positionChanged(itemKey: item.stableItemKey, offset: offset)
+            reading?.positionChanged(index: Int32(index), offset: offset)
         }
     }
 
@@ -133,20 +133,12 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
     private func restoreBookmarkIfReady() {
         guard let target = reading?.restorePosition, target !== restoredBookmark,
               isViewLoaded, !isApplyingSnapshot, !isRestoringScrollAnchor, pendingScrollAnchor == nil, allowsScrollAnchorRestoration,
-              let success = currentSuccess,
-              let id = itemIndexMap.keys.first(where: { id in
-                  guard let index = itemIndexMap[id] else { return false }
-                  return success.post(at: Int32(index))?.stableItemKey == target.itemKey
-              }) else { return }
+              let id = itemIndexMap.first(where: { $0.value == Int(target.index) })?.key else { return }
         gapScrollAnchor = nil
         leadingGap = nil
         collectionView.interruptRefreshForScrolling()
         if restoreScrollAnchorIfNeeded(ScrollAnchor(itemID: id, distanceFromViewportTop: target.offset)) {
             restoredBookmark = target
-            DispatchQueue.main.async { [weak self] in
-                guard self?.reading?.restorePosition === target else { return }
-                self?.reading?.restorationFinished()
-            }
         }
     }
 
@@ -156,11 +148,13 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
     }
 
     private func updateReadingBookmark() {
-        guard didScrollForReading, reading?.restorePosition == nil,
+        guard reading != nil, reading?.restorePosition == nil, !isApplyingSnapshot, pendingScrollAnchor == nil,
+              !collectionView.isScrollInteractionActive,
               isViewLoaded, view.window?.isKeyWindow == true, !isRestoringScrollAnchor,
               let anchor = captureScrollAnchor(requireIdle: false), let index = itemIndexMap[anchor.itemID],
               let item = currentSuccess?.post(at: Int32(index)), !item.isPaginationGap else { return }
-        reading?.positionChanged(itemKey: item.stableItemKey, offset: anchor.distanceFromViewportTop)
+        if didScrollForReading { reading?.positionChanged(index: Int32(index), offset: anchor.distanceFromViewportTop) }
+        else { reading?.viewportChanged(index: Int32(index), offset: anchor.distanceFromViewportTop) }
         didScrollForReading = false
     }
 
@@ -236,6 +230,7 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
         super.viewDidLayoutSubviews()
         updateColumnCount()
         restoreBookmarkIfReady()
+        updateReadingBookmark()
         scheduleVisiblePagingAccess()
         reportIsAtTop()
     }
@@ -830,9 +825,13 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
             guard let self else { return }
             self.isPagingAccessScheduled = false
             guard !self.isApplyingSnapshot, self.pendingContent == nil,
-                  self.pendingScrollAnchor == nil, self.reading?.restorePosition == nil,
+                  self.pendingScrollAnchor == nil,
                   !self.collectionView.hasReadingPosition,
                   let success = self.currentSuccess else { return }
+            if let target = self.reading?.restorePosition {
+                guard target === self.restoredBookmark else { return }
+                self.reading?.restorationFinished()
+            }
             for path in self.collectionView.indexPathsForVisibleItems {
                 guard let id = self.dataSource.itemIdentifier(for: path),
                       let index = self.itemIndexMap[id], index < success.items.count else { continue }
@@ -860,7 +859,7 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         if scrollingState.isScrolling, let anchor = captureScrollAnchor(requireIdle: false),
            let index = itemIndexMap[anchor.itemID], let item = currentSuccess?.post(at: Int32(index)), !item.isPaginationGap {
-            reading?.viewportChanged(itemKey: item.stableItemKey, offset: anchor.distanceFromViewportTop)
+            reading?.viewportChanged(index: Int32(index), offset: anchor.distanceFromViewportTop)
         }
         restorePendingScrollAnchorIfNeeded()
         reportIsAtTop()

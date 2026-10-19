@@ -47,21 +47,24 @@ class TimelineNewPostsScrollTest {
     fun scrollingRenderedPostsExcludesTheLeadingHeader() = checkScrolling(leadingHeader = true)
 
     @Test
-    fun returningToADisposedTabRestoresItsItemAfterThePagingWindowMoves() = checkReturningTab(PaddingValues(0.dp))
+    fun returningToADisposedTabRestoresItsIndexAfterMoreCachePagesLoad() = checkReturningTab(PaddingValues(0.dp))
 
     @Test
     fun returningToADisposedTabKeepsItsOffsetWithContentPadding() = checkReturningTab(PaddingValues(top = 40.dp))
 
     @Test
-    fun refreshingADeepWindowKeepsTheReadingItemAfterTheWindowShrinks() = checkShrinkingWindow(columns = 1)
+    fun refreshingADeepListKeepsTheReadingItemAfterPrepends() = checkPrepend(columns = 1)
 
     @Test
-    fun refreshingADeepTwoColumnWindowKeepsTheReadingItemAfterTheWindowShrinks() = checkShrinkingWindow(columns = 2)
+    fun refreshingADeepTwoColumnListKeepsTheReadingItemAfterPrepends() = checkPrepend(columns = 2)
 
-    private fun checkShrinkingWindow(columns: Int) {
+    @Test
+    fun refreshingAtTheTopKeepsTheOldHeadAndRecordsItsNewIndex() = checkPrepend(columns = 1, targetIndex = 0, offset = 0.0)
+
+    private fun checkPrepend(columns: Int, targetIndex: Int = 160, offset: Double = -25.0) {
         val pages = MutableStateFlow(page(0..199))
         val scroll = LazyStaggeredGridState()
-        val reading = Reading(TimelineReadingPosition("post-160", -25.0))
+        val reading = Reading(TimelineReadingPosition(targetIndex, offset))
         lateinit var state: TimelineWithLazyListState
         composeRule.setContent {
             val paging = pages.collectAsLazyPagingItems().toPagingState()
@@ -86,24 +89,23 @@ class TimelineNewPostsScrollTest {
         composeRule.waitUntil { reading.restorePosition == null }
         composeRule.runOnIdle {
             assertEquals(
-                -25,
+                offset.toInt(),
                 scroll.layoutInfo.visibleItemsInfo
-                    .first { it.key == "post-160" }
+                    .first { it.key == "post-$targetIndex" }
                     .offset.y,
             )
-            // A history refresh reloads a bounded page around the stable item,
-            // even when a large number of newly fetched posts precedes it in DB.
-            pages.value = page(154..173)
+            pages.value = page(-10..199)
         }
-        composeRule.waitUntil { (state.listState as? PagingState.Success)?.itemCount == 20 }
+        composeRule.waitUntil { (state.listState as? PagingState.Success)?.itemCount == 210 }
         composeRule.runOnIdle {
             assertEquals(
-                -25,
+                offset.toInt(),
                 scroll.layoutInfo.visibleItemsInfo
-                    .firstOrNull { it.key == "post-160" }
+                    .firstOrNull { it.key == "post-$targetIndex" }
                     ?.offset
                     ?.y,
             )
+            assertEquals(targetIndex + 10, reading.currentPosition.index)
         }
     }
 
@@ -111,7 +113,7 @@ class TimelineNewPostsScrollTest {
     fun restoringAtFractionalDensityKeepsTheExactPixelOffset() {
         val pages = MutableStateFlow(page(0..19))
         val scroll = LazyStaggeredGridState()
-        val reading = Reading(TimelineReadingPosition("post-5", -246.0 / 2.625))
+        val reading = Reading(TimelineReadingPosition(5, -246.0 / 2.625))
         composeRule.setContent {
             val paging = pages.collectAsLazyPagingItems().toPagingState()
             val base =
@@ -144,9 +146,9 @@ class TimelineNewPostsScrollTest {
 
     @Test
     fun showingLatestRestoresTheHeadWhenThePagingWindowChanges() {
-        val pages = MutableStateFlow(page(20..49))
+        val pages = MutableStateFlow(page(0..49))
         val scroll = LazyStaggeredGridState()
-        val reading = Reading(TimelineReadingPosition("post-25", -25.0))
+        val reading = Reading(TimelineReadingPosition(25, -25.0))
         composeRule.setContent {
             val paging = pages.collectAsLazyPagingItems().toPagingState()
             val base =
@@ -168,7 +170,7 @@ class TimelineNewPostsScrollTest {
         }
         composeRule.waitUntil { reading.restorePosition == null }
         composeRule.runOnIdle {
-            reading.restorePosition = TimelineReadingPosition("post-0", 0.0)
+            reading.restorePosition = TimelineReadingPosition(0, 0.0)
             pages.value = page(0..29)
         }
         composeRule.waitUntil { reading.restorePosition == null }
@@ -190,7 +192,7 @@ class TimelineNewPostsScrollTest {
 
     private fun checkReturningTab(contentPadding: PaddingValues) {
         val pages = MutableStateFlow(page(0..29))
-        val reading = Reading(TimelineReadingPosition("post-5", -25.0))
+        val reading = Reading(TimelineReadingPosition(5, -25.0))
         var visible by mutableStateOf(true)
         var expectedOffset = 0
         lateinit var scroll: LazyStaggeredGridState
@@ -230,7 +232,7 @@ class TimelineNewPostsScrollTest {
                     .offset.y
             visible = false
         }
-        composeRule.runOnIdle { pages.value = page(3..29) }
+        composeRule.runOnIdle { pages.value = page(0..49) }
         composeRule.runOnIdle { visible = true }
         composeRule.waitForIdle()
         composeRule.runOnIdle {
@@ -247,7 +249,7 @@ class TimelineNewPostsScrollTest {
     fun restoringARealItemWithAHeaderKeepsItsOffsetAcrossRefresh() {
         val pages = MutableStateFlow(page(0..19))
         val scroll = LazyStaggeredGridState()
-        val reading = Reading(TimelineReadingPosition("post-5", -25.0))
+        val reading = Reading(TimelineReadingPosition(5, -25.0))
         lateinit var state: TimelineWithLazyListState
         composeRule.setContent {
             val paging = pages.collectAsLazyPagingItems().toPagingState()
@@ -300,6 +302,11 @@ class TimelineNewPostsScrollTest {
                 scroll.layoutInfo.visibleItemsInfo
                     .first()
                     .offset.y,
+            )
+            assertEquals(
+                TimelineReadingPosition(8, -25.0),
+                reading.currentPosition,
+                "A prepend must update the persisted index even without another gesture",
             )
         }
     }
@@ -461,18 +468,21 @@ class TimelineNewPostsScrollTest {
         override var restorePosition by mutableStateOf<TimelineReadingPosition?>(target)
         override val hasNewContent = false
         var saved = 0
+        val currentPosition get() = target
 
         override fun viewportChanged(
-            itemKey: String,
+            index: Int,
             offset: Double,
-        ) = Unit
+        ) {
+            if (restorePosition == null) target = TimelineReadingPosition(index, offset)
+        }
 
         override fun positionChanged(
-            itemKey: String,
+            index: Int,
             offset: Double,
         ) {
             saved++
-            target = TimelineReadingPosition(itemKey, offset)
+            target = TimelineReadingPosition(index, offset)
         }
 
         override fun restorationFinished() {

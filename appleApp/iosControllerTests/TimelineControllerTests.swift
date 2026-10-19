@@ -7,6 +7,57 @@ import FlareAppleUI
 
 @MainActor
 final class TimelineControllerIntegrationTests: XCTestCase {
+    func testIndexRestoresOnlyAfterItsCachePageArrivesThenNativeKeysPreservePrepends() async throws {
+        let fixture = await Fixture(posts: true)
+        fixture.input.items = Array(fixture.input.items.prefix(20))
+        await fixture.apply()
+        let reading = ReadingState(position: TimelineReadingPosition(index: 30, offset: -37))
+        fixture.controller.reading = reading
+        await fixture.settle()
+        XCTAssertNotNil(reading.restorePosition)
+        fixture.input.items = (0..<60).map { .post(makeRow($0)) }
+        await fixture.apply()
+        XCTAssertNil(reading.restorePosition)
+        try fixture.assertPosition(("t:case-30", -37))
+        fixture.input.items.insert(.post(makeRow(100)), at: 0)
+        await fixture.apply()
+        try fixture.assertPosition(("t:case-30", -37))
+    }
+
+    func testGalleryIndexRestoresOnlyAfterItsCachePageArrives() async throws {
+        let fixture = await GalleryFixture()
+        fixture.content.items = Array(fixture.content.items.prefix(20))
+        fixture.controller.submit(fixture.content)
+        await fixture.settle()
+        let reading = ReadingState(position: TimelineReadingPosition(index: 30, offset: -37))
+        fixture.controller.reading = reading
+        await fixture.settle()
+        XCTAssertNotNil(reading.restorePosition)
+        fixture.content.items = (0..<60).map { .post(makeRow($0)) }
+        fixture.controller.submit(fixture.content)
+        await fixture.settle()
+        XCTAssertNil(reading.restorePosition)
+        try fixture.assertPosition(("g:case-30", -37))
+    }
+
+    func testSavingAfterAPrependCapturesTheNewIndexWithoutAnotherGesture() async throws {
+        let fixture = await Fixture(posts: true)
+        let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first)
+        let previousKeyWindow = scene.windows.first(where: \.isKeyWindow)
+        let window = UIWindow(windowScene: scene)
+        window.rootViewController = fixture.controller
+        window.makeKeyAndVisible()
+        defer { window.isHidden = true; window.rootViewController = nil; previousKeyWindow?.makeKey() }
+        let reading = ReadingState(position: TimelineReadingPosition(index: 30, offset: -37))
+        fixture.controller.reading = reading
+        await fixture.settle()
+        fixture.input.items.insert(.post(makeRow(100)), at: 0)
+        await fixture.apply()
+        NotificationCenter.default.post(name: UIApplication.willResignActiveNotification, object: nil)
+        XCTAssertEqual(reading.viewports.last?.index, 31)
+        XCTAssertEqual(try XCTUnwrap(reading.viewports.last).offset, -37, accuracy: 0.5)
+    }
+
     func testGapButtonRejectsAnotherTapBeforeLoadingStateIsPublished() async throws {
         var activations = 0
         var finish: (([String]) -> KotlinUnit)?
@@ -53,7 +104,7 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         let fixture = await GalleryFixture()
         fixture.collection.setContentOffset(CGPoint(x: 0, y: 1_500), animated: false)
         await fixture.settle()
-        let reading = ReadingState(position: TimelineReadingPosition(itemKey: "case-100", offset: 0))
+        let reading = ReadingState(position: TimelineReadingPosition(index: 0, offset: 0))
         fixture.controller.reading = reading
         fixture.content.items.insert(.post(makeRow(100)), at: 0)
         fixture.controller.submit(fixture.content)
@@ -101,7 +152,7 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         fixture.content.isRefreshing = true
         fixture.controller.submit(fixture.content)
         await fixture.settle()
-        let reading = ReadingState(position: TimelineReadingPosition(itemKey: "case-20", offset: -37))
+        let reading = ReadingState(position: TimelineReadingPosition(index: 20, offset: -37))
         fixture.controller.reading = reading
         await fixture.settle()
         fixture.content.isRefreshing = false
@@ -130,7 +181,7 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         }
         await fixture.settle()
         let restingInset = fixture.collection.adjustedContentInset.top
-        let latest = ReadingState(position: TimelineReadingPosition(itemKey: "case-0", offset: 0))
+        let latest = ReadingState(position: TimelineReadingPosition(index: 0, offset: 0))
         fixture.controller.reading = latest
         await fixture.settle()
         try fixture.assertPosition(("g:case-0", restingInset))
@@ -155,7 +206,7 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         await fixture.settle()
         NotificationCenter.default.post(name: UIApplication.willResignActiveNotification, object: nil)
         XCTAssertFalse(reading.saved.isEmpty)
-        XCTAssertEqual(reading.saved.first?.itemKey, anchor.0.replacingOccurrences(of: "g:", with: ""))
+        XCTAssertEqual(reading.saved.first?.index, Int32(anchor.0.replacingOccurrences(of: "g:case-", with: "")))
         for saved in reading.saved {
             XCTAssertEqual(saved.offset, anchor.1 - restingInset, accuracy: 0.5)
         }
@@ -189,7 +240,7 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         fixture.controller.submit(fixture.content)
         await fixture.settle()
         try fixture.assertPosition(("g:case-3", expected))
-        XCTAssertEqual(reading.saved.last?.itemKey, "case-3")
+        XCTAssertEqual(reading.saved.last?.index, 3)
         let insertedPath = try XCTUnwrap(fixture.source.indexPath(for: "g:case-100"))
         let insertedFrame = try XCTUnwrap(fixture.collection.layoutAttributesForItem(at: insertedPath)?.frame)
         XCTAssertLessThan(insertedFrame.minY - fixture.collection.contentOffset.y, fixture.collection.bounds.height)
@@ -245,7 +296,7 @@ final class TimelineControllerIntegrationTests: XCTestCase {
 
     func testGalleryPagingHintsWaitUntilTheRestoredViewportIsReady() async throws {
         let fixture = await GalleryFixture()
-        let reading = ReadingState(position: TimelineReadingPosition(itemKey: "case-30", offset: -37))
+        let reading = ReadingState(position: TimelineReadingPosition(index: 30, offset: -37))
         fixture.controller.reading = reading
         var prematureHints = 0
         var hints: [Int] = []
@@ -269,7 +320,7 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         fixture.controller.submit(fixture.content)
         await fixture.settle()
         fixture.controller.willLoadTimelineGap(gap)
-        let reading = ReadingState(position: TimelineReadingPosition(itemKey: "case-30", offset: -37))
+        let reading = ReadingState(position: TimelineReadingPosition(index: 31, offset: -37))
         fixture.controller.reading = reading
         fixture.controller.submit(fixture.content)
         await fixture.settle()
@@ -324,7 +375,7 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         fixture.input.items.insert(.post(gap), at: 18)
         await fixture.apply()
         fixture.controller.willLoadTimelineGap(gap)
-        let reading = ReadingState(position: TimelineReadingPosition(itemKey: "case-30", offset: -37))
+        let reading = ReadingState(position: TimelineReadingPosition(index: 31, offset: -37))
         fixture.controller.reading = reading
         await fixture.apply()
         try fixture.assertPosition(("t:case-30", -37))
@@ -445,7 +496,7 @@ final class TimelineControllerIntegrationTests: XCTestCase {
 
     func testPagingHintsWaitUntilTheRestoredViewportIsReady() async throws {
         let fixture = await Fixture(posts: true)
-        let reading = ReadingState(position: TimelineReadingPosition(itemKey: "case-30", offset: -37))
+        let reading = ReadingState(position: TimelineReadingPosition(index: 30, offset: -37))
         fixture.controller.reading = reading
         var prematureHints = 0
         var hints: [Int] = []
@@ -456,6 +507,36 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         await fixture.apply()
         XCTAssertEqual(prematureHints, 0, "Estimated or unrestored geometry must not advance Paging")
         XCTAssertFalse(hints.isEmpty, "Visible rows must resume paging once the bookmark has settled")
+        try fixture.assertPosition(("t:case-30", -37))
+    }
+
+    func testLaunchRefreshWaitsForTheRestoredNativeLayout() async throws {
+        let fixture = await Fixture(posts: true)
+        let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first)
+        let previousKeyWindow = scene.windows.first(where: \.isKeyWindow)
+        let window = UIWindow(windowScene: scene)
+        window.rootViewController = fixture.controller
+        window.makeKeyAndVisible()
+        defer {
+            window.isHidden = true
+            window.rootViewController = nil
+            previousKeyWindow?.makeKey()
+        }
+        await fixture.settle()
+        let reading = ReadingState(position: TimelineReadingPosition(index: 30, offset: -37))
+        var completions = 0
+        reading.onRestorationFinished = {
+            completions += 1
+            XCTAssertFalse(fixture.collection.hasReadingPosition, "Network refresh must wait for the native bookmark to settle")
+            do { try fixture.assertPosition(("t:case-30", -37)) }
+            catch { XCTFail("The restored item must already be laid out: \(error)") }
+            fixture.collection.beginRefreshing(revealingIndicator: true)
+        }
+        fixture.controller.reading = reading
+        await fixture.settle()
+        fixture.collection.endRefreshing()
+        await fixture.settle()
+        XCTAssertEqual(completions, 1)
         try fixture.assertPosition(("t:case-30", -37))
     }
 
@@ -472,6 +553,26 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         XCTAssertEqual(reading.viewports.count, 100)
         XCTAssertEqual(orderReads, 0, "Viewport reporting should only inspect visible items")
         fixture.collection.endScrollInteraction()
+    }
+
+    func testGalleryLaunchRefreshWaitsForTheRestoredNativeLayout() async throws {
+        let fixture = await GalleryFixture()
+        let collection = try XCTUnwrap(fixture.collection as? TimelineCollectionView)
+        let reading = ReadingState(position: TimelineReadingPosition(index: 25, offset: -17.5))
+        var completions = 0
+        reading.onRestorationFinished = {
+            completions += 1
+            XCTAssertFalse(collection.hasReadingPosition)
+            do { try fixture.assertPosition(("g:case-25", -17.5)) }
+            catch { XCTFail("The restored gallery item must already be laid out: \(error)") }
+            collection.beginRefreshing(revealingIndicator: true)
+        }
+        fixture.controller.reading = reading
+        await fixture.settle()
+        collection.endRefreshing()
+        await fixture.settle()
+        XCTAssertEqual(completions, 1)
+        try fixture.assertPosition(("g:case-25", -17.5))
     }
 
     func testStatusBarScrollRequestsTheHistoryHeadBeyondTheLoadedWindow() async throws {
@@ -525,7 +626,7 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         // On cold launch the remote refresh can reveal its spinner before the
         // saved bookmark and its cached rows have reached the native controller.
         fixture.collection.beginRefreshing(revealingIndicator: true)
-        let reading = ReadingState(position: TimelineReadingPosition(itemKey: "case-30", offset: -37))
+        let reading = ReadingState(position: TimelineReadingPosition(index: 30, offset: -37))
         fixture.controller.reading = reading
         await fixture.settle()
         fixture.collection.endRefreshing()
@@ -539,7 +640,7 @@ final class TimelineControllerIntegrationTests: XCTestCase {
 
     func testRestoringAReadingBookmarkDoesNotSaveAProgrammaticScroll() async throws {
         let fixture = await Fixture(posts: true)
-        let reading = ReadingState(position: TimelineReadingPosition(itemKey: "case-30", offset: -37))
+        let reading = ReadingState(position: TimelineReadingPosition(index: 30, offset: -37))
         fixture.controller.reading = reading
         await fixture.settle()
 
@@ -574,7 +675,7 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         await fixture.apply()
 
         try fixture.assertPosition(("t:case-3", expected))
-        XCTAssertEqual(reading.saved.last?.itemKey, "case-3")
+        XCTAssertEqual(reading.saved.last?.index, 3)
         XCTAssertFalse(fixture.collection.readingItemIDs?().contains("t:\(gap.stableItemKey)") ?? true)
         let insertedPath = try XCTUnwrap(fixture.collection.readingIndexPath?("t:case-100"))
         let insertedFrame = try XCTUnwrap(fixture.collection.layoutAttributesForItem(at: insertedPath)?.frame)
@@ -676,13 +777,14 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         var latestRequests = 0
 
         init(position: TimelineReadingPosition? = nil) { restorePosition = position }
-        func viewportChanged(itemKey: String, offset: Double) {
-            viewports.append(TimelineReadingPosition(itemKey: itemKey, offset: offset))
+        func viewportChanged(index: Int32, offset: Double) {
+            viewports.append(TimelineReadingPosition(index: index, offset: offset))
         }
-        func positionChanged(itemKey: String, offset: Double) {
-            saved.append(TimelineReadingPosition(itemKey: itemKey, offset: offset))
+        func positionChanged(index: Int32, offset: Double) {
+            saved.append(TimelineReadingPosition(index: index, offset: offset))
         }
-        func restorationFinished() { restorePosition = nil }
+        var onRestorationFinished: (() -> Void)?
+        func restorationFinished() { restorePosition = nil; onRestorationFinished?() }
         func showLatest() { latestRequests += 1 }
         func restoreCurrentPosition() {}
         func savePosition() {}

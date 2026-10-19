@@ -19,7 +19,6 @@ import kotlinx.coroutines.sync.withLock
 internal class TimelineDbPageCache {
     private val mutex = Mutex()
     private var snapshot = Snapshot()
-    private var startOffset = 0
     private val canonicalProfiles = HashMap<MicroBlogKey, UiProfile>()
 
     suspend fun hasCurrentWindowChanged(
@@ -33,7 +32,7 @@ internal class TimelineDbPageCache {
             val identities =
                 dao.getTimelinePageIdentities(
                     pagingKey = pagingKey,
-                    offset = startOffset,
+                    offset = 0,
                     limit = snapshot.size + 1,
                 )
             !snapshot.matches(identities)
@@ -44,8 +43,6 @@ internal class TimelineDbPageCache {
         pagingKey: String,
         offset: Int,
         limit: Int,
-        windowed: Boolean = false,
-        preserveWindow: Boolean = false,
     ): List<TimelinePageItem> =
         mutex.withLock {
             database.withReadTransaction {
@@ -54,8 +51,6 @@ internal class TimelineDbPageCache {
                     pagingKey = pagingKey,
                     offset = offset,
                     limit = limit,
-                    windowed = windowed,
-                    preserveWindow = preserveWindow,
                 )
             }
         }
@@ -65,8 +60,6 @@ internal class TimelineDbPageCache {
         pagingKey: String,
         offset: Int,
         limit: Int,
-        windowed: Boolean,
-        preserveWindow: Boolean,
     ): List<TimelinePageItem> {
         val identityRows =
             dao.getTimelinePageIdentities(
@@ -78,31 +71,14 @@ internal class TimelineDbPageCache {
         val pageIdentities = ArrayList<DbTimelinePageIdentity>(pageSize)
         repeat(pageSize) { pageIdentities += identityRows[it] }
         if (pageIdentities.isEmpty()) {
-            if (!preserveWindow && offset == startOffset) {
+            if (offset == 0) {
                 snapshot.replace(emptyList(), emptyList(), identityRows.firstOrNull())
                 canonicalProfiles.clear()
             }
             return emptyList()
         }
 
-        val cached = pageIdentities.map { snapshot[it] }
-        // Visibility probes reuse decoded posts without changing the paging source's observed window.
-        if (preserveWindow && snapshot.loaded) {
-            return if (cached.all { it != null }) {
-                cached.filterNotNull()
-            } else {
-                loadProjectedPage(dao, pagingKey, offset, limit, pageIdentities, HashMap(canonicalProfiles))
-            }
-        }
-
-        if (offset == startOffset || (
-                windowed && (
-                    !snapshot.loaded || snapshot.size > 400 ||
-                        offset > startOffset + snapshot.size || offset + pageIdentities.size < startOffset
-                )
-            )
-        ) {
-            startOffset = offset
+        if (offset == 0) {
             var firstDirty = -1
             var lastDirty = -1
             pageIdentities.forEachIndexed { index, identity ->
@@ -122,7 +98,7 @@ internal class TimelineDbPageCache {
                         loadProjectedPage(
                             dao = dao,
                             pagingKey = pagingKey,
-                            offset = offset + firstDirty,
+                            offset = firstDirty,
                             limit = lastDirty - firstDirty + 1,
                             identities = pageIdentities.subList(firstDirty, lastDirty + 1),
                         )
@@ -148,7 +124,6 @@ internal class TimelineDbPageCache {
             return data
         }
 
-        if (cached.all { it != null }) return cached.filterNotNull()
         val data =
             loadProjectedPage(
                 dao = dao,
@@ -157,16 +132,12 @@ internal class TimelineDbPageCache {
                 limit = limit,
                 identities = pageIdentities,
             )
-        if (startOffset + snapshot.size == offset && data.size == pageIdentities.size) {
+        if (snapshot.size == offset && data.size == pageIdentities.size) {
             snapshot.append(
                 identities = pageIdentities,
                 data = data,
                 nextIdentity = identityRows.getOrNull(pageIdentities.size),
             )
-        }
-        if (windowed && offset + data.size == startOffset && data.isNotEmpty()) {
-            snapshot.prepend(pageIdentities, data)
-            startOffset = offset
         }
         return data
     }
@@ -177,13 +148,12 @@ internal class TimelineDbPageCache {
         offset: Int,
         limit: Int,
         identities: List<DbTimelinePageIdentity>,
-        profiles: MutableMap<MicroBlogKey, UiProfile> = canonicalProfiles,
     ): List<TimelinePageItem> =
         TimelinePagingMapper.toPageItems(
             items = dao.getTimelinePageInCurrentTransaction(pagingKey, offset, limit),
             identities = identities,
             pagingKey = pagingKey,
-            canonicalProfiles = profiles,
+            canonicalProfiles = canonicalProfiles,
         )
 
     private class Snapshot {
@@ -227,15 +197,6 @@ internal class TimelineDbPageCache {
             this.nextIdentity = nextIdentity
         }
 
-        fun prepend(
-            identities: List<DbTimelinePageIdentity>,
-            data: List<TimelinePageItem>,
-        ) {
-            segments.add(0, Segment(identities))
-            identities.forEachIndexed { index, identity -> itemByIdentity[identity] = data[index] }
-            size += data.size
-        }
-
         fun matches(identityRows: List<DbTimelinePageIdentity>): Boolean {
             if (identityRows.getOrNull(size) != nextIdentity) {
                 return false
@@ -264,8 +225,6 @@ internal class TimelineDbPageLoader(
     private val database: CacheDatabase,
     private val pagingKey: String,
     private val pageCache: TimelineDbPageCache,
-    private val windowed: Boolean = false,
-    private val preserveWindow: Boolean = false,
 ) : OffsetFromStartPageLoader<TimelinePageItem> {
     override suspend fun load(
         offset: Int,
@@ -276,18 +235,7 @@ internal class TimelineDbPageLoader(
             pagingKey = pagingKey,
             offset = offset,
             limit = limit,
-            windowed = windowed,
-            preserveWindow = preserveWindow,
         )
-
-    override fun windowKey(item: TimelinePageItem): OffsetFromStartPagingKey.Window =
-        OffsetFromStartPagingKey.Window(item.baseItem.stableItemKey, item.sortId)
-
-    override suspend fun windowOffset(key: OffsetFromStartPagingKey.Window): Int {
-        val dao = database.pagingTimelineDao()
-        val sortId = dao.getRowByItemKey(pagingKey, key.itemKey)?.sortId ?: key.sortId
-        return dao.getOffset(pagingKey, sortId)
-    }
 
     override fun observeInvalidations(invalidate: () -> Unit): PageInvalidationSubscription {
         val ready = CompletableDeferred<Unit>()

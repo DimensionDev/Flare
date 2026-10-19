@@ -149,7 +149,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         guard let gapIndex = content.items.firstIndex(where: { $0?.post?.stableItemKey == message.stableItemKey }) else { return }
         let predecessor = (0..<gapIndex).reversed().first(where: { content.items[$0]?.post?.isPaginationGap == false })
         let index = predecessor ?? gapIndex
-        guard let item = content.items[index]?.post,
+        guard content.items[index]?.post != nil,
               let id = itemIndexMap.first(where: { $0.value == index })?.key,
               let path = dataSource.indexPath(for: id),
               let frame = collectionView.layoutAttributesForItem(at: path)?.frame else { return }
@@ -158,7 +158,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
             leadingGap = (message.stableItemKey, message.revision, nil, offset)
         } else {
             gapReadingPosition = .item(id: id, distanceFromTop: offset, itemOrder: [id], keepVisible: false)
-            reading?.positionChanged(itemKey: item.stableItemKey, offset: offset)
+            reading?.positionChanged(index: Int32(index), offset: offset)
         }
     }
 
@@ -179,7 +179,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         guard let target = reading?.restorePosition, target !== restoredBookmark,
               isViewLoaded, isSnapshotReadyForReadingPosition, !isApplyingSnapshot,
               pendingInput == nil, !collectionView.isScrollInteractionActive,
-              let id = itemIndexMap.keys.first(where: { timelineItem(for: $0)?.data.stableItemKey == target.itemKey })
+              let id = itemIndexMap.first(where: { $0.value == Int(target.index) })?.key
         else { return }
         restoredBookmark = target
         gapReadingPosition = nil
@@ -190,10 +190,6 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         collectionView.restoreReadingPosition(.item(id: id, distanceFromTop: target.offset,
             itemOrder: collectionView.readingItemIDs?() ?? [id]))
         collectionView.setNeedsLayout()
-        DispatchQueue.main.async { [weak self] in
-            guard self?.reading?.restorePosition === target else { return }
-            self?.reading?.restorationFinished()
-        }
     }
 
     @objc private func saveReadingBookmark() {
@@ -202,12 +198,15 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     }
 
     private func updateReadingBookmark() {
-        guard didScrollForReading, reading?.restorePosition == nil, isViewLoaded,
+        guard reading != nil, reading?.restorePosition == nil, isViewLoaded,
+              isSnapshotReadyForReadingPosition, !isApplyingSnapshot, !collectionView.isScrollInteractionActive,
               view.window?.isKeyWindow == true,
               !collectionView.hasReadingPosition,
               let (id, offset) = collectionView.captureViewportPosition(),
-              let item = timelineItem(for: id)?.data, !item.isPaginationGap else { return }
-        reading?.positionChanged(itemKey: item.stableItemKey, offset: offset)
+              let item = timelineItem(for: id)?.data, !item.isPaginationGap,
+              let index = itemIndexMap[id] else { return }
+        if didScrollForReading { reading?.positionChanged(index: Int32(index), offset: offset) }
+        else { reading?.viewportChanged(index: Int32(index), offset: offset) }
         didScrollForReading = false
     }
 
@@ -494,6 +493,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         }
         reportIsAtTop()
         restoreBookmarkIfReady()
+        updateReadingBookmark()
         revealRefreshControlIfNeeded()
         // Insets or a size change can finish/cancel a refresh reveal without a
         // scroll-end delegate callback. Resume its queued input on the next layout.
@@ -1888,10 +1888,15 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         // Estimated frames during a prepend or restore can briefly expose the
         // wrong end of the list. Only the settled viewport may advance Paging.
         guard isViewLoaded, !isApplyingSnapshot, pendingInput == nil,
-              reading?.restorePosition == nil, pendingReloadPosition == nil,
+              pendingReloadPosition == nil,
               !collectionView.hasReadingPosition,
               collectionView.bounds.width > 1, collectionView.bounds.height > 1,
               isReadingLayoutReady(at: collectionView.indexPathsForVisibleItems.first) else { return }
+        if let target = reading?.restorePosition {
+            guard target === restoredBookmark else { return }
+            // Launch refresh must not reveal its spinner before the native bookmark settles.
+            reading?.restorationFinished()
+        }
         for path in collectionView.indexPathsForVisibleItems {
             guard let id = dataSource.itemIdentifier(for: path), let index = itemIndexMap[id] else { continue }
             content.access(index)
@@ -1948,8 +1953,8 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         if collectionView.isScrollInteractionActive,
            let (id, offset) = collectionView.captureViewportPosition(),
-           let item = timelineItem(for: id)?.data, !item.isPaginationGap {
-            reading?.viewportChanged(itemKey: item.stableItemKey, offset: offset)
+           let item = timelineItem(for: id)?.data, !item.isPaginationGap, let index = itemIndexMap[id] {
+            reading?.viewportChanged(index: Int32(index), offset: offset)
         }
         updatePinnedHeader()
         if contentKey != nil, collectionView.isScrollInteractionActive {

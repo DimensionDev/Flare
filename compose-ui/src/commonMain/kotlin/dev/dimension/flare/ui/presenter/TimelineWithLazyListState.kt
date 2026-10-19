@@ -77,8 +77,6 @@ internal fun rememberTimelineWithLazyListState(
         }
     }
     LaunchedEffect(lazyListState, baseState.reading != null) {
-        // A tab's presenter can outlive its native list. Its new paging window may
-        // start elsewhere, so a saved numeric scroll index is no longer sufficient.
         latestReading?.restoreCurrentPosition()
     }
     baseState.listState.onSuccess {
@@ -114,15 +112,13 @@ internal fun rememberTimelineWithLazyListState(
         // A replacement page can contain the target without changing itemCount.
         LaunchedEffect(target, this, lazyListState, leadingItemCount) {
             if (target == null || lazyListState.isScrollInProgress) return@LaunchedEffect
-            val index =
-                (0 until itemCount).firstOrNull { peek(it)?.stableItemKey == target.itemKey }
-                    ?: return@LaunchedEffect
+            val index = target.index.takeIf { it in 0 until itemCount && peek(it) != null } ?: return@LaunchedEffect
             restoring = true
             try {
                 lazyListState.scrollToItem(index + leadingItemCount)
                 val height =
                     lazyListState.layoutInfo.visibleItemsInfo
-                        .firstOrNull { it.key == target.itemKey }
+                        .firstOrNull { it.index == index + leadingItemCount }
                         ?.size
                         ?.height
                 val offset = (-target.offset * density).roundToInt().coerceAtMost(height?.minus(1)?.coerceAtLeast(0) ?: Int.MAX_VALUE)
@@ -142,17 +138,15 @@ internal fun rememberTimelineWithLazyListState(
                     scrollingByUser = true
                     latestReading?.restorationFinished()
                 } else if (userScrolled) {
-                    val keys =
-                        (0 until currentPagingState.itemCount)
-                            .mapNotNull {
-                                currentPagingState.peek(it)?.takeUnless { item -> item.isPaginationGap }?.stableItemKey
-                            }.toSet()
                     lazyListState.layoutInfo.visibleItemsInfo
-                        .filter { it.key in keys }
-                        .minWithOrNull(compareBy({ it.offset.y }, { it.offset.x }))
+                        .filter { info ->
+                            val index = info.index - leadingItemCount
+                            info.offset.y + info.size.height > 0 && index in 0 until currentPagingState.itemCount &&
+                                currentPagingState.peek(index)?.let { !it.isPaginationGap && it.stableItemKey == info.key } == true
+                        }.minWithOrNull(compareBy({ it.offset.y }, { it.offset.x }))
                         ?.let { visible ->
                             latestReading?.positionChanged(
-                                visible.key as String,
+                                visible.index - leadingItemCount,
                                 visible.offset.y.toDouble() / density,
                             )
                         }
@@ -165,7 +159,7 @@ internal fun rememberTimelineWithLazyListState(
             snapshotFlow {
                 lazyListState.layoutInfo.visibleItemsInfo
                     .filter { info ->
-                        (info.index - leadingItemCount)
+                        info.offset.y + info.size.height > 0 && (info.index - leadingItemCount)
                             .takeIf { it in 0 until currentPagingState.itemCount }
                             ?.let {
                                 currentPagingState.peek(
@@ -175,10 +169,10 @@ internal fun rememberTimelineWithLazyListState(
                                 !it.isPaginationGap && it.stableItemKey == info.key
                             } == true
                     }.minWithOrNull(compareBy({ it.offset.y }, { it.offset.x }))
-                    ?.let { it.key to it.offset.y }
+                    ?.let { (it.index - leadingItemCount) to it.offset.y }
             }.collect { position ->
-                if (!restoring && lazyListState.isScrollInProgress && position != null) {
-                    latestReading?.viewportChanged(position.first as String, position.second.toDouble() / density)
+                if (!restoring && position != null) {
+                    latestReading?.viewportChanged(position.first, position.second.toDouble() / density)
                 }
             }
         }
@@ -188,8 +182,9 @@ internal fun rememberTimelineWithLazyListState(
                     lazyListState.layoutInfo.visibleItemsInfo
                         .firstOrNull { info ->
                             val index = info.index - leadingItemCount
-                            index in 0 until currentPagingState.itemCount && currentPagingState.peek(index)?.isPaginationGap == false
-                        }?.let { latestReading?.positionChanged(it.key as String, it.offset.y.toDouble() / density) }
+                            info.offset.y + info.size.height > 0 && index in 0 until currentPagingState.itemCount &&
+                                currentPagingState.peek(index)?.let { !it.isPaginationGap && it.stableItemKey == info.key } == true
+                        }?.let { latestReading?.positionChanged(it.index - leadingItemCount, it.offset.y.toDouble() / density) }
                 }
                 latestReading?.savePosition()
             }
@@ -270,7 +265,7 @@ internal fun rememberTimelineWithLazyListState(
                     val top = above?.offset?.y ?: gap?.offset?.y ?: 0
                     gapAnchor =
                         GapScrollAnchor(message.stableItemKey, message.renderHash, key, -top, above == null, headerCount)
-                    if (above != null) latestReading?.positionChanged(key, top.toDouble() / density)
+                    if (above != null) latestReading?.positionChanged(checkNotNull(previous), top.toDouble() / density)
                 } else {
                     val top =
                         lazyListState.layoutInfo.visibleItemsInfo

@@ -20,7 +20,6 @@ import dev.dimension.flare.testPlatformRegistry
 import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.UiTranslatableText
-import dev.dimension.flare.ui.presenter.home.TimelineViewport
 import dev.dimension.flare.ui.presenter.home.TimelineVisibility
 import dev.dimension.flare.ui.render.toUi
 import dev.dimension.flare.ui.render.toUiPlainText
@@ -110,7 +109,7 @@ class TimelineGapTest : RobolectricTest() {
                         listOf(healthy, failing),
                         dev.dimension.flare.data.model.tab.TimelineMergePolicy.Time,
                     )
-                val home = TimelineRemoteMediator(mixed, database, false, rememberPosition = true)
+                val home = TimelineRemoteMediator(mixed, database, false, retainHistory = true)
                 home.load(LoadType.REFRESH, state)
                 offline = true
                 repeat(3) { home.load(LoadType.REFRESH, state) }
@@ -155,7 +154,7 @@ class TimelineGapTest : RobolectricTest() {
                     listOf(ranked, chronological),
                     dev.dimension.flare.data.model.tab.TimelineMergePolicy.Time,
                 )
-            val home = TimelineRemoteMediator(mixed, database, false, rememberPosition = true)
+            val home = TimelineRemoteMediator(mixed, database, false, retainHistory = true)
             home.load(LoadType.REFRESH, state)
             fresh = true
             home.load(LoadType.REFRESH, state)
@@ -200,7 +199,7 @@ class TimelineGapTest : RobolectricTest() {
                         request: PagingRequest,
                     ) = response
                 }
-            val home = TimelineRemoteMediator(loader, database, false, rememberPosition = true)
+            val home = TimelineRemoteMediator(loader, database, false, retainHistory = true)
             home.load(LoadType.REFRESH, state)
             response = PagingResult(listOf(post(40), post(20), post(35), post(30)), nextKey = "refresh-tail")
             home.load(LoadType.REFRESH, state)
@@ -225,21 +224,21 @@ class TimelineGapTest : RobolectricTest() {
                         return response
                     }
                 }
-            val mediator = TimelineRemoteMediator(loader, database, false, rememberPosition = true)
+            val mediator = TimelineRemoteMediator(loader, database, false, retainHistory = true)
             assertIs<RemoteMediator.MediatorResult.Success>(mediator.load(LoadType.REFRESH, state))
-            val oldRows = database.pagingTimelineDao().getByPagingKey("home:home")
+            val oldRows = database.pagingTimelineDao().getByPagingKey("home")
             response = PagingResult(listOf(post(1), post(2)), nextKey = "gap-one")
             mediator.load(LoadType.REFRESH, state)
             val gap = contents().filterIsInstance<UiTimelineV2.Gap>().single()
             assertEquals(listOf("1", "2", gap.statusKey.id, "10", "11"), contents().map { it.statusKey.id })
-            assertEquals("tail", database.pagingTimelineDao().getPagingKey("home:home")?.nextKey)
+            assertEquals("tail", database.pagingTimelineDao().getPagingKey("home")?.nextKey)
             response = PagingResult(listOf(post(0)), nextKey = "gap-two")
             mediator.load(LoadType.REFRESH, state)
             val partialFailure = IllegalStateException("one source failed")
             response = PagingResult(listOf(post(3), post(10)), nextKey = "gap-one-next", continuationFailure = partialFailure)
             val filled = mediator.loadGap(gap)
-            val inserted = TimelinePagingMapper.toDb(listOf(post(3)), "home:home").single().timeline
-            assertEquals(listOf("home:home_${inserted.statusId}"), filled.insertedKeys)
+            val inserted = TimelinePagingMapper.toDb(listOf(post(3)), "home").single().timeline
+            assertEquals(listOf("home_${inserted.statusId}"), filled.insertedKeys)
             assertEquals(partialFailure, filled.failure)
             assertEquals(
                 listOf("0", "1", "2", "3", "10", "11"),
@@ -248,7 +247,7 @@ class TimelineGapTest : RobolectricTest() {
             assertEquals(listOf("gap-two", "gap-one-next"), contents().filterIsInstance<UiTimelineV2.Gap>().map { it.nextKey })
             assertEquals(
                 oldRows,
-                database.pagingTimelineDao().getByPagingKey("home:home").filter {
+                database.pagingTimelineDao().getByPagingKey("home").filter {
                     it._id in
                         oldRows.map { old ->
                             old._id
@@ -280,7 +279,7 @@ class TimelineGapTest : RobolectricTest() {
                         return response
                     }
                 }
-            val mediator = TimelineRemoteMediator(loader, database, false, rememberPosition = true)
+            val mediator = TimelineRemoteMediator(loader, database, false, retainHistory = true)
             mediator.load(LoadType.REFRESH, state)
             response = PagingResult(listOf(post(1)), nextKey = "gap")
             mediator.load(LoadType.REFRESH, state)
@@ -320,62 +319,6 @@ class TimelineGapTest : RobolectricTest() {
         }
 
     @Test
-    fun aThousandPrependsKeepABoundedWindowAroundTheSamePost() =
-        runTest {
-            var response = PagingResult<UiTimelineV2>((1000..1199).map { post(it) })
-            val mediator = mediator { response }
-            mediator.load(LoadType.REFRESH, state)
-            val loader = TimelineDbPageLoader(database, "home:home", TimelineDbPageCache(), windowed = true)
-            val item = loader.load(100, 1).single()
-            val anchor = loader.windowKey(item)
-            response = PagingResult((0..999).map { post(it) })
-            mediator.load(LoadType.REFRESH, state)
-            val source = OffsetFromStartPagingSource(loader) { anchor }
-            try {
-                val page =
-                    assertIs<androidx.paging.PagingSource.LoadResult.Page<OffsetFromStartPagingKey, TimelinePageItem>>(
-                        source.load(
-                            androidx.paging.PagingSource.LoadParams
-                                .Refresh(null, 40, false),
-                        ),
-                    )
-                assertEquals(40, page.data.size)
-                assertEquals(item.baseItem.stableItemKey, page.data[20].baseItem.stableItemKey)
-                assertIs<OffsetFromStartPagingKey.Window>(page.prevKey)
-                assertIs<OffsetFromStartPagingKey.Window>(page.nextKey)
-            } finally {
-                source.invalidate()
-            }
-        }
-
-    @Test
-    fun bookmarksRestorePerTabAndAnUnchangedOldWindowCannotOverwriteANewerOne() =
-        runTest {
-            val mediator = mediator { PagingResult((0..99).map { post(it) }) }
-            mediator.load(LoadType.REFRESH, state)
-            val loader = TimelineDbPageLoader(database, "home:home", TimelineDbPageCache())
-            val items = loader.load(0, 40)
-            val old = TimelineViewport(database, "home:home", "tab", this, this)
-            val newer = TimelineViewport(database, "home:home", "tab", this, this)
-            old.restore()
-            newer.restore()
-            old.positionChanged(items[10].baseItem.stableItemKey, -18.0)
-            newer.positionChanged(items[20].baseItem.stableItemKey, -27.0)
-            newer.savePosition()
-            runCurrent()
-            old.savePosition()
-            runCurrent()
-            val restored = TimelineViewport(database, "home:home", "tab", this, this)
-            restored.restore()
-            assertEquals(items[20].baseItem.stableItemKey, restored.target.value?.itemKey)
-            assertEquals(-27.0, restored.target.value?.offset)
-            kotlin.test.assertFalse(restored.isAtLatest.value)
-            val otherTab = TimelineViewport(database, "home:home", "other", this, this)
-            otherTab.restore()
-            assertEquals(items.first().baseItem.stableItemKey, otherTab.target.value?.itemKey)
-        }
-
-    @Test
     fun duplicatePagesAdvanceButFailedOrStuckPagesKeepTheirCursor() =
         runTest {
             var response = PagingResult<UiTimelineV2>(listOf(post(10)), nextKey = "tail")
@@ -402,7 +345,7 @@ class TimelineGapTest : RobolectricTest() {
         }
 
     @Test
-    fun aModeChangeInvalidatesAllHomeGapsAndTheirLateResponses() =
+    fun ordinaryRefreshReplacesHistoryAndRejectsRemovedGaps() =
         runTest {
             var response = PagingResult<UiTimelineV2>(listOf(post(10)), nextKey = "tail")
             val mediator = mediator { response }
@@ -411,71 +354,20 @@ class TimelineGapTest : RobolectricTest() {
             mediator.load(LoadType.REFRESH, state)
             val gap = contents().filterIsInstance<UiTimelineV2.Gap>().single()
             val disabled = mediator(remember = false) { PagingResult(listOf(post(100))) }
-            disabled.prepareHomeTimeline()
-            mediator.loadGap(gap)
-            assertEquals(emptyList(), contents())
             disabled.load(LoadType.REFRESH, state)
+            mediator.loadGap(gap)
             assertEquals(listOf("100"), contents().map { it.statusKey.id })
         }
 
     @Test
-    fun newContentIsAnnouncedEvenWhenTheCurrentPostUsedToBeTheHead() =
-        runTest {
-            var response = PagingResult<UiTimelineV2>(listOf(post(10)))
-            val mediator = mediator { response }
-            mediator.load(LoadType.REFRESH, state)
-            val viewport = TimelineViewport(database, "home:home", "tab", this, this)
-            viewport.restore()
-            viewport.restorationFinished(viewport.target.value)
-            val original = viewport.current.value
-            response = PagingResult(listOf(post(0)))
-            mediator.load(LoadType.REFRESH, state)
-            viewport.refreshHead()
-            kotlin.test.assertTrue(viewport.hasNewContent.value)
-            assertEquals(original, viewport.current.value)
-            viewport.showLatest()
-            runCurrent()
-            kotlin.test.assertFalse(viewport.hasNewContent.value)
-            kotlin.test.assertNotEquals(original?.itemKey, viewport.target.value?.itemKey)
-        }
-
-    @Test
-    fun staleRestorationCannotCompleteANewerTargetOrOverwriteItsPosition() =
-        runTest {
-            mediator { PagingResult((0..5).map { post(it) }) }.load(LoadType.REFRESH, state)
-            val items = TimelineDbPageLoader(database, "home:home", TimelineDbPageCache()).load(0, 6)
-            val viewport = TimelineViewport(database, "home:home", "tab", this, this)
-            viewport.restore()
-            val initialTarget = checkNotNull(viewport.target.value)
-            viewport.positionChanged(items[3].baseItem.stableItemKey, -17.0)
-            assertEquals(null, viewport.target.value)
-            viewport.restoreCurrentPosition()
-            val recreatedTarget = checkNotNull(viewport.target.value)
-            viewport.restorationFinished(initialTarget)
-            viewport.viewportChanged(items[0].baseItem.stableItemKey, 0.0)
-            viewport.restoreCurrentPosition()
-            assertEquals(recreatedTarget, viewport.target.value)
-            assertEquals(recreatedTarget, viewport.current.value)
-
-            viewport.restorationFinished(recreatedTarget)
-            assertEquals(null, viewport.target.value)
-            viewport.viewportChanged(items[4].baseItem.stableItemKey, -9.0)
-            viewport.savePosition()
-            runCurrent()
-            val reopened = TimelineViewport(database, "home:home", "tab", this, this)
-            reopened.restore()
-            assertEquals(viewport.current.value, reopened.target.value)
-        }
-
-    @Test
-    fun visibilityKeepsGapsInTheListButRestoresOnlyVisiblePosts() =
+    fun visibilityKeepsGapsInTheList() =
         runTest {
             var response = PagingResult<UiTimelineV2>(listOf(post(10)))
             val home = mediator { response }
             home.load(LoadType.REFRESH, state)
             response = PagingResult(listOf(post(0)), nextKey = "gap")
             home.load(LoadType.REFRESH, state)
-            val items = TimelineDbPageLoader(database, "home:home", TimelineDbPageCache()).load(0, 20)
+            val items = TimelineDbPageLoader(database, "home", TimelineDbPageCache()).load(0, 20)
             val visible =
                 TimelineVisibility(
                     filters = listOf(KeywordFilterPattern("Post 0", isRegex = false)),
@@ -486,17 +378,8 @@ class TimelineGapTest : RobolectricTest() {
                 )
             val displayed = items.map { it.baseItem }.filter(visible::isVisible)
             assertIs<UiTimelineV2.Gap>(displayed.first())
-            val viewport = TimelineViewport(database, "home:home", "tab", this, this)
-            viewport.setVisibility(visible)
-            viewport.restore()
-            assertEquals(displayed.last().stableItemKey, viewport.target.value?.itemKey)
-            viewport.restorationFinished(viewport.target.value)
-
             val changed = visible.copy(filters = listOf(KeywordFilterPattern("Post 10", isRegex = false)))
-            viewport.setVisibility(changed)
-            runCurrent()
             val updated = items.map { it.baseItem }.filter(changed::isVisible)
-            assertEquals(updated.first().stableItemKey, viewport.target.value?.itemKey)
             assertIs<UiTimelineV2.Gap>(updated.last())
         }
 
@@ -509,69 +392,20 @@ class TimelineGapTest : RobolectricTest() {
             response = PagingResult(listOf(post(0)), nextKey = "gap-0")
             mediator.load(LoadType.REFRESH, state)
             val originalKey = contents().filterIsInstance<UiTimelineV2.Gap>().single().statusKey
-            val reader = TimelineViewport(database, "home:home", "ranked-tab", this, this)
-            reader.restore()
-            val lastKey =
-                TimelineDbPageLoader(database, "home:home", TimelineDbPageCache())
-                    .load(0, 40)
-                    .last()
-                    .baseItem.stableItemKey
-            reader.positionChanged(lastKey, -9.0)
-            reader.savePosition()
-            runCurrent()
             repeat(10) { index ->
                 val gap = contents().filterIsInstance<UiTimelineV2.Gap>().single()
                 response = PagingResult(((index * 20 + 1)..(index * 20 + 20)).map { post(it) }, nextKey = "gap-${index + 1}")
                 mediator.loadGap(gap)
             }
-            val all = database.pagingTimelineDao().getTimelinePage("home:home", 0, 300).map { it.statusData.content }
+            val all = database.pagingTimelineDao().getTimelinePage("home", 0, 300).map { it.statusData.content }
             assertEquals(originalKey, all.filterIsInstance<UiTimelineV2.Gap>().single().statusKey)
             assertEquals((0..200).map(Int::toString) + "1000", all.filterNot { it is UiTimelineV2.Gap }.map { it.statusKey.id })
-            val rows = database.pagingTimelineDao().getByPagingKey("home:home")
+            val rows = database.pagingTimelineDao().getByPagingKey("home")
             assertEquals(rows.size, rows.map { it.sortId }.toSet().size)
-            assertEquals(
-                kotlin.test.assertNotNull(database.pagingTimelineDao().getRowByItemKey("home:home", lastKey)).sortId,
-                kotlin.test.assertNotNull(database.pagingTimelineDao().getPosition("ranked-tab")).sortId,
-            )
         }
 
     @Test
-    fun aFilteredOrDeletedBookmarkFallsBackToANearbyRealPost() =
-        runTest {
-            mediator { PagingResult((0..99).map { post(it) }) }.load(LoadType.REFRESH, state)
-            val items = TimelineDbPageLoader(database, "home:home", TimelineDbPageCache()).load(0, 100)
-            val original = TimelineViewport(database, "home:home", "tab", this, this)
-            original.restore()
-            original.positionChanged(items[50].baseItem.stableItemKey, -31.0)
-            original.savePosition()
-            runCurrent()
-            val filtered = TimelineViewport(database, "home:home", "tab", this, this)
-            val visibility =
-                TimelineVisibility(
-                    filters = listOf(KeywordFilterPattern("Post [5-9]\\d", isRegex = true, regex = Regex("Post [5-9]\\d"))),
-                    config = TimelineFilterConfig(),
-                    mxgaEnabled = false,
-                    mxgaSnapshot = MxgaSnapshot(),
-                    platformRegistry = testPlatformRegistry(),
-                )
-            filtered.setVisibility(visibility)
-            filtered.restore()
-            assertEquals(items[49].baseItem.stableItemKey, filtered.target.value?.itemKey)
-            assertEquals(0.0, filtered.target.value?.offset)
-            database.pagingTimelineDao().delete(
-                listOf(checkNotNull(database.pagingTimelineDao().getRowByItemKey("home:home", items[50].baseItem.stableItemKey))),
-            )
-            val deleted = TimelineViewport(database, "home:home", "tab", this, this)
-            deleted.restore()
-            assertEquals(items[51].baseItem.stableItemKey, deleted.target.value?.itemKey)
-            filtered.setVisibility(visibility.copy(filters = listOf(KeywordFilterPattern("Post", isRegex = false))))
-            runCurrent()
-            assertEquals(null, filtered.target.value)
-            assertEquals(null, filtered.current.value)
-        }
-
-    @Test
-    fun disabledHomeRefreshDoesNotDeleteTheSameSourcesOrdinaryCache() =
+    fun homeUsesTheOrdinarySourceCache() =
         runTest {
             val ordinary =
                 TimelineRemoteMediator(
@@ -593,29 +427,7 @@ class TimelineGapTest : RobolectricTest() {
             response = PagingResult()
             home.load(LoadType.REFRESH, state)
             assertEquals(emptyList(), contents())
-            assertEquals(1, database.pagingTimelineDao().getByPagingKey("home").size)
-        }
-
-    @Test
-    fun openingAnUnscrolledWindowCannotOverwriteAnotherWindowsRealReadingPosition() =
-        runTest {
-            mediator { PagingResult((0..99).map { post(it) }) }.load(LoadType.REFRESH, state)
-            val items = TimelineDbPageLoader(database, "home:home", TimelineDbPageCache()).load(0, 100)
-            val active = TimelineViewport(database, "home:home", "tab", this, this)
-            active.restore()
-            active.positionChanged(items[80].baseItem.stableItemKey, -15.0)
-            val untouched = TimelineViewport(database, "home:home", "tab", this, this)
-            untouched.restore()
-            untouched.savePosition()
-            runCurrent()
-            active.savePosition()
-            runCurrent()
-            assertEquals(items[80].baseItem.stableItemKey, database.pagingTimelineDao().getPosition("tab")?.itemKey)
-            database.pagingTimelineDao().delete(
-                listOf(checkNotNull(database.pagingTimelineDao().getRowByItemKey("home:home", items[80].baseItem.stableItemKey))),
-            )
-            active.refreshHead()
-            assertEquals(items[81].baseItem.stableItemKey, active.target.value?.itemKey)
+            assertEquals(emptyList(), database.pagingTimelineDao().getByPagingKey("home"))
         }
 
     @Test
@@ -673,23 +485,6 @@ class TimelineGapTest : RobolectricTest() {
         }
 
     @Test
-    fun queuedPositionSaveCannotResurrectADeletedTabBeforeItsPresenterIsDisposed() =
-        runTest {
-            mediator { PagingResult((0..10).map { post(it) }) }.load(LoadType.REFRESH, state)
-            var tabExists = true
-            val viewport = TimelineViewport(database, "home:home", "tab", this, this) { tabExists }
-            viewport.restore()
-            viewport.savePosition()
-            runCurrent()
-            viewport.positionChanged(checkNotNull(viewport.current.value).itemKey, -12.0)
-            viewport.savePosition()
-            tabExists = false
-            database.pagingTimelineDao().deleteTabPosition("tab")
-            runCurrent()
-            assertEquals(null, database.pagingTimelineDao().getPosition("tab"))
-        }
-
-    @Test
     fun deletingAnAccountRemovesItsOpaqueGapContinuationAndRejectsTheOldMediator() =
         runTest {
             val account = MicroBlogKey("reader", "example.com")
@@ -699,21 +494,13 @@ class TimelineGapTest : RobolectricTest() {
             response = PagingResult(listOf(post(0)), nextKey = "gap")
             home.load(LoadType.REFRESH, state)
             val gap = contents().filterIsInstance<UiTimelineV2.Gap>().single()
-            val reader = TimelineViewport(database, "home:home", "tab", this, this)
-            reader.restore()
-            reader.savePosition()
-            runCurrent()
             database.clearHomeTimelinesForAccount(MicroBlogKey("unrelated", "example.com"))
             assertEquals(gap, contents().filterIsInstance<UiTimelineV2.Gap>().single())
             database.clearHomeTimelinesForAccount(account)
             response = PagingResult(listOf(post(1)))
             home.loadGap(gap)
-            reader.positionChanged(checkNotNull(reader.current.value).itemKey, -5.0)
-            reader.savePosition()
-            runCurrent()
             assertEquals(emptyList(), contents())
-            assertEquals(null, database.pagingTimelineDao().getPagingKey("home:home"))
-            assertEquals(null, database.pagingTimelineDao().getPosition("tab"))
+            assertEquals(null, database.pagingTimelineDao().getPagingKey("home"))
         }
 
     private fun mediator(
@@ -731,11 +518,11 @@ class TimelineGapTest : RobolectricTest() {
         },
         database,
         false,
-        rememberPosition = remember,
+        retainHistory = remember,
         accountKeys = accountKeys,
     )
 
-    private suspend fun contents() = database.pagingTimelineDao().getTimelinePage("home:home", 0, 300).map { it.statusData.content }
+    private suspend fun contents() = database.pagingTimelineDao().getTimelinePage("home", 0, 300).map { it.statusData.content }
 
     private fun post(
         id: Int,

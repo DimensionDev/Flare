@@ -10,6 +10,7 @@ import dev.dimension.flare.data.repository.newDraftGroupId
 import dev.dimension.flare.data.repository.toComposeDraftBundle
 import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.ui.model.UiAccount
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -30,12 +31,14 @@ internal class ComposeUseCase(
         data: ComposeData,
         groupId: String,
         onPrepared: suspend () -> Unit = {},
+        onPreparationFailed: suspend () -> Unit = {},
     ) {
         invoke(
             accounts = accounts,
             data = data,
             groupId = groupId,
             onPrepared = onPrepared,
+            onPreparationFailed = onPreparationFailed,
         ) {
             if (it is ComposeProgressState.Error) {
                 DebugRepository.error(it.throwable)
@@ -63,9 +66,11 @@ internal class ComposeUseCase(
         data: ComposeData,
         groupId: String,
         onPrepared: suspend () -> Unit = {},
+        onPreparationFailed: suspend () -> Unit = {},
         progress: suspend (ComposeProgressState) -> Unit,
     ) {
         scope.launch {
+            var prepared = false
             tryRun {
                 progress.invoke(ComposeProgressState.Progress(0, 1))
                 appDataStore.composeConfigData.updateData {
@@ -81,9 +86,16 @@ internal class ComposeUseCase(
                 }
                 sendDraftUseCase(
                     bundle = data.toComposeDraftBundle(accounts = accounts, groupId = groupId),
-                    onPrepared = onPrepared,
+                    onPrepared = {
+                        prepared = true
+                        onPrepared()
+                    },
                     progress = progress,
                 )
+            }.onFailure { error ->
+                if (!prepared) onPreparationFailed()
+                if (error is CancellationException) throw error
+                progress(ComposeProgressState.Error(error))
             }
         }
     }
@@ -93,11 +105,16 @@ internal class ComposeUseCase(
         data: ComposeData,
         groupId: String = newDraftGroupId(),
         onSaved: suspend () -> Unit = {},
+        onFailure: suspend () -> Unit = {},
     ) {
         scope.launch {
             tryRun {
                 saveDraftUseCase(data.toComposeDraftBundle(accounts = accounts, groupId = groupId))
                 onSaved()
+            }.onFailure { error ->
+                onFailure()
+                if (error is CancellationException) throw error
+                withContext(Dispatchers.Main) { inAppNotification.onError(Message.Compose, error) }
             }
         }
     }

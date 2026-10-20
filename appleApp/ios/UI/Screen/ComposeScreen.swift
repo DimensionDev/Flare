@@ -47,6 +47,7 @@ struct ComposeScreen: View {
     @State private var presenter: KotlinPresenter<ComposeState>
     @State private var viewModel = ComposeContentViewModel()
     @State private var mediaViewModel = MediaViewModel()
+    @State private var imageInput = ComposeImageInput()
     @State private var uiTextView: UITextView?
     @State private var pendingCursor: Int?
     @State private var initialTextApplied = false
@@ -83,6 +84,8 @@ struct ComposeScreen: View {
                         .keyboardType(.twitter)
                         .introspect(.textEditor, on: .iOS(.v16, .v17, .v18, .v26, .v27)) { textView in
                             self.uiTextView = textView
+                            imageInput.receiveImage = { [weak mediaViewModel] in mediaViewModel?.importImage($0) }
+                            imageInput.install(on: textView)
                             applyCursorIfPossible()
                         }
                         .frame(minHeight: 120)
@@ -107,6 +110,10 @@ struct ComposeScreen: View {
                                     ComposeMediaItemView(item: item, mediaViewModel: mediaViewModel)
                                 }
                             }
+                        }
+                        .onDrop(of: [.image, .text], isTargeted: nil) { providers in
+                            mediaViewModel.importDrop(providers, insert: insertDroppedText)
+                            return true
                         }
                         StateView(state: presenter.state.composeConfig) { config in
                             if let media = config.media, media.canSensitive {
@@ -141,7 +148,21 @@ struct ComposeScreen: View {
             
         }
         .onAppear {
+            let currentPresenter = presenter
+            let content = viewModel
+            mediaViewModel.imagesAllowed = { currentPresenter.state.mediaEnabled && !content.pollViewModel.enabled }
+            mediaViewModel.onError = { error in
+                SwiftInAppNotification.shared.onError(message: .compose, throwable: KotlinThrowable(message: error.localizedDescription))
+            }
+            imageInput.receiveImage = { [weak mediaViewModel] in mediaViewModel?.importImage($0) }
+            if let uiTextView { imageInput.install(on: uiTextView) }
             applyPrefillIfNeeded()
+        }
+        .onDisappear {
+            mediaViewModel.cancelImports()
+            mediaViewModel.imagesAllowed = { false }
+            imageInput.receiveImage = nil
+            uiTextView?.pasteDelegate = nil
         }
         .onChange(of: presenter.state.initialTextState) { _, newValue in
             guard !initialTextApplied else { return }
@@ -155,8 +176,8 @@ struct ComposeScreen: View {
             }
         }
         .onSuccessOf(of: presenter.state.composeConfig) { config in
+            mediaViewModel.maxSize = Int(config.media?.maxCount ?? 0)
             if let media = config.media {
-                mediaViewModel.maxSize = Int(media.maxCount)
                 mediaViewModel.enableAltText = media.altTextMaxLength > 0
                 mediaViewModel.altTextMaxLength = Int(media.altTextMaxLength)
             }
@@ -523,6 +544,16 @@ struct ComposeScreen: View {
         textView.scrollRangeToVisible(NSRange(location: max(0, newLocation - 1), length: 1))
     }
     
+    private func insertDroppedText(_ text: String) {
+        guard let textView = uiTextView else {
+            viewModel.text += text
+            return
+        }
+        textView.unmarkText()
+        textView.insertText(text)
+        viewModel.text = textView.text
+    }
+
     private func getComposeData() -> ComposeData {
         viewModel.makeComposeData(
             visibility: getVisibility(),
@@ -534,30 +565,22 @@ struct ComposeScreen: View {
 
     private var hasDraftContent: Bool {
         viewModel.hasDraftContent ||
-        !mediaViewModel.items.isEmpty
+        !mediaViewModel.items.isEmpty || mediaViewModel.hasPendingImports
     }
     
     private func send() {
-        guard mediaViewModel.items.allSatisfy(\.isReady) else { return }
-        let files = mediaViewModel.items.compactMap(\.file)
-        let data = getComposeData()
-        presenter.state.send(data: data) { dispatched in
-            defer { withExtendedLifetime(files) {} }
-            if dispatched.boolValue {
-                dismiss()
-            }
+        mediaViewModel.dispatchWhenReady({ completed in
+            presenter.state.send(data: getComposeData()) { completed($0.boolValue) }
+        }) { dispatched in
+            if dispatched { dismiss() }
         }
     }
 
     private func saveDraft(shouldDismiss: Bool = false) {
-        guard mediaViewModel.items.allSatisfy(\.isReady) else { return }
-        let files = mediaViewModel.items.compactMap(\.file)
-        presenter.state.saveDraft(data: getComposeData()) { dispatched in
-            defer { withExtendedLifetime(files) {} }
-            guard dispatched.boolValue else { return }
-            if shouldDismiss {
-                dismiss()
-            }
+        mediaViewModel.dispatchWhenReady({ completed in
+            presenter.state.saveDraft(data: getComposeData()) { completed($0.boolValue) }
+        }) { dispatched in
+            if dispatched && shouldDismiss { dismiss() }
         }
     }
 
@@ -637,134 +660,6 @@ struct ComposeScreen: View {
 
 }
 
-@Observable
-class MediaViewModel {
-    var selectedItems: [PhotosPickerItem] = []
-    var items: [MediaItem] = []
-    var sensitive = false
-    var maxSize = 4
-    var enableAltText = true
-    var altTextMaxLength = 500
-    func update() {
-        if selectedItems.count > maxSize {
-            selectedItems = Array(selectedItems.suffix(maxSize))
-        }
-        items = selectedItems.map { item in
-            MediaItem(item: item)
-        }
-    }
-    func restore(draftMedias: [UiDraftMedia]) {
-        selectedItems = []
-        items = draftMedias.compactMap(MediaItem.init(draftMedia:))
-    }
-    func setInitialImage(data: Data, fileName: String) {
-        selectedItems = []
-        items = MediaItem(data: data, fileName: fileName).map { [$0] } ?? []
-    }
-    func remove(item: MediaItem) {
-        if let index = items.firstIndex(of: item) {
-            items.remove(at: index)
-            if selectedItems.indices.contains(index) {
-                selectedItems.remove(at: index)
-            }
-        }
-    }
-}
-
-private nonisolated struct PickedComposeFile: Transferable {
-    let file: ComposeMediaFile
-
-    static var transferRepresentation: some TransferRepresentation {
-        FileRepresentation(importedContentType: .movie) { received in
-            PickedComposeFile(file: try ComposeMediaFile(copying: received.file))
-        }
-        FileRepresentation(importedContentType: .image) { received in
-            PickedComposeFile(file: try ComposeMediaFile(copying: received.file))
-        }
-    }
-}
-
-@Observable
-class MediaItem: Equatable, Identifiable {
-    static func == (lhs: MediaItem, rhs: MediaItem) -> Bool {
-        lhs.id == rhs.id
-    }
-    let item: PhotosPickerItem?
-    var image: UIImage?
-    var data: Data?
-    var file: ComposeMediaFile?
-    var mimeType: String?
-    var loadError: String?
-    var isReady: Bool { file != nil || data != nil }
-    var altText: String = ""
-    let id: String
-    var fileName: String
-    var type: FileType = .other
-    
-    init(item: PhotosPickerItem) {
-        self.item = item
-        self.id = item.itemIdentifier ?? UUID().uuidString
-        self.fileName = item.itemIdentifier ?? UUID().uuidString
-        
-        if let contentType = item.supportedContentTypes.first {
-            if contentType.conforms(to: .image) {
-                self.type = .image
-            } else if contentType.conforms(to: .movie) {
-                self.type = .video
-            }
-        }
-        
-        self.mimeType = item.supportedContentTypes.first?.preferredMIMEType
-        item.loadTransferable(type: PickedComposeFile.self) { result in
-            DispatchQueue.main.async {
-                do {
-                    guard let picked = try result.get() else {
-                        self.loadError = "Unable to load this media file"
-                        return
-                    }
-                    self.file = picked.file
-                    self.fileName = picked.file.url.lastPathComponent
-                    if self.type == .image {
-                        self.image = UIImage(contentsOfFile: picked.file.url.path)
-                    }
-                } catch {
-                    self.loadError = error.localizedDescription
-                }
-            }
-        }
-    }
-
-    init?(data: Data, fileName: String) {
-        guard let image = UIImage(data: data) else { return nil }
-        self.item = nil
-        self.id = UUID().uuidString
-        self.fileName = fileName
-        self.data = data
-        self.image = image
-        self.type = .image
-    }
-
-    init?(draftMedia: UiDraftMedia) {
-        let fileURL = URL(fileURLWithPath: draftMedia.cachePath)
-        guard FileManager.default.fileExists(atPath: fileURL.path) else { return nil }
-
-        self.item = nil
-        self.id = draftMedia.cachePath
-        self.fileName = draftMedia.fileName ?? fileURL.lastPathComponent
-        self.file = ComposeMediaFile(draftURL: fileURL)
-        self.altText = draftMedia.altText ?? ""
-
-        switch draftMedia.type {
-        case .image:
-            self.type = .image
-            self.image = UIImage(contentsOfFile: fileURL.path)
-        case .video:
-            self.type = .video
-        default:
-            self.type = .other
-        }
-    }
-}
 
 extension UiDraftStatus {
     fileprivate var title: String {

@@ -6,8 +6,10 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.content.contentReceiver
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -60,11 +62,13 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -96,6 +100,8 @@ import compose.icons.fontawesomeicons.solid.TriangleExclamation
 import compose.icons.fontawesomeicons.solid.Xmark
 import dev.dimension.flare.R
 import dev.dimension.flare.common.FileItem
+import dev.dimension.flare.common.InAppNotification
+import dev.dimension.flare.common.Message
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.model.PostActionStyle
@@ -129,6 +135,7 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import moe.tlaster.precompose.molecule.producePresenter
+import org.koin.compose.koinInject
 import java.util.Locale
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.days
@@ -159,6 +166,7 @@ fun ShortcutComposeRoute(
 
 @OptIn(
     ExperimentalMaterial3Api::class,
+    ExperimentalFoundationApi::class,
 )
 @Composable
 internal fun ComposeScreen(
@@ -449,7 +457,7 @@ internal fun ComposeScreen(
                             .fillMaxWidth()
                             .focusRequester(
                                 focusRequester = focusRequester,
-                            ),
+                            ).contentReceiver(state.imageReceiver),
                     colors =
                         TextFieldDefaults.colors(
                             focusedContainerColor = Color.Transparent,
@@ -486,7 +494,8 @@ internal fun ComposeScreen(
                                 Modifier
                                     .padding(horizontal = screenHorizontalPadding)
                                     .fillMaxWidth()
-                                    .horizontalScroll(rememberScrollState()),
+                                    .horizontalScroll(rememberScrollState())
+                                    .contentReceiver(state.attachmentReceiver),
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
                             mediaState.medias.forEach { media ->
@@ -1191,19 +1200,40 @@ private fun composePresenter(
                 pollPresenter(it)
             }
 
+    val mediaConfig by rememberUpdatedState(state.composeConfig.takeSuccess()?.media)
+    val scope = rememberCoroutineScope()
+    val notification = koinInject<InAppNotification>()
+    val pollEnabled by rememberUpdatedState(pollState.takeSuccess()?.enabled == true)
+    val media =
+        remember(context) {
+            ComposeMediaState(
+                context,
+                { mediaConfig },
+                initialMedias,
+                scope,
+                imagesAllowed = { !pollEnabled },
+                onError = { notification.onError(Message.Compose, it) },
+            )
+        }
+    DisposableEffect(media) { onDispose { media.close() } }
+    val imageReceiver = remember(media) { ComposeImageReceiver(context, media) }
+    val attachmentReceiver =
+        remember(media) {
+            ComposeImageReceiver(context, media) { text ->
+                textFieldState.edit {
+                    replace(selection.min, selection.max, text)
+                }
+            }
+        }
     val mediaState =
         state.composeConfig
             .mapNotNull {
                 it.media
             }.map {
-                mediaPresenter(context, it, initialMedias)
+                media
             }
 
-    mediaState.onSuccess {
-        LaunchedEffect(it.medias.size) {
-            state.setMediaSize(it.medias.size)
-        }
-    }
+    LaunchedEffect(media.medias.size) { state.setMediaSize(media.medias.size) }
 
     val contentWarningState =
         state.composeConfig
@@ -1256,8 +1286,8 @@ private fun composePresenter(
                 append(draft.data.content)
                 selection = TextRange(length)
             }
-            mediaState.takeSuccess()?.replaceMedias(draft.medias)
-            mediaState.takeSuccess()?.setMediaSensitive(draft.data.sensitive)
+            media.replaceMedias(draft.medias)
+            media.setMediaSensitive(draft.data.sensitive)
             pollState.takeSuccess()?.setPoll(draft.data.poll)
             contentWarningState.takeSuccess()?.setText(draft.data.spoilerText)
             state.visibilityState.takeSuccess()?.setVisibility(draft.data.visibility)
@@ -1266,17 +1296,49 @@ private fun composePresenter(
         }
     }
 
-    val canPoll =
-        remember(mediaState) {
-            mediaState !is UiState.Success || mediaState.data.medias.isEmpty()
-        }
-    val canMedia =
-        remember(mediaState, pollState) {
-            (mediaState is UiState.Success && mediaState.data.canAddMedia) &&
-                !(pollState is UiState.Success && pollState.data.enabled)
-        }
+    val canPoll = media.medias.isEmpty()
+    val canMedia = media.canAddMedia && !pollEnabled
     var showEmojiMenu by remember { mutableStateOf(false) }
     var showAccountSelectMenu by remember { mutableStateOf(false) }
+    val buildComposeData by rememberUpdatedState {
+        ComposeData(
+            content = textFieldState.text.toString(),
+            medias =
+                media.medias.map {
+                    ComposeData.Media(
+                        file = FileItem(context, it.uri),
+                        altText =
+                            it.textState.text
+                                .toString()
+                                .takeIf { it.isNotEmpty() },
+                    )
+                },
+            poll =
+                pollState.takeSuccess()?.takeIf { it.enabled }?.let {
+                    ComposeData.Poll(
+                        multiple = !it.pollSingleChoice,
+                        expiredAfter = it.expiredAt.duration.inWholeMilliseconds,
+                        options =
+                            it.options.map { option ->
+                                option.text.toString()
+                            },
+                    )
+                },
+            sensitive = media.isMediaSensitive,
+            spoilerText = spoilerText,
+            visibility =
+                state.visibilityState.takeSuccess()?.visibility
+                    ?: UiTimelineV2.Post.Visibility.Public,
+            referenceStatus =
+                state.composeStatus?.let {
+                    ComposeData.ReferenceStatus(
+                        composeStatus = it,
+                    )
+                },
+            language = languageState.takeSuccess()?.selectedLanguage.orEmpty(),
+        )
+    }
+    val currentState by rememberUpdatedState(state)
     object {
         val remainingLength =
             remainingLength.map {
@@ -1288,11 +1350,13 @@ private fun composePresenter(
         val canMedia = canMedia
         val pollState = pollState
         val mediaState = mediaState
+        val imageReceiver = imageReceiver
+        val attachmentReceiver = attachmentReceiver
         val contentWarningState = contentWarningState
         val state = state
         val showAccountSelectMenu = showAccountSelectMenu
         val languageState = languageState
-        val hasTextContent = textFieldState.text.toString().isNotBlank()
+        val hasTextContent = textFieldState.text.toString().isNotBlank() || media.medias.isNotEmpty() || media.hasPendingImports
 
         fun selectEmoji(emoji: UiEmoji) {
             textFieldState.edit {
@@ -1310,55 +1374,14 @@ private fun composePresenter(
             showAccountSelectMenu = value
         }
 
-        fun buildComposeData() =
-            ComposeData(
-                content = textFieldState.text.toString(),
-                medias =
-                    mediaState.takeSuccess()?.medias.orEmpty().map {
-                        ComposeData.Media(
-                            file = FileItem(context, it.uri),
-                            altText =
-                                it.textState.text
-                                    .toString()
-                                    .takeIf { it.isNotEmpty() },
-                        )
-                    },
-                poll =
-                    pollState.takeSuccess()?.takeIf { it.enabled }?.let {
-                        ComposeData.Poll(
-                            multiple = !it.pollSingleChoice,
-                            expiredAfter = it.expiredAt.duration.inWholeMilliseconds,
-                            options =
-                                it.options.map { option ->
-                                    option.text.toString()
-                                },
-                        )
-                    },
-                sensitive = mediaState.takeSuccess()?.isMediaSensitive ?: false,
-                spoilerText = spoilerText,
-                visibility =
-                    state.visibilityState.takeSuccess()?.visibility
-                        ?: UiTimelineV2.Post.Visibility.Public,
-                referenceStatus =
-                    state.composeStatus?.let {
-                        ComposeData.ReferenceStatus(
-                            composeStatus = it,
-                        )
-                    },
-                language = languageState.takeSuccess()?.selectedLanguage.orEmpty(),
-            )
-
         fun send(onDispatched: () -> Unit = {}) {
-            val data = buildComposeData()
-            state.send(data) { dispatched ->
-                if (dispatched) {
-                    onDispatched()
-                }
+            media.dispatchWhenReady({ callback -> currentState.send(buildComposeData(), callback) }) { dispatched ->
+                if (dispatched) onDispatched()
             }
         }
 
         fun saveDraft(onDispatched: (Boolean) -> Unit) {
-            state.saveDraft(buildComposeData(), onDispatched)
+            media.dispatchWhenReady({ callback -> currentState.saveDraft(buildComposeData(), callback) }, onDispatched)
         }
     }
 }
@@ -1396,95 +1419,6 @@ private fun contentWarningPresenter() =
             }
         }
     }
-
-@Composable
-private fun mediaPresenter(
-    context: Context,
-    config: ComposeConfig.Media,
-    initialMedias: ImmutableList<Uri> = persistentListOf(),
-) = run {
-    var medias by remember {
-        mutableStateOf(
-            initialMedias.map {
-                createMediaData(context, it)
-            },
-        )
-    }
-    var isMediaSensitive by remember {
-        mutableStateOf(false)
-    }
-
-    object {
-        val medias = medias.toImmutableList()
-        val isMediaSensitive = isMediaSensitive
-        val canAddMedia = medias.size < config.maxCount
-        val canSensitive = config.canSensitive
-        val enabled = config.maxCount > 0
-        val enableAltText = config.altTextMaxLength > 0
-        val altTextMaxLength = config.altTextMaxLength
-
-        fun addMedia(uris: List<Uri>) {
-            medias =
-                (
-                    medias +
-                        uris.map {
-                            createMediaData(context, it)
-                        }
-                ).distinctBy {
-                    it.uri
-                }.takeLast(config.maxCount)
-        }
-
-        fun replaceMedias(items: List<dev.dimension.flare.ui.model.UiDraftMedia>) {
-            medias =
-                items
-                    .map { item ->
-                        createMediaData(
-                            context = context,
-                            uri = Uri.parse(item.cachePath),
-                            textState = TextFieldState(item.altText.orEmpty()),
-                        )
-                    }.distinctBy {
-                        it.uri
-                    }.takeLast(config.maxCount)
-        }
-
-        fun removeMedia(uri: Uri) {
-            medias = medias.filterNot { it.uri == uri }
-            if (medias.isEmpty()) {
-                isMediaSensitive = false
-            }
-        }
-
-        fun setMediaSensitive(value: Boolean) {
-            isMediaSensitive = value
-        }
-
-        fun clear() {
-            medias = emptyList()
-            isMediaSensitive = false
-        }
-    }
-}
-
-@Immutable
-private data class MediaData(
-    val uri: Uri,
-    val textState: TextFieldState = TextFieldState(),
-    val isVideo: Boolean,
-) {
-    val url = uri.toString()
-}
-
-private fun createMediaData(
-    context: Context,
-    uri: Uri,
-    textState: TextFieldState = TextFieldState(),
-) = MediaData(
-    uri = uri,
-    textState = textState,
-    isVideo = context.contentResolver.getType(uri)?.startsWith("video/") == true,
-)
 
 @Composable
 private fun pollPresenter(config: ComposeConfig.Poll) =

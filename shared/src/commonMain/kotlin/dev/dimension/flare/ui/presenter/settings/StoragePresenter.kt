@@ -15,6 +15,7 @@ import kotlinx.coroutines.launch
 
 @WebPresenter("storage")
 public class StoragePresenter : PresenterBase<StorageState>() {
+    private val appDataStore by koinInject<dev.dimension.flare.data.datastore.AppDataStore>()
     private val cacheDatabase by koinInject<CacheDatabase>()
     private val ugoiraRepository by koinInject<UgoiraRepository>()
 
@@ -26,6 +27,11 @@ public class StoragePresenter : PresenterBase<StorageState>() {
 
     public suspend fun clearCacheSuspend() {
         cacheDatabase.clearAllTables()
+        cacheDatabase.timelineResets.value += 1
+        appDataStore.homeTimelinePreferences.updateData {
+            dev.dimension.flare.data.datastore.model
+                .HomeTimelinePreferences()
+        }
     }
 
     @Composable

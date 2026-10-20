@@ -28,6 +28,7 @@ import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareLargeFlexibleTopAppBar
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.FlareTopAppBar
+import dev.dimension.flare.ui.component.LocalAppSettings
 import dev.dimension.flare.ui.component.LocalGlobalAppearance
 import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.TabIcon
@@ -121,6 +122,8 @@ internal fun DeckTimelineScreen(
                     item = tabItem,
                     contentPadding = contentPadding,
                     modifier = Modifier.fillMaxSize(),
+                    isHomeTimeline = true,
+                    autoRefreshInterval = LocalAppSettings.current.homeTimelineAutoRefreshInterval,
                 )
             }
         }

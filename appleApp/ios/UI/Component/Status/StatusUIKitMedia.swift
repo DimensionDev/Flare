@@ -444,6 +444,7 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding, UICollectionView
         carousel.dataSource = self
         carousel.delegate = self
         carousel.showsHorizontalScrollIndicator = false
+        carousel.scrollsToTop = false
         carousel.showsVerticalScrollIndicator = false
         carousel.isDirectionalLockEnabled = true
         carousel.alwaysBounceHorizontal = true

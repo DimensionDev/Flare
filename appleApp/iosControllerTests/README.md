@@ -42,6 +42,9 @@ The implementation has three state owners:
   Controller-local height storage retains at most two geometries per live item.
   `TimelineAutoplay` handles playback without controlling list offsets.
 
-Changing the list identity creates a fresh list at the top. Pages do not store
-reading positions for previously selected tabs or queries. The current list
-keeps its position through refreshes, loading placeholders and layout changes.
+With Home reading position enabled, the shared presenter restores the selected tab
+and an index/offset from device-local UI preferences after ordinary cache paging.
+The controller cases cover applying that bookmark, waiting for native layout before
+launch refresh, Gap insertion (including a Gap at the start of the list), and user
+scrolling taking precedence over pending restoration. UI preference restoration is
+tested in `TimelineViewportTest`; cursor transactions stay in `TimelineGapTest`.

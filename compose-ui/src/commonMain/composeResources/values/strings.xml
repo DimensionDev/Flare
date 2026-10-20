@@ -578,4 +578,7 @@
     <string name="fanbox_recommended_creators_title">Recommended creators</string>
     <string name="ugoira_play">Play animation</string>
     <string name="ugoira_loading">Loading animation</string>
+    <string name="timeline_load_missing_posts">Load missing posts</string>
+    <string name="timeline_loading_missing_posts">Loading missing posts…</string>
+    <string name="timeline_retry_missing_posts">Could not load posts. Tap to retry.</string>
 </resources>

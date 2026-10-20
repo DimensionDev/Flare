@@ -13,6 +13,7 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.ReferenceType
 import dev.dimension.flare.ui.model.UiTimelineV2
 import kotlin.time.Instant
+import kotlin.uuid.Uuid
 
 @Entity(
     indices = [
@@ -28,6 +29,7 @@ internal data class DbPagingTimeline(
     val pagingKey: String,
     val statusId: String,
     val sortId: Long,
+    val isGap: Boolean = false,
     @ColumnInfo(typeAffinity = ColumnInfo.BLOB)
     val message: UiTimelineV2.Message? = null,
     val messageRenderHash: Int? = message?.renderHash,
@@ -75,6 +77,10 @@ internal data class DbPagingKey(
     val pagingKey: String,
     val nextKey: String? = null,
     val prevKey: String? = null,
+    val generation: String = Uuid.random().toString(),
+    val revision: Long = 0,
+    val sourceHeads: String = "{}",
+    val accountKeys: String = "[]",
 )
 
 internal data class DbPagingTimelineWithStatus(

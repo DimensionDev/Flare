@@ -105,6 +105,18 @@ internal fun BehaviorScreen(
                     )
                 },
             )
+            SegmentedListItem(
+                onClick = { state.updateRememberHomeTimelinePosition(!appSettings.rememberHomeTimelinePosition) },
+                shapes = ListItemDefaults.item(),
+                content = { Text(stringResource(R.string.settings_remember_home_timeline_position)) },
+                supportingContent = { Text(stringResource(R.string.settings_remember_home_timeline_position_description)) },
+                trailingContent = {
+                    Switch(
+                        checked = appSettings.rememberHomeTimelinePosition,
+                        onCheckedChange = state::updateRememberHomeTimelinePosition,
+                    )
+                },
+            )
             SingleChoiceSettingsItem(
                 headline = {
                     Text(text = stringResource(id = R.string.settings_home_timeline_auto_refresh_interval))

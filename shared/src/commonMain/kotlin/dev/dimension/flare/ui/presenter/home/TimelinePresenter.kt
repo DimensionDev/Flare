@@ -1,14 +1,19 @@
 package dev.dimension.flare.ui.presenter.home
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.paging.ExperimentalPagingApi
+import androidx.paging.LoadState
+import androidx.paging.LoadType
 import androidx.paging.Pager
 import androidx.paging.PagingData
+import androidx.paging.RemoteMediator
 import androidx.paging.cachedIn
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.filter
@@ -22,11 +27,14 @@ import dev.dimension.flare.common.onEmpty
 import dev.dimension.flare.common.onError
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.common.toPagingState
+import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.model.TranslationDisplayOptions
 import dev.dimension.flare.data.datasource.microblog.offsetPagingConfig
 import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
+import dev.dimension.flare.data.datasource.microblog.paging.HomeTimelineRefreshSessions
 import dev.dimension.flare.data.datasource.microblog.paging.NotSupportRemoteLoader
+import dev.dimension.flare.data.datasource.microblog.paging.OffsetFromStartPagingKey
 import dev.dimension.flare.data.datasource.microblog.paging.OffsetFromStartPagingSource
 import dev.dimension.flare.data.datasource.microblog.paging.PostContextLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PostContextRemoteMediator
@@ -42,12 +50,12 @@ import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.model.tab.TimelineFilterConfig
 import dev.dimension.flare.data.model.tab.TimelinePostContent
 import dev.dimension.flare.data.model.tab.TimelinePostKind
+import dev.dimension.flare.data.model.tab.TimelinePresenterFactory
 import dev.dimension.flare.data.repository.KeywordFilterPattern
 import dev.dimension.flare.data.repository.LocalFilterRepository
 import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.data.repository.MxgaRepository
 import dev.dimension.flare.data.repository.SettingsRepository
-import dev.dimension.flare.data.repository.isMxgaMatch
 import dev.dimension.flare.data.translation.PreTranslationService
 import dev.dimension.flare.data.translation.TranslationSettingsSupport
 import dev.dimension.flare.di.koinInject
@@ -57,19 +65,28 @@ import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.asTimelinePostItem
 import dev.dimension.flare.ui.presenter.PresenterBase
+import dev.dimension.flare.ui.presenter.TimelineReadingState
 import dev.dimension.flare.web.shared.WebPresenter
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -90,6 +107,9 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
     private val appDataStore: AppDataStore by koinInject()
     private val preTranslationService: PreTranslationService by koinInject()
     private val settingsRepository: SettingsRepository by koinInject()
+    private val appDatabase: AppDatabase by koinInject()
+    private val timelinePresenterFactory: TimelinePresenterFactory by koinInject()
+    private val refreshSessions: HomeTimelineRefreshSessions by koinInject()
     private val mxgaRepository: MxgaRepository by koinInject()
     private val platformRegistry: PlatformRegistry by koinInject()
 
@@ -103,6 +123,13 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
     private val timelineTabItemId: String?
     private val isHomeTimeline: Boolean
     private val contextMediator = MutableStateFlow<PostContextRemoteMediator?>(null)
+    private val appScope: CoroutineScope by koinInject()
+    private val viewport = MutableStateFlow<TimelineViewport?>(null)
+    private val homeMediator = MutableStateFlow<TimelineRemoteMediator?>(null)
+    private val gapActivity = MutableStateFlow<Map<String, LoadState>>(emptyMap())
+    private val startupRefresh = MutableStateFlow(false)
+    internal var sourceActive: Flow<Boolean> = flowOf(true)
+    internal var sourceAccounts: Set<dev.dimension.flare.model.MicroBlogKey> = emptySet()
 
     private val timelineFilterConfigFlow: Flow<TimelineFilterConfig> by lazy {
         observeTimelineFilterConfig(
@@ -139,61 +166,108 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
     @OptIn(ExperimentalCoroutinesApi::class)
     internal fun createPager(scope: CoroutineScope): Flow<PagingData<UiTimelineV2>> =
         loader
-            .flatMapLatest { remoteLoader ->
-                contextMediator.value = null
-                when (remoteLoader) {
-                    is NotSupportRemoteLoader<UiTimelineV2> -> {
-                        PagingData.emptyFlow(isError = false)
-                    }
+            .combine(
+                if (isHomeTimeline) {
+                    settingsRepository.appSettings
+                        .map {
+                            it.rememberHomeTimelinePosition
+                        }.distinctUntilChanged()
+                } else {
+                    flowOf(false)
+                },
+            ) { source, enabled ->
+                source to
+                    enabled
+            }.combine(sourceActive) { (source, enabled), active -> (if (active) source else notSupported()) to enabled }
+            .combine(database.timelineResets) { source, _ -> source }
+            .flatMapLatest { (remoteLoader, enabled) ->
+                flow {
+                    coroutineScope {
+                        val sourceScope = this
+                        val visibility =
+                            combine(
+                                filterFlow,
+                                timelineFilterConfigFlow,
+                                mxgaEnabledFlow,
+                                mxgaRepository.snapshot,
+                            ) { filters, config, mxgaEnabled, snapshot ->
+                                TimelineVisibility(filters, config, mxgaEnabled, snapshot, platformRegistry)
+                            }.shareIn(sourceScope, SharingStarted.Lazily, replay = 1)
+                        viewport.value?.deactivate()
+                        viewport.value = null
+                        gapActivity.value = emptyMap()
+                        contextMediator.value = null
+                        homeMediator.value = null
+                        startupRefresh.value = false
+                        emitAll(
+                            when (remoteLoader) {
+                                is NotSupportRemoteLoader<UiTimelineV2> -> {
+                                    PagingData.emptyFlow(isError = false)
+                                }
 
-                    is CacheableRemoteLoader<UiTimelineV2> -> {
-                        cachePager(
-                            loader = remoteLoader,
-                        ).cachedIn(scope).flatMapLatest { pagingData ->
-                            translationSettingsFlow
-                                .map { translationDisplayOptions ->
-                                    withContext(PlatformDispatchers.IO) {
-                                        pagingData.map { item ->
-                                            item.toUi(translationDisplayOptions)
-                                        }
+                                is CacheableRemoteLoader<UiTimelineV2> -> {
+                                    cachePager(
+                                        loader = remoteLoader,
+                                        scope = sourceScope,
+                                        rememberPosition = isHomeTimeline && timelineTabItemId != null && enabled,
+                                    ).cachedIn(sourceScope).flatMapLatest { pagingData ->
+                                        translationSettingsFlow
+                                            .combine(gapActivity) { translationDisplayOptions, activity ->
+                                                withContext(PlatformDispatchers.IO) {
+                                                    pagingData.map { item ->
+                                                        val ui = item.toUi(translationDisplayOptions)
+                                                        if (ui is UiTimelineV2.Gap) {
+                                                            val mediator = homeMediator.value
+                                                            ui.copy(
+                                                                loading = activity[ui.stableItemKey] is LoadState.Loading,
+                                                                failed = activity[ui.stableItemKey] is LoadState.Error,
+                                                                onActivate = { onInserted ->
+                                                                    loadGap(ui, mediator, sourceScope, onInserted)
+                                                                },
+                                                            )
+                                                        } else {
+                                                            ui
+                                                        }
+                                                    }
+                                                }
+                                            }
                                     }
                                 }
-                        }
-                    }
 
-                    else -> {
-                        networkPager(
-                            loader = remoteLoader,
-                        ).cachedIn(scope)
-                    }
-                }.flatMapLatest { pager ->
-                    combine(
-                        filterFlow,
-                        timelineFilterConfigFlow,
-                        mxgaEnabledFlow,
-                        mxgaRepository.snapshot,
-                    ) { filterList, timelineFilterConfig, mxgaEnabled, mxgaSnapshot ->
-                        pager
-                            .filter { item ->
-                                item.matchesKeywordFilters(filterList) &&
-                                    item.matchesTimelineFilter(timelineFilterConfig) &&
-                                    (!mxgaEnabled || !item.isMxgaMatch(mxgaSnapshot, platformRegistry))
-                            }.map {
-                                transform(it)
-                            }
+                                else -> {
+                                    networkPager(
+                                        loader = remoteLoader,
+                                    ).cachedIn(sourceScope)
+                                }
+                            }.flatMapLatest { pager ->
+                                visibility.map { visible ->
+                                    pager
+                                        .filter { visible.isVisible(it) && (enabled || it !is UiTimelineV2.Gap) }
+                                        .map {
+                                            if (it is UiTimelineV2.Gap) it else transform(it)
+                                        }
+                                }
+                            },
+                        )
                     }
                 }
             }.catch {
                 emitAll(PagingData.emptyFlow(isError = true))
-            }
+            }.cachedIn(scope)
 
-    private fun cachePager(loader: CacheableRemoteLoader<UiTimelineV2>): Flow<PagingData<TimelinePageItem>> =
-        run {
+    private fun cachePager(
+        loader: CacheableRemoteLoader<UiTimelineV2>,
+        scope: CoroutineScope,
+        rememberPosition: Boolean,
+    ): Flow<PagingData<TimelinePageItem>> =
+        flow {
             val allowLongText = allowLongTextTranslationDisplay(loader)
             val pageCache = TimelineDbPageCache()
             val notifyError: (Throwable) -> Unit = { e ->
                 if (e is LoginExpiredException) {
-                    inAppNotification.onError(Message.LoginExpired, e)
+                    scope.launch(Dispatchers.Main.immediate) {
+                        inAppNotification.onError(Message.LoginExpired, e)
+                    }
                 }
             }
             val mediator =
@@ -211,27 +285,141 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
                         allowLongText = allowLongText,
                         preTranslationService = preTranslationService,
                         notifyError = notifyError,
+                        retainHistory = if (isHomeTimeline) rememberPosition else null,
+                        retainedHome = { retainedHomeMediator(loader, allowLongText, notifyError) },
+                        accountKeys = sourceAccounts,
+                        refreshSession =
+                            if (isHomeTimeline && timelineTabItemId != null) {
+                                refreshSessions.forTimeline(timelineTabItemId, loader.pagingKey)
+                            } else {
+                                null
+                            },
                         refreshOnInitialize = {
-                            shouldRefreshTimelineOnInitialize(isHomeTimeline) {
-                                settingsRepository.appSettings.first().refreshHomeTimelineOnLaunch
-                            }
+                            !rememberPosition &&
+                                shouldRefreshTimelineOnInitialize(isHomeTimeline) {
+                                    settingsRepository.appSettings.first().refreshHomeTimelineOnLaunch
+                                }
                         },
                     )
                 }
-            Pager(
-                config = offsetPagingConfig,
-                remoteMediator = mediator,
-                pagingSourceFactory = {
-                    OffsetFromStartPagingSource(
-                        TimelineDbPageLoader(
-                            database = database,
-                            pagingKey = loader.pagingKey,
-                            pageCache = pageCache,
-                        ),
+            homeMediator.value = mediator
+            val reading =
+                if (rememberPosition) {
+                    TimelineViewport(
+                        appDataStore.homeTimelinePreferences,
+                        loader.pagingKey,
+                        checkNotNull(timelineTabItemId),
+                        appScope,
+                        canSave = { sourceActive.first() && settingsRepository.appSettings.first().rememberHomeTimelinePosition },
                     )
-                },
-            ).flow
+                } else {
+                    null
+                }
+            viewport.value = reading
+            startupRefresh.value = reading != null && settingsRepository.appSettings.first().refreshHomeTimelineOnLaunch
+            var source: OffsetFromStartPagingSource<TimelinePageItem>? = null
+            try {
+                emitAll(
+                    Pager(
+                        config = offsetPagingConfig,
+                        remoteMediator =
+                            if (reading ==
+                                null
+                            ) {
+                                mediator
+                            } else {
+                                object : RemoteMediator<OffsetFromStartPagingKey, TimelinePageItem>() {
+                                    override suspend fun initialize(): InitializeAction =
+                                        mediator.initialize().also {
+                                            if (it == InitializeAction.LAUNCH_INITIAL_REFRESH) startupRefresh.value = false
+                                        }
+
+                                    override suspend fun load(
+                                        loadType: LoadType,
+                                        state: androidx.paging.PagingState<OffsetFromStartPagingKey, TimelinePageItem>,
+                                    ): MediatorResult {
+                                        reading.awaitRestoration()
+                                        return mediator.load(loadType, state)
+                                    }
+                                }
+                            },
+                        pagingSourceFactory = {
+                            OffsetFromStartPagingSource(TimelineDbPageLoader(database, loader.pagingKey, pageCache)).also { source = it }
+                        },
+                    ).flow,
+                )
+            } finally {
+                source?.invalidate()
+            }
         }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private suspend fun retainedHomeMediator(
+        loader: CacheableRemoteLoader<UiTimelineV2>,
+        allowLongText: Boolean,
+        notifyError: (Throwable) -> Unit,
+    ): TimelineRemoteMediator? {
+        if (!settingsRepository.appSettings.first().rememberHomeTimelinePosition) return null
+        // Resolve shared-cache ownership only on a remote write; ordinary cache reads never wait for it.
+        return settingsRepository.homeTimelineTabs
+            .combine(appDatabase.accountDao().allAccounts()) { tabs, accounts ->
+                tabs to accounts.filter { platformRegistry.get(it.platformId) != null }.map { it.account_key }.toSet()
+            }.mapLatest { (tabs, accounts) ->
+                for (tab in tabs.filter { it.enabled }) {
+                    try {
+                        val home = timelinePresenterFactory.create(tab, isHomeTimeline = true)
+                        if (!accounts.containsAll(home.sourceAccounts)) continue
+                        val source = home.loader.first()
+                        if (source is CacheableRemoteLoader<*> && source.pagingKey == loader.pagingKey) {
+                            return@mapLatest TimelineRemoteMediator(
+                                loader = loader,
+                                database = database,
+                                allowLongText = allowLongText,
+                                preTranslationService = preTranslationService,
+                                notifyError = notifyError,
+                                retainHistory = true,
+                                accountKeys = home.sourceAccounts,
+                                refreshSession = refreshSessions.forTimeline(tab.id, loader.pagingKey),
+                            )
+                        }
+                    } catch (exception: Exception) {
+                        if (exception is CancellationException) throw exception
+                        // A broken Home configuration must not block unrelated timelines.
+                    }
+                }
+                null
+            }.first()
+    }
+
+    private fun loadGap(
+        gap: UiTimelineV2.Gap,
+        mediator: TimelineRemoteMediator?,
+        scope: CoroutineScope,
+        onInserted: (List<String>) -> Unit,
+    ) {
+        scope.launch(Dispatchers.Main.immediate) {
+            if (gapActivity.value[gap.stableItemKey] is LoadState.Loading) return@launch
+            if (mediator == null || mediator !== homeMediator.value) {
+                onInserted(emptyList())
+                return@launch
+            }
+            gapActivity.update { it + (gap.stableItemKey to LoadState.Loading) }
+            try {
+                val result = withContext(PlatformDispatchers.IO) { mediator.loadGap(gap) }
+                onInserted(result.insertedKeys)
+                gapActivity.update {
+                    if (result.failure != null) it + (gap.stableItemKey to LoadState.Error(result.failure)) else it - gap.stableItemKey
+                }
+            } catch (error: CancellationException) {
+                onInserted(emptyList())
+                if (mediator === homeMediator.value) gapActivity.update { it - gap.stableItemKey }
+                throw error
+            } catch (error: Exception) {
+                onInserted(emptyList())
+                gapActivity.update { it + (gap.stableItemKey to LoadState.Error(error)) }
+            }
+        }
+    }
 
     protected open suspend fun transform(data: UiTimelineV2): UiTimelineV2 = options.transform(data)
 
@@ -254,6 +442,35 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
         val contextLoadStates by remember {
             contextMediator.flatMapLatest { it?.loadStates ?: flowOf(null) }
         }.collectAsState(null)
+        val reading by viewport.collectAsState()
+        val target by remember(reading) { reading?.target ?: flowOf(null) }.collectAsState(null)
+        val newContent by remember(reading) { reading?.hasNewContent ?: flowOf(false) }.collectAsState(false)
+        val atLatest by remember(reading) { reading?.isAtLatest ?: flowOf(true) }.collectAsState(true)
+        val refreshOnLaunch by startupRefresh.collectAsState()
+        LaunchedEffect(reading) { reading?.restore() }
+        LaunchedEffect(reading, target, items.itemSnapshotList, items.loadState.source) {
+            val source = items.loadState.source
+            if (source.refresh is LoadState.NotLoading) {
+                reading
+                    ?.cacheChanged(
+                        items.itemSnapshotList.items.map { it.stableItemKey },
+                        endOfCache = source.append.endOfPaginationReached,
+                        firstPostKey =
+                            items.itemSnapshotList.items
+                                .firstOrNull { !it.isPaginationGap }
+                                ?.stableItemKey,
+                    )?.let { items[it] }
+            }
+        }
+        LaunchedEffect(reading, target, refreshOnLaunch) {
+            if (reading != null && refreshOnLaunch) {
+                reading?.awaitRestoration()
+                if (startupRefresh.compareAndSet(expect = true, update = false)) items.refresh()
+            }
+        }
+        DisposableEffect(reading) {
+            onDispose { reading?.savePosition() }
+        }
         val retry =
             remember(items) {
                 {
@@ -264,6 +481,32 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
         val listState = items.toPagingState(contextLoadStates, retry)
         return object : TimelineState {
             override val listState = listState
+            override val reading =
+                reading?.let { value ->
+                    object : TimelineReadingState {
+                        override val restorePosition = target
+                        override val hasNewContent = newContent
+                        override val isAtLatest = atLatest
+
+                        override fun viewportChanged(
+                            index: Int,
+                            offset: Double,
+                        ) = value.viewportChanged(index, offset)
+
+                        override fun positionChanged(
+                            index: Int,
+                            offset: Double,
+                        ) = value.positionChanged(index, offset)
+
+                        override fun savePosition() = value.savePosition()
+
+                        override fun restorationFinished() = value.restorationFinished(target)
+
+                        override fun restoreCurrentPosition() = value.restoreCurrentPosition()
+
+                        override fun showLatest() = value.showLatest()
+                    }
+                }
 
             override fun refreshAsync() {
                 scope.launch {
@@ -292,6 +535,7 @@ internal suspend fun shouldRefreshTimelineOnInitialize(
 
 @Immutable
 public interface TimelineState {
+    public val reading: TimelineReadingState? get() = null
     public val listState: PagingState<UiTimelineV2>
 
     public fun refreshAsync()
@@ -300,7 +544,7 @@ public interface TimelineState {
 }
 
 internal fun UiTimelineV2.matchesKeywordFilters(filters: List<KeywordFilterPattern>): Boolean =
-    if (filters.isEmpty()) {
+    if (this is UiTimelineV2.Gap || filters.isEmpty()) {
         true
     } else {
         !filters.any { filter ->

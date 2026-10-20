@@ -744,18 +744,24 @@ private val LocalScrollToTopRegistry =
 internal fun RegisterTabCallback(
     lazyListState: LazyStaggeredGridState,
     onRefresh: () -> Unit,
+    onScrollToTop: (() -> Unit)? = null,
+    canRefreshAtTop: Boolean = true,
 ) {
     val onRefreshState by rememberUpdatedState(onRefresh)
+    val onScrollToTopState by rememberUpdatedState(onScrollToTop)
+    val canRefreshAtTopState by rememberUpdatedState(canRefreshAtTop)
     val tabState = LocalScrollToTopRegistry.current
     if (tabState != null) {
         val scope = rememberCoroutineScope()
         val callback: () -> Unit =
             remember(lazyListState, scope) {
                 {
-                    if (lazyListState.firstVisibleItemIndex == 0 &&
+                    if (canRefreshAtTopState && lazyListState.firstVisibleItemIndex == 0 &&
                         lazyListState.firstVisibleItemScrollOffset == 0
                     ) {
                         onRefreshState.invoke()
+                    } else if (onScrollToTopState != null) {
+                        onScrollToTopState?.invoke()
                     } else {
                         scope.launch {
                             if (lazyListState.firstVisibleItemIndex > 20) {

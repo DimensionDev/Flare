@@ -63,6 +63,7 @@ private const val TIMELINE_WITH_STATUS_QUERY =
         "DbPagingTimeline.pagingKey AS pagingKey, " +
         "DbPagingTimeline.statusId AS statusId, " +
         "DbPagingTimeline.sortId AS sortId, " +
+        "DbPagingTimeline.isGap AS isGap, " +
         "DbPagingTimeline.message AS message, " +
         "DbPagingTimeline.notificationKey AS notificationKey, " +
         "DbPagingTimeline.messageRenderHash AS messageRenderHash, " +
@@ -90,8 +91,28 @@ internal suspend fun PagingTimelineDao.getTimelinePageInCurrentTransaction(
     pagingKey: String,
     offset: Int,
     limit: Int,
+): List<DbPagingTimelineWithStatus> = hydrateTimelineRows(pagingKey, getTimelineRootRows(pagingKey, offset, limit))
+
+internal suspend fun PagingTimelineDao.getTimelineItemsInCurrentTransaction(
+    pagingKey: String,
+    timelineIds: List<String>,
 ): List<DbPagingTimelineWithStatus> {
-    val roots = getTimelineRootRows(pagingKey, offset, limit)
+    val roots =
+        timelineIds
+            .chunked(QUERY_BATCH_SIZE)
+            .flatMap { getTimelineRootRowsByIds(it) }
+            .associateBy { it.timeline._id }
+    val orderedRoots =
+        timelineIds.map { id ->
+            roots.getValue(id).also { check(it.timeline.pagingKey == pagingKey) }
+        }
+    return hydrateTimelineRows(pagingKey, orderedRoots)
+}
+
+private suspend fun PagingTimelineDao.hydrateTimelineRows(
+    pagingKey: String,
+    roots: List<DbTimelineRootRow>,
+): List<DbPagingTimelineWithStatus> {
     if (roots.isEmpty()) {
         return emptyList()
     }
@@ -247,6 +268,10 @@ internal interface PagingTimelineDao {
         limit: Int,
     ): List<DbTimelineRootRow>
 
+    // An additional pagingKey predicate can make SQLite scan the whole timeline instead of seeking its primary keys.
+    @Query(TIMELINE_WITH_STATUS_QUERY + "WHERE DbPagingTimeline._id IN (:timelineIds)")
+    suspend fun getTimelineRootRowsByIds(timelineIds: List<String>): List<DbTimelineRootRow>
+
     @Query(
         "SELECT * FROM status_reference " +
             "WHERE statusId IN (:statusIds) " +
@@ -301,6 +326,19 @@ internal interface PagingTimelineDao {
         offset: Int,
         limit: Int,
     ): List<DbTimelinePageIdentity>
+
+    @Query(
+        "SELECT COUNT(*) FROM DbPagingTimeline " +
+            "INNER JOIN DbStatus ON DbStatus.id = DbPagingTimeline.statusId " +
+            "WHERE DbPagingTimeline.pagingKey = :pagingKey AND DbPagingTimeline.sortId <= (" +
+            "SELECT anchor.sortId FROM DbPagingTimeline AS anchor " +
+            "INNER JOIN DbStatus AS status ON status.id = anchor.statusId " +
+            "WHERE anchor.pagingKey = :pagingKey AND anchor._id = :timelineId)",
+    )
+    suspend fun getTimelineSizeThrough(
+        pagingKey: String,
+        timelineId: String,
+    ): Int
 
     @Transaction
     @RewriteQueriesToDropUnusedColumns
@@ -434,6 +472,47 @@ internal interface PagingTimelineDao {
     @Query("SELECT MIN(sortId) FROM DbPagingTimeline WHERE pagingKey = :pagingKey")
     suspend fun getMinSortId(pagingKey: String): Long?
 
+    @Query("SELECT MAX(sortId) FROM DbPagingTimeline WHERE pagingKey = :pagingKey AND (:before IS NULL OR sortId < :before)")
+    suspend fun getPreviousSortId(
+        pagingKey: String,
+        before: Long?,
+    ): Long?
+
+    @Query("SELECT * FROM DbPagingTimeline WHERE pagingKey = :pagingKey AND _id = :id LIMIT 1")
+    suspend fun getRow(
+        pagingKey: String,
+        id: String,
+    ): DbPagingTimeline?
+
+    @Query(
+        "SELECT * FROM DbPagingTimeline WHERE pagingKey = :pagingKey AND sortId > " +
+            "(SELECT sortId FROM DbPagingTimeline WHERE pagingKey = :pagingKey AND _id = :id) ORDER BY sortId LIMIT 1",
+    )
+    suspend fun getRowAfter(
+        pagingKey: String,
+        id: String,
+    ): DbPagingTimeline?
+
+    @Query("SELECT * FROM DbPagingTimeline WHERE pagingKey = :pagingKey AND isGap = 0 ORDER BY sortId LIMIT 1")
+    suspend fun getFirstRow(pagingKey: String): DbPagingTimeline?
+
+    @Query("SELECT pagingKey FROM DbPagingKey WHERE accountKeys != '[]'")
+    suspend fun getAccountTimelineKeys(): List<String>
+
+    @Query("SELECT accountKeys FROM DbPagingKey WHERE pagingKey = :pagingKey")
+    suspend fun getAccountKeys(pagingKey: String): String?
+
+    @Query("DELETE FROM DbStatus WHERE id IN (SELECT statusId FROM DbPagingTimeline WHERE pagingKey = :pagingKey AND isGap = 1)")
+    suspend fun deleteGaps(pagingKey: String)
+
+    @Transaction
+    suspend fun clearHomeTimeline(pagingKey: String) {
+        deleteGaps(pagingKey)
+        deletePresentationReferences(pagingKey)
+        delete(pagingKey)
+        deletePagingKey(pagingKey)
+    }
+
     @Transaction
     @Query(
         TIMELINE_WITH_STATUS_QUERY +
@@ -534,6 +613,28 @@ internal interface PagingTimelineDao {
 
     @Query("SELECT * FROM DbPagingKey WHERE pagingKey = :pagingKey LIMIT 1")
     suspend fun getPagingKey(pagingKey: String): DbPagingKey?
+
+    // Continuations can contain buffered mixed-source posts; only append needs to materialize them.
+    @Query(
+        "SELECT pagingKey, NULL AS nextKey, prevKey, generation, revision, sourceHeads, accountKeys FROM DbPagingKey WHERE pagingKey = :pagingKey",
+    )
+    suspend fun getPagingKeyMetadata(pagingKey: String): DbPagingKey?
+
+    @Query("SELECT nextKey FROM DbPagingKey WHERE pagingKey = :pagingKey")
+    suspend fun getNextKey(pagingKey: String): String?
+
+    @Query(
+        "UPDATE DbPagingKey SET nextKey = CASE WHEN :keepNextKey THEN nextKey ELSE :nextKey END, " +
+            "prevKey = :prevKey, revision = revision + 1, sourceHeads = :sourceHeads, accountKeys = :accountKeys WHERE pagingKey = :pagingKey",
+    )
+    suspend fun updatePage(
+        pagingKey: String,
+        nextKey: String?,
+        keepNextKey: Boolean,
+        prevKey: String?,
+        sourceHeads: String,
+        accountKeys: String,
+    )
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertPagingKey(pagingKey: DbPagingKey)

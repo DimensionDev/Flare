@@ -20,10 +20,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,14 +40,17 @@ import dev.dimension.flare.LocalWindowPadding
 import dev.dimension.flare.RegisterTabCallback
 import dev.dimension.flare.Res
 import dev.dimension.flare.common.isRefreshing
+import dev.dimension.flare.data.datastore.model.TimelineAutoRefreshInterval
 import dev.dimension.flare.data.model.tab.UiTimelineTabItem
 import dev.dimension.flare.data.model.tab.resolveTimelineAppearance
 import dev.dimension.flare.edit_tab_title
 import dev.dimension.flare.home_timeline_new_toots
+import dev.dimension.flare.home_timeline_view_latest
 import dev.dimension.flare.refresh
 import dev.dimension.flare.ui.common.plus
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScrollBar
+import dev.dimension.flare.ui.component.LocalAppSettings
 import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.TabIcon
 import dev.dimension.flare.ui.component.floatingToolbarVerticalNestedScroll
@@ -62,6 +67,7 @@ import io.github.composefluent.component.AccentButton
 import io.github.composefluent.component.ProgressBar
 import io.github.composefluent.component.SubtleButton
 import io.github.composefluent.component.Text
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 import org.jetbrains.compose.resources.pluralStringResource
@@ -76,7 +82,25 @@ internal fun DeckTimelineScreen(
         remember { HomeTabItemPresenter(id = id) }.invoke()
     }
     tabState.tabItem.onSuccess { tabItem ->
-        val timelineState = rememberTimelineItemPresenterWithLazyListState(tabItem)
+        val timelineState = rememberTimelineItemPresenterWithLazyListState(tabItem, isHomeTimeline = true)
+        val latestState by rememberUpdatedState(timelineState)
+        val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
+        DisposableEffect(lifecycleOwner) {
+            val observer =
+                androidx.lifecycle.LifecycleEventObserver { _, event ->
+                    if (event == androidx.lifecycle.Lifecycle.Event.ON_STOP) latestState.reading?.savePosition()
+                }
+            lifecycleOwner.lifecycle.addObserver(observer)
+            onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+        }
+        val interval = LocalAppSettings.current.homeTimelineAutoRefreshInterval
+        LaunchedEffect(tabItem.id, interval) {
+            if (interval == TimelineAutoRefreshInterval.DISABLED) return@LaunchedEffect
+            while (true) {
+                delay(interval.minutes * 60_000L)
+                if (!latestState.isRefreshing) latestState.refreshSuspend()
+            }
+        }
         val isTopBarExpanded =
             remember(tabItem.id) { androidx.compose.runtime.mutableStateOf(true) }
         val timelineAppearance = LocalTimelineAppearance.current
@@ -238,6 +262,8 @@ internal fun TimelineContent(
     RegisterTabCallback(
         state.lazyListState,
         onRefresh = state::refreshSync,
+        onScrollToTop = state.reading?.let { { it.showLatest() } },
+        canRefreshAtTop = state.reading?.isAtLatest != false,
     )
     if (onScrollToTop != null) {
         LaunchedEffect(state.lazyListState) {
@@ -273,7 +299,7 @@ internal fun TimelineContent(
                         header.invoke()
                     }
                 }
-                status(state.listState)
+                status(state.listState, onLoadGap = state::loadGap)
             }
         }
         AnimatedVisibility(
@@ -302,9 +328,11 @@ internal fun TimelineContent(
         ) {
             AccentButton(
                 onClick = {
-                    state.onNewTootsShown()
-                    scope.launch {
-                        state.lazyListState.scrollToItem(0)
+                    if (state.reading != null) {
+                        state.reading?.showLatest()
+                    } else {
+                        state.onNewTootsShown()
+                        scope.launch { state.lazyListState.scrollToItem(0) }
                     }
                 },
             ) {
@@ -316,11 +344,15 @@ internal fun TimelineContent(
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
                     text =
-                        pluralStringResource(
-                            Res.plurals.home_timeline_new_toots,
-                            state.newPostsCount,
-                            state.newPostsCount,
-                        ),
+                        if (state.reading != null) {
+                            stringResource(Res.string.home_timeline_view_latest)
+                        } else {
+                            pluralStringResource(
+                                Res.plurals.home_timeline_new_toots,
+                                state.newPostsCount,
+                                state.newPostsCount,
+                            )
+                        },
                 )
             }
         }

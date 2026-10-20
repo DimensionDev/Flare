@@ -7,7 +7,7 @@ import androidx.room3.RoomDatabase
 import androidx.room3.RoomDatabaseConstructor
 import androidx.room3.withWriteTransaction
 
-internal const val CACHE_DATABASE_VERSION = 48
+internal const val CACHE_DATABASE_VERSION = 51
 
 @Database(
     entities = [
@@ -44,6 +44,8 @@ internal const val CACHE_DATABASE_VERSION = 48
 )
 @ConstructedBy(CacheDatabaseConstructor::class)
 internal abstract class CacheDatabase : RoomDatabase() {
+    val timelineResets = kotlinx.coroutines.flow.MutableStateFlow(0)
+
     abstract fun emojiDao(): dev.dimension.flare.data.database.cache.dao.EmojiDao
 
     abstract fun statusReferenceDao(): dev.dimension.flare.data.database.cache.dao.StatusReferenceDao
@@ -59,6 +61,19 @@ internal abstract class CacheDatabase : RoomDatabase() {
     abstract fun listDao(): dev.dimension.flare.data.database.cache.dao.ListDao
 
     abstract fun translationDao(): dev.dimension.flare.data.database.cache.dao.TranslationDao
+}
+
+internal suspend fun CacheDatabase.clearHomeTimelinesForAccount(accountKey: dev.dimension.flare.model.MicroBlogKey) {
+    connect {
+        val dao = pagingTimelineDao()
+        dao
+            .getAccountTimelineKeys()
+            .filter {
+                accountKey in
+                    kotlinx.serialization.json.Json
+                        .decodeFromString<Set<dev.dimension.flare.model.MicroBlogKey>>(dao.getAccountKeys(it) ?: "[]")
+            }.forEach { dao.clearHomeTimeline(it) }
+    }
 }
 
 // The Room compiler generates the `actual` implementations.

@@ -23,6 +23,8 @@ public sealed class UiTimelineV2 {
         itemKey
     }
 
+    public val isPaginationGap: Boolean get() = this is Gap
+
     public abstract val searchText: String?
     public abstract val statusKey: MicroBlogKey
     public abstract val createdAt: UiDateTime
@@ -41,6 +43,7 @@ public sealed class UiTimelineV2 {
             is User -> "user"
             is UserList -> "user_list"
             is Message -> "message"
+            is Gap -> "gap"
         }
 
     protected fun calculateStableItemKey(): String {
@@ -61,6 +64,27 @@ public sealed class UiTimelineV2 {
         val identity = notificationKey ?: statusKey
         return (account + listOf(kind, identity.id, identity.host))
             .joinToString(separator = "") { "${it.length}:$it" }
+    }
+
+    /** A persisted continuation between two parts of the same cached timeline. */
+    @Serializable
+    @Immutable
+    public data class Gap(
+        override val statusKey: MicroBlogKey,
+        override val createdAt: UiDateTime,
+        val nextKey: String,
+        val lowerBound: Map<String, List<String>> = emptyMap(),
+        val revision: Long = 0,
+        @Transient override val itemKey: String? = null,
+        @Transient val loading: Boolean = false,
+        @Transient val failed: Boolean = false,
+        @Transient val onActivate: (((List<String>) -> Unit) -> Unit)? = null,
+    ) : UiTimelineV2() {
+        override val accountType: AccountType = AccountType.Guest
+        override val searchText: String? = null
+
+        @Transient override val stableItemKey: String = calculateStableItemKey()
+        override val renderHash: Int get() = listOf(statusKey, revision, loading, failed).hashCode()
     }
 
     @Serializable
@@ -463,6 +487,7 @@ internal fun UiTimelineV2.withItemKey(itemKey: String?): UiTimelineV2 {
     return when (this) {
         is UiTimelineV2.Feed -> copy(itemKey = itemKey)
         is UiTimelineV2.Message -> copy(itemKey = itemKey)
+        is UiTimelineV2.Gap -> copy(itemKey = itemKey)
         is UiTimelineV2.Post -> copy(itemKey = itemKey)
         is UiTimelineV2.TimelinePostItem -> copy(itemKey = itemKey)
         is UiTimelineV2.User -> copy(itemKey = itemKey)

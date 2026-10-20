@@ -16,6 +16,7 @@ internal class AntennasTimelineRemoteMediator(
     private val accountKey: MicroBlogKey,
     private val id: String,
 ) : CacheableRemoteLoader<UiTimelineV2> {
+    override val canJoinTimeline: Boolean = true
     override val pagingKey = "antennas_${id}_$accountKey"
 
     override suspend fun load(

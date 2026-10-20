@@ -12,6 +12,7 @@ struct TimelineScreen: View {
     @Environment(\.timelineAppearance) private var timelineAppearance
     @Environment(\.appSettings) private var appSettings
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var canComposePresenter = KotlinPresenter(presenter: CanComposePresenter())
 
     init(tabItem: UiTimelineTabItem, allowGalleryMode: Bool = false, isHomeTimeline: Bool = false) {
@@ -36,6 +37,16 @@ struct TimelineScreen: View {
             allowGalleryMode: allowGalleryMode
         )
         .environment(\.timelineAppearance, tabItem.resolveTimelineAppearance(base: timelineAppearance))
+        .environment(\.timelineReading, presenter.state.reading)
+        .overlay(alignment: .top) {
+            if presenter.state.reading?.hasNewContent == true {
+                Button("home_timeline_view_latest") { presenter.state.reading?.showLatest() }
+                    .buttonStyle(.borderedProminent)
+                    .padding(.top, 8)
+                    .transition(reduceMotion ? .opacity : .move(edge: .top).combined(with: .opacity))
+            }
+        }
+        .animation(.easeInOut(duration: 0.2), value: presenter.state.reading?.hasNewContent)
         .refreshable {
             try? await presenter.state.refreshSuspend()
         }
@@ -43,6 +54,11 @@ struct TimelineScreen: View {
             try? await autoRefresh()
         }
         .toolbar {
+            if let reading = presenter.state.reading, !reading.isAtLatest {
+                ToolbarItem(placement: .primaryAction) {
+                    Button("home_timeline_view_latest") { reading.showLatest() }
+                }
+            }
             ToolbarItem(placement: .primaryAction) {
                 Button {
                     presenter.state.refreshSync()

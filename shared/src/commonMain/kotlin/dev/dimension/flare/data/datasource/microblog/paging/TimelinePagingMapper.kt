@@ -96,6 +96,7 @@ internal object TimelinePagingMapper {
                     pagingKey = pagingKey,
                     statusId = rootStatus.data.id,
                     sortId = sortId ?: SnowflakeIdGenerator.nextId(),
+                    isGap = data is UiTimelineV2.Gap,
                     message = presentation?.message,
                     notificationKey = presentation?.notificationKey,
                     _id = timelineId,
@@ -463,7 +464,7 @@ internal object TimelinePagingMapper {
 
     private fun UiTimelineV2.canonicalizeProfiles(canonicalProfiles: MutableMap<MicroBlogKey, UiProfile>): UiTimelineV2 =
         when (this) {
-            is UiTimelineV2.Feed -> {
+            is UiTimelineV2.Gap, is UiTimelineV2.Feed -> {
                 this
             }
 
@@ -565,7 +566,7 @@ internal object TimelinePagingMapper {
 
     private fun UiTimelineV2.collectProfiles(collect: (UiProfile) -> Unit) {
         when (this) {
-            is UiTimelineV2.Feed -> {}
+            is UiTimelineV2.Gap, is UiTimelineV2.Feed -> {}
 
             is UiTimelineV2.Message -> {
                 user?.let(collect)

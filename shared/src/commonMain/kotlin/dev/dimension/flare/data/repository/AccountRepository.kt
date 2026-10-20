@@ -12,6 +12,7 @@ import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.database.app.model.DbAccount
 import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.database.cache.clearHomeTimelinesForAccount
 import dev.dimension.flare.data.database.cache.connect
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datastore.AppDataStore
@@ -205,6 +206,8 @@ internal class AccountRepository internal constructor(
                     datasource.close()
                 }
             }
+            appDatabase.accountDao().delete(accountKey)
+            cacheDatabase.clearHomeTimelinesForAccount(accountKey)
             cacheDatabase.pagingTimelineDao().deleteByAccountType(
                 AccountType.Specific(accountKey),
             )
@@ -220,7 +223,6 @@ internal class AccountRepository internal constructor(
             cacheDatabase.messageDao().clearMessageTimeline(
                 AccountType.Specific(accountKey),
             )
-            appDatabase.accountDao().delete(accountKey)
         }
 
     internal fun getFlow(accountKey: MicroBlogKey): Flow<UiState<UiAccount>> =

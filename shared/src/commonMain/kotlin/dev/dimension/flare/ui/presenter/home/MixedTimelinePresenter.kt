@@ -61,7 +61,7 @@ public class MixedTimelinePresenter(
                     ?.children
                     ?.filter { it.enabled }
             }.distinctUntilChanged { old, new ->
-                old.orEmpty().map { it.id } == new.orEmpty().map { it.id }
+                old.orEmpty().map { it.contentSourceKey } == new.orEmpty().map { it.contentSourceKey }
             }.flatMapLatest { tabs ->
                 if (tabs == null) {
                     if (fallbackSubTimelinePresenter.isEmpty()) {
@@ -121,7 +121,8 @@ public class SystemHomeMixedTimelinePresenter(
                 tabs
                     .filterNot { it.isSystemHomeMixedTimeline }
                     .filter { it.enabled }
-            }.distinctUntilChangedByTabIds()
+                    .sortedBy { it.id }
+            }.distinctUntilChangedBySource()
             .flatMapLatest { tabs ->
                 if (tabs.isEmpty()) {
                     flowOf(emptyList())
@@ -146,7 +147,7 @@ public class SystemHomeMixedTimelinePresenter(
             }
 }
 
-private fun Flow<List<UiTimelineTabItem>>.distinctUntilChangedByTabIds(): Flow<List<UiTimelineTabItem>> =
+private fun Flow<List<UiTimelineTabItem>>.distinctUntilChangedBySource(): Flow<List<UiTimelineTabItem>> =
     distinctUntilChanged { old, new ->
-        old.map { it.id } == new.map { it.id }
+        old.map { it.contentSourceKey } == new.map { it.contentSourceKey }
     }

@@ -41,6 +41,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromHexString
 import kotlinx.serialization.encodeToHexString
+import kotlinx.serialization.json.Json
 import kotlinx.serialization.protobuf.ProtoBuf
 import org.koin.core.annotation.Single
 import kotlin.native.HiddenFromObjC
@@ -85,6 +86,23 @@ public sealed interface UiTimelineTabItem {
     public val enabled: Boolean
     public val filterConfig: TimelineFilterConfig
     public val loaderKey: String
+    public val contentSourceKey: String
+        get() =
+            when (this) {
+                is UiSourceTimelineTabItem -> {
+                    source?.let { Json.encodeToString(listOf(it.specId, it.data)) } ?: loaderKey
+                }
+
+                is UiGroupTimelineTabItem -> {
+                    Json.encodeToString(
+                        listOf(mergePolicy.name) +
+                            children
+                                .filter { it.enabled }
+                                .let { if (isSystemHomeMixedTimeline) it.sortedBy { child -> child.id } else it }
+                                .map { it.contentSourceKey },
+                    )
+                }
+            }
 
     // for iOS and Compose call sites
     public val key: String get() = id
@@ -688,6 +706,20 @@ internal class TimelineResolver(
                 }
             }
 
+    internal fun accountKeys(item: UiTimelineTabItem): Set<MicroBlogKey> =
+        when (item) {
+            is UiSourceTimelineTabItem -> {
+                setOfNotNull(item.source?.let(::resolveAccountKey))
+            }
+
+            is UiGroupTimelineTabItem -> {
+                item.children
+                    .filter { it.enabled }
+                    .flatMap(::accountKeys)
+                    .toSet()
+            }
+        }
+
     private fun resolveSpec(source: TimelineSourceRef): TimelineSpec<out TimelineSpec.Data> =
         specs[source.specId]
             ?: throw IllegalArgumentException("No timeline spec found for source ID: ${source.specId}")
@@ -719,19 +751,38 @@ private fun <T : TimelineSpec.Data> TimelineTarget<T>.toSource(
 @Single
 internal class TimelinePresenterFactory(
     private val timelineResolver: TimelineResolver,
+    private val settingsRepository: dev.dimension.flare.data.repository.SettingsRepository,
 ) {
     fun create(
         item: UiTimelineTabItem,
         isHomeTimeline: Boolean = false,
     ): TimelinePresenter =
-        if (item.isSystemHomeMixedTimeline) {
-            SystemHomeMixedTimelinePresenter(item.id, isHomeTimeline)
-        } else {
-            TimelinePresenter(
-                tabId = item.id,
-                loader = timelineResolver.resolveLoader(item),
-                isHomeTimeline = isHomeTimeline,
-            )
+        (
+            if (item.isSystemHomeMixedTimeline) {
+                SystemHomeMixedTimelinePresenter(item.id, isHomeTimeline)
+            } else {
+                TimelinePresenter(
+                    tabId = item.id,
+                    loader = timelineResolver.resolveLoader(item),
+                    isHomeTimeline = isHomeTimeline,
+                )
+            }
+        ).also { presenter ->
+            if (isHomeTimeline) {
+                presenter.sourceAccounts = timelineResolver.accountKeys(item)
+                var wasStored = false
+                presenter.sourceActive =
+                    settingsRepository
+                        .homeTimelineTab(item.id)
+                        .map { current ->
+                            if (current != null) wasStored = true
+                            if (current == null) {
+                                !wasStored
+                            } else {
+                                current.enabled && current.contentSourceKey == item.contentSourceKey
+                            }
+                        }.distinctUntilChanged()
+            }
         }
 }
 

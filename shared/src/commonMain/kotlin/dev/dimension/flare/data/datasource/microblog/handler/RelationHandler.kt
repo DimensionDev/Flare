@@ -378,7 +378,7 @@ public class RelationHandler(
 
     private fun UiTimelineV2.containsUser(userKey: MicroBlogKey): Boolean =
         when (this) {
-            is UiTimelineV2.Feed -> {
+            is UiTimelineV2.Gap, is UiTimelineV2.Feed -> {
                 false
             }
 

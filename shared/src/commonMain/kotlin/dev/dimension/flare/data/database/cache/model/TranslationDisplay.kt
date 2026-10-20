@@ -183,7 +183,7 @@ internal fun UiTimelineV2.applyTranslation(
             }
         }
 
-        is UiTimelineV2.Message -> {
+        is UiTimelineV2.Gap, is UiTimelineV2.Message -> {
             this
         }
 
@@ -322,7 +322,7 @@ internal fun UiTimelineV2.translationPayload(): TranslationPayload? =
             displayPost.translationPayload()
         }
 
-        is UiTimelineV2.Message -> {
+        is UiTimelineV2.Gap, is UiTimelineV2.Message -> {
             null
         }
 

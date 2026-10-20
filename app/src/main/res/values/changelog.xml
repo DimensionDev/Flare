@@ -5,11 +5,11 @@
     <string name="changelog_current"><![CDATA[
             <span>Version %1$s:</span>
             <ul>
-                <li>Added Pixiv Ugoira playback and saving as MP4 videos.</li>
-                <li>The media viewer now lets you drag up to view post details and actions.</li>
-                <li>Added Bluesky GIF and MOV uploads, fixed video saving, and filtered home-timeline replies to accounts you do not follow.</li>
-                <li>Improved media uploads and draft retries.</li>
-                <li>Bug fixes and performance improvements.</li>
+                <li>Added an option to remember your Home reading position across refreshes and app launches, including your last selected tab.</li>
+                <li>Added image paste and drag-and-drop when composing posts.</li>
+                <li>Improved RSS reading with opening-mode recommendations and feed-content fallback when webpage loading fails.</li>
+                <li>Improved predictive-back animations and page corners in split-screen and windowed modes.</li>
+                <li>Fixed post character counts, media saving, and reaction-list crashes, with performance improvements.</li>
             </ul>
         ]]></string>
 </resources>

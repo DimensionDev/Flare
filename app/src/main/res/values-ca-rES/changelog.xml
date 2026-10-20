@@ -3,11 +3,11 @@
     <string name="changelog_current"><![CDATA[
             <span>Versió %1$s:</span>
             <ul>
-                <li>S’ha afegit la reproducció d’animacions Ugoira de Pixiv i la possibilitat de desar-les com a vídeos MP4.</li>
-                <li>Arrossegueu cap amunt al visor multimèdia per veure els detalls i les accions de la publicació.</li>
-                <li>Bluesky ara permet pujar GIF i MOV. S’ha corregit el desament de vídeos i el fil d’inici amaga les respostes a comptes que no seguiu.</li>
-                <li>S’han millorat les pujades de contingut multimèdia i el reenviament d’esborranys.</li>
-                <li>Correccions d’errors i millores de rendiment.</li>
+                <li>S’ha afegit una opció per recordar la posició de lectura del fil d’inici en actualitzar i tornar a obrir l’aplicació, inclosa l’última pestanya seleccionada.</li>
+                <li>Ara podeu enganxar i arrossegar i deixar anar imatges en escriure publicacions.</li>
+                <li>S’ha millorat la lectura RSS amb recomanacions de mode d’obertura i contingut del canal quan no es pot carregar la pàgina web.</li>
+                <li>S’han millorat les animacions de retorn predictiu i les cantonades de les pàgines en pantalla dividida i mode finestra.</li>
+                <li>S’han corregit el recompte de caràcters, el desament de contingut multimèdia i els bloquejos de les llistes de reaccions, i s’ha millorat el rendiment.</li>
             </ul>
         ]]></string>
     <string name="changelog_title">Et donem la benvinguda de nou!</string>

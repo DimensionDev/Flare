@@ -5,11 +5,11 @@
     <string name="changelog_current"><![CDATA[
             <span>Versão %1$s:</span>
             <ul>
-                <li>Adicionada a reprodução de animações Ugoira do Pixiv e a possibilidade de as guardar como vídeos MP4.</li>
-                <li>Arraste para cima no visualizador multimédia para ver os detalhes e as ações da publicação.</li>
-                <li>O Bluesky permite agora enviar GIF e MOV. Corrigida a gravação de vídeos; a cronologia inicial oculta respostas a contas que não segue.</li>
-                <li>Melhorado o envio de conteúdos multimédia e o reenvio de rascunhos.</li>
-                <li>Correções de erros e melhorias de desempenho.</li>
+                <li>Adicionada uma opção para memorizar a posição de leitura na cronologia inicial ao atualizar e reabrir a aplicação, incluindo o último separador selecionado.</li>
+                <li>Agora é possível colar e arrastar e largar imagens ao escrever publicações.</li>
+                <li>Melhorada a leitura RSS com recomendações do modo de abertura e conteúdo do feed quando a página Web não carrega.</li>
+                <li>Melhoradas as animações de retrocesso preditivo e os cantos das páginas nos modos de ecrã dividido e janela.</li>
+                <li>Corrigidas a contagem de caracteres, a gravação de conteúdos multimédia e as falhas nas listas de reações, com melhorias de desempenho.</li>
             </ul>
         ]]></string>
 </resources>

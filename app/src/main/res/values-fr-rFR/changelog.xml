@@ -3,11 +3,11 @@
     <string name="changelog_current"><![CDATA[
             <span>Version %1$s :</span>
             <ul>
-                <li>Ajout de la lecture des animations Ugoira de Pixiv et de leur enregistrement en vidéos MP4.</li>
-                <li>Faites glisser vers le haut dans la visionneuse multimédia pour consulter les détails et les actions du post.</li>
-                <li>Bluesky prend en charge l’envoi de GIF et de MOV. L’enregistrement des vidéos est corrigé et le fil d’accueil masque les réponses aux comptes que vous ne suivez pas.</li>
-                <li>Amélioration de l’envoi des médias et du renvoi des brouillons.</li>
-                <li>Corrections de bugs et améliorations des performances.</li>
+                <li>Ajout d’une option pour mémoriser la position de lecture du fil d’accueil lors des actualisations et des réouvertures de l’application, ainsi que le dernier onglet sélectionné.</li>
+                <li>Ajout du collage et du glisser-déposer d’images lors de la rédaction de posts.</li>
+                <li>Amélioration de la lecture RSS avec des recommandations de mode d’ouverture et l’affichage du contenu du flux si la page web ne se charge pas.</li>
+                <li>Amélioration des animations de retour prédictif et des coins des pages en écran partagé et en mode fenêtré.</li>
+                <li>Correction du comptage des caractères, de l’enregistrement des médias et des plantages des listes de réactions, avec des améliorations des performances.</li>
             </ul>
         ]]></string>
     <string name="changelog_title">Bon retour !</string>

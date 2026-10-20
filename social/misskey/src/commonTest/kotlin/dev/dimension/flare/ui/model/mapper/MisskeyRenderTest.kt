@@ -294,6 +294,7 @@ class MisskeyRenderTest {
                     is UiTimelineV2.User -> assertNotNull(rendered.message)
 
                     is UiTimelineV2.Feed,
+                    is UiTimelineV2.Gap,
                     is UiTimelineV2.UserList,
                     -> error("Unexpected rendered timeline item: ${rendered::class.simpleName}")
                 }

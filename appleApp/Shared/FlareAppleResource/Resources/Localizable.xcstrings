@@ -32912,181 +32912,181 @@
         "af" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Weergawe %@:\n• Pixiv Ugoira-animasies kan nou gespeel en as MP4-video's gestoor word.\n• Sleep op in die mediakyker om plasingsbesonderhede en aksies te sien.\n• Bluesky ondersteun nou GIF- en MOV-oplaaie. Videostoor is reggestel en die tuistydlyn versteek antwoorde aan rekeninge wat jy nie volg nie.\n• Mediaoplaaie en herprobeer van konsepte is verbeter.\n• Foutregstellings en werkverrigtingverbeterings."
+            "value" : "Weergawe %@:\n• ’n Opsie is bygevoeg om jou leesposisie op die tuistydlyn te onthou wanneer jy verfris of die toepassing heropen, saam met jou laaste gekose oortjie.\n• Prente kan nou geplak en gesleep en laat val word wanneer jy plasings skryf.\n• RSS-lees is verbeter met aanbevelings vir die oopmaakmodus en voerinhoud as terugval wanneer ’n webblad nie laai nie.\n• Tydlynverfrissing en blaai is stabieler, en afgesnyde voorskoue van lang plasings is reggestel.\n• Vassteek tydens kortvideoherhaling en probleme met GIF-afspeel is reggestel; karaktertellings vir plasings is verbeter."
           }
         },
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "الإصدار %@:\n• إضافة تشغيل رسوم Ugoira المتحركة من Pixiv وحفظها كفيديوهات MP4.\n• اسحب لأعلى في عارض الوسائط لعرض تفاصيل المنشور وإجراءاته.\n• يدعم Bluesky الآن رفع ملفات GIF وMOV. أُصلح حفظ الفيديو، وتُخفى من الخط الزمني الرئيسي الردود على الحسابات التي لا تتابعها.\n• تحسين رفع الوسائط وإعادة إرسال المسودات.\n• إصلاحات للأخطاء وتحسينات في الأداء."
+            "value" : "الإصدار %@:\n• إضافة خيار لتذكر موضع القراءة في الخط الزمني الرئيسي عند التحديث وإعادة فتح التطبيق، مع استعادة آخر علامة تبويب محددة.\n• إضافة لصق الصور وسحبها وإفلاتها عند كتابة المنشورات.\n• تحسين قراءة RSS مع اقتراح طريقة الفتح وعرض محتوى الخلاصة عند تعذر تحميل صفحة الويب.\n• تحسين استقرار تحديث الخط الزمني والتمرير، وإصلاح اقتطاع معاينات المنشورات الطويلة.\n• إصلاح توقف تكرار الفيديوهات القصيرة ومشكلات تشغيل GIF، وتحسين حساب أحرف المنشورات."
           }
         },
         "bg" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Версия %@:\n• Добавено е възпроизвеждане на анимации Ugoira от Pixiv и запазването им като MP4 видеоклипове.\n• Плъзнете нагоре в медийния преглед, за да видите подробностите и действията за публикацията.\n• Bluesky вече поддържа качване на GIF и MOV. Поправено е запазването на видеоклипове, а началната хронология скрива отговорите към акаунти, които не следвате.\n• Подобрено е качването на медии и повторното изпращане на чернови.\n• Поправки на грешки и подобрения в производителността."
+            "value" : "Версия %@:\n• Добавена е настройка за запомняне на позицията за четене в началната хронология при опресняване и повторно отваряне, включително последния избран раздел.\n• Добавено е поставяне и плъзгане и пускане на изображения при писане на публикации.\n• Подобрено е четенето на RSS с препоръки за начина на отваряне и показване на съдържанието от емисията при неуспешно зареждане на уебстраницата.\n• Подобрена е стабилността при опресняване и превъртане на хронологията; поправено е изрязването на прегледите на дълги публикации.\n• Поправени са блокирането при повторение на кратки видеоклипове и възпроизвеждането на GIF; подобрено е броенето на знаци."
           }
         },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Versió %@:\n• S’ha afegit la reproducció d’animacions Ugoira de Pixiv i la possibilitat de desar-les com a vídeos MP4.\n• Arrossegueu cap amunt al visor multimèdia per veure els detalls i les accions de la publicació.\n• Bluesky ara permet pujar GIF i MOV. S’ha corregit el desament de vídeos i el fil d’inici amaga les respostes a comptes que no seguiu.\n• S’han millorat les pujades de contingut multimèdia i el reenviament d’esborranys.\n• Correccions d’errors i millores de rendiment."
+            "value" : "Versió %@:\n• S’ha afegit una opció per recordar la posició de lectura del fil d’inici en actualitzar i tornar a obrir l’aplicació, inclosa l’última pestanya seleccionada.\n• Ara podeu enganxar i arrossegar i deixar anar imatges en escriure publicacions.\n• S’ha millorat la lectura RSS amb recomanacions de mode d’obertura i contingut del canal quan no es pot carregar la pàgina web.\n• S’ha millorat l’estabilitat de l’actualització i el desplaçament del fil, i s’han corregit les previsualitzacions retallades de publicacions llargues.\n• S’han corregit els bloquejos de vídeos curts en bucle i la reproducció de GIF, i s’ha millorat el recompte de caràcters."
           }
         },
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Verze %@:\n• Přidáno přehrávání animací Ugoira z Pixiv a jejich ukládání jako videí MP4.\n• Tažením nahoru v prohlížeči médií zobrazíte podrobnosti příspěvku a jeho akce.\n• Bluesky nyní podporuje nahrávání GIF a MOV. Opraveno ukládání videí; domovská časová osa skrývá odpovědi účtům, které nesledujete.\n• Vylepšeno nahrávání médií a opakované odesílání konceptů.\n• Opravy chyb a vylepšení výkonu."
+            "value" : "Verze %@:\n• Přidána možnost zapamatovat si pozici čtení na domovské časové ose při obnovení a opětovném otevření aplikace, včetně poslední vybrané karty.\n• Při psaní příspěvků lze nyní vkládat a přetahovat obrázky.\n• Vylepšeno čtení RSS doporučením režimu otevření a zobrazením obsahu kanálu při selhání načítání webové stránky.\n• Vylepšena stabilita obnovování a posouvání časové osy a opravené oříznuté náhledy dlouhých příspěvků.\n• Opraveno zamrzání krátkých videí při opakování a přehrávání GIF; vylepšeno počítání znaků příspěvků."
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Version %@:\n• Tilføjet afspilning af Pixiv Ugoira-animationer og lagring som MP4-videoer.\n• Træk op i medievisningen for at se opslagets detaljer og handlinger.\n• Bluesky understøtter nu upload af GIF og MOV. Lagring af videoer er rettet, og starttidslinjen skjuler svar til konti, du ikke følger.\n• Forbedret upload af medier og gensending af kladder.\n• Fejlrettelser og forbedret ydeevne."
+            "value" : "Version %@:\n• Tilføjet en indstilling til at huske læsepositionen på starttidslinjen ved opdatering og genåbning af appen, inklusive den sidst valgte fane.\n• Billeder kan nu indsættes og trækkes og slippes, når du skriver opslag.\n• Forbedret RSS-læsning med anbefalinger til åbning og visning af feedindhold, når websiden ikke kan indlæses.\n• Forbedret stabiliteten ved opdatering og rulning af tidslinjen og rettet beskårne forhåndsvisninger af lange opslag.\n• Rettet fastfrysning ved gentagelse af korte videoer og GIF-afspilning samt forbedret tegnoptællingen i opslag."
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Version %@:\n• Wiedergabe von Pixiv-Ugoira-Animationen und Speichern als MP4-Videos hinzugefügt.\n• Im Medienbetrachter nach oben ziehen, um Beitragsdetails und Aktionen aufzurufen.\n• Bluesky unterstützt jetzt GIF- und MOV-Uploads. Das Speichern von Videos wurde korrigiert; die Start-Timeline blendet Antworten an nicht gefolgte Konten aus.\n• Medienuploads und erneutes Senden von Entwürfen verbessert.\n• Fehlerbehebungen und Leistungsverbesserungen."
+            "value" : "Version %@:\n• Neue Option zum Merken der Leseposition in der Start-Timeline beim Aktualisieren und erneuten Öffnen der App, einschließlich des zuletzt gewählten Tabs.\n• Bilder können beim Schreiben von Beiträgen jetzt eingefügt und per Drag-and-drop hinzugefügt werden.\n• RSS-Lesen mit Empfehlungen zum Öffnungsmodus und Anzeige des Feed-Inhalts verbessert, wenn die Webseite nicht geladen werden kann.\n• Aktualisieren und Scrollen der Timeline stabiler gemacht und abgeschnittene Vorschauen langer Beiträge korrigiert.\n• Einfrieren kurzer Videos bei Wiederholung und GIF-Wiedergabe behoben sowie die Zeichenzählung verbessert."
           }
         },
         "el" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Έκδοση %@:\n• Προστέθηκε αναπαραγωγή κινούμενων εικόνων Ugoira του Pixiv και αποθήκευσή τους ως βίντεο MP4.\n• Σύρετε προς τα πάνω στην προβολή πολυμέσων για να δείτε λεπτομέρειες και ενέργειες της ανάρτησης.\n• Το Bluesky υποστηρίζει πλέον μεταφόρτωση GIF και MOV. Διορθώθηκε η αποθήκευση βίντεο και η αρχική χρονογραμμή αποκρύπτει απαντήσεις προς λογαριασμούς που δεν ακολουθείτε.\n• Βελτιώθηκαν οι μεταφορτώσεις πολυμέσων και η επανάληψη αποστολής προσχεδίων.\n• Διορθώσεις σφαλμάτων και βελτιώσεις απόδοσης."
+            "value" : "Έκδοση %@:\n• Προστέθηκε επιλογή απομνημόνευσης της θέσης ανάγνωσης στην αρχική χρονογραμμή κατά την ανανέωση και το άνοιγμα της εφαρμογής, μαζί με την τελευταία επιλεγμένη καρτέλα.\n• Προστέθηκε επικόλληση και μεταφορά και απόθεση εικόνων κατά τη σύνταξη αναρτήσεων.\n• Βελτιώθηκε η ανάγνωση RSS με προτάσεις τρόπου ανοίγματος και προβολή περιεχομένου ροής όταν αποτυγχάνει η φόρτωση της ιστοσελίδας.\n• Βελτιώθηκε η σταθερότητα ανανέωσης και κύλισης της χρονογραμμής και διορθώθηκαν οι κομμένες προεπισκοπήσεις μεγάλων αναρτήσεων.\n• Διορθώθηκαν το πάγωμα σύντομων βίντεο σε επανάληψη και η αναπαραγωγή GIF και βελτιώθηκε η καταμέτρηση χαρακτήρων."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Version %@:\n• Added Pixiv Ugoira playback and saving as MP4 videos.\n• The media viewer now lets you drag up to view post details and actions.\n• Added Bluesky GIF and MOV uploads, fixed video saving, and filtered home-timeline replies to accounts you do not follow.\n• Improved media uploads and draft retries.\n• Bug fixes and performance improvements."
+            "value" : "Version %@:\n• Added an option to remember your Home reading position across refreshes and app launches, including your last selected tab.\n• Added image paste and drag-and-drop when composing posts.\n• Improved RSS reading with opening-mode recommendations and feed-content fallback when webpage loading fails.\n• Improved timeline refresh and scrolling stability, and fixed clipped long-post previews.\n• Fixed short-video looping and GIF playback, and improved post character counts."
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Versio %@:\n• Lisätty Pixiv Ugoira -animaatioiden toisto ja tallennus MP4-videoiksi.\n• Vedä mediaselaimessa ylöspäin nähdäksesi julkaisun tiedot ja toiminnot.\n• Bluesky tukee nyt GIF- ja MOV-latauksia. Videoiden tallennus on korjattu, ja kotiaikajana piilottaa vastaukset tileille, joita et seuraa.\n• Parannettu median lataamista ja luonnosten uudelleenlähetystä.\n• Virhekorjauksia ja suorituskyvyn parannuksia."
+            "value" : "Versio %@:\n• Lisätty asetus kotiaikajanan lukukohdan muistamiseen päivityksen ja sovelluksen uudelleen avaamisen yhteydessä, mukaan lukien viimeksi valittu välilehti.\n• Julkaisuja kirjoitettaessa voi nyt liittää ja vetää ja pudottaa kuvia.\n• Parannettu RSS-lukemista avaamistavan suosituksilla ja näyttämällä syötteen sisältö, jos verkkosivun lataus epäonnistuu.\n• Parannettu aikajanan päivityksen ja vierityksen vakautta sekä korjattu pitkien julkaisujen leikkautuvat esikatselut.\n• Korjattu lyhyiden videoiden toiston jumittuminen ja GIF-toisto sekä parannettu julkaisujen merkkilaskentaa."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Version %@ :\n• Ajout de la lecture des animations Ugoira de Pixiv et de leur enregistrement en vidéos MP4.\n• Faites glisser vers le haut dans la visionneuse multimédia pour consulter les détails et les actions du post.\n• Bluesky prend en charge l’envoi de GIF et de MOV. L’enregistrement des vidéos est corrigé et le fil d’accueil masque les réponses aux comptes que vous ne suivez pas.\n• Amélioration de l’envoi des médias et du renvoi des brouillons.\n• Corrections de bugs et améliorations des performances."
+            "value" : "Version %@ :\n• Ajout d’une option pour mémoriser la position de lecture du fil d’accueil lors des actualisations et des réouvertures de l’application, ainsi que le dernier onglet sélectionné.\n• Ajout du collage et du glisser-déposer d’images lors de la rédaction de posts.\n• Amélioration de la lecture RSS avec des recommandations de mode d’ouverture et l’affichage du contenu du flux si la page web ne se charge pas.\n• Amélioration de la stabilité de l’actualisation et du défilement du fil, et correction des aperçus tronqués des posts longs.\n• Correction des blocages des vidéos courtes en boucle et de la lecture des GIF, et amélioration du comptage des caractères."
           }
         },
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "גרסה %@:\n• נוספה אפשרות לנגן אנימציות Ugoira של Pixiv ולשמור אותן כסרטוני MP4.\n• גררו כלפי מעלה במציג המדיה כדי לראות את פרטי הפוסט ואת הפעולות.\n• Bluesky תומך כעת בהעלאת GIF ו-MOV. שמירת סרטונים תוקנה, וציר הזמן הראשי מסתיר תגובות לחשבונות שאינכם עוקבים אחריהם.\n• שופרו העלאת מדיה ושליחה חוזרת של טיוטות.\n• תיקוני באגים ושיפורי ביצועים."
+            "value" : "גרסה %@:\n• נוספה אפשרות לזכור את מיקום הקריאה בציר הזמן הראשי בעת רענון ופתיחה מחדש של היישום, כולל הלשונית האחרונה שנבחרה.\n• נוספה תמיכה בהדבקת תמונות ובגרירה ושחרור שלהן בעת כתיבת פוסטים.\n• קריאת RSS שופרה עם המלצות לאופן הפתיחה והצגת תוכן ההזנה כאשר טעינת דף האינטרנט נכשלת.\n• שופרה יציבות הרענון והגלילה בציר הזמן ותוקנו תצוגות מקדימות חתוכות של פוסטים ארוכים.\n• תוקנו קפיאות בלולאות של סרטונים קצרים ובעיות ניגון GIF, ושופרה ספירת התווים בפוסטים."
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@ verzió:\n• A Pixiv Ugoira animációk most már lejátszhatók és MP4-videóként menthetők.\n• Húzza felfelé a médianézegetőt a bejegyzés részleteinek és műveleteinek megtekintéséhez.\n• A Bluesky már támogatja a GIF- és MOV-feltöltéseket. Javítottuk a videók mentését, a kezdő idővonal pedig elrejti a nem követett fiókoknak írt válaszokat.\n• Javult a médiafeltöltés és a piszkozatok újraküldése.\n• Hibajavítások és teljesítménybeli fejlesztések."
+            "value" : "%@ verzió:\n• Új beállítás őrzi meg a kezdő idővonal olvasási helyét frissítéskor és az alkalmazás újbóli megnyitásakor, a legutóbb kiválasztott lappal együtt.\n• Bejegyzés írásakor már képek is beilleszthetők és behúzhatók.\n• Javult az RSS-olvasás: megnyitásimód-ajánlások és a hírfolyam tartalmának megjelenítése, ha a weboldal nem tölthető be.\n• Stabilabb lett az idővonal frissítése és görgetése; javítottuk a hosszú bejegyzések levágott előnézeteit.\n• Javítottuk a rövid videók ismétlés közbeni megakadását és a GIF-lejátszást, valamint a karakterszámlálást."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Versione %@:\n• Aggiunte la riproduzione delle animazioni Ugoira di Pixiv e la possibilità di salvarle come video MP4.\n• Trascina verso l’alto nel visualizzatore multimediale per vedere dettagli e azioni del post.\n• Bluesky supporta il caricamento di GIF e MOV. Corretto il salvataggio dei video; la timeline principale nasconde le risposte ad account che non segui.\n• Migliorati il caricamento dei media e il reinvio delle bozze.\n• Correzioni di bug e miglioramenti delle prestazioni."
+            "value" : "Versione %@:\n• Aggiunta un’opzione per ricordare la posizione di lettura nella timeline principale durante gli aggiornamenti e alla riapertura dell’app, inclusa l’ultima scheda selezionata.\n• Aggiunti l’incolla e il trascinamento delle immagini durante la scrittura dei post.\n• Migliorata la lettura RSS con suggerimenti sulla modalità di apertura e il contenuto del feed quando la pagina web non si carica.\n• Migliorata la stabilità dell’aggiornamento e dello scorrimento della timeline e corrette le anteprime tagliate dei post lunghi.\n• Corretti i blocchi dei video brevi in ripetizione e la riproduzione delle GIF e migliorato il conteggio dei caratteri."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "バージョン %@:\n• Pixiv のうごイラ再生と MP4 動画としての保存に対応しました。\n• メディアビューアーを上にドラッグして、投稿の詳細確認や操作ができるようになりました。\n• Bluesky で GIF と MOV のアップロードに対応し、動画の保存を修正しました。ホームではフォローしていないアカウントへの返信を非表示にします。\n• メディアのアップロードと下書きの再送を改善しました。\n• 不具合修正とパフォーマンス改善。"
+            "value" : "バージョン %@:\n• ホームの閲覧位置を記憶する設定を追加しました。更新時も位置を維持し、再起動時に前回のタブと閲覧位置を復元します。\n• 投稿作成時に画像の貼り付けとドラッグ＆ドロップに対応しました。\n• RSS の開き方のおすすめを追加し、ウェブページの読み込みに失敗した場合はフィードの内容を表示できるようにしました。\n• タイムラインの更新とスクロールの安定性を改善し、長文プレビューの文字が切れる問題を修正しました。\n• 短い動画のループ停止と一部の GIF の再生不具合を修正し、投稿の文字数カウントを改善しました。"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "버전 %@:\n• Pixiv Ugoira 애니메이션 재생과 MP4 동영상 저장을 추가했습니다.\n• 미디어 뷰어를 위로 드래그해 게시물 상세 정보를 확인하고 작업할 수 있습니다.\n• Bluesky에서 GIF와 MOV 업로드를 지원하고 동영상 저장을 수정했습니다. 홈 타임라인에서는 팔로우하지 않는 계정에 대한 답글을 숨깁니다.\n• 미디어 업로드와 초안 재전송을 개선했습니다.\n• 버그 수정 및 성능 개선."
+            "value" : "버전 %@:\n• 홈 읽기 위치 기억 옵션을 추가했습니다. 새로고침할 때 위치를 유지하고 앱을 다시 열면 마지막 탭과 읽기 위치를 복원합니다.\n• 게시물 작성 시 이미지 붙여넣기와 끌어놓기를 지원합니다.\n• RSS 열기 방식 추천을 추가하고 웹페이지를 불러오지 못하면 피드 내용을 표시하도록 개선했습니다.\n• 타임라인 새로고침과 스크롤 안정성을 개선하고 긴 게시물 미리보기가 잘리는 문제를 수정했습니다.\n• 짧은 동영상 반복 재생 멈춤과 일부 GIF 재생 문제를 수정하고 게시물 글자 수 계산을 개선했습니다."
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Versjon %@:\n• Lagt til avspilling av Pixiv Ugoira-animasjoner og lagring som MP4-videoer.\n• Dra opp i medievisningen for å se innleggets detaljer og handlinger.\n• Bluesky støtter nå opplasting av GIF og MOV. Videolagring er rettet, og hjemmetidslinjen skjuler svar til kontoer du ikke følger.\n• Forbedret opplasting av medier og ny sending av utkast.\n• Feilrettinger og ytelsesforbedringer."
+            "value" : "Versjon %@:\n• Lagt til en innstilling for å huske leseposisjonen på hjemmetidslinjen ved oppdatering og gjenåpning av appen, inkludert den sist valgte fanen.\n• Bilder kan nå limes inn og dras og slippes når du skriver innlegg.\n• Forbedret RSS-lesing med anbefalinger for åpningsmåte og visning av feedinnhold når nettsiden ikke kan lastes.\n• Forbedret stabiliteten ved oppdatering og rulling av tidslinjen og rettet avkuttede forhåndsvisninger av lange innlegg.\n• Rettet frysing ved gjentakelse av korte videoer og GIF-avspilling samt forbedret tegntelling i innlegg."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Versie %@:\n• Afspelen van Pixiv Ugoira-animaties en opslaan als MP4-video’s toegevoegd.\n• Sleep omhoog in de mediaviewer om berichtdetails en acties te bekijken.\n• Bluesky ondersteunt nu GIF- en MOV-uploads. Het opslaan van video’s is hersteld en de starttijdlijn verbergt antwoorden aan accounts die je niet volgt.\n• Uploads van media en opnieuw verzenden van concepten verbeterd.\n• Bugfixes en prestatieverbeteringen."
+            "value" : "Versie %@:\n• Een optie toegevoegd om je leespositie op de starttijdlijn te onthouden bij vernieuwen en heropenen van de app, inclusief het laatst gekozen tabblad.\n• Afbeeldingen kunnen nu worden geplakt en versleept tijdens het schrijven van berichten.\n• RSS-lezen verbeterd met aanbevelingen voor de openingsmodus en feedinhoud als terugval wanneer de webpagina niet kan worden geladen.\n• Vernieuwen en scrollen van de tijdlijn stabieler gemaakt en afgekapte voorbeelden van lange berichten hersteld.\n• Vastlopen van korte video’s bij herhalen en GIF-weergave verholpen en tekentelling van berichten verbeterd."
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Wersja %@:\n• Dodano odtwarzanie animacji Ugoira z Pixiv i zapisywanie ich jako filmów MP4.\n• Przeciągnij w górę w przeglądarce multimediów, aby zobaczyć szczegóły wpisu i działania.\n• Bluesky obsługuje teraz przesyłanie GIF i MOV. Naprawiono zapisywanie filmów, a główna oś czasu ukrywa odpowiedzi do kont, których nie obserwujesz.\n• Ulepszono przesyłanie multimediów i ponawianie wysyłania szkiców.\n• Poprawki błędów i ulepszenia wydajności."
+            "value" : "Wersja %@:\n• Dodano opcję zapamiętywania pozycji czytania na głównej osi czasu podczas odświeżania i ponownego otwierania aplikacji, wraz z ostatnio wybraną kartą.\n• Dodano wklejanie i przeciąganie obrazów podczas pisania wpisów.\n• Ulepszono czytanie RSS dzięki rekomendacjom sposobu otwierania i wyświetlaniu treści kanału, gdy strona internetowa się nie ładuje.\n• Poprawiono stabilność odświeżania i przewijania osi czasu oraz naprawiono przycięte podglądy długich wpisów.\n• Naprawiono zawieszanie krótkich filmów w pętli i odtwarzanie GIF oraz poprawiono liczenie znaków."
           }
         },
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Versão %@:\n• Adicionada a reprodução de animações Ugoira do Pixiv e a possibilidade de as guardar como vídeos MP4.\n• Arraste para cima no visualizador multimédia para ver os detalhes e as ações da publicação.\n• O Bluesky permite agora enviar GIF e MOV. Corrigida a gravação de vídeos; a cronologia inicial oculta respostas a contas que não segue.\n• Melhorado o envio de conteúdos multimédia e o reenvio de rascunhos.\n• Correções de erros e melhorias de desempenho."
+            "value" : "Versão %@:\n• Adicionada uma opção para memorizar a posição de leitura na cronologia inicial ao atualizar e reabrir a aplicação, incluindo o último separador selecionado.\n• Agora é possível colar e arrastar e largar imagens ao escrever publicações.\n• Melhorada a leitura RSS com recomendações do modo de abertura e conteúdo do feed quando a página Web não carrega.\n• Melhorada a estabilidade da atualização e deslocação da cronologia e corrigidas pré-visualizações cortadas de publicações longas.\n• Corrigidos bloqueios de vídeos curtos em repetição e a reprodução de GIF, e melhorada a contagem de caracteres."
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Versão %@:\n• Adicionadas a reprodução de animações Ugoira do Pixiv e a opção de salvá-las como vídeos MP4.\n• Arraste para cima no visualizador de mídia para ver os detalhes e as ações do post.\n• O Bluesky agora permite enviar GIF e MOV. Corrigido o salvamento de vídeos; a timeline inicial oculta respostas a contas que você não segue.\n• Melhorado o envio de mídia e o reenvio de rascunhos.\n• Correções de bugs e melhorias de desempenho."
+            "value" : "Versão %@:\n• Adicionada uma opção para lembrar a posição de leitura na timeline inicial ao atualizar e reabrir o aplicativo, incluindo a última aba selecionada.\n• Agora é possível colar e arrastar e soltar imagens ao escrever posts.\n• Melhorada a leitura RSS com recomendações do modo de abertura e conteúdo do feed quando a página da web não carrega.\n• Melhorada a estabilidade da atualização e rolagem da timeline e corrigidas prévias cortadas de posts longos.\n• Corrigidos travamentos de vídeos curtos em repetição e a reprodução de GIF, e melhorada a contagem de caracteres."
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Versiunea %@:\n• Adăugate redarea animațiilor Ugoira de pe Pixiv și salvarea lor ca videoclipuri MP4.\n• Trageți în sus în vizualizatorul media pentru a vedea detaliile și acțiunile postării.\n• Bluesky acceptă acum încărcarea fișierelor GIF și MOV. Salvarea videoclipurilor a fost corectată, iar cronologia principală ascunde răspunsurile către conturi pe care nu le urmăriți.\n• Îmbunătățite încărcarea fișierelor media și retrimiterea ciornelor.\n• Corectări de erori și îmbunătățiri de performanță."
+            "value" : "Versiunea %@:\n• Adăugată o opțiune pentru memorarea poziției de citire din cronologia principală la actualizare și redeschiderea aplicației, inclusiv ultima filă selectată.\n• Adăugate lipirea și glisarea și fixarea imaginilor la scrierea postărilor.\n• Îmbunătățită citirea RSS cu recomandări pentru modul de deschidere și conținutul fluxului când pagina web nu se încarcă.\n• Îmbunătățită stabilitatea actualizării și derulării cronologiei și corectate previzualizările tăiate ale postărilor lungi.\n• Corectate blocarea videoclipurilor scurte în buclă și redarea GIF; îmbunătățită numărarea caracterelor."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Версия %@:\n• Добавлены воспроизведение анимаций Ugoira из Pixiv и сохранение их как видео MP4.\n• Потяните вверх в медиапросмотре, чтобы открыть сведения о публикации и действия.\n• Bluesky теперь поддерживает загрузку GIF и MOV. Исправлено сохранение видео; главная лента скрывает ответы аккаунтам, на которые вы не подписаны.\n• Улучшены загрузка медиа и повторная отправка черновиков.\n• Исправления ошибок и улучшения производительности."
+            "value" : "Версия %@:\n• Добавлена настройка запоминания позиции чтения в главной ленте при обновлении и повторном открытии приложения, включая последнюю выбранную вкладку.\n• Добавлены вставка и перетаскивание изображений при написании публикаций.\n• Улучшено чтение RSS: рекомендации способа открытия и показ содержимого ленты, если веб-страница не загружается.\n• Повышена стабильность обновления и прокрутки ленты, исправлено обрезание предпросмотра длинных публикаций.\n• Исправлены зависание коротких видео при повторении и воспроизведение GIF; улучшен подсчёт символов."
           }
         },
         "sr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Верзија %@:\n• Додати су репродукција Pixiv Ugoira анимација и чување као MP4 видео-снимака.\n• Повуците нагоре у приказивачу медија да видите детаље објаве и радње.\n• Bluesky сада подржава отпремање GIF и MOV датотека. Исправљено је чување видеа, а почетна временска линија скрива одговоре налозима које не пратите.\n• Побољшани су отпремање медија и поновно слање нацрта.\n• Исправке грешака и побољшања перформанси."
+            "value" : "Верзија %@:\n• Додата је опција за памћење положаја читања на почетној временској линији при освежавању и поновном отварању апликације, укључујући последњу изабрану картицу.\n• Додато је лепљење и превлачење слика при писању објава.\n• Побољшано је RSS читање уз препоруке начина отварања и приказ садржаја извора када се веб-страница не учита.\n• Побољшана је стабилност освежавања и померања временске линије и исправљени су одсечени прегледи дугих објава.\n• Исправљени су застоји кратких видео-снимака у петљи и репродукција GIF датотека, а бројање знакова је побољшано."
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Version %@:\n• Stöd för uppspelning av Pixiv Ugoira-animationer och sparande som MP4-videor har lagts till.\n• Dra uppåt i medievisaren för att se inläggets detaljer och åtgärder.\n• Bluesky stöder nu uppladdning av GIF och MOV. Videosparande har rättats och hemtidslinjen döljer svar till konton du inte följer.\n• Uppladdning av medier och omsändning av utkast har förbättrats.\n• Buggfixar och prestandaförbättringar."
+            "value" : "Version %@:\n• Lagt till en inställning som minns läspositionen på hemtidslinjen vid uppdatering och när appen öppnas igen, inklusive den senast valda fliken.\n• Bilder kan nu klistras in och dras och släppas när du skriver inlägg.\n• Förbättrad RSS-läsning med rekommendationer om öppningsläge och visning av flödets innehåll när webbsidan inte kan läsas in.\n• Förbättrad stabilitet vid uppdatering och rullning av tidslinjen och rättade avklippta förhandsvisningar av långa inlägg.\n• Rättat frysning av korta videor vid upprepning och GIF-uppspelning samt förbättrat teckenräkningen."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sürüm %@:\n• Pixiv Ugoira animasyonlarını oynatma ve MP4 video olarak kaydetme desteği eklendi.\n• Gönderi ayrıntılarını ve işlemlerini görmek için medya görüntüleyicide yukarı sürükleyin.\n• Bluesky artık GIF ve MOV yüklemelerini destekliyor. Video kaydetme düzeltildi; ana zaman akışı, takip etmediğiniz hesaplara verilen yanıtları gizliyor.\n• Medya yüklemeleri ve taslakları yeniden gönderme iyileştirildi.\n• Hata düzeltmeleri ve performans iyileştirmeleri."
+            "value" : "Sürüm %@:\n• Yenileme ve uygulamayı yeniden açma sırasında ana zaman akışındaki okuma konumunu ve son seçilen sekmeyi hatırlama seçeneği eklendi.\n• Gönderi yazarken resim yapıştırma ve sürükleyip bırakma desteği eklendi.\n• RSS okuma, açılış modu önerileri ve web sayfası yüklenemediğinde akış içeriğini gösterme ile iyileştirildi.\n• Zaman akışı yenileme ve kaydırma kararlılığı iyileştirildi; uzun gönderi önizlemelerinin kırpılması düzeltildi.\n• Kısa videoların döngüde takılması ve GIF oynatma sorunları düzeltildi; gönderi karakter sayımı iyileştirildi."
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Версія %@:\n• Додано відтворення анімацій Ugoira з Pixiv і збереження їх як відео MP4.\n• Потягніть угору в переглядачі медіа, щоб відкрити подробиці допису та дії.\n• Bluesky тепер підтримує завантаження GIF і MOV. Виправлено збереження відео; головна стрічка приховує відповіді обліковим записам, на які ви не підписані.\n• Покращено завантаження медіа та повторне надсилання чернеток.\n• Виправлення помилок і покращення продуктивності."
+            "value" : "Версія %@:\n• Додано налаштування запам’ятовування позиції читання головної стрічки під час оновлення й повторного відкриття застосунку, включно з останньою вибраною вкладкою.\n• Додано вставлення й перетягування зображень під час написання дописів.\n• Покращено читання RSS: рекомендації способу відкриття й показ вмісту стрічки, якщо вебсторінка не завантажується.\n• Покращено стабільність оновлення й прокручування стрічки та виправлено обрізані попередні перегляди довгих дописів.\n• Виправлено зависання коротких відео під час повторення й відтворення GIF; покращено підрахунок символів."
           }
         },
         "vi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Phiên bản %@:\n• Thêm phát ảnh động Ugoira từ Pixiv và lưu dưới dạng video MP4.\n• Kéo lên trong trình xem đa phương tiện để xem chi tiết bài đăng và các thao tác.\n• Bluesky hỗ trợ tải lên GIF và MOV. Đã sửa lỗi lưu video; dòng thời gian chính ẩn phản hồi gửi đến các tài khoản bạn không theo dõi.\n• Cải thiện tải lên nội dung đa phương tiện và gửi lại bản nháp.\n• Sửa lỗi và cải thiện hiệu suất."
+            "value" : "Phiên bản %@:\n• Thêm tùy chọn ghi nhớ vị trí đọc trên dòng thời gian chính khi làm mới và mở lại ứng dụng, bao gồm thẻ được chọn gần nhất.\n• Hỗ trợ dán và kéo thả hình ảnh khi soạn bài đăng.\n• Cải thiện đọc RSS với đề xuất cách mở và hiển thị nội dung nguồn cấp khi không tải được trang web.\n• Cải thiện độ ổn định khi làm mới và cuộn dòng thời gian, sửa phần xem trước bài dài bị cắt.\n• Sửa video ngắn bị đứng khi phát lặp và lỗi phát GIF, đồng thời cải thiện cách đếm ký tự bài đăng."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "版本 %@：\n• 新增 Pixiv 动图播放，支持保存为 MP4 视频。\n• 媒体查看器支持上拉查看帖子详情并进行快捷操作。\n• Bluesky 支持上传 GIF 和 MOV，修复视频保存，并在首页过滤回复给未关注账号的帖子。\n• 改进媒体上传和草稿重试。\n• 修复已知问题并优化性能。"
+            "value" : "版本 %@：\n• 新增“记住首页阅读位置”选项，刷新时保留位置，重新打开后恢复标签页和阅读进度。\n• 发帖支持粘贴和拖放图片。\n• 改进 RSS 阅读，新增打开方式推荐，网页正文加载失败时可回退显示订阅内容。\n• 改善时间线刷新和滚动稳定性，修复长文本预览裁切。\n• 修复短视频循环卡住和部分 GIF 无法播放的问题，改进发帖字数统计。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "版本 %@：\n• 新增 Pixiv 動圖播放，支援儲存為 MP4 影片。\n• 媒體檢視器支援向上拖曳查看貼文詳情並進行快捷操作。\n• Bluesky 支援上傳 GIF 和 MOV，修正影片儲存問題，並在首頁過濾回覆給未追蹤帳號的貼文。\n• 改善媒體上傳和草稿重試。\n• 修正已知問題並最佳化效能。"
+            "value" : "版本 %@：\n• 新增「記住首頁閱讀位置」選項，重新整理時保留位置，重新開啟後恢復分頁和閱讀進度。\n• 發文支援貼上和拖放圖片。\n• 改善 RSS 閱讀，新增開啟方式建議，網頁全文載入失敗時可改為顯示訂閱內容。\n• 改善時間軸重新整理和捲動穩定性，修正長文預覽裁切。\n• 修正短片循環播放卡住和部分 GIF 無法播放的問題，改善發文字數計算。"
           }
         }
       }

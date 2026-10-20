@@ -3,11 +3,11 @@
     <string name="changelog_current"><![CDATA[
             <span>%1$s verzió:</span>
             <ul>
-                <li>A Pixiv Ugoira animációk most már lejátszhatók és MP4-videóként menthetők.</li>
-                <li>Húzza felfelé a médianézegetőt a bejegyzés részleteinek és műveleteinek megtekintéséhez.</li>
-                <li>A Bluesky már támogatja a GIF- és MOV-feltöltéseket. Javítottuk a videók mentését, a kezdő idővonal pedig elrejti a nem követett fiókoknak írt válaszokat.</li>
-                <li>Javult a médiafeltöltés és a piszkozatok újraküldése.</li>
-                <li>Hibajavítások és teljesítménybeli fejlesztések.</li>
+                <li>Új beállítás őrzi meg a kezdő idővonal olvasási helyét frissítéskor és az alkalmazás újbóli megnyitásakor, a legutóbb kiválasztott lappal együtt.</li>
+                <li>Bejegyzés írásakor már képek is beilleszthetők és behúzhatók.</li>
+                <li>Javult az RSS-olvasás: megnyitásimód-ajánlások és a hírfolyam tartalmának megjelenítése, ha a weboldal nem tölthető be.</li>
+                <li>Javultak az előrejelző visszalépési animációk és az oldalak sarkai osztott képernyős és ablakos módban.</li>
+                <li>Javítottuk a karakterszámlálást, a médiamentést és a reakciólisták összeomlását, valamint a teljesítményt.</li>
             </ul>
         ]]></string>
     <string name="changelog_title">Üdv újra!</string>

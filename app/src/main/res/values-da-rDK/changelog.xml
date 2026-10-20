@@ -5,11 +5,11 @@
     <string name="changelog_current"><![CDATA[
             <span>Version %1$s:</span>
             <ul>
-                <li>Tilføjet afspilning af Pixiv Ugoira-animationer og lagring som MP4-videoer.</li>
-                <li>Træk op i medievisningen for at se opslagets detaljer og handlinger.</li>
-                <li>Bluesky understøtter nu upload af GIF og MOV. Lagring af videoer er rettet, og starttidslinjen skjuler svar til konti, du ikke følger.</li>
-                <li>Forbedret upload af medier og gensending af kladder.</li>
-                <li>Fejlrettelser og forbedret ydeevne.</li>
+                <li>Tilføjet en indstilling til at huske læsepositionen på starttidslinjen ved opdatering og genåbning af appen, inklusive den sidst valgte fane.</li>
+                <li>Billeder kan nu indsættes og trækkes og slippes, når du skriver opslag.</li>
+                <li>Forbedret RSS-læsning med anbefalinger til åbning og visning af feedindhold, når websiden ikke kan indlæses.</li>
+                <li>Forbedret forudsigende tilbageanimation og sidehjørner i delt skærm og vinduestilstand.</li>
+                <li>Rettet tegnoptælling i opslag, lagring af medier og nedbrud i reaktionslister samt forbedret ydeevnen.</li>
             </ul>
         ]]></string>
 </resources>

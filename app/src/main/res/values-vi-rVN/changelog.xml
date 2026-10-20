@@ -3,11 +3,11 @@
     <string name="changelog_current"><![CDATA[
             <span>Phiên bản %1$s:</span>
             <ul>
-                <li>Thêm phát ảnh động Ugoira từ Pixiv và lưu dưới dạng video MP4.</li>
-                <li>Kéo lên trong trình xem đa phương tiện để xem chi tiết bài đăng và các thao tác.</li>
-                <li>Bluesky hỗ trợ tải lên GIF và MOV. Đã sửa lỗi lưu video; dòng thời gian chính ẩn phản hồi gửi đến các tài khoản bạn không theo dõi.</li>
-                <li>Cải thiện tải lên nội dung đa phương tiện và gửi lại bản nháp.</li>
-                <li>Sửa lỗi và cải thiện hiệu suất.</li>
+                <li>Thêm tùy chọn ghi nhớ vị trí đọc trên dòng thời gian chính khi làm mới và mở lại ứng dụng, bao gồm thẻ được chọn gần nhất.</li>
+                <li>Hỗ trợ dán và kéo thả hình ảnh khi soạn bài đăng.</li>
+                <li>Cải thiện đọc RSS với đề xuất cách mở và hiển thị nội dung nguồn cấp khi không tải được trang web.</li>
+                <li>Cải thiện hiệu ứng quay lại dự đoán và góc trang trong chế độ chia đôi màn hình và cửa sổ.</li>
+                <li>Sửa cách đếm ký tự bài đăng, lưu nội dung đa phương tiện và lỗi danh sách phản ứng bị treo, đồng thời cải thiện hiệu suất.</li>
             </ul>
         ]]></string>
     <string name="changelog_title">Chào mừng trở lại!</string>

@@ -5,11 +5,11 @@
     <string name="changelog_current"><![CDATA[
             <span>Versie %1$s:</span>
             <ul>
-                <li>Afspelen van Pixiv Ugoira-animaties en opslaan als MP4-video’s toegevoegd.</li>
-                <li>Sleep omhoog in de mediaviewer om berichtdetails en acties te bekijken.</li>
-                <li>Bluesky ondersteunt nu GIF- en MOV-uploads. Het opslaan van video’s is hersteld en de starttijdlijn verbergt antwoorden aan accounts die je niet volgt.</li>
-                <li>Uploads van media en opnieuw verzenden van concepten verbeterd.</li>
-                <li>Bugfixes en prestatieverbeteringen.</li>
+                <li>Een optie toegevoegd om je leespositie op de starttijdlijn te onthouden bij vernieuwen en heropenen van de app, inclusief het laatst gekozen tabblad.</li>
+                <li>Afbeeldingen kunnen nu worden geplakt en versleept tijdens het schrijven van berichten.</li>
+                <li>RSS-lezen verbeterd met aanbevelingen voor de openingsmodus en feedinhoud als terugval wanneer de webpagina niet kan worden geladen.</li>
+                <li>Voorspellende teruganimaties en paginahoeken in gesplitst scherm en venstermodus verbeterd.</li>
+                <li>Tekentelling, het opslaan van media en crashes in reactielijsten verholpen, met prestatieverbeteringen.</li>
             </ul>
         ]]></string>
 </resources>

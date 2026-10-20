@@ -5,11 +5,11 @@
     <string name="changelog_current"><![CDATA[
             <span>Versjon %1$s:</span>
             <ul>
-                <li>Lagt til avspilling av Pixiv Ugoira-animasjoner og lagring som MP4-videoer.</li>
-                <li>Dra opp i medievisningen for å se innleggets detaljer og handlinger.</li>
-                <li>Bluesky støtter nå opplasting av GIF og MOV. Videolagring er rettet, og hjemmetidslinjen skjuler svar til kontoer du ikke følger.</li>
-                <li>Forbedret opplasting av medier og ny sending av utkast.</li>
-                <li>Feilrettinger og ytelsesforbedringer.</li>
+                <li>Lagt til en innstilling for å huske leseposisjonen på hjemmetidslinjen ved oppdatering og gjenåpning av appen, inkludert den sist valgte fanen.</li>
+                <li>Bilder kan nå limes inn og dras og slippes når du skriver innlegg.</li>
+                <li>Forbedret RSS-lesing med anbefalinger for åpningsmåte og visning av feedinnhold når nettsiden ikke kan lastes.</li>
+                <li>Forbedret animasjoner for prediktiv tilbakebevegelse og sidehjørner i delt skjerm og vindusmodus.</li>
+                <li>Rettet tegntelling i innlegg, lagring av medier og krasj i reaksjonslister, med ytelsesforbedringer.</li>
             </ul>
         ]]></string>
 </resources>

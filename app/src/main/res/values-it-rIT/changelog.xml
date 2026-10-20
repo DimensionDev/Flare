@@ -3,11 +3,11 @@
     <string name="changelog_current"><![CDATA[
             <span>Versione %1$s:</span>
             <ul>
-                <li>Aggiunte la riproduzione delle animazioni Ugoira di Pixiv e la possibilità di salvarle come video MP4.</li>
-                <li>Trascina verso l’alto nel visualizzatore multimediale per vedere dettagli e azioni del post.</li>
-                <li>Bluesky supporta il caricamento di GIF e MOV. Corretto il salvataggio dei video; la timeline principale nasconde le risposte ad account che non segui.</li>
-                <li>Migliorati il caricamento dei media e il reinvio delle bozze.</li>
-                <li>Correzioni di bug e miglioramenti delle prestazioni.</li>
+                <li>Aggiunta un’opzione per ricordare la posizione di lettura nella timeline principale durante gli aggiornamenti e alla riapertura dell’app, inclusa l’ultima scheda selezionata.</li>
+                <li>Aggiunti l’incolla e il trascinamento delle immagini durante la scrittura dei post.</li>
+                <li>Migliorata la lettura RSS con suggerimenti sulla modalità di apertura e il contenuto del feed quando la pagina web non si carica.</li>
+                <li>Migliorate le animazioni del gesto Indietro predittivo e gli angoli delle pagine nelle modalità schermo diviso e finestra.</li>
+                <li>Corretti il conteggio dei caratteri, il salvataggio dei media e gli arresti delle liste di reazioni, con miglioramenti delle prestazioni.</li>
             </ul>
         ]]></string>
     <string name="changelog_title">Bentornato!</string>

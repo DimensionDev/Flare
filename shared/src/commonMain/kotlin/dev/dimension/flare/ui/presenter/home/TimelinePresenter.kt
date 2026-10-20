@@ -31,6 +31,7 @@ import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.model.TranslationDisplayOptions
 import dev.dimension.flare.data.datasource.microblog.offsetPagingConfig
 import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
+import dev.dimension.flare.data.datasource.microblog.paging.HomeTimelineRefreshSessions
 import dev.dimension.flare.data.datasource.microblog.paging.NotSupportRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.OffsetFromStartPagingKey
 import dev.dimension.flare.data.datasource.microblog.paging.OffsetFromStartPagingSource
@@ -103,6 +104,7 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
     private val appDataStore: AppDataStore by koinInject()
     private val preTranslationService: PreTranslationService by koinInject()
     private val settingsRepository: SettingsRepository by koinInject()
+    private val refreshSessions: HomeTimelineRefreshSessions by koinInject()
     private val mxgaRepository: MxgaRepository by koinInject()
     private val platformRegistry: PlatformRegistry by koinInject()
 
@@ -280,6 +282,12 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
                         notifyError = notifyError,
                         retainHistory = if (isHomeTimeline) rememberPosition else null,
                         accountKeys = sourceAccounts,
+                        refreshSession =
+                            if (isHomeTimeline && timelineTabItemId != null) {
+                                refreshSessions.forTimeline(timelineTabItemId, loader.pagingKey)
+                            } else {
+                                null
+                            },
                         refreshOnInitialize = {
                             !rememberPosition &&
                                 shouldRefreshTimelineOnInitialize(isHomeTimeline) {

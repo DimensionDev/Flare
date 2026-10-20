@@ -62,6 +62,7 @@ internal class MixedTimelinePageLoader(
         pageSize: Int,
         request: PagingRequest,
         cachedItemKeys: suspend (List<UiTimelineV2>) -> Set<String> = { emptySet() },
+        refreshWithoutGap: Set<String> = emptySet(),
         joinsTimeline: suspend (String, List<UiTimelineV2>) -> Boolean,
     ): PagingResult<UiTimelineV2> =
         coroutineScope {
@@ -75,6 +76,7 @@ internal class MixedTimelinePageLoader(
             require(pages.size == sources.size) { "Mixed timeline sources changed" }
             val attempted = mutableSetOf<Int>()
             val failures = mutableListOf<Throwable>()
+            val refreshedSources = mutableSetOf<String>()
             var failedAttempts = 0
             var continuationFailure: Throwable? = null
 
@@ -95,7 +97,7 @@ internal class MixedTimelinePageLoader(
                                     }
                                 val response =
                                     if (source is MixedTimelinePageLoader) {
-                                        source.loadPage(pageSize, subRequest, cachedItemKeys, joinsTimeline)
+                                        source.loadPage(pageSize, subRequest, cachedItemKeys, refreshWithoutGap, joinsTimeline)
                                     } else {
                                         source.load(pageSize, subRequest)
                                     }
@@ -111,7 +113,7 @@ internal class MixedTimelinePageLoader(
                                         response.continuationFailure == null && response.sourceFailures.isEmpty() &&
                                         cachedItemKeys(response.data).containsAll(response.data.map { it.stableItemKey })
                                 val result =
-                                    if (boundaryIndex >= 0 || rankedPageIsCached) {
+                                    if (boundaryIndex >= 0 || rankedPageIsCached || source.pagingKey in refreshWithoutGap) {
                                         response.copy(
                                             data =
                                                 if (boundaryIndex >= 0 && subRequest is PagingRequest.Append) {
@@ -142,6 +144,12 @@ internal class MixedTimelinePageLoader(
                         if (result != null) {
                             val previous = pages[index]
                             val source = sources[index]
+                            refreshedSources += result.refreshedSources
+                            if (request is PagingRequest.Refresh && source.refreshGapOncePerSession &&
+                                result.continuationFailure == null && result.sourceFailures.isEmpty()
+                            ) {
+                                refreshedSources += source.pagingKey
+                            }
                             val fetchedHeads =
                                 if (source is MixedTimelinePageLoader) {
                                     result.sourceHeads
@@ -217,12 +225,19 @@ internal class MixedTimelinePageLoader(
                 pages.indices.forEach { pages[it] = pages[it].copy(pending = emptyList()) }
             }
             val cachedPending = cachedItemKeys(pages.flatMap { it.pending })
-            if (cachedPending.isNotEmpty()) {
+            if (cachedPending.isNotEmpty() || refreshWithoutGap.isNotEmpty()) {
                 val published = selected.mapTo(hashSetOf()) { it.stableItemKey }
                 pages.indices.forEach { index ->
-                    val (cached, remaining) = pages[index].pending.partition { it.stableItemKey in cachedPending }
-                    // Write cached updates now; only unseen buffered items need a gap.
-                    selected += cached.filter { published.add(it.stableItemKey) }
+                    val publishNow =
+                        cachedPending +
+                            pages[index]
+                                .sourceHeads
+                                .filterKeys { it in refreshWithoutGap }
+                                .values
+                                .flatten()
+                    val (ready, remaining) = pages[index].pending.partition { it.stableItemKey in publishNow }
+                    // Publish fetched featured posts before discarding their refresh continuation.
+                    selected += ready.filter { published.add(it.stableItemKey) && !exclude(it) }
                     pages[index] = pages[index].copy(pending = remaining)
                 }
                 if (ordersByTime) selected.sortByDescending { it.createdAt.value }
@@ -238,6 +253,7 @@ internal class MixedTimelinePageLoader(
                 nextKey = if (pages.any { it.canLoad || it.pending.isNotEmpty() }) Json.encodeToString(pages) else null,
                 continuationFailure = continuationFailure,
                 sourceFailures = failures.distinct(),
+                refreshedSources = refreshedSources,
                 sourceHeads =
                     pages
                         .flatMap { it.sourceHeads.entries }

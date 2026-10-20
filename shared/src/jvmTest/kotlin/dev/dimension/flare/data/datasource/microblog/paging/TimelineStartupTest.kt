@@ -195,6 +195,7 @@ class TimelineStartupTest {
     ) = TimelineRemoteMediator(
         object : CacheableRemoteLoader<UiTimelineV2> {
             override val pagingKey = "startup"
+            override val refreshGapOncePerSession = true
 
             override suspend fun load(
                 pageSize: Int,
@@ -204,6 +205,7 @@ class TimelineStartupTest {
         db,
         false,
         retainHistory = remember,
+        refreshSession = HomeTimelineRefreshSessions().forTimeline("home", "startup"),
     )
 
     private fun post(id: Int) =

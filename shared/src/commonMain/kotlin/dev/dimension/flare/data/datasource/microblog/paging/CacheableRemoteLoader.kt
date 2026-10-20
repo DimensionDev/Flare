@@ -8,6 +8,8 @@ public interface CacheableRemoteLoader<T : Any> : RemoteLoader<T> {
     // Only an ordered source may finish a retained page at its known lower neighbour.
     public val canJoinTimeline: Boolean
         get() = false
+    public val refreshGapOncePerSession: Boolean
+        get() = false
     public val supportPrepend: Boolean
         get() = false
     public val collapseReplyChains: Boolean

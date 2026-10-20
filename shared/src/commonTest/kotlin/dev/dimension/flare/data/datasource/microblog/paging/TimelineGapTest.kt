@@ -13,6 +13,7 @@ import dev.dimension.flare.data.database.cache.clearHomeTimelinesForAccount
 import dev.dimension.flare.data.database.cache.connect
 import dev.dimension.flare.data.database.cache.mapper.saveToDatabase
 import dev.dimension.flare.data.database.cache.model.DbPagingKey
+import dev.dimension.flare.data.database.cache.model.DbStatus
 import dev.dimension.flare.data.database.createDatabaseDriver
 import dev.dimension.flare.data.datasource.microblog.MixedRemoteMediator
 import dev.dimension.flare.data.datasource.microblog.offsetPagingConfig
@@ -20,6 +21,8 @@ import dev.dimension.flare.data.model.tab.TimelineFilterConfig
 import dev.dimension.flare.data.model.tab.TimelineMergePolicy
 import dev.dimension.flare.data.repository.KeywordFilterPattern
 import dev.dimension.flare.data.repository.MxgaSnapshot
+import dev.dimension.flare.data.translation.NoopPreTranslationService
+import dev.dimension.flare.data.translation.PreTranslationService
 import dev.dimension.flare.memoryDatabaseBuilder
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -32,7 +35,9 @@ import dev.dimension.flare.ui.render.toUi
 import dev.dimension.flare.ui.render.toUiPlainText
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runCurrent
@@ -67,6 +72,376 @@ class TimelineGapTest : RobolectricTest() {
     fun tearDown() {
         database.close()
     }
+
+    @Test
+    fun featuredRefreshCreatesOneGapPerRunAndKeepsExistingGapsLoadable() =
+        runTest {
+            var generation = 0
+            val requests = mutableListOf<PagingRequest>()
+            val featured =
+                source("featured", ordered = false, refreshGapOncePerSession = true) { request ->
+                    requests += request
+                    if (request is PagingRequest.Append) {
+                        PagingResult(listOf(datedPost(5)))
+                    } else {
+                        PagingResult(listOf(datedPost(++generation * 10)), nextKey = "page-$generation")
+                    }
+                }
+
+            fun home(sessions: HomeTimelineRefreshSessions? = null) =
+                TimelineRemoteMediator(
+                    featured,
+                    database,
+                    false,
+                    retainHistory = true,
+                    refreshSession = sessions?.forTimeline("home", featured.pagingKey),
+                )
+            home().load(LoadType.REFRESH, state)
+            val sessions = HomeTimelineRefreshSessions()
+            val first = home(sessions)
+            listOf(
+                launch { first.load(LoadType.REFRESH, state) },
+                launch { home(sessions).load(LoadType.REFRESH, state) },
+            ).forEach { it.join() }
+            val gap = contents(first).filterIsInstance<UiTimelineV2.Gap>().single()
+            home(sessions).load(LoadType.REFRESH, state)
+            assertEquals(listOf(gap), contents(first).filterIsInstance<UiTimelineV2.Gap>())
+            assertEquals(listOf("40", "30", "20", "10"), contents(first).filterIsInstance<UiTimelineV2.Post>().map { it.statusKey.id })
+            assertEquals("page-1", database.pagingTimelineDao().getNextKey(first.pagingKey))
+            home(HomeTimelineRefreshSessions()).load(LoadType.REFRESH, state)
+            assertEquals(2, contents(first).filterIsInstance<UiTimelineV2.Gap>().size, "A new process permits another gap")
+            first.loadGap(gap)
+            assertEquals(PagingRequest.Append("page-2"), requests.last())
+            assertEquals(1, contents(first).filterIsInstance<UiTimelineV2.Gap>().size)
+        }
+
+    @Test
+    fun featuredEmptyOrDuplicateFirstRefreshConsumesItsOpportunity() =
+        runTest {
+            for (empty in listOf(false, true)) {
+                var response = PagingResult<UiTimelineV2>(listOf(datedPost(10)), nextKey = "tail")
+                val featured = source("featured-$empty", ordered = false, refreshGapOncePerSession = true) { response }
+                TimelineRemoteMediator(featured, database, false, retainHistory = true).load(LoadType.REFRESH, state)
+                val home =
+                    TimelineRemoteMediator(
+                        featured,
+                        database,
+                        false,
+                        retainHistory = true,
+                        refreshSession = HomeTimelineRefreshSessions().forTimeline("home", featured.pagingKey),
+                    )
+                if (empty) response = PagingResult()
+                home.load(LoadType.REFRESH, state)
+                response = PagingResult(listOf(datedPost(20)), nextKey = "unused")
+                home.load(LoadType.REFRESH, state)
+                assertEquals(0, contents(home).filterIsInstance<UiTimelineV2.Gap>().size)
+            }
+        }
+
+    @Test
+    fun featuredFailureDoesNotConsumeItsFirstSuccessfulRefresh() =
+        runTest {
+            var fail = false
+            var response = PagingResult<UiTimelineV2>(listOf(datedPost(10)), nextKey = "tail")
+            val featured =
+                source("featured", ordered = false, refreshGapOncePerSession = true) {
+                    check(!fail) { "offline" }
+                    response
+                }
+            TimelineRemoteMediator(featured, database, false, retainHistory = true).load(LoadType.REFRESH, state)
+            val home =
+                TimelineRemoteMediator(
+                    featured,
+                    database,
+                    false,
+                    retainHistory = true,
+                    refreshSession = HomeTimelineRefreshSessions().forTimeline("home", featured.pagingKey),
+                )
+            fail = true
+            assertIs<RemoteMediator.MediatorResult.Error>(home.load(LoadType.REFRESH, state))
+            fail = false
+            response = PagingResult(listOf(datedPost(20)), nextKey = "gap")
+            home.load(LoadType.REFRESH, state)
+            assertEquals(1, contents(home).filterIsInstance<UiTimelineV2.Gap>().size)
+            response = PagingResult(listOf(datedPost(30)), nextKey = "unused")
+            home.load(LoadType.REFRESH, state)
+            assertEquals(1, contents(home).filterIsInstance<UiTimelineV2.Gap>().size)
+        }
+
+    @Test
+    fun mixedFeaturedRefreshPublishesBufferedPostsAndKeepsOnlyOtherSourcesInNewGaps() =
+        runTest {
+            for (policy in TimelineMergePolicy.entries) {
+                for (nested in listOf(false, true)) {
+                    var generation = 0
+                    val appended = mutableListOf<String>()
+                    val featured =
+                        source("featured-$policy-$nested", ordered = false, refreshGapOncePerSession = true) { request ->
+                            if (request is PagingRequest.Append) {
+                                appended += "featured"
+                                PagingResult(listOf(datedPost(5)))
+                            } else {
+                                PagingResult(
+                                    (generation * 100 + 40 downTo generation * 100 + 1).map(::datedPost),
+                                    nextKey = "featured-$generation",
+                                )
+                            }
+                        }
+                    val ordered =
+                        source("ordered") { request ->
+                            if (request is PagingRequest.Append) {
+                                appended += "ordered"
+                                PagingResult(listOf(datedPost(15)))
+                            } else {
+                                PagingResult(listOf(datedPost(generation * 100 + 60)), nextKey = "ordered-$generation")
+                            }
+                        }
+                    val inner = MixedRemoteMediator(database, listOf(featured, ordered), policy)
+                    val loader = if (nested) MixedRemoteMediator(database, listOf(inner), policy) else inner
+                    TimelineRemoteMediator(loader, database, false, retainHistory = true).load(LoadType.REFRESH, state)
+                    val home =
+                        TimelineRemoteMediator(
+                            loader,
+                            database,
+                            false,
+                            retainHistory = true,
+                            refreshSession = HomeTimelineRefreshSessions().forTimeline("home", loader.pagingKey),
+                        )
+                    generation = 1
+                    home.load(LoadType.REFRESH, state)
+                    val oldGap = contents(home).filterIsInstance<UiTimelineV2.Gap>().single()
+                    generation = 2
+                    home.load(LoadType.REFRESH, state)
+                    val newGap = contents(home).filterIsInstance<UiTimelineV2.Gap>().single { it.statusKey != oldGap.statusKey }
+                    assertTrue(
+                        contents(home).map { it.statusKey.id }.containsAll((201..240).map(Int::toString)),
+                        "All fetched featured posts must be published: $policy nested=$nested",
+                    )
+                    home.loadGap(newGap)
+                    assertEquals(listOf("ordered"), appended, "A new gap must not fetch featured pages")
+                    assertEquals(listOf(oldGap), contents(home).filterIsInstance<UiTimelineV2.Gap>())
+                    repeat(4) {
+                        contents(home).filterIsInstance<UiTimelineV2.Gap>().find { it.statusKey == oldGap.statusKey }?.let {
+                            home.loadGap(it)
+                        }
+                    }
+                    assertTrue("featured" in appended, "An existing gap keeps its original continuation")
+                }
+            }
+        }
+
+    @Test
+    fun mixedFailedFeaturedSourceKeepsItsOwnFirstRefreshOpportunity() =
+        runTest {
+            var generation = 0
+            var fail = false
+            val appended = mutableListOf<Int>()
+            val sources =
+                (1..2).map { index ->
+                    source("featured-$index", ordered = false, refreshGapOncePerSession = true) { request ->
+                        check(index != 2 || !fail) { "offline" }
+                        if (request is PagingRequest.Append) {
+                            appended += index
+                            PagingResult(listOf(datedPost(index)))
+                        } else {
+                            PagingResult(listOf(datedPost(generation * 100 + index * 10)), nextKey = "source-$index-$generation")
+                        }
+                    }
+                }
+            val loader = MixedRemoteMediator(database, sources, TimelineMergePolicy.Time)
+            TimelineRemoteMediator(loader, database, false, retainHistory = true).load(LoadType.REFRESH, state)
+            val home =
+                TimelineRemoteMediator(
+                    loader,
+                    database,
+                    false,
+                    retainHistory = true,
+                    refreshSession = HomeTimelineRefreshSessions().forTimeline("home", loader.pagingKey),
+                )
+            generation = 1
+            fail = true
+            home.load(LoadType.REFRESH, state)
+            val firstGap = contents(home).filterIsInstance<UiTimelineV2.Gap>().single()
+            generation = 2
+            fail = false
+            home.load(LoadType.REFRESH, state)
+            val retryGap = contents(home).filterIsInstance<UiTimelineV2.Gap>().single { it.statusKey != firstGap.statusKey }
+            home.loadGap(retryGap)
+            assertEquals(listOf(2), appended, "Only the source that failed its first refresh may create a new gap")
+            generation = 3
+            home.load(LoadType.REFRESH, state)
+            assertEquals(listOf(firstGap), contents(home).filterIsInstance<UiTimelineV2.Gap>())
+        }
+
+    @Test
+    fun cancelledOrStaleFeaturedRefreshDoesNotConsumeItsOpportunity() =
+        runTest {
+            for (cancel in listOf(false, true)) {
+                var delayed = false
+                var response = PagingResult<UiTimelineV2>(listOf(datedPost(10)), nextKey = "tail")
+                val entered = CompletableDeferred<Unit>()
+                val release = CompletableDeferred<Unit>()
+                val featured =
+                    source("featured-$cancel", ordered = false, refreshGapOncePerSession = true) {
+                        if (delayed) {
+                            entered.complete(Unit)
+                            withContext(NonCancellable) { release.await() }
+                        }
+                        response
+                    }
+                TimelineRemoteMediator(featured, database, false, retainHistory = true).load(LoadType.REFRESH, state)
+                val home =
+                    TimelineRemoteMediator(
+                        featured,
+                        database,
+                        false,
+                        retainHistory = true,
+                        refreshSession = HomeTimelineRefreshSessions().forTimeline("home", featured.pagingKey),
+                    )
+                delayed = true
+                response = PagingResult(listOf(datedPost(20)), nextKey = "discarded")
+                val job = launch { home.load(LoadType.REFRESH, state) }
+                entered.await()
+                if (cancel) {
+                    job.cancel()
+                } else {
+                    val dao = database.pagingTimelineDao()
+                    val key = assertNotNull(dao.getPagingKeyMetadata(home.pagingKey))
+                    dao.updatePage(home.pagingKey, null, true, "changed", key.sourceHeads, key.accountKeys)
+                }
+                release.complete(Unit)
+                job.join()
+                assertEquals(listOf("10"), contents(home).map { it.statusKey.id })
+                delayed = false
+                home.load(LoadType.REFRESH, state)
+                assertEquals(1, contents(home).filterIsInstance<UiTimelineV2.Gap>().size)
+                response = PagingResult(listOf(datedPost(30)), nextKey = "unused")
+                home.load(LoadType.REFRESH, state)
+                assertEquals(1, contents(home).filterIsInstance<UiTimelineV2.Gap>().size)
+            }
+        }
+
+    @Test
+    fun rolledBackFeaturedRefreshDoesNotConsumeItsOpportunity() =
+        runTest {
+            for (cancel in listOf(false, true)) {
+                var reject = true
+                var refreshJob: Job? = null
+                var response = PagingResult<UiTimelineV2>(listOf(datedPost(10)), nextKey = "tail")
+                val featured = source("featured-$cancel", ordered = false, refreshGapOncePerSession = true) { response }
+                TimelineRemoteMediator(featured, database, false, retainHistory = true).load(LoadType.REFRESH, state)
+                val home =
+                    TimelineRemoteMediator(
+                        featured,
+                        database,
+                        false,
+                        retainHistory = true,
+                        refreshSession = HomeTimelineRefreshSessions().forTimeline("home", featured.pagingKey),
+                        preTranslationService =
+                            object : PreTranslationService by NoopPreTranslationService {
+                                override fun enqueueStatuses(
+                                    statuses: List<DbStatus>,
+                                    allowLongText: Boolean,
+                                ) {
+                                    if (reject) {
+                                        if (cancel) checkNotNull(refreshJob).cancel() else error("Reject transaction")
+                                    }
+                                }
+                            },
+                    )
+                response = PagingResult(listOf(datedPost(20)), nextKey = "gap")
+                refreshJob = launch(start = CoroutineStart.LAZY) { home.load(LoadType.REFRESH, state) }
+                refreshJob.start()
+                refreshJob.join()
+                assertEquals(listOf("10"), contents(home).map { it.statusKey.id })
+                reject = false
+                home.load(LoadType.REFRESH, state)
+                assertEquals(1, contents(home).filterIsInstance<UiTimelineV2.Gap>().size)
+                response = PagingResult(listOf(datedPost(30)), nextKey = "unused")
+                home.load(LoadType.REFRESH, state)
+                assertEquals(1, contents(home).filterIsInstance<UiTimelineV2.Gap>().size)
+            }
+        }
+
+    @Test
+    fun featuredSessionStillAllowsNormalPagingAfterAnEmptyCacheLoadOrCacheClear() =
+        runTest {
+            var generation = 0
+            val requests = mutableListOf<PagingRequest>()
+            val featured =
+                source("featured", ordered = false, refreshGapOncePerSession = true) { request ->
+                    requests += request
+                    if (request is PagingRequest.Append) {
+                        PagingResult(listOf(datedPost(1)))
+                    } else {
+                        PagingResult(listOf(datedPost(++generation * 10)), nextKey = "tail-$generation")
+                    }
+                }
+            val session = HomeTimelineRefreshSessions().forTimeline("home", featured.pagingKey)
+            val home = TimelineRemoteMediator(featured, database, false, retainHistory = true, refreshSession = session)
+            repeat(2) { home.load(LoadType.REFRESH, state) }
+            assertEquals(0, contents(home).filterIsInstance<UiTimelineV2.Gap>().size)
+            home.load(LoadType.APPEND, state)
+            assertEquals(PagingRequest.Append("tail-1"), requests.last())
+            database.connect {
+                val dao = database.pagingTimelineDao()
+                dao.delete(dao.getByPagingKey(home.pagingKey))
+                dao.deletePagingKey(home.pagingKey)
+            }
+            home.load(LoadType.REFRESH, state)
+            home.load(LoadType.APPEND, state)
+            assertEquals(PagingRequest.Append("tail-3"), requests.last())
+            assertEquals(listOf("30", "1"), contents(home).map { it.statusKey.id })
+        }
+
+    @Test
+    fun homeRefreshSessionSurvivesSettingChangesButIsScopedToTheTabAndSourceConfiguration() =
+        runTest {
+            var generation = 0
+            val featured =
+                source("featured", ordered = false, refreshGapOncePerSession = true) {
+                    PagingResult(listOf(datedPost(++generation * 10)), nextKey = "tail-$generation")
+                }
+            val sessions = HomeTimelineRefreshSessions()
+
+            fun home(
+                tab: String,
+                remember: Boolean,
+            ) = TimelineRemoteMediator(
+                featured,
+                database,
+                false,
+                retainHistory = remember,
+                refreshSession = sessions.forTimeline(tab, featured.pagingKey),
+            )
+            home("first", false).load(LoadType.REFRESH, state)
+            val first = home("first", true)
+            first.load(LoadType.REFRESH, state)
+            assertEquals(0, contents(first).filterIsInstance<UiTimelineV2.Gap>().size)
+            home("second", true).load(LoadType.REFRESH, state)
+            assertEquals(1, contents(first).filterIsInstance<UiTimelineV2.Gap>().size)
+            assertTrue(sessions.forTimeline("first", "another-account").refreshedSources.isEmpty())
+        }
+
+    @Test
+    fun otherRankedSourcesStillCreateGapsOnEveryRefresh() =
+        runTest {
+            var generation = 0
+            val ranked =
+                source("ranked", ordered = false) {
+                    PagingResult(listOf(datedPost(++generation * 10)), nextKey = "tail-$generation")
+                }
+            val home =
+                TimelineRemoteMediator(
+                    ranked,
+                    database,
+                    false,
+                    retainHistory = true,
+                    refreshSession = HomeTimelineRefreshSessions().forTimeline("home", ranked.pagingKey),
+                )
+            repeat(3) { home.load(LoadType.REFRESH, state) }
+            assertEquals(2, contents(home).filterIsInstance<UiTimelineV2.Gap>().size)
+        }
 
     @Test
     fun rankedRefreshKeepsTheOldAnchorAndItsTrailingWindowAfterALargePrepend() =
@@ -838,10 +1213,12 @@ class TimelineGapTest : RobolectricTest() {
     private fun source(
         name: String,
         ordered: Boolean = true,
+        refreshGapOncePerSession: Boolean = false,
         response: suspend (PagingRequest) -> PagingResult<UiTimelineV2>,
     ) = object : CacheableRemoteLoader<UiTimelineV2> {
         override val pagingKey = name
         override val canJoinTimeline = ordered
+        override val refreshGapOncePerSession = refreshGapOncePerSession
 
         override suspend fun load(
             pageSize: Int,

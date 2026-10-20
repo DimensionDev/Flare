@@ -78,6 +78,7 @@ internal class FeaturedTimelineRemoteMediator(
     private val accountKey: MicroBlogKey,
 ) : CacheableRemoteLoader<UiTimelineV2> {
     override val pagingKey: String = "featured_$accountKey"
+    override val refreshGapOncePerSession = true
 
     override suspend fun load(
         pageSize: Int,

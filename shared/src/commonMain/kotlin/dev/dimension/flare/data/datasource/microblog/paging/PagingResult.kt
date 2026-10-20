@@ -9,6 +9,7 @@ public data class PagingResult<T : Any>(
     val continuationFailure: Throwable? = null,
     val sourceFailures: List<Throwable> = emptyList(),
     val sourceHeads: Map<String, List<String>> = emptyMap(),
+    val refreshedSources: Set<String> = emptySet(),
 ) {
     public constructor(
         endOfPaginationReached: Boolean,

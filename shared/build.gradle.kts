@@ -157,6 +157,11 @@ val runDatabaseBenchmark =
         .map(String::toBoolean)
         .orElse(false)
 
+tasks.named<org.gradle.api.tasks.testing.Test>("jvmTest") {
+    // Keep off-screen image tests from waiting for macOS AppKit startup.
+    systemProperty("java.awt.headless", "true")
+}
+
 tasks.withType<org.gradle.api.tasks.testing.AbstractTestTask>().configureEach {
     if (runDatabaseBenchmark.get()) {
         outputs.upToDateWhen { false }

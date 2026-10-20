@@ -19,40 +19,6 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 jobs:
-  diagnose-shared-jvm:
-    runs-on: [xcode-27]
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-java@v6
-        with:
-          distribution: 'jetbrains'
-          java-version: 25
-      - name: Diagnose shared JVM tests
-        timeout-minutes: 20
-        run: |
-          cat > "$RUNNER_TEMP/test-events.init.gradle" <<'EOF'
-          import org.gradle.api.tasks.testing.Test
-          allprojects {
-            tasks.withType(Test).configureEach {
-              testLogging.events('started', 'passed', 'failed', 'skipped')
-            }
-          }
-          EOF
-          (
-            while sleep 60; do
-              jcmd -l | awk '/GradleWorkerMain/ { print $1 }' | while read -r test_pid; do
-                jcmd "$test_pid" Thread.print -l || true
-              done
-            done
-          ) &
-          diagnostics_pid=$!
-          trap 'kill "$diagnostics_pid" 2>/dev/null || true' EXIT
-          ./gradlew :shared:jvmTest --init-script "$RUNNER_TEMP/test-events.init.gradle" --console=plain
-      - uses: actions/upload-artifact@v7
-        if: always()
-        with:
-          name: shared-jvm-diagnostics
-          path: shared/build/test-results/jvmTest/
   build:
     runs-on: [xcode-27]
 

@@ -3,6 +3,9 @@ package dev.dimension.flare.ui.presenter.compose
 import androidx.room3.Room
 import dev.dimension.flare.RobolectricTest
 import dev.dimension.flare.common.FileType
+import dev.dimension.flare.common.InAppNotification
+import dev.dimension.flare.common.Message
+import dev.dimension.flare.common.UploadMedia
 import dev.dimension.flare.createTestFileItem
 import dev.dimension.flare.createTestFileSystem
 import dev.dimension.flare.createTestRootPath
@@ -13,6 +16,8 @@ import dev.dimension.flare.data.database.app.model.DraftReferenceType
 import dev.dimension.flare.data.database.app.model.DraftTargetStatus
 import dev.dimension.flare.data.database.createDatabaseDriver
 import dev.dimension.flare.data.datasource.microblog.ComposeData
+import dev.dimension.flare.data.datastore.AppDataStore
+import dev.dimension.flare.data.io.FileStorage
 import dev.dimension.flare.data.io.OkioFileStorage
 import dev.dimension.flare.data.repository.ComposeDraftBundle
 import dev.dimension.flare.data.repository.DraftMediaStore
@@ -27,18 +32,27 @@ import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiTimelineV2
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
 import okio.FileSystem
+import okio.Path
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -1126,6 +1140,130 @@ class SendDraftUseCaseTest : RobolectricTest() {
         assertEquals(accounts.map { it.accountKey }, sent.map { it.account.accountKey })
         assertNull(repository.draft("cancelled-setup").first())
     }
+
+    @Test
+    fun nativePreparationFailureReportsErrorAndReleasesSendAndSaveCallbacks() =
+        runTest {
+            Dispatchers.setMain(UnconfinedTestDispatcher(testScheduler))
+            try {
+                val failingStore =
+                    DraftMediaStore(
+                        object : FileStorage by fileStorage {
+                            override suspend fun write(
+                                path: Path,
+                                media: UploadMedia,
+                            ) {
+                                error("Cannot copy imported file")
+                            }
+                        },
+                    )
+                var prepared = 0
+                var failed = 0
+                var notified = CompletableDeferred<Unit>()
+                val notification =
+                    object : InAppNotification {
+                        override fun onProgress(
+                            message: Message,
+                            progress: Int,
+                            total: Int,
+                        ) = Unit
+
+                        override fun onSuccess(message: Message) = Unit
+
+                        override fun onError(
+                            message: Message,
+                            throwable: Throwable,
+                        ) {
+                            notified.complete(Unit)
+                        }
+                    }
+                val useCase =
+                    ComposeUseCase(
+                        scope = this,
+                        inAppNotification = notification,
+                        appDataStore = AppDataStore(fileStorage),
+                        saveDraftUseCase = SaveDraftUseCase(repository, failingStore),
+                        sendDraftUseCase =
+                            SendDraftUseCase(repository, failingStore, findAccount = { null }, composeDraft = {
+                                _,
+                                _,
+                                _,
+                                ->
+                                error("Must not upload")
+                            }),
+                    )
+                val accounts = listOf(mastodonAccount("alice", "example.com"))
+                val data = ComposeData(content = "image", medias = listOf(media("a.gif", byteArrayOf(1), altText = null)))
+                useCase(accounts, data, "failed-send", onPrepared = { prepared++ }, onPreparationFailed = { failed++ })
+                notified.await()
+                assertEquals(0, prepared)
+                assertEquals(1, failed)
+                notified = CompletableDeferred()
+                useCase.saveDraft(accounts, data, "failed-save", onSaved = { prepared++ }, onFailure = { failed++ })
+                notified.await()
+                assertEquals(0, prepared)
+                assertEquals(2, failed)
+            } finally {
+                Dispatchers.resetMain()
+            }
+        }
+
+    @Test
+    fun nativeAccountLookupCancellationCompletesDispatchBeforeAndAfterStart() =
+        runTest {
+            Dispatchers.setMain(UnconfinedTestDispatcher(testScheduler))
+            try {
+                for (startLookup in listOf(false, true)) {
+                    val composerScope = CoroutineScope(coroutineContext + Job())
+                    val results = mutableListOf<Boolean>()
+                    composerScope.launchComposeWithAccounts(
+                        accounts = flow { awaitCancellation() },
+                        onDispatched = { results += it },
+                        dispatch = { error("Cancelled lookup must not dispatch") },
+                    )
+                    if (startLookup) runCurrent()
+                    composerScope.cancel()
+                    advanceUntilIdle()
+                    assertEquals(listOf(false), results)
+                }
+                val closedScope = CoroutineScope(coroutineContext + Job()).apply { cancel() }
+                val results = mutableListOf<Boolean>()
+                closedScope.launchComposeWithAccounts(
+                    accounts = flowOf(listOf(mastodonAccount("alice", "example.com"))),
+                    onDispatched = { results += it },
+                    dispatch = { error("A closed composer must not dispatch synchronous accounts") },
+                )
+                advanceUntilIdle()
+                assertEquals(listOf(false), results)
+            } finally {
+                Dispatchers.resetMain()
+            }
+        }
+
+    @Test
+    fun nativeAccountLookupKeepsBackgroundDispatchAliveAfterComposerCloses() =
+        runTest {
+            Dispatchers.setMain(UnconfinedTestDispatcher(testScheduler))
+            try {
+                for (accounts in listOf(emptyList(), listOf(mastodonAccount("alice", "example.com")))) {
+                    val composerScope = CoroutineScope(coroutineContext + Job())
+                    val results = mutableListOf<Boolean>()
+                    var dispatches = 0
+                    composerScope.launchComposeWithAccounts(
+                        accounts = flowOf(accounts),
+                        onDispatched = { results += it },
+                        dispatch = { dispatches++ },
+                    )
+                    advanceUntilIdle()
+                    composerScope.cancel()
+                    advanceUntilIdle()
+                    assertEquals(if (accounts.isEmpty()) 0 else 1, dispatches)
+                    assertEquals(if (accounts.isEmpty()) listOf(false) else emptyList(), results)
+                }
+            } finally {
+                Dispatchers.resetMain()
+            }
+        }
 
     private fun testUseCase(
         sent: MutableList<SentCompose> = mutableListOf(),

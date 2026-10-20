@@ -253,6 +253,7 @@ class TimelinePresenterBindingTest : RobolectricTest() {
                 initialMixedTab.loaderKey,
                 updatedMixedTab.loaderKey,
             )
+            assertEquals(setOf(MicroBlogKey("first", "example.com")), timelineResolver.accountKeys(updatedMixedTab))
         }
 
     @Test

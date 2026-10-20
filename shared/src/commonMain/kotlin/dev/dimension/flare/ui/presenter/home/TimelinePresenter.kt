@@ -27,6 +27,7 @@ import dev.dimension.flare.common.onEmpty
 import dev.dimension.flare.common.onError
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.common.toPagingState
+import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.model.TranslationDisplayOptions
 import dev.dimension.flare.data.datasource.microblog.offsetPagingConfig
@@ -49,6 +50,7 @@ import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.model.tab.TimelineFilterConfig
 import dev.dimension.flare.data.model.tab.TimelinePostContent
 import dev.dimension.flare.data.model.tab.TimelinePostKind
+import dev.dimension.flare.data.model.tab.TimelinePresenterFactory
 import dev.dimension.flare.data.repository.KeywordFilterPattern
 import dev.dimension.flare.data.repository.LocalFilterRepository
 import dev.dimension.flare.data.repository.LoginExpiredException
@@ -82,6 +84,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -104,6 +107,8 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
     private val appDataStore: AppDataStore by koinInject()
     private val preTranslationService: PreTranslationService by koinInject()
     private val settingsRepository: SettingsRepository by koinInject()
+    private val appDatabase: AppDatabase by koinInject()
+    private val timelinePresenterFactory: TimelinePresenterFactory by koinInject()
     private val refreshSessions: HomeTimelineRefreshSessions by koinInject()
     private val mxgaRepository: MxgaRepository by koinInject()
     private val platformRegistry: PlatformRegistry by koinInject()
@@ -281,6 +286,7 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
                         preTranslationService = preTranslationService,
                         notifyError = notifyError,
                         retainHistory = if (isHomeTimeline) rememberPosition else null,
+                        retainedHome = { retainedHomeMediator(loader, allowLongText, notifyError) },
                         accountKeys = sourceAccounts,
                         refreshSession =
                             if (isHomeTimeline && timelineTabItemId != null) {
@@ -346,6 +352,44 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
                 source?.invalidate()
             }
         }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private suspend fun retainedHomeMediator(
+        loader: CacheableRemoteLoader<UiTimelineV2>,
+        allowLongText: Boolean,
+        notifyError: (Throwable) -> Unit,
+    ): TimelineRemoteMediator? {
+        if (!settingsRepository.appSettings.first().rememberHomeTimelinePosition) return null
+        // Resolve shared-cache ownership only on a remote write; ordinary cache reads never wait for it.
+        return settingsRepository.homeTimelineTabs
+            .combine(appDatabase.accountDao().allAccounts()) { tabs, accounts ->
+                tabs to accounts.filter { platformRegistry.get(it.platformId) != null }.map { it.account_key }.toSet()
+            }.mapLatest { (tabs, accounts) ->
+                for (tab in tabs.filter { it.enabled }) {
+                    try {
+                        val home = timelinePresenterFactory.create(tab, isHomeTimeline = true)
+                        if (!accounts.containsAll(home.sourceAccounts)) continue
+                        val source = home.loader.first()
+                        if (source is CacheableRemoteLoader<*> && source.pagingKey == loader.pagingKey) {
+                            return@mapLatest TimelineRemoteMediator(
+                                loader = loader,
+                                database = database,
+                                allowLongText = allowLongText,
+                                preTranslationService = preTranslationService,
+                                notifyError = notifyError,
+                                retainHistory = true,
+                                accountKeys = home.sourceAccounts,
+                                refreshSession = refreshSessions.forTimeline(tab.id, loader.pagingKey),
+                            )
+                        }
+                    } catch (exception: Exception) {
+                        if (exception is CancellationException) throw exception
+                        // A broken Home configuration must not block unrelated timelines.
+                    }
+                }
+                null
+            }.first()
+    }
 
     private fun loadGap(
         gap: UiTimelineV2.Gap,

@@ -708,8 +708,16 @@ internal class TimelineResolver(
 
     internal fun accountKeys(item: UiTimelineTabItem): Set<MicroBlogKey> =
         when (item) {
-            is UiSourceTimelineTabItem -> setOfNotNull(item.source?.let(::resolveAccountKey))
-            is UiGroupTimelineTabItem -> item.children.flatMap { accountKeys(it) }.toSet()
+            is UiSourceTimelineTabItem -> {
+                setOfNotNull(item.source?.let(::resolveAccountKey))
+            }
+
+            is UiGroupTimelineTabItem -> {
+                item.children
+                    .filter { it.enabled }
+                    .flatMap(::accountKeys)
+                    .toSet()
+            }
         }
 
     private fun resolveSpec(source: TimelineSourceRef): TimelineSpec<out TimelineSpec.Data> =

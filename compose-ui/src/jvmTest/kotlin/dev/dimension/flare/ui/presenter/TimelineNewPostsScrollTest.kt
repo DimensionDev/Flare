@@ -67,6 +67,53 @@ class TimelineNewPostsScrollTest {
     @Test
     fun refreshingAfterALargePrependKeepsBothColumnsInPlace() = checkPrepend(columns = 2, prependCount = 40)
 
+    @Test
+    fun dynamicHeaderRemovalMustKeepRecording() = checkDynamicHeader(true)
+
+    @Test
+    fun dynamicHeaderInsertionMustKeepRecording() = checkDynamicHeader(false)
+
+    private fun checkDynamicHeader(initialHeader: Boolean) {
+        val pages = MutableStateFlow(page(0..19))
+        val scroll = LazyStaggeredGridState()
+        val reading = Reading(TimelineReadingPosition(5, -25.0))
+        var header by mutableStateOf(initialHeader)
+        lateinit var state: TimelineWithLazyListState
+        composeRule.setContent {
+            val paging = pages.collectAsLazyPagingItems().toPagingState()
+            val base =
+                object : TimelineItemPresenter.State {
+                    override val listState = paging
+                    override val reading = reading
+                    override val isRefreshing = false
+
+                    override fun refreshSync() = Unit
+
+                    override suspend fun refreshSuspend() = Unit
+                }
+            val timeline = rememberTimelineWithLazyListState(base, scroll, leadingItemCount = if (header) 1 else 0)
+            SideEffect { state = timeline }
+            LazyVerticalStaggeredGrid(StaggeredGridCells.Fixed(1), Modifier.size(300.dp, 150.dp), state = scroll) {
+                if (header) item(key = "header") { Box(Modifier.fillMaxWidth().height(100.dp)) }
+                paging.onSuccess { items(itemCount, key = itemKey { it.stableItemKey }) { Box(Modifier.fillMaxWidth().height(100.dp)) } }
+            }
+        }
+        composeRule.waitUntil { reading.restorePosition == null }
+        composeRule.runOnIdle { header = !header }
+        composeRule.waitForIdle()
+        composeRule.runOnIdle { pages.value = page(-3..19) }
+        composeRule.waitUntil { (state.listState as? PagingState.Success)?.itemCount == 23 }
+        composeRule.runOnIdle {
+            assertEquals(
+                "post-5",
+                scroll.layoutInfo.visibleItemsInfo
+                    .first()
+                    .key,
+            )
+            assertEquals(TimelineReadingPosition(8, -25.0), reading.currentPosition)
+        }
+    }
+
     private fun checkPrepend(
         columns: Int,
         targetIndex: Int = 160,

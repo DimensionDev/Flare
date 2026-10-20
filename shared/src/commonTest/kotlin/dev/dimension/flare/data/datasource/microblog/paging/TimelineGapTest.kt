@@ -49,6 +49,7 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertNotNull
 import kotlin.test.assertSame
@@ -74,6 +75,172 @@ class TimelineGapTest : RobolectricTest() {
     fun tearDown() {
         database.close()
     }
+
+    @Test
+    fun partialOverlapContinuationMustRemainAfterItsRefreshPage() =
+        runTest {
+            val violations = mutableListOf<String>()
+            for (mixedPolicy in listOf<TimelineMergePolicy?>(
+                null,
+                TimelineMergePolicy.TimePerPage,
+                TimelineMergePolicy.Staggered,
+                TimelineMergePolicy.Time,
+            )) {
+                var response = PagingResult<UiTimelineV2>(listOf(datedPost(10), datedPost(9)), nextKey = "old-tail")
+                val leaf = source("ranked-$mixedPolicy", ordered = false) { response }
+                val loader = if (mixedPolicy == null) leaf else MixedRemoteMediator(database, listOf(leaf), mixedPolicy)
+                val home = TimelineRemoteMediator(loader, database, false, retainHistory = true)
+                home.load(LoadType.REFRESH, state)
+                response = PagingResult(listOf(datedPost(12), datedPost(10)), nextKey = "after-10")
+                home.load(LoadType.REFRESH, state)
+                val gap = contents(home).filterIsInstance<UiTimelineV2.Gap>().single()
+                response = PagingResult(listOf(datedPost(8)))
+                home.loadGap(gap)
+                val ids = contents(home).map { it.statusKey.id }
+                if (ids.indexOf("8") < ids.indexOf("10")) violations += "$mixedPolicy: $ids"
+            }
+            assertEquals(emptyList(), violations, "Continuation item 8 must follow refresh-page item 10")
+        }
+
+    @Test
+    fun singleRankedGapMustCloseOnAFullCachedPage() =
+        runTest {
+            var response = PagingResult<UiTimelineV2>(listOf(datedPost(10), datedPost(9)), nextKey = "old-tail")
+            val featured = source("featured", ordered = false, refreshGapOncePerSession = true) { response }
+            val home = TimelineRemoteMediator(featured, database, false, retainHistory = true)
+            home.load(LoadType.REFRESH, state)
+            response = PagingResult(listOf(datedPost(12)), nextKey = "gap-page")
+            home.load(LoadType.REFRESH, state)
+            val gap = contents(home).filterIsInstance<UiTimelineV2.Gap>().single()
+            response = PagingResult(listOf(datedPost(10), datedPost(9)), nextKey = "another-page")
+            home.loadGap(gap)
+            val remaining = contents(home).filterIsInstance<UiTimelineV2.Gap>()
+            assertTrue(remaining.isEmpty(), "A successful full-cached recommended page must finish backfill")
+        }
+
+    @Test
+    fun gapBoundaryUpdateMustNotSilentlyDiscardConcurrentRefresh() =
+        runTest {
+            var primaryId = 30
+            var delayRefresh = false
+            val entered = CompletableDeferred<Unit>()
+            val release = CompletableDeferred<Unit>()
+            val home =
+                mixed(
+                    source("primary") {
+                        if (delayRefresh) {
+                            entered.complete(Unit)
+                            release.await()
+                        }
+                        PagingResult(listOf(datedPost(primaryId)))
+                    },
+                    source("secondary") { PagingResult(listOf(datedPost(20))) },
+                )
+            val oneRow = PagingState<OffsetFromStartPagingKey, TimelinePageItem>(emptyList(), null, PagingConfig(1), 0)
+            home.load(LoadType.REFRESH, oneRow)
+            primaryId = 40
+            home.load(LoadType.REFRESH, oneRow)
+            val gap = contents(home).filterIsInstance<UiTimelineV2.Gap>().single()
+            val before = assertNotNull(database.pagingTimelineDao().getPagingKeyMetadata(home.pagingKey))
+            primaryId = 50
+            delayRefresh = true
+            var result: RemoteMediator.MediatorResult? = null
+            val refreshing = launch { result = home.load(LoadType.REFRESH, oneRow) }
+            entered.await()
+            home.loadGap(gap)
+            val after = assertNotNull(database.pagingTimelineDao().getPagingKeyMetadata(home.pagingKey))
+            release.complete(Unit)
+            refreshing.join()
+            assertTrue(after.revision > before.revision, "Gap fill must publish the missing source boundary")
+            assertTrue(result is RemoteMediator.MediatorResult.Error, "A failed compare-and-set must be retryable")
+            assertFalse(contents(home).any { it.statusKey.id == "50" })
+            delayRefresh = false
+            assertTrue(home.load(LoadType.REFRESH, oneRow) is RemoteMediator.MediatorResult.Success)
+            assertTrue(contents(home).any { it.statusKey.id == "50" }, "Retry must read the new revision and commit")
+        }
+
+    @Test
+    fun sharedPrependSourceRetriesItsInitialRefreshButDoesNotRepeatItAfterSuccess() =
+        runTest {
+            for (cached in listOf(false, true)) {
+                var failure = false
+                var requests = 0
+                val source =
+                    source("prepend-$cached") {
+                        requests++
+                        check(!failure) { "Offline" }
+                        PagingResult(listOf(datedPost(20)), previousKey = "head")
+                    }
+                val loader =
+                    object : CacheableRemoteLoader<UiTimelineV2> by source {
+                        override val supportPrepend = true
+                    }
+                val home = TimelineRemoteMediator(loader, database, false, retainHistory = true)
+                if (cached) home.load(LoadType.REFRESH, state)
+                requests = 0
+                val ordinary = TimelineRemoteMediator(loader, database, false, retainedHome = { home })
+                ordinary.initialize()
+                if (cached) {
+                    failure = true
+                    assertIs<RemoteMediator.MediatorResult.Error>(ordinary.load(LoadType.PREPEND, state))
+                    failure = false
+                    assertIs<RemoteMediator.MediatorResult.Success>(ordinary.load(LoadType.PREPEND, state))
+                    assertEquals(2, requests)
+                } else {
+                    assertIs<RemoteMediator.MediatorResult.Success>(ordinary.load(LoadType.REFRESH, state))
+                    assertEquals(1, requests)
+                }
+                val completed = requests
+                ordinary.load(LoadType.PREPEND, state)
+                assertEquals(completed, requests, "The boundary after initial refresh must not hit the network again")
+                ordinary.load(LoadType.REFRESH, state)
+                ordinary.load(LoadType.PREPEND, state)
+                assertEquals(completed + 1, requests, "Manual refresh must also finish its prepend boundary locally")
+            }
+        }
+
+    @Test
+    fun ordinaryAndHomeTimeAppendUseTheSameRankScaleWithReadingDisabled() =
+        runTest {
+            var id = 20
+            val loader =
+                MixedRemoteMediator(
+                    database,
+                    listOf(
+                        source("time") {
+                            PagingResult(listOf(datedPost(id)), nextKey = "after-$id")
+                        },
+                    ),
+                    TimelineMergePolicy.Time,
+                )
+            val home = TimelineRemoteMediator(loader, database, false, retainHistory = false)
+            val ordinary = TimelineRemoteMediator(loader, database, false)
+            home.load(LoadType.REFRESH, state)
+            id = 19
+            ordinary.load(LoadType.APPEND, state)
+            id = 18
+            home.load(LoadType.APPEND, state)
+            assertEquals(listOf("20", "19", "18"), contents(home).map { it.statusKey.id })
+        }
+
+    @Test
+    fun partiallyOverlappingGapPageMovesOnlyItsContinuationPastCachedPosts() =
+        runTest {
+            var response = PagingResult<UiTimelineV2>(listOf(datedPost(10), datedPost(9), datedPost(7)), nextKey = "tail")
+            val home = mediator { response }
+            home.load(LoadType.REFRESH, state)
+            response = PagingResult(listOf(datedPost(12)), nextKey = "gap-one")
+            home.load(LoadType.REFRESH, state)
+            val firstGap = contents(home).filterIsInstance<UiTimelineV2.Gap>().single()
+            response = PagingResult(listOf(datedPost(11), datedPost(9)), nextKey = "gap-two")
+            home.loadGap(firstGap)
+            val nextGap = contents(home).filterIsInstance<UiTimelineV2.Gap>().single()
+            assertEquals(firstGap.statusKey, nextGap.statusKey)
+            assertEquals(listOf("12", "11", "10", "9", nextGap.statusKey.id, "7"), contents(home).map { it.statusKey.id })
+            response = PagingResult(listOf(datedPost(8)))
+            home.loadGap(nextGap)
+            assertEquals(listOf("12", "11", "10", "9", "8", "7"), contents(home).map { it.statusKey.id })
+        }
 
     @Test
     fun featuredRefreshCreatesOneGapPerRunAndKeepsExistingGapsLoadable() =
@@ -1011,7 +1178,7 @@ class TimelineGapTest : RobolectricTest() {
         }
 
     @Test
-    fun duplicatePagesAdvanceButFailedOrStuckPagesKeepTheirCursor() =
+    fun emptyPagesAdvanceButFailedOrStuckPagesKeepTheirCursor() =
         runTest {
             var response = PagingResult<UiTimelineV2>(listOf(post(10)), nextKey = "tail")
             var failure = false
@@ -1028,7 +1195,7 @@ class TimelineGapTest : RobolectricTest() {
             kotlin.test.assertFailsWith<IllegalStateException> { mediator.loadGap(gap) }
             assertEquals(gap, contents().filterIsInstance<UiTimelineV2.Gap>().single())
             failure = false
-            response = PagingResult(listOf(post(10)), nextKey = "gap-next")
+            response = PagingResult(emptyList(), nextKey = "gap-next")
             mediator.loadGap(gap)
             val progressed = contents().filterIsInstance<UiTimelineV2.Gap>().single()
             assertEquals("gap-next", progressed.nextKey)

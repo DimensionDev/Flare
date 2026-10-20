@@ -484,6 +484,15 @@ internal interface PagingTimelineDao {
         id: String,
     ): DbPagingTimeline?
 
+    @Query(
+        "SELECT * FROM DbPagingTimeline WHERE pagingKey = :pagingKey AND sortId > " +
+            "(SELECT sortId FROM DbPagingTimeline WHERE pagingKey = :pagingKey AND _id = :id) ORDER BY sortId LIMIT 1",
+    )
+    suspend fun getRowAfter(
+        pagingKey: String,
+        id: String,
+    ): DbPagingTimeline?
+
     @Query("SELECT * FROM DbPagingTimeline WHERE pagingKey = :pagingKey AND isGap = 0 ORDER BY sortId LIMIT 1")
     suspend fun getFirstRow(pagingKey: String): DbPagingTimeline?
 

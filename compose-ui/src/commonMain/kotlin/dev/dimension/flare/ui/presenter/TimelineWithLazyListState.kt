@@ -66,6 +66,7 @@ internal fun rememberTimelineWithLazyListState(
     density: Float = 1f,
 ): TimelineWithLazyListState {
     val latestReading by rememberUpdatedState(baseState.reading)
+    val currentLeadingItemCount by rememberUpdatedState(leadingItemCount)
     var restoring by remember { mutableStateOf(false) }
     var scrollingByUser by remember { mutableStateOf(false) }
     var gapAnchor by remember { mutableStateOf<GapScrollAnchor?>(null) }
@@ -140,13 +141,13 @@ internal fun rememberTimelineWithLazyListState(
                 } else if (userScrolled) {
                     lazyListState.layoutInfo.visibleItemsInfo
                         .filter { info ->
-                            val index = info.index - leadingItemCount
+                            val index = info.index - currentLeadingItemCount
                             info.offset.y + info.size.height > 0 && index in 0 until currentPagingState.itemCount &&
                                 currentPagingState.peek(index)?.let { !it.isPaginationGap && it.stableItemKey == info.key } == true
                         }.minWithOrNull(compareBy({ it.offset.y }, { it.offset.x }))
                         ?.let { visible ->
                             latestReading?.positionChanged(
-                                visible.index - leadingItemCount,
+                                visible.index - currentLeadingItemCount,
                                 visible.offset.y.toDouble() / density,
                             )
                         }
@@ -159,7 +160,7 @@ internal fun rememberTimelineWithLazyListState(
             snapshotFlow {
                 lazyListState.layoutInfo.visibleItemsInfo
                     .filter { info ->
-                        info.offset.y + info.size.height > 0 && (info.index - leadingItemCount)
+                        info.offset.y + info.size.height > 0 && (info.index - currentLeadingItemCount)
                             .takeIf { it in 0 until currentPagingState.itemCount }
                             ?.let {
                                 currentPagingState.peek(
@@ -169,7 +170,7 @@ internal fun rememberTimelineWithLazyListState(
                                 !it.isPaginationGap && it.stableItemKey == info.key
                             } == true
                     }.minWithOrNull(compareBy({ it.offset.y }, { it.offset.x }))
-                    ?.let { (it.index - leadingItemCount) to it.offset.y }
+                    ?.let { (it.index - currentLeadingItemCount) to it.offset.y }
             }.collect { position ->
                 if (!restoring && position != null) {
                     latestReading?.viewportChanged(position.first, position.second.toDouble() / density)
@@ -181,10 +182,10 @@ internal fun rememberTimelineWithLazyListState(
                 if (scrollingByUser && !restoring && latestReading?.restorePosition == null) {
                     lazyListState.layoutInfo.visibleItemsInfo
                         .firstOrNull { info ->
-                            val index = info.index - leadingItemCount
+                            val index = info.index - currentLeadingItemCount
                             info.offset.y + info.size.height > 0 && index in 0 until currentPagingState.itemCount &&
                                 currentPagingState.peek(index)?.let { !it.isPaginationGap && it.stableItemKey == info.key } == true
-                        }?.let { latestReading?.positionChanged(it.index - leadingItemCount, it.offset.y.toDouble() / density) }
+                        }?.let { latestReading?.positionChanged(it.index - currentLeadingItemCount, it.offset.y.toDouble() / density) }
                 }
                 latestReading?.savePosition()
             }

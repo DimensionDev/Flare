@@ -47,6 +47,7 @@ internal open class TimelineRemoteMediator(
     private val retainHistory: Boolean? = null,
     private val accountKeys: Set<MicroBlogKey> = emptySet(),
     private val refreshSession: HomeTimelineRefreshSessions.Session? = null,
+    private val retainedHome: suspend () -> TimelineRemoteMediator? = { null },
 ) : BasePagingRemoteMediator<
         OffsetFromStartPagingKey,
         TimelinePageItem,
@@ -56,6 +57,7 @@ internal open class TimelineRemoteMediator(
     ),
     RemoteLoader<DbPagingTimelineWithStatus> {
     private var suppressInitialPrepend = false
+    private var refreshSharedHomeOnPrepend = false
     private val ordersByTime = (loader as? MixedRemoteMediator)?.pageLoader()?.ordersByTime == true
 
     override val pagingKey: String
@@ -79,6 +81,7 @@ internal open class TimelineRemoteMediator(
 
         val shouldRefresh = refreshOnInitialize()
         suppressInitialPrepend = loader.supportPrepend && !shouldRefresh
+        refreshSharedHomeOnPrepend = retainHistory == null && loader.supportPrepend && shouldRefresh
         return if (!shouldRefresh || (loader.supportPrepend && retainHistory != true)) {
             InitializeAction.SKIP_INITIAL_REFRESH
         } else {
@@ -96,10 +99,28 @@ internal open class TimelineRemoteMediator(
         }
         if (loadType == LoadType.REFRESH) {
             suppressInitialPrepend = false
+            refreshSharedHomeOnPrepend = false
         }
         return when {
             retainHistory == null -> {
-                super.doLoad(loadType, state)
+                val home = retainedHome()
+                if (home != null && loadType == LoadType.PREPEND && refreshSharedHomeOnPrepend) {
+                    // Ordinary prepend sources use this boundary for their initial head refresh.
+                    when (val result = home.load(LoadType.REFRESH, state)) {
+                        is MediatorResult.Error -> {
+                            result
+                        }
+
+                        is MediatorResult.Success -> {
+                            refreshSharedHomeOnPrepend = false
+                            MediatorResult.Success(true)
+                        }
+                    }
+                } else {
+                    (home?.load(loadType, state) ?: super.doLoad(loadType, state)).also {
+                        if (loadType == LoadType.PREPEND && it is MediatorResult.Success) refreshSharedHomeOnPrepend = false
+                    }
+                }
             }
 
             loadType == LoadType.REFRESH && refreshSession != null -> {
@@ -203,10 +224,15 @@ internal open class TimelineRemoteMediator(
                                     },
                             )
                         } else {
+                            val overlap = if (gapRows.isNotEmpty()) existing.values.maxByOrNull { it.sortId } else null
                             savePreservingOrder(
-                                mapped + gapRows,
+                                mapped + if (overlap == null) gapRows else emptyList(),
                                 beforeId = first?.takeIf { loadType == LoadType.REFRESH }?._id,
                             )
+                            if (overlap != null) {
+                                // The continuation follows every cached item in this page, even on ranked overlap.
+                                savePreservingOrder(gapRows, dao.getRowAfter(pagingKey, overlap._id)?._id)
+                            }
                         }
                     } else {
                         onSaveCache(request, mapped)
@@ -228,6 +254,7 @@ internal open class TimelineRemoteMediator(
                     true
                 }
             if (committed && loadType == LoadType.REFRESH) refreshSession?.refreshedSources?.addAll(result.refreshedSources)
+            check(committed) { "Timeline changed while loading; retry" }
         }
         result.sourceFailures.forEach(notifyError)
         return MediatorResult.Success(if (loadType == LoadType.REFRESH) false else result.nextKey == null)
@@ -268,6 +295,7 @@ internal open class TimelineRemoteMediator(
                     ?.content as? UiTimelineV2.Gap ?: return@connect
             if (current.revision != gap.revision || current.nextKey != gap.nextKey) return@connect
             val existing = existingRows(mapped)
+            val overlap = existing.values.maxByOrNull { it.sortId }?.takeIf { it.sortId > row.sortId }
             check(
                 continuationIdentity(result.nextKey) != continuationIdentity(gap.nextKey) || mapped.any { it.timeline._id !in existing },
             ) {
@@ -281,10 +309,17 @@ internal open class TimelineRemoteMediator(
             } else {
                 val next = gap.copy(nextKey = result.nextKey, revision = gap.revision + 1)
                 val nextRow = TimelinePagingMapper.toDb(listOf(next), pagingKey).single()
-                saveToDatabase(
-                    database,
-                    listOf(nextRow.copy(timeline = nextRow.timeline.copy(sortId = checkNotNull(dao.getRow(pagingKey, row._id)).sortId))),
-                )
+                if (!ordersByTime && overlap != null) {
+                    dao.delete(listOf(row))
+                    savePreservingOrder(listOf(nextRow), dao.getRowAfter(pagingKey, overlap._id)?._id)
+                } else {
+                    saveToDatabase(
+                        database,
+                        listOf(
+                            nextRow.copy(timeline = nextRow.timeline.copy(sortId = checkNotNull(dao.getRow(pagingKey, row._id)).sortId)),
+                        ),
+                    )
+                }
             }
             val sourceHeads = Json.decodeFromString<Map<String, List<String>>>(currentKey.sourceHeads)
             val updatedHeads = result.sourceHeads + sourceHeads
@@ -323,6 +358,11 @@ internal open class TimelineRemoteMediator(
                 }
             } else {
                 loader.load(pageSize, request).let { response ->
+                    val rankedPageIsCached =
+                        checkCachedItems && request is PagingRequest.Append && !loader.canJoinTimeline &&
+                            response.nextKey != null && response.data.isNotEmpty() &&
+                            response.continuationFailure == null && response.sourceFailures.isEmpty() &&
+                            cachedItemKeys(response.data).containsAll(response.data.map { it.stableItemKey })
                     val join =
                         if (loader.canJoinTimeline) {
                             response.data.indexOfFirst { it.stableItemKey in boundary[loader.pagingKey].orEmpty() }
@@ -332,7 +372,7 @@ internal open class TimelineRemoteMediator(
                     val data = if (join >= 0 && request is PagingRequest.Append) response.data.take(join + 1) else response.data
                     response.copy(
                         data = data,
-                        nextKey = if (join >= 0 || loader.pagingKey in refreshWithoutGap) null else response.nextKey,
+                        nextKey = if (join >= 0 || rankedPageIsCached || loader.pagingKey in refreshWithoutGap) null else response.nextKey,
                         sourceHeads = mapOf(loader.pagingKey to data.map { it.stableItemKey }),
                         refreshedSources =
                             if (request is PagingRequest.Refresh && loader.refreshGapOncePerSession &&
@@ -414,12 +454,11 @@ internal open class TimelineRemoteMediator(
                 pageSize = pageSize,
                 request = request,
             )
-        val sortIdProvider = loader as? SortIdProvider
         val data =
             TimelinePagingMapper.toDb(
                 data = result.data,
                 pagingKey = pagingKey,
-                sortIds = result.data.map { sortIdProvider?.sortId(it) },
+                sortIds = result.data.map { homeSortId(it) },
             )
         return PagingResult(
             data = data,

@@ -91,8 +91,28 @@ internal suspend fun PagingTimelineDao.getTimelinePageInCurrentTransaction(
     pagingKey: String,
     offset: Int,
     limit: Int,
+): List<DbPagingTimelineWithStatus> = hydrateTimelineRows(pagingKey, getTimelineRootRows(pagingKey, offset, limit))
+
+internal suspend fun PagingTimelineDao.getTimelineItemsInCurrentTransaction(
+    pagingKey: String,
+    timelineIds: List<String>,
 ): List<DbPagingTimelineWithStatus> {
-    val roots = getTimelineRootRows(pagingKey, offset, limit)
+    val roots =
+        timelineIds
+            .chunked(QUERY_BATCH_SIZE)
+            .flatMap { getTimelineRootRowsByIds(it) }
+            .associateBy { it.timeline._id }
+    val orderedRoots =
+        timelineIds.map { id ->
+            roots.getValue(id).also { check(it.timeline.pagingKey == pagingKey) }
+        }
+    return hydrateTimelineRows(pagingKey, orderedRoots)
+}
+
+private suspend fun PagingTimelineDao.hydrateTimelineRows(
+    pagingKey: String,
+    roots: List<DbTimelineRootRow>,
+): List<DbPagingTimelineWithStatus> {
     if (roots.isEmpty()) {
         return emptyList()
     }
@@ -247,6 +267,10 @@ internal interface PagingTimelineDao {
         offset: Int,
         limit: Int,
     ): List<DbTimelineRootRow>
+
+    // An additional pagingKey predicate can make SQLite scan the whole timeline instead of seeking its primary keys.
+    @Query(TIMELINE_WITH_STATUS_QUERY + "WHERE DbPagingTimeline._id IN (:timelineIds)")
+    suspend fun getTimelineRootRowsByIds(timelineIds: List<String>): List<DbTimelineRootRow>
 
     @Query(
         "SELECT * FROM status_reference " +

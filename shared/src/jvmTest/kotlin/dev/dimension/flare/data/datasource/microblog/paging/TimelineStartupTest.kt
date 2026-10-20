@@ -12,6 +12,7 @@ import dev.dimension.flare.data.database.cache.TimelineRevisionCallback
 import dev.dimension.flare.data.database.cache.connect
 import dev.dimension.flare.data.database.cache.mapper.saveToDatabase
 import dev.dimension.flare.data.database.cache.model.DbPagingKey
+import dev.dimension.flare.data.database.cache.model.TranslationDisplayOptions
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.ClickEvent
@@ -29,6 +30,9 @@ import kotlinx.coroutines.withTimeoutOrNull
 import java.nio.file.Files
 import java.util.concurrent.atomic.AtomicLong
 import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNotSame
+import kotlin.test.assertSame
 import kotlin.test.assertTrue
 import kotlin.time.Instant
 
@@ -60,6 +64,7 @@ class TimelineStartupTest {
                         "Cached Home must not materialize a continuation before displaying posts",
                     )
                     kotlin.test.assertEquals(20L, driver.blobs.get(), "Cold starts must decode only the ordinary first page")
+                    assertEquals(1L, driver.rootQueries.get(), "Cold starts must use one ordinary page read")
                     kotlin.test.assertEquals(0L, driver.anchorLookups.get(), "Cold starts must not locate a refresh anchor")
                 } finally {
                     db.close()
@@ -147,6 +152,78 @@ class TimelineStartupTest {
         }
 
     @Test
+    fun scatteredUpdatesAndAnUncachedTailOnlyDecodeChangedPosts() =
+        runBlocking { checkScatteredUpdates(cachedSize = 100, changed = setOf(5, 6, 42, 80, 99)) }
+
+    @Test
+    fun denseScatteredUpdatesStayBatchedAcrossTheSqlParameterLimit() =
+        runBlocking { checkScatteredUpdates(cachedSize = 1000, changed = (0 until 1000 step 2).toSet()) }
+
+    private suspend fun checkScatteredUpdates(
+        cachedSize: Int,
+        changed: Set<Int>,
+    ) {
+        val path = Files.createTempFile("flare-scattered-refresh", ".db")
+        val driver = CountingDriver()
+        val db =
+            Room
+                .databaseBuilder<CacheDatabase>(name = path.toString())
+                .addCallback(TimelineRevisionCallback)
+                .setDriver(driver)
+                .setQueryCoroutineContext(Dispatchers.IO)
+                .build()
+        try {
+            db.connect {
+                val indices = 0 until cachedSize + 100
+                saveToDatabase(db, TimelinePagingMapper.toDb(indices.map(::post), "startup", indices.map { it.toLong() }))
+            }
+            val loader = TimelineDbPageLoader(db, "startup", TimelineDbPageCache())
+            val options = TranslationDisplayOptions(false, false, "")
+            val before = loader.load(0, cachedSize)
+            val beforeUi = before.map { it.toUi(options) }
+            db.connect {
+                changed.forEach { index ->
+                    val updated = post(index).copy(content = UiTranslatableText("Updated $index".toUiPlainText()))
+                    db.statusDao().update(updated.statusKey, AccountType.Guest, updated, updated.renderHash, updated.searchText)
+                }
+            }
+
+            driver.reset()
+            val after = loader.load(0, cachedSize + 20)
+            assertEquals(changed.size.toLong() + 20, driver.blobs.get(), "Only changed posts and the uncached tail need decoding")
+            assertTrue(driver.rootQueries.get() <= 2, "Scattered posts must be batched; executed ${driver.rootQueries.get()} root queries")
+            assertEquals(0L, driver.subsetRangeScans.get(), "Subset reads must seek primary keys without scanning the whole timeline")
+            assertEquals(0L, driver.anchorLookups.get())
+            before.indices.forEach { index ->
+                if (index in changed) {
+                    assertNotSame(before[index], after[index])
+                    assertEquals(
+                        "Updated $index",
+                        (after[index].baseItem as UiTimelineV2.TimelinePostItem)
+                            .post.content.original.raw,
+                    )
+                } else {
+                    assertSame(before[index], after[index])
+                    assertSame(beforeUi[index], after[index].toUi(options))
+                }
+            }
+            val fresh = TimelineDbPageLoader(db, "startup", TimelineDbPageCache()).load(0, cachedSize + 20)
+            assertEquals(fresh.map { it.toUi(options) }, after.map { it.toUi(options) })
+            driver.reset()
+            loader.load(0, cachedSize + 20).forEachIndexed { index, item -> assertSame(after[index], item) }
+            assertEquals(0L, driver.blobs.get(), "An unchanged refresh must decode nothing")
+            assertEquals(0L, driver.rootQueries.get())
+            val tail = loader.load(cachedSize + 20, 20)
+            assertEquals(20, tail.size)
+            assertEquals(20L, driver.blobs.get())
+            assertEquals((cachedSize + 20).toString(), (tail.first().baseItem as UiTimelineV2.TimelinePostItem).post.statusKey.id)
+        } finally {
+            db.close()
+            listOf("", "-wal", "-shm").forEach { Files.deleteIfExists(path.resolveSibling(path.fileName.toString() + it)) }
+        }
+    }
+
+    @Test
     fun refreshingAndFillingAGapDoNotMaterializeTheStoredTailCursor() =
         runBlocking {
             val path = Files.createTempFile("flare-refresh-cursor", ".db")
@@ -232,11 +309,15 @@ class TimelineStartupTest {
         val blobs = AtomicLong()
         val largeTextReads = AtomicLong()
         val anchorLookups = AtomicLong()
+        val rootQueries = AtomicLong()
+        val subsetRangeScans = AtomicLong()
 
         fun reset() {
             blobs.set(0)
             largeTextReads.set(0)
             anchorLookups.set(0)
+            rootQueries.set(0)
+            subsetRangeScans.set(0)
         }
 
         override fun open(fileName: String): SQLiteConnection {
@@ -244,8 +325,29 @@ class TimelineStartupTest {
             return object : SQLiteConnection by connection {
                 override fun prepare(sql: String): SQLiteStatement {
                     if (sql.startsWith("SELECT COUNT(*) FROM DbPagingTimeline")) anchorLookups.incrementAndGet()
+                    val isRootQuery = "DbStatus.content AS status_content" in sql
                     val statement = connection.prepare(sql)
                     return object : SQLiteStatement by statement {
+                        private var firstStep = true
+
+                        override fun step(): Boolean {
+                            if (firstStep && isRootQuery) rootQueries.incrementAndGet()
+                            if (firstStep && isRootQuery && "._id IN (" in sql) {
+                                connection.prepare("EXPLAIN QUERY PLAN $sql").use { plan ->
+                                    while (plan.step()) {
+                                        if ("pagingKey=?" in plan.getText(3)) subsetRangeScans.incrementAndGet()
+                                    }
+                                }
+                            }
+                            firstStep = false
+                            return statement.step()
+                        }
+
+                        override fun reset() {
+                            statement.reset()
+                            firstStep = true
+                        }
+
                         override fun getText(index: Int): String =
                             statement.getText(index).also {
                                 if (it.length >= 1_000_000) largeTextReads.incrementAndGet()

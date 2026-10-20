@@ -5,6 +5,7 @@ import dev.dimension.flare.common.PlatformDispatchers
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.dao.DbTimelinePageIdentity
 import dev.dimension.flare.data.database.cache.dao.PagingTimelineDao
+import dev.dimension.flare.data.database.cache.dao.getTimelineItemsInCurrentTransaction
 import dev.dimension.flare.data.database.cache.dao.getTimelinePageInCurrentTransaction
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiProfile
@@ -91,38 +92,22 @@ internal class TimelineDbPageCache {
         }
 
         if (offset == 0) {
-            var firstDirty = -1
-            var lastDirty = -1
-            pageIdentities.forEachIndexed { index, identity ->
-                if (snapshot[identity] == null) {
-                    if (firstDirty < 0) firstDirty = index
-                    lastDirty = index
-                }
-            }
+            val missing = pageIdentities.filter { snapshot[it] == null }
             val data =
-                if (firstDirty < 0) {
-                    ArrayList<TimelinePageItem>(pageIdentities.size).also { result ->
-                        pageIdentities.forEach { identity -> result += checkNotNull(snapshot[identity]) }
-                    }
+                if (missing.size == pageIdentities.size) {
+                    loadProjectedPage(dao, pagingKey, offset, limit, pageIdentities)
                 } else {
-                    // ponytail: Split disjoint ranges only if a trace shows this span is too broad.
-                    val fetchedData =
-                        loadProjectedPage(
-                            dao = dao,
+                    // Batch scattered changes together so query count and shared references do not grow per range.
+                    val fetched =
+                        TimelinePagingMapper.toPageItems(
+                            items = dao.getTimelineItemsInCurrentTransaction(pagingKey, missing.map { it.timelineId }),
+                            identities = missing,
                             pagingKey = pagingKey,
-                            offset = firstDirty,
-                            limit = lastDirty - firstDirty + 1,
-                            identities = pageIdentities.subList(firstDirty, lastDirty + 1),
+                            canonicalProfiles = canonicalProfiles,
                         )
-                    ArrayList<TimelinePageItem>(pageIdentities.size).also { result ->
-                        pageIdentities.forEachIndexed { index, identity ->
-                            result +=
-                                if (index in firstDirty..lastDirty) {
-                                    fetchedData[index - firstDirty]
-                                } else {
-                                    checkNotNull(snapshot[identity])
-                                }
-                        }
+                    val newItems = fetched.iterator()
+                    pageIdentities.mapTo(ArrayList(pageIdentities.size)) { identity ->
+                        snapshot[identity] ?: newItems.next()
                     }
                 }
             val retainedIdentities =

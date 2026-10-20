@@ -14,6 +14,7 @@ import dev.dimension.flare.data.database.cache.connect
 import dev.dimension.flare.data.database.cache.mapper.saveToDatabase
 import dev.dimension.flare.data.database.cache.model.DbPagingKey
 import dev.dimension.flare.data.database.cache.model.DbStatus
+import dev.dimension.flare.data.database.cache.model.TranslationDisplayOptions
 import dev.dimension.flare.data.database.createDatabaseDriver
 import dev.dimension.flare.data.datasource.microblog.MixedRemoteMediator
 import dev.dimension.flare.data.datasource.microblog.offsetPagingConfig
@@ -50,6 +51,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertNotNull
+import kotlin.test.assertSame
 import kotlin.test.assertTrue
 import kotlin.time.Instant
 
@@ -534,6 +536,8 @@ class TimelineGapTest : RobolectricTest() {
                     before.getRefreshKey(PagingState(listOf(initial), anchor, offsetPagingConfig, 0)),
                 )
             val anchorId = initial.data[anchor].identity.timelineId
+            val display = TranslationDisplayOptions(false, false, "")
+            val previousUi = initial.data.associate { it.identity to it.toUi(display) }
             repeat(refreshes) {
                 generation++
                 assertIs<RemoteMediator.MediatorResult.Success>(home.load(LoadType.REFRESH, state))
@@ -554,6 +558,13 @@ class TimelineGapTest : RobolectricTest() {
                 refreshed.data.map { it.identity },
                 "Refresh must retain the anchor and its trailing window",
             )
+            val previousItems = initial.data.associateBy { it.identity }
+            val unchanged = refreshed.data.filter { it.identity in previousItems }
+            if (remember && !deleteAnchor) assertTrue(unchanged.isNotEmpty())
+            unchanged.forEach { item ->
+                assertSame(previousItems[item.identity], item, "Unchanged cached posts must survive a large prepend")
+                assertSame(previousUi[item.identity], item.toUi(display), "The cached UI model must also be reused")
+            }
             assertEquals(OffsetFromStartPagingKey.Append(expectedSize), refreshed.nextKey)
             val appended =
                 assertIs<PagingSource.LoadResult.Page<OffsetFromStartPagingKey, TimelinePageItem>>(

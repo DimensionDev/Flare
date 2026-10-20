@@ -247,7 +247,7 @@ class TimelineSharedCacheTest {
             headRequests.set(0)
             val models = MutableStateFlow<TimelineState?>(null)
             val ordinary = factory.create(tab)
-            scope.launch {
+            scope.launch(Dispatchers.Main) {
                 moleculeFlow(RecompositionMode.Immediate) { ordinary.body() }.collect { models.value = it }
             }
             if (removeAccount) {

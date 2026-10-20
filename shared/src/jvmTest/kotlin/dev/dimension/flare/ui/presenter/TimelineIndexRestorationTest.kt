@@ -187,7 +187,7 @@ class TimelineIndexRestorationTest {
                 }
             val presenter = TimelinePresenter(tabId = "home", loader = flowOf(loader), isHomeTimeline = true)
             val models = MutableStateFlow<TimelineState?>(null)
-            scope.launch {
+            scope.launch(Dispatchers.Main) {
                 moleculeFlow(RecompositionMode.Immediate) { presenter.body() }.collect { models.value = it }
             }
             if (hideAll || count == 0) {

@@ -180,7 +180,7 @@ class TimelineGapCompletionTest {
             seed.load(LoadType.REFRESH, state)
             val presenter = TimelinePresenter(tabId = "home", loader = flowOf(loader), isHomeTimeline = true)
             val displayedGap = CompletableDeferred<UiTimelineV2.Gap>()
-            scope.launch {
+            scope.launch(Dispatchers.Main) {
                 moleculeFlow(RecompositionMode.Immediate) { presenter.body() }.collect { model ->
                     model.listState.onSuccess {
                         model.reading

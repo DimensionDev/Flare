@@ -11,10 +11,12 @@ import dev.dimension.flare.data.database.cache.mapper.saveToDatabase
 import dev.dimension.flare.data.database.cache.model.DbPagingKey
 import dev.dimension.flare.data.database.cache.model.DbPagingTimeline
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
+import dev.dimension.flare.data.database.cache.model.DbStatus
 import dev.dimension.flare.data.datasource.microblog.MixedRemoteMediator
 import dev.dimension.flare.data.translation.NoopPreTranslationService
 import dev.dimension.flare.data.translation.PreTranslationService
 import dev.dimension.flare.model.AccountType
+import dev.dimension.flare.model.DbAccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.ReferenceType
 import dev.dimension.flare.ui.model.UiTimelineV2
@@ -280,7 +282,11 @@ internal open class TimelineRemoteMediator(
         if (dao.getRow(pagingKey, gapRow._id) == null) return GapLoadResult()
         val result =
             try {
-                fetchPage(pageSize, PagingRequest.Append(gap.nextKey), gap.lowerBound, checkCachedItems = true)
+                if (hasJoinedSingleSourceGap(gap, gapRow._id)) {
+                    PagingResult()
+                } else {
+                    fetchPage(pageSize, PagingRequest.Append(gap.nextKey), gap.lowerBound, checkCachedItems = true)
+                }
             } catch (error: kotlinx.coroutines.CancellationException) {
                 throw error
             } catch (error: Exception) {
@@ -352,6 +358,52 @@ internal open class TimelineRemoteMediator(
         }
         result.sourceFailures.forEach(notifyError)
         return GapLoadResult(insertedKeys, result.continuationFailure)
+    }
+
+    private suspend fun hasJoinedSingleSourceGap(
+        gap: UiTimelineV2.Gap,
+        gapId: String,
+    ): Boolean {
+        if (loader is MixedRemoteMediator || !loader.canJoinTimeline) return false
+        val statusIds = gap.lowerBound[loader.pagingKey].orEmpty().mapNotNull(::boundaryStatusId)
+        if (statusIds.isEmpty()) return false
+        return database.connect {
+            val dao = database.pagingTimelineDao()
+            val row = dao.getRow(pagingKey, gapId) ?: return@connect false
+            // Legacy ordered sources could advance their Gap beyond an already cached lower boundary.
+            statusIds.chunked(500).any { ids ->
+                dao.getByPagingKeyAndStatusIds(pagingKey, ids).any {
+                    !it.isGap && it.notificationKey == null &&
+                        it.sortId < row.sortId
+                }
+            }
+        }
+    }
+
+    private fun boundaryStatusId(key: String): String? {
+        // Post and Feed boundaries use length-prefixed stable identities; unknown formats keep loading.
+        val parts = mutableListOf<String>()
+        var offset = 0
+        while (offset < key.length && parts.size < 6) {
+            val separator = key.indexOf(':', offset)
+            if (separator < 0) return null
+            val length = key.substring(offset, separator).toIntOrNull() ?: return null
+            offset = separator + 1
+            if (length < 0 || length > key.length - offset) return null
+            parts += key.substring(offset, offset + length)
+            offset += length
+        }
+        if (offset != key.length || parts.size < 4) return null
+        val kind = parts[parts.size - 3]
+        if (kind != "post" && kind != "feed") return null
+        val account: DbAccountType =
+            when {
+                parts.size == 4 && parts[0] == "guest" -> AccountType.Guest
+                parts.size == 5 && parts[0] == "guest_host" -> AccountType.GuestHost(parts[1])
+                parts.size == 6 && parts[0] == "specific" -> AccountType.Specific(MicroBlogKey(parts[1], parts[2]))
+                else -> return null
+            }
+        return DbStatus.createId(account, MicroBlogKey(parts[parts.size - 2], parts.last()))
     }
 
     private suspend fun fetchPage(

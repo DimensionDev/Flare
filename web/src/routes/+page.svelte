@@ -156,7 +156,6 @@
 							role="tab"
 							type="button"
 							aria-selected={selectedTab?.id === tab.id}
-							disabled={!tab.enabled}
 							onclick={() => {
 								selectedTabId = tab.id;
 							}}

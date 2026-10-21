@@ -279,6 +279,35 @@ class TimelinePresenterBindingTest : RobolectricTest() {
             assertIs<SystemHomeMixedTimelinePresenter>(presenter)
         }
 
+    @Test
+    fun savingTabsPreservesExcludedSourcesAndGroupsInsideManualGroup() =
+        runTest {
+            val visible = homeSlot(accountId = "visible")
+            val excluded = homeSlot(accountId = "excluded").copy(presentation = TimelinePresentation(enabled = false))
+            val excludedGroup =
+                TimelineSlot(
+                    id = "excluded-group",
+                    content = TimelineSlotContent.Group(children = listOf(homeSlot(accountId = "nested"))),
+                    presentation = TimelinePresentation(enabled = false),
+                )
+            val group =
+                TimelineSlot(
+                    id = "custom",
+                    content = TimelineSlotContent.Group(children = listOf(visible, excluded, excludedGroup)),
+                )
+            settingsRepository.updateTabSettingsV2 { TabSettingsV2(homeSlots = listOf(group)) }
+
+            val tabs = settingsRepository.homeTimelineTabs.first()
+            val item = assertIs<UiGroupTimelineTabItem>(tabs.single())
+            val visibleOnly = group.copy(content = TimelineSlotContent.Group(children = listOf(visible)))
+            assertEquals(timelineResolver.toTabItem(visibleOnly).contentSourceKey, item.contentSourceKey)
+            assertEquals(setOf(MicroBlogKey("visible", "example.com")), timelineResolver.accountKeys(item))
+
+            settingsRepository.replaceHomeTimelineTabs(tabs)
+
+            assertEquals(listOf(group), settingsRepository.tabSettingsV2.first().homeSlots)
+        }
+
     private suspend fun systemHomeMixedTab(): UiGroupTimelineTabItem {
         val tab =
             settingsRepository.homeTimelineTabs

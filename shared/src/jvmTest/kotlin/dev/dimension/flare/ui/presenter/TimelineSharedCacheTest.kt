@@ -26,6 +26,7 @@ import dev.dimension.flare.data.io.OkioFileStorage
 import dev.dimension.flare.data.model.tab.TabSettingsV2
 import dev.dimension.flare.data.model.tab.TimelineLoaderFactory
 import dev.dimension.flare.data.model.tab.TimelineMergePolicy
+import dev.dimension.flare.data.model.tab.TimelinePresentation
 import dev.dimension.flare.data.model.tab.TimelinePresenterFactory
 import dev.dimension.flare.data.model.tab.TimelineResolver
 import dev.dimension.flare.data.model.tab.TimelineSlot
@@ -93,6 +94,10 @@ class TimelineSharedCacheTest {
 
     @Test fun ordinaryMixedTimeUsesTheHomeRankScale() = ordinaryRefresh(mixed = true)
 
+    @Test fun ordinarySourceExcludedFromMixedPreservesHomeRowsAndSession() = ordinaryRefresh(includedInMixed = false)
+
+    @Test fun ordinaryGroupExcludedFromMixedPreservesHomeRowsAndSession() = ordinaryRefresh(mixed = true, includedInMixed = false)
+
     @Test fun disabledReadingKeepsOrdinaryRefreshSemantics() = ordinaryRefresh(remember = false)
 
     @Test fun removingAnAccountCancelsItsPendingHomeResolution() = ordinaryRefresh(missingFirst = true, removeAccount = true)
@@ -106,6 +111,7 @@ class TimelineSharedCacheTest {
     private fun ordinaryRefresh(
         prepend: Boolean = false,
         mixed: Boolean = false,
+        includedInMixed: Boolean = true,
         remember: Boolean = true,
         shared: Boolean = true,
         missingFirst: Boolean = false,
@@ -212,14 +218,16 @@ class TimelineSharedCacheTest {
             }
             val single = spec.source(TimelineSpec.AccountBasedData(MicroBlogKey("home", "example.invalid"))).toSlot()
             val slot =
-                if (mixed) {
-                    TimelineSlot(
-                        id = "mixed",
-                        content = TimelineSlotContent.Group(listOf(single), mergePolicy = TimelineMergePolicy.Time),
-                    )
-                } else {
-                    single
-                }
+                (
+                    if (mixed) {
+                        TimelineSlot(
+                            id = "mixed",
+                            content = TimelineSlotContent.Group(listOf(single), mergePolicy = TimelineMergePolicy.Time),
+                        )
+                    } else {
+                        single
+                    }
+                ).copy(presentation = TimelinePresentation(enabled = includedInMixed))
             app.accountDao().insert(DbAccount(MicroBlogKey("home", "example.invalid"), "{}", "xQt", 0))
             val missing = unavailable.source(TimelineSpec.AccountBasedData(MicroBlogKey("missing", "example.invalid"))).toSlot()
             if (removeAccount) app.accountDao().insert(DbAccount(MicroBlogKey("missing", "example.invalid"), "{}", "xQt", 0))

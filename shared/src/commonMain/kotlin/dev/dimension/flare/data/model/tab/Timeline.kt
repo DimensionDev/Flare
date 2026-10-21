@@ -83,6 +83,8 @@ public sealed interface UiTimelineTabItem {
     public val title: UiText
     public val icon: IconType
     public val appearancePatch: AppearancePatch?
+
+    /** Controls inclusion in parent mixed/group timelines; this tab's own page remains available. */
     public val enabled: Boolean
     public val filterConfig: TimelineFilterConfig
     public val loaderKey: String
@@ -298,6 +300,7 @@ internal data class TimelinePresentation internal constructor(
     val titleOverride: String? = null,
     val iconOverride: IconType? = null,
     private val appearanceOverride: AppearanceBag? = null,
+    /** Persisted [UiTimelineTabItem.enabled]; does not disable standalone page loading. */
     val enabled: Boolean = true,
     val filterConfig: TimelineFilterConfig = TimelineFilterConfig(),
 ) {
@@ -779,7 +782,7 @@ internal class TimelinePresenterFactory(
                             if (current == null) {
                                 !wasStored
                             } else {
-                                current.enabled && current.contentSourceKey == item.contentSourceKey
+                                current.contentSourceKey == item.contentSourceKey
                             }
                         }.distinctUntilChanged()
             }

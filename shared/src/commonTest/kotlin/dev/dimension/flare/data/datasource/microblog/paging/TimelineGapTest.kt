@@ -77,6 +77,147 @@ class TimelineGapTest : RobolectricTest() {
     }
 
     @Test
+    fun orderedRefreshOverlapClosesForSingleAndEveryMixedPolicy() =
+        runTest {
+            for (policy in listOf(null) + TimelineMergePolicy.entries) {
+                var refreshing = false
+                val ordered =
+                    source("overlapping-$policy") {
+                        PagingResult((if (refreshing) listOf(100, 90) else listOf(90, 80, 60)).map(::datedPost), nextKey = "tail")
+                    }
+                val other = source("unchanged-$policy") { PagingResult(listOf(datedPost(95), datedPost(85))) }
+                val loader = if (policy == null) ordered else MixedRemoteMediator(database, listOf(ordered, other), policy)
+                val home = TimelineRemoteMediator(loader, database, false, retainHistory = true)
+                assertIs<RemoteMediator.MediatorResult.Success>(home.load(LoadType.REFRESH, state))
+                val tail = database.pagingTimelineDao().getNextKey(home.pagingKey)
+                refreshing = true
+                assertIs<RemoteMediator.MediatorResult.Success>(home.load(LoadType.REFRESH, state))
+                assertTrue(contents(home).none { it is UiTimelineV2.Gap }, "$policy")
+                assertEquals(listOf("100", "90", "80", "60"), contents(home).map { it.statusKey.id }.filter { it !in listOf("95", "85") })
+                assertEquals(tail, database.pagingTimelineDao().getNextKey(home.pagingKey))
+            }
+        }
+
+    @Test
+    fun legacyJoinedSingleSourceClosesWithoutFetchingOlderHistory() =
+        runTest {
+            val accounts =
+                listOf(AccountType.Guest, AccountType.GuestHost("guest:host"), AccountType.Specific(MicroBlogKey("a:@,b", "host")))
+            for ((account, feed) in accounts.flatMap { listOf(it to false, it to true) }) {
+                for (alreadyFilled in listOf(false, true)) {
+                    fun item(id: Int): UiTimelineV2 =
+                        if (feed) {
+                            UiTimelineV2.Feed(
+                                title = "Article $id",
+                                description = null,
+                                url = "https://creator.fanbox.cc/posts/$id",
+                                createdAt = datedPost(id).createdAt,
+                                source = UiTimelineV2.Feed.Source("Creator", null),
+                                accountType = account,
+                            )
+                        } else {
+                            datedPost(id).copy(accountType = account, statusKey = MicroBlogKey("$id:🎨@,", "x:host"))
+                        }
+                    var ordered = false
+                    var generation = 0
+                    val requests = mutableListOf<PagingRequest>()
+                    val original =
+                        source("legacy-single-$account-$feed-$alreadyFilled", ordered = false) { request ->
+                            requests += request
+                            val ids =
+                                when (request) {
+                                    is PagingRequest.Append -> {
+                                        if (request.nextKey == "tail-0") listOf(70) else listOf(85)
+                                    }
+
+                                    else -> {
+                                        when (generation) {
+                                            0 -> listOf(90, 80)
+                                            1 -> listOf(100, 90)
+                                            else -> listOf(110, 100)
+                                        }
+                                    }
+                                }
+                            PagingResult(ids.map(::item), nextKey = "tail-$generation")
+                        }
+                    val upgraded =
+                        object : CacheableRemoteLoader<UiTimelineV2> by original {
+                            override val canJoinTimeline: Boolean get() = ordered
+                        }
+                    val home = TimelineRemoteMediator(upgraded, database, false, retainHistory = true)
+                    assertIs<RemoteMediator.MediatorResult.Success>(home.load(LoadType.REFRESH, state))
+                    generation = 1
+                    assertIs<RemoteMediator.MediatorResult.Success>(home.load(LoadType.REFRESH, state))
+                    var gap = contents(home).filterIsInstance<UiTimelineV2.Gap>().single()
+                    if (alreadyFilled) {
+                        home.loadGap(gap)
+                        gap = contents(home).filterIsInstance<UiTimelineV2.Gap>().single()
+                    }
+                    ordered = true
+                    generation = 2
+                    assertIs<RemoteMediator.MediatorResult.Success>(home.load(LoadType.REFRESH, state))
+                    val before = contents(home).filterNot { it is UiTimelineV2.Gap }
+                    val tail = database.pagingTimelineDao().getNextKey(home.pagingKey)
+                    requests.clear()
+                    val result = home.loadGap(gap)
+                    assertEquals(emptyList(), requests, "The original boundary was crossed before this cursor")
+                    assertEquals(emptyList(), result.insertedKeys)
+                    assertEquals(null, result.failure)
+                    assertEquals(before, contents(home))
+                    assertEquals(tail, database.pagingTimelineDao().getNextKey(home.pagingKey))
+                    assertIs<RemoteMediator.MediatorResult.Success>(home.load(LoadType.APPEND, state))
+                    assertEquals(listOf<PagingRequest>(PagingRequest.Append("tail-0")), requests)
+                    assertEquals(item(70).statusKey, contents(home).last().statusKey)
+                }
+            }
+        }
+
+    @Test
+    fun singleSourceRecoveryDoesNotGuessUnknownOrForeignBoundaries() =
+        runTest {
+            val post = datedPost(90)
+            val notification = UiTimelineV2.TimelinePostItem(post, UiTimelineV2.PostPresentation(notificationKey = post.statusKey))
+            val boundaries =
+                listOf(
+                    emptyList(),
+                    listOf("invalid", "-1:", "2147483647:x", post.stableItemKey.dropLast(1)),
+                    listOf(notification.stableItemKey),
+                    listOf(post.copy(accountType = AccountType.Specific(MicroBlogKey("other", "x.com"))).stableItemKey),
+                    listOf(datedPost(80).stableItemKey),
+                )
+            for ((index, boundary) in boundaries.withIndex()) {
+                var phase = 0
+                var requests = 0
+                val loader =
+                    source("uncertain-boundary-$index") { request ->
+                        if (request is PagingRequest.Append) requests++
+                        when (phase) {
+                            0 -> PagingResult(listOf(post, datedPost(80)), nextKey = "tail")
+                            1 -> PagingResult(listOf(datedPost(110), datedPost(100)), nextKey = "gap")
+                            else -> PagingResult(listOf(datedPost(95)), nextKey = "gap-next")
+                        }
+                    }
+                val home = TimelineRemoteMediator(loader, database, false, retainHistory = true)
+                home.load(LoadType.REFRESH, state)
+                phase = 1
+                home.load(LoadType.REFRESH, state)
+                val gap =
+                    contents(
+                        home,
+                    ).filterIsInstance<UiTimelineV2.Gap>().single().copy(lowerBound = mapOf(loader.pagingKey to boundary))
+                val row =
+                    assertNotNull(
+                        database.pagingTimelineDao().getRow(home.pagingKey, TimelinePagingMapper.toDb(post, home.pagingKey).timeline._id),
+                    )
+                saveToDatabase(database, listOf(TimelinePagingMapper.toDb(gap, home.pagingKey, row.sortId + 1)))
+                phase = 2
+                assertEquals(1, home.loadGap(gap).insertedKeys.size)
+                assertEquals(1, requests)
+                assertEquals(1, contents(home).filterIsInstance<UiTimelineV2.Gap>().size)
+            }
+        }
+
+    @Test
     fun legacyJoinedMixedSourceClosesWithoutFetchingOlderHistory() =
         runTest {
             for (nestedPolicy in listOf(null) + TimelineMergePolicy.entries) {

@@ -186,6 +186,7 @@ internal class NostrDataSource(
     override fun homeTimeline(): RemoteLoader<UiTimelineV2> =
         object : CacheableRemoteLoader<UiTimelineV2> {
             override val pagingKey: String = "home_$accountKey"
+            override val canJoinTimeline: Boolean = true
 
             override suspend fun load(
                 pageSize: Int,

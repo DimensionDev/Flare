@@ -59,6 +59,7 @@ internal class FanboxHomeTimelineLoader(
     accountKey: MicroBlogKey,
 ) : FanboxTimelineLoader(service, accountKey) {
     override val pagingKey: String = "fanbox_home_$accountKey"
+    override val canJoinTimeline: Boolean = true
 
     override suspend fun loadPage(
         pageSize: Int,
@@ -85,6 +86,7 @@ internal class FanboxSupportedTimelineLoader(
     accountKey: MicroBlogKey,
 ) : FanboxTimelineLoader(service, accountKey) {
     override val pagingKey: String = "fanbox_supported_$accountKey"
+    override val canJoinTimeline: Boolean = true
 
     override suspend fun loadPage(
         pageSize: Int,

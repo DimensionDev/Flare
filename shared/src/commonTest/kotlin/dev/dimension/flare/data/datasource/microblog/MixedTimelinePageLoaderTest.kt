@@ -49,11 +49,11 @@ class MixedTimelinePageLoaderTest : RobolectricTest() {
             val cached: suspend (
                 List<UiTimelineV2>,
             ) -> Set<String> = { setOf(mixedTestPost(30).stableItemKey, mixedTestPost(20).stableItemKey) }
-            val partial = outer.loadPage(20, PagingRequest.Append(assertNotNull(first.nextKey)), cached) { _, _ -> false }
+            val partial = outer.loadPage(20, PagingRequest.Append(assertNotNull(first.nextKey)), cached)
             assertEquals(listOf("30"), partial.data.map { it.statusKey.id })
             assertSame(failure, partial.continuationFailure)
             fail = false
-            val retry = outer.loadPage(20, PagingRequest.Append(assertNotNull(partial.nextKey)), cached) { _, _ -> false }
+            val retry = outer.loadPage(20, PagingRequest.Append(assertNotNull(partial.nextKey)), cached)
             assertEquals(listOf("10"), retry.data.map { it.statusKey.id })
             assertNull(retry.nextKey)
             assertEquals(2, good.requests.size)
@@ -65,8 +65,8 @@ class MixedTimelinePageLoaderTest : RobolectricTest() {
             val source = Source("sparse", listOf(page(next = "more"), page(30, next = "unused")))
             val mixed = MixedTimelinePageLoader(listOf(source), TimelineMergePolicy.Time)
             val cached: suspend (List<UiTimelineV2>) -> Set<String> = { setOf(mixedTestPost(30).stableItemKey) }
-            val first = mixed.loadPage(20, PagingRequest.Refresh, cached) { _, _ -> false }
-            val next = mixed.loadPage(20, PagingRequest.Append(assertNotNull(first.nextKey)), cached) { _, _ -> false }
+            val first = mixed.loadPage(20, PagingRequest.Refresh, cached)
+            val next = mixed.loadPage(20, PagingRequest.Append(assertNotNull(first.nextKey)), cached)
             assertEquals(listOf("30"), next.data.map { it.statusKey.id })
             assertNull(next.nextKey)
         }

@@ -371,9 +371,8 @@ internal open class TimelineRemoteMediator(
                     publishAll =
                         checkCachedItems &&
                             (request is PagingRequest.Append || boundary.isNotEmpty() || database.pagingTimelineDao().anyPaging(pagingKey)),
-                ) { source, items ->
-                    items.any { it.stableItemKey in boundary[source].orEmpty() }
-                }
+                    boundary = boundary,
+                )
             } else {
                 loader.load(pageSize, request).let { response ->
                     val join =

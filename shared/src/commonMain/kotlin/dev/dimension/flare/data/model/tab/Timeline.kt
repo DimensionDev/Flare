@@ -611,7 +611,8 @@ internal class TimelineResolver(
             is TimelineSlotContent.Group -> {
                 UiGroupTimelineTabItem(
                     id = slot.id,
-                    children = content.children.map { toTabItem(it) }.filter { it.enabled },
+                    // Preserve excluded children for editing; resolveGroupLoader handles inclusion.
+                    children = content.children.map { toTabItem(it) },
                     mergePolicy = content.mergePolicy,
                     source = content.source,
                     presentation = slot.presentation,

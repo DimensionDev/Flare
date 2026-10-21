@@ -365,7 +365,7 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
             .combine(appDatabase.accountDao().allAccounts()) { tabs, accounts ->
                 tabs to accounts.filter { platformRegistry.get(it.platformId) != null }.map { it.account_key }.toSet()
             }.mapLatest { (tabs, accounts) ->
-                for (tab in tabs.filter { it.enabled }) {
+                for (tab in tabs) {
                     try {
                         val home = timelinePresenterFactory.create(tab, isHomeTimeline = true)
                         if (!accounts.containsAll(home.sourceAccounts)) continue

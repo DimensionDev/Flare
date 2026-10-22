@@ -4,6 +4,7 @@ import dev.dimension.flare.common.Locale
 import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.database.cache.connect
 import dev.dimension.flare.data.database.cache.model.DbStatus
 import dev.dimension.flare.data.database.cache.model.DbTranslation
 import dev.dimension.flare.data.database.cache.model.DbUser
@@ -12,6 +13,7 @@ import dev.dimension.flare.data.database.cache.model.TranslationEntityType
 import dev.dimension.flare.data.database.cache.model.TranslationPayload
 import dev.dimension.flare.data.database.cache.model.TranslationStatus
 import dev.dimension.flare.data.database.cache.model.effectiveTranslationCacheKey
+import dev.dimension.flare.data.database.cache.model.matchesPlatformTranslation
 import dev.dimension.flare.data.database.cache.model.platformTranslationPayload
 import dev.dimension.flare.data.database.cache.model.sourceHash
 import dev.dimension.flare.data.database.cache.model.statusTranslationEntityKey
@@ -196,11 +198,10 @@ internal class OnlinePreTranslationService(
             val settings = activeTranslationSettings(requirePreTranslation = requirePreTranslation) ?: return@launch
             val session = executionSessionFor(settings) ?: return@launch
             session.scope.launch {
-                val candidates = prepareCandidates(settings)
                 processPreparedCandidates(
                     session = session,
                     settings = settings,
-                    candidates = candidates,
+                    prepareCandidates = { prepareCandidates(settings) },
                 )
             }
         }
@@ -279,31 +280,32 @@ internal class OnlinePreTranslationService(
     private suspend fun processPreparedCandidates(
         session: PreTranslationExecutionSession,
         settings: ActivePreTranslationSettings,
-        candidates: List<PreparedTranslationCandidate>,
+        prepareCandidates: suspend () -> List<PreparedTranslationCandidate>,
     ) {
-        if (candidates.isEmpty()) {
-            return
-        }
-        ensureCurrentExecutionSession(session)
-        val (platformCandidates, providerCandidates) =
-            candidates.partition { it.platformPayload != null }
-        if (platformCandidates.isNotEmpty()) {
-            val updatedAt = Clock.System.now().toEpochMilliseconds()
-            database.translationDao().insertAll(
-                platformCandidates.map { candidate ->
-                    PreTranslationStoreSupport.toDbTranslation(
-                        candidate = candidate,
-                        status = TranslationStatus.Completed,
-                        updatedAt = updatedAt,
-                        payload = candidate.platformPayload,
+        val providerCandidates =
+            database.connect {
+                ensureCurrentExecutionSession(session)
+                val (platformCandidates, providerCandidates) = prepareCandidates().partition { it.platformPayload != null }
+                ensureCurrentExecutionSession(session)
+                if (platformCandidates.isNotEmpty()) {
+                    val updatedAt = Clock.System.now().toEpochMilliseconds()
+                    database.translationDao().insertAll(
+                        platformCandidates.map { candidate ->
+                            PreTranslationStoreSupport.toDbTranslation(
+                                candidate = candidate,
+                                status = TranslationStatus.Completed,
+                                updatedAt = updatedAt,
+                                payload = candidate.platformPayload,
+                            )
+                        },
                     )
-                },
-            )
-        }
+                }
+                markPending(providerCandidates)
+                providerCandidates
+            }
         if (providerCandidates.isEmpty()) {
             return
         }
-        markPending(providerCandidates)
         session.semaphore.withPermit {
             ensureCurrentExecutionSession(session)
             translatePreparedCandidates(
@@ -399,29 +401,40 @@ internal class OnlinePreTranslationService(
         return buildList {
             deduplicated.forEach { status ->
                 val entityKey = status.translationEntityKey()
+                val sourcePayload = status.content.translationPayload() ?: return@forEach
+                val existing = existingByKey[entityKey]
+                val platformCacheKey = status.content.effectiveTranslationCacheKey(providerCacheKey, preferPlatformTranslation = true)
                 val platformPayload =
-                    status.content
-                        .platformTranslationPayload()
-                        ?.takeIf { preferPlatformTranslation }
+                    if (preferPlatformTranslation) {
+                        status.content.platformTranslationPayload()
+                            ?: existing
+                                ?.takeIf {
+                                    it.status == TranslationStatus.Completed &&
+                                        it.matchesPlatformTranslation(sourcePayload, platformCacheKey)
+                                }?.payload
+                    } else {
+                        null
+                    }
                 val effectiveCacheKey =
                     status.content.effectiveTranslationCacheKey(
                         providerCacheKey = providerCacheKey,
-                        preferPlatformTranslation = preferPlatformTranslation,
+                        preferPlatformTranslation = platformPayload != null,
                     )
                 prepareCandidate(
                     entityType = TranslationEntityType.Status,
                     entityKey = entityKey,
-                    payload = status.content.translationPayload(),
+                    payload = sourcePayload,
                     sourceLanguages = PreTranslationContentRules.sourceLanguages(status.content),
-                    existing = existingByKey[entityKey],
+                    existing = existing,
                     targetLanguage = targetLanguage,
                     autoTranslateExcludedLanguages = autoTranslateExcludedLanguages,
                     providerCacheKey = effectiveCacheKey,
                     now = now,
                     allowLongText = allowLongText,
                     preferredDisplayMode = preferredDisplayMode,
+                    platformPayload = platformPayload,
                 )?.let { candidate ->
-                    add(candidate.copy(platformPayload = platformPayload))
+                    add(candidate)
                 }
             }
         }
@@ -465,6 +478,7 @@ internal class OnlinePreTranslationService(
         now: Long,
         allowLongText: Boolean,
         preferredDisplayMode: TranslationDisplayMode? = null,
+        platformPayload: TranslationPayload? = null,
     ): PreparedTranslationCandidate? {
         if (payload == null) {
             return null
@@ -517,7 +531,10 @@ internal class OnlinePreTranslationService(
             )
             return null
         }
-        if (!PreTranslationStoreSupport.shouldTranslate(existing = existing, sourceHash = sourceHash)) {
+        if (
+            !PreTranslationStoreSupport.shouldTranslate(existing = existing, sourceHash = sourceHash) &&
+            (platformPayload == null || existing?.payload == platformPayload)
+        ) {
             return null
         }
         return PreparedTranslationCandidate(
@@ -529,6 +546,7 @@ internal class OnlinePreTranslationService(
             sourceDocument = sourceDocument,
             attemptCount = (existing?.attemptCount ?: 0) + 1,
             displayMode = displayMode,
+            platformPayload = platformPayload,
         )
     }
 
@@ -574,35 +592,35 @@ internal class OnlinePreTranslationService(
         }
         ensureCurrentExecutionSession(session)
         val startedAt = Clock.System.now().toEpochMilliseconds()
-        database.translationDao().insertAll(
-            candidates.map { candidate ->
+        val activeCandidates =
+            updateInFlightTranslations(session, candidates) { candidate ->
                 PreTranslationStoreSupport.toDbTranslation(
                     candidate = candidate,
                     status = TranslationStatus.Translating,
                     updatedAt = startedAt,
                 )
-            },
-        )
+            }
+        if (activeCandidates.isEmpty()) {
+            return
+        }
 
         val failure =
             runBatchTranslationWithRetry(
                 session = session,
                 settings = settings,
-                candidates = candidates,
+                candidates = activeCandidates,
             ).exceptionOrNull()
         if (failure != null) {
             ensureCurrentExecutionSession(session)
             val failedAt = Clock.System.now().toEpochMilliseconds()
-            database.translationDao().insertAll(
-                candidates.map { candidate ->
-                    PreTranslationStoreSupport.toDbTranslation(
-                        candidate = candidate,
-                        status = TranslationStatus.Failed,
-                        updatedAt = failedAt,
-                        statusReason = failure.message,
-                    )
-                },
-            )
+            updateInFlightTranslations(session, activeCandidates) { candidate ->
+                PreTranslationStoreSupport.toDbTranslation(
+                    candidate = candidate,
+                    status = TranslationStatus.Failed,
+                    updatedAt = failedAt,
+                    statusReason = failure.message,
+                )
+            }
         }
     }
 
@@ -672,28 +690,47 @@ internal class OnlinePreTranslationService(
                 .decodeJson(PreTranslationBatchDocument.serializer())
         val translatedItems = translatedDocument.items.associateBy { it.entityKey }
         val updatedAt = Clock.System.now().toEpochMilliseconds()
-        database.translationDao().insertAll(
-            candidates.map { candidate ->
-                tryRun {
-                    val translatedItem =
-                        translatedItems[candidate.entityKey]
-                            ?: error("Missing translated item for ${candidate.entityKey}")
-                    translatedDbTranslation(
-                        candidate = candidate,
-                        translatedItem = translatedItem,
-                        updatedAt = updatedAt,
-                    )
-                }.getOrElse { throwable ->
-                    PreTranslationStoreSupport.toDbTranslation(
-                        candidate = candidate,
-                        status = TranslationStatus.Failed,
-                        updatedAt = updatedAt,
-                        statusReason = throwable.message,
-                    )
-                }
-            },
-        )
+        updateInFlightTranslations(session, candidates) { candidate ->
+            tryRun {
+                val translatedItem =
+                    translatedItems[candidate.entityKey]
+                        ?: error("Missing translated item for ${candidate.entityKey}")
+                translatedDbTranslation(
+                    candidate = candidate,
+                    translatedItem = translatedItem,
+                    updatedAt = updatedAt,
+                )
+            }.getOrElse { throwable ->
+                PreTranslationStoreSupport.toDbTranslation(
+                    candidate = candidate,
+                    status = TranslationStatus.Failed,
+                    updatedAt = updatedAt,
+                    statusReason = throwable.message,
+                )
+            }
+        }
     }
+
+    private suspend fun updateInFlightTranslations(
+        session: PreTranslationExecutionSession,
+        candidates: List<PreparedTranslationCandidate>,
+        translation: (PreparedTranslationCandidate) -> DbTranslation,
+    ): List<PreparedTranslationCandidate> =
+        database.connect {
+            ensureCurrentExecutionSession(session)
+            candidates.filter { candidate ->
+                val record = translation(candidate)
+                database.translationDao().updateInFlight(
+                    id = record.id,
+                    sourceHash = record.sourceHash,
+                    attemptCount = record.attemptCount,
+                    status = record.status,
+                    payload = record.payload,
+                    statusReason = record.statusReason,
+                    updatedAt = record.updatedAt,
+                ) != 0
+            }
+        }
 
     private fun translatedDbTranslation(
         candidate: PreparedTranslationCandidate,

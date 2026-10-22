@@ -20,6 +20,24 @@ internal interface TranslationDao {
     suspend fun insertAll(data: List<DbTranslation>)
 
     @Query(
+        "UPDATE DbTranslation SET status = :status, payload = :payload, " +
+            "statusReason = :statusReason, updatedAt = :updatedAt " +
+            "WHERE id = :id AND sourceHash = :sourceHash AND attemptCount = :attemptCount " +
+            "AND status IN (:pendingStatus, :translatingStatus)",
+    )
+    suspend fun updateInFlight(
+        id: String,
+        sourceHash: String,
+        attemptCount: Int,
+        status: TranslationStatus,
+        payload: TranslationPayload?,
+        statusReason: String?,
+        updatedAt: Long,
+        pendingStatus: TranslationStatus = TranslationStatus.Pending,
+        translatingStatus: TranslationStatus = TranslationStatus.Translating,
+    ): Int
+
+    @Query(
         "SELECT * FROM DbTranslation " +
             "WHERE entityType = :entityType AND entityKey = :entityKey AND targetLanguage = :targetLanguage " +
             "LIMIT 1",

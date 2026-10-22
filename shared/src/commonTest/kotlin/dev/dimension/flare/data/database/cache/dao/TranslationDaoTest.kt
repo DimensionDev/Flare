@@ -42,6 +42,48 @@ class TranslationDaoTest : RobolectricTest() {
     }
 
     @Test
+    fun updateInFlightRequiresTheCurrentAttemptAndPreservesDisplayMode() =
+        runTest {
+            val translation =
+                DbTranslation(
+                    entityType = TranslationEntityType.Status,
+                    entityKey = "status:guarded-write",
+                    targetLanguage = "en",
+                    sourceHash = "current-source",
+                    status = TranslationStatus.Translating,
+                    displayMode = TranslationDisplayMode.Original,
+                    attemptCount = 2,
+                    updatedAt = 1,
+                )
+            db.translationDao().insert(translation)
+
+            suspend fun write(
+                sourceHash: String = translation.sourceHash,
+                attemptCount: Int = translation.attemptCount,
+                status: TranslationStatus = TranslationStatus.Completed,
+            ): Int =
+                db.translationDao().updateInFlight(
+                    id = translation.id,
+                    sourceHash = sourceHash,
+                    attemptCount = attemptCount,
+                    status = status,
+                    payload = TranslationPayload(content = "translated".toUiPlainText()),
+                    statusReason = null,
+                    updatedAt = 2,
+                )
+
+            assertEquals(0, write(sourceHash = "old-source"))
+            assertEquals(0, write(attemptCount = 1))
+            assertEquals(translation, db.translationDao().get(TranslationEntityType.Status, translation.entityKey, "en"))
+            assertEquals(1, write())
+            assertEquals(0, write(status = TranslationStatus.Failed))
+            val saved = assertNotNull(db.translationDao().get(TranslationEntityType.Status, translation.entityKey, "en"))
+            assertEquals(TranslationStatus.Completed, saved.status)
+            assertEquals(TranslationDisplayMode.Original, saved.displayMode)
+            assertEquals("translated", saved.payload?.content?.raw)
+        }
+
+    @Test
     fun insertAndFindStatusTranslation_roundTripsPayload() =
         runTest {
             val translation =

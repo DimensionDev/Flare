@@ -77,6 +77,283 @@ class TimelineGapTest : RobolectricTest() {
     }
 
     @Test
+    fun timeMixedRecommendationsRefreshTheOrdinaryTailWithoutCreatingGaps() =
+        runTest {
+            for ((nestedPolicy, once) in (listOf(null) + TimelineMergePolicy.entries).flatMap { policy ->
+                listOf(false, true).map { policy to it }
+            }) {
+                var fresh = false
+                val requests = mutableListOf<PagingRequest>()
+                val ranked =
+                    source("recommendations-$nestedPolicy-$once", ordered = false, refreshGapOncePerSession = once) { request ->
+                        requests += request
+                        when (request) {
+                            is PagingRequest.Append -> {
+                                PagingResult(listOf(datedPost(50)))
+                            }
+
+                            else -> {
+                                PagingResult(
+                                    listOf(datedPost(if (fresh) 200 else 100)),
+                                    nextKey = if (fresh) "new-tail" else "old-tail",
+                                )
+                            }
+                        }
+                    }
+                val inner = if (nestedPolicy == null) ranked else MixedRemoteMediator(database, listOf(ranked), nestedPolicy)
+                val loader = MixedRemoteMediator(database, listOf(inner), TimelineMergePolicy.Time)
+                val home =
+                    TimelineRemoteMediator(
+                        loader,
+                        database,
+                        false,
+                        retainHistory = true,
+                        refreshSession = HomeTimelineRefreshSessions().forTimeline("home", loader.pagingKey),
+                    )
+                home.load(LoadType.REFRESH, state)
+                fresh = true
+                repeat(2) { home.load(LoadType.REFRESH, state) }
+                assertEquals(listOf("200", "100"), contents(home).map { it.statusKey.id }, "$nestedPolicy")
+                requests.clear()
+                home.load(LoadType.APPEND, state)
+                assertEquals(listOf<PagingRequest>(PagingRequest.Append("new-tail")), requests)
+                assertEquals(listOf("200", "100", "50"), contents(home).map { it.statusKey.id })
+            }
+        }
+
+    @Test
+    fun timeMixedGapsOnlyFetchOrderedSourcesAndKeepTheirOriginalTail() =
+        runTest {
+            for (nestedPolicy in listOf(null) + TimelineMergePolicy.entries) {
+                var fresh = false
+                val requests = mutableListOf<Pair<String, PagingRequest>>()
+                val ordered =
+                    source("ordered-$nestedPolicy") { request ->
+                        requests += "ordered" to request
+                        when (request) {
+                            is PagingRequest.Append -> {
+                                if (request.nextKey == "ordered-gap") {
+                                    PagingResult(listOf(datedPost(250), datedPost(100)), nextKey = "joined")
+                                } else {
+                                    PagingResult(listOf(datedPost(80)))
+                                }
+                            }
+
+                            else -> {
+                                PagingResult(
+                                    listOf(datedPost(if (fresh) 300 else 100)),
+                                    nextKey = if (fresh) "ordered-gap" else "ordered-tail",
+                                )
+                            }
+                        }
+                    }
+                val ranked =
+                    source("ranked-$nestedPolicy", ordered = false) { request ->
+                        requests += "ranked" to request
+                        if (request is PagingRequest.Append) {
+                            PagingResult(listOf(datedPost(50)))
+                        } else {
+                            PagingResult(listOf(datedPost(if (fresh) 200 else 90)), nextKey = if (fresh) "ranked-new" else "ranked-old")
+                        }
+                    }
+                val sources =
+                    if (nestedPolicy == null) {
+                        listOf(ordered, ranked)
+                    } else {
+                        listOf(MixedRemoteMediator(database, listOf(ordered, ranked), nestedPolicy))
+                    }
+                val home = mixed(*sources.toTypedArray())
+                home.load(LoadType.REFRESH, state)
+                fresh = true
+                home.load(LoadType.REFRESH, state)
+                val gap = contents(home).filterIsInstance<UiTimelineV2.Gap>().single()
+                requests.clear()
+                home.loadGap(gap)
+                assertEquals(
+                    listOf<Pair<String, PagingRequest>>("ordered" to PagingRequest.Append("ordered-gap")),
+                    requests,
+                    "$nestedPolicy",
+                )
+                assertTrue(contents(home).none { it is UiTimelineV2.Gap })
+                requests.clear()
+                home.load(LoadType.APPEND, state)
+                assertEquals(
+                    setOf<Pair<String, PagingRequest>>(
+                        "ordered" to PagingRequest.Append("ordered-tail"),
+                        "ranked" to PagingRequest.Append("ranked-new"),
+                    ),
+                    requests.toSet(),
+                    "$nestedPolicy",
+                )
+                assertEquals(listOf("300", "250", "200", "100", "90", "80", "50"), contents(home).map { it.statusKey.id })
+            }
+        }
+
+    @Test
+    fun timeMixedRecommendationRefreshPreservesPendingAndHandlesEmptyOrFailedPages() =
+        runTest {
+            for ((nestedPolicy, outcome) in (listOf(null) + TimelineMergePolicy.entries).flatMap { policy ->
+                listOf("empty", "ended", "failed").map { policy to it }
+            }) {
+                var fresh = false
+                val requests = mutableListOf<PagingRequest>()
+                val ranked =
+                    source("buffered-$outcome-$nestedPolicy", ordered = false) { request ->
+                        requests += request
+                        when {
+                            request is PagingRequest.Append -> PagingResult(listOf(datedPost(70)))
+                            !fresh -> PagingResult(listOf(datedPost(90), datedPost(80)), nextKey = "old-tail")
+                            outcome == "failed" -> error("offline")
+                            outcome == "empty" -> PagingResult()
+                            else -> PagingResult(listOf(datedPost(200)))
+                        }
+                    }
+                val ordered = source("joined-$outcome-$nestedPolicy") { PagingResult(listOf(datedPost(100))) }
+                val home =
+                    if (nestedPolicy == null) {
+                        mixed(ordered, ranked)
+                    } else {
+                        mixed(MixedRemoteMediator(database, listOf(ordered, ranked), nestedPolicy))
+                    }
+                val oneRow = PagingState<OffsetFromStartPagingKey, TimelinePageItem>(emptyList(), null, PagingConfig(1), 0)
+                home.load(LoadType.REFRESH, oneRow)
+                assertEquals(listOf("100"), contents(home).map { it.statusKey.id })
+                fresh = true
+                home.load(LoadType.REFRESH, oneRow)
+                assertTrue(contents(home).none { it is UiTimelineV2.Gap })
+                requests.clear()
+                repeat(2) { home.load(LoadType.APPEND, state) }
+                assertTrue(contents(home).map { it.statusKey.id }.containsAll(listOf("100", "90", "80")), outcome)
+                assertEquals(
+                    if (outcome ==
+                        "failed"
+                    ) {
+                        listOf<PagingRequest>(PagingRequest.Append("old-tail"))
+                    } else {
+                        emptyList()
+                    },
+                    requests,
+                    outcome,
+                )
+            }
+        }
+
+    @Test
+    fun timeMixedEndedRecommendationRefreshClearsTheOldTail() =
+        runTest {
+            for (empty in listOf(false, true)) {
+                var fresh = false
+                val requests = mutableListOf<PagingRequest>()
+                val ranked =
+                    source("ended-$empty", ordered = false) { request ->
+                        requests += request
+                        if (!fresh) {
+                            PagingResult(listOf(datedPost(100)), nextKey = "old-tail")
+                        } else {
+                            PagingResult(if (empty) emptyList() else listOf(datedPost(200)))
+                        }
+                    }
+                val home = mixed(ranked)
+                home.load(LoadType.REFRESH, state)
+                fresh = true
+                home.load(LoadType.REFRESH, state)
+                assertEquals(null, database.pagingTimelineDao().getNextKey(home.pagingKey))
+                assertTrue(contents(home).none { it is UiTimelineV2.Gap })
+                requests.clear()
+                home.load(LoadType.APPEND, state)
+                assertEquals(emptyList(), requests)
+                assertTrue(contents(home).any { it.statusKey.id == "100" })
+            }
+        }
+
+    @Test
+    fun legacyTimeMixedGapsPublishPendingAndMigrateOnlyTheirOrderedContinuations() =
+        runTest {
+            for (nestedPolicy in listOf(null) + TimelineMergePolicy.entries) {
+                for ((onlyRecommendations, ended) in listOf(false to false, true to false, true to true)) {
+                    var generation = 0
+                    val requests = mutableListOf<Pair<String, PagingRequest>>()
+                    val ranked =
+                        source("legacy-ranked-$nestedPolicy-$onlyRecommendations-$ended", ordered = false) { request ->
+                            requests += "ranked" to request
+                            if (request is PagingRequest.Append) {
+                                PagingResult(listOf(datedPost(50)))
+                            } else if (generation == 2 && ended) {
+                                PagingResult()
+                            } else {
+                                PagingResult(
+                                    listOf(datedPost(90 + generation * 100), datedPost(80 + generation * 100)),
+                                    nextKey = "ranked-$generation",
+                                )
+                            }
+                        }
+                    val ordered =
+                        source("legacy-ordered-$nestedPolicy-$onlyRecommendations-$ended") { request ->
+                            requests += "ordered" to request
+                            if (request is PagingRequest.Append) {
+                                if (request.nextKey == "ordered-1") {
+                                    PagingResult(listOf(datedPost(150), datedPost(100)), nextKey = "joined")
+                                } else {
+                                    PagingResult(listOf(datedPost(70)))
+                                }
+                            } else {
+                                PagingResult(listOf(datedPost(if (generation == 0) 100 else 300)), nextKey = "ordered-$generation")
+                            }
+                        }
+                    val sources = if (onlyRecommendations) listOf(ranked) else listOf(ordered, ranked)
+                    val inner = if (nestedPolicy == null) sources else listOf(MixedRemoteMediator(database, sources, nestedPolicy))
+                    val loader = MixedRemoteMediator(database, inner, TimelineMergePolicy.Time)
+                    val home = TimelineRemoteMediator(loader, database, false, retainHistory = true)
+                    home.load(LoadType.REFRESH, state)
+                    val cached = contents(home).map { it.statusKey.id }
+                    val metadata = assertNotNull(database.pagingTimelineDao().getPagingKeyMetadata(home.pagingKey))
+                    generation = 1
+                    val page = loader.pageLoader().load(1, PagingRequest.Refresh)
+                    val gap =
+                        UiTimelineV2.Gap(
+                            statusKey = MicroBlogKey("legacy-$nestedPolicy-$onlyRecommendations-$ended", "timeline-gap"),
+                            createdAt = Instant.fromEpochMilliseconds(300).toUi(),
+                            nextKey = assertNotNull(page.nextKey),
+                            lowerBound = Json.decodeFromString(metadata.sourceHeads),
+                        )
+                    val sortId = assertNotNull(database.pagingTimelineDao().getFirstRow(home.pagingKey)).sortId - 1
+                    saveToDatabase(
+                        database,
+                        TimelinePagingMapper.toDb(
+                            page.data + gap,
+                            home.pagingKey,
+                            sortIds = page.data.map { assertNotNull(loader.sortId(it)) * 2 } + sortId,
+                        ),
+                    )
+                    if (onlyRecommendations) {
+                        generation = 2
+                        home.load(LoadType.REFRESH, state)
+                    }
+                    requests.clear()
+                    home.loadGap(gap)
+                    assertEquals(
+                        if (onlyRecommendations) {
+                            emptyList()
+                        } else {
+                            listOf<Pair<String, PagingRequest>>("ordered" to PagingRequest.Append("ordered-1"))
+                        },
+                        requests,
+                    )
+                    assertTrue(contents(home).none { it is UiTimelineV2.Gap })
+                    assertTrue(contents(home).map { it.statusKey.id }.containsAll(listOf("190", "180") + cached))
+                    requests.clear()
+                    home.load(LoadType.APPEND, state)
+                    assertTrue(contents(home).map { it.statusKey.id }.containsAll(listOf("90", "80")))
+                    if (ended) {
+                        assertEquals(emptyList(), requests)
+                    } else {
+                        assertTrue(("ranked" to PagingRequest.Append(if (onlyRecommendations) "ranked-2" else "ranked-0")) in requests)
+                    }
+                }
+            }
+        }
+
+    @Test
     fun orderedRefreshOverlapClosesForSingleAndEveryMixedPolicy() =
         runTest {
             for (policy in listOf(null) + TimelineMergePolicy.entries) {
@@ -246,7 +523,7 @@ class TimelineGapTest : RobolectricTest() {
                     }
                 val sources =
                     if (nestedPolicy == null) listOf(upgraded) else listOf(MixedRemoteMediator(database, listOf(upgraded), nestedPolicy))
-                val loader = MixedRemoteMediator(database, sources, TimelineMergePolicy.Time)
+                val loader = MixedRemoteMediator(database, sources, TimelineMergePolicy.TimePerPage)
                 val home = TimelineRemoteMediator(loader, database, false, retainHistory = true)
                 home.load(LoadType.REFRESH, state)
                 val tail = database.pagingTimelineDao().getNextKey(loader.pagingKey)
@@ -303,7 +580,7 @@ class TimelineGapTest : RobolectricTest() {
                         }
                     }
                 val inner = MixedRemoteMediator(database, listOf(upgraded, other), TimelineMergePolicy.TimePerPage)
-                val loader = MixedRemoteMediator(database, listOf(inner), TimelineMergePolicy.Time)
+                val loader = MixedRemoteMediator(database, listOf(inner), TimelineMergePolicy.TimePerPage)
                 val home = TimelineRemoteMediator(loader, database, false, retainHistory = true)
                 home.load(LoadType.REFRESH, state)
                 val tail = database.pagingTimelineDao().getNextKey(loader.pagingKey)
@@ -386,7 +663,7 @@ class TimelineGapTest : RobolectricTest() {
                     source("featured-$nestedPolicy", ordered = false, refreshGapOncePerSession = true) { request ->
                         requests += "featured" to request
                         if (request is PagingRequest.Append) {
-                            PagingResult(listOf(datedPost(100)), nextKey = "already-cached")
+                            PagingResult(listOf(datedPost(100)))
                         } else {
                             PagingResult(
                                 listOf(datedPost(100 + generation * 100)),
@@ -424,7 +701,6 @@ class TimelineGapTest : RobolectricTest() {
                 val loader = MixedRemoteMediator(database, sources, TimelineMergePolicy.Time)
                 val smallPage = PagingState<OffsetFromStartPagingKey, TimelinePageItem>(emptyList(), null, PagingConfig(2), 0)
                 TimelineRemoteMediator(loader, database, false, retainHistory = true).load(LoadType.REFRESH, smallPage)
-                val tail = database.pagingTimelineDao().getNextKey(loader.pagingKey)
                 val home =
                     TimelineRemoteMediator(
                         loader,
@@ -435,22 +711,24 @@ class TimelineGapTest : RobolectricTest() {
                     )
                 generation = 1
                 assertIs<RemoteMediator.MediatorResult.Success>(home.load(LoadType.REFRESH, smallPage))
-                val firstGap = contents(home).filterIsInstance<UiTimelineV2.Gap>().single()
+                assertTrue(contents(home).none { it is UiTimelineV2.Gap })
                 generation = 2
                 assertIs<RemoteMediator.MediatorResult.Success>(home.load(LoadType.REFRESH, smallPage))
-                assertEquals(listOf(firstGap), contents(home).filterIsInstance<UiTimelineV2.Gap>(), "$nestedPolicy")
+                assertTrue(contents(home).none { it is UiTimelineV2.Gap }, "$nestedPolicy")
                 assertEquals(
                     listOf("300", "200", "100", "90", "80", "70", "60"),
                     contents(home).filterNot { it is UiTimelineV2.Gap }.map { it.statusKey.id },
                 )
-                assertEquals(tail, database.pagingTimelineDao().getNextKey(loader.pagingKey))
-                requests.clear()
-                home.loadGap(firstGap, pageSize = 2)
-                assertTrue(contents(home).none { it is UiTimelineV2.Gap })
-                assertEquals(listOf<Pair<String, PagingRequest>>("featured" to PagingRequest.Append("featured-1")), requests)
                 requests.clear()
                 assertIs<RemoteMediator.MediatorResult.Success>(home.load(LoadType.APPEND, smallPage))
-                assertEquals(listOf<Pair<String, PagingRequest>>("ordered" to PagingRequest.Append("original-tail")), requests)
+                assertEquals(
+                    setOf<Pair<String, PagingRequest>>(
+                        "featured" to PagingRequest.Append("featured-2"),
+                        "ordered" to PagingRequest.Append("original-tail"),
+                    ),
+                    requests.toSet(),
+                    "$nestedPolicy",
+                )
                 assertTrue(contents(home).any { it.statusKey.id == "50" })
             }
         }
@@ -630,9 +908,13 @@ class TimelineGapTest : RobolectricTest() {
                 home.load(LoadType.REFRESH, state)
                 response = PagingResult(listOf(datedPost(12), datedPost(10)), nextKey = "after-10")
                 home.load(LoadType.REFRESH, state)
-                val gap = contents(home).filterIsInstance<UiTimelineV2.Gap>().single()
+                val gap = contents(home).filterIsInstance<UiTimelineV2.Gap>().singleOrNull()
                 response = PagingResult(listOf(datedPost(8)))
-                home.loadGap(gap)
+                if (mixedPolicy == TimelineMergePolicy.Time) {
+                    home.load(LoadType.APPEND, state)
+                } else {
+                    home.loadGap(checkNotNull(gap))
+                }
                 val ids = contents(home).map { it.statusKey.id }
                 if (ids.indexOf("8") < ids.indexOf("10")) violations += "$mixedPolicy: $ids"
             }
@@ -946,7 +1228,11 @@ class TimelineGapTest : RobolectricTest() {
                             home.loadGap(it)
                         }
                     }
-                    assertTrue("featured" in appended, "An existing gap keeps its original continuation")
+                    assertEquals(
+                        policy != TimelineMergePolicy.Time,
+                        "featured" in appended,
+                        "Only page-based gaps retain recommendation continuations",
+                    )
                 }
             }
         }
@@ -969,7 +1255,7 @@ class TimelineGapTest : RobolectricTest() {
                         }
                     }
                 }
-            val loader = MixedRemoteMediator(database, sources, TimelineMergePolicy.Time)
+            val loader = MixedRemoteMediator(database, sources, TimelineMergePolicy.TimePerPage)
             val seed = TimelineRemoteMediator(loader, database, false, retainHistory = true)
             seed.load(LoadType.REFRESH, state)
             seed.load(LoadType.APPEND, state)
@@ -1439,22 +1725,20 @@ class TimelineGapTest : RobolectricTest() {
         }
 
     @Test
-    fun mixedRankedGapKeepsNewItemsAfterDuplicatesAndClosesOnlyOnAFullCachedPage() =
+    fun timeMixedRecommendationsKeepNewItemsAfterDuplicatesDuringOrdinaryPaging() =
         runTest {
             var response = PagingResult<UiTimelineV2>(listOf(datedPost(30), datedPost(20)), nextKey = "tail")
             val home = mixed(source("ranked", ordered = false) { response })
             home.load(LoadType.REFRESH, state)
-            val tail = database.pagingTimelineDao().getNextKey(home.pagingKey)
             response = PagingResult(listOf(datedPost(30), datedPost(40)), nextKey = "gap-one")
             home.load(LoadType.REFRESH, state)
-            val gap = contents(home).filterIsInstance<UiTimelineV2.Gap>().single()
+            assertTrue(contents(home).none { it is UiTimelineV2.Gap })
             response = PagingResult(listOf(datedPost(30), datedPost(35)), nextKey = "gap-two")
-            assertEquals(1, home.loadGap(gap).insertedKeys.size)
-            val nextGap = contents(home).filterIsInstance<UiTimelineV2.Gap>().single()
-            response = PagingResult(listOf(datedPost(30), datedPost(20)), nextKey = "unused-tail")
-            assertEquals(emptyList(), home.loadGap(nextGap).insertedKeys)
+            home.load(LoadType.APPEND, state)
+            response = PagingResult(listOf(datedPost(30), datedPost(20)))
+            home.load(LoadType.APPEND, state)
             assertEquals(listOf("40", "35", "30", "20"), contents(home).map { it.statusKey.id })
-            assertEquals(tail, database.pagingTimelineDao().getNextKey(home.pagingKey))
+            assertEquals(null, database.pagingTimelineDao().getNextKey(home.pagingKey))
         }
 
     @Test
@@ -1561,7 +1845,10 @@ class TimelineGapTest : RobolectricTest() {
                         pageSize: Int,
                         request: PagingRequest,
                     ) = if (request is PagingRequest.Append) {
-                        PagingResult(if (tail) listOf(dated(5)) else listOf(dated(50), dated(25)))
+                        PagingResult(
+                            if (tail) listOf(dated(5)) else listOf(dated(50), dated(25)),
+                            nextKey = if (tail) null else "next-recommendations",
+                        )
                     } else {
                         PagingResult(if (fresh) listOf(dated(40), dated(10)) else listOf(dated(30)), nextKey = "ranked-tail")
                     }
@@ -1595,14 +1882,8 @@ class TimelineGapTest : RobolectricTest() {
                     }.filterNot { it.isPaginationGap }
                     .map { it.statusKey.id }
             assertEquals(listOf("40", "30", "20", "10"), ids)
-            val gap =
-                database
-                    .pagingTimelineDao()
-                    .getTimelinePage(home.pagingKey, 0, 50)
-                    .map { it.statusData.content }
-                    .filterIsInstance<UiTimelineV2.Gap>()
-                    .single()
-            home.loadGap(gap)
+            assertTrue(contents(home).none { it is UiTimelineV2.Gap })
+            home.load(LoadType.APPEND, state)
             val filled = database.pagingTimelineDao().getTimelinePage(home.pagingKey, 0, 50).map { it.statusData.content }
             assertEquals(listOf("50", "40", "30", "25", "20", "10"), filled.map { it.statusKey.id })
             tail = true

@@ -249,7 +249,8 @@ class TimelineSharedCacheTest {
             home.load(LoadType.REFRESH, state)
 
             suspend fun rows() = cache.pagingTimelineDao().getTimelinePage(loader.pagingKey, 0, 100).map { it.statusData.content }
-            val gap = rows().filterIsInstance<UiTimelineV2.Gap>().single()
+            val gaps = rows().filterIsInstance<UiTimelineV2.Gap>()
+            assertEquals(if (mixed) 0 else 1, gaps.size)
             sessions.forTimeline(tab.id, loader.pagingKey).refreshedSources += leaf.pagingKey
             response = PagingResult(listOf(post(30)), nextKey = "new-tail", previousKey = if (prepend) "head" else null)
             headRequests.set(0)
@@ -275,7 +276,7 @@ class TimelineSharedCacheTest {
             if (remember && shared) {
                 assertEquals(listOf("30", "20", "10"), result.filterIsInstance<UiTimelineV2.Post>().map { it.statusKey.id })
                 assertEquals(
-                    listOf(gap),
+                    gaps,
                     result.filterIsInstance<UiTimelineV2.Gap>(),
                     "Existing gap and once-per-process session must survive",
                 )

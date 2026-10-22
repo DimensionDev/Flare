@@ -10,6 +10,7 @@ public data class PagingResult<T : Any>(
     val sourceFailures: List<Throwable> = emptyList(),
     val sourceHeads: Map<String, List<String>> = emptyMap(),
     val refreshedSources: Set<String> = emptySet(),
+    val refreshedRecommendations: Set<String> = emptySet(),
 ) {
     public constructor(
         endOfPaginationReached: Boolean,

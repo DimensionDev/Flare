@@ -195,7 +195,12 @@ internal open class TimelineRemoteMediator(
                         } else {
                             result.nextKey to null
                         }
-                    val updatedTail = mergeTailContinuation(tailUpdates)
+                    val refreshedRecommendations =
+                        result.refreshedRecommendations
+                            .takeIf { retainHistory == true && loadType == LoadType.REFRESH && first != null }
+                            .orEmpty()
+                    val updateTail = tailUpdates != null || refreshedRecommendations.isNotEmpty()
+                    val updatedTail = if (updateTail) mergeTailContinuation(tailUpdates, refreshedRecommendations) else null
                     if (retainHistory == true && loadType == LoadType.APPEND && result.nextKey != null) {
                         val existing = existingRows(mapped)
                         check(
@@ -248,10 +253,10 @@ internal open class TimelineRemoteMediator(
                     }
                     dao.updatePage(
                         pagingKey = pagingKey,
-                        nextKey = updatedTail ?: result.nextKey,
+                        nextKey = if (updateTail) updatedTail else result.nextKey,
                         keepNextKey =
                             loadType == LoadType.PREPEND ||
-                                (loadType == LoadType.REFRESH && retainHistory == true && first != null && updatedTail == null),
+                                (loadType == LoadType.REFRESH && retainHistory == true && first != null && !updateTail),
                         prevKey = if (loadType == LoadType.APPEND) before.prevKey else result.previousKey,
                         sourceHeads =
                             Json.encodeToString(
@@ -280,9 +285,23 @@ internal open class TimelineRemoteMediator(
         val key = dao.getPagingKeyMetadata(pagingKey) ?: return GapLoadResult()
         val gapRow = TimelinePagingMapper.toDb(listOf(gap), pagingKey).single().timeline
         if (dao.getRow(pagingKey, gapRow._id) == null) return GapLoadResult()
+        var migratedTail: String? = null
         val result =
             try {
-                if (hasJoinedSingleSourceGap(gap, gapRow._id)) {
+                if (ordersByTime && loader is MixedRemoteMediator) {
+                    val pages = loader.pageLoader()
+                    val pending = pages.drainPending(gap.nextKey)
+                    val (continuation, tail) = pages.splitContinuation(pending.nextKey, gap.lowerBound.keys)
+                    migratedTail = tail
+                    val loaded =
+                        continuation?.let {
+                            fetchPage(pageSize, PagingRequest.Append(it), gap.lowerBound, checkCachedItems = true)
+                        } ?: PagingResult()
+                    loaded.copy(
+                        data = (pending.data + loaded.data).distinctBy { it.stableItemKey },
+                        sourceHeads = loaded.sourceHeads + pending.sourceHeads,
+                    )
+                } else if (hasJoinedSingleSourceGap(gap, gapRow._id)) {
                     PagingResult()
                 } else {
                     fetchPage(pageSize, PagingRequest.Append(gap.nextKey), gap.lowerBound, checkCachedItems = true)
@@ -314,7 +333,14 @@ internal open class TimelineRemoteMediator(
                 } else {
                     result.nextKey to null
                 }
-            val updatedTail = mergeTailContinuation(tailUpdates)
+            val combinedTail =
+                if (migratedTail != null && loader is MixedRemoteMediator) {
+                    loader.pageLoader().mergeTailContinuation(migratedTail, tailUpdates)
+                } else {
+                    tailUpdates
+                }
+            val updateTail = combinedTail != null
+            val updatedTail = if (updateTail) mergeTailContinuation(combinedTail) else null
             val existing = existingRows(mapped)
             val overlap = existing.values.maxByOrNull { it.sortId }?.takeIf { it.sortId > row.sortId }
             check(
@@ -344,11 +370,11 @@ internal open class TimelineRemoteMediator(
             }
             val sourceHeads = Json.decodeFromString<Map<String, List<String>>>(currentKey.sourceHeads)
             val updatedHeads = result.sourceHeads + sourceHeads
-            if (updatedHeads != sourceHeads || updatedTail != null) {
+            if (updatedHeads != sourceHeads || updateTail) {
                 dao.updatePage(
                     pagingKey = pagingKey,
                     nextKey = updatedTail,
-                    keepNextKey = updatedTail == null,
+                    keepNextKey = !updateTail,
                     prevKey = currentKey.prevKey,
                     sourceHeads = Json.encodeToString(updatedHeads),
                     accountKeys = currentKey.accountKeys,
@@ -413,6 +439,12 @@ internal open class TimelineRemoteMediator(
         checkCachedItems: Boolean,
         refreshWithoutGap: Set<String> = emptySet(),
     ): PagingResult<UiTimelineV2> {
+        val tailSortId =
+            if (ordersByTime && checkCachedItems && request is PagingRequest.Refresh) {
+                database.pagingTimelineDao().getPreviousSortId(pagingKey, null)
+            } else {
+                null
+            }
         val result =
             if (loader is MixedRemoteMediator) {
                 loader.pageLoader().loadPage(
@@ -424,6 +456,8 @@ internal open class TimelineRemoteMediator(
                         checkCachedItems &&
                             (request is PagingRequest.Append || boundary.isNotEmpty() || database.pagingTimelineDao().anyPaging(pagingKey)),
                     boundary = boundary,
+                    // Keep older refresh posts buffered until ordinary pagination reaches them.
+                    canPublish = { tailSortId == null || checkNotNull(homeSortId(it)) <= tailSortId },
                 )
             } else {
                 loader.load(pageSize, request).let { response ->
@@ -460,10 +494,18 @@ internal open class TimelineRemoteMediator(
     private fun continuationIdentity(cursor: String?): String? =
         cursor?.let { if (loader is MixedRemoteMediator) loader.pageLoader().continuationIdentity(it) else it }
 
-    private suspend fun mergeTailContinuation(updates: String?): String? {
-        if (updates == null || loader !is MixedRemoteMediator) return null
+    private suspend fun mergeTailContinuation(
+        updates: String?,
+        refreshedRecommendations: Set<String> = emptySet(),
+    ): String? {
+        if (loader !is MixedRemoteMediator) return null
         val previous = database.pagingTimelineDao().getNextKey(pagingKey)
-        return loader.pageLoader().mergeTailContinuation(previous, updates)?.takeIf { it != previous }
+        return loader.pageLoader().mergeTailContinuation(
+            previous,
+            updates,
+            refreshedRecommendations,
+            preserveRecommendations = ordersByTime,
+        )
     }
 
     private suspend fun homeSortId(item: UiTimelineV2): Long? =

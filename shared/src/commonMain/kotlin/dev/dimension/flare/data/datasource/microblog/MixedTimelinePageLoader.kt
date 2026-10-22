@@ -53,7 +53,7 @@ internal class MixedTimelinePageLoader(
             },
         )
 
-    /** Time gaps only retain ordered sources with an old boundary. */
+    /** Time gaps retain unfinished ordered cursors with an old boundary; buffered posts follow the ordinary tail. */
     fun splitContinuation(
         nextKey: String?,
         boundarySources: Set<String>,
@@ -61,7 +61,7 @@ internal class MixedTimelinePageLoader(
     ): Pair<String?, String?> {
         if (nextKey == null) return null to null
         if (boundarySources.isEmpty()) return null to nextKey
-        if (allSourcesHaveBoundary(boundarySources, orderedOnly)) return nextKey to null
+        if (!orderedOnly && allSourcesHaveBoundary(boundarySources, orderedOnly)) return nextKey to null
         val gap = mutableListOf<SourcePage>()
         val tail = mutableListOf<SourcePage>()
         decodeContinuation(nextKey).forEachIndexed { index, page ->
@@ -69,13 +69,13 @@ internal class MixedTimelinePageLoader(
             when {
                 source is MixedTimelinePageLoader -> {
                     val (gapNext, tailNext) = source.splitContinuation(page.next, boundarySources, orderedOnly)
-                    gap += page.copy(next = gapNext)
+                    gap += page.copy(next = gapNext, pending = if (orderedOnly) emptyList() else page.pending)
                     tail += page.copy(next = tailNext)
                 }
 
-                source.pagingKey in boundarySources && (!orderedOnly || source.canJoinTimeline) -> {
-                    gap += page
-                    tail += SourcePage(started = true)
+                source.pagingKey in boundarySources && (!orderedOnly || (source.canJoinTimeline && page.canLoad)) -> {
+                    gap += if (orderedOnly) page.copy(pending = emptyList()) else page
+                    tail += if (orderedOnly) page.copy(next = null) else SourcePage(started = true)
                 }
 
                 else -> {
@@ -111,18 +111,33 @@ internal class MixedTimelinePageLoader(
             previous.mapIndexed { index, page ->
                 val update = incoming[index]
                 val source = sources[index]
+                val pending =
+                    (page.pending + update.pending).distinctBy { it.stableItemKey }.let {
+                        if (ordersByTime) it.sortedByDescending { item -> item.createdAt.value } else it
+                    }
                 when {
                     source is MixedTimelinePageLoader && (update.next != null || refreshedRecommendations.isNotEmpty()) -> {
+                        val next = source.mergeTailContinuation(page.next, update.next, refreshedRecommendations, preserveRecommendations)
+                        // Compare nested buffers with this page before selecting the next item by time.
+                        val buffered = next?.takeIf { ordersByTime }?.let(source::drainPending)
                         page.copy(
                             started = true,
-                            next = source.mergeTailContinuation(page.next, update.next, refreshedRecommendations, preserveRecommendations),
-                            pending = (page.pending + update.pending).distinctBy { it.stableItemKey },
+                            next = if (buffered != null) buffered.nextKey else next,
+                            pending =
+                                if (buffered ==
+                                    null
+                                ) {
+                                    pending
+                                } else {
+                                    mergePending(listOf(pending, buffered.data)).distinctBy { it.stableItemKey }
+                                },
+                            sourceHeads = page.sourceHeads + buffered?.sourceHeads.orEmpty(),
                         )
                     }
 
                     source.pagingKey in refreshedRecommendations -> {
                         // Replace the recommendation cursor while retaining already downloaded posts.
-                        update.copy(pending = (page.pending + update.pending).distinctBy { it.stableItemKey })
+                        update.copy(pending = pending)
                     }
 
                     preserveRecommendations && !source.canJoinTimeline -> {
@@ -133,8 +148,15 @@ internal class MixedTimelinePageLoader(
                     !page.canLoad && update.canLoad -> {
                         page.copy(
                             next = update.next,
-                            pending = (page.pending + update.pending).distinctBy { it.stableItemKey },
+                            pending = pending,
                             sourceHeads = update.sourceHeads + page.sourceHeads,
+                        )
+                    }
+
+                    ordersByTime || preserveRecommendations -> {
+                        page.copy(
+                            pending = pending,
+                            sourceHeads = if (update.pending.isEmpty()) page.sourceHeads else page.sourceHeads + update.sourceHeads,
                         )
                     }
 
@@ -235,6 +257,7 @@ internal class MixedTimelinePageLoader(
         publishAll: Boolean = false,
         boundary: Map<String, List<String>> = emptyMap(),
         timeOrdered: Boolean = ordersByTime,
+        canPublish: suspend (UiTimelineV2) -> Boolean = { true },
     ): PagingResult<UiTimelineV2> =
         coroutineScope {
             if (request is PagingRequest.Prepend) return@coroutineScope PagingResult()
@@ -291,6 +314,7 @@ internal class MixedTimelinePageLoader(
                                             publishAll,
                                             boundary,
                                             timeOrdered,
+                                            canPublish,
                                         )
                                     } else {
                                         source.load(pageSize, subRequest)
@@ -412,11 +436,16 @@ internal class MixedTimelinePageLoader(
                 }
             } else {
                 fetch(pages.indices.filter { pages[it].pending.isEmpty() && pages[it].canLoad })
+                val ready =
+                    pages.indices.map { index ->
+                        val (published, remaining) = pages[index].pending.partition { canPublish(it) }
+                        pages[index] = pages[index].copy(pending = remaining)
+                        published
+                    }
                 selected +=
-                    mergePending(pages.map { it.pending })
+                    mergePending(ready)
                         .distinctBy { it.stableItemKey }
                         .filterNot { exclude(it) }
-                pages.indices.forEach { pages[it] = pages[it].copy(pending = emptyList()) }
             }
             val cachedPending = cachedItemKeys(pages.flatMap { it.pending })
             if (cachedPending.isNotEmpty() || refreshWithoutGap.isNotEmpty()) {
@@ -429,7 +458,10 @@ internal class MixedTimelinePageLoader(
                                 .filterKeys { it in refreshWithoutGap }
                                 .values
                                 .flatten()
-                    val (ready, remaining) = pages[index].pending.partition { it.stableItemKey in publishNow }
+                    val (ready, remaining) =
+                        pages[index].pending.partition {
+                            it.stableItemKey in cachedPending || (it.stableItemKey in publishNow && canPublish(it))
+                        }
                     // Publish fetched featured posts before discarding their refresh continuation.
                     selected += ready.filter { published.add(it.stableItemKey) && !exclude(it) }
                     pages[index] = pages[index].copy(pending = remaining)

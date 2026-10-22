@@ -439,6 +439,12 @@ internal open class TimelineRemoteMediator(
         checkCachedItems: Boolean,
         refreshWithoutGap: Set<String> = emptySet(),
     ): PagingResult<UiTimelineV2> {
+        val tailSortId =
+            if (ordersByTime && checkCachedItems && request is PagingRequest.Refresh) {
+                database.pagingTimelineDao().getPreviousSortId(pagingKey, null)
+            } else {
+                null
+            }
         val result =
             if (loader is MixedRemoteMediator) {
                 loader.pageLoader().loadPage(
@@ -450,6 +456,8 @@ internal open class TimelineRemoteMediator(
                         checkCachedItems &&
                             (request is PagingRequest.Append || boundary.isNotEmpty() || database.pagingTimelineDao().anyPaging(pagingKey)),
                     boundary = boundary,
+                    // Keep older refresh posts buffered until ordinary pagination reaches them.
+                    canPublish = { tailSortId == null || checkNotNull(homeSortId(it)) <= tailSortId },
                 )
             } else {
                 loader.load(pageSize, request).let { response ->

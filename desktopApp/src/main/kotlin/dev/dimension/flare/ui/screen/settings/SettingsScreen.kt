@@ -623,15 +623,6 @@ internal fun SettingsScreen(
                 },
             )
 
-            Expander(
-                expanded = showProxy,
-                onExpandedChanged = { showProxy = it },
-                heading = { Text(stringResource(Res.string.proxy_title)) },
-                caption = { Text(stringResource(Res.string.proxy_settings_subtitle)) },
-            ) {
-                ProxySettingsContent()
-            }
-
             Header(stringResource(Res.string.settings_appearance_title))
 
             CardExpanderItem(
@@ -2485,6 +2476,15 @@ internal fun SettingsScreen(
                         }
                     }
                 }
+            }
+
+            Expander(
+                expanded = showProxy,
+                onExpandedChanged = { showProxy = it },
+                heading = { Text(stringResource(Res.string.proxy_title)) },
+                caption = { Text(stringResource(Res.string.proxy_settings_subtitle)) },
+            ) {
+                ProxySettingsContent()
             }
 
             Header(stringResource(Res.string.settings_about_title))

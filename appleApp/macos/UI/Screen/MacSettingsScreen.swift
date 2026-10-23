@@ -36,9 +36,9 @@ private enum MacSettingsPane: String, CaseIterable, Identifiable, Hashable {
     case behavior
     case localFilter
     case storage
-    case proxy
     case aiConfig
     case translationConfig
+    case proxy
     case about
 
     var id: String { rawValue }

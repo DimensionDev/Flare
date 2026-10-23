@@ -142,19 +142,6 @@ internal fun SettingsScreen(
                     Text(text = stringResource(id = R.string.settings_accounts_subtitle))
                 },
             )
-            SegmentedListItem(
-                onClick = toProxy,
-                shapes = ListItemDefaults.single(),
-                content = { Text(stringResource(R.string.proxy_title)) },
-                supportingContent = { Text(stringResource(R.string.proxy_settings_subtitle)) },
-                leadingContent = {
-                    ThemedIcon(
-                        imageVector = FontAwesomeIcons.Solid.Globe,
-                        contentDescription = null,
-                        color = ThemeIconData.Color.SapphireBlue,
-                    )
-                },
-            )
             Column(
                 verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
             ) {
@@ -368,7 +355,7 @@ internal fun SettingsScreen(
                     onClick = {
                         toTranslationConfig.invoke()
                     },
-                    shapes = ListItemDefaults.last(),
+                    shapes = ListItemDefaults.item(),
                     content = {
                         Text(text = stringResource(id = R.string.settings_translation_title))
                     },
@@ -381,6 +368,19 @@ internal fun SettingsScreen(
                     },
                     supportingContent = {
                         Text(text = stringResource(id = R.string.settings_translation_description))
+                    },
+                )
+                SegmentedListItem(
+                    onClick = toProxy,
+                    shapes = ListItemDefaults.last(),
+                    content = { Text(stringResource(R.string.proxy_title)) },
+                    supportingContent = { Text(stringResource(R.string.proxy_settings_subtitle)) },
+                    leadingContent = {
+                        ThemedIcon(
+                            imageVector = FontAwesomeIcons.Solid.Globe,
+                            contentDescription = null,
+                            color = ThemeIconData.Color.SapphireBlue,
+                        )
                     },
                 )
             }

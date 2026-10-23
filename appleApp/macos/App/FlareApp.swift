@@ -24,6 +24,7 @@ struct FlareApp: App {
         if firebaseEnabled {
             AppleSharedHelper.shared.setupCrashlytics()
         }
+        ProxySessionConfigurator.install()
         AppleSharedHelper.shared.initialize(
             inAppNotification: SwiftInAppNotification.shared,
             swiftFormatter: Formatter.shared,
@@ -295,8 +296,7 @@ private struct MacAppCommands: Commands {
                                 } icon: {
                                     if let avatar = data.data.avatar {
                                         AvatarView(
-                                            data: avatar.url,
-                                            customHeader: avatar.customHeaders
+                                            data: avatar
                                         )
                                         .frame(width: 16, height: 16)
                                         .clipShape(Circle())

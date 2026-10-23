@@ -659,7 +659,7 @@ private struct ServiceInstanceRow: View {
     @ViewBuilder
     private var instanceIcon: some View {
         if let iconUrl = instance.iconUrl, !iconUrl.isEmpty {
-            NetworkImage(data: iconUrl)
+            NetworkImage(data: UiMediaImage(url: iconUrl, proxy: ProxyRef.Global.shared))
                 .clipShape(RoundedRectangle(cornerRadius: 4))
         } else {
             Image(fontAwesome: icon)

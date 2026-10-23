@@ -19,6 +19,7 @@ import dev.dimension.flare.data.datasource.microblog.loader.RelationActionType
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.data.network.mastodon.GuestMastodonService
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -50,6 +51,7 @@ internal class GuestMastodonDataSource(
 
     override val userHandler by lazy {
         UserHandler(
+            proxy = ProxyRef.Global,
             host = host,
             loader = loader,
         )

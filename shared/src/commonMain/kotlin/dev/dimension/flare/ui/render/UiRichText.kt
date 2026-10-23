@@ -3,10 +3,13 @@ package dev.dimension.flare.ui.render
 import androidx.compose.runtime.Immutable
 import de.cketti.codepoints.codePointCount
 import dev.dimension.flare.common.SerializableImmutableList
+import dev.dimension.flare.data.model.ProxyRef
+import dev.dimension.flare.ui.model.UiMedia
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 import kotlin.native.HiddenFromObjC
 
 public expect class PlatformText
@@ -43,7 +46,10 @@ public sealed class RenderContent {
     public data class BlockImage(
         val url: String,
         val href: String?,
-    ) : RenderContent()
+        @Transient val proxy: ProxyRef = ProxyRef.Unbound,
+    ) : RenderContent() {
+        val media: UiMedia.Image get() = UiMedia.Image(url, proxy = proxy)
+    }
 }
 
 @Serializable
@@ -58,7 +64,10 @@ public sealed class RenderRun {
     public data class Image(
         val url: String,
         val alt: String,
-    ) : RenderRun()
+        @Transient val proxy: ProxyRef = ProxyRef.Unbound,
+    ) : RenderRun() {
+        val media: UiMedia.Image get() = UiMedia.Image(url, proxy = proxy)
+    }
 }
 
 @Serializable
@@ -98,6 +107,14 @@ public data class UiRichText(
     public val innerText: String,
     public val imageUrls: SerializableImmutableList<String>,
 ) {
+    public val imageMedias: List<UiMedia.Image>
+        get() = renderRuns.flatMap { content ->
+            when (content) {
+                is RenderContent.BlockImage -> listOf(content.media)
+                is RenderContent.Text -> content.runs.filterIsInstance<RenderRun.Image>().map { it.media }
+            }
+        }
+
     public val isEmpty: Boolean =
         renderRuns.all { content ->
             when (content) {

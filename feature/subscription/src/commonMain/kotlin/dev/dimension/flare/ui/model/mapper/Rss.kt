@@ -8,6 +8,7 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.bindMediaProxy
 import dev.dimension.flare.ui.render.toUi
 import dev.dimension.flare.ui.route.DeeplinkRoute
 import io.ktor.http.Url
@@ -92,7 +93,7 @@ internal fun Feed.Atom.Entry.render(
                 ?.let { input -> parseRssDateToInstant(input) }
                 ?.toUi() ?: Instant.fromEpochMilliseconds(0L).toUi(),
         accountType = AccountType.Guest,
-    )
+    ).bindMediaProxy()
 }
 
 internal fun Feed.Rss20.Item.render(
@@ -150,7 +151,7 @@ internal fun Feed.Rss20.Item.render(
                 ?.let { input -> parseRssDateToInstant(input) }
                 ?.toUi() ?: Instant.fromEpochMilliseconds(0L).toUi(),
         accountType = AccountType.Guest,
-    )
+    ).bindMediaProxy()
 }
 
 internal fun Feed.RDF.Item.render(
@@ -203,7 +204,7 @@ internal fun Feed.RDF.Item.render(
                 ?.let { input -> parseRssDateToInstant(input) }
                 ?.toUi() ?: Instant.fromEpochMilliseconds(0L).toUi(),
         accountType = AccountType.Guest,
-    )
+    ).bindMediaProxy()
 }
 
 private fun RssDisplayMode.toFeedClickEvent(

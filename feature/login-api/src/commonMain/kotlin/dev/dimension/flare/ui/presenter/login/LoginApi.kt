@@ -212,3 +212,6 @@ public class LoginPlatformRegistry(
 public class UnsupportedLoginPlatformException(
     public val platformId: String,
 ) : IllegalArgumentException("Login platform is not registered: $platformId")
+
+public val LoginContext.proxy: dev.dimension.flare.data.model.ProxyRef
+    get() = dev.dimension.flare.data.model.ProxyRef.forAccount(reloginTarget?.accountKey)

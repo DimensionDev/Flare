@@ -1,12 +1,10 @@
 package dev.dimension.flare.ui.screen.media
 
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -28,7 +26,6 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
@@ -58,11 +55,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.roundToIntSize
 import androidx.compose.ui.unit.toOffset
 import coil3.compose.AsyncImagePainter
-import coil3.compose.LocalPlatformContext
 import coil3.compose.rememberAsyncImagePainter
-import coil3.network.NetworkHeaders
-import coil3.network.httpHeaders
-import coil3.request.ImageRequest
 import coil3.request.crossfade
 import coil3.size.Size
 import compose.icons.FontAwesomeIcons
@@ -91,10 +84,10 @@ import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.UgoiraPlayer
 import dev.dimension.flare.ui.component.VideoPlayer
 import dev.dimension.flare.ui.component.accessibleDescription
+import dev.dimension.flare.ui.component.rememberMediaImageRequest
 import dev.dimension.flare.ui.component.status.MediaItem
 import dev.dimension.flare.ui.humanizer.humanize
 import dev.dimension.flare.ui.model.UiMedia
-import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.contentPostOrNull
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onSuccess
@@ -115,7 +108,6 @@ import io.github.composefluent.component.SubtleButton
 import io.github.composefluent.component.Text
 import io.github.composefluent.surface.Card
 import io.github.kdroidfilter.composemediaplayer.VideoPlayerState
-import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -225,9 +217,7 @@ private fun StatusMediaContent(
                     is UiMedia.Image -> {
                         ImageItem(
                             modifier = Modifier.fillMaxSize(),
-                            url = media.url,
-                            previewUrl = media.previewUrl,
-                            customHeaders = media.customHeaders,
+                            media = media,
                             description = media.accessibleDescription(),
                             isFocused = pagerState.currentPage == it,
                             setLockPager = state::setLockPager,
@@ -237,8 +227,7 @@ private fun StatusMediaContent(
                     is UiMedia.Video -> {
                         if (pagerState.currentPage == it) {
                             VideoItem(
-                                url = media.url,
-                                thumbnailUrl = media.thumbnailUrl,
+                                media = media,
                                 description = media.accessibleDescription(),
                                 modifier =
                                     Modifier
@@ -247,9 +236,7 @@ private fun StatusMediaContent(
                         } else {
                             ImageItem(
                                 modifier = Modifier.fillMaxSize(),
-                                url = media.thumbnailUrl,
-                                previewUrl = media.thumbnailUrl,
-                                customHeaders = media.customHeaders,
+                                media = media.preview,
                                 description = media.accessibleDescription(),
                                 isFocused = pagerState.currentPage == it,
                                 setLockPager = state::setLockPager,
@@ -303,14 +290,7 @@ private fun StatusMediaContent(
                             },
                         ) {
                             NetworkImage(
-                                model =
-                                    when (media) {
-                                        is UiMedia.Audio -> media.previewUrl
-                                        is UiMedia.Gif -> media.previewUrl
-                                        is UiMedia.Image -> media.previewUrl
-                                        is UiMedia.Video -> media.thumbnailUrl
-                                        is UiMedia.Ugoira -> media.previewUrl
-                                    },
+                                model = media.preview,
                                 contentDescription = media.accessibleDescription(),
                                 modifier =
                                     Modifier
@@ -345,15 +325,13 @@ private fun StatusMediaContent(
 
 @Composable
 internal fun VideoItem(
-    url: String,
-    thumbnailUrl: String,
+    media: UiMedia.Video,
     description: String?,
     modifier: Modifier = Modifier,
 ) {
     var showControls by remember { mutableStateOf(true) }
     VideoPlayer(
-        uri = url,
-        previewUri = thumbnailUrl,
+        media = media,
         contentDescription = description,
         modifier = modifier.clickable { showControls = !showControls },
         muted = false,
@@ -490,9 +468,7 @@ private fun PlayerControl(
 @OptIn(ExperimentalTelephotoApi::class)
 @Composable
 internal fun ImageItem(
-    url: String,
-    previewUrl: String,
-    customHeaders: ImmutableMap<String, String>?,
+    media: UiMedia?,
     description: String?,
     setLockPager: (Boolean) -> Unit,
     isFocused: Boolean,
@@ -501,27 +477,7 @@ internal fun ImageItem(
 ) {
     val painter =
         rememberAsyncImagePainter(
-            ImageRequest
-                .Builder(LocalPlatformContext.current)
-                .data(url)
-                .placeholderMemoryCacheKey(previewUrl)
-                .crossfade(1_000)
-                .size(Size.ORIGINAL)
-                .let { builder ->
-                    if (customHeaders.isNullOrEmpty()) {
-                        builder
-                    } else {
-                        builder.httpHeaders(
-                            NetworkHeaders
-                                .Builder()
-                                .apply {
-                                    customHeaders.forEach { (key, value) ->
-                                        set(key, value)
-                                    }
-                                }.build(),
-                        )
-                    }
-                }.build(),
+            rememberMediaImageRequest(media, crossfade = false).newBuilder().size(Size.ORIGINAL).build(),
         )
     val focusRequester = remember { FocusRequester() }
     LaunchedEffect(isFocused) {
@@ -663,8 +619,7 @@ private fun presenter(
                     ) ?: return
                 scope.launch {
                     desktopDownloadManager.download(
-                        url = item.urlForDownload,
-                        customHeaders = item.customHeaders,
+                        media = item,
                         targetFile = targetFile,
                     )
                 }

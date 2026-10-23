@@ -2,6 +2,7 @@ package dev.dimension.flare.data.network.bluesky
 
 import app.bsky.embed.ExternalExternal
 import app.bsky.feed.PostEmbedUnion
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.data.network.ktorClient
 import dev.dimension.flare.data.network.nullableFallbackJson
 import io.ktor.client.HttpClient
@@ -47,14 +48,17 @@ internal data class BlueskyLinkCard(
 )
 
 internal class BlueskyLinkCardResolver(
-    private val client: HttpClient =
-        ktorClient {
+    private val client: HttpClient,
+) {
+    constructor(proxy: ProxyRef) : this(
+        ktorClient(proxy) {
             followRedirects = false
             install(ContentNegotiation) {
                 nullableFallbackJson()
             }
         },
-) {
+    )
+
     suspend fun resolve(value: String): BlueskyLinkCard? {
         val uri = normalizeHttpUrl(value) ?: return null
         return bestEffort {

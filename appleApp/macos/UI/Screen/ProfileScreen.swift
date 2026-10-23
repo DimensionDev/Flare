@@ -389,10 +389,9 @@ private struct ProfileGalleryTile: View {
 
     @ViewBuilder
     private var imageContent: some View {
-        if let previewURL = item.media.profileGalleryPreviewURL {
+        if let media = item.media.preview {
             NetworkImage(
-                data: previewURL,
-                customHeader: item.media.profileGalleryCustomHeaders
+                data: media
             )
         } else {
             ProfileGalleryPlaceholder()

@@ -4,6 +4,8 @@ import androidx.room3.Room
 import app.cash.molecule.RecompositionMode
 import app.cash.molecule.moleculeFlow
 import dev.dimension.flare.RobolectricTest
+import dev.dimension.flare.createTestFileSystem
+import dev.dimension.flare.createTestRootPath
 import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.database.app.model.AppDatabaseExport
 import dev.dimension.flare.data.database.app.model.DbAccount
@@ -11,6 +13,9 @@ import dev.dimension.flare.data.database.app.model.DbKeywordFilter
 import dev.dimension.flare.data.database.app.model.DbRssSources
 import dev.dimension.flare.data.database.app.model.DbSearchHistory
 import dev.dimension.flare.data.database.createDatabaseDriver
+import dev.dimension.flare.data.io.OkioFileStorage
+import dev.dimension.flare.data.repository.ProxyRepository
+import dev.dimension.flare.deleteTestRootPath
 import dev.dimension.flare.di.startKoin
 import dev.dimension.flare.di.testSingle
 import dev.dimension.flare.memoryDatabaseBuilder
@@ -22,6 +27,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.Json
+import okio.Path
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
 import kotlin.test.AfterTest
@@ -34,6 +40,7 @@ import kotlin.test.assertTrue
 @OptIn(ExperimentalCoroutinesApi::class)
 class ExportAppDatabasePresenterTest : RobolectricTest() {
     private lateinit var db: AppDatabase
+    private lateinit var root: Path
     private val json = Json { ignoreUnknownKeys = true }
 
     @BeforeTest
@@ -45,11 +52,13 @@ class ExportAppDatabasePresenterTest : RobolectricTest() {
                 .setQueryCoroutineContext(Dispatchers.Unconfined)
                 .build()
         this.db = db
+        root = createTestRootPath()
 
         startKoin {
             modules(
                 module {
                     testSingle { db }
+                    testSingle { ProxyRepository(OkioFileStorage(createTestFileSystem(), root)) }
                 },
             )
         }
@@ -59,6 +68,7 @@ class ExportAppDatabasePresenterTest : RobolectricTest() {
     fun tearDown() {
         db.close()
         stopKoin()
+        deleteTestRootPath(root)
     }
 
     @Test

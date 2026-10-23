@@ -2,6 +2,7 @@ package dev.dimension.flare.data.datasource.pixiv
 
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.PostActionFamily
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.data.network.pixiv.PIXIV_IMAGE_REFERER
 import dev.dimension.flare.data.network.pixiv.model.PixivComment
 import dev.dimension.flare.data.network.pixiv.model.PixivCommentStamp
@@ -23,8 +24,10 @@ import dev.dimension.flare.ui.model.UiNumber
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.UiTranslatableText
+import dev.dimension.flare.ui.model.bindMediaProxy
 import dev.dimension.flare.ui.model.mapper.pixivFavourite
 import dev.dimension.flare.ui.model.toUiImage
+import dev.dimension.flare.ui.model.withProxy
 import dev.dimension.flare.ui.render.parseHtml
 import dev.dimension.flare.ui.render.toUi
 import dev.dimension.flare.ui.render.toUiPlainText
@@ -107,7 +110,7 @@ internal fun PixivIllust.toUiTimeline(accountKey: MicroBlogKey): UiTimelineV2.Po
             ),
         mediaClickPolicy = UiTimelineV2.Post.MediaClickPolicy.OpenPostClickEvent,
         accountType = AccountType.Specific(accountKey),
-    )
+    ).bindMediaProxy()
 }
 
 internal fun PixivComment.toUiTimeline(
@@ -140,7 +143,7 @@ internal fun PixivComment.toUiTimeline(
             ),
         mediaClickPolicy = UiTimelineV2.Post.MediaClickPolicy.OpenPostClickEvent,
         accountType = AccountType.Specific(accountKey),
-    )
+    ).bindMediaProxy()
 
 private fun PixivCommentStamp.toUiMedia(): UiMedia.Image? = stampUrl.toUiImage(persistentMapOf("Referer" to PIXIV_IMAGE_REFERER))
 
@@ -176,7 +179,7 @@ internal fun PixivUser.toUiProfile(accountKey: MicroBlogKey? = null): UiProfile 
                 persistentListOf()
             },
         bottomContent = null,
-    )
+    ).withProxy(ProxyRef.forAccount(accountKey))
 
 internal fun PixivCredential.toUiProfile(accountKey: MicroBlogKey? = null): UiProfile =
     UiProfile(
@@ -208,7 +211,7 @@ internal fun PixivCredential.toUiProfile(accountKey: MicroBlogKey? = null): UiPr
                 persistentListOf()
             },
         bottomContent = null,
-    )
+    ).withProxy(ProxyRef.forAccount(accountKey))
 
 internal fun PixivUserDetailResponse.toUiProfile(accountKey: MicroBlogKey? = null): UiProfile {
     val base = user.toUiProfile(accountKey)

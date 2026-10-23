@@ -131,9 +131,8 @@ private fun CoroutineScope.downloadMedia(
         }
         runCatching {
             downloadManager.downloadMedia(
-                uri = media.urlForDownload,
+                media = media,
                 fileName = post.statusMediaFileName(media),
-                customHeaders = media.customHeaders,
                 callback =
                     object : AndroidDownloadManager.DownloadCallback {
                         override fun onDownloadStarted(downloadId: Long) {

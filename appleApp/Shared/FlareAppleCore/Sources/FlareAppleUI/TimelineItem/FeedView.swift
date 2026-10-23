@@ -19,7 +19,7 @@ struct FeedView: View {
             spacing: 4
         ) {
             HStack(spacing: 8) {
-                if let sourceIcon = data.source.icon, !sourceIcon.isEmpty {
+                if let sourceIcon = data.source.media {
                     NetworkImage(data: sourceIcon)
                         .frame(width: 20, height: 20)
                 }
@@ -53,7 +53,7 @@ struct FeedView: View {
                     }
                     if let image = data.media {
                         if desc != nil {
-                            NetworkImage(data: image.url, customHeader: image.customHeaders)
+                            NetworkImage(data: image)
                                 .frame(width: 80, height: 80)
                                 .clipShape(RoundedRectangle(cornerRadius: 8))
                                 .accessibilityLabel(Text(verbatim: image.accessibleDescription))
@@ -62,7 +62,7 @@ struct FeedView: View {
                                 .aspectRatio(16.0 / 9.0, contentMode: .fit)
                                 .frame(maxWidth: .infinity)
                                 .overlay {
-                                    NetworkImage(data: image.url, customHeader: image.customHeaders)
+                                    NetworkImage(data: image)
                                         .allowsHitTesting(false)
                                 }
                                 .clipShape(RoundedRectangle(cornerRadius: 8))

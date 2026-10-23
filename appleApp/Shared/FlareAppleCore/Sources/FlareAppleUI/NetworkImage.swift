@@ -1,41 +1,93 @@
 import SwiftUI
 import Kingfisher
+import KotlinSharedUI
+import FlareAppleCore
 
 public struct NetworkImage: View {
     @Environment(\.shareImageLoading) private var shareImageLoading
     @State private var shareImageID = UUID()
-    private let data: URL?
-    private let placeholder: URL?
-    private let customHeader: [String: String]?
+    private let data: UiMedia?
+    private let placeholder: UiMedia?
     private let contentMode: SwiftUI.ContentMode
     private let usesCrossfade: Bool
     private let onProgress: ((Double?) -> Void)?
+    private let onImageSize: ((CGSize) -> Void)?
     private var downsamplingEnabled = true
+    @State private var prepared: PreparedMediaImage?
+    @State private var preparedIdentity: String?
+
+    public init(data: UiMedia?, placeholder: UiMedia? = nil,
+                contentMode: SwiftUI.ContentMode = .fill, usesCrossfade: Bool = false,
+                onProgress: ((Double?) -> Void)? = nil, onImageSize: ((CGSize) -> Void)? = nil) {
+        self.data = data
+        self.placeholder = placeholder
+        self.contentMode = contentMode
+        self.usesCrossfade = usesCrossfade
+        self.onProgress = onProgress
+        self.onImageSize = onImageSize
+    }
+
+    public var body: some View {
+        let identity = "\(String(describing: data?.proxy))|\(data?.cacheKey ?? "")"
+        let taskIdentity = "\(identity)|\(ProxyMediaImages.shared.revision)"
+        Group {
+            if let prepared, preparedIdentity == identity {
+                ResolvedNetworkImage(source: prepared.source, downloader: prepared.downloader, redirectHandler: prepared.redirectHandler,
+                    mediaPlaceholder: placeholder, data: data.flatMap { URL(string: $0.url) },
+                    customHeader: data?.customHeaders, contentMode: contentMode,
+                    usesCrossfade: usesCrossfade, onProgress: onProgress, onImageSize: onImageSize,
+                    downsamplingEnabled: downsamplingEnabled, shareImageID: shareImageID)
+                    .id(prepared.key)
+            } else {
+                Rectangle().fill(.placeholder).redacted(reason: .placeholder)
+            }
+        }
+        .onAppear { if data != nil { shareImageLoading?.register(shareImageID) } }
+        .onDisappear { shareImageLoading?.remove(shareImageID) }
+        .task(id: taskIdentity) {
+            guard let data else { prepared = nil; return }
+            do {
+                let result = try await ProxyMediaImages.shared.prepare(data)
+                guard !Task.isCancelled else { return }
+                if preparedIdentity != identity || prepared?.key != result.key {
+                    prepared = result
+                }
+                preparedIdentity = identity
+            } catch {
+                guard !Task.isCancelled else { return }
+                prepared = nil
+                shareImageLoading?.complete(shareImageID, success: false)
+                onProgress?(nil)
+            }
+        }
+    }
+}
+
+private struct ResolvedNetworkImage: View {
+    let source: Source
+    let downloader: ImageDownloader
+    let redirectHandler: AnyRedirectHandler
+    let mediaPlaceholder: UiMedia?
+    let data: URL?
+    let customHeader: [String: String]?
+    let contentMode: SwiftUI.ContentMode
+    let usesCrossfade: Bool
+    let onProgress: ((Double?) -> Void)?
+    let onImageSize: ((CGSize) -> Void)?
+    let downsamplingEnabled: Bool
+    let shareImageID: UUID
+    @Environment(\.shareImageLoading) private var shareImageLoading
     @Environment(\.displayScale) private var displayScale
     @State private var measuredPixels: CGSize = .zero
     @State private var requestedPixels: CGSize = .zero
     @State private var previousImage: (url: URL?, image: KFCrossPlatformImage)?
 
-    private init(
-        data: URL?,
-        placeholder: URL?,
-        customHeader: [String: String]?,
-        contentMode: SwiftUI.ContentMode,
-        usesCrossfade: Bool = false,
-        onProgress: ((Double?) -> Void)? = nil
-    ) {
-        self.data = data
-        self.placeholder = placeholder
-        self.customHeader = customHeader
-        self.contentMode = contentMode
-        self.usesCrossfade = usesCrossfade
-        self.onProgress = onProgress
-    }
-
     public var body: some View {
         NetworkImageBoundsLayout {
-            if data?.pathExtension.lowercased() == "gif" {
-                KFAnimatedImage(data)
+            if AppleMediaFileExtension.isGIF(url: data) {
+                KFAnimatedImage(source: source)
+                    .downloader(downloader)
+                    .redirectHandler(redirectHandler)
                     .configure { view in
                         view.needsPrescaling = downsamplingEnabled
                         #if os(iOS)
@@ -51,7 +103,8 @@ public struct NetworkImage: View {
                     .onProgress { receivedSize, totalSize in
                         reportProgress(receivedSize: receivedSize, totalSize: totalSize)
                     }
-                    .onSuccess { _ in
+                    .onSuccess { result in
+                        onImageSize?(result.image.size)
                         shareImageLoading?.complete(shareImageID, success: true)
                         onProgress?(1)
                     }
@@ -66,12 +119,15 @@ public struct NetworkImage: View {
                 placeholderView
             } else if usesCrossfade && shareImageLoading == nil {
                 CrossfadeNetworkImage(
-                    data: data, placeholder: placeholder, customHeader: customHeader,
-                    contentMode: contentMode, onProgress: onProgress,
+                    source: source, downloader: downloader, redirectHandler: redirectHandler,
+                    mediaPlaceholder: mediaPlaceholder, data: data, customHeader: customHeader,
+                    contentMode: contentMode, onProgress: onProgress, onImageSize: onImageSize,
                     processor: processor, displayScale: displayScale
                 )
             } else {
-                KFImage(data)
+                KFImage(source: source)
+                    .downloader(downloader)
+                    .redirectHandler(redirectHandler)
                     .setProcessor(processor)
                     .scaleFactor(displayScale)
                     .cacheOriginalImage()
@@ -88,6 +144,7 @@ public struct NetworkImage: View {
                     }
                     .onSuccess { result in
                         previousImage = (data, result.image)
+                        onImageSize?(result.image.size)
                         shareImageLoading?.complete(shareImageID, success: true)
                         onProgress?(1)
                     }
@@ -100,8 +157,6 @@ public struct NetworkImage: View {
                     .aspectRatio(contentMode: contentMode)
             }
         }
-        .onAppear { if data != nil { shareImageLoading?.register(shareImageID) } }
-        .onDisappear { shareImageLoading?.remove(shareImageID) }
         .onGeometryChange(for: CGSize.self) { [displayScale] proxy in
             CGSize(width: ceil(proxy.size.width * displayScale), height: ceil(proxy.size.height * displayScale))
         } action: { size in
@@ -129,8 +184,8 @@ public struct NetworkImage: View {
             #else
             Image(uiImage: previousImage.image).resizable()
             #endif
-        } else if let placeholder {
-            NetworkImage(data: placeholder, customHeader: customHeader, contentMode: contentMode)
+        } else if let mediaPlaceholder {
+            NetworkImage(data: mediaPlaceholder, contentMode: contentMode)
         } else {
             Rectangle().fill(.placeholder).redacted(reason: .placeholder)
         }
@@ -160,11 +215,15 @@ private struct NetworkImageBoundsLayout: Layout {
 }
 
 private struct CrossfadeNetworkImage: View {
+    let source: Source
+    let downloader: ImageDownloader
+    let redirectHandler: AnyRedirectHandler
+    let mediaPlaceholder: UiMedia?
     let data: URL?
-    let placeholder: URL?
     let customHeader: [String: String]?
     let contentMode: SwiftUI.ContentMode
     let onProgress: ((Double?) -> Void)?
+    let onImageSize: ((CGSize) -> Void)?
     let processor: any ImageProcessor
     let displayScale: CGFloat
 
@@ -182,7 +241,9 @@ private struct CrossfadeNetworkImage: View {
                 placeholderView
             }
 
-            KFImage(data)
+            KFImage(source: source)
+                .downloader(downloader)
+                .redirectHandler(redirectHandler)
                 .setProcessor(processor)
                 .scaleFactor(displayScale)
                 .cacheOriginalImage()
@@ -203,6 +264,7 @@ private struct CrossfadeNetworkImage: View {
                 }
                 .onSuccess { result in
                     onProgress?(1)
+                    onImageSize?(result.image.size)
                     loadedURL = data
                     loadedImage = result.image
                     loadedProcessorID = processor.identifier
@@ -241,10 +303,9 @@ private struct CrossfadeNetworkImage: View {
             #else
             Image(uiImage: loadedImage).resizable().aspectRatio(contentMode: contentMode)
             #endif
-        } else if let placeholder {
+        } else if let mediaPlaceholder {
             NetworkImage(
-                data: placeholder,
-                customHeader: customHeader,
+                data: mediaPlaceholder,
                 contentMode: contentMode
             )
         } else {
@@ -313,86 +374,5 @@ public extension NetworkImage {
         var result = self
         result.downsamplingEnabled = false
         return result
-    }
-
-    init(
-        data: String?,
-        customHeader: [String: String]? = nil,
-        contentMode: SwiftUI.ContentMode = .fill,
-        usesCrossfade: Bool = false,
-        onProgress: ((Double?) -> Void)? = nil
-    ) {
-        self.init(
-            data: data.flatMap(URL.init(string:)),
-            placeholder: nil,
-            customHeader: customHeader,
-            contentMode: contentMode,
-            usesCrossfade: usesCrossfade,
-            onProgress: onProgress
-        )
-    }
-    init(
-        data: String,
-        customHeader: [String: String]? = nil,
-        contentMode: SwiftUI.ContentMode = .fill,
-        usesCrossfade: Bool = false,
-        onProgress: ((Double?) -> Void)? = nil
-    ) {
-        self.init(
-            data: .init(string: data),
-            placeholder: nil,
-            customHeader: customHeader,
-            contentMode: contentMode,
-            usesCrossfade: usesCrossfade,
-            onProgress: onProgress
-        )
-    }
-    init(
-        data: String,
-        placeholder: String,
-        customHeader: [String: String]? = nil,
-        contentMode: SwiftUI.ContentMode = .fill,
-        usesCrossfade: Bool = false,
-        onProgress: ((Double?) -> Void)? = nil
-    ) {
-        self.init(
-            data: .init(string: data),
-            placeholder: .init(string: placeholder),
-            customHeader: customHeader,
-            contentMode: contentMode,
-            usesCrossfade: usesCrossfade,
-            onProgress: onProgress
-        )
-    }
-    init(
-        data: URL?,
-        contentMode: SwiftUI.ContentMode = .fill,
-        usesCrossfade: Bool = false,
-        onProgress: ((Double?) -> Void)? = nil
-    ) {
-        self.init(
-            data: data,
-            placeholder: nil,
-            customHeader: nil,
-            contentMode: contentMode,
-            usesCrossfade: usesCrossfade,
-            onProgress: onProgress
-        )
-    }
-    init(
-        data: URL?,
-        customHeader: [String: String]?,
-        contentMode: SwiftUI.ContentMode = .fill,
-        usesCrossfade: Bool = false,
-        onProgress: ((Double?) -> Void)? = nil
-    ) {
-        self.init(
-            data: data,
-            placeholder: nil,
-            customHeader: customHeader,
-            contentMode: contentMode,
-            usesCrossfade: usesCrossfade,
-            onProgress: onProgress
-        )
     }
 }

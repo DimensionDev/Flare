@@ -6,6 +6,10 @@ import FlareAppleCore
 struct SettingsScreen: View {
     var body: some View {
         List {
+            NavigationLink { ProxySettingsView() } label: {
+                Label("proxy_title", systemImage: "network")
+            }
+
             NavigationLink(value: Route.accountManagement) {
                 Label {
                     Text("account_management_title")

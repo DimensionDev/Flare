@@ -14,6 +14,7 @@ import androidx.compose.ui.text.style.LineBreak
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.util.fastForEach
+import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.render.RenderBlockStyle
 import dev.dimension.flare.ui.render.RenderContent
 import dev.dimension.flare.ui.render.RenderRun
@@ -30,7 +31,7 @@ internal sealed interface RichTextContent {
         val content: AnnotatedString,
         val block: RenderBlockStyle? = null,
     ) : RichTextContent
-    data class BlockImage(val url: String, val href: String?) : RichTextContent
+    data class BlockImage(val media: UiMedia.Image, val href: String?) : RichTextContent
 }
 
 internal class RichTextState(
@@ -64,7 +65,7 @@ internal class BuildContentAnnotatedStringContext {
     private var isBlockState = false
 
     sealed interface InlineType {
-        data class Emoji(val url: String) : InlineType
+        data class Emoji(val media: UiMedia.Image) : InlineType
     }
 
     val inlineContent = mutableMapOf<String, InlineType>()
@@ -85,10 +86,10 @@ internal class BuildContentAnnotatedStringContext {
 
     fun isInBlockState(): Boolean = isBlockState
     fun appendImageInlineContent(
-        url: String,
+        media: UiMedia.Image,
     ): String {
         val id = "inline_${inlineContent.size}"
-        inlineContent[id] = InlineType.Emoji(url)
+        inlineContent[id] = InlineType.Emoji(media)
         return id
     }
 }
@@ -138,9 +139,9 @@ private class ContentBuilder(
         currentBuilder.appendInlineContent(id, alternateText)
     }
 
-    fun appendBlockImage(url: String, href: String?) {
+    fun appendBlockImage(media: UiMedia.Image, href: String?) {
         flushText()
-        _contents.add(RichTextContent.BlockImage(url, href))
+        _contents.add(RichTextContent.BlockImage(media, href))
         currentBuilder = AnnotatedString.Builder()
         restoreStyles()
     }
@@ -245,7 +246,7 @@ private fun ContentBuilder.renderContents(
 ) {
     renderContents.fastForEach { content ->
         when (content) {
-            is RenderContent.BlockImage -> appendBlockImage(content.url, content.href)
+            is RenderContent.BlockImage -> appendBlockImage(content.media, content.href)
             is RenderContent.Text -> {
                 if (content.block.isBlockQuote) {
                     flushText()
@@ -290,7 +291,7 @@ private fun ContentBuilder.renderRuns(
     runs.fastForEach { run ->
         when (run) {
             is RenderRun.Image -> {
-                val imageId = context.appendImageInlineContent(run.url)
+                val imageId = context.appendImageInlineContent(run.media)
                 appendInlineContent(imageId, if (allowLinkAnnotation) "\uFFFC" else run.alt.ifEmpty { run.url })
             }
             is RenderRun.Text -> renderTextRun(run, block, styleData, blockTextStyle)

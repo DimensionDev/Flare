@@ -96,6 +96,7 @@ private class VVOWebCookieLoginHandler(
         val credentialState = MutableStateFlow(VVoCredential(chocolate = chocolate))
         val service =
             VVOService(
+                proxy = context.proxy,
                 credentialFlow = credentialState,
                 onCredentialRefreshed = { credential ->
                     credentialState.value = credential

@@ -318,9 +318,9 @@ final class FeedUIView: UIView, ManualLayoutMeasurable, TimelineHeightProviding 
     func configure(data: UiTimelineV2.Feed) {
         self.data = data
 
-        if let icon = data.source.icon, !icon.isEmpty, let url = URL(string: icon) {
+        if let media = data.source.media {
             sourceIcon.isHidden = false
-            sourceIcon.setImage(with: url)
+            sourceIcon.setImage(media: media)
         } else {
             sourceIcon.isHidden = true
             sourceIcon.cancelImageLoad()
@@ -357,9 +357,9 @@ final class FeedUIView: UIView, ManualLayoutMeasurable, TimelineHeightProviding 
             descriptionLabel.text = nil
         }
 
-        if let media = data.media, let url = URL(string: media.url) {
+        if let media = data.media {
             mediaView.isHidden = false
-            mediaView.setImage(with: url, customHeaders: media.customHeaders)
+            mediaView.setImage(media: media)
         } else {
             mediaView.isHidden = true
             mediaView.cancelImageLoad()

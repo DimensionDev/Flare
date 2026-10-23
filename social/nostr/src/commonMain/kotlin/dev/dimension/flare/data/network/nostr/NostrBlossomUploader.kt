@@ -2,6 +2,7 @@ package dev.dimension.flare.data.network.nostr
 
 import dev.dimension.flare.common.JSON
 import dev.dimension.flare.common.UploadMedia
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.data.network.asContent
 import dev.dimension.flare.data.network.ktorClient
 import dev.dimension.flare.data.network.nullableFallbackJson
@@ -28,7 +29,7 @@ import kotlin.io.encoding.Base64
 internal class NostrBlossomUploader(
     private val buildAuthHeader: suspend (sha256: String) -> String,
     private val httpClient: HttpClient =
-        ktorClient {
+        ktorClient(ProxyRef.System) {
             install(ContentNegotiation) {
                 nullableFallbackJson(JSON)
             }

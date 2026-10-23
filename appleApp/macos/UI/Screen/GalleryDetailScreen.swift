@@ -206,7 +206,7 @@ private struct GalleryAuthorCard: View {
     var body: some View {
         HStack(spacing: 12) {
             if let user = detail.author {
-                AvatarView(data: user.avatar?.url, customHeader: user.avatar?.customHeaders)
+                AvatarView(data: user.avatar)
                     .frame(width: 44, height: 44)
                     .onTapGesture {
                         onProfile(user)

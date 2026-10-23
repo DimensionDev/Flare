@@ -36,6 +36,7 @@ private enum MacSettingsPane: String, CaseIterable, Identifiable, Hashable {
     case behavior
     case localFilter
     case storage
+    case proxy
     case aiConfig
     case translationConfig
     case about
@@ -52,6 +53,7 @@ private enum MacSettingsPane: String, CaseIterable, Identifiable, Hashable {
             "settings_behavior_title"
         case .localFilter:
             "local_filter_title"
+        case .proxy: "proxy_title"
         case .storage:
             "storage_title"
         case .aiConfig:
@@ -73,6 +75,7 @@ private enum MacSettingsPane: String, CaseIterable, Identifiable, Hashable {
             "settings_behavior_description"
         case .localFilter:
             "local_filter_description"
+        case .proxy: "proxy_description"
         case .storage:
             "storage_description"
         case .aiConfig:
@@ -94,6 +97,7 @@ private enum MacSettingsPane: String, CaseIterable, Identifiable, Hashable {
             .sliders
         case .localFilter:
             .filter
+        case .proxy: .globe
         case .storage:
             .database
         case .aiConfig:
@@ -116,6 +120,7 @@ private enum MacSettingsPane: String, CaseIterable, Identifiable, Hashable {
             MacBehaviorSettingsPane()
         case .localFilter:
             MacLocalFilterSettingsPane()
+        case .proxy: ProxySettingsView()
         case .storage:
             MacStorageSettingsPane()
         case .aiConfig:

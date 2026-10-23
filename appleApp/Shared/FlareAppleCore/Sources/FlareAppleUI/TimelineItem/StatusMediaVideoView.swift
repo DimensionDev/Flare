@@ -234,7 +234,7 @@ public struct StatusMediaVideoView: View {
             #else
             Color.clear
                 .overlay {
-                    NetworkImage(data: data.thumbnailUrl, customHeader: data.customHeaders)
+                    NetworkImage(data: data.preview)
                         .scaledToFit()
                         .allowsHitTesting(false)
                 }
@@ -292,7 +292,7 @@ public struct StatusMediaVideoView: View {
 
     private func updatePlayback() {
         (presentation ?? fallbackPresentation).update(
-            session, url: data.url,
+            session, media: data,
             playing: play, rate: playbackRate
         )
     }
@@ -303,7 +303,7 @@ public struct StatusMediaVideoView: View {
         Color.black
             .overlay {
                 if !session.hasDisplayedFrame {
-                    NetworkImage(data: data.thumbnailUrl, customHeader: data.customHeaders)
+                    NetworkImage(data: data.preview)
                         .scaledToFit()
                         .allowsHitTesting(false)
                 }

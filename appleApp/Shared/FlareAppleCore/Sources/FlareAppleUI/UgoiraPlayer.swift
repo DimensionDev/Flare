@@ -236,7 +236,7 @@ struct UgoiraFrameView: View {
             if let image = session.image {
                 Image(decorative: image, scale: 1).resizable().aspectRatio(contentMode: contentMode)
             } else {
-                NetworkImage(data: media.previewUrl, customHeader: media.customHeaders, contentMode: contentMode)
+                NetworkImage(data: media.preview, contentMode: contentMode)
             }
         }.clipped().accessibilityLabel(media.accessibleDescription)
     }
@@ -264,7 +264,7 @@ public struct GalleryMedia: View {
                     data: image.url, placeholder: image.previewUrl,
                     customHeader: image.customHeaders, contentMode: contentMode)
             } else {
-                NetworkImage(data: media.url, customHeader: media.customHeaders, contentMode: contentMode)
+                NetworkImage(data: media, contentMode: contentMode)
             }
         }.onAppear {
             if !entered {

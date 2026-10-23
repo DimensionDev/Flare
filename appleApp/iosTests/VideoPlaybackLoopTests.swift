@@ -11,7 +11,7 @@ extension VideoPlaybackSessionTests {
             VideoPlaybackSession.releaseIdleBuffer()
             try? FileManager.default.removeItem(at: url)
         }
-        session.play(url: url.absoluteString)
+        session.play(media: testVideo(url.absoluteString))
         let player = try XCTUnwrap(session.player)
         try await waitUntilReady(player)
         var playedItems: [AVPlayerItem] = []
@@ -26,10 +26,15 @@ extension VideoPlaybackSessionTests {
             try await Task.sleep(for: .milliseconds(10))
         }
         XCTAssertEqual(playedItems.count, 8, "Playback must continue after the initial queue is consumed")
-        XCTAssertEqual(player.items().count, 3)
-        XCTAssertEqual(Set(player.items().map { ObjectIdentifier($0.asset) }).count, 3)
-
         session.setPlaying(false)
+        for _ in 0..<100 {
+            if player.items().count == 3 { break }
+            try await Task.sleep(for: .milliseconds(10))
+        }
+        let items = player.items()
+        XCTAssertEqual(items.count, 3)
+        XCTAssertEqual(Set(items.map { ObjectIdentifier($0.asset) }).count, 3)
+
         let pausedItem = try XCTUnwrap(player.currentItem)
         let pausedTime = player.currentTime().seconds
         try await Task.sleep(for: .milliseconds(200))

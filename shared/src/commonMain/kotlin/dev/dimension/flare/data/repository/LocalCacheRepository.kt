@@ -1,10 +1,12 @@
 package dev.dimension.flare.data.repository
 
 import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.contentPostOrNull
+import dev.dimension.flare.ui.model.withProxy
 import org.koin.core.annotation.Single
 import kotlin.native.HiddenFromObjC
 
@@ -72,7 +74,7 @@ internal class DatabaseLocalCacheRepository(
             .searchUser(
                 query = normalizedQuery.toLikePattern(),
                 limit = limit.normalizedLocalCacheLimit(),
-            ).map { it.content }
+            ).map { it.content.withProxy(ProxyRef.Global) }
             .distinctBy { it.platformId to it.key }
     }
 
@@ -82,7 +84,7 @@ internal class DatabaseLocalCacheRepository(
             .getUserHistory(limit.normalizedLocalCacheLimit())
             .asSequence()
             .filter { it.data.accountType is AccountType.Specific }
-            .map { it.user.content }
+            .map { it.user.content.withProxy(ProxyRef.forAccountType(it.data.accountType as AccountType)) }
             .distinctBy { it.platformId to it.key }
             .toList()
 }

@@ -3,6 +3,7 @@ package dev.dimension.flare.ui.route
 import androidx.compose.runtime.Immutable
 import androidx.navigation3.runtime.NavKey
 import dev.dimension.flare.common.SerializableImmutableList
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.data.model.tab.UiSourceTimelineTabItem
 import dev.dimension.flare.data.model.tab.UiTimelineTabItem
 import dev.dimension.flare.data.model.tab.xqtDeviceFollow
@@ -453,11 +454,13 @@ internal sealed interface Route : NavKey {
             val uri: String,
             val previewUrl: String?,
             val customHeaders: Map<String, String>? = null,
+            val proxy: ProxyRef = ProxyRef.Global,
         ) : Media
 
         @Serializable
         data class RawMedia(
             val medias: SerializableImmutableList<UiMedia>,
+            val proxies: List<ProxyRef> = medias.map { it.proxy },
             val index: Int = 0,
             val preview: String? = null,
         ) : Media
@@ -600,6 +603,7 @@ internal sealed interface Route : NavKey {
                         uri = deeplinkRoute.uri,
                         previewUrl = deeplinkRoute.previewUrl,
                         customHeaders = deeplinkRoute.customHeaders,
+                        proxy = deeplinkRoute.proxy,
                     )
                 }
 

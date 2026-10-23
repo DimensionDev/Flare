@@ -16,11 +16,11 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.EmojiData
 import dev.dimension.flare.ui.model.UiEmoji
 import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.contentPostOrNull
 import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onSuccess
+import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.ui.presenter.status.StatusPresenter
@@ -53,7 +53,9 @@ public class AddReactionPresenter(
                     }
                 }.map {
                     remember(it) {
-                        EmojiData(it, accountType)
+                        EmojiData(it, service.takeSuccess()?.let { source ->
+                            (source as? dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource)?.accountKey?.let(AccountType::Specific)
+                        } ?: accountType)
                     }
                 }
 

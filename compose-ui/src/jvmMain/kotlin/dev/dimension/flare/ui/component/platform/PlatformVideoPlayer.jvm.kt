@@ -6,15 +6,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import dev.dimension.flare.ui.component.VideoPlayer
-import kotlinx.collections.immutable.ImmutableMap
+import dev.dimension.flare.ui.model.UiMedia
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 internal actual fun PlatformVideoPlayer(
-    uri: String,
-    previewUri: String?,
+    media: UiMedia,
     contentDescription: String?,
-    customHeaders: ImmutableMap<String, String>?,
     modifier: Modifier,
     muted: Boolean,
     showControls: Boolean,
@@ -29,8 +27,7 @@ internal actual fun PlatformVideoPlayer(
     loadingPlaceholder: @Composable BoxScope.() -> Unit,
 ) {
     VideoPlayer(
-        uri = uri,
-        previewUri = previewUri,
+        media = media,
         contentDescription = contentDescription,
         modifier = modifier,
         muted = muted,

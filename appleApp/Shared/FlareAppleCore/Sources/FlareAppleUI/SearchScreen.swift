@@ -211,14 +211,14 @@ public struct SearchScreen: View {
                                 Label {
                                     Text(account.handle.canonical)
                                 } icon: {
-                                    AvatarView(data: account.avatar?.url, customHeader: account.avatar?.customHeaders)
+                                    AvatarView(data: account.avatar)
                                 }
                             }
                         }
                     } label: {
                         if let selectedAccount = searchPresenter.state.selectedAccount {
                             HStack {
-                                AvatarView(data: selectedAccount.avatar?.url, customHeader: selectedAccount.avatar?.customHeaders)
+                                AvatarView(data: selectedAccount.avatar)
                                     .frame(width: 24, height: 24)
                                 Text(selectedAccount.handle.canonical)
                                 Image(fontAwesome: .chevronDown)
@@ -264,8 +264,7 @@ public struct SearchScreen: View {
                         isMacAccountPopoverPresented.toggle()
                     } label: {
                         AvatarView(
-                            data: toolbarAccount.avatar?.url,
-                            customHeader: toolbarAccount.avatar?.customHeaders
+                            data: toolbarAccount.avatar
                         )
                         .frame(width: 26, height: 26)
                     }
@@ -337,7 +336,7 @@ private struct MacSearchAccountRow: View {
                     .foregroundStyle(isSelected ? Color.accentColor : Color.secondary)
                     .frame(width: 18)
 
-                AvatarView(data: account.avatar?.url, customHeader: account.avatar?.customHeaders)
+                AvatarView(data: account.avatar)
                     .frame(width: 28, height: 28)
 
                 Text(account.handle.canonical)

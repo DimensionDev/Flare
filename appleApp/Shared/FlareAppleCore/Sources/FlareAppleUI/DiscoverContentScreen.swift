@@ -228,8 +228,7 @@ public struct DiscoverContentScreen<AskAiOverlay: View>: View {
                     } label: {
                         if let toolbarAccount = presenter.state.selectedAccount {
                             AvatarView(
-                                data: toolbarAccount.avatar?.url,
-                                customHeader: toolbarAccount.avatar?.customHeaders
+                                data: toolbarAccount.avatar
                             )
                             .frame(width: 26, height: 26)
                         } else {

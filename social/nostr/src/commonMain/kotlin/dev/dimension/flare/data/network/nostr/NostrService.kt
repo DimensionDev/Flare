@@ -7,6 +7,7 @@ import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.PostActionFamily
 import dev.dimension.flare.data.datasource.microblog.userActionsMenu
 import dev.dimension.flare.data.datasource.nostr.NostrCache
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.data.network.ktorClient
 import dev.dimension.flare.data.platform.NOSTR_PLATFORM_ID
 import dev.dimension.flare.data.platform.NostrCredential
@@ -26,9 +27,11 @@ import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.UiTranslatableText
 import dev.dimension.flare.ui.model.asTimelinePostItem
+import dev.dimension.flare.ui.model.bindMediaProxy
 import dev.dimension.flare.ui.model.mapper.nostrLike
 import dev.dimension.flare.ui.model.mapper.nostrRepost
 import dev.dimension.flare.ui.model.toUiImage
+import dev.dimension.flare.ui.model.withProxy
 import dev.dimension.flare.ui.render.RenderContent
 import dev.dimension.flare.ui.render.RenderRun
 import dev.dimension.flare.ui.render.RenderTextStyle
@@ -100,7 +103,7 @@ internal class NostrService(
     credential: NostrCredential,
     private val amberSignerBridge: AmberSignerBridge,
     initialRelays: List<String> = emptyList(),
-    private val relayInfoClient: HttpClient = ktorClient { expectSuccess = true },
+    private val relayInfoClient: HttpClient = ktorClient(ProxyRef.System) { expectSuccess = true },
 ) : AutoCloseable {
     companion object {
         private val HEX_KEY_REGEX = Regex("^[0-9a-fA-F]{64}\$")
@@ -2022,7 +2025,7 @@ internal class NostrService(
                     ),
                 ),
             accountType = AccountType.Specific(accountKey),
-        )
+        ).bindMediaProxy()
     }
 
     private fun TextNoteEvent.toUiTimelineItem(
@@ -2065,7 +2068,7 @@ internal class NostrService(
                                         ).orEmpty()
                                         .toImmutableList(),
                             ),
-                    )
+                    ).bindMediaProxy()
                 }.toImmutableList()
         val quotes = resolveQuotes(eventsById, visited, resolveEvent)
         return if (inlineParents.isNotEmpty() || quotes.isNotEmpty()) {
@@ -2076,7 +2079,7 @@ internal class NostrService(
                         inlineParents = inlineParents,
                         quotes = quotes,
                     ),
-            )
+            ).bindMediaProxy()
         } else {
             post
         }
@@ -2304,7 +2307,7 @@ internal class NostrService(
                         ),
                     repost = boostedPost,
                 ),
-        )
+        ).bindMediaProxy()
     }
 
     private fun GenericRepostEvent.toUiGenericRepost(
@@ -2330,7 +2333,7 @@ internal class NostrService(
                         ),
                     repost = boostedPost,
                 ),
-        )
+        ).bindMediaProxy()
     }
 
     private fun UiTimelineV2.Post.toRepostWrapperPost(
@@ -2393,7 +2396,7 @@ internal class NostrService(
                     ),
                 ),
             accountType = AccountType.Specific(accountKey),
-        )
+        ).bindMediaProxy()
 
     private fun UiTimelineV2.withPresentationMessage(message: UiTimelineV2.Message): UiTimelineV2 {
         val post = asTimelinePostItem() ?: return this
@@ -2509,7 +2512,7 @@ internal class NostrService(
                             repost = boosted,
                             notificationKey = wrapperStatusKey,
                         ),
-                )
+                ).bindMediaProxy()
             }
 
             is GenericRepostEvent -> {
@@ -2539,7 +2542,7 @@ internal class NostrService(
                             repost = boosted,
                             notificationKey = wrapperStatusKey,
                         ),
-                )
+                ).bindMediaProxy()
             }
 
             else -> {
@@ -2733,7 +2736,7 @@ internal class NostrService(
                     },
                 ).toImmutableList(),
             bottomContent = metadata.toBottomContent(),
-        )
+        ).withProxy(ProxyRef.System)
     }
 
     private fun UserMetadata?.toBottomContent(): UiProfile.BottomContent? {
@@ -2894,5 +2897,5 @@ internal class NostrService(
                     ),
                 ),
             accountType = AccountType.Specific(accountKey),
-        )
+        ).bindMediaProxy()
 }

@@ -243,6 +243,9 @@ targets:
       - package: swiftui-introspect
         product: SwiftUIIntrospect
       - target: TimelineUnitTestHost
+      - target: FlareAppleCore
+      - package: Firebase
+        product: FirebaseCrashlytics
     sources:
       - path: iosTests
       - path: ios/UI/Component/IPadCompactTabBarModifier.swift

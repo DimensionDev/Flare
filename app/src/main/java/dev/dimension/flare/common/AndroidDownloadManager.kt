@@ -191,17 +191,15 @@ internal class AndroidDownloadManager(
      * fetched through the same Media3 cache and written to the configured destination.
      */
     suspend fun downloadMedia(
-        uri: String,
+        media: UiMedia,
         fileName: String,
-        customHeaders: Map<String, String>? = null,
         callback: DownloadCallback? = null,
     ): Long {
         val downloadId = nextDownloadId.incrementAndGet()
         val success =
             saveMedia(
-                uri = uri,
+                media = media,
                 fileName = fileName,
-                customHeaders = customHeaders,
                 onDownloadStarted = {
                     withContext(Dispatchers.Main) {
                         callback?.onDownloadStarted(downloadId)
@@ -241,9 +239,8 @@ internal class AndroidDownloadManager(
                         saveUgoira(media, fileName, askDirectoryUri)
                     } else {
                         saveMedia(
-                            uri = media.urlForDownload,
+                            media = media,
                             fileName = fileName,
-                            customHeaders = media.customHeaders,
                             onDownloadStarted = {},
                             askDirectoryUri = askDirectoryUri,
                         )
@@ -275,28 +272,26 @@ internal class AndroidDownloadManager(
     fun release() = Unit
 
     private suspend fun saveMedia(
-        uri: String,
+        media: UiMedia,
         fileName: String,
-        customHeaders: Map<String, String>?,
         onDownloadStarted: suspend () -> Unit,
         askDirectoryUri: Uri? = null,
     ): Boolean =
         withContext(Dispatchers.IO) {
+            val uri = media.urlForDownload
             if (isAdaptiveStream(uri)) {
                 Log.w(TAG, "Adaptive streams cannot be exported as a single media file: $uri")
                 return@withContext false
             }
 
-            val headers = customHeaders?.takeIf { it.isNotEmpty() }?.toMap()
             val mimeType = getMimeType(uri = uri, fileName = fileName)
 
-            if (media3VideoCacheManager.isFullyCached(uri = uri, customHeaders = headers)) {
+            if (media3VideoCacheManager.isFullyCached(media)) {
                 val saveMode = mediaSaveLocationRepository.state.value.mode
                 val savedFromCache =
                     saveFile(fileName = fileName, mimeType = mimeType, askDirectoryUri = askDirectoryUri) { outputStream ->
                         exportToStream(
-                            uri = uri,
-                            customHeaders = headers,
+                            media = media,
                             outputStream = outputStream,
                             cacheOnly = true,
                         )
@@ -314,8 +309,7 @@ internal class AndroidDownloadManager(
 
             saveFile(fileName = fileName, mimeType = mimeType, askDirectoryUri = askDirectoryUri) { outputStream ->
                 exportToStream(
-                    uri = uri,
-                    customHeaders = headers,
+                    media = media,
                     outputStream = outputStream,
                     cacheOnly = false,
                 )
@@ -323,19 +317,19 @@ internal class AndroidDownloadManager(
         }
 
     private fun exportToStream(
-        uri: String,
-        customHeaders: Map<String, String>?,
+        media: UiMedia,
         outputStream: OutputStream,
         cacheOnly: Boolean,
     ): Boolean {
+        val uri = media.urlForDownload
         val dataSource =
             if (cacheOnly) {
                 media3VideoCacheManager
-                    .cacheOnlyDataSourceFactory(customHeaders)
+                    .cacheOnlyDataSourceFactory(media)
                     .createDataSource()
             } else {
                 media3VideoCacheManager
-                    .downloadingDataSourceFactory(customHeaders)
+                    .downloadingDataSourceFactory(media)
                     .createDataSourceForDownloading()
             }
         return try {

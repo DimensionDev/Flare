@@ -34,6 +34,8 @@ import com.halilibo.richtext.ui.string.RichTextString
 import com.halilibo.richtext.ui.string.RichTextStringStyle
 import com.halilibo.richtext.ui.string.Text
 import com.halilibo.richtext.ui.string.withFormat
+import dev.dimension.flare.data.model.ProxyRef
+import dev.dimension.flare.ui.model.toUiImage
 import dev.dimension.flare.ui.route.DeeplinkRoute
 import dev.dimension.flare.ui.route.toUri
 import io.github.composefluent.FluentTheme
@@ -254,14 +256,13 @@ private fun RichTextScope.RenderElement(
                     )
                 }
                 SubcomposeNetworkImage(
-                    src,
+                    src.toUiImage(proxy = ProxyRef.Global),
                     contentDescription = alt,
                     modifier =
                         Modifier
                             .clickable {
                                 context.onMediaClick(src)
                             }.fillMaxSize(),
-                    customHeaders = context.imageHeader,
                 )
             } else {
                 context.builder.append(alt.orEmpty())

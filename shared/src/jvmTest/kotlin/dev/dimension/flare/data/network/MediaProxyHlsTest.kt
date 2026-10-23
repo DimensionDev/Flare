@@ -127,6 +127,34 @@ class MediaProxyHlsTest {
         }
 
     @Test
+    fun malformedRootAndChildPathsAreRejectedBeforeUpstreamRequests(): Unit =
+        runBlocking {
+            for (path in listOf("/live.m3u8", "/playlist")) {
+                fixture(path) { source, client, queries ->
+                    val child =
+                        client.get(source.url).use { response ->
+                            Regex("URI=\"([^\"]+)\"").findAll(response.body.string()).elementAt(1).groupValues[1]
+                        }
+                    val base = child.substringBeforeLast('/')
+                    val parts = child.substringAfterLast('/').split('.')
+                    val requests = queries.size
+                    val malformed =
+                        listOf(
+                            "$base/${parts.take(2).joinToString(".")}",
+                            child.substringBeforeLast('.') + ".ts",
+                            child + ".extra",
+                            "$base/extra/${child.substringAfterLast('/')}",
+                            source.url + ".extra",
+                        )
+                    for (url in malformed) client.get(url).use { assertEquals(502, it.code, url) }
+                    assertEquals(requests, queries.size)
+                    client.get(child).use { assertEquals(200, it.code) }
+                    client.get(source.url).use { assertEquals(200, it.code) }
+                }
+            }
+        }
+
+    @Test
     fun playlistMarksOnlyKeysAndEncryptedPayloadsOpaque() {
         val resources = mutableListOf<Pair<String, Boolean>>()
         rewriteProxyPlaylist(

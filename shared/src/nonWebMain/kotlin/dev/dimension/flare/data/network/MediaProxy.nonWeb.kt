@@ -18,6 +18,7 @@ import io.ktor.utils.io.readAvailable
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
@@ -85,39 +86,38 @@ public actual object MediaProxy {
     private val tokens = mutableMapOf<Resource, String>()
     private val scope = CoroutineScope(SupervisorJob() + PlatformDispatchers.IO)
     private val permits = Semaphore(64)
+    private var serverFailure: Throwable? = null
     private val server by lazy {
         MediaRelayListener().also { listener ->
             scope.launch {
-                while (true) {
-                    permits.acquire()
-                    val connection =
-                        try {
-                            acceptMediaRelayConnection(listener::accept)
-                        } catch (error: Exception) {
-                            permits.release()
-                            throw error
-                        }
-                    launch {
-                        try {
-                            serve(connection)
-                        } finally {
-                            connection.close()
-                            permits.release()
-                        }
+                try {
+                    runMediaRelay(permits, listener::accept, ::serve)
+                } catch (error: Throwable) {
+                    lock.withLock { serverFailure = error }
+                    if (error is CancellationException) throw error
+                    error.printStackTrace()
+                } finally {
+                    try {
+                        listener.close()
+                    } catch (error: Exception) {
+                        error.printStackTrace()
                     }
                 }
             }
         }
     }
 
-    public actual fun failureMessage(localUrl: String): String? = lock.withLock { entry(localUrl)?.failure }
+    public actual fun failureMessage(localUrl: String): String? =
+        lock.withLock {
+            entry(localUrl)?.let { if (serverFailure != null) "Media relay unavailable" else it.failure }
+        }
 
     private fun entry(localUrl: String): Entry? = entries[localUrl.substringBefore('?').substringAfterLast('/').substringBefore('.')]
 
     private fun register(resource: Resource): String {
-        val suffix = Url(resource.url).encodedPath.substringAfterLast('.').takeIf { it.length <= 8 && it.all(Char::isLetterOrDigit) }
         val port = server.port
         return lock.withLock {
+            serverFailure?.let { throw IllegalStateException("Media relay unavailable", it) }
             val token =
                 if (resource.root == null) {
                     token(resource)
@@ -125,14 +125,23 @@ public actual object MediaProxy {
                     val root = entries[resource.root]
                     check(root != null && root.leases > 0) { "Expired media request" }
                     // Signed child URLs avoid retaining every segment of a long-running live stream.
+                    // shortcut: payloads expose CDN queries to the player; encrypt if URL confidentiality becomes required.
                     val data =
                         ("${if (resource.opaque) 1 else 0}${if (resource.headers == root.resource.headers) 1 else 0}" + resource.url)
                             .encodeUtf8()
                     "${root.token}.${data.base64Url()}.${data.hmacSha256(root.secret).hex()}"
                 }
-            "http://127.0.0.1:$port/$token${suffix?.let { ".$it" }.orEmpty()}"
+            "http://127.0.0.1:$port/$token${suffix(resource.url)}"
         }
     }
+
+    private fun suffix(url: String): String =
+        Url(url)
+            .encodedPath
+            .substringAfterLast('.')
+            .takeIf { it.isNotEmpty() && it.length <= 8 && it.all(Char::isLetterOrDigit) }
+            ?.let { ".$it" }
+            .orEmpty()
 
     private fun token(resource: Resource): String =
         tokens[resource] ?: Uuid.random().toString().also {
@@ -144,9 +153,11 @@ public actual object MediaProxy {
         path: String,
         root: Entry,
     ): Resource {
-        val parts = path.substringBefore('?').substringAfterLast('/').split('.')
-        if (parts.size <= 2) return root.resource
+        val name = path.substringBefore('?').removePrefix("/")
+        if (name == root.token + suffix(root.resource.url)) return root.resource
+        val parts = name.split('.')
         require(parts.size in 3..4) { "Invalid media resource" }
+        require(parts[0] == root.token) { "Invalid media resource" }
         val data = requireNotNull(parts[1].decodeBase64()) { "Invalid media resource" }
         val signature = parts[2].decodeHex()
         val expected = data.hmacSha256(root.secret)
@@ -157,6 +168,7 @@ public actual object MediaProxy {
         ) { "Invalid media resource signature" }
         val value = data.utf8()
         require(value.length > 2 && value[0] in "01" && value[1] in "01") { "Invalid media resource" }
+        require(name == "${root.token}.${data.base64Url()}.${expected.hex()}${suffix(value.substring(2))}") { "Invalid media resource" }
         return root.resource.copy(
             url = value.substring(2),
             headers =
@@ -430,17 +442,55 @@ public actual object MediaProxy {
 }
 
 internal suspend fun acceptMediaRelayConnection(accept: () -> MediaRelayConnection): MediaRelayConnection {
+    var failures = 0
     while (true) {
         currentCoroutineContext().ensureActive()
         try {
             return accept()
         } catch (error: CancellationException) {
             throw error
-        } catch (_: Exception) {
+        } catch (error: Exception) {
+            if (++failures == 3) throw error
             delay(250)
         }
     }
 }
+
+internal suspend fun runMediaRelay(
+    permits: Semaphore,
+    accept: () -> MediaRelayConnection,
+    serve: suspend (MediaRelayConnection) -> Unit,
+): Unit =
+    coroutineScope {
+        while (true) {
+            permits.acquire()
+            val connection =
+                try {
+                    acceptMediaRelayConnection(accept)
+                } catch (error: Throwable) {
+                    permits.release()
+                    throw error
+                }
+            launch {
+                try {
+                    serve(connection)
+                } catch (error: CancellationException) {
+                    throw error
+                } catch (error: Exception) {
+                    error.printStackTrace()
+                }
+            }.invokeOnCompletion {
+                // Completion also runs if cancellation prevents the request coroutine from starting.
+                try {
+                    connection.close()
+                } catch (error: Exception) {
+                    error.printStackTrace()
+                } finally {
+                    permits.release()
+                }
+            }
+        }
+    }
 
 private fun mediaOrigin(url: String): Triple<String, String, Int> = Url(url).let { Triple(it.protocol.name, it.host, it.port) }
 
@@ -544,6 +594,8 @@ internal expect class MediaRelayListener() {
     val port: Int
 
     fun accept(): MediaRelayConnection
+
+    fun close()
 }
 
 internal interface MediaRelayConnection {

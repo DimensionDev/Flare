@@ -11,6 +11,13 @@ public enum VideoState {
     case error(any Error)
 }
 
+private func playbackFailure(_ error: any Error) -> NSError {
+    NSError(domain: "Flare.VideoPlayback", code: 1, userInfo: [
+        NSLocalizedDescriptionKey: Bundle.main.localizedString(forKey: "media_video_error", value: "Video failed to load", table: nil),
+        NSUnderlyingErrorKey: error
+    ])
+}
+
 /// The only AVPlayer allocation for inline video and the media viewer.
 @MainActor
 final class SharedVideoPlayer {
@@ -406,7 +413,7 @@ public final class VideoPlaybackSession {
             do {
                 try attach(MediaPlaybackSource(url: media.url, key: media.url, originalUrl: media.url, snapshot: nil), request: nextRequest, position: position)
             } catch {
-                state = .error(error)
+                state = .error(playbackFailure(error))
                 updateSubject.send()
             }
             return
@@ -438,7 +445,7 @@ public final class VideoPlaybackSession {
                 SharedVideoPlayer.shared.detach(self)
                 SharedVideoPlayer.shared.clearIfIdle()
                 self.player = nil
-                self.state = .error(error)
+                self.state = .error(playbackFailure(error))
                 self.updateSubject.send()
             }
         }
@@ -489,7 +496,7 @@ public final class VideoPlaybackSession {
         guard let player else { return }
         defer { updateSubject.send() }
         if let error = SharedVideoPlayer.shared.error(self) ?? player.currentItem?.error {
-            state = .error(error)
+            state = .error(playbackFailure(error))
             if player.timeControlStatus != .paused { player.pause() }
             return
         }

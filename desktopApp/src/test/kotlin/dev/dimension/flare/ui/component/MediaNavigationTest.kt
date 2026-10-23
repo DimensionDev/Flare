@@ -2,6 +2,7 @@ package dev.dimension.flare.ui.component
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
@@ -118,7 +119,24 @@ class MediaNavigationTest {
         val media = UiMedia.Video(url, "", null, 100f, 100f, proxy = ProxyRef.Unbound)
         content { VideoPlayer(media, contentDescription = null) }
         composeRule.waitForIdle()
-        composeRule.onNodeWithText("Media is missing its account proxy scope").assertIsDisplayed()
+        composeRule.onNodeWithText("Video failed to load").assertIsDisplayed()
+        composeRule.onNodeWithText("Media is missing its account proxy scope").assertDoesNotExist()
+    }
+
+    @Test
+    fun customPlaybackErrorReplacesTheDefaultWithoutBlockingClicks() {
+        var clicks = 0
+        val media = UiMedia.Video(url, "", null, 100f, 100f, proxy = ProxyRef.Unbound)
+        content {
+            VideoPlayer(media, contentDescription = null, onClick = { clicks++ }, errorContent = {
+                BasicText("Custom playback error")
+            })
+        }
+        composeRule.waitForIdle()
+        composeRule.onNodeWithText("Custom playback error").assertIsDisplayed().performClick()
+        composeRule.onNodeWithText("Video failed to load").assertDoesNotExist()
+        composeRule.onNodeWithText("Media is missing its account proxy scope").assertDoesNotExist()
+        assertEquals(1, clicks)
     }
 
     @Test

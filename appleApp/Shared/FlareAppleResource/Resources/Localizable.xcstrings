@@ -1,6 +1,13 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+  "media_video_error": {
+    "extractionState": "manual",
+    "localizations": {
+      "en": { "stringUnit": { "state": "translated", "value": "Video failed to load" } },
+      "zh-Hans": { "stringUnit": { "state": "translated", "value": "视频加载失败" } }
+    }
+  },
   "proxy_settings_subtitle": {
     "extractionState": "manual",
     "localizations": {

@@ -704,8 +704,6 @@
 
     <string name="proxy_settings_subtitle">管理全局和各账号的代理连接</string>
     <string name="proxy_title">代理</string>
-    <string name="proxy_description">代理设置保存在本机，不包含在应用内导出中。修改设置可能会中断进行中的请求。代理失败时不会回退到直连。</string>
-    <string name="proxy_scope">RSS、翻译和 AI 使用全局代理。Nostr、浏览器、网页视图、系统推送及使用独立网络连接的服务不受这些设置控制。</string>
     <string name="proxy_global">全局</string>
     <string name="proxy_system">系统设置</string>
     <string name="proxy_direct">直连</string>
@@ -726,5 +724,4 @@
     <string name="proxy_save">保存</string>
     <string name="proxy_cancel">取消</string>
     <string name="proxy_delete">删除</string>
-    <string name="proxy_effective">当前生效</string>
 </resources>

@@ -42,10 +42,8 @@ import dev.dimension.flare.proxy_accounts
 import dev.dimension.flare.proxy_add
 import dev.dimension.flare.proxy_cancel
 import dev.dimension.flare.proxy_delete
-import dev.dimension.flare.proxy_description
 import dev.dimension.flare.proxy_direct
 import dev.dimension.flare.proxy_edit
-import dev.dimension.flare.proxy_effective
 import dev.dimension.flare.proxy_global
 import dev.dimension.flare.proxy_host
 import dev.dimension.flare.proxy_in_use
@@ -56,14 +54,16 @@ import dev.dimension.flare.proxy_port
 import dev.dimension.flare.proxy_profiles
 import dev.dimension.flare.proxy_protocol
 import dev.dimension.flare.proxy_save
-import dev.dimension.flare.proxy_scope
 import dev.dimension.flare.proxy_system
 import dev.dimension.flare.proxy_test
 import dev.dimension.flare.proxy_test_hint
 import dev.dimension.flare.proxy_test_success
+import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScrollBar
 import dev.dimension.flare.ui.component.Header
+import dev.dimension.flare.ui.component.RichText
+import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.settings.ProxySettingsPresenter
 import dev.dimension.flare.ui.presenter.settings.ProxySettingsState
@@ -130,22 +130,15 @@ internal fun ProxySettingsContent(state: ProxySettingsState) {
             if (accounts.isNotEmpty()) {
                 Header(stringResource(Res.string.proxy_accounts))
                 accounts.forEach { account ->
-                    ProxyPolicyRow("${account.platformDisplayName} · ${account.accountKey}", settings, account.accountKey, state)
+                    ProxyPolicyRow(account.accountKey.toString(), settings, account.accountKey, state, account)
                 }
             }
-            Text(
-                stringResource(Res.string.proxy_description),
-                style = FluentTheme.typography.caption,
-                color = FluentTheme.colors.text.text.secondary,
-            )
-            Text(
-                stringResource(Res.string.proxy_scope),
-                style = FluentTheme.typography.caption,
-                color = FluentTheme.colors.text.text.secondary,
-            )
             editing?.let { profile ->
                 key(profile.id) {
-                    ProxyEditor(profile, settings.profiles.none { it.id == profile.id }, state, onClose = { editing = null })
+                    ProxyEditor(profile, settings.profiles.none { it.id == profile.id }, state, onClose = {
+                        state.clearEditorError()
+                        editing = null
+                    })
                 }
             }
         }
@@ -158,16 +151,25 @@ private fun ProxyPolicyRow(
     settings: ProxySettings,
     accountKey: MicroBlogKey?,
     state: ProxySettingsState,
+    account: UiAccount? = null,
 ) {
+    val profile = state.accountProfiles[accountKey]
     val policy = settings.policy(accountKey)
     val options =
         listOf(ProxyPolicy(if (accountKey == null) ProxyMode.SYSTEM else ProxyMode.INHERIT), ProxyPolicy(ProxyMode.DIRECT)) +
             settings.profiles.map { ProxyPolicy(ProxyMode.PROXY, it.id) }
     CardExpanderItem(
-        icon = null,
-        heading = { Text(title) },
+        icon =
+            if (account != null) {
+                { AvatarComponent(data = profile?.avatar, size = 24.dp) }
+            } else {
+                null
+            },
+        heading = {
+            if (profile != null) RichText(profile.name, maxLines = 1) else Text(account?.platformDisplayName ?: title)
+        },
         caption = {
-            if (policy.mode == ProxyMode.INHERIT) Text("${stringResource(Res.string.proxy_effective)}: ${settings.global.label(settings)}")
+            if (account != null) Text(profile?.handle?.canonical ?: account.accountKey.toString(), maxLines = 1)
         },
         trailing = {
             ComboBox(
@@ -274,7 +276,10 @@ private fun ProxyEditor(
                         style = FluentTheme.typography.caption,
                         color = FluentTheme.colors.text.text.secondary,
                     )
-                    Button(onClick = { state.test(value()) }, disabled = state.busy) { Text(stringResource(Res.string.proxy_test)) }
+                    Button(
+                        onClick = { state.test(value(), fromEditor = true) },
+                        disabled = state.busy,
+                    ) { Text(stringResource(Res.string.proxy_test)) }
                     Text(
                         stringResource(Res.string.proxy_test_hint),
                         style = FluentTheme.typography.caption,
@@ -282,7 +287,7 @@ private fun ProxyEditor(
                     )
                     if (state.busy) ProgressBar(Modifier.fillMaxWidth())
                     if (state.isTested(value())) Text(stringResource(Res.string.proxy_test_success))
-                    state.error?.let { Text(it, color = FluentTheme.colors.system.critical) }
+                    state.editorError?.let { Text(it, color = FluentTheme.colors.system.critical) }
                 }
             }
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {

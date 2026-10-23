@@ -199,200 +199,383 @@
         }
       }
     },
-  "None": {
+  "proxy_settings_subtitle": {
+    "extractionState": "manual",
+    "localizations": {
+      "en": { "stringUnit": { "state": "translated", "value": "Global and per-account proxy settings" } },
+      "zh-Hans": { "stringUnit": { "state": "translated", "value": "管理全局和各账号的代理连接" } }
+    }
+  },
+  "proxy_title": {
+    "extractionState": "manual",
     "localizations": {
       "en": {
         "stringUnit": {
           "state": "translated",
-          "value": "None"
+          "value": "Proxy"
         }
       },
       "zh-Hans": {
         "stringUnit": {
           "state": "translated",
-          "value": "关闭"
-        }
-      },
-      "zh-Hant": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "關閉"
+          "value": "代理"
         }
       }
     }
   },
-  "Minimal": {
+  "proxy_global": {
+    "extractionState": "manual",
     "localizations": {
       "en": {
         "stringUnit": {
           "state": "translated",
-          "value": "Minimal"
+          "value": "Global"
         }
       },
       "zh-Hans": {
         "stringUnit": {
           "state": "translated",
-          "value": "最低"
-        }
-      },
-      "zh-Hant": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "最低"
+          "value": "全局"
         }
       }
     }
   },
-  "Extra High": {
+  "proxy_system": {
+    "extractionState": "manual",
     "localizations": {
       "en": {
         "stringUnit": {
           "state": "translated",
-          "value": "Extra High"
+          "value": "System settings"
         }
       },
       "zh-Hans": {
         "stringUnit": {
           "state": "translated",
-          "value": "极高"
-        }
-      },
-      "zh-Hant": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "極高"
+          "value": "系统设置"
         }
       }
     }
   },
-  "Maximum": {
+  "proxy_direct": {
+    "extractionState": "manual",
     "localizations": {
       "en": {
         "stringUnit": {
           "state": "translated",
-          "value": "Maximum"
+          "value": "Direct connection"
         }
       },
       "zh-Hans": {
         "stringUnit": {
           "state": "translated",
-          "value": "最高"
-        }
-      },
-      "zh-Hant": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "最高"
+          "value": "直连"
         }
       }
     }
   },
-  "settings_ai_config_basic_title": {
+  "proxy_inherit": {
+    "extractionState": "manual",
     "localizations": {
       "en": {
         "stringUnit": {
           "state": "translated",
-          "value": "Translation and summaries"
+          "value": "Follow global"
         }
       },
       "zh-Hans": {
         "stringUnit": {
           "state": "translated",
-          "value": "翻译与摘要"
-        }
-      },
-      "zh-Hant": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "翻譯與摘要"
+          "value": "跟随全局"
         }
       }
     }
   },
-  "settings_ai_config_agent_title": {
+  "proxy_profiles": {
+    "extractionState": "manual",
     "localizations": {
       "en": {
         "stringUnit": {
           "state": "translated",
-          "value": "AI Agent"
+          "value": "Proxy servers"
         }
       },
       "zh-Hans": {
         "stringUnit": {
           "state": "translated",
-          "value": "AI Agent"
-        }
-      },
-      "zh-Hant": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "AI Agent"
+          "value": "代理服务器"
         }
       }
     }
   },
-  "settings_ai_config_use_shared": {
+  "proxy_add": {
+    "extractionState": "manual",
     "localizations": {
       "en": {
         "stringUnit": {
           "state": "translated",
-          "value": "Use translation and summary AI settings"
+          "value": "Add proxy"
         }
       },
       "zh-Hans": {
         "stringUnit": {
           "state": "translated",
-          "value": "使用翻译与摘要的 AI 设置"
-        }
-      },
-      "zh-Hant": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "使用翻譯與摘要的 AI 設定"
+          "value": "添加代理"
         }
       }
     }
   },
-  "settings_ai_config_use_shared_description": {
+  "proxy_name": {
+    "extractionState": "manual",
     "localizations": {
       "en": {
         "stringUnit": {
           "state": "translated",
-          "value": "Turn off to configure a separate server, model and reasoning settings for the Agent."
+          "value": "Name"
         }
       },
       "zh-Hans": {
         "stringUnit": {
           "state": "translated",
-          "value": "关闭后，可为 Agent 单独设置服务器、模型和推理参数。"
-        }
-      },
-      "zh-Hant": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "關閉後，可為 Agent 單獨設定伺服器、模型和推理參數。"
+          "value": "名称"
         }
       }
     }
   },
-  "settings_ai_config_model_description": {
+  "proxy_host": {
+    "extractionState": "manual",
     "localizations": {
       "en": {
         "stringUnit": {
           "state": "translated",
-          "value": "AI model used for this configuration"
+          "value": "Hostname or IP address"
         }
       },
       "zh-Hans": {
         "stringUnit": {
           "state": "translated",
-          "value": "此配置使用的 AI 模型"
+          "value": "主机名或 IP 地址"
         }
-      },
-      "zh-Hant": {
+      }
+    }
+  },
+  "proxy_port": {
+    "extractionState": "manual",
+    "localizations": {
+      "en": {
         "stringUnit": {
           "state": "translated",
-          "value": "此設定使用的 AI 模型"
+          "value": "Port"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "端口"
+        }
+      }
+    }
+  },
+  "proxy_protocol": {
+    "extractionState": "manual",
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Protocol"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "协议"
+        }
+      }
+    }
+  },
+  "proxy_no_auth": {
+    "extractionState": "manual",
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Supports TLS-encrypted HTTPS proxies and SOCKS5 with remote destination DNS. Plain HTTP proxies and proxy authentication are not supported."
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "支持 TLS 加密的 HTTPS 代理和由代理解析目标域名的 SOCKS5。不支持明文 HTTP 代理及代理身份验证。"
+        }
+      }
+    }
+  },
+  "proxy_test": {
+    "extractionState": "manual",
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Test connection"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "测试连接"
+        }
+      }
+    }
+  },
+  "proxy_test_hint": {
+    "extractionState": "manual",
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Tests HTTPS access to example.com through this proxy."
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "通过此代理测试 example.com 的 HTTPS 连接。"
+        }
+      }
+    }
+  },
+  "proxy_test_success": {
+    "extractionState": "manual",
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Connection succeeded"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "连接成功"
+        }
+      }
+    }
+  },
+  "proxy_in_use": {
+    "extractionState": "manual",
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Reassign global and account settings before deleting this proxy."
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "删除前请先调整使用此代理的全局和账号设置。"
+        }
+      }
+    }
+  },
+  "proxy_edit": {
+    "extractionState": "manual",
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Edit proxy"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "编辑代理"
+        }
+      }
+    }
+  },
+  "proxy_accounts": {
+    "extractionState": "manual",
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Accounts"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "账号"
+        }
+      }
+    }
+  },
+  "proxy_save": {
+    "extractionState": "manual",
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Save"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "保存"
+        }
+      }
+    }
+  },
+  "proxy_cancel": {
+    "extractionState": "manual",
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Cancel"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "取消"
+        }
+      }
+    }
+  },
+  "proxy_delete": {
+    "extractionState": "manual",
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Delete"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "删除"
+        }
+      }
+    }
+  },
+  "proxy_done": {
+    "extractionState": "manual",
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Done"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "完成"
         }
       }
     }
@@ -179631,444 +179814,200 @@
         }
       }
     },
-  "proxy_title": {
-    "extractionState": "manual",
+  "None": {
     "localizations": {
       "en": {
         "stringUnit": {
           "state": "translated",
-          "value": "Proxy"
+          "value": "None"
         }
       },
       "zh-Hans": {
         "stringUnit": {
           "state": "translated",
-          "value": "代理"
+          "value": "关闭"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "關閉"
         }
       }
     }
   },
-  "proxy_description": {
-    "extractionState": "manual",
+  "Minimal": {
     "localizations": {
       "en": {
         "stringUnit": {
           "state": "translated",
-          "value": "Proxy settings are saved on this device and excluded from app exports. Changes may interrupt active requests. A failed proxy never falls back to a direct connection."
+          "value": "Minimal"
         }
       },
       "zh-Hans": {
         "stringUnit": {
           "state": "translated",
-          "value": "代理设置保存在本机，不包含在应用内导出中。修改设置可能会中断进行中的请求。代理失败时不会回退到直连。"
+          "value": "最低"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "最低"
         }
       }
     }
   },
-  "proxy_scope": {
-    "extractionState": "manual",
+  "Extra High": {
     "localizations": {
       "en": {
         "stringUnit": {
           "state": "translated",
-          "value": "RSS, translation and AI use the global proxy. Nostr, browsers, web views, system push and services with their own network connections are not controlled by these settings."
+          "value": "Extra High"
         }
       },
       "zh-Hans": {
         "stringUnit": {
           "state": "translated",
-          "value": "RSS、翻译和 AI 使用全局代理。Nostr、浏览器、网页视图、系统推送及使用独立网络连接的服务不受这些设置控制。"
+          "value": "极高"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "極高"
         }
       }
     }
   },
-  "proxy_global": {
-    "extractionState": "manual",
+  "Maximum": {
     "localizations": {
       "en": {
         "stringUnit": {
           "state": "translated",
-          "value": "Global"
+          "value": "Maximum"
         }
       },
       "zh-Hans": {
         "stringUnit": {
           "state": "translated",
-          "value": "全局"
+          "value": "最高"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "最高"
         }
       }
     }
   },
-  "proxy_system": {
-    "extractionState": "manual",
+  "settings_ai_config_basic_title": {
     "localizations": {
       "en": {
         "stringUnit": {
           "state": "translated",
-          "value": "System settings"
+          "value": "Translation and summaries"
         }
       },
       "zh-Hans": {
         "stringUnit": {
           "state": "translated",
-          "value": "系统设置"
+          "value": "翻译与摘要"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "翻譯與摘要"
         }
       }
     }
   },
-  "proxy_direct": {
-    "extractionState": "manual",
+  "settings_ai_config_agent_title": {
     "localizations": {
       "en": {
         "stringUnit": {
           "state": "translated",
-          "value": "Direct connection"
+          "value": "AI Agent"
         }
       },
       "zh-Hans": {
         "stringUnit": {
           "state": "translated",
-          "value": "直连"
+          "value": "AI Agent"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "AI Agent"
         }
       }
     }
   },
-  "proxy_inherit": {
-    "extractionState": "manual",
+  "settings_ai_config_use_shared": {
     "localizations": {
       "en": {
         "stringUnit": {
           "state": "translated",
-          "value": "Follow global"
+          "value": "Use translation and summary AI settings"
         }
       },
       "zh-Hans": {
         "stringUnit": {
           "state": "translated",
-          "value": "跟随全局"
+          "value": "使用翻译与摘要的 AI 设置"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "使用翻譯與摘要的 AI 設定"
         }
       }
     }
   },
-  "proxy_profiles": {
-    "extractionState": "manual",
+  "settings_ai_config_use_shared_description": {
     "localizations": {
       "en": {
         "stringUnit": {
           "state": "translated",
-          "value": "Proxy servers"
+          "value": "Turn off to configure a separate server, model and reasoning settings for the Agent."
         }
       },
       "zh-Hans": {
         "stringUnit": {
           "state": "translated",
-          "value": "代理服务器"
+          "value": "关闭后，可为 Agent 单独设置服务器、模型和推理参数。"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "關閉後，可為 Agent 單獨設定伺服器、模型和推理參數。"
         }
       }
     }
   },
-  "proxy_add": {
-    "extractionState": "manual",
+  "settings_ai_config_model_description": {
     "localizations": {
       "en": {
         "stringUnit": {
           "state": "translated",
-          "value": "Add proxy"
+          "value": "AI model used for this configuration"
         }
       },
       "zh-Hans": {
         "stringUnit": {
           "state": "translated",
-          "value": "添加代理"
-        }
-      }
-    }
-  },
-  "proxy_name": {
-    "extractionState": "manual",
-    "localizations": {
-      "en": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "Name"
+          "value": "此配置使用的 AI 模型"
         }
       },
-      "zh-Hans": {
+      "zh-Hant": {
         "stringUnit": {
           "state": "translated",
-          "value": "名称"
-        }
-      }
-    }
-  },
-  "proxy_host": {
-    "extractionState": "manual",
-    "localizations": {
-      "en": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "Hostname or IP address"
-        }
-      },
-      "zh-Hans": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "主机名或 IP 地址"
-        }
-      }
-    }
-  },
-  "proxy_port": {
-    "extractionState": "manual",
-    "localizations": {
-      "en": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "Port"
-        }
-      },
-      "zh-Hans": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "端口"
-        }
-      }
-    }
-  },
-  "proxy_protocol": {
-    "extractionState": "manual",
-    "localizations": {
-      "en": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "Protocol"
-        }
-      },
-      "zh-Hans": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "协议"
-        }
-      }
-    }
-  },
-  "proxy_no_auth": {
-    "extractionState": "manual",
-    "localizations": {
-      "en": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "Supports TLS-encrypted HTTPS proxies and SOCKS5 with remote destination DNS. Plain HTTP proxies and proxy authentication are not supported."
-        }
-      },
-      "zh-Hans": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "支持 TLS 加密的 HTTPS 代理和由代理解析目标域名的 SOCKS5。不支持明文 HTTP 代理及代理身份验证。"
-        }
-      }
-    }
-  },
-  "proxy_test": {
-    "extractionState": "manual",
-    "localizations": {
-      "en": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "Test connection"
-        }
-      },
-      "zh-Hans": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "测试连接"
-        }
-      }
-    }
-  },
-  "proxy_test_hint": {
-    "extractionState": "manual",
-    "localizations": {
-      "en": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "Tests HTTPS access to example.com through this proxy."
-        }
-      },
-      "zh-Hans": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "通过此代理测试 example.com 的 HTTPS 连接。"
-        }
-      }
-    }
-  },
-  "proxy_test_success": {
-    "extractionState": "manual",
-    "localizations": {
-      "en": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "Connection succeeded"
-        }
-      },
-      "zh-Hans": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "连接成功"
-        }
-      }
-    }
-  },
-  "proxy_in_use": {
-    "extractionState": "manual",
-    "localizations": {
-      "en": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "Reassign global and account settings before deleting this proxy."
-        }
-      },
-      "zh-Hans": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "删除前请先调整使用此代理的全局和账号设置。"
-        }
-      }
-    }
-  },
-  "proxy_edit": {
-    "extractionState": "manual",
-    "localizations": {
-      "en": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "Edit proxy"
-        }
-      },
-      "zh-Hans": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "编辑代理"
-        }
-      }
-    }
-  },
-  "proxy_accounts": {
-    "extractionState": "manual",
-    "localizations": {
-      "en": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "Accounts"
-        }
-      },
-      "zh-Hans": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "账号"
-        }
-      }
-    }
-  },
-  "proxy_save": {
-    "extractionState": "manual",
-    "localizations": {
-      "en": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "Save"
-        }
-      },
-      "zh-Hans": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "保存"
-        }
-      }
-    }
-  },
-  "proxy_cancel": {
-    "extractionState": "manual",
-    "localizations": {
-      "en": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "Cancel"
-        }
-      },
-      "zh-Hans": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "取消"
-        }
-      }
-    }
-  },
-  "proxy_delete": {
-    "extractionState": "manual",
-    "localizations": {
-      "en": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "Delete"
-        }
-      },
-      "zh-Hans": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "删除"
-        }
-      }
-    }
-  },
-  "proxy_done": {
-    "extractionState": "manual",
-    "localizations": {
-      "en": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "Done"
-        }
-      },
-      "zh-Hans": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "完成"
-        }
-      }
-    }
-  },
-  "proxy_effective": {
-    "extractionState": "manual",
-    "localizations": {
-      "en": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "Effective"
-        }
-      },
-      "zh-Hans": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "当前生效"
-        }
-      }
-    }
-  },
-  "proxy_settings_subtitle": {
-    "extractionState": "manual",
-    "localizations": {
-      "en": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "Global and per-account proxy settings"
-        }
-      },
-      "zh-Hans": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "管理全局和各账号的代理连接"
+          "value": "此設定使用的 AI 模型"
         }
       }
     }

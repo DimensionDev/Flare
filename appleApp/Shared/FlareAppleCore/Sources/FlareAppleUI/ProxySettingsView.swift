@@ -22,8 +22,6 @@ public struct ProxySettingsView: View {
                     policyPicker(settings, accountKey: nil)
                 } header: {
                     Text("proxy_global", bundle: FlareAppleUILocalization.bundle)
-                } footer: {
-                    Text("proxy_description", bundle: FlareAppleUILocalization.bundle)
                 }
 
                 Section {
@@ -33,7 +31,7 @@ public struct ProxySettingsView: View {
                                 Button { editing = profile } label: {
                                     Label { Text("proxy_edit", bundle: FlareAppleUILocalization.bundle) } icon: { Image(systemName: "pencil") }
                                 }
-                                Button { presenter.state.test(profile: profile) } label: {
+                                Button { presenter.state.test(profile: profile, fromEditor: false) } label: {
                                     Label { Text("proxy_test", bundle: FlareAppleUILocalization.bundle) } icon: { Image(systemName: "network") }
                                 }
                                 Button(role: .destructive) { presenter.state.remove(id: profile.id) } label: {
@@ -57,21 +55,33 @@ public struct ProxySettingsView: View {
                     }
                 } header: {
                     Text("proxy_profiles", bundle: FlareAppleUILocalization.bundle)
-                } footer: {
-                    if accounts.isEmpty {
-                        Text("proxy_scope", bundle: FlareAppleUILocalization.bundle)
-                    }
                 }
 
                 if !accounts.isEmpty {
                     Section {
                         ForEach(accounts, id: \.accountKey) { account in
-                            policyPicker(settings, accountKey: account.accountKey, title: "\(account.platformDisplayName) · \(account.accountKey)")
+                            if let profile = presenter.state.accountProfiles[account.accountKey] {
+                                UserCompatView(data: profile) {
+                                    accountPolicyPicker(settings, account: account)
+                                }
+                            } else {
+                                HStack(spacing: 8) {
+                                    Image(fontAwesome: account.platformIcon.fontAwesomeIcon)
+                                        .frame(width: 44, height: 44)
+                                    VStack(alignment: .leading) {
+                                        Text(verbatim: account.platformDisplayName)
+                                        Text(verbatim: account.accountKey.description())
+                                            .font(.caption)
+                                            .foregroundStyle(.secondary)
+                                    }
+                                    .lineLimit(1)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    accountPolicyPicker(settings, account: account)
+                                }
+                            }
                         }
                     } header: {
                         Text("proxy_accounts", bundle: FlareAppleUILocalization.bundle)
-                    } footer: {
-                        Text("proxy_scope", bundle: FlareAppleUILocalization.bundle)
                     }
                 }
             }
@@ -82,18 +92,31 @@ public struct ProxySettingsView: View {
         #if os(macOS)
         .navigationSubtitle(Text("proxy_settings_subtitle", bundle: FlareAppleUILocalization.bundle))
         #endif
-        .sheet(isPresented: Binding(get: { editing != nil }, set: { if !$0 { editing = nil } })) {
+        .sheet(isPresented: Binding(get: { editing != nil }, set: { if !$0 { closeEditor() } })) {
             if let profile = editing {
                 ProxyEditor(
                     profile: profile,
                     isNew: presenter.state.settings?.profiles.contains { $0.id == profile.id } != true,
                     state: presenter.state,
-                    onClose: { editing = nil }
+                    onClose: closeEditor
                 )
                 .id(profile.id)
                 .interactiveDismissDisabled(presenter.state.busy)
             }
         }
+    }
+
+    private func closeEditor() {
+        presenter.state.clearEditorError()
+        editing = nil
+    }
+
+    private func accountPolicyPicker(_ settings: ProxySettings, account: UiAccount) -> some View {
+        policyPicker(settings, accountKey: account.accountKey, title: account.accountKey.description())
+            .labelsHidden()
+            .pickerStyle(.menu)
+            .fixedSize(horizontal: false, vertical: true)
+            .frame(maxWidth: 180, alignment: .trailing)
     }
 
     @ViewBuilder
@@ -157,9 +180,6 @@ public struct ProxySettingsView: View {
                 Text(verbatim: title)
             } else {
                 Text("proxy_title", bundle: FlareAppleUILocalization.bundle)
-            }
-            if policy.mode == .inherit {
-                Text("\(String(localized: "proxy_effective", bundle: FlareAppleUILocalization.bundle)): \(policyLabel(settings.global, settings))")
             }
         }
         .accessibilityLabel(Text(title ?? String(localized: "proxy_title", bundle: FlareAppleUILocalization.bundle)))
@@ -268,14 +288,14 @@ private struct ProxyEditor: View {
                 Text("proxy_no_auth", bundle: FlareAppleUILocalization.bundle)
             }
             Section {
-                Button { state.test(profile: value) } label: {
+                Button { state.test(profile: value, fromEditor: true) } label: {
                     Text("proxy_test", bundle: FlareAppleUILocalization.bundle)
                 }
                 if state.busy { ProgressView() }
                 if state.isTested(profile: value) {
                     Label { Text("proxy_test_success", bundle: FlareAppleUILocalization.bundle) } icon: { Image(systemName: "checkmark.circle") }
                 }
-                if let error = state.error { Text(verbatim: error).foregroundStyle(.red) }
+                if let error = state.editorError { Text(verbatim: error).foregroundStyle(.red) }
             } footer: {
                 Text("proxy_test_hint", bundle: FlareAppleUILocalization.bundle)
             }

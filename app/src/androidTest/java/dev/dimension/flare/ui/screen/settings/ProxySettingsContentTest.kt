@@ -6,13 +6,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.ComposeUiFlags
 import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isDialog
+import androidx.compose.ui.test.isPopup
 import androidx.compose.ui.test.junit4.v2.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -25,12 +28,17 @@ import dev.dimension.flare.data.model.ProxyProfile
 import dev.dimension.flare.data.model.ProxyProtocol
 import dev.dimension.flare.data.model.ProxySettings
 import dev.dimension.flare.data.model.appearance.GlobalAppearance
+import dev.dimension.flare.data.model.appearance.TimelineAppearance
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.LocalGlobalAppearance
+import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.model.UiAccount
+import dev.dimension.flare.ui.model.UiProfile
+import dev.dimension.flare.ui.model.createSampleUser
 import dev.dimension.flare.ui.presenter.settings.ProxySettingsState
 import dev.dimension.flare.ui.theme.FlareTheme
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -82,15 +90,16 @@ class ProxySettingsContentTest {
     fun accountInheritanceUsesEffectiveProxyAndKeepsAccountScope() {
         val state = State(ProxySettings(profiles = listOf(profile), global = ProxyPolicy(ProxyMode.PROXY, profile.id)))
         show(state)
-        compose.onNodeWithText("Mastodon · $account").performScrollTo().performClick()
-        option("Follow global").performClick()
+        compose.onNodeWithText(account.toString()).performScrollTo().assertIsDisplayed()
+        compose.onNodeWithContentDescription("Proxy: $account").performClick()
+        compose.onNode(hasText("Follow global") and hasAnyAncestor(isPopup())).performClick()
         compose.runOnIdle {
             assertEquals(1, permissionRequests)
             assertNull(state.selection)
             pendingPermission?.invoke()
             assertEquals(account to ProxyPolicy(), state.selection)
         }
-        compose.onNodeWithText("Nostr · bob@nostr").assertDoesNotExist()
+        compose.onNodeWithText("bob@nostr").assertDoesNotExist()
     }
 
     @Test
@@ -113,13 +122,16 @@ class ProxySettingsContentTest {
         compose.onNodeWithText("Cancel").assertIsNotEnabled()
         compose.runOnIdle {
             state.busy = false
-            state.error = "Connection refused"
+            state.editorError = "Connection refused"
         }
+        compose.onAllNodesWithText("Connection refused").assertCountEquals(1)
         option("Connection refused").performScrollTo().assertIsDisplayed()
         compose.onNodeWithText("Name").performScrollTo().assertTextContains("Work")
         compose.onNodeWithText("Cancel").performClick()
         compose.runOnIdle { assertNull(state.saved) }
+        compose.onNodeWithText("Connection refused").assertDoesNotExist()
         compose.onNodeWithText("Office").performClick()
+        compose.onNodeWithText("Connection refused").assertDoesNotExist()
         compose.onNodeWithText("Name").assertTextContains("Office")
     }
 
@@ -137,9 +149,30 @@ class ProxySettingsContentTest {
 
     private fun option(text: String) = compose.onNode(hasText(text) and hasAnyAncestor(isDialog()))
 
+    @Test
+    fun accountRowShowsProfileAndKeepsItsOwnDropdown() {
+        val state = State()
+        val user = createSampleUser().copy(key = account, avatar = null)
+        state.accountProfiles = persistentMapOf(account to user)
+        state.error = "Could not change policy"
+        show(state)
+        compose.onNodeWithText("Could not change policy").assertIsDisplayed()
+        compose.onNodeWithText(user.handle.canonical).performScrollTo().assertIsDisplayed()
+        compose.onNodeWithText(user.name.raw).assertIsDisplayed()
+        compose.onNodeWithContentDescription("Proxy: $account").performClick()
+        compose.onNode(hasText("Direct connection") and hasAnyAncestor(isPopup())).performClick()
+        compose.runOnIdle {
+            assertEquals(account to ProxyPolicy(ProxyMode.DIRECT), state.selection)
+            assertEquals(0, permissionRequests)
+        }
+    }
+
     private fun show(state: State) {
         compose.setContent {
-            CompositionLocalProvider(LocalGlobalAppearance provides GlobalAppearance()) {
+            CompositionLocalProvider(
+                LocalGlobalAppearance provides GlobalAppearance(),
+                LocalTimelineAppearance provides TimelineAppearance(),
+            ) {
                 FlareTheme(darkTheme = false, dynamicColor = false) {
                     ProxySettingsContent(state, onBack = {}, beforeConnect = {
                         permissionRequests++
@@ -156,6 +189,8 @@ class ProxySettingsContentTest {
         override val settings = initialSettings
         override val accounts =
             persistentListOf(UiAccount(account, "mastodon", "Mastodon"), UiAccount(MicroBlogKey("bob", "nostr"), "nostr", "Nostr"))
+        override var accountProfiles by mutableStateOf(persistentMapOf<MicroBlogKey, UiProfile>())
+        override var editorError by mutableStateOf<String?>(null)
         override var busy by mutableStateOf(false)
         override var error by mutableStateOf<String?>(null)
         override var tested by mutableStateOf<ProxyProfile?>(null)
@@ -182,7 +217,15 @@ class ProxySettingsContentTest {
             removed = id
         }
 
-        override fun test(profile: ProxyProfile) {
+        override fun clearEditorError() {
+            editorError = null
+        }
+
+        override fun test(
+            profile: ProxyProfile,
+            fromEditor: Boolean,
+        ) {
+            assertEquals(true, fromEditor)
             tested = profile
         }
     }

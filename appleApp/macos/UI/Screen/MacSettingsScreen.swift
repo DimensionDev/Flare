@@ -75,7 +75,7 @@ private enum MacSettingsPane: String, CaseIterable, Identifiable, Hashable {
             "settings_behavior_description"
         case .localFilter:
             "local_filter_description"
-        case .proxy: "proxy_description"
+        case .proxy: "proxy_settings_subtitle"
         case .storage:
             "storage_description"
         case .aiConfig:

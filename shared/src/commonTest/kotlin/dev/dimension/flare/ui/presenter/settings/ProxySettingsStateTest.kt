@@ -5,6 +5,7 @@ import dev.dimension.flare.data.model.ProxyProfile
 import dev.dimension.flare.data.model.ProxyProtocol
 import dev.dimension.flare.model.MicroBlogKey
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -36,6 +37,8 @@ class ProxySettingsStateTest {
         object : ProxySettingsState {
             override val settings = null
             override val accounts = persistentListOf<dev.dimension.flare.ui.model.UiAccount>()
+            override val accountProfiles = persistentMapOf<MicroBlogKey, dev.dimension.flare.ui.model.UiProfile>()
+            override val editorError = null
             override val busy = false
             override val error = null
             override val tested = result
@@ -52,6 +55,11 @@ class ProxySettingsStateTest {
 
             override fun remove(id: String) = error("Not used")
 
-            override fun test(profile: ProxyProfile) = error("Not used")
+            override fun clearEditorError() = error("Not used")
+
+            override fun test(
+                profile: ProxyProfile,
+                fromEditor: Boolean,
+            ) = error("Not used")
         }
 }

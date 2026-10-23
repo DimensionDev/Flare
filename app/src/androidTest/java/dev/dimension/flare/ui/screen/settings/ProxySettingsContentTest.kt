@@ -70,20 +70,30 @@ class ProxySettingsContentTest {
     fun selectingProxyWaitsForPermissionAndDirectDoesNot() {
         val state = State()
         show(state)
-        compose.onNodeWithText("Global").performClick()
-        option("Office").performClick()
+        compose.onNodeWithContentDescription("Global").performClick()
+        compose.onNode(isDialog()).assertDoesNotExist()
+        popupOption("Follow global").assertDoesNotExist()
+        popupOption("Office").performClick()
         compose.runOnIdle {
             assertEquals(1, permissionRequests)
             assertNull(state.selection)
             pendingPermission?.invoke()
             assertEquals(null to ProxyPolicy(ProxyMode.PROXY, profile.id), state.selection)
         }
-        compose.onNodeWithText("Global").performClick()
-        option("Direct connection").performClick()
+        compose.onNodeWithContentDescription("Global").performClick()
+        popupOption("Direct connection").performClick()
         compose.runOnIdle {
             assertEquals(1, permissionRequests)
             assertEquals(null to ProxyPolicy(ProxyMode.DIRECT), state.selection)
         }
+        compose.onNodeWithContentDescription("Global").performClick()
+        popupOption("System settings").performClick()
+        compose.runOnIdle {
+            assertEquals(1, permissionRequests)
+            assertEquals(null to ProxyPolicy(ProxyMode.SYSTEM), state.selection)
+            state.busy = true
+        }
+        compose.onNodeWithContentDescription("Global").assertIsNotEnabled()
     }
 
     @Test
@@ -92,7 +102,7 @@ class ProxySettingsContentTest {
         show(state)
         compose.onNodeWithText(account.toString()).performScrollTo().assertIsDisplayed()
         compose.onNodeWithContentDescription("Proxy: $account").performClick()
-        compose.onNode(hasText("Follow global") and hasAnyAncestor(isPopup())).performClick()
+        popupOption("Follow global").performClick()
         compose.runOnIdle {
             assertEquals(1, permissionRequests)
             assertNull(state.selection)
@@ -149,6 +159,8 @@ class ProxySettingsContentTest {
 
     private fun option(text: String) = compose.onNode(hasText(text) and hasAnyAncestor(isDialog()))
 
+    private fun popupOption(text: String) = compose.onNode(hasText(text) and hasAnyAncestor(isPopup()))
+
     @Test
     fun accountRowShowsProfileAndKeepsItsOwnDropdown() {
         val state = State()
@@ -160,7 +172,7 @@ class ProxySettingsContentTest {
         compose.onNodeWithText(user.handle.canonical).performScrollTo().assertIsDisplayed()
         compose.onNodeWithText(user.name.raw).assertIsDisplayed()
         compose.onNodeWithContentDescription("Proxy: $account").performClick()
-        compose.onNode(hasText("Direct connection") and hasAnyAncestor(isPopup())).performClick()
+        popupOption("Direct connection").performClick()
         compose.runOnIdle {
             assertEquals(account to ProxyPolicy(ProxyMode.DIRECT), state.selection)
             assertEquals(0, permissionRequests)

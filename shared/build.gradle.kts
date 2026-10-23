@@ -35,6 +35,13 @@ kotlin {
             libs.room.compiler,
         )
     }
+    wasmJs {
+        browser {
+            testTask {
+                useKarma { useChromeHeadless() }
+            }
+        }
+    }
     android {
         withHostTest {}
         withDeviceTest {

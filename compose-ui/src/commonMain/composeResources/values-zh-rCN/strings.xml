@@ -444,4 +444,27 @@
     <string name="share_replies_more">加载更多回复</string>
     <string name="share_replies_retry">重试</string>
     <string name="share_replies_children">加载这条评论的回复</string>
+
+    <string name="proxy_description">代理设置保存在本机，不包含在应用内导出中。修改设置可能会中断进行中的请求。代理失败时不会回退到直连。</string>
+    <string name="proxy_scope">RSS、翻译和 AI 使用全局代理。Nostr、浏览器、网页视图、系统推送及使用独立网络连接的服务不受这些设置控制。</string>
+    <string name="proxy_global">全局</string>
+    <string name="proxy_system">系统设置</string>
+    <string name="proxy_direct">直连</string>
+    <string name="proxy_inherit">跟随全局</string>
+    <string name="proxy_profiles">代理服务器</string>
+    <string name="proxy_add">添加代理</string>
+    <string name="proxy_name">名称</string>
+    <string name="proxy_host">主机名或 IP 地址</string>
+    <string name="proxy_port">端口</string>
+    <string name="proxy_no_auth">支持 TLS 加密的 HTTPS 代理和由代理解析目标域名的 SOCKS5。不支持明文 HTTP 代理及代理身份验证。</string>
+    <string name="proxy_test">测试连接</string>
+    <string name="proxy_test_hint">通过此代理测试 example.com 的 HTTPS 连接。</string>
+    <string name="proxy_test_success">连接成功</string>
+    <string name="proxy_in_use">删除前请先调整使用此代理的全局和账号设置。</string>
+    <string name="proxy_edit">编辑代理</string>
+    <string name="proxy_accounts">账号</string>
+    <string name="proxy_save">保存</string>
+    <string name="proxy_cancel">取消</string>
+    <string name="proxy_delete">删除</string>
+    <string name="proxy_effective">当前生效</string>
 </resources>

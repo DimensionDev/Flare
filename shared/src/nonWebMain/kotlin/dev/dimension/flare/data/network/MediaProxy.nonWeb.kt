@@ -18,9 +18,15 @@ import io.ktor.utils.io.readAvailable
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Semaphore
 import okio.Buffer
+import okio.ByteString.Companion.decodeBase64
+import okio.ByteString.Companion.decodeHex
+import okio.ByteString.Companion.encodeUtf8
 import kotlin.uuid.Uuid
 
 public actual object MediaProxy {
@@ -51,14 +57,8 @@ public actual object MediaProxy {
         lock.withLock {
             val root = entry(source.url) ?: return@withLock
             if (--root.leases > 0) return@withLock
-            val iterator = entries.iterator()
-            while (iterator.hasNext()) {
-                val (token, entry) = iterator.next()
-                if (token == root.token || entry.resource.root == root.token) {
-                    tokens.remove(entry.resource)
-                    iterator.remove()
-                }
-            }
+            tokens.remove(root.resource)
+            entries.remove(root.token)
         }
     }
 
@@ -75,6 +75,7 @@ public actual object MediaProxy {
         val resource: Resource,
         val token: String,
     ) {
+        val secret = Uuid.random().toString().encodeUtf8()
         var failure: String? = null
         var leases: Int = 0
     }
@@ -82,7 +83,6 @@ public actual object MediaProxy {
     private val lock = MediaRelayLock()
     private val entries = LinkedHashMap<String, Entry>()
     private val tokens = mutableMapOf<Resource, String>()
-    private var serverFailure: String? = null
     private val scope = CoroutineScope(SupervisorJob() + PlatformDispatchers.IO)
     private val permits = Semaphore(64)
     private val server by lazy {
@@ -92,14 +92,10 @@ public actual object MediaProxy {
                     permits.acquire()
                     val connection =
                         try {
-                            listener.accept()
+                            acceptMediaRelayConnection(listener::accept)
                         } catch (error: Exception) {
                             permits.release()
-                            lock.withLock {
-                                serverFailure = error.message ?: "Media relay stopped"
-                                entries.values.forEach { it.failure = serverFailure }
-                            }
-                            return@launch
+                            throw error
                         }
                     launch {
                         try {
@@ -122,9 +118,18 @@ public actual object MediaProxy {
         val suffix = Url(resource.url).encodedPath.substringAfterLast('.').takeIf { it.length <= 8 && it.all(Char::isLetterOrDigit) }
         val port = server.port
         return lock.withLock {
-            check(serverFailure == null) { serverFailure.orEmpty() }
-            check(resource.root == null || entries[resource.root]?.leases?.let { it > 0 } == true) { "Expired media request" }
-            val token = token(resource)
+            val token =
+                if (resource.root == null) {
+                    token(resource)
+                } else {
+                    val root = entries[resource.root]
+                    check(root != null && root.leases > 0) { "Expired media request" }
+                    // Signed child URLs avoid retaining every segment of a long-running live stream.
+                    val data =
+                        ("${if (resource.opaque) 1 else 0}${if (resource.headers == root.resource.headers) 1 else 0}" + resource.url)
+                            .encodeUtf8()
+                    "${root.token}.${data.base64Url()}.${data.hmacSha256(root.secret).hex()}"
+                }
             "http://127.0.0.1:$port/$token${suffix?.let { ".$it" }.orEmpty()}"
         }
     }
@@ -135,6 +140,38 @@ public actual object MediaProxy {
             entries[it] = Entry(resource, it)
         }
 
+    private fun resource(
+        path: String,
+        root: Entry,
+    ): Resource {
+        val parts = path.substringBefore('?').substringAfterLast('/').split('.')
+        if (parts.size <= 2) return root.resource
+        require(parts.size in 3..4) { "Invalid media resource" }
+        val data = requireNotNull(parts[1].decodeBase64()) { "Invalid media resource" }
+        val signature = parts[2].decodeHex()
+        val expected = data.hmacSha256(root.secret)
+        require(
+            signature.size == expected.size && (0 until signature.size).fold(0) { difference, index ->
+                difference or (signature[index].toInt() xor expected[index].toInt())
+            } == 0,
+        ) { "Invalid media resource signature" }
+        val value = data.utf8()
+        require(value.length > 2 && value[0] in "01" && value[1] in "01") { "Invalid media resource" }
+        return root.resource.copy(
+            url = value.substring(2),
+            headers =
+                if (value[1] ==
+                    '1'
+                ) {
+                    root.resource.headers
+                } else {
+                    root.resource.headers.filterKeys { it.lowercase() !in setOf("authorization", "cookie") }
+                },
+            root = root.token,
+            opaque = value[0] == '1',
+        )
+    }
+
     private suspend fun serve(connection: MediaRelayConnection) {
         var responseStarted = false
         var root: Entry? = null
@@ -143,12 +180,10 @@ public actual object MediaProxy {
             val lines = raw.split("\r\n")
             val request = lines.first().split(' ')
             require(request.size == 3 && request[0] in listOf("GET", "HEAD")) { "Unsupported method" }
-            val selected = lock.withLock { entry(request[1]) } ?: error("Expired media request")
-            root = lock.withLock {
-                if (selected.resource.root == null) selected else entries[selected.resource.root]
-            } ?: error("Expired media request")
+            root = lock.withLock { entry(request[1]) } ?: error("Expired media request")
+            val selected = resource(request[1], root)
             val rootToken = root.token
-            check(ProxyNetwork.snapshot(selected.resource.proxy).key == selected.resource.routeKey) { "Proxy configuration changed" }
+            check(ProxyNetwork.snapshot(selected.proxy).key == selected.routeKey) { "Proxy configuration changed" }
             val headers =
                 lines.drop(1).filter { ':' in it }.associate {
                     it.substringBefore(':').lowercase() to
@@ -156,7 +191,7 @@ public actual object MediaProxy {
                 }
             require(headers["host"] == "127.0.0.1:${server.port}") { "Invalid loopback host" }
             val client =
-                HttpClient(ProxyRoutingEngine(selected.resource.proxy)) {
+                HttpClient(ProxyRoutingEngine(selected.proxy)) {
                     install(HttpTimeout) {
                         connectTimeoutMillis = 30_000
                         socketTimeoutMillis = 60_000
@@ -166,7 +201,7 @@ public actual object MediaProxy {
                 }
             try {
                 var target =
-                    URLBuilder(selected.resource.url)
+                    URLBuilder(selected.url)
                         .apply {
                             val query = parseQueryString(request[1].substringAfter('?', ""))
                             for (name in listOf("_HLS_msn", "_HLS_part", "_HLS_skip")) {
@@ -176,7 +211,7 @@ public actual object MediaProxy {
                                 }
                             }
                         }.buildString()
-                var requestHeaders = selected.resource.headers
+                var requestHeaders = selected.headers
                 for (redirect in 0..8) {
                     var next: String? = null
                     client
@@ -211,7 +246,7 @@ public actual object MediaProxy {
                                     .substringBefore(';')
                                     .lowercase()
                             var playlist =
-                                !selected.resource.opaque && (
+                                !selected.opaque && (
                                     type in
                                         setOf(
                                             "application/vnd.apple.mpegurl",
@@ -221,7 +256,7 @@ public actual object MediaProxy {
                                         ) ||
                                         Url(target).encodedPath.endsWith(".m3u8", true)
                                 )
-                            if (!selected.resource.opaque && response.status.value in 200..299 &&
+                            if (!selected.opaque && response.status.value in 200..299 &&
                                 (
                                     Url(target).encodedPath.endsWith(".mpd", true) ||
                                         Url(target).encodedPath.endsWith(".ism/manifest", true)
@@ -242,7 +277,7 @@ public actual object MediaProxy {
                                         null ||
                                         it == "0"
                                 }
-                            if (!selected.resource.opaque && request[0] == "GET" && response.status.value in 200..299 &&
+                            if (!selected.opaque && request[0] == "GET" && response.status.value in 200..299 &&
                                 rangeStartsAtBeginning
                             ) {
                                 val bytes = ByteArray(256)
@@ -287,14 +322,14 @@ public actual object MediaProxy {
                                         register(
                                             Resource(
                                                 url,
-                                                selected.resource.proxy,
+                                                selected.proxy,
                                                 requestHeaders.filterKeys {
                                                     mediaOrigin(url) ==
                                                         mediaOrigin(target) ||
                                                         it.lowercase() !in setOf("authorization", "cookie")
                                                 },
                                                 rootToken,
-                                                selected.resource.routeKey,
+                                                selected.routeKey,
                                                 opaque = opaque,
                                             ),
                                         )
@@ -392,6 +427,19 @@ public actual object MediaProxy {
             "expires",
             "content-encoding",
         )
+}
+
+internal suspend fun acceptMediaRelayConnection(accept: () -> MediaRelayConnection): MediaRelayConnection {
+    while (true) {
+        currentCoroutineContext().ensureActive()
+        try {
+            return accept()
+        } catch (error: CancellationException) {
+            throw error
+        } catch (_: Exception) {
+            delay(250)
+        }
+    }
 }
 
 private fun mediaOrigin(url: String): Triple<String, String, Int> = Url(url).let { Triple(it.protocol.name, it.host, it.port) }

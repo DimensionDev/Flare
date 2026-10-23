@@ -19,10 +19,12 @@ import org.koin.core.context.stopKoin
 import org.koin.dsl.module
 import java.net.InetSocketAddress
 import java.net.Proxy
+import java.util.Base64
 import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
+import kotlin.test.assertNotEquals
 
 class MediaProxyHlsTest {
     private val key = ByteArray(16) { (it + 0x3c).toByte() }
@@ -84,6 +86,47 @@ class MediaProxyHlsTest {
         }
 
     @Test
+    fun liveReloadsKeepPreviouslyIssuedSegmentsUsable() =
+        runBlocking {
+            fixture(playlistBody = { sequence ->
+                "#EXTM3U\n#EXT-X-MEDIA-SEQUENCE:$sequence\n#EXT-X-KEY:METHOD=AES-128,URI=\"key\"\n" +
+                    (0 until 256).joinToString("\n") { "#EXTINF:2,\nsegment.ts?generation=$sequence&part=$it" }
+            }) { source, client, _ ->
+                fun segment() =
+                    client.get(source.url).use {
+                        it.body
+                            .string()
+                            .lineSequence()
+                            .first { it.startsWith("http") }
+                    }
+                val first = segment()
+                repeat(32) { assertNotEquals(first, segment()) }
+                client.get(first).use { assertContentEquals(ciphertext, it.body.bytes()) }
+            }
+        }
+
+    @Test
+    fun childUrlsRejectTamperingAndExpireWithTheirRootLease(): Unit =
+        runBlocking {
+            fixture { source, client, queries ->
+                val child =
+                    client.get(source.url).use { response ->
+                        Regex("URI=\"([^\"]+)\"").find(response.body.string())!!.groupValues[1]
+                    }
+                client.get(child).use { assertEquals(200, it.code) }
+                val parts = child.substringAfterLast('/').split('.').toMutableList()
+                val target = String(Base64.getUrlDecoder().decode(parts[1])).replace("/key", "/segment.ts")
+                parts[1] = Base64.getUrlEncoder().encodeToString(target.toByteArray())
+                val changed = parts.joinToString(".")
+                val requests = queries.size
+                client.get(child.substringBeforeLast('/') + "/" + changed).use { assertEquals(502, it.code) }
+                assertEquals(requests, queries.size, "An altered target must be rejected before any upstream request")
+                MediaProxy.release(source)
+                client.get(child).use { assertEquals(502, it.code) }
+            }
+        }
+
+    @Test
     fun playlistMarksOnlyKeysAndEncryptedPayloadsOpaque() {
         val resources = mutableListOf<Pair<String, Boolean>>()
         rewriteProxyPlaylist(
@@ -106,6 +149,7 @@ class MediaProxyHlsTest {
 
     private suspend fun fixture(
         path: String = "/live.m3u8",
+        playlistBody: (Int) -> String = { playlist },
         block: (MediaPlaybackSource, OkHttpClient, CopyOnWriteArrayList<String>) -> Unit,
     ) {
         val root = createTestRootPath()
@@ -119,7 +163,7 @@ class MediaProxyHlsTest {
                     "/key" -> key
                     "/init.mp4", "/part.ts", "/next.ts", "/segment.ts" -> ciphertext
                     "/error.ts" -> "<html>Not media</html>".toByteArray()
-                    else -> playlist.toByteArray()
+                    else -> playlistBody(queries.size).toByteArray()
                 }
             exchange.responseHeaders.add(
                 "Content-Type",

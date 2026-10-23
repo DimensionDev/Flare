@@ -750,4 +750,8 @@
     <string name="settings_ai_config_agent_title">AI Agent</string>
     <string name="settings_ai_config_use_shared">Use translation and summary AI settings</string>
     <string name="settings_ai_config_use_shared_description">Turn off to configure a separate server, model and reasoning settings for the Agent.</string>
+
+    <string name="proxy_title">Proxy</string>
+    <string name="proxy_description">Proxy settings are saved on this device and excluded from app exports. Changes may interrupt active requests. A failed proxy never falls back to a direct connection.</string>
+    <string name="proxy_done">Done</string>
 </resources>

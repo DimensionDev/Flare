@@ -783,4 +783,8 @@
     <string name="settings_ai_config_agent_title">AI Agent</string>
     <string name="settings_ai_config_use_shared">使用翻译与摘要的 AI 设置</string>
     <string name="settings_ai_config_use_shared_description">关闭后，可为 Agent 单独设置服务器、模型和推理参数。</string>
+
+    <string name="proxy_title">代理</string>
+    <string name="proxy_description">代理设置保存在本机，不包含在应用内导出中。修改设置可能会中断进行中的请求。代理失败时不会回退到直连。</string>
+    <string name="proxy_local_network_permission">请允许访问本地网络，以连接局域网中的代理服务器。</string>
 </resources>

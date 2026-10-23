@@ -61,6 +61,8 @@ class ProxyRoutingTest {
                 val body =
                     when (exchange.requestURI.path) {
                         "/video.m3u8" -> playlist
+                        "/cross.m3u8" -> "#EXTM3U\nhttp://localhost:${server.address.port}/return.m3u8"
+                        "/return.m3u8" -> "#EXTM3U\nhttp://127.0.0.1:${server.address.port}/credential-target"
                         "/range" -> "2345"
                         else -> "OK"
                     }.toByteArray()
@@ -127,6 +129,26 @@ class ProxyRoutingTest {
                     assertEquals("/credential-target" to null, cookies.last())
                 } finally {
                     MediaProxy.release(redirected)
+                }
+
+                val crossOrigin = MediaProxy.playbackSource(authenticated.copy(url = "$base/cross.m3u8"))
+                try {
+                    var url = crossOrigin.url
+                    repeat(2) {
+                        url =
+                            local.newCall(Request.Builder().url(url).build()).execute().use {
+                                assertEquals(200, it.code)
+                                it.body
+                                    .string()
+                                    .lineSequence()
+                                    .first { line -> line.startsWith("http") }
+                            }
+                    }
+                    local.newCall(Request.Builder().url(url).build()).execute().use { assertEquals(200, it.code) }
+                    assertEquals("/credential-target" to null, calls.last(), "Returning to the root origin must not restore credentials")
+                    assertEquals("/credential-target" to null, cookies.last())
+                } finally {
+                    MediaProxy.release(crossOrigin)
                 }
 
                 val media =

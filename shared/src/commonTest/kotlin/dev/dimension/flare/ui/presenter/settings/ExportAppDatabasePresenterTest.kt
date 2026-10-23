@@ -12,17 +12,24 @@ import dev.dimension.flare.data.database.app.model.DbAccount
 import dev.dimension.flare.data.database.app.model.DbKeywordFilter
 import dev.dimension.flare.data.database.app.model.DbRssSources
 import dev.dimension.flare.data.database.app.model.DbSearchHistory
+import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.createDatabaseDriver
+import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.io.OkioFileStorage
+import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.ProxyRepository
 import dev.dimension.flare.deleteTestRootPath
 import dev.dimension.flare.di.startKoin
 import dev.dimension.flare.di.testSingle
 import dev.dimension.flare.memoryDatabaseBuilder
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.testPlatformRegistry
 import dev.dimension.flare.ui.presenter.ExportState
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
@@ -41,6 +48,8 @@ import kotlin.test.assertTrue
 class ExportAppDatabasePresenterTest : RobolectricTest() {
     private lateinit var db: AppDatabase
     private lateinit var root: Path
+    private lateinit var cache: CacheDatabase
+    private lateinit var scope: CoroutineScope
     private val json = Json { ignoreUnknownKeys = true }
 
     @BeforeTest
@@ -53,12 +62,24 @@ class ExportAppDatabasePresenterTest : RobolectricTest() {
                 .build()
         this.db = db
         root = createTestRootPath()
+        val storage = OkioFileStorage(createTestFileSystem(), root)
+        val proxy = ProxyRepository(storage)
+        cache =
+            Room
+                .memoryDatabaseBuilder<CacheDatabase>()
+                .setDriver(
+                    createDatabaseDriver(),
+                ).setQueryCoroutineContext(Dispatchers.Unconfined)
+                .build()
+        scope = CoroutineScope(SupervisorJob() + Dispatchers.Unconfined)
+        val accounts = AccountRepository(db, scope, AppDataStore(storage), cache, proxy, testPlatformRegistry())
 
         startKoin {
             modules(
                 module {
                     testSingle { db }
-                    testSingle { ProxyRepository(OkioFileStorage(createTestFileSystem(), root)) }
+                    testSingle { proxy }
+                    testSingle { accounts }
                 },
             )
         }
@@ -66,6 +87,8 @@ class ExportAppDatabasePresenterTest : RobolectricTest() {
 
     @AfterTest
     fun tearDown() {
+        scope.cancel()
+        cache.close()
         db.close()
         stopKoin()
         deleteTestRootPath(root)

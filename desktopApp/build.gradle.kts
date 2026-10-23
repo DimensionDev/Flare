@@ -121,6 +121,7 @@ buildConfig {
 
 nucleus.application {
     jvmArgs += "--enable-native-access=ALL-UNNAMED"
+    jvmArgs += "-Djava.net.useSystemProxies=true"
     mainClass = "dev.dimension.flare.MainKt"
     buildTypes {
         release {

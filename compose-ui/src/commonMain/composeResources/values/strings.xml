@@ -586,4 +586,27 @@
     <string name="share_replies_more">Load more replies</string>
     <string name="share_replies_retry">Retry</string>
     <string name="share_replies_children">Load replies to this comment</string>
+
+    <string name="proxy_description">Proxy settings are saved on this device and excluded from app exports. Changes may interrupt active requests. A failed proxy never falls back to a direct connection.</string>
+    <string name="proxy_scope">RSS, translation and AI use the global proxy. Nostr, browsers, web views, system push and services with their own network connections are not controlled by these settings.</string>
+    <string name="proxy_global">Global</string>
+    <string name="proxy_system">System settings</string>
+    <string name="proxy_direct">Direct connection</string>
+    <string name="proxy_inherit">Follow global</string>
+    <string name="proxy_profiles">Proxy servers</string>
+    <string name="proxy_add">Add proxy</string>
+    <string name="proxy_name">Name</string>
+    <string name="proxy_host">Hostname or IP address</string>
+    <string name="proxy_port">Port</string>
+    <string name="proxy_no_auth">Supports TLS-encrypted HTTPS proxies and SOCKS5 with remote destination DNS. Plain HTTP proxies and proxy authentication are not supported.</string>
+    <string name="proxy_test">Test connection</string>
+    <string name="proxy_test_hint">Tests HTTPS access to example.com through this proxy.</string>
+    <string name="proxy_test_success">Connection succeeded</string>
+    <string name="proxy_in_use">Reassign global and account settings before deleting this proxy.</string>
+    <string name="proxy_edit">Edit proxy</string>
+    <string name="proxy_accounts">Accounts</string>
+    <string name="proxy_save">Save</string>
+    <string name="proxy_cancel">Cancel</string>
+    <string name="proxy_delete">Delete</string>
+    <string name="proxy_effective">Effective</string>
 </resources>

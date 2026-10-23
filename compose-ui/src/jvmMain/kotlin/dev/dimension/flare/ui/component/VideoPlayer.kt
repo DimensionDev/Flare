@@ -1,12 +1,14 @@
 package dev.dimension.flare.ui.component
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -32,8 +34,10 @@ import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.CirclePlay
 import dev.dimension.flare.compose.ui.Res
 import dev.dimension.flare.compose.ui.media_play_video
+import dev.dimension.flare.compose.ui.media_video_error
 import dev.dimension.flare.data.network.MediaPlaybackSource
 import dev.dimension.flare.data.network.MediaProxy
+import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.component.status.LocalIsScrollingInProgress
 import dev.dimension.flare.ui.model.UiMedia
 import io.github.composefluent.component.ProgressRing
@@ -81,6 +85,7 @@ public fun VideoPlayer(
     onLongClick: (() -> Unit)? = null,
     autoPlay: Boolean = true,
     remainingTimeContent: @Composable (BoxScope.(Long) -> Unit)? = null,
+    errorContent: @Composable BoxScope.() -> Unit = {},
     loadingPlaceholder: @Composable BoxScope.() -> Unit = {
         if (media.preview != null) {
             Box(
@@ -175,7 +180,13 @@ public fun VideoPlayer(
     }
     val resolved = source?.getOrNull()
     if (resolved == null) {
-        Box(modifier) { if (source?.isFailure == true) idlePlaceholder() else loadingPlaceholder() }
+        Box(modifier) {
+            if (source?.isFailure == true) {
+                PlaybackError(source?.exceptionOrNull()?.message, errorContent)
+            } else {
+                loadingPlaceholder()
+            }
+        }
         return
     }
     val uri = media.url
@@ -222,8 +233,26 @@ public fun VideoPlayer(
             }
             remainingTimeContent?.invoke(this, remainingTime)
             if (showControls) controls(playerState, binding.second::seek)
+            if (playerState.error != null) {
+                Box(playerModifier.fillMaxSize()) {
+                    PlaybackError(MediaProxy.failureMessage(resolved.url), errorContent)
+                }
+            }
         }
     }
+}
+
+@Composable
+private fun BoxScope.PlaybackError(
+    message: String?,
+    errorContent: @Composable BoxScope.() -> Unit,
+) {
+    errorContent()
+    PlatformText(
+        text = message ?: stringResource(Res.string.media_video_error),
+        color = Color.White,
+        modifier = Modifier.align(Alignment.Center).background(Color.Black.copy(alpha = 0.75f)).padding(12.dp),
+    )
 }
 
 @Composable

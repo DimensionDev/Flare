@@ -5,6 +5,7 @@ import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.database.app.model.AppDatabaseExport
 import dev.dimension.flare.data.database.cache.connect
+import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.ProxyRepository
 import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.model.requireValidPlatformId
@@ -15,6 +16,7 @@ public class ImportAppDatabasePresenter(
     private val jsonContent: String,
 ) : PresenterBase<ImportState>() {
     private val appDatabase: AppDatabase by koinInject()
+    private val accountRepository: AccountRepository by koinInject()
     private val proxyRepository: ProxyRepository by koinInject()
 
     @Composable
@@ -37,20 +39,22 @@ public class ImportAppDatabasePresenter(
         // Validate imported data
         validateImportData(export)
 
-        // Perform import within a transaction (automatically rolls back on error)
-        // Note: DAO insert methods use OnConflictStrategy.REPLACE - existing records with matching primary keys will be replaced
-        appDatabase.connect {
-            export.accounts.forEach { appDatabase.accountDao().insert(it) }
+        accountRepository.withAccountChanges {
+            // Perform import within a transaction (automatically rolls back on error)
+            // Note: DAO insert methods use OnConflictStrategy.REPLACE - existing records with matching primary keys will be replaced
+            appDatabase.connect {
+                export.accounts.forEach { appDatabase.accountDao().insert(it) }
 
-            export.keywordFilters.forEach { appDatabase.keywordFilterDao().insert(it) }
+                export.keywordFilters.forEach { appDatabase.keywordFilterDao().insert(it) }
 
-            export.searchHistories.forEach { appDatabase.searchHistoryDao().insert(it) }
+                export.searchHistories.forEach { appDatabase.searchHistoryDao().insert(it) }
 
-            if (export.rssSources.isNotEmpty()) {
-                appDatabase.rssSourceDao().insertAll(export.rssSources)
+                if (export.rssSources.isNotEmpty()) {
+                    appDatabase.rssSourceDao().insertAll(export.rssSources)
+                }
             }
+            export.accounts.forEach { proxyRepository.restoreAccount(it.account_key) }
         }
-        export.accounts.forEach { proxyRepository.restoreAccount(it.account_key) }
     }
 
     private fun validateImportData(export: AppDatabaseExport) {

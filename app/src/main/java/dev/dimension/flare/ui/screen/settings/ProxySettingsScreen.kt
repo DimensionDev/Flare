@@ -53,7 +53,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
-import compose.icons.fontawesomeicons.solid.ChevronDown
 import compose.icons.fontawesomeicons.solid.EllipsisVertical
 import compose.icons.fontawesomeicons.solid.Plus
 import dev.dimension.flare.R
@@ -211,7 +210,6 @@ internal fun ProxySettingsContent(
                                                 maxLines = 1,
                                                 overflow = TextOverflow.Ellipsis,
                                             )
-                                            FAIcon(FontAwesomeIcons.Solid.ChevronDown, contentDescription = null)
                                         }
                                         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
                                             val options =

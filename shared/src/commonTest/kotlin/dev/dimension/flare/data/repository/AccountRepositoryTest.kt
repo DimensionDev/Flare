@@ -96,7 +96,7 @@ class AccountRepositoryTest : RobolectricTest() {
             proxy.removeAccount(accountKey)
             val repository = createRepository(this, proxy)
             val other = MicroBlogKey("other", "example.social")
-            repository.addAccount(UiAccount(other, "Mastodon"), "unaffected credentials").join()
+            repository.addAccount(UiAccount(other, "Mastodon"), "unaffected credentials")
             assertNull(appDatabase.accountDao().getAccount(accountKey))
             assertEquals(
                 emptyList(),
@@ -106,7 +106,7 @@ class AccountRepositoryTest : RobolectricTest() {
             )
             assertEquals(setOf(accountKey.toString()), proxy.settings.first().removedAccounts)
 
-            repository.addAccount(UiAccount(accountKey, "Mastodon"), "new credentials").join()
+            repository.addAccount(UiAccount(accountKey, "Mastodon"), "new credentials")
             assertEquals(accountKey, repository.find(accountKey)?.accountKey)
             assertFalse(accountKey.toString() in proxy.settings.first().removedAccounts)
         }
@@ -118,7 +118,7 @@ class AccountRepositoryTest : RobolectricTest() {
             val proxy = ProxyRepository(fileStorage)
             proxy.removeAccount(accountKey)
             val repository = createRepository(this, proxy)
-            repository.addAccount(UiAccount(accountKey, "Mastodon"), "new credentials").join()
+            repository.addAccount(UiAccount(accountKey, "Mastodon"), "new credentials")
             assertEquals(accountKey, repository.find(accountKey)?.accountKey)
             assertFalse(accountKey.toString() in proxy.settings.first().removedAccounts)
         }
@@ -281,7 +281,7 @@ class AccountRepositoryTest : RobolectricTest() {
             assertEquals("TestNet", activationError.platformId)
             assertEquals("{\"token\":\"kept\"}", appDatabase.accountDao().getAccount(unavailableKey)?.credential_json)
 
-            repository.delete(unavailableKey).join()
+            repository.delete(unavailableKey)
             assertNull(appDatabase.accountDao().getAccount(unavailableKey))
         }
 

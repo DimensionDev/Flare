@@ -62,6 +62,9 @@
 	<div class="accounts-content">
 		<section class="accounts-section" aria-labelledby="signed-in-heading">
 			<h2 id="signed-in-heading" class="section-title">{m.settingsAccountsSignedIn()}</h2>
+			{#if accountsPresenter.removalFailed}
+				<p role="alert" class="text-error">{m.settingsAccountsRemoveFailed()}</p>
+			{/if}
 
 			{#if accountsState.type === 'Success'}
 				{#if accountsState.data.length > 0}

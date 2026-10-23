@@ -27,6 +27,7 @@ import dev.dimension.flare.data.model.ProxyPolicy
 import dev.dimension.flare.data.model.ProxyProfile
 import dev.dimension.flare.data.model.ProxyProtocol
 import dev.dimension.flare.data.model.ProxySettings
+import dev.dimension.flare.data.model.ProxySettingsError
 import dev.dimension.flare.data.model.appearance.GlobalAppearance
 import dev.dimension.flare.data.model.appearance.TimelineAppearance
 import dev.dimension.flare.model.MicroBlogKey
@@ -101,7 +102,7 @@ class ProxySettingsContentTest {
         val state = State(ProxySettings(profiles = listOf(profile), global = ProxyPolicy(ProxyMode.PROXY, profile.id)))
         show(state)
         compose.onNodeWithText(account.toString()).performScrollTo().assertIsDisplayed()
-        compose.onNodeWithContentDescription("Proxy: $account").performClick()
+        compose.onNodeWithContentDescription("Proxy: ${state.accountLabel(state.accounts.first())}").performClick()
         popupOption("Follow global").performClick()
         compose.runOnIdle {
             assertEquals(1, permissionRequests)
@@ -132,16 +133,16 @@ class ProxySettingsContentTest {
         compose.onNodeWithText("Cancel").assertIsNotEnabled()
         compose.runOnIdle {
             state.busy = false
-            state.editorError = "Connection refused"
+            state.editorError = ProxySettingsError.REQUEST_FAILED
         }
-        compose.onAllNodesWithText("Connection refused").assertCountEquals(1)
-        option("Connection refused").performScrollTo().assertIsDisplayed()
+        compose.onAllNodesWithText("Proxy operation failed. Please try again.").assertCountEquals(1)
+        option("Proxy operation failed. Please try again.").performScrollTo().assertIsDisplayed()
         compose.onNodeWithText("Name").performScrollTo().assertTextContains("Work")
         compose.onNodeWithText("Cancel").performClick()
         compose.runOnIdle { assertNull(state.saved) }
-        compose.onNodeWithText("Connection refused").assertDoesNotExist()
+        compose.onNodeWithText("Proxy operation failed. Please try again.").assertDoesNotExist()
         compose.onNodeWithText("Office").performClick()
-        compose.onNodeWithText("Connection refused").assertDoesNotExist()
+        compose.onNodeWithText("Proxy operation failed. Please try again.").assertDoesNotExist()
         compose.onNodeWithText("Name").assertTextContains("Office")
     }
 
@@ -166,12 +167,12 @@ class ProxySettingsContentTest {
         val state = State()
         val user = createSampleUser().copy(key = account, avatar = null)
         state.accountProfiles = persistentMapOf(account to user)
-        state.error = "Could not change policy"
+        state.error = ProxySettingsError.INVALID_POLICY
         show(state)
-        compose.onNodeWithText("Could not change policy").assertIsDisplayed()
+        compose.onNodeWithText("Select an available proxy policy").assertIsDisplayed()
         compose.onNodeWithText(user.handle.canonical).performScrollTo().assertIsDisplayed()
         compose.onNodeWithText(user.name.raw).assertIsDisplayed()
-        compose.onNodeWithContentDescription("Proxy: $account").performClick()
+        compose.onNodeWithContentDescription("Proxy: ${state.accountLabel(state.accounts.first())}").performClick()
         popupOption("Direct connection").performClick()
         compose.runOnIdle {
             assertEquals(account to ProxyPolicy(ProxyMode.DIRECT), state.selection)
@@ -202,9 +203,9 @@ class ProxySettingsContentTest {
         override val accounts =
             persistentListOf(UiAccount(account, "mastodon", "Mastodon"), UiAccount(MicroBlogKey("bob", "nostr"), "nostr", "Nostr"))
         override var accountProfiles by mutableStateOf(persistentMapOf<MicroBlogKey, UiProfile>())
-        override var editorError by mutableStateOf<String?>(null)
+        override var editorError by mutableStateOf<ProxySettingsError?>(null)
         override var busy by mutableStateOf(false)
-        override var error by mutableStateOf<String?>(null)
+        override var error by mutableStateOf<ProxySettingsError?>(null)
         override var tested by mutableStateOf<ProxyProfile?>(null)
         var saved: ProxyProfile? = null
         var removed: String? = null

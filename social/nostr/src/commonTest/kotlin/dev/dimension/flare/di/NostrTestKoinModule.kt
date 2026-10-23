@@ -70,11 +70,11 @@ private object TestAccountService : AccountService {
         unsupported()
     }
 
-    override fun <T : Any> addAccount(
+    override suspend fun <T : Any> addAccount(
         account: UiAccount,
         credential: T,
         serializer: KSerializer<T>,
-    ): Job = unsupported()
+    ): Unit = unsupported()
 
     override fun <T : Any> credentialFlow(
         accountKey: MicroBlogKey,

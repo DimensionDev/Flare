@@ -11,6 +11,8 @@ import androidx.compose.runtime.setValue
 import dev.dimension.flare.data.model.ProxyPolicy
 import dev.dimension.flare.data.model.ProxyProfile
 import dev.dimension.flare.data.model.ProxySettings
+import dev.dimension.flare.data.model.ProxySettingsError
+import dev.dimension.flare.data.model.ProxySettingsException
 import dev.dimension.flare.data.network.createPlatformHttpClientEngine
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.ProxyRepository
@@ -51,8 +53,8 @@ public class ProxySettingsPresenter : PresenterBase<ProxySettingsState>() {
                 .toImmutableMap()
         val scope = rememberCoroutineScope()
         var busy by remember { mutableStateOf(false) }
-        var error by remember { mutableStateOf<String?>(null) }
-        var editorErrorMessage by remember { mutableStateOf<String?>(null) }
+        var error by remember { mutableStateOf<ProxySettingsError?>(null) }
+        var editorErrorMessage by remember { mutableStateOf<ProxySettingsError?>(null) }
         var tested by remember { mutableStateOf<ProxyProfile?>(null) }
 
         fun action(
@@ -70,7 +72,8 @@ public class ProxySettingsPresenter : PresenterBase<ProxySettingsState>() {
                 } catch (cancelled: CancellationException) {
                     throw cancelled
                 } catch (exception: Exception) {
-                    val message = exception.message ?: "Proxy request failed"
+                    if (exception !is ProxySettingsException) exception.printStackTrace()
+                    val message = (exception as? ProxySettingsException)?.reason ?: ProxySettingsError.REQUEST_FAILED
                     if (fromEditor) editorErrorMessage = message else error = message
                 } finally {
                     busy = false
@@ -141,9 +144,13 @@ public interface ProxySettingsState {
     public val accounts: ImmutableList<UiAccount>
     public val accountProfiles: ImmutableMap<MicroBlogKey, UiProfile>
     public val busy: Boolean
-    public val error: String?
-    public val editorError: String?
+    public val error: ProxySettingsError?
+    public val editorError: ProxySettingsError?
     public val tested: ProxyProfile?
+
+    public fun accountLabel(account: UiAccount): String =
+        accountProfiles[account.accountKey]?.let { "${it.name.innerText}, ${it.handle.canonical}" }
+            ?: "${account.platformDisplayName}, ${account.accountKey}"
 
     public fun isTested(profile: ProxyProfile): Boolean =
         tested?.let {

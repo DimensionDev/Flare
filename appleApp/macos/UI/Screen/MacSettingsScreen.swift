@@ -319,6 +319,9 @@ private struct MacAccountManagementSettingsPane: View {
     var body: some View {
         StateView(state: presenter.state.accounts) { data in
             VStack {
+                if presenter.state.removalFailed {
+                    Text("settings_accounts_remove_failed").foregroundStyle(.red)
+                }
                 Button {
                     isLoginSheetPresented = true
                 } label: {

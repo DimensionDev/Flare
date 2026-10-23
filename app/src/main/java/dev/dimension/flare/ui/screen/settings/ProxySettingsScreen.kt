@@ -55,6 +55,7 @@ import dev.dimension.flare.data.model.ProxyPolicy
 import dev.dimension.flare.data.model.ProxyProfile
 import dev.dimension.flare.data.model.ProxyProtocol
 import dev.dimension.flare.data.model.ProxySettings
+import dev.dimension.flare.data.model.ProxySettingsError
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.BackButton
@@ -102,7 +103,7 @@ internal fun ProxySettingsContent(
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             if (state.busy || settings == null) LinearProgressIndicator(Modifier.fillMaxWidth())
-            state.error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+            state.error?.let { Text(it.localizedMessage(), color = MaterialTheme.colorScheme.error) }
             if (settings != null) {
                 val globalTitle = stringResource(R.string.proxy_global)
                 SegmentedListItem(
@@ -176,7 +177,7 @@ internal fun ProxySettingsContent(
                         accounts.forEachIndexed { index, account ->
                             val profile = state.accountProfiles[account.accountKey]
                             var expanded by remember(account.accountKey) { mutableStateOf(false) }
-                            val label = "${stringResource(R.string.proxy_title)}: ${account.accountKey}"
+                            val label = "${stringResource(R.string.proxy_title)}: ${state.accountLabel(account)}"
                             SegmentedListItem(
                                 onClick = { expanded = true },
                                 enabled = !state.busy,
@@ -353,7 +354,7 @@ private fun ProxyEditor(
                 ProxyFootnote(stringResource(R.string.proxy_test_hint))
                 if (state.busy) LinearProgressIndicator(Modifier.fillMaxWidth())
                 if (state.isTested(value())) Text(stringResource(R.string.proxy_test_success))
-                state.editorError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+                state.editorError?.let { Text(it.localizedMessage(), color = MaterialTheme.colorScheme.error) }
             }
         },
         confirmButton = {
@@ -395,3 +396,16 @@ private fun rememberProxyPermission(): (() -> Unit) -> Unit {
         }
     }
 }
+
+@Composable
+private fun ProxySettingsError.localizedMessage(): String =
+    stringResource(
+        when (this) {
+            ProxySettingsError.NAME_REQUIRED -> R.string.proxy_error_name
+            ProxySettingsError.INVALID_HOST -> R.string.proxy_error_host
+            ProxySettingsError.INVALID_PORT -> R.string.proxy_error_port
+            ProxySettingsError.IN_USE -> R.string.proxy_error_in_use
+            ProxySettingsError.INVALID_POLICY -> R.string.proxy_error_policy
+            ProxySettingsError.REQUEST_FAILED -> R.string.proxy_error_request
+        },
+    )

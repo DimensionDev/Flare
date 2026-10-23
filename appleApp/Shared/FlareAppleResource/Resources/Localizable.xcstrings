@@ -199,6 +199,13 @@
         }
       }
     },
+  "proxy_error_name": {"extractionState": "manual", "localizations": {"en": {"stringUnit": {"state": "translated", "value": "A proxy name is required"}}, "zh-Hans": {"stringUnit": {"state": "translated", "value": "请输入代理名称"}}}},
+  "proxy_error_host": {"extractionState": "manual", "localizations": {"en": {"stringUnit": {"state": "translated", "value": "Enter a hostname or IP address without a scheme or credentials"}}, "zh-Hans": {"stringUnit": {"state": "translated", "value": "请输入主机名或 IP 地址，不要包含协议或身份验证信息"}}}},
+  "proxy_error_port": {"extractionState": "manual", "localizations": {"en": {"stringUnit": {"state": "translated", "value": "Port must be between 1 and 65535"}}, "zh-Hans": {"stringUnit": {"state": "translated", "value": "端口必须介于 1 和 65535 之间"}}}},
+  "proxy_error_in_use": {"extractionState": "manual", "localizations": {"en": {"stringUnit": {"state": "translated", "value": "Reassign accounts and the global policy before deleting this proxy"}}, "zh-Hans": {"stringUnit": {"state": "translated", "value": "请先修改使用此代理的账号和全局设置，再删除代理"}}}},
+  "proxy_error_policy": {"extractionState": "manual", "localizations": {"en": {"stringUnit": {"state": "translated", "value": "Select an available proxy policy"}}, "zh-Hans": {"stringUnit": {"state": "translated", "value": "请选择有效的代理设置"}}}},
+  "proxy_error_request": {"extractionState": "manual", "localizations": {"en": {"stringUnit": {"state": "translated", "value": "Proxy operation failed. Please try again."}}, "zh-Hans": {"stringUnit": {"state": "translated", "value": "代理操作失败，请重试。"}}}},
+  "settings_accounts_remove_failed": {"extractionState": "manual", "localizations": {"en": {"stringUnit": {"state": "translated", "value": "Could not remove this account. Please try again."}}, "zh-Hans": {"stringUnit": {"state": "translated", "value": "无法移除此账号，请重试。"}}}},
   "media_video_error": {
     "extractionState": "manual",
     "localizations": {
@@ -566,23 +573,6 @@
         "stringUnit": {
           "state": "translated",
           "value": "删除"
-        }
-      }
-    }
-  },
-  "proxy_done": {
-    "extractionState": "manual",
-    "localizations": {
-      "en": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "Done"
-        }
-      },
-      "zh-Hans": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "完成"
         }
       }
     }

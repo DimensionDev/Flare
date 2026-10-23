@@ -91,9 +91,10 @@ public actual object MediaProxy {
         MediaRelayListener().also { listener ->
             scope.launch {
                 try {
-                    runMediaRelay(permits, listener::accept, ::serve)
+                    runMediaRelay(permits, listener::accept, ::serve) { error ->
+                        lock.withLock { serverFailure = error }
+                    }
                 } catch (error: Throwable) {
-                    lock.withLock { serverFailure = error }
                     if (error is CancellationException) throw error
                     error.printStackTrace()
                 } finally {
@@ -460,33 +461,55 @@ internal suspend fun runMediaRelay(
     permits: Semaphore,
     accept: () -> MediaRelayConnection,
     serve: suspend (MediaRelayConnection) -> Unit,
+    onFailure: (Throwable) -> Unit = {},
 ): Unit =
     coroutineScope {
-        while (true) {
-            permits.acquire()
-            val connection =
-                try {
-                    acceptMediaRelayConnection(accept)
-                } catch (error: Throwable) {
-                    permits.release()
-                    throw error
-                }
-            launch {
-                try {
-                    serve(connection)
-                } catch (error: CancellationException) {
-                    throw error
-                } catch (error: Exception) {
-                    error.printStackTrace()
-                }
-            }.invokeOnCompletion {
-                // Completion also runs if cancellation prevents the request coroutine from starting.
-                try {
-                    connection.close()
-                } catch (error: Exception) {
-                    error.printStackTrace()
-                } finally {
-                    permits.release()
+        val connections = mutableSetOf<MediaRelayConnection>()
+        val connectionLock = MediaRelayLock()
+
+        fun close(connection: MediaRelayConnection) {
+            if (!connectionLock.withLock { connections.remove(connection) }) return
+            try {
+                connection.close()
+            } catch (error: Exception) {
+                error.printStackTrace()
+            } finally {
+                permits.release()
+            }
+        }
+        try {
+            while (true) {
+                permits.acquire()
+                val connection =
+                    try {
+                        acceptMediaRelayConnection(accept)
+                    } catch (error: Throwable) {
+                        permits.release()
+                        throw error
+                    }
+                connectionLock.withLock { connections.add(connection) }
+                launch {
+                    try {
+                        serve(connection)
+                    } catch (error: CancellationException) {
+                        throw error
+                    } catch (error: Exception) {
+                        error.printStackTrace()
+                    }
+                }.invokeOnCompletion { close(connection) }
+            }
+        } catch (error: Throwable) {
+            onFailure(error)
+            throw error
+        } finally {
+            // Unblock native I/O before joining children; completion still owns close and permit release.
+            connectionLock.withLock {
+                connections.forEach {
+                    try {
+                        it.interrupt()
+                    } catch (error: Exception) {
+                        error.printStackTrace()
+                    }
                 }
             }
         }
@@ -599,6 +622,8 @@ internal expect class MediaRelayListener() {
 }
 
 internal interface MediaRelayConnection {
+    fun interrupt()
+
     fun read(bytes: ByteArray): Int
 
     fun write(

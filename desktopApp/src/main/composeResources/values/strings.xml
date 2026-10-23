@@ -773,4 +773,11 @@
     <string name="proxy_save">Save</string>
     <string name="proxy_cancel">Cancel</string>
     <string name="proxy_delete">Delete</string>
+    <string name="proxy_error_name">A proxy name is required</string>
+    <string name="proxy_error_host">Enter a hostname or IP address without a scheme or credentials</string>
+    <string name="proxy_error_port">Port must be between 1 and 65535</string>
+    <string name="proxy_error_in_use">Reassign accounts and the global policy before deleting this proxy</string>
+    <string name="proxy_error_policy">Select an available proxy policy</string>
+    <string name="proxy_error_request">Proxy operation failed. Please try again.</string>
+    <string name="settings_accounts_remove_failed">Could not remove this account. Please try again.</string>
 </resources>

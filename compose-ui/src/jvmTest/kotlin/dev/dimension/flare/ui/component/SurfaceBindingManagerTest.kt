@@ -39,6 +39,19 @@ import kotlin.test.assertTrue
 @OptIn(ExperimentalCoroutinesApi::class)
 class SurfaceBindingManagerTest {
     @Test
+    fun playbackDiagnosticsKeepRelayCauseWithoutLeakingMediaUrls() {
+        val error = VideoPlayerError.SourceError("Native failed at https://player.example/video?token=native-secret")
+        assertEquals(
+            "Video playback failed (SourceError): Target returned HTTP 503",
+            playbackFailureDiagnostic(error, "Target returned HTTP 503"),
+        )
+        val redacted =
+            playbackFailureDiagnostic(error, "Request failed at HTTPS://user:password@cdn.example/video?token=secret\nCookie: secret")
+        assertEquals("Video playback failed (SourceError): Request failed at [redacted URL]", redacted)
+        assertEquals("Video playback failed (SourceError): Native failed at [redacted URL]", playbackFailureDiagnostic(error, null))
+    }
+
+    @Test
     fun relaySurvivesSurfaceDisposalAndHandoffUntilTheNativeBufferIsReleased() =
         runTest {
             withProxyRepository { repository ->

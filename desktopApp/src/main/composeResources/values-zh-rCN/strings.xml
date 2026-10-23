@@ -724,4 +724,11 @@
     <string name="proxy_save">保存</string>
     <string name="proxy_cancel">取消</string>
     <string name="proxy_delete">删除</string>
+    <string name="proxy_error_name">请输入代理名称</string>
+    <string name="proxy_error_host">请输入主机名或 IP 地址，不要包含协议或身份验证信息</string>
+    <string name="proxy_error_port">端口必须介于 1 和 65535 之间</string>
+    <string name="proxy_error_in_use">请先修改使用此代理的账号和全局设置，再删除代理</string>
+    <string name="proxy_error_policy">请选择有效的代理设置</string>
+    <string name="proxy_error_request">代理操作失败，请重试。</string>
+    <string name="settings_accounts_remove_failed">无法移除此账号，请重试。</string>
 </resources>

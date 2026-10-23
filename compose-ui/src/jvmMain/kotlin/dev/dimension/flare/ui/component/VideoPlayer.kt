@@ -42,6 +42,7 @@ import dev.dimension.flare.ui.component.status.LocalIsScrollingInProgress
 import dev.dimension.flare.ui.model.UiMedia
 import io.github.composefluent.component.ProgressRing
 import io.github.kdroidfilter.composemediaplayer.InitialPlayerState
+import io.github.kdroidfilter.composemediaplayer.VideoPlayerError
 import io.github.kdroidfilter.composemediaplayer.VideoPlayerState
 import io.github.kdroidfilter.composemediaplayer.VideoPlayerSurface
 import kotlinx.coroutines.CoroutineScope
@@ -234,13 +235,40 @@ public fun VideoPlayer(
             }
             remainingTimeContent?.invoke(this, remainingTime)
             if (showControls) controls(playerState, binding.second::seek)
-            if (playerState.error != null) {
+            val playbackError = playerState.error
+            LaunchedEffect(playerState, playbackError, resolved.key) {
+                if (playbackError != null) {
+                    System.err.println(playbackFailureDiagnostic(playbackError, MediaProxy.failureMessage(resolved.url)))
+                }
+            }
+            if (playbackError != null) {
                 Box(playerModifier.fillMaxSize()) {
                     errorContent()
                 }
             }
         }
     }
+}
+
+internal fun playbackFailureDiagnostic(
+    error: VideoPlayerError,
+    relayFailure: String?,
+): String {
+    val nativeMessage =
+        when (error) {
+            is VideoPlayerError.CodecError -> error.message
+            is VideoPlayerError.NetworkError -> error.message
+            is VideoPlayerError.SourceError -> error.message
+            is VideoPlayerError.UnknownError -> error.message
+        }
+    val diagnostic =
+        (relayFailure ?: nativeMessage)
+            .lineSequence()
+            .first()
+            .replace(Regex("(?i)https?://\\S+"), "[redacted URL]")
+            .replace(Regex("(?i)(authorization|cookie):.*"), "[redacted credentials]")
+            .take(512)
+    return "Video playback failed (${error::class.simpleName}): $diagnostic"
 }
 
 @Composable

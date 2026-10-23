@@ -7,7 +7,12 @@ struct SettingsScreen: View {
     var body: some View {
         List {
             NavigationLink { ProxySettingsView() } label: {
-                Label("proxy_title", systemImage: "network")
+                Label {
+                    Text("proxy_title")
+                    Text("proxy_settings_subtitle")
+                } icon: {
+                    Image(systemName: "network")
+                }
             }
 
             NavigationLink(value: Route.accountManagement) {

@@ -17,10 +17,6 @@ import androidx.compose.material3.SegmentedListItem
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -35,6 +31,7 @@ import compose.icons.fontawesomeicons.solid.CircleUser
 import compose.icons.fontawesomeicons.solid.Database
 import compose.icons.fontawesomeicons.solid.Filter
 import compose.icons.fontawesomeicons.solid.Gear
+import compose.icons.fontawesomeicons.solid.Globe
 import compose.icons.fontawesomeicons.solid.Language
 import compose.icons.fontawesomeicons.solid.Newspaper
 import compose.icons.fontawesomeicons.solid.Palette
@@ -50,7 +47,6 @@ import dev.dimension.flare.ui.component.FlareLargeFlexibleTopAppBar
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.ThemeIconData
 import dev.dimension.flare.ui.component.ThemedIcon
-import dev.dimension.flare.ui.screen.settings.ProxySettingsContent
 import dev.dimension.flare.ui.theme.first
 import dev.dimension.flare.ui.theme.item
 import dev.dimension.flare.ui.theme.last
@@ -87,6 +83,7 @@ internal fun SettingsDetailPlaceholder(modifier: Modifier = Modifier) {
 @Composable
 internal fun SettingsScreen(
     toAccounts: () -> Unit,
+    toProxy: () -> Unit,
     toAppearanceTheme: () -> Unit,
     toAppearanceLayout: () -> Unit,
     toAppearanceDisplay: () -> Unit,
@@ -100,12 +97,6 @@ internal fun SettingsScreen(
     toTranslationConfig: () -> Unit,
     onBack: () -> Unit,
 ) {
-    var showProxy by remember { mutableStateOf(false) }
-    if (showProxy) {
-        androidx.compose.material3.ModalBottomSheet(onDismissRequest = { showProxy = false }) {
-            ProxySettingsContent(Modifier.fillMaxWidth(), beforeConnect = rememberProxyPermission())
-        }
-    }
     val context = LocalContext.current
     val topAppBarScrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     FlareScaffold(
@@ -152,10 +143,17 @@ internal fun SettingsScreen(
                 },
             )
             SegmentedListItem(
-                onClick = { showProxy = true },
+                onClick = toProxy,
                 shapes = ListItemDefaults.single(),
                 content = { Text(stringResource(R.string.proxy_title)) },
-                supportingContent = { Text(stringResource(R.string.proxy_description)) },
+                supportingContent = { Text(stringResource(R.string.proxy_settings_subtitle)) },
+                leadingContent = {
+                    ThemedIcon(
+                        imageVector = FontAwesomeIcons.Solid.Globe,
+                        contentDescription = null,
+                        color = ThemeIconData.Color.SapphireBlue,
+                    )
+                },
             )
             Column(
                 verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
@@ -433,23 +431,5 @@ internal fun SettingsScreen(
                 )
             }
         }
-    }
-}
-
-@Composable
-private fun rememberProxyPermission(): (() -> Unit) -> Unit {
-    val context = LocalContext.current
-    var pending by remember { mutableStateOf<(() -> Unit)?>(null) }
-    val launcher = androidx.activity.compose.rememberLauncherForActivityResult(
-        androidx.activity.result.contract.ActivityResultContracts.RequestPermission(),
-    ) { granted ->
-        if (granted) pending?.invoke()
-        else android.widget.Toast.makeText(context, R.string.proxy_local_network_permission, android.widget.Toast.LENGTH_LONG).show()
-        pending = null
-    }
-    return { action ->
-        val permission = "android.permission.ACCESS_LOCAL_NETWORK"
-        if (android.os.Build.VERSION.SDK_INT < 37 || androidx.core.content.ContextCompat.checkSelfPermission(context, permission) == android.content.pm.PackageManager.PERMISSION_GRANTED) action()
-        else { pending = action; launcher.launch(permission) }
     }
 }

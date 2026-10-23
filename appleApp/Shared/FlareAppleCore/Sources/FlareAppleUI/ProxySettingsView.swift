@@ -10,54 +10,135 @@ public struct ProxySettingsView: View {
 
     public var body: some View {
         Form {
-            Section {
-                Text("proxy_description", bundle: FlareAppleUILocalization.bundle)
-                Text("proxy_scope", bundle: FlareAppleUILocalization.bundle)
+            if presenter.state.busy || presenter.state.settings == nil {
+                Section { ProgressView() }
             }
-            if let error = presenter.state.error { Text(verbatim: error).foregroundStyle(.red) }
+            if let error = presenter.state.error {
+                Section { Text(verbatim: error).foregroundStyle(.red) }
+            }
             if let settings = presenter.state.settings {
+                let accounts = presenter.state.accounts.filter { $0.accountKey.host != "nostr" }
                 Section {
                     policyPicker(settings, accountKey: nil)
-                } header: { Text("proxy_global", bundle: FlareAppleUILocalization.bundle) }
+                } header: {
+                    Text("proxy_global", bundle: FlareAppleUILocalization.bundle)
+                } footer: {
+                    Text("proxy_description", bundle: FlareAppleUILocalization.bundle)
+                }
+
                 Section {
                     ForEach(settings.profiles, id: \.id) { profile in
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text(verbatim: profile.name)
-                            Text(verbatim: "\(profile.protocol.name) · \(profile.host):\(profile.port)").font(.caption)
-                            HStack {
-                                Button { editing = profile } label: { Text("proxy_edit", bundle: FlareAppleUILocalization.bundle) }
-                                Button { presenter.state.test(profile: profile) } label: { Text("proxy_test", bundle: FlareAppleUILocalization.bundle) }
-                                Button(role: .destructive) { presenter.state.remove(id: profile.id) } label: { Text("proxy_delete", bundle: FlareAppleUILocalization.bundle) }
-                                    .disabled(inUse(profile, settings))
+                        profileRow(profile, settings: settings)
+                            .contextMenu {
+                                Button { editing = profile } label: {
+                                    Label { Text("proxy_edit", bundle: FlareAppleUILocalization.bundle) } icon: { Image(systemName: "pencil") }
+                                }
+                                Button { presenter.state.test(profile: profile) } label: {
+                                    Label { Text("proxy_test", bundle: FlareAppleUILocalization.bundle) } icon: { Image(systemName: "network") }
+                                }
+                                Button(role: .destructive) { presenter.state.remove(id: profile.id) } label: {
+                                    Label { Text("proxy_delete", bundle: FlareAppleUILocalization.bundle) } icon: { Image(systemName: "trash") }
+                                }
+                                .disabled(inUse(profile, settings))
                             }
-                            .buttonStyle(.borderless)
-                            if inUse(profile, settings) { Text("proxy_in_use", bundle: FlareAppleUILocalization.bundle).font(.caption) }
-                            if presenter.state.isTested(profile: profile) { Text("proxy_test_success", bundle: FlareAppleUILocalization.bundle) }
-                        }
+                            #if os(iOS)
+                            .swipeActions {
+                                Button(role: .destructive) { presenter.state.remove(id: profile.id) } label: {
+                                    Label { Text("proxy_delete", bundle: FlareAppleUILocalization.bundle) } icon: { Image(systemName: "trash") }
+                                }
+                                .disabled(inUse(profile, settings))
+                            }
+                            #endif
                     }
                     Button {
                         editing = ProxyProfile(id: UUID().uuidString, name: "", protocol: .https, host: "", port: 443)
-                    } label: { Text("proxy_add", bundle: FlareAppleUILocalization.bundle) }
-                } header: { Text("proxy_profiles", bundle: FlareAppleUILocalization.bundle) }
-                Section {
-                    ForEach(Array(presenter.state.accounts), id: \.accountKey) { account in
-                        if account.accountKey.host != "nostr" {
-                            VStack(alignment: .leading) {
-                                Text(verbatim: "\(account.platformDisplayName) · \(account.accountKey)")
-                                policyPicker(settings, accountKey: account.accountKey)
-                            }
-                        }
+                    } label: {
+                        Label { Text("proxy_add", bundle: FlareAppleUILocalization.bundle) } icon: { Image(systemName: "plus") }
                     }
-                } header: { Text("proxy_accounts", bundle: FlareAppleUILocalization.bundle) }
+                } header: {
+                    Text("proxy_profiles", bundle: FlareAppleUILocalization.bundle)
+                } footer: {
+                    if accounts.isEmpty {
+                        Text("proxy_scope", bundle: FlareAppleUILocalization.bundle)
+                    }
+                }
+
+                if !accounts.isEmpty {
+                    Section {
+                        ForEach(accounts, id: \.accountKey) { account in
+                            policyPicker(settings, accountKey: account.accountKey, title: "\(account.platformDisplayName) · \(account.accountKey)")
+                        }
+                    } header: {
+                        Text("proxy_accounts", bundle: FlareAppleUILocalization.bundle)
+                    } footer: {
+                        Text("proxy_scope", bundle: FlareAppleUILocalization.bundle)
+                    }
+                }
             }
-            if presenter.state.busy { ProgressView() }
         }
         .formStyle(.grouped)
         .disabled(presenter.state.busy)
         .navigationTitle(Text("proxy_title", bundle: FlareAppleUILocalization.bundle))
+        #if os(macOS)
+        .navigationSubtitle(Text("proxy_settings_subtitle", bundle: FlareAppleUILocalization.bundle))
+        #endif
         .sheet(isPresented: Binding(get: { editing != nil }, set: { if !$0 { editing = nil } })) {
             if let profile = editing {
-                ProxyEditor(profile: profile, state: presenter.state, onClose: { editing = nil })
+                ProxyEditor(
+                    profile: profile,
+                    isNew: presenter.state.settings?.profiles.contains { $0.id == profile.id } != true,
+                    state: presenter.state,
+                    onClose: { editing = nil }
+                )
+                .id(profile.id)
+                .interactiveDismissDisabled(presenter.state.busy)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func profileRow(_ profile: ProxyProfile, settings: ProxySettings) -> some View {
+        #if os(macOS)
+        HStack {
+            profileSummary(profile, settings: settings)
+            Spacer()
+            Button { editing = profile } label: { Text("proxy_edit", bundle: FlareAppleUILocalization.bundle) }
+            Button(role: .destructive) { presenter.state.remove(id: profile.id) } label: {
+                Image(systemName: "trash")
+            }
+            .accessibilityLabel(Text("proxy_delete", bundle: FlareAppleUILocalization.bundle))
+            .disabled(inUse(profile, settings))
+        }
+        #else
+        Button { editing = profile } label: {
+            HStack {
+                profileSummary(profile, settings: settings)
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(.tertiary)
+                    .accessibilityHidden(true)
+            }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        #endif
+    }
+
+    private func profileSummary(_ profile: ProxyProfile, settings: ProxySettings) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(verbatim: profile.name)
+            Text(verbatim: "\(profile.protocol.name) · \(profile.host):\(profile.port)")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            if inUse(profile, settings) {
+                Text("proxy_in_use", bundle: FlareAppleUILocalization.bundle)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            if presenter.state.isTested(profile: profile) {
+                Label { Text("proxy_test_success", bundle: FlareAppleUILocalization.bundle) } icon: { Image(systemName: "checkmark.circle") }
+                    .font(.caption)
             }
         }
     }
@@ -66,17 +147,23 @@ public struct ProxySettingsView: View {
         settings.global.proxyId == profile.id || settings.accounts.values.contains { $0.proxyId == profile.id }
     }
 
-    private func policyPicker(_ settings: ProxySettings, accountKey: MicroBlogKey?) -> some View {
+    private func policyPicker(_ settings: ProxySettings, accountKey: MicroBlogKey?, title: String? = nil) -> some View {
         let policy = settings.policy(accountKey: accountKey)
         let options = [ProxyPolicy(mode: accountKey == nil ? .system : .inherit, proxyId: nil), ProxyPolicy(mode: .direct, proxyId: nil)] + settings.profiles.map { ProxyPolicy(mode: .proxy, proxyId: $0.id) }
-        return VStack(alignment: .leading) {
-            Picker(selection: Binding(get: { policy }, set: { presenter.state.select(accountKey: accountKey, policy: $0) })) {
-                ForEach(options, id: \.self) { option in Text(policyLabel(option, settings)).tag(option) }
-            } label: { Text("proxy_title", bundle: FlareAppleUILocalization.bundle) }
+        return Picker(selection: Binding(get: { policy }, set: { presenter.state.select(accountKey: accountKey, policy: $0) })) {
+            ForEach(options, id: \.self) { option in Text(policyLabel(option, settings)).tag(option) }
+        } label: {
+            if let title {
+                Text(verbatim: title)
+            } else {
+                Text("proxy_title", bundle: FlareAppleUILocalization.bundle)
+            }
             if policy.mode == .inherit {
-                Text("\(String(localized: "proxy_effective", bundle: FlareAppleUILocalization.bundle)): \(policyLabel(settings.global, settings))").font(.caption)
+                Text("\(String(localized: "proxy_effective", bundle: FlareAppleUILocalization.bundle)): \(policyLabel(settings.global, settings))")
             }
         }
+        .accessibilityLabel(Text(title ?? String(localized: "proxy_title", bundle: FlareAppleUILocalization.bundle)))
+        .accessibilityValue(Text(policyLabel(policy, settings)))
     }
 
     private func policyLabel(_ policy: ProxyPolicy, _ settings: ProxySettings) -> String {
@@ -84,13 +171,14 @@ public struct ProxySettingsView: View {
         case .system: String(localized: "proxy_system", bundle: FlareAppleUILocalization.bundle)
         case .direct: String(localized: "proxy_direct", bundle: FlareAppleUILocalization.bundle)
         case .inherit: String(localized: "proxy_inherit", bundle: FlareAppleUILocalization.bundle)
-        default: settings.profiles.first { $0.id == policy.proxyId }?.name ?? ""
+        default: settings.profiles.first { $0.id == policy.proxyId }?.name ?? policy.proxyId ?? ""
         }
     }
 }
 
 private struct ProxyEditor: View {
     let profile: ProxyProfile
+    let isNew: Bool
     let state: ProxySettingsState
     let onClose: () -> Void
     @State private var name: String
@@ -98,8 +186,9 @@ private struct ProxyEditor: View {
     @State private var port: String
     @State private var proxyProtocol: ProxyProtocol
 
-    init(profile: ProxyProfile, state: ProxySettingsState, onClose: @escaping () -> Void) {
+    init(profile: ProxyProfile, isNew: Bool, state: ProxySettingsState, onClose: @escaping () -> Void) {
         self.profile = profile
+        self.isNew = isNew
         self.state = state
         self.onClose = onClose
         _name = State(initialValue: profile.name)
@@ -113,39 +202,99 @@ private struct ProxyEditor: View {
                      host: host.trimmingCharacters(in: .whitespacesAndNewlines), port: Int32(port) ?? 0)
     }
 
+    private var title: Text {
+        Text(isNew ? "proxy_add" : "proxy_edit", bundle: FlareAppleUILocalization.bundle)
+    }
+
     var body: some View {
-        NavigationStack {
-            Form {
-                TextField(text: $name) { Text("proxy_name", bundle: FlareAppleUILocalization.bundle) }
-                Picker(selection: $proxyProtocol) {
-                    Text("HTTPS").tag(ProxyProtocol.https)
-                    Text("SOCKS5").tag(ProxyProtocol.socks5)
-                } label: { Text("proxy_protocol", bundle: FlareAppleUILocalization.bundle) }
-                TextField(text: $host) { Text("proxy_host", bundle: FlareAppleUILocalization.bundle) }
-                    #if os(iOS)
-                    .textInputAutocapitalization(.never).autocorrectionDisabled().keyboardType(.URL)
-                    #endif
-                TextField(text: $port) { Text("proxy_port", bundle: FlareAppleUILocalization.bundle) }
-                    #if os(iOS)
-                    .keyboardType(.numberPad)
-                    #endif
-                Text("proxy_no_auth", bundle: FlareAppleUILocalization.bundle).font(.caption)
-                Text("proxy_test_hint", bundle: FlareAppleUILocalization.bundle).font(.caption)
-                Button { state.test(profile: value) } label: { Text("proxy_test", bundle: FlareAppleUILocalization.bundle) }
-                if state.isTested(profile: value) { Text("proxy_test_success", bundle: FlareAppleUILocalization.bundle) }
-                if let error = state.error { Text(verbatim: error).foregroundStyle(.red) }
-                if state.busy { ProgressView() }
+        #if os(macOS)
+        VStack(spacing: 0) {
+            title.font(.headline).frame(maxWidth: .infinity, alignment: .leading).padding()
+            form
+            Divider()
+            HStack {
+                Spacer()
+                cancelButton.keyboardShortcut(.cancelAction)
+                saveButton.keyboardShortcut(.defaultAction)
             }
-            .formStyle(.grouped)
-            .disabled(state.busy)
-            .navigationTitle(Text("proxy_edit", bundle: FlareAppleUILocalization.bundle))
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button(action: onClose) { Text("proxy_cancel", bundle: FlareAppleUILocalization.bundle) }.disabled(state.busy) }
-                ToolbarItem(placement: .confirmationAction) { Button { state.save(profile: value, onSaved: onClose) } label: { Text("proxy_save", bundle: FlareAppleUILocalization.bundle) }.disabled(state.busy) }
+            .padding()
+        }
+        .frame(width: 520, height: 560)
+        #else
+        NavigationStack {
+            form
+                .navigationTitle(title)
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) { cancelButton }
+                    ToolbarItem(placement: .confirmationAction) { saveButton }
+                }
+        }
+        #endif
+    }
+
+    private var form: some View {
+        Form {
+            Section {
+                LabeledContent {
+                    TextField(text: $name) { Text("proxy_name", bundle: FlareAppleUILocalization.bundle) }
+                        .labelsHidden()
+                        #if os(iOS)
+                        .multilineTextAlignment(.trailing)
+                        #endif
+                } label: { Text("proxy_name", bundle: FlareAppleUILocalization.bundle) }
+                Picker(selection: $proxyProtocol) {
+                    Text(verbatim: "HTTPS").tag(ProxyProtocol.https)
+                    Text(verbatim: "SOCKS5").tag(ProxyProtocol.socks5)
+                } label: { Text("proxy_protocol", bundle: FlareAppleUILocalization.bundle) }
+                LabeledContent {
+                    TextField(text: $host) { Text("proxy_host", bundle: FlareAppleUILocalization.bundle) }
+                        .labelsHidden()
+                        #if os(iOS)
+                        .multilineTextAlignment(.trailing)
+                        .textInputAutocapitalization(.never)
+                        .keyboardType(.URL)
+                        #endif
+                } label: { Text("proxy_host", bundle: FlareAppleUILocalization.bundle) }
+                LabeledContent {
+                    TextField(text: $port) { Text("proxy_port", bundle: FlareAppleUILocalization.bundle) }
+                        .labelsHidden()
+                        #if os(iOS)
+                        .multilineTextAlignment(.trailing)
+                        .keyboardType(.numberPad)
+                        #endif
+                } label: { Text("proxy_port", bundle: FlareAppleUILocalization.bundle) }
+            } footer: {
+                Text("proxy_no_auth", bundle: FlareAppleUILocalization.bundle)
+            }
+            Section {
+                Button { state.test(profile: value) } label: {
+                    Text("proxy_test", bundle: FlareAppleUILocalization.bundle)
+                }
+                if state.busy { ProgressView() }
+                if state.isTested(profile: value) {
+                    Label { Text("proxy_test_success", bundle: FlareAppleUILocalization.bundle) } icon: { Image(systemName: "checkmark.circle") }
+                }
+                if let error = state.error { Text(verbatim: error).foregroundStyle(.red) }
+            } footer: {
+                Text("proxy_test_hint", bundle: FlareAppleUILocalization.bundle)
             }
         }
+        .formStyle(.grouped)
+        .autocorrectionDisabled()
+        .disabled(state.busy)
         #if os(macOS)
-        .frame(width: 520, height: 500)
+        .textFieldStyle(.roundedBorder)
         #endif
+    }
+
+    private var cancelButton: some View {
+        Button(action: onClose) { Text("proxy_cancel", bundle: FlareAppleUILocalization.bundle) }
+            .disabled(state.busy)
+    }
+
+    private var saveButton: some View {
+        Button { state.save(profile: value, onSaved: onClose) } label: { Text("proxy_save", bundle: FlareAppleUILocalization.bundle) }
+            .disabled(state.busy)
     }
 }

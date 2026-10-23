@@ -1,6 +1,13 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+  "proxy_settings_subtitle": {
+    "extractionState": "manual",
+    "localizations": {
+      "en": { "stringUnit": { "state": "translated", "value": "Global and per-account proxy settings" } },
+      "zh-Hans": { "stringUnit": { "state": "translated", "value": "管理全局和各账号的代理连接" } }
+    }
+  },
   "proxy_title": {
     "extractionState": "manual",
     "localizations": {

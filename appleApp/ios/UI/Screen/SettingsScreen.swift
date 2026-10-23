@@ -133,7 +133,7 @@ struct SettingsScreen: View {
                         Text("proxy_title")
                         Text("proxy_settings_subtitle")
                     } icon: {
-                        Image(systemName: "network")
+                        Image(fontAwesome: .globe)
                     }
                 }
             }

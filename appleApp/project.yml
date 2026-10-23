@@ -248,6 +248,7 @@ targets:
       - path: ios/Common/MediaViewerDismissGesturePolicy.swift
       - path: ios/Common/MediaViewerImageLayoutPolicy.swift
       - path: ios/Common/StatusTextContent.swift
+      - path: ios/UI/Route/RouterNavigationState.swift
       - path: ios/UI/Component/TimelineCollectionView.swift
       - path: ios/UI/Component/TimelineItemHeightCache.swift
       - path: ios/UI/Component/Status/StatusMediaCarouselLayout.swift

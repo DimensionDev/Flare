@@ -5,6 +5,8 @@ import androidx.compose.runtime.Immutable
 import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.presenter.PresenterBase
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 public class ReloginPresenter(
     private val target: ReloginTarget,
@@ -31,7 +33,9 @@ public class ReloginPresenter(
                         host = target.accountKey.host,
                         methodType = methodType,
                         onSuccess = {
-                            onSuccess()
+                            withContext(Dispatchers.Main) {
+                                onSuccess()
+                            }
                         },
                         reloginTarget = target,
                     ),

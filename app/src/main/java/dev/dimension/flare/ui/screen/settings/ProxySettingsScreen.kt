@@ -3,13 +3,10 @@ package dev.dimension.flare.ui.screen.settings
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.selection.selectable
-import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.rememberTextFieldState
@@ -27,7 +24,6 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.SegmentedListItem
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -39,12 +35,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
@@ -90,7 +84,7 @@ internal fun ProxySettingsContent(
     beforeConnect: (() -> Unit) -> Unit,
 ) {
     var editingId by rememberSaveable { mutableStateOf<String?>(null) }
-    var choosingPolicy by remember { mutableStateOf<Pair<MicroBlogKey?, String>?>(null) }
+    var choosingGlobal by remember { mutableStateOf(false) }
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val settings = state.settings
     FlareScaffold(
@@ -112,11 +106,13 @@ internal fun ProxySettingsContent(
             if (settings != null) {
                 val globalTitle = stringResource(R.string.proxy_global)
                 SegmentedListItem(
-                    onClick = { choosingPolicy = null to globalTitle },
+                    onClick = { choosingGlobal = true },
                     enabled = !state.busy,
                     shapes = ListItemDefaults.single(),
                     content = { Text(globalTitle) },
-                    supportingContent = { Text(settings.global.label(settings)) },
+                    trailingContent = {
+                        ProxyPolicyDropdown(state, null, globalTitle, choosingGlobal, { choosingGlobal = it }, beforeConnect)
+                    },
                 )
                 Text(stringResource(R.string.proxy_profiles), style = MaterialTheme.typography.titleSmall)
                 Column(verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap)) {
@@ -179,7 +175,6 @@ internal fun ProxySettingsContent(
                     Column(verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap)) {
                         accounts.forEachIndexed { index, account ->
                             val profile = state.accountProfiles[account.accountKey]
-                            val policy = settings.policy(account.accountKey)
                             var expanded by remember(account.accountKey) { mutableStateOf(false) }
                             val label = "${stringResource(R.string.proxy_title)}: ${account.accountKey}"
                             SegmentedListItem(
@@ -198,41 +193,7 @@ internal fun ProxySettingsContent(
                                     )
                                 },
                                 trailingContent = {
-                                    Box {
-                                        TextButton(
-                                            onClick = { expanded = true },
-                                            enabled = !state.busy,
-                                            modifier = Modifier.widthIn(max = 160.dp).semantics { contentDescription = label },
-                                        ) {
-                                            Text(
-                                                policy.label(settings),
-                                                Modifier.weight(1f, fill = false),
-                                                maxLines = 1,
-                                                overflow = TextOverflow.Ellipsis,
-                                            )
-                                        }
-                                        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-                                            val options =
-                                                listOf(ProxyPolicy(), ProxyPolicy(ProxyMode.DIRECT)) +
-                                                    settings.profiles.map { ProxyPolicy(ProxyMode.PROXY, it.id) }
-                                            options.forEach { option ->
-                                                DropdownMenuItem(
-                                                    text = { Text(option.label(settings)) },
-                                                    enabled = !state.busy,
-                                                    modifier = Modifier.semantics { selected = policy == option },
-                                                    onClick = {
-                                                        expanded = false
-                                                        val effective = if (option.mode == ProxyMode.INHERIT) settings.global else option
-                                                        if (effective.mode == ProxyMode.PROXY) {
-                                                            beforeConnect { state.select(account.accountKey, option) }
-                                                        } else {
-                                                            state.select(account.accountKey, option)
-                                                        }
-                                                    },
-                                                )
-                                            }
-                                        }
-                                    }
+                                    ProxyPolicyDropdown(state, account.accountKey, label, expanded, { expanded = it }, beforeConnect)
                                 },
                             )
                         }
@@ -242,45 +203,6 @@ internal fun ProxySettingsContent(
         }
     }
     if (settings != null) {
-        choosingPolicy?.let { (accountKey, title) ->
-            val options =
-                listOf(ProxyPolicy(if (accountKey == null) ProxyMode.SYSTEM else ProxyMode.INHERIT), ProxyPolicy(ProxyMode.DIRECT)) +
-                    settings.profiles.map { ProxyPolicy(ProxyMode.PROXY, it.id) }
-            AlertDialog(
-                onDismissRequest = { choosingPolicy = null },
-                title = { Text(title) },
-                text = {
-                    Column(Modifier.verticalScroll(rememberScrollState()).selectableGroup()) {
-                        options.forEach { policy ->
-                            Row(
-                                Modifier
-                                    .fillMaxWidth()
-                                    .selectable(
-                                        selected = settings.policy(accountKey) == policy,
-                                        enabled = !state.busy,
-                                        role = Role.RadioButton,
-                                        onClick = {
-                                            choosingPolicy = null
-                                            val effective = if (policy.mode == ProxyMode.INHERIT) settings.global else policy
-                                            if (effective.mode == ProxyMode.PROXY) {
-                                                beforeConnect { state.select(accountKey, policy) }
-                                            } else {
-                                                state.select(accountKey, policy)
-                                            }
-                                        },
-                                    ).padding(vertical = 12.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                            ) {
-                                RadioButton(selected = settings.policy(accountKey) == policy, onClick = null)
-                                Text(policy.label(settings))
-                            }
-                        }
-                    }
-                },
-                confirmButton = { TextButton(onClick = { choosingPolicy = null }) { Text(stringResource(R.string.proxy_cancel)) } },
-            )
-        }
         editingId?.let { id ->
             key(id) {
                 val existing = settings.profiles.firstOrNull { it.id == id }
@@ -292,6 +214,49 @@ internal fun ProxySettingsContent(
                     onClose = {
                         state.clearEditorError()
                         editingId = null
+                    },
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ProxyPolicyDropdown(
+    state: ProxySettingsState,
+    accountKey: MicroBlogKey?,
+    label: String,
+    expanded: Boolean,
+    onExpandedChange: (Boolean) -> Unit,
+    beforeConnect: (() -> Unit) -> Unit,
+) {
+    val settings = state.settings ?: return
+    val policy = settings.policy(accountKey)
+    Box {
+        TextButton(
+            onClick = { onExpandedChange(true) },
+            enabled = !state.busy,
+            modifier = Modifier.widthIn(max = 160.dp).semantics { contentDescription = label },
+        ) {
+            Text(policy.label(settings), maxLines = 1, overflow = TextOverflow.Ellipsis)
+        }
+        DropdownMenu(expanded = expanded, onDismissRequest = { onExpandedChange(false) }) {
+            val options =
+                listOf(ProxyPolicy(if (accountKey == null) ProxyMode.SYSTEM else ProxyMode.INHERIT), ProxyPolicy(ProxyMode.DIRECT)) +
+                    settings.profiles.map { ProxyPolicy(ProxyMode.PROXY, it.id) }
+            options.forEach { option ->
+                DropdownMenuItem(
+                    text = { Text(option.label(settings)) },
+                    enabled = !state.busy,
+                    modifier = Modifier.semantics { selected = policy == option },
+                    onClick = {
+                        onExpandedChange(false)
+                        val effective = if (option.mode == ProxyMode.INHERIT) settings.global else option
+                        if (effective.mode == ProxyMode.PROXY) {
+                            beforeConnect { state.select(accountKey, option) }
+                        } else {
+                            state.select(accountKey, option)
+                        }
                     },
                 )
             }

@@ -25,7 +25,22 @@ final class ProxyPlaybackLifecycleTests: XCTestCase {
             return false
         }
         guard case .error(let error) = session.state else { return XCTFail("Expected playback error") }
-        XCTAssertEqual(error.localizedDescription, "Target returned HTTP 503")
+        XCTAssertEqual(error.localizedDescription, String(localized: "media_video_error", bundle: .main))
+        let diagnostic = try XCTUnwrap((error as NSError).userInfo[NSUnderlyingErrorKey] as? NSError)
+        XCTAssertEqual(diagnostic.localizedDescription, "Target returned HTTP 503")
+    }
+
+    func testSetupFailureUsesLocalizedTextAndRetainsDiagnostic() async throws {
+        let session = VideoPlaybackSession()
+        defer { session.detach() }
+        session.play(media: media("https://example.invalid/video.mp4", proxy: ProxyRef.Unbound.shared))
+        try await eventually {
+            if case .error = session.state { return true }
+            return false
+        }
+        guard case .error(let error) = session.state else { return XCTFail("Expected playback error") }
+        XCTAssertEqual(error.localizedDescription, String(localized: "media_video_error", bundle: .main))
+        XCTAssertNotNil((error as NSError).userInfo[NSUnderlyingErrorKey])
     }
 
     func testChangingRouteRetiresTheNativeItemWhileItsSurfaceIsDetached() async throws {

@@ -85,7 +85,7 @@ public fun VideoPlayer(
     onLongClick: (() -> Unit)? = null,
     autoPlay: Boolean = true,
     remainingTimeContent: @Composable (BoxScope.(Long) -> Unit)? = null,
-    errorContent: @Composable BoxScope.() -> Unit = {},
+    errorContent: @Composable BoxScope.() -> Unit = { PlaybackError() },
     loadingPlaceholder: @Composable BoxScope.() -> Unit = {
         if (media.preview != null) {
             Box(
@@ -172,6 +172,7 @@ public fun VideoPlayer(
                 ) {
                     throw error
                 } catch (error: Exception) {
+                    error.printStackTrace()
                     Result.failure(error)
                 }
             value = resolved
@@ -180,9 +181,9 @@ public fun VideoPlayer(
     }
     val resolved = source?.getOrNull()
     if (resolved == null) {
-        Box(modifier) {
+        Box(modifier.let { if (onClick != null) it.combinedClickable(onClick = onClick, onLongClick = onLongClick) else it }) {
             if (source?.isFailure == true) {
-                PlaybackError(source?.exceptionOrNull()?.message, errorContent)
+                errorContent()
             } else {
                 loadingPlaceholder()
             }
@@ -235,7 +236,7 @@ public fun VideoPlayer(
             if (showControls) controls(playerState, binding.second::seek)
             if (playerState.error != null) {
                 Box(playerModifier.fillMaxSize()) {
-                    PlaybackError(MediaProxy.failureMessage(resolved.url), errorContent)
+                    errorContent()
                 }
             }
         }
@@ -243,13 +244,9 @@ public fun VideoPlayer(
 }
 
 @Composable
-private fun BoxScope.PlaybackError(
-    message: String?,
-    errorContent: @Composable BoxScope.() -> Unit,
-) {
-    errorContent()
+private fun BoxScope.PlaybackError() {
     PlatformText(
-        text = message ?: stringResource(Res.string.media_video_error),
+        text = stringResource(Res.string.media_video_error),
         color = Color.White,
         modifier = Modifier.align(Alignment.Center).background(Color.Black.copy(alpha = 0.75f)).padding(12.dp),
     )

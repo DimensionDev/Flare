@@ -57,7 +57,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Run Kotlin wasmJs tests
-        run: ./gradlew :web-shared:wasmJsTest --stacktrace
+        run: ./gradlew :web-shared:wasmJsTest :shared:wasmJsBrowserTest --tests '*ProxyEngineCapabilitiesTest*' --stacktrace
 
       - name: Run Svelte codegen tests
         working-directory: web

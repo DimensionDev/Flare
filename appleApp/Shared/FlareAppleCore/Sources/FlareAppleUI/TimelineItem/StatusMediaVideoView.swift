@@ -250,6 +250,7 @@ public struct StatusMediaVideoView: View {
                     .padding(12)
                     .background(.black.opacity(0.75), in: .rect(cornerRadius: 8))
                     .padding()
+                    .allowsHitTesting(false)
             }
         }
         .onAppear {

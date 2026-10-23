@@ -68,8 +68,10 @@ public class ProxyRepository(
             it.copy(accounts = it.accounts - accountKey.toString(), removedAccounts = it.removedAccounts + accountKey.toString())
         }
 
-    internal suspend fun restoreAccount(accountKey: MicroBlogKey): Unit =
+    internal suspend fun restoreAccount(accountKey: MicroBlogKey): Unit = restoreAccounts(listOf(accountKey))
+
+    internal suspend fun restoreAccounts(accountKeys: List<MicroBlogKey>): Unit =
         update {
-            it.copy(removedAccounts = it.removedAccounts - accountKey.toString())
+            it.copy(removedAccounts = it.removedAccounts - accountKeys.map(MicroBlogKey::toString).toSet())
         }
 }

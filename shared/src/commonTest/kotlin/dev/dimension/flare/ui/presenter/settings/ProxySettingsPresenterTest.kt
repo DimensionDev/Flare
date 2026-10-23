@@ -31,8 +31,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withContext
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
 import kotlin.test.Test
@@ -41,7 +41,7 @@ import kotlin.test.assertNull
 class ProxySettingsPresenterTest : RobolectricTest() {
     @Test
     fun editorFailuresStaySeparateFromPageActions() =
-        runBlocking {
+        runTest {
             val root = createTestRootPath()
             val storage = OkioFileStorage(createTestFileSystem(), root)
             val app =
@@ -74,7 +74,7 @@ class ProxySettingsPresenterTest : RobolectricTest() {
                     moleculeFlow(RecompositionMode.Immediate) { presenter.body() }.collect { models.value = it }
                 }
             try {
-                withTimeout(10_000) {
+                withContext(Dispatchers.Default) {
                     val states = models.filterNotNull()
                     val invalid = ProxyProfile("draft", "", ProxyProtocol.HTTPS, "", 443)
                     states.first { it.settings != null }.save(invalid) { error("Invalid draft must not be saved") }

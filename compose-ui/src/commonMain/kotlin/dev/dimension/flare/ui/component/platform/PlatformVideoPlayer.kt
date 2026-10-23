@@ -34,18 +34,14 @@ internal expect fun PlatformVideoPlayer(
     autoPlay: Boolean = true,
     remainingTimeContent: @Composable (BoxScope.(Long) -> Unit)? = null,
     errorContent: @Composable BoxScope.() -> Unit = {
-        if (media.preview != null) {
-            Box(
-                modifier =
-                    Modifier
-                        .fillMaxSize(),
-                contentAlignment = Alignment.Center,
-            ) {
-                FAIcon(
-                    FontAwesomeIcons.Solid.FaceFrown,
-                    contentDescription = stringResource(Res.string.media_video_error),
-                )
-            }
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center,
+        ) {
+            FAIcon(
+                FontAwesomeIcons.Solid.FaceFrown,
+                contentDescription = stringResource(Res.string.media_video_error),
+            )
         }
     },
     loadingPlaceholder: @Composable BoxScope.() -> Unit = {

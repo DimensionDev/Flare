@@ -52,6 +52,10 @@ internal actual class MediaRelayListener actual constructor() {
     private val descriptor = socket(AF_INET, SOCK_STREAM, 0).also { check(it >= 0) { "Cannot create media listener" } }
     actual val port: Int
 
+    actual fun close() {
+        close(descriptor)
+    }
+
     init {
         try {
             port =

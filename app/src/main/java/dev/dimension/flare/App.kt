@@ -8,14 +8,13 @@ import coil3.SingletonImageLoader
 import coil3.annotation.ExperimentalCoilApi
 import coil3.gif.AnimatedImageDecoder
 import coil3.gif.GifDecoder
-import coil3.network.ktor3.KtorNetworkFetcherFactory
 import coil3.request.crossfade
 import coil3.svg.SvgDecoder
 import coil3.video.VideoFrameDecoder
 import dev.dimension.flare.common.AnimatedPngDecoder
 import dev.dimension.flare.common.AnimatedWebPDecoder
-import dev.dimension.flare.data.network.ktorClient
 import dev.dimension.flare.di.AndroidKoinApplication
+import dev.dimension.flare.ui.component.proxyImageFetcherFactory
 import org.koin.android.ext.koin.androidContext
 import org.koin.plugin.module.dsl.startKoin
 
@@ -44,12 +43,7 @@ class App :
                 add(AnimatedWebPDecoder.Factory())
                 add(VideoFrameDecoder.Factory())
                 add(
-                    KtorNetworkFetcherFactory(
-                        httpClient =
-                            ktorClient {
-                                useDefaultTransformers = false
-                            },
-                    ),
+                    proxyImageFetcherFactory(),
                 )
             }.crossfade(true)
             .build()

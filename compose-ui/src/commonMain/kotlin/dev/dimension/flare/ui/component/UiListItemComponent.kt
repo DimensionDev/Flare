@@ -191,7 +191,7 @@ private fun UiListCard(
                 leadingContent = {
                     if (item.avatar != null) {
                         NetworkImage(
-                            model = item.avatar,
+                            model = item.media,
                             contentDescription = item.title,
                             modifier =
                                 Modifier
@@ -252,7 +252,7 @@ private fun UiListCard(
             leadingContent = {
                 if (item.avatar != null) {
                     NetworkImage(
-                        model = item.avatar,
+                        model = item.media,
                         contentDescription = item.title,
                         modifier =
                             Modifier
@@ -327,7 +327,7 @@ private fun UiFeedCard(
                 leadingContent = {
                     if (item.avatar != null) {
                         NetworkImage(
-                            model = item.avatar,
+                            model = item.media,
                             contentDescription = item.title,
                             modifier =
                                 Modifier
@@ -388,7 +388,7 @@ private fun UiFeedCard(
             leadingContent = {
                 if (item.avatar != null) {
                     NetworkImage(
-                        model = item.avatar,
+                        model = item.media,
                         contentDescription = item.title,
                         modifier =
                             Modifier
@@ -500,7 +500,7 @@ private fun UiChannelCard(
                 leadingContent = {
                     if (item.banner != null) {
                         NetworkImage(
-                            model = item.banner,
+                            model = item.media,
                             contentDescription = item.title,
                             modifier =
                                 Modifier
@@ -548,7 +548,7 @@ private fun UiChannelCard(
             leadingContent = {
                 if (item.banner != null) {
                     NetworkImage(
-                        model = item.banner,
+                        model = item.media,
                         contentDescription = item.title,
                         modifier =
                             Modifier

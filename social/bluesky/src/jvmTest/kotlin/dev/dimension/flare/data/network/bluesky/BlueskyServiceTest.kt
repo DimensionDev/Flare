@@ -3,6 +3,7 @@ package dev.dimension.flare.data.network.bluesky
 import com.sun.net.httpserver.HttpServer
 import dev.dimension.flare.common.UploadMedia
 import dev.dimension.flare.data.platform.BlueskyCredential
+import dev.dimension.flare.di.startProxyTestStore
 import dev.dimension.flare.model.MicroBlogKey
 import io.ktor.http.Url
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,6 +15,8 @@ import sh.christian.ozone.oauth.OAuthScope
 import sh.christian.ozone.oauth.OAuthToken
 import java.net.InetSocketAddress
 import java.util.Collections
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -21,6 +24,9 @@ import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.minutes
 
 class BlueskyServiceTest {
+    private lateinit var proxyStore: AutoCloseable
+    @BeforeTest fun setUpProxy() { proxyStore = startProxyTestStore() }
+    @AfterTest fun tearDownProxy() { proxyStore.close() }
     @Test
     fun videoServiceAuthRequestsPdsAudienceAndBlobUploadScope() =
         runBlocking {

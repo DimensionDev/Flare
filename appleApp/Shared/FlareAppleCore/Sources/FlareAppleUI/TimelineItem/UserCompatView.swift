@@ -19,7 +19,7 @@ public struct UserCompatView<TrailingContent: View>: View {
 
     public var body: some View {
         HStack(spacing: 8) {
-            AvatarView(data: data.avatar?.url, customHeader: data.avatar?.customHeaders)
+            AvatarView(data: data.avatar)
                 .frame(width: 44, height: 44)
                 .if(onClicked != nil) { view in
                     view

@@ -35,6 +35,7 @@ import dev.dimension.flare.data.datasource.microblog.handler.UserHandler
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.notSupported
 import dev.dimension.flare.data.model.IconType
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.data.model.tab.ShortcutSpec
 import dev.dimension.flare.data.model.tab.TimelineSpec
 import dev.dimension.flare.data.network.xqt.XQTMediaUploader
@@ -197,6 +198,7 @@ internal class XQTDataSource(
 
     override val userHandler by lazy {
         UserHandler(
+            proxy = ProxyRef.forAccount(accountKey),
             host = accountKey.host,
             loader = loader,
         )
@@ -841,7 +843,7 @@ internal class XQTDataSource(
                                     ?.render(accountKey = accountKey)
                             }.toImmutableList()
                     UiPodcast(
-                        id = id,
+                        proxy = ProxyRef.forAccount(accountKey),                        id = id,
                         title = title ?: "",
                         playbackUrl = null,
                         ended = ended,

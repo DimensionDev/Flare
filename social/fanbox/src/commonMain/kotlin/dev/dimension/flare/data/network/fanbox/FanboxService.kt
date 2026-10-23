@@ -2,6 +2,7 @@ package dev.dimension.flare.data.network.fanbox
 
 import com.fleeksoft.ksoup.Ksoup
 import dev.dimension.flare.common.JSON
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.data.network.fanbox.api.FanboxResources
 import dev.dimension.flare.data.network.fanbox.api.FanboxWebResources
 import dev.dimension.flare.data.network.fanbox.api.createFanboxResources
@@ -51,7 +52,8 @@ private fun fanboxKtorfit(
     baseUrl: String,
     accept: String,
     credentialFlow: Flow<FanboxCredential>,
-) = ktorfit(baseUrl) {
+    proxy: ProxyRef,
+) = ktorfit(baseUrl, proxy = proxy) {
     expectSuccess = true
     install(FanboxHeaderPlugin) {
         this.accept = accept
@@ -59,20 +61,21 @@ private fun fanboxKtorfit(
     }
 }
 
-private fun fanboxResources(credentialFlow: Flow<FanboxCredential>): FanboxResources =
-    fanboxKtorfit(FANBOX_API_URL, FANBOX_JSON_ACCEPT, credentialFlow)
+private fun fanboxResources(credentialFlow: Flow<FanboxCredential>, proxy: ProxyRef): FanboxResources =
+    fanboxKtorfit(FANBOX_API_URL, FANBOX_JSON_ACCEPT, credentialFlow, proxy)
         .createFanboxResources()
 
-private fun fanboxWebResources(credentialFlow: Flow<FanboxCredential>): FanboxWebResources =
-    fanboxKtorfit(FANBOX_WEB_URL, FANBOX_HTML_ACCEPT, credentialFlow)
+private fun fanboxWebResources(credentialFlow: Flow<FanboxCredential>, proxy: ProxyRef): FanboxWebResources =
+    fanboxKtorfit(FANBOX_WEB_URL, FANBOX_HTML_ACCEPT, credentialFlow, proxy)
         .createFanboxWebResources()
 
 internal class FanboxService(
     private val credentialFlow: Flow<FanboxCredential>,
     private val onCredentialRefreshed: suspend (FanboxCredential) -> Unit = {},
-) : FanboxResources by fanboxResources(credentialFlow) {
+    private val proxy: ProxyRef = ProxyRef.Global,
+) : FanboxResources by fanboxResources(credentialFlow, proxy) {
     private val webResources: FanboxWebResources =
-        fanboxWebResources(credentialFlow)
+        fanboxWebResources(credentialFlow, proxy)
 
     suspend fun metadata(): FanboxMetaDataEntity = webResources.metadata(FANBOX_WEB_URL).toFanboxMetadata()
 
@@ -80,6 +83,7 @@ internal class FanboxService(
         val html =
             fanboxWebResources(
                 flowOf(FanboxCredential(sessionId = sessionId, userId = "")),
+                proxy,
             ).metadata(FANBOX_WEB_URL)
         return html.toFanboxMetadata()
     }

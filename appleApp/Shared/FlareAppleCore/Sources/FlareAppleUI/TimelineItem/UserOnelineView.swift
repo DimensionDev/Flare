@@ -23,7 +23,7 @@ public struct UserOnelineView<TrailingContent: View>: View {
     public var body: some View {
         HStack(spacing: 4) {
             if showAvatar {
-                AvatarView(data: data.avatar?.url, customHeader: data.avatar?.customHeaders)
+                AvatarView(data: data.avatar)
                     .frame(width: 20, height: 20)
                     .accessibilityLabel(
                         Text(verbatim: openProfileAccessibilityLabel(handle: data.handle.canonical))

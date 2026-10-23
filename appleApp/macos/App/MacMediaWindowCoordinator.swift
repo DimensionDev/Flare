@@ -48,7 +48,7 @@ final class MacMediaWindowCoordinator {
 
     func open(route: Route, openWindow: OpenWindowAction) {
         switch route {
-        case .mediaImage(let url, let preview, let customHeaders):
+        case .mediaImage(let url, let preview, let customHeaders, let proxy):
             open(
                 medias: [
                     UiMediaImage(
@@ -58,7 +58,8 @@ final class MacMediaWindowCoordinator {
                         height: 0,
                         width: 0,
                         sensitive: false,
-                        customHeaders: customHeaders
+                        customHeaders: customHeaders,
+                        proxy: proxy
                     )
                 ],
                 initialIndex: 0,

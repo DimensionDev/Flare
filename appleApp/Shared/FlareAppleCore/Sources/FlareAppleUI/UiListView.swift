@@ -34,7 +34,7 @@ private struct UiListRow: View {
             Label {
                 Text(data.title)
             } icon: {
-                if let image = data.avatar {
+                if let image = data.media {
                     NetworkImage(data: image)
                         .frame(width: 24, height: 24)
                         .clipShape(RoundedRectangle(cornerRadius: 4))
@@ -62,7 +62,7 @@ private struct UiFeedRow: View {
             Label {
                 Text(data.title)
             } icon: {
-                if let image = data.avatar {
+                if let image = data.media {
                     NetworkImage(data: image)
                         .frame(width: 24, height: 24)
                         .clipShape(RoundedRectangle(cornerRadius: 4))
@@ -107,7 +107,7 @@ private struct UiChannelRow: View {
             Label {
                 Text(data.title)
             } icon: {
-                if let image = data.banner {
+                if let image = data.media {
                     NetworkImage(data: image)
                         .frame(width: 24, height: 24)
                         .clipShape(RoundedRectangle(cornerRadius: 4))

@@ -79,6 +79,8 @@ kotlin {
                 implementation(libs.material3.adaptive)
                 implementation(libs.material3)
                 implementation(libs.bundles.media3)
+                implementation(libs.media3.datasource.okhttp)
+                implementation(libs.ktor.client.okhttp)
                 implementation(project.dependencies.platform(libs.koin.bom))
                 implementation(libs.bundles.koin)
             }

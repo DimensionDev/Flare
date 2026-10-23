@@ -128,7 +128,7 @@ final class RichTextUIViewTests: XCTestCase {
             link: nil, bold: false, italic: false, strikethrough: false,
             monospace: false, code: false, underline: false, small: false, time: false
         ))
-        let emoji = RenderRun.Image(url: emojiURL, alt: "emoji")
+        let emoji = RenderRun.Image(url: emojiURL, alt: "emoji", proxy: ProxyRef.Global.shared)
         for runs in [[plainRun, emoji] as [RenderRun], [emoji, plainRun]] {
             let source = UiRichText(renderRuns: [RenderContent.Text(runs: runs, block: RenderBlockStyle())],
                                     isRtl: false, raw: longText, innerText: longText, imageUrls: [emojiURL])

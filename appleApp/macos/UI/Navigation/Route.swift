@@ -33,7 +33,7 @@ enum Route: Hashable, Identifiable {
     case profileInsight(AccountType, MicroBlogKey)
     case userFollowing(AccountType, MicroBlogKey)
     case userFans(AccountType, MicroBlogKey)
-    case mediaImage(String, String?, [String: String]?)
+    case mediaImage(String, String?, [String: String]?, ProxyRef)
     case mediaRaw([any UiMedia], Int, String?)
     case mediaStatusMedia(AccountType, MicroBlogKey, Int32, String?)
     case deepLinkAccountPicker(String, [MicroBlogKey: Route])
@@ -395,13 +395,12 @@ private struct MacArticleScreen: View {
         Task {
             do {
                 _ = try await MacMediaFileExporter.saveRemoteFile(
-                    url: block.url,
+                    media: block.media,
                     fileName: MediaFileNamePolicy.shared.articleFileName(
                         name: block.name,
                         url: block.url,
                         extensionName: block.extension
-                    ),
-                    customHeaders: block.customHeaders
+                    )
                 )
             } catch {
                 downloadAlert = MacArticleDownloadAlert(message: error.localizedDescription)
@@ -521,7 +520,7 @@ extension Route {
     private static func fromMedia(_ media: DeeplinkRoute.Media) -> Route? {
         switch onEnum(of: media) {
         case .image(let data):
-            .mediaImage(data.uri, data.previewUrl, data.customHeaders)
+            .mediaImage(data.uri, data.previewUrl, data.customHeaders, data.proxy)
         case .statusMedia(let data):
             .mediaStatusMedia(data.accountType, data.statusKey, Int32(data.index), data.preview)
         case .podcast:

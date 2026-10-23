@@ -508,8 +508,7 @@ struct HomeSidebarAddTabPopover: View {
                                 Text(account.profile.handle.canonical)
                             } icon: {
                                 AvatarView(
-                                    data: account.profile.avatar?.url,
-                                    customHeader: account.profile.avatar?.customHeaders
+                                    data: account.profile.avatar
                                 )
                                 .frame(width: 20, height: 20)
                             }

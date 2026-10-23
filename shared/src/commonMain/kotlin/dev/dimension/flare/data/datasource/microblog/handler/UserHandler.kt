@@ -10,12 +10,14 @@ import dev.dimension.flare.data.database.cache.model.applyTranslation
 import dev.dimension.flare.data.database.cache.model.translationEntityKey
 import dev.dimension.flare.data.datasource.microblog.loader.UserLoader
 import dev.dimension.flare.data.datastore.AppDataStore
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.data.translation.PreTranslationService
 import dev.dimension.flare.data.translation.TranslationSettingsSupport
 import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiHandle
 import dev.dimension.flare.ui.model.UiProfile
+import dev.dimension.flare.ui.model.withProxy
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
@@ -29,6 +31,7 @@ import kotlin.native.HiddenFromObjC
 public class UserHandler(
     private val host: String,
     private val loader: UserLoader,
+    private val proxy: ProxyRef = ProxyRef.Global,
 ) {
     private val database: CacheDatabase by koinInject()
     private val appDataStore: AppDataStore by koinInject()
@@ -117,5 +120,5 @@ public class UserHandler(
                     )
                 }
             }
-        }.mapNotNull { it }
+        }.mapNotNull { it?.withProxy(proxy) }
 }

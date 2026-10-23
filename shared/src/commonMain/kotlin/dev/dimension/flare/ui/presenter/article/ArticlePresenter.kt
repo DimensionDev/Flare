@@ -18,6 +18,7 @@ import dev.dimension.flare.data.datasource.microblog.datasource.ArticleDataSourc
 import dev.dimension.flare.data.datasource.microblog.paging.TimelinePagingMapper
 import dev.dimension.flare.data.datasource.microblog.paging.toTimelinePagingSource
 import dev.dimension.flare.data.datasource.microblog.pagingConfig
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.data.repository.AccountService
 import dev.dimension.flare.data.repository.STATUS_HISTORY_PAGING_KEY
 import dev.dimension.flare.di.koinInject
@@ -30,6 +31,7 @@ import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.takeSuccess
+import dev.dimension.flare.ui.model.withProxy
 import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.ui.render.toUi
 import dev.dimension.flare.ui.route.DeeplinkRoute
@@ -56,7 +58,7 @@ public class ArticlePresenter(
             val articleDataSource =
                 service as? ArticleDataSource
                     ?: error("Current service does not support article data source")
-            articleDataSource.article(articleKey)
+            articleDataSource.article(articleKey).withProxy(ProxyRef.forAccount((service as? dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource)?.accountKey))
         }
     }
 

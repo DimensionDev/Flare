@@ -128,6 +128,14 @@ struct SettingsScreen: View {
                         Image(fontAwesome: .language)
                     }
                 }
+                NavigationLink { ProxySettingsView() } label: {
+                    Label {
+                        Text("proxy_title")
+                        Text("proxy_settings_subtitle")
+                    } icon: {
+                        Image(fontAwesome: .globe)
+                    }
+                }
             }
 
             Section {

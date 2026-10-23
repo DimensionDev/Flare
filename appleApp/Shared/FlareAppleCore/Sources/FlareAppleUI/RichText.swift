@@ -50,12 +50,8 @@ public struct RichText: View {
                             renderBlock(textContent: textContent)
                         }
                     case let imageContent as PlatformTextBlockImageContent:
-                        if let url = URL(string: imageContent.url) {
-                            let image = KFImage(url)
-                                .flareBackgroundDecodeIfSupported()
-                                .loadDiskFileSynchronously(false)
-                                .resizable()
-                                .scaledToFit()
+                        if URL(string: imageContent.url) != nil {
+                            let image = NetworkImage(data: imageContent.media, contentMode: .fit)
                                 .clipShape(RoundedRectangle(cornerRadius: 12))
                                 .contentShape(Rectangle())
                                 .accessibilityLabel(
@@ -113,13 +109,13 @@ public struct RichText: View {
             }
         }
         .onPreferenceChange(RichTextPreviewMeasurements.self) { previewMeasurements = $0 }
-        .task(id: text.raw) {
-            let urls = text.imageUrls
+        .task(id: text.raw + text.imageMedias.map { String(describing: $0.proxy) }.joined() + String(ProxyMediaImages.shared.revision)) {
+            let medias = text.imageMedias
             let targetHeight = imageSize
-            for urlString in urls {
-                guard let url = URL(string: urlString) else { continue }
+            for media in medias {
+                let urlString = media.url
                 do {
-                    let result = try await KingfisherManager.shared.retrieveImage(with: url)
+                    let result = try await ProxyMediaImages.shared.retrieve(media)
                     let platformImage = result.image
                     let resized = platformImage.resize(height: targetHeight) ?? platformImage
                     images[urlString] = Image(platformImage: resized)

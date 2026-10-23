@@ -1,19 +1,23 @@
 package dev.dimension.flare.ui.component
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
@@ -30,9 +34,15 @@ import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.CirclePlay
 import dev.dimension.flare.compose.ui.Res
 import dev.dimension.flare.compose.ui.media_play_video
+import dev.dimension.flare.compose.ui.media_video_error
+import dev.dimension.flare.data.network.MediaPlaybackSource
+import dev.dimension.flare.data.network.MediaProxy
+import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.component.status.LocalIsScrollingInProgress
+import dev.dimension.flare.ui.model.UiMedia
 import io.github.composefluent.component.ProgressRing
 import io.github.kdroidfilter.composemediaplayer.InitialPlayerState
+import io.github.kdroidfilter.composemediaplayer.VideoPlayerError
 import io.github.kdroidfilter.composemediaplayer.VideoPlayerState
 import io.github.kdroidfilter.composemediaplayer.VideoPlayerSurface
 import kotlinx.coroutines.CoroutineScope
@@ -64,8 +74,7 @@ import kotlin.math.roundToLong
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 public fun VideoPlayer(
-    uri: String,
-    previewUri: String?,
+    media: UiMedia,
     contentDescription: String?,
     modifier: Modifier = Modifier,
     muted: Boolean = false,
@@ -77,8 +86,9 @@ public fun VideoPlayer(
     onLongClick: (() -> Unit)? = null,
     autoPlay: Boolean = true,
     remainingTimeContent: @Composable (BoxScope.(Long) -> Unit)? = null,
+    errorContent: @Composable BoxScope.() -> Unit = { PlaybackError() },
     loadingPlaceholder: @Composable BoxScope.() -> Unit = {
-        if (previewUri != null) {
+        if (media.preview != null) {
             Box(
                 modifier =
                     Modifier
@@ -86,7 +96,7 @@ public fun VideoPlayer(
                 contentAlignment = Alignment.Center,
             ) {
                 NetworkImage(
-                    model = previewUri,
+                    model = media.preview,
                     contentScale = contentScale,
                     contentDescription = contentDescription,
                     modifier =
@@ -112,7 +122,7 @@ public fun VideoPlayer(
         }
     },
     idlePlaceholder: @Composable BoxScope.() -> Unit = {
-        if (previewUri != null) {
+        if (media.preview != null) {
             Box(
                 modifier =
                     Modifier
@@ -120,7 +130,7 @@ public fun VideoPlayer(
                 contentAlignment = Alignment.Center,
             ) {
                 NetworkImage(
-                    model = previewUri,
+                    model = media.preview,
                     contentScale = contentScale,
                     contentDescription = contentDescription,
                     modifier =
@@ -151,8 +161,39 @@ public fun VideoPlayer(
     },
     controls: @Composable BoxScope.(VideoPlayerState, (Float) -> Unit) -> Unit = { _, _ -> },
 ) {
+    val route = rememberMediaProxySnapshot(media)
+    val source by key(media, route) {
+        produceState<Result<MediaPlaybackSource>?>(null) {
+            if (media.isRemote && route == null) return@produceState
+            val resolved =
+                try {
+                    Result.success(MediaProxy.playbackSource(media))
+                } catch (
+                    error: kotlinx.coroutines.CancellationException,
+                ) {
+                    throw error
+                } catch (error: Exception) {
+                    error.printStackTrace()
+                    Result.failure(error)
+                }
+            value = resolved
+            awaitDispose { resolved.getOrNull()?.let(MediaProxy::release) }
+        }
+    }
+    val resolved = source?.getOrNull()
+    if (resolved == null) {
+        Box(modifier.let { if (onClick != null) it.combinedClickable(onClick = onClick, onLongClick = onLongClick) else it }) {
+            if (source?.isFailure == true) {
+                errorContent()
+            } else {
+                loadingPlaceholder()
+            }
+        }
+        return
+    }
+    val uri = media.url
     val playback = rememberTimelinePlayback()
-    val binding = rememberSurfaceBinding(uri, playback, muted)
+    val binding = rememberSurfaceBinding(resolved, playback, muted)
     val playerState = binding.first
     // Keep the cover underneath the surface. The desktop renderer draws nothing
     // until it has an actual frame; metadata readiness is not frame readiness.
@@ -162,9 +203,9 @@ public fun VideoPlayer(
         if (playerState == null) {
             if (binding.second.isPreparing && !LocalIsScrollingInProgress.current) loadingPlaceholder() else idlePlaceholder()
         } else {
-            if (previewUri != null) {
+            if (media.preview != null) {
                 NetworkImage(
-                    model = previewUri,
+                    model = media.preview,
                     contentDescription = contentDescription,
                     contentScale = contentScale,
                     modifier = Modifier.fillMaxSize(),
@@ -194,13 +235,54 @@ public fun VideoPlayer(
             }
             remainingTimeContent?.invoke(this, remainingTime)
             if (showControls) controls(playerState, binding.second::seek)
+            val playbackError = playerState.error
+            LaunchedEffect(playerState, playbackError, resolved.key) {
+                if (playbackError != null) {
+                    System.err.println(playbackFailureDiagnostic(playbackError, MediaProxy.failureMessage(resolved.url)))
+                }
+            }
+            if (playbackError != null) {
+                Box(playerModifier.fillMaxSize()) {
+                    errorContent()
+                }
+            }
         }
     }
 }
 
+internal fun playbackFailureDiagnostic(
+    error: VideoPlayerError,
+    relayFailure: String?,
+): String {
+    val nativeMessage =
+        when (error) {
+            is VideoPlayerError.CodecError -> error.message
+            is VideoPlayerError.NetworkError -> error.message
+            is VideoPlayerError.SourceError -> error.message
+            is VideoPlayerError.UnknownError -> error.message
+        }
+    val diagnostic =
+        (relayFailure ?: nativeMessage)
+            .lineSequence()
+            .first()
+            .replace(Regex("(?i)https?://\\S+"), "[redacted URL]")
+            .replace(Regex("(?i)(authorization|cookie):.*"), "[redacted credentials]")
+            .take(512)
+    return "Video playback failed (${error::class.simpleName}): $diagnostic"
+}
+
+@Composable
+private fun BoxScope.PlaybackError() {
+    PlatformText(
+        text = stringResource(Res.string.media_video_error),
+        color = Color.White,
+        modifier = Modifier.align(Alignment.Center).background(Color.Black.copy(alpha = 0.75f)).padding(12.dp),
+    )
+}
+
 @Composable
 private fun rememberSurfaceBinding(
-    uri: String,
+    source: MediaPlaybackSource,
     playback: TimelinePlaybackCoordinator,
     muted: Boolean,
 ): Pair<VideoPlayerState?, SurfaceBindingManager.Binding> {
@@ -209,10 +291,10 @@ private fun rememberSurfaceBinding(
         manager.observeAppFocus()
         onDispose { }
     }
-    var player by remember(uri, manager, playback, muted) { mutableStateOf<VideoPlayerState?>(null) }
+    var player by remember(source, manager, playback, muted) { mutableStateOf<VideoPlayerState?>(null) }
     val binding =
-        remember(uri, manager, playback, muted) {
-            manager.register(uri, playback, muted) { player = it }
+        remember(source, manager, playback, muted) {
+            manager.register(source, playback, muted) { player = it }
         }
     DisposableEffect(binding, playback) {
         playback.register(binding, binding::setActive)
@@ -238,18 +320,29 @@ internal class SurfaceBindingManager() {
         this.createPlayer = createPlayer
     }
 
-    private val playerDelegate =
+    private fun newPlayer() =
         lazy {
             createPlayer().apply {
                 loop = true
                 volume = 0f
             }
         }
-    val player: VideoPlayerState by playerDelegate
+
+    private var playerDelegate = newPlayer()
+    val player: VideoPlayerState get() = playerDelegate.value
     private var activeBinding: Binding? = null
-    private var requestedSource: String? = null
-    private var requestedPlayback: TimelinePlaybackCoordinator? = null
-    private var currentSource: String? = null
+    private var requestedBinding: Binding? = null
+        set(value) {
+            if (field === value) return
+            value?.source?.let(MediaProxy::retain)
+            field?.source?.let(MediaProxy::release)
+            field = value
+        }
+
+    // A pending native open can still own the previous source while the next binding waits.
+    private var nativeSource: MediaPlaybackSource? = null
+    private var unsubscribeRoute: (() -> Unit)? = null
+    private var currentSource: MediaPlaybackSource? = null
     private var retentionJob: Job? = null
     private var handoffJob: Job? = null
     private var transferring = false
@@ -272,7 +365,7 @@ internal class SurfaceBindingManager() {
             suspendedPlaybacks.clear()
             playbacks.forEach { it.setSuspended(false) }
         } else {
-            requestedPlayback?.let {
+            requestedBinding?.playback?.let {
                 suspendedPlaybacks.add(it)
                 it.setSuspended(true)
             }
@@ -332,11 +425,12 @@ internal class SurfaceBindingManager() {
     }
 
     inner class Binding(
-        private val uri: String,
+        val source: MediaPlaybackSource,
         val playback: TimelinePlaybackCoordinator,
         private val muted: Boolean,
         private val callback: (VideoPlayerState?) -> Unit,
     ) {
+        val uri: String get() = source.originalUrl
         val isForeground: Boolean get() = foreground
         var isPreparing by mutableStateOf(false)
             private set
@@ -349,19 +443,18 @@ internal class SurfaceBindingManager() {
                     return
                 }
                 if (activeBinding === this) return
-                transferring = requestedSource == uri
+                transferring = requestedBinding?.source == source
                 activeBinding?.setActive(false)
                 transferring = false
                 retentionJob?.cancel()
                 handoffJob?.cancel()
-                if (requestedSource != uri) clearPendingSeek()
+                if (requestedBinding?.source != source) clearPendingSeek()
                 activeBinding = this
-                requestedPlayback = playback
-                requestedSource = uri
+                requestedBinding = this
                 isPreparing = true
                 prepareRequestedSource()
             } else if (activeBinding === this) {
-                if (currentSource == uri && prepareJob?.isActive != true) {
+                if (currentSource == source && prepareJob?.isActive != true) {
                     val seconds =
                         if (player.userDragging && player.duration > 0) {
                             player.sliderPos / 1000.0 * player.duration
@@ -406,7 +499,7 @@ internal class SurfaceBindingManager() {
         }
 
         fun seek(sliderPosition: Float) {
-            if (activeBinding !== this || currentSource != uri || player.duration <= 0) return
+            if (activeBinding !== this || currentSource != source || player.duration <= 0) return
             val seconds = sliderPosition.coerceIn(0f, 1000f) / 1000.0 * player.duration
             if (!seconds.isFinite()) return
             playback.savePosition(uri, seconds)
@@ -421,18 +514,18 @@ internal class SurfaceBindingManager() {
     }
 
     fun register(
-        uri: String,
+        source: MediaPlaybackSource,
         playback: TimelinePlaybackCoordinator,
         muted: Boolean = true,
         callback: (VideoPlayerState?) -> Unit,
     ): Binding {
         playback.onClose(this) { release(playback) }
-        return Binding(uri, playback, muted, callback)
+        return Binding(source, playback, muted, callback)
     }
 
     private fun prepareRequestedSource() {
         if (prepareJob?.isActive == true) return
-        if (currentSource != null && currentSource == requestedSource && player.error == null) {
+        if (currentSource != null && currentSource == requestedBinding?.source && player.error == null) {
             activeBinding?.prepared()
             return
         }
@@ -441,26 +534,31 @@ internal class SurfaceBindingManager() {
             scope.launch(start = CoroutineStart.UNDISPATCHED) {
                 // Serialize native opens: cancelling a coroutine waiting for metadata
                 // does not cancel the library's in-flight openUri operation.
-                while (currentSource != requestedSource || (requestedSource == null && player.hasMedia)) {
+                while (currentSource != requestedBinding?.source ||
+                    (requestedBinding == null && (nativeSource != null || player.hasMedia))
+                ) {
                     clearPendingSeek()
                     currentSource = null
                     if (player.hasMedia) {
                         player.stop()
                         snapshotFlow { !player.hasMedia }.first { it }
                     }
-                    val source = requestedSource ?: break
+                    val source = requestedBinding?.source
+                    setNativeSource(source)
+                    if (source == null) break
                     player.clearError()
-                    player.openUri(source, InitialPlayerState.PAUSE)
+                    player.openUri(source.url, InitialPlayerState.PAUSE)
                     // Linux keeps hasMedia true during openUri and clears isLoading
                     // on pause. The completed stop above establishes a fresh baseline.
                     snapshotFlow { (player.hasMedia && !player.isLoading) || player.error != null }.first { it }
                     if (player.error != null) {
-                        if (requestedSource == source) break
+                        if (requestedBinding?.source == source) break
                         continue
                     }
                     currentSource = source
-                    if (requestedSource == source) {
-                        val seconds = requestedPlayback?.position(source) ?: 0.0
+                    val binding = requestedBinding
+                    if (binding?.source == source) {
+                        val seconds = binding.playback.position(binding.uri)
                         if (seconds > 0 && player.duration > 0) {
                             seekTo(seconds)
                         }
@@ -468,6 +566,40 @@ internal class SurfaceBindingManager() {
                 }
                 activeBinding?.prepared()
             }
+    }
+
+    private fun setNativeSource(source: MediaPlaybackSource?) {
+        if (nativeSource == source) return
+        unsubscribeRoute?.invoke()
+        source?.let(MediaProxy::retain)
+        nativeSource?.let(MediaProxy::release)
+        nativeSource = source
+        val snapshot = source?.snapshot
+        unsubscribeRoute =
+            snapshot?.onInvalidated {
+                scope.launch {
+                    if (nativeSource?.snapshot !== snapshot) return@launch
+                    if (requestedBinding?.source?.snapshot === snapshot) {
+                        activeBinding?.setActive(false)
+                        requestedBinding = null
+                    }
+                    retentionJob?.cancel()
+                    handoffJob?.cancel()
+                    disposeNativePlayer()
+                    if (requestedBinding != null) prepareRequestedSource()
+                }
+            }
+    }
+
+    private fun disposeNativePlayer() {
+        prepareJob?.cancel()
+        prepareJob = null
+        clearPendingSeek()
+        currentSource = null
+        // Native loading outlives openUri's caller; disposal cancels its own worker.
+        if (playerDelegate.isInitialized()) player.dispose()
+        playerDelegate = newPlayer()
+        setNativeSource(null)
     }
 
     fun close() {
@@ -480,16 +612,12 @@ internal class SurfaceBindingManager() {
         activeBinding?.setActive(false)
         retentionJob?.cancel()
         handoffJob?.cancel()
-        prepareJob?.cancel()
-        clearPendingSeek()
-        requestedSource = null
-        requestedPlayback = null
-        currentSource = null
-        if (playerDelegate.isInitialized()) player.dispose()
+        requestedBinding = null
+        disposeNativePlayer()
     }
 
     fun release(playback: TimelinePlaybackCoordinator) {
-        if (requestedPlayback !== playback) return
+        if (requestedBinding?.playback !== playback) return
         if (activeBinding?.playback === playback) activeBinding?.setActive(false)
         handoffJob?.cancel()
         handoffJob = null
@@ -502,9 +630,12 @@ internal class SurfaceBindingManager() {
         retentionJob = null
         handoffJob?.cancel()
         handoffJob = null
-        requestedSource = null
-        requestedPlayback = null
-        if (playerDelegate.isInitialized()) prepareRequestedSource()
+        requestedBinding = null
+        if (prepareJob?.isActive == true) {
+            disposeNativePlayer()
+        } else if (playerDelegate.isInitialized()) {
+            prepareRequestedSource()
+        }
     }
 
     private fun seekTo(seconds: Double) {

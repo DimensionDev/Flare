@@ -21,6 +21,7 @@ struct MediaViewerScreen: View {
     let medias: [any UiMedia]
     let initialIndex: Int
     let preview: String?
+    let previewProxy: ProxyRef
     let previewAspectRatio: CGFloat?
     let previewIsImage: Bool
     let shareContext: MediaViewerShareContext?
@@ -48,6 +49,7 @@ struct MediaViewerScreen: View {
         medias: [any UiMedia],
         initialIndex: Int,
         preview: String?,
+        previewProxy: ProxyRef = ProxyRef.Global.shared,
         previewAspectRatio: CGFloat? = nil,
         previewIsImage: Bool = true,
         shareContext: MediaViewerShareContext? = nil,
@@ -57,6 +59,7 @@ struct MediaViewerScreen: View {
         self.medias = medias
         self.initialIndex = initialIndex
         self.preview = preview
+        self.previewProxy = previewProxy
         self.previewAspectRatio = previewAspectRatio
         self.previewIsImage = previewIsImage
         self.shareContext = shareContext
@@ -77,12 +80,12 @@ struct MediaViewerScreen: View {
                                     switch MediaViewerImageLayoutPolicy.previewLayout(isImage: previewIsImage) {
                                     case .adaptiveImage:
                                         AdaptiveKFImage(
-                                            data: preview,
+                                            data: UiMediaImage(url: preview, proxy: previewProxy),
                                             placeholder: nil,
                                             mediaAspectRatio: previewAspectRatio
                                         )
                                     case .aspectFit:
-                                        NetworkImage(data: preview)
+                                        NetworkImage(data: UiMediaImage(url: preview, proxy: previewProxy))
                                             .scaledToFit()
                                     }
                                 }
@@ -227,9 +230,8 @@ struct MediaViewerScreen: View {
             UgoiraPlayer(media: animation, active: selectedMedia?.url == animation.url)
         case .image(let image):
             AdaptiveKFImage(
-                data: image.url,
-                placeholder: image.previewUrl,
-                customHeader: image.customHeaders,
+                data: image,
+                placeholder: image.preview,
                 mediaAspectRatio: CGFloat(image.aspectRatio)
             )
         case .video(let video):
@@ -242,11 +244,11 @@ struct MediaViewerScreen: View {
                     playbackRate: $playbackRate
                 )
             } else {
-                NetworkImage(data: video.thumbnailUrl, customHeader: video.customHeaders)
+                NetworkImage(data: video.preview)
                     .scaledToFit()
             }
         case .gif(let gif):
-            NetworkImage(data: gif.url, placeholder: gif.previewUrl, customHeader: gif.customHeaders)
+            NetworkImage(data: gif, placeholder: gif.preview)
                 .scaledToFit()
         case .audio:
             EmptyView()
@@ -578,33 +580,29 @@ struct MediaViewerScreen: View {
             MediaSaver.shared.saveUgoira(animation, fileName: fileName(for: media), showsSaveResult: showsSaveResult, completion: completion)
         case .image(let image):
             MediaSaver.shared.saveImage(
-                url: image.url,
-                customHeaders: image.customHeaders,
+                media: image,
                 showsDownloadStarted: showsDownloadStarted,
                 showsSaveResult: showsSaveResult,
                 completion: completion
             )
         case .gif(let gif):
             MediaSaver.shared.saveImage(
-                url: gif.url,
-                customHeaders: gif.customHeaders,
+                media: gif,
                 showsDownloadStarted: showsDownloadStarted,
                 showsSaveResult: showsSaveResult,
                 completion: completion
             )
         case .video(let video):
             MediaSaver.shared.saveVideo(
-                url: video.urlForDownload,
-                customHeaders: video.customHeaders,
+                media: video,
                 showsDownloadStarted: showsDownloadStarted,
                 showsSaveResult: showsSaveResult,
                 completion: completion
             )
         case .audio(let audio):
             MediaSaver.shared.saveFile(
-                url: audio.url,
+                media: audio,
                 fileName: fileName(for: media),
-                customHeaders: audio.customHeaders,
                 showsDownloadStarted: showsDownloadStarted,
                 showsSaveResult: showsSaveResult,
                 completion: completion
@@ -660,7 +658,6 @@ struct MediaViewerScreen: View {
         }
 
         let sourceURL = image.url
-        let customHeaders = image.customHeaders
         isPreparingShare = true
         Task {
             defer {
@@ -668,8 +665,7 @@ struct MediaViewerScreen: View {
             }
             do {
                 let fileURL = try await OriginalImageShareFile.make(
-                    url: sourceURL,
-                    customHeaders: customHeaders,
+                    media: image,
                     statusKey: shareContext?.statusKey,
                     userHandle: shareContext?.userHandle,
                     onPreparingNeeded: {

@@ -76,6 +76,7 @@ import dev.dimension.flare.compose.ui.service_select_welcome_hint
 import dev.dimension.flare.compose.ui.service_select_welcome_list_hint
 import dev.dimension.flare.compose.ui.service_select_welcome_message
 import dev.dimension.flare.compose.ui.service_select_welcome_title
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.placeholder
@@ -98,6 +99,7 @@ import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.takeSuccess
+import dev.dimension.flare.ui.model.toUiImage
 import dev.dimension.flare.ui.presenter.login.LoginEffect
 import dev.dimension.flare.ui.presenter.login.LoginField
 import dev.dimension.flare.ui.presenter.login.LoginFieldType
@@ -760,7 +762,7 @@ private fun ServiceSelectItem(
         ) {
             instance?.bannerUrl?.let {
                 NetworkImage(
-                    it,
+                    it.toUiImage(proxy = ProxyRef.Global),
                     contentDescription = null,
                     modifier = Modifier.clip(PlatformTheme.shapes.medium),
                 )
@@ -768,7 +770,7 @@ private fun ServiceSelectItem(
             Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                 if (!instance?.iconUrl.isNullOrEmpty()) {
                     NetworkImage(
-                        instance.iconUrl,
+                        instance.iconUrl.toUiImage(proxy = ProxyRef.Global),
                         contentDescription = null,
                         modifier =
                             Modifier

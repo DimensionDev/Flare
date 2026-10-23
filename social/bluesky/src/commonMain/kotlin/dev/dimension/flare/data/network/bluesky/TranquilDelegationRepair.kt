@@ -1,5 +1,6 @@
 package dev.dimension.flare.data.network.bluesky
 
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.data.network.ktorClient
 import dev.dimension.flare.data.platform.BlueskyCredential
 import io.ktor.client.plugins.DefaultRequest
@@ -75,12 +76,13 @@ internal fun OAuthToken.delegationControllerDidOrNull(): String? =
 internal suspend fun repairTranquilDelegationScopes(
     credential: BlueskyCredential.OAuthCredential,
     controllerDid: String,
+    proxy: ProxyRef,
 ) {
     val credentialFlow = MutableStateFlow<BlueskyCredential>(credential)
     val oauthApi =
         sh.christian.ozone.oauth.OAuthApi(
             httpClient =
-                ktorClient {
+                ktorClient(proxy) {
                     install(DefaultRequest) {
                         url.takeFrom(credential.baseUrl)
                     }
@@ -88,7 +90,7 @@ internal suspend fun repairTranquilDelegationScopes(
             challengeSelector = { OAuthCodeChallengeMethodS256 },
         )
     val client =
-        ktorClient {
+        ktorClient(proxy) {
             install(DefaultRequest) {
                 url.takeFrom(credential.baseUrl)
             }
@@ -97,6 +99,7 @@ internal suspend fun repairTranquilDelegationScopes(
                 authTokenFlow = credentialFlow
                 onAuthTokensChanged = { credentialFlow.value = it }
                 this.oauthApi = oauthApi
+                resolveOAuthPds = { token, issuer -> token.withResolvedPds(issuer, proxy) }
             }
             expectSuccess = false
         }

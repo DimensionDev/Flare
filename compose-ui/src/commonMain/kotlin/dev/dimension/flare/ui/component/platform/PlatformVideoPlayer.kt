@@ -16,15 +16,13 @@ import dev.dimension.flare.compose.ui.Res
 import dev.dimension.flare.compose.ui.media_video_error
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.NetworkImage
-import kotlinx.collections.immutable.ImmutableMap
+import dev.dimension.flare.ui.model.UiMedia
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
 internal expect fun PlatformVideoPlayer(
-    uri: String,
-    previewUri: String?,
+    media: UiMedia,
     contentDescription: String?,
-    customHeaders: ImmutableMap<String, String>? = null,
     modifier: Modifier = Modifier,
     muted: Boolean = false,
     showControls: Boolean = false,
@@ -36,22 +34,18 @@ internal expect fun PlatformVideoPlayer(
     autoPlay: Boolean = true,
     remainingTimeContent: @Composable (BoxScope.(Long) -> Unit)? = null,
     errorContent: @Composable BoxScope.() -> Unit = {
-        if (previewUri != null) {
-            Box(
-                modifier =
-                    Modifier
-                        .fillMaxSize(),
-                contentAlignment = Alignment.Center,
-            ) {
-                FAIcon(
-                    FontAwesomeIcons.Solid.FaceFrown,
-                    contentDescription = stringResource(Res.string.media_video_error),
-                )
-            }
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center,
+        ) {
+            FAIcon(
+                FontAwesomeIcons.Solid.FaceFrown,
+                contentDescription = stringResource(Res.string.media_video_error),
+            )
         }
     },
     loadingPlaceholder: @Composable BoxScope.() -> Unit = {
-        if (previewUri != null) {
+        if (media.preview != null) {
             Box(
                 modifier =
                     Modifier
@@ -59,8 +53,7 @@ internal expect fun PlatformVideoPlayer(
                 contentAlignment = Alignment.Center,
             ) {
                 NetworkImage(
-                    model = previewUri,
-                    customHeaders = customHeaders,
+                    model = media.preview,
                     contentScale = contentScale,
                     contentDescription = contentDescription,
                     modifier =

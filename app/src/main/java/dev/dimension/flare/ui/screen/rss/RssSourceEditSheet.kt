@@ -20,7 +20,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -55,6 +54,7 @@ import compose.icons.fontawesomeicons.solid.CircleXmark
 import dev.dimension.flare.R
 import dev.dimension.flare.data.database.app.model.RssDisplayMode
 import dev.dimension.flare.data.database.app.model.SubscriptionType
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.model.UiRssSource
@@ -64,6 +64,7 @@ import dev.dimension.flare.ui.model.isSuccess
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.takeSuccess
+import dev.dimension.flare.ui.model.toUiImage
 import dev.dimension.flare.ui.presenter.home.rss.CheckRssSourcePresenter
 import dev.dimension.flare.ui.presenter.home.rss.EditRssSourcePresenter
 import dev.dimension.flare.ui.presenter.home.rss.RssReadingMode
@@ -158,7 +159,7 @@ internal fun RssSourceEditSheet(
                             rssState.icon?.let {
                                 {
                                     NetworkImage(
-                                        it,
+                                        it.toUiImage(proxy = ProxyRef.Global),
                                         contentDescription = null,
                                         modifier =
                                             Modifier
@@ -238,7 +239,7 @@ internal fun RssSourceEditSheet(
                                     ),
                                 leadingContent = {
                                     NetworkImage(
-                                        source.favIcon,
+                                        source.favIcon.toUiImage(proxy = ProxyRef.Global),
                                         contentDescription = null,
                                         modifier =
                                             Modifier
@@ -300,7 +301,7 @@ internal fun RssSourceEditSheet(
                                     rssState.icon?.let {
                                         {
                                             NetworkImage(
-                                                it,
+                                                it.toUiImage(proxy = ProxyRef.Global),
                                                 contentDescription = null,
                                                 modifier =
                                                     Modifier

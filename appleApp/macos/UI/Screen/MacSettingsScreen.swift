@@ -38,6 +38,7 @@ private enum MacSettingsPane: String, CaseIterable, Identifiable, Hashable {
     case storage
     case aiConfig
     case translationConfig
+    case proxy
     case about
 
     var id: String { rawValue }
@@ -52,6 +53,7 @@ private enum MacSettingsPane: String, CaseIterable, Identifiable, Hashable {
             "settings_behavior_title"
         case .localFilter:
             "local_filter_title"
+        case .proxy: "proxy_title"
         case .storage:
             "storage_title"
         case .aiConfig:
@@ -73,6 +75,7 @@ private enum MacSettingsPane: String, CaseIterable, Identifiable, Hashable {
             "settings_behavior_description"
         case .localFilter:
             "local_filter_description"
+        case .proxy: "proxy_settings_subtitle"
         case .storage:
             "storage_description"
         case .aiConfig:
@@ -94,6 +97,7 @@ private enum MacSettingsPane: String, CaseIterable, Identifiable, Hashable {
             .sliders
         case .localFilter:
             .filter
+        case .proxy: .globe
         case .storage:
             .database
         case .aiConfig:
@@ -116,6 +120,7 @@ private enum MacSettingsPane: String, CaseIterable, Identifiable, Hashable {
             MacBehaviorSettingsPane()
         case .localFilter:
             MacLocalFilterSettingsPane()
+        case .proxy: ProxySettingsView()
         case .storage:
             MacStorageSettingsPane()
         case .aiConfig:
@@ -314,6 +319,9 @@ private struct MacAccountManagementSettingsPane: View {
     var body: some View {
         StateView(state: presenter.state.accounts) { data in
             VStack {
+                if presenter.state.removalFailed {
+                    Text("settings_accounts_remove_failed").foregroundStyle(.red)
+                }
                 Button {
                     isLoginSheetPresented = true
                 } label: {

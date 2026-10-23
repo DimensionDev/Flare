@@ -13,4 +13,7 @@ public data class UiPodcast(
     val hosts: SerializableImmutableList<UiProfile>,
     val speakers: SerializableImmutableList<UiProfile>,
     val listeners: SerializableImmutableList<UiProfile>,
-)
+    val proxy: dev.dimension.flare.data.model.ProxyRef,
+) {
+    val media: UiMedia.Audio? get() = playbackUrl?.let { UiMedia.Audio(it, title, creator.avatar?.url, proxy = proxy) }
+}

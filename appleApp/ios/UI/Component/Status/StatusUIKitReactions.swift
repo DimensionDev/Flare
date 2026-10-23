@@ -1,3 +1,4 @@
+import FlareAppleUI
 import UIKit
 import Kingfisher
 import KotlinSharedUI
@@ -220,6 +221,7 @@ private final class ReactionChipView: UIControl, ManualLayoutMeasurable, Timelin
     private var showsImage = false
     private var isMyReaction = false
     private var imageURL: URL?
+    private var imageProxy: ProxyRef?
     private var imageWidth: CGFloat = 0
 
     private static let horizontalPadding: CGFloat = 8
@@ -272,10 +274,11 @@ private final class ReactionChipView: UIControl, ManualLayoutMeasurable, Timelin
 
         if item.isUnicode {
             imageURL = nil
+            imageProxy = nil
             imageWidth = 0
             nameLabel.text = item.name
             nameLabel.isHidden = false
-            imageView.kf.cancelDownloadTask()
+            imageView.cancelMediaLoad()
             imageView.image = nil
             imageView.isHidden = true
         } else {
@@ -283,14 +286,15 @@ private final class ReactionChipView: UIControl, ManualLayoutMeasurable, Timelin
             nameLabel.isHidden = true
             imageView.isHidden = false
             let url = URL(string: item.url)
-            if imageURL != url {
+            if imageURL != url || imageProxy != item.media.proxy {
                 imageURL = url
+                imageProxy = item.media.proxy
                 imageWidth = 0
-                imageView.kf.cancelDownloadTask()
+                imageView.cancelMediaLoad()
                 imageView.image = nil
             }
             if let url, imageView.image == nil {
-                imageView.kf.setImage(with: url, options: [.backgroundDecode]) { [weak self] result in
+                imageView.setMedia(item.media, options: [.backgroundDecode]) { [weak self] result in
                     guard let self, self.imageURL == url,
                           case .success(let value) = result else { return }
                     self.updateImageWidth(for: value.image)

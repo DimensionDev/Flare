@@ -37,13 +37,12 @@ class MediaSaver: NSObject, UIDocumentPickerDelegate {
     }
 
     func saveImage(
-        url: String,
-        customHeaders: [String: String]? = nil,
+        media: any UiMedia,
         showsDownloadStarted: Bool = true,
         showsSaveResult: Bool = true,
         completion: (@Sendable (Bool) -> Void)? = nil
     ) {
-        guard let remoteUrl = URL(string: url) else {
+        guard let remoteUrl = URL(string: media.urlForDownload) else {
             finishSave(success: false, mediaType: .image, showsSaveResult: showsSaveResult, completion: completion)
             return
         }
@@ -51,8 +50,7 @@ class MediaSaver: NSObject, UIDocumentPickerDelegate {
             showDownloadStarted(mediaType: .image)
         }
         saveRemoteOriginalDataToPhotos(
-            from: remoteUrl,
-            customHeaders: customHeaders,
+            media: media,
             showsSaveResult: showsSaveResult,
             completion: completion
         )
@@ -63,13 +61,12 @@ class MediaSaver: NSObject, UIDocumentPickerDelegate {
     }
 
     func saveVideo(
-        url: String,
-        customHeaders: [String: String]? = nil,
+        media: any UiMedia,
         showsDownloadStarted: Bool = true,
         showsSaveResult: Bool = true,
         completion: (@Sendable (Bool) -> Void)? = nil
     ) {
-        guard let remoteUrl = URL(string: url),
+        guard let remoteUrl = URL(string: media.urlForDownload),
               remoteUrl.pathExtension.lowercased() != "m3u8" else {
             finishSave(success: false, mediaType: .video, showsSaveResult: showsSaveResult, completion: completion)
             return
@@ -79,7 +76,7 @@ class MediaSaver: NSObject, UIDocumentPickerDelegate {
             showDownloadStarted(mediaType: .video)
         }
 
-        if let cachedFileURL = completeCachedVideoFileURL(for: remoteUrl) {
+        if media.customHeaders?.isEmpty != false, let cachedFileURL = completeCachedVideoFileURL(for: remoteUrl) {
             saveVideoFileToPhotos(
                 cachedFileURL,
                 showsSaveResult: showsSaveResult,
@@ -89,22 +86,20 @@ class MediaSaver: NSObject, UIDocumentPickerDelegate {
         }
 
         downloadRemoteVideoToPhotos(
-            from: remoteUrl,
-            customHeaders: customHeaders,
+            media: media,
             showsSaveResult: showsSaveResult,
             completion: completion
         )
     }
 
     func saveFile(
-        url: String,
+        media: any UiMedia,
         fileName: String,
-        customHeaders: [String: String]? = nil,
         showsDownloadStarted: Bool = true,
         showsSaveResult: Bool = true,
         completion: (@Sendable (Bool) -> Void)? = nil
     ) {
-        guard let remoteUrl = URL(string: url) else {
+        guard let remoteUrl = URL(string: media.urlForDownload) else {
             finishSave(success: false, mediaType: .file, showsSaveResult: showsSaveResult, completion: completion)
             return
         }
@@ -113,35 +108,24 @@ class MediaSaver: NSObject, UIDocumentPickerDelegate {
             showDownloadStarted(mediaType: .file)
         }
         downloadRemoteFileForExport(
-            from: remoteUrl,
+            media: media,
             fileName: fileName,
-            customHeaders: customHeaders,
             showsSaveResult: showsSaveResult,
             completion: completion
         )
     }
 
     private func saveRemoteOriginalDataToPhotos(
-        from url: URL,
-        customHeaders: [String: String]?,
+        media: any UiMedia,
         showsSaveResult: Bool,
         completion: (@Sendable (Bool) -> Void)?
     ) {
-        KingfisherManager.shared.downloader.downloadImage(with: url, options: kingfisherOptions(customHeaders: customHeaders), progressBlock: nil) { result in
-            switch result {
-            case .success(let v):
-                self.saveOriginalDataToPhotos(
-                    v.originalData,
-                    showsSaveResult: showsSaveResult,
-                    completion: completion
-                )
-            case .failure:
-                self.finishSave(
-                    success: false,
-                    mediaType: .image,
-                    showsSaveResult: showsSaveResult,
-                    completion: completion
-                )
+        Task {
+            do {
+                let data = try await MediaTransfer.data(media)
+                self.saveOriginalDataToPhotos(data, showsSaveResult: showsSaveResult, completion: completion)
+            } catch {
+                self.finishSave(success: false, mediaType: .image, showsSaveResult: showsSaveResult, completion: completion)
             }
         }
     }
@@ -156,18 +140,13 @@ class MediaSaver: NSObject, UIDocumentPickerDelegate {
     }
 
     private func downloadRemoteVideoToPhotos(
-        from url: URL,
-        customHeaders: [String: String]?,
+        media: any UiMedia,
         showsSaveResult: Bool,
         completion: (@Sendable (Bool) -> Void)?
     ) {
-        var request = URLRequest(url: url)
-        customHeaders?.forEach { key, value in
-            request.setValue(value, forHTTPHeaderField: key)
-        }
-
-        URLSession.shared.downloadTask(with: request) { temporaryURL, response, error in
-            guard error == nil, let temporaryURL else {
+        Task {
+            guard let url = URL(string: media.urlForDownload),
+                  let (temporaryURL, response) = try? await MediaTransfer.download(media) else {
                 self.finishSave(
                     success: false,
                     mediaType: .video,
@@ -177,6 +156,7 @@ class MediaSaver: NSObject, UIDocumentPickerDelegate {
                 return
             }
 
+            defer { try? FileManager.default.removeItem(at: temporaryURL) }
             let fileExtension = AppleMediaFileExtension.video(url: url, response: response)
             let targetURL = FileManager.default.temporaryDirectory
                 .appendingPathComponent("flare-video-\(UUID().uuidString)")
@@ -198,25 +178,18 @@ class MediaSaver: NSObject, UIDocumentPickerDelegate {
                     completion: completion
                 )
             }
-        }.resume()
+        }
     }
 
     private func downloadRemoteFileForExport(
-        from url: URL,
+        media: any UiMedia,
         fileName: String,
-        customHeaders: [String: String]?,
         showsSaveResult: Bool,
         completion: (@Sendable (Bool) -> Void)?
     ) {
-        var request = URLRequest(url: url)
-        customHeaders?.forEach { key, value in
-            request.setValue(value, forHTTPHeaderField: key)
-        }
-
-        URLSession.shared.downloadTask(with: request) { temporaryURL, response, error in
-            guard error == nil,
-                  let temporaryURL,
-                  Self.isSuccessfulHTTPResponse(response) else {
+        Task {
+            guard let url = URL(string: media.urlForDownload),
+                  let (temporaryURL, response) = try? await MediaTransfer.download(media) else {
                 self.finishSave(
                     success: false,
                     mediaType: .file,
@@ -226,10 +199,11 @@ class MediaSaver: NSObject, UIDocumentPickerDelegate {
                 return
             }
 
+            defer { try? FileManager.default.removeItem(at: temporaryURL) }
             let exportDirectory = FileManager.default.temporaryDirectory
                 .appendingPathComponent("flare-file-\(UUID().uuidString)", isDirectory: true)
             let sourceName = fileName.trimmedNonEmpty
-                ?? response?.suggestedFilename?.trimmedNonEmpty
+                ?? response.suggestedFilename?.trimmedNonEmpty
                 ?? url.lastPathComponent.trimmedNonEmpty
                 ?? "file"
             let exportURL = exportDirectory
@@ -255,7 +229,7 @@ class MediaSaver: NSObject, UIDocumentPickerDelegate {
                     completion: completion
                 )
             }
-        }.resume()
+        }
     }
 
     nonisolated private func saveOriginalDataToPhotos(
@@ -304,26 +278,6 @@ class MediaSaver: NSObject, UIDocumentPickerDelegate {
                 completion: completion
             )
         }
-    }
-
-    nonisolated private static func isSuccessfulHTTPResponse(_ response: URLResponse?) -> Bool {
-        guard let response = response as? HTTPURLResponse else {
-            return true
-        }
-        return (200..<300).contains(response.statusCode)
-    }
-
-    private func kingfisherOptions(customHeaders: [String: String]?) -> KingfisherOptionsInfo {
-        guard let customHeaders, !customHeaders.isEmpty else {
-            return []
-        }
-        return [.requestModifier(AnyModifier { request in
-            var request = request
-            for (key, value) in customHeaders {
-                request.setValue(value, forHTTPHeaderField: key)
-            }
-            return request
-        })]
     }
 
     nonisolated private func finishSave(

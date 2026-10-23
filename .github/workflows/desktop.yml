@@ -195,19 +195,21 @@ jobs:
           java-version: 25
       # Run tests
       - name: Run Tests
-        run: ./gradlew jvmTest
+        env:
+          JAVA_TOOL_OPTIONS: -Djava.awt.headless=true
+        run: ./gradlew jvmTest :desktopApp:test
       - name: Build with Gradle
         env:
           BUILD_NUMBER: ${{github.run_number}}
           BUILD_VERSION: ${{github.ref_name}}
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
-        run: ./gradlew :desktop:check :desktop:build --stacktrace
+        run: ./gradlew :desktopApp:check :desktopApp:build --stacktrace
       - name: Package with Gradle
         env:
           BUILD_NUMBER: ${{github.run_number}}
           BUILD_VERSION: ${{github.ref_name}}
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
-        run: ./gradlew :desktop:packageReleaseAppx --stacktrace
+        run: ./gradlew :desktopApp:packageReleaseAppx --stacktrace
       - name: Build appxbundle with same version as appx
         shell: pwsh
         run: |
@@ -296,19 +298,21 @@ jobs:
           java-version: 25
       # Run tests
       - name: Run Tests
-        run: ./gradlew jvmTest
+        env:
+          JAVA_TOOL_OPTIONS: -Djava.awt.headless=true
+        run: ./gradlew jvmTest :desktopApp:test
       - name: Build with Gradle
         env:
           BUILD_NUMBER: ${{github.run_number}}
           BUILD_VERSION: ${{github.ref_name}}
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
-        run: ./gradlew :desktop:check :desktop:build --stacktrace
+        run: ./gradlew :desktopApp:check :desktopApp:build --stacktrace
       - name: Package with Gradle
         env:
           BUILD_NUMBER: ${{github.run_number}}
           BUILD_VERSION: ${{github.ref_name}}
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
-        run: ./gradlew :desktop:packageReleaseAppImage --stacktrace
+        run: ./gradlew :desktopApp:packageReleaseAppImage --stacktrace
       - name: Upload AppImage package
         if: startsWith(github.ref, 'refs/tags/')
         uses: actions/upload-artifact@v7

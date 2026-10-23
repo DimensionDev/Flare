@@ -234,13 +234,24 @@ public struct StatusMediaVideoView: View {
             #else
             Color.clear
                 .overlay {
-                    NetworkImage(data: data.thumbnailUrl, customHeader: data.customHeaders)
+                    NetworkImage(data: data.preview)
                         .scaledToFit()
                         .allowsHitTesting(false)
                 }
                 .clipped()
                 .overlay { player }
             #endif
+        }
+        .overlay {
+            if case .error(let error) = session.state {
+                Text(error.localizedDescription)
+                    .font(.callout)
+                    .foregroundStyle(.white)
+                    .padding(12)
+                    .background(.black.opacity(0.75), in: .rect(cornerRadius: 8))
+                    .padding()
+                    .allowsHitTesting(false)
+            }
         }
         .onAppear {
             if presentation == nil {
@@ -292,7 +303,7 @@ public struct StatusMediaVideoView: View {
 
     private func updatePlayback() {
         (presentation ?? fallbackPresentation).update(
-            session, url: data.url,
+            session, media: data,
             playing: play, rate: playbackRate
         )
     }
@@ -303,7 +314,7 @@ public struct StatusMediaVideoView: View {
         Color.black
             .overlay {
                 if !session.hasDisplayedFrame {
-                    NetworkImage(data: data.thumbnailUrl, customHeader: data.customHeaders)
+                    NetworkImage(data: data.preview)
                         .scaledToFit()
                         .allowsHitTesting(false)
                 }

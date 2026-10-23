@@ -126,6 +126,7 @@ import dev.dimension.flare.ui.model.mapNotNull
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.takeSuccess
+import dev.dimension.flare.ui.model.toUiImage
 import dev.dimension.flare.ui.presenter.compose.ComposePresenter
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus
 import dev.dimension.flare.ui.presenter.invoke
@@ -513,7 +514,7 @@ internal fun ComposeScreen(
                                         )
                                 Box {
                                     NetworkImage(
-                                        model = media.url,
+                                        model = media.url.toUiImage(),
                                         contentDescription = mediaDescription,
                                         modifier =
                                             Modifier
@@ -565,7 +566,7 @@ internal fun ComposeScreen(
                                                         },
                                                         icon = {
                                                             NetworkImage(
-                                                                model = media.url,
+                                                                model = media.url.toUiImage(),
                                                                 contentDescription = mediaDescription,
                                                                 modifier =
                                                                     Modifier

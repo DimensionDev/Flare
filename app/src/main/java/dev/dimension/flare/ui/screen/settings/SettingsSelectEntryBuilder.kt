@@ -23,6 +23,7 @@ internal fun EntryProviderScope<NavKey>.settingsSelectEntryBuilder(
         )
     ) {
         SettingsScreen(
+            toProxy = { navigate(Route.Settings.Proxy) },
             toAccounts = {
                 navigate(Route.Settings.Accounts)
             },
@@ -61,6 +62,12 @@ internal fun EntryProviderScope<NavKey>.settingsSelectEntryBuilder(
             },
             onBack = onBack,
         )
+    }
+
+    entry<Route.Settings.Proxy>(
+        metadata = ListDetailSceneStrategy.detailPane(sceneKey = "Settings"),
+    ) {
+        ProxySettingsScreen(onBack = onBack)
     }
 
     entry<Route.Settings.Accounts>(

@@ -35,6 +35,13 @@ kotlin {
             libs.room.compiler,
         )
     }
+    wasmJs {
+        browser {
+            testTask {
+                useKarma { useChromeHeadless() }
+            }
+        }
+    }
     android {
         withHostTest {}
         withDeviceTest {
@@ -72,7 +79,7 @@ kotlin {
                 implementation(libs.room.paging)
                 implementation(libs.sqlite)
                 implementation(libs.sqlite.async)
-                implementation(libs.datastore.core)
+                api(libs.datastore.core)
                 implementation(libs.datastore.core.okio)
                 implementation(libs.kotlinx.serialization.protobuf)
                 implementation(libs.ktor.client.resources)

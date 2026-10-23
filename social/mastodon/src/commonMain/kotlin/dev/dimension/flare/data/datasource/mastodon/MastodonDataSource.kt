@@ -34,6 +34,7 @@ import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.notSupported
 import dev.dimension.flare.data.datasource.pleroma.PleromaDataSource
 import dev.dimension.flare.data.model.IconType
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.data.model.tab.ShortcutSpec
 import dev.dimension.flare.data.model.tab.TimelineSpec
 import dev.dimension.flare.data.network.mastodon.DefaultMastodonMaxStatusCharactersProvider
@@ -98,7 +99,7 @@ internal open class MastodonDataSource(
     private val imageCompressor: ImageCompressor by koinInject()
     private val service by lazy {
         MastodonService(
-            baseUrl = "https://$instance/",
+            proxy = ProxyRef.forAccount(accountKey),            baseUrl = "https://$instance/",
             accessTokenFlow = credentialFlow.map { it.accessToken },
         )
     }
@@ -134,6 +135,7 @@ internal open class MastodonDataSource(
 
     override val userHandler by lazy {
         UserHandler(
+            proxy = ProxyRef.forAccount(accountKey),
             host = accountKey.host,
             loader = loader,
         )

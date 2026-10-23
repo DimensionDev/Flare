@@ -33,8 +33,10 @@ private struct MediaItemSignature: Equatable {
     let altText: String
     let aspectRatio: CGFloat?
     let customHeaders: [String: String]?
+    let proxy: ProxyRef
 
     init(media: UiMedia) {
+        proxy = media.proxy
         downloadURL = media.downloadUrl
         altText = media.description_ ?? ""
         aspectRatio = media.carouselLayoutAspectRatio
@@ -74,6 +76,7 @@ private struct MediaItemSignature: Equatable {
 //   authoritative play path, matching the SwiftUI tap-to-expand behaviour.
 final class MediaUIView: UIView {
     private(set) var videoURL: URL?
+    private(set) var videoMedia: UiMedia?
     private let imageView: UIImageView = {
         let iv = UIImageView()
         iv.contentMode = .scaleAspectFill
@@ -157,6 +160,7 @@ final class MediaUIView: UIView {
             imageView.trailingAnchor.constraint(equalTo: trailingAnchor),
             imageView.bottomAnchor.constraint(equalTo: bottomAnchor),
             playBadgeBg.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
+            playBadgeBg.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -16),
             playBadgeBg.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -16),
             playBadgeBg.widthAnchor.constraint(greaterThanOrEqualToConstant: 32),
             playBadgeBg.heightAnchor.constraint(equalToConstant: 32),
@@ -170,6 +174,7 @@ final class MediaUIView: UIView {
     required init?(coder: NSCoder) { fatalError("init(coder:) not supported") }
 
     func set(media: UiMedia, cornerRadius: CGFloat) {
+        videoMedia = media
         accessibilityLabel = media.accessibleDescription
         let signature = MediaItemSignature(media: media)
         if lastMediaSignature == signature {
@@ -183,23 +188,23 @@ final class MediaUIView: UIView {
         videoURL = nil
         lastCornerRadius = cornerRadius
         layer.cornerRadius = cornerRadius
-        imageView.kf.cancelDownloadTask()
+        imageView.cancelMediaLoad()
         imageView.isHidden = false
         imageView.image = nil
         setAutoplayOverlay(.idle, showsBadge: false)
 
         switch onEnum(of: media) {
         case .image(let image):
-            loadImage(url: image.previewUrl, customHeaders: image.customHeaders)
+            loadImage(media: image.preview)
         case .video(let video):
             videoURL = URL(string: video.url)
-            loadImage(url: video.thumbnailUrl, customHeaders: video.customHeaders)
+            loadImage(media: video.preview)
             setAutoplayOverlay(.idle)
         case .gif(let gif):
-            loadGif(url: gif.url, customHeaders: gif.customHeaders)
+            loadGif(media: gif)
         case .ugoira(let animation):
             videoURL = URL(string: animation.url)
-            loadImage(url: animation.previewUrl, customHeaders: animation.customHeaders)
+            loadImage(media: animation.preview)
             setAutoplayOverlay(.idle)
         case .audio:
             imageView.image = nil
@@ -208,7 +213,7 @@ final class MediaUIView: UIView {
 
     func prepareForPoolRemoval() {
         accessibilityLabel = nil
-        imageView.kf.cancelDownloadTask()
+        imageView.cancelMediaLoad()
         imageView.image = nil
         lastMediaSignature = nil
         videoURL = nil
@@ -253,6 +258,7 @@ final class MediaUIView: UIView {
         _ state: VideoAutoplayOverlayState,
         showsBadge: Bool = true,
         progress: Double? = nil,
+        errorMessage: String? = nil,
         onRetry: (() -> Void)? = nil
     ) {
         playBadgeBg.isHidden = !showsBadge
@@ -281,6 +287,9 @@ final class MediaUIView: UIView {
             countdownLabel.text = Self.formatRemainingTime(remaining)
             countdownLabel.isHidden = false
         case .error:
+            countdownLabel.text = errorMessage
+            countdownLabel.isHidden = errorMessage == nil
+            accessibilityValue = errorMessage
             playBadge.image = UIImage(systemName: onRetry == nil ? "exclamationmark.triangle.fill" : "arrow.clockwise")
             playBadge.isHidden = false
             if showsBadge, let onRetry {
@@ -312,14 +321,12 @@ final class MediaUIView: UIView {
         return String(format: "%d:%02d", minutes, remainder)
     }
 
-    private func loadImage(url: String?, customHeaders: [String: String]?) {
-        guard let u = url.flatMap(URL.init(string:)) else { return }
-        imageView.kf.setImage(with: u, options: imageOptions(customHeaders: customHeaders, cacheOriginalImage: true))
+    private func loadImage(media: UiMedia?) {
+        imageView.setMedia(media, options: [.transition(.fade(0.25)), .backgroundDecode, .cacheOriginalImage])
     }
 
-    private func loadGif(url: String?, customHeaders: [String: String]?) {
-        guard let u = url.flatMap(URL.init(string:)) else { return }
-        imageView.kf.setImage(with: u, options: imageOptions(customHeaders: customHeaders, cacheOriginalImage: false))
+    private func loadGif(media: UiMedia?) {
+        imageView.setMedia(media, options: [.transition(.fade(0.25)), .backgroundDecode])
     }
 
     private func imageOptions(customHeaders: [String: String]?, cacheOriginalImage: Bool) -> KingfisherOptionsInfo {

@@ -1,5 +1,6 @@
 package dev.dimension.flare.ui.route
 
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -168,6 +169,7 @@ public sealed class DeeplinkRoute {
             val uri: String,
             val previewUrl: String?,
             val customHeaders: Map<String, String>? = null,
+            val proxy: ProxyRef = ProxyRef.Global,
         ) : Media()
 
         @Serializable

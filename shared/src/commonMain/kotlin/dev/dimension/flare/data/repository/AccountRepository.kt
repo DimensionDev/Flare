@@ -28,13 +28,17 @@ import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.takeSuccess
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.distinctUntilChangedBy
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
@@ -42,6 +46,7 @@ import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.serializer
 import org.koin.core.annotation.Provided
@@ -56,6 +61,7 @@ internal class AccountRepository internal constructor(
     private val coroutineScope: CoroutineScope,
     internal val appDataStore: AppDataStore,
     private val cacheDatabase: CacheDatabase,
+    private val proxyRepository: ProxyRepository,
     @Provided internal val platformRegistry: PlatformRegistry,
 ) {
     internal val activeAccount: Flow<UiState<UiAccount>> by lazy {
@@ -116,7 +122,51 @@ internal class AccountRepository internal constructor(
             .distinctUntilChangedBy { it }
     }
 
-    internal inline fun <reified T : Any> addAccount(
+    private val accountChanges = Mutex()
+    private val pendingDeletions =
+        coroutineScope.async {
+            val removedAccounts =
+                try {
+                    proxyRepository.settings.first().removedAccounts
+                } catch (error: CancellationException) {
+                    throw error
+                } catch (error: Exception) {
+                    error.printStackTrace()
+                    return@async
+                }
+            for (key in removedAccounts) {
+                try {
+                    deleteAccount(MicroBlogKey.valueOf(key))
+                } catch (error: CancellationException) {
+                    throw error
+                } catch (error: Exception) {
+                    // Keep the tombstone so a later startup or login can retry cleanup.
+                    error.printStackTrace()
+                }
+            }
+        }
+
+    internal suspend fun <T> withAccountChanges(block: suspend () -> T): T {
+        pendingDeletions.await()
+        return accountChanges.withLock { block() }
+    }
+
+    internal suspend fun <T> restoreAccounts(
+        keys: List<MicroBlogKey>,
+        block: suspend () -> T,
+    ): T =
+        withAccountChanges {
+            val removed = if (keys.isEmpty()) emptySet() else proxyRepository.settings.first().removedAccounts
+            keys.distinct().filter { it.toString() in removed }.forEach { deleteAccount(it) }
+            // A failed settings write rolls back the DB; cancellation cannot split restoration from commit.
+            withContext(NonCancellable) {
+                appDatabase.connect {
+                    block().also { if (keys.isNotEmpty()) proxyRepository.restoreAccounts(keys) }
+                }
+            }
+        }
+
+    internal suspend inline fun <reified T : Any> addAccount(
         account: UiAccount,
         credential: T,
     ) = addAccount(
@@ -125,25 +175,27 @@ internal class AccountRepository internal constructor(
         serializer = serializer(),
     )
 
-    internal fun <T : Any> addAccount(
+    internal suspend fun <T : Any> addAccount(
         account: UiAccount,
         credential: T,
         serializer: KSerializer<T>,
-    ) = coroutineScope.launch {
-        val existingAccount = appDatabase.accountDao().getAccount(account.accountKey)
-        val credentialJson = credential.encodeJson(serializer)
-        val dbAccount =
-            existingAccount?.copy(
-                credential_json = credentialJson,
-                last_active = Clock.System.now().toEpochMilliseconds(),
-            ) ?: DbAccount(
-                account_key = account.accountKey,
-                platformId = account.platformId,
-                credential_json = credentialJson,
-                last_active = Clock.System.now().toEpochMilliseconds(),
-                sort_id = appDatabase.accountDao().getMaxSortId()?.plus(1) ?: 0L,
-            )
-        appDatabase.accountDao().insert(dbAccount)
+    ) {
+        restoreAccounts(listOf(account.accountKey)) {
+            val existingAccount = appDatabase.accountDao().getAccount(account.accountKey)
+            val credentialJson = credential.encodeJson(serializer)
+            val dbAccount =
+                existingAccount?.copy(
+                    credential_json = credentialJson,
+                    last_active = Clock.System.now().toEpochMilliseconds(),
+                ) ?: DbAccount(
+                    account_key = account.accountKey,
+                    platformId = account.platformId,
+                    credential_json = credentialJson,
+                    last_active = Clock.System.now().toEpochMilliseconds(),
+                    sort_id = appDatabase.accountDao().getMaxSortId()?.plus(1) ?: 0L,
+                )
+            appDatabase.accountDao().insert(dbAccount)
+        }
         addAccountFlow.value = account
     }
 
@@ -192,38 +244,43 @@ internal class AccountRepository internal constructor(
         }
     }
 
-    internal fun delete(accountKey: MicroBlogKey) =
-        coroutineScope.launch {
-            appDataStore.composeConfigData.updateData {
-                it.copy(
-                    lastAccounts = it.lastAccounts.filterNot { key -> key == accountKey },
-                )
-            }
-            removeAccountFlow.value = accountKey
-            dataSourceCacheMutex.withLock {
-                val datasource = dataSourceCache.remove(accountKey)
-                if (datasource is AutoCloseable) {
-                    datasource.close()
-                }
-            }
-            appDatabase.accountDao().delete(accountKey)
-            cacheDatabase.clearHomeTimelinesForAccount(accountKey)
-            cacheDatabase.pagingTimelineDao().deleteByAccountType(
-                AccountType.Specific(accountKey),
-            )
-            cacheDatabase.statusDao().deleteByAccountType(
-                AccountType.Specific(accountKey),
-            )
-            cacheDatabase.userDao().deleteHistoryByAccountType(
-                AccountType.Specific(accountKey),
-            )
-            cacheDatabase.emojiDao().clearHistoryByAccountType(
-                AccountType.Specific(accountKey),
-            )
-            cacheDatabase.messageDao().clearMessageTimeline(
-                AccountType.Specific(accountKey),
+    internal suspend fun delete(accountKey: MicroBlogKey): Unit =
+        withAccountChanges {
+            proxyRepository.removeAccount(accountKey)
+            deleteAccount(accountKey)
+        }
+
+    private suspend fun deleteAccount(accountKey: MicroBlogKey) {
+        appDataStore.composeConfigData.updateData {
+            it.copy(
+                lastAccounts = it.lastAccounts.filterNot { key -> key == accountKey },
             )
         }
+        removeAccountFlow.value = accountKey
+        dataSourceCacheMutex.withLock {
+            val datasource = dataSourceCache.remove(accountKey)
+            if (datasource is AutoCloseable) {
+                datasource.close()
+            }
+        }
+        cacheDatabase.clearHomeTimelinesForAccount(accountKey)
+        cacheDatabase.pagingTimelineDao().deleteByAccountType(
+            AccountType.Specific(accountKey),
+        )
+        cacheDatabase.statusDao().deleteByAccountType(
+            AccountType.Specific(accountKey),
+        )
+        cacheDatabase.userDao().deleteHistoryByAccountType(
+            AccountType.Specific(accountKey),
+        )
+        cacheDatabase.emojiDao().clearHistoryByAccountType(
+            AccountType.Specific(accountKey),
+        )
+        cacheDatabase.messageDao().clearMessageTimeline(
+            AccountType.Specific(accountKey),
+        )
+        appDatabase.accountDao().delete(accountKey)
+    }
 
     internal fun getFlow(accountKey: MicroBlogKey): Flow<UiState<UiAccount>> =
         appDatabase.accountDao().get(accountKey).map {

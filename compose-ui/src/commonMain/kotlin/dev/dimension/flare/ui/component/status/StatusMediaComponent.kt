@@ -625,10 +625,9 @@ public fun MediaItem(
 
         is UiMedia.Image -> {
             NetworkImage(
-                model = media.previewUrl,
+                model = media.preview,
                 contentDescription = accessibleDescription,
                 contentScale = contentScale,
-                customHeaders = media.customHeaders,
                 modifier =
                     modifier
                         .fillMaxWidth()
@@ -655,10 +654,8 @@ public fun MediaItem(
             if (shouldPlay) {
                 PlatformVideoPlayer(
                     contentScale = contentScale,
-                    uri = media.url,
-                    customHeaders = media.customHeaders,
+                    media = media,
                     muted = true,
-                    previewUri = media.thumbnailUrl,
                     contentDescription = accessibleDescription,
                     modifier =
                         modifier
@@ -682,8 +679,7 @@ public fun MediaItem(
                         ) {
                             NetworkImage(
                                 contentScale = contentScale,
-                                model = media.thumbnailUrl,
-                                customHeaders = media.customHeaders,
+                                model = media.preview,
                                 contentDescription = accessibleDescription,
                                 modifier =
                                     Modifier
@@ -719,8 +715,7 @@ public fun MediaItem(
                         ) {
                             NetworkImage(
                                 contentScale = contentScale,
-                                model = media.thumbnailUrl,
-                                customHeaders = media.customHeaders,
+                                model = media.preview,
                                 contentDescription = accessibleDescription,
                                 modifier =
                                     Modifier
@@ -782,8 +777,7 @@ public fun MediaItem(
                 ) {
                     NetworkImage(
                         contentScale = contentScale,
-                        model = media.thumbnailUrl,
-                        customHeaders = media.customHeaders,
+                        model = media.preview,
                         contentDescription = accessibleDescription,
                         modifier =
                             Modifier
@@ -825,8 +819,7 @@ public fun MediaItem(
 
         is UiMedia.Audio -> {
             AudioPlayer(
-                uri = media.url,
-                previewUri = media.previewUrl,
+                media = media,
                 contentDescription = accessibleDescription,
                 modifier = modifier,
             )
@@ -834,10 +827,9 @@ public fun MediaItem(
 
         is UiMedia.Gif -> {
             NetworkImage(
-                model = media.url,
+                model = media,
                 contentDescription = accessibleDescription,
                 contentScale = contentScale,
-                customHeaders = media.customHeaders,
                 modifier =
                     modifier
                         .fillMaxWidth()

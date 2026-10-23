@@ -138,6 +138,8 @@ public fun DMItem(
                                                     .Image(
                                                         message.media.url,
                                                         previewUrl = null,
+                                                        customHeaders = message.media.customHeaders,
+                                                        proxy = message.media.proxy,
                                                     ).toUri(),
                                             )
                                         }

@@ -94,6 +94,17 @@ final class UgoiraPlaybackTests: XCTestCase {
         XCTAssertNil(media.accessibilityCustomActions)
         badge.sendActions(for: .touchUpInside)
         XCTAssertEqual(retries, 1)
+
+        let failure = "Target returned HTTP 503: " + String(repeating: "temporarily unavailable ", count: 10)
+        media.setAutoplayOverlay(.error, errorMessage: failure)
+        try await layout()
+        XCTAssertEqual(label.text, failure)
+        XCTAssertFalse(label.isHidden)
+        XCTAssertEqual(media.accessibilityValue, failure)
+        XCTAssertLessThanOrEqual(badge.frame.maxX, media.bounds.maxX - 16)
+        media.setAutoplayOverlay(.idle)
+        XCTAssertTrue(label.isHidden)
+        XCTAssertNil(media.accessibilityValue)
     }
 
     func testFrameDelayPreservesTimingAndCatchesUpAcrossLoopBoundaries() {

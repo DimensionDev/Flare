@@ -685,4 +685,34 @@
     <string name="home_timeline_view_latest">回到最新</string>
     <string name="settings_remember_home_timeline_position">记住首页阅读位置</string>
     <string name="settings_remember_home_timeline_position_description">刷新和重新打开后保留阅读位置。使用“回到最新”跳转到新内容。</string>
+
+    <string name="proxy_settings_subtitle">管理全局和各账号的代理连接</string>
+    <string name="proxy_title">代理</string>
+    <string name="proxy_global">全局</string>
+    <string name="proxy_system">系统设置</string>
+    <string name="proxy_direct">直连</string>
+    <string name="proxy_inherit">跟随全局</string>
+    <string name="proxy_profiles">代理服务器</string>
+    <string name="proxy_add">添加代理</string>
+    <string name="proxy_protocol">协议</string>
+    <string name="proxy_name">名称</string>
+    <string name="proxy_host">主机名或 IP 地址</string>
+    <string name="proxy_port">端口</string>
+    <string name="proxy_no_auth">支持 TLS 加密的 HTTPS 代理和由代理解析目标域名的 SOCKS5。不支持明文 HTTP 代理及代理身份验证。</string>
+    <string name="proxy_test">测试连接</string>
+    <string name="proxy_test_hint">通过此代理测试 example.com 的 HTTPS 连接。</string>
+    <string name="proxy_test_success">连接成功</string>
+    <string name="proxy_in_use">删除前请先调整使用此代理的全局和账号设置。</string>
+    <string name="proxy_edit">编辑代理</string>
+    <string name="proxy_accounts">账号</string>
+    <string name="proxy_save">保存</string>
+    <string name="proxy_cancel">取消</string>
+    <string name="proxy_delete">删除</string>
+    <string name="proxy_error_name">请输入代理名称</string>
+    <string name="proxy_error_host">请输入主机名或 IP 地址，不要包含协议或身份验证信息</string>
+    <string name="proxy_error_port">端口必须介于 1 和 65535 之间</string>
+    <string name="proxy_error_in_use">请先修改使用此代理的账号和全局设置，再删除代理</string>
+    <string name="proxy_error_policy">请选择有效的代理设置</string>
+    <string name="proxy_error_request">代理操作失败，请重试。</string>
+    <string name="settings_accounts_remove_failed">无法移除此账号，请重试。</string>
 </resources>

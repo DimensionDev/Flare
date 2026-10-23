@@ -295,7 +295,7 @@ public class ComposePresenter(
                 emojiConfig?.emoji?.toUi()?.map { emojiState ->
                     emojiState.map { emoji ->
                         EmojiData(
-                            data = emoji,
+                            unboundData = emoji,
                             accountType = AccountType.Specific(emojiConfig.accountKey),
                         )
                     }

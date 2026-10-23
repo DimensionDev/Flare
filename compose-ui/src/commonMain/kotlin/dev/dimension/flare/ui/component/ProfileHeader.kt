@@ -278,6 +278,7 @@ private fun ProfileHeaderSuccess(
                             uri = it.url,
                             previewUrl = null,
                             customHeaders = it.customHeaders,
+                            proxy = it.proxy,
                         ).toUri(),
                 )
             }
@@ -290,6 +291,7 @@ private fun ProfileHeaderSuccess(
                             uri = it.url,
                             previewUrl = null,
                             customHeaders = it.customHeaders,
+                            proxy = it.proxy,
                         ).toUri(),
                 )
             }

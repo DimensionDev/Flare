@@ -60,6 +60,7 @@ import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.notSupported
 import dev.dimension.flare.data.datasource.microblog.pagingConfig
 import dev.dimension.flare.data.model.IconType
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.data.model.tab.ShortcutSpec
 import dev.dimension.flare.data.model.tab.TimelineFilterConfig
 import dev.dimension.flare.data.model.tab.TimelinePostKind
@@ -94,7 +95,6 @@ import dev.dimension.flare.ui.presenter.status.action.BlueskyReportStatusState
 import dev.dimension.flare.ui.route.DeeplinkRoute
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
@@ -143,7 +143,7 @@ internal class BlueskyDataSource(
     PostEventHandler.Handler {
     private val coroutineScope: CoroutineScope by koinInject()
     private val imageCompressor: ImageCompressor by koinInject()
-    private val linkCardResolver = BlueskyLinkCardResolver()
+    private val linkCardResolver = BlueskyLinkCardResolver(ProxyRef.forAccount(accountKey))
     private var cachedPdsService: BlueskyService? = null
 
     private val mutex = Mutex(locked = false)
@@ -194,6 +194,7 @@ internal class BlueskyDataSource(
 
     override val userHandler by lazy {
         UserHandler(
+            proxy = ProxyRef.forAccount(accountKey),
             host = accountKey.host,
             loader = loader,
         )

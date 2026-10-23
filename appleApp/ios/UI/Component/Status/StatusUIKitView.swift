@@ -689,7 +689,7 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
         if newWantsAvatar, let user = data.user {
             let avatarView = resolvedAvatarView()
             avatarView.avatarShape = appearance.avatarShape
-            avatarView.set(url: user.avatar?.url, customHeaders: user.avatar?.customHeaders)
+            avatarView.set(media: user.avatar)
             avatarView.accessibilityLabel = openProfileAccessibilityLabel(handle: user.handle.canonical)
             if avatarView.superview !== self { addSubview(avatarView) }
         } else if avatarViewStorage?.superview === self {

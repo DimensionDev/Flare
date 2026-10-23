@@ -99,9 +99,6 @@ import androidx.media3.ui.compose.state.rememberPlayPauseButtonState
 import androidx.window.core.layout.WindowSizeClass
 import coil3.annotation.ExperimentalCoilApi
 import coil3.imageLoader
-import coil3.network.NetworkHeaders
-import coil3.network.httpHeaders
-import coil3.request.ImageRequest
 import coil3.size.Size
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
@@ -125,6 +122,7 @@ import dev.dimension.flare.common.AndroidDownloadManager
 import dev.dimension.flare.common.MediaFileNamePolicy
 import dev.dimension.flare.common.shareImageMedia
 import dev.dimension.flare.data.model.PostActionStyle
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.FAIcon
@@ -137,6 +135,7 @@ import dev.dimension.flare.ui.component.UgoiraPlayer
 import dev.dimension.flare.ui.component.VideoPlayer
 import dev.dimension.flare.ui.component.accessibleDescription
 import dev.dimension.flare.ui.component.placeholder
+import dev.dimension.flare.ui.component.rememberMediaImageRequest
 import dev.dimension.flare.ui.component.status.CommonStatusComponent
 import dev.dimension.flare.ui.humanizer.humanize
 import dev.dimension.flare.ui.model.UiMedia
@@ -148,12 +147,12 @@ import dev.dimension.flare.ui.model.isSuccess
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.takeSuccess
+import dev.dimension.flare.ui.model.toUiImage
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.status.StatusPresenter
 import dev.dimension.flare.ui.theme.FlareTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
@@ -204,6 +203,7 @@ internal fun StatusMediaScreen(
     MediaViewerScreen(
         medias = state.medias,
         initialIndex = index,
+        previewProxy = ProxyRef.forAccountType(accountType),
         preview = preview,
         onDismiss = onDismiss,
         toAltText = toAltText,
@@ -248,6 +248,7 @@ internal fun MediaViewerScreen(
     medias: UiState<ImmutableList<UiMedia>>,
     initialIndex: Int,
     preview: String?,
+    previewProxy: ProxyRef,
     onDismiss: () -> Unit,
     toAltText: (UiMedia) -> Unit,
     uriHandler: UriHandler,
@@ -369,30 +370,12 @@ internal fun MediaViewerScreen(
                                                 )
                                                 return@onSuccess
                                             }
-                                            val imageUrl =
-                                                when (media) {
-                                                    is UiMedia.Audio -> media.previewUrl ?: media.url
-                                                    is UiMedia.Gif -> media.url
-                                                    is UiMedia.Image -> media.url
-                                                    is UiMedia.Video -> media.thumbnailUrl
-                                                    is UiMedia.Ugoira -> media.previewUrl
-                                                }
-                                            val previewUrl =
-                                                when (media) {
-                                                    is UiMedia.Audio -> media.previewUrl ?: media.url
-                                                    is UiMedia.Gif -> media.previewUrl
-                                                    is UiMedia.Image -> media.previewUrl
-                                                    is UiMedia.Video -> media.thumbnailUrl
-                                                    is UiMedia.Ugoira -> media.previewUrl
-                                                }
                                             if (pagerState.currentPage != index || media is UiMedia.Image || media is UiMedia.Gif) {
                                                 ImageItem(
                                                     modifier =
                                                         Modifier
                                                             .fillMaxSize(),
-                                                    url = imageUrl,
-                                                    previewUrl = previewUrl,
-                                                    customHeaders = media.customHeaders,
+                                                    media = if (media is UiMedia.Image || media is UiMedia.Gif) media else media.preview,
                                                     description = media.accessibleDescription(),
                                                     onClick = {
                                                         state.setShowUi(!state.showUi)
@@ -421,9 +404,7 @@ internal fun MediaViewerScreen(
                                                     modifier = Modifier.fillMaxSize(),
                                                 ) {
                                                     VideoPlayer(
-                                                        uri = media.url,
-                                                        customHeaders = media.customHeaders,
-                                                        previewUri = media.thumbnailUrl,
+                                                        media = media,
                                                         contentDescription = media.accessibleDescription(),
                                                         modifier = Modifier.fillMaxSize(),
                                                         aspectRatio = media.aspectRatio,
@@ -434,7 +415,7 @@ internal fun MediaViewerScreen(
                                                         muted = false,
                                                         contentScale = ContentScale.Fit,
                                                     )
-                                                    surfaceBindingManager.playerFor(media.url)?.let { player ->
+                                                    surfaceBindingManager.playerFor(media)?.let { player ->
                                                         key(media.url) {
                                                             VideoGestureOverlay(
                                                                 player = player,
@@ -451,9 +432,7 @@ internal fun MediaViewerScreen(
                                                 }
                                             } else if (media is UiMedia.Audio) {
                                                 VideoPlayer(
-                                                    uri = media.url,
-                                                    customHeaders = media.customHeaders,
-                                                    previewUri = null,
+                                                    media = media,
                                                     contentDescription = media.accessibleDescription(),
                                                     autoPlay = false,
                                                     onClick = {
@@ -470,9 +449,7 @@ internal fun MediaViewerScreen(
                                         }.onLoading {
                                             if (preview != null) {
                                                 ImageItem(
-                                                    url = preview,
-                                                    previewUrl = preview,
-                                                    customHeaders = null,
+                                                    media = preview.toUiImage(proxy = previewProxy),
                                                     description = null,
                                                     onClick = { /*TODO*/ },
                                                     setLockPager = {
@@ -687,7 +664,7 @@ internal fun MediaViewerScreen(
                                                 medias.getOrNull(state.currentPage)
                                             }
                                         if (current is UiMedia.Video) {
-                                            surfaceBindingManager.playerFor(current.url)?.let { player ->
+                                            surfaceBindingManager.playerFor(current)?.let { player ->
                                                 key(current.url) {
                                                     PlayerControl(
                                                         player,
@@ -1295,9 +1272,7 @@ private const val MEDIA_VIEWER_PRESENTER_KEY = "media_viewer"
 @OptIn(ExperimentalTelephotoApi::class)
 @Composable
 private fun ImageItem(
-    url: String,
-    previewUrl: String,
-    customHeaders: ImmutableMap<String, String>?,
+    media: UiMedia?,
     description: String?,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
@@ -1347,27 +1322,7 @@ private fun ImageItem(
 
     ZoomableAsyncImage(
         model =
-            ImageRequest
-                .Builder(LocalContext.current)
-                .data(url)
-                .placeholderMemoryCacheKey(previewUrl)
-//                .crossfade(1_000)
-                .size(Size.ORIGINAL)
-                .let { builder ->
-                    if (customHeaders.isNullOrEmpty()) {
-                        builder
-                    } else {
-                        builder.httpHeaders(
-                            NetworkHeaders
-                                .Builder()
-                                .apply {
-                                    customHeaders.forEach { (key, value) ->
-                                        set(key, value)
-                                    }
-                                }.build(),
-                        )
-                    }
-                }.build(),
+            rememberMediaImageRequest(media, crossfade = false).newBuilder().size(Size.ORIGINAL).build(),
         contentDescription = description,
         state = rememberZoomableImageState(zoomableState),
         modifier = modifier,
@@ -1482,10 +1437,10 @@ private fun mediaViewerPresenter(
             context: Context,
         ) {
             when (data) {
-                is UiMedia.Audio -> download(data.url, fileName, data.customHeaders, context)
-                is UiMedia.Gif -> download(data.url, fileName, data.customHeaders, context)
-                is UiMedia.Image -> save(data.url, fileName, context)
-                is UiMedia.Video -> download(data.urlForDownload, fileName, data.customHeaders, context)
+                is UiMedia.Audio -> download(data, fileName, context)
+                is UiMedia.Gif -> download(data, fileName, context)
+                is UiMedia.Image -> saveImage(data, fileName, context)
+                is UiMedia.Video -> download(data, fileName, context)
                 is UiMedia.Ugoira -> scope.launch { mediaDownloadManager.saveUgoira(data, fileName) }
             }
         }
@@ -1549,16 +1504,14 @@ private fun mediaViewerPresenter(
         }
 
         fun download(
-            uri: String,
+            media: UiMedia,
             fileName: String,
-            customHeaders: Map<String, String>?,
             context: Context,
         ) {
             scope.launch {
                 mediaDownloadManager.downloadMedia(
-                    uri = uri,
+                    media = media,
                     fileName = fileName,
-                    customHeaders = customHeaders,
                     callback =
                         object : AndroidDownloadManager.DownloadCallback {
                             override fun onDownloadStarted(downloadId: Long) {
@@ -1604,13 +1557,13 @@ private fun mediaViewerPresenter(
             }
         }
 
-        fun save(
-            uri: String,
+        fun saveImage(
+            media: UiMedia.Image,
             fileName: String,
             context: Context,
         ) {
             scope.launch {
-                context.imageLoader.diskCache?.openSnapshot(uri)?.use {
+                context.imageLoader.diskCache?.openSnapshot(media.cacheKey)?.use {
                     val byteArray = it.data.toFile().readBytes()
                     val success =
                         mediaDownloadManager.saveByteArray(
@@ -1631,14 +1584,7 @@ private fun mediaViewerPresenter(
                                 Toast.LENGTH_SHORT,
                             ).show()
                     }
-                } ?: withContext(Dispatchers.Main) {
-                    Toast
-                        .makeText(
-                            context,
-                            context.getString(R.string.media_is_downloading),
-                            Toast.LENGTH_SHORT,
-                        ).show()
-                }
+                } ?: run { download(media, fileName, context) }
             }
         }
     }

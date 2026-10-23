@@ -12,6 +12,7 @@ struct RawMediaScreen: View {
             medias: medias,
             initialIndex: initialIndex,
             preview: preview,
+            previewProxy: medias.indices.contains(initialIndex) ? medias[initialIndex].proxy : ProxyRef.Unbound.shared,
             shareContext: shareContext
         )
     }
@@ -21,15 +22,18 @@ struct MediaScreen: View {
     let url: String
     let preview: String?
     let customHeaders: [String: String]?
+    let proxy: ProxyRef
 
     init(
         url: String,
         preview: String? = nil,
-        customHeaders: [String: String]?
+        customHeaders: [String: String]?,
+        proxy: ProxyRef
     ) {
         self.url = url
         self.preview = preview
         self.customHeaders = customHeaders
+        self.proxy = proxy
     }
 
     var body: some View {
@@ -49,7 +53,8 @@ struct MediaScreen: View {
             height: 0,
             width: 0,
             sensitive: false,
-            customHeaders: customHeaders
+            customHeaders: customHeaders,
+            proxy: proxy
         )
     }
 }

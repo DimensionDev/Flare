@@ -170,7 +170,7 @@ public struct DiscoverContentScreen<AskAiOverlay: View>: View {
                                 Label {
                                     Text(account.handle.canonical)
                                 } icon: {
-                                    AvatarView(data: account.avatar?.url, customHeader: account.avatar?.customHeaders)
+                                    AvatarView(data: account.avatar)
                                 }
                             }
                         }
@@ -178,8 +178,7 @@ public struct DiscoverContentScreen<AskAiOverlay: View>: View {
                         if let selectedAccount = presenter.state.selectedAccount {
                             HStack(spacing: 8) {
                                 AvatarView(
-                                    data: selectedAccount.avatar?.url,
-                                    customHeader: selectedAccount.avatar?.customHeaders
+                                    data: selectedAccount.avatar
                                 )
                                 .frame(width: 24, height: 24)
                                 Text(selectedAccount.handle.canonical)
@@ -226,8 +225,7 @@ public struct DiscoverContentScreen<AskAiOverlay: View>: View {
                         isMacAccountPopoverPresented.toggle()
                     } label: {
                         AvatarView(
-                            data: toolbarAccount.avatar?.url,
-                            customHeader: toolbarAccount.avatar?.customHeaders
+                            data: toolbarAccount.avatar
                         )
                         .frame(width: 26, height: 26)
                     }
@@ -385,7 +383,7 @@ private struct MacDiscoverAccountRow: View {
                     .foregroundStyle(isSelected ? Color.accentColor : Color.secondary)
                     .frame(width: 18)
 
-                AvatarView(data: account.avatar?.url, customHeader: account.avatar?.customHeaders)
+                AvatarView(data: account.avatar)
                     .frame(width: 28, height: 28)
 
                 Text(account.handle.canonical)

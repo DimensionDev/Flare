@@ -11,6 +11,7 @@ import dev.dimension.flare.common.encodeProtobuf
 import dev.dimension.flare.model.DbAccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.bindMediaProxy
 
 @Entity(
     indices = [Index(value = ["statusKey", "accountType"], unique = true)],
@@ -86,7 +87,7 @@ internal class DbStatusContent private constructor(
         fun encode(value: UiTimelineV2): DbStatusContent {
             val encoded = value.encodeProtobuf<UiTimelineV2>()
             return DbStatusContent(
-                value = value,
+                value = value.bindMediaProxy(),
                 encoded = encoded,
                 fingerprint = encoded.databaseContentFingerprint(),
             )
@@ -94,7 +95,7 @@ internal class DbStatusContent private constructor(
 
         fun decode(encoded: ByteArray): DbStatusContent =
             DbStatusContent(
-                value = encoded.decodeProtobuf<UiTimelineV2>(),
+                value = encoded.decodeProtobuf<UiTimelineV2>().bindMediaProxy(),
                 encoded = null,
                 fingerprint = 0,
             )

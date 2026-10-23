@@ -544,5 +544,6 @@
   "secondaryFooterVersion": "版本 {version}",
   "rssOpenModeChecking": "正在推荐打开方式…",
   "rssOpenModeRecommended": "已根据最近文章推荐，可随时修改。",
-  "rssOpenModeUnknown": "暂时无法推荐打开方式，你可以手动选择。"
+  "rssOpenModeUnknown": "暂时无法推荐打开方式，你可以手动选择。",
+  "settingsAccountsRemoveFailed": "无法移除此账号，请重试。"
 }

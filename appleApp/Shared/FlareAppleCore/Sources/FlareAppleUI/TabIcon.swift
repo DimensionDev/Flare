@@ -41,7 +41,7 @@ public struct TabIcon: View {
                 .frame(width: size, height: size)
                 .id("\(avatar.accountKey.id)@\(avatar.accountKey.host)")
         case .url(let url):
-            NetworkImage(data: url.url)
+            NetworkImage(data: UiMediaImage(url: url.url, proxy: ProxyRef.Global.shared))
                 .frame(width: size, height: size)
                 .clipShape(RoundedRectangle(cornerRadius: faviconCornerRadius, style: .continuous))
         case .mixed(let mixed):
@@ -107,7 +107,7 @@ public struct AvatarTabIcon: View {
 
     public var body: some View {
         StateView(state: presenter.state.user) { user in
-            AvatarView(data: user.avatar?.url, customHeader: user.avatar?.customHeaders)
+            AvatarView(data: user.avatar)
         } loadingContent: {
             Image(fontAwesome: .globe)
                 .resizable()
@@ -126,7 +126,7 @@ public struct FavTabIcon: View {
 
     public var body: some View {
         StateView(state: presenter.state) { url in
-            NetworkImage(data: .init(url))
+            NetworkImage(data: UiMediaImage(url: String(url), proxy: ProxyRef.Global.shared))
                 .clipShape(RoundedRectangle(cornerRadius: faviconCornerRadius, style: .continuous))
         } loadingContent: {
             Image(fontAwesome: .globe)

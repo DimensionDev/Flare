@@ -16,12 +16,14 @@ import dev.dimension.flare.data.datasource.microblog.loader.ListLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.createPagingRemoteMediator
 import dev.dimension.flare.data.datasource.microblog.pagingConfig
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.DbAccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiList
+import dev.dimension.flare.ui.model.withProxy
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -84,7 +86,7 @@ public class ListHandler<T : UiList>(
         ).flow.map { pagingData ->
             pagingData.map {
                 @Suppress("UNCHECKED_CAST")
-                it.list.content.data as T
+                it.list.content.data.withProxy(ProxyRef.forAccount(accountKey)) as T
             }
         }
     }
@@ -93,7 +95,7 @@ public class ListHandler<T : UiList>(
         database.listDao().getListKeysFlow(pagingKey).map { dbItems ->
             dbItems.map {
                 @Suppress("UNCHECKED_CAST")
-                it.list.content.data as T
+                it.list.content.data.withProxy(ProxyRef.forAccount(accountKey)) as T
             }
         }
     }
@@ -123,7 +125,7 @@ public class ListHandler<T : UiList>(
                         accountType = accountType,
                     ).mapNotNull { dbList ->
                         @Suppress("UNCHECKED_CAST")
-                        dbList?.content?.data as T?
+                        dbList?.content?.data?.withProxy(ProxyRef.forAccount(accountKey)) as T?
                     }
             },
         )

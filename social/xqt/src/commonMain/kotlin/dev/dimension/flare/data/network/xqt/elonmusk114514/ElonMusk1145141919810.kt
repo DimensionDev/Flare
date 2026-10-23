@@ -35,10 +35,12 @@ internal object ElonMusk1145141919810 {
     suspend fun senpaiSukissu(
         method: String,
         path: String,
+        proxy: dev.dimension.flare.data.model.ProxyRef,
     ): String {
         if (jsonPair == null) {
             val url = "https://raw.githubusercontent.com/fa0311/x-client-transaction-id-pair-dict/refs/heads/main/pair.json"
-            val response = ktorClient().get(url).bodyAsText()
+            val client = ktorClient(proxy)
+            val response = try { client.get(url).bodyAsText() } finally { client.close(); client.engine.close() }
             jsonPair = response.decodeJson()
         }
 

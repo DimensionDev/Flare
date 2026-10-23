@@ -10,6 +10,7 @@ import dev.dimension.flare.data.network.fanbox.FanboxService
 import dev.dimension.flare.data.network.fanbox.toFanboxCursor
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.bindMediaProxy
 import io.ktor.http.Url
 import kotlinx.collections.immutable.toImmutableList
 
@@ -266,7 +267,7 @@ internal class FanboxCommentsLoader(
                                 UiTimelineV2.PostPresentation(
                                     quotes = replies,
                                 ),
-                        )
+                        ).bindMediaProxy()
                     } else {
                         post
                     }

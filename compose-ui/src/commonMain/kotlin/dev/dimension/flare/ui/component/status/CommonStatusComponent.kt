@@ -728,7 +728,7 @@ private fun StatusReactionComponent(
                             PlatformText(reaction.name)
                         } else {
                             EmojiImage(
-                                uri = reaction.url,
+                                media = reaction.media,
                                 modifier = Modifier.height(16.dp),
                             )
                         }

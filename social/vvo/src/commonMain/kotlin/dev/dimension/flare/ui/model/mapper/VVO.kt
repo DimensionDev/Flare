@@ -4,6 +4,7 @@ import com.fleeksoft.ksoup.nodes.Element
 import com.fleeksoft.ksoup.nodes.Node
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.PostActionFamily
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.data.network.vvo.model.Attitude
 import dev.dimension.flare.data.network.vvo.model.Comment
 import dev.dimension.flare.data.network.vvo.model.Status
@@ -23,8 +24,10 @@ import dev.dimension.flare.ui.model.UiNumber
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.UiTranslatableText
+import dev.dimension.flare.ui.model.bindMediaProxy
 import dev.dimension.flare.ui.model.contentPostOrNull
 import dev.dimension.flare.ui.model.toUiImage
+import dev.dimension.flare.ui.model.withProxy
 import dev.dimension.flare.ui.render.UiRichText
 import dev.dimension.flare.ui.render.parseHtml
 import dev.dimension.flare.ui.render.toUi
@@ -65,13 +68,13 @@ internal fun Attitude.render(accountKey: MicroBlogKey): UiTimelineV2 {
                         ClickEvent.Noop
                     },
                 accountType = AccountType.Specific(accountKey),
-            ),
+            ).bindMediaProxy(),
         users = listOfNotNull(user).toImmutableList(),
         post = content,
         createdAt = createdAt?.toUi() ?: Clock.System.now().toUi(),
         statusKey = MicroBlogKey(id.toString(), accountKey.host),
         accountType = AccountType.Specific(accountKey),
-    )
+    ).bindMediaProxy()
 }
 
 private fun Status.renderStatusV2(accountKey: MicroBlogKey): UiTimelineV2 {
@@ -184,7 +187,7 @@ private fun Status.renderStatusV2(accountKey: MicroBlogKey): UiTimelineV2 {
                         ),
                     ),
                 accountType = AccountType.Specific(accountKey),
-            )
+            ).bindMediaProxy()
         }
 
     val quote = retweetedStatus?.renderStatusV2(accountKey)?.contentPostOrNull()
@@ -311,7 +314,7 @@ private fun Status.renderStatusV2(accountKey: MicroBlogKey): UiTimelineV2 {
                     ),
                 ),
             accountType = AccountType.Specific(accountKey),
-        )
+        ).bindMediaProxy()
     return if (message != null || quote != null) {
         UiTimelineV2.TimelinePostItem(
             post = post,
@@ -320,7 +323,7 @@ private fun Status.renderStatusV2(accountKey: MicroBlogKey): UiTimelineV2 {
                     message = message,
                     quotes = listOfNotNull(quote).toImmutableList(),
                 ),
-        )
+        ).bindMediaProxy()
     } else {
         post
     }
@@ -486,7 +489,7 @@ private fun Comment.renderStatusV2(accountKey: MicroBlogKey): UiTimelineV2 {
                     },
                 ),
             accountType = AccountType.Specific(accountKey),
-        )
+        ).bindMediaProxy()
     return if (quote.isNotEmpty()) {
         UiTimelineV2.TimelinePostItem(
             post = post,
@@ -494,7 +497,7 @@ private fun Comment.renderStatusV2(accountKey: MicroBlogKey): UiTimelineV2 {
                 UiTimelineV2.PostPresentation(
                     quotes = quote,
                 ),
-        )
+        ).bindMediaProxy()
     } else {
         post
     }
@@ -555,7 +558,7 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile {
                     userKey = userKey,
                 ),
             ),
-    )
+    ).withProxy(ProxyRef.forAccount(accountKey))
 }
 
 internal fun renderVVOText(
@@ -627,7 +630,7 @@ private fun replaceMentionAndHashtag(
                 if (url.contains("sinaimg.cn/")) {
                     node.attributes().put(
                         "href",
-                        DeeplinkRoute.Media.Image(uri = url, previewUrl = null).toUri(),
+                        DeeplinkRoute.Media.Image(uri = url, previewUrl = null, proxy = ProxyRef.forAccount(accountKey)).toUri(),
                     )
                 } else {
                     node.attributes().put(

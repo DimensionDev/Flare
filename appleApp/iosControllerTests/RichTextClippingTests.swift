@@ -98,7 +98,7 @@ final class RichTextClippingTests: XCTestCase {
         var blocks: [RenderContent] = paragraphs.map {
             RenderContent.Text(runs: [RenderRun.Text(text: $0, style: style)], block: block)
         }
-        if invalidImage { blocks.insert(RenderContent.BlockImage(url: "https://[", href: nil), at: 0) }
+        if invalidImage { blocks.insert(RenderContent.BlockImage(url: "https://[", href: nil, proxy: ProxyRef.Global.shared), at: 0) }
         let raw = paragraphs.joined(separator: "\n")
         return UiRichText(renderRuns: blocks, isRtl: false, raw: raw, innerText: raw, imageUrls: [])
     }

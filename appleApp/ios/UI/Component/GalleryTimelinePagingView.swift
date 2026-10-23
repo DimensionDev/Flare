@@ -1165,7 +1165,7 @@ private final class GalleryPostTileUIView: UIView, UIGestureRecognizerDelegate {
         imageAspectConstraint = nil
         imageView.cancel()
         playBadgeBackground.isHidden = true
-        avatar.set(url: nil)
+        avatar.set(media: nil)
         bodyText.text = nil
         bodyTranslationText.text = nil
         bodyTranslationText.isHidden = true
@@ -1195,7 +1195,7 @@ private final class GalleryPostTileUIView: UIView, UIGestureRecognizerDelegate {
                 imageView.isHidden = false
                 playBadgeBackground.isHidden = !isVideo(media)
                 if loadsRemoteImages {
-                    imageView.set(url: preview, customHeaders: media.customHeaders)
+                    imageView.set(media: media.preview)
                 }
                 let ratio = max(media.aspectRatio ?? 1.0, 0.3)
                 imageAspectConstraint = imageView.heightAnchor.constraint(equalTo: imageView.widthAnchor, multiplier: 1 / ratio)
@@ -1221,13 +1221,12 @@ private final class GalleryPostTileUIView: UIView, UIGestureRecognizerDelegate {
         if let user = post.user {
             userRow.isHidden = false
             avatar.set(
-                url: loadsRemoteImages ? user.avatar?.url : nil,
-                customHeaders: loadsRemoteImages ? user.avatar?.customHeaders : nil
+                media: loadsRemoteImages ? user.avatar : nil
             )
             userName.text = user.name
         } else {
             userRow.isHidden = true
-            avatar.set(url: nil)
+            avatar.set(media: nil)
             userName.text = nil
         }
     }
@@ -1373,7 +1372,7 @@ private final class GalleryFeedTileUIView: UIView {
         if appearance.showMedia, let media = feed.media {
             imageView.isHidden = false
             if loadsRemoteImages {
-                imageView.set(url: media.url, customHeaders: media.customHeaders)
+                imageView.set(media: media)
             }
             let ratio = max(CGFloat(media.aspectRatio), 0.3)
             imageAspectConstraint = imageView.heightAnchor.constraint(equalTo: imageView.widthAnchor, multiplier: 1 / ratio)
@@ -1391,7 +1390,7 @@ private final class GalleryFeedTileUIView: UIView {
         if let icon = feed.source.icon, !icon.isEmpty {
             sourceIcon.isHidden = false
             if loadsRemoteImages {
-                sourceIcon.set(url: icon, customHeaders: nil)
+                sourceIcon.set(media: feed.source.media)
             } else {
                 sourceIcon.cancel()
             }
@@ -1465,26 +1464,12 @@ private final class GalleryNetworkImageView: UIImageView {
     }
     required init?(coder: NSCoder) { fatalError("init(coder:) not supported") }
 
-    func set(url: String, customHeaders: [String: String]?) {
-        guard let url = URL(string: url) else {
-            image = nil
-            return
-        }
-        var options: KingfisherOptionsInfo = [.transition(.fade(0.25)), .cacheOriginalImage, .backgroundDecode]
-        if let customHeaders, !customHeaders.isEmpty {
-            options.append(.requestModifier(AnyModifier { request in
-                var request = request
-                for (key, value) in customHeaders {
-                    request.setValue(value, forHTTPHeaderField: key)
-                }
-                return request
-            }))
-        }
-        kf.setImage(with: url, options: options)
+    func set(media: UiMedia?) {
+        setMedia(media, options: [.transition(.fade(0.25)), .cacheOriginalImage, .backgroundDecode])
     }
 
     func cancel() {
-        kf.cancelDownloadTask()
+        cancelMediaLoad()
         image = nil
     }
 }

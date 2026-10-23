@@ -7,12 +7,17 @@ import androidx.core.content.FileProvider
 import coil3.annotation.ExperimentalCoilApi
 import coil3.imageLoader
 import dev.dimension.flare.R
+import dev.dimension.flare.data.network.applyMedia
+import dev.dimension.flare.data.network.mediaHttpClient
 import dev.dimension.flare.ui.model.UiMedia
+import io.ktor.client.HttpClient
+import io.ktor.client.request.prepareGet
+import io.ktor.client.statement.bodyAsChannel
+import io.ktor.http.isSuccess
+import io.ktor.utils.io.readAvailable
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
-import java.net.HttpURLConnection
-import java.net.URL
 
 @OptIn(ExperimentalCoilApi::class)
 internal suspend fun shareImageMedia(
@@ -27,7 +32,7 @@ internal suspend fun shareImageMedia(
         )
     val success =
         withContext(Dispatchers.IO) {
-            context.imageLoader.diskCache?.openSnapshot(media.url)?.use {
+            context.imageLoader.diskCache?.openSnapshot(media.cacheKey)?.use {
                 it.data.toFile().copyTo(targetFile, overwrite = true)
                 true
             } ?: run {
@@ -40,9 +45,8 @@ internal suspend fun shareImageMedia(
                         ).show()
                 }
                 downloadToFile(
-                    url = media.url,
+                    media = media,
                     targetFile = targetFile,
-                    customHeaders = media.customHeaders,
                 )
             }
         }
@@ -78,31 +82,33 @@ internal suspend fun shareImageMedia(
     }
 }
 
-private fun downloadToFile(
-    url: String,
+internal suspend fun downloadToFile(
+    media: UiMedia.Image,
     targetFile: File,
-    customHeaders: Map<String, String>?,
+    client: HttpClient = mediaHttpClient(media.proxy),
 ): Boolean =
     runCatching {
         targetFile.parentFile?.mkdirs()
-        val connection = URL(url).openConnection()
-        customHeaders?.forEach { (key, value) ->
-            connection.setRequestProperty(key, value)
-        }
-        if (connection is HttpURLConnection) {
-            connection.connect()
-            if (connection.responseCode !in 200..299) {
-                connection.disconnect()
-                return@runCatching false
+        try {
+            client.prepareGet(media.url) { applyMedia(media) }.execute { response ->
+                check(response.status.isSuccess())
+                targetFile.outputStream().use { output ->
+                    val channel = response.bodyAsChannel()
+                    val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+                    while (true) {
+                        val count = channel.readAvailable(buffer)
+                        if (count < 0) break
+                        output.write(buffer, 0, count)
+                    }
+                    channel.closedCause?.let { throw it }
+                }
             }
-        }
-        connection.getInputStream().use { input ->
-            targetFile.outputStream().use { output ->
-                input.copyTo(output)
-            }
-        }
-        if (connection is HttpURLConnection) {
-            connection.disconnect()
+        } finally {
+            client.close()
+            client.engine.close()
         }
         true
-    }.getOrDefault(false)
+    }.getOrElse {
+        targetFile.delete()
+        false
+    }

@@ -1,5 +1,6 @@
 package dev.dimension.flare.data.network.bluesky
 
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.data.network.ktorClient
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
@@ -19,15 +20,19 @@ import sh.christian.ozone.oauth.OAuthToken
 private const val AT_PROTO_PDS_SERVICE_ID = "#atproto_pds"
 private const val AT_PROTO_PDS_SERVICE_TYPE = "AtprotoPersonalDataServer"
 
-internal suspend fun OAuthToken.withResolvedPds(issuer: String): OAuthToken {
+internal suspend fun OAuthToken.withResolvedPds(
+    issuer: String,
+    proxy: ProxyRef,
+): OAuthToken {
     val httpClient =
-        ktorClient {
+        ktorClient(proxy) {
             followRedirects = false
         }
     return try {
         withResolvedPds(issuer, httpClient)
     } finally {
         httpClient.close()
+        httpClient.engine.close()
     }
 }
 

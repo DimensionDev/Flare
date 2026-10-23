@@ -4,6 +4,7 @@ import de.jensklingenberg.ktorfit.converter.ResponseConverterFactory
 import dev.dimension.flare.common.JSON
 import dev.dimension.flare.common.UploadMedia
 import dev.dimension.flare.common.decodeJson
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.data.network.appendMedia
 import dev.dimension.flare.data.network.ktorClient
 import dev.dimension.flare.data.network.nullableFallbackJson
@@ -52,8 +53,6 @@ private val defaultConfigLoginRetryDelay = 500.milliseconds
 private const val CONFIG_LOGIN_RETRY_LIMIT = 5
 
 private typealias VVOHttpClientFactory = (HttpClientConfig<*>.() -> Unit) -> HttpClient
-
-private fun defaultVvoHttpClient(config: HttpClientConfig<*>.() -> Unit): HttpClient = ktorClient(config)
 
 private fun vvoKtorfit(
     url: String = baseUrl,
@@ -108,7 +107,8 @@ internal class VVOService private constructor(
         refreshCookieWhenStale: Boolean = false,
         configLoginRetryDelay: Duration = defaultConfigLoginRetryDelay,
         onCredentialRefreshed: suspend (VVoCredential) -> Unit = {},
-        httpClientFactory: (HttpClientConfig<*>.() -> Unit) -> HttpClient = ::defaultVvoHttpClient,
+        proxy: ProxyRef = ProxyRef.Global,
+        httpClientFactory: (HttpClientConfig<*>.() -> Unit) -> HttpClient = { ktorClient(proxy, it) },
     ) : this(
         credentialFlow = credentialFlow,
         refreshCookieWhenStale = refreshCookieWhenStale,

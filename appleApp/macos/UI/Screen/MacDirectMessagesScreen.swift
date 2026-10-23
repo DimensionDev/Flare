@@ -206,7 +206,7 @@ private struct MacDMUserRow: View {
     var body: some View {
         StateView(state: item.profile) { user in
             HStack(spacing: 10) {
-                AvatarView(data: user.avatar?.url, customHeader: user.avatar?.customHeaders)
+                AvatarView(data: user.avatar)
                     .frame(width: 34, height: 34)
 
                 VStack(alignment: .leading, spacing: 2) {
@@ -619,7 +619,7 @@ private struct MacDMMessageRow: View {
                 if item.isFromMe {
                     Spacer(minLength: 56)
                 } else if item.showSender {
-                    AvatarView(data: item.user.avatar?.url, customHeader: item.user.avatar?.customHeaders)
+                    AvatarView(data: item.user.avatar)
                         .frame(width: 32, height: 32)
                 }
 
@@ -751,7 +751,7 @@ private struct MacDMRoomAvatar: View {
 
     var body: some View {
         if room.hasUser, let firstUser = room.users.first {
-            AvatarView(data: firstUser.avatar?.url, customHeader: firstUser.avatar?.customHeaders)
+            AvatarView(data: firstUser.avatar)
                 .frame(width: 42, height: 42)
         } else {
             Image(fontAwesome: .circleUser)

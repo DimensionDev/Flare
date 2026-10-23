@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.route
 
 import androidx.navigation3.runtime.NavKey
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.data.model.tab.UiSourceTimelineTabItem
 import dev.dimension.flare.data.model.tab.UiTimelineTabItem
 import dev.dimension.flare.data.model.tab.xqtDeviceFollow
@@ -175,6 +176,7 @@ internal sealed interface Route : NavKey {
     data class RawImage(
         val rawImage: String,
         val customHeaders: ImmutableMap<String, String>? = null,
+        val proxy: ProxyRef = ProxyRef.Global,
     ) : WindowRoute
 
     data object Compose {
@@ -409,7 +411,7 @@ internal sealed interface Route : NavKey {
                 }
 
                 is DeeplinkRoute.Media.Image -> {
-                    RawImage(deeplinkRoute.uri)
+                    RawImage(deeplinkRoute.uri, deeplinkRoute.customHeaders?.toImmutableMap(), deeplinkRoute.proxy)
                 }
 
                 is DeeplinkRoute.Media.Podcast -> {

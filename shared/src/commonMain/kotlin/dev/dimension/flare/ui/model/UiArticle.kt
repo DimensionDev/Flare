@@ -3,6 +3,7 @@ package dev.dimension.flare.ui.model
 import androidx.compose.runtime.Immutable
 import dev.dimension.flare.common.SerializableImmutableList
 import dev.dimension.flare.common.SerializableImmutableMap
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.ui.render.RenderContent
 import dev.dimension.flare.ui.render.UiDateTime
 import dev.dimension.flare.ui.render.UiRichText
@@ -12,6 +13,7 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 import kotlin.native.HiddenFromObjC
 
 @Serializable
@@ -43,7 +45,10 @@ public sealed interface UiArticleAuthor {
         val siteName: String? = null,
         val byline: String? = null,
         val iconUrl: String? = null,
-    ) : UiArticleAuthor
+        @Transient val proxy: ProxyRef = ProxyRef.Unbound,
+    ) : UiArticleAuthor {
+        val media: UiMedia.Image? get() = iconUrl.toUiImage(proxy = proxy)
+    }
 }
 
 @Serializable
@@ -99,7 +104,10 @@ public sealed interface UiArticleBlock {
         val sizeBytes: Long? = null,
         val extension: String? = null,
         val customHeaders: SerializableImmutableMap<String, String>? = null,
-    ) : UiArticleBlock
+        @Transient val proxy: ProxyRef = ProxyRef.Unbound,
+    ) : UiArticleBlock {
+        val media: UiMedia get() = UiMedia.Image(url, customHeaders, proxy)
+    }
 
     @Serializable
     @SerialName("embed")
@@ -111,7 +119,10 @@ public sealed interface UiArticleBlock {
         val description: String? = null,
         val imageUrl: String? = null,
         val htmlFallback: String? = null,
-    ) : UiArticleBlock
+        @Transient val proxy: ProxyRef = ProxyRef.Unbound,
+    ) : UiArticleBlock {
+        val media: UiMedia.Image? get() = imageUrl.toUiImage(proxy = proxy)
+    }
 
     @Serializable
     @SerialName("content_gate")

@@ -39,6 +39,7 @@ import dev.dimension.flare.add_rss_source
 import dev.dimension.flare.cancel
 import dev.dimension.flare.data.database.app.model.RssDisplayMode
 import dev.dimension.flare.data.database.app.model.SubscriptionType
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.edit_rss_source
 import dev.dimension.flare.mastodon_available_timelines
 import dev.dimension.flare.mastodon_federated_timeline
@@ -74,6 +75,7 @@ import dev.dimension.flare.ui.model.isSuccess
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.takeSuccess
+import dev.dimension.flare.ui.model.toUiImage
 import dev.dimension.flare.ui.presenter.home.rss.CheckRssSourcePresenter
 import dev.dimension.flare.ui.presenter.home.rss.EditRssSourcePresenter
 import dev.dimension.flare.ui.presenter.home.rss.RssReadingMode
@@ -254,7 +256,7 @@ fun EditRssSourceScreen(
                                     rssState.icon?.let {
                                         {
                                             NetworkImage(
-                                                it,
+                                                it.toUiImage(proxy = ProxyRef.Global),
                                                 contentDescription = null,
                                                 modifier =
                                                     Modifier
@@ -314,7 +316,7 @@ fun EditRssSourceScreen(
                                 CardExpanderItem(
                                     icon = {
                                         NetworkImage(
-                                            source.favIcon,
+                                            source.favIcon.toUiImage(proxy = ProxyRef.Global),
                                             contentDescription = null,
                                             modifier =
                                                 Modifier
@@ -368,7 +370,7 @@ fun EditRssSourceScreen(
                                         rssState.icon?.let {
                                             {
                                                 NetworkImage(
-                                                    it,
+                                                    it.toUiImage(proxy = ProxyRef.Global),
                                                     contentDescription = null,
                                                     modifier =
                                                         Modifier

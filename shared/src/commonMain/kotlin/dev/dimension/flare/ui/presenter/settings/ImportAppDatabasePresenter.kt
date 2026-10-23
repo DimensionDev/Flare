@@ -5,6 +5,7 @@ import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.database.app.model.AppDatabaseExport
 import dev.dimension.flare.data.database.cache.connect
+import dev.dimension.flare.data.repository.ProxyRepository
 import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.model.requireValidPlatformId
 import dev.dimension.flare.ui.presenter.ImportState
@@ -14,6 +15,7 @@ public class ImportAppDatabasePresenter(
     private val jsonContent: String,
 ) : PresenterBase<ImportState>() {
     private val appDatabase: AppDatabase by koinInject()
+    private val proxyRepository: ProxyRepository by koinInject()
 
     @Composable
     override fun body(): ImportState =
@@ -48,6 +50,7 @@ public class ImportAppDatabasePresenter(
                 appDatabase.rssSourceDao().insertAll(export.rssSources)
             }
         }
+        export.accounts.forEach { proxyRepository.restoreAccount(it.account_key) }
     }
 
     private fun validateImportData(export: AppDatabaseExport) {

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="proxy_title">代理</string>
+    <string name="proxy_description">为全局及各账号设置本机代理。修改立即用于新请求，代理失败不会自动直连。</string>
+    <string name="proxy_scope">Nostr、外部浏览器、网页视图、系统推送及第三方 SDK 使用各自的网络设置。</string>
+    <string name="proxy_global">全局</string>
+    <string name="proxy_system">系统设置</string>
+    <string name="proxy_direct">直连</string>
+    <string name="proxy_inherit">跟随全局</string>
+    <string name="proxy_profiles">代理服务器</string>
+    <string name="proxy_add">添加代理</string>
+    <string name="proxy_name">名称</string>
+    <string name="proxy_host">主机名或 IP 地址</string>
+    <string name="proxy_port">端口</string>
+    <string name="proxy_protocol">协议</string>
+    <string name="proxy_no_auth">HTTPS 使用 TLS 连接代理服务器；SOCKS5 由代理解析目标域名。暂不支持代理认证。</string>
+    <string name="proxy_test">测试连接</string>
+    <string name="proxy_test_hint">通过此代理测试 example.com 的 HTTPS 连接。</string>
+    <string name="proxy_test_success">连接成功</string>
+    <string name="proxy_in_use">删除前请先调整使用此代理的全局和账号设置。</string>
+    <string name="proxy_edit">编辑代理</string>
+    <string name="proxy_accounts">账号</string>
+    <string name="proxy_save">保存</string>
+    <string name="proxy_cancel">取消</string>
+    <string name="proxy_delete">删除</string>
+    <string name="proxy_done">完成</string>
+    <string name="proxy_effective">当前生效</string>
+    <string name="proxy_local_network_permission">请允许访问本地网络，以连接局域网中的代理服务器。</string>
+</resources>

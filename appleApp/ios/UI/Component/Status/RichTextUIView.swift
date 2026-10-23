@@ -1,8 +1,10 @@
+import FlareAppleUI
 import UIKit
 import Kingfisher
 import KotlinSharedUI
 import SwiftUI
 import FlareAppleCore
+import Combine
 
 /// Pure-UIKit renderer for the iOS `RichText` SwiftUI view.
 final class RichTextUIView: UIView, TimelineHeightProviding {
@@ -70,6 +72,8 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
     private var collapsedPreviewHeight: CGFloat?
     private var renderedInlineImageURLs: Set<String> = []
     private var loadingInlineImageURLs: Set<String> = []
+    private var inlineImageRevision = 0
+    private var proxyObservation: AnyCancellable?
     private var blockImageAspectRatios: [String: CGFloat] = [:]
 
     private struct StructuralSignature: Equatable {
@@ -219,6 +223,7 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
         renderedWidthKey = Self.measurementWidthKey(width)
 
         guard let text else {
+            proxyObservation = nil
             invalidateIntrinsicContentSize()
             return
         }
@@ -234,7 +239,7 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
                 case let textContent as PlatformTextTextContent:
                     addTextContent(textContent)
                 case let imageContent as PlatformTextBlockImageContent:
-                    addBlockImage(url: imageContent.url, href: imageContent.href)
+                    addBlockImage(media: imageContent.media, href: imageContent.href)
                 default:
                     continue
                 }
@@ -507,7 +512,7 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
                 }
                 remainingLines -= visibleLines
             case .image(let content, let height, let lines):
-                addBlockImage(url: content.url, href: content.href)
+                addBlockImage(media: content.media, href: content.href)
                 previewHeight += lines <= remainingLines ? height : min(height, CGFloat(remainingLines) * lineHeight)
                 remainingLines -= min(lines, remainingLines)
             }
@@ -586,9 +591,10 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
         }
     }
 
-    private func addBlockImage(url: String, href: String?) {
+    private func addBlockImage(media: UiMediaImage, href: String?) {
+        let url = media.url
         guard URL(string: url) != nil else { return }
-        let imageView = RichTextBlockImageView(url: url, href: href, aspectRatio: blockImageAspectRatios[url])
+        let imageView = RichTextBlockImageView(media: media, href: href, aspectRatio: blockImageAspectRatios[url])
         let measurement = RichTextBlockImageMeasurement()
         if let ratio = blockImageAspectRatios[url] { measurement.update(aspectRatio: ratio) }
         let generation = renderGeneration
@@ -730,17 +736,28 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
     }
 
     private func loadInlineImages(for text: UiRichText, generation: Int) {
+        guard !renderedInlineImageURLs.isEmpty else { proxyObservation = nil; return }
+        if proxyObservation == nil {
+            proxyObservation = ProxyNetwork.shared.changes.toPublisher()
+                .receive(on: DispatchQueue.main)
+                .sink { [weak self] _ in
+                    guard let self, let text = self.text else { return }
+                    self.inlineImageRevision += 1
+                    self.loadingInlineImageURLs.removeAll()
+                    self.loadInlineImages(for: text, generation: self.renderGeneration)
+                }
+        }
+        let revision = inlineImageRevision
         for urlString in renderedInlineImageURLs where inlineImages[urlString] == nil && !loadingInlineImageURLs.contains(urlString) {
-            guard let url = URL(string: urlString) else { continue }
+            guard let media = text.imageMedias.first(where: { $0.url == urlString }) else { continue }
             loadingInlineImageURLs.insert(urlString)
-            KingfisherManager.shared.retrieveImage(with: url) { [weak self] result in
-                Task { @MainActor [weak self] in
-                    guard let self, self.renderGeneration == generation else { return }
-                    self.loadingInlineImageURLs.remove(urlString)
-                    if case .success(let value) = result {
-                        self.inlineImages[urlString] = value.image
-                        self.refreshTextBlocks()
-                    }
+            Task { @MainActor [weak self] in
+                let result = try? await ProxyMediaImages.shared.retrieve(media)
+                guard let self, self.renderGeneration == generation, self.inlineImageRevision == revision else { return }
+                self.loadingInlineImageURLs.remove(urlString)
+                if let result {
+                    self.inlineImages[urlString] = result.image
+                    self.refreshTextBlocks()
                 }
             }
         }
@@ -1660,15 +1677,16 @@ private final class RichTextBlockImageView: UIView, RichTextFittingPreparing {
     var onOpenURL: ((URL) -> Void)?
     var onAspectRatioChanged: ((CGFloat) -> Void)?
 
-    private let url: String
+    private let media: UiMediaImage
+    private var url: String { media.url }
     private let href: String?
     private let imageView = UIImageView()
     private var aspectConstraint: NSLayoutConstraint?
     private var aspectRatio: CGFloat?
     private var lastLayoutWidth: CGFloat = 0
 
-    init(url: String, href: String?, aspectRatio: CGFloat? = nil) {
-        self.url = url
+    init(media: UiMediaImage, href: String?, aspectRatio: CGFloat? = nil) {
+        self.media = media
         self.href = href
         self.aspectRatio = aspectRatio
         super.init(frame: .zero)
@@ -1707,8 +1725,7 @@ private final class RichTextBlockImageView: UIView, RichTextFittingPreparing {
     }
 
     func loadImage() {
-        guard let imageURL = URL(string: url) else { return }
-        imageView.kf.setImage(with: imageURL, options: [.backgroundDecode]) { [weak self] result in
+        imageView.setMedia(media, options: [.backgroundDecode]) { [weak self] result in
             guard let self else { return }
             if case .success(let value) = result {
                 self.updateAspectRatio(for: value.image)

@@ -727,7 +727,7 @@ private struct MacComposeAccountAvatar: View {
 
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
-            AvatarView(data: user.avatar?.url, customHeader: user.avatar?.customHeaders)
+            AvatarView(data: user.avatar)
                 .scaledToFit()
                 .frame(width: size, height: size)
                 .clipShape(Circle())

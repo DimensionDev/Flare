@@ -1,6 +1,10 @@
 import Foundation
 
 public enum AppleMediaFileExtension {
+    public nonisolated static func isGIF(url: URL?) -> Bool {
+        url?.pathExtension.lowercased() == "gif"
+    }
+
     public nonisolated static func image(url: URL, fallback: String = "jpg") -> String {
         extensionFromPath(url.path) ?? fallback
     }

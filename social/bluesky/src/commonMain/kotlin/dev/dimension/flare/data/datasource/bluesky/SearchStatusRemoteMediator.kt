@@ -57,7 +57,7 @@ internal class SearchStatusRemoteMediator(
                 }
             }.requireResponse()
 
-        val downloadUrls = resolveBlueskyVideoDownloadUrls(response.posts)
+        val downloadUrls = resolveBlueskyVideoDownloadUrls(response.posts, accountKey)
         return PagingResult(
             endOfPaginationReached = response.cursor == null,
             data = response.posts.map { it.render(accountKey, downloadUrls) },

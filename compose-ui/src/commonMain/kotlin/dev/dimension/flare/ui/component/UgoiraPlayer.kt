@@ -127,11 +127,10 @@ public fun UgoiraPlayer(
         val frame = painter
         if (frame == null) {
             NetworkImage(
-                media.previewUrl,
+                media.preview,
                 media.accessibleDescription(),
                 Modifier.matchParentSize(),
                 contentScale = contentScale,
-                customHeaders = media.customHeaders,
             )
         } else {
             Image(frame, media.accessibleDescription(), Modifier.matchParentSize(), contentScale = contentScale)
@@ -217,7 +216,7 @@ public fun GalleryMedia(
         }
         UgoiraPlayer(media, modifier, contentScale = contentScale)
     } else {
-        NetworkImage(media.url, media.accessibleDescription(), modifier, contentScale = contentScale, customHeaders = media.customHeaders)
+        NetworkImage(media, media.accessibleDescription(), modifier, contentScale = contentScale)
     }
 }
 

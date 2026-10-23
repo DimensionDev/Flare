@@ -4,18 +4,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import dev.dimension.flare.ui.component.MediaViewerPlayback
-import kotlinx.collections.immutable.ImmutableMap
+import dev.dimension.flare.ui.model.UiMedia
 
 @Composable
 internal fun RawMediaScreen(
-    url: String,
-    customHeaders: ImmutableMap<String, String>?,
+    media: UiMedia?,
 ) {
     MediaViewerPlayback {
         ImageItem(
-            url = url,
-            previewUrl = url,
-            customHeaders = customHeaders,
+            media = media,
             description = null,
             setLockPager = {},
             isFocused = true,

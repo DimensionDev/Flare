@@ -1,6 +1,7 @@
 package dev.dimension.flare.data.network.bluesky
 
 import com.atproto.server.RefreshSessionResponse
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.data.platform.BLUESKY_PLATFORM_ID
 import dev.dimension.flare.data.platform.BlueskyCredential
 import dev.dimension.flare.data.repository.LoginExpiredException
@@ -59,9 +60,7 @@ internal class BlueskyAuthPlugin(
     class Config(
         var json: Json = BlueskyJson,
         var oauthApi: OAuthApi = OAuthApi(),
-        var resolveOAuthPds: suspend (OAuthToken, String) -> OAuthToken = { token, issuer ->
-            token.withResolvedPds(issuer)
-        },
+        var resolveOAuthPds: (suspend (OAuthToken, String) -> OAuthToken)? = null,
         var accountKey: MicroBlogKey? = null,
         var baseUrlFlow: Flow<String>? = null,
         var authTokenFlow: Flow<BlueskyCredential>? = null,
@@ -76,7 +75,10 @@ internal class BlueskyAuthPlugin(
             return BlueskyAuthPlugin(
                 json = config.json,
                 oauthApi = config.oauthApi,
-                resolveOAuthPds = config.resolveOAuthPds,
+                resolveOAuthPds =
+                    config.resolveOAuthPds ?: { token, issuer ->
+                        token.withResolvedPds(issuer, ProxyRef.forAccount(config.accountKey))
+                    },
                 accountKey = config.accountKey,
                 baseUrlFlow = config.baseUrlFlow,
                 authTokenFlow = config.authTokenFlow,

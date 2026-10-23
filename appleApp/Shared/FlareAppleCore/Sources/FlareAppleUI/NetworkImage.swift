@@ -1,33 +1,80 @@
 import SwiftUI
 import Kingfisher
+import KotlinSharedUI
+import FlareAppleCore
 
 public struct NetworkImage: View {
-    private let data: URL?
-    private let placeholder: URL?
-    private let customHeader: [String: String]?
+    private let data: UiMedia?
+    private let placeholder: UiMedia?
     private let contentMode: SwiftUI.ContentMode
     private let usesCrossfade: Bool
     private let onProgress: ((Double?) -> Void)?
+    private let onImageSize: ((CGSize) -> Void)?
+    @State private var prepared: PreparedMediaImage?
+    @State private var preparedIdentity: String?
 
-    private init(
-        data: URL?,
-        placeholder: URL?,
-        customHeader: [String: String]?,
-        contentMode: SwiftUI.ContentMode,
-        usesCrossfade: Bool = false,
-        onProgress: ((Double?) -> Void)? = nil
-    ) {
+    public init(data: UiMedia?, placeholder: UiMedia? = nil,
+                contentMode: SwiftUI.ContentMode = .fill, usesCrossfade: Bool = false,
+                onProgress: ((Double?) -> Void)? = nil, onImageSize: ((CGSize) -> Void)? = nil) {
         self.data = data
         self.placeholder = placeholder
-        self.customHeader = customHeader
         self.contentMode = contentMode
         self.usesCrossfade = usesCrossfade
         self.onProgress = onProgress
+        self.onImageSize = onImageSize
     }
 
     public var body: some View {
-        if data?.absoluteString.hasSuffix(".gif") == true {
-            KFAnimatedImage(data)
+        let identity = "\(String(describing: data?.proxy))|\(data?.cacheKey ?? "")"
+        let taskIdentity = "\(identity)|\(ProxyMediaImages.shared.revision)"
+        Group {
+            if let prepared, preparedIdentity == identity {
+                ResolvedNetworkImage(source: prepared.source, downloader: prepared.downloader, redirectHandler: prepared.redirectHandler,
+                    mediaPlaceholder: placeholder, data: data.flatMap { URL(string: $0.url) },
+                    placeholder: placeholder.flatMap { URL(string: $0.url) },
+                    customHeader: data?.customHeaders, contentMode: contentMode,
+                    usesCrossfade: usesCrossfade, onProgress: onProgress, onImageSize: onImageSize)
+                    .id(prepared.key)
+            } else {
+                Rectangle().fill(.placeholder).redacted(reason: .placeholder)
+            }
+        }
+        .task(id: taskIdentity) {
+            guard let data else { prepared = nil; return }
+            do {
+                let result = try await ProxyMediaImages.shared.prepare(data)
+                guard !Task.isCancelled else { return }
+                if preparedIdentity != identity || prepared?.key != result.key {
+                    prepared = result
+                }
+                preparedIdentity = identity
+            } catch {
+                guard !Task.isCancelled else { return }
+                prepared = nil
+                onProgress?(nil)
+            }
+        }
+    }
+}
+
+private struct ResolvedNetworkImage: View {
+    let source: Source
+    let downloader: ImageDownloader
+    let redirectHandler: AnyRedirectHandler
+    let mediaPlaceholder: UiMedia?
+    let data: URL?
+    let placeholder: URL?
+    let customHeader: [String: String]?
+    let contentMode: SwiftUI.ContentMode
+    let usesCrossfade: Bool
+    let onProgress: ((Double?) -> Void)?
+    let onImageSize: ((CGSize) -> Void)?
+
+    public var body: some View {
+        if AppleMediaFileExtension.isGIF(url: data) {
+            KFAnimatedImage(source: source)
+                .downloader(downloader)
+                .redirectHandler(redirectHandler)
                 .flareBackgroundDecodeIfSupported()
                 .loadDiskFileSynchronously(false)
                 .fade(duration: 0.25)
@@ -41,15 +88,16 @@ public struct NetworkImage: View {
                 .onProgress { receivedSize, totalSize in
                     reportProgress(receivedSize: receivedSize, totalSize: totalSize)
                 }
-                .onSuccess { _ in
+                .onSuccess { result in
+                    onImageSize?(result.image.size)
                     onProgress?(1)
                 }
                 .onFailure { _ in
                     onProgress?(nil)
                 }
                 .placeholder {
-                    if let placeholder {
-                        NetworkImage(data: placeholder, customHeader: customHeader)
+                    if let placeholder = mediaPlaceholder {
+                        NetworkImage(data: placeholder)
                     } else {
                         Rectangle()
                             .fill(.placeholder)
@@ -60,14 +108,21 @@ public struct NetworkImage: View {
                 .aspectRatio(contentMode: contentMode)
         } else if usesCrossfade {
             CrossfadeNetworkImage(
+                source: source,
+                downloader: downloader,
+                redirectHandler: redirectHandler,
+                mediaPlaceholder: mediaPlaceholder,
                 data: data,
                 placeholder: placeholder,
                 customHeader: customHeader,
                 contentMode: contentMode,
-                onProgress: onProgress
+                onProgress: onProgress,
+                onImageSize: onImageSize
             )
         } else {
-            KFImage(data)
+            KFImage(source: source)
+                .downloader(downloader)
+                .redirectHandler(redirectHandler)
                 .flareBackgroundDecodeIfSupported()
                 .loadDiskFileSynchronously(false)
                 .resizable()
@@ -82,17 +137,17 @@ public struct NetworkImage: View {
                 .onProgress { receivedSize, totalSize in
                     reportProgress(receivedSize: receivedSize, totalSize: totalSize)
                 }
-                .onSuccess { _ in
+                .onSuccess { result in
+                    onImageSize?(result.image.size)
                     onProgress?(1)
                 }
                 .onFailure { _ in
                     onProgress?(nil)
                 }
                 .placeholder {
-                    if let placeholder {
+                    if let placeholder = mediaPlaceholder {
                         NetworkImage(
                             data: placeholder,
-                            customHeader: customHeader,
                             contentMode: contentMode
                         )
                     } else {
@@ -116,17 +171,22 @@ public struct NetworkImage: View {
 }
 
 private struct CrossfadeNetworkImage: View {
+    let source: Source
+    let downloader: ImageDownloader
+    let redirectHandler: AnyRedirectHandler
+    let mediaPlaceholder: UiMedia?
     let data: URL?
     let placeholder: URL?
     let customHeader: [String: String]?
     let contentMode: SwiftUI.ContentMode
     let onProgress: ((Double?) -> Void)?
+    let onImageSize: ((CGSize) -> Void)?
 
     @State private var loadedURL: URL?
     @State private var showsLoadedImage = false
     @State private var keepsPlaceholder = true
     @State private var placeholderRemovalTask: Task<Void, Never>?
-    private let transitionDuration: TimeInterval = 0.22
+    let transitionDuration: TimeInterval = 0.22
 
     var body: some View {
         ZStack {
@@ -134,7 +194,9 @@ private struct CrossfadeNetworkImage: View {
                 placeholderView
             }
 
-            KFImage(data)
+            KFImage(source: source)
+                .downloader(downloader)
+                .redirectHandler(redirectHandler)
                 .flareBackgroundDecodeIfSupported()
                 .loadDiskFileSynchronously(false)
                 .resizable()
@@ -149,7 +211,8 @@ private struct CrossfadeNetworkImage: View {
                 .onProgress { receivedSize, totalSize in
                     reportProgress(receivedSize: receivedSize, totalSize: totalSize)
                 }
-                .onSuccess { _ in
+                .onSuccess { result in
+                    onImageSize?(result.image.size)
                     onProgress?(1)
                     loadedURL = data
                     keepsPlaceholder = true
@@ -182,10 +245,9 @@ private struct CrossfadeNetworkImage: View {
 
     @ViewBuilder
     private var placeholderView: some View {
-        if let placeholder {
+        if let placeholder = mediaPlaceholder {
             NetworkImage(
                 data: placeholder,
-                customHeader: customHeader,
                 contentMode: contentMode
             )
         } else {
@@ -237,88 +299,5 @@ extension KFImageProtocol {
         #else
         return backgroundDecode()
         #endif
-    }
-}
-
-public extension NetworkImage {
-    init(
-        data: String?,
-        customHeader: [String: String]? = nil,
-        contentMode: SwiftUI.ContentMode = .fill,
-        usesCrossfade: Bool = false,
-        onProgress: ((Double?) -> Void)? = nil
-    ) {
-        self.init(
-            data: data.flatMap(URL.init(string:)),
-            placeholder: nil,
-            customHeader: customHeader,
-            contentMode: contentMode,
-            usesCrossfade: usesCrossfade,
-            onProgress: onProgress
-        )
-    }
-    init(
-        data: String,
-        customHeader: [String: String]? = nil,
-        contentMode: SwiftUI.ContentMode = .fill,
-        usesCrossfade: Bool = false,
-        onProgress: ((Double?) -> Void)? = nil
-    ) {
-        self.init(
-            data: .init(string: data),
-            placeholder: nil,
-            customHeader: customHeader,
-            contentMode: contentMode,
-            usesCrossfade: usesCrossfade,
-            onProgress: onProgress
-        )
-    }
-    init(
-        data: String,
-        placeholder: String,
-        customHeader: [String: String]? = nil,
-        contentMode: SwiftUI.ContentMode = .fill,
-        usesCrossfade: Bool = false,
-        onProgress: ((Double?) -> Void)? = nil
-    ) {
-        self.init(
-            data: .init(string: data),
-            placeholder: .init(string: placeholder),
-            customHeader: customHeader,
-            contentMode: contentMode,
-            usesCrossfade: usesCrossfade,
-            onProgress: onProgress
-        )
-    }
-    init(
-        data: URL?,
-        contentMode: SwiftUI.ContentMode = .fill,
-        usesCrossfade: Bool = false,
-        onProgress: ((Double?) -> Void)? = nil
-    ) {
-        self.init(
-            data: data,
-            placeholder: nil,
-            customHeader: nil,
-            contentMode: contentMode,
-            usesCrossfade: usesCrossfade,
-            onProgress: onProgress
-        )
-    }
-    init(
-        data: URL?,
-        customHeader: [String: String]?,
-        contentMode: SwiftUI.ContentMode = .fill,
-        usesCrossfade: Bool = false,
-        onProgress: ((Double?) -> Void)? = nil
-    ) {
-        self.init(
-            data: data,
-            placeholder: nil,
-            customHeader: customHeader,
-            contentMode: contentMode,
-            usesCrossfade: usesCrossfade,
-            onProgress: onProgress
-        )
     }
 }

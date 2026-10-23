@@ -72,6 +72,7 @@ dependencies {
 
     testImplementation(compose("org.jetbrains.compose.ui:ui-test-junit4"))
     testImplementation(libs.junit)
+    testImplementation(libs.ktor.client.mock)
 }
 
 val fdroid = rootProject.file("fdroid.properties")

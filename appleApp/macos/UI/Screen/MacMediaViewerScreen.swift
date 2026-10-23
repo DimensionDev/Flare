@@ -12,6 +12,7 @@ struct MacMediaViewerScreen: View {
     let medias: [any UiMedia]
     let initialIndex: Int
     let preview: String?
+    let previewProxy: ProxyRef
     let shareContext: MacMediaShareContext?
 
     @State private var selectedIndex: Int
@@ -32,11 +33,13 @@ struct MacMediaViewerScreen: View {
         medias: [any UiMedia],
         initialIndex: Int,
         preview: String?,
+        previewProxy: ProxyRef = ProxyRef.Global.shared,
         shareContext: MacMediaShareContext? = nil
     ) {
         self.medias = medias
         self.initialIndex = initialIndex
         self.preview = preview
+        self.previewProxy = previewProxy
         self.shareContext = shareContext
         let initialSelection = max(0, initialIndex)
         self.selectedIndex = initialSelection
@@ -237,7 +240,7 @@ struct MacMediaViewerScreen: View {
                 minimumMagnification: macMediaMinimumZoomScale,
                 maximumMagnification: macMediaMaximumZoomScale
             ) {
-                NetworkImage(data: preview, contentMode: .fit, usesCrossfade: true)
+                NetworkImage(data: UiMediaImage(url: preview, proxy: previewProxy), contentMode: .fit, usesCrossfade: true)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         } else {
@@ -596,9 +599,9 @@ private struct MacMediaViewerPage: View {
                 UgoiraPlayer(media: animation, active: isSelected).frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         case .image(let image):
-            zoomableImage(url: image.url, preview: image.previewUrl, customHeaders: image.customHeaders)
+            zoomableImage(media: image)
         case .gif(let gif):
-            zoomableImage(url: gif.url, preview: gif.previewUrl, customHeaders: gif.customHeaders)
+            zoomableImage(media: gif)
         case .video(let video):
             if isSelected {
                 StatusMediaVideoView(
@@ -610,7 +613,7 @@ private struct MacMediaViewerPage: View {
                 )
                 .padding(24)
             } else {
-                NetworkImage(data: video.thumbnailUrl, customHeader: video.customHeaders, contentMode: .fit)
+                NetworkImage(data: video.preview, contentMode: .fit)
                     .padding(24)
             }
         case .audio:
@@ -640,36 +643,11 @@ private struct MacMediaViewerPage: View {
         }
     }
 
-    private func zoomableImage(
-        url: String,
-        preview: String,
-        customHeaders: [String: String]?
-    ) -> some View {
-        MacZoomableScrollView(
-            magnification: $zoomScale,
-            minimumMagnification: macMediaMinimumZoomScale,
-            maximumMagnification: macMediaMaximumZoomScale
-        ) {
-            if preview.isEmpty || preview == url {
-                NetworkImage(
-                    data: url,
-                    customHeader: customHeaders,
-                    contentMode: .fit,
-                    usesCrossfade: true,
-                    onProgress: handleImageLoadingProgress
-                )
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-            } else {
-                NetworkImage(
-                    data: url,
-                    placeholder: preview,
-                    customHeader: customHeaders,
-                    contentMode: .fit,
-                    usesCrossfade: true,
-                    onProgress: handleImageLoadingProgress
-                )
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-            }
+    private func zoomableImage(media: any UiMedia) -> some View {
+        MacZoomableScrollView(magnification: $zoomScale, minimumMagnification: macMediaMinimumZoomScale, maximumMagnification: macMediaMaximumZoomScale) {
+            NetworkImage(data: media, placeholder: media.preview, contentMode: .fit, usesCrossfade: true,
+                         onProgress: handleImageLoadingProgress)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
     }
 

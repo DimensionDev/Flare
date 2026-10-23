@@ -703,7 +703,7 @@ private final class DMMessageUIView: UIView, TimelineHeightProviding {
         statusLabel.isHidden = item.sendState != .sending
 
         if !avatarView.isHidden {
-            avatarView.set(url: item.user.avatar?.url, customHeaders: item.user.avatar?.customHeaders)
+            avatarView.set(media: item.user.avatar)
         }
         if !senderNameView.isHidden {
             senderNameView.configure(
@@ -1063,7 +1063,7 @@ private final class DMMediaPreviewView: UIView {
     func configure(media: UiMedia, onOpenURL: ((URL) -> Void)?) {
         self.onOpenURL = onOpenURL
         imageRouteURL = nil
-        imageView.kf.cancelDownloadTask()
+        imageView.cancelMediaLoad()
         imageView.image = nil
         playIconView.isHidden = true
 
@@ -1074,7 +1074,7 @@ private final class DMMediaPreviewView: UIView {
             imageURL = image.previewUrl
             customHeaders = image.customHeaders
             aspectRatio = boundedAspectRatio(CGFloat(image.aspectRatio))
-            imageRouteURL = URL(string: DeeplinkRoute.Media.MediaImage(uri: image.url, previewUrl: image.previewUrl, customHeaders: image.customHeaders).toUri())
+            imageRouteURL = URL(string: DeeplinkRoute.Media.MediaImage(uri: image.url, previewUrl: image.previewUrl, customHeaders: image.customHeaders, proxy: image.proxy).toUri())
         case .ugoira(let animation):
             imageURL = animation.previewUrl
             customHeaders = animation.customHeaders
@@ -1100,7 +1100,7 @@ private final class DMMediaPreviewView: UIView {
         }
 
         if let url = URL(string: imageURL) {
-            imageView.kf.setImage(with: url, options: kingfisherOptions(customHeaders: customHeaders))
+            imageView.setMedia(media is UiMediaGif ? media : media.preview, options: kingfisherOptions(customHeaders: customHeaders))
         }
         setNeedsLayout()
     }

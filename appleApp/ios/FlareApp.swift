@@ -14,6 +14,7 @@ struct FlareApp: App {
         if firebaseEnabled {
             AppleSharedHelper.shared.setupCrashlytics()
         }
+        ProxySessionConfigurator.install()
         AppleSharedHelper.shared.initialize(
             inAppNotification: SwiftInAppNotification.shared,
             swiftFormatter: Formatter.shared,

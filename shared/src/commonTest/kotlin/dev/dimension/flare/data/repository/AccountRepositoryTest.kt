@@ -279,6 +279,7 @@ class AccountRepositoryTest : RobolectricTest() {
             coroutineScope = scope,
             appDataStore = appDataStore,
             cacheDatabase = cacheDatabase,
+            proxyRepository = ProxyRepository(fileStorage),
             platformRegistry = testPlatformRegistry(),
         )
 

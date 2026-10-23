@@ -259,7 +259,7 @@ final class TimelineAutoplay: NSObject {
             }
             ugoiraSession.play(animation)
         } else {
-            autoplaySession.play(url: candidate.url.absoluteString)
+            if let media = newHost.videoMedia { autoplaySession.play(media: media) }
             autoplayPlayerView.canDisplayFrame = autoplaySession.hasRestoredPosition
             autoplayPlayerView.player = autoplaySession.player
         }
@@ -302,6 +302,7 @@ final class TimelineAutoplay: NSObject {
             return
         }
         autoplaySession.refresh()
+        autoplayPlayerView.player = autoplaySession.player
         autoplayPlayerView.canDisplayFrame = autoplaySession.hasRestoredPosition
         switch autoplaySession.state {
         case .playing(let duration): host.setAutoplayOverlay(.playing(remaining: max(duration - autoplaySession.position, 0)))

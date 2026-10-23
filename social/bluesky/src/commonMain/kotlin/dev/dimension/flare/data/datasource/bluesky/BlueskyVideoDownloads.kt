@@ -13,8 +13,8 @@ internal suspend fun List<FeedViewPost>.renderWithDownloadUrls(accountKey: Micro
         flatMap {
             listOfNotNull(it.post, (it.reply?.parent as? ReplyRefParentUnion.PostView)?.value)
         }
-    return render(accountKey, resolveBlueskyVideoDownloadUrls(posts))
+    return render(accountKey, resolveBlueskyVideoDownloadUrls(posts, accountKey))
 }
 
 internal suspend fun PostView.renderWithDownloadUrls(accountKey: MicroBlogKey): UiTimelineV2.Post =
-    render(accountKey, resolveBlueskyVideoDownloadUrls(listOf(this)))
+    render(accountKey, resolveBlueskyVideoDownloadUrls(listOf(this), accountKey))

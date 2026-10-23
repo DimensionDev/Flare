@@ -9,6 +9,8 @@ import androidx.compose.ui.unit.sp
 import com.fleeksoft.ksoup.Ksoup
 import dev.dimension.flare.ui.render.UiRichText
 import dev.dimension.flare.ui.render.toUi
+import dev.dimension.flare.ui.model.withProxy
+import dev.dimension.flare.data.model.ProxyRef
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
@@ -89,11 +91,13 @@ class RichTextStateTest {
     @Test
     fun emoji_creates_inline_content_entry() {
         val emojiUrl = "https://example.com/emoji.png"
-        val ui = htmlToUiRichText("<p>Hi <emoji target=\"$emojiUrl\"/></p>")
+        val ui = htmlToUiRichText("<p>Hi <emoji target=\"$emojiUrl\"/></p>").withProxy(ProxyRef.Global)
         val state = RichTextState(ui, defaultStyleData())
 
         assertTrue(state.inlineContent.isNotEmpty())
-        val anyEmoji = state.inlineContent.values.any { it is BuildContentAnnotatedStringContext.InlineType.Emoji && it.url == emojiUrl }
+        val anyEmoji = state.inlineContent.values.any {
+            it is BuildContentAnnotatedStringContext.InlineType.Emoji && it.media.url == emojiUrl && it.media.proxy == ProxyRef.Global
+        }
         assertTrue(anyEmoji, "Expected an Emoji inline content with the provided URL")
     }
 
@@ -105,7 +109,7 @@ class RichTextStateTest {
 
         val blockContent = state.contents.filterIsInstance<RichTextContent.BlockImage>().firstOrNull()
         assertNotNull(blockContent)
-        assertEquals(imgUrl, blockContent.url)
+        assertEquals(imgUrl, blockContent.media.url)
     }
 
     @Test
@@ -116,7 +120,7 @@ class RichTextStateTest {
 
         val anyInlineImage =
             state.inlineContent.values.any {
-                it is BuildContentAnnotatedStringContext.InlineType.Emoji && it.url == imgUrl
+                it is BuildContentAnnotatedStringContext.InlineType.Emoji && it.media.url == imgUrl
             }
         assertTrue(anyInlineImage, "Expected an inline image entry with the provided URL")
     }

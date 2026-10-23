@@ -1,5 +1,6 @@
 package dev.dimension.flare.data.network.mastodon
 
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.data.network.ktorfit
 import dev.dimension.flare.data.network.mastodon.api.MastodonOAuthResources
 import dev.dimension.flare.data.network.mastodon.api.createMastodonOAuthResources
@@ -9,6 +10,7 @@ import io.ktor.http.encodeURLParameter
 
 internal class MastodonOAuthService(
     private val baseUrl: String,
+    proxy: ProxyRef = ProxyRef.Global,
     private val client_name: String,
     private val website: String? = null,
     private val redirect_uri: String = "urn:ietf:wg:oauth:2.0:oob",
@@ -19,7 +21,7 @@ internal class MastodonOAuthService(
             MastodonAuthScope.Follow,
             MastodonAuthScope.Push,
         ),
-) : MastodonOAuthResources by ktorfit(baseUrl).createMastodonOAuthResources() {
+) : MastodonOAuthResources by ktorfit(baseUrl, proxy = proxy).createMastodonOAuthResources() {
     suspend fun createApplication() =
         createApplication(
             client_name = client_name,

@@ -20,7 +20,7 @@ public data class UiProfile public constructor(
     val key: MicroBlogKey,
     val handle: UiHandle,
     val avatar: UiMedia.Image?,
-    private val nameInternal: UiRichText,
+    internal val nameInternal: UiRichText,
     @SerialName("platformType")
     val platformId: String,
     val platformIcon: UiIcon = UiIcon.World,

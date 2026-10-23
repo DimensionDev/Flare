@@ -544,5 +544,6 @@
   "secondaryFooterVersion": "Version {version}",
   "rssOpenModeChecking": "Checking the best opening mode…",
   "rssOpenModeRecommended": "Recommended from recent articles. You can change this.",
-  "rssOpenModeUnknown": "Could not recommend an opening mode. You can choose one."
+  "rssOpenModeUnknown": "Could not recommend an opening mode. You can choose one.",
+  "settingsAccountsRemoveFailed": "Could not remove this account. Please try again."
 }

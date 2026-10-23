@@ -93,6 +93,7 @@ import dev.dimension.flare.settings_about_telegram
 import dev.dimension.flare.settings_about_telegram_description
 import dev.dimension.flare.settings_about_title
 import dev.dimension.flare.settings_accounts_remove_confirm
+import dev.dimension.flare.settings_accounts_remove_failed
 import dev.dimension.flare.settings_accounts_title
 import dev.dimension.flare.settings_agent_history_description
 import dev.dimension.flare.settings_agent_history_title
@@ -417,6 +418,9 @@ internal fun SettingsScreen(
                     .padding(horizontal = screenHorizontalPadding),
         ) {
             val activeAccount = state.accountState.user.takeSuccess()
+            if (state.accountState.removalFailed) {
+                Text(stringResource(Res.string.settings_accounts_remove_failed), color = FluentTheme.colors.system.critical)
+            }
             state.accountState.accounts
                 .onSuccess { accounts ->
                     Header(stringResource(Res.string.settings_accounts_title))

@@ -75,7 +75,7 @@ class ImportedAccountProxyTest {
                 proxy.selectGlobal(ProxyPolicy(ProxyMode.DIRECT))
                 assertEquals(ProxyMode.DIRECT, ProxyNetwork.snapshot(ProxyRef.Account(key)).connection.mode)
 
-                accounts.delete(key).join()
+                accounts.delete(key)
                 assertNull(app.accountDao().getAccount(key))
                 assertFailsWith<IllegalStateException> { ProxyNetwork.snapshot(ProxyRef.Account(key)) }
 

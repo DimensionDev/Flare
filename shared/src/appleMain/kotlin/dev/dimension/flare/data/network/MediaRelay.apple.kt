@@ -15,6 +15,7 @@ import kotlinx.cinterop.value
 import platform.Foundation.NSLock
 import platform.posix.AF_INET
 import platform.posix.EINTR
+import platform.posix.SHUT_RDWR
 import platform.posix.SOCK_STREAM
 import platform.posix.SOL_SOCKET
 import platform.posix.SO_NOSIGPIPE
@@ -30,6 +31,7 @@ import platform.posix.memset
 import platform.posix.recv
 import platform.posix.send
 import platform.posix.setsockopt
+import platform.posix.shutdown
 import platform.posix.sockaddr_in
 import platform.posix.socket
 import platform.posix.socklen_tVar
@@ -98,6 +100,11 @@ internal actual class MediaRelayListener actual constructor() {
             setsockopt(accepted, SOL_SOCKET, SO_SNDTIMEO, timeout.ptr, sizeOf<timeval>().convert())
         }
         return object : MediaRelayConnection {
+            // Keep the descriptor alive until the request exits so a blocked call cannot see a reused fd.
+            override fun interrupt() {
+                shutdown(accepted, SHUT_RDWR)
+            }
+
             override fun read(bytes: ByteArray): Int =
                 bytes.usePinned {
                     var count: Long

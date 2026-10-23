@@ -2,6 +2,8 @@ package dev.dimension.flare.data.repository
 
 import androidx.datastore.core.DataStore
 import androidx.room3.Room
+import app.cash.molecule.RecompositionMode
+import app.cash.molecule.moleculeFlow
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.createTestFileSystem
 import dev.dimension.flare.createTestRootPath
@@ -23,9 +25,10 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.testPlatformRegistry
 import dev.dimension.flare.ui.model.UiAccount
+import dev.dimension.flare.ui.presenter.settings.AccountsPresenter
+import dev.dimension.flare.ui.presenter.settings.AccountsState
 import dev.dimension.flare.ui.presenter.settings.ImportAppDatabasePresenter
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -90,7 +93,7 @@ class AccountProxyRecoveryTest {
             val (accounts, scope) = repository()
             accounts.withAccountChanges { }
             assertTrue(scope.isActive)
-            accounts.addAccount(UiAccount(other, "Mastodon"), "credentials").join()
+            accounts.addAccount(UiAccount(other, "Mastodon"), "credentials")
             assertNotNull(app.accountDao().getAccount(other))
         }
 
@@ -105,8 +108,116 @@ class AccountProxyRecoveryTest {
             assertTrue(scope.isActive)
             assertNotNull(app.accountDao().getAccount(deleted), "Do not discard the account before cleanup succeeds")
             assertTrue(deleted.toString() in store.state.value.removedAccounts)
-            accounts.addAccount(UiAccount(other, "Mastodon"), "credentials").join()
+            accounts.addAccount(UiAccount(other, "Mastodon"), "credentials")
             assertNotNull(app.accountDao().getAccount(other))
+        }
+
+    @Test
+    fun failedLoginDoesNotCancelSharedScopeAndCanBeRetried(): Unit =
+        runBlocking {
+            val (accounts, scope) = repository()
+            accounts.withAccountChanges { }
+            store.failWrite = true
+            val failure = runCatching { accounts.addAccount(UiAccount(other, "Mastodon"), "credentials") }.exceptionOrNull()
+            assertTrue(scope.isActive, "A failed login must not stop unrelated repositories")
+            assertTrue(failure is IOException, "The caller must receive the storage failure")
+            assertNull(app.accountDao().getAccount(other))
+            store.failWrite = false
+            accounts.addAccount(UiAccount(other, "Mastodon"), "credentials")
+            assertNotNull(app.accountDao().getAccount(other))
+        }
+
+    @Test
+    fun failedDeletionDoesNotCancelSharedScopeAndCanBeRetried(): Unit =
+        runBlocking {
+            val (accounts, scope) = repository()
+            accounts.withAccountChanges { }
+            app.accountDao().insert(row(deleted))
+            store.failWrite = true
+            val failure = runCatching { accounts.delete(deleted) }.exceptionOrNull()
+            assertTrue(scope.isActive, "A failed deletion must not stop unrelated repositories")
+            assertTrue(failure is IOException, "The caller must receive the storage failure")
+            assertNotNull(app.accountDao().getAccount(deleted))
+            store.failWrite = false
+            accounts.delete(deleted)
+            assertNull(app.accountDao().getAccount(deleted))
+            accounts.addAccount(UiAccount(other, "Mastodon"), "credentials")
+            assertNotNull(app.accountDao().getAccount(other))
+        }
+
+    @Test
+    fun persistentReadFailureIsReportedWithoutCancellingSharedScope(): Unit =
+        runBlocking {
+            store.persistentReadFailure = true
+            val (accounts, scope) = repository()
+            accounts.withAccountChanges { }
+            val failure = runCatching { accounts.addAccount(UiAccount(other, "Mastodon"), "credentials") }.exceptionOrNull()
+            assertTrue(scope.isActive)
+            assertTrue(failure is IOException)
+            assertNull(app.accountDao().getAccount(other))
+            store.persistentReadFailure = false
+            accounts.addAccount(UiAccount(other, "Mastodon"), "credentials")
+            assertNotNull(app.accountDao().getAccount(other))
+        }
+
+    @Test
+    fun deletionFailureIsShownByThePresenterAndCanBeRetried(): Unit =
+        runBlocking {
+            val (accounts, scope) = repository()
+            accounts.withAccountChanges { }
+            app.accountDao().insert(row(deleted))
+            install(accounts)
+            val models = MutableStateFlow<AccountsState?>(null)
+            val presenter = AccountsPresenter()
+            val collector =
+                launch {
+                    moleculeFlow(RecompositionMode.Immediate) { presenter.body() }.collect { models.value = it }
+                }
+            try {
+                withTimeout(5_000) {
+                    store.failWrite = true
+                    models.first { it != null }!!.removeAccount(deleted)
+                    val failed = models.first { it?.removalFailed == true }!!
+                    assertTrue(scope.isActive)
+                    assertNotNull(app.accountDao().getAccount(deleted))
+                    store.failWrite = false
+                    failed.removeAccount(deleted)
+                    app.accountDao().get(deleted).first { it == null }
+                    models.first { it?.removalFailed == false }
+                    assertTrue(scope.isActive)
+                }
+            } finally {
+                collector.cancelAndJoin()
+            }
+        }
+
+    @Test
+    fun cancellationWhileWaitingForAccountChangesDoesNotCancelSharedScope(): Unit =
+        runBlocking {
+            val (accounts, scope) = repository()
+            accounts.withAccountChanges { }
+            val locked = CompletableDeferred<Unit>()
+            val unlock = CompletableDeferred<Unit>()
+            val holder =
+                launch {
+                    accounts.withAccountChanges {
+                        locked.complete(Unit)
+                        unlock.await()
+                    }
+                }
+            locked.await()
+            val login =
+                launch(start = kotlinx.coroutines.CoroutineStart.UNDISPATCHED) {
+                    accounts.addAccount(UiAccount(other, "Mastodon"), "credentials")
+                }
+            try {
+                login.cancelAndJoin()
+                assertTrue(scope.isActive)
+                assertNull(app.accountDao().getAccount(other))
+            } finally {
+                unlock.complete(Unit)
+                holder.join()
+            }
         }
 
     @Test
@@ -196,7 +307,7 @@ class AccountProxyRecoveryTest {
             val (accounts, _) = repository()
             accounts.withAccountChanges { }
             store.failWrite = true
-            accounts.addAccount(UiAccount(deleted, "Mastodon"), "new credentials").join()
+            assertFailsWith<IOException> { accounts.addAccount(UiAccount(deleted, "Mastodon"), "new credentials") }
             assertNull(app.accountDao().getAccount(deleted))
             assertTrue(deleted.toString() in store.state.value.removedAccounts)
         }
@@ -219,7 +330,7 @@ class AccountProxyRecoveryTest {
     private fun row(key: MicroBlogKey) = DbAccount(key, "{}", "Mastodon", 1L)
 
     private fun repository(): Pair<AccountRepository, CoroutineScope> {
-        val scope = CoroutineScope(Job() + Dispatchers.IO + CoroutineExceptionHandler { _, _ -> })
+        val scope = CoroutineScope(Job() + Dispatchers.IO)
         scopes += scope
         return AccountRepository(app, scope, AppDataStore(storage), cache, proxy, testPlatformRegistry()) to scope
     }
@@ -239,11 +350,12 @@ class AccountProxyRecoveryTest {
     private class FailingStore : DataStore<ProxySettings> {
         val state = MutableStateFlow(ProxySettings())
         var failRead = false
+        var persistentReadFailure = false
         var failWrite = false
         var beforeWrite: suspend () -> Unit = { }
         override val data =
             flow {
-                if (failRead) {
+                if (failRead || persistentReadFailure) {
                     failRead = false
                     throw IOException("Injected read failure")
                 }

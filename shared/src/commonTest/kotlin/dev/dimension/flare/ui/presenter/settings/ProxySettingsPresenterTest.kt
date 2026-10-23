@@ -15,6 +15,7 @@ import dev.dimension.flare.data.model.ProxyMode
 import dev.dimension.flare.data.model.ProxyPolicy
 import dev.dimension.flare.data.model.ProxyProfile
 import dev.dimension.flare.data.model.ProxyProtocol
+import dev.dimension.flare.data.model.ProxySettingsError
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.ProxyRepository
 import dev.dimension.flare.deleteTestRootPath
@@ -36,6 +37,7 @@ import kotlinx.coroutines.withContext
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
 class ProxySettingsPresenterTest : RobolectricTest() {
@@ -80,6 +82,7 @@ class ProxySettingsPresenterTest : RobolectricTest() {
                     states.first { it.settings != null }.save(invalid) { error("Invalid draft must not be saved") }
                     val saveFailure = states.first { !it.busy && it.editorError != null }
                     assertNull(saveFailure.error)
+                    assertEquals(ProxySettingsError.NAME_REQUIRED, saveFailure.editorError)
                     saveFailure.clearEditorError()
                     states.first { it.editorError == null }.test(invalid, fromEditor = true)
                     val testFailure = states.first { !it.busy && it.editorError != null }
@@ -91,6 +94,7 @@ class ProxySettingsPresenterTest : RobolectricTest() {
                     pageTestFailure.select(null, ProxyPolicy(ProxyMode.PROXY, "missing"))
                     val selectionFailure = states.first { !it.busy && it.error != null && it.error != pageTestFailure.error }
                     assertNull(selectionFailure.editorError)
+                    assertEquals(ProxySettingsError.INVALID_POLICY, selectionFailure.error)
                 }
             } finally {
                 job.cancelAndJoin()

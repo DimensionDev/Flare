@@ -166,7 +166,7 @@ internal class AccountRepository internal constructor(
             }
         }
 
-    internal inline fun <reified T : Any> addAccount(
+    internal suspend inline fun <reified T : Any> addAccount(
         account: UiAccount,
         credential: T,
     ) = addAccount(
@@ -175,11 +175,11 @@ internal class AccountRepository internal constructor(
         serializer = serializer(),
     )
 
-    internal fun <T : Any> addAccount(
+    internal suspend fun <T : Any> addAccount(
         account: UiAccount,
         credential: T,
         serializer: KSerializer<T>,
-    ) = coroutineScope.launch {
+    ) {
         restoreAccounts(listOf(account.accountKey)) {
             val existingAccount = appDatabase.accountDao().getAccount(account.accountKey)
             val credentialJson = credential.encodeJson(serializer)
@@ -244,12 +244,10 @@ internal class AccountRepository internal constructor(
         }
     }
 
-    internal fun delete(accountKey: MicroBlogKey) =
-        coroutineScope.launch {
-            withAccountChanges {
-                proxyRepository.removeAccount(accountKey)
-                deleteAccount(accountKey)
-            }
+    internal suspend fun delete(accountKey: MicroBlogKey): Unit =
+        withAccountChanges {
+            proxyRepository.removeAccount(accountKey)
+            deleteAccount(accountKey)
         }
 
     private suspend fun deleteAccount(accountKey: MicroBlogKey) {

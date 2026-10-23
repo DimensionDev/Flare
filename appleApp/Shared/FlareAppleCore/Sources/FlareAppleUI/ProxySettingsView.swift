@@ -14,7 +14,7 @@ public struct ProxySettingsView: View {
                 Section { ProgressView() }
             }
             if let error = presenter.state.error {
-                Section { Text(verbatim: error).foregroundStyle(.red) }
+                Section { Text(error.localizedKey, bundle: FlareAppleUILocalization.bundle).foregroundStyle(.red) }
             }
             if let settings = presenter.state.settings {
                 let accounts = presenter.state.accounts.filter { $0.accountKey.host != "nostr" }
@@ -172,7 +172,7 @@ public struct ProxySettingsView: View {
                 Text("proxy_title", bundle: FlareAppleUILocalization.bundle)
             }
         }
-        .accessibilityLabel(Text(accountKey?.description() ?? String(localized: "proxy_title", bundle: FlareAppleUILocalization.bundle)))
+        .accessibilityLabel(Text(account.map { presenter.state.accountLabel(account: $0) } ?? String(localized: "proxy_title", bundle: FlareAppleUILocalization.bundle)))
         .accessibilityValue(Text(policyLabel(policy, settings)))
     }
 
@@ -286,7 +286,7 @@ private struct ProxyEditor: View {
                 if state.isTested(profile: value) {
                     Label { Text("proxy_test_success", bundle: FlareAppleUILocalization.bundle) } icon: { Image(systemName: "checkmark.circle") }
                 }
-                if let error = state.editorError { Text(verbatim: error).foregroundStyle(.red) }
+                if let error = state.editorError { Text(error.localizedKey, bundle: FlareAppleUILocalization.bundle).foregroundStyle(.red) }
             } footer: {
                 Text("proxy_test_hint", bundle: FlareAppleUILocalization.bundle)
             }
@@ -311,5 +311,19 @@ private struct ProxyEditor: View {
             Label { Text("proxy_save", bundle: FlareAppleUILocalization.bundle) } icon: { Image(fontAwesome: .check) }
         }
         .disabled(state.busy)
+    }
+}
+
+private extension ProxySettingsError {
+    var localizedKey: LocalizedStringKey {
+        switch self {
+        case .nameRequired: "proxy_error_name"
+        case .invalidHost: "proxy_error_host"
+        case .invalidPort: "proxy_error_port"
+        case .inUse: "proxy_error_in_use"
+        case .invalidPolicy: "proxy_error_policy"
+        case .requestFailed: "proxy_error_request"
+        default: "proxy_error_request"
+        }
     }
 }

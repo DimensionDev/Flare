@@ -806,11 +806,11 @@ private fun List<AccountMicroblogDataSource>.agentTimelineAccountService(): Acco
 
         override fun allAccountServicesFlow(): Flow<List<AccountMicroblogDataSource>> = flowOf(this@agentTimelineAccountService)
 
-        override fun <T : Any> addAccount(
+        override suspend fun <T : Any> addAccount(
             account: UiAccount,
             credential: T,
             serializer: KSerializer<T>,
-        ): Job = error("Agent timeline tools cannot add accounts.")
+        ): Unit = error("Agent timeline tools cannot add accounts.")
 
         override fun <T : Any> credentialFlow(
             accountKey: MicroBlogKey,

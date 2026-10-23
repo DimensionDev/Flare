@@ -30,6 +30,19 @@ public sealed class ProxyRef {
     }
 }
 
+public enum class ProxySettingsError { NAME_REQUIRED, INVALID_HOST, INVALID_PORT, IN_USE, INVALID_POLICY, REQUEST_FAILED }
+
+internal class ProxySettingsException(
+    val reason: ProxySettingsError,
+) : IllegalArgumentException(reason.name)
+
+private fun requireProxy(
+    condition: Boolean,
+    reason: ProxySettingsError,
+) {
+    if (!condition) throw ProxySettingsException(reason)
+}
+
 @Serializable
 public enum class ProxyProtocol { HTTPS, SOCKS5 }
 
@@ -51,12 +64,13 @@ public data class ProxyProfile(
     val port: Int,
 ) {
     internal fun validate() {
-        require(id.isNotBlank() && name.isNotBlank()) { "A proxy name is required" }
-        require(host.isNotBlank() && host == host.trim() && host.none { it.isWhitespace() || it in "/\\@?#" }) {
-            "Enter a hostname or IP address without a scheme or credentials"
-        }
-        require(!host.contains("://") && (':' !in host || host.count { it == ':' } >= 2)) { "Invalid proxy host" }
-        require(port in 1..65535) { "Port must be between 1 and 65535" }
+        requireProxy(id.isNotBlank() && name.isNotBlank(), ProxySettingsError.NAME_REQUIRED)
+        requireProxy(
+            host.isNotBlank() && host == host.trim() && host.none { it.isWhitespace() || it in "/\\@?#" },
+            ProxySettingsError.INVALID_HOST,
+        )
+        requireProxy(!host.contains("://") && (':' !in host || host.count { it == ':' } >= 2), ProxySettingsError.INVALID_HOST)
+        requireProxy(port in 1..65535, ProxySettingsError.INVALID_PORT)
     }
 
     internal fun connection(): ProxyConnection {
@@ -110,12 +124,12 @@ public data class ProxySettings(
         policy: ProxyPolicy,
         account: Boolean,
     ) {
-        require(account || policy.mode != ProxyMode.INHERIT) { "Global proxy cannot inherit" }
-        require(!account || policy.mode != ProxyMode.SYSTEM) { "Use inherit to follow the global policy" }
+        requireProxy(account || policy.mode != ProxyMode.INHERIT, ProxySettingsError.INVALID_POLICY)
+        requireProxy(!account || policy.mode != ProxyMode.SYSTEM, ProxySettingsError.INVALID_POLICY)
         if (policy.mode == ProxyMode.PROXY) {
-            require(profiles.any { it.id == policy.proxyId }) { "Selected proxy no longer exists" }
+            requireProxy(profiles.any { it.id == policy.proxyId }, ProxySettingsError.INVALID_POLICY)
         } else {
-            require(policy.proxyId == null) { "This policy does not select a proxy" }
+            requireProxy(policy.proxyId == null, ProxySettingsError.INVALID_POLICY)
         }
     }
 
@@ -125,12 +139,13 @@ public data class ProxySettings(
     }
 
     internal fun remove(id: String): ProxySettings {
-        require(
+        requireProxy(
             global.proxyId != id &&
                 accounts.values.none {
                     it.proxyId == id
                 },
-        ) { "Reassign accounts and the global policy before deleting this proxy" }
+            ProxySettingsError.IN_USE,
+        )
         return copy(profiles = profiles.filterNot { it.id == id })
     }
 }

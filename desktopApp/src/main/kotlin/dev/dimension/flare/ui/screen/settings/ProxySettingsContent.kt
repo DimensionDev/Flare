@@ -37,6 +37,7 @@ import dev.dimension.flare.data.model.ProxyPolicy
 import dev.dimension.flare.data.model.ProxyProfile
 import dev.dimension.flare.data.model.ProxyProtocol
 import dev.dimension.flare.data.model.ProxySettings
+import dev.dimension.flare.data.model.ProxySettingsError
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.proxy_accounts
 import dev.dimension.flare.proxy_add
@@ -44,6 +45,12 @@ import dev.dimension.flare.proxy_cancel
 import dev.dimension.flare.proxy_delete
 import dev.dimension.flare.proxy_direct
 import dev.dimension.flare.proxy_edit
+import dev.dimension.flare.proxy_error_host
+import dev.dimension.flare.proxy_error_in_use
+import dev.dimension.flare.proxy_error_name
+import dev.dimension.flare.proxy_error_policy
+import dev.dimension.flare.proxy_error_port
+import dev.dimension.flare.proxy_error_request
 import dev.dimension.flare.proxy_global
 import dev.dimension.flare.proxy_host
 import dev.dimension.flare.proxy_in_use
@@ -91,7 +98,7 @@ internal fun ProxySettingsContent(state: ProxySettingsState) {
     var editing by remember { mutableStateOf<ProxyProfile?>(null) }
     Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         if (state.busy || state.settings == null) ProgressBar(Modifier.fillMaxWidth())
-        state.error?.let { Text(it, color = FluentTheme.colors.system.critical) }
+        state.error?.let { Text(it.localizedMessage(), color = FluentTheme.colors.system.critical) }
         state.settings?.let { settings ->
             ProxyPolicyRow(stringResource(Res.string.proxy_global), settings, null, state)
             Header(stringResource(Res.string.proxy_profiles))
@@ -130,7 +137,7 @@ internal fun ProxySettingsContent(state: ProxySettingsState) {
             if (accounts.isNotEmpty()) {
                 Header(stringResource(Res.string.proxy_accounts))
                 accounts.forEach { account ->
-                    ProxyPolicyRow(account.accountKey.toString(), settings, account.accountKey, state, account)
+                    ProxyPolicyRow(state.accountLabel(account), settings, account.accountKey, state, account)
                 }
             }
             editing?.let { profile ->
@@ -287,7 +294,7 @@ private fun ProxyEditor(
                     )
                     if (state.busy) ProgressBar(Modifier.fillMaxWidth())
                     if (state.isTested(value())) Text(stringResource(Res.string.proxy_test_success))
-                    state.editorError?.let { Text(it, color = FluentTheme.colors.system.critical) }
+                    state.editorError?.let { Text(it.localizedMessage(), color = FluentTheme.colors.system.critical) }
                 }
             }
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -303,3 +310,16 @@ private fun ProxyEditor(
         }
     }
 }
+
+@Composable
+private fun ProxySettingsError.localizedMessage(): String =
+    stringResource(
+        when (this) {
+            ProxySettingsError.NAME_REQUIRED -> Res.string.proxy_error_name
+            ProxySettingsError.INVALID_HOST -> Res.string.proxy_error_host
+            ProxySettingsError.INVALID_PORT -> Res.string.proxy_error_port
+            ProxySettingsError.IN_USE -> Res.string.proxy_error_in_use
+            ProxySettingsError.INVALID_POLICY -> Res.string.proxy_error_policy
+            ProxySettingsError.REQUEST_FAILED -> Res.string.proxy_error_request
+        },
+    )

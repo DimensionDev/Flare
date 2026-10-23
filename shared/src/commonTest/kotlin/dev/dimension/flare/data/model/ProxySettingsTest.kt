@@ -17,6 +17,14 @@ class ProxySettingsTest {
     private val profile = ProxyProfile("one", "Work", ProxyProtocol.SOCKS5, "proxy.example", 1080)
 
     @Test
+    fun nostrAlwaysUsesSystemRoutingEvenWhenGlobalProxyIsSelected() {
+        val key = MicroBlogKey("pubkey", "nostr")
+        val settings = ProxySettings(global = ProxyPolicy(ProxyMode.PROXY, "missing"), removedAccounts = setOf(key.toString()))
+        assertEquals(ProxyRef.System, ProxyRef.forAccount(key))
+        assertEquals(ProxyMode.SYSTEM, settings.resolve(ProxyRef.forAccount(key)).mode)
+    }
+
+    @Test
     fun policiesDistinguishInheritanceSystemAndDirect() {
         val settings =
             ProxySettings(

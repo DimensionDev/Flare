@@ -767,4 +767,8 @@
     <string name="settings_remember_home_timeline_position">记住首页阅读位置</string>
     <string name="settings_remember_home_timeline_position_description">刷新时保留当前位置，启动时恢复上次的标签页和阅读位置。</string>
     <string name="home_timeline_view_latest">查看最新内容</string>
+
+    <string name="proxy_title">代理</string>
+    <string name="proxy_description">代理设置保存在本机，不包含在应用内导出中。修改设置可能会中断进行中的请求。代理失败时不会回退到直连。</string>
+    <string name="proxy_local_network_permission">请允许访问本地网络，以连接局域网中的代理服务器。</string>
 </resources>

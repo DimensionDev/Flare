@@ -65,6 +65,7 @@ class ImportedAccountProxyTest {
                     module {
                         testSingle { app }
                         testSingle { proxy }
+                        testSingle { accounts }
                     },
                 )
             }

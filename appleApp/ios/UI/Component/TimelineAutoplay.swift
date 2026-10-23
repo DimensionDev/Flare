@@ -307,7 +307,7 @@ final class TimelineAutoplay: NSObject {
         switch autoplaySession.state {
         case .playing(let duration): host.setAutoplayOverlay(.playing(remaining: max(duration - autoplaySession.position, 0)))
         case .loading: host.setAutoplayOverlay(.loading)
-        case .error: host.setAutoplayOverlay(.error)
+        case .error(let error): host.setAutoplayOverlay(.error, errorMessage: error.localizedDescription)
         case .idle, .paused: host.setAutoplayOverlay(.idle)
         }
     }

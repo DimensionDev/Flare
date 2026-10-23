@@ -24,13 +24,13 @@
       "en": {
         "stringUnit": {
           "state": "translated",
-          "value": "Device-local proxies for global and account traffic. Changes apply to new requests. A failed proxy never falls back to a direct connection."
+          "value": "Proxy settings are saved on this device and excluded from app exports. Changes may interrupt active requests. A failed proxy never falls back to a direct connection."
         }
       },
       "zh-Hans": {
         "stringUnit": {
           "state": "translated",
-          "value": "为全局及各账号设置本机代理。修改立即用于新请求，代理失败不会自动直连。"
+          "value": "代理设置保存在本机，不包含在应用内导出中。修改设置可能会中断进行中的请求。代理失败时不会回退到直连。"
         }
       }
     }
@@ -41,13 +41,13 @@
       "en": {
         "stringUnit": {
           "state": "translated",
-          "value": "Nostr, external browsers, web views, system push and third-party SDKs use their own network settings."
+          "value": "RSS, translation and AI use the global proxy. Nostr, browsers, web views, system push and services with their own network connections are not controlled by these settings."
         }
       },
       "zh-Hans": {
         "stringUnit": {
           "state": "translated",
-          "value": "Nostr、外部浏览器、网页视图、系统推送及第三方 SDK 使用各自的网络设置。"
+          "value": "RSS、翻译和 AI 使用全局代理。Nostr、浏览器、网页视图、系统推送及使用独立网络连接的服务不受这些设置控制。"
         }
       }
     }
@@ -228,13 +228,13 @@
       "en": {
         "stringUnit": {
           "state": "translated",
-          "value": "HTTPS connects securely to the proxy. SOCKS5 resolves destination names remotely. Authentication is not supported."
+          "value": "Supports TLS-encrypted HTTPS proxies and SOCKS5 with remote destination DNS. Plain HTTP proxies and proxy authentication are not supported."
         }
       },
       "zh-Hans": {
         "stringUnit": {
           "state": "translated",
-          "value": "HTTPS 使用 TLS 连接代理服务器；SOCKS5 由代理解析目标域名。暂不支持代理认证。"
+          "value": "支持 TLS 加密的 HTTPS 代理和由代理解析目标域名的 SOCKS5。不支持明文 HTTP 代理及代理身份验证。"
         }
       }
     }

@@ -203,8 +203,11 @@ public struct MediaVideoView: View {
                     .font(.caption)
                     .foregroundStyle(.white)
                     .mediaVideoBadgeStyle()
-            case .error:
-                Image(systemName: "exclamationmark.triangle.fill").mediaVideoBadgeStyle()
+            case .error(let error):
+                Label(error.localizedDescription, systemImage: "exclamationmark.triangle.fill")
+                    .font(.caption)
+                    .lineLimit(2)
+                    .mediaVideoBadgeStyle()
             }
         }
     }

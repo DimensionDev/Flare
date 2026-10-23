@@ -58,7 +58,7 @@ fun RssRichText(
     val uriHandler = LocalUriHandler.current
     val isDarkTheme = FluentTheme.colors.darkMode
     val context =
-        remember(element, isDarkTheme) {
+        remember(element, isDarkTheme, imageHeader, uriHandler) {
             RenderContext(
                 RichTextStyle(
                     stringStyle =
@@ -86,7 +86,7 @@ fun RssRichText(
                 imageHeader = imageHeader,
                 onMediaClick = {
                     uriHandler.openUri(
-                        DeeplinkRoute.Media.Image(it, previewUrl = null).toUri(),
+                        DeeplinkRoute.Media.Image(it, previewUrl = null, customHeaders = imageHeader, proxy = ProxyRef.Global).toUri(),
                     )
                 },
             )
@@ -256,7 +256,7 @@ private fun RichTextScope.RenderElement(
                     )
                 }
                 SubcomposeNetworkImage(
-                    src.toUiImage(proxy = ProxyRef.Global),
+                    src.toUiImage(customHeaders = context.imageHeader, proxy = ProxyRef.Global),
                     contentDescription = alt,
                     modifier =
                         Modifier

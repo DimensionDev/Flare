@@ -12,6 +12,8 @@ import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.createDatabaseDriver
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.io.OkioFileStorage
+import dev.dimension.flare.data.model.ProxyMode
+import dev.dimension.flare.data.model.ProxyPolicy
 import dev.dimension.flare.deleteTestRootPath
 import dev.dimension.flare.memoryDatabaseBuilder
 import dev.dimension.flare.model.MicroBlogKey
@@ -73,6 +75,43 @@ class AccountRepositoryTest : RobolectricTest() {
         cacheDatabase.close()
         deleteTestRootPath(root)
     }
+
+    @Test
+    fun startupCompletesInterruptedDeletionAndAllowsRelogin() =
+        runTest {
+            insertAccount()
+            val proxy = ProxyRepository(fileStorage)
+            proxy.selectAccount(accountKey, ProxyPolicy(ProxyMode.DIRECT))
+            appDataStore.composeConfigData.updateData { it.copy(lastAccounts = listOf(accountKey)) }
+            proxy.removeAccount(accountKey)
+            val repository = createRepository(this, proxy)
+            val other = MicroBlogKey("other", "example.social")
+            repository.addAccount(UiAccount(other, "Mastodon"), "unaffected credentials").join()
+            assertNull(appDatabase.accountDao().getAccount(accountKey))
+            assertEquals(
+                emptyList(),
+                appDataStore.composeConfigData.data
+                    .first()
+                    .lastAccounts,
+            )
+            assertEquals(setOf(accountKey.toString()), proxy.settings.first().removedAccounts)
+
+            repository.addAccount(UiAccount(accountKey, "Mastodon"), "new credentials").join()
+            assertEquals(accountKey, repository.find(accountKey)?.accountKey)
+            assertFalse(accountKey.toString() in proxy.settings.first().removedAccounts)
+        }
+
+    @Test
+    fun reloginWaitsForPendingDeletionRecovery() =
+        runTest {
+            insertAccount()
+            val proxy = ProxyRepository(fileStorage)
+            proxy.removeAccount(accountKey)
+            val repository = createRepository(this, proxy)
+            repository.addAccount(UiAccount(accountKey, "Mastodon"), "new credentials").join()
+            assertEquals(accountKey, repository.find(accountKey)?.accountKey)
+            assertFalse(accountKey.toString() in proxy.settings.first().removedAccounts)
+        }
 
     @Test
     fun allAccountsDoesNotReEmitWhenActiveTimestampChanges() =
@@ -273,13 +312,16 @@ class AccountRepositoryTest : RobolectricTest() {
             assertEquals(listOf("TestNet"), assertIs<NoAvailableAccountException>(error).platformIds)
         }
 
-    private fun createRepository(scope: CoroutineScope): AccountRepository =
+    private fun createRepository(
+        scope: CoroutineScope,
+        proxy: ProxyRepository = ProxyRepository(fileStorage),
+    ): AccountRepository =
         AccountRepository(
             appDatabase = appDatabase,
             coroutineScope = scope,
             appDataStore = appDataStore,
             cacheDatabase = cacheDatabase,
-            proxyRepository = ProxyRepository(fileStorage),
+            proxyRepository = proxy,
             platformRegistry = testPlatformRegistry(),
         )
 

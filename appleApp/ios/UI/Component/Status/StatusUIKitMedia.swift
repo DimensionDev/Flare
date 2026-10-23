@@ -160,6 +160,7 @@ final class MediaUIView: UIView {
             imageView.trailingAnchor.constraint(equalTo: trailingAnchor),
             imageView.bottomAnchor.constraint(equalTo: bottomAnchor),
             playBadgeBg.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
+            playBadgeBg.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -16),
             playBadgeBg.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -16),
             playBadgeBg.widthAnchor.constraint(greaterThanOrEqualToConstant: 32),
             playBadgeBg.heightAnchor.constraint(equalToConstant: 32),
@@ -257,6 +258,7 @@ final class MediaUIView: UIView {
         _ state: VideoAutoplayOverlayState,
         showsBadge: Bool = true,
         progress: Double? = nil,
+        errorMessage: String? = nil,
         onRetry: (() -> Void)? = nil
     ) {
         playBadgeBg.isHidden = !showsBadge
@@ -285,6 +287,9 @@ final class MediaUIView: UIView {
             countdownLabel.text = Self.formatRemainingTime(remaining)
             countdownLabel.isHidden = false
         case .error:
+            countdownLabel.text = errorMessage
+            countdownLabel.isHidden = errorMessage == nil
+            accessibilityValue = errorMessage
             playBadge.image = UIImage(systemName: onRetry == nil ? "exclamationmark.triangle.fill" : "arrow.clockwise")
             playBadge.isHidden = false
             if showsBadge, let onRetry {

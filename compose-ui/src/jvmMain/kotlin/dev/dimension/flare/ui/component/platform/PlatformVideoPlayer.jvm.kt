@@ -39,6 +39,7 @@ internal actual fun PlatformVideoPlayer(
         onLongClick = onLongClick,
         autoPlay = autoPlay,
         remainingTimeContent = remainingTimeContent,
+        errorContent = errorContent,
         loadingPlaceholder = loadingPlaceholder,
     )
 }

@@ -734,4 +734,8 @@
     <string name="home_timeline_view_latest">View latest</string>
     <string name="settings_remember_home_timeline_position">Remember Home reading position</string>
     <string name="settings_remember_home_timeline_position_description">Keep your place after refreshing and reopening. Use View latest to jump to new posts.</string>
+
+    <string name="proxy_title">Proxy</string>
+    <string name="proxy_description">Proxy settings are saved on this device and excluded from app exports. Changes may interrupt active requests. A failed proxy never falls back to a direct connection.</string>
+    <string name="proxy_done">Done</string>
 </resources>

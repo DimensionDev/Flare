@@ -685,4 +685,8 @@
     <string name="home_timeline_view_latest">回到最新</string>
     <string name="settings_remember_home_timeline_position">记住首页阅读位置</string>
     <string name="settings_remember_home_timeline_position_description">刷新和重新打开后保留阅读位置。使用“回到最新”跳转到新内容。</string>
+
+    <string name="proxy_title">代理</string>
+    <string name="proxy_description">代理设置保存在本机，不包含在应用内导出中。修改设置可能会中断进行中的请求。代理失败时不会回退到直连。</string>
+    <string name="proxy_done">完成</string>
 </resources>

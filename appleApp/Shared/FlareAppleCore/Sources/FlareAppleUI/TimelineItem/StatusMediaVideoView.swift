@@ -242,6 +242,16 @@ public struct StatusMediaVideoView: View {
                 .overlay { player }
             #endif
         }
+        .overlay {
+            if case .error(let error) = session.state {
+                Text(error.localizedDescription)
+                    .font(.callout)
+                    .foregroundStyle(.white)
+                    .padding(12)
+                    .background(.black.opacity(0.75), in: .rect(cornerRadius: 8))
+                    .padding()
+            }
+        }
         .onAppear {
             if presentation == nil {
                 fallbackPresentation.setSuspended(scenePhase != .active)

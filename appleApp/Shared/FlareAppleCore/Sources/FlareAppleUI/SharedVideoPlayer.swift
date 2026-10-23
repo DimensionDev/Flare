@@ -177,7 +177,12 @@ final class SharedVideoPlayer {
 
     func error(_ session: VideoPlaybackSession) -> (any Error)? {
         guard owner === session else { return nil }
-        return playbackError ?? player.error
+        guard let error = playbackError ?? player.error ?? player.currentItem?.error else { return nil }
+        if let source = loadedSource, let message = MediaProxy.shared.failureMessage(localUrl: source.url) {
+            return NSError(domain: "Flare.MediaProxy", code: 1,
+                           userInfo: [NSLocalizedDescriptionKey: message, NSUnderlyingErrorKey: error])
+        }
+        return error
     }
 
     func update(_ session: VideoPlaybackSession, playing: Bool, rate: Float) {

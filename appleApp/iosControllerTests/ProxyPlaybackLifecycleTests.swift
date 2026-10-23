@@ -7,6 +7,27 @@ import FlareAppleCore
 
 @MainActor
 final class ProxyPlaybackLifecycleTests: XCTestCase {
+    func testRelayFailureReachesPlaybackErrorState() async throws {
+        let presenter = KotlinPresenter(presenter: ProxySettingsPresenter())
+        addTeardownBlock { @MainActor in try await self.select(.system, presenter: presenter) }
+        try await select(.direct, presenter: presenter)
+        let server = try PlaybackHTTPServer(statusCode: 503)
+        defer { server.stop() }
+        try await eventually { (server.listener.port?.rawValue ?? 0) > 0 }
+        let session = VideoPlaybackSession()
+        defer {
+            session.detach()
+            VideoPlaybackSession.releaseIdleBuffer()
+        }
+        session.play(media: media(server.url), playing: true)
+        try await eventually {
+            if case .error = session.state { return true }
+            return false
+        }
+        guard case .error(let error) = session.state else { return XCTFail("Expected playback error") }
+        XCTAssertEqual(error.localizedDescription, "Target returned HTTP 503")
+    }
+
     func testChangingRouteRetiresTheNativeItemWhileItsSurfaceIsDetached() async throws {
         let presenter = KotlinPresenter(presenter: ProxySettingsPresenter())
         addTeardownBlock { @MainActor in try await self.select(.system, presenter: presenter) }
@@ -145,10 +166,12 @@ private final class PlaybackHTTPServer {
     let listener: NWListener
     private var connections: [NWConnection] = []
     private let bytes: Data
+    private let statusCode: Int
     var url: String { "http://127.0.0.1:\(listener.port!.rawValue)/\(id).wav" }
     private let id = UUID().uuidString
 
-    init() throws {
+    init(statusCode: Int = 200) throws {
+        self.statusCode = statusCode
         var data = Data("RIFF".utf8)
         func append(_ value: UInt32) {
             var value = value.littleEndian
@@ -186,6 +209,11 @@ private final class PlaybackHTTPServer {
                 let text = String(decoding: received, as: UTF8.self)
                 guard text.contains("\r\n\r\n") else {
                     if complete { connection.cancel() } else { self.read(connection, prefix: received) }
+                    return
+                }
+                if self.statusCode != 200 {
+                    connection.send(content: Data("HTTP/1.1 \(self.statusCode) Unavailable\r\nContent-Length: 0\r\nConnection: close\r\n\r\n".utf8),
+                                    completion: .contentProcessed { _ in connection.cancel() })
                     return
                 }
                 let range = text.components(separatedBy: "\r\n").first { $0.lowercased().hasPrefix("range: bytes=") }?

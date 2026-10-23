@@ -19,7 +19,7 @@ public struct ProxySettingsView: View {
             if let settings = presenter.state.settings {
                 let accounts = presenter.state.accounts.filter { $0.accountKey.host != "nostr" }
                 Section {
-                    policyPicker(settings, accountKey: nil)
+                    policyPicker(settings)
                 } header: {
                     Text("proxy_global", bundle: FlareAppleUILocalization.bundle)
                 }
@@ -60,25 +60,7 @@ public struct ProxySettingsView: View {
                 if !accounts.isEmpty {
                     Section {
                         ForEach(accounts, id: \.accountKey) { account in
-                            if let profile = presenter.state.accountProfiles[account.accountKey] {
-                                UserCompatView(data: profile) {
-                                    accountPolicyPicker(settings, account: account)
-                                }
-                            } else {
-                                HStack(spacing: 8) {
-                                    Image(fontAwesome: account.platformIcon.fontAwesomeIcon)
-                                        .frame(width: 44, height: 44)
-                                    VStack(alignment: .leading) {
-                                        Text(verbatim: account.platformDisplayName)
-                                        Text(verbatim: account.accountKey.description())
-                                            .font(.caption)
-                                            .foregroundStyle(.secondary)
-                                    }
-                                    .lineLimit(1)
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                    accountPolicyPicker(settings, account: account)
-                                }
-                            }
+                            policyPicker(settings, account: account)
                         }
                     } header: {
                         Text("proxy_accounts", bundle: FlareAppleUILocalization.bundle)
@@ -109,14 +91,6 @@ public struct ProxySettingsView: View {
     private func closeEditor() {
         presenter.state.clearEditorError()
         editing = nil
-    }
-
-    private func accountPolicyPicker(_ settings: ProxySettings, account: UiAccount) -> some View {
-        policyPicker(settings, accountKey: account.accountKey, title: account.accountKey.description())
-            .labelsHidden()
-            .pickerStyle(.menu)
-            .fixedSize(horizontal: false, vertical: true)
-            .frame(maxWidth: 180, alignment: .trailing)
     }
 
     @ViewBuilder
@@ -170,19 +144,35 @@ public struct ProxySettingsView: View {
         settings.global.proxyId == profile.id || settings.accounts.values.contains { $0.proxyId == profile.id }
     }
 
-    private func policyPicker(_ settings: ProxySettings, accountKey: MicroBlogKey?, title: String? = nil) -> some View {
+    private func policyPicker(_ settings: ProxySettings, account: UiAccount? = nil) -> some View {
+        let accountKey = account?.accountKey
         let policy = settings.policy(accountKey: accountKey)
         let options = [ProxyPolicy(mode: accountKey == nil ? .system : .inherit, proxyId: nil), ProxyPolicy(mode: .direct, proxyId: nil)] + settings.profiles.map { ProxyPolicy(mode: .proxy, proxyId: $0.id) }
         return Picker(selection: Binding(get: { policy }, set: { presenter.state.select(accountKey: accountKey, policy: $0) })) {
             ForEach(options, id: \.self) { option in Text(policyLabel(option, settings)).tag(option) }
         } label: {
-            if let title {
-                Text(verbatim: title)
+            if let account {
+                if let profile = presenter.state.accountProfiles[account.accountKey] {
+                    UserCompatView(data: profile)
+                } else {
+                    HStack(spacing: 8) {
+                        Image(fontAwesome: account.platformIcon.fontAwesomeIcon)
+                            .frame(width: 44, height: 44)
+                        VStack(alignment: .leading) {
+                            Text(verbatim: account.platformDisplayName)
+                            Text(verbatim: account.accountKey.description())
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        .lineLimit(1)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                }
             } else {
                 Text("proxy_title", bundle: FlareAppleUILocalization.bundle)
             }
         }
-        .accessibilityLabel(Text(title ?? String(localized: "proxy_title", bundle: FlareAppleUILocalization.bundle)))
+        .accessibilityLabel(Text(accountKey?.description() ?? String(localized: "proxy_title", bundle: FlareAppleUILocalization.bundle)))
         .accessibilityValue(Text(policyLabel(policy, settings)))
     }
 

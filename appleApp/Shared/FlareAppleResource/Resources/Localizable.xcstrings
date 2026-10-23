@@ -25,40 +25,6 @@
       }
     }
   },
-  "proxy_description": {
-    "extractionState": "manual",
-    "localizations": {
-      "en": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "Proxy settings are saved on this device and excluded from app exports. Changes may interrupt active requests. A failed proxy never falls back to a direct connection."
-        }
-      },
-      "zh-Hans": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "代理设置保存在本机，不包含在应用内导出中。修改设置可能会中断进行中的请求。代理失败时不会回退到直连。"
-        }
-      }
-    }
-  },
-  "proxy_scope": {
-    "extractionState": "manual",
-    "localizations": {
-      "en": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "RSS, translation and AI use the global proxy. Nostr, browsers, web views, system push and services with their own network connections are not controlled by these settings."
-        }
-      },
-      "zh-Hans": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "RSS、翻译和 AI 使用全局代理。Nostr、浏览器、网页视图、系统推送及使用独立网络连接的服务不受这些设置控制。"
-        }
-      }
-    }
-  },
   "proxy_global": {
     "extractionState": "manual",
     "localizations": {
@@ -412,23 +378,6 @@
         "stringUnit": {
           "state": "translated",
           "value": "完成"
-        }
-      }
-    }
-  },
-  "proxy_effective": {
-    "extractionState": "manual",
-    "localizations": {
-      "en": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "Effective"
-        }
-      },
-      "zh-Hans": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "当前生效"
         }
       }
     }

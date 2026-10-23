@@ -835,9 +835,7 @@
 
     <string name="proxy_settings_subtitle">Global and per-account proxy settings</string>
     <string name="proxy_title">Proxy</string>
-    <string name="proxy_description">Proxy settings are saved on this device and excluded from app exports. Changes may interrupt active requests. A failed proxy never falls back to a direct connection.</string>
     <string name="proxy_local_network_permission">Allow local network access to connect to proxy servers on your network.</string>
-    <string name="proxy_scope">RSS, translation and AI use the global proxy. Nostr, browsers, web views, system push and services with their own network connections are not controlled by these settings.</string>
     <string name="proxy_global">Global</string>
     <string name="proxy_system">System settings</string>
     <string name="proxy_direct">Direct connection</string>
@@ -858,5 +856,4 @@
     <string name="proxy_save">Save</string>
     <string name="proxy_cancel">Cancel</string>
     <string name="proxy_delete">Delete</string>
-    <string name="proxy_effective">Effective</string>
 </resources>

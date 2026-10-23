@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
@@ -44,10 +45,15 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.solid.ChevronDown
 import compose.icons.fontawesomeicons.solid.EllipsisVertical
 import compose.icons.fontawesomeicons.solid.Plus
 import dev.dimension.flare.R
@@ -57,10 +63,12 @@ import dev.dimension.flare.data.model.ProxyProfile
 import dev.dimension.flare.data.model.ProxyProtocol
 import dev.dimension.flare.data.model.ProxySettings
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareLargeFlexibleTopAppBar
 import dev.dimension.flare.ui.component.FlareScaffold
+import dev.dimension.flare.ui.component.RichText
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.settings.ProxySettingsPresenter
 import dev.dimension.flare.ui.presenter.settings.ProxySettingsState
@@ -111,7 +119,6 @@ internal fun ProxySettingsContent(
                     content = { Text(globalTitle) },
                     supportingContent = { Text(settings.global.label(settings)) },
                 )
-                ProxyFootnote(stringResource(R.string.proxy_description))
                 Text(stringResource(R.string.proxy_profiles), style = MaterialTheme.typography.titleSmall)
                 Column(verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap)) {
                     settings.profiles.forEachIndexed { index, profile ->
@@ -172,18 +179,60 @@ internal fun ProxySettingsContent(
                     Text(stringResource(R.string.proxy_accounts), style = MaterialTheme.typography.titleSmall)
                     Column(verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap)) {
                         accounts.forEachIndexed { index, account ->
-                            val title = "${account.platformDisplayName} · ${account.accountKey}"
+                            val profile = state.accountProfiles[account.accountKey]
                             val policy = settings.policy(account.accountKey)
+                            var expanded by remember(account.accountKey) { mutableStateOf(false) }
+                            val label = "${stringResource(R.string.proxy_title)}: ${account.accountKey}"
                             SegmentedListItem(
-                                onClick = { choosingPolicy = account.accountKey to title },
+                                onClick = { expanded = true },
                                 enabled = !state.busy,
                                 shapes = ListItemDefaults.segmentedShapes2(index, accounts.size),
-                                content = { Text(title) },
+                                leadingContent = { AvatarComponent(data = profile?.avatar) },
+                                content = {
+                                    if (profile != null) RichText(profile.name, maxLines = 1) else Text(account.platformDisplayName)
+                                },
                                 supportingContent = {
-                                    Column {
-                                        Text(policy.label(settings))
-                                        if (policy.mode == ProxyMode.INHERIT) {
-                                            Text("${stringResource(R.string.proxy_effective)}: ${settings.global.label(settings)}")
+                                    Text(
+                                        profile?.handle?.canonical ?: account.accountKey.toString(),
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                    )
+                                },
+                                trailingContent = {
+                                    Box {
+                                        TextButton(
+                                            onClick = { expanded = true },
+                                            enabled = !state.busy,
+                                            modifier = Modifier.widthIn(max = 160.dp).semantics { contentDescription = label },
+                                        ) {
+                                            Text(
+                                                policy.label(settings),
+                                                Modifier.weight(1f, fill = false),
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis,
+                                            )
+                                            FAIcon(FontAwesomeIcons.Solid.ChevronDown, contentDescription = null)
+                                        }
+                                        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+                                            val options =
+                                                listOf(ProxyPolicy(), ProxyPolicy(ProxyMode.DIRECT)) +
+                                                    settings.profiles.map { ProxyPolicy(ProxyMode.PROXY, it.id) }
+                                            options.forEach { option ->
+                                                DropdownMenuItem(
+                                                    text = { Text(option.label(settings)) },
+                                                    enabled = !state.busy,
+                                                    modifier = Modifier.semantics { selected = policy == option },
+                                                    onClick = {
+                                                        expanded = false
+                                                        val effective = if (option.mode == ProxyMode.INHERIT) settings.global else option
+                                                        if (effective.mode == ProxyMode.PROXY) {
+                                                            beforeConnect { state.select(account.accountKey, option) }
+                                                        } else {
+                                                            state.select(account.accountKey, option)
+                                                        }
+                                                    },
+                                                )
+                                            }
                                         }
                                     }
                                 },
@@ -191,7 +240,6 @@ internal fun ProxySettingsContent(
                         }
                     }
                 }
-                ProxyFootnote(stringResource(R.string.proxy_scope))
             }
         }
     }
@@ -243,7 +291,10 @@ internal fun ProxySettingsContent(
                     isNew = existing == null,
                     state = state,
                     beforeConnect = beforeConnect,
-                    onClose = { editingId = null },
+                    onClose = {
+                        state.clearEditorError()
+                        editingId = null
+                    },
                 )
             }
         }
@@ -333,13 +384,13 @@ private fun ProxyEditor(
                 }, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), lineLimits = TextFieldLineLimits.SingleLine)
                 ProxyFootnote(stringResource(R.string.proxy_no_auth))
                 TextButton(
-                    onClick = { beforeConnect { state.test(value()) } },
+                    onClick = { beforeConnect { state.test(value(), fromEditor = true) } },
                     enabled = !state.busy,
                 ) { Text(stringResource(R.string.proxy_test)) }
                 ProxyFootnote(stringResource(R.string.proxy_test_hint))
                 if (state.busy) LinearProgressIndicator(Modifier.fillMaxWidth())
                 if (state.isTested(value())) Text(stringResource(R.string.proxy_test_success))
-                state.error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+                state.editorError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
             }
         },
         confirmButton = {

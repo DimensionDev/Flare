@@ -237,6 +237,7 @@ private struct ProxyEditor: View {
                 cancelButton.keyboardShortcut(.cancelAction)
                 saveButton.keyboardShortcut(.defaultAction)
             }
+            .labelStyle(.titleOnly)
             .padding()
         }
         .frame(width: 520, height: 560)
@@ -246,8 +247,8 @@ private struct ProxyEditor: View {
                 .navigationTitle(title)
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
-                    ToolbarItem(placement: .cancellationAction) { cancelButton }
-                    ToolbarItem(placement: .confirmationAction) { saveButton }
+                    ToolbarItem(placement: .cancellationAction) { cancelButton.labelStyle(.iconOnly) }
+                    ToolbarItem(placement: .confirmationAction) { saveButton.labelStyle(.iconOnly) }
                 }
         }
         #endif
@@ -309,12 +310,16 @@ private struct ProxyEditor: View {
     }
 
     private var cancelButton: some View {
-        Button(action: onClose) { Text("proxy_cancel", bundle: FlareAppleUILocalization.bundle) }
-            .disabled(state.busy)
+        Button(action: onClose) {
+            Label { Text("proxy_cancel", bundle: FlareAppleUILocalization.bundle) } icon: { Image(fontAwesome: .xmark) }
+        }
+        .disabled(state.busy)
     }
 
     private var saveButton: some View {
-        Button { state.save(profile: value, onSaved: onClose) } label: { Text("proxy_save", bundle: FlareAppleUILocalization.bundle) }
-            .disabled(state.busy)
+        Button { state.save(profile: value, onSaved: onClose) } label: {
+            Label { Text("proxy_save", bundle: FlareAppleUILocalization.bundle) } icon: { Image(fontAwesome: .check) }
+        }
+        .disabled(state.busy)
     }
 }

@@ -79,8 +79,7 @@ import dev.dimension.flare.import_error
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.ilink
 import dev.dimension.flare.ok
-import dev.dimension.flare.proxy_description
-import dev.dimension.flare.proxy_done
+import dev.dimension.flare.proxy_settings_subtitle
 import dev.dimension.flare.proxy_title
 import dev.dimension.flare.remove_account
 import dev.dimension.flare.save_completed
@@ -312,7 +311,6 @@ import dev.dimension.flare.ui.presenter.settings.StoragePresenter
 import dev.dimension.flare.ui.presenter.settings.StorageState
 import dev.dimension.flare.ui.presenter.settings.TranslateProviderOption
 import dev.dimension.flare.ui.render.toUi
-import dev.dimension.flare.ui.screen.settings.ProxySettingsContent
 import dev.dimension.flare.ui.theme.LocalComposeWindow
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import io.github.composefluent.ExperimentalFluentApi
@@ -370,12 +368,6 @@ internal fun SettingsScreen(
     toPostActionLayout: () -> Unit,
 ) {
     var showProxy by remember { mutableStateOf(false) }
-    ContentDialog(
-        title = stringResource(Res.string.proxy_title), visible = showProxy,
-        primaryButtonText = stringResource(Res.string.proxy_done),
-        content = { ProxySettingsContent(Modifier.fillMaxWidth().heightIn(max = 640.dp)) },
-        onButtonClick = { showProxy = false },
-    )
     val window = LocalComposeWindow.current
     val state by producePresenter {
         presenter(
@@ -639,11 +631,14 @@ internal fun SettingsScreen(
                 },
             )
 
-            CardExpanderItem(
+            Expander(
+                expanded = showProxy,
+                onExpandedChanged = { showProxy = it },
                 heading = { Text(stringResource(Res.string.proxy_title)) },
-                caption = { Text(stringResource(Res.string.proxy_description)) },
-                onClick = { showProxy = true },
-            )
+                caption = { Text(stringResource(Res.string.proxy_settings_subtitle)) },
+            ) {
+                ProxySettingsContent()
+            }
 
             Header(stringResource(Res.string.settings_appearance_title))
 

@@ -10,11 +10,19 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import com.kevinnzou.web.WebView
 import com.kevinnzou.web.rememberWebViewState
+import dev.dimension.flare.common.WebViewProxy
+import dev.dimension.flare.data.datastore.model.AppSettings
+import dev.dimension.flare.data.repository.SettingsRepository
+import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.ui.component.FlareScaffold
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.seconds
@@ -33,6 +41,21 @@ internal fun WebCookieLoginScreen(
     onBack: () -> Unit,
 ) {
     val webViewState = rememberWebViewState(url)
+
+    // WebView has its own network stack and ignores the Ktor/OkHttp proxy selector, so apply the
+    // configured proxy to WebView explicitly while this screen is open.
+    val settingsRepository: SettingsRepository by koinInject()
+    val settings by settingsRepository.appSettings.collectAsState(AppSettings(version = ""))
+    val currentProxy = rememberUpdatedState(settings.proxy)
+    LaunchedEffect(settings.proxy) {
+        WebViewProxy.apply(settings.proxy)
+    }
+    DisposableEffect(Unit) {
+        onDispose {
+            WebViewProxy.clear()
+        }
+    }
+
     LaunchedEffect(url) {
         while (true) {
             webViewState.lastLoadedUrl?.let { loadedUrl ->
@@ -63,6 +86,8 @@ internal fun WebCookieLoginScreen(
                     .padding(it)
                     .fillMaxSize(),
             onCreated = {
+                // Applying here makes sure the WebView provider is already initialized.
+                WebViewProxy.apply(currentProxy.value)
                 WebStorage.getInstance().deleteAllData()
                 CookieManager.getInstance().removeAllCookies(null)
                 with(it.settings) {

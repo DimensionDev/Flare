@@ -15,6 +15,11 @@ public data class AppSettings(
     val refreshHomeTimelineOnLaunch: Boolean = true,
     val homeTimelineAutoRefreshInterval: TimelineAutoRefreshInterval = TimelineAutoRefreshInterval.DISABLED,
     val rememberHomeTimelinePosition: Boolean = false,
+    // NOTE: AppSettings is persisted with kotlinx ProtoBuf over this store, which assigns field
+    // numbers in *declaration order*. Always append new fields at the end of this class; inserting
+    // one in the middle silently reassigns the field numbers of everything after it and corrupts
+    // existing users' settings.
+    val proxy: ProxyConfig = ProxyConfig(),
 ) {
     public companion object {
         // for SwiftUI environment defaults
@@ -118,6 +123,30 @@ public data class AppSettings(
                 val reasoningEffort: String = "",
                 val extraBody: String = "",
             ) : Type
+        }
+    }
+
+    /**
+     * Network proxy used for every outbound HTTP request.
+     *
+     * [Type.System] is the default so that upgrading the app never changes existing behaviour.
+     */
+    @Serializable
+    public data class ProxyConfig(
+        val type: Type = Type.System,
+        val host: String = "",
+        val port: Int = 0,
+    ) {
+        @Serializable
+        public enum class Type {
+            /** Follow the platform proxy (default before this setting existed). */
+            System,
+
+            /** Connect directly, ignoring any system proxy. */
+            Direct,
+
+            /** Always connect through the configured HTTP/HTTPS proxy. */
+            Http,
         }
     }
 }

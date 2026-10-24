@@ -158,6 +158,9 @@ internal sealed interface Route : NavKey {
 
         @Serializable
         data object ColorSpace : Settings
+
+        @Serializable
+        data object NetworkProxy : Settings
     }
 
     @Serializable

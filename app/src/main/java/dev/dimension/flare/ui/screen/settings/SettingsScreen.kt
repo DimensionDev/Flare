@@ -31,6 +31,7 @@ import compose.icons.fontawesomeicons.solid.Database
 import compose.icons.fontawesomeicons.solid.Filter
 import compose.icons.fontawesomeicons.solid.Gear
 import compose.icons.fontawesomeicons.solid.Language
+import compose.icons.fontawesomeicons.solid.NetworkWired
 import compose.icons.fontawesomeicons.solid.Newspaper
 import compose.icons.fontawesomeicons.solid.Palette
 import compose.icons.fontawesomeicons.solid.PhotoFilm
@@ -92,6 +93,7 @@ internal fun SettingsScreen(
     toLocalFilter: () -> Unit,
     toAiConfig: () -> Unit,
     toTranslationConfig: () -> Unit,
+    toNetworkProxy: () -> Unit,
     onBack: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -292,7 +294,7 @@ internal fun SettingsScreen(
                     onClick = {
                         toStorage.invoke()
                     },
-                    shapes = ListItemDefaults.last(),
+                    shapes = ListItemDefaults.item(),
                     content = {
                         Text(text = stringResource(id = R.string.settings_storage_title))
                     },
@@ -305,6 +307,25 @@ internal fun SettingsScreen(
                     },
                     supportingContent = {
                         Text(text = stringResource(id = R.string.settings_storage_subtitle))
+                    },
+                )
+                SegmentedListItem(
+                    onClick = {
+                        toNetworkProxy.invoke()
+                    },
+                    shapes = ListItemDefaults.last(),
+                    content = {
+                        Text(text = stringResource(id = R.string.settings_network_proxy_title))
+                    },
+                    leadingContent = {
+                        ThemedIcon(
+                            imageVector = FontAwesomeIcons.Solid.NetworkWired,
+                            contentDescription = stringResource(id = R.string.settings_network_proxy_title),
+                            color = ThemeIconData.Color.SapphireBlue,
+                        )
+                    },
+                    supportingContent = {
+                        Text(text = stringResource(id = R.string.settings_network_proxy_description))
                     },
                 )
             }

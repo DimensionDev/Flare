@@ -59,6 +59,9 @@ internal fun EntryProviderScope<NavKey>.settingsSelectEntryBuilder(
             toTranslationConfig = {
                 navigate(Route.Settings.TranslationConfig)
             },
+            toNetworkProxy = {
+                navigate(Route.Settings.NetworkProxy)
+            },
             onBack = onBack,
         )
     }
@@ -305,6 +308,16 @@ internal fun EntryProviderScope<NavKey>.settingsSelectEntryBuilder(
         )
     ) { args ->
         ColorSpaceScreen(
+            onBack = onBack
+        )
+    }
+
+    entry<Route.Settings.NetworkProxy>(
+        metadata = ListDetailSceneStrategy.detailPane(
+            sceneKey = "Settings"
+        )
+    ) {
+        NetworkProxyScreen(
             onBack = onBack
         )
     }

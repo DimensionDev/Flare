@@ -741,6 +741,12 @@ private struct MacOSWebLoginScreen: View {
                 MacOSWebView(url: URL(string: url), configuration: viewModel.configuration) { webView in
                     webView.navigationDelegate = viewModel.delegate
                 }
+                .safeAreaInset(edge: .bottom, spacing: 0) {
+                    if XCookieImportView.isXLoginURL(url) {
+                        XCookieImportView(onSubmit: onCookie)
+                            .background(.bar)
+                    }
+                }
             } else {
                 ProgressView()
                     .frame(maxWidth: .infinity, maxHeight: .infinity)

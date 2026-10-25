@@ -25,6 +25,12 @@ struct WebLoginScreen: View {
                             viewModel.page.load(requestURL)
                         }
                     }
+                    .safeAreaInset(edge: .bottom, spacing: 0) {
+                        if XCookieImportView.isXLoginURL(url) {
+                            XCookieImportView(onSubmit: onCookie)
+                                .background(.bar)
+                        }
+                    }
                     .toolbar {
                         ToolbarItem(placement: .cancellationAction) {
                             Button {

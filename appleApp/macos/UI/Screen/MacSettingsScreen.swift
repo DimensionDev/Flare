@@ -288,13 +288,13 @@ private struct MacSettingLabelContent: View {
             Text(title)
             if let subtitleKey {
                 Text(subtitleKey)
-                    .font(.caption)
+                    .scaledFont(.caption)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
             if let value {
                 Text(verbatim: value)
-                    .font(.caption)
+                    .scaledFont(.caption)
                     .foregroundStyle(.secondary)
                     .lineLimit(2)
                     .truncationMode(.middle)
@@ -430,7 +430,7 @@ private struct MacAccountManagementSettingsPane: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(verbatim: account.platformDisplayName)
                 Text(verbatim: account.accountKey.description())
-                    .font(.caption)
+                    .scaledFont(.caption)
                     .foregroundStyle(.secondary)
             }
         }
@@ -528,7 +528,7 @@ private struct MacAccountOrderButtons: View {
             .disabled(!canMoveDown)
             .help(Text("macos_action_move_down"))
         }
-        .font(.caption)
+        .scaledFont(.caption)
     }
 }
 
@@ -625,13 +625,13 @@ private struct MacLinkOpenDefaultInlineRow: View {
                 VStack(alignment: .leading, spacing: 3) {
                     Text(verbatim: target.title)
                     MacLinkOpenDefaultOptionLabel(option: target.selectedOption)
-                        .font(.caption)
+                        .scaledFont(.caption)
                         .foregroundStyle(.secondary)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
 
                 Image(systemName: "chevron.down")
-                    .font(.caption)
+                    .scaledFont(.caption)
                     .foregroundStyle(.secondary)
             }
             .contentShape(Rectangle())
@@ -1216,13 +1216,13 @@ private struct MacAboutSettingsPane: View {
 
                     VStack(spacing: 6) {
                         Text("Flare")
-                            .font(.largeTitle.weight(.semibold))
+                            .scaledFont(.largeTitle, weight: .semibold)
                         Text("settings_about_description")
                             .foregroundStyle(.secondary)
                             .multilineTextAlignment(.center)
                         if !version.isEmpty {
                             Text(verbatim: version)
-                                .font(.footnote.monospacedDigit())
+                                .scaledFont(.footnote).monospacedDigit()
                                 .foregroundStyle(.tertiary)
                         }
                     }

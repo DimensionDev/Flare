@@ -197,7 +197,7 @@ private struct ArticleContentView: View {
 
     private var articleCommentsTitle: some View {
         Text("Comments", bundle: FlareAppleUILocalization.bundle)
-            .font(.headline)
+            .scaledFont(.headline)
             .frame(maxWidth: 680, alignment: .leading)
             .padding(.horizontal)
     }
@@ -269,7 +269,7 @@ private struct ArticleHeaderView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text(article.title)
-                .font(.title2)
+                .scaledFont(.title2)
                 .fontWeight(.semibold)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
@@ -282,7 +282,7 @@ private struct ArticleHeaderView: View {
                             Group {
                                 if let publishDate = article.publishDate {
                                     DateTimeText(data: publishDate, fullTime: true)
-                                        .font(.caption)
+                                        .scaledFont(.caption)
                                         .foregroundStyle(.secondary)
                                 }
                             }
@@ -301,7 +301,7 @@ private struct ArticleHeaderView: View {
                 }
             } else if let publishDate = article.publishDate {
                 DateTimeText(data: publishDate, fullTime: true)
-                    .font(.caption)
+                    .scaledFont(.caption)
                     .foregroundStyle(.secondary)
             }
         }
@@ -331,7 +331,7 @@ private struct ArticleRssAuthorView: View {
                                 .clipShape(.rect(cornerRadius: 4))
                         }
                         Text(siteName)
-                            .font(.caption)
+                            .scaledFont(.caption)
                             .foregroundStyle(.secondary)
                     }
                 }
@@ -339,14 +339,14 @@ private struct ArticleRssAuthorView: View {
                 HStack(spacing: 8) {
                     if let byline = author.byline {
                         Text(byline)
-                            .font(.caption)
+                            .scaledFont(.caption)
                             .foregroundStyle(.secondary)
                             .lineLimit(1)
                     }
                     Spacer(minLength: 8)
                     if let publishDate {
                         DateTimeText(data: publishDate, fullTime: true)
-                            .font(.caption)
+                            .scaledFont(.caption)
                             .foregroundStyle(.secondary)
                     }
                 }
@@ -477,18 +477,18 @@ private struct ArticleFileBlockView: View {
     private func content(canDownload: Bool) -> some View {
         HStack(spacing: 12) {
             Image(systemName: "doc.fill")
-                .font(.title3)
+                .scaledFont(.title3)
                 .foregroundStyle(.secondary)
                 .frame(width: 28, height: 28)
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(block.name)
-                    .font(.body)
+                    .scaledFont(.body)
                     .lineLimit(2)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 if let extensionName {
                     Text(extensionName)
-                        .font(.caption)
+                        .scaledFont(.caption)
                         .foregroundStyle(.secondary)
                 }
             }
@@ -533,25 +533,25 @@ private struct ArticleEmbedBlockView: View {
                     .clipShape(.rect(cornerRadius: 8))
             } else {
                 Image(fontAwesome: .globe)
-                    .font(.title3)
+                    .scaledFont(.title3)
                     .foregroundStyle(.secondary)
                     .frame(width: 28, height: 28)
             }
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(block.title ?? block.url ?? block.htmlFallback ?? "")
-                    .font(.body)
+                    .scaledFont(.body)
                     .lineLimit(2)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 if let description = block.description_ {
                     Text(description)
-                        .font(.caption)
+                        .scaledFont(.caption)
                         .foregroundStyle(.secondary)
                         .lineLimit(3)
                 }
                 if let url = block.url {
                     Text(url)
-                        .font(.caption)
+                        .scaledFont(.caption)
                         .foregroundStyle(.tint)
                         .lineLimit(1)
                 }
@@ -571,15 +571,15 @@ private struct ArticleContentGateBlockView: View {
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
             Image(fontAwesome: .lock)
-                .font(.title3)
+                .scaledFont(.title3)
                 .foregroundStyle(.tint)
                 .frame(width: 28, height: 28)
 
             VStack(alignment: .leading, spacing: 8) {
                 Text("Subscription required", bundle: FlareAppleUILocalization.bundle)
-                    .font(.body.weight(.semibold))
+                    .scaledFont(.body, weight: .semibold)
                 Text(descriptionText)
-                    .font(.body)
+                    .scaledFont(.body)
                     .foregroundStyle(.secondary)
 
                 if let actionUrl = block.actionUrl, !actionUrl.isEmpty {

@@ -14,7 +14,7 @@ public struct BlueskyReportSheet: View {
                     VStack {
                         Text(FlareAppleUILocalization.string(reason.stringKey))
                         Text(FlareAppleUILocalization.string(reason.descriptionKey))
-                            .font(.caption)
+                            .scaledFont(.caption)
                             .foregroundStyle(.secondary)
                     }
                     .tag(reason)

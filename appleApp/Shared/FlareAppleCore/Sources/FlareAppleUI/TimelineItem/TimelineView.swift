@@ -7,7 +7,11 @@ public struct TimelineView: View {
     private let detailStatusKey: MicroBlogKey?
     private let showTranslate: Bool
     @Environment(\.timelineAppearance.fullWidthPost) private var fullWidthPost
-    @ScaledMetric(relativeTo: .caption) private var iconSize: CGFloat = 15
+    @ScaledMetric(relativeTo: .caption) private var baseIconSize: CGFloat = 15
+    @Environment(\.fontScale) private var fontScale
+    private var iconSize: CGFloat {
+        baseIconSize * fontScale
+    }
 
     public init(data: UiTimelineV2, detailStatusKey: MicroBlogKey?, showTranslate: Bool = true) {
         self.data = data
@@ -69,7 +73,7 @@ public struct TimelineView: View {
                 })
                 .if(!topMessageOnly, transform: { view in
                     view.lineLimit(1)
-                        .font(.caption)
+                        .scaledFont(.caption)
                         .foregroundStyle(.secondary)
                 })
         }

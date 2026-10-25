@@ -77,7 +77,7 @@ public struct LocalFilterSettingsView: View {
                             Text(item.keyword)
                             if item.isRegex {
                                 Text("local_filter_regex", bundle: FlareAppleUILocalization.bundle)
-                                    .font(.caption)
+                                    .scaledFont(.caption)
                                     .foregroundStyle(.secondary)
                             }
                         }
@@ -168,7 +168,7 @@ private struct MxgaSettingsSection: View {
                             Text("settings_mxga_refresh_title", bundle: FlareAppleUILocalization.bundle)
                                 .foregroundStyle(.primary)
                             refreshStatus
-                                .font(.caption)
+                                .scaledFont(.caption)
                                 .foregroundStyle(.secondary)
                         }
                         Spacer()

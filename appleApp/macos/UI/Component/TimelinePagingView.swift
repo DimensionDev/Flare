@@ -9,6 +9,7 @@ struct TimelinePagingView: View {
     @Environment(\.refresh) private var refreshAction: RefreshAction?
     @Environment(\.timelineReading) private var reading
     @Environment(\.timelineAppearance.timelineDisplayMode) private var timelineDisplayMode
+    @Environment(\.fontScale) private var fontScale
 
     let data: PagingState<UiTimelineV2>
     let detailStatusKey: MicroBlogKey?
@@ -16,6 +17,12 @@ struct TimelinePagingView: View {
     let topContentInset: CGFloat
     let allowGalleryMode: Bool
     let suppressInitialRefreshIndicator: Bool
+
+    /// Keeps the single-column timeline readable when the window is very wide (e.g. full screen).
+    /// Grows with the text size so zooming in widens the column instead of wrapping sooner.
+    private var maxContentWidth: CGFloat {
+        680 * fontScale
+    }
 
     init(
         data: PagingState<UiTimelineV2>,
@@ -91,6 +98,8 @@ struct TimelinePagingView: View {
             LazyVStack(spacing: 2) {
                 TimelinePagingContent(data: data, detailStatusKey: detailStatusKey)
             }
+            .frame(maxWidth: maxContentWidth)
+            .frame(maxWidth: .infinity)
         }
     }
 

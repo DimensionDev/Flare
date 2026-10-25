@@ -39,7 +39,7 @@ struct FlareApp: App {
             }
         }
         .defaultSize(width: 480, height: 600)
-        .windowResizability(.contentSize)
+        .windowResizability(.contentMinSize)
         .windowSizeFitContent()
         .commands {
             MacAppCommands()
@@ -190,6 +190,12 @@ private struct MacAppCommands: Commands {
     @State private var secondaryTabPresenter = KotlinPresenter(
         presenter: SecondaryTabsPresenter()
     )
+    @State private var environmentSettingsPresenter = KotlinPresenter(
+        presenter: EnvironmentSettingsPresenter()
+    )
+    @State private var settingsPresenter = KotlinPresenter(
+        presenter: SettingsPresenter()
+    )
 
     var body: some Commands {
         CommandGroup(replacing: .newItem) {
@@ -203,6 +209,34 @@ private struct MacAppCommands: Commands {
                 }
             }
             .keyboardShortcut("n")
+        }
+
+        CommandGroup(after: .toolbar) {
+            Button {
+                updateFontSizeDiff(fontSizeDiff + 1)
+            } label: {
+                Text("macos_menu_zoom_in")
+            }
+            .keyboardShortcut("+")
+            .disabled(fontSizeDiff >= FlareFontScale.fontSizeDiffRange.upperBound)
+
+            Button {
+                updateFontSizeDiff(fontSizeDiff - 1)
+            } label: {
+                Text("macos_menu_zoom_out")
+            }
+            .keyboardShortcut("-")
+            .disabled(fontSizeDiff <= FlareFontScale.fontSizeDiffRange.lowerBound)
+
+            Button {
+                updateFontSizeDiff(0)
+            } label: {
+                Text("macos_menu_actual_size")
+            }
+            .keyboardShortcut("0")
+            .disabled(fontSizeDiff == 0)
+
+            Divider()
         }
 
         CommandGroup(after: .sidebar) {
@@ -352,6 +386,18 @@ private struct MacAppCommands: Commands {
                 }
             }
         }
+    }
+
+    private var fontSizeDiff: Float {
+        if case .success(let data) = onEnum(of: environmentSettingsPresenter.state.globalAppearance) {
+            return data.data.fontSizeDiff
+        }
+        return 0
+    }
+
+    private func updateFontSizeDiff(_ value: Float) {
+        let range = FlareFontScale.fontSizeDiffRange
+        settingsPresenter.state.updateFontScale(fontSizeDiff: min(max(value, range.lowerBound), range.upperBound))
     }
 
     private func openMainWindow(route: Route) {

@@ -60,7 +60,7 @@ struct MacComposeScreen: View {
             }
             
             TextEditor(text: $viewModel.text)
-                .font(.body)
+                .scaledFont(.body)
                 .scrollDisabled(true)
                 .onDrop(of: Self.mediaTransferTypes, isTargeted: $mediaDropTargeted) { providers in
                     importMediaProviders(providers)
@@ -258,14 +258,14 @@ struct MacComposeScreen: View {
                 HStack(spacing: 6) {
                     if selected.isEmpty {
                         Image(systemName: "person.crop.circle.badge.plus")
-                            .font(.title3)
+                            .scaledFont(.title3)
                             .foregroundStyle(.secondary)
                     } else {
                         MacComposeAccountAvatarStack(users: selected, size: 26)
                     }
 
                     Image(systemName: "chevron.down")
-                        .font(.caption2)
+                        .scaledFont(.caption2)
                         .foregroundStyle(.secondary)
                 }
                 .padding(.horizontal, 8)
@@ -691,7 +691,7 @@ private struct MacComposeAccountRow: View {
                     Text(account.handle.canonical)
                         .lineLimit(1)
                     Text(account.key.host)
-                        .font(.caption)
+                        .scaledFont(.caption)
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
                 }
@@ -761,9 +761,9 @@ private struct MacComposeMediaTile: View {
             } else {
                 VStack(spacing: 6) {
                     Image(systemName: item.type == .video ? "film" : "doc")
-                        .font(.title2)
+                        .scaledFont(.title2)
                     Text(item.fileName)
-                        .font(.caption)
+                        .scaledFont(.caption)
                         .lineLimit(1)
                 }
                 .foregroundStyle(.secondary)

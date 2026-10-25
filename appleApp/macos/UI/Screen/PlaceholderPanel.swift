@@ -18,9 +18,9 @@ struct PlaceholderPanel: View {
 
                 VStack(spacing: 8) {
                     Text(destination.macOSTitle)
-                        .font(.title.weight(.semibold))
+                        .scaledFont(.title, weight: .semibold)
                     Text(destination.macOSPlaceholder)
-                        .font(.body)
+                        .scaledFont(.body)
                         .foregroundStyle(.secondary)
                         .multilineTextAlignment(.center)
                         .frame(maxWidth: 420)

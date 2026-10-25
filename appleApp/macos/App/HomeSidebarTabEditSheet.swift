@@ -74,7 +74,7 @@ struct HomeSidebarTabEditSheet: View {
     private var titleAndIconPane: some View {
         VStack(alignment: .leading, spacing: 16) {
             Text("tab_settings_edit_title_header")
-                .font(.headline)
+                .scaledFont(.headline)
 
             TextField(titlePlaceholder, text: $text)
                 .textFieldStyle(.roundedBorder)
@@ -87,7 +87,7 @@ struct HomeSidebarTabEditSheet: View {
 
                 VStack(alignment: .leading, spacing: 14) {
                     Text("tab_settings_edit_icon_header")
-                        .font(.headline)
+                        .scaledFont(.headline)
 
                     if presenter.state.canUseAvatar {
                         Toggle(isOn: Binding(
@@ -385,7 +385,7 @@ struct MacSidebarSettingLabel: View {
             Text(title)
             if let subtitle {
                 Text(subtitle)
-                    .font(.caption)
+                    .scaledFont(.caption)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -403,7 +403,7 @@ struct MacSidebarFilterEditor: View {
         DisclosureGroup {
             VStack(alignment: .leading, spacing: 8) {
                 Text("tab_settings_filter_kind_group")
-                    .font(.caption)
+                    .scaledFont(.caption)
                     .foregroundStyle(.secondary)
 
                 ForEach(kindOptions, id: \.self) { kind in
@@ -413,7 +413,7 @@ struct MacSidebarFilterEditor: View {
                 }
 
                 Text("tab_settings_filter_content_group")
-                    .font(.caption)
+                    .scaledFont(.caption)
                     .foregroundStyle(.secondary)
                     .padding(.top, 4)
 
@@ -428,7 +428,7 @@ struct MacSidebarFilterEditor: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text("tab_settings_filter_title")
                 Text(filterSummary)
-                    .font(.caption)
+                    .scaledFont(.caption)
                     .foregroundStyle(.secondary)
             }
         }

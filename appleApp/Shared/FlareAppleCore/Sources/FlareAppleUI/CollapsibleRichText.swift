@@ -1,4 +1,5 @@
 import SwiftUI
+import FlareAppleCore
 import KotlinSharedUI
 
 struct CollapsibleRichText: View {
@@ -9,7 +10,11 @@ struct CollapsibleRichText: View {
     let isTextSelectionEnabled: Bool
     let onOverflowChanged: (Bool) -> Void
 
-    @ScaledMetric(relativeTo: .body) private var fallbackLineHeight: CGFloat = 20
+    @ScaledMetric(relativeTo: .body) private var baseFallbackLineHeight: CGFloat = 20
+    @Environment(\.fontScale) private var fontScale
+    private var fallbackLineHeight: CGFloat {
+        baseFallbackLineHeight * fontScale
+    }
     @State private var fullHeight: CGFloat = 0
     @State private var lineHeight: CGFloat = 0
 

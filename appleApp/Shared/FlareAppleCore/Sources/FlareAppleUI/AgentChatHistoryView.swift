@@ -58,7 +58,7 @@ public struct AgentChatHistoryRow: View {
     public var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             Text(verbatim: room.title)
-                .font(.headline)
+                .scaledFont(.headline)
                 .lineLimit(2)
 
             HStack(spacing: 6) {
@@ -70,7 +70,7 @@ public struct AgentChatHistoryRow: View {
                     Text(relativeUpdatedAtText(now: context.date))
                 }
             }
-            .font(.caption)
+            .scaledFont(.caption)
             .foregroundStyle(.secondary)
         }
         .padding(.vertical, 4)

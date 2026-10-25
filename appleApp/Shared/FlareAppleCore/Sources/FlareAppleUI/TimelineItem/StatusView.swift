@@ -257,7 +257,7 @@ public struct StatusView: View {
                                             Image(fontAwesome: .reply)
                                             Text("Reply to \(replyToHandle)", bundle: FlareAppleUILocalization.bundle)
                                         }
-                                        .font(.caption)
+                                        .scaledFont(.caption)
                                         .foregroundStyle(.secondary)
                                         .padding(.top, 4)
                                     }
@@ -439,7 +439,7 @@ public struct StatusView: View {
                                             Image(fontAwesome: .tv)
                                             Text(sourceChannelName)
                                         }
-                                        .font(.footnote)
+                                        .scaledFont(.footnote)
                                         .foregroundStyle(.secondary)
                                     }
                                     if hasEmojiReactions {
@@ -452,7 +452,7 @@ public struct StatusView: View {
 
                         if isDetail {
                             DateTimeText(data: createdAt, fullTime: true)
-                                .font(.caption)
+                                .scaledFont(.caption)
                                 .foregroundStyle(.secondary)
                                 .padding(.top, 8)
                         }
@@ -460,9 +460,9 @@ public struct StatusView: View {
                         if (postActionStyle != .hidden || isDetail) && !forceHideActions {
                             StatusActionsView(data: actions, useText: false, topPadding: 8)
                             #if os(macOS)
-                                .font(isDetail ? .body : .callout)
+                                .scaledFont(isDetail ? .body : .callout)
                             #else
-                                .font(isDetail ? .body : .footnote)
+                                .scaledFont(isDetail ? .body : .footnote)
                             #endif
                                 .foregroundStyle(isDetail ? .primary : .secondary)
                         }
@@ -514,17 +514,17 @@ public struct StatusView: View {
         HStack(spacing: 4) {
             if let visibility {
                 StatusVisibilityView(data: visibility)
-                    .font(.caption)
+                    .scaledFont(.caption)
                     .foregroundStyle(.secondary)
             }
             if translationDisplayState != .hidden {
                 TranslateStatusComponent(data: translationDisplayState)
-                    .font(.caption)
+                    .scaledFont(.caption)
                     .foregroundStyle(.secondary)
             }
             if showPlatformLogo {
                 Image(fontAwesome: platformIcon.fontAwesomeIcon)
-                    .font(.caption)
+                    .scaledFont(.caption)
                     .foregroundStyle(.secondary)
                     .accessibilityLabel(
                         Text(
@@ -540,7 +540,7 @@ public struct StatusView: View {
             }
             if !isDetail {
                 DateTimeText(data: createdAt)
-                    .font(.caption)
+                    .scaledFont(.caption)
                     .foregroundStyle(.secondary)
             }
             if agentEnabled, !isQuote {
@@ -554,7 +554,7 @@ public struct StatusView: View {
                     }
                 } label: {
                     Image(fontAwesome: .robot)
-                        .font(.caption)
+                        .scaledFont(.caption)
                         .foregroundStyle(.secondary)
                 }
                 .buttonStyle(.plain)

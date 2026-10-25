@@ -382,7 +382,7 @@ private struct MediaOverflowOverlay: View {
         ZStack {
             Color.black.opacity(0.55)
             Text(count.mediaOverflowDisplayText)
-                .font(.headline)
+                .scaledFont(.headline)
                 .fontWeight(.semibold)
                 .foregroundStyle(.white)
         }

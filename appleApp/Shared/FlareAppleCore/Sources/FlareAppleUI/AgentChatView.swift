@@ -544,7 +544,7 @@ public struct StatusInsightCurrentTrace: View {
         HStack(spacing: 8) {
             Image(fontAwesome: .robot)
             Text(verbatim: trace)
-                .font(.body)
+                .scaledFont(.body)
                 .shimmeringText()
         }
         .frame(maxWidth: .infinity, alignment: .leading)

@@ -22,10 +22,14 @@ public struct StatusActionsView: View {
     @Environment(\.timelineAppearance.postActionFixedWidth) private var postActionFixedWidth
     @Environment(\.openURL) private var openURL
     #if os(macOS)
-    @ScaledMetric(relativeTo: .callout) private var fontSize = 16
+    @ScaledMetric(relativeTo: .callout) private var baseFontSize: CGFloat = 16
     #else
-    @ScaledMetric(relativeTo: .footnote) private var fontSize = 13
+    @ScaledMetric(relativeTo: .footnote) private var baseFontSize: CGFloat = 13
     #endif
+    @Environment(\.fontScale) private var fontScale
+    private var fontSize: CGFloat {
+        baseFontSize * fontScale
+    }
     private let data: [ActionMenu]
     private let useText: Bool
     private let allowSpacer: Bool
@@ -826,7 +830,7 @@ public struct MacStatusShareSheet: View {
         case .shareScreenshot:
             VStack(alignment: .leading, spacing: 16) {
                 Text("appearance_layout_group_title")
-                    .font(.headline)
+                    .scaledFont(.headline)
 
                 Picker("appearance_layout_group_title", selection: $previewStyle) {
                     Text("appearance_timeline_display_mode_card").tag(MacStatusSharePreviewStyle.card)
@@ -836,7 +840,7 @@ public struct MacStatusShareSheet: View {
                 .pickerStyle(.segmented)
 
                 Text("appearance_theme")
-                    .font(.headline)
+                    .scaledFont(.headline)
 
                 Picker("appearance_theme", selection: $theme) {
                     Text("appearance_theme_system").tag(nil as ColorScheme?)

@@ -22,7 +22,7 @@ public struct EmojiPopup: View {
                         }
                     } header: {
                         Text("emoji_recently_used", bundle: FlareAppleUILocalization.bundle)
-                            .font(.body)
+                            .scaledFont(.body)
                     }
                 }
             }
@@ -33,7 +33,7 @@ public struct EmojiPopup: View {
                         EmojiGrid(items: value, onItemClicked: onItemClicked)
                     } header: {
                         Text(key)
-                            .font(.body)
+                            .scaledFont(.body)
                     }
                 } else {
                     EmojiSection(value: value, key: key) { item in
@@ -104,7 +104,7 @@ private struct EmojiSection: View {
             EmojiGrid(items: value, onItemClicked: onItemClicked)
         } header: {
             Text(key)
-                .font(.body)
+                .scaledFont(.body)
         }
     }
 }

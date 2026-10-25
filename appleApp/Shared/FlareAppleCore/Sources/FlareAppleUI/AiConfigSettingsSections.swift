@@ -295,10 +295,10 @@ private struct AiConfigEditSheet: View {
                 } footer: {
                     if let footerKey = field.footerKey {
                         Text(footerKey, bundle: FlareAppleUILocalization.bundle)
-                            .font(.footnote)
+                            .scaledFont(.footnote)
                     } else if let footerText = field.footerText {
                         Text(footerText)
-                            .font(.footnote)
+                            .scaledFont(.footnote)
                     }
                 }
 
@@ -311,7 +311,7 @@ private struct AiConfigEditSheet: View {
                                     state.editingText = suggestion
                                 } label: {
                                     Text(suggestion)
-                                        .font(.callout.monospaced())
+                                        .scaledFont(.callout, design: .monospaced)
                                         .lineLimit(1)
                                 }
                                 .buttonStyle(.plain)

@@ -231,7 +231,7 @@ private final class RenderContext {
         block: RenderBlockStyle
     ) -> AttributeContainer {
         var container = AttributeContainer()
-        if let font = font(for: style, block: block) {
+        if let font = PlatformTextRenderer.font(for: PlatformTextStyleDescriptor(style: style, block: block), scale: 1) {
             container.font = font
         }
 
@@ -255,45 +255,6 @@ private final class RenderContext {
         return container
     }
 
-    private func font(
-        for style: RenderTextStyle,
-        block: RenderBlockStyle
-    ) -> Font? {
-        if let headingLevel = block.headingLevel {
-            switch headingLevel.intValue {
-            case 1:
-                return .title
-            case 2:
-                return .title2
-            case 3:
-                return .title3
-            case 4:
-                return .headline
-            case 5:
-                return .subheadline
-            default:
-                return .body
-            }
-        }
-
-        if style.code || style.monospace {
-            return .system(.body, design: .monospaced)
-        }
-
-        guard style.small || style.bold || style.italic || block.isBlockQuote || block.isFigCaption else {
-            return nil
-        }
-
-        var font = Font.system(size: style.small ? Self.platformSmallSystemFontSize : Self.platformSystemFontSize)
-        if style.bold {
-            font = font.weight(.bold)
-        }
-        if style.italic || block.isBlockQuote || block.isFigCaption {
-            font = font.italic()
-        }
-        return font
-    }
-
     private func textAlignment(from block: RenderBlockStyle) -> TextAlignment? {
         switch block.textAlignment {
         case .center:
@@ -301,6 +262,45 @@ private final class RenderContext {
         default:
             return nil
         }
+    }
+}
+
+public extension PlatformTextRenderer {
+    /// Font for a styled run; `nil` means the run uses the environment font.
+    static func font(for descriptor: PlatformTextStyleDescriptor, scale: CGFloat) -> Font? {
+        if let headingLevel = descriptor.headingLevel {
+            switch headingLevel {
+            case 1:
+                return .flare(.title, scale: scale)
+            case 2:
+                return .flare(.title2, scale: scale)
+            case 3:
+                return .flare(.title3, scale: scale)
+            case 4:
+                return .flare(.headline, scale: scale)
+            case 5:
+                return .flare(.subheadline, scale: scale)
+            default:
+                return .flare(.body, scale: scale)
+            }
+        }
+
+        if descriptor.code || descriptor.monospace {
+            return .flare(.body, scale: scale, design: .monospaced)
+        }
+
+        guard descriptor.small || descriptor.bold || descriptor.italic || descriptor.isBlockQuote || descriptor.isFigCaption else {
+            return nil
+        }
+
+        var font = Font.flare(size: descriptor.small ? platformSmallSystemFontSize : platformSystemFontSize, scale: scale)
+        if descriptor.bold {
+            font = font.weight(.bold)
+        }
+        if descriptor.italic || descriptor.isBlockQuote || descriptor.isFigCaption {
+            font = font.italic()
+        }
+        return font
     }
 
     private static var platformSmallSystemFontSize: CGFloat {

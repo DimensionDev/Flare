@@ -35,7 +35,7 @@ public struct UserOnelineView<TrailingContent: View>: View {
             HStack(spacing: 4) {
                 RichText(text: data.name)
                 Text(data.handle.canonical)
-                    .font(.caption)
+                    .scaledFont(.caption)
                     .foregroundStyle(.secondary)
             }
             .frame(maxWidth: .infinity, alignment: .leading)

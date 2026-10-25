@@ -12,9 +12,8 @@ struct FlareTheme<Content: View>: View {
     @State private var globalAppearance: GlobalAppearance = GlobalAppearance.companion.Default
     @State private var timelineAppearance: TimelineAppearance = TimelineAppearance.companion.Default
 
-    private let sizes: [DynamicTypeSize] = [.xSmall, .small, .medium, .large, .xLarge, .xxLarge, .xxxLarge]
-
     var body: some View {
+        let fontScale = FlareFontScale.factor(fontSizeDiff: globalAppearance.fontSizeDiff)
         content()
             .networkStatus()
             .environment(\.aiConfig, appSettings.aiConfig)
@@ -25,7 +24,8 @@ struct FlareTheme<Content: View>: View {
             .preferredColorScheme(
                 globalAppearance.theme == .system ? nil : (globalAppearance.theme == .dark ? .dark : .light)
             )
-            .dynamicTypeSize(sizes[min(max(Int(globalAppearance.fontSizeDiff) + 2, 0), sizes.count - 1)])
+            .environment(\.fontScale, fontScale)
+            .font(.flare(.body, scale: fontScale))
             .environment(\.openURL, OpenURLAction { url in
                 .systemAction(url)
             })

@@ -54,7 +54,7 @@ public struct VideoControlView: View {
                     Image(systemName: "forward.fill")
                     Text(verbatim: "\(formatRate(playbackRate))x")
                 }
-                .font(.caption.weight(.semibold))
+                .scaledFont(.caption, weight: .semibold)
                 .monospacedDigit()
                 .foregroundStyle(.white)
                 .padding(.horizontal, 10)
@@ -68,7 +68,7 @@ public struct VideoControlView: View {
                     isPlaying.toggle()
                 } label: {
                     Image(fontAwesome: isPlaying ? .pause : .play)
-                        .font(.title2)
+                        .scaledFont(.title2)
                         .frame(height: 24)
                         .contentTransition(.symbolEffect(.replace))
                 }
@@ -83,7 +83,7 @@ public struct VideoControlView: View {
                 .glassButtonStyle(fallbackStyle: .plain)
 
                 Text(formatTime(sliderValue))
-                    .font(.caption)
+                    .scaledFont(.caption)
                     .monospacedDigit()
 
                 Slider(value: $sliderValue, in: 0...max(duration, 0.1)) { editing in
@@ -105,7 +105,7 @@ public struct VideoControlView: View {
                 )
 
                 Text(formatTime(duration))
-                    .font(.caption)
+                    .scaledFont(.caption)
                     .monospacedDigit()
             }
         }

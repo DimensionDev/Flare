@@ -121,13 +121,13 @@ private struct DraftBoxContentRow: View {
                 VStack(alignment: .leading, spacing: rowMode == .compact ? 4 : 6) {
                     if let spoilerText = draft.data.spoilerText?.nonEmpty {
                         Text(spoilerText)
-                            .font(rowMode == .compact ? .caption : .subheadline)
+                            .scaledFont(rowMode == .compact ? .caption : .subheadline)
                             .foregroundStyle(.secondary)
                             .lineLimit(1)
                     }
 
                     Text(draft.previewText)
-                        .font(.body)
+                        .scaledFont(.body)
                         .foregroundStyle(.primary)
                         .multilineTextAlignment(.leading)
                         .lineLimit(2)
@@ -150,13 +150,13 @@ private struct DraftBoxContentRow: View {
                     }
 
                     DateTimeText(data: draft.updatedAt, fullTime: true)
-                        .font(.caption)
+                        .scaledFont(.caption)
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
 
                     if !draft.medias.isEmpty {
                         Text(attachmentCountText(draft.medias.count))
-                            .font(.caption)
+                            .scaledFont(.caption)
                             .foregroundStyle(.secondary)
                             .lineLimit(1)
                     }
@@ -262,7 +262,7 @@ private struct DraftAccountsStrip: View {
 
             if accounts.count > 6 {
                 Text("+\(accounts.count - 6)")
-                    .font(.caption2.weight(.medium))
+                    .scaledFont(.caption2, weight: .medium)
                     .foregroundStyle(.secondary)
                     .padding(.horizontal, 6)
                     .frame(height: 22)
@@ -288,7 +288,7 @@ private struct DraftStatusText: View {
 
     var body: some View {
         Text(FlareAppleUILocalization.string(status.titleKey))
-            .font(.caption.weight(.medium))
+            .scaledFont(.caption, weight: .medium)
             .foregroundStyle(status.tint)
     }
 }

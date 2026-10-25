@@ -19,9 +19,14 @@ public struct RichText: View {
     private let previewLineHeight: CGFloat
     @State private var images: [String: Image] = [:]
     @State private var previewMeasurements: [Int: [Int: CGFloat]] = [:]
-    @ScaledMetric(relativeTo: .body) private var imageSize = 17
+    @ScaledMetric(relativeTo: .body) private var baseImageSize: CGFloat = 17
     @ScaledMetric(relativeTo: .body) private var quoteBarWidth = 3
     @Environment(\.openURL) private var openURL
+    @Environment(\.fontScale) private var fontScale
+
+    private var imageSize: CGFloat {
+        baseImageSize * fontScale
+    }
 
     public init(text: UiRichText) {
         self.text = text
@@ -113,7 +118,7 @@ public struct RichText: View {
             }
         }
         .onPreferenceChange(RichTextPreviewMeasurements.self) { previewMeasurements = $0 }
-        .task(id: text.raw) {
+        .task(id: "\(imageSize)|\(text.raw)") {
             let urls = text.imageUrls
             let targetHeight = imageSize
             for urlString in urls {
@@ -192,7 +197,7 @@ public struct RichText: View {
         textContent.runs.reduce(Text(verbatim: "")) { partial, run in
             switch run {
             case let attributedRun as PlatformTextAttributedRun:
-                partial + Text(attributedRun.text)
+                partial + Text(scaledText(attributedRun))
             case let imageRun as PlatformTextImageRun:
                 if let image = images[imageRun.url] {
                     partial + Text(image).baselineOffset(-3)
@@ -203,6 +208,21 @@ public struct RichText: View {
                 partial
             }
         }
+    }
+
+    private func scaledText(_ run: PlatformTextAttributedRun) -> AttributedString {
+        guard fontScale != 1 else { return run.text }
+        var text = run.text
+        let source = run.attributedText
+        source.enumerateAttribute(
+            .platformTextStyleDescriptor,
+            in: NSRange(location: 0, length: source.length)
+        ) { value, range, _ in
+            guard let descriptor = value as? PlatformTextStyleDescriptor,
+                  let textRange = Range(range, in: text) else { return }
+            text[textRange].font = PlatformTextRenderer.font(for: descriptor, scale: fontScale)
+        }
+        return text
     }
 
     private func textAlignment(_ alignment: TextAlignment?) -> Alignment {

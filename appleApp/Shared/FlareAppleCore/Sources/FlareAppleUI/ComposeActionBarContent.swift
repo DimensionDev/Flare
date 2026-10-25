@@ -113,7 +113,7 @@ public struct ComposeActionBarContent<MediaControl: View>: View {
                         maxLanguageSelectionCount: maxLanguageSelectionCount
                     )
                 }
-                .font(.title)
+                .scaledFont(.title)
                 .buttonStyle(.plain)
                 .labelStyle(.iconOnly)
             }
@@ -252,7 +252,7 @@ private struct ComposeLanguageMenu: View {
                 if let first = selectedLanguages.wrappedValue.first,
                    selectedLanguages.wrappedValue.count == 1 {
                     Text(first.uppercased())
-                        .font(.caption)
+                        .scaledFont(.caption)
                         .bold()
                         .padding(4)
                         .overlay {

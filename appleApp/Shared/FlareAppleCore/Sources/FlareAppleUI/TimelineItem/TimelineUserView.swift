@@ -5,7 +5,11 @@ import FlareAppleCore
 public struct TimelineUserView: View {
     @Environment(\.openURL) private var openURL
     @Environment(\.timelineAppearance.showNumbers) private var showNumbers
-    @ScaledMetric(relativeTo: .footnote) private var fontSize = 13
+    @ScaledMetric(relativeTo: .footnote) private var baseFontSize: CGFloat = 13
+    @Environment(\.fontScale) private var fontScale
+    private var fontSize: CGFloat {
+        baseFontSize * fontScale
+    }
     private let data: UiTimelineV2.User
 
     public init(data: UiTimelineV2.User) {

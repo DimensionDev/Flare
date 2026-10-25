@@ -79,9 +79,9 @@ struct ServiceSelectionScreen: View {
     private var header: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(ServiceSelectCopy.welcomeTitle)
-                .font(.title2.weight(.semibold))
+                .scaledFont(.title2, weight: .semibold)
             Text(ServiceSelectCopy.welcomeMessage)
-                .font(.body)
+                .scaledFont(.body)
                 .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -175,7 +175,7 @@ struct ServiceSelectionScreen: View {
 
                 if node.compatibleMode {
                     Text(ServiceSelectCopy.compatibilityWarning(node.software))
-                        .font(.caption)
+                        .scaledFont(.caption)
                         .foregroundStyle(.secondary)
                 }
 
@@ -211,9 +211,9 @@ struct ServiceSelectionScreen: View {
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(node.platformDisplayName)
-                    .font(.headline)
+                    .scaledFont(.headline)
                 Text(node.host)
-                    .font(.caption)
+                    .scaledFont(.caption)
                     .foregroundStyle(.secondary)
             }
 
@@ -243,7 +243,7 @@ struct ServiceSelectionScreen: View {
             },
             emptyContent: {
                 Text(ServiceSelectCopy.emptyMessage)
-                    .font(.headline)
+                    .scaledFont(.headline)
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 16)
@@ -336,11 +336,11 @@ struct ReloginScreen: View {
                 .frame(width: 28, height: 28)
             VStack(alignment: .leading, spacing: 2) {
                 Text(ServiceSelectCopy.loginExpired)
-                    .font(.title3.weight(.semibold))
+                    .scaledFont(.title3, weight: .semibold)
                 Text("\(target.accountKey.id)@\(target.accountKey.host)")
-                    .font(.headline)
+                    .scaledFont(.headline)
                 Text(ServiceSelectCopy.loginExpiredMessage)
-                    .font(.caption)
+                    .scaledFont(.caption)
                     .foregroundStyle(.secondary)
             }
             Spacer()
@@ -573,7 +573,7 @@ private struct LoginFieldView: View {
                     .textFieldStyle(.roundedBorder)
             case .displayText:
                 Text(field.value)
-                    .font(.caption)
+                    .scaledFont(.caption)
                     .foregroundStyle(.secondary)
             default:
                 TextField(field.label.text, text: $value)
@@ -599,7 +599,7 @@ private struct QRLoginView: View {
     var body: some View {
         VStack(spacing: 10) {
             Text(ServiceSelectCopy.nostrQRHint)
-                .font(.caption)
+                .scaledFont(.caption)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
             QRCodeView(text: content)
@@ -609,13 +609,13 @@ private struct QRLoginView: View {
                 ProgressView()
                     .controlSize(.small)
                 Text(ServiceSelectCopy.nostrQRWaiting)
-                    .font(.caption)
+                    .scaledFont(.caption)
             }
             Text(ServiceSelectCopy.nostrQRLinkLabel)
-                .font(.caption)
+                .scaledFont(.caption)
                 .foregroundStyle(.secondary)
             Text(content)
-                .font(.caption2)
+                .scaledFont(.caption2)
                 .textSelection(.enabled)
                 .multilineTextAlignment(.center)
                 .lineLimit(4)
@@ -638,12 +638,12 @@ private struct ServiceInstanceRow: View {
                     Text(instance.name)
                         .lineLimit(1)
                     Text(instance.domain)
-                        .font(.caption)
+                        .scaledFont(.caption)
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
                     if let description = instance.description_, !description.isEmpty {
                         Text(description)
-                            .font(.caption)
+                            .scaledFont(.caption)
                             .foregroundStyle(.secondary)
                             .lineLimit(2)
                     }
@@ -677,9 +677,9 @@ private struct ServiceInstancePlaceholderRow: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text("Placeholder")
                 Text("placeholder")
-                    .font(.caption)
+                    .scaledFont(.caption)
                 Text("Description Placeholder")
-                    .font(.caption)
+                    .scaledFont(.caption)
             }
             Spacer()
         }
@@ -693,7 +693,7 @@ private struct LoginErrorText: View {
     var body: some View {
         if let message, !message.isEmpty {
             Text(message)
-                .font(.caption)
+                .scaledFont(.caption)
                 .foregroundStyle(.red)
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
@@ -706,7 +706,7 @@ private struct LoginAgreementView: View {
     var body: some View {
         if let urlString, let url = URL(string: urlString) {
             Text(agreement(url: url))
-                .font(.caption)
+                .scaledFont(.caption)
                 .foregroundStyle(.secondary)
         }
     }

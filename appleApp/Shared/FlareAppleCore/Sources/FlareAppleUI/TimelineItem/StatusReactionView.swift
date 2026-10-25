@@ -48,7 +48,7 @@ struct StatusReactionView: View {
                     expanded = true
                 } label: {
                     Text("mastodon_item_show_more", bundle: FlareAppleUILocalization.bundle)
-                        .font(.caption)
+                        .scaledFont(.caption)
                         .foregroundStyle(Color.flareSecondaryLabel)
                 }
                 .buttonStyle(.plain)

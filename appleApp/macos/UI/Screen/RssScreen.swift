@@ -705,7 +705,7 @@ private struct RssArticleLoadingView: View {
         VStack {
             VStack(alignment: .leading, spacing: 16) {
                 Text("Loading...")
-                    .font(.title2)
+                    .scaledFont(.title2)
                     .bold()
                     .redacted(reason: .placeholder)
                 Divider()
@@ -1012,7 +1012,7 @@ private struct ImportOPMLScreen: View {
                     VStack(alignment: .leading, spacing: 8) {
                         ProgressView(value: presenter.state.progress)
                         Text("\(presenter.state.importedCount) / \(presenter.state.totalCount)")
-                            .font(.caption)
+                            .scaledFont(.caption)
                             .foregroundStyle(.secondary)
                     }
                     .padding(.horizontal)

@@ -93,7 +93,7 @@ public struct EditRssSheet: View {
                         }
 
                         Text(rssFeed.url)
-                            .font(.caption)
+                            .scaledFont(.caption)
                             .foregroundStyle(.secondary)
                             .textSelection(.enabled)
                     } header: {
@@ -143,7 +143,7 @@ public struct EditRssSheet: View {
 
                         if !presenter.state.actualRssHubUrl.isEmpty {
                             Text(presenter.state.actualRssHubUrl)
-                                .font(.caption)
+                                .scaledFont(.caption)
                                 .foregroundStyle(.secondary)
                                 .textSelection(.enabled)
                         }
@@ -446,7 +446,7 @@ private struct RssReadingModePicker: View {
         }
         if mode.automatic {
             Text(LocalizedStringKey(mode.checking ? "rss_open_mode_checking" : (mode.recommended != nil ? "rss_open_mode_recommended" : "rss_open_mode_unknown")))
-                .font(.caption)
+                .scaledFont(.caption)
                 .foregroundStyle(.secondary)
         }
     }

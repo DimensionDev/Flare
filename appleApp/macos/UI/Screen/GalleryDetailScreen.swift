@@ -219,12 +219,12 @@ private struct GalleryAuthorCard: View {
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(detail.title)
-                    .font(.headline)
+                    .scaledFont(.headline)
                     .fontWeight(.semibold)
                     .fixedSize(horizontal: false, vertical: true)
                 if let user = detail.author {
                     RichText(text: user.name)
-                        .font(.caption)
+                        .scaledFont(.caption)
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
                 }
@@ -273,7 +273,7 @@ private struct GalleryMetadataRow: View {
     var body: some View {
         HStack(alignment: .firstTextBaseline, spacing: 8) {
             DateTimeText(data: detail.createdAt, fullTime: true)
-                .font(.caption)
+                .scaledFont(.caption)
                 .foregroundStyle(.secondary)
                 .lineLimit(1)
             ForEach(Array(detail.matrix.enumerated()), id: \.offset) { _, item in
@@ -283,7 +283,7 @@ private struct GalleryMetadataRow: View {
                         Text(item.humanizedCount)
                     }
                 }
-                .font(.caption)
+                .scaledFont(.caption)
                 .foregroundStyle(.secondary)
                 .accessibilityLabel(
                     Text(
@@ -458,7 +458,7 @@ private struct GallerySectionTitle: View {
 
     var body: some View {
         Text(title)
-            .font(.headline)
+            .scaledFont(.headline)
             .fontWeight(.semibold)
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.top, 4)

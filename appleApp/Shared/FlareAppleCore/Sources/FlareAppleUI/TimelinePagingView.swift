@@ -288,7 +288,7 @@ public struct TimelineGalleryItemView: View {
                     ForEach(Array(contents.enumerated()), id: \.offset) { _, content in
                         if !content.isEmpty {
                             RichText(text: content)
-                                .font(.subheadline)
+                                .scaledFont(.subheadline)
                                 .lineLimit(5)
                         }
                     }
@@ -301,7 +301,7 @@ public struct TimelineGalleryItemView: View {
                     AvatarView(data: user.avatar?.url, customHeader: user.avatar?.customHeaders)
                         .frame(width: 24, height: 24)
                     RichText(text: user.name)
-                        .font(.caption)
+                        .scaledFont(.caption)
                         .lineLimit(1)
                 }
                 .padding(.horizontal, 8)
@@ -343,12 +343,12 @@ public struct TimelineGalleryItemView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     if let title = feed.title, !title.isEmpty {
                         Text(title)
-                            .font(.subheadline.weight(.semibold))
+                            .scaledFont(.subheadline, weight: .semibold)
                             .lineLimit(3)
                     }
                     if let description = feed.description_, !description.isEmpty {
                         Text(description)
-                            .font(.caption)
+                            .scaledFont(.caption)
                             .foregroundStyle(.secondary)
                             .lineLimit(4)
                     }
@@ -363,7 +363,7 @@ public struct TimelineGalleryItemView: View {
                         .clipShape(RoundedRectangle(cornerRadius: 4, style: .continuous))
                 }
                 Text(feed.source.name)
-                    .font(.caption)
+                    .scaledFont(.caption)
                     .lineLimit(1)
             }
             .padding(.horizontal, 8)

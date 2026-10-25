@@ -38,19 +38,25 @@ public struct AppearanceThemeSettingsSection: View {
         #if os(iOS)
         VStack(alignment: .leading) {
             Text("appearance_font_size_diff", bundle: FlareAppleUILocalization.bundle)
-            Slider(value: Binding(get: {
-                globalAppearance.fontSizeDiff
-            }, set: { newValue in
-                presenter.state.updateFontScale(fontSizeDiff: newValue)
-            }), in: -2...4, step: 1) {
-                Text("appearance_font_size_diff", bundle: FlareAppleUILocalization.bundle)
-            } minimumValueLabel: {
-                Image(systemName: "textformat.size.smaller")
-            } maximumValueLabel: {
-                Image(systemName: "textformat.size.larger")
-            }
+            fontSizeSlider
         }
+        #else
+        fontSizeSlider
         #endif
+    }
+
+    private var fontSizeSlider: some View {
+        Slider(value: Binding(get: {
+            globalAppearance.fontSizeDiff
+        }, set: { newValue in
+            presenter.state.updateFontScale(fontSizeDiff: newValue)
+        }), in: -2...4, step: 1) {
+            Text("appearance_font_size_diff", bundle: FlareAppleUILocalization.bundle)
+        } minimumValueLabel: {
+            Image(systemName: "textformat.size.smaller")
+        } maximumValueLabel: {
+            Image(systemName: "textformat.size.larger")
+        }
     }
 }
 
@@ -337,12 +343,12 @@ private struct LinkOpenDefaultSettingsMenu: View {
                     Text(target.title)
                         .foregroundStyle(.primary)
                     LinkOpenDefaultSelectedOptionLabel(option: target.selectedOption)
-                        .font(.subheadline)
+                        .scaledFont(.subheadline)
                         .foregroundStyle(.secondary)
                 }
                 Spacer()
                 Image(systemName: "chevron.up.chevron.down")
-                    .font(.caption)
+                    .scaledFont(.caption)
                     .foregroundStyle(.tertiary)
             }
             .contentShape(.rect)

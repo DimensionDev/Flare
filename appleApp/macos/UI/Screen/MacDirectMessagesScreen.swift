@@ -213,7 +213,7 @@ private struct MacDMUserRow: View {
                     RichText(text: user.name)
                         .lineLimit(1)
                     Text(user.handle.canonical)
-                        .font(.caption)
+                        .scaledFont(.caption)
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
                 }
@@ -231,7 +231,7 @@ private struct MacDMUserRow: View {
                     Text(item.accountKey.id)
                         .lineLimit(1)
                     Text(item.accountKey.host)
-                        .font(.caption)
+                        .scaledFont(.caption)
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
                 }
@@ -248,7 +248,7 @@ private struct MacDMUnreadBadge: View {
     var body: some View {
         if let count = unreadCount, count > 0 {
             Text(verbatim: "\(count)")
-                .font(.caption2.weight(.semibold))
+                .scaledFont(.caption2, weight: .semibold)
                 .foregroundStyle(.white)
                 .padding(.horizontal, 6)
                 .padding(.vertical, 3)
@@ -452,28 +452,28 @@ private struct MacDMRoomRow: View {
             VStack(alignment: .leading, spacing: 5) {
                 HStack(spacing: 6) {
                     Text(room.dmTitle)
-                        .font(.headline)
+                        .scaledFont(.headline)
                         .lineLimit(1)
 
                     Spacer(minLength: 8)
 
                     if let lastMessage = room.lastMessage {
                         DateTimeText(data: lastMessage.timestamp)
-                            .font(.caption)
+                            .scaledFont(.caption)
                             .foregroundStyle(.secondary)
                             .lineLimit(1)
                     }
                 }
 
                 Text(room.lastMessageText)
-                    .font(.caption)
+                    .scaledFont(.caption)
                     .foregroundStyle(.secondary)
                     .lineLimit(2)
             }
 
             if room.unreadCount > 0 {
                 Text(verbatim: "\(room.unreadCount)")
-                    .font(.caption2.weight(.semibold))
+                    .scaledFont(.caption2, weight: .semibold)
                     .foregroundStyle(.white)
                     .padding(.horizontal, 6)
                     .padding(.vertical, 3)
@@ -659,7 +659,7 @@ private struct MacDMMessageRow: View {
                 )
         case .deleted:
             Text("dm_deleted")
-                .font(.caption)
+                .scaledFont(.caption)
                 .foregroundStyle(.secondary)
                 .padding(.horizontal, 13)
                 .padding(.vertical, 9)
@@ -701,7 +701,7 @@ private struct MacDMMessageRow: View {
                 DateTimeText(data: item.timestamp)
             }
         }
-        .font(.caption2)
+        .scaledFont(.caption2)
         .foregroundStyle(.secondary)
         .padding(.leading, item.showSender && !item.isFromMe ? 40 : 0)
         .padding(.trailing, item.isFromMe ? 4 : 0)
@@ -772,9 +772,9 @@ private struct MacDMPlaceholder: View {
                 .font(.system(size: 34))
                 .foregroundStyle(.secondary)
             Text(title)
-                .font(.headline)
+                .scaledFont(.headline)
             Text(message)
-                .font(.callout)
+                .scaledFont(.callout)
                 .foregroundStyle(.secondary)
         }
         .multilineTextAlignment(.center)
@@ -789,7 +789,7 @@ private struct MacDMListInlinePlaceholder: View {
     var body: some View {
         VStack(spacing: 8) {
             Image(fontAwesome: icon)
-                .font(.title2)
+                .scaledFont(.title2)
                 .foregroundStyle(.secondary)
             Text(title)
                 .foregroundStyle(.secondary)

@@ -1,4 +1,5 @@
 import SwiftUI
+import FlareAppleCore
 import KotlinSharedUI
 import SwiftUIBackports
 
@@ -21,7 +22,7 @@ public struct ListErrorView: View {
                     .frame(width: 64, height: 64)
                 Text("error_login_expired \(expiredError.accountKey)", bundle: FlareAppleUILocalization.bundle)
                     .multilineTextAlignment(.center)
-                    .font(.headline)
+                    .scaledFont(.headline)
                 Button {
                     if let url = reloginURL(
                         accountKey: expiredError.accountKey,
@@ -41,7 +42,7 @@ public struct ListErrorView: View {
                     .frame(width: 64, height: 64)
                 Text("permission_denied_title", bundle: FlareAppleUILocalization.bundle)
                     .multilineTextAlignment(.center)
-                    .font(.headline)
+                    .scaledFont(.headline)
                 Text("permission_denied_message", bundle: FlareAppleUILocalization.bundle)
                 Button {
                     if let url = reloginURL(
@@ -62,7 +63,7 @@ public struct ListErrorView: View {
                     .frame(width: 64, height: 64)
                 Text("error", bundle: FlareAppleUILocalization.bundle)
                     .multilineTextAlignment(.center)
-                    .font(.headline)
+                    .scaledFont(.headline)
                 Button {
                     onRetry()
                 } label: {
@@ -72,7 +73,7 @@ public struct ListErrorView: View {
                 .glassProminentButtonStyle()
                 if let message = error.message {
                     Text(message)
-                        .font(.caption)
+                        .scaledFont(.caption)
                         .foregroundStyle(.secondary)
                 }
             }

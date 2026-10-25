@@ -280,7 +280,7 @@ private struct HomeSidebarEditableGroupRow: View {
 
             if showsReorderHandle {
                 Image(systemName: "line.3.horizontal")
-                    .font(.caption)
+                    .scaledFont(.caption)
                     .foregroundStyle(.tertiary)
             }
         }
@@ -361,7 +361,7 @@ private struct HomeSidebarEditableTabRow: View {
 
             if showsReorderHandle {
                 Image(systemName: "line.3.horizontal")
-                    .font(.caption)
+                    .scaledFont(.caption)
                     .foregroundStyle(.tertiary)
             }
         }
@@ -553,7 +553,7 @@ private struct HomeSidebarCreateGroupPopover: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             Text("tab_settings_add_group")
-                .font(.headline)
+                .scaledFont(.headline)
 
             TextField("tab_settings_group_name_placeholder", text: $name)
                 .textFieldStyle(.roundedBorder)
@@ -564,7 +564,7 @@ private struct HomeSidebarCreateGroupPopover: View {
 
                 VStack(alignment: .leading, spacing: 6) {
                     Text("tab_settings_edit_icon_header")
-                        .font(.subheadline)
+                        .scaledFont(.subheadline)
                         .foregroundStyle(.secondary)
 
                     ScrollView(.horizontal) {
@@ -613,11 +613,11 @@ private struct HomeSidebarCreateGroupPopover: View {
             HStack {
                 if tabs.isEmpty {
                     Text("tab_settings_group_empty")
-                        .font(.caption)
+                        .scaledFont(.caption)
                         .foregroundStyle(.secondary)
                 } else {
                     Text(verbatim: "\(tabs.count)")
-                        .font(.caption)
+                        .scaledFont(.caption)
                         .foregroundStyle(.secondary)
                 }
 

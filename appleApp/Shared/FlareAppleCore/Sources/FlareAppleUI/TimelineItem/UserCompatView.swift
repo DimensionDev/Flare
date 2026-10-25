@@ -36,7 +36,7 @@ public struct UserCompatView<TrailingContent: View>: View {
             ) {
                 RichText(text: data.name)
                 Text(data.handle.canonical)
-                    .font(.caption)
+                    .scaledFont(.caption)
                     .foregroundStyle(.secondary)
             }
             .if(onClicked != nil) { view in
@@ -78,7 +78,7 @@ public struct UserLoadingView: View {
             ) {
                 Text("#loading", bundle: FlareAppleUILocalization.bundle)
                 Text("#loading", bundle: FlareAppleUILocalization.bundle)
-                    .font(.caption)
+                    .scaledFont(.caption)
                     .foregroundStyle(.secondary)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -106,7 +106,7 @@ public struct UserErrorView: View {
                 ) {
                     Text("notification_login_expired", bundle: FlareAppleUILocalization.bundle)
                     Text("error_login_expired \(expiredError.accountKey)", bundle: FlareAppleUILocalization.bundle)
-                        .font(.caption)
+                        .scaledFont(.caption)
                         .foregroundStyle(.secondary)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -122,7 +122,7 @@ public struct UserErrorView: View {
                 ) {
                     Text("error", bundle: FlareAppleUILocalization.bundle)
                     Text(error.message ?? "Unknown error")
-                        .font(.caption)
+                        .scaledFont(.caption)
                         .foregroundStyle(.secondary)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)

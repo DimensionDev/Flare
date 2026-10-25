@@ -145,7 +145,7 @@ public struct CommonProfileHeader: View {
 
                                     if case .success(let relationState) = onEnum(of: relation), relationState.data.isFans {
                                         Text("relation_is_fans", bundle: FlareAppleUILocalization.bundle)
-                                            .font(.caption)
+                                            .scaledFont(.caption)
                                             .foregroundStyle(.secondary)
                                             .multilineTextAlignment(.center)
                                     }
@@ -216,12 +216,12 @@ public struct CommonProfileHeader: View {
             spacing: 8
         ) {
             RichText(text: user.name)
-                .font(.headline)
+                .scaledFont(.headline)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .textSelection(.enabled)
             HStack {
                 Text(user.handle.canonical)
-                    .font(.subheadline)
+                    .scaledFont(.subheadline)
                     .foregroundColor(.gray)
                     .textSelection(.enabled)
                 ForEach(0..<user.mark.count, id: \.self) { index in
@@ -243,7 +243,7 @@ public struct CommonProfileHeader: View {
                 }
                 if user.translationDisplayState != .hidden {
                     TranslateStatusComponent(data: user.translationDisplayState)
-                        .font(.caption)
+                        .scaledFont(.caption)
                         .foregroundStyle(.secondary)
                 }
             }
@@ -406,7 +406,7 @@ public struct MatrixView: View {
                 onFansClick()
             }
         }
-        .font(.caption)
+        .scaledFont(.caption)
         .foregroundStyle(.secondary)
     }
 }
@@ -426,7 +426,7 @@ public struct IconFieldView: View {
                     title: {
                         if let text = value {
                             RichText(text: text)
-                                .font(.body)
+                                .scaledFont(.body)
                         }
                     },
                     icon: {
@@ -465,12 +465,12 @@ public struct FieldsView: View {
                     let key = keys[index]
                     Text(key)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                        .font(.caption)
+                        .scaledFont(.caption)
                         .foregroundStyle(.secondary)
                     if let richText = fields[key] {
                         RichText(text: richText)
                             .frame(maxWidth: .infinity, alignment: .leading)
-                            .font(.body)
+                            .scaledFont(.body)
                     }
                     if index != keys.count - 1 {
                         Divider()

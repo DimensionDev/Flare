@@ -222,7 +222,7 @@ public struct SearchScreen: View {
                                     .frame(width: 24, height: 24)
                                 Text(selectedAccount.handle.canonical)
                                 Image(fontAwesome: .chevronDown)
-                                    .font(.footnote)
+                                    .scaledFont(.footnote)
                                     .foregroundStyle(.secondary)
                                     .scaledToFit()
                                     .frame(width: 8, height: 8)

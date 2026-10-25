@@ -209,7 +209,7 @@ struct UgoiraStatusOverlay: View {
                     ProgressView().controlSize(.small).tint(.white)
                     if session.progress > 0 {
                         Text("\(Int((min(session.progress, 1) * 100).rounded()))%")
-                            .font(.caption).monospacedDigit()
+                            .scaledFont(.caption).monospacedDigit()
                     }
                 }
                 .mediaVideoBadgeStyle()

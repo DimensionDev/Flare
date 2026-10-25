@@ -35,7 +35,7 @@ public struct TimelineListHeader {
     public static func title(_ key: String) -> Self {
         Self(id: key, isPinned: true) {
             Text(FlareAppleUILocalization.string(key))
-                .font(.subheadline.weight(.semibold))
+                .scaledFont(.subheadline, weight: .semibold)
                 .foregroundStyle(.secondary)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal, 16)

@@ -175,7 +175,7 @@ struct RootView: View {
                     initialRoute: displayedRoute,
                     externalNavigationRequest: mainNavigationRequest
                 )
-                .navigationSplitViewColumnWidth(min: 280, ideal: 400, max: 500)
+                .navigationSplitViewColumnWidth(min: 280, ideal: 400)
                     .id(HomeRouteIdentity(route: selectedTab, contentSourceKey: contentSourceKey(displayedRoute)))
                     .toolbar {
                         if case .success(let data) = onEnum(of: loggedInPresenter.state.isLoggedIn), !data.data.boolValue {
@@ -360,9 +360,9 @@ private struct LoginExpiredToastView: View {
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(String(localized: "login_expired", defaultValue: "Login session expired"))
-                    .font(.callout.weight(.semibold))
+                    .scaledFont(.callout, weight: .semibold)
                 Text("\(toast.accountKey)")
-                    .font(.caption)
+                    .scaledFont(.caption)
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
             }

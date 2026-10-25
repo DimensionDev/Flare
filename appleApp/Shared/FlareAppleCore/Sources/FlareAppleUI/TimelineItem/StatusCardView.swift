@@ -33,13 +33,13 @@ struct StatusCardView: View {
                 if let desc = data.description_, !desc.isEmpty {
                     Text(desc)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                        .font(.caption)
+                        .scaledFont(.caption)
                         .foregroundStyle(.secondary)
                         .lineLimit(2)
                 } else {
                     Text(data.url)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                        .font(.caption)
+                        .scaledFont(.caption)
                         .foregroundStyle(.secondary)
                         .lineLimit(2)
                 }
@@ -87,13 +87,13 @@ struct StatusCompatCardView: View {
                 if let desc = data.description_, !desc.isEmpty {
                     Text(desc)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                        .font(.caption)
+                        .scaledFont(.caption)
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
                 } else {
                     Text(data.url)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                        .font(.caption)
+                        .scaledFont(.caption)
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
                 }

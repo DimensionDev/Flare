@@ -24,17 +24,17 @@ struct FeedView: View {
                         .frame(width: 20, height: 20)
                 }
                 Text(data.source.name)
-                    .font(.footnote)
+                    .scaledFont(.footnote)
                     .fixedSize(horizontal: false, vertical: true)
                 Spacer()
                 if data.translationDisplayState != .hidden {
                     TranslateStatusComponent(data: data.translationDisplayState)
-                        .font(.caption)
+                        .scaledFont(.caption)
                         .foregroundStyle(.secondary)
                 }
                 if let date = data.actualCreatedAt {
                     DateTimeText(data: date)
-                        .font(.footnote)
+                        .scaledFont(.footnote)
                         .foregroundStyle(.secondary)
                 }
             }
@@ -45,7 +45,7 @@ struct FeedView: View {
                 HStack(alignment: .top, spacing: 8) {
                     if let desc {
                         Text(desc)
-                            .font(.caption)
+                            .scaledFont(.caption)
                             .foregroundStyle(.secondary)
                             .lineLimit(5)
                             .frame(maxWidth: .infinity, alignment: .leading)

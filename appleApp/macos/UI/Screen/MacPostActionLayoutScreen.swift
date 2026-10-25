@@ -42,9 +42,9 @@ struct MacPostActionLayoutScreen: View {
         VStack(alignment: .leading, spacing: 16) {
             VStack(alignment: .leading, spacing: 4) {
                 Text("post_action_layout_preview_title")
-                    .font(.headline)
+                    .scaledFont(.headline)
                 Text("post_action_layout_preview_description")
-                    .font(.caption)
+                    .scaledFont(.caption)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -74,7 +74,7 @@ struct MacPostActionLayoutScreen: View {
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Customize actions")
                         Text("post_action_layout_customize_description")
-                            .font(.caption)
+                            .scaledFont(.caption)
                             .foregroundStyle(.secondary)
                             .fixedSize(horizontal: false, vertical: true)
                     }
@@ -106,10 +106,10 @@ struct MacPostActionLayoutScreen: View {
         return VStack(alignment: .leading, spacing: 10) {
             HStack(alignment: .firstTextBaseline, spacing: 8) {
                 Text(placement.postActionLayoutTitleKey)
-                    .font(.headline)
+                    .scaledFont(.headline)
 
                 Text(verbatim: "\(families.count)")
-                    .font(.caption)
+                    .scaledFont(.caption)
                     .foregroundStyle(.secondary)
                     .padding(.horizontal, 6)
                     .padding(.vertical, 2)
@@ -120,7 +120,7 @@ struct MacPostActionLayoutScreen: View {
 
             if families.isEmpty {
                 Text("No actions")
-                    .font(.callout)
+                    .scaledFont(.callout)
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, minHeight: 36, alignment: .leading)
             } else {

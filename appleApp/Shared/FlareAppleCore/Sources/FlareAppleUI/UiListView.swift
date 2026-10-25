@@ -1,4 +1,5 @@
 import SwiftUI
+import FlareAppleCore
 import KotlinSharedUI
 
 public struct UiListView: View {
@@ -45,7 +46,7 @@ private struct UiListRow: View {
             }
             if let desc = data.description_, !desc.isEmpty {
                 Text(desc)
-                    .font(.caption)
+                    .scaledFont(.caption)
                     .foregroundStyle(.secondary)
             }
         }
@@ -73,7 +74,7 @@ private struct UiFeedRow: View {
             }
             if let desc = data.description_, !desc.isEmpty {
                 Text(desc)
-                    .font(.caption)
+                    .scaledFont(.caption)
                     .foregroundStyle(.secondary)
             }
         }
@@ -118,7 +119,7 @@ private struct UiChannelRow: View {
             }
             if let desc = data.description_, !desc.isEmpty {
                 RichText(text: desc)
-                    .font(.caption)
+                    .scaledFont(.caption)
                     .foregroundStyle(.secondary)
             }
         }
@@ -141,7 +142,7 @@ public struct UiListPlaceholder: View {
                 Text("#loading", bundle: FlareAppleUILocalization.bundle)
             }
             Text("#loading", bundle: FlareAppleUILocalization.bundle)
-                .font(.caption)
+                .scaledFont(.caption)
                 .foregroundStyle(.secondary)
         }
         .redacted(reason: .placeholder)

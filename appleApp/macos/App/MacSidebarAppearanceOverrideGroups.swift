@@ -359,7 +359,7 @@ private struct MacSidebarAppearanceOverrideGroup<Content: View>: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(title)
                     Text(subtitle)
-                        .font(.caption)
+                        .scaledFont(.caption)
                         .foregroundStyle(.secondary)
                 }
 

@@ -33,11 +33,11 @@ public struct StatusPollView: View {
                     } label: {
                         HStack {
                             Text(option.title)
-                                .font(.caption)
+                                .scaledFont(.caption)
                             Spacer()
                             if selectedOption.contains(index) {
                                 Image(systemName: "checkmark.circle")
-                                    .font(.caption)
+                                    .scaledFont(.caption)
                                     .foregroundStyle(.secondary)
                             } else {
                                 EmptyView()
@@ -62,16 +62,16 @@ public struct StatusPollView: View {
                     VStack {
                         HStack {
                             Text(option.title)
-                                .font(.caption)
+                                .scaledFont(.caption)
                             Spacer()
                             if data.ownVotes.contains(KotlinInt(value: Int32(index))) {
                                 Image(systemName: "checkmark.circle")
-                                    .font(.caption)
+                                    .scaledFont(.caption)
                             } else {
                                 EmptyView()
                             }
                             Text(option.humanizedPercentage)
-                                .font(.caption)
+                                .scaledFont(.caption)
                                 .foregroundStyle(.secondary)
                         }
                         ProgressView(value: option.percentage)
@@ -92,14 +92,14 @@ public struct StatusPollView: View {
             
             if data.expired {
                 Text("poll_expired", bundle: FlareAppleUILocalization.bundle)
-                    .font(.caption)
+                    .scaledFont(.caption)
                     .foregroundStyle(.secondary)
             } else if let expiredAt = data.expiredAt {
                 Text("poll_expires_at", bundle: FlareAppleUILocalization.bundle)
-                    .font(.caption)
+                    .scaledFont(.caption)
                     .foregroundStyle(.secondary)
                 DateTimeText(data: expiredAt, fullTime: true)
-                    .font(.caption)
+                    .scaledFont(.caption)
                     .foregroundStyle(.secondary)
             }
             

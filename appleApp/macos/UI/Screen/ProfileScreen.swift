@@ -409,7 +409,7 @@ private struct ProfileGalleryTile: View {
                 .profileGalleryBadgeStyle()
         case .gif:
             Text("GIF")
-                .font(.caption2.bold())
+                .scaledFont(.caption2, weight: .bold)
                 .profileGalleryBadgeStyle()
         case .audio:
             Image(systemName: "waveform")

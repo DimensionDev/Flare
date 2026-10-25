@@ -200,7 +200,7 @@ public struct MediaVideoView: View {
             case .playing(let duration):
                 let remaining = max(Int((duration - player.position).rounded(.down)), 0)
                 Text(String(format: "%d:%02d", remaining / 60, remaining % 60))
-                    .font(.caption)
+                    .scaledFont(.caption)
                     .foregroundStyle(.white)
                     .mediaVideoBadgeStyle()
             case .error:

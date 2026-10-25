@@ -50,7 +50,7 @@ public struct AppearanceThemeSettingsSection: View {
             globalAppearance.fontSizeDiff
         }, set: { newValue in
             presenter.state.updateFontScale(fontSizeDiff: newValue)
-        }), in: -2...4, step: 1) {
+        }), in: FlareFontScale.fontSizeDiffRange, step: 1) {
             Text("appearance_font_size_diff", bundle: FlareAppleUILocalization.bundle)
         } minimumValueLabel: {
             Image(systemName: "textformat.size.smaller")

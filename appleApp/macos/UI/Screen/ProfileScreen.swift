@@ -69,6 +69,7 @@ struct ProfileScreen: View {
                     profileTabPinnedHeader
                 }
             }
+            .readableWidth()
             .padding(.bottom, 16)
         }
         .navigationTitle(title)

@@ -27,6 +27,7 @@ struct StatusDetailScreen: View {
                     detailStatusKey: statusKey
                 )
             }
+            .readableWidth()
         }
         .detectScrolling()
         .id(presenter.key)

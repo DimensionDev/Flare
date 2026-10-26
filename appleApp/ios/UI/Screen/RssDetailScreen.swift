@@ -214,13 +214,16 @@ private struct RssArticleContentView: View {
                             .frame(maxWidth: .infinity, alignment: .center)
                     }
                     
-                    HtmlWebView(
-                        dynamicHeight: $webViewHeight,
-                        htmlString: translatedHtml ?? document.content,
-                        baseURL: .init(string: url),
-                        onOpenURL: { url in self.openURL(url) }
-                    )
-                    .frame(height: webViewHeight)
+                    ProxyWebContent { route in
+                        HtmlWebView(
+                            dynamicHeight: $webViewHeight,
+                            htmlString: translatedHtml ?? document.content,
+                            baseURL: .init(string: url),
+                            onOpenURL: { url in self.openURL(url) },
+                            route: route
+                        )
+                        .frame(height: webViewHeight)
+                    }
                 }
                 .frame(maxWidth: 600)
                 .padding()
@@ -275,6 +278,7 @@ struct HtmlWebView: UIViewRepresentable {
     let htmlString: String?
     let baseURL: URL?
     let onOpenURL: ((URL) -> Void)?
+    let route: WebViewProxyRoute
     private let heightMessageName = "flareHeight"
     
     var forceColorScheme: ColorScheme? = nil
@@ -285,10 +289,23 @@ struct HtmlWebView: UIViewRepresentable {
         var renderedBaseURL: URL?
         init(_ parent: HtmlWebView) { self.parent = parent }
 
+        func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
+            parent.route.report(error)
+        }
+
+        func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
+            parent.route.report(error)
+        }
+
         @MainActor
         func webView(_ webView: WKWebView,
                      decidePolicyFor navigationAction: WKNavigationAction,
                      decisionHandler: @escaping @MainActor (WKNavigationActionPolicy) -> Void) {
+            guard parent.route.isValid else {
+                decisionHandler(.cancel)
+                return
+            }
+
             guard let targetURL = navigationAction.request.url else {
                 decisionHandler(.allow)
                 return
@@ -372,9 +389,11 @@ struct HtmlWebView: UIViewRepresentable {
     
     func makeUIView(context: Context) -> WKWebView {
         let config = WKWebViewConfiguration()
+        config.websiteDataStore = route.dataStore
         config.userContentController.add(context.coordinator, name: heightMessageName)
         let webview = WKWebView(frame: .zero, configuration: config)
         webview.navigationDelegate = context.coordinator
+        route.bind(webview)
         webview.scrollView.bounces = false
         webview.scrollView.isScrollEnabled = false
         
@@ -395,11 +414,14 @@ struct HtmlWebView: UIViewRepresentable {
     }
     
     static func dismantleUIView(_ uiView: WKWebView, coordinator: Coordinator) {
+        uiView.stopLoading()
+        uiView.navigationDelegate = nil
+        uiView.loadHTMLString("", baseURL: nil)
         uiView.configuration.userContentController.removeScriptMessageHandler(forName: coordinator.parent.heightMessageName)
     }
     
     private func loadHTMLIfNeeded(in webview: WKWebView, context: Context) {
-        guard let html = htmlString else { return }
+        guard route.isValid, let html = htmlString else { return }
         let renderedHTML = getHtmlData(html: html, scheme: (forceColorScheme ?? colorScheme))
         guard context.coordinator.renderedHTML != renderedHTML ||
                 context.coordinator.renderedBaseURL != baseURL else {

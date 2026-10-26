@@ -85,6 +85,7 @@ jobs:
             -destination 'platform=iOS Simulator,name=iPhone 17' \
             -only-testing:TimelineControllerTests/ProxyPlaybackLifecycleTests \
             -only-testing:TimelineControllerTests/ProxyImageLifecycleTests \
+            -only-testing:TimelineControllerTests/WebViewProxyTests \
             -only-testing:TimelineControllerTests/UgoiraPlaybackTests \
             -parallel-testing-enabled NO -skipPackagePluginValidation -skipMacroValidation \
             GRADLE_JVM_ARGS="-Xmx16G -Dfile.encoding=UTF-8" CODE_SIGNING_ALLOWED=NO

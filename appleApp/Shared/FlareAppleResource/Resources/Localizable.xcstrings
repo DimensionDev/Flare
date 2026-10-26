@@ -199,6 +199,7 @@
         }
       }
     },
+  "proxy_webview_error": {"extractionState": "manual", "localizations": {"en": {"stringUnit": {"state": "translated", "value": "The webpage could not be loaded with the global proxy settings. Check the proxy and try again."}}, "zh-Hans": {"stringUnit": {"state": "translated", "value": "无法使用全局代理设置加载网页。请检查代理后重试。"}}, "zh-Hant": {"stringUnit": {"state": "translated", "value": "無法使用全域代理設定載入網頁。請檢查代理後重試。"}}}},
   "proxy_error_name": {"extractionState": "manual", "localizations": {"en": {"stringUnit": {"state": "translated", "value": "A proxy name is required"}}, "zh-Hans": {"stringUnit": {"state": "translated", "value": "请输入代理名称"}}}},
   "proxy_error_host": {"extractionState": "manual", "localizations": {"en": {"stringUnit": {"state": "translated", "value": "Enter a hostname or IP address without a scheme or credentials"}}, "zh-Hans": {"stringUnit": {"state": "translated", "value": "请输入主机名或 IP 地址，不要包含协议或身份验证信息"}}}},
   "proxy_error_port": {"extractionState": "manual", "localizations": {"en": {"stringUnit": {"state": "translated", "value": "Port must be between 1 and 65535"}}, "zh-Hans": {"stringUnit": {"state": "translated", "value": "端口必须介于 1 和 65535 之间"}}}},

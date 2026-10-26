@@ -814,4 +814,6 @@
     <string name="proxy_error_policy">请选择有效的代理设置</string>
     <string name="proxy_error_request">代理操作失败，请重试。</string>
     <string name="settings_accounts_remove_failed">无法移除此账号，请重试。</string>
+    <string name="proxy_webview_error">无法使用全局代理设置加载网页。请检查代理后重试。</string>
+    <string name="proxy_webview_unsupported">此 Android WebView 不支持应用内代理。请更新 Android 系统 WebView 以使用全局代理设置。</string>
 </resources>

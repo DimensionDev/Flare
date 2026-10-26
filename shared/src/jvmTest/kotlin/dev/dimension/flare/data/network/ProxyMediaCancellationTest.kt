@@ -109,6 +109,7 @@ class ProxyMediaCancellationTest {
             fixture { repository, _, _, _ ->
                 repository.selectAccount(account, blocked)
                 val snapshot = ProxyNetwork.snapshot(accountProxy)
+                assertTrue(snapshot.isValid)
                 var invalidations = 0
                 snapshot.onInvalidated { invalidations++ }
                 val unsubscribe = snapshot.onInvalidated { error("Unsubscribed observer must not run") }
@@ -117,7 +118,9 @@ class ProxyMediaCancellationTest {
                 repository.save(profile)
                 assertEquals(0, invalidations)
                 assertEquals(snapshot, ProxyNetwork.snapshot(accountProxy))
+                assertTrue(snapshot.isValid)
                 repository.save(profile.copy(host = "localhost"))
+                assertTrue(!snapshot.isValid)
                 assertEquals(1, invalidations)
                 snapshot.onInvalidated { invalidations++ }
                 assertEquals(2, invalidations)

@@ -70,6 +70,7 @@ public data class ProxySnapshot internal constructor(
     val key: String,
 ) {
     private val invalidation = Job()
+    public val isValid: Boolean get() = invalidation.isActive
 
     // Completion also notifies late subscribers, closing the snapshot-to-request race.
     public fun onInvalidated(cancel: () -> Unit): () -> Unit {

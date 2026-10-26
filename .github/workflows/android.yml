@@ -69,7 +69,7 @@ jobs:
           target: google_apis
           arch: x86_64
           disable-animations: true
-          script: ./gradlew :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=dev.dimension.flare.ui.screen.settings.ProxySettingsContentTest
+          script: ./gradlew :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=dev.dimension.flare.ui.screen.settings.ProxySettingsContentTest,dev.dimension.flare.common.WebViewProxyTest
 
       # Build with Gradle
       - name: Build with Gradle

@@ -638,11 +638,14 @@ private struct RssArticleContentView: View {
     @Environment(\.openURL) private var openURL
 
     var body: some View {
-        MacRssHtmlWebView(
-            htmlString: translatedHtml ?? document.content,
-            baseURL: URL(string: url),
-            onOpenURL: { url in openURL(url) }
-        )
+        ProxyWebContent { route in
+            MacRssHtmlWebView(
+                htmlString: translatedHtml ?? document.content,
+                baseURL: URL(string: url),
+                onOpenURL: { url in openURL(url) },
+                route: route
+            )
+        }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .ignoresSafeArea(.container, edges: .top)
         .background(Color(nsColor: .textBackgroundColor))
@@ -725,6 +728,7 @@ private struct MacRssHtmlWebView: NSViewRepresentable {
     let htmlString: String?
     let baseURL: URL?
     let onOpenURL: ((URL) -> Void)?
+    let route: WebViewProxyRoute
 
     final class Coordinator: NSObject, WKNavigationDelegate {
         var parent: MacRssHtmlWebView
@@ -735,12 +739,25 @@ private struct MacRssHtmlWebView: NSViewRepresentable {
             self.parent = parent
         }
 
+        func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
+            parent.route.report(error)
+        }
+
+        func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
+            parent.route.report(error)
+        }
+
         @MainActor
         func webView(
             _ webView: WKWebView,
             decidePolicyFor navigationAction: WKNavigationAction,
             decisionHandler: @escaping @MainActor (WKNavigationActionPolicy) -> Void
         ) {
+            guard parent.route.isValid else {
+                decisionHandler(.cancel)
+                return
+            }
+
             guard let targetURL = navigationAction.request.url else {
                 decisionHandler(.allow)
                 return
@@ -778,9 +795,11 @@ private struct MacRssHtmlWebView: NSViewRepresentable {
 
     func makeNSView(context: Context) -> WKWebView {
         let config = WKWebViewConfiguration()
+        config.websiteDataStore = route.dataStore
 
         let webView = WKWebView(frame: .zero, configuration: config)
         webView.navigationDelegate = context.coordinator
+        route.bind(webView)
 
         loadHTMLIfNeeded(in: webView, context: context)
         return webView
@@ -792,11 +811,13 @@ private struct MacRssHtmlWebView: NSViewRepresentable {
     }
 
     static func dismantleNSView(_ nsView: WKWebView, coordinator: Coordinator) {
+        nsView.stopLoading()
         nsView.navigationDelegate = nil
+        nsView.loadHTMLString("", baseURL: nil)
     }
 
     private func loadHTMLIfNeeded(in webView: WKWebView, context: Context) {
-        guard let html = htmlString else {
+        guard route.isValid, let html = htmlString else {
             return
         }
 

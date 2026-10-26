@@ -18,6 +18,10 @@ public final class ProxySessionConfigurator: NSObject, AppleProxySessionConfigur
             return
         }
         if connection.mode == .system { return }
+        configuration.proxyConfigurations = [Self.proxyConfiguration(connection)]
+    }
+
+    nonisolated static func proxyConfiguration(_ connection: ProxyConnection) -> Network.ProxyConfiguration {
         guard connection.mode == .proxy,
               let host = connection.host, let port = connection.port,
               (1...65535).contains(port.intValue),
@@ -35,6 +39,6 @@ public final class ProxySessionConfigurator: NSObject, AppleProxySessionConfigur
             preconditionFailure("Unsupported proxy protocol")
         }
         proxy.allowFailover = false
-        configuration.proxyConfigurations = [proxy]
+        return proxy
     }
 }

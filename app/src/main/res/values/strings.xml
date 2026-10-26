@@ -879,4 +879,6 @@
     <string name="proxy_error_policy">Select an available proxy policy</string>
     <string name="proxy_error_request">Proxy operation failed. Please try again.</string>
     <string name="settings_accounts_remove_failed">Could not remove this account. Please try again.</string>
+    <string name="proxy_webview_error">The webpage could not be loaded with the global proxy settings. Check the proxy and try again.</string>
+    <string name="proxy_webview_unsupported">This Android WebView does not support proxy overrides. Update Android System WebView to use the global proxy settings.</string>
 </resources>

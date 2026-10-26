@@ -13,7 +13,9 @@ final class TimelineCollectionView: UICollectionView {
     // The owner knows when the snapshot and measurements for this layout are ready.
     // A nil path denotes a restore to the top, without a target item.
     var isReadingLayoutReady: ((IndexPath?) -> Bool)?
+    var prepareVisibleCells: (() -> Bool)?
     var onReadingLayoutChanged: (() -> Void)?
+    private var isPreparingVisibleCells = false
     private var isExternalScrollInteractionActive = false
     var isScrollInteractionActive: Bool { hasScrollGesture || isProgrammaticScrolling || isExternalScrollInteractionActive }
     var onProgrammaticScrollBegan: (() -> Void)?
@@ -544,8 +546,16 @@ final class TimelineCollectionView: UICollectionView {
 
     override func layoutSubviews() {
         super.layoutSubviews()
+        guard !isPreparingVisibleCells else { return }
         startRefreshIfReady()
         restoreReadingPositionIfNeeded()
+        isPreparingVisibleCells = true
+        defer { isPreparingVisibleCells = false }
+        // A shorter newly measured card can expose another cold cell in its column.
+        while prepareVisibleCells?() == true {
+            super.layoutSubviews()
+            restoreReadingPositionIfNeeded()
+        }
         onReadingLayoutChanged?()
     }
 

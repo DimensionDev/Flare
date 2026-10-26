@@ -7,6 +7,89 @@ import FlareAppleUI
 
 @MainActor
 final class TimelineControllerIntegrationTests: XCTestCase {
+    func testAppendedTwoColumnRowsHaveFinalPositionsInTheirFirstLayout() async throws {
+        let fixture = await Fixture(posts: true, columns: 2)
+        let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first)
+        let window = UIWindow(windowScene: scene)
+        window.rootViewController = fixture.controller
+        window.isHidden = false
+        defer { window.isHidden = true; window.rootViewController = nil }
+        fixture.collection.isPrefetchingEnabled = false
+        fixture.input.items = (0..<2).map { .post(makeRow($0, mediaCount: 0, textRepeatCount: 0)) }
+        await fixture.apply()
+        let list = fixture.collection
+        list.beginExternalScrollInteraction()
+        defer { list.endScrollInteraction() }
+        var firstFrames: [String: CGFloat] = [:]
+        let didLayout = list.onReadingLayoutChanged
+        list.onReadingLayoutChanged = {
+            didLayout?()
+            guard firstFrames.isEmpty else { return }
+            firstFrames = Dictionary(uniqueKeysWithValues: list.visibleCells.compactMap { cell -> (String, CGFloat)? in
+                guard let path = list.indexPath(for: cell), let id = list.readingItemID?(path),
+                      let index = Int(id.replacingOccurrences(of: "t:case-", with: "")), index >= 2,
+                      cell.frame.minY >= list.contentOffset.y,
+                      cell.frame.minY < list.contentOffset.y + list.bounds.height else { return nil }
+                return (id, cell.frame.minY - list.contentOffset.y)
+            })
+        }
+        defer { list.onReadingLayoutChanged = didLayout }
+        fixture.input.items += (2..<20).map {
+            .post(makeRow($0, mediaCount: $0 % 2 == 0 ? 0 : 4, textRepeatCount: $0 % 4))
+        }
+        await fixture.apply()
+        XCTAssertGreaterThan(firstFrames.count, 2)
+        for (id, top) in firstFrames {
+            let path = try XCTUnwrap(list.readingIndexPath?(id))
+            let frame = try XCTUnwrap(list.layoutAttributesForItem(at: path)?.frame)
+            XCTAssertEqual(frame.minY - list.contentOffset.y, top, accuracy: 1,
+                           "\(id) must be measured before the appended page becomes visible")
+        }
+    }
+
+    func testNewTwoColumnRowsHaveFinalPositionsBeforeTheFirstLayoutReturns() async throws {
+        let fixture = await Fixture(posts: true, columns: 2)
+        fixture.collection.isPrefetchingEnabled = false
+        func row(_ index: Int) -> TimelineContent.Item {
+            .post(makeRow(index, mediaCount: index % 2 == 0 ? 0 : 4,
+                          textRepeatCount: index % 3 == 0 ? 0 : index % 4 + 1))
+        }
+        fixture.input.items = (0..<20).map(row)
+        await fixture.apply()
+        await fixture.scroll(max(fixture.collection.contentSize.height - fixture.collection.bounds.height, 0))
+        fixture.input.items += (20..<40).map(row)
+        await fixture.apply()
+        var comparedNewRows = Set<String>()
+        for _ in 0..<4 {
+            let list = fixture.collection
+            var firstFrames: [String: CGFloat] = [:]
+            let didLayout = list.onReadingLayoutChanged
+            list.onReadingLayoutChanged = {
+                didLayout?()
+                guard firstFrames.isEmpty else { return }
+                firstFrames = Dictionary(uniqueKeysWithValues: list.visibleCells.compactMap { cell -> (String, CGFloat)? in
+                    guard let path = list.indexPath(for: cell), let id = list.readingItemID?(path),
+                          let index = Int(id.replacingOccurrences(of: "t:case-", with: "")), index >= 20,
+                          cell.frame.minY >= list.contentOffset.y,
+                          cell.frame.minY < list.contentOffset.y + list.bounds.height else { return nil }
+                    return (id, cell.frame.minY - list.contentOffset.y)
+                })
+            }
+            list.setContentOffset(CGPoint(x: 0, y: list.contentOffset.y + 480), animated: false)
+            list.layoutIfNeeded()
+            await fixture.settle()
+            list.onReadingLayoutChanged = didLayout
+            for (id, top) in firstFrames {
+                let path = try XCTUnwrap(list.readingIndexPath?(id))
+                let cell = try XCTUnwrap(list.cellForItem(at: path))
+                XCTAssertEqual(cell.frame.minY - list.contentOffset.y, top, accuracy: 1,
+                               "\(id) must not reflow after it first becomes visible")
+                comparedNewRows.insert(id)
+            }
+        }
+        XCTAssertGreaterThan(comparedNewRows.count, 2)
+    }
+
     func testReadingOrderReusesStorageAcrossCapturesAndUnchangedRowsButPublishesNewPagingSource() async throws {
         for columns in [1, 2] {
             let fixture = await Fixture(posts: true, columns: columns)
@@ -1775,12 +1858,13 @@ private func makeGap(revision: Int64 = 0, failed: Bool = false) -> UiTimelineV2.
 }
 
 @MainActor
-private func makeRow(_ index: Int, liked: Bool = false, imageHeight: Float = 600) -> UiTimelineV2 {
-    let text = "Post \(index): " + String(repeating: "Rotation should preserve this reading item while text wraps and media resizes. ", count: index % 4 + 1)
+private func makeRow(_ index: Int, liked: Bool = false, imageHeight: Float = 600,
+                     mediaCount: Int? = nil, textRepeatCount: Int? = nil) -> UiTimelineV2 {
+    let text = "Post \(index): " + String(repeating: "Rotation should preserve this reading item while text wraps and media resizes. ", count: textRepeatCount ?? (index % 4 + 1))
     let style = RenderTextStyle(link: nil, bold: false, italic: false, strikethrough: false, monospace: false, code: false, underline: false, small: false, time: false)
     let rich = UiRichText(renderRuns: [RenderContent.Text(runs: [RenderRun.Text(text: text, style: style)], block: RenderBlockStyle())], isRtl: false, raw: text, innerText: text, imageUrls: [])
     let action = ActionMenu.Item(updateKey: "like", icon: liked ? .unlike : .like, text: nil, count: UiNumber(value: liked ? 2 : 1), color: liked ? .red : .contentColor, clickEvent: ClickEventNoop.shared, actionFamily: .like, enabled: true)
-    let images: [UiMedia] = (0..<(index % 3 == 0 ? 1 : 4)).map { i in UiMediaImage(url: "https://example.invalid/fixture-\(i).png", previewUrl: "https://example.invalid/fixture-\(i).png", description: nil, height: imageHeight, width: 800, sensitive: false, customHeaders: nil) }
+    let images: [UiMedia] = (0..<(mediaCount ?? (index % 3 == 0 ? 1 : 4))).map { i in UiMediaImage(url: "https://example.invalid/fixture-\(i).png", previewUrl: "https://example.invalid/fixture-\(i).png", description: nil, height: imageHeight, width: 800, sensitive: false, customHeaders: nil) }
     let profile = UiProfile(key: MicroBlogKey(id: "user", host: "example.invalid"), handle: UiHandle(raw: "reader", host: "example.invalid"), avatar: nil as UiMediaImage?, nameInternal: rich, platformId: "mastodon", platformIcon: .world, clickEvent: ClickEventNoop.shared, banner: nil, description: nil, sourceLanguages: [], translationDisplayState: .hidden, matrices: UiProfile.Matrices(fansCount: 0, followsCount: 0, statusesCount: 0, platformFansCount: nil), mark: [], bottomContent: nil)
     let post = UiTimelineV2.Post(platformId: "mastodon", images: images, sensitive: false, contentWarning: nil, user: profile, platformIcon: .world, sourceLanguages: [], translationDisplayState: .hidden, content: UiTranslatableText(original: rich, translation: nil), actions: [action], poll: nil, statusKey: MicroBlogKey(id: "case-\(index)", host: "example.invalid"), card: nil, createdAt: KotlinInstant.companion.fromEpochMilliseconds(epochMilliseconds: 0).toUi(), emojiReactions: [], sourceChannel: nil, visibility: nil, replyToHandle: nil, references: [], clickEvent: ClickEventNoop.shared, mediaClickPolicy: .openStatusMedia, accountType: AccountType.Guest.shared, itemKey: "case-\(index)")
     return UiTimelineV2.TimelinePostItem(post: post, presentation: UiTimelineV2.PostPresentation(message: nil, inlineParents: [], quotes: [], repost: nil, notificationKey: nil), itemKey: "case-\(index)")

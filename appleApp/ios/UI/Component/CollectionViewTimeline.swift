@@ -579,6 +579,15 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         collectionView.isReadingLayoutReady = { [weak self] indexPath in
             self?.isReadingLayoutReady(at: indexPath) == true
         }
+        collectionView.prepareVisibleCells = { [weak self] in
+            guard let self, self.columnCount > 1 else { return false }
+            // UIKit has installed these cells even when diffable completion is still pending.
+            for case let cell as TimelineUIKitCollectionViewCell in self.collectionView.visibleCells
+                where !cell.hasMeasuredHeight(for: cell.bounds.width) {
+                cell.reportPreferredHeightIfNeeded(width: cell.bounds.width)
+            }
+            return self.flushPendingHeightCorrections()
+        }
         collectionView.onReadingLayoutChanged = { [weak self] in
             self?.scheduleVisiblePagingAccess()
         }
@@ -766,22 +775,28 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
               itemHeightCache.hasPendingMeasurements else { return }
         isHeightCorrectionFlushScheduled = true
         DispatchQueue.main.async { [weak self] in
-            self?.flushPendingHeightCorrections()
+            guard let self else { return }
+            self.isHeightCorrectionFlushScheduled = false
+            guard !self.isApplyingSnapshot else { return }
+            self.flushPendingHeightCorrections()
         }
     }
 
-    private func flushPendingHeightCorrections() {
-        isHeightCorrectionFlushScheduled = false
-        guard isViewLoaded, !isApplyingSnapshot, itemHeightCache.hasPendingMeasurements else { return }
+    @discardableResult
+    private func flushPendingHeightCorrections() -> Bool {
+        guard isViewLoaded, itemHeightCache.hasPendingMeasurements else { return false }
         let paths = itemHeightCache.pendingItemIDs.compactMap { dataSource.indexPath(for: $0) }
+        var changed = false
         collectionView.invalidateMeasuredHeights(at: paths) {
-            self.itemHeightCache.commitPendingMeasurements { id, geometry, renderHash in
+            changed = self.itemHeightCache.commitPendingMeasurements { id, geometry, renderHash in
                 guard self.lastRenderHashMap[id] == renderHash,
                       let path = self.dataSource.indexPath(for: id),
                       let layout = self.collectionView.collectionViewLayout as? CHTCollectionViewWaterfallLayout else { return false }
                 return geometry == self.heightGeometry(itemID: id, width: max(layout.itemWidthInSection(at: path.section), 1))
             }
+            return changed
         }
+        return changed
     }
 
     private func applyLayoutForColumnCount() {

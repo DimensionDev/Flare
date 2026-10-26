@@ -97,11 +97,13 @@ final class TimelineItemHeightCacheTests: XCTestCase {
         cache.stage(400, for: "changed", geometry: single, renderHash: 1)
         cache.stage(500, for: "current", geometry: single, renderHash: 2)
         cache.keep(["changed", "current"])
+        XCTAssertEqual(Set(cache.pendingItemIDs), ["changed", "current"])
         XCTAssertNil(cache.measuredHeight(for: "removed", geometry: single, renderHash: 1))
         XCTAssertTrue(cache.commitPendingMeasurements { id, _, hash in id == "current" && hash == 2 })
         XCTAssertNil(cache.height(for: "changed", geometry: single))
         XCTAssertEqual(cache.height(for: "current", geometry: single), 500)
         XCTAssertFalse(cache.hasPendingMeasurements)
+        XCTAssertTrue(cache.pendingItemIDs.isEmpty)
     }
 
     func testClearingMeasurementsAlsoClearsPendingGeometry() {

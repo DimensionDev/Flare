@@ -773,7 +773,8 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     private func flushPendingHeightCorrections() {
         isHeightCorrectionFlushScheduled = false
         guard isViewLoaded, !isApplyingSnapshot, itemHeightCache.hasPendingMeasurements else { return }
-        collectionView.invalidateMeasuredHeights {
+        let paths = itemHeightCache.pendingItemIDs.compactMap { dataSource.indexPath(for: $0) }
+        collectionView.invalidateMeasuredHeights(at: paths) {
             self.itemHeightCache.commitPendingMeasurements { id, geometry, renderHash in
                 guard self.lastRenderHashMap[id] == renderHash,
                       let path = self.dataSource.indexPath(for: id),

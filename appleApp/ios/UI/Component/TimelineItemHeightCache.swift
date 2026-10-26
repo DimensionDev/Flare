@@ -17,6 +17,7 @@ struct TimelineItemHeightCache {
     private var pending: [String: [Measurement]] = [:]
 
     var hasPendingMeasurements: Bool { !pending.isEmpty }
+    var pendingItemIDs: [String] { Array(pending.keys) }
 
     func height(for id: String, geometry: Geometry, renderHash: Int32? = nil) -> CGFloat? {
         items[id]?.first {

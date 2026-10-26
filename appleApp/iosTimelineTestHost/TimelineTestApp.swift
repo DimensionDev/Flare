@@ -188,7 +188,7 @@ private final class TimelineTestController: UIViewController, CHTCollectionViewD
         let oldScreenY = oldFrame.minY - list.contentOffset.y
         let nextPath = dataSource.indexPath(for: id + 1)!
         let nextScreenY = layout.layoutAttributesForItem(at: nextPath)!.frame.minY - list.contentOffset.y
-        list.invalidateMeasuredHeights {
+        list.invalidateMeasuredHeights(at: [dataSource.indexPath(for: refineReadingItem ? id : id - 1)!]) {
             if refineReadingItem {
                 self.heights[id] = 120
             } else {
@@ -273,7 +273,7 @@ private final class TimelineTestController: UIViewController, CHTCollectionViewD
         check(list.shouldDeferSnapshotChanges, "measurement missed the refresh collapse")
         check(list.contentOffset.y < -list.adjustedContentInset.top - 1, "measurement missed the elastic top boundary")
         let before = list.contentOffset.y
-        list.invalidateMeasuredHeights {
+        list.invalidateMeasuredHeights(at: [dataSource.indexPath(for: 0)!]) {
             heights[0] = itemHeight(0) + 35
             return true
         }

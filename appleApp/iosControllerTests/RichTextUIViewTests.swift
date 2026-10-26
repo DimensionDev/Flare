@@ -5,6 +5,34 @@ import KotlinSharedUI
 
 @MainActor
 final class RichTextUIViewTests: XCTestCase {
+    func testGrowingAndClippingAPreviewChoosesTheRendererForItsVisibleAttributes() throws {
+        let plain = RenderTextStyle(link: nil, bold: false, italic: false, strikethrough: false,
+                                    monospace: false, code: false, underline: false, small: false, time: false)
+        let linked = RenderTextStyle(link: "https://example.invalid/visible", bold: false, italic: false,
+                                     strikethrough: false, monospace: false, code: false,
+                                     underline: false, small: false, time: false)
+        let prefix = String(repeating: "text 中文 ", count: 40)
+        let text = UiRichText(renderRuns: [RenderContent.Text(runs: [
+            RenderRun.Text(text: prefix, style: plain), RenderRun.Text(text: " linked suffix", style: linked),
+        ], block: RenderBlockStyle())], isRtl: false, raw: prefix + " linked suffix",
+                             innerText: prefix + " linked suffix", imageUrls: [])
+        let view = RichTextUIView()
+        view.configure(text: text, lineLimit: 5, isTextSelectionEnabled: false, onOpenURL: nil,
+                       collapseAboveLineCount: 15)
+        view.prepareForFitting(width: 1_000)
+        XCTAssertFalse(view.hasCollapsedOverflow(for: 1_000))
+        XCTAssertTrue(try XCTUnwrap(textViews(in: view).first) is UITextView)
+        XCTAssertEqual(renderedText(in: view), text.innerText)
+        view.prepareForFitting(width: 100)
+        XCTAssertTrue(view.hasCollapsedOverflow(for: 100))
+        XCTAssertTrue(try XCTUnwrap(textViews(in: view).first) is UILabel,
+                      "A link outside the preview must not change the visible text renderer")
+        XCTAssertFalse(renderedText(in: view).contains("linked suffix"))
+        view.prepareForFitting(width: 1_000)
+        XCTAssertTrue(try XCTUnwrap(textViews(in: view).first) is UITextView)
+        XCTAssertEqual(renderedText(in: view), text.innerText)
+    }
+
     func testSingleBlockBelowCollapseThresholdMatchesFullTextLayout() throws {
         let quote = RenderBlockStyle(headingLevel: nil, textAlignment: nil,
                                      isListItem: false, isBlockQuote: true, isFigCaption: false)

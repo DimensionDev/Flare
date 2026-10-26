@@ -2,6 +2,11 @@ import Foundation
 import CoreGraphics
 import ImageIO
 import Kingfisher
+#if canImport(UIKit)
+import UIKit
+#elseif canImport(AppKit)
+import AppKit
+#endif
 
 public nonisolated struct ImageDownsamplingProcessor: ImageProcessor {
     public let pixelSize: CGSize

@@ -1,3 +1,5 @@
+@file:OptIn(kotlin.concurrent.atomics.ExperimentalAtomicApi::class)
+
 package dev.dimension.flare.data.datasource.microblog
 
 import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
@@ -11,6 +13,7 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import kotlin.concurrent.atomics.AtomicReference
 
 /** Self-contained mixed continuations: at most one pending remote page per source. */
 internal class MixedTimelinePageLoader(
@@ -22,6 +25,13 @@ internal class MixedTimelinePageLoader(
         "mixed:${policy.name}:" + sources.joinToString("") { "${it.pagingKey.length}:${it.pagingKey}" }
     override val collapseReplyChains = false
     val ordersByTime: Boolean get() = policy == TimelineMergePolicy.Time
+
+    private val cachedContinuation = AtomicReference<CachedContinuation?>(null)
+
+    private data class CachedContinuation(
+        val encoded: String,
+        val pages: List<SourcePage>,
+    )
 
     @Serializable
     private data class SourcePage(
@@ -168,13 +178,24 @@ internal class MixedTimelinePageLoader(
         return if (merged == previous) nextKey else encodeContinuation(merged)
     }
 
-    private fun encodeContinuation(pages: List<SourcePage>): String? =
-        if (pages.any { it.canLoad || it.pending.isNotEmpty() }) Json.encodeToString(pages) else null
-
-    private fun decodeContinuation(nextKey: String): List<SourcePage> =
-        Json.decodeFromString<List<SourcePage>>(nextKey).also {
-            require(it.size == sources.size) { "Mixed timeline sources changed" }
+    private fun encodeContinuation(pages: List<SourcePage>): String? {
+        if (pages.none { it.canLoad || it.pending.isNotEmpty() }) {
+            cachedContinuation.store(null)
+            return null
         }
+        val encoded = Json.encodeToString(pages)
+        // The load loop mutates its outer list; retain only its immutable snapshot.
+        cachedContinuation.store(CachedContinuation(encoded, pages.toList()))
+        return encoded
+    }
+
+    private fun decodeContinuation(nextKey: String): List<SourcePage> {
+        cachedContinuation.load()?.takeIf { it.encoded == nextKey }?.let { return it.pages }
+        return Json.decodeFromString<List<SourcePage>>(nextKey).also {
+            require(it.size == sources.size) { "Mixed timeline sources changed" }
+            cachedContinuation.store(CachedContinuation(nextKey, it))
+        }
+    }
 
     private fun closeJoinedSources(
         pages: List<SourcePage>,

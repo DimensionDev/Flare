@@ -5,11 +5,213 @@ import ImageIO
 import UniformTypeIdentifiers
 import Kingfisher
 import KotlinSharedUI
-import FlareAppleUI
+@testable import FlareAppleUI
 @testable import Flare
 
 @MainActor
 final class TimelineMediaPreviewTests: XCTestCase {
+    func testReactionImagesDecodeAtTheirDisplayHeightOnBothRenderers() async throws {
+        for kind in ["uikit", "swiftui"] {
+            let fixture = try Fixture()
+            KingfisherManager.shared.defaultOptions += [.requestModifier(AnyModifier { request in
+                var request = request
+                request.setValue("fixture", forHTTPHeaderField: "X-Preview-Test")
+                return request
+            })]
+            let url = fixture.media(path: "reaction-\(kind).png").previewUrl
+            let processor = ImageDownsamplingProcessor(
+                pixelSize: CGSize(width: CGFloat.greatestFiniteMagnitude, height: 48), fillsBounds: false)
+            let reaction = UiTimelineV2.PostEmojiReaction(name: ":test:", url: url, count: UiNumber(value: 2),
+                clickEvent: ClickEventNoop.shared, isUnicode: false, me: true)
+            let host: UIViewController
+            if kind == "uikit" {
+                host = UIViewController()
+                let view = StatusReactionUIView()
+                view.traitOverrides.displayScale = 3
+                host.view.addSubview(view)
+                view.configure(data: [reaction], isDetail: false)
+                view.frame = CGRect(x: 0, y: 0, width: 180, height: 100)
+            } else {
+                host = UIHostingController(rootView: StatusReactionView(data: [reaction], isDetail: false)
+                    .environment(\.displayScale, 3).frame(width: 180))
+            }
+            let window = try fixture.show(host)
+            defer { window.isHidden = true; window.rootViewController = nil }
+            for _ in 0..<300 {
+                if fixture.cache.imageSize(for: url, processor: processor) != nil { break }
+                host.view.layoutIfNeeded()
+                try await Task.sleep(for: .milliseconds(10))
+            }
+            let size = try XCTUnwrap(fixture.cache.imageSize(for: url, processor: processor), kind)
+            XCTAssertEqual(size, CGSize(width: 64, height: 48), kind)
+        }
+    }
+
+    func testRichTextBlockImagesDecodeForTheirWidthAndKeepNaturalAspectRatio() async throws {
+        for kind in ["uikit", "swiftui"] {
+            let fixture = try Fixture()
+            KingfisherManager.shared.defaultOptions += [.requestModifier(AnyModifier { request in
+                var request = request
+                request.setValue("fixture", forHTTPHeaderField: "X-Preview-Test")
+                return request
+            })]
+            let url = fixture.media(path: "block-\(kind).png").previewUrl
+            let processor = ImageDownsamplingProcessor(
+                pixelSize: CGSize(width: 540, height: CGFloat.greatestFiniteMagnitude), fillsBounds: false)
+            let text = UiRichText(renderRuns: [RenderContent.BlockImage(url: url, href: nil)],
+                isRtl: false, raw: url, innerText: "", imageUrls: [url])
+            let host: UIViewController
+            var native: RichTextUIView?
+            var swiftUIHeight: (() -> CGFloat)?
+            if kind == "uikit" {
+                host = UIViewController()
+                let view = RichTextUIView()
+                native = view
+                view.traitOverrides.displayScale = 3
+                host.view.addSubview(view)
+                view.configure(text: text, lineLimit: nil, isTextSelectionEnabled: false, onOpenURL: nil)
+                view.prepareForFitting(width: 180)
+                view.frame = CGRect(x: 0, y: 0, width: 180, height: 135)
+            } else {
+                let controller = UIHostingController(rootView: RichText(text: text)
+                    .environment(\.displayScale, 3).frame(width: 180))
+                host = controller
+                swiftUIHeight = {
+                    controller.sizeThatFits(in: CGSize(width: 180, height: 1_000)).height
+                        - controller.view.safeAreaInsets.top - controller.view.safeAreaInsets.bottom
+                }
+            }
+            let window = try fixture.show(host)
+            defer { window.isHidden = true; window.rootViewController = nil }
+            for _ in 0..<300 {
+                host.view.layoutIfNeeded()
+                native?.prepareForFitting(width: 180)
+                if fixture.cache.imageSize(for: url, processor: processor) != nil { break }
+                try await Task.sleep(for: .milliseconds(10))
+            }
+            let size = try XCTUnwrap(fixture.cache.imageSize(for: url, processor: processor), kind)
+            XCTAssertEqual(size.width, 540, accuracy: 1, kind)
+            XCTAssertEqual(size.height, 405, accuracy: 1, kind)
+            try await Task.sleep(for: .milliseconds(30))
+            if let swiftUIHeight { XCTAssertEqual(swiftUIHeight(), 135, accuracy: 1) }
+            let inlineProcessor = ImageDownsamplingProcessor(
+                pixelSize: CGSize(width: CGFloat.greatestFiniteMagnitude, height: 51), fillsBounds: false)
+            XCTAssertEqual(fixture.cache.imageCachedType(forKey: url, processorIdentifier: inlineProcessor.identifier),
+                           .none, "Block images must not also be loaded as inline emoji: \(kind)")
+            if let native {
+                XCTAssertEqual(try XCTUnwrap(native.timelineHeight(for: 180)), 135, accuracy: 1)
+            }
+        }
+    }
+
+    func testRichTextInlineImagesDecodeAtDisplaySizeOnBothRenderers() async throws {
+        for kind in ["uikit", "swiftui"] {
+            let fixture = try Fixture()
+            KingfisherManager.shared.defaultOptions += [.requestModifier(AnyModifier { request in
+                var request = request
+                request.setValue("fixture", forHTTPHeaderField: "X-Preview-Test")
+                return request
+            })]
+            let url = fixture.media(path: "inline-\(kind).png").previewUrl
+            let processor = ImageDownsamplingProcessor(
+                pixelSize: CGSize(width: CGFloat.greatestFiniteMagnitude, height: 51), fillsBounds: false)
+            let largeHeight: CGFloat = kind == "uikit" ? 159 : 144
+            let largeProcessor = ImageDownsamplingProcessor(
+                pixelSize: CGSize(width: CGFloat.greatestFiniteMagnitude, height: largeHeight), fillsBounds: false)
+            let text = UiRichText(renderRuns: [RenderContent.Text(runs: [RenderRun.Image(url: url, alt: "emoji")],
+                block: RenderBlockStyle())], isRtl: false, raw: url, innerText: "emoji", imageUrls: [url])
+            let host: UIViewController
+            var growText: (() -> Void)?
+            if kind == "uikit" {
+                host = UIViewController()
+                let view = RichTextUIView()
+                view.traitOverrides.displayScale = 3
+                host.view.addSubview(view)
+                view.configure(text: text, lineLimit: nil, isTextSelectionEnabled: false, onOpenURL: nil,
+                               preferredContentSizeCategory: .large)
+                view.prepareForFitting(width: 200)
+                view.frame = CGRect(x: 0, y: 0, width: 200, height: 100)
+                growText = {
+                    view.configure(text: text, lineLimit: nil, isTextSelectionEnabled: false, onOpenURL: nil,
+                                   preferredContentSizeCategory: .accessibilityExtraExtraExtraLarge)
+                    view.prepareForFitting(width: 200)
+                }
+            } else {
+                func content(_ size: DynamicTypeSize) -> some View {
+                    RichText(text: text).environment(\.displayScale, 3)
+                        .environment(\.dynamicTypeSize, size).frame(width: 200)
+                }
+                let controller = UIHostingController(rootView: content(.large))
+                host = controller
+                growText = { controller.rootView = content(.accessibility5) }
+            }
+            let window = try fixture.show(host)
+            defer { window.isHidden = true; window.rootViewController = nil }
+            for _ in 0..<300 {
+                if fixture.cache.imageSize(for: url, processor: processor) != nil { break }
+                host.view.layoutIfNeeded()
+                try await Task.sleep(for: .milliseconds(10))
+            }
+            let size = try XCTUnwrap(fixture.cache.imageSize(for: url, processor: processor), kind)
+            XCTAssertEqual(size.height, 51, accuracy: 1, kind)
+            XCTAssertEqual(size.width / size.height, 4.0 / 3.0, accuracy: 0.03, kind)
+            growText?()
+            for _ in 0..<300 {
+                if fixture.cache.imageSize(for: url, processor: largeProcessor) != nil { break }
+                host.view.layoutIfNeeded()
+                try await Task.sleep(for: .milliseconds(10))
+            }
+            XCTAssertEqual(try XCTUnwrap(fixture.cache.imageSize(for: url, processor: largeProcessor)).height,
+                           largeHeight, accuracy: 1, kind)
+        }
+    }
+
+    func testPreviewsKeepOriginalDiskDataWithoutWritingProcessedVariants() async throws {
+        for kind in ["uikit", "swiftui", "crossfade"] {
+            let fixture = try Fixture()
+            KingfisherManager.shared.defaultOptions.append(.waitForCache)
+            let url = fixture.media(path: "\(kind).png").previewUrl
+            var window: UIWindow?
+            var completed = false
+            defer { window?.isHidden = true; window?.rootViewController = nil }
+
+            if kind == "uikit" {
+                fixture.view.frame.size = CGSize(width: 180, height: 135)
+                fixture.view.set(media: fixture.media(path: "\(kind).png"), cornerRadius: 0)
+                fixture.view.layoutIfNeeded()
+                _ = try await fixture.loadedImage(width: 540)
+            } else {
+                let host = UIHostingController(rootView: NetworkImage(
+                    data: url, customHeader: ["X-Preview-Test": "fixture"],
+                    contentMode: .fill, usesCrossfade: kind == "crossfade",
+                    onProgress: { completed = $0 == 1 }
+                ).frame(width: 180, height: 135).environment(\.displayScale, 3))
+                window = try fixture.show(host)
+                for _ in 0..<300 {
+                    if completed { break }
+                    host.view.layoutIfNeeded()
+                    try await Task.sleep(for: .milliseconds(10))
+                }
+                XCTAssertTrue(completed, kind)
+            }
+
+            let processor = ImageDownsamplingProcessor(pixelSize: CGSize(width: 540, height: 405), fillsBounds: true)
+            XCTAssertEqual(fixture.cache.imageCachedType(forKey: url, processorIdentifier: processor.identifier), .memory, kind)
+            fixture.cache.clearMemoryCache()
+            XCTAssertEqual(fixture.cache.imageCachedType(forKey: url, processorIdentifier: processor.identifier), .none,
+                           "A preview must not spend CPU encoding a second disk copy: \(kind)")
+            XCTAssertEqual(fixture.cache.imageCachedType(forKey: url), .disk,
+                           "The original bytes must remain available offline: \(kind)")
+            let image = try await KingfisherManager.shared.retrieveImage(
+                with: URL(string: url)!,
+                options: [.targetCache(fixture.cache), .onlyFromCache,
+                          .processor(processor), .scaleFactor(3), .cacheMemoryOnly]
+            ).image
+            XCTAssertEqual(image.cgImage?.width, 540, kind)
+            XCTAssertEqual(image.cgImage?.height, 405, kind)
+        }
+    }
+
     func testMediaCreatesOptionalViewsOnDemandAndPreservesReuseBehavior() throws {
         let fixture = try Fixture()
         let host = UIViewController()
@@ -305,13 +507,17 @@ final class TimelineMediaPreviewTests: XCTestCase {
             .onGeometryChange(for: CGSize.self) { $0.size } action: { size = $0 })
         let window = try fixture.show(host)
         defer { window.isHidden = true; window.rootViewController = nil }
-        for _ in 0..<100 {
+        let processor = ImageDownsamplingProcessor(pixelSize: CGSize(width: 540, height: 540), fillsBounds: false)
+        for _ in 0..<300 {
             host.view.layoutIfNeeded()
+            if size.height == 135, fixture.cache.imageSize(for: fixture.media().previewUrl, processor: processor) != nil {
+                break
+            }
             try await Task.sleep(for: .milliseconds(10))
         }
         XCTAssertEqual(size.width, 180, accuracy: 0.5)
         XCTAssertEqual(size.height, 135, accuracy: 0.5)
-        XCTAssertEqual(fixture.cache.imageSize(for: fixture.media().previewUrl)?.width, 540)
+        XCTAssertEqual(fixture.cache.imageSize(for: fixture.media().previewUrl, processor: processor)?.width, 540)
     }
 
     func testSwiftUIGIFWithQueryUsesAnimatedImageView() async throws {
@@ -537,6 +743,13 @@ private nonisolated final class PreviewImageCache: ImageCache, @unchecked Sendab
     private var sizes: [String: CGSize] = [:]
 
     func imageSize(for key: String) -> CGSize? { lock.withLock { sizes[key] } }
+
+    func imageSize(for key: String, processor: ImageDownsamplingProcessor) -> CGSize? {
+        guard let image = retrieveImageInMemoryCache(forKey: key, options: [.processor(processor)])?.cgImage else {
+            return nil
+        }
+        return CGSize(width: image.width, height: image.height)
+    }
 
     override func store(_ image: UIImage, original: Data?, forKey key: String,
                         options: KingfisherParsedOptionsInfo, toDisk: Bool,

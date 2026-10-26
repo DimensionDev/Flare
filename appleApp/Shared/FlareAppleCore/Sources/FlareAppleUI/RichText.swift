@@ -22,6 +22,7 @@ public struct RichText: View {
     @ScaledMetric(relativeTo: .body) private var imageSize = 17
     @ScaledMetric(relativeTo: .body) private var quoteBarWidth = 3
     @Environment(\.openURL) private var openURL
+    @Environment(\.displayScale) private var displayScale
 
     public init(text: UiRichText) {
         self.text = text
@@ -51,11 +52,7 @@ public struct RichText: View {
                         }
                     case let imageContent as PlatformTextBlockImageContent:
                         if let url = URL(string: imageContent.url) {
-                            let image = KFImage(url)
-                                .flareBackgroundDecodeIfSupported()
-                                .loadDiskFileSynchronously(false)
-                                .resizable()
-                                .scaledToFit()
+                            let image = RichTextBlockImage(url: url)
                                 .clipShape(RoundedRectangle(cornerRadius: 12))
                                 .contentShape(Rectangle())
                                 .accessibilityLabel(
@@ -113,13 +110,21 @@ public struct RichText: View {
             }
         }
         .onPreferenceChange(RichTextPreviewMeasurements.self) { previewMeasurements = $0 }
-        .task(id: text.raw) {
-            let urls = text.imageUrls
+        .task(id: InlineImageRequest(urls: inlineImageURLs, height: imageSize, scale: displayScale)) {
+            let urls = inlineImageURLs
+            images = images.filter { urls.contains($0.key) }
             let targetHeight = imageSize
             for urlString in urls {
                 guard let url = URL(string: urlString) else { continue }
                 do {
-                    let result = try await KingfisherManager.shared.retrieveImage(with: url)
+                    let processor = ImageDownsamplingProcessor(
+                        pixelSize: CGSize(width: .greatestFiniteMagnitude, height: ceil(targetHeight * displayScale)),
+                        fillsBounds: false)
+                    let result = try await KingfisherManager.shared.retrieveImage(with: url, options: [
+                        .processor(processor), .scaleFactor(displayScale), .cacheOriginalImage, .cacheMemoryOnly,
+                        .backgroundDecode, .asyncCacheTypeCheck,
+                    ])
+                    guard !Task.isCancelled else { return }
                     let platformImage = result.image
                     let resized = platformImage.resize(height: targetHeight) ?? platformImage
                     images[urlString] = Image(platformImage: resized)
@@ -132,6 +137,12 @@ public struct RichText: View {
 
     private var contents: [PlatformTextContent] {
         text.platformText.compactMap { $0 as? PlatformTextContent }
+    }
+
+    private var inlineImageURLs: [String] {
+        contents.compactMap { $0 as? PlatformTextTextContent }.flatMap { content in
+            content.runs.compactMap { ($0 as? PlatformTextImageRun)?.url }
+        }
     }
 
     private var previewContents: [PlatformTextContent] {
@@ -214,6 +225,39 @@ public struct RichText: View {
         default:
             return .leading
         }
+    }
+}
+
+private struct InlineImageRequest: Hashable {
+    let urls: [String]
+    let height: CGFloat
+    let scale: CGFloat
+}
+
+private struct RichTextBlockImage: View {
+    let url: URL
+    @Environment(\.displayScale) private var displayScale
+    @State private var pixelWidth: CGFloat = 0
+
+    var body: some View {
+        KFImage(pixelWidth > 0 ? url : nil)
+            .setProcessor(ImageDownsamplingProcessor(
+                pixelSize: CGSize(width: pixelWidth, height: .greatestFiniteMagnitude), fillsBounds: false))
+            .scaleFactor(displayScale)
+            .cacheOriginalImage()
+            .cacheMemoryOnly()
+            .flareAsyncCacheTypeCheck()
+            .flareBackgroundDecodeIfSupported()
+            .loadDiskFileSynchronously(false)
+            .placeholder { Color.clear.frame(height: 1) }
+            .resizable()
+            .scaledToFit()
+            .frame(maxWidth: .infinity)
+            .onGeometryChange(for: CGFloat.self) { proxy in
+                ceil(proxy.size.width * displayScale)
+            } action: { width in
+                pixelWidth = max(pixelWidth, width)
+            }
     }
 }
 

@@ -24,6 +24,35 @@ import kotlin.time.Instant
 
 class MixedTimelinePageLoaderTest : RobolectricTest() {
     @Test
+    fun replayingAnOlderNestedContinuationDoesNotMutateItsPendingItems() =
+        runTest {
+            for (policy in TimelineMergePolicy.entries) {
+                val a = Source("a", listOf(page(9, 7, 5, 3, 1)))
+                val b = Source("b", listOf(page(8, 6, 4, 2)))
+
+                fun tree() =
+                    MixedTimelinePageLoader(
+                        listOf(MixedTimelinePageLoader(listOf(a, b), policy)),
+                        TimelineMergePolicy.Time,
+                    )
+                val mixed = tree()
+                val first = mixed.load(2, PagingRequest.Refresh)
+                val cursor = assertNotNull(first.nextKey)
+                val second = mixed.load(2, PagingRequest.Append(cursor))
+                val next = assertNotNull(second.nextKey)
+                mixed.load(2, PagingRequest.Append(next))
+                val replayed = mixed.load(2, PagingRequest.Append(cursor))
+                val reopened = tree().load(2, PagingRequest.Append(cursor))
+                assertEquals(second.data.map { it.stableItemKey }, replayed.data.map { it.stableItemKey })
+                assertEquals(second.nextKey, replayed.nextKey)
+                assertEquals(second.data.map { it.stableItemKey }, reopened.data.map { it.stableItemKey })
+                assertEquals(second.nextKey, reopened.nextKey)
+                assertEquals(listOf<PagingRequest>(PagingRequest.Refresh), a.requests)
+                assertEquals(listOf<PagingRequest>(PagingRequest.Refresh), b.requests)
+            }
+        }
+
+    @Test
     fun cachedNestedSuccessDoesNotCloseAnotherSourcesFailedContinuation() =
         runTest {
             val good = Source("good", listOf(page(30, next = "good-tail"), page(30, next = "unused-tail")))

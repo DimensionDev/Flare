@@ -462,9 +462,14 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
             case let content as PlatformTextTextContent:
                 let textWidth = max(width - (content.isBlockQuote ? RichTextQuoteBlockView.horizontalInset : 0), 1)
                 let insets = content.isBlockQuote ? RichTextQuoteBlockView.verticalInset * 2 : 0
-                let layout = limitedLayout(for: content, width: textWidth,
+                let (layout, renderer) = limitedLayout(for: content, width: textWidth,
                     minimumLines: max((lineLimit ?? 1) - lineCount + 1, 1),
                     heightLimit: thresholdHeight - fullHeight - spacing - insets)
+                // A single block below the threshold is complete and needs no line clipping.
+                if contents.count == 1, layout.text.length > 0, layout.height + insets <= thresholdHeight {
+                    addTextContent(content, attributedText: layout.text, preparedRenderer: renderer)
+                    return
+                }
                 guard !layout.lines.isEmpty else { continue }
                 blocks.append(.text(content, layout))
                 lineCount += layout.lines.count
@@ -516,16 +521,17 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
     }
 
     private func limitedLayout(for content: PlatformTextTextContent, width: CGFloat,
-                               minimumLines: Int, heightLimit: CGFloat) -> RichTextLineLayout {
+                               minimumLines: Int, heightLimit: CGFloat) -> (RichTextLineLayout, RichTextTextRendering) {
         var length = 256
         while true {
             let prefix = attributedPrefix(for: content, length: length)
             // Match the rendered block height, including fallback-font metrics.
-            let height = makeTextRenderer(content: content, attributedText: prefix.text).measuredSize(for: width).height
+            let renderer = makeTextRenderer(content: content, attributedText: prefix.text)
+            let height = renderer.measuredSize(for: width).height
             let layout = RichTextLineLayout(text: prefix.text, width: width, height: height)
             // Keep enough lines for the preview even if large glyphs exhaust the height budget first.
             if prefix.complete || (layout.height > heightLimit && layout.lines.count >= minimumLines) {
-                return layout
+                return (layout, renderer)
             }
             // This is a starting window, not a character truncation rule. Wide
             // columns and narrow/zero-width glyphs grow it until layout decides.
@@ -535,12 +541,13 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
 
     @discardableResult
     private func addTextContent(_ content: PlatformTextTextContent, attributedText: NSAttributedString? = nil,
-                                visibleLineLimit: Int? = nil) -> RichTextTextRendering {
+                                visibleLineLimit: Int? = nil,
+                                preparedRenderer: RichTextTextRendering? = nil) -> RichTextTextRendering {
         let attributedText = attributedText ?? attributedString(for: content)
         attributedText.enumerateAttribute(.richTextInlineImageURL, in: NSRange(location: 0, length: attributedText.length)) { value, _, _ in
             if let url = value as? String { renderedInlineImageURLs.insert(url) }
         }
-        let renderer = makeTextRenderer(
+        let renderer = preparedRenderer ?? makeTextRenderer(
             content: content,
             attributedText: attributedText
         )
@@ -1047,19 +1054,23 @@ private enum RichTextCollapsedBlock {
 
 /// Layout only a growing prefix, stopping once the caller can decide overflow.
 /// UIKit receives at most the preview plus one line of lookahead afterwards.
-private struct RichTextLineLayout {
+private final class RichTextLineLayout {
     struct Line {
         let characterEnd: Int
     }
 
     let text: NSAttributedString
-    let lines: [Line]
     let height: CGFloat
+    private let width: CGFloat
 
     init(text: NSAttributedString, width: CGFloat, height: CGFloat) {
         self.text = text
         self.height = height
-        guard text.length > 0 else { lines = []; return }
+        self.width = width
+    }
+
+    lazy var lines: [Line] = {
+        guard text.length > 0 else { return [] }
         let storage = NSTextStorage(attributedString: text)
         let manager = NSLayoutManager()
         let container = NSTextContainer(size: CGSize(width: width, height: .greatestFiniteMagnitude))
@@ -1075,8 +1086,8 @@ private struct RichTextLineLayout {
         if manager.extraLineFragmentTextContainer === container {
             lines.append(Line(characterEnd: text.length))
         }
-        self.lines = lines
-    }
+        return lines
+    }()
 
     func prefix(throughLine count: Int) -> NSAttributedString {
         guard count < lines.count else { return text }

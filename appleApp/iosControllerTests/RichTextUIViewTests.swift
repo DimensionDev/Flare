@@ -5,6 +5,47 @@ import KotlinSharedUI
 
 @MainActor
 final class RichTextUIViewTests: XCTestCase {
+    func testSingleBlockBelowCollapseThresholdMatchesFullTextLayout() throws {
+        let quote = RenderBlockStyle(headingLevel: nil, textAlignment: nil,
+                                     isListItem: false, isBlockQuote: true, isFigCaption: false)
+        let samples = ["", "\n", "\u{200B}", "short 中文 👩🏽‍💻", "first\nsecond\n", "مرحبا بالعالم العربية 中文",
+                       String(repeating: "long enough to grow the prefix 中文 ", count: 16)]
+        var compared = 0
+        for category in [UIContentSizeCategory.medium, .accessibilityExtraExtraExtraLarge] {
+            let threshold = ceil(UIFont.preferredFont(forTextStyle: .body,
+                compatibleWith: UITraitCollection(preferredContentSizeCategory: category)).lineHeight) * 15
+            for width: CGFloat in [160, 340, 1_000] {
+                for (link, selection) in [(false, false), (true, false), (false, true)] {
+                    for block in [RenderBlockStyle(), quote] {
+                        for sample in samples {
+                            let text = richText([sample], link: link, block: block)
+                            let full = RichTextUIView()
+                            let preview = RichTextUIView()
+                            full.configure(text: text, lineLimit: nil, isTextSelectionEnabled: selection,
+                                           onOpenURL: nil, preferredContentSizeCategory: category)
+                            full.prepareForFitting(width: width)
+                            let height = try XCTUnwrap(full.timelineHeight(for: width))
+                            guard height <= threshold else { continue }
+                            preview.configure(text: text, lineLimit: 5, isTextSelectionEnabled: selection,
+                                              onOpenURL: nil, preferredContentSizeCategory: category,
+                                              collapseAboveLineCount: 15)
+                            preview.prepareForFitting(width: width)
+                            XCTAssertFalse(preview.hasCollapsedOverflow(for: width))
+                            XCTAssertEqual(renderedText(in: preview), renderedText(in: full))
+                            // Empty blocks are omitted by the collapsed renderer.
+                            if !sample.isEmpty {
+                                XCTAssertEqual(try XCTUnwrap(preview.timelineHeight(for: width)), height, accuracy: 0.5)
+                                XCTAssertEqual(textViews(in: preview).first is UITextView, link || selection)
+                            }
+                            compared += 1
+                        }
+                    }
+                }
+            }
+        }
+        XCTAssertGreaterThan(compared, 80)
+    }
+
     func testCollapsedTextBoundsRenderingAndRestoresContentAcrossUpdates() throws {
         let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first)
         let previousKeyWindow = scene.windows.first(where: \.isKeyWindow)

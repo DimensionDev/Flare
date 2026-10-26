@@ -200,14 +200,16 @@ internal class AccountRepository internal constructor(
                     lastAccounts = it.lastAccounts.filterNot { key -> key == accountKey },
                 )
             }
-            try {
-                appDataStore.notificationPreferences.updateData {
-                    if (it.selectedAccountKey == accountKey) it.copy(selectedAccountKey = null) else it
+            listOf(appDataStore.notificationPreferences, appDataStore.discoverPreferences).forEach { preferences ->
+                try {
+                    preferences.updateData {
+                        if (it.selectedAccountKey == accountKey) it.copy(selectedAccountKey = null) else it
+                    }
+                } catch (error: CancellationException) {
+                    throw error
+                } catch (error: Exception) {
+                    error.printStackTrace()
                 }
-            } catch (error: CancellationException) {
-                throw error
-            } catch (error: Exception) {
-                error.printStackTrace()
             }
             removeAccountFlow.value = accountKey
             dataSourceCacheMutex.withLock {

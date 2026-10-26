@@ -127,9 +127,9 @@ internal fun DiscoverScreen(
                             lineLimits = TextFieldLineLimits.SingleLine,
                             onKeyboardAction = {
                                 if (state.textState.text.isNotBlank()) {
-                                    state.selectedAccount?.let { user ->
+                                    if (state.isAccountReady) {
                                         toSearch(
-                                            AccountType.Specific(user.key),
+                                            state.selectedAccountType,
                                             state.textState.text.toString(),
                                         )
                                     }
@@ -166,9 +166,9 @@ internal fun DiscoverScreen(
                                     items(searchResult) {
                                         ListItem(
                                             onClick = {
-                                                state.selectedAccount?.let { user ->
+                                                if (state.isAccountReady) {
                                                     toSearch(
-                                                        AccountType.Specific(user.key),
+                                                        state.selectedAccountType,
                                                         it.keyword,
                                                     )
                                                 }
@@ -210,7 +210,7 @@ internal fun DiscoverScreen(
                 }
             }
             state.accounts.onSuccess { accounts ->
-                if (accounts.size > 1) {
+                if (state.canSwitchAccount) {
                     item(
                         span = StaggeredGridItemSpan.FullLine,
                     ) {
@@ -229,7 +229,7 @@ internal fun DiscoverScreen(
                         ) {
                             accounts.forEach { profile ->
                                 PillButton(
-                                    selected = state.selectedAccount?.key == profile.key,
+                                    selected = state.selectedAccountKey == profile.key,
                                     onSelectedChanged = {
                                         if (it) {
                                             state.setAccount(profile)
@@ -309,12 +309,7 @@ internal fun DiscoverScreen(
                                         CommonStatusHeaderComponent(
                                             data = user,
                                             onUserClick = {
-                                                state.selectedAccount?.let {
-                                                    toUser.invoke(
-                                                        AccountType.Specific(it.key),
-                                                        user.key,
-                                                    )
-                                                }
+                                                toUser.invoke(state.selectedAccountType, user.key)
                                             },
                                             modifier = Modifier.padding(8.dp),
                                         )
@@ -424,8 +419,8 @@ internal fun DiscoverScreen(
                             Card(
                                 onClick = {
                                     hashtag?.searchContent?.let { it1 ->
-                                        state.selectedAccount?.let { user ->
-                                            toSearch(AccountType.Specific(user.key), it1)
+                                        if (state.isAccountReady) {
+                                            toSearch(state.selectedAccountType, it1)
                                         }
                                     }
                                 },

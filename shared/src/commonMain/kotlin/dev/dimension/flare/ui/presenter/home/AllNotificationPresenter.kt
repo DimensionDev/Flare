@@ -110,7 +110,7 @@ public class AllNotificationPresenter : PresenterBase<AllNotificationPresenter.S
     private val appDataStore: AppDataStore by koinInject()
     private val appScope: CoroutineScope by koinInject()
     private val accountSelection by lazy {
-        NotificationAccountSelection(appDataStore.notificationPreferences, appScope)
+        RememberedAccountSelection(appDataStore.notificationPreferences, appScope)
     }
     private val selectedNotificationFilterFlow = MutableStateFlow<NotificationFilter?>(null)
 
@@ -194,7 +194,7 @@ public class AllNotificationPresenter : PresenterBase<AllNotificationPresenter.S
     @Composable
     override fun body(): State {
         val notifications by accountsNotificationFlow.collectAsState(emptyList<NotificationAccountItem>().toImmutableList())
-        val selectedAccountKey by accountSelection.selectedAccountKey.collectAsState()
+        val selectedAccountKey by accountSelection.selectedAccountKey.collectAsState(null)
         val selectedAccount = notifications.firstOrNull { it.profile.key == selectedAccountKey }?.profile
         val selectedAccountIndex by remember {
             derivedStateOf {

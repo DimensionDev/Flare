@@ -308,6 +308,41 @@ class AccountRepositoryTest : RobolectricTest() {
             )
         }
 
+    @Test
+    fun deletingAccountClearsItsSavedDiscoverSelectionEvenWhenThePageIsClosed() =
+        runTest {
+            val repository = createRepository(this)
+            insertAccount()
+            appDataStore.discoverPreferences.updateData { it.copy(selectedAccountKey = accountKey) }
+
+            repository.delete(accountKey).join()
+
+            assertNull(
+                appDataStore.discoverPreferences.data
+                    .first()
+                    .selectedAccountKey,
+            )
+            assertNull(appDatabase.accountDao().getAccount(accountKey))
+        }
+
+    @Test
+    fun deletingAnotherAccountPreservesTheSavedDiscoverSelection() =
+        runTest {
+            val repository = createRepository(this)
+            insertAccount()
+            val savedAccount = MicroBlogKey("bob", "another.social")
+            appDataStore.discoverPreferences.updateData { it.copy(selectedAccountKey = savedAccount) }
+
+            repository.delete(accountKey).join()
+
+            assertEquals(
+                savedAccount,
+                appDataStore.discoverPreferences.data
+                    .first()
+                    .selectedAccountKey,
+            )
+        }
+
     private fun createRepository(scope: CoroutineScope): AccountRepository =
         AccountRepository(
             appDatabase = appDatabase,

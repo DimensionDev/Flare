@@ -23,8 +23,8 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.Robot
+import compose.icons.fontawesomeicons.solid.User
 import dev.dimension.flare.R
 import dev.dimension.flare.common.isLoading
 import dev.dimension.flare.common.isRefreshing
@@ -108,18 +109,13 @@ internal fun DiscoverScreen(
                         state.commitSearch(it)
                     },
                     trailingIcon =
-                        state.selectedAccount?.let { account ->
-                            if (!isBigScreen) {
-                                {
-                                    state.accounts.onSuccess { accounts ->
-                                        var showMenu by remember { mutableStateOf(false) }
-                                        IconButton(
-                                            onClick = {
-                                                if (accounts.size > 1) {
-                                                    showMenu = true
-                                                }
-                                            },
-                                        ) {
+                        if (!isBigScreen && (state.selectedAccount != null || state.canSwitchAccount)) {
+                            {
+                                state.accounts.onSuccess { accounts ->
+                                    var showMenu by remember { mutableStateOf(false) }
+                                    val account = state.selectedAccount
+                                    IconButton(onClick = { if (state.canSwitchAccount) showMenu = true }) {
+                                        if (account != null) {
                                             AvatarComponent(
                                                 data = account.avatar,
                                                 contentDescription =
@@ -128,34 +124,32 @@ internal fun DiscoverScreen(
                                                         account.handle.canonical,
                                                     ),
                                             )
+                                        } else {
+                                            FAIcon(
+                                                FontAwesomeIcons.Solid.User,
+                                                contentDescription = stringResource(R.string.home_tab_discover_title),
+                                            )
                                         }
-                                        FlareDropdownMenu(
-                                            expanded = showMenu,
-                                            onDismissRequest = { showMenu = false },
-                                        ) {
-                                            accounts.forEach { profile ->
-                                                DropdownMenuItem(
-                                                    text = {
-                                                        Text(profile.handle.canonical)
-                                                    },
-                                                    leadingIcon = {
-                                                        AvatarComponent(
-                                                            data = profile.avatar,
-                                                            size = 18.dp,
-                                                        )
-                                                    },
-                                                    onClick = {
-                                                        state.setAccount(profile)
-                                                        showMenu = false
-                                                    },
-                                                )
-                                            }
+                                    }
+                                    FlareDropdownMenu(
+                                        expanded = showMenu,
+                                        onDismissRequest = { showMenu = false },
+                                    ) {
+                                        accounts.forEach { profile ->
+                                            DropdownMenuItem(
+                                                text = { Text(profile.handle.canonical) },
+                                                leadingIcon = { AvatarComponent(data = profile.avatar, size = 18.dp) },
+                                                onClick = {
+                                                    state.setAccount(profile)
+                                                    showMenu = false
+                                                },
+                                            )
                                         }
                                     }
                                 }
-                            } else {
-                                null
                             }
+                        } else {
+                            null
                         },
                     historyFloatingActionButton =
                         if (showAskAi) {
@@ -202,7 +196,7 @@ internal fun DiscoverScreen(
                 ) {
                     if (isBigScreen) {
                         state.accounts.onSuccess { accounts ->
-                            if (accounts.size > 1) {
+                            if (state.canSwitchAccount) {
                                 item(
                                     span = StaggeredGridItemSpan.FullLine,
                                 ) {
@@ -214,7 +208,7 @@ internal fun DiscoverScreen(
                                     ) {
                                         items(accounts) { profile ->
                                             FilterChip(
-                                                selected = state.selectedAccount?.key == profile.key,
+                                                selected = state.selectedAccountKey == profile.key,
                                                 onClick = {
                                                     state.setAccount(profile)
                                                 },
@@ -239,9 +233,7 @@ internal fun DiscoverScreen(
                             searchUsers = state.searchState.users,
                             searchStatus = state.searchState.status,
                             toUser = { key ->
-                                state.searchState.selectedAccount?.let { account ->
-                                    onUserClick(AccountType.Specific(account.key), key)
-                                }
+                                onUserClick(state.selectedAccountType, key)
                             },
                         )
                     } else {
@@ -301,12 +293,7 @@ internal fun DiscoverScreen(
                                                 modifier = Modifier.padding(8.dp),
                                                 data = item,
                                                 onUserClick = {
-                                                    state.selectedAccount?.let { account ->
-                                                        onUserClick(
-                                                            AccountType.Specific(account.key),
-                                                            item.key,
-                                                        )
-                                                    }
+                                                    onUserClick(state.selectedAccountType, item.key)
                                                 },
                                             )
                                         }
@@ -442,15 +429,14 @@ private fun discoverPresenter() =
         val state = remember { DiscoverPresenter() }.invoke()
         val searchBarState = searchBarPresenter()
         val searchState =
-            remember {
-                SearchPresenter(accountType = state.selectedAccountType)
-            }.invoke()
-
-        LaunchedEffect(state.selectedAccount) {
-            state.selectedAccount?.let { profile ->
-                searchState.setAccount(profile)
+            key(state.selectedAccountType, state.isAccountReady) {
+                remember {
+                    SearchPresenter(
+                        accountType = state.selectedAccountType,
+                        initialQuery = if (!state.isAccountReady) "" else searchBarState.queryTextState.text.toString(),
+                    )
+                }.invoke()
             }
-        }
 
         object : DiscoverState by state, SearchBarState by searchBarState {
             val searchState = searchState
@@ -466,6 +452,7 @@ private fun discoverPresenter() =
                 }
 
             fun refresh() {
+                if (!state.isAccountReady) return
                 if (isInSearchMode) {
                     searchState.search(queryTextState.text.toString())
                 } else {
@@ -486,7 +473,7 @@ private fun discoverPresenter() =
             fun commitSearch(new: String) {
                 searchBarState.setQuery(new)
                 searchBarState.addSearchHistory(new)
-                searchState.search(new)
+                if (state.isAccountReady) searchState.search(new)
             }
 
             fun clearSearch() {

@@ -175,6 +175,48 @@ class SettingsImportExportPresenterTest : RobolectricTest() {
         }
 
     @Test
+    fun discoverAccountRemainsLocalAcrossSettingsExportAndImport() =
+        runTest {
+            val key = MicroBlogKey("discover-local-only", "example.social")
+            appDataStore.discoverPreferences.updateData { it.copy(selectedAccountKey = key) }
+
+            val exported = ExportSettingsPresenter().export()
+            assertFalse(exported.contains(key.id))
+            ImportSettingsPresenter(exported).import()
+
+            assertEquals(
+                key,
+                appDataStore.discoverPreferences.data
+                    .first()
+                    .selectedAccountKey,
+            )
+        }
+
+    @Test
+    fun clearingCacheAndDisablingHomeRetentionPreserveDiscoverAccount() =
+        runTest {
+            val key = MicroBlogKey("discover-local-only", "example.social")
+            appDataStore.discoverPreferences.updateData { it.copy(selectedAccountKey = key) }
+            settingsRepository.updateAppSettings { copy(rememberHomeTimelinePosition = true) }
+            settingsRepository.updateAppSettings { copy(rememberHomeTimelinePosition = false) }
+            assertEquals(
+                key,
+                appDataStore.discoverPreferences.data
+                    .first()
+                    .selectedAccountKey,
+            )
+
+            StoragePresenter().clearCacheSuspend()
+
+            assertEquals(
+                key,
+                appDataStore.discoverPreferences.data
+                    .first()
+                    .selectedAccountKey,
+            )
+        }
+
+    @Test
     fun exportUsesTabSettingsV2FieldOnly() =
         runTest {
             val slot = homeSlot()

@@ -107,7 +107,8 @@ internal fun ProxySettingsContent(
             if (settings != null) {
                 val globalTitle = stringResource(R.string.proxy_global)
                 SegmentedListItem(
-                    onClick = { choosingGlobal = true },
+                    checked = choosingGlobal,
+                    onCheckedChange = { choosingGlobal = it },
                     enabled = !state.busy,
                     shapes = ListItemDefaults.single(),
                     content = { Text(globalTitle) },
@@ -179,7 +180,8 @@ internal fun ProxySettingsContent(
                             var expanded by remember(account.accountKey) { mutableStateOf(false) }
                             val label = "${stringResource(R.string.proxy_title)}: ${state.accountLabel(account)}"
                             SegmentedListItem(
-                                onClick = { expanded = true },
+                                checked = expanded,
+                                onCheckedChange = { expanded = it },
                                 enabled = !state.busy,
                                 shapes = ListItemDefaults.segmentedShapes2(index, accounts.size),
                                 leadingContent = { AvatarComponent(data = profile?.avatar) },

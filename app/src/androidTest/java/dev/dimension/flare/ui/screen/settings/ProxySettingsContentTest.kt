@@ -9,11 +9,15 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.assertIsOff
+import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.hasAnyAncestor
+import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isDialog
 import androidx.compose.ui.test.isPopup
+import androidx.compose.ui.test.isToggleable
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -21,6 +25,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextReplacement
+import androidx.test.espresso.Espresso.pressBack
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import dev.dimension.flare.data.model.ProxyMode
 import dev.dimension.flare.data.model.ProxyPolicy
@@ -66,6 +71,24 @@ class ProxySettingsContentTest {
     private val account = MicroBlogKey("alice", "example.social")
     private var permissionRequests = 0
     private var pendingPermission: (() -> Unit)? = null
+
+    @Test
+    fun policyRowsAreHighlightedOnlyWhileTheirDropdownIsOpen() {
+        val state = State()
+        show(state)
+        val globalRow = policyRow("Global")
+        globalRow.assertIsOff().performClick()
+        globalRow.assertIsOn()
+        popupOption("Direct connection").performClick()
+        globalRow.assertIsOff()
+
+        val accountRow = policyRow(account.toString())
+        accountRow.performScrollTo().assertIsOff()
+        compose.onNodeWithContentDescription("Proxy: ${state.accountLabel(state.accounts.first())}").performClick()
+        accountRow.assertIsOn()
+        pressBack()
+        accountRow.assertIsOff()
+    }
 
     @Test
     fun selectingProxyWaitsForPermissionAndDirectDoesNot() {
@@ -161,6 +184,8 @@ class ProxySettingsContentTest {
     private fun option(text: String) = compose.onNode(hasText(text) and hasAnyAncestor(isDialog()))
 
     private fun popupOption(text: String) = compose.onNode(hasText(text) and hasAnyAncestor(isPopup()))
+
+    private fun policyRow(text: String) = compose.onNode(isToggleable() and hasAnyDescendant(hasText(text)), useUnmergedTree = true)
 
     @Test
     fun accountRowShowsProfileAndKeepsItsOwnDropdown() {

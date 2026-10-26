@@ -9,7 +9,8 @@
 		type AiTypeOption,
 	} from '@flare/web-presenters/aiConfig.svelte';
 
-	const ai = createAiConfigPresenter();
+	const baseAi = createAiConfigPresenter(false);
+	const agentAi = createAiConfigPresenter(true);
 
 	function checked(event: Event): boolean {
 		return (event.currentTarget as HTMLInputElement).checked;
@@ -53,127 +54,161 @@
 	</AppTopBar>
 
 	<div class="settings-content">
-		<section class="settings-section" aria-labelledby="ai-provider-heading">
-			<h2 id="ai-provider-heading" class="section-title">{m.settingsAiProvider()}</h2>
-			<div class="list rounded-box border border-base-300 bg-base-100">
-				<div class="list-row setting-row">
-					{@render Icon('Bot')}
-					{@render Copy(m.settingsAiType(), m.settingsAiTypeDescription())}
-					<select
-						class="select select-sm w-48 max-w-full"
-						value={ai.aiType}
-						onchange={(event) => ai.selectType(selectValue<AiTypeOption>(event))}
-					>
-						{#each ai.supportedTypes as type (type)}
-							<option value={type}>{aiTypeLabel(type)}</option>
-						{/each}
-					</select>
-				</div>
-			</div>
-		</section>
+		{#each [baseAi, agentAi] as ai}
+			{#if ai === baseAi || ai.isAgentConfig}
+				{#if ai.isAgentConfig}
+					<section class="settings-section" aria-labelledby="agent-heading">
+						<h2 id="agent-heading" class="section-title">{m.settingsAiAgentTitle()}</h2>
+						<div class="list rounded-box border border-base-300 bg-base-100">
+							<label class="list-row setting-row">
+								{@render Icon('Bot')}
+								{@render Copy(m.settingsAiAgentEnabled(), m.settingsAiAgentDescription())}
+								<input
+									class="toggle toggle-primary"
+									type="checkbox"
+									checked={ai.aiAgent}
+									onchange={(event) => ai.setAIAgent(checked(event))}
+								/>
+							</label>
+							<label class="list-row setting-row">
+								{@render Icon('Bot')}
+								{@render Copy(m.settingsAiUseShared(), m.settingsAiUseSharedDescription())}
+								<input
+									class="toggle toggle-primary"
+									type="checkbox"
+									checked={ai.useSharedConfig}
+									onchange={(event) => ai.setUseSharedConfig(checked(event))}
+								/>
+							</label>
+						</div>
+					</section>
+				{/if}
+				{#if !ai.isAgentConfig || !ai.useSharedConfig}
+					<section class="settings-section" aria-labelledby={ai.isAgentConfig ? 'agent-provider-heading' : 'ai-provider-heading'}>
+						<h2 id={ai.isAgentConfig ? 'agent-provider-heading' : 'ai-provider-heading'} class="section-title">{ai.isAgentConfig ? m.settingsAiAgentTitle() : m.settingsAiBasicTitle()}</h2>
+						<div class="list rounded-box border border-base-300 bg-base-100">
+							<div class="list-row setting-row">
+								{@render Icon('Bot')}
+								{@render Copy(m.settingsAiType(), m.settingsAiTypeDescription())}
+								<select
+									class="select select-sm w-48 max-w-full"
+									value={ai.aiType}
+									onchange={(event) => ai.selectType(selectValue<AiTypeOption>(event))}
+								>
+									{#each ai.supportedTypes as type (type)}
+										<option value={type}>{aiTypeLabel(type)}</option>
+									{/each}
+								</select>
+							</div>
+						</div>
+					</section>
 
-		{#if ai.aiType === 'OpenAI'}
-			<section class="settings-section" aria-labelledby="openai-heading">
-				<h2 id="openai-heading" class="section-title">{m.settingsAiOpenAI()}</h2>
-				<div class="form-panel rounded-box border border-base-300 bg-base-100">
-					<label class="form-control">
-						<span class="label-text">{m.settingsAiServerUrl()}</span>
-						<input
-							class="input input-bordered w-full"
-							type="url"
-							list="openai-server-suggestions"
-							value={ai.openAIServerUrl}
-							onchange={(event) => ai.setOpenAIServerUrl(textValue(event))}
-						/>
-						<datalist id="openai-server-suggestions">
-							{#each ai.serverSuggestions as suggestion}
-								<option value={suggestion}></option>
-							{/each}
-						</datalist>
-					</label>
+					{#if ai.aiType === 'OpenAI'}
+						<section class="settings-section" aria-labelledby={ai.isAgentConfig ? 'agent-openai-heading' : 'openai-heading'}>
+							<h2 id={ai.isAgentConfig ? 'agent-openai-heading' : 'openai-heading'} class="section-title">{m.settingsAiOpenAI()}</h2>
+							<div class="form-panel rounded-box border border-base-300 bg-base-100">
+								<label class="form-control">
+									<span class="label-text">{m.settingsAiServerUrl()}</span>
+									<input
+										class="input input-bordered w-full"
+										type="url"
+										list={ai.isAgentConfig ? 'agent-server-suggestions' : 'openai-server-suggestions'}
+										value={ai.openAIServerUrl}
+										onchange={(event) => ai.setOpenAIServerUrl(textValue(event))}
+									/>
+									<datalist id={ai.isAgentConfig ? 'agent-server-suggestions' : 'openai-server-suggestions'}>
+										{#each ai.serverSuggestions as suggestion}
+											<option value={suggestion}></option>
+										{/each}
+									</datalist>
+								</label>
 
-					<label class="form-control">
-						<span class="label-text">{m.settingsAiApiKey()}</span>
-						<input
-							class="input input-bordered w-full"
-							type="password"
-							autocomplete="off"
-							value={ai.openAIApiKey}
-							onchange={(event) => ai.setOpenAIApiKey(textValue(event))}
-						/>
-					</label>
+								<label class="form-control">
+									<span class="label-text">{m.settingsAiApiKey()}</span>
+									<input
+										class="input input-bordered w-full"
+										type="password"
+										autocomplete="off"
+										value={ai.openAIApiKey}
+										onchange={(event) => ai.setOpenAIApiKey(textValue(event))}
+									/>
+								</label>
 
-					<label class="form-control">
-						<span class="label-text">{m.settingsAiModel()}</span>
-						<input
-							class="input input-bordered w-full"
-							type="text"
-							list="openai-model-suggestions"
-							value={ai.openAIModel}
-							onchange={(event) => ai.setOpenAIModel(textValue(event))}
-						/>
-						<datalist id="openai-model-suggestions">
-							{#if ai.openAIModels.type === 'Success'}
-								{#each ai.openAIModels.data as model}
-									<option value={model}></option>
-								{/each}
-							{/if}
-						</datalist>
-					</label>
+								<label class="form-control">
+									<span class="label-text">{m.settingsAiModel()}</span>
+									<input
+										class="input input-bordered w-full"
+										type="text"
+										list={ai.isAgentConfig ? 'agent-model-suggestions' : 'openai-model-suggestions'}
+										value={ai.openAIModel}
+										onchange={(event) => ai.setOpenAIModel(textValue(event))}
+									/>
+									<datalist id={ai.isAgentConfig ? 'agent-model-suggestions' : 'openai-model-suggestions'}>
+										{#if ai.openAIModels.type === 'Success'}
+											{#each ai.openAIModels.data as model}
+												<option value={model}></option>
+											{/each}
+										{/if}
+									</datalist>
+								</label>
 
-					<div class="list-row setting-row title-only-row compact-row">
-						<span class="setting-title">{m.settingsAiReasoningEffort()}</span>
-						<select
-							class="select select-sm w-48 max-w-full"
-							value={ai.openAIReasoningEffort}
-							onchange={(event) =>
-								ai.setOpenAIReasoningEffort(selectValue<AiReasoningEffortOption>(event))}
-						>
-							{#each ai.supportedOpenAIReasoningEfforts as effort}
-								<option value={effort}>{reasoningLabel(effort)}</option>
-							{/each}
-						</select>
-					</div>
+								<div class="list-row setting-row title-only-row compact-row">
+									<span class="setting-title">{m.settingsAiReasoningEffort()}</span>
+									<select
+										class="select select-sm w-48 max-w-full"
+										value={ai.openAIReasoningEffort}
+										onchange={(event) =>
+											ai.setOpenAIReasoningEffort(selectValue<AiReasoningEffortOption>(event))}
+									>
+										{#each ai.supportedOpenAIReasoningEfforts as effort}
+											<option value={effort}>{reasoningLabel(effort)}</option>
+										{/each}
+									</select>
+								</div>
 
-					<label class="form-control">
-						<span class="label-text">{m.settingsAiExtraBody()}</span>
-						<textarea
-							class="textarea textarea-bordered min-h-28 w-full font-mono text-xs"
-							value={ai.openAIExtraBody}
-							onchange={(event) => ai.setOpenAIExtraBody(textValue(event))}
-						></textarea>
-					</label>
-				</div>
-			</section>
-		{/if}
-
-		<section class="settings-section" aria-labelledby="ai-features-heading">
-			<h2 id="ai-features-heading" class="section-title">{m.settingsAiFeatures()}</h2>
-			<div class="list rounded-box border border-base-300 bg-base-100">
-				<div class="list-row setting-row">
-					{@render Icon('News')}
-					{@render Copy(m.settingsAiTldr(), m.settingsAiTldrDescription())}
-					<input
-						class="toggle toggle-primary"
-						type="checkbox"
-						checked={ai.aiTldr}
-						onchange={(event) => ai.setAITldr(checked(event))}
-					/>
-				</div>
-			</div>
-			{#if ai.aiTldr}
-				<div class="form-panel rounded-box border border-base-300 bg-base-100">
-					<label class="form-control">
-						<span class="label-text">{m.settingsAiTldrPrompt()}</span>
-						<textarea
-							class="textarea textarea-bordered min-h-32 w-full"
-							value={ai.tldrPrompt}
-							onchange={(event) => ai.setTldrPrompt(textValue(event))}
-						></textarea>
-					</label>
-				</div>
+								<label class="form-control">
+									<span class="label-text">{m.settingsAiExtraBody()}</span>
+									<textarea
+										class="textarea textarea-bordered min-h-28 w-full font-mono text-xs"
+										value={ai.openAIExtraBody}
+										onchange={(event) => ai.setOpenAIExtraBody(textValue(event))}
+									></textarea>
+								</label>
+							</div>
+						</section>
+					{/if}
+				{/if}
+				{#if !ai.isAgentConfig}
+					<section class="settings-section" aria-labelledby="ai-features-heading">
+						<h2 id="ai-features-heading" class="section-title">{m.settingsAiFeatures()}</h2>
+						<div class="list rounded-box border border-base-300 bg-base-100">
+							<div class="list-row setting-row">
+								{@render Icon('News')}
+								{@render Copy(m.settingsAiTldr(), m.settingsAiTldrDescription())}
+								<input
+									class="toggle toggle-primary"
+									type="checkbox"
+									checked={ai.aiTldr}
+									onchange={(event) => ai.setAITldr(checked(event))}
+								/>
+							</div>
+						</div>
+						{#if ai.aiTldr}
+							<div class="form-panel rounded-box border border-base-300 bg-base-100">
+								<label class="form-control">
+									<span class="label-text">{m.settingsAiTldrPrompt()}</span>
+									<textarea
+										class="textarea textarea-bordered min-h-32 w-full"
+										value={ai.tldrPrompt}
+										onchange={(event) => ai.setTldrPrompt(textValue(event))}
+									></textarea>
+								</label>
+							</div>
+						{/if}
+					</section>
+				{/if}
 			{/if}
-		</section>
+		{/each}
 	</div>
 </div>
 

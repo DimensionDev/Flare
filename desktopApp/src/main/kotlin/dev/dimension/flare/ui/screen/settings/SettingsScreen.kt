@@ -95,8 +95,10 @@ import dev.dimension.flare.settings_accounts_title
 import dev.dimension.flare.settings_agent_history_description
 import dev.dimension.flare.settings_agent_history_title
 import dev.dimension.flare.settings_ai_config_agent_description
+import dev.dimension.flare.settings_ai_config_agent_title
 import dev.dimension.flare.settings_ai_config_api_key
 import dev.dimension.flare.settings_ai_config_api_key_hint
+import dev.dimension.flare.settings_ai_config_basic_title
 import dev.dimension.flare.settings_ai_config_description
 import dev.dimension.flare.settings_ai_config_enable_agent
 import dev.dimension.flare.settings_ai_config_enable_pre_translation
@@ -138,6 +140,8 @@ import dev.dimension.flare.settings_ai_config_type
 import dev.dimension.flare.settings_ai_config_type_description
 import dev.dimension.flare.settings_ai_config_type_on_device
 import dev.dimension.flare.settings_ai_config_type_openai
+import dev.dimension.flare.settings_ai_config_use_shared
+import dev.dimension.flare.settings_ai_config_use_shared_description
 import dev.dimension.flare.settings_ai_config_value_empty_placeholder
 import dev.dimension.flare.settings_appearance_absolute_timestamp
 import dev.dimension.flare.settings_appearance_absolute_timestamp_description
@@ -1658,97 +1662,99 @@ internal fun SettingsScreen(
             }
 
             Header(stringResource(Res.string.settings_services_title))
-            state.aiConfigState.textEditDialog?.let { dialog ->
-                val textState = rememberTextFieldState()
-                var isSuggestionExpanded by remember(dialog) { mutableStateOf(false) }
-                LaunchedEffect(dialog) {
-                    textState.edit {
-                        replace(0, length, dialog.value)
-                    }
-                }
-                val filteredSuggestions by remember(dialog) {
-                    snapshotFlow { textState.text.toString() }
-                        .map { query ->
-                            dialog.suggestions.filter { item ->
-                                query.isBlank() || item.contains(query, ignoreCase = true)
-                            }
+            listOf(state.aiConfigState, state.agentConfigState).forEach { aiConfigState ->
+                aiConfigState.textEditDialog?.let { dialog ->
+                    val textState = rememberTextFieldState()
+                    var isSuggestionExpanded by remember(dialog) { mutableStateOf(false) }
+                    LaunchedEffect(dialog) {
+                        textState.edit {
+                            replace(0, length, dialog.value)
                         }
-                }.collectAsState(dialog.suggestions)
-                ContentDialog(
-                    title = dialog.title,
-                    visible = true,
-                    content = {
-                        Column(
-                            modifier = Modifier.padding(16.dp),
-                        ) {
-                            if (dialog.placeholder.isNotBlank()) {
-                                Text(
-                                    text = dialog.placeholder,
-                                )
-                                Spacer(modifier = Modifier.size(8.dp))
+                    }
+                    val filteredSuggestions by remember(dialog) {
+                        snapshotFlow { textState.text.toString() }
+                            .map { query ->
+                                dialog.suggestions.filter { item ->
+                                    query.isBlank() || item.contains(query, ignoreCase = true)
+                                }
                             }
-                            if (dialog.suggestions.isEmpty()) {
-                                TextField(
-                                    state = textState,
-                                    modifier = Modifier.fillMaxWidth().heightIn(max = 480.dp),
-                                )
-                            } else {
-                                AutoSuggestionBox(
-                                    expanded = isSuggestionExpanded,
-                                    onExpandedChange = { isSuggestionExpanded = it },
-                                ) {
+                    }.collectAsState(dialog.suggestions)
+                    ContentDialog(
+                        title = dialog.title,
+                        visible = true,
+                        content = {
+                            Column(
+                                modifier = Modifier.padding(16.dp),
+                            ) {
+                                if (dialog.placeholder.isNotBlank()) {
+                                    Text(
+                                        text = dialog.placeholder,
+                                    )
+                                    Spacer(modifier = Modifier.size(8.dp))
+                                }
+                                if (dialog.suggestions.isEmpty()) {
                                     TextField(
                                         state = textState,
-                                        shape = AutoSuggestBoxDefaults.textFieldShape(isSuggestionExpanded),
-                                        modifier = Modifier.fillMaxWidth().flyoutAnchor().heightIn(max = 480.dp),
-                                        lineLimits = TextFieldLineLimits.SingleLine,
+                                        modifier = Modifier.fillMaxWidth().heightIn(max = 480.dp),
                                     )
-                                    AutoSuggestBoxDefaults.suggestFlyout(
-                                        expanded = isSuggestionExpanded && filteredSuggestions.isNotEmpty(),
-                                        onDismissRequest = { isSuggestionExpanded = false },
-                                        itemsContent = {
-                                            items(filteredSuggestions) { item ->
-                                                ListItem(
-                                                    onClick = {
-                                                        textState.edit {
-                                                            replace(0, length, item)
-                                                        }
-                                                        isSuggestionExpanded = false
-                                                    },
-                                                    text = { Text(item, maxLines = 1) },
-                                                    modifier = Modifier.fillMaxWidth(),
-                                                )
-                                            }
-                                        },
-                                        modifier = Modifier.flyoutSize(matchAnchorWidth = true),
+                                } else {
+                                    AutoSuggestionBox(
+                                        expanded = isSuggestionExpanded,
+                                        onExpandedChange = { isSuggestionExpanded = it },
+                                    ) {
+                                        TextField(
+                                            state = textState,
+                                            shape = AutoSuggestBoxDefaults.textFieldShape(isSuggestionExpanded),
+                                            modifier = Modifier.fillMaxWidth().flyoutAnchor().heightIn(max = 480.dp),
+                                            lineLimits = TextFieldLineLimits.SingleLine,
+                                        )
+                                        AutoSuggestBoxDefaults.suggestFlyout(
+                                            expanded = isSuggestionExpanded && filteredSuggestions.isNotEmpty(),
+                                            onDismissRequest = { isSuggestionExpanded = false },
+                                            itemsContent = {
+                                                items(filteredSuggestions) { item ->
+                                                    ListItem(
+                                                        onClick = {
+                                                            textState.edit {
+                                                                replace(0, length, item)
+                                                            }
+                                                            isSuggestionExpanded = false
+                                                        },
+                                                        text = { Text(item, maxLines = 1) },
+                                                        modifier = Modifier.fillMaxWidth(),
+                                                    )
+                                                }
+                                            },
+                                            modifier = Modifier.flyoutSize(matchAnchorWidth = true),
+                                        )
+                                    }
+                                }
+                                if (dialog.hint.isNotBlank()) {
+                                    Spacer(modifier = Modifier.size(8.dp))
+                                    Text(
+                                        dialog.hint,
+                                        style = FluentTheme.typography.caption,
+                                        color = FluentTheme.colors.text.text.secondary,
                                     )
                                 }
                             }
-                            if (dialog.hint.isNotBlank()) {
-                                Spacer(modifier = Modifier.size(8.dp))
-                                Text(
-                                    dialog.hint,
-                                    style = FluentTheme.typography.caption,
-                                    color = FluentTheme.colors.text.text.secondary,
-                                )
-                            }
-                        }
-                    },
-                    primaryButtonText = stringResource(Res.string.ok),
-                    closeButtonText = stringResource(Res.string.cancel),
-                    onButtonClick = {
-                        when (it) {
-                            ContentDialogButton.Primary -> {
-                                dialog.onConfirm(textState.text.toString())
-                                state.aiConfigState.setTextEditDialog(null)
-                            }
+                        },
+                        primaryButtonText = stringResource(Res.string.ok),
+                        closeButtonText = stringResource(Res.string.cancel),
+                        onButtonClick = {
+                            when (it) {
+                                ContentDialogButton.Primary -> {
+                                    dialog.onConfirm(textState.text.toString())
+                                    aiConfigState.setTextEditDialog(null)
+                                }
 
-                            else -> {
-                                state.aiConfigState.setTextEditDialog(null)
+                                else -> {
+                                    aiConfigState.setTextEditDialog(null)
+                                }
                             }
-                        }
-                    },
-                )
+                        },
+                    )
+                }
             }
             if (state.aiConfigState.showExcludedLanguagesDialog) {
                 ExcludedLanguagesDialog(
@@ -1788,348 +1794,375 @@ internal fun SettingsScreen(
                 },
             )
 
-            Expander(
-                state.aiConfigState.expanded,
-                onExpandedChanged = state.aiConfigState::setExpanded,
-                heading = {
-                    Text(stringResource(Res.string.settings_ai_config_title))
-                },
-                caption = {
-                    Text(stringResource(Res.string.settings_ai_config_description))
-                },
-                icon = null,
-            ) {
-                val serverTitle = stringResource(Res.string.settings_ai_config_server)
-                val serverHint = stringResource(Res.string.settings_ai_config_server_hint)
-                val serverRequirementHint = stringResource(Res.string.settings_ai_config_server_url_requirement)
-                val apiKeyTitle = stringResource(Res.string.settings_ai_config_api_key)
-                val apiKeyHint = stringResource(Res.string.settings_ai_config_api_key_hint)
-                val extraBodyTitle = stringResource(Res.string.settings_ai_config_extra_body)
-                val modelTitle = stringResource(Res.string.settings_ai_config_model)
-                val modelPlaceholder = stringResource(Res.string.settings_ai_config_model_select)
-                val tldrPromptTitle = stringResource(Res.string.settings_ai_config_tldr_prompt)
-                val shouldShowAiAgentSwitch =
-                    state.aiConfigState.aiType == AiTypeOption.OpenAI &&
-                        state.aiConfigState.openAIModel.isNotBlank()
-                ExpanderItem(
+            listOf(state.aiConfigState, state.agentConfigState).forEach { aiConfigState ->
+                Expander(
+                    aiConfigState.expanded,
+                    onExpandedChanged = aiConfigState::setExpanded,
                     heading = {
-                        Text(stringResource(Res.string.settings_ai_config_type))
+                        Text(
+                            stringResource(
+                                if (aiConfigState.isAgentConfig) {
+                                    Res.string.settings_ai_config_agent_title
+                                } else {
+                                    Res.string.settings_ai_config_basic_title
+                                },
+                            ),
+                        )
                     },
                     caption = {
-                        Text(stringResource(Res.string.settings_ai_config_type_description))
+                        Text(
+                            stringResource(
+                                if (aiConfigState.isAgentConfig) {
+                                    Res.string.settings_ai_config_agent_description
+                                } else {
+                                    Res.string.settings_ai_config_description
+                                },
+                            ),
+                        )
                     },
-                    trailing = {
-                        DropDownButton(
-                            onClick = {
-                                state.aiConfigState.setShowTypeDropdown(!state.aiConfigState.showTypeDropdown)
-                            },
-                        ) {
-                            Text(
-                                stringResource(
-                                    when (state.aiConfigState.aiType) {
-                                        AiTypeOption.OnDevice -> Res.string.settings_ai_config_type_on_device
-                                        AiTypeOption.OpenAI -> Res.string.settings_ai_config_type_openai
-                                    },
-                                ),
-                            )
-                        }
-                        MenuFlyout(
-                            visible = state.aiConfigState.showTypeDropdown,
-                            onDismissRequest = { state.aiConfigState.setShowTypeDropdown(false) },
-                            placement = FlyoutPlacement.BottomAlignedEnd,
-                            modifier = Modifier.heightIn(max = 200.dp),
-                        ) {
-                            state.aiConfigState.supportedTypes.forEach { type ->
-                                MenuFlyoutItem(
-                                    text = {
-                                        Text(
-                                            stringResource(
-                                                when (type) {
-                                                    AiTypeOption.OnDevice -> Res.string.settings_ai_config_type_on_device
-                                                    AiTypeOption.OpenAI -> Res.string.settings_ai_config_type_openai
-                                                },
-                                            ),
-                                        )
-                                    },
-                                    onClick = {
-                                        state.aiConfigState.selectType(type)
-                                        state.aiConfigState.setShowTypeDropdown(false)
-                                    },
-                                )
-                            }
-                        }
-                    },
-                )
-                ExpanderItemSeparator()
-                AnimatedVisibility(state.aiConfigState.aiType == AiTypeOption.OpenAI) {
-                    Column {
+                    icon = null,
+                ) {
+                    val serverTitle = stringResource(Res.string.settings_ai_config_server)
+                    val serverHint = stringResource(Res.string.settings_ai_config_server_hint)
+                    val serverRequirementHint = stringResource(Res.string.settings_ai_config_server_url_requirement)
+                    val apiKeyTitle = stringResource(Res.string.settings_ai_config_api_key)
+                    val apiKeyHint = stringResource(Res.string.settings_ai_config_api_key_hint)
+                    val extraBodyTitle = stringResource(Res.string.settings_ai_config_extra_body)
+                    val modelTitle = stringResource(Res.string.settings_ai_config_model)
+                    val modelPlaceholder = stringResource(Res.string.settings_ai_config_model_select)
+                    val tldrPromptTitle = stringResource(Res.string.settings_ai_config_tldr_prompt)
+                    if (aiConfigState.isAgentConfig) {
                         ExpanderItem(
-                            heading = { Text(stringResource(Res.string.settings_ai_config_server)) },
+                            heading = {
+                                Text(stringResource(Res.string.settings_ai_config_enable_agent))
+                            },
                             caption = {
-                                Text(
-                                    state.aiConfigState.openAIServerUrl.ifBlank {
-                                        stringResource(Res.string.settings_ai_config_value_empty_placeholder)
-                                    },
-                                )
+                                Text(stringResource(Res.string.settings_ai_config_agent_description))
                             },
                             trailing = {
-                                Button(
-                                    onClick = {
-                                        state.aiConfigState.setTextEditDialog(
-                                            TextEditDialogState(
-                                                title = serverTitle,
-                                                placeholder = serverHint,
-                                                value = state.aiConfigState.openAIServerUrl,
-                                                suggestions = state.aiConfigState.serverSuggestions,
-                                                hint = serverRequirementHint,
-                                                onConfirm = { newValue ->
-                                                    state.aiConfigState.setOpenAIServerUrl(newValue)
-                                                },
-                                            ),
-                                        )
+                                Switcher(
+                                    checked = aiConfigState.aiAgent,
+                                    {
+                                        aiConfigState.setAIAgent(it)
                                     },
-                                ) {
-                                    Text(stringResource(Res.string.edit))
-                                }
+                                    textBefore = true,
+                                )
                             },
                         )
                         ExpanderItemSeparator()
                         ExpanderItem(
-                            heading = { Text(stringResource(Res.string.settings_ai_config_api_key)) },
-                            caption = {
-                                Text(
-                                    state.aiConfigState.openAIApiKey.ifBlank {
-                                        stringResource(Res.string.settings_ai_config_value_empty_placeholder)
-                                    },
-                                )
-                            },
+                            heading = { Text(stringResource(Res.string.settings_ai_config_use_shared)) },
+                            caption = { Text(stringResource(Res.string.settings_ai_config_use_shared_description)) },
                             trailing = {
-                                Button(
-                                    onClick = {
-                                        state.aiConfigState.setTextEditDialog(
-                                            TextEditDialogState(
-                                                title = apiKeyTitle,
-                                                placeholder = apiKeyHint,
-                                                value = state.aiConfigState.openAIApiKey,
-                                                onConfirm = { newValue ->
-                                                    state.aiConfigState.setOpenAIApiKey(newValue)
-                                                },
-                                            ),
-                                        )
-                                    },
-                                ) {
-                                    Text(stringResource(Res.string.edit))
-                                }
-                            },
-                        )
-                        ExpanderItemSeparator()
-                        val shouldShowManualModelInput =
-                            when (val openAIModels = state.aiConfigState.openAIModels) {
-                                is UiState.Error -> true
-                                is UiState.Success -> openAIModels.data.isEmpty()
-                                is UiState.Loading -> false
-                            }
-                        if (shouldShowManualModelInput) {
-                            ExpanderItem(
-                                heading = { Text(stringResource(Res.string.settings_ai_config_model_manual_input)) },
-                                caption = {
-                                    Text(
-                                        state.aiConfigState.openAIModel.ifBlank {
-                                            stringResource(Res.string.settings_ai_config_value_empty_placeholder)
-                                        },
-                                    )
-                                },
-                                trailing = {
-                                    Button(
-                                        onClick = {
-                                            state.aiConfigState.setTextEditDialog(
-                                                TextEditDialogState(
-                                                    title = modelTitle,
-                                                    placeholder = modelPlaceholder,
-                                                    value = state.aiConfigState.openAIModel,
-                                                    onConfirm = state.aiConfigState::setOpenAIModel,
-                                                ),
-                                            )
-                                        },
-                                    ) {
-                                        Text(stringResource(Res.string.edit))
-                                    }
-                                },
-                            )
-                            ExpanderItemSeparator()
-                        } else {
-                            ExpanderItem(
-                                heading = { Text(stringResource(Res.string.settings_ai_config_model)) },
-                                caption = { Text(stringResource(Res.string.settings_ai_config_model_description)) },
-                                trailing = {
-                                    DropDownButton(
-                                        onClick = {
-                                            state.aiConfigState.setShowModelDropdown(!state.aiConfigState.showModelDropdown)
-                                        },
-                                    ) {
-                                        Text(
-                                            state.aiConfigState.openAIModel.ifBlank {
-                                                stringResource(Res.string.settings_ai_config_model_select)
-                                            },
-                                        )
-                                    }
-                                    MenuFlyout(
-                                        visible = state.aiConfigState.showModelDropdown,
-                                        onDismissRequest = { state.aiConfigState.setShowModelDropdown(false) },
-                                        placement = FlyoutPlacement.BottomAlignedEnd,
-                                        modifier = Modifier.heightIn(max = 200.dp),
-                                    ) {
-                                        state.aiConfigState.openAIModels
-                                            .onLoading {
-                                                MenuFlyoutItem(
-                                                    text = { Text(stringResource(Res.string.settings_ai_config_model_loading)) },
-                                                    onClick = {},
-                                                )
-                                            }.onSuccess { models ->
-                                                models.forEach { model ->
-                                                    MenuFlyoutItem(
-                                                        text = { Text(model) },
-                                                        onClick = {
-                                                            state.aiConfigState.setOpenAIModel(model)
-                                                            state.aiConfigState.setShowModelDropdown(false)
-                                                        },
-                                                    )
-                                                }
-                                            }
-                                    }
-                                },
-                            )
-                            ExpanderItemSeparator()
-                        }
-                        ExpanderItem(
-                            heading = { Text(stringResource(Res.string.settings_ai_config_reasoning_effort)) },
-                            caption = {
-                                Text(stringResource(Res.string.settings_ai_config_reasoning_effort_description))
-                            },
-                            trailing = {
-                                DropDownButton(
-                                    onClick = {
-                                        state.aiConfigState.setShowReasoningEffortDropdown(
-                                            !state.aiConfigState.showReasoningEffortDropdown,
-                                        )
-                                    },
-                                ) {
-                                    Text(openAIReasoningEffortLabel(state.aiConfigState.openAIReasoningEffort))
-                                }
-                                MenuFlyout(
-                                    visible = state.aiConfigState.showReasoningEffortDropdown,
-                                    onDismissRequest = { state.aiConfigState.setShowReasoningEffortDropdown(false) },
-                                    placement = FlyoutPlacement.BottomAlignedEnd,
-                                ) {
-                                    state.aiConfigState.supportedOpenAIReasoningEfforts.forEach { effort ->
-                                        MenuFlyoutItem(
-                                            text = { Text(openAIReasoningEffortLabel(effort)) },
-                                            onClick = {
-                                                state.aiConfigState.setOpenAIReasoningEffort(effort)
-                                                state.aiConfigState.setShowReasoningEffortDropdown(false)
-                                            },
-                                        )
-                                    }
-                                }
-                            },
-                        )
-                        ExpanderItemSeparator()
-                        ExpanderItem(
-                            heading = { Text(extraBodyTitle) },
-                            caption = {
-                                if (state.aiConfigState.openAIExtraBody.isNotBlank()) {
-                                    Text(state.aiConfigState.openAIExtraBody)
-                                }
-                            },
-                            trailing = {
-                                Button(
-                                    onClick = {
-                                        state.aiConfigState.setTextEditDialog(
-                                            TextEditDialogState(
-                                                title = extraBodyTitle,
-                                                placeholder = "",
-                                                value = state.aiConfigState.openAIExtraBody,
-                                                hint = "{\"thinking\": {\"type\": \"enabled\"}}",
-                                                onConfirm = state.aiConfigState::setOpenAIExtraBody,
-                                            ),
-                                        )
-                                    },
-                                ) {
-                                    Text(stringResource(Res.string.edit))
-                                }
+                                Switcher(aiConfigState.useSharedConfig, aiConfigState::setUseSharedConfig)
                             },
                         )
                         ExpanderItemSeparator()
                     }
-                }
-                if (shouldShowAiAgentSwitch) {
-                    ExpanderItem(
-                        heading = {
-                            Text(stringResource(Res.string.settings_ai_config_enable_agent))
-                        },
-                        caption = {
-                            Text(stringResource(Res.string.settings_ai_config_agent_description))
-                        },
-                        trailing = {
-                            Switcher(
-                                checked = state.aiConfigState.aiAgent,
-                                {
-                                    state.aiConfigState.setAIAgent(it)
-                                },
-                                textBefore = true,
-                            )
-                        },
-                    )
-                    ExpanderItemSeparator()
-                }
-                ExpanderItem(
-                    heading = {
-                        Text(stringResource(Res.string.settings_ai_config_enable_tldr))
-                    },
-                    caption = {
-                        Text(stringResource(Res.string.settings_ai_config_tldr_description))
-                    },
-                    trailing = {
-                        Switcher(
-                            checked = state.aiConfigState.aiTldr,
-                            {
-                                state.aiConfigState.setAITldr(it)
-                            },
-                            textBefore = true,
-                        )
-                    },
-                )
-                AnimatedVisibility(state.aiConfigState.aiTldr) {
-                    Column {
-                        ExpanderItemSeparator()
+                    if (!aiConfigState.isAgentConfig || !aiConfigState.useSharedConfig) {
                         ExpanderItem(
-                            heading = { Text(stringResource(Res.string.settings_ai_config_tldr_prompt)) },
+                            heading = {
+                                Text(stringResource(Res.string.settings_ai_config_type))
+                            },
                             caption = {
-                                Text(
-                                    state.aiConfigState.tldrPrompt.ifBlank {
-                                        stringResource(Res.string.settings_ai_config_value_empty_placeholder)
-                                    },
-                                )
+                                Text(stringResource(Res.string.settings_ai_config_type_description))
                             },
                             trailing = {
-                                Button(
+                                DropDownButton(
                                     onClick = {
-                                        state.aiConfigState.setTextEditDialog(
-                                            TextEditDialogState(
-                                                title = tldrPromptTitle,
-                                                placeholder = "",
-                                                value = state.aiConfigState.tldrPrompt,
-                                                onConfirm = { newValue ->
-                                                    state.aiConfigState.setTldrPrompt(newValue)
-                                                },
-                                            ),
-                                        )
+                                        aiConfigState.setShowTypeDropdown(!aiConfigState.showTypeDropdown)
                                     },
                                 ) {
-                                    Text(stringResource(Res.string.edit))
+                                    Text(
+                                        stringResource(
+                                            when (aiConfigState.aiType) {
+                                                AiTypeOption.OnDevice -> Res.string.settings_ai_config_type_on_device
+                                                AiTypeOption.OpenAI -> Res.string.settings_ai_config_type_openai
+                                            },
+                                        ),
+                                    )
+                                }
+                                MenuFlyout(
+                                    visible = aiConfigState.showTypeDropdown,
+                                    onDismissRequest = { aiConfigState.setShowTypeDropdown(false) },
+                                    placement = FlyoutPlacement.BottomAlignedEnd,
+                                    modifier = Modifier.heightIn(max = 200.dp),
+                                ) {
+                                    aiConfigState.supportedTypes.forEach { type ->
+                                        MenuFlyoutItem(
+                                            text = {
+                                                Text(
+                                                    stringResource(
+                                                        when (type) {
+                                                            AiTypeOption.OnDevice -> Res.string.settings_ai_config_type_on_device
+                                                            AiTypeOption.OpenAI -> Res.string.settings_ai_config_type_openai
+                                                        },
+                                                    ),
+                                                )
+                                            },
+                                            onClick = {
+                                                aiConfigState.selectType(type)
+                                                aiConfigState.setShowTypeDropdown(false)
+                                            },
+                                        )
+                                    }
                                 }
                             },
                         )
+                        ExpanderItemSeparator()
+                        AnimatedVisibility(aiConfigState.aiType == AiTypeOption.OpenAI) {
+                            Column {
+                                ExpanderItem(
+                                    heading = { Text(stringResource(Res.string.settings_ai_config_server)) },
+                                    caption = {
+                                        Text(
+                                            aiConfigState.openAIServerUrl.ifBlank {
+                                                stringResource(Res.string.settings_ai_config_value_empty_placeholder)
+                                            },
+                                        )
+                                    },
+                                    trailing = {
+                                        Button(
+                                            onClick = {
+                                                aiConfigState.setTextEditDialog(
+                                                    TextEditDialogState(
+                                                        title = serverTitle,
+                                                        placeholder = serverHint,
+                                                        value = aiConfigState.openAIServerUrl,
+                                                        suggestions = aiConfigState.serverSuggestions,
+                                                        hint = serverRequirementHint,
+                                                        onConfirm = { newValue ->
+                                                            aiConfigState.setOpenAIServerUrl(newValue)
+                                                        },
+                                                    ),
+                                                )
+                                            },
+                                        ) {
+                                            Text(stringResource(Res.string.edit))
+                                        }
+                                    },
+                                )
+                                ExpanderItemSeparator()
+                                ExpanderItem(
+                                    heading = { Text(stringResource(Res.string.settings_ai_config_api_key)) },
+                                    caption = {
+                                        Text(
+                                            aiConfigState.openAIApiKey.ifBlank {
+                                                stringResource(Res.string.settings_ai_config_value_empty_placeholder)
+                                            },
+                                        )
+                                    },
+                                    trailing = {
+                                        Button(
+                                            onClick = {
+                                                aiConfigState.setTextEditDialog(
+                                                    TextEditDialogState(
+                                                        title = apiKeyTitle,
+                                                        placeholder = apiKeyHint,
+                                                        value = aiConfigState.openAIApiKey,
+                                                        onConfirm = { newValue ->
+                                                            aiConfigState.setOpenAIApiKey(newValue)
+                                                        },
+                                                    ),
+                                                )
+                                            },
+                                        ) {
+                                            Text(stringResource(Res.string.edit))
+                                        }
+                                    },
+                                )
+                                ExpanderItemSeparator()
+                                val shouldShowManualModelInput =
+                                    when (val openAIModels = aiConfigState.openAIModels) {
+                                        is UiState.Error -> true
+                                        is UiState.Success -> openAIModels.data.isEmpty()
+                                        is UiState.Loading -> false
+                                    }
+                                if (shouldShowManualModelInput) {
+                                    ExpanderItem(
+                                        heading = { Text(stringResource(Res.string.settings_ai_config_model_manual_input)) },
+                                        caption = {
+                                            Text(
+                                                aiConfigState.openAIModel.ifBlank {
+                                                    stringResource(Res.string.settings_ai_config_value_empty_placeholder)
+                                                },
+                                            )
+                                        },
+                                        trailing = {
+                                            Button(
+                                                onClick = {
+                                                    aiConfigState.setTextEditDialog(
+                                                        TextEditDialogState(
+                                                            title = modelTitle,
+                                                            placeholder = modelPlaceholder,
+                                                            value = aiConfigState.openAIModel,
+                                                            onConfirm = aiConfigState::setOpenAIModel,
+                                                        ),
+                                                    )
+                                                },
+                                            ) {
+                                                Text(stringResource(Res.string.edit))
+                                            }
+                                        },
+                                    )
+                                    ExpanderItemSeparator()
+                                } else {
+                                    ExpanderItem(
+                                        heading = { Text(stringResource(Res.string.settings_ai_config_model)) },
+                                        caption = { Text(stringResource(Res.string.settings_ai_config_model_description)) },
+                                        trailing = {
+                                            DropDownButton(
+                                                onClick = {
+                                                    aiConfigState.setShowModelDropdown(!aiConfigState.showModelDropdown)
+                                                },
+                                            ) {
+                                                Text(
+                                                    aiConfigState.openAIModel.ifBlank {
+                                                        stringResource(Res.string.settings_ai_config_model_select)
+                                                    },
+                                                )
+                                            }
+                                            MenuFlyout(
+                                                visible = aiConfigState.showModelDropdown,
+                                                onDismissRequest = { aiConfigState.setShowModelDropdown(false) },
+                                                placement = FlyoutPlacement.BottomAlignedEnd,
+                                                modifier = Modifier.heightIn(max = 200.dp),
+                                            ) {
+                                                aiConfigState.openAIModels
+                                                    .onLoading {
+                                                        MenuFlyoutItem(
+                                                            text = { Text(stringResource(Res.string.settings_ai_config_model_loading)) },
+                                                            onClick = {},
+                                                        )
+                                                    }.onSuccess { models ->
+                                                        models.forEach { model ->
+                                                            MenuFlyoutItem(
+                                                                text = { Text(model) },
+                                                                onClick = {
+                                                                    aiConfigState.setOpenAIModel(model)
+                                                                    aiConfigState.setShowModelDropdown(false)
+                                                                },
+                                                            )
+                                                        }
+                                                    }
+                                            }
+                                        },
+                                    )
+                                    ExpanderItemSeparator()
+                                }
+                                ExpanderItem(
+                                    heading = { Text(stringResource(Res.string.settings_ai_config_reasoning_effort)) },
+                                    caption = {
+                                        Text(stringResource(Res.string.settings_ai_config_reasoning_effort_description))
+                                    },
+                                    trailing = {
+                                        DropDownButton(
+                                            onClick = {
+                                                aiConfigState.setShowReasoningEffortDropdown(
+                                                    !aiConfigState.showReasoningEffortDropdown,
+                                                )
+                                            },
+                                        ) {
+                                            Text(openAIReasoningEffortLabel(aiConfigState.openAIReasoningEffort))
+                                        }
+                                        MenuFlyout(
+                                            visible = aiConfigState.showReasoningEffortDropdown,
+                                            onDismissRequest = { aiConfigState.setShowReasoningEffortDropdown(false) },
+                                            placement = FlyoutPlacement.BottomAlignedEnd,
+                                        ) {
+                                            aiConfigState.supportedOpenAIReasoningEfforts.forEach { effort ->
+                                                MenuFlyoutItem(
+                                                    text = { Text(openAIReasoningEffortLabel(effort)) },
+                                                    onClick = {
+                                                        aiConfigState.setOpenAIReasoningEffort(effort)
+                                                        aiConfigState.setShowReasoningEffortDropdown(false)
+                                                    },
+                                                )
+                                            }
+                                        }
+                                    },
+                                )
+                                ExpanderItemSeparator()
+                                ExpanderItem(
+                                    heading = { Text(extraBodyTitle) },
+                                    caption = {
+                                        if (aiConfigState.openAIExtraBody.isNotBlank()) {
+                                            Text(aiConfigState.openAIExtraBody)
+                                        }
+                                    },
+                                    trailing = {
+                                        Button(
+                                            onClick = {
+                                                aiConfigState.setTextEditDialog(
+                                                    TextEditDialogState(
+                                                        title = extraBodyTitle,
+                                                        placeholder = "",
+                                                        value = aiConfigState.openAIExtraBody,
+                                                        hint = "{\"thinking\": {\"type\": \"enabled\"}}",
+                                                        onConfirm = aiConfigState::setOpenAIExtraBody,
+                                                    ),
+                                                )
+                                            },
+                                        ) {
+                                            Text(stringResource(Res.string.edit))
+                                        }
+                                    },
+                                )
+                                ExpanderItemSeparator()
+                            }
+                        }
+                    }
+                    if (!aiConfigState.isAgentConfig) {
+                        ExpanderItem(
+                            heading = {
+                                Text(stringResource(Res.string.settings_ai_config_enable_tldr))
+                            },
+                            caption = {
+                                Text(stringResource(Res.string.settings_ai_config_tldr_description))
+                            },
+                            trailing = {
+                                Switcher(
+                                    checked = aiConfigState.aiTldr,
+                                    {
+                                        aiConfigState.setAITldr(it)
+                                    },
+                                    textBefore = true,
+                                )
+                            },
+                        )
+                        AnimatedVisibility(aiConfigState.aiTldr) {
+                            Column {
+                                ExpanderItemSeparator()
+                                ExpanderItem(
+                                    heading = { Text(stringResource(Res.string.settings_ai_config_tldr_prompt)) },
+                                    caption = {
+                                        Text(
+                                            aiConfigState.tldrPrompt.ifBlank {
+                                                stringResource(Res.string.settings_ai_config_value_empty_placeholder)
+                                            },
+                                        )
+                                    },
+                                    trailing = {
+                                        Button(
+                                            onClick = {
+                                                aiConfigState.setTextEditDialog(
+                                                    TextEditDialogState(
+                                                        title = tldrPromptTitle,
+                                                        placeholder = "",
+                                                        value = aiConfigState.tldrPrompt,
+                                                        onConfirm = { newValue ->
+                                                            aiConfigState.setTldrPrompt(newValue)
+                                                        },
+                                                    ),
+                                                )
+                                            },
+                                        ) {
+                                            Text(stringResource(Res.string.edit))
+                                        }
+                                    },
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -2626,6 +2659,7 @@ private fun presenter(
     val appearanceState = appearancePresenter()
     val storageState = storagePresenter(onExportFilePicker, onImportFilePicker)
     val aiConfigState = aiConfigPresenter()
+    val agentConfigState = aiConfigPresenter(agentConfig = true)
     val aiAgentEnabledState = remember { AiAgentEnabledPresenter() }.invoke()
     var aboutExpanded by remember { mutableStateOf(false) }
 
@@ -2633,6 +2667,7 @@ private fun presenter(
         val accountState = accountState
         val appearanceState = appearanceState
         val aiConfigState = aiConfigState
+        val agentConfigState = agentConfigState
         val aiAgentEnabledState = aiAgentEnabledState
         val storageState = storageState
         val aboutExpanded = aboutExpanded
@@ -2859,11 +2894,11 @@ private fun accountsPresenter() =
     }
 
 @Composable
-private fun aiConfigPresenter() =
+private fun aiConfigPresenter(agentConfig: Boolean = false) =
     run {
         var expanded by remember { mutableStateOf(false) }
         var translationExpanded by remember { mutableStateOf(false) }
-        val state = remember { AiConfigPresenter() }.invoke()
+        val state = remember(agentConfig) { AiConfigPresenter(agentConfig) }.invoke()
         val aiTranslationTestState = remember { AiTranslationTestPresenter() }.invoke()
         var showTypeDropdown by remember { mutableStateOf(false) }
         var showModelDropdown by remember { mutableStateOf(false) }

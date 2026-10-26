@@ -199,6 +199,116 @@
         }
       }
     },
+  "settings_ai_config_basic_title": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Translation and summaries"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "翻译与摘要"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "翻譯與摘要"
+        }
+      }
+    }
+  },
+  "settings_ai_config_agent_title": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "AI Agent"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "AI Agent"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "AI Agent"
+        }
+      }
+    }
+  },
+  "settings_ai_config_use_shared": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Use translation and summary AI settings"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "使用翻译与摘要的 AI 设置"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "使用翻譯與摘要的 AI 設定"
+        }
+      }
+    }
+  },
+  "settings_ai_config_use_shared_description": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Turn off to configure a separate server, model and reasoning settings for the Agent."
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "关闭后，可为 Agent 单独设置服务器、模型和推理参数。"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "關閉後，可為 Agent 單獨設定伺服器、模型和推理參數。"
+        }
+      }
+    }
+  },
+  "settings_ai_config_model_description": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "AI model used for this configuration"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "此配置使用的 AI 模型"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "此設定使用的 AI 模型"
+        }
+      }
+    }
+  },
     "settings_remember_home_timeline_position": {
     "localizations": {
       "en": {

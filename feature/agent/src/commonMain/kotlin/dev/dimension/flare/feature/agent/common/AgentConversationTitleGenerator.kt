@@ -29,7 +29,7 @@ internal class AgentConversationTitleGenerator(
                 .promptExecutor
                 .execute(
                     prompt =
-                        Prompt.build("agent-conversation-title") {
+                        Prompt.build("agent-conversation-title", params = runtime.params) {
                             system {
                                 text(
                                     """

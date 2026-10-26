@@ -742,4 +742,8 @@
     <string name="share_replies_cancel">Cancel</string>
     <string name="share_replies_clear">Clear</string>
     <string name="share_replies_done">Done</string>
+    <string name="settings_ai_config_basic_title">Translation and summaries</string>
+    <string name="settings_ai_config_agent_title">AI Agent</string>
+    <string name="settings_ai_config_use_shared">Use translation and summary AI settings</string>
+    <string name="settings_ai_config_use_shared_description">Turn off to configure a separate server, model and reasoning settings for the Agent.</string>
 </resources>

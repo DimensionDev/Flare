@@ -7,11 +7,16 @@ import ai.koog.prompt.executor.llms.MultiLLMPromptExecutor
 import ai.koog.prompt.llm.LLMCapability
 import ai.koog.prompt.llm.LLMProvider
 import ai.koog.prompt.llm.LLModel
+import ai.koog.prompt.params.LLMParams
+import dev.dimension.flare.common.JSON
 import dev.dimension.flare.data.datastore.model.AppSettings
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.put
 
 internal class AiConfigKoogBridge {
     fun availability(aiConfig: AppSettings.AiConfig): AgentAvailability =
-        when (val type = aiConfig.type) {
+        when (val type = aiConfig.effectiveAgentType) {
             AppSettings.AiConfig.Type.OnDevice -> {
                 AgentAvailability.Unavailable(AgentAvailability.Reason.OnDeviceAiUnsupported)
             }
@@ -45,7 +50,21 @@ internal class AiConfigKoogBridge {
             return null
         }
 
-        val openAIConfig = aiConfig.type as? AppSettings.AiConfig.Type.OpenAI ?: return null
+        val openAIConfig = aiConfig.effectiveAgentType as? AppSettings.AiConfig.Type.OpenAI ?: return null
+        val params =
+            LLMParams(
+                additionalProperties =
+                    buildJsonObject {
+                        openAIConfig.extraBody
+                            .takeIf { it.isNotBlank() }
+                            ?.let { JSON.parseToJsonElement(it).jsonObject }
+                            ?.filterKeys { it !in AGENT_REQUEST_FIELDS }
+                            ?.forEach { (key, value) -> put(key, value) }
+                        openAIConfig.reasoningEffort
+                            .takeIf { it.isNotBlank() }
+                            ?.let { put("reasoning_effort", it) }
+                    },
+            )
         val client =
             OpenAILLMClient(
                 apiKey = openAIConfig.apiKey,
@@ -79,11 +98,14 @@ internal class AiConfigKoogBridge {
         return FlareAgentRuntime(
             promptExecutor = MultiLLMPromptExecutor(client),
             model = model,
-            aiConfig = aiConfig,
+            params = params,
         )
     }
 
     private companion object {
         const val DEFAULT_CONTEXT_LENGTH = 128_000L
+
+        // The agent owns conversation history, tool selection and response transport.
+        val AGENT_REQUEST_FIELDS = setOf("model", "messages", "tools", "tool_choice", "stream", "stream_options", "n")
     }
 }

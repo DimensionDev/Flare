@@ -104,6 +104,30 @@ class SettingsImportExportPresenterTest : RobolectricTest() {
     }
 
     @Test
+    fun exportAndImportPreserveIndependentAgentConfiguration() =
+        runTest {
+            val config =
+                AppSettings.AiConfig(
+                    type = AppSettings.AiConfig.Type.OnDevice,
+                    agentType =
+                        AppSettings.AiConfig.Type.OpenAI(
+                            "https://agent.example/v1/",
+                            "agent-key",
+                            "strong",
+                            "high",
+                            "{\"seed\":2}",
+                        ),
+                )
+            settingsRepository.updateAppSettings { copy(aiConfig = config) }
+            val exported = ExportSettingsPresenter().export()
+            settingsRepository.updateAppSettings { copy(aiConfig = AppSettings.AiConfig()) }
+
+            ImportSettingsPresenter(exported).import()
+
+            assertEquals(config, settingsRepository.appSettings.first().aiConfig)
+        }
+
+    @Test
     fun exportUsesTabSettingsV2FieldOnly() =
         runTest {
             val slot = homeSlot()

@@ -6,10 +6,20 @@ import KotlinSharedUI
 struct TimelineContent {
     enum Kind { case timeline, users, profileMedia }
     enum State { case unbound, loading, loaded, empty, error }
-    enum Item {
+    enum Item: Equatable {
         case post(UiTimelineV2)
         case user(UiProfile)
         case media(ProfileMedia)
+
+        // Kotlin rows are immutable; identity avoids bridging IDs and hashes again on unchanged inputs.
+        static func == (lhs: Item, rhs: Item) -> Bool {
+            switch (lhs, rhs) {
+            case (.post(let lhs), .post(let rhs)): lhs === rhs
+            case (.user(let lhs), .user(let rhs)): lhs === rhs
+            case (.media(let lhs), .media(let rhs)): lhs === rhs
+            default: false
+            }
+        }
 
         var id: String {
             switch self {

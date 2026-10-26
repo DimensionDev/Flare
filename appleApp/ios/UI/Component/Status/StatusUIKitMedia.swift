@@ -1,5 +1,4 @@
 import UIKit
-import Kingfisher
 import KotlinSharedUI
 import SwiftUI
 import FlareAppleUI
@@ -74,8 +73,8 @@ private struct MediaItemSignature: Equatable {
 //   authoritative play path, matching the SwiftUI tap-to-expand behaviour.
 final class MediaUIView: UIView {
     private(set) var videoURL: URL?
-    private let imageView: UIImageView = {
-        let iv = UIImageView()
+    private let imageView: NetworkImageView = {
+        let iv = NetworkImageView()
         iv.contentMode = .scaleAspectFill
         iv.clipsToBounds = true
         iv.translatesAutoresizingMaskIntoConstraints = false
@@ -183,7 +182,7 @@ final class MediaUIView: UIView {
         videoURL = nil
         lastCornerRadius = cornerRadius
         layer.cornerRadius = cornerRadius
-        imageView.kf.cancelDownloadTask()
+        imageView.cancelImageLoad()
         imageView.isHidden = false
         imageView.image = nil
         setAutoplayOverlay(.idle, showsBadge: false)
@@ -196,7 +195,7 @@ final class MediaUIView: UIView {
             loadImage(url: video.thumbnailUrl, customHeaders: video.customHeaders)
             setAutoplayOverlay(.idle)
         case .gif(let gif):
-            loadGif(url: gif.url, customHeaders: gif.customHeaders)
+            loadImage(url: gif.url, customHeaders: gif.customHeaders)
         case .ugoira(let animation):
             videoURL = URL(string: animation.url)
             loadImage(url: animation.previewUrl, customHeaders: animation.customHeaders)
@@ -208,7 +207,7 @@ final class MediaUIView: UIView {
 
     func prepareForPoolRemoval() {
         accessibilityLabel = nil
-        imageView.kf.cancelDownloadTask()
+        imageView.cancelImageLoad()
         imageView.image = nil
         lastMediaSignature = nil
         videoURL = nil
@@ -313,31 +312,9 @@ final class MediaUIView: UIView {
     }
 
     private func loadImage(url: String?, customHeaders: [String: String]?) {
-        guard let u = url.flatMap(URL.init(string:)) else { return }
-        imageView.kf.setImage(with: u, options: imageOptions(customHeaders: customHeaders, cacheOriginalImage: true))
+        imageView.setImage(with: url.flatMap(URL.init(string:)), customHeaders: customHeaders)
     }
 
-    private func loadGif(url: String?, customHeaders: [String: String]?) {
-        guard let u = url.flatMap(URL.init(string:)) else { return }
-        imageView.kf.setImage(with: u, options: imageOptions(customHeaders: customHeaders, cacheOriginalImage: false))
-    }
-
-    private func imageOptions(customHeaders: [String: String]?, cacheOriginalImage: Bool) -> KingfisherOptionsInfo {
-        var options: KingfisherOptionsInfo = [.transition(.fade(0.25)), .backgroundDecode]
-        if cacheOriginalImage {
-            options.append(.cacheOriginalImage)
-        }
-        if let customHeaders, !customHeaders.isEmpty {
-            options.append(.requestModifier(AnyModifier { request in
-                var request = request
-                for (key, value) in customHeaders {
-                    request.setValue(value, forHTTPHeaderField: key)
-                }
-                return request
-            }))
-        }
-        return options
-    }
 }
 
 private final class HorizontalMediaCollectionView: UICollectionView {

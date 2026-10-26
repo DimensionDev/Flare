@@ -69,7 +69,7 @@ packages:
     exactVersion: 1.0.5
   Kingfisher:
     url: https://github.com/onevcat/Kingfisher.git
-    exactVersion: 8.13.0
+    exactVersion: 8.14.0
   LazyPager:
     # Temporary 1.2.1 fork: create the selected page before the first layout.
     # Return to upstream once it includes the initial-page flash fix.

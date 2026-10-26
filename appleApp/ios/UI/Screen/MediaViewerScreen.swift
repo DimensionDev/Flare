@@ -247,6 +247,7 @@ struct MediaViewerScreen: View {
             }
         case .gif(let gif):
             NetworkImage(data: gif.url, placeholder: gif.previewUrl, customHeader: gif.customHeaders)
+                .originalImage()
                 .scaledToFit()
         case .audio:
             EmptyView()

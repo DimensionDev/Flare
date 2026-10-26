@@ -1,5 +1,4 @@
 import UIKit
-import Kingfisher
 import KotlinSharedUI
 import SwiftUI
 import FlareAppleCore
@@ -19,8 +18,8 @@ final class FeedUIView: UIView, ManualLayoutMeasurable, TimelineHeightProviding 
     private static let sourceIconSize: CGFloat = 20
     private static let mediaSize: CGFloat = 72
 
-    private let sourceIcon: UIImageView = {
-        let v = UIImageView()
+    private let sourceIcon: NetworkImageView = {
+        let v = NetworkImageView()
         v.contentMode = .scaleAspectFit
         v.clipsToBounds = true
         return v
@@ -59,8 +58,8 @@ final class FeedUIView: UIView, ManualLayoutMeasurable, TimelineHeightProviding 
         return l
     }()
 
-    private let mediaView: UIImageView = {
-        let v = UIImageView()
+    private let mediaView: NetworkImageView = {
+        let v = NetworkImageView()
         v.contentMode = .scaleAspectFill
         v.clipsToBounds = true
         v.layer.cornerRadius = 8
@@ -321,10 +320,10 @@ final class FeedUIView: UIView, ManualLayoutMeasurable, TimelineHeightProviding 
 
         if let icon = data.source.icon, !icon.isEmpty, let url = URL(string: icon) {
             sourceIcon.isHidden = false
-            sourceIcon.kf.setImage(with: url, options: [.transition(.fade(0.25)), .cacheOriginalImage, .backgroundDecode])
+            sourceIcon.setImage(with: url)
         } else {
             sourceIcon.isHidden = true
-            sourceIcon.image = nil
+            sourceIcon.cancelImageLoad()
         }
         sourceName.text = data.source.name
 
@@ -360,10 +359,10 @@ final class FeedUIView: UIView, ManualLayoutMeasurable, TimelineHeightProviding 
 
         if let media = data.media, let url = URL(string: media.url) {
             mediaView.isHidden = false
-            mediaView.kf.setImage(with: url, options: imageOptions(customHeaders: media.customHeaders))
+            mediaView.setImage(with: url, customHeaders: media.customHeaders)
         } else {
             mediaView.isHidden = true
-            mediaView.image = nil
+            mediaView.cancelImageLoad()
         }
 
         accessibilityLabel = [
@@ -380,20 +379,6 @@ final class FeedUIView: UIView, ManualLayoutMeasurable, TimelineHeightProviding 
 
         invalidateIntrinsicContentSize()
         setNeedsLayout()
-    }
-
-    private func imageOptions(customHeaders: [String: String]?) -> KingfisherOptionsInfo {
-        var options: KingfisherOptionsInfo = [.transition(.fade(0.25)), .cacheOriginalImage, .backgroundDecode]
-        if let customHeaders, !customHeaders.isEmpty {
-            options.append(.requestModifier(AnyModifier { request in
-                var request = request
-                for (key, value) in customHeaders {
-                    request.setValue(value, forHTTPHeaderField: key)
-                }
-                return request
-            }))
-        }
-        return options
     }
 
     @objc private func onTap() {

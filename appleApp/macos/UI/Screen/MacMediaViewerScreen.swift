@@ -658,6 +658,7 @@ private struct MacMediaViewerPage: View {
                     usesCrossfade: true,
                     onProgress: handleImageLoadingProgress
                 )
+                    .originalImage()
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
                 NetworkImage(
@@ -668,6 +669,7 @@ private struct MacMediaViewerPage: View {
                     usesCrossfade: true,
                     onProgress: handleImageLoadingProgress
                 )
+                    .originalImage()
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }

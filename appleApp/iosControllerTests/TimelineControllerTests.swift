@@ -7,6 +7,77 @@ import FlareAppleUI
 
 @MainActor
 final class TimelineControllerIntegrationTests: XCTestCase {
+    func testReadingOrderReusesStorageAcrossCapturesAndUnchangedRowsButPublishesNewPagingSource() async throws {
+        for columns in [1, 2] {
+            let fixture = await Fixture(posts: true, columns: columns)
+            let first = try XCTUnwrap(fixture.collection.readingItemIDs?())
+            let second = try XCTUnwrap(fixture.collection.readingItemIDs?())
+            first.withUnsafeBufferPointer { a in
+                second.withUnsafeBufferPointer { b in
+                    XCTAssertEqual(a.baseAddress, b.baseAddress, "Capturing a bookmark must not rebuild the ordered IDs")
+                }
+            }
+            var accesses: [Int] = []
+            // Paging adaptation produces a new Swift array around the same immutable Kotlin rows.
+            fixture.input.items = fixture.input.items.map { $0 }
+            fixture.input.access = { accesses.append($0) }
+            await fixture.apply()
+            let updated = try XCTUnwrap(fixture.collection.readingItemIDs?())
+            first.withUnsafeBufferPointer { a in
+                updated.withUnsafeBufferPointer { b in
+                    XCTAssertEqual(a.baseAddress, b.baseAddress, "Unchanged rows must reuse the committed plan")
+                }
+            }
+            XCTAssertFalse(accesses.isEmpty, "The new paging source must still receive visible accesses")
+        }
+    }
+
+    func testCachedReadingOrderTracksHeadersGapsPlaceholdersDuplicatesAndDeletedAnchors() async throws {
+        for columns in [1, 2] {
+            let fixture = await Fixture(posts: true, columns: columns,
+                header: UiStateSuccess(data: makeRow(200)),
+                accessories: [UITimelineCollectionViewAccessoryItem(id: "tabs", view: Header())])
+            fixture.input.items.insert(.post(makeGap()), at: 1)
+            fixture.input.items.insert(nil, at: 2)
+            fixture.input.items.append(fixture.input.items[0])
+            await fixture.apply()
+            XCTAssertEqual(fixture.collection.readingItemIDs?(),
+                ["t:__header__", "a:tabs"] + (0..<60).map { "t:case-\($0)" })
+            await fixture.scroll(2_500)
+            let saved = try XCTUnwrap(fixture.collection.captureReadingPosition())
+            guard case .item(let id, _, let order, _) = saved,
+                  let index = order.firstIndex(of: id) else { return XCTFail("Expected a reading item") }
+            fixture.input.items.removeAll { $0?.id == id }
+            fixture.input.header = UiStateSuccess(data: makeGap())
+            fixture.controller.accessoryItems = []
+            await fixture.apply()
+            fixture.collection.restoreReadingPosition(saved)
+            await fixture.settle()
+            XCTAssertEqual(try fixture.position().id, order[index + 1])
+            XCTAssertEqual(fixture.collection.readingItemIDs?(), (0..<60).map { "t:case-\($0)" }.filter { $0 != id })
+        }
+    }
+
+    func testUnchangedErrorRowsReplaceMessagesAndRetryCallbacks() async throws {
+        for footer in [false, true] {
+            let fixture = await Fixture(posts: true)
+            fixture.input.items = footer ? [.post(makeRow(1))] : []
+            fixture.input.state = footer ? .loaded : .error
+            fixture.input.footer = footer ? .error : .none
+            var retries: [String] = []
+            for message in ["first", "latest"] {
+                let failure = TimelineContent.Failure(error: KotlinThrowable(message: message), retry: { retries.append(message) })
+                fixture.input.failure = footer ? nil : failure
+                fixture.input.appendFailure = footer ? failure : nil
+                await fixture.apply()
+            }
+            let error = try XCTUnwrap(descendants(fixture.collection).compactMap { $0 as? ListErrorUIView }.first)
+            XCTAssertTrue(descendants(error).compactMap { ($0 as? UILabel)?.text }.contains("latest"))
+            try XCTUnwrap(descendants(error).compactMap { $0 as? UIButton }.first).sendActions(for: .touchUpInside)
+            XCTAssertEqual(retries, ["latest"])
+        }
+    }
+
     func testIndexRestoresOnlyAfterItsCachePageArrivesThenNativeKeysPreservePrepends() async throws {
         let fixture = await Fixture(posts: true)
         fixture.input.items = Array(fixture.input.items.prefix(20))

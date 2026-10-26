@@ -8,6 +8,11 @@ public struct NetworkImage: View {
     private let contentMode: SwiftUI.ContentMode
     private let usesCrossfade: Bool
     private let onProgress: ((Double?) -> Void)?
+    private var downsamplingEnabled = true
+    @Environment(\.displayScale) private var displayScale
+    @State private var measuredPixels: CGSize = .zero
+    @State private var requestedPixels: CGSize = .zero
+    @State private var previousImage: (url: URL?, image: KFCrossPlatformImage)?
 
     private init(
         data: URL?,
@@ -26,83 +31,94 @@ public struct NetworkImage: View {
     }
 
     public var body: some View {
-        if data?.absoluteString.hasSuffix(".gif") == true {
-            KFAnimatedImage(data)
-                .flareBackgroundDecodeIfSupported()
-                .loadDiskFileSynchronously(false)
-                .fade(duration: 0.25)
-                .requestModifier({ request in
-                    if let customHeader {
-                        for (key, value) in customHeader {
-                            request.setValue(value, forHTTPHeaderField: key)
-                        }
+        NetworkImageBoundsLayout {
+            if data?.pathExtension.lowercased() == "gif" {
+                KFAnimatedImage(data)
+                    .configure { view in
+                        view.needsPrescaling = downsamplingEnabled
+                        #if os(iOS)
+                        view.contentMode = contentMode == .fill ? .scaleAspectFill : .scaleAspectFit
+                        #endif
                     }
-                })
-                .onProgress { receivedSize, totalSize in
-                    reportProgress(receivedSize: receivedSize, totalSize: totalSize)
-                }
-                .onSuccess { _ in
-                    onProgress?(1)
-                }
-                .onFailure { _ in
-                    onProgress?(nil)
-                }
-                .placeholder {
-                    if let placeholder {
-                        NetworkImage(data: placeholder, customHeader: customHeader)
-                    } else {
-                        Rectangle()
-                            .fill(.placeholder)
-                            .redacted(reason: .placeholder)
+                    .flareAsyncCacheTypeCheck()
+                    .loadDiskFileSynchronously(false)
+                    .fade(duration: 0.25)
+                    .requestModifier { request in
+                        customHeader?.forEach { request.setValue($0.value, forHTTPHeaderField: $0.key) }
                     }
-                }
-                .cancelOnDisappear(true)
-                .aspectRatio(contentMode: contentMode)
-        } else if usesCrossfade {
-            CrossfadeNetworkImage(
-                data: data,
-                placeholder: placeholder,
-                customHeader: customHeader,
-                contentMode: contentMode,
-                onProgress: onProgress
-            )
+                    .onProgress { receivedSize, totalSize in
+                        reportProgress(receivedSize: receivedSize, totalSize: totalSize)
+                    }
+                    .onSuccess { _ in onProgress?(1) }
+                    .onFailure { _ in onProgress?(nil) }
+                    .placeholder { placeholderView }
+                    .cancelOnDisappear(true)
+                    .aspectRatio(contentMode: contentMode)
+            } else if downsamplingEnabled && (requestedPixels.width <= 0 || requestedPixels.height <= 0) {
+                placeholderView
+            } else if usesCrossfade {
+                CrossfadeNetworkImage(
+                    data: data, placeholder: placeholder, customHeader: customHeader,
+                    contentMode: contentMode, onProgress: onProgress,
+                    processor: processor, displayScale: displayScale
+                )
+            } else {
+                KFImage(data)
+                    .setProcessor(processor)
+                    .scaleFactor(displayScale)
+                    .cacheOriginalImage()
+                    .flareAsyncCacheTypeCheck()
+                    .flareBackgroundDecodeIfSupported()
+                    .loadDiskFileSynchronously(false)
+                    .resizable()
+                    .fade(duration: 0.25)
+                    .requestModifier { request in
+                        customHeader?.forEach { request.setValue($0.value, forHTTPHeaderField: $0.key) }
+                    }
+                    .onProgress { receivedSize, totalSize in
+                        reportProgress(receivedSize: receivedSize, totalSize: totalSize)
+                    }
+                    .onSuccess { result in
+                        previousImage = (data, result.image)
+                        onProgress?(1)
+                    }
+                    .onFailure { _ in onProgress?(nil) }
+                    .placeholder { placeholderView }
+                    .cancelOnDisappear(true)
+                    .aspectRatio(contentMode: contentMode)
+            }
+        }
+        .onGeometryChange(for: CGSize.self) { [displayScale] proxy in
+            CGSize(width: ceil(proxy.size.width * displayScale), height: ceil(proxy.size.height * displayScale))
+        } action: { size in
+            measuredPixels = size
+            requestedPixels = CGSize(width: max(requestedPixels.width, size.width),
+                                     height: max(requestedPixels.height, size.height))
+        }
+        .onChange(of: data) { _, _ in
+            requestedPixels = measuredPixels
+            previousImage = nil
+        }
+    }
+
+    private var processor: any ImageProcessor {
+        downsamplingEnabled
+            ? ImageDownsamplingProcessor(pixelSize: requestedPixels, fillsBounds: contentMode == .fill)
+            : DefaultImageProcessor.default
+    }
+
+    @ViewBuilder
+    private var placeholderView: some View {
+        if let previousImage, previousImage.url == data {
+            #if os(macOS)
+            Image(nsImage: previousImage.image).resizable()
+            #else
+            Image(uiImage: previousImage.image).resizable()
+            #endif
+        } else if let placeholder {
+            NetworkImage(data: placeholder, customHeader: customHeader, contentMode: contentMode)
         } else {
-            KFImage(data)
-                .flareBackgroundDecodeIfSupported()
-                .loadDiskFileSynchronously(false)
-                .resizable()
-                .fade(duration: 0.25)
-                .requestModifier({ request in
-                    if let customHeader {
-                        for (key, value) in customHeader {
-                            request.setValue(value, forHTTPHeaderField: key)
-                        }
-                    }
-                })
-                .onProgress { receivedSize, totalSize in
-                    reportProgress(receivedSize: receivedSize, totalSize: totalSize)
-                }
-                .onSuccess { _ in
-                    onProgress?(1)
-                }
-                .onFailure { _ in
-                    onProgress?(nil)
-                }
-                .placeholder {
-                    if let placeholder {
-                        NetworkImage(
-                            data: placeholder,
-                            customHeader: customHeader,
-                            contentMode: contentMode
-                        )
-                    } else {
-                        Rectangle()
-                            .fill(.placeholder)
-                            .redacted(reason: .placeholder)
-                    }
-                }
-                .cancelOnDisappear(true)
-                .aspectRatio(contentMode: contentMode)
+            Rectangle().fill(.placeholder).redacted(reason: .placeholder)
         }
     }
 
@@ -115,14 +131,32 @@ public struct NetworkImage: View {
     }
 }
 
+// Aspect-fill pixels can overflow their proposal; measure the viewport, not that overflow.
+private struct NetworkImageBoundsLayout: Layout {
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        let size = subviews[0].sizeThatFits(proposal)
+        return CGSize(width: min(size.width, proposal.width ?? size.width),
+                      height: min(size.height, proposal.height ?? size.height))
+    }
+
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        subviews[0].place(at: CGPoint(x: bounds.midX, y: bounds.midY), anchor: .center,
+                          proposal: ProposedViewSize(bounds.size))
+    }
+}
+
 private struct CrossfadeNetworkImage: View {
     let data: URL?
     let placeholder: URL?
     let customHeader: [String: String]?
     let contentMode: SwiftUI.ContentMode
     let onProgress: ((Double?) -> Void)?
+    let processor: any ImageProcessor
+    let displayScale: CGFloat
 
     @State private var loadedURL: URL?
+    @State private var loadedImage: KFCrossPlatformImage?
+    @State private var loadedProcessorID: String?
     @State private var showsLoadedImage = false
     @State private var keepsPlaceholder = true
     @State private var placeholderRemovalTask: Task<Void, Never>?
@@ -130,11 +164,15 @@ private struct CrossfadeNetworkImage: View {
 
     var body: some View {
         ZStack {
-            if keepsPlaceholder {
+            if keepsPlaceholder || loadedURL != data || loadedProcessorID != processor.identifier {
                 placeholderView
             }
 
             KFImage(data)
+                .setProcessor(processor)
+                .scaleFactor(displayScale)
+                .cacheOriginalImage()
+                .flareAsyncCacheTypeCheck()
                 .flareBackgroundDecodeIfSupported()
                 .loadDiskFileSynchronously(false)
                 .resizable()
@@ -149,9 +187,11 @@ private struct CrossfadeNetworkImage: View {
                 .onProgress { receivedSize, totalSize in
                     reportProgress(receivedSize: receivedSize, totalSize: totalSize)
                 }
-                .onSuccess { _ in
+                .onSuccess { result in
                     onProgress?(1)
                     loadedURL = data
+                    loadedImage = result.image
+                    loadedProcessorID = processor.identifier
                     keepsPlaceholder = true
                     withAnimation(.easeInOut(duration: transitionDuration)) {
                         showsLoadedImage = true
@@ -160,7 +200,6 @@ private struct CrossfadeNetworkImage: View {
                 }
                 .onFailure { _ in
                     onProgress?(nil)
-                    loadedURL = nil
                     placeholderRemovalTask?.cancel()
                     keepsPlaceholder = true
                     showsLoadedImage = false
@@ -182,7 +221,13 @@ private struct CrossfadeNetworkImage: View {
 
     @ViewBuilder
     private var placeholderView: some View {
-        if let placeholder {
+        if let loadedImage, loadedURL == data, loadedProcessorID != processor.identifier {
+            #if os(macOS)
+            Image(nsImage: loadedImage).resizable().aspectRatio(contentMode: contentMode)
+            #else
+            Image(uiImage: loadedImage).resizable().aspectRatio(contentMode: contentMode)
+            #endif
+        } else if let placeholder {
             NetworkImage(
                 data: placeholder,
                 customHeader: customHeader,
@@ -202,6 +247,8 @@ private struct CrossfadeNetworkImage: View {
         placeholderRemovalTask?.cancel()
         placeholderRemovalTask = nil
         loadedURL = nil
+        loadedImage = nil
+        loadedProcessorID = nil
         showsLoadedImage = false
         keepsPlaceholder = true
     }
@@ -231,6 +278,12 @@ private struct CrossfadeNetworkImage: View {
 }
 
 extension KFImageProtocol {
+    func flareAsyncCacheTypeCheck() -> Self {
+        let result = copyForMutation()
+        result.options.asyncCacheTypeCheck = true
+        return result
+    }
+
     func flareBackgroundDecodeIfSupported() -> Self {
         #if os(macOS)
         return self
@@ -241,6 +294,13 @@ extension KFImageProtocol {
 }
 
 public extension NetworkImage {
+    /// Keep source pixels for views that support zooming through a transform.
+    func originalImage() -> Self {
+        var result = self
+        result.downsamplingEnabled = false
+        return result
+    }
+
     init(
         data: String?,
         customHeader: [String: String]? = nil,

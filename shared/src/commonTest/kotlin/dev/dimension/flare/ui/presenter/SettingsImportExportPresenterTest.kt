@@ -43,6 +43,7 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.testPlatformRuntimeData
 import dev.dimension.flare.ui.model.UiIcon
+import dev.dimension.flare.ui.presenter.settings.StoragePresenter
 import dev.dimension.flare.unavailableAccountService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -68,6 +69,7 @@ class SettingsImportExportPresenterTest : RobolectricTest() {
     private val json = Json { ignoreUnknownKeys = true }
     private lateinit var root: Path
     private lateinit var settingsRepository: SettingsRepository
+    private lateinit var appDataStore: AppDataStore
 
     @BeforeTest
     fun setup() {
@@ -80,17 +82,20 @@ class SettingsImportExportPresenterTest : RobolectricTest() {
                 .build()
         root = createTestRootPath()
         val fileStorage = OkioFileStorage(createTestFileSystem(), root)
+        appDataStore = AppDataStore(fileStorage)
         settingsRepository =
             SettingsRepository(
                 fileStorage = fileStorage,
                 cacheDatabase = cacheDatabase,
-                appDataStore = AppDataStore(fileStorage),
+                appDataStore = appDataStore,
                 timelineResolver = TimelineResolver(testPlatformRuntimeData(), unavailableAccountService()),
             )
         startKoin {
             modules(
                 module {
                     testSingle { settingsRepository }
+                    testSingle { appDataStore }
+                    testSingle { cacheDatabase }
                 },
             )
         }
@@ -125,6 +130,48 @@ class SettingsImportExportPresenterTest : RobolectricTest() {
             ImportSettingsPresenter(exported).import()
 
             assertEquals(config, settingsRepository.appSettings.first().aiConfig)
+        }
+
+    @Test
+    fun notificationAccountRemainsLocalAcrossSettingsExportAndImport() =
+        runTest {
+            val key = MicroBlogKey("notification-local-only", "example.social")
+            appDataStore.notificationPreferences.updateData { it.copy(selectedAccountKey = key) }
+
+            val exported = ExportSettingsPresenter().export()
+            assertFalse(exported.contains(key.id))
+            ImportSettingsPresenter(exported).import()
+
+            assertEquals(
+                key,
+                appDataStore.notificationPreferences.data
+                    .first()
+                    .selectedAccountKey,
+            )
+        }
+
+    @Test
+    fun clearingCacheAndDisablingHomeRetentionPreserveNotificationAccount() =
+        runTest {
+            val key = MicroBlogKey("notification-local-only", "example.social")
+            appDataStore.notificationPreferences.updateData { it.copy(selectedAccountKey = key) }
+            settingsRepository.updateAppSettings { copy(rememberHomeTimelinePosition = true) }
+            settingsRepository.updateAppSettings { copy(rememberHomeTimelinePosition = false) }
+            assertEquals(
+                key,
+                appDataStore.notificationPreferences.data
+                    .first()
+                    .selectedAccountKey,
+            )
+
+            StoragePresenter().clearCacheSuspend()
+
+            assertEquals(
+                key,
+                appDataStore.notificationPreferences.data
+                    .first()
+                    .selectedAccountKey,
+            )
         }
 
     @Test

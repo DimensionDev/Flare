@@ -8,6 +8,7 @@ import dev.dimension.flare.data.datastore.model.AppSettings
 import dev.dimension.flare.data.datastore.model.ComposeConfigData
 import dev.dimension.flare.data.datastore.model.FlareConfig
 import dev.dimension.flare.data.datastore.model.HomeTimelinePreferences
+import dev.dimension.flare.data.datastore.model.NotificationPreferences
 import dev.dimension.flare.data.datastore.model.PlatformOAuthPendingData
 import dev.dimension.flare.data.io.FileStorage
 import org.koin.core.annotation.Single
@@ -18,6 +19,10 @@ internal class AppDataStore(
 ) {
     val homeTimelinePreferences by lazy {
         createDataStore("home_timeline_preferences.pb", protobufSerializer(HomeTimelinePreferences()))
+    }
+
+    val notificationPreferences by lazy {
+        createDataStore("notification_preferences.pb", protobufSerializer(NotificationPreferences()))
     }
 
     val flareDataStore: DataStore<FlareConfig> by lazy {

@@ -273,6 +273,41 @@ class AccountRepositoryTest : RobolectricTest() {
             assertEquals(listOf("TestNet"), assertIs<NoAvailableAccountException>(error).platformIds)
         }
 
+    @Test
+    fun deletingAccountClearsItsSavedNotificationSelectionEvenWhenThePageIsClosed() =
+        runTest {
+            val repository = createRepository(this)
+            insertAccount()
+            appDataStore.notificationPreferences.updateData { it.copy(selectedAccountKey = accountKey) }
+
+            repository.delete(accountKey).join()
+
+            assertNull(
+                appDataStore.notificationPreferences.data
+                    .first()
+                    .selectedAccountKey,
+            )
+            assertNull(appDatabase.accountDao().getAccount(accountKey))
+        }
+
+    @Test
+    fun deletingAnotherAccountPreservesTheSavedNotificationSelection() =
+        runTest {
+            val repository = createRepository(this)
+            insertAccount()
+            val savedAccount = MicroBlogKey("bob", "another.social")
+            appDataStore.notificationPreferences.updateData { it.copy(selectedAccountKey = savedAccount) }
+
+            repository.delete(accountKey).join()
+
+            assertEquals(
+                savedAccount,
+                appDataStore.notificationPreferences.data
+                    .first()
+                    .selectedAccountKey,
+            )
+        }
+
     private fun createRepository(scope: CoroutineScope): AccountRepository =
         AccountRepository(
             appDatabase = appDatabase,

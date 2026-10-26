@@ -96,22 +96,24 @@ internal fun NotificationScreen() {
                         }
                     },
                 title = {
-                    if (state.notifications.size > 1) {
+                    if (state.canSwitchAccount) {
                         SecondaryScrollableTabRow(
                             containerColor = Color.Transparent,
                             modifier =
                                 Modifier
                                     .fillMaxWidth(),
-                            selectedTabIndex = state.selectedAccountIndex,
+                            selectedTabIndex = state.selectedAccountIndex.coerceAtLeast(0),
                             edgePadding = 0.dp,
                             divider = { },
                             indicator = {
-                                TabRowDefaults.SecondaryIndicator(
-                                    Modifier.tabIndicatorOffset(
-                                        state.selectedAccountIndex,
-                                        matchContentSize = false,
-                                    ),
-                                )
+                                if (state.selectedAccountIndex >= 0) {
+                                    TabRowDefaults.SecondaryIndicator(
+                                        Modifier.tabIndicatorOffset(
+                                            state.selectedAccountIndex,
+                                            matchContentSize = false,
+                                        ),
+                                    )
+                                }
                             },
                             minTabWidth = 48.dp,
                         ) {
@@ -121,7 +123,7 @@ internal fun NotificationScreen() {
                                 LeadingIconTab(
                                     selectedContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
                                     unselectedContentColor = LocalContentColor.current,
-                                    selected = state.selectedAccount?.key == account.key,
+                                    selected = state.selectedAccountKey == account.key,
                                     onClick = {
                                         state.setAccount(account)
                                     },

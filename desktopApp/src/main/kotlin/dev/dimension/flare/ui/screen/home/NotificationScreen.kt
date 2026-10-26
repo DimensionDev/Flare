@@ -70,7 +70,7 @@ internal fun NotificationScreen() {
                 contentPadding = LocalWindowPadding.current,
                 state = listState,
             ) {
-                if (state.notifications.size > 1) {
+                if (state.canSwitchAccount) {
                     item(
                         span = StaggeredGridItemSpan.FullLine,
                     ) {
@@ -91,7 +91,7 @@ internal fun NotificationScreen() {
                                     val profile = item.profile
                                     val badge = item.badge
                                     SelectorBarItem(
-                                        selected = state.selectedAccount?.key == profile.key,
+                                        selected = state.selectedAccountKey == profile.key,
                                         onSelectedChange = {
                                             if (it) {
                                                 state.setAccount(profile)
@@ -131,7 +131,7 @@ internal fun NotificationScreen() {
                                         val profile = item.profile
                                         val badge = item.badge
                                         MenuFlyoutItem(
-                                            selected = state.selectedAccount?.key == profile.key,
+                                            selected = state.selectedAccountKey == profile.key,
                                             onSelectedChanged = {
                                                 if (it) {
                                                     state.setAccount(profile)

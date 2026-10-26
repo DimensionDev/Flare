@@ -70,7 +70,6 @@ struct TimelineScreen: View {
                 reduceMotion ? .easeInOut(duration: 0.15) : .spring(response: 0.3, dampingFraction: 1),
                 value: presenter.state.reading?.hasNewContent == true
             )
-            .clipped()
             .padding(.top, 8)
         }
             .refreshable {

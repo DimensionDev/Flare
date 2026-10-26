@@ -910,6 +910,7 @@ private final class ProfileTimelinePagerViewController: UIViewController,
         observePageScrollView()
 
         accessoryScrollView.backgroundColor = .clear
+        accessoryScrollView.clipsToBounds = true
         accessoryScrollView.contentInsetAdjustmentBehavior = .never
         accessoryScrollView.showsHorizontalScrollIndicator = false
         accessoryScrollView.showsVerticalScrollIndicator = false
@@ -1287,12 +1288,13 @@ private final class ProfileTimelinePagerViewController: UIViewController,
         headerView?.transform = .identity
         headerView?.frame = CGRect(x: 0, y: 0, width: width, height: headerHeight)
         collapsedGlassView.transform = .identity
+        // shortcut: 40 pt hides glass corner seams outside the clipped viewport; recheck if system refraction changes.
         collapsedGlassView.frame = CGRect(
             x: 0,
             y: collapseDistance,
             width: width,
             height: max(headerHeight - collapseDistance, 0) + pickerHeight
-        )
+        ).insetBy(dx: -40, dy: 0)
         pickerView?.transform = .identity
         pickerView?.frame = CGRect(x: 0, y: headerHeight, width: width, height: pickerHeight)
 

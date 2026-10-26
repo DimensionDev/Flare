@@ -8,7 +8,7 @@ enum MediaViewerDismissLayer {
 struct MediaViewerDismissTransform: Equatable {
     var offset: CGSize = .zero
     var scale: CGFloat = 1
-    /// Unit point in the media frame that stays under the finger while scaling.
+    /// Unit point in the full-page container that stays under the finger while scaling.
     var anchor = CGPoint(x: 0.5, y: 0.5)
 }
 

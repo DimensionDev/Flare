@@ -717,27 +717,6 @@ struct MediaViewerScreen: View {
     }
 }
 
-private struct MediaViewerDismissEffect: ViewModifier {
-    // LazyPager hosts pages in separate SwiftUI trees. Reading the binding here
-    // preserves the animation transaction when the dismiss gesture settles.
-    @Binding var transform: MediaViewerDismissTransform
-
-    func body(content: Content) -> some View {
-        content
-            .scaleEffect(
-                transform.scale,
-                anchor: UnitPoint(x: transform.anchor.x, y: transform.anchor.y)
-            )
-            .offset(
-                x: transform.offset.width,
-                y: MediaViewerDismissGesturePolicy.verticalOffset(
-                    for: .media,
-                    translationY: transform.offset.height
-                )
-            )
-    }
-}
-
 private struct MediaViewerDismissPan {
     let translation: CGPoint
     let velocity: CGPoint

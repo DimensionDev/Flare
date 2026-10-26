@@ -9,11 +9,13 @@ import coil3.annotation.ExperimentalCoilApi
 import coil3.gif.AnimatedImageDecoder
 import coil3.gif.GifDecoder
 import coil3.network.ktor3.KtorNetworkFetcherFactory
+import coil3.request.allowPartialImage
 import coil3.request.crossfade
 import coil3.svg.SvgDecoder
 import coil3.video.VideoFrameDecoder
 import dev.dimension.flare.common.AnimatedPngDecoder
 import dev.dimension.flare.common.AnimatedWebPDecoder
+import dev.dimension.flare.common.CorruptImageRetryInterceptor
 import dev.dimension.flare.data.network.ktorClient
 import dev.dimension.flare.di.AndroidKoinApplication
 import org.koin.android.ext.koin.androidContext
@@ -30,27 +32,33 @@ class App :
     }
 
     @OptIn(ExperimentalCoilApi::class)
-    override fun newImageLoader(context: PlatformContext): ImageLoader =
-        ImageLoader
-            .Builder(this)
-            .components {
-                if (Build.VERSION.SDK_INT >= 28) {
-                    add(factory = AnimatedImageDecoder.Factory())
-                } else {
-                    add(GifDecoder.Factory())
-                }
-                add(AnimatedPngDecoder.Factory())
-                add(SvgDecoder.Factory())
-                add(AnimatedWebPDecoder.Factory())
-                add(VideoFrameDecoder.Factory())
-                add(
-                    KtorNetworkFetcherFactory(
-                        httpClient =
-                            ktorClient {
-                                useDefaultTransformers = false
-                            },
-                    ),
-                )
-            }.crossfade(true)
-            .build()
+    override fun newImageLoader(context: PlatformContext): ImageLoader {
+        lateinit var imageLoader: ImageLoader
+        imageLoader =
+            ImageLoader
+                .Builder(context)
+                .components {
+                    add(CorruptImageRetryInterceptor { imageLoader.diskCache })
+                    if (Build.VERSION.SDK_INT >= 28) {
+                        add(factory = AnimatedImageDecoder.Factory())
+                    } else {
+                        add(GifDecoder.Factory())
+                    }
+                    add(AnimatedPngDecoder.Factory())
+                    add(SvgDecoder.Factory())
+                    add(AnimatedWebPDecoder.Factory())
+                    add(VideoFrameDecoder.Factory())
+                    add(
+                        KtorNetworkFetcherFactory(
+                            httpClient =
+                                ktorClient {
+                                    useDefaultTransformers = false
+                                },
+                        ),
+                    )
+                }.allowPartialImage(false)
+                .crossfade(true)
+                .build()
+        return imageLoader
+    }
 }

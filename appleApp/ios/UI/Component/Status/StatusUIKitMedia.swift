@@ -86,7 +86,7 @@ final class MediaUIView: UIView {
         v.translatesAutoresizingMaskIntoConstraints = false
         return v
     }()
-    private let playBadge: UIImageView = {
+    private lazy var playBadge: UIImageView = {
         let iv = UIImageView(image: UIImage(fontAwesome: .circlePlay))
         iv.contentMode = .scaleAspectFit
         iv.tintColor = .white
@@ -94,7 +94,7 @@ final class MediaUIView: UIView {
         iv.isHidden = true
         return iv
     }()
-    private let playBadgeBg: UIButton = {
+    private lazy var playBadgeBg: UIButton = {
         let v = UIButton(type: .custom)
         v.backgroundColor = .black
         v.layer.cornerRadius = 16
@@ -103,14 +103,14 @@ final class MediaUIView: UIView {
         v.isUserInteractionEnabled = false
         return v
     }()
-    private let loadingIndicator: UIActivityIndicatorView = {
+    private lazy var loadingIndicator: UIActivityIndicatorView = {
         let indicator = UIActivityIndicatorView(style: .medium)
         indicator.color = .white
         indicator.translatesAutoresizingMaskIntoConstraints = false
         indicator.isHidden = true
         return indicator
     }()
-    private let countdownLabel: UILabel = {
+    private lazy var countdownLabel: UILabel = {
         let label = UILabel()
         label.font = .preferredFont(forTextStyle: .caption1)
         label.textColor = .white
@@ -120,6 +120,7 @@ final class MediaUIView: UIView {
         label.isHidden = true
         return label
     }()
+    private var isOverlayInstalled = false
     private var lastMediaSignature: MediaItemSignature?
     private var lastCornerRadius: CGFloat?
     private weak var autoplayPlayerView: UIView?
@@ -132,6 +133,22 @@ final class MediaUIView: UIView {
         isAccessibilityElement = true
         addSubview(background)
         addSubview(imageView)
+        NSLayoutConstraint.activate([
+            background.topAnchor.constraint(equalTo: topAnchor),
+            background.leadingAnchor.constraint(equalTo: leadingAnchor),
+            background.trailingAnchor.constraint(equalTo: trailingAnchor),
+            background.bottomAnchor.constraint(equalTo: bottomAnchor),
+            imageView.topAnchor.constraint(equalTo: topAnchor),
+            imageView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            imageView.trailingAnchor.constraint(equalTo: trailingAnchor),
+            imageView.bottomAnchor.constraint(equalTo: bottomAnchor),
+        ])
+    }
+    required init?(coder: NSCoder) { fatalError("init(coder:) not supported") }
+
+    private func installOverlayIfNeeded() {
+        guard !isOverlayInstalled else { return }
+        isOverlayInstalled = true
         addSubview(playBadgeBg)
         playBadgeBg.addTarget(self, action: #selector(retryAutoplay), for: .touchUpInside)
         let badgeContent = UIStackView(arrangedSubviews: [playBadge, loadingIndicator, countdownLabel])
@@ -147,14 +164,6 @@ final class MediaUIView: UIView {
             width.isActive = true
         }
         NSLayoutConstraint.activate([
-            background.topAnchor.constraint(equalTo: topAnchor),
-            background.leadingAnchor.constraint(equalTo: leadingAnchor),
-            background.trailingAnchor.constraint(equalTo: trailingAnchor),
-            background.bottomAnchor.constraint(equalTo: bottomAnchor),
-            imageView.topAnchor.constraint(equalTo: topAnchor),
-            imageView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            imageView.trailingAnchor.constraint(equalTo: trailingAnchor),
-            imageView.bottomAnchor.constraint(equalTo: bottomAnchor),
             playBadgeBg.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
             playBadgeBg.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -16),
             playBadgeBg.widthAnchor.constraint(greaterThanOrEqualToConstant: 32),
@@ -166,7 +175,6 @@ final class MediaUIView: UIView {
             loadingIndicator.heightAnchor.constraint(equalToConstant: 16),
         ])
     }
-    required init?(coder: NSCoder) { fatalError("init(coder:) not supported") }
 
     func set(media: UiMedia, cornerRadius: CGFloat) {
         accessibilityLabel = media.accessibleDescription
@@ -221,7 +229,7 @@ final class MediaUIView: UIView {
         detachAutoplayPlayer()
         playerView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(playerView)
-        bringSubviewToFront(playBadgeBg)
+        if isOverlayInstalled { bringSubviewToFront(playBadgeBg) }
         autoplayPlayerView = playerView
         autoplayPlayerConstraints = [
             playerView.topAnchor.constraint(equalTo: topAnchor),
@@ -254,11 +262,21 @@ final class MediaUIView: UIView {
         progress: Double? = nil,
         onRetry: (() -> Void)? = nil
     ) {
-        playBadgeBg.isHidden = !showsBadge
-        playBadgeBg.isUserInteractionEnabled = false
         onAutoplayRetry = nil
         accessibilityCustomActions = nil
         accessibilityValue = nil
+        // Image-only tiles never need the video controls or their layout constraints.
+        guard showsBadge else {
+            if isOverlayInstalled {
+                playBadgeBg.isHidden = true
+                playBadgeBg.isUserInteractionEnabled = false
+                loadingIndicator.stopAnimating()
+            }
+            return
+        }
+        installOverlayIfNeeded()
+        playBadgeBg.isHidden = false
+        playBadgeBg.isUserInteractionEnabled = false
         playBadge.isHidden = true
         countdownLabel.isHidden = true
         loadingIndicator.isHidden = true

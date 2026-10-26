@@ -10,6 +10,69 @@ import FlareAppleUI
 
 @MainActor
 final class TimelineMediaPreviewTests: XCTestCase {
+    func testImagesDoNotCreateVideoOverlayViews() throws {
+        let fixture = try Fixture()
+        let view = fixture.view
+        view.frame.size = CGSize(width: 180, height: 135)
+        view.set(media: fixture.media(), cornerRadius: 12)
+        view.layoutIfNeeded()
+        XCTAssertFalse(view.subviews.contains { $0 is UIButton }, "Static images must not create video controls")
+        XCTAssertEqual(fixture.imageView.frame, view.bounds)
+        XCTAssertEqual(view.accessibilityLabel, "Preview description")
+        view.prepareForPoolRemoval()
+        XCTAssertFalse(view.subviews.contains { $0 is UIButton }, "Pool cleanup must not create video controls")
+        XCTAssertNil(view.accessibilityCustomActions)
+    }
+
+    func testVideoOverlayKeepsStateAndRetryWhenReusedForAnImage() throws {
+        let fixture = try Fixture()
+        let view = fixture.view
+        view.frame.size = CGSize(width: 180, height: 135)
+        view.set(media: fixture.media(), cornerRadius: 12)
+        let player = UIView()
+        view.attachAutoplayPlayer(player)
+        view.setAutoplayOverlay(.loading, progress: 0.42)
+        view.layoutIfNeeded()
+        let badge = try XCTUnwrap(view.subviews.compactMap { $0 as? UIButton }.first)
+        let stack = try XCTUnwrap(badge.subviews.compactMap { $0 as? UIStackView }.first)
+        let spinner = try XCTUnwrap(stack.arrangedSubviews.compactMap { $0 as? UIActivityIndicatorView }.first)
+        let label = try XCTUnwrap(stack.arrangedSubviews.compactMap { $0 as? UILabel }.first)
+        XCTAssertFalse(badge.isHidden)
+        XCTAssertTrue(spinner.isAnimating)
+        XCTAssertEqual(label.text, "42%")
+        XCTAssertEqual(view.accessibilityValue, "42%")
+        XCTAssertEqual(view.subviews.last, badge, "Video controls must remain above a newly attached player")
+        XCTAssertEqual(player.frame, view.bounds)
+        view.setAutoplayOverlay(.playing(remaining: 61))
+        XCTAssertFalse(spinner.isAnimating)
+        XCTAssertEqual(label.text, "1:01")
+        XCTAssertNil(view.accessibilityValue)
+        var retries = 0
+        view.setAutoplayOverlay(.error) { retries += 1 }
+        badge.sendActions(for: .touchUpInside)
+        XCTAssertEqual(retries, 1)
+        XCTAssertEqual(view.accessibilityCustomActions?.count, 1)
+        view.prepareForPoolRemoval()
+        view.set(media: fixture.media(path: "second.png"), cornerRadius: 0)
+        XCTAssertTrue(badge.isHidden)
+        XCTAssertFalse(badge.isUserInteractionEnabled)
+        XCTAssertFalse(spinner.isAnimating)
+        XCTAssertNil(view.accessibilityCustomActions)
+        XCTAssertNil(view.accessibilityValue)
+        XCTAssertNil(player.superview)
+        badge.sendActions(for: .touchUpInside)
+        XCTAssertEqual(retries, 1, "Image reuse must clear the old retry callback")
+        let video = UiMediaVideo(url: "https://timeline-preview.invalid/movie.mp4",
+            thumbnailUrl: "https://timeline-preview.invalid/thumbnail.png", description: nil,
+            height: 768, width: 1_024, customHeaders: nil, downloadUrl: nil)
+        view.set(media: video, cornerRadius: 12)
+        view.layoutIfNeeded()
+        XCTAssertEqual(view.videoURL?.absoluteString, video.url)
+        XCTAssertFalse(badge.isHidden)
+        XCTAssertEqual(view.subviews.filter { $0 is UIButton }.count, 1)
+        XCTAssertEqual(badge.frame.height, 32, accuracy: 0.5)
+    }
+
     func testSwiftUICrossfadeKeepsPreviewWhileLargerImageIsProcessing() async throws {
         let fixture = try Fixture()
         let queue = DispatchQueue(label: "preview-resize-test")
@@ -366,6 +429,7 @@ final class TimelineMediaPreviewTests: XCTestCase {
             oldOptions = KingfisherManager.shared.defaultOptions
             KingfisherManager.shared.defaultOptions = [.downloader(downloader), .targetCache(cache)]
             view.traitOverrides.displayScale = 3
+            view.updateTraitsIfNeeded()
         }
 
         isolated deinit {

@@ -237,6 +237,7 @@ targets:
     type: bundle.unit-test
     platform: iOS
     dependencies:
+      - package: LazyPager
       - package: CHTCollectionViewWaterfallLayout
         product: CHTCollectionViewWaterfallLayoutObjC
       - package: swiftui-introspect
@@ -245,6 +246,7 @@ targets:
     sources:
       - path: iosTests
       - path: ios/UI/Component/IPadCompactTabBarModifier.swift
+      - path: ios/UI/Component/MediaViewerDismissEffect.swift
       - path: ios/Common/MediaViewerDismissGesturePolicy.swift
       - path: ios/Common/MediaViewerImageLayoutPolicy.swift
       - path: ios/Common/StatusTextContent.swift

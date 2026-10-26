@@ -5,11 +5,19 @@ enum MediaViewerDismissLayer {
     case bottomOverlay
 }
 
+struct MediaViewerDismissTransform: Equatable {
+    var offset: CGSize = .zero
+    var scale: CGFloat = 1
+    /// Unit point in the full-page container that stays under the finger while scaling.
+    var anchor = CGPoint(x: 0.5, y: 0.5)
+}
+
 enum MediaViewerDismissGesturePolicy {
-    // UIPan reports points/s; 1,300 matches LazyPager's 1.3 points/ms sensitivity.
-    static let velocityThreshold: CGFloat = 1_300
-    // Android's Swiper dismisses a slow drag after half the page height.
-    static let distanceThreshold: CGFloat = 0.5
+    /// Fraction of the page height the media must be projected to travel.
+    static let distanceThreshold: CGFloat = 0.25
+    // UIScrollView's normal deceleration (0.998 per ms) coasts velocity × 0.499 s.
+    static let projectionDuration: CGFloat = 0.499
+    static let minimumScale: CGFloat = 0.6
     static let scrollEdgeTolerance: CGFloat = 1
 
     @MainActor
@@ -87,24 +95,44 @@ enum MediaViewerDismissGesturePolicy {
         return false
     }
 
+    static func transform(
+        translation: CGPoint,
+        startLocation: CGPoint,
+        containerSize: CGSize
+    ) -> MediaViewerDismissTransform {
+        guard containerSize.width > 0, containerSize.height > 0 else {
+            return MediaViewerDismissTransform()
+        }
+        let dragProgress = progress(translationY: translation.y, containerHeight: containerSize.height)
+        return MediaViewerDismissTransform(
+            offset: CGSize(width: translation.x, height: translation.y),
+            scale: 1 - (1 - minimumScale) * dragProgress,
+            anchor: CGPoint(
+                x: startLocation.x / containerSize.width,
+                y: startLocation.y / containerSize.height
+            )
+        )
+    }
+
+    static func projectedTranslationY(translationY: CGFloat, velocityY: CGFloat) -> CGFloat {
+        translationY + velocityY * projectionDuration
+    }
+
     static func shouldDismiss(
         translationY: CGFloat,
         velocityY: CGFloat,
         containerHeight: CGFloat
     ) -> Bool {
         guard containerHeight > 0 else { return false }
-        return abs(velocityY) >= velocityThreshold ||
-            abs(translationY) >= containerHeight * distanceThreshold
+        let projected = projectedTranslationY(translationY: translationY, velocityY: velocityY)
+        return abs(projected) >= containerHeight * distanceThreshold
     }
 
     static func dismissDirection(
         translationY: CGFloat,
         velocityY: CGFloat
     ) -> CGFloat {
-        let directionValue = abs(velocityY) >= velocityThreshold
-            ? velocityY
-            : translationY
-        return directionValue < 0 ? -1 : 1
+        projectedTranslationY(translationY: translationY, velocityY: velocityY) < 0 ? -1 : 1
     }
 
     static func progress(translationY: CGFloat, containerHeight: CGFloat) -> CGFloat {

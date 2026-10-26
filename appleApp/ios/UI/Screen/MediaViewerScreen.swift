@@ -32,7 +32,7 @@ struct MediaViewerScreen: View {
     @State private var videoState: VideoState = .idle
     @State private var playbackTimes: [String: CMTime] = [:]
     @State private var opacity: CGFloat = 1
-    @State private var dismissOffset: CGFloat = 0
+    @State private var dismissTransform = MediaViewerDismissTransform()
     @State private var isDismissing = false
     @State private var showData = true
     @State private var protectInitialPagerSelection: Bool
@@ -86,7 +86,7 @@ struct MediaViewerScreen: View {
                                             .scaledToFit()
                                     }
                                 }
-                                .modifier(MediaViewerDismissOffset(offset: $dismissOffset))
+                                .modifier(MediaViewerDismissEffect(transform: $dismissTransform))
                             }
                             .zoomable(min: 1, max: 5, doubleTapGesture: .scale(2))
                         } else {
@@ -122,7 +122,7 @@ struct MediaViewerScreen: View {
                                     }
                                 }
                                 // Move the content, keeping the pager's safe-area insets stable.
-                                .modifier(MediaViewerDismissOffset(offset: $dismissOffset))
+                                .modifier(MediaViewerDismissEffect(transform: $dismissTransform))
                         }
                         .onTap {
                             withAnimation {
@@ -149,7 +149,7 @@ struct MediaViewerScreen: View {
                                 .offset(
                                     y: MediaViewerDismissGesturePolicy.verticalOffset(
                                         for: .bottomOverlay,
-                                        translationY: dismissOffset
+                                        translationY: dismissTransform.offset.height
                                     )
                                 )
                                 .opacity(opacity)
@@ -517,25 +517,25 @@ struct MediaViewerScreen: View {
         return min(max(index, 0), count - 1)
     }
 
-    private func updateDismissGesture(translationY: CGFloat, containerHeight: CGFloat) {
+    private func updateDismissGesture(_ pan: MediaViewerDismissPan) {
         guard !isDismissing else { return }
-        dismissOffset = translationY
+        dismissTransform = MediaViewerDismissGesturePolicy.transform(
+            translation: pan.translation,
+            startLocation: pan.startLocation,
+            containerSize: pan.containerSize
+        )
         opacity = 1 - MediaViewerDismissGesturePolicy.progress(
-            translationY: translationY,
-            containerHeight: containerHeight
+            translationY: pan.translation.y,
+            containerHeight: pan.containerSize.height
         )
     }
 
-    private func endDismissGesture(
-        translationY: CGFloat,
-        velocityY: CGFloat,
-        containerHeight: CGFloat
-    ) -> Bool {
+    private func endDismissGesture(_ pan: MediaViewerDismissPan) -> Bool {
         guard !isDismissing else { return true }
         guard MediaViewerDismissGesturePolicy.shouldDismiss(
-            translationY: translationY,
-            velocityY: velocityY,
-            containerHeight: containerHeight
+            translationY: pan.translation.y,
+            velocityY: pan.velocity.y,
+            containerHeight: pan.containerSize.height
         ) else {
             cancelDismissGesture()
             return false
@@ -543,11 +543,11 @@ struct MediaViewerScreen: View {
 
         isDismissing = true
         let direction = MediaViewerDismissGesturePolicy.dismissDirection(
-            translationY: translationY,
-            velocityY: velocityY
+            translationY: pan.translation.y,
+            velocityY: pan.velocity.y
         )
         withAnimation(.linear(duration: 0.2)) {
-            dismissOffset = direction * containerHeight
+            dismissTransform.offset.height = direction * pan.containerSize.height
             opacity = 0
         } completion: {
             var transaction = Transaction()
@@ -562,7 +562,9 @@ struct MediaViewerScreen: View {
     private func cancelDismissGesture() {
         guard !isDismissing else { return }
         withAnimation(.spring(response: 0.25, dampingFraction: 0.9)) {
-            dismissOffset = 0
+            // Keep the anchor so the media springs back along the path it was dragged.
+            dismissTransform.offset = .zero
+            dismissTransform.scale = 1
             opacity = 1
         }
     }
@@ -715,20 +717,17 @@ struct MediaViewerScreen: View {
     }
 }
 
-private struct MediaViewerDismissOffset: ViewModifier {
-    // LazyPager hosts pages in separate SwiftUI trees. Reading the binding here
-    // preserves the animation transaction when the dismiss gesture settles.
-    @Binding var offset: CGFloat
-
-    func body(content: Content) -> some View {
-        content.offset(y: MediaViewerDismissGesturePolicy.verticalOffset(for: .media, translationY: offset))
-    }
+private struct MediaViewerDismissPan {
+    let translation: CGPoint
+    let velocity: CGPoint
+    let startLocation: CGPoint
+    let containerSize: CGSize
 }
 
 private struct MediaViewerDismissGestureHost: UIViewRepresentable {
     let enabled: Bool
-    let onChanged: (CGFloat, CGFloat) -> Void
-    let onEnded: (CGFloat, CGFloat, CGFloat) -> Bool
+    let onChanged: (MediaViewerDismissPan) -> Void
+    let onEnded: (MediaViewerDismissPan) -> Bool
     let onCancelled: () -> Void
 
     func makeUIView(context: Context) -> MediaViewerDismissGestureHostView {
@@ -767,8 +766,8 @@ private struct MediaViewerDismissGestureHost: UIViewRepresentable {
 
     final class Coordinator: NSObject, UIGestureRecognizerDelegate {
         var enabled = true
-        var onChanged: (CGFloat, CGFloat) -> Void
-        var onEnded: (CGFloat, CGFloat, CGFloat) -> Bool
+        var onChanged: (MediaViewerDismissPan) -> Void
+        var onEnded: (MediaViewerDismissPan) -> Bool
         var onCancelled: () -> Void
 
         private weak var sourceView: UIView?
@@ -777,10 +776,11 @@ private struct MediaViewerDismissGestureHost: UIViewRepresentable {
         private weak var touchedVerticalScrollView: UIScrollView?
         private var touchedZoomScrollViewInitialOffset: CGPoint?
         private var panRecognizer: UIPanGestureRecognizer?
+        private var panStartLocation: CGPoint = .zero
 
         init(
-            onChanged: @escaping (CGFloat, CGFloat) -> Void,
-            onEnded: @escaping (CGFloat, CGFloat, CGFloat) -> Bool,
+            onChanged: @escaping (MediaViewerDismissPan) -> Void,
+            onEnded: @escaping (MediaViewerDismissPan) -> Bool,
             onCancelled: @escaping () -> Void
         ) {
             self.onChanged = onChanged
@@ -817,18 +817,24 @@ private struct MediaViewerDismissGestureHost: UIViewRepresentable {
 
         @objc private func handlePan(_ recognizer: UIPanGestureRecognizer) {
             guard let sourceView else { return }
-            let translationY = recognizer.translation(in: sourceView).y
-            let containerHeight = sourceView.bounds.height
+            let translation = recognizer.translation(in: sourceView)
+            if recognizer.state == .began {
+                // Recognition starts after some movement; anchor where the finger first landed.
+                let location = recognizer.location(in: sourceView)
+                panStartLocation = CGPoint(x: location.x - translation.x, y: location.y - translation.y)
+            }
+            let pan = MediaViewerDismissPan(
+                translation: translation,
+                velocity: recognizer.velocity(in: sourceView),
+                startLocation: panStartLocation,
+                containerSize: sourceView.bounds.size
+            )
 
             switch recognizer.state {
             case .began, .changed:
-                onChanged(translationY, containerHeight)
+                onChanged(pan)
             case .ended:
-                let didDismiss = onEnded(
-                    translationY,
-                    recognizer.velocity(in: sourceView).y,
-                    containerHeight
-                )
+                let didDismiss = onEnded(pan)
                 finishTrackingTouchedScrollView(didDismiss: didDismiss)
             case .cancelled, .failed:
                 onCancelled()

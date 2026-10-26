@@ -10,6 +10,73 @@ import FlareAppleUI
 
 @MainActor
 final class TimelineMediaPreviewTests: XCTestCase {
+    func testMediaCreatesOptionalViewsOnDemandAndPreservesReuseBehavior() throws {
+        let fixture = try Fixture()
+        let host = UIViewController()
+        let window = try fixture.show(host)
+        defer { window.isHidden = true; window.rootViewController = nil }
+        let view = StatusMediaUIView()
+        host.view.addSubview(view)
+        let items: [UiMedia] = (0..<4).map { fixture.media(path: "grid-\($0).png") }
+
+        func configure(_ layout: TimelineMediaLayout, sensitive: Bool = false, count: Int = 4) {
+            view.configure(data: Array(items.prefix(count)), sensitive: sensitive, cornerRadius: 16,
+                           singleFollowsImageAspect: true, limitMediaGridToNine: true,
+                           mediaLayout: layout, carouselLeadingPadding: 16, carouselTrailingPadding: 16)
+            view.frame = CGRect(x: 0, y: 0, width: 340, height: view.timelineHeight(for: 340) ?? 0)
+            view.layoutIfNeeded()
+            XCTAssertGreaterThan(view.bounds.height, 0)
+        }
+
+        configure(.grid)
+        XCTAssertFalse(view.isCarouselScrolling)
+        view.performLightweightPoolCleanup()
+        view.performDeferredPoolCleanup()
+        XCTAssertFalse(view.subviews.contains { $0 is UICollectionView }, "Grid media must not create a hidden carousel")
+        XCTAssertFalse(view.subviews.contains { $0 is UIVisualEffectView }, "Ordinary media must not create a blur overlay")
+        XCTAssertFalse(view.subviews.contains { $0 is UIButton }, "Ordinary media must not create sensitive-content controls")
+
+        configure(.grid, sensitive: true)
+        let blur = try XCTUnwrap(view.subviews.compactMap { $0 as? UIVisualEffectView }.first)
+        let toggle = try XCTUnwrap(view.subviews.compactMap { $0 as? UIButton }.first)
+        XCTAssertFalse(blur.isHidden)
+        XCTAssertFalse(toggle.isHidden)
+        XCTAssertFalse(view.allowsVideoAutoplay)
+        XCTAssertEqual(blur.frame, view.bounds)
+        XCTAssertEqual(toggle.center.x, view.bounds.midX, accuracy: 0.5)
+        XCTAssertEqual(toggle.center.y, view.bounds.midY, accuracy: 0.5)
+        XCTAssertNotNil(toggle.accessibilityLabel)
+        toggle.sendActions(for: .touchUpInside)
+        XCTAssertTrue(blur.isHidden)
+        XCTAssertTrue(view.allowsVideoAutoplay)
+
+        configure(.carousel, sensitive: true)
+        let carousel = try XCTUnwrap(view.subviews.compactMap { $0 as? UICollectionView }.first)
+        XCTAssertFalse(carousel.isHidden)
+        XCTAssertFalse(view.isCarouselScrolling)
+        XCTAssertEqual(carousel.frame, view.bounds)
+        XCTAssertEqual(carousel.numberOfItems(inSection: 0), 4)
+        XCTAssertTrue(blur.isHidden, "Changing layout must preserve the user's sensitive-content choice")
+        XCTAssertLessThan(try XCTUnwrap(view.subviews.firstIndex(of: carousel)),
+                          try XCTUnwrap(view.subviews.firstIndex(of: blur)))
+        XCTAssertEqual(view.subviews.last, toggle)
+        toggle.sendActions(for: .touchUpInside)
+        XCTAssertFalse(blur.isHidden)
+        XCTAssertFalse(view.allowsVideoAutoplay)
+
+        configure(.grid, count: 1)
+        XCTAssertTrue(carousel.isHidden)
+        XCTAssertEqual(carousel.numberOfItems(inSection: 0), 0)
+        XCTAssertTrue(blur.isHidden)
+        XCTAssertTrue(toggle.isHidden)
+        XCTAssertTrue(view.allowsVideoAutoplay)
+        configure(.carousel)
+        XCTAssertTrue(view.subviews.compactMap { $0 as? UICollectionView }.first === carousel)
+        XCTAssertEqual(carousel.numberOfItems(inSection: 0), 4)
+        XCTAssertEqual(view.subviews.filter { $0 is UICollectionView }.count, 1)
+        XCTAssertEqual(view.subviews.filter { $0 is UIVisualEffectView }.count, 1)
+    }
+
     func testImagesDoNotCreateVideoOverlayViews() throws {
         let fixture = try Fixture()
         let view = fixture.view

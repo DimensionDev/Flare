@@ -355,7 +355,7 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding, UICollectionView
     var onMediaMenuAction: ((UiMedia, TimelineMediaMenuAction) -> Void)?
 
     private let grid = UIView()
-    private let carouselLayout: UICollectionViewFlowLayout = {
+    private lazy var carouselLayout: UICollectionViewFlowLayout = {
         let layout = StatusMediaCarouselLayout()
         layout.scrollDirection = .horizontal
         layout.minimumLineSpacing = 4
@@ -366,8 +366,10 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding, UICollectionView
         frame: .zero,
         collectionViewLayout: carouselLayout
     )
-    private let blurView = UIVisualEffectView(effect: UIBlurEffect(style: .regular))
-    private let toggleButton = UIButton(type: .system)
+    private var isCarouselInstalled = false
+    private lazy var blurView = UIVisualEffectView(effect: UIBlurEffect(style: .regular))
+    private lazy var toggleButton = UIButton(type: .system)
+    private var areSensitiveControlsInstalled = false
     private let overflowView = MediaOverflowView()
 
     let autoplayGroupID = UUID().uuidString
@@ -376,7 +378,9 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding, UICollectionView
     private var selectionURLs: [String] = []
     private var pendingReturnedIndex: Int?
     private var hasInteractedWithCarousel = false
-    var isCarouselScrolling: Bool { carousel.isDragging || carousel.isDecelerating || carousel.isTracking }
+    var isCarouselScrolling: Bool {
+        isCarouselInstalled && (carousel.isDragging || carousel.isDecelerating || carousel.isTracking)
+    }
 
     private var items: [UiMedia] = []
     private var sensitive: Bool = false
@@ -434,6 +438,18 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding, UICollectionView
         overflowView.isHidden = true
         grid.addSubview(overflowView)
 
+        NSLayoutConstraint.activate([
+            grid.topAnchor.constraint(equalTo: topAnchor),
+            grid.leadingAnchor.constraint(equalTo: leadingAnchor),
+            grid.trailingAnchor.constraint(equalTo: trailingAnchor),
+            grid.bottomAnchor.constraint(equalTo: bottomAnchor),
+        ])
+    }
+    required init?(coder: NSCoder) { fatalError("init(coder:) not supported") }
+
+    private func installCarouselIfNeeded() {
+        guard !isCarouselInstalled else { return }
+        isCarouselInstalled = true
         carousel.translatesAutoresizingMaskIntoConstraints = false
         carousel.backgroundColor = .clear
         carousel.dataSource = self
@@ -449,8 +465,18 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding, UICollectionView
             forCellWithReuseIdentifier: Self.carouselCellReuseIdentifier
         )
         carousel.isHidden = true
-        addSubview(carousel)
+        insertSubview(carousel, aboveSubview: grid)
+        NSLayoutConstraint.activate([
+            carousel.topAnchor.constraint(equalTo: topAnchor),
+            carousel.leadingAnchor.constraint(equalTo: leadingAnchor),
+            carousel.trailingAnchor.constraint(equalTo: trailingAnchor),
+            carousel.bottomAnchor.constraint(equalTo: bottomAnchor),
+        ])
+    }
 
+    private func installSensitiveControlsIfNeeded() {
+        guard !areSensitiveControlsInstalled else { return }
+        areSensitiveControlsInstalled = true
         blurView.translatesAutoresizingMaskIntoConstraints = false
         blurView.isHidden = true
         addSubview(blurView)
@@ -460,21 +486,12 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding, UICollectionView
         addSubview(toggleButton)
 
         NSLayoutConstraint.activate([
-            grid.topAnchor.constraint(equalTo: topAnchor),
-            grid.leadingAnchor.constraint(equalTo: leadingAnchor),
-            grid.trailingAnchor.constraint(equalTo: trailingAnchor),
-            grid.bottomAnchor.constraint(equalTo: bottomAnchor),
-            carousel.topAnchor.constraint(equalTo: topAnchor),
-            carousel.leadingAnchor.constraint(equalTo: leadingAnchor),
-            carousel.trailingAnchor.constraint(equalTo: trailingAnchor),
-            carousel.bottomAnchor.constraint(equalTo: bottomAnchor),
             blurView.topAnchor.constraint(equalTo: topAnchor),
             blurView.leadingAnchor.constraint(equalTo: leadingAnchor),
             blurView.trailingAnchor.constraint(equalTo: trailingAnchor),
             blurView.bottomAnchor.constraint(equalTo: bottomAnchor),
         ])
     }
-    required init?(coder: NSCoder) { fatalError("init(coder:) not supported") }
 
     override func layoutSubviews() {
         super.layoutSubviews()
@@ -573,7 +590,9 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding, UICollectionView
             pendingReturnedIndex = nil
             selectedCarouselIndex = 0
             hasInteractedWithCarousel = false
-            carousel.setContentOffset(.zero, animated: false)
+            if isCarouselInstalled {
+                carousel.setContentOffset(.zero, animated: false)
+            }
         }
         layer.cornerRadius = usesCarousel ? 0 : cornerRadius
         updateAspectConstraint()
@@ -643,20 +662,24 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding, UICollectionView
 
     private func reloadMediaLayout() {
         grid.isHidden = usesCarousel
-        carousel.isHidden = !usesCarousel
-        carouselLayout.sectionInset = UIEdgeInsets(
-            top: 0,
-            left: carouselLeadingPadding,
-            bottom: 0,
-            right: carouselTrailingPadding
-        )
-        carouselLayout.invalidateLayout()
-        carousel.reloadData()
-
         if usesCarousel {
+            installCarouselIfNeeded()
+            carousel.isHidden = false
+            carouselLayout.sectionInset = UIEdgeInsets(
+                top: 0,
+                left: carouselLeadingPadding,
+                bottom: 0,
+                right: carouselTrailingPadding
+            )
+            carouselLayout.invalidateLayout()
+            carousel.reloadData()
             overflowView.isHidden = true
             trimCellPool(activeCount: 0)
         } else {
+            if isCarouselInstalled {
+                carousel.isHidden = true
+                carousel.reloadData()
+            }
             rebuildGrid()
         }
         setNeedsLayout()
@@ -1020,6 +1043,10 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding, UICollectionView
     }
 
     private func updateBlurUI() {
+        guard sensitive || areSensitiveControlsInstalled else { return }
+        if sensitive {
+            installSensitiveControlsIfNeeded()
+        }
         blurView.isHidden = !(sensitive && isBlurred)
         NSLayoutConstraint.deactivate(toggleButtonPositionConstraints)
         toggleButtonPositionConstraints = []

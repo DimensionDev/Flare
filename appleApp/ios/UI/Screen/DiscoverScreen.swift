@@ -20,6 +20,7 @@ struct DiscoverScreen: View {
                     .zIndex(1)
             }
         }
+        .environment(\.timelineListRenderer, nil)
         .animation(.easeInOut(duration: 0.2), value: agentEnabled)
     }
 }

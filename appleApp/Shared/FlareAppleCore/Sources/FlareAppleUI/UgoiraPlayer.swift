@@ -253,7 +253,16 @@ public struct GalleryMedia: View {
     public var body: some View {
         Group {
             if let animation = media as? UiMediaUgoira {
-                if entered { UgoiraPlayer(media: animation, contentMode: contentMode) }
+                if entered {
+                    UgoiraPlayer(media: animation, contentMode: contentMode)
+                } else {
+                    // A nonempty row lets the lazy gallery deliver onAppear.
+                    Color.clear
+                }
+            } else if let image = media as? UiMediaImage {
+                NetworkImage(
+                    data: image.url, placeholder: image.previewUrl,
+                    customHeader: image.customHeaders, contentMode: contentMode)
             } else {
                 NetworkImage(data: media.url, customHeader: media.customHeaders, contentMode: contentMode)
             }

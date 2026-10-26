@@ -724,7 +724,7 @@ public struct MacStatusShareSheet: View {
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.dismiss) private var dismiss
     @Environment(\.timelineAppearance) private var timelineAppearance
-    @State private var presenter: KotlinPresenter<StatusState>
+    @State private var presenter: KotlinPresenter<StatusSharePresenterState>
     @State private var theme: ColorScheme?
     @State private var previewStyle: MacStatusSharePreviewStyle = .card
     @State private var screenshotURL: URL?
@@ -732,6 +732,15 @@ public struct MacStatusShareSheet: View {
     @State private var renderRequestID: UUID?
     @State private var alert: MacStatusShareAlert?
     @State private var crossPostDispatched = false
+    @State private var renderedRevision: String?
+    @State private var renderAttempt = 0
+
+    private var previewRevision: String {
+        let statusHash: Int32 = if case .success(let data) = onEnum(of: presenter.state.status) { data.data.renderHash } else { 0 }
+        return "\(statusHash)-\(Array(presenter.state.selectedReplies).map { $0.renderHash })-\(resolvedColorScheme)-\(previewStyle)-\(renderAttempt)"
+    }
+
+    private var currentScreenshotURL: URL? { renderedRevision == previewRevision ? screenshotURL : nil }
 
     public init(
         statusKey: MicroBlogKey,
@@ -744,7 +753,7 @@ public struct MacStatusShareSheet: View {
         self.onCrossPost = onCrossPost
         _presenter = .init(
             wrappedValue: .init(
-                presenter: StatusPresenter(
+                presenter: StatusSharePresenter(
                     accountType: accountType,
                     statusKey: statusKey
                 )
@@ -755,32 +764,25 @@ public struct MacStatusShareSheet: View {
     public var body: some View {
         StateView(state: presenter.state.status) { state in
             VStack(spacing: 0) {
-                ScrollView {
-                    MacStatusSharePreview(
-                        data: state,
-                        statusKey: statusKey,
-                        colorScheme: resolvedColorScheme,
-                        previewStyle: previewStyle,
-                        timelineAppearance: timelineAppearance
-                    )
-                    .allowsHitTesting(false)
+                if presenter.state.selecting {
+                    StatusShareReplyPicker(state: presenter.state)
+                } else {
+                    ScrollView {
+                        if let url = currentScreenshotURL, let image = NSImage(contentsOf: url) {
+                            Image(nsImage: image).resizable().scaledToFit()
+                        } else if isRenderingScreenshot {
+                            ProgressView("share_replies_preparing")
+                                .padding()
+                        }
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    Divider()
+                    footer.padding(20)
                 }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-
-                Divider()
-
-                footer
-                .padding(20)
             }
             .frame(width: 560, height: 720)
-            .onAppear {
-                renderScreenshot(data: state)
-            }
-            .onChange(of: theme) { _, _ in
-                renderScreenshot(data: state)
-            }
-            .onChange(of: previewStyle) { _, _ in
-                renderScreenshot(data: state)
+            .task(id: previewRevision) {
+                await renderScreenshot(data: state)
             }
         } errorContent: { error in
             ContentUnavailableView {
@@ -822,108 +824,84 @@ public struct MacStatusShareSheet: View {
 
     @ViewBuilder
     private var footer: some View {
-        switch purpose {
-        case .shareScreenshot:
-            VStack(alignment: .leading, spacing: 16) {
-                Text("appearance_layout_group_title")
-                    .font(.headline)
-
-                Picker("appearance_layout_group_title", selection: $previewStyle) {
-                    Text("appearance_timeline_display_mode_card").tag(MacStatusSharePreviewStyle.card)
-                    Text("status_share_sheet_preview_content").tag(MacStatusSharePreviewStyle.content)
-                }
-                .labelsHidden()
-                .pickerStyle(.segmented)
-
-                Text("appearance_theme")
-                    .font(.headline)
-
-                Picker("appearance_theme", selection: $theme) {
-                    Text("appearance_theme_system").tag(nil as ColorScheme?)
-                    Text("appearance_theme_light").tag(Optional(ColorScheme.light))
-                    Text("appearance_theme_dark").tag(Optional(ColorScheme.dark))
-                }
-                .labelsHidden()
-                .pickerStyle(.segmented)
-
-                HStack {
-                    Button("Cancel") {
-                        dismiss()
-                    }
-
-                    Spacer()
-
-                    if let screenshotURL {
-                        ShareLink(item: screenshotURL) {
-                            Text("done")
-                        }
-                        .buttonStyle(.borderedProminent)
-                    } else {
-                        Button {} label: {
-                            if isRenderingScreenshot {
-                                ProgressView()
-                                    .controlSize(.small)
-                            } else {
-                                Text("done")
+        VStack(alignment: .leading, spacing: 16) {
+            Button {
+                presenter.state.selectReplies()
+            } label: {
+                Text(String(format: String(localized: "share_replies_select", bundle: FlareAppleUILocalization.bundle), Int(presenter.state.selectedCount)))
+            }
+            Picker("appearance_layout_group_title", selection: $previewStyle) {
+                Text("appearance_timeline_display_mode_card").tag(MacStatusSharePreviewStyle.card)
+                Text("status_share_sheet_preview_content").tag(MacStatusSharePreviewStyle.content)
+            }
+            .pickerStyle(.segmented)
+            Picker("appearance_theme", selection: $theme) {
+                Text("appearance_theme_system").tag(nil as ColorScheme?)
+                Text("appearance_theme_light").tag(Optional(ColorScheme.light))
+                Text("appearance_theme_dark").tag(Optional(ColorScheme.dark))
+            }
+            .pickerStyle(.segmented)
+            HStack {
+                Button("Cancel") { dismiss() }
+                Spacer()
+                if let url = currentScreenshotURL {
+                    switch purpose {
+                    case .shareScreenshot:
+                        ShareLink(item: url) { Text("done") }.buttonStyle(.borderedProminent)
+                    case .crossPost:
+                        Button("share_crosspost") {
+                            do {
+                                let data = try Data(contentsOf: url)
+                                crossPostDispatched = true
+                                onCrossPost?(data, url.lastPathComponent)
+                            } catch {
+                                alert = MacStatusShareAlert(message: error.localizedDescription)
                             }
                         }
                         .buttonStyle(.borderedProminent)
-                        .disabled(true)
+                        .disabled(crossPostDispatched)
                     }
+                } else if isRenderingScreenshot {
+                    ProgressView().controlSize(.small)
+                } else {
+                    Button("share_replies_retry") { renderAttempt += 1 }
                 }
-            }
-        case .crossPost:
-            HStack {
-                Button("Cancel") {
-                    dismiss()
-                }
-
-                Spacer()
-
-                ProgressView()
-                    .controlSize(.small)
-                Text("share_crosspost")
             }
         }
     }
 
-    private func renderScreenshot(data: UiTimelineV2) {
+    private func renderScreenshot(data: UiTimelineV2) async {
         guard !crossPostDispatched else { return }
         let requestID = UUID()
+        let revision = previewRevision
         renderRequestID = requestID
         screenshotURL = nil
         isRenderingScreenshot = true
-
-        Task { @MainActor in
-            do {
-                let screenshot = try await MacStatusShareScreenshotRenderer.render(
-                    view: MacStatusSharePreview(
-                        data: data,
-                        statusKey: statusKey,
-                        colorScheme: resolvedColorScheme,
-                        previewStyle: previewStyle,
-                        timelineAppearance: timelineAppearance
-                    ),
-                    fileName: "flare-status-\(statusKey.description()).png"
-                )
-                guard renderRequestID == requestID else { return }
-                switch purpose {
-                case .shareScreenshot:
-                    screenshotURL = screenshot.fileURL
-                case .crossPost:
-                    crossPostDispatched = true
-                    onCrossPost?(screenshot.data, screenshot.fileURL.lastPathComponent)
-                    try? FileManager.default.removeItem(
-                        at: screenshot.fileURL.deletingLastPathComponent()
-                    )
-                }
-            } catch {
-                guard renderRequestID == requestID else { return }
-                alert = MacStatusShareAlert(message: error.localizedDescription)
+        do {
+            let screenshot = try await MacStatusShareScreenshotRenderer.render(
+                view: MacStatusSharePreview(
+                    data: data,
+                    statusKey: statusKey,
+                    replies: Array(presenter.state.selectedReplies),
+                    colorScheme: resolvedColorScheme,
+                    previewStyle: previewStyle,
+                    timelineAppearance: timelineAppearance
+                ),
+                fileName: "flare-status-\(statusKey.description()).png"
+            )
+            guard !Task.isCancelled, renderRequestID == requestID, revision == previewRevision else {
+                try? FileManager.default.removeItem(at: screenshot.fileURL.deletingLastPathComponent())
+                return
             }
+            screenshotURL = screenshot.fileURL
+            renderedRevision = revision
+        } catch is CancellationError {
+        } catch {
             guard renderRequestID == requestID else { return }
-            isRenderingScreenshot = false
+            alert = MacStatusShareAlert(message: error.localizedDescription)
         }
+        guard renderRequestID == requestID else { return }
+        isRenderingScreenshot = false
     }
 }
 
@@ -935,16 +913,13 @@ private struct MacStatusShareScreenshot {
 private struct MacStatusSharePreview: View {
     let data: UiTimelineV2
     let statusKey: MicroBlogKey
+    let replies: [UiTimelineV2]
     let colorScheme: ColorScheme
     let previewStyle: MacStatusSharePreviewStyle
     let timelineAppearance: TimelineAppearance
 
     var body: some View {
-        TimelineView(
-            data: data,
-            detailStatusKey: statusKey,
-            showTranslate: false
-        )
+        StatusShareContent(data: data, statusKey: statusKey, replies: replies)
         .frame(width: 360, alignment: .leading)
         .padding()
         .background(Color.flareSecondarySystemGroupedBackground)
@@ -968,17 +943,27 @@ private enum MacStatusShareScreenshotRenderer {
         fileName: String
     ) async throws -> MacStatusShareScreenshot {
         let scale: CGFloat = 2
-        let hostingView = NSHostingView(rootView: view.fixedSize(horizontal: false, vertical: true))
-        let fittingSize = hostingView.fittingSize
+        let loading = ShareImageLoading()
+        let hostingView = NSHostingView(rootView: view.environment(\.shareImageLoading, loading).fixedSize(horizontal: false, vertical: true))
+        var fittingSize = hostingView.fittingSize
+        try ShareImageLoading.checkSize(fittingSize, scale: scale)
         guard fittingSize.width > 0, fittingSize.height > 0 else {
             throw MacStatusShareError.invalidSnapshotSize
         }
 
-        hostingView.frame = NSRect(origin: .zero, size: fittingSize)
+        hostingView.frame = NSRect(origin: CGPoint(x: -fittingSize.width * 2, y: 0), size: fittingSize)
+        guard let container = NSApp.keyWindow?.contentView else { throw StatusShareRenderError.mediaUnavailable }
+        container.addSubview(hostingView)
+        defer { hostingView.removeFromSuperview() }
         hostingView.wantsLayer = true
         hostingView.layer?.contentsScale = scale
         hostingView.layoutSubtreeIfNeeded()
-        try? await Task.sleep(nanoseconds: 100_000_000)
+        try await Task.sleep(for: .milliseconds(100))
+        try await loading.awaitReady()
+        try await Task.sleep(for: .milliseconds(50))
+        fittingSize = hostingView.fittingSize
+        try ShareImageLoading.checkSize(fittingSize, scale: scale)
+        hostingView.frame = NSRect(origin: CGPoint(x: -fittingSize.width * 2, y: 0), size: fittingSize)
         hostingView.layoutSubtreeIfNeeded()
 
         let pixelWidth = max(1, Int((fittingSize.width * scale).rounded(.up)))

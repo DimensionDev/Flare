@@ -2,6 +2,8 @@ import SwiftUI
 import Kingfisher
 
 public struct NetworkImage: View {
+    @Environment(\.shareImageLoading) private var shareImageLoading
+    @State private var shareImageID = UUID()
     private let data: URL?
     private let placeholder: URL?
     private let customHeader: [String: String]?
@@ -42,21 +44,27 @@ public struct NetworkImage: View {
                     }
                     .flareAsyncCacheTypeCheck()
                     .loadDiskFileSynchronously(false)
-                    .fade(duration: 0.25)
+                    .fade(duration: shareImageLoading == nil ? 0.25 : 0)
                     .requestModifier { request in
                         customHeader?.forEach { request.setValue($0.value, forHTTPHeaderField: $0.key) }
                     }
                     .onProgress { receivedSize, totalSize in
                         reportProgress(receivedSize: receivedSize, totalSize: totalSize)
                     }
-                    .onSuccess { _ in onProgress?(1) }
-                    .onFailure { _ in onProgress?(nil) }
+                    .onSuccess { _ in
+                        shareImageLoading?.complete(shareImageID, success: true)
+                        onProgress?(1)
+                    }
+                    .onFailure { _ in
+                        if data != nil { shareImageLoading?.complete(shareImageID, success: false) }
+                        onProgress?(nil)
+                    }
                     .placeholder { placeholderView }
                     .cancelOnDisappear(true)
                     .aspectRatio(contentMode: contentMode)
             } else if downsamplingEnabled && (requestedPixels.width <= 0 || requestedPixels.height <= 0) {
                 placeholderView
-            } else if usesCrossfade {
+            } else if usesCrossfade && shareImageLoading == nil {
                 CrossfadeNetworkImage(
                     data: data, placeholder: placeholder, customHeader: customHeader,
                     contentMode: contentMode, onProgress: onProgress,
@@ -71,7 +79,7 @@ public struct NetworkImage: View {
                     .flareBackgroundDecodeIfSupported()
                     .loadDiskFileSynchronously(false)
                     .resizable()
-                    .fade(duration: 0.25)
+                    .fade(duration: shareImageLoading == nil ? 0.25 : 0)
                     .requestModifier { request in
                         customHeader?.forEach { request.setValue($0.value, forHTTPHeaderField: $0.key) }
                     }
@@ -80,14 +88,20 @@ public struct NetworkImage: View {
                     }
                     .onSuccess { result in
                         previousImage = (data, result.image)
+                        shareImageLoading?.complete(shareImageID, success: true)
                         onProgress?(1)
                     }
-                    .onFailure { _ in onProgress?(nil) }
+                    .onFailure { _ in
+                        if data != nil { shareImageLoading?.complete(shareImageID, success: false) }
+                        onProgress?(nil)
+                    }
                     .placeholder { placeholderView }
                     .cancelOnDisappear(true)
                     .aspectRatio(contentMode: contentMode)
             }
         }
+        .onAppear { if data != nil { shareImageLoading?.register(shareImageID) } }
+        .onDisappear { shareImageLoading?.remove(shareImageID) }
         .onGeometryChange(for: CGSize.self) { [displayScale] proxy in
             CGSize(width: ceil(proxy.size.width * displayScale), height: ceil(proxy.size.height * displayScale))
         } action: { size in

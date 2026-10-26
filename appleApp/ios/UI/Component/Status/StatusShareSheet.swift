@@ -21,11 +21,20 @@ struct StatusShareSheet: View {
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.dismiss) private var dismiss
     @Environment(\.timelineAppearance) private var timelineAppearance
-    @State private var presenter: KotlinPresenter<StatusState>
-    @State private var renderScale: CGFloat = 2.0
+    @State private var presenter: KotlinPresenter<StatusSharePresenterState>
     @State private var theme: ColorScheme? = nil
     @State private var previewStyle: SharePreviewStyle = .card
     @State private var image: UIImage? = nil
+    @State private var renderedRevision: String?
+    @State private var renderError: String?
+    @State private var renderAttempt = 0
+
+    private var previewRevision: String {
+        let statusHash: Int32 = if case .success(let data) = onEnum(of: presenter.state.status) { data.data.renderHash } else { 0 }
+        return "\(statusHash)-\(Array(presenter.state.selectedReplies).map { $0.renderHash })-\(String(describing: theme ?? colorScheme))-\(previewStyle)-\(renderAttempt)"
+    }
+
+    private var currentImage: UIImage? { renderedRevision == previewRevision ? image : nil }
     
     init(
         statusKey: MicroBlogKey,
@@ -41,27 +50,33 @@ struct StatusShareSheet: View {
         self.fxShareUrl = fxShareUrl
         self.fixvxShareUrl = fixvxShareUrl
         self.onCrossPost = onCrossPost
-        self._presenter = .init(wrappedValue: .init(presenter: StatusPresenter(accountType: accountType, statusKey: statusKey)))
+        self._presenter = .init(wrappedValue: .init(presenter: StatusSharePresenter(accountType: accountType, statusKey: statusKey)))
     }
     
     var body: some View {
         List {
             StateView(state: presenter.state.status) { data in
-                ViewBox {
-                    ZStack {
-                        previewView(data: data)
-                            .padding()
-                        Color.clear
-                            .contentShape(Rectangle())
-                            .onTapGesture {
-                            }
+                ScrollView {
+                    if let currentImage {
+                        Image(uiImage: currentImage).resizable().scaledToFit()
+                    } else if let renderError {
+                        Text(renderError)
+                        Button("share_replies_retry") { renderAttempt += 1 }
+                    } else {
+                        ProgressView("share_replies_preparing")
                     }
                 }
-                .frame(minHeight: 200, maxHeight: 360)
+                .frame(height: 360)
                 .listRowSeparator(.hidden)
                 .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
                 .listRowBackground(Color.clear)
-                
+
+                Button {
+                    presenter.state.selectReplies()
+                } label: {
+                    Text(String(format: String(localized: "share_replies_select"), Int(presenter.state.selectedCount)))
+                }
+
                 Section {
                     Button {
                         crossPost()
@@ -72,7 +87,7 @@ struct StatusShareSheet: View {
                             Image(fontAwesome: .retweet)
                         }
                     }
-                    .disabled(image == nil)
+                    .disabled(currentImage == nil)
 
                     if let url = URL(string: shareUrl) {
                         ShareLink(item: url) {
@@ -80,7 +95,7 @@ struct StatusShareSheet: View {
                         }
                     }
                     
-                    if let image {
+                    if let image = currentImage {
                         ShareLink(item: Image(uiImage: image), preview: SharePreview("share_screenshot", image: Image(uiImage: image))) {
                             Label("share_screenshot", systemImage: "photo")
                         }
@@ -91,6 +106,7 @@ struct StatusShareSheet: View {
                     } label: {
                         Label("save_screenshot", systemImage: "arrow.down.circle")
                     }
+                    .disabled(currentImage == nil)
                     
                     if let fxShareUrl, let url = URL(string: fxShareUrl) {
                         ShareLink(item: url) {
@@ -135,33 +151,35 @@ struct StatusShareSheet: View {
             }
         }
         .navigationTitle("fx_share")
-        .onSuccessOf(of: presenter.state.status) { data in
+        .sheet(isPresented: Binding(
+            get: { presenter.state.selecting },
+            set: { if !$0 { presenter.state.cancelSelection() } }
+        )) {
+            StatusShareReplyPicker(state: presenter.state)
+                .presentationDetents([.large])
+        }
+        .task(id: previewRevision) {
+            let revision = previewRevision
             image = nil
-            Task {
-                image = await renderImage(data: data)
-            }
-        }
-        .onChange(of: theme) { oldValue, newValue in
-            if case .success(let data) = onEnum(of: presenter.state.status) {
-                image = nil
-                Task {
-                    image = await renderImage(data: data.data)
-                }
-            }
-        }
-        .onChange(of: previewStyle) { oldValue, newValue in
-            if case .success(let data) = onEnum(of: presenter.state.status) {
-                image = nil
-                Task {
-                    image = await renderImage(data: data.data)
-                }
+            renderError = nil
+            guard case .success(let data) = onEnum(of: presenter.state.status) else { return }
+            do {
+                let result = try await previewView(data: data.data).snapshot(colorScheme: theme ?? colorScheme)
+                try Task.checkCancellation()
+                guard revision == previewRevision else { return }
+                image = result
+                renderedRevision = revision
+            } catch is CancellationError {
+            } catch {
+                guard revision == previewRevision else { return }
+                renderError = error.localizedDescription
             }
         }
     }
     
     @ViewBuilder
     private func previewView(data: UiTimelineV2) -> some View {
-        TimelineView(data: data, detailStatusKey: statusKey, showTranslate: false)
+        StatusShareContent(data: data, statusKey: statusKey, replies: Array(presenter.state.selectedReplies))
             .frame(width: 360)
             .padding()
             .background(Color(.secondarySystemGroupedBackground))
@@ -178,20 +196,14 @@ struct StatusShareSheet: View {
     }
     
     
-    private func renderImage(data: UiTimelineV2) async -> UIImage? {
-        return await previewView(data: data).snapshot(
-            colorScheme: theme ?? colorScheme
-        )
-    }
-    
     private func saveImage() {
-        guard let image = image else { return }
+        guard let image = currentImage else { return }
         MediaSaver.shared.saveImage(image)
         dismiss()
     }
 
     private func crossPost() {
-        guard let imageData = image?.pngData() else { return }
+        guard let imageData = currentImage?.pngData() else { return }
         onCrossPost(
             ComposePrefill(
                 text: "\n\n\(shareUrl)",
@@ -234,24 +246,34 @@ private extension TimelineAppearance {
 
 extension View {
     @MainActor
-    func snapshot(
-        colorScheme: ColorScheme,
-        delay: TimeInterval = 0.1
-    ) async -> UIImage? {
-        let controller = UIHostingController(rootView: self.edgesIgnoringSafeArea(.top))
+    func snapshot(colorScheme: ColorScheme) async throws -> UIImage {
+        let loading = ShareImageLoading()
+        let controller = UIHostingController(rootView: self.environment(\.shareImageLoading, loading).fixedSize())
         controller.overrideUserInterfaceStyle = colorScheme == .dark ? .dark : .light
-        let view = controller.view
-        let targetSize = controller.view.intrinsicContentSize
-        view?.bounds = CGRect(origin: CGPoint(x: 0, y: 0), size: targetSize)
-        view?.backgroundColor = .systemGroupedBackground
-        try? await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
-
+        let view = controller.view!
+        var targetSize = view.intrinsicContentSize
+        try ShareImageLoading.checkSize(targetSize, scale: 3)
+        view.frame = CGRect(origin: CGPoint(x: -targetSize.width * 2, y: 0), size: targetSize)
+        view.backgroundColor = .systemGroupedBackground
+        guard let window = UIApplication.shared.connectedScenes
+            .compactMap({ $0 as? UIWindowScene }).flatMap(\.windows).first(where: \.isKeyWindow) else {
+            throw StatusShareRenderError.mediaUnavailable
+        }
+        window.addSubview(view)
+        defer { view.removeFromSuperview() }
+        view.layoutIfNeeded()
+        try await Task.sleep(for: .milliseconds(100))
+        try await loading.awaitReady()
+        try await Task.sleep(for: .milliseconds(50))
+        targetSize = view.intrinsicContentSize
+        try ShareImageLoading.checkSize(targetSize, scale: 3)
+        view.frame = CGRect(origin: CGPoint(x: -targetSize.width * 2, y: 0), size: targetSize)
+        view.layoutIfNeeded()
         let format = UIGraphicsImageRendererFormat()
         format.scale = 3
         format.opaque = true
-        let renderer = UIGraphicsImageRenderer(size: targetSize, format: format)
-        return renderer.image { _ in
-            view?.drawHierarchy(in: controller.view.bounds, afterScreenUpdates: true)
+        return UIGraphicsImageRenderer(size: targetSize, format: format).image { _ in
+            view.drawHierarchy(in: view.bounds, afterScreenUpdates: true)
         }
     }
 }

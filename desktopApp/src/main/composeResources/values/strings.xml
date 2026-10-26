@@ -734,4 +734,7 @@
     <string name="home_timeline_view_latest">View latest</string>
     <string name="settings_remember_home_timeline_position">Remember Home reading position</string>
     <string name="settings_remember_home_timeline_position_description">Keep your place after refreshing and reopening. Use View latest to jump to new posts.</string>
+    <string name="share_replies_too_large">The image is too long. Select fewer replies.</string>
+    <string name="share_replies_render_failed">Unable to prepare the image. Retry or remove replies with unavailable media.</string>
+    <string name="share_replies_preparing">Preparing image…</string>
 </resources>

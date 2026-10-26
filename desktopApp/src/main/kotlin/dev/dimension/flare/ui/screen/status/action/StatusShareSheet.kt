@@ -8,16 +8,21 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
@@ -44,6 +49,9 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.settings_appearance_theme_dark
 import dev.dimension.flare.settings_appearance_theme_light
 import dev.dimension.flare.settings_appearance_timeline_display_mode_card
+import dev.dimension.flare.share_replies_preparing
+import dev.dimension.flare.share_replies_render_failed
+import dev.dimension.flare.share_replies_too_large
 import dev.dimension.flare.status_share
 import dev.dimension.flare.status_share_crosspost
 import dev.dimension.flare.status_share_crosspost_failed
@@ -54,12 +62,17 @@ import dev.dimension.flare.status_share_via_fixvx
 import dev.dimension.flare.status_share_via_fxembed
 import dev.dimension.flare.ui.component.ComposeInAppNotification
 import dev.dimension.flare.ui.component.FAIcon
+import dev.dimension.flare.ui.component.LocalShareImageLoading
 import dev.dimension.flare.ui.component.LocalTimelineAppearance
+import dev.dimension.flare.ui.component.ShareImageLoading
 import dev.dimension.flare.ui.component.ViewBox
-import dev.dimension.flare.ui.component.status.StatusItem
+import dev.dimension.flare.ui.component.status.StatusShareContent
+import dev.dimension.flare.ui.component.status.StatusShareReplyButton
+import dev.dimension.flare.ui.component.status.StatusShareReplyPicker
 import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.presenter.invoke
-import dev.dimension.flare.ui.presenter.status.StatusPresenter
+import dev.dimension.flare.ui.presenter.status.StatusShareImageLimits
+import dev.dimension.flare.ui.presenter.status.StatusSharePresenter
 import dev.dimension.flare.ui.theme.FlareTheme
 import dev.dimension.flare.ui.theme.LocalComposeWindow
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
@@ -115,15 +128,49 @@ internal fun StatusShareSheet(
     var previewTheme by remember { mutableStateOf(SharePreviewTheme.Light) }
     var previewStyle by remember { mutableStateOf(SharePreviewStyle.Card) }
     var isPreparingCrossPost by remember { mutableStateOf(false) }
+    var isPreparingImage by remember { mutableStateOf(false) }
+    var imageError by remember { mutableStateOf<org.jetbrains.compose.resources.StringResource?>(null) }
+    var imageAttempt by remember { mutableStateOf(0) }
 
     val state by producePresenter("DesktopStatusShareSheet_${accountType}_$statusKey") {
         remember(accountType, statusKey) {
-            StatusPresenter(accountType = accountType, statusKey = statusKey)
+            StatusSharePresenter(accountType = accountType, statusKey = statusKey)
         }.invoke()
+    }
+    val imageLoading = remember(state.status, state.selectedReplies, previewTheme, previewStyle, imageAttempt) { ShareImageLoading() }
+
+    suspend fun captureImage(): ImageBitmap? {
+        if (isPreparingImage) return null
+        isPreparingImage = true
+        imageError = null
+        try {
+            repeat(2) { withFrameNanos { } }
+            imageLoading.awaitReady()
+            repeat(2) { withFrameNanos { } }
+            if (!StatusShareImageLimits.canRender(previewGraphicsLayer.size.width, previewGraphicsLayer.size.height)) {
+                imageError = Res.string.share_replies_too_large
+                return null
+            }
+            return capturePreviewImage(previewGraphicsLayer).also {
+                if (it == null) imageError = Res.string.share_replies_render_failed
+            }
+        } catch (error: kotlinx.coroutines.CancellationException) {
+            throw error
+        } catch (_: Exception) {
+            imageError = Res.string.share_replies_render_failed
+            imageAttempt++
+            return null
+        } finally {
+            isPreparingImage = false
+        }
     }
     FluentDialog(
         visible = true,
     ) {
+        if (state.selecting) {
+            StatusShareReplyPicker(state, Modifier.width(560.dp).height(640.dp).padding(16.dp))
+            return@FluentDialog
+        }
         Column(
             modifier =
                 modifier
@@ -140,13 +187,13 @@ internal fun StatusShareSheet(
                 LiteFilter {
                     PillButton(
                         selected = previewStyle == SharePreviewStyle.Card,
-                        onSelectedChanged = { previewStyle = SharePreviewStyle.Card },
+                        onSelectedChanged = { if (!isPreparingImage) previewStyle = SharePreviewStyle.Card },
                     ) {
                         Text(stringResource(Res.string.settings_appearance_timeline_display_mode_card))
                     }
                     PillButton(
                         selected = previewStyle == SharePreviewStyle.Content,
-                        onSelectedChanged = { previewStyle = SharePreviewStyle.Content },
+                        onSelectedChanged = { if (!isPreparingImage) previewStyle = SharePreviewStyle.Content },
                     ) {
                         Text(stringResource(Res.string.status_share_sheet_preview_content))
                     }
@@ -154,13 +201,13 @@ internal fun StatusShareSheet(
                 LiteFilter {
                     PillButton(
                         selected = previewTheme == SharePreviewTheme.Light,
-                        onSelectedChanged = { previewTheme = SharePreviewTheme.Light },
+                        onSelectedChanged = { if (!isPreparingImage) previewTheme = SharePreviewTheme.Light },
                     ) {
                         Text(stringResource(Res.string.settings_appearance_theme_light))
                     }
                     PillButton(
                         selected = previewTheme == SharePreviewTheme.Dark,
-                        onSelectedChanged = { previewTheme = SharePreviewTheme.Dark },
+                        onSelectedChanged = { if (!isPreparingImage) previewTheme = SharePreviewTheme.Dark },
                     ) {
                         Text(stringResource(Res.string.settings_appearance_theme_dark))
                     }
@@ -173,7 +220,7 @@ internal fun StatusShareSheet(
                 FlareTheme(
                     isDarkTheme = previewTheme == SharePreviewTheme.Dark,
                 ) {
-                    ViewBox {
+                    ViewBox(modifier = Modifier.verticalScroll(rememberScrollState())) {
                         Box(
                             modifier =
                                 Modifier.drawWithContent {
@@ -190,6 +237,7 @@ internal fun StatusShareSheet(
                             ) {
                                 val content: @Composable () -> Unit = {
                                     CompositionLocalProvider(
+                                        LocalShareImageLoading provides imageLoading,
                                         LocalTimelineAppearance provides
                                             LocalTimelineAppearance.current.copy(
                                                 expandContentWarning = true,
@@ -199,10 +247,13 @@ internal fun StatusShareSheet(
                                         LocalContentColor provides FluentTheme.colors.text.text.primary,
                                         LocalTextStyle provides LocalTextStyle.current.copy(Color.Unspecified),
                                     ) {
-                                        StatusItem(
-                                            item = state.status.takeSuccess(),
-                                            detailStatusKey = statusKey,
-                                        )
+                                        key(imageLoading) {
+                                            StatusShareContent(
+                                                status = state.status.takeSuccess(),
+                                                statusKey = statusKey,
+                                                replies = state.selectedReplies,
+                                            )
+                                        }
                                     }
                                 }
                                 when (previewStyle) {
@@ -245,6 +296,9 @@ internal fun StatusShareSheet(
                     }
                 }
             }
+            StatusShareReplyButton(state, enabled = !isPreparingImage && !isPreparingCrossPost)
+            if (isPreparingImage) Text(stringResource(Res.string.share_replies_preparing))
+            imageError?.let { Text(stringResource(it)) }
             FlowRow(
                 modifier = Modifier.fillMaxWidth().weight(1f, fill = false),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -254,7 +308,7 @@ internal fun StatusShareSheet(
                     onClick = {
                         isPreparingCrossPost = true
                         scope.launch {
-                            val image = capturePreviewImage(previewGraphicsLayer)
+                            val image = captureImage()
                             val file =
                                 image?.let {
                                     writeCrossPostImage(
@@ -271,7 +325,7 @@ internal fun StatusShareSheet(
                             }
                         }
                     },
-                    disabled = isPreparingCrossPost,
+                    disabled = isPreparingCrossPost || isPreparingImage || state.status.takeSuccess() == null,
                 ) {
                     FAIcon(
                         FontAwesomeIcons.Solid.Retweet,
@@ -290,9 +344,10 @@ internal fun StatusShareSheet(
                     Text(stringResource(Res.string.status_share))
                 }
                 Button(
+                    disabled = isPreparingImage || isPreparingCrossPost || state.status.takeSuccess() == null,
                     onClick = {
                         scope.launch {
-                            val image = capturePreviewImage(previewGraphicsLayer) ?: return@launch
+                            val image = captureImage() ?: return@launch
                             shareImageToClipboard(image)
                             inAppNotification.message(Res.string.copied_to_clipboard)
                         }
@@ -305,9 +360,10 @@ internal fun StatusShareSheet(
                     Text(stringResource(Res.string.status_share_image))
                 }
                 Button(
+                    disabled = isPreparingImage || isPreparingCrossPost || state.status.takeSuccess() == null,
                     onClick = {
                         scope.launch {
-                            val image = capturePreviewImage(previewGraphicsLayer) ?: return@launch
+                            val image = captureImage() ?: return@launch
                             saveImageWithDialog(
                                 window,
                                 image,

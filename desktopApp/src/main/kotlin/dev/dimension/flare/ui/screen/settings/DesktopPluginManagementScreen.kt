@@ -15,9 +15,12 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.input.TextFieldLineLimits
+import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -49,16 +52,20 @@ import dev.dimension.flare.feature.plugin.management.PluginManagementItemV1
 import dev.dimension.flare.feature.plugin.management.PluginManagementPresenterV1
 import dev.dimension.flare.feature.plugin.management.PluginManagementStateV1
 import dev.dimension.flare.plugin_capabilities
+import dev.dimension.flare.plugin_check_updates
 import dev.dimension.flare.plugin_cleanup
 import dev.dimension.flare.plugin_confirm_install
 import dev.dimension.flare.plugin_empty
+import dev.dimension.flare.plugin_github_repository
 import dev.dimension.flare.plugin_inactive
 import dev.dimension.flare.plugin_install
+import dev.dimension.flare.plugin_install_github
 import dev.dimension.flare.plugin_issue_files_missing
 import dev.dimension.flare.plugin_issue_index_corrupt
 import dev.dimension.flare.plugin_issue_platform_conflict
 import dev.dimension.flare.plugin_issue_platform_invalid
 import dev.dimension.flare.plugin_issues
+import dev.dimension.flare.plugin_load_versions
 import dev.dimension.flare.plugin_operation_failed
 import dev.dimension.flare.plugin_permission_account_origin
 import dev.dimension.flare.plugin_permission_account_origin_label
@@ -73,11 +80,17 @@ import dev.dimension.flare.plugin_runtime_paused
 import dev.dimension.flare.plugin_uninstall
 import dev.dimension.flare.plugin_uninstall_confirm_message
 import dev.dimension.flare.plugin_uninstall_confirm_title
+import dev.dimension.flare.plugin_unverified_github_warning
 import dev.dimension.flare.plugin_unverified_warning
+import dev.dimension.flare.plugin_up_to_date
+import dev.dimension.flare.plugin_update
+import dev.dimension.flare.plugin_version
 import dev.dimension.flare.plugin_warning_added_permission
 import dev.dimension.flare.plugin_warning_changed_package
 import dev.dimension.flare.plugin_warning_compatibility
 import dev.dimension.flare.plugin_warning_downgrade
+import dev.dimension.flare.plugin_warning_source_changed
+import dev.dimension.flare.plugin_warning_tag_moved
 import dev.dimension.flare.settings_plugins_subtitle
 import dev.dimension.flare.settings_plugins_title
 import dev.dimension.flare.ui.component.FAIcon
@@ -88,6 +101,7 @@ import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import io.github.composefluent.FluentTheme
 import io.github.composefluent.component.AccentButton
 import io.github.composefluent.component.CardExpanderItem
+import io.github.composefluent.component.ComboBox
 import io.github.composefluent.component.ContentDialog
 import io.github.composefluent.component.ContentDialogButton
 import io.github.composefluent.component.FlyoutPlacement
@@ -99,6 +113,7 @@ import io.github.composefluent.component.ProgressRing
 import io.github.composefluent.component.SubtleButton
 import io.github.composefluent.component.Switcher
 import io.github.composefluent.component.Text
+import io.github.composefluent.component.TextField
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -117,10 +132,25 @@ internal fun DesktopPluginManagementScreen(onBack: () -> Unit) {
         onDispose { presenter.close() }
     }
     val state by presenter.state.collectAsState()
+    LaunchedEffect(presenter) { scope.launchPresenterAction { presenter.checkUpdates(forceRefresh = false) } }
+    var showsGitHubInstall by remember { mutableStateOf(false) }
     val installLabel = stringResource(Res.string.plugin_install)
     var showsMaintenanceMenu by remember { mutableStateOf(false) }
     var pendingUninstallId by remember { mutableStateOf<String?>(null) }
     val pendingUninstall = state.plugins.firstOrNull { it.pluginId == pendingUninstallId }
+
+    if (showsGitHubInstall) {
+        GitHubInstallDialog(
+            state = state,
+            onLoad = { url -> scope.launchPresenterAction { presenter.loadGitHubRepository(url) } },
+            onInstall = { tag ->
+                showsGitHubInstall = false
+                scope.launchPresenterAction { presenter.inspectGitHub(tag) }
+            },
+            onUrlChanged = presenter::clearGitHubRepository,
+            onDismiss = { showsGitHubInstall = false },
+        )
+    }
 
     state.pendingInstall?.let { review ->
         PluginInstallReviewDialog(
@@ -195,6 +225,14 @@ internal fun DesktopPluginManagementScreen(onBack: () -> Unit) {
                         onDismissRequest = { showsMaintenanceMenu = false },
                         placement = FlyoutPlacement.BottomAlignedEnd,
                     ) {
+                        MenuFlyoutItem(
+                            text = { Text(stringResource(Res.string.plugin_check_updates)) },
+                            enabled = state.plugins.any { it.sourceUrl != null },
+                            onClick = {
+                                showsMaintenanceMenu = false
+                                scope.launchPresenterAction { presenter.checkUpdates() }
+                            },
+                        )
                         if (state.canRebuildIndex) {
                             MenuFlyoutItem(
                                 text = { Text(stringResource(Res.string.plugin_rebuild_index)) },
@@ -214,6 +252,13 @@ internal fun DesktopPluginManagementScreen(onBack: () -> Unit) {
                         )
                     }
                 }
+                SubtleButton(
+                    disabled = state.busy,
+                    onClick = {
+                        presenter.clearGitHubRepository()
+                        showsGitHubInstall = true
+                    },
+                ) { Text(stringResource(Res.string.plugin_install_github)) }
                 AccentButton(
                     disabled = state.busy,
                     onClick = {
@@ -240,6 +285,7 @@ internal fun DesktopPluginManagementScreen(onBack: () -> Unit) {
                     scope.launchPresenterAction { presenter.setEnabled(pluginId, enabled) }
                 },
                 onUninstall = { pendingUninstallId = it },
+                onUpdate = { pluginId -> scope.launchPresenterAction { presenter.inspectGitHubUpdate(pluginId) } },
                 onRetryRuntime = { pluginId ->
                     scope.launchPresenterAction { presenter.retryRuntime(pluginId) }
                 },
@@ -270,7 +316,18 @@ private fun PluginInstallReviewDialog(
                         .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                Text(stringResource(Res.string.plugin_unverified_warning))
+                Text(
+                    stringResource(
+                        if (review.sourceUrl ==
+                            null
+                        ) {
+                            Res.string.plugin_unverified_warning
+                        } else {
+                            Res.string.plugin_unverified_github_warning
+                        },
+                    ),
+                )
+                review.sourceUrl?.let { Text(it) }
                 if (review.capabilities.isNotEmpty()) {
                     Text(stringResource(Res.string.plugin_capabilities), style = FluentTheme.typography.bodyStrong)
                     review.capabilities.forEach { Text("• $it") }
@@ -317,10 +374,66 @@ private fun PluginSensitivePermissionV1.localizedDescription(): String {
 }
 
 @Composable
+private fun GitHubInstallDialog(
+    state: PluginManagementStateV1,
+    onLoad: (String) -> Unit,
+    onInstall: (String) -> Unit,
+    onUrlChanged: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val url = rememberTextFieldState()
+    var selectedTag by remember { mutableStateOf<String?>(null) }
+    LaunchedEffect(url.text) {
+        selectedTag = null
+        onUrlChanged()
+    }
+    val versions = state.githubCatalog?.versions.orEmpty()
+    val selection = versions.firstOrNull { it.tag == selectedTag } ?: versions.firstOrNull()
+    ContentDialog(
+        visible = true,
+        title = stringResource(Res.string.plugin_install_github),
+        content = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                TextField(
+                    url,
+                    modifier = Modifier.fillMaxWidth(),
+                    header = { Text(stringResource(Res.string.plugin_github_repository)) },
+                    placeholder = { Text("https://github.com/owner/repository") },
+                    lineLimits = TextFieldLineLimits.SingleLine,
+                    enabled = !state.busy,
+                )
+                if (selection != null) {
+                    ComboBox(
+                        header = stringResource(Res.string.plugin_version),
+                        items = versions.map { it.tag },
+                        selected = versions.indexOf(selection),
+                        disabled = state.busy,
+                        onSelectionChange = { index, _ -> selectedTag = versions[index].tag },
+                    )
+                }
+                state.error?.let { Text(it.take(512)) }
+            }
+        },
+        primaryButtonText = stringResource(if (selection == null) Res.string.plugin_load_versions else Res.string.plugin_confirm_install),
+        closeButtonText = stringResource(Res.string.cancel),
+        onButtonClick = { button ->
+            if (!state.busy) {
+                if (button == ContentDialogButton.Primary) {
+                    if (selection == null) onLoad(url.text.toString()) else onInstall(selection.tag)
+                } else {
+                    onDismiss()
+                }
+            }
+        },
+    )
+}
+
+@Composable
 private fun PluginManagementList(
     state: PluginManagementStateV1,
     onSetEnabled: (String, Boolean) -> Unit,
     onUninstall: (String) -> Unit,
+    onUpdate: (String) -> Unit,
     onRetryRuntime: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -347,7 +460,16 @@ private fun PluginManagementList(
             }
             if (state.error != null) {
                 item(key = "operation-error") {
-                    ErrorInfoBar(stringResource(Res.string.plugin_operation_failed))
+                    ErrorInfoBar("${stringResource(Res.string.plugin_operation_failed)}: ${state.error.orEmpty().take(512)}")
+                }
+            }
+            if (state.updatesChecked && state.plugins.none { it.availableUpdate != null }) {
+                item(key = "up-to-date") {
+                    InfoBar(
+                        title = { Text(stringResource(Res.string.plugin_up_to_date)) },
+                        message = {},
+                        modifier = Modifier.fillMaxWidth(),
+                    )
                 }
             }
             state.issues.forEach { issue ->
@@ -388,6 +510,7 @@ private fun PluginManagementList(
                         busy = state.busy,
                         onSetEnabled = onSetEnabled,
                         onUninstall = onUninstall,
+                        onUpdate = onUpdate,
                     )
                 }
             }
@@ -401,6 +524,7 @@ private fun PluginItem(
     busy: Boolean,
     onSetEnabled: (String, Boolean) -> Unit,
     onUninstall: (String) -> Unit,
+    onUpdate: (String) -> Unit,
 ) {
     CardExpanderItem(
         heading = { Text(plugin.nameText.resolveText()) },
@@ -418,6 +542,12 @@ private fun PluginItem(
         caption = {
             Column {
                 Text("${plugin.platformId} · ${plugin.version}")
+                plugin.sourceUrl?.let { Text(it) }
+                plugin.availableUpdate?.let { update ->
+                    SubtleButton(disabled = busy, onClick = { onUpdate(plugin.pluginId) }) {
+                        Text("${stringResource(Res.string.plugin_update)} ${update.tag}")
+                    }
+                }
                 Text(
                     if (plugin.running) {
                         stringResource(Res.string.plugin_running)
@@ -497,6 +627,8 @@ private fun PluginInstallWarningV1.localizedMessage(): String {
                 PluginInstallWarningTypeV1.Downgrade -> Res.string.plugin_warning_downgrade
                 PluginInstallWarningTypeV1.SameVersionDifferentHash -> Res.string.plugin_warning_changed_package
                 PluginInstallWarningTypeV1.Compatibility -> Res.string.plugin_warning_compatibility
+                PluginInstallWarningTypeV1.SourceChanged -> Res.string.plugin_warning_source_changed
+                PluginInstallWarningTypeV1.TagMoved -> Res.string.plugin_warning_tag_moved
             },
         )
     val localizedDetail =

@@ -26,11 +26,31 @@ internal data class FppArchive(
 internal class FppArchiveReader(
     private val fileSystem: FileSystem,
 ) {
-    fun read(path: Path): FppArchive {
+    fun read(
+        path: Path,
+        repositoryArchive: Boolean = false,
+    ): FppArchive {
         val packageSize = requireNotNull(fileSystem.metadataOrNull(path)?.size) { "Package does not exist" }
         require(packageSize in 1..FppLimits.MAX_PACKAGE_BYTES) { "Package exceeds the compressed size limit" }
 
-        val entries = readDirectory(path, packageSize)
+        val directory = readDirectory(path, packageSize, repositoryArchive)
+        val root = if (repositoryArchive) directory.first().path.substringBefore('/') else ""
+        val entries =
+            if (repositoryArchive) {
+                require(directory.map { it.path.lowercase() }.distinct().size == directory.size) { "Duplicate ZIP path" }
+                require(directory.sumOf(FppArchiveEntry::uncompressedSize) <= FppLimits.MAX_UNCOMPRESSED_BYTES) {
+                    "Repository exceeds the uncompressed size limit"
+                }
+                require(directory.all { it.path.startsWith("$root/") || (it.path == root && it.isDirectory) }) {
+                    "Repository archive must have one root directory"
+                }
+                directory.mapNotNull { entry ->
+                    val name = entry.path.removePrefix("$root/")
+                    entry.copy(path = name).takeIf { !entry.isDirectory && isPluginPath(name) }
+                }
+            } else {
+                directory
+            }
         validateLayout(entries)
         val zip = fileSystem.openZip(path)
         val files =
@@ -39,7 +59,7 @@ internal class FppArchiveReader(
                 .filterNot(FppArchiveEntry::isDirectory)
                 .associate { entry ->
                     val bytes =
-                        zip.source("/${entry.path}".toPath()).buffer().use { source ->
+                        zip.source("/${if (repositoryArchive) "$root/" else ""}${entry.path}".toPath()).buffer().use { source ->
                             val buffer = Buffer()
                             while (true) {
                                 val remaining = entry.uncompressedSize + 1 - buffer.size
@@ -60,6 +80,7 @@ internal class FppArchiveReader(
     private fun readDirectory(
         path: Path,
         packageSize: Long,
+        repositoryArchive: Boolean,
     ): List<FppArchiveEntry> =
         fileSystem.openReadOnly(path).use { handle ->
             val tailSize = minOf(packageSize, MAX_EOCD_SEARCH_BYTES).toInt()
@@ -73,7 +94,7 @@ internal class FppArchiveReader(
             require(tail.ushortLe(eocdIndex + 4) == 0 && tail.ushortLe(eocdIndex + 6) == 0) { "Spanned ZIP is not supported" }
             val entryCount = tail.ushortLe(eocdIndex + 10)
             require(entryCount == tail.ushortLe(eocdIndex + 8)) { "Spanned ZIP is not supported" }
-            require(entryCount in 1..FppLimits.MAX_ENTRY_COUNT) { "Invalid ZIP entry count" }
+            require(entryCount in 1..if (repositoryArchive) 4_096 else FppLimits.MAX_ENTRY_COUNT) { "Invalid ZIP entry count" }
             val centralSize = tail.uintLe(eocdIndex + 12)
             val centralOffset = tail.uintLe(eocdIndex + 16)
             require(centralSize != UINT32_MAX && centralOffset != UINT32_MAX) { "ZIP64 is not supported" }
@@ -88,7 +109,7 @@ internal class FppArchiveReader(
                 val result = ArrayList<FppArchiveEntry>(entryCount)
                 var consumed = 0L
                 repeat(entryCount) {
-                    val parsed = source.readCentralEntry()
+                    val parsed = source.readCentralEntry(repositoryArchive)
                     consumed += parsed.bytesRead
                     require(consumed <= centralSize) { "Central directory exceeds its declared size" }
                     val dataOffset = validateLocalHeader(handle.source(parsed.entry.localHeaderOffset).buffer(), parsed)
@@ -100,7 +121,7 @@ internal class FppArchiveReader(
             }
         }
 
-    private fun BufferedSource.readCentralEntry(): ParsedCentralEntry {
+    private fun BufferedSource.readCentralEntry(repositoryArchive: Boolean): ParsedCentralEntry {
         require(readIntLe() == CENTRAL_HEADER_SIGNATURE) { "Invalid ZIP central directory entry" }
         val versionMadeBy = ushortLe()
         skip(2)
@@ -131,7 +152,7 @@ internal class FppArchiveReader(
         val extra = readByteArray(extraSize.toLong())
         validateExtra(extra)
         skip(commentSize.toLong())
-        validatePath(name)
+        validatePath(name, repositoryArchive)
 
         val isDirectory = name.endsWith('/')
         validateUnixType(versionMadeBy, externalAttributes, isDirectory)
@@ -244,9 +265,12 @@ internal class FppArchiveReader(
         }
     }
 
-    private fun validatePath(name: String) {
+    private fun validatePath(
+        name: String,
+        allowUnicode: Boolean,
+    ) {
         require(name.isNotEmpty() && name.length <= MAX_PATH_LENGTH) { "Invalid ZIP path" }
-        require(name.all { it.code in 0x20..0x7e }) { "ZIP paths must be ASCII" }
+        require(name.all { if (allowUnicode) !it.isISOControl() else it.code in 0x20..0x7e }) { "Invalid ZIP path characters" }
         require(!name.startsWith('/') && '\\' !in name && !DRIVE_PATH.containsMatchIn(name)) { "Absolute ZIP path" }
         val normalized = name.removeSuffix("/")
         require(normalized.isNotEmpty()) { "Invalid ZIP path" }

@@ -119,6 +119,166 @@
       }
     }
   },
+  "plugin_install_github": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Install from GitHub"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "从 GitHub 安装"
+        }
+      }
+    }
+  },
+  "plugin_github_repository": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "GitHub repository URL"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "GitHub 仓库链接"
+        }
+      }
+    }
+  },
+  "plugin_load_versions": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Load versions"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "获取版本"
+        }
+      }
+    }
+  },
+  "plugin_version": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Version"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "版本"
+        }
+      }
+    }
+  },
+  "plugin_check_updates": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Check for updates"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "检查更新"
+        }
+      }
+    }
+  },
+  "plugin_update": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Update"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "更新"
+        }
+      }
+    }
+  },
+  "plugin_up_to_date": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "GitHub plugins are up to date"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "GitHub 插件均为最新版本"
+        }
+      }
+    }
+  },
+  "plugin_warning_source_changed": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "This installation changes the plugin source"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "此次安装将更改插件来源"
+        }
+      }
+    }
+  },
+  "plugin_warning_tag_moved": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "This tag now points to a different commit"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "此 tag 现在指向不同的提交"
+        }
+      }
+    }
+  },
+  "plugin_unverified_github_warning": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "This GitHub plugin has not been verified. Only install it if you trust the author."
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "此 GitHub 插件未经验证。请仅在信任作者时安装。"
+        }
+      }
+    }
+  },
   "plugin_install": {
     "localizations": {
       "en": {

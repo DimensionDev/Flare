@@ -14,6 +14,9 @@ public struct PluginManagementView: View {
     @State private var facade: PluginAppleFacadeV1
     @State private var presenter: KotlinPresenter<PluginManagementStateV1>
     @State private var importsPlugin = false
+    @State private var showsGitHubInstall = false
+    @State private var gitHubURL = ""
+    @State private var selectedGitHubTag = ""
     @State private var fileError: String?
     @State private var pendingUninstallId: String?
     @State private var pendingUninstallName: String?
@@ -41,7 +44,14 @@ public struct PluginManagementView: View {
                 Section {
                     Label("plugin_operation_failed", systemImage: "exclamationmark.triangle")
                         .foregroundStyle(.red)
+                    if let error = presenter.state.error {
+                        Text(String(error.prefix(512))).font(.caption)
+                    }
                 }
+            }
+
+            if presenter.state.updatesChecked && presenter.state.plugins.allSatisfy({ $0.availableUpdate == nil }) {
+                Label("plugin_up_to_date", systemImage: "checkmark.circle")
             }
 
             if !presenter.state.issues.isEmpty || !presenter.state.runtimeIssues.isEmpty {
@@ -95,6 +105,16 @@ public struct PluginManagementView: View {
             }
             ToolbarItem(placement: .automatic) {
                 Menu {
+                    Button("plugin_install_github") {
+                        gitHubURL = ""
+                        selectedGitHubTag = ""
+                        facade.clearGitHubRepository()
+                        showsGitHubInstall = true
+                    }
+                    Button("plugin_check_updates") {
+                        Task { try? await facade.checkUpdates(forceRefresh: true) }
+                    }
+                    .disabled(!presenter.state.plugins.contains { $0.sourceUrl != nil })
                     if presenter.state.canRebuildIndex {
                         Button("plugin_rebuild_index") {
                             Task { try? await facade.rebuildIndex() }
@@ -123,6 +143,10 @@ public struct PluginManagementView: View {
             allowsMultipleSelection: false,
             onCompletion: importPlugin
         )
+        .task { try? await facade.checkUpdates(forceRefresh: false) }
+        .sheet(isPresented: $showsGitHubInstall) {
+            gitHubInstallSheet
+        }
         .alert(
             presenter.state.pendingInstall.map { "\($0.name) \($0.version)" } ?? "",
             isPresented: Binding(
@@ -216,6 +240,18 @@ public struct PluginManagementView: View {
                     .foregroundStyle(.tint)
             }
 
+            if let source = plugin.sourceUrl {
+                Text(source).font(.caption).foregroundStyle(.secondary)
+            }
+            if let update = plugin.availableUpdate {
+                Button {
+                    Task { try? await facade.inspectGitHubUpdate(pluginId: plugin.pluginId) }
+                } label: {
+                    Text("plugin_update") + Text(" " + update.tag)
+                }
+                .disabled(presenter.state.busy)
+            }
+
             Button("plugin_uninstall", role: .destructive) {
                 pendingUninstallId = plugin.pluginId
                 pendingUninstallName = plugin.nameText.text
@@ -223,6 +259,62 @@ public struct PluginManagementView: View {
             .disabled(presenter.state.busy)
         }
         .padding(.vertical, 4)
+    }
+
+    private var selectedGitHubVersion: GitHubPluginVersionV1? {
+        guard let versions = presenter.state.githubCatalog?.versions else { return nil }
+        return versions.first { $0.tag == selectedGitHubTag } ?? versions.first
+    }
+
+    private var gitHubInstallSheet: some View {
+        NavigationStack {
+            Form {
+                TextField("plugin_github_repository", text: $gitHubURL, prompt: Text("https://github.com/owner/repository"))
+                    .autocorrectionDisabled()
+                    .onChange(of: gitHubURL) { _, _ in
+                        selectedGitHubTag = ""
+                        facade.clearGitHubRepository()
+                    }
+                Button("plugin_load_versions") {
+                    Task { try? await facade.loadGitHubRepository(url: gitHubURL) }
+                }
+                .disabled(gitHubURL.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                if let catalog = presenter.state.githubCatalog {
+                    Picker("plugin_version", selection: Binding(
+                        get: { selectedGitHubVersion?.tag ?? "" },
+                        set: { selectedGitHubTag = $0 }
+                    )) {
+                        ForEach(catalog.versions, id: \.tag) { version in
+                            Text(version.tag).tag(version.tag)
+                        }
+                    }
+                }
+                if let error = presenter.state.error {
+                    Text(String(error.prefix(512))).foregroundStyle(.red)
+                }
+            }
+            .disabled(presenter.state.busy)
+            .navigationTitle("plugin_install_github")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { showsGitHubInstall = false }
+                        .disabled(presenter.state.busy)
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("plugin_confirm_install") {
+                        guard let version = selectedGitHubVersion else { return }
+                        showsGitHubInstall = false
+                        Task { try? await facade.inspectGitHub(tag: version.tag) }
+                    }
+                    .disabled(presenter.state.busy || selectedGitHubVersion == nil)
+                }
+            }
+            .overlay { if presenter.state.busy { ProgressView() } }
+        }
+        .interactiveDismissDisabled(presenter.state.busy)
+        #if os(macOS)
+        .frame(minWidth: 440, minHeight: 280)
+        #endif
     }
 
     private func importPlugin(_ result: Result<[URL], Error>) {
@@ -295,7 +387,8 @@ public struct PluginManagementView: View {
     }
 
     private func installReviewText(_ review: PluginInstallReviewV1) -> String {
-        var lines = [String(localized: "plugin_unverified_warning")]
+        var lines = [review.sourceUrl == nil ? String(localized: "plugin_unverified_warning") : String(localized: "plugin_unverified_github_warning")]
+        if let source = review.sourceUrl { lines.append(source) }
         if !review.capabilities.isEmpty {
             lines.append("")
             lines.append(String(localized: "plugin_capabilities"))
@@ -344,6 +437,10 @@ public struct PluginManagementView: View {
             key = "plugin_warning_changed_package"
         case .compatibility:
             key = "plugin_warning_compatibility"
+        case .sourceChanged:
+            key = "plugin_warning_source_changed"
+        case .tagMoved:
+            key = "plugin_warning_tag_moved"
         }
         let message = String(localized: String.LocalizationValue(key))
         let detail = warning.detail?.replacingOccurrences(

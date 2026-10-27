@@ -953,4 +953,14 @@
     <string name="plugin_warning_downgrade">This package is older than the installed version</string>
     <string name="plugin_warning_changed_package">This version has different package contents</string>
     <string name="plugin_warning_compatibility">Compatibility warning</string>
+    <string name="plugin_install_github">Install from GitHub</string>
+    <string name="plugin_github_repository">GitHub repository URL</string>
+    <string name="plugin_load_versions">Load versions</string>
+    <string name="plugin_version">Version</string>
+    <string name="plugin_check_updates">Check for updates</string>
+    <string name="plugin_update">Update</string>
+    <string name="plugin_up_to_date">GitHub plugins are up to date</string>
+    <string name="plugin_warning_source_changed">This installation changes the plugin source</string>
+    <string name="plugin_warning_tag_moved">This tag now points to a different commit</string>
+    <string name="plugin_unverified_github_warning">This GitHub plugin has not been verified. Only install it if you trust the author.</string>
 </resources>

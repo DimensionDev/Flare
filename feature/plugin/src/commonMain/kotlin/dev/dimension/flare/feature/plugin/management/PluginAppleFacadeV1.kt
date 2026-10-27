@@ -29,6 +29,30 @@ public class PluginAppleFacadeV1 : PresenterBase<PluginManagementStateV1>() {
     @Throws(Exception::class)
     public suspend fun inspect(path: String): PluginInstallReviewV1 = presenter.inspect(path)
 
+    public fun clearGitHubRepository() {
+        presenter.clearGitHubRepository()
+    }
+
+    @Throws(Exception::class)
+    public suspend fun loadGitHubRepository(url: String) {
+        presenter.loadGitHubRepository(url)
+    }
+
+    @Throws(Exception::class)
+    public suspend fun inspectGitHub(tag: String) {
+        presenter.inspectGitHub(tag)
+    }
+
+    @Throws(Exception::class)
+    public suspend fun checkUpdates(forceRefresh: Boolean) {
+        presenter.checkUpdates(forceRefresh)
+    }
+
+    @Throws(Exception::class)
+    public suspend fun inspectGitHubUpdate(pluginId: String) {
+        presenter.inspectGitHubUpdate(pluginId)
+    }
+
     @Throws(Exception::class)
     public suspend fun confirmInstall() {
         presenter.confirmInstall()

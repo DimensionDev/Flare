@@ -1,6 +1,8 @@
 package dev.dimension.flare.feature.plugin.lifecycle
 
+import dev.dimension.flare.feature.plugin.github.GitHubPluginRepositoryV1
 import dev.dimension.flare.feature.plugin.manifest.PluginManifestV1
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -27,8 +29,18 @@ public data class InstalledPluginV1(
 )
 
 @Serializable
-public enum class PluginInstallSourceV1 {
-    Local,
+public sealed interface PluginInstallSourceV1 {
+    @Serializable
+    @SerialName("local")
+    public data object Local : PluginInstallSourceV1
+
+    @Serializable
+    @SerialName("github")
+    public data class GitHub(
+        val repository: GitHubPluginRepositoryV1,
+        val tag: String,
+        val commitSha: String,
+    ) : PluginInstallSourceV1
 }
 
 public data class RunningPluginV1(

@@ -1,6 +1,8 @@
 package dev.dimension.flare.feature.plugin.installer
 
 import dev.dimension.flare.feature.plugin.abi.PluginAbiV1
+import dev.dimension.flare.feature.plugin.github.COMMIT_SHA
+import dev.dimension.flare.feature.plugin.github.stableGitHubVersion
 import dev.dimension.flare.feature.plugin.lifecycle.InstalledPluginV1
 import dev.dimension.flare.feature.plugin.lifecycle.PluginCleanupResultV1
 import dev.dimension.flare.feature.plugin.lifecycle.PluginInstallSourceV1
@@ -27,20 +29,49 @@ public class PluginInstaller(
     private val mutex = Mutex()
     private var activePreview: PreparedPluginInstallV1? = null
 
-    public suspend fun inspect(path: Path): PreparedPluginInstallV1 = fileSystem.source(path).buffer().use { source -> inspect(source) }
+    public suspend fun inspect(
+        path: Path,
+        installSource: PluginInstallSourceV1 = PluginInstallSourceV1.Local,
+        expectedPluginId: String? = null,
+    ): PreparedPluginInstallV1 = fileSystem.source(path).buffer().use { source -> inspect(source, installSource, expectedPluginId) }
 
-    public suspend fun inspect(source: Source): PreparedPluginInstallV1 =
+    public suspend fun inspect(
+        source: Source,
+        installSource: PluginInstallSourceV1 = PluginInstallSourceV1.Local,
+        expectedPluginId: String? = null,
+    ): PreparedPluginInstallV1 =
         mutex.withLock {
             activePreview?.let { discardLocked(it) }
             ensureDirectories()
             fileSystem.delete(stateStore.paths.incoming, mustExist = false)
-            val hash = stage(source)
+            val stagedHash = stage(source)
             try {
+                val hash =
+                    if (installSource is PluginInstallSourceV1.GitHub) {
+                        installSource.repository.requireValid()
+                        require(COMMIT_SHA.matches(installSource.commitSha)) { "Invalid GitHub tag commit" }
+                        val files = FppArchiveReader(fileSystem).read(stateStore.paths.incoming, repositoryArchive = true).files
+                        fileSystem.write(stateStore.paths.incoming) { write(encodePluginArchive(files)) }
+                        hash(stateStore.paths.incoming)
+                    } else {
+                        stagedHash
+                    }
                 val validated = validator.validate(stateStore.paths.incoming)
+                require(expectedPluginId == null || validated.manifest.id == expectedPluginId) { "GitHub update changed the plugin ID" }
+                if (installSource is PluginInstallSourceV1.GitHub) {
+                    require(
+                        stableGitHubVersion(installSource.tag) == validated.manifest.version,
+                    ) { "GitHub tag does not match manifest.version" }
+                }
                 val packageSize = requireNotNull(fileSystem.metadata(stateStore.paths.incoming).size)
                 val existing = stateStore.desired.value.plugins[validated.manifest.id]
                 require(existing == null || existing.manifest.platform.id == validated.manifest.platform.id) {
                     "Plugin platform ID cannot change during an update"
+                }
+                if (expectedPluginId != null && installSource is PluginInstallSourceV1.GitHub) {
+                    require((existing?.source as? PluginInstallSourceV1.GitHub)?.repository?.id == installSource.repository.id) {
+                        "GitHub update changed the installation source"
+                    }
                 }
                 val preview =
                     PreparedPluginInstallV1(
@@ -55,9 +86,10 @@ public class PluginInstaller(
                                 capability.operations.keys
                             },
                         permissions = validated.manifest.sensitivePermissions(),
-                        warnings = buildWarnings(validated.manifest, hash, existing, validated.warnings),
-                        requiresConfirmation = existing?.packageHash != hash,
+                        warnings = buildWarnings(validated.manifest, hash, existing, validated.warnings, installSource),
+                        requiresConfirmation = existing?.packageHash != hash || existing.source != installSource,
                         existingVersion = existing?.version,
+                        source = installSource,
                         validated = validated,
                     )
                 activePreview = preview
@@ -87,7 +119,7 @@ public class PluginInstaller(
                     iconSize =
                         preview.validated.icon.size
                             .toLong(),
-                    source = PluginInstallSourceV1.Local,
+                    source = preview.source,
                     enabled = existing?.enabled ?: true,
                     manifest = preview.validated.manifest,
                     catalogs = preview.validated.catalogs,
@@ -256,6 +288,7 @@ public class PreparedPluginInstallV1 internal constructor(
     public val warnings: List<PluginInstallWarningV1>,
     public val requiresConfirmation: Boolean,
     public val existingVersion: String?,
+    public val source: PluginInstallSourceV1,
     internal val validated: ValidatedPluginPackage,
 )
 
@@ -286,6 +319,8 @@ public enum class PluginInstallWarningTypeV1 {
     Downgrade,
     SameVersionDifferentHash,
     Compatibility,
+    SourceChanged,
+    TagMoved,
 }
 
 private fun buildWarnings(
@@ -293,10 +328,24 @@ private fun buildWarnings(
     hash: String,
     existing: InstalledPluginV1?,
     validationWarnings: List<String>,
+    source: PluginInstallSourceV1,
 ): List<PluginInstallWarningV1> =
     buildList {
-        add(PluginInstallWarningV1(PluginInstallWarningTypeV1.UnverifiedLocal))
+        if (source == PluginInstallSourceV1.Local) add(PluginInstallWarningV1(PluginInstallWarningTypeV1.UnverifiedLocal))
         if (existing != null) {
+            val sourceChanged =
+                when (val previous = existing.source) {
+                    PluginInstallSourceV1.Local -> source != PluginInstallSourceV1.Local
+                    is PluginInstallSourceV1.GitHub -> (source as? PluginInstallSourceV1.GitHub)?.repository?.id != previous.repository.id
+                }
+            if (sourceChanged) add(PluginInstallWarningV1(PluginInstallWarningTypeV1.SourceChanged))
+            val previousGitHub = existing.source as? PluginInstallSourceV1.GitHub
+            if (source is PluginInstallSourceV1.GitHub && previousGitHub != null &&
+                previousGitHub.repository.id == source.repository.id && previousGitHub.tag == source.tag &&
+                previousGitHub.commitSha != source.commitSha
+            ) {
+                add(PluginInstallWarningV1(PluginInstallWarningTypeV1.TagMoved, source.tag))
+            }
             val addedPermissions = manifest.sensitivePermissions() - existing.manifest.sensitivePermissions()
             addedPermissions.forEach { permission ->
                 add(
@@ -336,7 +385,7 @@ private fun PluginManifestV1.sensitivePermissions(): Set<PluginSensitivePermissi
         }
     }
 
-private fun compareSemVer(
+internal fun compareSemVer(
     first: String,
     second: String,
 ): Int {

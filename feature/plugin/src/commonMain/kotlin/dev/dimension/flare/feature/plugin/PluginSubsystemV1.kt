@@ -3,6 +3,7 @@ package dev.dimension.flare.feature.plugin
 import dev.dimension.flare.data.datastore.PlatformOAuthPendingRepository
 import dev.dimension.flare.data.io.AppFileStore
 import dev.dimension.flare.feature.plugin.adapter.PluginPlatformSpecSourceV1
+import dev.dimension.flare.feature.plugin.github.GitHubPluginClient
 import dev.dimension.flare.feature.plugin.host.createKtorPluginHttpTransport
 import dev.dimension.flare.feature.plugin.installer.PluginInstaller
 import dev.dimension.flare.feature.plugin.lifecycle.PluginStateIssueV1
@@ -42,6 +43,7 @@ public class PluginSubsystemV1 internal constructor(
             transportFactory = ::createKtorPluginHttpTransport,
         )
     public val installer: PluginInstaller = PluginInstaller(appFiles.fileSystem, stateStore)
+    public val github: GitHubPluginClient by lazy { GitHubPluginClient() }
 
     private val mutableSourceIssues = MutableStateFlow(stateStore.running.issues)
     public val sourceIssues: StateFlow<List<PluginStateIssueV1>> = mutableSourceIssues.asStateFlow()

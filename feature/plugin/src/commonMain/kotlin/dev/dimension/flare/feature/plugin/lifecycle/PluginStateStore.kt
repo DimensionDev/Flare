@@ -1,6 +1,8 @@
 package dev.dimension.flare.feature.plugin.lifecycle
 
 import dev.dimension.flare.feature.plugin.abi.PluginJsonV1
+import dev.dimension.flare.feature.plugin.github.COMMIT_SHA
+import dev.dimension.flare.feature.plugin.github.stableGitHubVersion
 import dev.dimension.flare.feature.plugin.installer.FppLimits
 import dev.dimension.flare.feature.plugin.installer.validatePluginCatalogs
 import dev.dimension.flare.feature.plugin.manifest.validate
@@ -266,6 +268,12 @@ private fun validateIndex(index: PluginStateIndexV1) {
     ) { "Duplicate plugin ID" }
     index.plugins.forEach { plugin ->
         require(plugin.pluginId == plugin.manifest.id && plugin.version == plugin.manifest.version) { "Plugin identity mismatch" }
+        (plugin.source as? PluginInstallSourceV1.GitHub)?.let { source ->
+            source.repository.requireValid()
+            require(
+                stableGitHubVersion(source.tag) == plugin.version && COMMIT_SHA.matches(source.commitSha),
+            ) { "Invalid GitHub installation source" }
+        }
         require(HASH.matches(plugin.packageHash)) { "Invalid package hash" }
         require(plugin.packageSize in 1..FppLimits.MAX_PACKAGE_BYTES) { "Invalid package size" }
         require(plugin.iconSize in 1..FppLimits.MAX_ICON_BYTES) { "Invalid icon size" }

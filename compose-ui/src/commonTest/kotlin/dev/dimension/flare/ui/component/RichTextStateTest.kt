@@ -7,10 +7,13 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.fleeksoft.ksoup.Ksoup
+import dev.dimension.flare.data.model.ProxyRef
+import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.model.toUiImage
+import dev.dimension.flare.ui.model.withProxy
 import dev.dimension.flare.ui.render.UiRichText
 import dev.dimension.flare.ui.render.toUi
-import dev.dimension.flare.ui.model.withProxy
-import dev.dimension.flare.data.model.ProxyRef
+import dev.dimension.flare.ui.route.DeeplinkRoute
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
@@ -86,6 +89,23 @@ class RichTextStateTest {
             assertNotNull(a)
             assertEquals(url, a.item)
         }
+    }
+
+    @Test
+    fun image_link_is_annotated_with_its_signed_account_route() {
+        val proxy = ProxyRef.Account(MicroBlogKey("viewer", "weibo.cn"))
+        val image = requireNotNull("https://cdn.example/image.jpg".toUiImage(proxy = proxy))
+        val ui = Ksoup.parse("""<a href="${image.url}">查看图片</a>""").body().toUi(imageLinks = mapOf(image.url to image))
+        val text = assertIs<RichTextContent.Text>(RichTextState(ui, defaultStyleData()).contents.single()).content
+        val link =
+            if (allowLinkAnnotation) {
+                assertIs<LinkAnnotation.Url>(text.getLinkAnnotations(0, text.length).single().item).url
+            } else {
+                text.getStringAnnotations(TAG_URL, 0, text.length).single().item
+            }
+        val route = assertIs<DeeplinkRoute.Media.Image>(DeeplinkRoute.parse(link))
+        assertEquals(image.url, route.uri)
+        assertEquals(proxy, route.proxy)
     }
 
     @Test

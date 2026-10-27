@@ -79,7 +79,7 @@ public final class PlatformTextStyleDescriptor: NSObject {
     public let isFigCaption: Bool
 
     public init(style: RenderTextStyle, block: RenderBlockStyle) {
-        link = style.link
+        link = style.resolvedLink
         bold = style.bold
         italic = style.italic
         strikethrough = style.strikethrough
@@ -222,7 +222,7 @@ private final class RenderContext {
         var attributes: [NSAttributedString.Key: Any] = [
             .platformTextStyleDescriptor: PlatformTextStyleDescriptor(style: style, block: block),
         ]
-        if let link = style.link, let url = URL(string: link) {
+        if let link = style.resolvedLink, let url = URL(string: link) {
             attributes[.link] = url
         }
         return attributes
@@ -237,7 +237,7 @@ private final class RenderContext {
             container.font = font
         }
 
-        if let link = style.link, let url = URL(string: link) {
+        if let link = style.resolvedLink, let url = URL(string: link) {
             container.link = url
         }
         if style.strikethrough {

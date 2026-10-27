@@ -13,6 +13,7 @@ import dev.dimension.flare.data.repository.ProxyRepository
 import dev.dimension.flare.deleteTestRootPath
 import dev.dimension.flare.di.startKoin
 import dev.dimension.flare.di.testSingle
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.route.DeeplinkRoute
@@ -78,13 +79,27 @@ class MediaDeeplinkProxyRoutingTest {
 
                 assertFails { fetch(image) }
                 assertEquals(0, calls.get())
-                for (proxy in listOf(ProxyRef.System, ProxyRef.Account(account))) {
-                    val encoded = ProtoBuf.encodeToHexString(ExternalRoutePackage(image.copy(proxy = proxy)))
+                val statusMedia =
+                    DeeplinkRoute.Media.StatusMedia(
+                        statusKey = MicroBlogKey("missing-post", "example.social"),
+                        accountType = AccountType.Specific(account),
+                        index = 0,
+                        preview = image.uri,
+                    )
+                for (route in listOf(
+                    image.copy(proxy = ProxyRef.System),
+                    image.copy(proxy = ProxyRef.Account(account)),
+                    statusMedia,
+                    statusMedia.copy(accountType = AccountType.Specific(MicroBlogKey("forged", "nostr"))),
+                )) {
+                    val encoded = ProtoBuf.encodeToHexString(ExternalRoutePackage(route))
                     val decoded = DeeplinkRoute.parse("flare://$encoded")
-                    if (decoded is DeeplinkRoute.Media.Image) {
-                        runCatching { fetch(decoded) }
+                    when (decoded) {
+                        is DeeplinkRoute.Media.Image -> runCatching { fetch(decoded) }
+                        is DeeplinkRoute.Media.StatusMedia -> runCatching { fetchPreview(decoded) }
+                        else -> Unit
                     }
-                    assertEquals(0, calls.get(), "External media must not bypass the global proxy via $proxy")
+                    assertEquals(0, calls.get(), "External media must not bypass the global proxy via $route")
                     assertNull(decoded)
                 }
 
@@ -92,6 +107,9 @@ class MediaDeeplinkProxyRoutingTest {
                 val decoded = assertIs<DeeplinkRoute.Media.Image>(DeeplinkRoute.parse(internal.toUri()))
                 assertEquals(200, fetch(decoded))
                 assertEquals(1, calls.get(), "Internally generated account media must retain its selected route")
+                val decodedPreview = assertIs<DeeplinkRoute.Media.StatusMedia>(DeeplinkRoute.parse(statusMedia.toUri()))
+                assertEquals(200, fetchPreview(decodedPreview))
+                assertEquals(2, calls.get(), "Internally generated previews must retain their selected route")
             } finally {
                 repository.selectGlobal(ProxyPolicy(ProxyMode.SYSTEM))
                 stopKoin()
@@ -111,6 +129,9 @@ class MediaDeeplinkProxyRoutingTest {
             client.engine.close()
         }
     }
+
+    private suspend fun fetchPreview(route: DeeplinkRoute.Media.StatusMedia): Int =
+        fetch(DeeplinkRoute.Media.Image(requireNotNull(route.preview), null, proxy = ProxyRef.forAccountType(route.accountType)))
 
     @Serializable
     private data class ExternalRoutePackage(

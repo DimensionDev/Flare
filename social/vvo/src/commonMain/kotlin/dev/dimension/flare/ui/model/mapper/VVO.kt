@@ -567,11 +567,12 @@ internal fun renderVVOText(
     sourceLanguages: List<String> = emptyList(),
 ): UiRichText {
     val element = parseHtml(text, baseUri = "https://$vvoHost/")
+    val imageLinks = mutableMapOf<String, UiMedia.Image>()
     extractImagesFromLinks(element)
     element.childNodes().forEach {
-        replaceMentionAndHashtag(element, it, accountKey)
+        replaceMentionAndHashtag(element, it, accountKey, imageLinks)
     }
-    return element.toUi(sourceLanguages)
+    return element.toUi(sourceLanguages, imageLinks)
 }
 
 private fun extractImagesFromLinks(element: Element) {
@@ -592,6 +593,7 @@ private fun replaceMentionAndHashtag(
     element: Element,
     node: Node,
     accountKey: MicroBlogKey,
+    imageLinks: MutableMap<String, UiMedia.Image>,
 ) {
     if (node is Element) {
         val href = node.attribute("href")?.value
@@ -628,16 +630,9 @@ private fun replaceMentionAndHashtag(
                 val url =
                     href.removePrefix("https://$vvoHostShort/sinaurl?u=").decodeURLPart()
                 if (url.contains("sinaimg.cn/")) {
-                    node.attributes().put(
-                        "href",
-                        DeeplinkRoute.Media.Image(uri = url, previewUrl = null, proxy = ProxyRef.forAccount(accountKey)).toUri(),
-                    )
-                } else {
-                    node.attributes().put(
-                        "href",
-                        url,
-                    )
+                    imageLinks[url] = requireNotNull(url.toUiImage(proxy = ProxyRef.forAccount(accountKey)))
                 }
+                node.attributes().put("href", url)
             } else if (href.startsWith("/status/")) {
                 // open the post
                 node.attributes().put(
@@ -651,7 +646,7 @@ private fun replaceMentionAndHashtag(
             }
         }
         node.childNodes().forEach {
-            replaceMentionAndHashtag(element, it, accountKey)
+            replaceMentionAndHashtag(element, it, accountKey, imageLinks)
         }
     }
 }

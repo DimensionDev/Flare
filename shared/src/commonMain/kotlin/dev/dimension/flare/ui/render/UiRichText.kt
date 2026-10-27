@@ -5,6 +5,8 @@ import de.cketti.codepoints.codePointCount
 import dev.dimension.flare.common.SerializableImmutableList
 import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.ui.model.UiMedia
+import dev.dimension.flare.ui.route.DeeplinkRoute
+import dev.dimension.flare.ui.route.toUri
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -24,13 +26,13 @@ public sealed class RenderContent {
         val block: RenderBlockStyle = RenderBlockStyle(),
     ) : RenderContent() {
         /**
-         * `true` when any text run carries a non-empty `link`. Used by platform
+         * `true` when any text run carries a non-empty link or an image target. Used by platform
          * renderers to decide whether the block needs a tappable text widget
          * (`UITextView` on iOS) or can fall back to a cheaper plain label.
          */
         public val hasLink: Boolean =
             runs.any { run ->
-                run is RenderRun.Text && !run.style.link.isNullOrEmpty()
+                run is RenderRun.Text && (run.style.imageLink != null || !run.style.link.isNullOrEmpty())
             }
 
         /**
@@ -81,7 +83,12 @@ public data class RenderTextStyle(
     val underline: Boolean = false,
     val small: Boolean = false,
     val time: Boolean = false,
-)
+    val imageLink: UiMedia.Image? = null,
+) {
+    // Process signatures belong to rendered links, not persisted rich text.
+    public val resolvedLink: String?
+        get() = imageLink?.let { DeeplinkRoute.Media.Image(it.url, it.previewUrl, it.customHeaders, it.proxy).toUri() } ?: link
+}
 
 @Serializable
 public data class RenderBlockStyle(

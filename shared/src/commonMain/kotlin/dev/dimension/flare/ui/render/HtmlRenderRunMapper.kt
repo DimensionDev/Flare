@@ -3,6 +3,7 @@ package dev.dimension.flare.ui.render
 import com.fleeksoft.ksoup.nodes.Element
 import com.fleeksoft.ksoup.nodes.Node
 import com.fleeksoft.ksoup.nodes.TextNode
+import dev.dimension.flare.ui.model.UiMedia
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 
@@ -14,8 +15,11 @@ internal data class HtmlRenderResult(
 
 internal fun mapHtmlToRenderContents(element: Element): ImmutableList<RenderContent> = mapHtmlToRenderResult(element).contents
 
-internal fun mapHtmlToRenderResult(element: Element): HtmlRenderResult {
-    val builder = RenderRunBuilder()
+internal fun mapHtmlToRenderResult(
+    element: Element,
+    imageLinks: Map<String, UiMedia.Image> = emptyMap(),
+): HtmlRenderResult {
+    val builder = RenderRunBuilder(imageLinks)
     builder.renderElement(
         element = element,
         style = RenderTextStyle(),
@@ -24,7 +28,9 @@ internal fun mapHtmlToRenderResult(element: Element): HtmlRenderResult {
     return builder.build()
 }
 
-private class RenderRunBuilder {
+private class RenderRunBuilder(
+    private val imageLinks: Map<String, UiMedia.Image>,
+) {
     private val contents = mutableListOf<RenderContent>()
     private val currentRuns = mutableListOf<RenderRun>()
     private val raw = StringBuilder()
@@ -59,7 +65,9 @@ private class RenderRunBuilder {
     ) {
         when (element.tagName().lowercase()) {
             "a" -> {
-                renderChildren(element, style.copy(link = element.resolvedHref()), block)
+                val href = element.resolvedHref()
+                val image = imageLinks[href]
+                renderChildren(element, style.copy(link = href.takeIf { image == null }, imageLink = image), block)
             }
 
             "strong", "b" -> {

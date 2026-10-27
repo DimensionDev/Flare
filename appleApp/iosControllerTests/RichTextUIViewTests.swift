@@ -1,16 +1,17 @@
 import XCTest
 import UIKit
 import KotlinSharedUI
+import FlareAppleUI
 @testable import Flare
 
 @MainActor
 final class RichTextUIViewTests: XCTestCase {
     func testGrowingAndClippingAPreviewChoosesTheRendererForItsVisibleAttributes() throws {
         let plain = RenderTextStyle(link: nil, bold: false, italic: false, strikethrough: false,
-                                    monospace: false, code: false, underline: false, small: false, time: false)
+                                    monospace: false, code: false, underline: false, small: false, time: false, imageLink: nil)
         let linked = RenderTextStyle(link: "https://example.invalid/visible", bold: false, italic: false,
                                      strikethrough: false, monospace: false, code: false,
-                                     underline: false, small: false, time: false)
+                                     underline: false, small: false, time: false, imageLink: nil)
         let prefix = String(repeating: "text 中文 ", count: 40)
         let text = UiRichText(renderRuns: [RenderContent.Text(runs: [
             RenderRun.Text(text: prefix, style: plain), RenderRun.Text(text: " linked suffix", style: linked),
@@ -72,6 +73,23 @@ final class RichTextUIViewTests: XCTestCase {
             }
         }
         XCTAssertGreaterThan(compared, 80)
+    }
+
+    func testImageLinkKeepsItsSignedURLInRenderedText() throws {
+        let image = UiMediaImage(url: "https://cdn.example/image.jpg", proxy: ProxyRef.Account(accountKey: MicroBlogKey(id: "viewer", host: "weibo.cn")))
+        let style = RenderTextStyle(link: nil, bold: false, italic: false, strikethrough: false,
+                                   monospace: false, code: false, underline: false, small: false, time: false, imageLink: image)
+        let block = RenderContent.Text(runs: [RenderRun.Text(text: "查看图片", style: style)], block: RenderBlockStyle())
+        let text = UiRichText(renderRuns: [block], isRtl: false, raw: "查看图片", innerText: "查看图片", imageUrls: [])
+        let view = RichTextUIView()
+        view.configure(text: text, lineLimit: nil, isTextSelectionEnabled: false, onOpenURL: nil)
+        view.prepareForFitting(width: 340)
+        let renderer = try XCTUnwrap(textViews(in: view).first as? UITextView)
+        let link = try XCTUnwrap(renderer.attributedText.attribute(.link, at: 0, effectiveRange: nil) as? URL)
+        XCTAssertTrue(block.hasLink)
+        XCTAssertNil(style.link)
+        XCTAssertTrue(link.absoluteString.hasPrefix("flare://"))
+        XCTAssertEqual(link.absoluteString, style.resolvedLink)
     }
 
     func testCollapsedTextBoundsRenderingAndRestoresContentAcrossUpdates() throws {
@@ -195,7 +213,7 @@ final class RichTextUIViewTests: XCTestCase {
         let emojiURL = "https://[" // Invalid URL keeps this rendering check offline.
         let plainRun = RenderRun.Text(text: longText, style: RenderTextStyle(
             link: nil, bold: false, italic: false, strikethrough: false,
-            monospace: false, code: false, underline: false, small: false, time: false
+            monospace: false, code: false, underline: false, small: false, time: false, imageLink: nil
         ))
         let emoji = RenderRun.Image(url: emojiURL, alt: "emoji", proxy: ProxyRef.Global.shared)
         for runs in [[plainRun, emoji] as [RenderRun], [emoji, plainRun]] {
@@ -214,7 +232,7 @@ final class RichTextUIViewTests: XCTestCase {
     private func richText(_ paragraphs: [String], link: Bool, block: RenderBlockStyle = RenderBlockStyle(), small: Bool = false) -> UiRichText {
         let style = RenderTextStyle(link: link ? "https://example.invalid" : nil, bold: false,
                                     italic: false, strikethrough: false, monospace: false,
-                                    code: false, underline: false, small: small, time: false)
+                                    code: false, underline: false, small: small, time: false, imageLink: nil)
         let blocks = paragraphs.map {
             RenderContent.Text(runs: [RenderRun.Text(text: $0, style: style)], block: block)
         }

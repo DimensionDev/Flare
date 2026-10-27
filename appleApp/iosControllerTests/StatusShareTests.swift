@@ -182,7 +182,7 @@ final class StatusShareTests: XCTestCase {
 
     private func post(_ id: String, textBlocks: [String]) -> UiTimelineV2.Post {
         let style = RenderTextStyle(link: nil, bold: false, italic: false, strikethrough: false,
-                                    monospace: false, code: false, underline: false, small: false, time: false)
+                                    monospace: false, code: false, underline: false, small: false, time: false, imageLink: nil)
         let text = textBlocks.joined(separator: "\n\n")
         let rich = UiRichText(renderRuns: textBlocks.map {
             RenderContent.Text(runs: [RenderRun.Text(text: $0, style: style)], block: RenderBlockStyle())

@@ -309,7 +309,7 @@ private fun ContentBuilder.renderTextRun(
     val appendContent: ContentBuilder.() -> Unit = {
         append(run.text)
     }
-    val link = run.style.link
+    val link = run.style.resolvedLink
 
     if (link != null) {
         withLink(link) {

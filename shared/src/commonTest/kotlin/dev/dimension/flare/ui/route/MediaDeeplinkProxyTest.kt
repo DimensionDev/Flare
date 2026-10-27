@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.route
 
 import dev.dimension.flare.data.model.ProxyRef
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
@@ -21,6 +22,13 @@ class MediaDeeplinkProxyTest {
             customHeaders = mapOf("Authorization" to "Bearer private"),
             proxy = ProxyRef.Account(account),
         )
+    private val statusMedia =
+        DeeplinkRoute.Media.StatusMedia(
+            statusKey = MicroBlogKey("post", "example.social"),
+            accountType = AccountType.Specific(account),
+            index = 0,
+            preview = image.previewUrl,
+        )
 
     @Test
     fun externalMediaCannotChooseSystemOrAccountRouting() {
@@ -31,8 +39,50 @@ class MediaDeeplinkProxyTest {
 
     @Test
     fun externalAccountPickerCannotHideScopedMedia() {
-        val nested = picker(picker(image))
-        assertNull(DeeplinkRoute.parse(externalUri(nested)))
+        for (route in listOf(image, statusMedia)) {
+            assertNull(DeeplinkRoute.parse(externalUri(picker(picker(route)))))
+        }
+    }
+
+    @Test
+    fun externalStatusPreviewsCannotChooseSystemOrAccountRouting() {
+        for (key in listOf(account, MicroBlogKey("forged", "nostr"))) {
+            val route = statusMedia.copy(accountType = AccountType.Specific(key))
+            assertNull(DeeplinkRoute.parse(externalUri(route)))
+            assertNull(DeeplinkRoute.parse(externalUri(route, signature = "00".repeat(32))))
+        }
+    }
+
+    @Test
+    fun unsignedGlobalPreviewsAndStatusLinksWithoutPreviewsRemainCompatible() {
+        for (type in listOf(AccountType.Guest, AccountType.GuestHost("example.social"))) {
+            val route = statusMedia.copy(accountType = type)
+            assertEquals(route, DeeplinkRoute.parse(externalUri(route)))
+        }
+        val withoutPreview = statusMedia.copy(preview = null)
+        assertEquals(withoutPreview, DeeplinkRoute.parse(externalUri(withoutPreview)))
+    }
+
+    @Test
+    fun internalStatusPreviewsPreserveTheirScope() {
+        for (key in listOf(account, MicroBlogKey("internal", "nostr"))) {
+            val route = statusMedia.copy(accountType = AccountType.Specific(key))
+            assertEquals(route, DeeplinkRoute.parse(route.toUri()))
+            assertEquals(picker(route), DeeplinkRoute.parse(picker(route).toUri()))
+        }
+    }
+
+    @Test
+    fun changingSignedStatusPreviewsCannotReuseTheirRoutingPermission() {
+        val signed = ProtoBuf.decodeFromHexString<ExternalRoutePackage>(statusMedia.toUri().removePrefix("flare://"))
+        for (route in listOf(
+            statusMedia.copy(preview = "https://attacker.example/image.jpg"),
+            statusMedia.copy(accountType = AccountType.Specific(MicroBlogKey("forged", "nostr"))),
+            statusMedia.copy(statusKey = MicroBlogKey("other-post", "example.social")),
+            picker(statusMedia),
+        )) {
+            assertNull(DeeplinkRoute.parse(externalUri(route, signed.signature)))
+        }
     }
 
     @Test

@@ -818,7 +818,7 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
     private func attributes(for style: RenderTextStyle, block: RenderBlockStyle) -> [NSAttributedString.Key: Any] {
         var attributes = baseAttributes(font: font(for: style, block: block), color: color(for: style, block: block))
 
-        if let link = style.link, let url = URL(string: link) {
+        if let link = style.resolvedLink, let url = URL(string: link) {
             attributes[.link] = url
             attributes[.foregroundColor] = linkColor()
         }
@@ -1076,7 +1076,7 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
     private func hasLinks(in content: RenderContent.Text) -> Bool {
         content.runs.contains { run in
             guard let textRun = run as? RenderRun.Text,
-                  let link = textRun.style.link else {
+                  let link = textRun.style.resolvedLink else {
                 return false
             }
             return URL(string: link) != nil

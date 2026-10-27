@@ -94,7 +94,7 @@ final class RichTextClippingTests: XCTestCase {
                       block: RenderBlockStyle = RenderBlockStyle(), invalidImage: Bool = false) -> UiRichText {
         let style = RenderTextStyle(link: link ? "https://example.invalid" : nil, bold: false,
                                     italic: false, strikethrough: false, monospace: false,
-                                    code: false, underline: false, small: false, time: false)
+                                    code: false, underline: false, small: false, time: false, imageLink: nil)
         var blocks: [RenderContent] = paragraphs.map {
             RenderContent.Text(runs: [RenderRun.Text(text: $0, style: style)], block: block)
         }

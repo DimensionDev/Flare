@@ -34,7 +34,17 @@ private fun RenderContent.withProxy(proxy: ProxyRef): RenderContent =
                 runs =
                     runs
                         .map {
-                            if (it is RenderRun.Image) it.copy(proxy = proxy) else it
+                            when (it) {
+                                is RenderRun.Image -> {
+                                    it.copy(proxy = proxy)
+                                }
+
+                                is RenderRun.Text -> {
+                                    it.style.imageLink?.let { image ->
+                                        it.copy(style = it.style.copy(imageLink = image.copy(proxy = proxy)))
+                                    } ?: it
+                                }
+                            }
                         }.toImmutableList(),
             )
         }

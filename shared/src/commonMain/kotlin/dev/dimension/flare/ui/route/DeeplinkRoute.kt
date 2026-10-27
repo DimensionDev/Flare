@@ -324,6 +324,7 @@ private val mediaProxySigningKey by lazy { Uuid.random().toString().encodeUtf8()
 private fun DeeplinkRoute.hasMediaProxyOverride(): Boolean =
     when (this) {
         is DeeplinkRoute.Media.Image -> proxy != ProxyRef.Global
+        is DeeplinkRoute.Media.StatusMedia -> preview != null && ProxyRef.forAccountType(accountType) != ProxyRef.Global
         is DeeplinkRoute.DeepLinkAccountPicker -> data.values.any { it.hasMediaProxyOverride() }
         else -> false
     }

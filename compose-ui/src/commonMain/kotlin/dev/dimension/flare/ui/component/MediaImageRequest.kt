@@ -56,6 +56,7 @@ public fun ImageRequest.Builder.media(
         data(data.url)
         extras[imageProxy] = data.proxy
         memoryCacheKey("${snapshot?.key.orEmpty()}|${data.cacheKey}")
+        placeholderMemoryCacheKey(data.preview?.let { "${snapshot?.key.orEmpty()}|${it.cacheKey}" })
         diskCacheKey(data.cacheKey)
         httpHeaders(
             NetworkHeaders

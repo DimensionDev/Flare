@@ -65,6 +65,7 @@ import dev.dimension.flare.proxy_system
 import dev.dimension.flare.proxy_test
 import dev.dimension.flare.proxy_test_hint
 import dev.dimension.flare.proxy_test_success
+import dev.dimension.flare.status_loadmore_error_retry
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScrollBar
@@ -97,8 +98,11 @@ internal fun ProxySettingsContent() {
 internal fun ProxySettingsContent(state: ProxySettingsState) {
     var editing by remember { mutableStateOf<ProxyProfile?>(null) }
     Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        if (state.busy || state.settings == null) ProgressBar(Modifier.fillMaxWidth())
+        if (state.busy || (state.settings == null && state.error == null)) ProgressBar(Modifier.fillMaxWidth())
         state.error?.let { Text(it.localizedMessage(), color = FluentTheme.colors.system.critical) }
+        if (state.settings == null && state.error != null) {
+            Button(onClick = state::retry) { Text(stringResource(Res.string.status_loadmore_error_retry)) }
+        }
         state.settings?.let { settings ->
             ProxyPolicyRow(stringResource(Res.string.proxy_global), settings, null, state)
             Header(stringResource(Res.string.proxy_profiles))

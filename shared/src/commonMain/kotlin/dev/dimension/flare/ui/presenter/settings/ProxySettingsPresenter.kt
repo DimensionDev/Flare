@@ -4,6 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -20,6 +22,8 @@ import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiProfile
+import dev.dimension.flare.ui.model.collectAsUiState
+import dev.dimension.flare.ui.model.isError
 import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.ui.presenter.invoke
@@ -40,7 +44,9 @@ public class ProxySettingsPresenter : PresenterBase<ProxySettingsState>() {
 
     @Composable
     override fun body(): ProxySettingsState {
-        val settings by repository.settings.collectAsState(null)
+        var loadAttempt by remember { mutableIntStateOf(0) }
+        val settingsState = key(loadAttempt) { repository.settings.collectAsUiState().value }
+        val settings = settingsState.takeSuccess()
         val accounts by accountRepository.allAccounts.collectAsState(persistentListOf())
         val accountState = remember { AccountsPresenter() }.invoke()
         val accountProfiles =
@@ -85,9 +91,13 @@ public class ProxySettingsPresenter : PresenterBase<ProxySettingsState>() {
             override val accounts = accounts
             override val accountProfiles = accountProfiles
             override val busy = busy
-            override val error = error
+            override val error = if (settingsState.isError) ProxySettingsError.REQUEST_FAILED else error
             override val editorError = editorErrorMessage
             override val tested = tested
+
+            override fun retry() {
+                loadAttempt++
+            }
 
             override fun select(
                 accountKey: MicroBlogKey?,
@@ -147,6 +157,8 @@ public interface ProxySettingsState {
     public val error: ProxySettingsError?
     public val editorError: ProxySettingsError?
     public val tested: ProxyProfile?
+
+    public fun retry()
 
     public fun accountLabel(account: UiAccount): String =
         accountProfiles[account.accountKey]?.let { "${it.name.innerText}, ${it.handle.canonical}" }

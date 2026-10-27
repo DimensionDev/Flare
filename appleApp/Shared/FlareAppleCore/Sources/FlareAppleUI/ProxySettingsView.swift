@@ -10,11 +10,18 @@ public struct ProxySettingsView: View {
 
     public var body: some View {
         Form {
-            if presenter.state.busy || presenter.state.settings == nil {
+            if presenter.state.busy || (presenter.state.settings == nil && presenter.state.error == nil) {
                 Section { ProgressView() }
             }
             if let error = presenter.state.error {
-                Section { Text(error.localizedKey, bundle: FlareAppleUILocalization.bundle).foregroundStyle(.red) }
+                Section {
+                    Text(error.localizedKey, bundle: FlareAppleUILocalization.bundle).foregroundStyle(.red)
+                    if presenter.state.settings == nil {
+                        Button { presenter.state.retry() } label: {
+                            Text("action_retry", bundle: FlareAppleUILocalization.bundle)
+                        }
+                    }
+                }
             }
             if let settings = presenter.state.settings {
                 let accounts = presenter.state.accounts.filter { $0.accountKey.host != "nostr" }

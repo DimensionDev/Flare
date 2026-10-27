@@ -59,6 +59,7 @@ public class ProxyRepository(
     ): Unit =
         update {
             require(accountKey.host != "nostr") { "Nostr does not support app proxies" }
+            check(accountKey.toString() !in it.removedAccounts) { "Account has been removed" }
             it.validatePolicy(policy, account = true)
             it.copy(accounts = it.accounts + (accountKey.toString() to policy))
         }

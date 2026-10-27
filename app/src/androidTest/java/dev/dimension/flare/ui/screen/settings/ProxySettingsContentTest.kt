@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.ComposeUiFlags
 import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.semantics.ProgressBarRangeInfo
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
@@ -14,6 +15,7 @@ import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasAnyDescendant
+import androidx.compose.ui.test.hasProgressBarRangeInfo
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isDialog
 import androidx.compose.ui.test.isPopup
@@ -205,7 +207,27 @@ class ProxySettingsContentTest {
         }
     }
 
-    private fun show(state: State) {
+    @Test
+    fun settingsReadFailureShowsRetryInsteadOfAnIndefiniteSpinner() {
+        var retries = 0
+        val state =
+            object : ProxySettingsState by State() {
+                override val settings = null
+                override val error = ProxySettingsError.REQUEST_FAILED
+
+                override fun retry() {
+                    retries++
+                }
+            }
+        show(state)
+        compose.onNodeWithText("Proxy operation failed. Please try again.").assertIsDisplayed()
+        compose.onNodeWithText("Retry").assertIsDisplayed().performClick()
+        compose.onNodeWithText("Add proxy").assertDoesNotExist()
+        compose.onNode(hasProgressBarRangeInfo(ProgressBarRangeInfo.Indeterminate)).assertDoesNotExist()
+        compose.runOnIdle { assertEquals(1, retries) }
+    }
+
+    private fun show(state: ProxySettingsState) {
         compose.setContent {
             CompositionLocalProvider(
                 LocalGlobalAppearance provides GlobalAppearance(),
@@ -235,6 +257,8 @@ class ProxySettingsContentTest {
         var saved: ProxyProfile? = null
         var removed: String? = null
         var selection: Pair<MicroBlogKey?, ProxyPolicy>? = null
+
+        override fun retry() = Unit
 
         override fun select(
             accountKey: MicroBlogKey?,

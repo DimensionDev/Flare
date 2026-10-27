@@ -102,8 +102,11 @@ internal fun ProxySettingsContent(
             Modifier.verticalScroll(rememberScrollState()).padding(padding).padding(horizontal = screenHorizontalPadding),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            if (state.busy || settings == null) LinearProgressIndicator(Modifier.fillMaxWidth())
+            if (state.busy || (settings == null && state.error == null)) LinearProgressIndicator(Modifier.fillMaxWidth())
             state.error?.let { Text(it.localizedMessage(), color = MaterialTheme.colorScheme.error) }
+            if (settings == null && state.error != null) {
+                TextButton(onClick = state::retry) { Text(stringResource(R.string.status_loadmore_error_retry)) }
+            }
             if (settings != null) {
                 val globalTitle = stringResource(R.string.proxy_global)
                 SegmentedListItem(

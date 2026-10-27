@@ -61,6 +61,8 @@ class ProxySettingsStateTest {
             override val error = null
             override val tested = result
 
+            override fun retry() = error("Not used")
+
             override fun select(
                 accountKey: MicroBlogKey?,
                 policy: ProxyPolicy,

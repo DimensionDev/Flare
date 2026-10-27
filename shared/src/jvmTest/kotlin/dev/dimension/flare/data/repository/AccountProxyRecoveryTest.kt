@@ -16,7 +16,14 @@ import dev.dimension.flare.data.database.cache.model.DbEmojiHistory
 import dev.dimension.flare.data.database.createDatabaseDriver
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.io.OkioFileStorage
+import dev.dimension.flare.data.model.ProxyMode
+import dev.dimension.flare.data.model.ProxyPolicy
+import dev.dimension.flare.data.model.ProxyProfile
+import dev.dimension.flare.data.model.ProxyProtocol
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.data.model.ProxySettings
+import dev.dimension.flare.data.model.ProxySettingsError
+import dev.dimension.flare.data.network.ProxyNetwork
 import dev.dimension.flare.deleteTestRootPath
 import dev.dimension.flare.di.startKoin
 import dev.dimension.flare.di.testSingle
@@ -28,6 +35,8 @@ import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.presenter.settings.AccountsPresenter
 import dev.dimension.flare.ui.presenter.settings.AccountsState
 import dev.dimension.flare.ui.presenter.settings.ImportAppDatabasePresenter
+import dev.dimension.flare.ui.presenter.settings.ProxySettingsPresenter
+import dev.dimension.flare.ui.presenter.settings.ProxySettingsState
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -325,6 +334,84 @@ class AccountProxyRecoveryTest {
             assertFailsWith<Exception> { ImportAppDatabasePresenter(backup).import() }
             assertTrue(deleted.toString() in store.state.value.removedAccounts)
             assertEquals("{}", app.accountDao().getAccount(deleted)?.credential_json)
+        }
+
+    @Test
+    fun proxySettingsReadFailureCanBeRetriedWithoutResettingPolicies(): Unit =
+        runBlocking {
+            proxy.save(ProxyProfile("work", "Work", ProxyProtocol.SOCKS5, "127.0.0.1", 1080))
+            proxy.selectGlobal(ProxyPolicy(ProxyMode.PROXY, "work"))
+            store.persistentReadFailure = true
+            val (accounts, _) = repository()
+            accounts.withAccountChanges { }
+            install(accounts)
+            val presenter = ProxySettingsPresenter()
+            val models = MutableStateFlow<ProxySettingsState?>(null)
+            val collector =
+                launch {
+                    moleculeFlow(RecompositionMode.Immediate) { presenter.body() }.collect { models.value = it }
+                }
+            try {
+                withTimeout(5_000) {
+                    val failed = models.first { it?.error != null }!!
+                    assertEquals(ProxySettingsError.REQUEST_FAILED, failed.error)
+                    assertNull(failed.settings)
+                    assertFailsWith<IOException> { ProxyNetwork.snapshot(ProxyRef.Global) }
+                    store.persistentReadFailure = false
+                    failed.retry()
+                    val loaded = models.first { it?.settings != null }!!
+                    assertNull(loaded.error)
+                    assertEquals(ProxyPolicy(ProxyMode.PROXY, "work"), loaded.settings?.global)
+                    assertEquals(ProxyMode.PROXY, ProxyNetwork.snapshot(ProxyRef.Global).connection.mode)
+                }
+            } finally {
+                collector.cancelAndJoin()
+            }
+        }
+
+    @Test
+    fun lateProxySelectionDuringDeletionCannotSurviveReplacementLogin(): Unit =
+        runBlocking {
+            proxy.save(ProxyProfile("work", "Work", ProxyProtocol.SOCKS5, "127.0.0.1", 1080))
+            proxy.selectGlobal(ProxyPolicy(ProxyMode.PROXY, "work"))
+            val (accounts, _) = repository()
+            accounts.withAccountChanges { }
+            app.accountDao().insert(row(deleted))
+            proxy.selectAccount(deleted, ProxyPolicy(ProxyMode.DIRECT))
+            val entered = CompletableDeferred<Unit>()
+            val release = CompletableDeferred<Unit>()
+            val hold =
+                launch(Dispatchers.IO) {
+                    accounts.appDataStore.composeConfigData.updateData {
+                        entered.complete(Unit)
+                        release.await()
+                        it
+                    }
+                }
+            withTimeout(5_000) { entered.await() }
+            val removal = launch(Dispatchers.Default) { accounts.delete(deleted) }
+            try {
+                withTimeout(5_000) { store.state.first { deleted.toString() in it.removedAccounts } }
+                assertNotNull(app.accountDao().getAccount(deleted), "The old settings row can still receive input")
+                val lateSelection = runCatching { proxy.selectAccount(deleted, ProxyPolicy(ProxyMode.DIRECT)) }
+                release.complete(Unit)
+                hold.join()
+                removal.join()
+                assertNull(app.accountDao().getAccount(deleted))
+                accounts.addAccount(UiAccount(deleted, "Mastodon"), "fresh credentials")
+                assertEquals(
+                    ProxyMode.PROXY,
+                    store.state.value
+                        .resolve(ProxyRef.Account(deleted))
+                        .mode,
+                )
+                assertTrue(lateSelection.isFailure, "A deleted account must reject stale policy changes")
+                assertTrue(deleted.toString() !in store.state.value.accounts)
+            } finally {
+                release.complete(Unit)
+                hold.cancelAndJoin()
+                removal.cancelAndJoin()
+            }
         }
 
     private fun row(key: MicroBlogKey) = DbAccount(key, "{}", "Mastodon", 1L)

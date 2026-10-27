@@ -32,6 +32,7 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.ReferenceType
 import dev.dimension.flare.ui.model.ClickEvent
+import dev.dimension.flare.ui.model.PluginMediaPermissions
 import dev.dimension.flare.ui.model.UiArticle
 import dev.dimension.flare.ui.model.UiArticleAuthor
 import dev.dimension.flare.ui.model.UiArticleBlock
@@ -73,8 +74,32 @@ internal class PluginWireMapperV1(
     private val composeAvailable: Boolean,
     private val mediaNetwork: Boolean = false,
 ) {
+    init {
+        PluginMediaPermissions.register(pluginId, mediaNetwork)
+    }
+
     private val accountType: AccountType = accountKey?.let(AccountType::Specific) ?: AccountType.GuestHost(originHost)
     private val mediaProxy = ProxyRef.forAccountType(accountType)
+
+    fun cachedProfile(value: ProfileV1): UiProfile =
+        profile(
+            if (mediaNetwork) {
+                value
+            } else {
+                value.copy(
+                    avatarUrl = null,
+                    bannerUrl = null,
+                    description = value.description?.withoutMedia(),
+                    fields = value.fields.map { it.copy(value = it.value.withoutMedia()) },
+                )
+            },
+        )
+
+    private fun RichTextV1.withoutMedia(): RichTextV1 =
+        when (format) {
+            RichTextFormatV1.Plain -> this
+            RichTextFormatV1.Html -> RichTextV1(value = validatedHtml("https://$originHost/").text())
+        }
 
     fun profile(value: ProfileV1): UiProfile {
         value.requireValid()
@@ -88,6 +113,7 @@ internal class PluginWireMapperV1(
                 .takeIf(String::isNotBlank)
                 ?: value.key.host
         return UiProfile(
+            pluginId = pluginId,
             key = key,
             handle = UiHandle(value.handle, handleHost),
             avatar = value.avatarUrl.toUiImage(),
@@ -158,6 +184,7 @@ internal class PluginWireMapperV1(
     fun directMessageRoom(value: DirectMessageRoomV1): UiDMRoom {
         require(value.unreadCount >= 0 && value.participants.size <= 256) { "Invalid plugin direct-message room" }
         return UiDMRoom(
+            pluginId = pluginId,
             key = value.key.toMicroBlogKey(),
             users = value.participants.map(::profile).toImmutableList(),
             lastMessage = value.lastMessage?.let(::directMessage),
@@ -167,6 +194,7 @@ internal class PluginWireMapperV1(
 
     fun directMessage(value: DirectMessageV1): UiDMItem =
         UiDMItem(
+            pluginId = pluginId,
             key = value.key.toMicroBlogKey(),
             user = profile(value.sender),
             content = UiDMItem.Message.Text(value.content.toUi()),
@@ -190,6 +218,7 @@ internal class PluginWireMapperV1(
                 }
             }
         return UiArticle(
+            pluginId = pluginId,
             key = value.key.id,
             title = value.title,
             content = uiArticleContentOf(blocks, richText.raw),
@@ -203,7 +232,11 @@ internal class PluginWireMapperV1(
     fun gallery(value: GalleryV1): GalleryDetail {
         value.url.requireHttpsUrl()
         val images = value.images.mapNotNull { it.toUi(value.actions.any { action -> action.active == true }) as? UiMedia.Image }
-        val bookmark = value.actions.firstOrNull { it.action == SemanticActionV1.Bookmark || it.action == SemanticActionV1.Unbookmark }
+        val bookmark =
+            value.actions.firstOrNull {
+                it.enabled &&
+                    (it.action == SemanticActionV1.Bookmark || it.action == SemanticActionV1.Unbookmark)
+            }
         val key = value.key.toMicroBlogKey()
         return GalleryDetail(
             orientation =
@@ -222,6 +255,7 @@ internal class PluginWireMapperV1(
             isBookmarked = bookmark?.active == true || bookmark?.action == SemanticActionV1.Unbookmark,
             bookmarkAction =
                 accountKey
+                    ?.takeIf { postMutationAvailable }
                     ?.let { account ->
                         bookmark?.toSemanticPostAction()?.let { action ->
                             semanticPostActionMenu(key, action, bookmark.actionToken, bookmark.count ?: 0, account).clickEvent
@@ -315,6 +349,7 @@ internal class PluginWireMapperV1(
                 )
         }
         return UiTimelineV2.Post(
+            pluginId = pluginId,
             platformId = platformId,
             images = media.map { it.toUi(sensitive) }.toPersistentList(),
             sensitive = sensitive,

@@ -192,6 +192,7 @@ public sealed class UiTimelineV2 {
         override val accountType: AccountType,
         @Transient
         override val itemKey: String? = null,
+        val pluginId: String? = null,
     ) : UiTimelineV2() {
         val actualCreatedAt: UiDateTime? by lazy {
             if (createdAt.value == Instant.fromEpochMilliseconds(0L)) {
@@ -327,6 +328,7 @@ public sealed class UiTimelineV2 {
         public override val accountType: AccountType,
         @Transient
         override val itemKey: String? = null,
+        val pluginId: String? = null,
     ) : UiTimelineV2() {
         @Transient
         override val stableItemKey: String = calculateStableItemKey()

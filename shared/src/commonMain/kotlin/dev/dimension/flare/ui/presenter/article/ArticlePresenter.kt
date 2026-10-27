@@ -146,6 +146,7 @@ private fun UiArticle.toHistoryFeed(
 ): UiTimelineV2.Feed? {
     val url = sourceUrl?.takeIf { it.isNotBlank() } ?: return null
     return UiTimelineV2.Feed(
+        pluginId = pluginId,
         title = title.takeIf { it.isNotBlank() },
         description = content.rawText.takeIf { it.isNotBlank() },
         url = url,

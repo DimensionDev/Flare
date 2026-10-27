@@ -1,6 +1,9 @@
 package dev.dimension.flare.feature.plugin.management
 
+import dev.dimension.flare.common.decodeJson
+import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.io.AppFileStore
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.feature.plugin.PluginSubsystemV1
 import dev.dimension.flare.feature.plugin.github.GitHubPluginClient
 import dev.dimension.flare.feature.plugin.installer.PluginInstallWarningTypeV1
@@ -8,6 +11,10 @@ import dev.dimension.flare.feature.plugin.installer.TestFppFactory
 import dev.dimension.flare.feature.plugin.lifecycle.PluginInstallSourceV1
 import dev.dimension.flare.feature.plugin.login.PluginOAuthPendingStoreV1
 import dev.dimension.flare.feature.plugin.login.PluginOAuthPendingV1
+import dev.dimension.flare.ui.model.PluginMediaPermissions
+import dev.dimension.flare.ui.model.UiProfile
+import dev.dimension.flare.ui.model.createSampleUser
+import dev.dimension.flare.ui.model.withProxy
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
 import io.ktor.http.HttpStatusCode
@@ -81,6 +88,51 @@ class PluginGitHubManagementTest {
         client.close()
         fileSystem.deleteRecursively(root, mustExist = false)
     }
+
+    @Test
+    fun cachedMediaGrantIsRevokedOnlyAfterTheConfirmedUpdateRestarts() =
+        runBlocking {
+            archives[FIRST_SHA] = archive("1.0.0", mediaNetwork = true)
+            val cache = createSampleUser().copy(pluginId = PLUGIN_ID).encodeJson()
+            withPresenter { _, presenter -> install(presenter) }
+            archives[SECOND_SHA] = archive("1.1.0")
+            tags = listOf("v1.0.0" to FIRST_SHA, "v1.1.0" to SECOND_SHA)
+            withPresenter { _, presenter ->
+                assertTrue(PluginMediaPermissions.isAllowed(PLUGIN_ID))
+                assertNotNull(cache.decodeJson<UiProfile>().withProxy(ProxyRef.Global).avatar)
+                presenter.checkUpdates()
+                presenter.inspectGitHubUpdate(PLUGIN_ID)
+                presenter.confirmInstall()
+                assertTrue(PluginMediaPermissions.isAllowed(PLUGIN_ID))
+                assertNotNull(cache.decodeJson<UiProfile>().withProxy(ProxyRef.Global).avatar)
+            }
+            withPresenter { _, _ ->
+                assertFalse(PluginMediaPermissions.isAllowed(PLUGIN_ID))
+                assertNull(cache.decodeJson<UiProfile>().withProxy(ProxyRef.Global).avatar)
+            }
+        }
+
+    @Test
+    fun disabledAndUninstalledPluginsLoseCachedMediaAfterRestart() =
+        runBlocking {
+            archives[FIRST_SHA] = archive("1.0.0", mediaNetwork = true)
+            withPresenter { _, presenter -> install(presenter) }
+            withPresenter { _, presenter ->
+                assertTrue(PluginMediaPermissions.isAllowed(PLUGIN_ID))
+                presenter.setEnabled(PLUGIN_ID, false)
+                assertTrue(PluginMediaPermissions.isAllowed(PLUGIN_ID))
+            }
+            withPresenter { _, presenter ->
+                assertFalse(PluginMediaPermissions.isAllowed(PLUGIN_ID))
+                presenter.setEnabled(PLUGIN_ID, true)
+            }
+            withPresenter { _, presenter ->
+                assertTrue(PluginMediaPermissions.isAllowed(PLUGIN_ID))
+                presenter.uninstall(PLUGIN_ID)
+                assertTrue(PluginMediaPermissions.isAllowed(PLUGIN_ID))
+            }
+            withPresenter { _, _ -> assertFalse(PluginMediaPermissions.isAllowed(PLUGIN_ID)) }
+        }
 
     @Test
     fun githubInstallCanBeCancelledAndOnlyRunsAfterConfirmationAndRestart() =
@@ -338,8 +390,12 @@ class PluginGitHubManagementTest {
         version: String,
         id: String = PLUGIN_ID,
         addedPermission: Boolean = false,
+        mediaNetwork: Boolean = false,
     ): ByteArray {
         var manifest = TestFppFactory.validManifest.replace("\"version\": \"1.0.0\"", "\"version\": \"$version\"").replace(PLUGIN_ID, id)
+        if (mediaNetwork) {
+            manifest = manifest.replace("\"defaultLocale\":", "\"permissions\": {\"mediaNetwork\":true}, \"defaultLocale\":")
+        }
         if (addedPermission) {
             manifest =
                 manifest.replace("\"defaultLocale\":", "\"permissions\": {\"authOrigins\":[\"https://auth.example\"]}, \"defaultLocale\":")

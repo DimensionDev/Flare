@@ -10,6 +10,7 @@ import dev.dimension.flare.data.datasource.microblog.DataSourceCapabilityProvide
 import dev.dimension.flare.data.datasource.microblog.DataSourceCapabilitySet
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
+import dev.dimension.flare.data.datasource.microblog.accountProfileFlow
 import dev.dimension.flare.data.datasource.microblog.datasource.ArticleDataSource
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.model.ProxyRef
@@ -23,6 +24,7 @@ import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.createSampleUser
 import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.model.uiArticleContentOf
+import dev.dimension.flare.ui.model.withProxy
 import dev.dimension.flare.ui.presenter.article.articleFlow
 import dev.dimension.flare.ui.presenter.compose.observeComposeUsers
 import dev.dimension.flare.ui.render.toUiPlainText
@@ -33,6 +35,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class CapabilityPresentationTest {
@@ -50,10 +53,23 @@ class CapabilityPresentationTest {
         }
 
     @Test
+    fun accountIdentityIsAvailableWithoutTheProfileCapability() =
+        runTest {
+            val source = CapabilityOnlySource(key, profile)
+            assertNull(source.capabilitySet.profile)
+            val identity = source.accountProfileFlow()!!.first().takeSuccess()!!
+            assertEquals(key, identity.key)
+            assertEquals("Login profile", identity.name.raw)
+            assertEquals(ProxyRef.Account(key), identity.avatar?.proxy)
+            assertNull(CapabilityOnlySource(null, profile).accountProfileFlow())
+            assertNull(CapabilityOnlySource(MicroBlogKey("other", key.host), profile).accountProfileFlow())
+        }
+
+    @Test
     fun composeOnlyAccountsUseTheirLoginProfile() =
         runTest {
             val users = observeComposeUsers(flowOf(listOf(CapabilityOnlySource(key, profile)))).first()
-            assertEquals(profile, users[key]?.takeSuccess())
+            assertEquals(profile.withProxy(ProxyRef.Account(key)), users[key]?.takeSuccess())
             assertTrue(observeComposeUsers(flowOf(listOf(CapabilityOnlySource(null, profile)))).first().isEmpty())
         }
 }
@@ -63,6 +79,8 @@ private class CapabilityOnlySource(
     private val loginProfile: UiProfile,
 ) : MicroblogDataSource,
     DataSourceCapabilityProvider {
+    override val authenticatedProfile = loginProfile
+
     override val capabilitySet: DataSourceCapabilitySet by lazy {
         DataSourceCapabilitySet(
             article =
@@ -84,7 +102,6 @@ private class CapabilityOnlySource(
                 ComposeCapability(
                     object : ComposeDataSource, MicroblogDataSource by this {
                         override val accountKey = loginProfile.key
-                        override val composeProfile = loginProfile
 
                         override fun composeConfig(type: ComposeType) = ComposeConfig()
 

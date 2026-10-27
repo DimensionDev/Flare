@@ -187,7 +187,11 @@ that returns avatars, images, audio, video, covers, or HTML images must declare
 media requests to any website, including CDNs and federated servers; these URLs
 can transmit the plugin account's data. Adding this permission during an update
 requires confirmation. It does not expand `flare.http.request` origins or permit
-local-file resources. Text-only plugins do not need it.
+local-file resources. Text-only plugins do not need it. Cached profiles, posts,
+article history, and direct messages retain their plugin ownership and recheck
+the running package's grant when restored, including translated and nested media.
+Permission removal, disable, and uninstall take effect after restart, like the
+package change itself; absent plugins cannot restore media.
 
 Flare owns HTTP routing: detector, guest, and new-login requests follow the
 global proxy policy; account requests and relogin requests follow that account's
@@ -226,8 +230,10 @@ expiry, replay protection, and relogin identity validation. `begin` returns:
 
 At least one displayable capability must be negotiated. `accountId` must equal
 `profile.key.id`, and `profile.key.host` must equal the selected origin's host.
-The Host retains this login profile for compose account selection when a plugin
-does not provide profile lookup. Login cannot replace an existing account owned
+The Host retains this login profile as the current account's identity for account
+menus, compose, notifications, discovery/search, and direct-message selection when
+a plugin does not provide profile lookup. This fallback never enables arbitrary
+profile lookup or profile timelines. Cached login media follows the current grant. Login cannot replace an existing account owned
 by another platform with the same account ID and host.
 
 ## Errors

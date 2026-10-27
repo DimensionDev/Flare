@@ -15,6 +15,7 @@ import dev.dimension.flare.feature.plugin.login.PluginOAuthPendingStoreV1
 import dev.dimension.flare.feature.plugin.login.PluginWebCookieLoginCoordinatorV1
 import dev.dimension.flare.feature.plugin.runtime.PluginRuntimePool
 import dev.dimension.flare.model.PlatformSpecSource
+import dev.dimension.flare.ui.model.PluginMediaPermissions
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -33,10 +34,13 @@ public class PluginSubsystemV1 internal constructor(
     ) : this(appFiles, PlatformOAuthPluginPendingStoreV1(pendingRepository))
 
     public val stateStore: PluginStateStore =
-        PluginStateStore.open(
-            fileSystem = appFiles.fileSystem,
-            root = appFiles.directory(STORAGE_NAMESPACE),
-        )
+        PluginStateStore
+            .open(
+                fileSystem = appFiles.fileSystem,
+                root = appFiles.directory(STORAGE_NAMESPACE),
+            ).also { store ->
+                PluginMediaPermissions.replace(store.running.plugins.mapValues { it.value.installed.manifest.permissions.mediaNetwork })
+            }
     public val runtimePool: PluginRuntimePool =
         PluginRuntimePool(
             fileSystem = appFiles.fileSystem,

@@ -51,7 +51,9 @@ private fun RenderContent.withProxy(proxy: ProxyRef): RenderContent =
     }
 
 @HiddenFromObjC
-public fun UiProfile.withProxy(proxy: ProxyRef): UiProfile =
+public fun UiProfile.withProxy(proxy: ProxyRef): UiProfile = filterPluginMedia(pluginId).bindProfileProxy(proxy)
+
+private fun UiProfile.bindProfileProxy(proxy: ProxyRef): UiProfile =
     copy(
         avatar = avatar?.copy(proxy = proxy),
         banner = banner?.copy(proxy = proxy),
@@ -90,14 +92,16 @@ public fun <T : UiTimelineV2> T.bindMediaProxy(): T {
     val proxy = ProxyRef.forAccountType(accountType)
     return when (this) {
         is UiTimelineV2.Post -> {
-            copy(
-                images = images.map { it.withProxy(proxy) }.toImmutableList(),
-                user = user?.withProxy(proxy),
-                content = content.withProxy(proxy),
-                contentWarning = contentWarning?.withProxy(proxy),
-                card = card?.copy(media = card.media?.withProxy(proxy)),
-                emojiReactions = emojiReactions.map { it.copy(proxy = proxy) }.toImmutableList(),
-            )
+            filterPluginMedia(pluginId).let { post ->
+                post.copy(
+                    images = post.images.map { it.withProxy(proxy) }.toImmutableList(),
+                    user = post.user?.withProxy(proxy),
+                    content = post.content.withProxy(proxy),
+                    contentWarning = post.contentWarning?.withProxy(proxy),
+                    card = post.card?.let { it.copy(media = it.media?.withProxy(proxy)) },
+                    emojiReactions = post.emojiReactions.map { it.copy(proxy = proxy) }.toImmutableList(),
+                )
+            }
         }
 
         is UiTimelineV2.Message -> {
@@ -105,7 +109,10 @@ public fun <T : UiTimelineV2> T.bindMediaProxy(): T {
         }
 
         is UiTimelineV2.Feed -> {
-            copy(media = media?.copy(proxy = proxy), source = source.copy(proxy = proxy))
+            copy(
+                media = media?.takeIf { it.allowedForPlugin(pluginId) }?.copy(proxy = proxy),
+                source = source.copy(icon = source.icon?.takeIf { UiMedia.Image(it).allowedForPlugin(pluginId) }, proxy = proxy),
+            )
         }
 
         is UiTimelineV2.User -> {
@@ -151,32 +158,77 @@ public fun UiList.withProxy(proxy: ProxyRef): UiList =
 @HiddenFromObjC
 public fun UiArticle.withProxy(proxy: ProxyRef): UiArticle =
     copy(
-        cover = cover?.copy(proxy = proxy),
+        cover = cover?.takeIf { it.allowedForPlugin(pluginId) }?.copy(proxy = proxy),
         author =
             when (val author = author) {
-                is UiArticleAuthor.Profile -> author.copy(profile = author.profile.withProxy(proxy))
-                is UiArticleAuthor.Rss -> author.copy(proxy = proxy)
-                null -> null
+                is UiArticleAuthor.Profile -> {
+                    author.copy(profile = author.profile.filterPluginMedia(pluginId).withProxy(proxy))
+                }
+
+                is UiArticleAuthor.Rss -> {
+                    author.copy(
+                        iconUrl = author.iconUrl?.takeIf { UiMedia.Image(it).allowedForPlugin(pluginId) },
+                        proxy = proxy,
+                    )
+                }
+
+                null -> {
+                    null
+                }
             },
         content =
             content.copy(
                 blocks =
                     content.blocks
-                        .map { block ->
+                        .mapNotNull { block ->
                             when (block) {
-                                is UiArticleBlock.Image -> block.copy(media = block.media.copy(proxy = proxy))
-                                is UiArticleBlock.Video -> block.copy(media = block.media.copy(proxy = proxy))
-                                is UiArticleBlock.Text -> block.copy(content = block.content.withProxy(proxy) as RenderContent.Text)
-                                is UiArticleBlock.Embed -> block.copy(proxy = proxy)
-                                is UiArticleBlock.File -> block.copy(proxy = proxy)
-                                is UiArticleBlock.ContentGate -> block
+                                is UiArticleBlock.Image -> {
+                                    if (block.media.allowedForPlugin(
+                                            pluginId,
+                                        )
+                                    ) {
+                                        block.copy(media = block.media.copy(proxy = proxy))
+                                    } else {
+                                        null
+                                    }
+                                }
+
+                                is UiArticleBlock.Video -> {
+                                    if (block.media.allowedForPlugin(
+                                            pluginId,
+                                        )
+                                    ) {
+                                        block.copy(media = block.media.copy(proxy = proxy))
+                                    } else {
+                                        null
+                                    }
+                                }
+
+                                is UiArticleBlock.Text -> {
+                                    val text = block.richText.filterPluginMedia(pluginId).withProxy(proxy)
+                                    block.copy(content = text.renderRuns.single() as RenderContent.Text)
+                                }
+
+                                is UiArticleBlock.Embed -> {
+                                    block.takeIf { pluginId == null }?.copy(proxy = proxy)
+                                }
+
+                                is UiArticleBlock.File -> {
+                                    block.takeIf { it.media.allowedForPlugin(pluginId) }?.copy(proxy = proxy)
+                                }
+
+                                is UiArticleBlock.ContentGate -> {
+                                    block
+                                }
                             }
                         }.toImmutableList(),
             ),
     )
 
 @HiddenFromObjC
-public fun UiDMItem.withProxy(proxy: ProxyRef): UiDMItem =
+public fun UiDMItem.withProxy(proxy: ProxyRef): UiDMItem = filterPluginMedia(pluginId).bindDMProxy(proxy)
+
+private fun UiDMItem.bindDMProxy(proxy: ProxyRef): UiDMItem =
     copy(
         user = user.withProxy(proxy),
         content =
@@ -191,6 +243,6 @@ public fun UiDMItem.withProxy(proxy: ProxyRef): UiDMItem =
 @HiddenFromObjC
 public fun UiDMRoom.withProxy(proxy: ProxyRef): UiDMRoom =
     copy(
-        users = users.map { it.withProxy(proxy) }.toImmutableList(),
-        lastMessage = lastMessage?.withProxy(proxy),
+        users = users.map { it.filterPluginMedia(pluginId).withProxy(proxy) }.toImmutableList(),
+        lastMessage = lastMessage?.filterPluginMedia(pluginId)?.withProxy(proxy),
     )

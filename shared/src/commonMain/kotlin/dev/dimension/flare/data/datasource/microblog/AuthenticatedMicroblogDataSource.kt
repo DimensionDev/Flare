@@ -2,7 +2,6 @@ package dev.dimension.flare.data.datasource.microblog
 
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus
 import kotlinx.coroutines.flow.first
@@ -22,9 +21,6 @@ public interface NotificationTimelineDataSource : AuthenticatedMicroblogDataSour
 
 @HiddenFromObjC
 public interface ComposeDataSource : AuthenticatedMicroblogDataSource {
-    public val composeProfile: UiProfile?
-        get() = null
-
     public suspend fun compose(
         data: ComposeData,
         progress: () -> Unit,

@@ -34,6 +34,55 @@ class PluginWireMapperV1Test {
         )
 
     @Test
+    fun disabledOrUnsupportedGalleryBookmarkDoesNotCreateAMutation() {
+        val gallery =
+            GalleryV1(
+                key = post.key,
+                title = "Gallery",
+                createdAt = post.createdAt,
+                url = "https://remote.example/gallery",
+                images = listOf(MediaV1("image", MediaTypeV1.Image, "https://remote.example/image.png")),
+                actions =
+                    listOf(
+                        dev.dimension.flare.feature.plugin.wire.ActionDescriptorV1(
+                            action = dev.dimension.flare.feature.plugin.wire.SemanticActionV1.Bookmark,
+                            enabled = false,
+                        ),
+                    ),
+            )
+        assertEquals(ClickEvent.Noop, mapper.gallery(gallery).bookmarkAction)
+        val available = gallery.copy(actions = gallery.actions.map { it.copy(enabled = true) })
+        assertNotEquals(ClickEvent.Noop, mapper.gallery(available).bookmarkAction)
+        assertEquals(ClickEvent.Noop, createMapper(null).gallery(available).bookmarkAction)
+        assertEquals(
+            ClickEvent.Noop,
+            createMapper(MicroBlogKey("me", "local.example"), postMutationAvailable = false).gallery(available).bookmarkAction,
+        )
+    }
+
+    @Test
+    fun savedLoginIdentitySurvivesMediaPermissionRemoval() {
+        val denied = createMapper(MicroBlogKey("me", "local.example"), mediaNetwork = false)
+        val profile =
+            denied.cachedProfile(
+                post.author.copy(
+                    avatarUrl = "https://cdn.example/avatar.png",
+                    bannerUrl = "https://cdn.example/banner.png",
+                    description = RichTextV1(RichTextFormatV1.Html, "<p>About<img src='https://cdn.example/old.png'></p>"),
+                ),
+            )
+        assertEquals(null, profile.avatar)
+        assertEquals(null, profile.banner)
+        assertEquals("About", profile.description?.raw)
+        assertEquals(post.author.key.id, profile.key.id)
+        assertEquals(
+            false,
+            dev.dimension.flare.ui.model.PluginMediaPermissions
+                .isAllowed(profile.pluginId!!),
+        )
+    }
+
+    @Test
     fun remoteMediaRequiresAnExplicitNetworkGrant() {
         val denied = createMapper(MicroBlogKey("me", "local.example"), mediaNetwork = false)
         assertFailsWith<IllegalArgumentException> {
@@ -212,6 +261,7 @@ class PluginWireMapperV1Test {
     private fun createMapper(
         accountKey: MicroBlogKey?,
         mediaNetwork: Boolean = true,
+        postMutationAvailable: Boolean = true,
     ): PluginWireMapperV1 =
         PluginWireMapperV1(
             pluginId = "test.plugin",
@@ -223,7 +273,7 @@ class PluginWireMapperV1Test {
             postDetailAvailable = true,
             articleDetailAvailable = true,
             galleryDetailAvailable = true,
-            postMutationAvailable = true,
+            postMutationAvailable = postMutationAvailable,
             postDeleteAvailable = true,
             composeAvailable = true,
         )

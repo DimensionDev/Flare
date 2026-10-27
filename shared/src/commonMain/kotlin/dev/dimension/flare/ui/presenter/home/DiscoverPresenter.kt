@@ -17,6 +17,7 @@ import dev.dimension.flare.common.emptyFlow
 import dev.dimension.flare.common.refreshSuspend
 import dev.dimension.flare.common.toPagingState
 import dev.dimension.flare.data.datasource.microblog.accountKeyOrNull
+import dev.dimension.flare.data.datasource.microblog.accountProfileFlow
 import dev.dimension.flare.data.datasource.microblog.capabilities
 import dev.dimension.flare.data.datasource.microblog.paging.toPagingSource
 import dev.dimension.flare.data.datasource.microblog.pagingConfig
@@ -33,7 +34,6 @@ import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.takeSuccess
-import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.web.shared.WebIgnore
 import dev.dimension.flare.web.shared.WebPresenter
@@ -64,7 +64,7 @@ public class DiscoverPresenter : PresenterBase<DiscoverState>() {
         allAccountServicesFlow(accountRepository)
             .map { sources ->
                 sources
-                    .filter { it.capabilities.profile != null && it.capabilities.search != null }
+                    .filter { it.capabilities.search != null && it.accountProfileFlow() != null }
                     .mapNotNull { it.accountKeyOrNull }
             }.distinctUntilChanged()
     }
@@ -75,15 +75,9 @@ public class DiscoverPresenter : PresenterBase<DiscoverState>() {
                 it
                     .mapNotNull { dataSource ->
                         val capabilities = dataSource.capabilities
-                        val profile = capabilities.profile ?: return@mapNotNull null
                         if (capabilities.search == null) return@mapNotNull null
-                        val accountKey = dataSource.accountKeyOrNull ?: return@mapNotNull null
-                        profile to accountKey
+                        dataSource.accountProfileFlow()
                     }.toImmutableList()
-            }.map {
-                it.map { (profile, accountKey) ->
-                    profile.userHandler.userById(accountKey.id).toUi()
-                }
             }.combineLatestFlowLists()
             .map {
                 it

@@ -233,7 +233,10 @@ internal class PluginExtraCapabilitiesV1(
                 .map(NotificationFilterKindV1::toHost)
 
         override fun notification(type: NotificationFilter): RemoteLoader<UiTimelineV2> =
-            pluginRemoteLoader(
+            invoker.timelineLoader(
+                capability = PluginAbiV1.Capabilities.NOTIFICATION,
+                operation = "page",
+                identity = listOf(type.toWire().orEmpty()),
                 directions = directions(PluginAbiV1.Capabilities.NOTIFICATION, "page"),
                 load = { pageSize, request ->
                     invoker.invoke(
@@ -728,7 +731,10 @@ internal class PluginExtraCapabilitiesV1(
         key: MicroBlogKey,
         entityToken: String? = null,
     ): RemoteLoader<UiTimelineV2> =
-        pluginRemoteLoader(
+        invoker.timelineLoader(
+            capability = capability,
+            operation = operation,
+            identity = listOf(key.id, key.host),
             directions = directions(capability, operation),
             load = { pageSize, request ->
                 invoker.invoke(

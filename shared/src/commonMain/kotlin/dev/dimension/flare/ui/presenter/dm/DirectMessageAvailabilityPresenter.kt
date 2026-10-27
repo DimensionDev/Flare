@@ -5,6 +5,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
+import dev.dimension.flare.data.datasource.microblog.accountProfileFlow
 import dev.dimension.flare.data.datasource.microblog.capabilities
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.allAccountServicesFlow
@@ -42,4 +43,4 @@ public class DirectMessageAvailabilityPresenter : PresenterBase<DirectMessageAva
 }
 
 internal fun MicroblogDataSource.isDirectMessageCapableAccountService(): Boolean =
-    capabilities.directMessage != null && capabilities.profile != null
+    capabilities.directMessage != null && accountProfileFlow() != null

@@ -3,6 +3,7 @@ package dev.dimension.flare.ui.presenter.home
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import dev.dimension.flare.data.datasource.microblog.accountKeyOrNull
+import dev.dimension.flare.data.datasource.microblog.accountProfileFlow
 import dev.dimension.flare.data.datasource.microblog.capabilities
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.NoActiveAccountException
@@ -28,14 +29,14 @@ public open class UserPresenter(
     private val dataFlow by lazy {
         accountServiceFlow(accountType, accountRepository)
             .flatMapLatest { service ->
-                val userId =
-                    userKey?.id
-                        ?: service.accountKeyOrNull?.id
-                val profile = service.capabilities.profile
-                if (userId == null || profile == null) {
-                    flowOf(UiState.Error(NoActiveAccountException))
+                if (userKey == null || userKey == service.accountKeyOrNull) {
+                    service.accountProfileFlow() ?: flowOf(UiState.Error(NoActiveAccountException))
                 } else {
-                    profile.userHandler.userById(userId).toUi()
+                    service.capabilities.profile
+                        ?.userHandler
+                        ?.userById(userKey.id)
+                        ?.toUi()
+                        ?: flowOf(UiState.Error(NoActiveAccountException))
                 }
             }
     }

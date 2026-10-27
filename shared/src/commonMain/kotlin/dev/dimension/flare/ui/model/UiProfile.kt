@@ -33,6 +33,7 @@ public data class UiProfile public constructor(
     public val matrices: Matrices,
     public val mark: SerializableImmutableList<Mark>,
     public val bottomContent: BottomContent?,
+    public val pluginId: String? = null,
 ) {
     public constructor(
         key: MicroBlogKey,
@@ -80,6 +81,7 @@ public data class UiProfile public constructor(
     }
 
     internal fun mergeWith(existing: UiProfile): UiProfile {
+        if (pluginId != existing.pluginId) return this
         val keepExistingHandle = handle.raw.isBlank()
         val keepExistingName = nameInternal.raw.isBlank()
         return UiProfile(
@@ -96,6 +98,7 @@ public data class UiProfile public constructor(
             matrices = matrices.mergeWith(existing.matrices),
             mark = (existing.mark + mark).distinct().toPersistentList(),
             bottomContent = bottomContent.mergeWith(existing.bottomContent),
+            pluginId = pluginId,
         )
     }
 

@@ -17,6 +17,7 @@ import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.datasource.microblog.ComposeType
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.accountKeyOrNull
+import dev.dimension.flare.data.datasource.microblog.accountProfileFlow
 import dev.dimension.flare.data.datasource.microblog.capabilities
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.repository.AccountRepository
@@ -987,14 +988,10 @@ internal fun observeComposeUsers(servicesFlow: Flow<List<MicroblogDataSource>>):
     servicesFlow
         .map { services ->
             services.mapNotNull { service ->
-                val profile = service.capabilities.profile
                 val accountKey = service.accountKeyOrNull
                 val compose = service.capabilities.compose
                 if (compose != null && accountKey != null) {
-                    val userFlow =
-                        profile?.userHandler?.userById(accountKey.id)?.toUi()
-                            ?: compose.composeProfile?.let { flowOf(UiState.Success(it)) }
-                            ?: return@mapNotNull null
+                    val userFlow = service.accountProfileFlow() ?: return@mapNotNull null
                     userFlow.map {
                         accountKey to it
                     }

@@ -9,6 +9,7 @@ import dev.dimension.flare.common.collectAsState
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
 import dev.dimension.flare.data.datasource.microblog.accountKeyOrNull
+import dev.dimension.flare.data.datasource.microblog.accountProfileFlow
 import dev.dimension.flare.data.datasource.microblog.capabilities
 import dev.dimension.flare.data.datasource.microblog.loader.RelationActionType
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
@@ -74,7 +75,11 @@ public class ProfilePresenter(
                 userKey?.id
                     ?: service.accountKeyOrNull?.id
                     ?: throw NoActiveAccountException
-            requireNotNull(service.capabilities.profile).userHandler.userById(userId).toUi()
+            if (userKey == null || userKey == service.accountKeyOrNull) {
+                requireNotNull(service.accountProfileFlow())
+            } else {
+                requireNotNull(service.capabilities.profile).userHandler.userById(userId).toUi()
+            }
         }
     }
 
@@ -134,8 +139,9 @@ public class ProfilePresenter(
                             throw NoActiveAccountException
                         }
 
-                    requireNotNull(service.capabilities.profile)
-                        .profileTabs(actualUserKey)
+                    service.capabilities.profile
+                        ?.profileTabs(actualUserKey)
+                        .orEmpty()
                         .map { tab ->
                             val tabId = "${accountType}_${actualUserKey}_${tab.id}"
                             val timelinePresenter =

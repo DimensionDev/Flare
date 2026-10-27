@@ -6,6 +6,7 @@ import dev.dimension.flare.data.datasource.microblog.NotificationFilter
 import dev.dimension.flare.data.datasource.microblog.datasource.GalleryDetail
 import dev.dimension.flare.data.datasource.microblog.list.ListMetaData
 import dev.dimension.flare.data.datasource.microblog.loader.RelationActionType
+import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.feature.plugin.abi.PluginAbiV1
 import dev.dimension.flare.feature.plugin.host.PluginHttpTransport
@@ -69,6 +70,56 @@ class PluginDetailCapabilityTest {
         }
 
     @Test
+    fun pluginTimelinesRemainAvailableToMixedTimelineLoaders() =
+        runBlocking<Unit> {
+            val plugin = install()
+            val source = authenticated(plugin)
+            val first =
+                assertIs<CacheableRemoteLoader<*>>(
+                    source.timeline("dynamic-feed", mapOf("kind" to "photos", "sort" to "new")),
+                )
+            val reordered =
+                assertIs<CacheableRemoteLoader<*>>(
+                    source.timeline("dynamic-feed", mapOf("sort" to "new", "kind" to "photos")),
+                )
+            val another =
+                assertIs<CacheableRemoteLoader<*>>(
+                    source.timeline("dynamic-feed", mapOf("kind" to "details")),
+                )
+            assertEquals(first.pagingKey, reordered.pagingKey)
+            assertTrue(first.pagingKey != another.pagingKey)
+            assertEquals(false, first.supportPrepend)
+            assertEquals(
+                listOf("post-1"),
+                source
+                    .timeline("dynamic-feed", mapOf("kind" to "photos"))
+                    .load(20, PagingRequest.Refresh)
+                    .data
+                    .map { it.statusKey.id },
+            )
+            assertIs<CacheableRemoteLoader<*>>(
+                source.extraCapabilities.listAdapter!!.listTimeline("list-1"),
+            )
+            val notifications = requireNotNull(source.capabilitySet.notification?.timeline)
+            assertTrue(
+                assertIs<CacheableRemoteLoader<*>>(notifications.notification(NotificationFilter.All)).pagingKey !=
+                    assertIs<CacheableRemoteLoader<*>>(notifications.notification(NotificationFilter.Mention)).pagingKey,
+            )
+            val otherAccount = authenticated(plugin, accountKey = MicroBlogKey("account-2", "plugin.example"))
+            val otherOrigin =
+                authenticated(plugin, accountKey = MicroBlogKey("account-1", "plugin.example:8443"), origin = "https://plugin.example:8443")
+            val upgraded = authenticated(plugin.copy(installed = plugin.installed.copy(packageHash = "f".repeat(64))))
+            val keys =
+                listOf(source, otherAccount, otherOrigin, upgraded).map {
+                    assertIs<CacheableRemoteLoader<*>>(it.timeline("dynamic-feed", mapOf("kind" to "photos"))).pagingKey
+                }
+            assertEquals(4, keys.toSet().size)
+            val prepend =
+                authenticated(install(MANIFEST.replace("\"directions\": [\"refresh\"]", "\"directions\": [\"refresh\", \"newer\"]")))
+            assertTrue(assertIs<CacheableRemoteLoader<*>>(prepend.timeline("dynamic-feed")).supportPrepend)
+        }
+
+    @Test
     fun composeWithoutProfileCapabilityKeepsThePersistedLoginProfile() =
         runBlocking<Unit> {
             val manifest =
@@ -89,7 +140,8 @@ class PluginDetailCapabilityTest {
                 )
             val dataSource = authenticated(install(manifest, script))
             assertEquals(null, dataSource.capabilitySet.profile)
-            val profile = requireNotNull(dataSource.capabilitySet.compose).composeProfile
+            assertTrue(dataSource.capabilitySet.compose != null)
+            val profile = dataSource.authenticatedProfile
             assertEquals(MicroBlogKey("account-1", "plugin.example"), profile?.key)
             assertEquals("Test", profile?.name?.raw)
         }
@@ -252,12 +304,13 @@ class PluginDetailCapabilityTest {
     private suspend fun authenticated(
         plugin: RunningPluginV1,
         unavailableCapabilities: Set<String> = emptySet(),
+        accountKey: MicroBlogKey = MicroBlogKey("account-1", "plugin.example"),
+        origin: String = ORIGIN,
     ): PluginDataSourceV1 {
-        val accountKey = MicroBlogKey("account-1", "plugin.example")
         val success =
             LoginSuccessV1(
                 accountId = accountKey.id,
-                origin = ORIGIN,
+                origin = origin,
                 credential = JsonObject(emptyMap()),
                 profile = ProfileV1(EntityKeyV1(accountKey.id, accountKey.host), "test@plugin.example", "Test"),
                 capabilities =

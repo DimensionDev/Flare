@@ -11,6 +11,7 @@ import dev.dimension.flare.common.combineLatestFlowLists
 import dev.dimension.flare.common.refreshSuspend
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
 import dev.dimension.flare.data.datasource.microblog.accountKeyOrNull
+import dev.dimension.flare.data.datasource.microblog.accountProfileFlow
 import dev.dimension.flare.data.datasource.microblog.capabilities
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.notSupported
@@ -56,17 +57,16 @@ internal fun notificationAccountsFlow(accountRepository: AccountRepository): Flo
         .map {
             it
                 .mapNotNull { dataSource ->
-                    val profile = dataSource.capabilities.profile ?: return@mapNotNull null
+                    val profileFlow = dataSource.accountProfileFlow() ?: return@mapNotNull null
                     val notification = dataSource.capabilities.notification ?: return@mapNotNull null
                     if (notification.timeline == null) return@mapNotNull null
-                    val accountKey = dataSource.accountKeyOrNull ?: return@mapNotNull null
-                    Triple(profile, accountKey, notification.events)
+                    profileFlow to notification.events
                 }
         }.map { accounts ->
-            accounts.map { (profile, accountKey, notificationEvents) ->
+            accounts.map { (profileFlow, notificationEvents) ->
                 when (notificationEvents) {
                     null -> {
-                        profile.userHandler.userById(accountKey.id).toUi().map {
+                        profileFlow.map {
                             it.map {
                                 it to 0
                             }
@@ -75,7 +75,7 @@ internal fun notificationAccountsFlow(accountRepository: AccountRepository): Flo
 
                     else -> {
                         combine(
-                            profile.userHandler.userById(accountKey.id).toUi(),
+                            profileFlow,
                             notificationEvents.notificationHandler.notificationBadgeCount.toUi(),
                         ) { user, badge ->
                             user.flatMap { profile ->
@@ -144,7 +144,7 @@ public class AllNotificationPresenter : PresenterBase<AllNotificationPresenter.S
         allAccountServicesFlow(accountRepository)
             .map { sources ->
                 sources
-                    .filter { it.capabilities.notification?.timeline != null && it.capabilities.profile != null }
+                    .filter { it.capabilities.notification?.timeline != null && it.accountProfileFlow() != null }
                     .mapNotNull { it.accountKeyOrNull }
             }.distinctUntilChanged()
     }

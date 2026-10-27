@@ -1,6 +1,7 @@
 package dev.dimension.flare.feature.plugin.adapter
 
 import dev.dimension.flare.common.Locale
+import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
@@ -19,7 +20,11 @@ import dev.dimension.flare.feature.plugin.wire.PageV1
 import dev.dimension.flare.feature.plugin.wire.PluginErrorCodeV1
 import dev.dimension.flare.feature.plugin.wire.requireValid
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.model.UiTimelineV2
 import kotlinx.serialization.KSerializer
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonPrimitive
+import okio.ByteString.Companion.encodeUtf8
 
 internal class PluginAccountInvokerV1(
     private val plugin: RunningPluginV1,
@@ -28,6 +33,42 @@ internal class PluginAccountInvokerV1(
     private val accountKey: MicroBlogKey?,
     private val context: suspend (locale: String, assets: Map<String, PluginAsset>) -> PluginInvocationContextV1,
 ) {
+    fun <Wire : Any> timelineLoader(
+        capability: String,
+        operation: String,
+        identity: List<String>,
+        directions: Set<PageDirectionV1>,
+        load: suspend (pageSize: Int, request: PagingRequest) -> PageV1<Wire>,
+        map: (Wire) -> UiTimelineV2,
+    ): CacheableRemoteLoader<UiTimelineV2> {
+        val loader = pluginRemoteLoader(directions, load, map)
+        val key =
+            JsonArray(
+                (
+                    listOf(
+                        "plugin-timeline-v1",
+                        runtimeKey.pluginId,
+                        runtimeKey.packageHash,
+                        runtimeKey.scope.name,
+                        runtimeKey.identity,
+                        capability,
+                        operation,
+                    ) +
+                        identity
+                ).map(::JsonPrimitive),
+            )
+        return object : CacheableRemoteLoader<UiTimelineV2>, RemoteLoader<UiTimelineV2> by loader {
+            override val pagingKey =
+                "plugin:" +
+                    key
+                        .toString()
+                        .encodeUtf8()
+                        .sha256()
+                        .hex()
+            override val supportPrepend = PageDirectionV1.Newer.isSupportedBy(directions)
+        }
+    }
+
     suspend fun <Request, Response> invoke(
         capabilityId: String,
         operation: String,

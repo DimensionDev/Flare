@@ -100,6 +100,9 @@ internal class PluginDataSourceV1 private constructor(
 ) : MicroblogDataSource,
     DataSourceCapabilityProvider,
     PluginNamedTimelineDataSourceV1 {
+    override val authenticatedProfile: UiProfile?
+        get() = loginProfile?.let(mapper::cachedProfile)
+
     private val accountKey: MicroBlogKey?
         get() = authenticatedAccountKey
 
@@ -308,11 +311,16 @@ internal class PluginDataSourceV1 private constructor(
         val acceptsDynamicTimeline = hasOperation(PluginAbiV1.Capabilities.TAB_CATALOG, "page")
         if (declared == null && !acceptsDynamicTimeline) return notSupported()
         if (!hasOperation(PluginAbiV1.Capabilities.TIMELINE, "page")) return notSupported()
-        return postPageLoader(PluginAbiV1.Capabilities.TIMELINE, "page") { pageSize, request ->
+        val effectiveParameters = declared?.parameters.orEmpty() + parameters
+        return postPageLoader(
+            PluginAbiV1.Capabilities.TIMELINE,
+            "page",
+            listOf(timelineId) + effectiveParameters.toPagingIdentity(),
+        ) { pageSize, request ->
             invoker.invoke(
                 capabilityId = PluginAbiV1.Capabilities.TIMELINE,
                 operation = "page",
-                request = TimelinePageRequestV1(timelineId, request.toWire(pageSize), declared?.parameters.orEmpty() + parameters),
+                request = TimelinePageRequestV1(timelineId, request.toWire(pageSize), effectiveParameters),
                 requestSerializer = TimelinePageRequestV1.serializer(),
                 responseSerializer = PageV1.serializer(PostV1.serializer()),
                 validate = { page -> page.requireValid { it.requireValid() } },
@@ -334,7 +342,7 @@ internal class PluginDataSourceV1 private constructor(
 
     override fun context(statusKey: MicroBlogKey): RemoteLoader<UiTimelineV2> {
         if (!hasOperation(PluginAbiV1.Capabilities.POST, "context")) return notSupported()
-        return postPageLoader(PluginAbiV1.Capabilities.POST, "context") { pageSize, request ->
+        return postPageLoader(PluginAbiV1.Capabilities.POST, "context", listOf(statusKey.id, statusKey.host)) { pageSize, request ->
             invoker.invoke(
                 capabilityId = PluginAbiV1.Capabilities.POST,
                 operation = "context",
@@ -404,7 +412,11 @@ internal class PluginDataSourceV1 private constructor(
         userKey: MicroBlogKey,
         tab: ProfileTabManifestV1?,
     ): RemoteLoader<UiTimelineV2> =
-        postPageLoader(PluginAbiV1.Capabilities.PROFILE, "timeline") { pageSize, request ->
+        postPageLoader(
+            PluginAbiV1.Capabilities.PROFILE,
+            "timeline",
+            listOf(userKey.id, userKey.host, tab?.id.orEmpty()) + tab?.parameters.orEmpty().toPagingIdentity(),
+        ) { pageSize, request ->
             invoker.invoke(
                 capabilityId = PluginAbiV1.Capabilities.PROFILE,
                 operation = "timeline",
@@ -453,7 +465,7 @@ internal class PluginDataSourceV1 private constructor(
         query: String,
     ): RemoteLoader<UiTimelineV2> {
         if (!hasOperation(PluginAbiV1.Capabilities.SEARCH, operation)) return notSupported()
-        return postPageLoader(PluginAbiV1.Capabilities.SEARCH, operation) { pageSize, request ->
+        return postPageLoader(PluginAbiV1.Capabilities.SEARCH, operation, listOf(query)) { pageSize, request ->
             invoker.invoke(
                 capabilityId = PluginAbiV1.Capabilities.SEARCH,
                 operation = operation,
@@ -489,15 +501,14 @@ internal class PluginDataSourceV1 private constructor(
     private fun postPageLoader(
         capabilityId: String,
         operation: String,
+        identity: List<String>,
         load: suspend (pageSize: Int, request: PagingRequest) -> PageV1<PostV1>,
-    ): RemoteLoader<UiTimelineV2> = pluginRemoteLoader(directions(capabilityId, operation), load, mapper::post)
+    ): RemoteLoader<UiTimelineV2> =
+        invoker.timelineLoader(capabilityId, operation, identity, directions(capabilityId, operation), load, mapper::post)
 
     private inner class ComposeCapabilityAdapter :
         ComposeDataSource,
         AuthenticatedMicroblogDataSource by AuthenticatedDelegate() {
-        override val composeProfile: UiProfile?
-            get() = loginProfile?.let(mapper::profile)
-
         override suspend fun publish(
             data: ComposeData,
             progress: () -> Unit,
@@ -994,3 +1005,5 @@ internal fun dev.dimension.flare.feature.plugin.wire.HostIconV1.toUiIcon(): dev.
         dev.dimension.flare.feature.plugin.wire.HostIconV1.Mute -> dev.dimension.flare.ui.model.UiIcon.Mute
         dev.dimension.flare.feature.plugin.wire.HostIconV1.Info -> dev.dimension.flare.ui.model.UiIcon.Info
     }
+
+private fun Map<String, String>.toPagingIdentity(): List<String> = entries.sortedBy { it.key }.flatMap { listOf(it.key, it.value) }

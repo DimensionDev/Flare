@@ -10,11 +10,17 @@ import dev.dimension.flare.data.datasource.microblog.datasource.RelationDataSour
 import dev.dimension.flare.data.datasource.microblog.datasource.TimelineTabConfigurationDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.UserDataSource
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiHashtag
 import dev.dimension.flare.ui.model.UiProfile
+import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.toUi
+import dev.dimension.flare.ui.model.withProxy
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 import kotlin.native.HiddenFromObjC
 
 @HiddenFromObjC
@@ -39,6 +45,9 @@ public interface DataSourceCapabilityProvider {
 
     public val authenticatedAccountKey: MicroBlogKey?
         get() = null
+
+    public val authenticatedProfile: UiProfile?
+        get() = null
 }
 
 public val MicroblogDataSource.capabilities: DataSourceCapabilitySet
@@ -48,6 +57,15 @@ public val MicroblogDataSource.accountKeyOrNull: MicroBlogKey?
     get() =
         (this as? DataSourceCapabilityProvider)?.authenticatedAccountKey
             ?: (this as? AuthenticatedMicroblogDataSource)?.accountKey
+
+// An account identity does not imply support for arbitrary profile lookups.
+@HiddenFromObjC
+public fun MicroblogDataSource.accountProfileFlow(): Flow<UiState<UiProfile>>? {
+    val accountKey = accountKeyOrNull ?: return null
+    capabilities.profile?.let { return it.userHandler.userById(accountKey.id).toUi() }
+    val profile = (this as? DataSourceCapabilityProvider)?.authenticatedProfile?.takeIf { it.key == accountKey } ?: return null
+    return flowOf(UiState.Success(profile.withProxy(ProxyRef.Account(accountKey))))
+}
 
 @HiddenFromObjC
 public class TimelineCapability(

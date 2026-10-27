@@ -4,6 +4,7 @@ import androidx.datastore.core.DataStoreFactory
 import androidx.room3.Room
 import app.cash.molecule.RecompositionMode
 import app.cash.molecule.moleculeFlow
+import dev.dimension.flare.common.Cacheable
 import dev.dimension.flare.common.protobufSerializer
 import dev.dimension.flare.createTestFileSystem
 import dev.dimension.flare.createTestRootPath
@@ -12,9 +13,18 @@ import dev.dimension.flare.data.database.app.model.DbAccount
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.createDatabaseDriver
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
+import dev.dimension.flare.data.datasource.microblog.DataSourceCapabilityProvider
+import dev.dimension.flare.data.datasource.microblog.DataSourceCapabilitySet
+import dev.dimension.flare.data.datasource.microblog.DirectMessageCapability
+import dev.dimension.flare.data.datasource.microblog.DirectMessageDataSource
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
+import dev.dimension.flare.data.datasource.microblog.NotificationCapability
+import dev.dimension.flare.data.datasource.microblog.NotificationFilter
+import dev.dimension.flare.data.datasource.microblog.NotificationTimelineDataSource
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
+import dev.dimension.flare.data.datasource.microblog.SearchCapability
 import dev.dimension.flare.data.datasource.microblog.datasource.UserDataSource
+import dev.dimension.flare.data.datasource.microblog.handler.DirectMessageHandler
 import dev.dimension.flare.data.datasource.microblog.handler.UserHandler
 import dev.dimension.flare.data.datasource.microblog.loader.UserLoader
 import dev.dimension.flare.data.datasource.microblog.paging.notSupported
@@ -46,12 +56,19 @@ import dev.dimension.flare.ui.model.UiHandle
 import dev.dimension.flare.ui.model.UiHashtag
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.createSampleUser
 import dev.dimension.flare.ui.model.takeSuccess
+import dev.dimension.flare.ui.presenter.dm.DirectMessageAvailabilityPresenter
+import dev.dimension.flare.ui.presenter.dm.DirectMessageUserListPresenter
+import dev.dimension.flare.ui.presenter.home.ActiveAccountPresenter
 import dev.dimension.flare.ui.presenter.home.DiscoverPresenter
 import dev.dimension.flare.ui.presenter.home.DiscoverState
 import dev.dimension.flare.ui.presenter.home.SearchPresenter
 import dev.dimension.flare.ui.presenter.home.SearchState
+import dev.dimension.flare.ui.presenter.home.SecondaryTabsPresenter
+import dev.dimension.flare.ui.presenter.home.notificationAccountsFlow
 import dev.dimension.flare.ui.presenter.home.rememberDiscoverSearchState
+import dev.dimension.flare.ui.presenter.settings.AccountsPresenter
 import dev.dimension.flare.ui.render.toUiPlainText
 import dev.dimension.flare.unavailableAccountService
 import kotlinx.collections.immutable.persistentListOf
@@ -66,6 +83,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -86,6 +104,71 @@ import kotlin.test.assertTrue
 class DiscoverAccountRestorationTest {
     private val firstAccount = MicroBlogKey("alice", "example.social")
     private val savedAccount = MicroBlogKey("bob", "example.social")
+
+    @Test
+    fun profileOptionalAccountsRemainVisibleAcrossAccountAndMessagingUi() =
+        withFixture {
+            profileOptional = true
+            insertAccounts()
+            val models = MutableStateFlow<AccountSelectors?>(null)
+            val page = launchAccountSelectors(models)
+            try {
+                val state =
+                    models.filterNotNull().first {
+                        it.active != null &&
+                            it.managed?.size == 2 && it.secondary?.size == 2 &&
+                            it.dmAvailable && it.directMessages?.size == 2
+                    }
+                assertTrue(state.active in listOf(firstAccount, savedAccount))
+                assertEquals(listOf(firstAccount, savedAccount), state.managed)
+                assertEquals(listOf(firstAccount, savedAccount), state.secondary)
+                assertEquals(listOf(firstAccount, savedAccount), state.directMessages)
+                val notifications = notificationAccountsFlow(repository).first { it.size == 2 }
+                assertEquals(setOf(firstAccount, savedAccount), notifications.map { it.profile.key }.toSet())
+            } finally {
+                page.cancelAndJoin()
+            }
+        }
+
+    @Test
+    fun profileOptionalAccountsAppearInDiscoverAndSearchSelectors() =
+        withFixture {
+            profileOptional = true
+            seedSelection(savedAccount)
+            insertAccounts()
+            val models = MutableStateFlow<SearchPage?>(null)
+            val page = launchSearchPage(models)
+            try {
+                val state =
+                    models.filterNotNull().first {
+                        it.discover.isAccountReady && it.discover.selectedAccount != null &&
+                            it.discover.accounts
+                                .takeSuccess()
+                                ?.size == 2 &&
+                            it.search.accounts
+                                .takeSuccess()
+                                ?.size == 2
+                    }
+                assertEquals(
+                    listOf(firstAccount, savedAccount),
+                    state.discover.accounts
+                        .takeSuccess()!!
+                        .map { it.key },
+                )
+                assertEquals(savedAccount, state.discover.selectedAccountKey)
+                assertEquals(savedAccount, state.discover.selectedAccount?.key)
+                assertEquals(
+                    listOf(firstAccount, savedAccount),
+                    state.search.accounts
+                        .takeSuccess()!!
+                        .map { it.key },
+                )
+                state.discover.setAccountKey(firstAccount)
+                models.filterNotNull().first { it.discover.selectedAccount?.key == firstAccount }
+            } finally {
+                page.cancelAndJoin()
+            }
+        }
 
     @Test
     fun anotherLoadedProfileRemainsSelectableWithoutReplacingTheSavedAccount() =
@@ -317,6 +400,14 @@ class DiscoverAccountRestorationTest {
             }
         }
 
+    private data class AccountSelectors(
+        val active: MicroBlogKey?,
+        val managed: List<MicroBlogKey>?,
+        val secondary: List<MicroBlogKey>?,
+        val dmAvailable: Boolean,
+        val directMessages: List<MicroBlogKey>?,
+    )
+
     private data class SearchPage(
         val discover: DiscoverState,
         val search: SearchState,
@@ -333,6 +424,7 @@ class DiscoverAccountRestorationTest {
         val requests = Channel<Pair<AccountType, String>>(Channel.UNLIMITED)
         val searchRequests = Channel<Pair<AccountType, String>>(Channel.UNLIMITED)
         var loadedProfileKey: MicroBlogKey? = null
+        var profileOptional = false
         val registry =
             PlatformRegistry(
                 PlatformRuntimeData(
@@ -340,7 +432,7 @@ class DiscoverAccountRestorationTest {
                         listOf(
                             object : PlatformSpec by testPlatformRegistry().defaultGuest {
                                 override fun createDataSource(context: PlatformDataSourceContext): MicroblogDataSource =
-                                    AccountSource(context.accountKey)
+                                    if (profileOptional) IdentitySource(context.accountKey) else AccountSource(context.accountKey)
 
                                 override fun guestDataSource(
                                     host: String,
@@ -400,6 +492,40 @@ class DiscoverAccountRestorationTest {
             }
         }
 
+        fun launchAccountSelectors(models: MutableStateFlow<AccountSelectors?>) =
+            scope.launch {
+                val active = ActiveAccountPresenter()
+                val managed = AccountsPresenter()
+                val secondary = SecondaryTabsPresenter()
+                val available = DirectMessageAvailabilityPresenter()
+                val messages = DirectMessageUserListPresenter()
+                moleculeFlow(RecompositionMode.Immediate) {
+                    AccountSelectors(
+                        active
+                            .body()
+                            .user
+                            .takeSuccess()
+                            ?.key,
+                        managed
+                            .body()
+                            .accounts
+                            .takeSuccess()
+                            ?.map { it.account.accountKey },
+                        secondary
+                            .body()
+                            .items
+                            .takeSuccess()
+                            ?.map { it.accountKey },
+                        available.body().hasAvailableAccount,
+                        messages
+                            .body()
+                            .items
+                            .takeSuccess()
+                            ?.map { it.profile.takeSuccess()?.key ?: it.accountKey },
+                    )
+                }.collect { models.value = it }
+            }
+
         fun launchPage(models: MutableStateFlow<DiscoverState?>) =
             scope.launch {
                 val presenter = DiscoverPresenter()
@@ -458,6 +584,40 @@ class DiscoverAccountRestorationTest {
             override fun discoverStatuses() = notSupported<UiTimelineV2>().also { requests.trySend(accountType to "statuses") }
 
             override fun discoverHashtags() = notSupported<UiHashtag>().also { requests.trySend(accountType to "hashtags") }
+        }
+
+        private inner class IdentitySource(
+            override val authenticatedAccountKey: MicroBlogKey,
+        ) : Source(AccountType.Specific(authenticatedAccountKey)),
+            DataSourceCapabilityProvider {
+            override val authenticatedProfile =
+                createSampleUser().copy(
+                    key = authenticatedAccountKey,
+                    nameInternal = authenticatedAccountKey.id.toUiPlainText(),
+                )
+            override val capabilitySet =
+                DataSourceCapabilitySet(
+                    search = SearchCapability(this),
+                    notification =
+                        NotificationCapability(
+                            timeline =
+                                object : NotificationTimelineDataSource, MicroblogDataSource by this {
+                                    override val accountKey = authenticatedAccountKey
+                                    override val supportedNotificationFilter = listOf(NotificationFilter.All)
+
+                                    override fun notification(type: NotificationFilter) = notSupported<UiTimelineV2>()
+                                },
+                            events = null,
+                        ),
+                    directMessage =
+                        DirectMessageCapability(
+                            object : DirectMessageDataSource, MicroblogDataSource by this {
+                                override val accountKey = authenticatedAccountKey
+                                override val directMessageHandler: DirectMessageHandler get() = error("Unused")
+                                override val directMessageBadgeCount = Cacheable(fetchSource = {}, cacheSource = { flowOf(0) })
+                            },
+                        ),
+                )
         }
 
         private inner class AccountSource(

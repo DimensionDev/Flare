@@ -64,9 +64,8 @@ public class DiscoverPresenter : PresenterBase<DiscoverState>() {
         allAccountServicesFlow(accountRepository)
             .map { sources ->
                 sources
-                    .filterIsInstance<AuthenticatedMicroblogDataSource>()
-                    .filter { it is UserDataSource }
-                    .map { it.accountKey }
+                    .filter { it.capabilities.profile != null && it.capabilities.search != null }
+                    .mapNotNull { it.accountKeyOrNull }
             }.distinctUntilChanged()
     }
 

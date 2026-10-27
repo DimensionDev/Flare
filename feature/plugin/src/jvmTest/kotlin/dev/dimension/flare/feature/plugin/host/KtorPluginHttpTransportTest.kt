@@ -7,7 +7,7 @@ import io.ktor.http.content.OutgoingContent
 import io.ktor.http.headersOf
 import io.ktor.utils.io.ByteChannel
 import io.ktor.utils.io.core.readText
-import io.ktor.utils.io.readRemaining
+import io.ktor.utils.io.readBuffer
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
@@ -85,7 +85,7 @@ class KtorPluginHttpTransportTest {
                                     content.writeTo(channel)
                                     channel.close()
                                 }
-                            val value = channel.readRemaining().readText()
+                            val value = channel.readBuffer().readText()
                             writer.await()
                             value
                         }

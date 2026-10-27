@@ -632,6 +632,9 @@ internal class PluginExtraCapabilitiesV1(
     }
 
     private inner class GalleryAdapter : GalleryDataSource {
+        override suspend fun ugoiraMetadata(statusKey: MicroBlogKey): Nothing =
+            throw UnsupportedOperationException("Plugin API v1 does not support Ugoira")
+
         override fun galleryDetail(
             statusKey: MicroBlogKey,
         ): Cacheable<dev.dimension.flare.data.datasource.microblog.datasource.GalleryDetail> {

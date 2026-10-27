@@ -22,8 +22,10 @@ public actual class FileItem {
             if (it.moveToFirst()) it.getString(0) else null
         } ?: uri.lastPathSegment
         this.mimeType = context.contentResolver.getType(uri)
-            ?: name?.substringAfterLast('.', missingDelimiterValue = "")
-                ?.lowercase()?.takeIf(String::isNotEmpty)
+            ?: name
+                ?.substringAfterLast('.', missingDelimiterValue = "")
+                ?.lowercase()
+                ?.takeIf(String::isNotEmpty)
                 ?.let(MimeTypeMap.getSingleton()::getMimeTypeFromExtension)
         this.type = resolveType(this.mimeType, uri)
         this.source = Source.UriSource(context, uri)

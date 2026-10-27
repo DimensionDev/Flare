@@ -54,7 +54,7 @@ public struct PluginPlatformIcon: View {
             fallbackIcon
             #endif
         } else {
-            NetworkImage(data: value, contentMode: .fit)
+            NetworkImage(data: UiMediaImage(url: value, proxy: ProxyRef.Global.shared), contentMode: .fit)
         }
     }
 

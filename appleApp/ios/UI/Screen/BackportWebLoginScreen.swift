@@ -16,7 +16,7 @@ struct BackportWebLoginScreen: View {
         self.url = url
         self.onCookie = onCookie
     }
-    
+
     var body: some View {
         NavigationStack {
             ProxyWebContent { route in
@@ -72,7 +72,7 @@ class WKDelegate: NSObject, WKNavigationDelegate {
         onOriginChange(origin)
         return .allow
     }
-    
+
     func webView(_ webView: WKWebView, decidePolicyFor navigationResponse: WKNavigationResponse) async -> WKNavigationResponsePolicy {
         guard route.isValid else { return .cancel }
         decidePolicy()
@@ -97,8 +97,7 @@ final class BackportWebLoginViewModel {
             guard let self else { return }
             route.dataStore.httpCookieStore.getAllCookies { cookies in
                 guard self.route.isValid else { return }
-                guard self.route.isValid else { return }
-            self.onCookie(cookies)
+                self.onCookie(cookies)
             }
         }
         delegate.onOriginChange = { [weak self] origin in

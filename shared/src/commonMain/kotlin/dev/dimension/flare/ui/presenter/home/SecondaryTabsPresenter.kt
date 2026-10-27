@@ -96,7 +96,7 @@ public class SecondaryTabsPresenter : PresenterBase<SecondaryTabsPresenter.State
                                 }.map { userState ->
                                     userState.takeSuccess()?.let { user ->
                                         Item(
-                                            accountKey = service.accountKey,
+                                            accountKey = accountKey,
                                             user = userState,
                                             tabs =
                                                 (

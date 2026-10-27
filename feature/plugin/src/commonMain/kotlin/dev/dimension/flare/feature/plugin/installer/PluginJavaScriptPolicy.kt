@@ -19,9 +19,18 @@ private fun scanCode(
     while (index < source.length) {
         val current = source[index]
         when {
-            current.isWhitespace() -> index++
-            current == '/' && source.getOrNull(index + 1) == '/' -> index = skipLineComment(source, index + 2)
-            current == '/' && source.getOrNull(index + 1) == '*' -> index = skipBlockComment(source, index + 2)
+            current.isWhitespace() -> {
+                index++
+            }
+
+            current == '/' && source.getOrNull(index + 1) == '/' -> {
+                index = skipLineComment(source, index + 2)
+            }
+
+            current == '/' && source.getOrNull(index + 1) == '*' -> {
+                index = skipBlockComment(source, index + 2)
+            }
+
             current == '/' && canStartRegex -> {
                 index = skipRegexLiteral(source, index + 1)
                 canStartRegex = false
@@ -94,15 +103,23 @@ private fun scanTemplate(
     var index = start
     while (index < source.length) {
         when {
-            source[index] == '\\' -> index = (index + 2).coerceAtMost(source.length)
-            source[index] == '`' -> return ScanResult(found = false, next = index + 1)
+            source[index] == '\\' -> {
+                index = (index + 2).coerceAtMost(source.length)
+            }
+
+            source[index] == '`' -> {
+                return ScanResult(found = false, next = index + 1)
+            }
+
             source[index] == '$' && source.getOrNull(index + 1) == '{' -> {
                 val result = scanCode(source, index + 2, stopAtClosingBrace = true)
                 if (result.found) return result
                 index = result.next
             }
 
-            else -> index++
+            else -> {
+                index++
+            }
         }
     }
     return ScanResult(found = false, next = source.length)
@@ -165,7 +182,10 @@ private fun skipRegexLiteral(
     var inCharacterClass = false
     while (index < source.length) {
         when (source[index]) {
-            '\\' -> index = (index + 2).coerceAtMost(source.length)
+            '\\' -> {
+                index = (index + 2).coerceAtMost(source.length)
+            }
+
             '[' -> {
                 inCharacterClass = true
                 index++
@@ -176,7 +196,7 @@ private fun skipRegexLiteral(
                 index++
             }
 
-            '/' ->
+            '/' -> {
                 if (inCharacterClass) {
                     index++
                 } else {
@@ -184,9 +204,15 @@ private fun skipRegexLiteral(
                     while (source.getOrNull(index)?.isJavaScriptIdentifierPart() == true) index++
                     return index
                 }
+            }
 
-            '\n', '\r' -> return index
-            else -> index++
+            '\n', '\r' -> {
+                return index
+            }
+
+            else -> {
+                index++
+            }
         }
     }
     return source.length

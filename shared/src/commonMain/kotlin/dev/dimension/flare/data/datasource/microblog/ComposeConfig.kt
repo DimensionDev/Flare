@@ -312,7 +312,12 @@ public data class ComposeConfig public constructor(
     ) {
         public fun supportsMimeType(mimeType: String?): Boolean {
             val constraints = supportedMimeTypes ?: return true
-            val actual = mimeType?.substringBefore(';')?.trim()?.lowercase()?.takeIf(String::isNotEmpty) ?: return false
+            val actual =
+                mimeType
+                    ?.substringBefore(';')
+                    ?.trim()
+                    ?.lowercase()
+                    ?.takeIf(String::isNotEmpty) ?: return false
             return constraints.any { constraint ->
                 val normalized = constraint.substringBefore(';').trim().lowercase()
                 normalized == actual || (normalized.endsWith("/*") && actual.startsWith(normalized.removeSuffix("*")))

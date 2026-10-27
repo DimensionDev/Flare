@@ -379,7 +379,7 @@ internal class PluginDataSourceV1 private constructor(
 
     override fun fans(userKey: MicroBlogKey): RemoteLoader<UiProfile> = profilePage("followers", userKey)
 
-    override fun profileTabs(userKey: MicroBlogKey): ImmutableList<ProfileTab> =
+    override suspend fun profileTabs(userKey: MicroBlogKey): ImmutableList<ProfileTab> =
         plugin.installed.manifest.platform.profileTabs
             .takeIf { hasOperation(PluginAbiV1.Capabilities.PROFILE, "timeline") }
             .orEmpty()
@@ -491,7 +491,7 @@ internal class PluginDataSourceV1 private constructor(
     private inner class ComposeCapabilityAdapter :
         ComposeDataSource,
         AuthenticatedMicroblogDataSource by AuthenticatedDelegate() {
-        override suspend fun compose(
+        override suspend fun publish(
             data: ComposeData,
             progress: () -> Unit,
         ) {
@@ -814,8 +814,8 @@ private fun ComposeConfigV1?.toHostComposeConfig(): ComposeConfig {
         visibility =
             config.visibility?.let {
                 ComposeConfig.Visibility(
-                    allowedValues = it.allowed.mapTo(linkedSetOf(), VisibilityV1::toHost),
-                    defaultValue = it.default.toHost(),
+                    allVisibilities = it.allowed.map(VisibilityV1::toHost).toImmutableList(),
+                    defaultVisibility = it.default.toHost(),
                 )
             },
         language = config.language?.let { ComposeConfig.Language(it.maxCount) },

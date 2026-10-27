@@ -38,12 +38,12 @@ import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.toList
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
@@ -145,7 +145,10 @@ class AccountRepositoryTest : RobolectricTest() {
             val events = Channel<String>(Channel.UNLIMITED)
             val observer =
                 launch(Dispatchers.Unconfined) {
-                    repository.accountChanges.filterIsInstance<AccountChange.Added>().map { it.account }.collect { events.send("added") }
+                    repository.accountChanges
+                        .filterIsInstance<AccountChange.Added>()
+                        .map { it.account }
+                        .collect { events.send("added") }
                 }
             val addition = launch { repository.addAccount(UiAccount(accountKey, "Mastodon"), "restored") }
             val nextMutation =
@@ -186,7 +189,10 @@ class AccountRepositoryTest : RobolectricTest() {
             val events = Channel<UiAccount>(Channel.UNLIMITED)
             val observer =
                 launch(Dispatchers.Unconfined) {
-                    repository.accountChanges.filterIsInstance<AccountChange.Added>().map { it.account }.collect { events.send(it) }
+                    repository.accountChanges
+                        .filterIsInstance<AccountChange.Added>()
+                        .map { it.account }
+                        .collect { events.send(it) }
                 }
             try {
                 val thrown =
@@ -378,7 +384,7 @@ class AccountRepositoryTest : RobolectricTest() {
                     platformIconUrl = "file:///stable/future.png",
                 )
 
-            repository.addAccount(account, "credential").join()
+            repository.addAccount(account, "credential")
 
             val stored = requireNotNull(appDatabase.accountDao().getAccount(account.accountKey))
             assertEquals("Future Network", stored.platformDisplayName)
@@ -556,7 +562,13 @@ class AccountRepositoryTest : RobolectricTest() {
 
         val concurrentSelection =
             launch(Dispatchers.Unconfined) {
-                assertEquals(accountKey, repository.accountChanges.filterIsInstance<AccountChange.Removed>().map { it.accountKey }.first())
+                assertEquals(
+                    accountKey,
+                    repository.accountChanges
+                        .filterIsInstance<AccountChange.Removed>()
+                        .map { it.accountKey }
+                        .first(),
+                )
                 openPage.selectAccount(selectedDuringDeletion)
                 // The page closes after this click; only the app-scoped save remains.
             }

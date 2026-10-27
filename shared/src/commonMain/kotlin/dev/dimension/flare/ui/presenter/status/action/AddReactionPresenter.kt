@@ -55,9 +55,12 @@ public class AddReactionPresenter(
                     }
                 }.map {
                     remember(it) {
-                        EmojiData(it, service.takeSuccess()?.let { source ->
-                            (source as? dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource)?.accountKey?.let(AccountType::Specific)
-                        } ?: accountType)
+                        EmojiData(
+                            it,
+                            service.takeSuccess()?.let { source ->
+                                source.accountKeyOrNull?.let(AccountType::Specific)
+                            } ?: accountType,
+                        )
                     }
                 }
 

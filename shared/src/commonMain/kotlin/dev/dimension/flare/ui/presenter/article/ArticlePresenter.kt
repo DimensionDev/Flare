@@ -59,7 +59,14 @@ public class ArticlePresenter(
             val articleDataSource =
                 service.capabilities.article
                     ?: error("Current service does not support article data source")
-            articleDataSource.article(articleKey).withProxy(ProxyRef.forAccount((service as? dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource)?.accountKey))
+            articleDataSource
+                .article(
+                    articleKey,
+                ).withProxy(
+                    ProxyRef.forAccount(
+                        (service as? dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource)?.accountKey,
+                    ),
+                )
         }
     }
 

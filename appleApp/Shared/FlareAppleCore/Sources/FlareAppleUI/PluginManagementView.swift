@@ -12,7 +12,7 @@ import AppKit
 
 public struct PluginManagementView: View {
     @State private var facade: PluginAppleFacadeV1
-    @StateObject private var presenter: KotlinPresenter<PluginManagementStateV1>
+    @State private var presenter: KotlinPresenter<PluginManagementStateV1>
     @State private var importsPlugin = false
     @State private var fileError: String?
     @State private var pendingUninstallId: String?
@@ -21,7 +21,7 @@ public struct PluginManagementView: View {
     public init() {
         let facade = PluginAppleFacadeV1()
         _facade = State(initialValue: facade)
-        _presenter = StateObject(wrappedValue: KotlinPresenter(presenter: facade))
+        _presenter = State(initialValue: KotlinPresenter(presenter: facade))
     }
 
     public var body: some View {

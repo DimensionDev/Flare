@@ -6,7 +6,7 @@ import dev.dimension.flare.ui.route.Route
 
 internal fun EntryProviderScope<NavKey>.serviceSelectEntryBuilder(
     navigate: (Route) -> Unit,
-    onBack: () -> Unit
+    onBack: () -> Unit,
 ) {
     entry<Route.ServiceSelect.Selection> {
         ServiceSelectScreen(

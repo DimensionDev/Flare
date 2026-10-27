@@ -9,8 +9,8 @@ import okio.Path
 import okio.Path.Companion.toPath
 import okio.buffer
 import okio.use
-import kotlin.uuid.Uuid
 import kotlin.native.HiddenFromObjC
+import kotlin.uuid.Uuid
 
 internal interface FileStorage {
     fun cacheDirectory(): Path = dataStoreFile("cache")

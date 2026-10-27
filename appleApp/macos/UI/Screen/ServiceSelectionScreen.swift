@@ -838,8 +838,7 @@ private final class MacOSWebLoginViewModel {
             guard let self else { return }
             route.dataStore.httpCookieStore.getAllCookies { cookies in
                 guard self.route.isValid else { return }
-                guard self.route.isValid else { return }
-            self.onCookie(cookies)
+                self.onCookie(cookies)
             }
         }
         delegate.onOriginChange = { [weak self] origin in

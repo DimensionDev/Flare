@@ -285,7 +285,9 @@ internal class AccountRepository internal constructor(
                 lastAccounts = it.lastAccounts.filterNot { key -> key == accountKey },
             )
         }
-        check(accountChangeChannel.trySend(AccountChange.Removed(accountKey)).isSuccess)
+        if (appDatabase.accountDao().getAccount(accountKey) != null) {
+            check(accountChangeChannel.trySend(AccountChange.Removed(accountKey)).isSuccess)
+        }
         dataSourceCacheMutex.withLock {
             val datasource = dataSourceCache.remove(accountKey)
             if (datasource is AutoCloseable) {

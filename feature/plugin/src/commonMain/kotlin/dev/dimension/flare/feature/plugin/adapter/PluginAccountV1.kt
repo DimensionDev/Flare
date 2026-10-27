@@ -86,7 +86,7 @@ internal suspend fun AccountService.addPluginAccount(
             ),
         credential = plugin.accountCredential(success),
         serializer = PluginAccountCredentialV1.serializer(),
-    ).join()
+    )
     return accountKey
 }
 

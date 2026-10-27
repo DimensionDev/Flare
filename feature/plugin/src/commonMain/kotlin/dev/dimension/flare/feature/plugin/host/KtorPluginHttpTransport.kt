@@ -16,8 +16,7 @@ import io.ktor.http.content.TextContent
 import io.ktor.utils.io.ByteWriteChannel
 import io.ktor.utils.io.InternalAPI
 import io.ktor.utils.io.cancel
-import io.ktor.utils.io.core.remaining
-import io.ktor.utils.io.readRemaining
+import io.ktor.utils.io.readBuffer
 import io.ktor.utils.io.writeFully
 import kotlinx.coroutines.withTimeout
 import kotlinx.io.readByteArray
@@ -50,8 +49,8 @@ public class KtorPluginHttpTransport(
                         channel.cancel()
                         "HTTP response is too large"
                     }
-                    val packet = channel.readRemaining(MAX_RESPONSE_BYTES.toLong() + 1)
-                    require(packet.remaining <= MAX_RESPONSE_BYTES) {
+                    val packet = channel.readBuffer(MAX_RESPONSE_BYTES.toLong() + 1)
+                    require(packet.size <= MAX_RESPONSE_BYTES) {
                         channel.cancel()
                         "HTTP response is too large"
                     }

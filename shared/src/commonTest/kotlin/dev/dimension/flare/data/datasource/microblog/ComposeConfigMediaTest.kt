@@ -1,6 +1,7 @@
 package dev.dimension.flare.data.datasource.microblog
 
 import dev.dimension.flare.ui.model.UiTimelineV2
+import kotlinx.collections.immutable.toImmutableList
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -60,7 +61,7 @@ class ComposeConfigMediaTest {
                 UiTimelineV2.Post.Visibility.Home,
                 UiTimelineV2.Post.Visibility.Followers,
             ),
-            merged.visibility?.allowedValues,
+            merged.visibility?.allVisibilities?.toSet(),
         )
     }
 
@@ -100,6 +101,12 @@ class ComposeConfigMediaTest {
                     supportedMimeTypes = mimeTypes,
                     compression = ComposeConfig.Media.Compression(maxSizeBytes, maxWidth, maxHeight),
                 ),
-            visibility = visibility?.let { ComposeConfig.Visibility(allowedValues = it) },
+            visibility =
+                visibility?.let {
+                    ComposeConfig.Visibility(
+                        allVisibilities = it.toImmutableList(),
+                        defaultVisibility = it.first(),
+                    )
+                },
         )
 }

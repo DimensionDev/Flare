@@ -394,13 +394,12 @@ private class RecordingAccountService : AccountService {
 
     override fun allAccountServicesFlow(): Flow<List<AccountMicroblogDataSource>> = emptyFlow()
 
-    override fun <T : Any> addAccount(
+    override suspend fun <T : Any> addAccount(
         account: UiAccount,
         credential: T,
         serializer: KSerializer<T>,
-    ): Job {
+    ) {
         added += account to credential
-        return Job().apply { complete() }
     }
 
     override fun <T : Any> credentialFlow(

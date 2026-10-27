@@ -58,6 +58,7 @@ import compose.icons.fontawesomeicons.solid.List
 import compose.icons.fontawesomeicons.solid.Plus
 import compose.icons.fontawesomeicons.solid.Trash
 import dev.dimension.flare.R
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.data.repository.RequireReLoginException
 import dev.dimension.flare.model.MicroBlogKey
@@ -84,6 +85,7 @@ import dev.dimension.flare.ui.model.isSuccess
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
+import dev.dimension.flare.ui.model.toUiImage
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.login.ReloginTarget
 import dev.dimension.flare.ui.presenter.settings.AccountsState.AccountItem
@@ -484,7 +486,7 @@ fun AccountItem(
                         if (throwable is UnsupportedPlatformException) {
                             if (unavailableAccount?.platformIconUrl != null) {
                                 NetworkImage(
-                                    model = unavailableAccount.platformIconUrl,
+                                    model = unavailableAccount.platformIconUrl.toUiImage(proxy = ProxyRef.Global),
                                     contentDescription = unavailableAccount.platformDisplayName,
                                     modifier = Modifier.size(avatarSize).clip(CircleShape),
                                 )

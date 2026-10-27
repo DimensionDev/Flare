@@ -12,8 +12,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -34,13 +34,13 @@ import dev.dimension.flare.common.WebViewProxy
 import dev.dimension.flare.data.network.ProxyNetwork
 import dev.dimension.flare.data.network.ProxySnapshot
 import dev.dimension.flare.ui.component.BackButton
-import dev.dimension.flare.ui.component.FlareTopAppBar
 import dev.dimension.flare.ui.component.ErrorContent
 import dev.dimension.flare.ui.component.FlareScaffold
-import kotlinx.coroutines.CancellationException
+import dev.dimension.flare.ui.component.FlareTopAppBar
 import dev.dimension.flare.ui.presenter.login.LoginCookieSnapshot
 import dev.dimension.flare.ui.presenter.login.LoginCookieValue
 import dev.dimension.flare.ui.presenter.login.LoginEffect
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -100,7 +100,14 @@ internal fun WebCookieLoginScreen(
                 title = {
                     androidx.compose.material3.Text(
                         text = currentOrigin,
-                        color = if (currentOrigin.isNotEmpty() && currentOrigin != initialOrigin) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface,
+                        color =
+                            if (currentOrigin.isNotEmpty() &&
+                                currentOrigin != initialOrigin
+                            ) {
+                                MaterialTheme.colorScheme.error
+                            } else {
+                                MaterialTheme.colorScheme.onSurface
+                            },
                     )
                 },
                 navigationIcon = { BackButton(onBack = onBack) },
@@ -115,7 +122,10 @@ internal fun WebCookieLoginScreen(
             } else if (prepared != null && prepared.isValid) {
                 key(prepared.key, retry) {
                     ProxyLoginWebView(
-                        request, prepared, callback, onBack,
+                        request,
+                        prepared,
+                        callback,
+                        onBack,
                         onOriginChange = { currentOrigin = it },
                         onError = { errorMessage = R.string.proxy_webview_error },
                     )
@@ -180,12 +190,16 @@ private fun ProxyLoginWebView(
         client =
             remember {
                 object : AccompanistWebViewClient() {
-                    override fun shouldOverrideUrlLoading(view: AndroidWebView?, request: WebResourceRequest?): Boolean =
-                        !route.isValid || (request?.isForMainFrame == true && !request.url.isHttps())
+                    override fun shouldOverrideUrlLoading(
+                        view: AndroidWebView?,
+                        request: WebResourceRequest?,
+                    ): Boolean = !route.isValid || (request?.isForMainFrame == true && !request.url.isHttps())
 
                     @Deprecated("Deprecated in Android")
-                    override fun shouldOverrideUrlLoading(view: AndroidWebView?, url: String?): Boolean =
-                        !route.isValid || url?.httpsOriginOrNull() == null
+                    override fun shouldOverrideUrlLoading(
+                        view: AndroidWebView?,
+                        url: String?,
+                    ): Boolean = !route.isValid || url?.httpsOriginOrNull() == null
 
                     override fun onReceivedError(
                         view: AndroidWebView,

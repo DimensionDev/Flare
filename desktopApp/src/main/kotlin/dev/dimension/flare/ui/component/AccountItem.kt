@@ -15,6 +15,7 @@ import compose.icons.fontawesomeicons.solid.FaceSadTear
 import dev.dimension.flare.Res
 import dev.dimension.flare.account_item_error_message
 import dev.dimension.flare.account_item_error_title
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.data.repository.RequireReLoginException
 import dev.dimension.flare.login_expired
@@ -29,6 +30,7 @@ import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
+import dev.dimension.flare.ui.model.toUiImage
 import dev.dimension.flare.ui.presenter.login.ReloginTarget
 import io.github.composefluent.component.CardExpanderItem
 import io.github.composefluent.component.SubtleButton
@@ -117,7 +119,7 @@ fun AccountItem(
                 icon = {
                     if (throwable is UnsupportedPlatformException && unavailableAccount?.platformIconUrl != null) {
                         NetworkImage(
-                            model = unavailableAccount.platformIconUrl,
+                            model = unavailableAccount.platformIconUrl.toUiImage(proxy = ProxyRef.Global),
                             contentDescription = unavailableAccount.platformDisplayName,
                             modifier = Modifier.size(avatarSize).clip(CircleShape),
                         )

@@ -47,7 +47,7 @@ private open class LegacyDataSource :
     override val userHandler: UserHandler
         get() = error("Not used")
 
-    override suspend fun compose(
+    override suspend fun publish(
         data: ComposeData,
         progress: () -> Unit,
     ) = error("Not used")

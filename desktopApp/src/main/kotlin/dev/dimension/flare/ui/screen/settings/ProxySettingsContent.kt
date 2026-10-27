@@ -13,6 +13,7 @@ import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
@@ -73,7 +74,12 @@ import dev.dimension.flare.ui.component.FlareScrollBar
 import dev.dimension.flare.ui.component.Header
 import dev.dimension.flare.ui.component.RichText
 import dev.dimension.flare.ui.model.UiAccount
+import dev.dimension.flare.ui.model.UiState
+import dev.dimension.flare.ui.model.isLoading
+import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.presenter.invoke
+import dev.dimension.flare.ui.presenter.settings.ProxyEditorPresenter
+import dev.dimension.flare.ui.presenter.settings.ProxyEditorState
 import dev.dimension.flare.ui.presenter.settings.ProxySettingsPresenter
 import dev.dimension.flare.ui.presenter.settings.ProxySettingsState
 import io.github.composefluent.FluentTheme
@@ -100,11 +106,12 @@ internal fun ProxySettingsContent() {
 @Composable
 internal fun ProxySettingsContent(
     state: ProxySettingsState,
-    editorState: @Composable () -> ProxySettingsState = { remember { ProxySettingsPresenter() }.invoke() },
+    editorState: @Composable () -> ProxyEditorState = { remember { ProxyEditorPresenter() }.invoke() },
 ) {
     var editing by remember { mutableStateOf<ProxyProfile?>(null) }
+    val settings = state.settings.takeSuccess()
     Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        state.settings?.let { settings ->
+        if (settings != null) {
             ProxyPolicyRow(stringResource(Res.string.proxy_global), settings, null, state)
             Header(stringResource(Res.string.proxy_profiles))
             settings.profiles.forEach { profile ->
@@ -117,8 +124,15 @@ internal fun ProxySettingsContent(
                     },
                     trailing = {
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Button(onClick = { editing = profile }, disabled = state.busy) { Text(stringResource(Res.string.proxy_edit)) }
-                            SubtleButton(onClick = { state.remove(profile.id) }, disabled = state.busy || inUse, iconOnly = true) {
+                            Button(
+                                onClick = { editing = profile },
+                                disabled = state.operation?.isLoading == true,
+                            ) { Text(stringResource(Res.string.proxy_edit)) }
+                            SubtleButton(
+                                onClick = { state.remove(profile.id) },
+                                disabled = state.operation?.isLoading == true || inUse,
+                                iconOnly = true,
+                            ) {
                                 FAIcon(
                                     FontAwesomeIcons.Solid.Trash,
                                     contentDescription = stringResource(Res.string.proxy_delete),
@@ -130,7 +144,7 @@ internal fun ProxySettingsContent(
             }
             Button(
                 onClick = { editing = ProxyProfile(Uuid.random().toString(), "", ProxyProtocol.HTTPS, "", 443) },
-                disabled = state.busy,
+                disabled = state.operation?.isLoading == true,
             ) {
                 Text(stringResource(Res.string.proxy_add))
             }
@@ -156,11 +170,11 @@ internal fun ProxySettingsContent(
             ContentDialog(
                 visible = true,
                 title = stringResource(Res.string.proxy_title),
-                primaryButtonText = stringResource(if (state.settings == null) Res.string.status_loadmore_error_retry else Res.string.ok),
+                primaryButtonText = stringResource(if (settings == null) Res.string.status_loadmore_error_retry else Res.string.ok),
                 closeButtonText = stringResource(Res.string.proxy_cancel),
                 onButtonClick = {
                     dismissed = true
-                    if (it == ContentDialogButton.Primary && state.settings == null) state.retry()
+                    if (it == ContentDialogButton.Primary && settings == null) state.retry()
                 },
                 content = { Text(error.localizedMessage()) },
             )
@@ -199,7 +213,7 @@ private fun ProxyPolicyRow(
                 modifier = Modifier.widthIn(max = 240.dp).semantics { contentDescription = title },
                 items = options.map { it.label(settings) },
                 selected = options.indexOf(policy).takeIf { it >= 0 },
-                disabled = state.busy,
+                disabled = state.operation?.isLoading == true,
                 onSelectionChange = { index, _ -> state.select(accountKey, options[index]) },
             )
         },
@@ -219,19 +233,19 @@ private fun ProxyPolicy.label(settings: ProxySettings): String =
 private fun ProxyEditor(
     profile: ProxyProfile,
     isNew: Boolean,
-    stateProvider: @Composable () -> ProxySettingsState,
+    stateProvider: @Composable () -> ProxyEditorState,
     onClose: () -> Unit,
 ) {
     val state = stateProvider()
+    val isLoading = state.saveState is UiState.Loading || state.testState is UiState.Loading
     val name = rememberTextFieldState(profile.name)
     val host = rememberTextFieldState(profile.host)
     val port = rememberTextFieldState(profile.port.toString())
     var protocol by remember { mutableStateOf(profile.protocol) }
     val scrollState = rememberScrollState()
 
-    fun close() {
-        state.clearEditorError()
-        onClose()
+    LaunchedEffect(state.saveState) {
+        if (state.saveState is UiState.Success) onClose()
     }
 
     fun value() =
@@ -245,8 +259,8 @@ private fun ProxyEditor(
     FluentDialog(visible = true) {
         Column(
             Modifier.fillMaxWidth().padding(24.dp).onKeyEvent {
-                if (it.key == Key.Escape && it.type == KeyEventType.KeyUp && !state.busy) {
-                    close()
+                if (it.key == Key.Escape && it.type == KeyEventType.KeyUp && !isLoading) {
+                    onClose()
                     true
                 } else {
                     false
@@ -268,7 +282,7 @@ private fun ProxyEditor(
                         Modifier.fillMaxWidth().semantics {
                             contentDescription = nameLabel
                         },
-                        enabled = !state.busy,
+                        enabled = !isLoading,
                         header = { Text(nameLabel) },
                         lineLimits = TextFieldLineLimits.SingleLine,
                     )
@@ -276,7 +290,7 @@ private fun ProxyEditor(
                         header = stringResource(Res.string.proxy_protocol),
                         items = ProxyProtocol.entries.map { it.name },
                         selected = ProxyProtocol.entries.indexOf(protocol),
-                        disabled = state.busy,
+                        disabled = isLoading,
                         onSelectionChange = { index, _ -> protocol = ProxyProtocol.entries[index] },
                     )
                     TextField(
@@ -284,7 +298,7 @@ private fun ProxyEditor(
                         Modifier.fillMaxWidth().semantics {
                             contentDescription = hostLabel
                         },
-                        enabled = !state.busy,
+                        enabled = !isLoading,
                         header = { Text(hostLabel) },
                         lineLimits = TextFieldLineLimits.SingleLine,
                     )
@@ -293,7 +307,7 @@ private fun ProxyEditor(
                         Modifier.fillMaxWidth().semantics {
                             contentDescription = portLabel
                         },
-                        enabled = !state.busy,
+                        enabled = !isLoading,
                         header = {
                             Text(portLabel)
                         },
@@ -306,26 +320,26 @@ private fun ProxyEditor(
                         color = FluentTheme.colors.text.text.secondary,
                     )
                     Button(
-                        onClick = { state.test(value(), fromEditor = true) },
-                        disabled = state.busy,
+                        onClick = { state.test(value()) },
+                        disabled = isLoading,
                     ) { Text(stringResource(Res.string.proxy_test)) }
                     Text(
                         stringResource(Res.string.proxy_test_hint),
                         style = FluentTheme.typography.caption,
                         color = FluentTheme.colors.text.text.secondary,
                     )
-                    if (state.busy) ProgressBar(Modifier.fillMaxWidth())
+                    if (isLoading) ProgressBar(Modifier.fillMaxWidth())
                     if (state.isTested(value())) Text(stringResource(Res.string.proxy_test_success))
-                    state.editorError?.let { Text(it.localizedMessage(), color = FluentTheme.colors.system.critical) }
+                    state.error?.let { Text(it.localizedMessage(), color = FluentTheme.colors.system.critical) }
                 }
             }
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 AccentButton(onClick = {
-                    state.save(value(), ::close)
-                }, disabled = state.busy, modifier = Modifier.weight(1f)) { Text(stringResource(Res.string.proxy_save)) }
+                    state.save(value())
+                }, disabled = isLoading, modifier = Modifier.weight(1f)) { Text(stringResource(Res.string.proxy_save)) }
                 Button(
-                    onClick = ::close,
-                    disabled = state.busy,
+                    onClick = onClose,
+                    disabled = isLoading,
                     modifier = Modifier.weight(1f),
                 ) { Text(stringResource(Res.string.proxy_cancel)) }
             }

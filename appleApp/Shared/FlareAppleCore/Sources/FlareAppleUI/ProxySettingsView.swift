@@ -11,7 +11,8 @@ public struct ProxySettingsView: View {
 
     public var body: some View {
         Form {
-            if let settings = presenter.state.settings {
+            if case .success(let data) = onEnum(of: presenter.state.settings) {
+                let settings = data.data
                 let accounts = presenter.state.accounts.filter { $0.accountKey.host != "nostr" }
                 Section {
                     policyPicker(settings)
@@ -61,7 +62,7 @@ public struct ProxySettingsView: View {
             }
         }
         .formStyle(.grouped)
-        .disabled(presenter.state.busy)
+        .disabled(presenter.state.operation is UiStateLoading<KotlinUnit>)
         .navigationTitle(Text("proxy_title", bundle: FlareAppleUILocalization.bundle))
         #if os(macOS)
         .navigationSubtitle(Text("proxy_settings_subtitle", bundle: FlareAppleUILocalization.bundle))
@@ -70,7 +71,7 @@ public struct ProxySettingsView: View {
             if let profile = editing {
                 ProxyEditor(
                     profile: profile,
-                    isNew: presenter.state.settings?.profiles.contains { $0.id == profile.id } != true,
+                    isNew: (presenter.state.settings as? UiStateSuccess<ProxySettings>)?.data.profiles.contains { $0.id == profile.id } != true,
                     onClose: closeEditor
                 )
                 .id(profile.id)
@@ -80,7 +81,7 @@ public struct ProxySettingsView: View {
             showError = error != nil
         }
         .alert(Text("proxy_title", bundle: FlareAppleUILocalization.bundle), isPresented: $showError, presenting: presenter.state.error) { _ in
-            if presenter.state.settings == nil {
+            if presenter.state.settings is UiStateError<ProxySettings> {
                 Button { presenter.state.retry() } label: {
                     Text("action_retry", bundle: FlareAppleUILocalization.bundle)
                 }
@@ -185,7 +186,7 @@ private struct ProxyEditor: View {
     let profile: ProxyProfile
     let isNew: Bool
     let onClose: () -> Void
-    @State private var presenter = KotlinPresenter(presenter: ProxySettingsPresenter())
+    @State private var presenter = KotlinPresenter(presenter: ProxyEditorPresenter())
     @State private var name: String
     @State private var host: String
     @State private var port: String
@@ -201,7 +202,10 @@ private struct ProxyEditor: View {
         _proxyProtocol = State(initialValue: profile.protocol)
     }
 
-    private var state: ProxySettingsState { presenter.state }
+    private var state: ProxyEditorState { presenter.state }
+    private var isLoading: Bool {
+        state.saveState is UiStateLoading<KotlinUnit> || state.testState is UiStateLoading<ProxyProfile>
+    }
 
     private var value: ProxyProfile {
         ProxyProfile(id: profile.id, name: name.trimmingCharacters(in: .whitespacesAndNewlines), protocol: proxyProtocol,
@@ -227,7 +231,7 @@ private struct ProxyEditor: View {
             .padding()
         }
         .frame(width: 520, height: 560)
-        .interactiveDismissDisabled(state.busy)
+        .interactiveDismissDisabled(isLoading)
         #else
         NavigationStack {
             form
@@ -238,7 +242,7 @@ private struct ProxyEditor: View {
                     ToolbarItem(placement: .confirmationAction) { saveButton.labelStyle(.iconOnly) }
                 }
         }
-        .interactiveDismissDisabled(state.busy)
+        .interactiveDismissDisabled(isLoading)
         #endif
     }
 
@@ -277,21 +281,24 @@ private struct ProxyEditor: View {
                 Text("proxy_no_auth", bundle: FlareAppleUILocalization.bundle)
             }
             Section {
-                Button { state.test(profile: value, fromEditor: true) } label: {
+                Button { state.test(profile: value) } label: {
                     Text("proxy_test", bundle: FlareAppleUILocalization.bundle)
                 }
-                if state.busy { ProgressView() }
+                if isLoading { ProgressView() }
                 if state.isTested(profile: value) {
                     Label { Text("proxy_test_success", bundle: FlareAppleUILocalization.bundle) } icon: { Image(systemName: "checkmark.circle") }
                 }
-                if let error = state.editorError { Text(error.localizedKey, bundle: FlareAppleUILocalization.bundle).foregroundStyle(.red) }
+                if let error = state.error { Text(error.localizedKey, bundle: FlareAppleUILocalization.bundle).foregroundStyle(.red) }
             } footer: {
                 Text("proxy_test_hint", bundle: FlareAppleUILocalization.bundle)
             }
         }
         .formStyle(.grouped)
+        .onChange(of: state.saveState) { _, operation in
+            if operation is UiStateSuccess<KotlinUnit> { onClose() }
+        }
         .autocorrectionDisabled()
-        .disabled(state.busy)
+        .disabled(isLoading)
         #if os(macOS)
         .textFieldStyle(.roundedBorder)
         #endif
@@ -301,14 +308,14 @@ private struct ProxyEditor: View {
         Button(action: onClose) {
             Label { Text("proxy_cancel", bundle: FlareAppleUILocalization.bundle) } icon: { Image(fontAwesome: .xmark) }
         }
-        .disabled(state.busy)
+        .disabled(isLoading)
     }
 
     private var saveButton: some View {
-        Button { state.save(profile: value, onSaved: onClose) } label: {
+        Button { state.save(profile: value) } label: {
             Label { Text("proxy_save", bundle: FlareAppleUILocalization.bundle) } icon: { Image(fontAwesome: .check) }
         }
-        .disabled(state.busy)
+        .disabled(isLoading)
     }
 }
 

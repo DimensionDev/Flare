@@ -32,6 +32,7 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.testPlatformRegistry
 import dev.dimension.flare.ui.model.UiAccount
+import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.presenter.settings.AccountsPresenter
 import dev.dimension.flare.ui.presenter.settings.AccountsState
 import dev.dimension.flare.ui.presenter.settings.ImportAppDatabasePresenter
@@ -355,13 +356,13 @@ class AccountProxyRecoveryTest {
                 withTimeout(5_000) {
                     val failed = models.first { it?.error != null }!!
                     assertEquals(ProxySettingsError.REQUEST_FAILED, failed.error)
-                    assertNull(failed.settings)
+                    assertNull(failed.settings.takeSuccess())
                     assertFailsWith<IOException> { ProxyNetwork.snapshot(ProxyRef.Global) }
                     store.persistentReadFailure = false
                     failed.retry()
-                    val loaded = models.first { it?.settings != null }!!
+                    val loaded = models.first { it?.settings?.takeSuccess() != null }!!
                     assertNull(loaded.error)
-                    assertEquals(ProxyPolicy(ProxyMode.PROXY, "work"), loaded.settings?.global)
+                    assertEquals(ProxyPolicy(ProxyMode.PROXY, "work"), loaded.settings.takeSuccess()?.global)
                     assertEquals(ProxyMode.PROXY, ProxyNetwork.snapshot(ProxyRef.Global).connection.mode)
                 }
             } finally {

@@ -26,6 +26,8 @@ import dev.dimension.flare.di.testSingle
 import dev.dimension.flare.memoryDatabaseBuilder
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.testPlatformRegistry
+import dev.dimension.flare.ui.model.UiState
+import dev.dimension.flare.ui.model.takeSuccess
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -45,10 +47,11 @@ import org.koin.dsl.module
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class ProxySettingsPresenterTest : RobolectricTest() {
     @Test
-    fun policySelectionKeepsPageInteractiveAndEditorFailuresStayLocal() =
+    fun operationsUseUiStateAndPolicySelectionKeepsThePageInteractive() =
         runTest {
             val root = createTestRootPath()
             val storage = OkioFileStorage(createTestFileSystem(), root)
@@ -93,45 +96,71 @@ class ProxySettingsPresenterTest : RobolectricTest() {
                 )
             }
             val presenter = ProxySettingsPresenter()
+            val editor = ProxyEditorPresenter()
             val models = MutableStateFlow<ProxySettingsState?>(null)
+            val editorModels = MutableStateFlow<ProxyEditorState?>(null)
             val job =
                 launch {
-                    moleculeFlow(RecompositionMode.Immediate) { presenter.body() }.collect { models.value = it }
+                    moleculeFlow(RecompositionMode.Immediate) { presenter.body() to editor.body() }.collect { (page, dialog) ->
+                        models.value = page
+                        editorModels.value = dialog
+                    }
                 }
             try {
                 withContext(Dispatchers.Default) {
                     val states = models.filterNotNull()
+                    val editorStates = editorModels.filterNotNull()
                     pauseWrites.value = true
                     for (account in listOf(null, MicroBlogKey("alice", "example.social"))) {
-                        states.first { it.settings != null }.select(account, ProxyPolicy(ProxyMode.DIRECT))
+                        states.first { it.settings.takeSuccess() != null }.select(account, ProxyPolicy(ProxyMode.DIRECT))
                         val release = writes.receive()
                         val disabledPage =
                             try {
-                                withTimeoutOrNull(200) { states.first { it.busy } }
+                                withTimeoutOrNull(200) { states.first { it.operation is UiState.Loading } }
                             } finally {
                                 release.complete(Unit)
                             }
-                        states.first { !it.busy && it.settings?.policy(account)?.mode == ProxyMode.DIRECT }
+                        states.first {
+                            it.operation !is UiState.Loading &&
+                                it.settings
+                                    .takeSuccess()
+                                    ?.policy(account)
+                                    ?.mode == ProxyMode.DIRECT
+                        }
                         assertNull(disabledPage, "Changing one proxy policy must not disable the whole settings list")
                     }
+                    val profile = ProxyProfile("work", "Work", ProxyProtocol.HTTPS, "proxy.example", 443)
+                    editorStates.first().save(profile)
+                    val release = writes.receive()
+                    try {
+                        val saving = editorStates.first { it.saveState is UiState.Loading }
+                        assertNull(saving.testState)
+                        assertTrue(models.value!!.operation !is UiState.Loading)
+                    } finally {
+                        release.complete(Unit)
+                    }
+                    editorStates.first { it.saveState is UiState.Success }
+                    states.first {
+                        it.settings
+                            .takeSuccess()
+                            ?.profiles
+                            ?.contains(profile) == true
+                    }
                     pauseWrites.value = false
-                    val invalid = ProxyProfile("draft", "", ProxyProtocol.HTTPS, "", 443)
-                    states.first { it.settings != null }.save(invalid) { error("Invalid draft must not be saved") }
-                    val saveFailure = states.first { !it.busy && it.editorError != null }
-                    assertNull(saveFailure.error)
-                    assertEquals(ProxySettingsError.NAME_REQUIRED, saveFailure.editorError)
-                    saveFailure.clearEditorError()
-                    states.first { it.editorError == null }.test(invalid, fromEditor = true)
-                    val testFailure = states.first { !it.busy && it.editorError != null }
-                    assertNull(testFailure.error)
-                    testFailure.clearEditorError()
-                    states.first { it.editorError == null }.test(invalid, fromEditor = false)
-                    val pageTestFailure = states.first { !it.busy && it.error != null }
-                    assertNull(pageTestFailure.editorError)
-                    pageTestFailure.select(null, ProxyPolicy(ProxyMode.PROXY, "missing"))
-                    val selectionFailure = states.first { !it.busy && it.error != null && it.error != pageTestFailure.error }
-                    assertNull(selectionFailure.editorError)
+                    val invalid = profile.copy(id = "draft", name = "", host = "")
+                    editorStates.first().save(invalid)
+                    val saveFailure = editorStates.first { it.saveState is UiState.Error }
+                    assertEquals(ProxySettingsError.NAME_REQUIRED, saveFailure.error)
+                    assertNull(models.value!!.error)
+                    saveFailure.test(invalid.copy(name = "Draft"))
+                    val testFailure = editorStates.first { it.testState is UiState.Error }
+                    assertNull(testFailure.saveState)
+                    assertEquals(ProxySettingsError.INVALID_HOST, testFailure.error)
+                    assertNull(models.value!!.error)
+                    states.first().select(null, ProxyPolicy(ProxyMode.PROXY, "missing"))
+                    val selectionFailure = states.first { it.operation is UiState.Error }
                     assertEquals(ProxySettingsError.INVALID_POLICY, selectionFailure.error)
+                    assertEquals(ProxySettingsError.INVALID_HOST, editorModels.value!!.error)
                 }
             } finally {
                 job.cancelAndJoin()

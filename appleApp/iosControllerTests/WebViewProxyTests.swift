@@ -12,6 +12,7 @@ import KotlinSharedUI
 @MainActor
 final class WebViewProxyTests: XCTestCase {
     private var presenter: KotlinPresenter<ProxySettingsState>!
+    private var editor: KotlinPresenter<ProxyEditorState>!
     private var original: ProxyPolicy!
     private var profiles: [String] = []
     private var sessions: [WebViewProxy] = []
@@ -22,8 +23,9 @@ final class WebViewProxyTests: XCTestCase {
 
     override func setUp() async throws {
         presenter = KotlinPresenter(presenter: ProxySettingsPresenter())
-        try await eventually { self.presenter.state.settings != nil && !self.presenter.state.busy }
-        original = presenter.state.settings!.global
+        editor = KotlinPresenter(presenter: ProxyEditorPresenter())
+        try await eventually { self.presenter.state.settings is UiStateSuccess<ProxySettings> }
+        original = (presenter.state.settings as! UiStateSuccess<ProxySettings>).data.global
         let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first)
         previousWindow = scene.windows.first(where: \.isKeyWindow)
         window = UIWindow(windowScene: scene)
@@ -42,9 +44,10 @@ final class WebViewProxyTests: XCTestCase {
         try await select(original)
         for id in profiles {
             presenter.state.remove(id: id)
-            try await eventually { !self.presenter.state.busy && self.presenter.state.settings?.profiles.contains { $0.id == id } == false }
+            try await eventually { !(self.presenter.state.operation is UiStateLoading<KotlinUnit>) && (self.presenter.state.settings as? UiStateSuccess<ProxySettings>)?.data.profiles.contains { $0.id == id } == false }
         }
         servers.forEach { $0.stop() }
+        editor = nil
         presenter = nil
     }
 
@@ -132,10 +135,10 @@ final class WebViewProxyTests: XCTestCase {
         try await eventually { first.requests.count == 1 }
         let account = MicroBlogKey(id: UUID().uuidString, host: "webview-tests.example")
         presenter.state.select(accountKey: account, policy: ProxyPolicy(mode: .direct, proxyId: nil))
-        try await eventually { !self.presenter.state.busy && self.presenter.state.settings?.policy(accountKey: account).mode == .direct }
+        try await eventually { (self.presenter.state.settings as? UiStateSuccess<ProxySettings>)?.data.policy(accountKey: account).mode == .direct }
         XCTAssertTrue(session.route === old)
         presenter.state.select(accountKey: account, policy: ProxyPolicy(mode: .inherit, proxyId: nil))
-        try await eventually { !self.presenter.state.busy && self.presenter.state.settings?.policy(accountKey: account).mode == .inherit }
+        try await eventually { (self.presenter.state.settings as? UiStateSuccess<ProxySettings>)?.data.policy(accountKey: account).mode == .inherit }
 
         try await selectProxy(second, protocol: .socks5)
         try await eventually { session.route != nil && session.route !== old && first.closedPending == 1 }
@@ -257,16 +260,16 @@ final class WebViewProxyTests: XCTestCase {
         let id = UUID().uuidString
         let profile = ProxyProfile(id: id, name: "WebView test", protocol: kind, host: "127.0.0.1", port: Int32(server.listener.port!.rawValue))
         profiles.append(id)
-        presenter.state.save(profile: profile, onSaved: { @Sendable in })
-        try await eventually { !self.presenter.state.busy && (self.presenter.state.settings?.profiles.contains { $0.id == id } == true || self.presenter.state.editorError != nil) }
-        XCTAssertNil(presenter.state.editorError)
+        editor.state.save(profile: profile)
+        try await eventually { (self.editor.state.saveState is UiStateSuccess<KotlinUnit> && (self.presenter.state.settings as? UiStateSuccess<ProxySettings>)?.data.profiles.contains { $0.id == id } == true) || self.editor.state.error != nil }
+        XCTAssertNil(editor.state.error)
         try await select(ProxyPolicy(mode: .proxy, proxyId: id))
     }
 
     private func select(_ policy: ProxyPolicy) async throws {
-        if presenter.state.settings?.global == policy { return }
+        if (presenter.state.settings as? UiStateSuccess<ProxySettings>)?.data.global == policy { return }
         presenter.state.select(accountKey: nil, policy: policy)
-        try await eventually { !self.presenter.state.busy && self.presenter.state.settings?.global == policy }
+        try await eventually { (self.presenter.state.settings as? UiStateSuccess<ProxySettings>)?.data.global == policy }
         XCTAssertNil(presenter.state.error)
     }
 

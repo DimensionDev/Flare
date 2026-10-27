@@ -160,10 +160,10 @@ final class ProxyPlaybackLifecycleTests: XCTestCase {
 
     private func select(_ mode: ProxyMode, account: MicroBlogKey? = nil,
                         presenter: KotlinPresenter<ProxySettingsState>) async throws {
-        try await eventually { presenter.state.settings != nil && !presenter.state.busy }
-        if presenter.state.settings?.policy(accountKey: account).mode == mode { return }
+        try await eventually { presenter.state.settings is UiStateSuccess<ProxySettings> }
+        if (presenter.state.settings as? UiStateSuccess<ProxySettings>)?.data.policy(accountKey: account).mode == mode { return }
         presenter.state.select(accountKey: account, policy: ProxyPolicy(mode: mode, proxyId: nil))
-        try await eventually { presenter.state.settings?.policy(accountKey: account).mode == mode && !presenter.state.busy }
+        try await eventually { (presenter.state.settings as? UiStateSuccess<ProxySettings>)?.data.policy(accountKey: account).mode == mode }
         XCTAssertNil(presenter.state.error)
     }
 

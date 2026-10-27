@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -32,13 +33,15 @@ import dev.dimension.flare.data.model.ProxyPolicy
 import dev.dimension.flare.data.model.ProxyProfile
 import dev.dimension.flare.data.model.ProxyProtocol
 import dev.dimension.flare.data.model.ProxySettings
-import dev.dimension.flare.data.model.ProxySettingsError
 import dev.dimension.flare.data.model.appearance.TimelineAppearance
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiProfile
+import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.createSampleUser
+import dev.dimension.flare.ui.model.takeSuccess
+import dev.dimension.flare.ui.presenter.settings.ProxyEditorState
 import dev.dimension.flare.ui.presenter.settings.ProxySettingsState
 import dev.dimension.flare.ui.theme.FlareTheme
 import kotlinx.collections.immutable.persistentListOf
@@ -55,8 +58,8 @@ class ProxySettingsContentTest {
 
     @Test
     fun editorTestsCurrentDraftAndOnlySavesOnConfirmation() {
-        val state = State()
-        show(state)
+        val editor = EditorState()
+        show(State(), editor)
         compose.onNodeWithText("Add proxy").performClick()
         compose.onNodeWithContentDescription("Name").performTextReplacement("Work")
         compose.onNodeWithContentDescription("Hostname or IP address").performTextReplacement("proxy.example")
@@ -65,28 +68,35 @@ class ProxySettingsContentTest {
         compose.onNodeWithContentDescription("Port").performTextReplacement("1080")
         compose.onNodeWithText("Test connection").performScrollTo().performClick()
         compose.runOnIdle {
-            assertNull(state.saved)
-            assertEquals(ProxyProtocol.SOCKS5, state.tested?.protocol)
-            assertEquals(1080, state.tested?.port)
+            assertNull(editor.saved)
+            assertEquals(ProxyProtocol.SOCKS5, editor.testState?.takeSuccess()?.protocol)
+            assertEquals(1080, editor.testState?.takeSuccess()?.port)
         }
         compose.onNodeWithText("Connection succeeded").performScrollTo().assertIsDisplayed()
         compose.onNodeWithContentDescription("Hostname or IP address").performScrollTo().performTextReplacement("other.example")
         compose.onNodeWithText("Connection succeeded").assertDoesNotExist()
         compose.onNodeWithText("Save").performClick()
-        compose.runOnIdle { assertEquals("other.example", state.saved?.host) }
+        compose.runOnIdle { assertEquals("other.example", editor.saved?.host) }
         compose.onNodeWithText("Save").assertDoesNotExist()
     }
 
     @Test
     fun cancelAndEscapeDoNotSaveOrChangeExistingProfile() {
         val state = State(ProxySettings(profiles = listOf(profile)))
-        show(state)
+        val editor = EditorState()
+        show(state, editor)
         compose.onNodeWithText("Edit proxy").performClick()
         compose.onNodeWithContentDescription("Name").performTextReplacement("Changed")
         compose.onNodeWithText("Cancel").performClick()
         compose.runOnIdle {
-            assertNull(state.saved)
-            assertEquals(profile, state.settings.profiles.single())
+            assertNull(editor.saved)
+            assertEquals(
+                profile,
+                state.settings
+                    .takeSuccess()!!
+                    .profiles
+                    .single(),
+            )
         }
         compose.onNodeWithText("Edit proxy").performClick()
         compose
@@ -95,7 +105,7 @@ class ProxySettingsContentTest {
             .performClick()
             .performKeyInput { pressKey(Key.Escape) }
         compose.onNodeWithText("Save").assertDoesNotExist()
-        compose.runOnIdle { assertNull(state.saved) }
+        compose.runOnIdle { assertNull(editor.saved) }
     }
 
     @Test
@@ -117,7 +127,7 @@ class ProxySettingsContentTest {
         show(state)
         compose.onNodeWithText("Reassign global and account settings before deleting this proxy.").assertDoesNotExist()
         compose.onNodeWithContentDescription("Delete").assertIsNotEnabled()
-        compose.runOnIdle { state.settings = state.settings.copy(global = ProxyPolicy(ProxyMode.DIRECT)) }
+        compose.runOnIdle { state.settings = UiState.Success(state.settings.takeSuccess()!!.copy(global = ProxyPolicy(ProxyMode.DIRECT))) }
         compose.onNodeWithContentDescription("Delete").assertIsEnabled().performClick()
         compose.runOnIdle { assertEquals(profile.id, state.removed) }
     }
@@ -127,31 +137,29 @@ class ProxySettingsContentTest {
         var pageReads = 0
         val page =
             object : ProxySettingsState by State() {
-                override val settings: ProxySettings
+                override val settings: UiState<ProxySettings>
                     get() {
                         pageReads++
-                        return ProxySettings(profiles = listOf(profile))
+                        return UiState.Success(ProxySettings(profiles = listOf(profile)))
                     }
             }
-        val editor = State()
+        val editor = EditorState()
         show(page, editor)
         compose.onNodeWithText("Edit proxy").performClick()
         var initialPageReads = 0
         compose.runOnIdle {
             initialPageReads = pageReads
-            editor.busy = true
+            editor.testState = UiState.Loading()
         }
         compose.onNodeWithContentDescription("Global").assertIsEnabled()
         compose.onNodeWithText("Save").assertIsNotEnabled()
         compose.onNodeWithText("Cancel").assertIsNotEnabled()
         compose.runOnIdle {
-            editor.busy = false
-            editor.editorError = ProxySettingsError.REQUEST_FAILED
+            editor.testState = UiState.Error(IllegalStateException())
         }
         compose.onAllNodesWithText("Proxy operation failed. Please try again.").assertCountEquals(1)
         compose.runOnIdle {
-            editor.editorError = null
-            editor.tested = profile
+            editor.testState = UiState.Success(profile)
         }
         compose.onAllNodesWithText("Connection succeeded").assertCountEquals(1)
         compose.runOnIdle { assertEquals(initialPageReads, pageReads) }
@@ -161,18 +169,17 @@ class ProxySettingsContentTest {
     }
 
     @Test
-    fun editorPreservesInputAndShowsFailureAfterBusyState() {
-        val state = State()
-        show(state)
+    fun editorPreservesInputAndShowsFailureAfterLoadingState() {
+        val editor = EditorState()
+        show(State(), editor)
         compose.onNodeWithText("Add proxy").performClick()
         compose.onNodeWithContentDescription("Name").performTextReplacement("Work")
-        compose.runOnIdle { state.busy = true }
+        compose.runOnIdle { editor.saveState = UiState.Loading() }
         compose.onNodeWithText("Save").assertIsNotEnabled()
         compose.onNodeWithText("Cancel").assertIsNotEnabled()
         compose.onNodeWithContentDescription("Name").assertIsNotEnabled()
         compose.runOnIdle {
-            state.busy = false
-            state.editorError = ProxySettingsError.REQUEST_FAILED
+            editor.saveState = UiState.Error(IllegalStateException())
         }
         compose.onAllNodesWithText("Proxy operation failed. Please try again.").assertCountEquals(1)
         compose.onNodeWithText("Proxy operation failed. Please try again.").performScrollTo().assertIsDisplayed()
@@ -189,9 +196,9 @@ class ProxySettingsContentTest {
         val state = State()
         val user = createSampleUser().copy(key = account, avatar = null)
         state.accountProfiles = persistentMapOf(account to user)
-        state.error = ProxySettingsError.INVALID_POLICY
+        state.operation = UiState.Error(IllegalStateException())
         show(state)
-        compose.onNodeWithText("Select an available proxy policy").assertIsDisplayed()
+        compose.onNodeWithText("Proxy operation failed. Please try again.").assertIsDisplayed()
         compose.onNodeWithText("OK").performClick()
         compose.onNodeWithText(user.handle.canonical).performScrollTo().assertIsDisplayed()
         compose.onNodeWithText(user.name.raw).assertIsDisplayed()
@@ -204,10 +211,7 @@ class ProxySettingsContentTest {
     fun settingsReadFailureShowsRetryInsteadOfAnIndefiniteSpinner() {
         var retries = 0
         val state =
-            object : ProxySettingsState by State() {
-                override val settings = null
-                override val error = ProxySettingsError.REQUEST_FAILED
-
+            object : ProxySettingsState by (State().apply { settings = UiState.Error(IllegalStateException()) }) {
                 override fun retry() {
                     retries++
                 }
@@ -222,14 +226,20 @@ class ProxySettingsContentTest {
 
     private fun show(
         state: ProxySettingsState,
-        editorState: ProxySettingsState = state,
+        editorState: EditorState = EditorState(),
     ) {
         compose.setContent {
             FlareTheme(isDarkTheme = false) {
                 Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
                     CompositionLocalProvider(LocalTimelineAppearance provides TimelineAppearance()) {
                         ProxySettingsContent(state, editorState = {
-                            remember(editorState.busy, editorState.editorError, editorState.tested) { editorState }
+                            DisposableEffect(editorState) {
+                                onDispose {
+                                    editorState.saveState = null
+                                    editorState.testState = null
+                                }
+                            }
+                            remember(editorState.saveState, editorState.testState) { editorState }
                         })
                     }
                 }
@@ -240,15 +250,11 @@ class ProxySettingsContentTest {
     private inner class State(
         initialSettings: ProxySettings = ProxySettings(),
     ) : ProxySettingsState {
-        override var settings by mutableStateOf(initialSettings)
+        override var settings by mutableStateOf<UiState<ProxySettings>>(UiState.Success(initialSettings))
         override val accounts =
             persistentListOf(UiAccount(account, "mastodon", "Mastodon"), UiAccount(MicroBlogKey("bob", "nostr"), "nostr", "Nostr"))
         override var accountProfiles by mutableStateOf(persistentMapOf<MicroBlogKey, UiProfile>())
-        override var editorError by mutableStateOf<ProxySettingsError?>(null)
-        override var busy by mutableStateOf(false)
-        override var error by mutableStateOf<ProxySettingsError?>(null)
-        override var tested by mutableStateOf<ProxyProfile?>(null)
-        var saved: ProxyProfile? = null
+        override var operation by mutableStateOf<UiState<Unit>?>(null)
         var removed: String? = null
         var selection: Pair<MicroBlogKey?, ProxyPolicy>? = null
 
@@ -261,28 +267,23 @@ class ProxySettingsContentTest {
             selection = accountKey to policy
         }
 
-        override fun save(
-            profile: ProxyProfile,
-            onSaved: () -> Unit,
-        ) {
-            saved = profile
-            onSaved()
-        }
-
         override fun remove(id: String) {
             removed = id
         }
+    }
 
-        override fun clearEditorError() {
-            editorError = null
+    private class EditorState : ProxyEditorState {
+        override var saveState by mutableStateOf<UiState<Unit>?>(null)
+        override var testState by mutableStateOf<UiState<ProxyProfile>?>(null)
+        var saved: ProxyProfile? = null
+
+        override fun save(profile: ProxyProfile) {
+            saved = profile
+            saveState = UiState.Success(Unit)
         }
 
-        override fun test(
-            profile: ProxyProfile,
-            fromEditor: Boolean,
-        ) {
-            assertEquals(true, fromEditor)
-            tested = profile
+        override fun test(profile: ProxyProfile) {
+            testState = UiState.Success(profile)
         }
     }
 }

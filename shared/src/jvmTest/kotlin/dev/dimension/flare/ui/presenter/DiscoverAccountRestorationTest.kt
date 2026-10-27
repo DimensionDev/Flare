@@ -49,6 +49,8 @@ import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.presenter.home.DiscoverPresenter
 import dev.dimension.flare.ui.presenter.home.DiscoverState
 import dev.dimension.flare.ui.presenter.home.SearchPresenter
+import dev.dimension.flare.ui.presenter.home.SearchState
+import dev.dimension.flare.ui.presenter.home.rememberDiscoverSearchState
 import dev.dimension.flare.ui.render.toUiPlainText
 import dev.dimension.flare.unavailableAccountService
 import kotlinx.collections.immutable.persistentListOf
@@ -75,6 +77,7 @@ import org.koin.dsl.module
 import java.util.concurrent.Executors
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -166,7 +169,7 @@ class DiscoverAccountRestorationTest {
         }
 
     @Test
-    fun pendingRestorationDoesNotRequestGuestOrTheFirstAccount() =
+    fun pendingRestorationDoesNotRequestGuestOrTheFirstAccountOrStartSearch() =
         withFixture {
             insertAccounts()
             val entered = CompletableDeferred<Unit>()
@@ -180,15 +183,81 @@ class DiscoverAccountRestorationTest {
                     }
                 }
             entered.await()
-            val models = MutableStateFlow<DiscoverState?>(null)
-            val page = launchPage(models)
+            val models = MutableStateFlow<SearchPage?>(null)
+            val page = launchSearchPage(models)
             try {
-                models.filterNotNull().first { it.accounts is dev.dimension.flare.ui.model.UiState.Success }
-                assertTrue(!models.value!!.isAccountReady)
+                val pending = models.filterNotNull().first { it.discover.accounts is dev.dimension.flare.ui.model.UiState.Success }
+                assertFalse(pending.discover.isAccountReady)
+                assertFalse(pending.search.searching)
                 assertTrue(requests.tryReceive().isFailure)
                 release.complete(Unit)
                 save.join()
                 assertEquals(listOf(AccountType.Specific(savedAccount)), List(3) { requests.receive().first }.distinct())
+                val restored = models.filterNotNull().first { it.discover.isAccountReady }
+                assertFalse(restored.search.searching)
+                assertTrue(searchRequests.tryReceive().isFailure)
+            } finally {
+                release.complete(Unit)
+                save.cancelAndJoin()
+                page.cancelAndJoin()
+            }
+        }
+
+    @Test
+    fun accountSwitchingReplaysSubmittedSearchesAndClearingForgetsThem() =
+        withFixture {
+            insertAccounts()
+            val models = MutableStateFlow<SearchPage?>(null)
+            val page = launchSearchPage(models)
+            try {
+                val initial = models.filterNotNull().first { it.discover.isAccountReady }
+                assertEquals(firstAccount, initial.discover.selectedAccountKey)
+                initial.search.search("cats")
+                repeat(2) { assertEquals(AccountType.Specific(firstAccount) to "cats", searchRequests.receive()) }
+
+                initial.discover.setAccountKey(savedAccount)
+                repeat(2) { assertEquals(AccountType.Specific(savedAccount) to "cats", searchRequests.receive()) }
+                val switched = models.filterNotNull().first { it.discover.selectedAccountKey == savedAccount }
+                switched.search.search("")
+                models.filterNotNull().first { !it.search.searching }
+                switched.discover.setAccountKey(firstAccount)
+
+                val cleared = models.filterNotNull().first { it.discover.selectedAccountKey == firstAccount }
+                assertFalse(cleared.search.searching)
+                assertTrue(searchRequests.tryReceive().isFailure)
+            } finally {
+                page.cancelAndJoin()
+            }
+        }
+
+    @Test
+    fun searchSubmittedDuringRestorationUsesTheSubmittedQueryAfterInitialization() =
+        withFixture {
+            insertAccounts()
+            val entered = CompletableDeferred<Unit>()
+            val release = CompletableDeferred<Unit>()
+            val save =
+                scope.launch {
+                    appData.discoverPreferences.updateData {
+                        entered.complete(Unit)
+                        release.await()
+                        it.copy(selectedAccountKey = savedAccount)
+                    }
+                }
+            entered.await()
+            val models = MutableStateFlow<SearchPage?>(null)
+            val page = launchSearchPage(models)
+            try {
+                val pending = models.filterNotNull().first { it.discover.accounts is dev.dimension.flare.ui.model.UiState.Success }
+                assertFalse(pending.discover.isAccountReady)
+                pending.search.search("cats")
+                assertTrue(searchRequests.tryReceive().isFailure)
+                release.complete(Unit)
+                save.join()
+
+                repeat(2) { assertEquals(AccountType.Specific(savedAccount) to "cats", searchRequests.receive()) }
+                val restored = models.filterNotNull().first { it.discover.isAccountReady }
+                assertTrue(restored.search.searching)
             } finally {
                 release.complete(Unit)
                 save.cancelAndJoin()
@@ -247,6 +316,11 @@ class DiscoverAccountRestorationTest {
             }
         }
 
+    private data class SearchPage(
+        val discover: DiscoverState,
+        val search: SearchState,
+    )
+
     private inner class Fixture(
         val scope: CoroutineScope,
     ) {
@@ -256,6 +330,7 @@ class DiscoverAccountRestorationTest {
         val cache = Room.memoryDatabaseBuilder<CacheDatabase>().setDriver(createDatabaseDriver()).build()
         val appData = AppDataStore(storage)
         val requests = Channel<Pair<AccountType, String>>(Channel.UNLIMITED)
+        val searchRequests = Channel<Pair<AccountType, String>>(Channel.UNLIMITED)
         var loadedProfileKey: MicroBlogKey? = null
         val registry =
             PlatformRegistry(
@@ -330,6 +405,15 @@ class DiscoverAccountRestorationTest {
                 moleculeFlow(RecompositionMode.Immediate) { presenter.body() }.collect { models.value = it }
             }
 
+        fun launchSearchPage(models: MutableStateFlow<SearchPage?>) =
+            scope.launch {
+                val presenter = DiscoverPresenter()
+                moleculeFlow(RecompositionMode.Immediate) {
+                    val state = presenter.body()
+                    SearchPage(state, rememberDiscoverSearchState(state.selectedAccountType, state.isAccountReady))
+                }.collect { models.value = it }
+            }
+
         suspend fun close() {
             scope.coroutineContext.job.cancelAndJoin()
             app.close()
@@ -351,9 +435,16 @@ class DiscoverAccountRestorationTest {
             override fun context(statusKey: MicroBlogKey) = notSupported<UiTimelineV2>()
 
             override fun searchStatus(query: String) =
-                notSupported<UiTimelineV2>().also { requests.trySend(accountType to "searchStatuses") }
+                notSupported<UiTimelineV2>().also {
+                    requests.trySend(accountType to "searchStatuses")
+                    searchRequests.trySend(accountType to query)
+                }
 
-            override fun searchUser(query: String) = notSupported<UiProfile>().also { requests.trySend(accountType to "searchUsers") }
+            override fun searchUser(query: String) =
+                notSupported<UiProfile>().also {
+                    requests.trySend(accountType to "searchUsers")
+                    searchRequests.trySend(accountType to query)
+                }
 
             override fun following(userKey: MicroBlogKey) = notSupported<UiProfile>()
 

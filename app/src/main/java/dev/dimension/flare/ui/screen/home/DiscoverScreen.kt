@@ -24,7 +24,6 @@ import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -69,8 +68,7 @@ import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.DiscoverPresenter
 import dev.dimension.flare.ui.presenter.home.DiscoverState
-import dev.dimension.flare.ui.presenter.home.SearchPresenter
-import dev.dimension.flare.ui.presenter.home.SearchState
+import dev.dimension.flare.ui.presenter.home.rememberDiscoverSearchState
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.coroutines.launch
@@ -424,26 +422,17 @@ internal fun DiscoverScreen(
 }
 
 @Composable
-internal fun discoverPresenter(): DiscoverScreenState =
+private fun discoverPresenter() =
     run {
         val scope = rememberCoroutineScope()
         val state = remember { DiscoverPresenter() }.invoke()
         val searchBarState = searchBarPresenter()
-        var committedQuery by remember { mutableStateOf("") }
-        val searchState =
-            key(state.selectedAccountType, state.isAccountReady) {
-                remember {
-                    SearchPresenter(
-                        accountType = state.selectedAccountType,
-                        initialQuery = if (state.isAccountReady) committedQuery else "",
-                    )
-                }.invoke()
-            }
+        val searchState = rememberDiscoverSearchState(state.selectedAccountType, state.isAccountReady)
 
-        object : DiscoverScreenState, DiscoverState by state, SearchBarState by searchBarState {
-            override val searchState = searchState
-            override val isInSearchMode = queryTextState.text.isNotEmpty()
-            override val refreshing =
+        object : DiscoverState by state, SearchBarState by searchBarState {
+            val searchState = searchState
+            val isInSearchMode = queryTextState.text.isNotEmpty()
+            val refreshing =
                 if (!isInSearchMode) {
                     state.users.isRefreshing ||
                         state.status.isRefreshing ||
@@ -453,7 +442,7 @@ internal fun discoverPresenter(): DiscoverScreenState =
                         searchState.status.isRefreshing
                 }
 
-            override fun refresh() {
+            fun refresh() {
                 if (!state.isAccountReady) return
                 if (isInSearchMode) {
                     scope.launch { searchState.refreshSuspend() }
@@ -472,31 +461,15 @@ internal fun discoverPresenter(): DiscoverScreenState =
                 }
             }
 
-            override fun commitSearch(new: String) {
-                committedQuery = new
+            fun commitSearch(new: String) {
                 searchBarState.setQuery(new)
                 searchBarState.addSearchHistory(new)
-                if (state.isAccountReady) searchState.search(new)
+                searchState.search(new)
             }
 
-            override fun clearSearch() {
-                committedQuery = ""
+            fun clearSearch() {
                 searchBarState.setQuery("")
                 searchState.search("")
             }
         }
     }
-
-internal interface DiscoverScreenState :
-    DiscoverState,
-    SearchBarState {
-    val searchState: SearchState
-    val isInSearchMode: Boolean
-    val refreshing: Boolean
-
-    fun refresh()
-
-    fun commitSearch(new: String)
-
-    fun clearSearch()
-}

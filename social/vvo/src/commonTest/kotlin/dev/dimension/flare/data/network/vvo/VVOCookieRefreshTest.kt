@@ -26,6 +26,7 @@ import kotlinx.serialization.json.Json
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlin.time.Clock
@@ -264,6 +265,14 @@ class VVOCookieRefreshTest {
                     "http://passport.weibo.cn/collect",
                     "http://m.weibo.cn/collect",
                     "https://passport.weibo.cn:8443/collect",
+                    "https://weibo.com.untrusted.example/collect",
+                    "https://untrustedweibo.cn/collect",
+                    "https://untrustedweibo.com/collect",
+                    "https://login.sina.com.cn.untrusted.example/collect",
+                    "https://news.sina.com.cn/collect",
+                    "https://untrusted@passport.weibo.com/collect",
+                    "http://passport.weibo.com/collect",
+                    "https://passport.weibo.com:8443/collect",
                 )
 
             for (location in untrustedLocations) {
@@ -303,6 +312,64 @@ class VVOCookieRefreshTest {
                 assertEquals(listOf("https://m.weibo.cn/", passportUrl), refreshHops, location)
                 assertEquals(refreshedCookie, credentialFlow.value.chocolate, location)
             }
+        }
+
+    @Test
+    fun refreshSharesTheCookieHeaderAcrossWeiboAndSinaSsoHops() =
+        runTest {
+            val oldCookie = "MLOGIN=1; SUB=old-sub; ALF=9999999999"
+            val afterHome = "$oldCookie; SCF=shared-scf"
+            val afterCom = "MLOGIN=1; SUB=com-sub; ALF=9999999999; SCF=shared-scf"
+            val afterSina = "$afterCom; SSO=sina-sso"
+            val refreshedCookie = "MLOGIN=1; SUB=cn-new-sub; ALF=9999999999; SCF=shared-scf; SSO=sina-sso"
+            val hops =
+                listOf(
+                    Triple("https://m.weibo.cn/", oldCookie, listOf("SCF=shared-scf; Domain=.weibo.cn; Path=/; Secure")),
+                    Triple("https://visitor.passport.weibo.cn/visitor/visitor?entry=sinawap", afterHome, emptyList()),
+                    Triple(
+                        "https://passport.weibo.com/sso/signin?entry=wapsso",
+                        afterHome,
+                        listOf("SUB=com-sub; Domain=.weibo.com; Path=/; Secure"),
+                    ),
+                    Triple(
+                        "https://login.sina.com.cn/sso/login.php?entry=weibo",
+                        afterCom,
+                        listOf("SSO=sina-sso; Domain=.sina.com.cn; Path=/; Secure"),
+                    ),
+                    Triple("https://weibo.com/sso/crossdomain?ticket=one", afterSina, emptyList()),
+                    Triple(
+                        "https://passport.weibo.cn/sso/complete?ticket=two",
+                        afterSina,
+                        listOf("SUB=cn-new-sub; Domain=.weibo.cn; Path=/; Secure"),
+                    ),
+                )
+            val credentialFlow = MutableStateFlow(VVoCredential(chocolate = oldCookie))
+            var hopIndex = 0
+            val service =
+                VVOService(
+                    credentialFlow = credentialFlow,
+                    refreshCookieWhenStale = true,
+                    onCredentialRefreshed = { credentialFlow.value = it },
+                    httpClientFactory =
+                        mockHttpClientFactory { request ->
+                            if (request.url.encodedPath == "/api/config") {
+                                assertEquals(refreshedCookie, request.headers[HttpHeaders.Cookie])
+                                return@mockHttpClientFactory configResponse(login = true)
+                            }
+                            val (url, cookie, setCookies) = hops[hopIndex++]
+                            assertEquals(url, request.url.toString())
+                            assertEquals(cookie, request.headers[HttpHeaders.Cookie])
+                            if (hopIndex < hops.size) {
+                                redirectResponse(hops[hopIndex].first, *setCookies.toTypedArray())
+                            } else {
+                                setCookieResponse(*setCookies.toTypedArray())
+                            }
+                        },
+                )
+
+            assertEquals(true, service.config().data?.login)
+            assertEquals(hops.size, hopIndex)
+            assertEquals(refreshedCookie, credentialFlow.value.chocolate)
         }
 
     @Test
@@ -674,6 +741,25 @@ class VVOCookieRefreshTest {
                 location = "https://m.weibo.cn/",
             ),
         )
+    }
+
+    @Test
+    fun resolveRefreshRedirectUrlAcceptsWeiboSitesAndSinaSso() {
+        val locations =
+            listOf(
+                "https://weibo.cn/",
+                "https://weibo.com/",
+                "https://www.weibo.com/",
+                "https://visitor.passport.weibo.cn/visitor/visitor",
+                "https://visitor.passport.weibo.com/visitor/visitor",
+                "https://passport.weibo.com/sso/signin",
+                "https://login.sina.com.cn/sso/login.php",
+                "https://PASSPORT.WEIBO.COM:443/sso/signin",
+                "//visitor.passport.weibo.com/visitor/visitor",
+            )
+        for (location in locations) {
+            assertNotNull(resolveRefreshRedirectUrl(current = "https://m.weibo.cn/", location = location), location)
+        }
     }
 
     @Test

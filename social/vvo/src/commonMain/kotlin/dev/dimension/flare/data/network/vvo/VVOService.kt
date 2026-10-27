@@ -310,6 +310,7 @@ internal class VVOService private constructor(
 
     // Follows the redirect chain by hand, carrying every freshly set cookie to
     // the next hop so the passport SSO leg can mint a new SUB from ALF/SCF.
+    // shortcut: Keep the legacy shared Cookie header; use scoped storage if per-site isolation is required.
     private suspend fun followRefreshRedirects(
         startUrl: String,
         initialCookieHeader: String,
@@ -371,9 +372,16 @@ internal fun resolveRefreshRedirectUrl(
             takeFrom(location)
         }.build()
         .takeIf {
+            val host = it.host.lowercase()
             it.protocol == URLProtocol.HTTPS &&
                 it.port == URLProtocol.HTTPS.defaultPort &&
-                it.host.lowercase() in setOf(vvoHost, "passport.weibo.cn")
+                it.user == null &&
+                it.password == null &&
+                (
+                    host == "weibo.cn" || host.endsWith(".weibo.cn") ||
+                        host == "weibo.com" || host.endsWith(".weibo.com") ||
+                        host == "login.sina.com.cn"
+                )
         }?.toString()
 
 // ALF carries the session's absolute expiry as epoch seconds.

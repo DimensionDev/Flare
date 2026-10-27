@@ -5,24 +5,12 @@ import SwiftUI
 public struct ProxySettingsView: View {
     @State private var presenter = KotlinPresenter(presenter: ProxySettingsPresenter())
     @State private var editing: ProxyProfile?
+    @State private var showError = false
 
     public init() {}
 
     public var body: some View {
         Form {
-            if presenter.state.busy || (presenter.state.settings == nil && presenter.state.error == nil) {
-                Section { ProgressView() }
-            }
-            if let error = presenter.state.error {
-                Section {
-                    Text(error.localizedKey, bundle: FlareAppleUILocalization.bundle).foregroundStyle(.red)
-                    if presenter.state.settings == nil {
-                        Button { presenter.state.retry() } label: {
-                            Text("action_retry", bundle: FlareAppleUILocalization.bundle)
-                        }
-                    }
-                }
-            }
             if let settings = presenter.state.settings {
                 let accounts = presenter.state.accounts.filter { $0.accountKey.host != "nostr" }
                 Section {
@@ -37,9 +25,6 @@ public struct ProxySettingsView: View {
                             .contextMenu {
                                 Button { editing = profile } label: {
                                     Label { Text("proxy_edit", bundle: FlareAppleUILocalization.bundle) } icon: { Image(systemName: "pencil") }
-                                }
-                                Button { presenter.state.test(profile: profile, fromEditor: false) } label: {
-                                    Label { Text("proxy_test", bundle: FlareAppleUILocalization.bundle) } icon: { Image(systemName: "network") }
                                 }
                                 Button(role: .destructive) { presenter.state.remove(id: profile.id) } label: {
                                     Label { Text("proxy_delete", bundle: FlareAppleUILocalization.bundle) } icon: { Image(systemName: "trash") }
@@ -86,17 +71,29 @@ public struct ProxySettingsView: View {
                 ProxyEditor(
                     profile: profile,
                     isNew: presenter.state.settings?.profiles.contains { $0.id == profile.id } != true,
-                    state: presenter.state,
                     onClose: closeEditor
                 )
                 .id(profile.id)
-                .interactiveDismissDisabled(presenter.state.busy)
             }
+        }
+        .onChange(of: presenter.state.error, initial: true) { _, error in
+            showError = error != nil
+        }
+        .alert(Text("proxy_title", bundle: FlareAppleUILocalization.bundle), isPresented: $showError, presenting: presenter.state.error) { _ in
+            if presenter.state.settings == nil {
+                Button { presenter.state.retry() } label: {
+                    Text("action_retry", bundle: FlareAppleUILocalization.bundle)
+                }
+            }
+            Button(role: .cancel) {} label: {
+                Text("proxy_cancel", bundle: FlareAppleUILocalization.bundle)
+            }
+        } message: { error in
+            Text(error.localizedKey, bundle: FlareAppleUILocalization.bundle)
         }
     }
 
     private func closeEditor() {
-        presenter.state.clearEditorError()
         editing = nil
     }
 
@@ -104,7 +101,7 @@ public struct ProxySettingsView: View {
     private func profileRow(_ profile: ProxyProfile, settings: ProxySettings) -> some View {
         #if os(macOS)
         HStack {
-            profileSummary(profile, settings: settings)
+            profileSummary(profile)
             Spacer()
             Button { editing = profile } label: { Text("proxy_edit", bundle: FlareAppleUILocalization.bundle) }
             Button(role: .destructive) { presenter.state.remove(id: profile.id) } label: {
@@ -116,7 +113,7 @@ public struct ProxySettingsView: View {
         #else
         Button { editing = profile } label: {
             HStack {
-                profileSummary(profile, settings: settings)
+                profileSummary(profile)
                 Spacer()
                 Image(systemName: "chevron.right")
                     .font(.footnote.weight(.semibold))
@@ -129,21 +126,12 @@ public struct ProxySettingsView: View {
         #endif
     }
 
-    private func profileSummary(_ profile: ProxyProfile, settings: ProxySettings) -> some View {
+    private func profileSummary(_ profile: ProxyProfile) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(verbatim: profile.name)
             Text(verbatim: "\(profile.protocol.name) · \(profile.host):\(profile.port)")
                 .font(.caption)
                 .foregroundStyle(.secondary)
-            if inUse(profile, settings) {
-                Text("proxy_in_use", bundle: FlareAppleUILocalization.bundle)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-            if presenter.state.isTested(profile: profile) {
-                Label { Text("proxy_test_success", bundle: FlareAppleUILocalization.bundle) } icon: { Image(systemName: "checkmark.circle") }
-                    .font(.caption)
-            }
         }
     }
 
@@ -196,23 +184,24 @@ public struct ProxySettingsView: View {
 private struct ProxyEditor: View {
     let profile: ProxyProfile
     let isNew: Bool
-    let state: ProxySettingsState
     let onClose: () -> Void
+    @State private var presenter = KotlinPresenter(presenter: ProxySettingsPresenter())
     @State private var name: String
     @State private var host: String
     @State private var port: String
     @State private var proxyProtocol: ProxyProtocol
 
-    init(profile: ProxyProfile, isNew: Bool, state: ProxySettingsState, onClose: @escaping () -> Void) {
+    init(profile: ProxyProfile, isNew: Bool, onClose: @escaping () -> Void) {
         self.profile = profile
         self.isNew = isNew
-        self.state = state
         self.onClose = onClose
         _name = State(initialValue: profile.name)
         _host = State(initialValue: profile.host)
         _port = State(initialValue: String(profile.port))
         _proxyProtocol = State(initialValue: profile.protocol)
     }
+
+    private var state: ProxySettingsState { presenter.state }
 
     private var value: ProxyProfile {
         ProxyProfile(id: profile.id, name: name.trimmingCharacters(in: .whitespacesAndNewlines), protocol: proxyProtocol,
@@ -238,6 +227,7 @@ private struct ProxyEditor: View {
             .padding()
         }
         .frame(width: 520, height: 560)
+        .interactiveDismissDisabled(state.busy)
         #else
         NavigationStack {
             form
@@ -248,6 +238,7 @@ private struct ProxyEditor: View {
                     ToolbarItem(placement: .confirmationAction) { saveButton.labelStyle(.iconOnly) }
                 }
         }
+        .interactiveDismissDisabled(state.busy)
         #endif
     }
 

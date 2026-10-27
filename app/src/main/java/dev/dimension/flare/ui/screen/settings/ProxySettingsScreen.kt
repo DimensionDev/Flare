@@ -47,8 +47,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
-import compose.icons.fontawesomeicons.solid.EllipsisVertical
 import compose.icons.fontawesomeicons.solid.Plus
+import compose.icons.fontawesomeicons.solid.Trash
 import dev.dimension.flare.R
 import dev.dimension.flare.data.model.ProxyMode
 import dev.dimension.flare.data.model.ProxyPolicy
@@ -83,6 +83,7 @@ internal fun ProxySettingsContent(
     state: ProxySettingsState,
     onBack: () -> Unit,
     beforeConnect: (() -> Unit) -> Unit,
+    editorState: @Composable () -> ProxySettingsState = { remember { ProxySettingsPresenter() }.invoke() },
 ) {
     var editingId by rememberSaveable { mutableStateOf<String?>(null) }
     var choosingGlobal by remember { mutableStateOf(false) }
@@ -102,11 +103,6 @@ internal fun ProxySettingsContent(
             Modifier.verticalScroll(rememberScrollState()).padding(padding).padding(horizontal = screenHorizontalPadding),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            if (state.busy || (settings == null && state.error == null)) LinearProgressIndicator(Modifier.fillMaxWidth())
-            state.error?.let { Text(it.localizedMessage(), color = MaterialTheme.colorScheme.error) }
-            if (settings == null && state.error != null) {
-                TextButton(onClick = state::retry) { Text(stringResource(R.string.status_loadmore_error_retry)) }
-            }
             if (settings != null) {
                 val globalTitle = stringResource(R.string.proxy_global)
                 SegmentedListItem(
@@ -122,7 +118,6 @@ internal fun ProxySettingsContent(
                 Text(stringResource(R.string.proxy_profiles), style = MaterialTheme.typography.titleSmall)
                 Column(verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap)) {
                     settings.profiles.forEachIndexed { index, profile ->
-                        var showMenu by remember(profile.id) { mutableStateOf(false) }
                         val inUse = settings.global.proxyId == profile.id || settings.accounts.values.any { it.proxyId == profile.id }
                         SegmentedListItem(
                             onClick = { editingId = profile.id },
@@ -130,38 +125,14 @@ internal fun ProxySettingsContent(
                             shapes = ListItemDefaults.segmentedShapes2(index, settings.profiles.size + 1),
                             content = { Text(profile.name) },
                             supportingContent = {
-                                Column {
-                                    Text("${profile.protocol.name} · ${profile.host}:${profile.port}")
-                                    if (inUse) Text(stringResource(R.string.proxy_in_use))
-                                    if (state.isTested(profile)) Text(stringResource(R.string.proxy_test_success))
-                                }
+                                Text("${profile.protocol.name} · ${profile.host}:${profile.port}")
                             },
                             trailingContent = {
-                                Box {
-                                    IconButton(onClick = { showMenu = true }, enabled = !state.busy) {
-                                        FAIcon(
-                                            FontAwesomeIcons.Solid.EllipsisVertical,
-                                            contentDescription = "${stringResource(R.string.more)}: ${profile.name}",
-                                        )
-                                    }
-                                    DropdownMenu(expanded = showMenu, onDismissRequest = { showMenu = false }) {
-                                        DropdownMenuItem(text = { Text(stringResource(R.string.proxy_edit)) }, onClick = {
-                                            showMenu = false
-                                            editingId = profile.id
-                                        })
-                                        DropdownMenuItem(text = { Text(stringResource(R.string.proxy_test)) }, onClick = {
-                                            showMenu = false
-                                            beforeConnect { state.test(profile) }
-                                        })
-                                        DropdownMenuItem(
-                                            text = { Text(stringResource(R.string.proxy_delete)) },
-                                            enabled = !inUse,
-                                            onClick = {
-                                                showMenu = false
-                                                state.remove(profile.id)
-                                            },
-                                        )
-                                    }
+                                IconButton(onClick = { state.remove(profile.id) }, enabled = !state.busy && !inUse) {
+                                    FAIcon(
+                                        FontAwesomeIcons.Solid.Trash,
+                                        contentDescription = "${stringResource(R.string.proxy_delete)}: ${profile.name}",
+                                    )
                                 }
                             },
                         )
@@ -215,14 +186,31 @@ internal fun ProxySettingsContent(
                 ProxyEditor(
                     profile = existing ?: ProxyProfile(id, "", ProxyProtocol.HTTPS, "", 443),
                     isNew = existing == null,
-                    state = state,
+                    stateProvider = editorState,
                     beforeConnect = beforeConnect,
                     onClose = {
-                        state.clearEditorError()
                         editingId = null
                     },
                 )
             }
+        }
+    }
+    state.error?.let { error ->
+        var dismissed by remember(error) { mutableStateOf(false) }
+        if (!dismissed) {
+            AlertDialog(
+                onDismissRequest = { dismissed = true },
+                title = { Text(stringResource(R.string.proxy_title)) },
+                text = { Text(error.localizedMessage()) },
+                confirmButton = {
+                    TextButton(onClick = {
+                        dismissed = true
+                        if (settings == null) state.retry()
+                    }) {
+                        Text(stringResource(if (settings == null) R.string.status_loadmore_error_retry else android.R.string.ok))
+                    }
+                },
+            )
         }
     }
 }
@@ -289,15 +277,21 @@ private fun ProxyFootnote(text: String) {
 private fun ProxyEditor(
     profile: ProxyProfile,
     isNew: Boolean,
-    state: ProxySettingsState,
+    stateProvider: @Composable () -> ProxySettingsState,
     beforeConnect: (() -> Unit) -> Unit,
     onClose: () -> Unit,
 ) {
+    val state = stateProvider()
     val name = rememberTextFieldState(profile.name)
     val host = rememberTextFieldState(profile.host)
     val port = rememberTextFieldState(profile.port.toString())
     var protocol by rememberSaveable { mutableStateOf(profile.protocol) }
     var expanded by remember { mutableStateOf(false) }
+
+    fun close() {
+        state.clearEditorError()
+        onClose()
+    }
 
     fun value() =
         profile.copy(
@@ -308,7 +302,7 @@ private fun ProxyEditor(
                 port.text.toString().toIntOrNull() ?: 0,
         )
     AlertDialog(
-        onDismissRequest = { if (!state.busy) onClose() },
+        onDismissRequest = { if (!state.busy) close() },
         title = { Text(stringResource(if (isNew) R.string.proxy_add else R.string.proxy_edit)) },
         text = {
             Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -363,9 +357,9 @@ private fun ProxyEditor(
             }
         },
         confirmButton = {
-            TextButton(onClick = { state.save(value(), onClose) }, enabled = !state.busy) { Text(stringResource(R.string.proxy_save)) }
+            TextButton(onClick = { state.save(value(), ::close) }, enabled = !state.busy) { Text(stringResource(R.string.proxy_save)) }
         },
-        dismissButton = { TextButton(onClick = onClose, enabled = !state.busy) { Text(stringResource(R.string.proxy_cancel)) } },
+        dismissButton = { TextButton(onClick = ::close, enabled = !state.busy) { Text(stringResource(R.string.proxy_cancel)) } },
     )
 }
 

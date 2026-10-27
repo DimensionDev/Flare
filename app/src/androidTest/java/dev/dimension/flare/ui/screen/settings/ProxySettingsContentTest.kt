@@ -3,12 +3,14 @@ package dev.dimension.flare.ui.screen.settings
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.ComposeUiFlags
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.semantics.ProgressBarRangeInfo
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.assertIsOn
@@ -139,12 +141,52 @@ class ProxySettingsContentTest {
     }
 
     @Test
-    fun referencedProfileCannotBeDeletedFromMenu() {
+    fun referencedProfileKeepsDeletionDisabledWithoutMoreOrInUseText() {
         val state = State(ProxySettings(profiles = listOf(profile), global = ProxyPolicy(ProxyMode.PROXY, profile.id)))
         show(state)
-        compose.onNodeWithContentDescription("More: Office").performScrollTo().performClick()
-        compose.onNodeWithText("Delete").assertIsNotEnabled()
+        compose.onNodeWithContentDescription("More: Office").assertDoesNotExist()
+        compose.onNodeWithText("Reassign global and account settings before deleting this proxy.").assertDoesNotExist()
+        compose.onNodeWithContentDescription("Delete: Office").assertIsNotEnabled()
         compose.runOnIdle { assertNull(state.removed) }
+    }
+
+    @Test
+    fun connectionTestStateOnlyUpdatesTheEditor() {
+        var pageReads = 0
+        val page =
+            object : ProxySettingsState by State() {
+                override val settings: ProxySettings
+                    get() {
+                        pageReads++
+                        return ProxySettings(profiles = listOf(profile))
+                    }
+            }
+        val editor = State()
+        show(page, editor)
+        compose.onNodeWithText("Office").performClick()
+        var initialPageReads = 0
+        compose.runOnIdle {
+            initialPageReads = pageReads
+            editor.busy = true
+        }
+        compose.onNodeWithContentDescription("Global").assertIsEnabled()
+        val progress = hasProgressBarRangeInfo(ProgressBarRangeInfo.Indeterminate)
+        compose.onNode(progress and hasAnyAncestor(isDialog())).assertExists()
+        compose.onNode(progress and !hasAnyAncestor(isDialog())).assertDoesNotExist()
+        compose.runOnIdle {
+            editor.busy = false
+            editor.editorError = ProxySettingsError.REQUEST_FAILED
+        }
+        option("Proxy operation failed. Please try again.").performScrollTo().assertIsDisplayed()
+        compose.runOnIdle {
+            editor.editorError = null
+            editor.tested = profile
+        }
+        compose.onAllNodesWithText("Connection succeeded").assertCountEquals(1)
+        compose.runOnIdle { assertEquals(initialPageReads, pageReads) }
+        compose.onNodeWithText("Cancel").performClick()
+        compose.onNodeWithText("Connection succeeded").assertDoesNotExist()
+        compose.onNode(progress).assertDoesNotExist()
     }
 
     @Test
@@ -197,6 +239,7 @@ class ProxySettingsContentTest {
         state.error = ProxySettingsError.INVALID_POLICY
         show(state)
         compose.onNodeWithText("Select an available proxy policy").assertIsDisplayed()
+        compose.onNodeWithText("OK").performClick()
         compose.onNodeWithText(user.handle.canonical).performScrollTo().assertIsDisplayed()
         compose.onNodeWithText(user.name.raw).assertIsDisplayed()
         compose.onNodeWithContentDescription("Proxy: ${state.accountLabel(state.accounts.first())}").performClick()
@@ -220,14 +263,17 @@ class ProxySettingsContentTest {
                 }
             }
         show(state)
-        compose.onNodeWithText("Proxy operation failed. Please try again.").assertIsDisplayed()
+        option("Proxy operation failed. Please try again.").assertIsDisplayed()
         compose.onNodeWithText("Retry").assertIsDisplayed().performClick()
         compose.onNodeWithText("Add proxy").assertDoesNotExist()
         compose.onNode(hasProgressBarRangeInfo(ProgressBarRangeInfo.Indeterminate)).assertDoesNotExist()
         compose.runOnIdle { assertEquals(1, retries) }
     }
 
-    private fun show(state: ProxySettingsState) {
+    private fun show(
+        state: ProxySettingsState,
+        editorState: ProxySettingsState = state,
+    ) {
         compose.setContent {
             CompositionLocalProvider(
                 LocalGlobalAppearance provides GlobalAppearance(),
@@ -237,6 +283,8 @@ class ProxySettingsContentTest {
                     ProxySettingsContent(state, onBack = {}, beforeConnect = {
                         permissionRequests++
                         pendingPermission = it
+                    }, editorState = {
+                        remember(editorState.busy, editorState.editorError, editorState.tested) { editorState }
                     })
                 }
             }

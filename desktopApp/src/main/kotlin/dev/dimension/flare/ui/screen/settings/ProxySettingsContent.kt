@@ -39,6 +39,7 @@ import dev.dimension.flare.data.model.ProxyProtocol
 import dev.dimension.flare.data.model.ProxySettings
 import dev.dimension.flare.data.model.ProxySettingsError
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ok
 import dev.dimension.flare.proxy_accounts
 import dev.dimension.flare.proxy_add
 import dev.dimension.flare.proxy_cancel
@@ -53,7 +54,6 @@ import dev.dimension.flare.proxy_error_port
 import dev.dimension.flare.proxy_error_request
 import dev.dimension.flare.proxy_global
 import dev.dimension.flare.proxy_host
-import dev.dimension.flare.proxy_in_use
 import dev.dimension.flare.proxy_inherit
 import dev.dimension.flare.proxy_name
 import dev.dimension.flare.proxy_no_auth
@@ -65,6 +65,7 @@ import dev.dimension.flare.proxy_system
 import dev.dimension.flare.proxy_test
 import dev.dimension.flare.proxy_test_hint
 import dev.dimension.flare.proxy_test_success
+import dev.dimension.flare.proxy_title
 import dev.dimension.flare.status_loadmore_error_retry
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.FAIcon
@@ -80,6 +81,8 @@ import io.github.composefluent.component.AccentButton
 import io.github.composefluent.component.Button
 import io.github.composefluent.component.CardExpanderItem
 import io.github.composefluent.component.ComboBox
+import io.github.composefluent.component.ContentDialog
+import io.github.composefluent.component.ContentDialogButton
 import io.github.composefluent.component.FluentDialog
 import io.github.composefluent.component.ProgressBar
 import io.github.composefluent.component.SubtleButton
@@ -95,14 +98,12 @@ internal fun ProxySettingsContent() {
 }
 
 @Composable
-internal fun ProxySettingsContent(state: ProxySettingsState) {
+internal fun ProxySettingsContent(
+    state: ProxySettingsState,
+    editorState: @Composable () -> ProxySettingsState = { remember { ProxySettingsPresenter() }.invoke() },
+) {
     var editing by remember { mutableStateOf<ProxyProfile?>(null) }
     Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        if (state.busy || (state.settings == null && state.error == null)) ProgressBar(Modifier.fillMaxWidth())
-        state.error?.let { Text(it.localizedMessage(), color = FluentTheme.colors.system.critical) }
-        if (state.settings == null && state.error != null) {
-            Button(onClick = state::retry) { Text(stringResource(Res.string.status_loadmore_error_retry)) }
-        }
         state.settings?.let { settings ->
             ProxyPolicyRow(stringResource(Res.string.proxy_global), settings, null, state)
             Header(stringResource(Res.string.proxy_profiles))
@@ -112,11 +113,7 @@ internal fun ProxySettingsContent(state: ProxySettingsState) {
                     icon = null,
                     heading = { Text(profile.name) },
                     caption = {
-                        Column {
-                            Text("${profile.protocol.name} · ${profile.host}:${profile.port}")
-                            if (inUse) Text(stringResource(Res.string.proxy_in_use))
-                            if (state.isTested(profile)) Text(stringResource(Res.string.proxy_test_success))
-                        }
+                        Text("${profile.protocol.name} · ${profile.host}:${profile.port}")
                     },
                     trailing = {
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -146,12 +143,27 @@ internal fun ProxySettingsContent(state: ProxySettingsState) {
             }
             editing?.let { profile ->
                 key(profile.id) {
-                    ProxyEditor(profile, settings.profiles.none { it.id == profile.id }, state, onClose = {
-                        state.clearEditorError()
+                    ProxyEditor(profile, settings.profiles.none { it.id == profile.id }, editorState, onClose = {
                         editing = null
                     })
                 }
             }
+        }
+    }
+    state.error?.let { error ->
+        var dismissed by remember(error) { mutableStateOf(false) }
+        if (!dismissed) {
+            ContentDialog(
+                visible = true,
+                title = stringResource(Res.string.proxy_title),
+                primaryButtonText = stringResource(if (state.settings == null) Res.string.status_loadmore_error_retry else Res.string.ok),
+                closeButtonText = stringResource(Res.string.proxy_cancel),
+                onButtonClick = {
+                    dismissed = true
+                    if (it == ContentDialogButton.Primary && state.settings == null) state.retry()
+                },
+                content = { Text(error.localizedMessage()) },
+            )
         }
     }
 }
@@ -207,14 +219,20 @@ private fun ProxyPolicy.label(settings: ProxySettings): String =
 private fun ProxyEditor(
     profile: ProxyProfile,
     isNew: Boolean,
-    state: ProxySettingsState,
+    stateProvider: @Composable () -> ProxySettingsState,
     onClose: () -> Unit,
 ) {
+    val state = stateProvider()
     val name = rememberTextFieldState(profile.name)
     val host = rememberTextFieldState(profile.host)
     val port = rememberTextFieldState(profile.port.toString())
     var protocol by remember { mutableStateOf(profile.protocol) }
     val scrollState = rememberScrollState()
+
+    fun close() {
+        state.clearEditorError()
+        onClose()
+    }
 
     fun value() =
         profile.copy(
@@ -228,7 +246,7 @@ private fun ProxyEditor(
         Column(
             Modifier.fillMaxWidth().padding(24.dp).onKeyEvent {
                 if (it.key == Key.Escape && it.type == KeyEventType.KeyUp && !state.busy) {
-                    onClose()
+                    close()
                     true
                 } else {
                     false
@@ -303,10 +321,10 @@ private fun ProxyEditor(
             }
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 AccentButton(onClick = {
-                    state.save(value(), onClose)
+                    state.save(value(), ::close)
                 }, disabled = state.busy, modifier = Modifier.weight(1f)) { Text(stringResource(Res.string.proxy_save)) }
                 Button(
-                    onClick = onClose,
+                    onClick = ::close,
                     disabled = state.busy,
                     modifier = Modifier.weight(1f),
                 ) { Text(stringResource(Res.string.proxy_cancel)) }

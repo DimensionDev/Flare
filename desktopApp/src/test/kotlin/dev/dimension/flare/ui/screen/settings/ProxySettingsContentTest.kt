@@ -7,6 +7,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.key.Key
@@ -114,10 +115,49 @@ class ProxySettingsContentTest {
     fun referencedProxyCannotBeDeleted() {
         val state = State(ProxySettings(profiles = listOf(profile), global = ProxyPolicy(ProxyMode.PROXY, profile.id)))
         show(state)
+        compose.onNodeWithText("Reassign global and account settings before deleting this proxy.").assertDoesNotExist()
         compose.onNodeWithContentDescription("Delete").assertIsNotEnabled()
         compose.runOnIdle { state.settings = state.settings.copy(global = ProxyPolicy(ProxyMode.DIRECT)) }
         compose.onNodeWithContentDescription("Delete").assertIsEnabled().performClick()
         compose.runOnIdle { assertEquals(profile.id, state.removed) }
+    }
+
+    @Test
+    fun connectionTestStateOnlyUpdatesTheEditor() {
+        var pageReads = 0
+        val page =
+            object : ProxySettingsState by State() {
+                override val settings: ProxySettings
+                    get() {
+                        pageReads++
+                        return ProxySettings(profiles = listOf(profile))
+                    }
+            }
+        val editor = State()
+        show(page, editor)
+        compose.onNodeWithText("Edit proxy").performClick()
+        var initialPageReads = 0
+        compose.runOnIdle {
+            initialPageReads = pageReads
+            editor.busy = true
+        }
+        compose.onNodeWithContentDescription("Global").assertIsEnabled()
+        compose.onNodeWithText("Save").assertIsNotEnabled()
+        compose.onNodeWithText("Cancel").assertIsNotEnabled()
+        compose.runOnIdle {
+            editor.busy = false
+            editor.editorError = ProxySettingsError.REQUEST_FAILED
+        }
+        compose.onAllNodesWithText("Proxy operation failed. Please try again.").assertCountEquals(1)
+        compose.runOnIdle {
+            editor.editorError = null
+            editor.tested = profile
+        }
+        compose.onAllNodesWithText("Connection succeeded").assertCountEquals(1)
+        compose.runOnIdle { assertEquals(initialPageReads, pageReads) }
+        compose.onNodeWithText("Cancel").performClick()
+        compose.onNodeWithText("Connection succeeded").assertDoesNotExist()
+        compose.onNode(hasProgressBarRangeInfo(ProgressBarRangeInfo.Indeterminate)).assertDoesNotExist()
     }
 
     @Test
@@ -152,6 +192,7 @@ class ProxySettingsContentTest {
         state.error = ProxySettingsError.INVALID_POLICY
         show(state)
         compose.onNodeWithText("Select an available proxy policy").assertIsDisplayed()
+        compose.onNodeWithText("OK").performClick()
         compose.onNodeWithText(user.handle.canonical).performScrollTo().assertIsDisplayed()
         compose.onNodeWithText(user.name.raw).assertIsDisplayed()
         compose.onNodeWithContentDescription(state.accountLabel(state.accounts.first())).performClick()
@@ -179,12 +220,17 @@ class ProxySettingsContentTest {
         compose.runOnIdle { assertEquals(1, retries) }
     }
 
-    private fun show(state: ProxySettingsState) {
+    private fun show(
+        state: ProxySettingsState,
+        editorState: ProxySettingsState = state,
+    ) {
         compose.setContent {
             FlareTheme(isDarkTheme = false) {
                 Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
                     CompositionLocalProvider(LocalTimelineAppearance provides TimelineAppearance()) {
-                        ProxySettingsContent(state)
+                        ProxySettingsContent(state, editorState = {
+                            remember(editorState.busy, editorState.editorError, editorState.tested) { editorState }
+                        })
                     }
                 }
             }

@@ -4,6 +4,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.core.DataStoreFactory
 import androidx.datastore.core.okio.OkioSerializer
 import dev.dimension.flare.common.protobufSerializer
+import dev.dimension.flare.data.datastore.model.AccountSelectionPreferences
 import dev.dimension.flare.data.datastore.model.AppSettings
 import dev.dimension.flare.data.datastore.model.ComposeConfigData
 import dev.dimension.flare.data.datastore.model.FlareConfig
@@ -18,6 +19,14 @@ internal class AppDataStore(
 ) {
     val homeTimelinePreferences by lazy {
         createDataStore("home_timeline_preferences.pb", protobufSerializer(HomeTimelinePreferences()))
+    }
+
+    val notificationPreferences by lazy {
+        createDataStore("notification_preferences.pb", protobufSerializer(AccountSelectionPreferences()))
+    }
+
+    val discoverPreferences by lazy {
+        createDataStore("discover_preferences.pb", protobufSerializer(AccountSelectionPreferences()))
     }
 
     val flareDataStore: DataStore<FlareConfig> by lazy {

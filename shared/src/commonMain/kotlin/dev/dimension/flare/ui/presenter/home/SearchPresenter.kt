@@ -5,8 +5,11 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.paging.Pager
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
@@ -44,6 +47,26 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
+import kotlin.native.HiddenFromObjC
+
+@HiddenFromObjC
+@Composable
+public fun rememberDiscoverSearchState(
+    accountType: AccountType,
+    isAccountReady: Boolean,
+): SearchState {
+    var committedQuery by remember { mutableStateOf("") }
+    val state =
+        key(accountType, isAccountReady) {
+            remember { SearchPresenter(accountType, if (isAccountReady) committedQuery else "") }.body()
+        }
+    return object : SearchState by state {
+        override fun search(query: String) {
+            committedQuery = query
+            if (isAccountReady) state.search(query)
+        }
+    }
+}
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @WebPresenter("search")

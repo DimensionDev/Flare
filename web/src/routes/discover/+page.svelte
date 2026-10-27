@@ -37,23 +37,18 @@
 	const isSearching = $derived(submittedQuery.trim().length > 0);
 	const accountKey = $derived(accountTypeKey(discover.selectedAccountType));
 	const search = useReactiveRetainedPresenter(
-		() => `discover:search:${accountKey}`,
-		() => createSearchPresenterController(discover.selectedAccountType, submittedQuery),
+		() => !discover.isAccountReady ? 'discover:search:restoring' : `discover:search:${accountKey}:${submittedQuery}`,
+		() => createSearchPresenterController(discover.selectedAccountType, !discover.isAccountReady ? '' : submittedQuery),
 		{ ttlMs: 0 }
 	);
 	const accounts = $derived(discover.accounts.type === 'Success' ? discover.accounts.data : []);
-	const hasMultipleAccounts = $derived(accounts.length > 1);
+	const canSwitchAccount = $derived(discover.canSwitchAccount);
 
-	$effect(() => {
-		if (!isSearching) return;
-		search.search(submittedQuery);
-	});
 
 	function submitSearch(): void {
 		const next = query.trim();
 		submittedQuery = next;
-		if (next) {
-			search.search(next);
+		if (next && discover.isAccountReady) {
 			void goto(searchUrl(next));
 		}
 	}
@@ -69,9 +64,9 @@
 	}
 
 	function searchHashtag(hashtag: UiHashtag): void {
+		if (!discover.isAccountReady) return;
 		query = hashtag.searchContent;
 		submittedQuery = hashtag.searchContent;
-		search.search(hashtag.searchContent);
 		void goto(searchUrl(hashtag.searchContent));
 	}
 
@@ -179,19 +174,23 @@
 		{/snippet}
 
 		{#snippet end()}
-			{#if discover.selectedAccount}
+			{#if discover.selectedAccount || canSwitchAccount}
 				<div class="dropdown dropdown-end account-dropdown">
 					<button
 						class="btn btn-ghost btn-square btn-sm rounded-box"
 						type="button"
-						aria-label={discover.selectedAccount.handle.canonical}
+						aria-label={discover.selectedAccount?.handle.canonical ?? m.homeTabDiscoverTitle()}
 						onclick={() => {
 							showAccountMenu = !showAccountMenu;
 						}}
 					>
-						<img class="account-avatar" src={discover.selectedAccount.avatar?.url} alt="" />
+						{#if discover.selectedAccount}
+							<img class="account-avatar" src={discover.selectedAccount.avatar?.url} alt="" />
+						{:else}
+							<FaIcon name="Profile" size={20} />
+						{/if}
 					</button>
-					{#if showAccountMenu && hasMultipleAccounts}
+					{#if showAccountMenu && canSwitchAccount}
 						<ul class="menu dropdown-content z-20 mt-2 w-64 rounded-box border border-base-300 bg-base-100 p-2 shadow-lg">
 							{#each accounts as account (account.key.host + ':' + account.key.id)}
 								<li>
@@ -215,12 +214,12 @@
 	</AppTopBar>
 
 	<section class="discover-content">
-		{#if hasMultipleAccounts}
+		{#if canSwitchAccount}
 			<div class="account-chips">
 				{#each accounts as account (account.key.host + ':' + account.key.id)}
 					<button
-						class:btn-primary={discover.selectedAccount?.key.id === account.key.id && discover.selectedAccount?.key.host === account.key.host}
-						class:btn-outline={discover.selectedAccount?.key.id !== account.key.id || discover.selectedAccount?.key.host !== account.key.host}
+						class:btn-primary={discover.selectedAccountKey?.id === account.key.id && discover.selectedAccountKey?.host === account.key.host}
+						class:btn-outline={discover.selectedAccountKey?.id !== account.key.id || discover.selectedAccountKey?.host !== account.key.host}
 						class="btn btn-sm rounded-box"
 						type="button"
 						onclick={() => selectAccount(account)}

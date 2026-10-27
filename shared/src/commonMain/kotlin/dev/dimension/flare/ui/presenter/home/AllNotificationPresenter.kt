@@ -15,6 +15,8 @@ import dev.dimension.flare.data.datasource.microblog.NotificationTimelineDataSou
 import dev.dimension.flare.data.datasource.microblog.datasource.NotificationDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.UserDataSource
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
+import dev.dimension.flare.data.datasource.microblog.paging.notSupported
+import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceFlow
 import dev.dimension.flare.data.repository.allAccountServicesFlow
@@ -35,12 +37,12 @@ import dev.dimension.flare.web.shared.WebIgnore
 import dev.dimension.flare.web.shared.WebPresenter
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
@@ -105,7 +107,14 @@ internal fun notificationAccountsFlow(accountRepository: AccountRepository): Flo
 @WebPresenter("notifications")
 public class AllNotificationPresenter : PresenterBase<AllNotificationPresenter.State>() {
     private val accountRepository: AccountRepository by koinInject()
-    private val selectedAccountFlow = MutableStateFlow<UiProfile?>(null)
+    private val appDataStore: AppDataStore by koinInject()
+    private val appScope: CoroutineScope by koinInject()
+    private val accountSelection by lazy {
+        RememberedAccountSelection(appDataStore.notificationPreferences, appScope, accountRepository.accountMutationMutex) {
+            accountRepository.find(it) !=
+                null
+        }
+    }
     private val selectedNotificationFilterFlow = MutableStateFlow<NotificationFilter?>(null)
 
     @androidx.compose.runtime.Immutable
@@ -115,7 +124,9 @@ public class AllNotificationPresenter : PresenterBase<AllNotificationPresenter.S
         public val timeline: PagingState<UiTimelineV2>
         public val selectedFilter: NotificationFilter?
         public val selectedAccount: UiProfile?
+        public val selectedAccountKey: MicroBlogKey?
         public val selectedAccountIndex: Int
+        public val canSwitchAccount: Boolean
 
         @WebIgnore
         public fun setAccount(profile: UiProfile)
@@ -131,16 +142,28 @@ public class AllNotificationPresenter : PresenterBase<AllNotificationPresenter.S
         notificationAccountsFlow(accountRepository)
     }
 
+    private val notificationAccountKeysFlow by lazy {
+        allAccountServicesFlow(accountRepository)
+            .map { sources ->
+                sources
+                    .filterIsInstance<NotificationTimelineDataSource>()
+                    .filter { it is UserDataSource }
+                    .map { it.accountKey }
+            }.distinctUntilChanged()
+    }
+
     @OptIn(ExperimentalCoroutinesApi::class)
     private val notificationFiltersFlow by lazy {
-        selectedAccountFlow
-            .filterNotNull()
-            .distinctUntilChanged()
-            .flatMapLatest {
-                accountServiceFlow(AccountType.Specific(it.key), accountRepository)
-            }.map {
-                require(it is NotificationTimelineDataSource)
-                it.supportedNotificationFilter.toImmutableList()
+        accountSelection.selectedAccountKey
+            .flatMapLatest { accountKey ->
+                if (accountKey == null) {
+                    flowOf(emptyList<NotificationFilter>().toImmutableList())
+                } else {
+                    accountServiceFlow(AccountType.Specific(accountKey), accountRepository).map {
+                        require(it is NotificationTimelineDataSource)
+                        it.supportedNotificationFilter.toImmutableList()
+                    }
+                }
             }.distinctUntilChanged()
     }
 
@@ -148,18 +171,24 @@ public class AllNotificationPresenter : PresenterBase<AllNotificationPresenter.S
     private val timelinePresenter by lazy {
         object : TimelinePresenter() {
             override val loader: Flow<RemoteLoader<UiTimelineV2>> by lazy {
-                combine(
-                    selectedNotificationFilterFlow.filterNotNull(),
-                    selectedAccountFlow.filterNotNull(),
-                ) { filter, profile -> filter to profile.key }
-                    .distinctUntilChanged()
-                    .flatMapLatest { (filter, accountKey) ->
+                accountSelection.selectedAccountKey.flatMapLatest { accountKey ->
+                    if (accountKey == null) {
+                        flowOf(notSupported())
+                    } else {
                         accountServiceFlow(AccountType.Specific(accountKey), accountRepository)
-                            .map {
-                                require(it is NotificationTimelineDataSource)
-                                it.notification(filter)
+                            .flatMapLatest { source ->
+                                require(source is NotificationTimelineDataSource)
+                                selectedNotificationFilterFlow
+                                    .map { filter ->
+                                        filter?.takeIf { it in source.supportedNotificationFilter }
+                                            ?: source.supportedNotificationFilter.firstOrNull()
+                                    }.distinctUntilChanged()
+                                    .map { filter ->
+                                        filter?.let(source::notification) ?: notSupported()
+                                    }
                             }.distinctUntilChanged()
                     }
+                }
             }
         }
     }
@@ -168,15 +197,11 @@ public class AllNotificationPresenter : PresenterBase<AllNotificationPresenter.S
     @Composable
     override fun body(): State {
         val notifications by accountsNotificationFlow.collectAsState(emptyList<NotificationAccountItem>().toImmutableList())
-        val selectedAccount by selectedAccountFlow.collectAsState()
+        val selectedAccountKey by accountSelection.selectedAccountKey.collectAsState(null)
+        val selectedAccount = notifications.firstOrNull { it.profile.key == selectedAccountKey }?.profile
         val selectedAccountIndex by remember {
             derivedStateOf {
-                val maxIndex = (notifications.size - 1).coerceAtLeast(0)
-                selectedAccount?.let { profile ->
-                    notifications
-                        .indexOfFirst { it.profile.key == profile.key }
-                        .coerceIn(0, maxIndex)
-                } ?: 0
+                notifications.indexOfFirst { it.profile.key == selectedAccountKey }
             }
         }
         val selectedNotificationFilter by selectedNotificationFilterFlow.collectAsState()
@@ -188,11 +213,11 @@ public class AllNotificationPresenter : PresenterBase<AllNotificationPresenter.S
             }
         }
 
-        LaunchedEffect(notifications) {
-            val current = selectedAccountFlow.value
-            if (current == null || notifications.none { it.profile.key == current.key }) {
-                selectedAccountFlow.value = notifications.firstOrNull()?.profile
-            }
+        LaunchedEffect(Unit) {
+            accountSelection.restore()
+        }
+        LaunchedEffect(Unit) {
+            notificationAccountKeysFlow.collect(accountSelection::updateAccounts)
         }
 
         val listState = timelinePresenter.body().listState
@@ -203,16 +228,16 @@ public class AllNotificationPresenter : PresenterBase<AllNotificationPresenter.S
             override val timeline = listState
             override val selectedFilter = selectedNotificationFilter
             override val selectedAccount = selectedAccount
+            override val selectedAccountKey = selectedAccountKey
             override val selectedAccountIndex = selectedAccountIndex
+            override val canSwitchAccount = notifications.any { it.profile.key != selectedAccountKey }
 
             override fun setAccount(profile: UiProfile) {
-                selectedAccountFlow.value = profile
+                setAccountKey(profile.key)
             }
 
             override fun setAccountKey(key: MicroBlogKey) {
-                notifications.firstOrNull { it.profile.key == key }?.let {
-                    selectedAccountFlow.value = it.profile
-                }
+                accountSelection.selectAccount(key)
             }
 
             override fun setFilter(filter: NotificationFilter) {

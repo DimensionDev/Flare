@@ -439,7 +439,6 @@
     <string name="timeline_load_missing_posts">加载缺失的内容</string>
     <string name="timeline_loading_missing_posts">正在加载缺失的内容…</string>
     <string name="timeline_retry_missing_posts">加载失败，点击重试。</string>
-    <string name="share_replies_partial">部分回复</string>
     <string name="share_replies_empty">暂无可选回复</string>
     <string name="share_replies_failed">回复加载失败，已保留当前选择。</string>
     <string name="share_replies_more">加载更多回复</string>

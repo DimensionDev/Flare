@@ -18,9 +18,6 @@ public struct StatusShareContent: View {
             TimelineView(data: data, detailStatusKey: statusKey, showTranslate: false)
             if !replies.isEmpty {
                 Divider()
-                Text("share_replies_partial", bundle: FlareAppleUILocalization.bundle)
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
                 ForEach(Array(replies.enumerated()), id: \.element.statusKey) { index, reply in
                     if index > 0 { Divider() }
                     TimelineView(data: reply, detailStatusKey: nil, showTranslate: false)
@@ -103,7 +100,8 @@ public struct StatusShareReplyPicker: View {
                 }
             }
             if state.loading {
-                ProgressView().frame(maxWidth: .infinity)
+                TimelinePlaceholderView()
+                    .padding(.vertical, 8)
             } else if state.error != nil {
                 Text("share_replies_failed", bundle: FlareAppleUILocalization.bundle)
                 Button { state.loadMore() } label: {
@@ -113,6 +111,7 @@ public struct StatusShareReplyPicker: View {
                 Button { state.loadMore() } label: {
                     Text("share_replies_more", bundle: FlareAppleUILocalization.bundle)
                 }
+                .frame(maxWidth: .infinity, alignment: .center)
             } else if state.replies.isEmpty {
                 Text("share_replies_empty", bundle: FlareAppleUILocalization.bundle)
                     .foregroundStyle(.secondary)

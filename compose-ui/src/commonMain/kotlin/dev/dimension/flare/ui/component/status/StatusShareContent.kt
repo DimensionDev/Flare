@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.semantics.Role
@@ -24,14 +25,12 @@ import dev.dimension.flare.compose.ui.share_replies_children
 import dev.dimension.flare.compose.ui.share_replies_empty
 import dev.dimension.flare.compose.ui.share_replies_failed
 import dev.dimension.flare.compose.ui.share_replies_more
-import dev.dimension.flare.compose.ui.share_replies_partial
 import dev.dimension.flare.compose.ui.share_replies_retry
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.HorizontalDivider
 import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.platform.PlatformButton
 import dev.dimension.flare.ui.component.platform.PlatformCheckbox
-import dev.dimension.flare.ui.component.platform.PlatformCircularProgressIndicator
 import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.component.platform.PlatformTextButton
 import dev.dimension.flare.ui.component.platform.PlatformTextStyle
@@ -51,7 +50,6 @@ public fun StatusShareContent(
             StatusItem(item = status, detailStatusKey = statusKey)
             if (replies.isNotEmpty()) {
                 HorizontalDivider()
-                PlatformText(stringResource(Res.string.share_replies_partial), Modifier.padding(16.dp))
                 replies.forEachIndexed { index, reply ->
                     if (index > 0) HorizontalDivider()
                     CompositionLocalProvider(
@@ -102,7 +100,7 @@ public fun StatusShareReplyList(
             item {
                 when {
                     state.loading -> {
-                        PlatformCircularProgressIndicator(Modifier.padding(16.dp))
+                        StatusItem(item = null)
                     }
 
                     state.error != null -> {
@@ -113,7 +111,9 @@ public fun StatusShareReplyList(
                     }
 
                     state.hasMore -> {
-                        PlatformButton(onClick = state::loadMore) { PlatformText(stringResource(Res.string.share_replies_more)) }
+                        Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                            PlatformButton(onClick = state::loadMore) { PlatformText(stringResource(Res.string.share_replies_more)) }
+                        }
                     }
 
                     state.replies.isEmpty() -> {

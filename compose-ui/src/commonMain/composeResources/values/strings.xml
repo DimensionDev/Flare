@@ -581,7 +581,6 @@
     <string name="timeline_load_missing_posts">Load missing posts</string>
     <string name="timeline_loading_missing_posts">Loading missing posts…</string>
     <string name="timeline_retry_missing_posts">Could not load posts. Tap to retry.</string>
-    <string name="share_replies_partial">Selected replies</string>
     <string name="share_replies_empty">No replies available</string>
     <string name="share_replies_failed">Unable to load replies. Your selection is saved.</string>
     <string name="share_replies_more">Load more replies</string>

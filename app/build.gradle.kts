@@ -39,6 +39,8 @@ kotlin {
 }
 
 android {
+    testOptions.unitTests.isIncludeAndroidResources = true
+
     val fdroid = rootProject.file("fdroid.properties")
     val fdroidProp = Properties()
     fdroidProp.load(fdroid.inputStream())
@@ -173,12 +175,26 @@ dependencies {
     testImplementation(libs.junit)
     testImplementation(libs.robolectric)
     testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.ui.test.junit4)
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.espresso.core)
     androidTestImplementation(platform(libs.compose.bom))
     androidTestImplementation(libs.ui.test.junit4)
     debugImplementation(libs.ui.tooling)
     debugImplementation(libs.ui.test.manifest)
+}
+
+tasks.withType<Test>().configureEach {
+    val sqliteNative = project(":shared").tasks.matching { it.name == "extractSqliteBundledJvmNative" }
+    dependsOn(sqliteNative)
+    doFirst {
+        // Robolectric uses the host SQLite library instead of the Android binary.
+        sqliteNative.forEach { extraction ->
+            val library = extraction.outputs.files.asFileTree.single()
+            systemProperty("androidx.sqlite.driver.bundled.path", library.parent)
+            systemProperty("androidx.sqlite.driver.bundled.name", library.name)
+        }
+    }
 }
 
 // START Non-FOSS component

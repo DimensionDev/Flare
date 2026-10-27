@@ -65,10 +65,11 @@ public class ProxySettingsPresenter : PresenterBase<ProxySettingsState>() {
 
         fun action(
             fromEditor: Boolean = false,
+            showBusy: Boolean = true,
             block: suspend () -> Unit,
         ) {
             if (busy) return
-            busy = true
+            if (showBusy) busy = true
             error = null
             editorErrorMessage = null
             tested = null
@@ -82,7 +83,7 @@ public class ProxySettingsPresenter : PresenterBase<ProxySettingsState>() {
                     val message = (exception as? ProxySettingsException)?.reason ?: ProxySettingsError.REQUEST_FAILED
                     if (fromEditor) editorErrorMessage = message else error = message
                 } finally {
-                    busy = false
+                    if (showBusy) busy = false
                 }
             }
         }
@@ -102,7 +103,7 @@ public class ProxySettingsPresenter : PresenterBase<ProxySettingsState>() {
             override fun select(
                 accountKey: MicroBlogKey?,
                 policy: ProxyPolicy,
-            ) = action {
+            ) = action(showBusy = false) {
                 if (accountKey == null) repository.selectGlobal(policy) else repository.selectAccount(accountKey, policy)
             }
 

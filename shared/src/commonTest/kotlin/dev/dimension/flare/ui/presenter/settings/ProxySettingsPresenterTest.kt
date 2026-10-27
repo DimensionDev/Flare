@@ -1,5 +1,6 @@
 package dev.dimension.flare.ui.presenter.settings
 
+import androidx.datastore.core.DataStore
 import androidx.room3.Room
 import app.cash.molecule.RecompositionMode
 import app.cash.molecule.moleculeFlow
@@ -15,6 +16,7 @@ import dev.dimension.flare.data.model.ProxyMode
 import dev.dimension.flare.data.model.ProxyPolicy
 import dev.dimension.flare.data.model.ProxyProfile
 import dev.dimension.flare.data.model.ProxyProtocol
+import dev.dimension.flare.data.model.ProxySettings
 import dev.dimension.flare.data.model.ProxySettingsError
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.ProxyRepository
@@ -22,18 +24,22 @@ import dev.dimension.flare.deleteTestRootPath
 import dev.dimension.flare.di.startKoin
 import dev.dimension.flare.di.testSingle
 import dev.dimension.flare.memoryDatabaseBuilder
+import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.testPlatformRegistry
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
 import kotlin.test.Test
@@ -42,7 +48,7 @@ import kotlin.test.assertNull
 
 class ProxySettingsPresenterTest : RobolectricTest() {
     @Test
-    fun editorFailuresStaySeparateFromPageActions() =
+    fun policySelectionKeepsPageInteractiveAndEditorFailuresStayLocal() =
         runTest {
             val root = createTestRootPath()
             val storage = OkioFileStorage(createTestFileSystem(), root)
@@ -59,7 +65,24 @@ class ProxySettingsPresenterTest : RobolectricTest() {
                     .setQueryCoroutineContext(Dispatchers.Unconfined)
                     .build()
             val scope = CoroutineScope(SupervisorJob() + Dispatchers.Unconfined)
-            val proxy = ProxyRepository(storage)
+            val settings = MutableStateFlow(ProxySettings())
+            val pauseWrites = MutableStateFlow(false)
+            val writes = Channel<CompletableDeferred<Unit>>(Channel.UNLIMITED)
+            val proxy =
+                ProxyRepository(
+                    object : DataStore<ProxySettings> {
+                        override val data = settings
+
+                        override suspend fun updateData(transform: suspend (ProxySettings) -> ProxySettings): ProxySettings {
+                            if (pauseWrites.value) {
+                                val release = CompletableDeferred<Unit>()
+                                writes.send(release)
+                                release.await()
+                            }
+                            return transform(settings.value).also { settings.value = it }
+                        }
+                    },
+                )
             val accounts = AccountRepository(app, scope, AppDataStore(storage), cache, proxy, testPlatformRegistry())
             startKoin {
                 modules(
@@ -78,6 +101,20 @@ class ProxySettingsPresenterTest : RobolectricTest() {
             try {
                 withContext(Dispatchers.Default) {
                     val states = models.filterNotNull()
+                    pauseWrites.value = true
+                    for (account in listOf(null, MicroBlogKey("alice", "example.social"))) {
+                        states.first { it.settings != null }.select(account, ProxyPolicy(ProxyMode.DIRECT))
+                        val release = writes.receive()
+                        val disabledPage =
+                            try {
+                                withTimeoutOrNull(200) { states.first { it.busy } }
+                            } finally {
+                                release.complete(Unit)
+                            }
+                        states.first { !it.busy && it.settings?.policy(account)?.mode == ProxyMode.DIRECT }
+                        assertNull(disabledPage, "Changing one proxy policy must not disable the whole settings list")
+                    }
+                    pauseWrites.value = false
                     val invalid = ProxyProfile("draft", "", ProxyProtocol.HTTPS, "", 443)
                     states.first { it.settings != null }.save(invalid) { error("Invalid draft must not be saved") }
                     val saveFailure = states.first { !it.busy && it.editorError != null }

@@ -317,6 +317,14 @@ class OpenAIServiceTest {
         assertEquals("0.2", body["temperature"]?.jsonPrimitive?.content)
     }
 
+    @Test
+    fun buildChatCompletionBody_preservesExtendedEffortsAndOmitsDefault() {
+        for (effort in listOf("", "none", "minimal", "xhigh", "max")) {
+            val body = service.buildChatCompletionBody(openAIConfig(reasoningEffort = effort), "Hello")
+            assertEquals(effort.takeIf { it.isNotEmpty() }, body["reasoning_effort"]?.jsonPrimitive?.content)
+        }
+    }
+
     private fun openAIConfig(
         model: String = "test-model",
         reasoningEffort: String = "",

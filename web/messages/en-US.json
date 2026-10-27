@@ -439,9 +439,13 @@
   "settingsAiReasoningEffort": "Reasoning",
   "settingsAiReasoningEffortDescription": "Choose how much extra reasoning the model uses. Default follows the provider's setting.",
   "settingsAiReasoningDefault": "Default",
+  "settingsAiReasoningNone": "None",
+  "settingsAiReasoningMinimal": "Minimal",
   "settingsAiReasoningLow": "Low",
   "settingsAiReasoningMedium": "Medium",
   "settingsAiReasoningHigh": "High",
+  "settingsAiReasoningXHigh": "Extra High",
+  "settingsAiReasoningMax": "Maximum",
   "settingsAiExtraBody": "Extra Body",
   "settingsAiFeatures": "AI",
   "settingsAiTldr": "Enable AI summaries",
@@ -544,5 +548,11 @@
   "secondaryFooterVersion": "Version {version}",
   "rssOpenModeChecking": "Checking the best opening mode…",
   "rssOpenModeRecommended": "Recommended from recent articles. You can change this.",
-  "rssOpenModeUnknown": "Could not recommend an opening mode. You can choose one."
+  "rssOpenModeUnknown": "Could not recommend an opening mode. You can choose one.",
+  "settingsAiBasicTitle": "Translation and summaries",
+  "settingsAiAgentTitle": "AI Agent",
+  "settingsAiUseShared": "Use translation and summary AI settings",
+  "settingsAiUseSharedDescription": "Turn off to configure a separate server, model and reasoning settings for the Agent.",
+  "settingsAiAgentEnabled": "Enable AI Agent",
+  "settingsAiAgentDescription": "Show AI Agent entry points when a compatible model is configured."
 }

@@ -300,9 +300,13 @@
     <string name="settings_ai_config_reasoning_effort">Reasoning Effort</string>
     <string name="settings_ai_config_reasoning_effort_description">Choose how much extra reasoning the model uses. Default follows the provider\'s setting.</string>
     <string name="settings_ai_config_reasoning_effort_default">Default</string>
+    <string name="settings_ai_config_reasoning_effort_none">None</string>
+    <string name="settings_ai_config_reasoning_effort_minimal">Minimal</string>
     <string name="settings_ai_config_reasoning_effort_low">Low</string>
     <string name="settings_ai_config_reasoning_effort_medium">Medium</string>
     <string name="settings_ai_config_reasoning_effort_high">High</string>
+    <string name="settings_ai_config_reasoning_effort_xhigh">Extra High</string>
+    <string name="settings_ai_config_reasoning_effort_max">Maximum</string>
     <string name="settings_ai_config_extra_body">Extra Body</string>
     <string name="settings_ai_config_translate_prompt">Translation Prompt</string>
     <string name="settings_ai_config_tldr_prompt">Summary Prompt</string>
@@ -742,4 +746,8 @@
     <string name="share_replies_cancel">Cancel</string>
     <string name="share_replies_clear">Clear</string>
     <string name="share_replies_done">Done</string>
+    <string name="settings_ai_config_basic_title">Translation and summaries</string>
+    <string name="settings_ai_config_agent_title">AI Agent</string>
+    <string name="settings_ai_config_use_shared">Use translation and summary AI settings</string>
+    <string name="settings_ai_config_use_shared_description">Turn off to configure a separate server, model and reasoning settings for the Agent.</string>
 </resources>

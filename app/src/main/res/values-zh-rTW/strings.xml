@@ -119,9 +119,13 @@
     <string name="settings_ai_config_reasoning_effort">推理程度</string>
     <string name="settings_ai_config_reasoning_effort_description">選擇模型使用的額外推理量。預設遵循供應商的設定。</string>
     <string name="settings_ai_config_reasoning_effort_default">預設</string>
+    <string name="settings_ai_config_reasoning_effort_none">關閉</string>
+    <string name="settings_ai_config_reasoning_effort_minimal">最低</string>
     <string name="settings_ai_config_reasoning_effort_low">低</string>
     <string name="settings_ai_config_reasoning_effort_medium">中</string>
     <string name="settings_ai_config_reasoning_effort_high">高</string>
+    <string name="settings_ai_config_reasoning_effort_xhigh">極高</string>
+    <string name="settings_ai_config_reasoning_effort_max">最高</string>
     <string name="settings_ai_config_extra_body">額外 Body</string>
     <string name="settings_ai_config_tap_to_edit">點擊以編輯</string>
     <string name="settings_ai_config_entable_translation">啟用 AI 翻譯</string>
@@ -760,4 +764,8 @@
 <string name="ugoira_resolution_unsupported">此裝置無法匯出原始尺寸。是否匯出最長邊不超過 1920 像素的影片？</string>
 <string name="ugoira_export_smaller">匯出較小尺寸的 MP4</string>
 <string name="ugoira_export_progress">正在儲存 MP4：%1$d%%</string>
+    <string name="settings_ai_config_basic_title">翻譯與摘要</string>
+    <string name="settings_ai_config_agent_title">AI Agent</string>
+    <string name="settings_ai_config_use_shared">使用翻譯與摘要的 AI 設定</string>
+    <string name="settings_ai_config_use_shared_description">關閉後，可為 Agent 單獨設定伺服器、模型和推理參數。</string>
 </resources>

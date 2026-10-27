@@ -192,9 +192,13 @@
     <string name="settings_ai_config_reasoning_effort">推理程度</string>
     <string name="settings_ai_config_reasoning_effort_description">選擇模型使用的額外推理程度。預設遵循供應商的設定。</string>
     <string name="settings_ai_config_reasoning_effort_default">預設</string>
+    <string name="settings_ai_config_reasoning_effort_none">關閉</string>
+    <string name="settings_ai_config_reasoning_effort_minimal">最低</string>
     <string name="settings_ai_config_reasoning_effort_low">低</string>
     <string name="settings_ai_config_reasoning_effort_medium">中</string>
     <string name="settings_ai_config_reasoning_effort_high">高</string>
+    <string name="settings_ai_config_reasoning_effort_xhigh">極高</string>
+    <string name="settings_ai_config_reasoning_effort_max">最高</string>
     <string name="settings_ai_config_extra_body">額外請求體</string>
     <string name="settings_ai_config_translate_prompt">翻譯提示詞</string>
     <string name="settings_ai_config_tldr_prompt">摘要提示詞</string>
@@ -678,4 +682,8 @@
     <string name="settings_translation_prefer_platform_description">自動翻譯時，若有平台提供的翻譯則使用該翻譯。</string>
     <string name="settings_translation_show_original_with_translation">同時顯示原文和翻譯</string>
     <string name="settings_translation_show_original_with_translation_description">在翻譯前顯示原始文字</string>
+    <string name="settings_ai_config_basic_title">翻譯與摘要</string>
+    <string name="settings_ai_config_agent_title">AI Agent</string>
+    <string name="settings_ai_config_use_shared">使用翻譯與摘要的 AI 設定</string>
+    <string name="settings_ai_config_use_shared_description">關閉後，可為 Agent 單獨設定伺服器、模型和推理參數。</string>
 </resources>

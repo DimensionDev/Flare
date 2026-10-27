@@ -439,9 +439,13 @@
   "settingsAiReasoningEffort": "推理强度",
   "settingsAiReasoningEffortDescription": "选择模型使用的额外推理量。默认遵循提供商设置。",
   "settingsAiReasoningDefault": "默认",
+  "settingsAiReasoningNone": "关闭",
+  "settingsAiReasoningMinimal": "最低",
   "settingsAiReasoningLow": "低",
   "settingsAiReasoningMedium": "中",
   "settingsAiReasoningHigh": "高",
+  "settingsAiReasoningXHigh": "极高",
+  "settingsAiReasoningMax": "最高",
   "settingsAiExtraBody": "额外请求体 (Extra Body)",
   "settingsAiFeatures": "功能",
   "settingsAiTldr": "启用 AI 摘要",
@@ -544,5 +548,11 @@
   "secondaryFooterVersion": "版本 {version}",
   "rssOpenModeChecking": "正在推荐打开方式…",
   "rssOpenModeRecommended": "已根据最近文章推荐，可随时修改。",
-  "rssOpenModeUnknown": "暂时无法推荐打开方式，你可以手动选择。"
+  "rssOpenModeUnknown": "暂时无法推荐打开方式，你可以手动选择。",
+  "settingsAiBasicTitle": "翻译与摘要",
+  "settingsAiAgentTitle": "AI Agent",
+  "settingsAiUseShared": "使用翻译与摘要的 AI 设置",
+  "settingsAiUseSharedDescription": "关闭后，可为 Agent 单独设置服务器、模型和推理参数。",
+  "settingsAiAgentEnabled": "启用 AI Agent",
+  "settingsAiAgentDescription": "配置兼容的模型后显示 AI Agent 入口。"
 }

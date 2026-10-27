@@ -126,12 +126,11 @@ internal fun AiConfigScreen(onBack: () -> Unit) {
                     style = MaterialTheme.typography.titleMedium,
                 )
                 if (state.isAgentConfig) {
-                    Spacer(modifier = Modifier.height(12.dp))
                     SegmentedListItem(
                         onClick = {
                             state.setAIAgent(!state.aiAgent)
                         },
-                        shapes = ListItemDefaults.single(),
+                        shapes = ListItemDefaults.first(),
                         content = {
                             Text(
                                 text = stringResource(id = R.string.settings_ai_config_enable_agent),
@@ -153,7 +152,7 @@ internal fun AiConfigScreen(onBack: () -> Unit) {
                     )
                     SegmentedListItem(
                         onClick = { state.setUseSharedConfig(!state.useSharedConfig) },
-                        shapes = ListItemDefaults.single(),
+                        shapes = ListItemDefaults.last(),
                         content = { Text(stringResource(R.string.settings_ai_config_use_shared)) },
                         supportingContent = { Text(stringResource(R.string.settings_ai_config_use_shared_description)) },
                         trailingContent = {

@@ -35,6 +35,7 @@ import io.ktor.client.request.header
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpHeaders
 import io.ktor.http.URLBuilder
+import io.ktor.http.URLProtocol
 import io.ktor.http.takeFrom
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
@@ -49,11 +50,13 @@ import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
 
 private val baseUrl = "https://$vvoHost/"
+
 // SUB rotates well before the ALF session window ends, so refresh proactively
 // while the app is in use instead of waiting a full day.
 private val chocolateRefreshInterval = 6.hours
 private val defaultConfigLoginRetryDelay = 500.milliseconds
 private const val CONFIG_LOGIN_RETRY_LIMIT = 5
+
 // m.weibo.cn bounces an expired SUB through passport.weibo.cn to re-sign it.
 private const val REFRESH_REDIRECT_LIMIT = 5
 
@@ -329,7 +332,7 @@ internal class VVOService private constructor(
             if (!isRefreshRedirect(response.status.value, location)) {
                 return cookieHeader
             }
-            url = resolveRefreshRedirectUrl(current = url, location = location!!)
+            url = resolveRefreshRedirectUrl(current = url, location = location!!) ?: return cookieHeader
         }
         return cookieHeader
     }
@@ -360,7 +363,18 @@ internal fun isRefreshRedirect(
 internal fun resolveRefreshRedirectUrl(
     current: String,
     location: String,
-): String = URLBuilder().takeFrom(current).takeFrom(location).buildString()
+): String? =
+    URLBuilder()
+        .takeFrom(current)
+        .apply {
+            parameters.clear()
+            takeFrom(location)
+        }.build()
+        .takeIf {
+            it.protocol == URLProtocol.HTTPS &&
+                it.port == URLProtocol.HTTPS.defaultPort &&
+                it.host.lowercase() in setOf(vvoHost, "passport.weibo.cn")
+        }?.toString()
 
 // ALF carries the session's absolute expiry as epoch seconds.
 internal fun vvoSessionExpiryEpochMillis(cookieHeader: String): Long? =

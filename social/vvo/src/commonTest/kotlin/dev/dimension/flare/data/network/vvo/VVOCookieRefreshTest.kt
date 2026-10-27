@@ -193,8 +193,9 @@ class VVOCookieRefreshTest {
     @Test
     fun refreshFollowsPassportSsoRedirectAndAdoptsNewSub() =
         runTest {
-            val oldCookie = "MLOGIN=1; SUB=old-sub; ALF=9999999999"
-            val refreshedCookie = "MLOGIN=1; SUB=new-sub; ALF=9999999999"
+            val oldCookie = "MLOGIN=1; SUB=old-sub; SCF=old-scf; ALF=9999999999"
+            val passportCookie = "MLOGIN=1; SUB=old-sub; SCF=new-scf; ALF=9999999999"
+            val refreshedCookie = "MLOGIN=1; SUB=new-sub; SCF=new-scf; ALF=9999999999"
             val credentialFlow = MutableStateFlow(VVoCredential(chocolate = oldCookie))
             val homeHops = mutableListOf<String?>()
 
@@ -208,11 +209,24 @@ class VVOCookieRefreshTest {
                             when {
                                 request.url.host == "m.weibo.cn" && request.url.encodedPath == "/" -> {
                                     homeHops += request.headers[HttpHeaders.Cookie]
-                                    redirectResponse("https://passport.weibo.cn/sso/login?entry=mweibo")
+                                    redirectResponse(
+                                        "https://passport.weibo.cn/sso/login?entry=mweibo&ticket=old",
+                                        "SCF=new-scf; Path=/; Domain=.weibo.cn; HttpOnly",
+                                    )
                                 }
 
                                 request.url.host == "passport.weibo.cn" && request.url.encodedPath == "/sso/login" -> {
-                                    setCookieResponse("SUB=new-sub; Path=/; Domain=.weibo.cn; HttpOnly")
+                                    assertEquals(passportCookie, request.headers[HttpHeaders.Cookie])
+                                    redirectResponse(
+                                        "https://m.weibo.cn/sso/complete?ticket=new",
+                                        "SUB=new-sub; Path=/; Domain=.weibo.cn; HttpOnly",
+                                    )
+                                }
+
+                                request.url.encodedPath == "/sso/complete" -> {
+                                    assertEquals("https://m.weibo.cn/sso/complete?ticket=new", request.url.toString())
+                                    assertEquals(refreshedCookie, request.headers[HttpHeaders.Cookie])
+                                    setCookieResponse()
                                 }
 
                                 request.url.encodedPath == "/api/config" -> {
@@ -220,7 +234,9 @@ class VVOCookieRefreshTest {
                                     configResponse(login = cookie?.contains("SUB=new-sub") == true)
                                 }
 
-                                else -> error("Unexpected request: ${request.url}")
+                                else -> {
+                                    error("Unexpected request: ${request.url}")
+                                }
                             }
                         },
                 )
@@ -231,6 +247,62 @@ class VVOCookieRefreshTest {
             assertEquals(refreshedCookie, credentialFlow.value.chocolate)
             // The home hop is attempted with the stale cookie before the SSO leg re-signs it.
             assertEquals(listOf<String?>(oldCookie), homeHops)
+        }
+
+    @Test
+    fun refreshStopsBeforeUntrustedRedirectTargets() =
+        runTest {
+            val oldCookie = "MLOGIN=1; SUB=old-sub; SCF=scf; ALF=9999999999"
+            val refreshedCookie = "MLOGIN=1; SUB=new-sub; SCF=scf; ALF=9999999999"
+            val passportUrl = "https://passport.weibo.cn/sso/login"
+            val untrustedLocations =
+                listOf(
+                    "https://untrusted.example/collect",
+                    "//untrusted.example/collect",
+                    "https://passport.weibo.cn.untrusted.example/collect",
+                    "https://passport.weibo.cn@untrusted.example/collect",
+                    "http://passport.weibo.cn/collect",
+                    "http://m.weibo.cn/collect",
+                    "https://passport.weibo.cn:8443/collect",
+                )
+
+            for (location in untrustedLocations) {
+                val credentialFlow = MutableStateFlow(VVoCredential(chocolate = oldCookie))
+                val refreshHops = mutableListOf<String>()
+                val service =
+                    VVOService(
+                        credentialFlow = credentialFlow,
+                        refreshCookieWhenStale = true,
+                        onCredentialRefreshed = { credentialFlow.value = it },
+                        httpClientFactory =
+                            mockHttpClientFactory { request ->
+                                if (request.url.encodedPath == "/api/config") {
+                                    return@mockHttpClientFactory configResponse(login = true)
+                                }
+                                refreshHops += request.url.toString()
+                                when (request.url.toString()) {
+                                    "https://m.weibo.cn/" -> {
+                                        redirectResponse(passportUrl)
+                                    }
+
+                                    passportUrl -> {
+                                        redirectResponse(
+                                            location,
+                                            "SUB=new-sub; Path=/; Domain=.weibo.cn; HttpOnly",
+                                        )
+                                    }
+
+                                    else -> {
+                                        setCookieResponse("SUB=untrusted-sub; Path=/")
+                                    }
+                                }
+                            },
+                    )
+
+                assertEquals(true, service.config().data?.login)
+                assertEquals(listOf("https://m.weibo.cn/", passportUrl), refreshHops, location)
+                assertEquals(refreshedCookie, credentialFlow.value.chocolate, location)
+            }
         }
 
     @Test
@@ -253,9 +325,13 @@ class VVOCookieRefreshTest {
                                     setCookieResponse("SUB=new-sub; Path=/; Domain=.weibo.cn; HttpOnly")
                                 }
 
-                                "/api/config" -> configResponse(login = false)
+                                "/api/config" -> {
+                                    configResponse(login = false)
+                                }
 
-                                else -> error("Unexpected request: ${request.url}")
+                                else -> {
+                                    error("Unexpected request: ${request.url}")
+                                }
                             }
                         },
                 )
@@ -573,15 +649,29 @@ class VVOCookieRefreshTest {
         assertEquals(
             "https://passport.weibo.cn/sso/login?entry=mweibo",
             resolveRefreshRedirectUrl(
-                current = "https://m.weibo.cn/",
+                current = "https://m.weibo.cn/?entry=old",
                 location = "https://passport.weibo.cn/sso/login?entry=mweibo",
             ),
         )
         assertEquals(
             "https://m.weibo.cn/sso/crossdomain?action=login",
             resolveRefreshRedirectUrl(
-                current = "https://m.weibo.cn/home",
+                current = "https://m.weibo.cn/home?action=old",
                 location = "/sso/crossdomain?action=login",
+            ),
+        )
+        assertEquals(
+            "https://m.weibo.cn/home?action=login",
+            resolveRefreshRedirectUrl(
+                current = "https://m.weibo.cn/home?action=old",
+                location = "?action=login",
+            ),
+        )
+        assertEquals(
+            "https://m.weibo.cn/",
+            resolveRefreshRedirectUrl(
+                current = "https://passport.weibo.cn/sso/login?ticket=old",
+                location = "https://m.weibo.cn/",
             ),
         )
     }

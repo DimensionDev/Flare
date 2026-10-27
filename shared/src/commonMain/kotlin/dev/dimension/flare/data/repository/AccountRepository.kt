@@ -200,6 +200,15 @@ internal class AccountRepository internal constructor(
                     lastAccounts = it.lastAccounts.filterNot { key -> key == accountKey },
                 )
             }
+            removeAccountFlow.value = accountKey
+            dataSourceCacheMutex.withLock {
+                val datasource = dataSourceCache.remove(accountKey)
+                if (datasource is AutoCloseable) {
+                    datasource.close()
+                }
+            }
+            appDatabase.accountDao().delete(accountKey)
+            // Clear behind saves queued while the account was still selectable.
             listOf(appDataStore.notificationPreferences, appDataStore.discoverPreferences).forEach { preferences ->
                 try {
                     preferences.updateData {
@@ -211,14 +220,6 @@ internal class AccountRepository internal constructor(
                     error.printStackTrace()
                 }
             }
-            removeAccountFlow.value = accountKey
-            dataSourceCacheMutex.withLock {
-                val datasource = dataSourceCache.remove(accountKey)
-                if (datasource is AutoCloseable) {
-                    datasource.close()
-                }
-            }
-            appDatabase.accountDao().delete(accountKey)
             cacheDatabase.clearHomeTimelinesForAccount(accountKey)
             cacheDatabase.pagingTimelineDao().deleteByAccountType(
                 AccountType.Specific(accountKey),

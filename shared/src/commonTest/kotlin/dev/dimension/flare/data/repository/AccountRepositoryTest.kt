@@ -1,5 +1,6 @@
 package dev.dimension.flare.data.repository
 
+import androidx.datastore.core.DataStore
 import androidx.room3.Room
 import dev.dimension.flare.RobolectricTest
 import dev.dimension.flare.common.Cacheable
@@ -11,6 +12,7 @@ import dev.dimension.flare.data.database.app.model.DbAccount
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.createDatabaseDriver
 import dev.dimension.flare.data.datastore.AppDataStore
+import dev.dimension.flare.data.datastore.model.AccountSelectionPreferences
 import dev.dimension.flare.data.io.OkioFileStorage
 import dev.dimension.flare.deleteTestRootPath
 import dev.dimension.flare.memoryDatabaseBuilder
@@ -19,6 +21,7 @@ import dev.dimension.flare.model.UnsupportedPlatformException
 import dev.dimension.flare.testPlatformRegistry
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.toUi
+import dev.dimension.flare.ui.presenter.home.RememberedAccountSelection
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.awaitCancellation
@@ -49,6 +52,7 @@ class AccountRepositoryTest : RobolectricTest() {
     private lateinit var appDataStore: AppDataStore
 
     private val accountKey = MicroBlogKey(id = "alice", host = "example.social")
+    private val otherAccountKey = MicroBlogKey(id = "bob", host = "example.social")
 
     @BeforeTest
     fun setup() {
@@ -342,6 +346,71 @@ class AccountRepositoryTest : RobolectricTest() {
                     .selectedAccountKey,
             )
         }
+
+    @Test
+    fun notificationSelectionSavedDuringDeletionDoesNotReturnAfterReaddingAccount() =
+        runTest {
+            checkSelectionSavedDuringDeletion(appDataStore.notificationPreferences, accountKey, expectedSaved = null)
+        }
+
+    @Test
+    fun discoverSelectionSavedDuringDeletionDoesNotReturnAfterReaddingAccount() =
+        runTest {
+            checkSelectionSavedDuringDeletion(appDataStore.discoverPreferences, accountKey, expectedSaved = null)
+        }
+
+    @Test
+    fun notificationChoiceOfAnotherAccountDuringDeletionIsPreserved() =
+        runTest {
+            checkSelectionSavedDuringDeletion(appDataStore.notificationPreferences, otherAccountKey, expectedSaved = otherAccountKey)
+        }
+
+    @Test
+    fun discoverChoiceOfAnotherAccountDuringDeletionIsPreserved() =
+        runTest {
+            checkSelectionSavedDuringDeletion(appDataStore.discoverPreferences, otherAccountKey, expectedSaved = otherAccountKey)
+        }
+
+    private suspend fun CoroutineScope.checkSelectionSavedDuringDeletion(
+        preferences: DataStore<AccountSelectionPreferences>,
+        selectedDuringDeletion: MicroBlogKey,
+        expectedSaved: MicroBlogKey?,
+    ) {
+        val repository = createRepository(this)
+        insertAccount()
+        appDatabase.accountDao().insert(DbAccount(otherAccountKey, "{}", "Mastodon", last_active = 2L, sort_id = 1L))
+        val keys = repository.allAccounts.first().map { it.accountKey }
+        val openPage = RememberedAccountSelection(preferences, this)
+        openPage.updateAccounts(keys)
+        openPage.restore()
+        openPage.selectAccount(otherAccountKey)
+        val closedPage = RememberedAccountSelection(preferences, this)
+        closedPage.updateAccounts(keys)
+        closedPage.restore()
+        closedPage.selectAccount(accountKey)
+        preferences.updateData { it }
+
+        val concurrentSelection =
+            launch(Dispatchers.Unconfined) {
+                assertEquals(accountKey, repository.onRemoved.first())
+                openPage.selectAccount(selectedDuringDeletion)
+                // The page closes after this click; only the app-scoped save remains.
+            }
+        try {
+            repository.delete(accountKey).join()
+            concurrentSelection.join()
+
+            assertNull(repository.find(accountKey))
+            assertEquals(expectedSaved, preferences.updateData { it }.selectedAccountKey)
+            appDatabase.accountDao().insert(DbAccount(accountKey, "{}", "Mastodon", last_active = 3L, sort_id = 2L))
+            val reopened = RememberedAccountSelection(preferences, this)
+            reopened.updateAccounts(repository.allAccounts.first().map { it.accountKey })
+            reopened.restore()
+            assertEquals(otherAccountKey, reopened.selectedAccountKey.first())
+        } finally {
+            concurrentSelection.cancel()
+        }
+    }
 
     private fun createRepository(scope: CoroutineScope): AccountRepository =
         AccountRepository(

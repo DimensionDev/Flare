@@ -156,15 +156,22 @@ internal class AccountRepository internal constructor(
         block: suspend () -> T,
     ): T =
         withAccountChanges {
-            val removed = if (keys.isEmpty()) emptySet() else proxyRepository.settings.first().removedAccounts
-            keys.distinct().filter { it.toString() in removed }.forEach { deleteAccount(it) }
-            // A failed settings write rolls back the DB; cancellation cannot split restoration from commit.
-            withContext(NonCancellable) {
-                appDatabase.connect {
-                    block().also { if (keys.isNotEmpty()) proxyRepository.restoreAccounts(keys) }
-                }
+            restoreAccountsLocked(keys, block)
+        }
+
+    private suspend fun <T> restoreAccountsLocked(
+        keys: List<MicroBlogKey>,
+        block: suspend () -> T,
+    ): T {
+        val removed = if (keys.isEmpty()) emptySet() else proxyRepository.settings.first().removedAccounts
+        keys.distinct().filter { it.toString() in removed }.forEach { deleteAccount(it) }
+        // A failed settings write rolls back the DB; cancellation cannot split restoration from commit.
+        return withContext(NonCancellable) {
+            appDatabase.connect {
+                block().also { if (keys.isNotEmpty()) proxyRepository.restoreAccounts(keys) }
             }
         }
+    }
 
     internal suspend inline fun <reified T : Any> addAccount(
         account: UiAccount,
@@ -180,23 +187,25 @@ internal class AccountRepository internal constructor(
         credential: T,
         serializer: KSerializer<T>,
     ) {
-        restoreAccounts(listOf(account.accountKey)) {
-            val existingAccount = appDatabase.accountDao().getAccount(account.accountKey)
-            val credentialJson = credential.encodeJson(serializer)
-            val dbAccount =
-                existingAccount?.copy(
-                    credential_json = credentialJson,
-                    last_active = Clock.System.now().toEpochMilliseconds(),
-                ) ?: DbAccount(
-                    account_key = account.accountKey,
-                    platformId = account.platformId,
-                    credential_json = credentialJson,
-                    last_active = Clock.System.now().toEpochMilliseconds(),
-                    sort_id = appDatabase.accountDao().getMaxSortId()?.plus(1) ?: 0L,
-                )
-            appDatabase.accountDao().insert(dbAccount)
+        withAccountChanges {
+            restoreAccountsLocked(listOf(account.accountKey)) {
+                val existingAccount = appDatabase.accountDao().getAccount(account.accountKey)
+                val credentialJson = credential.encodeJson(serializer)
+                val dbAccount =
+                    existingAccount?.copy(
+                        credential_json = credentialJson,
+                        last_active = Clock.System.now().toEpochMilliseconds(),
+                    ) ?: DbAccount(
+                        account_key = account.accountKey,
+                        platformId = account.platformId,
+                        credential_json = credentialJson,
+                        last_active = Clock.System.now().toEpochMilliseconds(),
+                        sort_id = appDatabase.accountDao().getMaxSortId()?.plus(1) ?: 0L,
+                    )
+                appDatabase.accountDao().insert(dbAccount)
+            }
+            addAccountFlow.value = account
         }
-        addAccountFlow.value = account
     }
 
     internal inline fun <reified T : Any> updateCredential(

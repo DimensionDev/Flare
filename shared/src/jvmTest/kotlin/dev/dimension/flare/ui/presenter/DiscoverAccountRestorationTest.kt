@@ -26,6 +26,7 @@ import dev.dimension.flare.data.model.tab.TimelineResolver
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.LocalFilterRepository
 import dev.dimension.flare.data.repository.MxgaRepository
+import dev.dimension.flare.data.repository.ProxyRepository
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.data.translation.NoopPreTranslationService
 import dev.dimension.flare.data.translation.PreTranslationService
@@ -350,7 +351,7 @@ class DiscoverAccountRestorationTest {
                     extraTimelineSpecs = emptyList(),
                 ),
             )
-        val repository = AccountRepository(app, scope, appData, cache, registry)
+        val repository = AccountRepository(app, scope, appData, cache, ProxyRepository(storage), registry)
 
         init {
             val resolver = TimelineResolver(PlatformRuntimeData(emptyList(), emptyList()), unavailableAccountService())

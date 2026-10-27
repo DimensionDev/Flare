@@ -27,12 +27,6 @@ open class NetworkImageView: AnimatedImageView {
     }
     public required init?(coder: NSCoder) { fatalError("init(coder:) not supported") }
 
-    public func setImage(with url: URL?, customHeaders: [String: String]? = nil,
-                         completionHandler: (@MainActor @Sendable (Result<RetrieveImageResult, KingfisherError>) -> Void)? = nil) {
-        setImage(media: url.map { UiMediaImage(url: $0.absoluteString, proxy: ProxyRef.Global.shared, headers: customHeaders) },
-                 completionHandler: completionHandler)
-    }
-
     public func setImage(media: (any UiMedia)?,
                          completionHandler: (@MainActor @Sendable (Result<RetrieveImageResult, KingfisherError>) -> Void)? = nil) {
         let identity = media.map { "\(String(describing: $0.proxy))|\($0.cacheKey)" }

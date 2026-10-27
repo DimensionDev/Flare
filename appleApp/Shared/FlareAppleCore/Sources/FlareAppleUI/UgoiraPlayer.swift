@@ -261,8 +261,7 @@ public struct GalleryMedia: View {
                 }
             } else if let image = media as? UiMediaImage {
                 NetworkImage(
-                    data: image.url, placeholder: image.previewUrl,
-                    customHeader: image.customHeaders, contentMode: contentMode)
+                    data: image, placeholder: image.preview, contentMode: contentMode)
             } else {
                 NetworkImage(data: media, contentMode: contentMode)
             }

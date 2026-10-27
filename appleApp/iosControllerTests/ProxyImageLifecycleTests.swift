@@ -31,7 +31,8 @@ final class ProxyImageLifecycleTests: XCTestCase {
         try await eventually { server.requests.count == 2 && server.requests[0].cancelled }
         server.complete()
         try await eventually {
-            (renderer.attributedText.attribute(.attachment, at: 0, effectiveRange: nil) as? NSTextAttachment)?.image?.size == server.imageSize
+            let image = (renderer.attributedText.attribute(.attachment, at: 0, effectiveRange: nil) as? NSTextAttachment)?.image?.cgImage
+            return image?.width == Int(server.imageSize.width) && image?.height == Int(server.imageSize.height)
         }
         XCTAssertTrue(textView(in: view) === renderer, "Retry must not rebuild unchanged text")
         try await select(.direct, presenter: presenter)

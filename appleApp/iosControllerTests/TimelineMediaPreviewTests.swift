@@ -12,7 +12,7 @@ import KotlinSharedUI
 final class TimelineMediaPreviewTests: XCTestCase {
     func testReactionImagesDecodeAtTheirDisplayHeightOnBothRenderers() async throws {
         for kind in ["uikit", "swiftui"] {
-            let fixture = try Fixture()
+            let fixture = try await Fixture()
             KingfisherManager.shared.defaultOptions += [.requestModifier(AnyModifier { request in
                 var request = request
                 request.setValue("fixture", forHTTPHeaderField: "X-Preview-Test")
@@ -22,7 +22,7 @@ final class TimelineMediaPreviewTests: XCTestCase {
             let processor = ImageDownsamplingProcessor(
                 pixelSize: CGSize(width: CGFloat.greatestFiniteMagnitude, height: 48), fillsBounds: false)
             let reaction = UiTimelineV2.PostEmojiReaction(name: ":test:", url: url, count: UiNumber(value: 2),
-                clickEvent: ClickEventNoop.shared, isUnicode: false, me: true)
+                clickEvent: ClickEventNoop.shared, isUnicode: false, me: true, proxy: ProxyRef.Global.shared)
             let host: UIViewController
             if kind == "uikit" {
                 host = UIViewController()
@@ -49,7 +49,7 @@ final class TimelineMediaPreviewTests: XCTestCase {
 
     func testRichTextBlockImagesDecodeForTheirWidthAndKeepNaturalAspectRatio() async throws {
         for kind in ["uikit", "swiftui"] {
-            let fixture = try Fixture()
+            let fixture = try await Fixture()
             KingfisherManager.shared.defaultOptions += [.requestModifier(AnyModifier { request in
                 var request = request
                 request.setValue("fixture", forHTTPHeaderField: "X-Preview-Test")
@@ -58,7 +58,7 @@ final class TimelineMediaPreviewTests: XCTestCase {
             let url = fixture.media(path: "block-\(kind).png").previewUrl
             let processor = ImageDownsamplingProcessor(
                 pixelSize: CGSize(width: 540, height: CGFloat.greatestFiniteMagnitude), fillsBounds: false)
-            let text = UiRichText(renderRuns: [RenderContent.BlockImage(url: url, href: nil)],
+            let text = UiRichText(renderRuns: [RenderContent.BlockImage(url: url, href: nil, proxy: ProxyRef.Global.shared)],
                 isRtl: false, raw: url, innerText: "", imageUrls: [url])
             let host: UIViewController
             var native: RichTextUIView?
@@ -106,7 +106,7 @@ final class TimelineMediaPreviewTests: XCTestCase {
 
     func testRichTextInlineImagesDecodeAtDisplaySizeOnBothRenderers() async throws {
         for kind in ["uikit", "swiftui"] {
-            let fixture = try Fixture()
+            let fixture = try await Fixture()
             KingfisherManager.shared.defaultOptions += [.requestModifier(AnyModifier { request in
                 var request = request
                 request.setValue("fixture", forHTTPHeaderField: "X-Preview-Test")
@@ -118,7 +118,7 @@ final class TimelineMediaPreviewTests: XCTestCase {
             let largeHeight: CGFloat = kind == "uikit" ? 159 : 144
             let largeProcessor = ImageDownsamplingProcessor(
                 pixelSize: CGSize(width: CGFloat.greatestFiniteMagnitude, height: largeHeight), fillsBounds: false)
-            let text = UiRichText(renderRuns: [RenderContent.Text(runs: [RenderRun.Image(url: url, alt: "emoji")],
+            let text = UiRichText(renderRuns: [RenderContent.Text(runs: [RenderRun.Image(url: url, alt: "emoji", proxy: ProxyRef.Global.shared)],
                 block: RenderBlockStyle())], isRtl: false, raw: url, innerText: "emoji", imageUrls: [url])
             let host: UIViewController
             var growText: (() -> Void)?
@@ -168,7 +168,7 @@ final class TimelineMediaPreviewTests: XCTestCase {
 
     func testColdPreviewsPersistOriginalAndProcessedImagesForOfflineReuse() async throws {
         for kind in ["uikit", "swiftui", "crossfade"] {
-            let fixture = try Fixture()
+            let fixture = try await Fixture()
             KingfisherManager.shared.defaultOptions.append(.waitForCache)
             let url = fixture.media(path: "\(kind).png").previewUrl
             var window: UIWindow?
@@ -182,7 +182,7 @@ final class TimelineMediaPreviewTests: XCTestCase {
                 _ = try await fixture.loadedImage(width: 540)
             } else {
                 let host = UIHostingController(rootView: NetworkImage(
-                    data: url, customHeader: ["X-Preview-Test": "fixture"],
+                    data: fixture.image(url),
                     contentMode: .fill, usesCrossfade: kind == "crossfade",
                     onProgress: { completed = $0 == 1 }
                 ).frame(width: 180, height: 135).environment(\.displayScale, 3))
@@ -196,14 +196,14 @@ final class TimelineMediaPreviewTests: XCTestCase {
             }
 
             let processor = ImageDownsamplingProcessor(pixelSize: CGSize(width: 540, height: 405), fillsBounds: true)
-            XCTAssertEqual(fixture.cache.imageCachedType(forKey: url, processorIdentifier: processor.identifier), .memory, kind)
+            XCTAssertEqual(fixture.cache.imageCachedType(forKey: fixture.image(url).cacheKey, processorIdentifier: processor.identifier), .memory, kind)
             fixture.cache.clearMemoryCache()
-            XCTAssertEqual(fixture.cache.imageCachedType(forKey: url, processorIdentifier: processor.identifier), .disk,
+            XCTAssertEqual(fixture.cache.imageCachedType(forKey: fixture.image(url).cacheKey, processorIdentifier: processor.identifier), .disk,
                            "The processed preview must remain reusable after memory eviction: \(kind)")
-            XCTAssertEqual(fixture.cache.imageCachedType(forKey: url), .disk,
+            XCTAssertEqual(fixture.cache.imageCachedType(forKey: fixture.image(url).cacheKey), .disk,
                            "The original bytes must remain available offline: \(kind)")
             let result = try await KingfisherManager.shared.retrieveImage(
-                with: URL(string: url)!,
+                with: .network(ImageResource(downloadURL: URL(string: url)!, cacheKey: fixture.image(url).cacheKey)),
                 options: [.targetCache(fixture.cache), .onlyFromCache,
                           .processor(processor), .scaleFactor(3)]
             )
@@ -215,14 +215,14 @@ final class TimelineMediaPreviewTests: XCTestCase {
 
     func testRichTextBlockImagesStayVisibleAndKeepTheirHeightDuringWidthUpgrades() async throws {
         for kind in ["uikit", "swiftui"] {
-            let fixture = try Fixture()
+            let fixture = try await Fixture()
             KingfisherManager.shared.defaultOptions.append(.requestModifier(AnyModifier { request in
                 var request = request
                 request.setValue("fixture", forHTTPHeaderField: "X-Preview-Test")
                 return request
             }))
             let url = fixture.media(path: "block-upgrade-\(kind).png").previewUrl
-            let text = UiRichText(renderRuns: [RenderContent.BlockImage(url: url, href: nil)],
+            let text = UiRichText(renderRuns: [RenderContent.BlockImage(url: url, href: nil, proxy: ProxyRef.Global.shared)],
                 isRtl: false, raw: url, innerText: "", imageUrls: [url])
             let host: UIViewController
             let resize: (CGFloat) -> Void
@@ -300,8 +300,8 @@ final class TimelineMediaPreviewTests: XCTestCase {
         }
     }
 
-    func testMediaCreatesOptionalViewsOnDemandAndPreservesReuseBehavior() throws {
-        let fixture = try Fixture()
+    func testMediaCreatesOptionalViewsOnDemandAndPreservesReuseBehavior() async throws {
+        let fixture = try await Fixture()
         let host = UIViewController()
         let window = try fixture.show(host)
         defer { window.isHidden = true; window.rootViewController = nil }
@@ -367,8 +367,8 @@ final class TimelineMediaPreviewTests: XCTestCase {
         XCTAssertEqual(view.subviews.filter { $0 is UIVisualEffectView }.count, 1)
     }
 
-    func testImagesDoNotCreateVideoOverlayViews() throws {
-        let fixture = try Fixture()
+    func testImagesDoNotCreateVideoOverlayViews() async throws {
+        let fixture = try await Fixture()
         let view = fixture.view
         view.frame.size = CGSize(width: 180, height: 135)
         view.set(media: fixture.media(), cornerRadius: 12)
@@ -381,8 +381,8 @@ final class TimelineMediaPreviewTests: XCTestCase {
         XCTAssertNil(view.accessibilityCustomActions)
     }
 
-    func testVideoOverlayKeepsStateAndRetryWhenReusedForAnImage() throws {
-        let fixture = try Fixture()
+    func testVideoOverlayKeepsStateAndRetryWhenReusedForAnImage() async throws {
+        let fixture = try await Fixture()
         let view = fixture.view
         view.frame.size = CGSize(width: 180, height: 135)
         view.set(media: fixture.media(), cornerRadius: 12)
@@ -421,7 +421,7 @@ final class TimelineMediaPreviewTests: XCTestCase {
         XCTAssertEqual(retries, 1, "Image reuse must clear the old retry callback")
         let video = UiMediaVideo(url: "https://timeline-preview.invalid/movie.mp4",
             thumbnailUrl: "https://timeline-preview.invalid/thumbnail.png", description: nil,
-            height: 768, width: 1_024, customHeaders: nil, downloadUrl: nil)
+            height: 768, width: 1_024, customHeaders: nil, proxy: ProxyRef.Global.shared, downloadUrl: nil)
         view.set(media: video, cornerRadius: 12)
         view.layoutIfNeeded()
         XCTAssertEqual(view.videoURL?.absoluteString, video.url)
@@ -431,13 +431,13 @@ final class TimelineMediaPreviewTests: XCTestCase {
     }
 
     func testSwiftUICrossfadeKeepsPreviewWhileLargerImageIsProcessing() async throws {
-        let fixture = try Fixture()
+        let fixture = try await Fixture()
         let queue = DispatchQueue(label: "preview-resize-test")
         let gate = DispatchSemaphore(value: 0)
         KingfisherManager.shared.defaultOptions.append(.processingQueue(.dispatch(queue)))
         let url = fixture.media().previewUrl
         func view(width: CGFloat) -> some View {
-            NetworkImage(data: url, customHeader: ["X-Preview-Test": "fixture"], usesCrossfade: true)
+            NetworkImage(data: fixture.image(url), usesCrossfade: true)
                 .frame(width: width, height: width * 0.75).environment(\.displayScale, 3)
         }
         let host = UIHostingController(rootView: view(width: 180))
@@ -474,7 +474,7 @@ final class TimelineMediaPreviewTests: XCTestCase {
     }
 
     func testUIKitReplacementIgnoresCancelledCompletionAndPublishesLatestCallback() async throws {
-        let fixture = try Fixture()
+        let fixture = try await Fixture()
         let view = try XCTUnwrap(fixture.imageView as? NetworkImageView)
         let queue = DispatchQueue(label: "preview-cancellation-test")
         let gate = DispatchSemaphore(value: 0)
@@ -485,11 +485,11 @@ final class TimelineMediaPreviewTests: XCTestCase {
         fixture.view.layoutIfNeeded()
         var cancelledCompletions = 0
         var currentCompletions = 0
-        view.setImage(with: URL(string: fixture.media().previewUrl), customHeaders: ["X-Preview-Test": "fixture"]) { _ in
+        view.setImage(media: fixture.media().preview) { _ in
             cancelledCompletions += 1
         }
         view.layoutIfNeeded()
-        view.setImage(with: URL(string: fixture.media(path: "second.png").previewUrl), customHeaders: ["X-Preview-Test": "fixture"]) { _ in
+        view.setImage(media: fixture.media(path: "second.png").preview) { _ in
             currentCompletions += 1
         }
         view.layoutIfNeeded()
@@ -504,14 +504,14 @@ final class TimelineMediaPreviewTests: XCTestCase {
     }
 
     func testUIKitFailedRequestCanRetryAtTheSameSize() async throws {
-        let fixture = try Fixture()
+        let fixture = try await Fixture()
         let view = try XCTUnwrap(fixture.imageView as? NetworkImageView)
         fixture.view.frame.size = CGSize(width: 180, height: 135)
         fixture.view.layoutIfNeeded()
-        let url = URL(string: fixture.media().previewUrl)
+        let media = fixture.media().preview
         KingfisherManager.shared.defaultOptions.append(.onlyFromCache)
         var failed = false
-        view.setImage(with: url, customHeaders: ["X-Preview-Test": "fixture"]) { result in
+        view.setImage(media: media) { result in
             if case .failure = result { failed = true }
         }
         view.layoutIfNeeded()
@@ -521,18 +521,17 @@ final class TimelineMediaPreviewTests: XCTestCase {
         }
         XCTAssertTrue(failed)
         KingfisherManager.shared.defaultOptions.removeLast()
-        view.setImage(with: url, customHeaders: ["X-Preview-Test": "fixture"])
+        view.setImage(media: media)
         view.layoutIfNeeded()
         _ = try await fixture.loadedImage(width: 540)
     }
 
     func testSwiftUIPreviewsDownsampleForFitAndFill() async throws {
         for mode in [SwiftUI.ContentMode.fit, .fill] {
-            let fixture = try Fixture()
+            let fixture = try await Fixture()
             var completed = false
             let url = "https://timeline-preview.invalid/swiftui.png"
-            let host = UIHostingController(rootView: NetworkImage(data: url,
-                customHeader: ["X-Preview-Test": "fixture"], contentMode: mode,
+            let host = UIHostingController(rootView: NetworkImage(data: fixture.image(url), contentMode: mode,
                 onProgress: { completed = $0 == 1 }).frame(width: 180, height: 180).environment(\.displayScale, 3))
             let window = try fixture.show(host)
             defer { window.isHidden = true; window.rootViewController = nil }
@@ -548,11 +547,11 @@ final class TimelineMediaPreviewTests: XCTestCase {
     }
 
     func testSwiftUIResizingAndURLReplacementKeepTheExpectedPixels() async throws {
-        let fixture = try Fixture()
+        let fixture = try await Fixture()
         let first = "https://timeline-preview.invalid/first.png"
         let second = "https://timeline-preview.invalid/second.png"
         func view(_ url: String, width: CGFloat) -> some View {
-            NetworkImage(data: url, customHeader: ["X-Preview-Test": "fixture"])
+            NetworkImage(data: fixture.image(url))
                 .frame(width: width, height: width * 0.75).environment(\.displayScale, 3)
         }
         let host = UIHostingController(rootView: view(first, width: 180))
@@ -570,11 +569,10 @@ final class TimelineMediaPreviewTests: XCTestCase {
     }
 
     func testSwiftUIOriginalImageAndCrossfadePreserveFullResolutionForZoom() async throws {
-        let fixture = try Fixture()
+        let fixture = try await Fixture()
         let url = "https://timeline-preview.invalid/zoom.png"
         var completed = false
-        let host = UIHostingController(rootView: NetworkImage(data: url, placeholder: fixture.media().previewUrl,
-            customHeader: ["X-Preview-Test": "fixture"], contentMode: .fit, usesCrossfade: true,
+        let host = UIHostingController(rootView: NetworkImage(data: fixture.image(url), placeholder: fixture.media().preview, contentMode: .fit, usesCrossfade: true,
             onProgress: { completed = $0 == 1 }).originalImage().frame(width: 180, height: 135))
         let window = try fixture.show(host)
         defer { window.isHidden = true; window.rootViewController = nil }
@@ -587,10 +585,9 @@ final class TimelineMediaPreviewTests: XCTestCase {
     }
 
     func testSwiftUIIntrinsicImageSettlesAtItsNaturalAspectRatio() async throws {
-        let fixture = try Fixture()
+        let fixture = try await Fixture()
         var size: CGSize = .zero
-        let host = UIHostingController(rootView: NetworkImage(data: fixture.media().previewUrl,
-            customHeader: ["X-Preview-Test": "fixture"], contentMode: .fit)
+        let host = UIHostingController(rootView: NetworkImage(data: fixture.media().preview, contentMode: .fit)
             .frame(width: 180).fixedSize(horizontal: false, vertical: true).environment(\.displayScale, 3)
             .onGeometryChange(for: CGSize.self) { $0.size } action: { size = $0 })
         let window = try fixture.show(host)
@@ -609,9 +606,8 @@ final class TimelineMediaPreviewTests: XCTestCase {
     }
 
     func testSwiftUIGIFWithQueryUsesAnimatedImageView() async throws {
-        let fixture = try Fixture(animated: true)
-        let host = UIHostingController(rootView: NetworkImage(data: "https://timeline-preview.invalid/animation.GIF?version=1",
-            customHeader: ["X-Preview-Test": "fixture"]).frame(width: 180, height: 135))
+        let fixture = try await Fixture(animated: true)
+        let host = UIHostingController(rootView: NetworkImage(data: fixture.image("https://timeline-preview.invalid/animation.GIF?version=1")).frame(width: 180, height: 135))
         let window = try fixture.show(host)
         defer { window.isHidden = true; window.rootViewController = nil }
         func find(_ view: UIView) -> AnimatedImageView? {
@@ -628,7 +624,7 @@ final class TimelineMediaPreviewTests: XCTestCase {
     }
 
     func testStaticPreviewDecodesAtDisplayPixelsAndWaitsForLayout() async throws {
-        let fixture = try Fixture()
+        let fixture = try await Fixture()
         let view = fixture.view
         view.frame = .zero
         view.set(media: fixture.media(), cornerRadius: 12)
@@ -645,7 +641,7 @@ final class TimelineMediaPreviewTests: XCTestCase {
 
     func testAspectFillUsesEncodedDimensionsWhenMetadataIsMissingOrWrong() async throws {
         for size in [CGSize(width: 180, height: 180), CGSize(width: 90, height: 180)] {
-            let fixture = try Fixture()
+            let fixture = try await Fixture()
             fixture.view.frame.size = size
             fixture.view.set(media: fixture.media(width: 0, height: 0), cornerRadius: 0)
             fixture.view.layoutIfNeeded()
@@ -656,7 +652,7 @@ final class TimelineMediaPreviewTests: XCTestCase {
     }
 
     func testGrowingOrChangingScaleUpgradesPreviewAndShrinkingKeepsIt() async throws {
-        let fixture = try Fixture()
+        let fixture = try await Fixture()
         fixture.view.frame.size = CGSize(width: 90, height: 60)
         fixture.view.set(media: fixture.media(), cornerRadius: 0)
         fixture.view.layoutIfNeeded()
@@ -677,7 +673,7 @@ final class TimelineMediaPreviewTests: XCTestCase {
     }
 
     func testPoolRemovalCancelsDeferredPreviewAndReuseLoadsTheNewMedia() async throws {
-        let fixture = try Fixture()
+        let fixture = try await Fixture()
         fixture.view.frame = .zero
         fixture.view.set(media: fixture.media(), cornerRadius: 0)
         fixture.view.prepareForPoolRemoval()
@@ -695,11 +691,11 @@ final class TimelineMediaPreviewTests: XCTestCase {
 
     func testAnimatedPreviewAndExplicitGIFKeepTheirFrames() async throws {
         for explicitGIF in [false, true] {
-            let fixture = try Fixture(animated: true)
+            let fixture = try await Fixture(animated: true)
             fixture.view.frame.size = CGSize(width: 90, height: 60)
             let media: UiMedia = explicitGIF ? UiMediaGif(url: "https://timeline-preview.invalid/animation.gif",
                 previewUrl: "https://timeline-preview.invalid/still.png", description: nil,
-                height: 768, width: 1_024, customHeaders: ["X-Preview-Test": "fixture"]) : fixture.media()
+                height: 768, width: 1_024, customHeaders: ["X-Preview-Test": "fixture"], proxy: ProxyRef.Global.shared) : fixture.media()
             fixture.view.set(media: media, cornerRadius: 0)
             fixture.view.layoutIfNeeded()
             let image = try await fixture.loadedImage()
@@ -716,7 +712,7 @@ final class TimelineMediaPreviewTests: XCTestCase {
     }
 
     func testEncodedOrientationIsAppliedBeforeAspectFillSizing() async throws {
-        let fixture = try Fixture(orientation: 6)
+        let fixture = try await Fixture(orientation: 6)
         fixture.view.frame.size = CGSize(width: 135, height: 180)
         fixture.view.set(media: fixture.media(), cornerRadius: 0)
         fixture.view.layoutIfNeeded()
@@ -727,11 +723,11 @@ final class TimelineMediaPreviewTests: XCTestCase {
     }
 
     func testVideoKeepsPlaybackURLWhileThumbnailIsDownsampled() async throws {
-        let fixture = try Fixture()
+        let fixture = try await Fixture()
         fixture.view.frame.size = CGSize(width: 180, height: 135)
         let video = UiMediaVideo(url: "https://timeline-preview.invalid/movie.mp4",
             thumbnailUrl: "https://timeline-preview.invalid/thumbnail.png", description: nil,
-            height: 768, width: 1_024, customHeaders: ["X-Preview-Test": "fixture"], downloadUrl: nil)
+            height: 768, width: 1_024, customHeaders: ["X-Preview-Test": "fixture"], proxy: ProxyRef.Global.shared, downloadUrl: nil)
         fixture.view.set(media: video, cornerRadius: 0)
         fixture.view.layoutIfNeeded()
         _ = try await fixture.loadedImage(width: 540)
@@ -739,13 +735,13 @@ final class TimelineMediaPreviewTests: XCTestCase {
     }
 
     func testPreviewResizeUsesOriginalCacheWithoutReplacingFullSizeMedia() async throws {
-        let fixture = try Fixture()
+        let fixture = try await Fixture()
         fixture.view.frame.size = CGSize(width: 180, height: 135)
         let media = fixture.media()
         fixture.view.set(media: media, cornerRadius: 0)
         fixture.view.layoutIfNeeded()
         _ = try await fixture.loadedImage(width: 540)
-        let original = try await fixture.cache.retrieveImageInDiskCache(forKey: media.previewUrl)
+        let original = try await fixture.cache.retrieveImageInDiskCache(forKey: media.preview!.cacheKey)
         XCTAssertEqual(original?.cgImage?.width, 1_024)
         fixture.cache.clearMemoryCache()
         KingfisherManager.shared.defaultOptions.append(.onlyFromCache)
@@ -760,9 +756,10 @@ final class TimelineMediaPreviewTests: XCTestCase {
         let view = MediaUIView()
         let cache = PreviewImageCache(name: "timeline-preview-tests-\(UUID().uuidString)")
         let oldOptions: KingfisherOptionsInfo
+        private var downloaders: [(ImageDownloader, URLSessionConfiguration)] = []
         var imageView: UIImageView { view.subviews.compactMap { $0 as? UIImageView }.first! }
 
-        init(animated: Bool = false, orientation: Int? = nil) throws {
+        init(animated: Bool = false, orientation: Int? = nil) async throws {
             let format = UIGraphicsImageRendererFormat()
             format.scale = 1
             let image = UIGraphicsImageRenderer(
@@ -783,12 +780,17 @@ final class TimelineMediaPreviewTests: XCTestCase {
             }
             XCTAssertTrue(CGImageDestinationFinalize(destination))
             PreviewImageProtocol.payload = data as Data
-            let downloader = ImageDownloader(name: "timeline-preview-tests-\(UUID().uuidString)")
-            let config = URLSessionConfiguration.ephemeral
-            config.protocolClasses = [PreviewImageProtocol.self]
-            downloader.sessionConfiguration = config
             oldOptions = KingfisherManager.shared.defaultOptions
-            KingfisherManager.shared.defaultOptions = [.downloader(downloader), .targetCache(cache)]
+            KingfisherManager.shared.defaultOptions = [.targetCache(cache)]
+            for headers in [nil, ["X-Preview-Test": "fixture"]] as [[String: String]?] {
+                let prepared = try await ProxyMediaImages.shared.prepare(
+                    UiMediaImage(url: "https://timeline-preview.invalid/fixture.png", proxy: ProxyRef.Global.shared, headers: headers))
+                downloaders.append((prepared.downloader, prepared.downloader.sessionConfiguration))
+                let config = URLSessionConfiguration.ephemeral
+                config.protocolClasses = [PreviewImageProtocol.self]
+                config.httpAdditionalHeaders = ["X-Preview-Test": "fixture"]
+                prepared.downloader.sessionConfiguration = config
+            }
             view.traitOverrides.displayScale = 3
             view.updateTraitsIfNeeded()
         }
@@ -796,14 +798,19 @@ final class TimelineMediaPreviewTests: XCTestCase {
         isolated deinit {
             view.prepareForPoolRemoval()
             KingfisherManager.shared.defaultOptions = oldOptions
+            for (downloader, configuration) in downloaders { downloader.sessionConfiguration = configuration }
             cache.clearMemoryCache()
             cache.clearDiskCache()
+        }
+
+        func image(_ url: String) -> UiMediaImage {
+            UiMediaImage(url: url, proxy: ProxyRef.Global.shared, headers: ["X-Preview-Test": "fixture"])
         }
 
         func media(path: String = "preview.png", width: Float = 1_024, height: Float = 768) -> UiMediaImage {
             UiMediaImage(url: "https://timeline-preview.invalid/original.png",
                 previewUrl: "https://timeline-preview.invalid/\(path)", description: "Preview description",
-                height: height, width: width, sensitive: false, customHeaders: ["X-Preview-Test": "fixture"])
+                height: height, width: width, sensitive: false, customHeaders: ["X-Preview-Test": "fixture"], proxy: ProxyRef.Global.shared)
         }
 
         func loadedImage(width: Int? = nil) async throws -> UIImage {
@@ -830,10 +837,23 @@ private nonisolated final class PreviewImageCache: ImageCache, @unchecked Sendab
     private let lock = NSLock()
     private var sizes: [String: CGSize] = [:]
 
-    func imageSize(for key: String) -> CGSize? { lock.withLock { sizes[key] } }
+    @MainActor
+    func imageSize(for url: String) -> CGSize? {
+        let keys = cacheKeys(for: url)
+        return lock.withLock { keys.lazy.compactMap { self.sizes[$0] }.first }
+    }
 
+    @MainActor
+    private func cacheKeys(for url: String) -> [String] {
+        [UiMediaImage(url: url, proxy: ProxyRef.Global.shared, headers: ["X-Preview-Test": "fixture"]).cacheKey,
+         UiMediaImage(url: url, proxy: ProxyRef.Global.shared).cacheKey]
+    }
+
+    @MainActor
     func imageSize(for key: String, processor: ImageDownsamplingProcessor) -> CGSize? {
-        guard let image = retrieveImageInMemoryCache(forKey: key, options: [.processor(processor)])?.cgImage else {
+        guard let image = cacheKeys(for: key).lazy.compactMap({
+            self.retrieveImageInMemoryCache(forKey: $0, options: [.processor(processor)])?.cgImage
+        }).first else {
             return nil
         }
         return CGSize(width: image.width, height: image.height)

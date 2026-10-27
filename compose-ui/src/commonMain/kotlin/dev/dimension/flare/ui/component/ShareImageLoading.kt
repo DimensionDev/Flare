@@ -8,6 +8,7 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import coil3.compose.AsyncImagePainter
+import coil3.request.NullRequestData
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withTimeoutOrNull
 
@@ -59,7 +60,10 @@ internal fun shareImageObserver(model: String?): ((AsyncImagePainter.State) -> U
     return { state ->
         when (state) {
             is AsyncImagePainter.State.Success -> loading.update(key, true)
-            is AsyncImagePainter.State.Error -> loading.update(key, false)
+
+            // The empty request waits for proxy preparation, so it is still loading.
+            is AsyncImagePainter.State.Error -> loading.update(key, if (state.result.request.data == NullRequestData) null else false)
+
             else -> loading.update(key, null)
         }
     }

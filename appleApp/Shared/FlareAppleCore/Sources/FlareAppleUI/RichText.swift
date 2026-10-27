@@ -249,10 +249,73 @@ private struct InlineImageRequest: Hashable {
 
 private struct RichTextBlockImage: View {
     let media: UiMediaImage
+    @Environment(\.displayScale) private var displayScale
+    @Environment(\.shareImageLoading) private var shareImageLoading
+    @State private var shareImageID = UUID()
+    @State private var pixelWidth: CGFloat = 0
+    @State private var loadedImage: (key: String, image: KFCrossPlatformImage)?
+    @State private var prepared: PreparedMediaImage?
+    @State private var preparedIdentity: String?
 
     var body: some View {
-        NetworkImage(data: media, contentMode: .fit)
-            .frame(maxWidth: .infinity)
+        let identity = "\(String(describing: media.proxy))|\(media.cacheKey)"
+        Group {
+            if let prepared, preparedIdentity == identity, pixelWidth > 0 {
+                KFImage(source: prepared.source)
+                    .downloader(prepared.downloader)
+                    .redirectHandler(prepared.redirectHandler)
+                    .requestModifier { request in
+                        media.customHeaders?.forEach { request.setValue($0.value, forHTTPHeaderField: $0.key) }
+                    }
+                    .setProcessor(ImageDownsamplingProcessor(
+                        pixelSize: CGSize(width: pixelWidth, height: .greatestFiniteMagnitude), fillsBounds: false))
+                    .scaleFactor(displayScale)
+                    .cacheOriginalImage()
+                    .flareAsyncCacheTypeCheck()
+                    .flareBackgroundDecodeIfSupported()
+                    .loadDiskFileSynchronously(false)
+                    .onSuccess {
+                        loadedImage = (identity, $0.image)
+                        shareImageLoading?.complete(shareImageID, success: true)
+                    }
+                    .onFailure { _ in shareImageLoading?.complete(shareImageID, success: false) }
+                    .placeholder { placeholder(identity: identity) }
+                    .resizable()
+                    .scaledToFit()
+                    .id(prepared.key)
+            } else {
+                placeholder(identity: identity)
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .onGeometryChange(for: CGFloat.self) { proxy in
+            ceil(proxy.size.width * displayScale)
+        } action: { width in
+            pixelWidth = max(pixelWidth, width)
+        }
+        .onAppear { shareImageLoading?.register(shareImageID) }
+        .onDisappear { shareImageLoading?.remove(shareImageID) }
+        .task(id: "\(identity)|\(ProxyMediaImages.shared.revision)") {
+            do {
+                let result = try await ProxyMediaImages.shared.prepare(media)
+                guard !Task.isCancelled else { return }
+                if preparedIdentity != identity || prepared?.key != result.key { prepared = result }
+                preparedIdentity = identity
+            } catch {
+                guard !Task.isCancelled else { return }
+                prepared = nil
+                shareImageLoading?.complete(shareImageID, success: false)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func placeholder(identity: String) -> some View {
+        if let loadedImage, loadedImage.key == identity {
+            Image(platformImage: loadedImage.image).resizable().scaledToFit()
+        } else {
+            Color.clear.frame(height: 1)
+        }
     }
 }
 

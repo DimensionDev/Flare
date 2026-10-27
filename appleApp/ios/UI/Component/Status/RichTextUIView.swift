@@ -248,7 +248,7 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
             }
         }
 
-        loadInlineImages(generation: generation)
+        loadInlineImages(for: text, generation: generation)
         invalidateIntrinsicContentSize()
     }
 

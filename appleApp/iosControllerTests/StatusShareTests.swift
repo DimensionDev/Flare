@@ -129,7 +129,7 @@ final class StatusShareTests: XCTestCase {
 
     func testFailedMediaCannotBeSharedAsAPlaceholder() async throws {
         do {
-            _ = try await NetworkImage(data: "file:///nonexistent-flare-share-image.png")
+            _ = try await NetworkImage(data: UiMediaImage(url: "file:///nonexistent-flare-share-image.png", proxy: ProxyRef.Global.shared))
                 .frame(width: 120, height: 120).snapshot(colorScheme: .light)
             XCTFail("Unavailable media must fail")
         } catch StatusShareRenderError.mediaUnavailable {
@@ -137,14 +137,14 @@ final class StatusShareTests: XCTestCase {
     }
 
     func testMissingOptionalImageDoesNotBlockScreenshot() async throws {
-        let image = try await NetworkImage(data: Optional<String>.none)
+        let image = try await NetworkImage(data: Optional<UiMediaImage>.none)
             .frame(width: 120, height: 120).snapshot(colorScheme: .light)
         XCTAssertEqual(image.size.width, 120)
     }
 
     func testFailedBlockImageCannotBeSharedAsAPlaceholder() async throws {
         let url = "file:///nonexistent-flare-share-block-image.png"
-        let text = UiRichText(renderRuns: [RenderContent.BlockImage(url: url, href: nil)],
+        let text = UiRichText(renderRuns: [RenderContent.BlockImage(url: url, href: nil, proxy: ProxyRef.Global.shared)],
                               isRtl: false, raw: url, innerText: "", imageUrls: [url])
         do {
             _ = try await RichText(text: text).frame(width: 120).snapshot(colorScheme: .light)

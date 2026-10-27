@@ -26,6 +26,28 @@ final class StatusShareTests: XCTestCase {
         }
     }
 
+    func testReplyScreenshotIncludesTwoTextBlocksInBothThemes() async throws {
+        let root = post("root", text: "Original post")
+        let reply = post("reply", textBlocks: [
+            Array(repeating: "First reply block", count: 20).joined(separator: "\n"),
+            Array(repeating: "Second reply block", count: 20).joined(separator: "\n"),
+        ])
+        for theme in [ColorScheme.light, .dark] {
+            let base = try await StatusShareContent(data: root, statusKey: root.statusKey, replies: [])
+                .frame(width: 360).background(Color.flareSystemGroupedBackground)
+                .environment(\.colorScheme, theme).snapshot(colorScheme: theme)
+            let image = try await StatusShareContent(data: root, statusKey: root.statusKey, replies: [reply])
+                .frame(width: 360).background(Color.flareSystemGroupedBackground)
+                .environment(\.colorScheme, theme).snapshot(colorScheme: theme)
+            XCTAssertEqual(image.size.width, base.size.width)
+            XCTAssertGreaterThan(image.size.height - base.size.height, 600, "Both reply blocks must render in full")
+            let attachment = XCTAttachment(image: image)
+            attachment.name = "two-block-reply-\(theme)"
+            attachment.lifetime = .keepAlways
+            add(attachment)
+        }
+    }
+
     func testOversizedScreenshotFailsBeforeRasterAllocation() async throws {
         do {
             _ = try await Color.white.frame(width: 360, height: 20_000).snapshot(colorScheme: .light)
@@ -144,10 +166,16 @@ final class StatusShareTests: XCTestCase {
     }
 
     private func post(_ id: String, text: String) -> UiTimelineV2.Post {
+        post(id, textBlocks: [text])
+    }
+
+    private func post(_ id: String, textBlocks: [String]) -> UiTimelineV2.Post {
         let style = RenderTextStyle(link: nil, bold: false, italic: false, strikethrough: false,
                                     monospace: false, code: false, underline: false, small: false, time: false)
-        let rich = UiRichText(renderRuns: [RenderContent.Text(runs: [RenderRun.Text(text: text, style: style)],
-                                                            block: RenderBlockStyle())],
+        let text = textBlocks.joined(separator: "\n\n")
+        let rich = UiRichText(renderRuns: textBlocks.map {
+            RenderContent.Text(runs: [RenderRun.Text(text: $0, style: style)], block: RenderBlockStyle())
+        },
                               isRtl: false, raw: text, innerText: text, imageUrls: [])
         return UiTimelineV2.Post(platformId: "mastodon", images: [], sensitive: false, contentWarning: nil,
                                 user: nil, platformIcon: .world, sourceLanguages: [], translationDisplayState: .hidden,

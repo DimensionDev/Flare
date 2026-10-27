@@ -6,6 +6,7 @@ import dev.dimension.flare.data.datasource.microblog.SemanticPostAction
 import dev.dimension.flare.data.datasource.microblog.datasource.GalleryDetail
 import dev.dimension.flare.data.datasource.microblog.datasource.GalleryOrientation
 import dev.dimension.flare.data.datasource.microblog.semanticPostActionMenu
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.feature.plugin.wire.ArticleV1
 import dev.dimension.flare.feature.plugin.wire.DirectMessageRoomV1
 import dev.dimension.flare.feature.plugin.wire.DirectMessageV1
@@ -26,6 +27,7 @@ import dev.dimension.flare.feature.plugin.wire.SemanticActionV1
 import dev.dimension.flare.feature.plugin.wire.SocialListV1
 import dev.dimension.flare.feature.plugin.wire.VisibilityV1
 import dev.dimension.flare.feature.plugin.wire.requireValid
+import dev.dimension.flare.feature.plugin.wire.validatedHtml
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.ReferenceType
@@ -44,8 +46,8 @@ import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.UiTranslatableText
 import dev.dimension.flare.ui.model.uiArticleContentOf
+import dev.dimension.flare.ui.model.withProxy
 import dev.dimension.flare.ui.render.RenderContent
-import dev.dimension.flare.ui.render.parseHtml
 import dev.dimension.flare.ui.render.toUi
 import dev.dimension.flare.ui.render.toUiPlainText
 import dev.dimension.flare.ui.route.DeeplinkRoute
@@ -69,8 +71,10 @@ internal class PluginWireMapperV1(
     private val postMutationAvailable: Boolean,
     private val postDeleteAvailable: Boolean,
     private val composeAvailable: Boolean,
+    private val mediaNetwork: Boolean = false,
 ) {
     private val accountType: AccountType = accountKey?.let(AccountType::Specific) ?: AccountType.GuestHost(originHost)
+    private val mediaProxy = ProxyRef.forAccountType(accountType)
 
     fun profile(value: ProfileV1): UiProfile {
         value.requireValid()
@@ -178,9 +182,11 @@ internal class PluginWireMapperV1(
         value.coverUrl.requireHttpsUrl()
         val richText = value.content.toUi()
         val blocks =
-            richText.renderRuns.mapIndexedNotNull { index, content ->
-                (content as? RenderContent.Text)?.let {
-                    UiArticleBlock.Text(key = "${value.key.id}:$index", content = it)
+            richText.renderRuns.mapIndexed { index, content ->
+                val blockKey = "${value.key.id}:$index"
+                when (content) {
+                    is RenderContent.Text -> UiArticleBlock.Text(key = blockKey, content = content)
+                    is RenderContent.BlockImage -> UiArticleBlock.Image(key = blockKey, media = content.media)
                 }
             }
         return UiArticle(
@@ -339,31 +345,63 @@ internal class PluginWireMapperV1(
             accountType = accountType,
         )
     }
+
+    private fun RichTextV1.toUi() =
+        when (format) {
+            RichTextFormatV1.Plain -> {
+                value.toUiPlainText()
+            }
+
+            RichTextFormatV1.Html -> {
+                val html = validatedHtml("https://$originHost/")
+                require(mediaNetwork || (html.getElementsByTag("img").isEmpty() && html.getElementsByTag("emoji").isEmpty())) {
+                    "Plugin has no media network permission"
+                }
+                html.toUi().withProxy(mediaProxy)
+            }
+        }
+
+    private fun requireMediaUrl(value: String?) {
+        value.requireHttpsUrl()
+        require(value.isNullOrBlank() || mediaNetwork) { "Plugin has no media network permission" }
+    }
+
+    private fun MediaV1.toUi(sensitive: Boolean): UiMedia {
+        requireMediaUrl(url)
+        requireMediaUrl(previewUrl)
+        return when (type) {
+            MediaTypeV1.Image -> {
+                UiMedia.Image(
+                    url,
+                    previewUrl ?: url,
+                    description,
+                    height?.toFloat() ?: 0f,
+                    width?.toFloat() ?: 0f,
+                    sensitive,
+                )
+            }
+
+            MediaTypeV1.Video -> {
+                UiMedia.Video(url, previewUrl ?: url, description, height?.toFloat() ?: 0f, width?.toFloat() ?: 0f)
+            }
+
+            MediaTypeV1.Gif -> {
+                UiMedia.Gif(url, previewUrl ?: url, description, height?.toFloat() ?: 0f, width?.toFloat() ?: 0f)
+            }
+
+            MediaTypeV1.Audio -> {
+                UiMedia.Audio(url, description, previewUrl)
+            }
+        }.withProxy(mediaProxy)
+    }
+
+    private fun String?.toUiImage(): UiMedia.Image? {
+        requireMediaUrl(this)
+        return this?.takeIf(String::isNotBlank)?.let { UiMedia.Image(it, it, null, 0f, 0f, false, proxy = mediaProxy) }
+    }
 }
 
 private fun dev.dimension.flare.feature.plugin.wire.EntityKeyV1.toMicroBlogKey(): MicroBlogKey = MicroBlogKey(id, host)
-
-private fun RichTextV1.toUi() =
-    when (format) {
-        RichTextFormatV1.Plain -> value.toUiPlainText()
-        RichTextFormatV1.Html -> parseHtml(value).toUi()
-    }
-
-private fun MediaV1.toUi(sensitive: Boolean): UiMedia {
-    url.requireHttpsUrl()
-    previewUrl.requireHttpsUrl()
-    return when (type) {
-        MediaTypeV1.Image -> UiMedia.Image(url, previewUrl ?: url, description, height?.toFloat() ?: 0f, width?.toFloat() ?: 0f, sensitive)
-        MediaTypeV1.Video -> UiMedia.Video(url, previewUrl ?: url, description, height?.toFloat() ?: 0f, width?.toFloat() ?: 0f)
-        MediaTypeV1.Gif -> UiMedia.Gif(url, previewUrl ?: url, description, height?.toFloat() ?: 0f, width?.toFloat() ?: 0f)
-        MediaTypeV1.Audio -> UiMedia.Audio(url, description, previewUrl)
-    }
-}
-
-private fun String?.toUiImage(): UiMedia.Image? =
-    this?.takeIf(String::isNotBlank)?.also { it.requireHttpsUrl() }?.let {
-        UiMedia.Image(it, it, null, 0f, 0f, false)
-    }
 
 private fun VisibilityV1.toUiVisibility(): UiTimelineV2.Post.Visibility =
     when (this) {

@@ -188,6 +188,9 @@ internal class AccountRepository internal constructor(
     ) {
         withAccountChanges {
             val existingAccount = appDatabase.accountDao().getAccount(account.accountKey)
+            require(existingAccount == null || existingAccount.platformId == account.platformId) {
+                "This account belongs to another platform"
+            }
             restoreAccountsLocked(listOf(account.accountKey)) {
                 val credentialJson = credential.encodeJson(serializer)
                 val dbAccount =

@@ -17,6 +17,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFails
+import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
@@ -227,6 +228,25 @@ class PluginInstallerTest {
             )
             assertFails { installer.inspect(input) }
             Unit
+        }
+
+    @Test
+    fun mediaNetworkAccessIsReviewedAndNewGrantsAreWarned() =
+        runBlocking<Unit> {
+            TestFppFactory.write(input)
+            val previous = installer.inspect(input)
+            assertFalse(previous.permissions.any { it.type == PluginSensitivePermissionTypeV1.MediaNetwork })
+            installer.commit(previous, confirmed = true)
+            val changed =
+                TestFppFactory.validManifest.replace(
+                    "\"name\": \"Test plugin\",",
+                    "\"name\": \"Test plugin\", \"permissions\": { \"mediaNetwork\": true },",
+                )
+            TestFppFactory.write(input, TestFppFactory.validEntries(manifest = changed))
+            val preview = installer.inspect(input)
+            assertTrue(preview.permissions.any { it.type == PluginSensitivePermissionTypeV1.MediaNetwork })
+            assertTrue(preview.warnings.any { it.type == PluginInstallWarningTypeV1.AddedPermission })
+            assertFailsWith<IllegalArgumentException> { installer.commit(preview, confirmed = false) }
         }
 
     @Test

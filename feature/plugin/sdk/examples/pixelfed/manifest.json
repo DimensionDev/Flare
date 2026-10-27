@@ -13,6 +13,7 @@
     "fallback": "Pixelfed support implemented as a Flare social plugin"
   },
   "permissions": {
+    "mediaNetwork": true,
     "authOrigins": []
   },
   "platform": {

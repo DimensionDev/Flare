@@ -331,7 +331,7 @@ public data class ComposeConfig public constructor(
                 altTextMaxLength = minOf(altTextMaxLength, other.altTextMaxLength),
                 allowMediaOnly = allowMediaOnly && other.allowMediaOnly,
                 minCountForNew = maxOf(minCountForNew, other.minCountForNew),
-                supportedMimeTypes = supportedMimeTypes.intersectConstraint(other.supportedMimeTypes),
+                supportedMimeTypes = intersectMimeTypeConstraints(supportedMimeTypes, other.supportedMimeTypes),
                 compression = compression.merge(other.compression),
             )
 
@@ -476,9 +476,23 @@ public data class ComposeConfig public constructor(
     }
 }
 
-private fun Set<String>?.intersectConstraint(other: Set<String>?): Set<String>? =
-    when {
-        this == null -> other
-        other == null -> this
-        else -> this intersect other
+/** Null is unrestricted; an empty intersection permits no media. */
+public fun intersectMimeTypeConstraints(
+    first: Set<String>?,
+    second: Set<String>?,
+): Set<String>? {
+    fun Set<String>.normalized() = mapTo(linkedSetOf()) { it.substringBefore(';').trim().lowercase() }
+    if (first == null) return second?.normalized()
+    if (second == null) return first.normalized()
+    val normalizedSecond = second.normalized()
+    return first.normalized().flatMapTo(linkedSetOf()) { left ->
+        normalizedSecond.mapNotNull { right ->
+            when {
+                left == right -> left
+                left.endsWith("/*") && right.startsWith(left.removeSuffix("*")) -> right
+                right.endsWith("/*") && left.startsWith(right.removeSuffix("*")) -> left
+                else -> null
+            }
+        }
     }
+}

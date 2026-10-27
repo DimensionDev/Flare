@@ -23,11 +23,13 @@ import dev.dimension.flare.data.datasource.microblog.datasource.UserDataSource
 import dev.dimension.flare.data.datasource.microblog.handler.PostEventHandler
 import dev.dimension.flare.data.datasource.microblog.handler.PostHandler
 import dev.dimension.flare.data.datasource.microblog.handler.UserHandler
+import dev.dimension.flare.data.datasource.microblog.intersectMimeTypeConstraints
 import dev.dimension.flare.data.datasource.microblog.loader.PostLoader
 import dev.dimension.flare.data.datasource.microblog.loader.UserLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.notSupported
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.data.model.tab.TimelineCandidate
 import dev.dimension.flare.data.model.tab.TimelineSpec
 import dev.dimension.flare.feature.plugin.abi.PluginAbiV1
@@ -94,6 +96,7 @@ internal class PluginDataSourceV1 private constructor(
     private val dynamicTimelineSpec: TimelineSpec<PluginTimelineDataV1>?,
     private val coroutineScope: CoroutineScope?,
     private val cachedComposeConfig: ComposeConfigV1?,
+    private val loginProfile: ProfileV1?,
 ) : MicroblogDataSource,
     DataSourceCapabilityProvider,
     PluginNamedTimelineDataSourceV1 {
@@ -167,6 +170,7 @@ internal class PluginDataSourceV1 private constructor(
             override val userHandler: UserHandler =
                 UserHandler(
                     host = originHost,
+                    proxy = ProxyRef.forAccount(accountKey),
                     loader =
                         object : UserLoader {
                             override suspend fun userByHandleAndHost(uiHandle: UiHandle): UiProfile {
@@ -491,6 +495,9 @@ internal class PluginDataSourceV1 private constructor(
     private inner class ComposeCapabilityAdapter :
         ComposeDataSource,
         AuthenticatedMicroblogDataSource by AuthenticatedDelegate() {
+        override val composeProfile: UiProfile?
+            get() = loginProfile?.let(mapper::profile)
+
         override suspend fun publish(
             data: ComposeData,
             progress: () -> Unit,
@@ -649,6 +656,7 @@ internal class PluginDataSourceV1 private constructor(
                         plugin.installed.manifest.platform.composeDefaults,
                         account.snapshot.composeConfig,
                     ),
+                loginProfile = account.snapshot.profile,
             )
         }
 
@@ -700,6 +708,7 @@ internal class PluginDataSourceV1 private constructor(
                 dynamicTimelineSpec = dynamicTimelineSpec,
                 coroutineScope = null,
                 composeConfig = null,
+                loginProfile = null,
             )
         }
 
@@ -714,6 +723,7 @@ internal class PluginDataSourceV1 private constructor(
             dynamicTimelineSpec: TimelineSpec<PluginTimelineDataV1>?,
             coroutineScope: CoroutineScope?,
             composeConfig: ComposeConfigV1?,
+            loginProfile: ProfileV1?,
         ): PluginDataSourceV1 =
             PluginDataSourceV1(
                 plugin = plugin,
@@ -727,6 +737,7 @@ internal class PluginDataSourceV1 private constructor(
                         pluginId = plugin.installed.pluginId,
                         platformId = plugin.installed.manifest.platform.id,
                         accountKey = accountKey,
+                        mediaNetwork = plugin.installed.manifest.permissions.mediaNetwork,
                         originHost = Url(origin).accountHost(),
                         profileAvailable = operations[PluginAbiV1.Capabilities.PROFILE].orEmpty().containsAll(PROFILE_LOOKUP_OPERATIONS),
                         postDetailAvailable = "detail" in operations[PluginAbiV1.Capabilities.POST].orEmpty(),
@@ -748,6 +759,7 @@ internal class PluginDataSourceV1 private constructor(
                 dynamicTimelineSpec = dynamicTimelineSpec,
                 coroutineScope = coroutineScope,
                 cachedComposeConfig = composeConfig,
+                loginProfile = loginProfile,
             )
     }
 }
@@ -856,7 +868,11 @@ internal fun mergePluginComposeConfigV1(
                     minCountForNew = minCountForNew,
                     maxCount = maxCount,
                     maxBytes = minOf(manifest.media.maxBytes, instance.media.maxBytes),
-                    supportedMimeTypes = intersectMimeConstraints(manifest.media.supportedMimeTypes, instance.media.supportedMimeTypes),
+                    supportedMimeTypes =
+                        intersectMimeTypeConstraints(
+                            manifest.media.supportedMimeTypes.takeIf(Set<String>::isNotEmpty),
+                            instance.media.supportedMimeTypes.takeIf(Set<String>::isNotEmpty),
+                        )?.also { require(it.isNotEmpty()) { "Plugin compose MIME constraints do not overlap" } }.orEmpty(),
                     altTextMaxLength = minOf(manifest.media.altTextMaxLength, instance.media.altTextMaxLength),
                     canSensitive = manifest.media.canSensitive && instance.media.canSensitive,
                 )
@@ -908,33 +924,6 @@ internal fun mergePluginComposeConfigV1(
             },
     ).also(ComposeConfigV1::requireValid)
 }
-
-private fun intersectMimeConstraints(
-    first: Set<String>,
-    second: Set<String>,
-): Set<String> {
-    val normalizedFirst = first.mapTo(linkedSetOf(), String::lowercase)
-    val normalizedSecond = second.mapTo(linkedSetOf(), String::lowercase)
-    if (normalizedFirst.isEmpty()) return normalizedSecond
-    if (normalizedSecond.isEmpty()) return normalizedFirst
-    return normalizedFirst
-        .flatMapTo(linkedSetOf()) { firstType ->
-            normalizedSecond.mapNotNull { secondType -> intersectMimeType(firstType, secondType) }
-        }.also {
-            require(it.isNotEmpty()) { "Plugin compose MIME constraints do not overlap" }
-        }
-}
-
-private fun intersectMimeType(
-    first: String,
-    second: String,
-): String? =
-    when {
-        first == second -> first
-        first.endsWith("/*") && second.startsWith(first.removeSuffix("*")) -> second
-        second.endsWith("/*") && first.startsWith(second.removeSuffix("*")) -> first
-        else -> null
-    }
 
 private fun validateComposeData(
     data: ComposeData,

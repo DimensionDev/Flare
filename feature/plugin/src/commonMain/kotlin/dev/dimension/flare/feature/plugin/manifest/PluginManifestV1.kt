@@ -24,6 +24,7 @@ public data class PluginManifestV1(
 @Serializable
 public data class PluginPermissionsV1(
     val authOrigins: Set<String> = emptySet(),
+    val mediaNetwork: Boolean = false,
 )
 
 @Serializable

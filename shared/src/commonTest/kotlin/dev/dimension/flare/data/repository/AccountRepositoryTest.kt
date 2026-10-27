@@ -770,6 +770,20 @@ class AccountRepositoryTest : RobolectricTest() {
         }
 
     @Test
+    fun addingAnotherPlatformCannotReplaceAnExistingAccount() =
+        runTest {
+            val repository = createRepository(this)
+            repository.addAccount(UiAccount(accountKey, "Mastodon"), "original")
+            val original = appDatabase.accountDao().getAccount(accountKey)
+
+            assertFailsWith<IllegalArgumentException> {
+                repository.addAccount(UiAccount(accountKey, "OtherPlugin"), "replacement")
+            }
+
+            assertEquals(original, appDatabase.accountDao().getAccount(accountKey))
+        }
+
+    @Test
     fun reloginDoesNotPublishANewAccountEvent() =
         runTest {
             val repository = createRepository(this)
@@ -784,11 +798,12 @@ class AccountRepositoryTest : RobolectricTest() {
                 repository.addAccount(bob, "second")
                 assertEquals(bob.accountKey, assertIs<AccountChange.Added>(events.receive()).account.accountKey)
 
-                repository.addAccount(alice.copy(platformId = "Pixelfed"), "refreshed")
+                repository.addAccount(alice.copy(platformDisplayName = "Updated metadata"), "refreshed")
 
                 assertNull(withTimeoutOrNull(100) { events.receive() })
                 val stored = appDatabase.accountDao().getAccount(accountKey)
-                assertEquals("Pixelfed", stored?.platformId)
+                assertEquals("Mastodon", stored?.platformId)
+                assertEquals("Updated metadata", stored?.platformDisplayName)
                 assertEquals("\"refreshed\"", stored?.credential_json)
             } finally {
                 collection.cancel()

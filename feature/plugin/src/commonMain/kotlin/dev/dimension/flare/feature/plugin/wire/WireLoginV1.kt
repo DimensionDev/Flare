@@ -126,6 +126,7 @@ public data class AccountPluginSnapshotV1(
     val packageHash: String,
     val origin: String,
     val accountId: String,
+    val profile: ProfileV1,
     val manifestCapabilities: Map<String, Set<String>>,
     val negotiatedCapabilities: Map<String, Set<String>>,
     val composeConfig: ComposeConfigV1? = null,

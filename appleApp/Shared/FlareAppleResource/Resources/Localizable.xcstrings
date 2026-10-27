@@ -311,6 +311,23 @@
       }
     }
   },
+  "plugin_permission_media_network": {
+    "extractionState": "manual",
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Load media from any website, which may receive this plugin’s account data"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "从任意网站加载媒体，这些网站可能收到该插件的账户数据"
+        }
+      }
+    }
+  },
   "plugin_permissions": {
     "localizations": {
       "en": {

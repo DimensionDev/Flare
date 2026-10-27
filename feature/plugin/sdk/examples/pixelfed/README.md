@@ -16,6 +16,10 @@ Guest mode, lists, direct messages, notifications, custom UI, and plugin Deep
 Links are intentionally omitted. Flare hides those entries because the
 manifest does not declare their capabilities.
 
+The manifest explicitly requests `mediaNetwork` so avatars and federated/CDN
+images can load. Installation review discloses that media destinations may
+receive this plugin's account data.
+
 ## Build
 
 From the repository root:

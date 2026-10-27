@@ -320,6 +320,9 @@ private fun PluginInstallReviewDialog(
 
 @Composable
 private fun PluginSensitivePermissionV1.localizedDescription(): String {
+    if (type == dev.dimension.flare.feature.plugin.installer.PluginSensitivePermissionTypeV1.MediaNetwork) {
+        return stringResource(R.string.plugin_permission_media_network)
+    }
     val accountRelativePath =
         origin
             .takeIf { it == PluginAbiV1.ACCOUNT_ORIGIN || it.startsWith("${PluginAbiV1.ACCOUNT_ORIGIN}/") }

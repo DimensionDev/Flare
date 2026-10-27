@@ -404,6 +404,9 @@ public struct PluginManagementView: View {
     }
 
     private func permissionText(_ permission: PluginSensitivePermissionV1) -> String {
+        if permission.type == .mediaNetwork {
+            return String(localized: "plugin_permission_media_network")
+        }
         let accountToken = "$accountOrigin"
         let accountRelativePath =
             permission.origin == accountToken || permission.origin.hasPrefix(accountToken + "/")

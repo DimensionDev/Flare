@@ -69,6 +69,40 @@ class DesktopPluginManagementScreenTest {
     }
 
     @Test
+    fun installReviewDisclosesUnrestrictedMediaNetworking() {
+        compose.setContent {
+            if (visible) {
+                FlareTheme(isDarkTheme = false) {
+                    PluginInstallReviewDialog(
+                        review =
+                            dev.dimension.flare.feature.plugin.management.PluginInstallReviewV1(
+                                pluginId = "fixture.plugin",
+                                platformId = "Fixture",
+                                name = "Fixture",
+                                version = "1.0.0",
+                                existingVersion = null,
+                                capabilities = emptyList(),
+                                warnings = emptyList(),
+                                sourceUrl = null,
+                                permissions =
+                                    listOf(
+                                        dev.dimension.flare.feature.plugin.installer.PluginSensitivePermissionV1(
+                                            dev.dimension.flare.feature.plugin.installer.PluginSensitivePermissionTypeV1.MediaNetwork,
+                                            "*",
+                                        ),
+                                    ),
+                            ),
+                        busy = false,
+                        onConfirm = {},
+                        onCancel = {},
+                    )
+                }
+            }
+        }
+        compose.onNodeWithText("• Load media from any website, which may receive this plugin’s account data").assertIsDisplayed()
+    }
+
+    @Test
     fun longRepositoryUrlKeepsUninstallAndUpdateActionsVisible() {
         val repository = GitHubPluginRepositoryV1(1, "Tlaster", "flare-plugin-github-e2e-20261028")
         val plugin =

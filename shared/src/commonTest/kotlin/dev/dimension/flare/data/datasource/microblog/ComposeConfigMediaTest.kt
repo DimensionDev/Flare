@@ -9,6 +9,18 @@ import kotlin.test.assertTrue
 
 class ComposeConfigMediaTest {
     @Test
+    fun compatibleWildcardConstraintsRemainCompatibleAcrossAccounts() {
+        val first = media(maxSizeBytes = 1_000_000, maxWidth = 100, maxHeight = 100, mimeTypes = setOf("IMAGE/*"))
+        val second = media(maxSizeBytes = 1_000_000, maxWidth = 100, maxHeight = 100, mimeTypes = setOf("image/png"))
+
+        assertTrue(first.media!!.supportsMimeType("image/png"))
+        assertTrue(second.media!!.supportsMimeType("image/png"))
+        assertTrue(first.merge(second).media!!.supportsMimeType("image/png"))
+        assertTrue(second.merge(first).media!!.supportsMimeType("image/png"))
+        assertFalse(first.merge(second).media!!.supportsMimeType("image/jpeg"))
+    }
+
+    @Test
     fun mergedAccountsUseStrictestCompressionLimits() {
         val first = media(maxSizeBytes = 16_000_000, maxWidth = 2_000, maxHeight = 4_000)
         val second = media(maxSizeBytes = 5_000_000, maxWidth = 4_000, maxHeight = 2_000)

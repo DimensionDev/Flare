@@ -221,6 +221,13 @@ class PluginAccountV1Test {
                     packageHash = plugin.installed.packageHash,
                     origin = "https://example.social",
                     accountId = "me",
+                    profile =
+                        dev.dimension.flare.feature.plugin.wire.ProfileV1(
+                            dev.dimension.flare.feature.plugin.wire
+                                .EntityKeyV1("me", "example.social"),
+                            "me",
+                            "Me",
+                        ),
                     manifestCapabilities = mapOf(PluginAbiV1.Capabilities.POST to previous),
                     negotiatedCapabilities = mapOf(PluginAbiV1.Capabilities.POST to negotiated),
                     credentialSchemaVersion = 1,

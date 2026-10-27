@@ -378,6 +378,7 @@ public fun EntityKeyV1.requireValid() {
 
 private fun RichTextV1.requireValid() {
     require(value.length <= WireLimitsV1.MAX_RICH_TEXT_LENGTH) { "Rich text is too large" }
+    if (format == RichTextFormatV1.Html) validatedHtml()
 }
 
 private fun MediaV1.requireValid() {

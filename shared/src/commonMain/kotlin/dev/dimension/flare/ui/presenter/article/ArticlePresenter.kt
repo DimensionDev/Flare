@@ -14,6 +14,8 @@ import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.toPagingState
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.saveToDatabase
+import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
+import dev.dimension.flare.data.datasource.microblog.accountKeyOrNull
 import dev.dimension.flare.data.datasource.microblog.capabilities
 import dev.dimension.flare.data.datasource.microblog.datasource.ArticleDataSource
 import dev.dimension.flare.data.datasource.microblog.paging.TimelinePagingMapper
@@ -54,21 +56,7 @@ public class ArticlePresenter(
         accountService.accountServiceFlow(accountType)
     }
 
-    private val articleStateFlow by lazy {
-        serviceFlow.map { service ->
-            val articleDataSource =
-                service.capabilities.article
-                    ?: error("Current service does not support article data source")
-            articleDataSource
-                .article(
-                    articleKey,
-                ).withProxy(
-                    ProxyRef.forAccount(
-                        (service as? dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource)?.accountKey,
-                    ),
-                )
-        }
-    }
+    private val articleStateFlow by lazy { articleFlow(serviceFlow, articleKey) }
 
     private val commentsFlow by lazy {
         articleCommentsFlow(
@@ -122,6 +110,24 @@ public class ArticlePresenter(
         }
     }
 }
+
+internal fun articleFlow(
+    dataSources: Flow<MicroblogDataSource>,
+    articleKey: MicroBlogKey,
+): Flow<UiArticle> =
+    dataSources.map { service ->
+        val articleDataSource =
+            service.capabilities.article
+                ?: error("Current service does not support article data source")
+        articleDataSource
+            .article(
+                articleKey,
+            ).withProxy(
+                ProxyRef.forAccount(
+                    service.accountKeyOrNull,
+                ),
+            )
+    }
 
 @OptIn(ExperimentalCoroutinesApi::class)
 internal fun articleCommentsFlow(

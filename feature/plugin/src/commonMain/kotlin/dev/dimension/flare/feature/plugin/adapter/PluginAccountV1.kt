@@ -43,6 +43,7 @@ public fun RunningPluginV1.accountCredential(success: LoginSuccessV1): PluginAcc
                 packageHash = installed.packageHash,
                 origin = PluginUrlPolicy.requireOrigin(success.origin),
                 accountId = success.accountId,
+                profile = success.profile,
                 manifestCapabilities = manifestCapabilities,
                 negotiatedCapabilities = success.capabilities,
                 composeConfig = success.composeConfig,
@@ -126,6 +127,14 @@ internal fun PluginAccountCredentialV1.requireValid(plugin: RunningPluginV1) {
         "Invalid plugin account ID"
     }
     require(PluginUrlPolicy.requireOrigin(snapshot.origin) == snapshot.origin) { "Invalid plugin account origin" }
+    snapshot.profile.requireValid()
+    require(
+        snapshot.profile.key.id == snapshot.accountId &&
+            snapshot.profile.key.host
+                .equals(Url(snapshot.origin).accountHost(), true),
+    ) {
+        "Plugin account profile identity mismatch"
+    }
     require(snapshot.credentialSchemaVersion > 0 && snapshot.timelineSchemaVersion > 0) { "Invalid plugin account schema" }
     require(snapshot.manifestCapabilities.isCapabilitySnapshot() && snapshot.negotiatedCapabilities.isCapabilitySnapshot()) {
         "Invalid plugin account capabilities"

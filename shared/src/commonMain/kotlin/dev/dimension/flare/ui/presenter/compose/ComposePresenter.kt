@@ -15,6 +15,7 @@ import dev.dimension.flare.common.combineLatestFlowLists
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.datasource.microblog.ComposeType
+import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.accountKeyOrNull
 import dev.dimension.flare.data.datasource.microblog.capabilities
 import dev.dimension.flare.data.datastore.AppDataStore
@@ -129,23 +130,7 @@ public class ComposePresenter(
         )
     }
 
-    private val allUsersFlow by lazy {
-        allAccountServicesFlow(accountRepository)
-            .map { services ->
-                services.mapNotNull { service ->
-                    val profile = service.capabilities.profile
-                    val accountKey = service.accountKeyOrNull
-                    if (profile != null && service.capabilities.compose != null && accountKey != null) {
-                        profile.userHandler.userById(accountKey.id).toUi().map {
-                            accountKey to it
-                        }
-                    } else {
-                        null
-                    }
-                }
-            }.combineLatestFlowLists()
-            .map { it.toMap() }
-    }
+    private val allUsersFlow by lazy { observeComposeUsers(allAccountServicesFlow(accountRepository)) }
 
     private val activeStatusFlow by lazy {
         MutableStateFlow(status)
@@ -997,6 +982,28 @@ internal fun observeComposeStatusTarget(
                 ?: fallbackAccountType as? AccountType.Specific
         composeStatus to resolvedAccountType
     }.distinctUntilChanged()
+
+internal fun observeComposeUsers(servicesFlow: Flow<List<MicroblogDataSource>>): Flow<Map<MicroBlogKey, UiState<UiProfile>>> =
+    servicesFlow
+        .map { services ->
+            services.mapNotNull { service ->
+                val profile = service.capabilities.profile
+                val accountKey = service.accountKeyOrNull
+                val compose = service.capabilities.compose
+                if (compose != null && accountKey != null) {
+                    val userFlow =
+                        profile?.userHandler?.userById(accountKey.id)?.toUi()
+                            ?: compose.composeProfile?.let { flowOf(UiState.Success(it)) }
+                            ?: return@mapNotNull null
+                    userFlow.map {
+                        accountKey to it
+                    }
+                } else {
+                    null
+                }
+            }
+        }.combineLatestFlowLists()
+        .map { it.toMap() }
 
 internal fun observeAllComposeAccounts(
     accountFlows: Flow<List<Flow<Pair<MicroBlogKey, UiState<UiAccount>>>>>,

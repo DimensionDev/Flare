@@ -300,6 +300,7 @@ public data class PluginSensitivePermissionV1(
 
 public enum class PluginSensitivePermissionTypeV1 {
     NetworkOrigin,
+    MediaNetwork,
     Cookie,
 }
 
@@ -369,6 +370,9 @@ private fun PluginManifestV1.sensitivePermissions(): Set<PluginSensitivePermissi
         add(PluginSensitivePermissionV1(PluginSensitivePermissionTypeV1.NetworkOrigin, PluginAbiV1.ACCOUNT_ORIGIN))
         permissions.authOrigins.forEach { origin ->
             add(PluginSensitivePermissionV1(PluginSensitivePermissionTypeV1.NetworkOrigin, origin))
+        }
+        if (permissions.mediaNetwork) {
+            add(PluginSensitivePermissionV1(PluginSensitivePermissionTypeV1.MediaNetwork, "*"))
         }
         platform.loginMethods.forEach { method ->
             method.cookie?.probes?.forEach { probe ->

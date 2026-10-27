@@ -1,17 +1,25 @@
 package dev.dimension.flare.feature.plugin.adapter
 
+import dev.dimension.flare.data.model.ProxyRef
+import dev.dimension.flare.feature.plugin.wire.ArticleV1
 import dev.dimension.flare.feature.plugin.wire.EntityKeyV1
+import dev.dimension.flare.feature.plugin.wire.GalleryV1
+import dev.dimension.flare.feature.plugin.wire.MediaTypeV1
+import dev.dimension.flare.feature.plugin.wire.MediaV1
 import dev.dimension.flare.feature.plugin.wire.PostDetailTypeV1
 import dev.dimension.flare.feature.plugin.wire.PostV1
 import dev.dimension.flare.feature.plugin.wire.ProfileV1
+import dev.dimension.flare.feature.plugin.wire.RichTextFormatV1
 import dev.dimension.flare.feature.plugin.wire.RichTextV1
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.ClickEvent
+import dev.dimension.flare.ui.model.UiArticleBlock
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.route.DeeplinkRoute
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertIs
 import kotlin.test.assertNotEquals
 
@@ -24,6 +32,100 @@ class PluginWireMapperV1Test {
             createdAt = "2026-10-27T00:00:00Z",
             content = RichTextV1(value = "Preview"),
         )
+
+    @Test
+    fun remoteMediaRequiresAnExplicitNetworkGrant() {
+        val denied = createMapper(MicroBlogKey("me", "local.example"), mediaNetwork = false)
+        assertFailsWith<IllegalArgumentException> {
+            denied.profile(post.author.copy(avatarUrl = "https://unapproved.example/collect?token=dummy"))
+        }
+        assertFailsWith<IllegalArgumentException> {
+            denied.post(post.copy(media = listOf(MediaV1("image", MediaTypeV1.Image, "https://cdn.example/image.png"))))
+        }
+        assertFailsWith<IllegalArgumentException> {
+            denied.post(post.copy(content = RichTextV1(RichTextFormatV1.Html, "<p><img src='https://cdn.example/image.png'></p>")))
+        }
+        assertIs<UiTimelineV2.TimelinePostItem>(denied.post(post))
+        assertEquals(
+            "https://cdn.example/avatar.png",
+            mapper.profile(post.author.copy(avatarUrl = "https://cdn.example/avatar.png")).avatar?.url,
+        )
+    }
+
+    @Test
+    fun richTextResolvesRelativeResourcesAtTheVerifiedOrigin() {
+        val value = mapper.post(post.copy(content = RichTextV1(RichTextFormatV1.Html, "<p><img src='/image.png'></p>")))
+        val image =
+            assertIs<UiTimelineV2.TimelinePostItem>(value)
+                .post.content.original.imageMedias
+                .single()
+        assertEquals("https://local.example/image.png", image.url)
+        assertEquals(ProxyRef.Account(MicroBlogKey("me", "local.example")), image.proxy)
+    }
+
+    @Test
+    fun galleryMediaKeepsTheViewingAccountScope() {
+        val value =
+            GalleryV1(
+                key = post.key,
+                title = "Gallery",
+                createdAt = post.createdAt,
+                url = "https://remote.example/gallery",
+                author = post.author.copy(avatarUrl = "https://remote.example/avatar.png"),
+                images = listOf(MediaV1("image", MediaTypeV1.Image, "https://remote.example/image.png")),
+            )
+        val detail = mapper.gallery(value)
+
+        assertEquals(ProxyRef.Account(MicroBlogKey("me", "local.example")), detail.images.single().proxy)
+        assertEquals(detail.images.single().proxy, detail.author?.avatar?.proxy)
+        assertEquals(
+            ProxyRef.Global,
+            createMapper(null)
+                .gallery(value)
+                .images
+                .single()
+                .proxy,
+        )
+    }
+
+    @Test
+    fun articleBlockImagesKeepTheirPosition() {
+        val value =
+            ArticleV1(
+                key = post.key,
+                title = "Article",
+                content =
+                    RichTextV1(
+                        RichTextFormatV1.Html,
+                        "<p>Before</p><figure><img src='https://remote.example/image.png'></figure><p>After</p>",
+                    ),
+            )
+        val blocks = mapper.article(value).content.blocks
+
+        assertEquals(3, blocks.size)
+        assertIs<UiArticleBlock.Text>(blocks[0])
+        assertEquals("https://remote.example/image.png", assertIs<UiArticleBlock.Image>(blocks[1]).media.url)
+        assertIs<UiArticleBlock.Text>(blocks[2])
+    }
+
+    @Test
+    fun richTextRejectsLocalResourcesAndUnsafeLinks() {
+        listOf(
+            "file:///private/tmp/private.png",
+            "content://private/image",
+            "data:image/png;base64,AAA",
+            "http://example.com/image",
+        ).forEach { url ->
+            assertFailsWith<IllegalArgumentException>(url) {
+                mapper.post(post.copy(content = RichTextV1(RichTextFormatV1.Html, "<p><img src='$url'></p>")))
+            }
+        }
+        listOf("javascript:alert(1)", "file:///private/tmp/private.png", "intent://example").forEach { url ->
+            assertFailsWith<IllegalArgumentException>(url) {
+                mapper.post(post.copy(content = RichTextV1(RichTextFormatV1.Html, "<a href='$url'>link</a>")))
+            }
+        }
+    }
 
     @Test
     fun remoteProfileHandleKeepsItsFederatedHost() {
@@ -107,9 +209,13 @@ class PluginWireMapperV1Test {
         )
     }
 
-    private fun createMapper(accountKey: MicroBlogKey?): PluginWireMapperV1 =
+    private fun createMapper(
+        accountKey: MicroBlogKey?,
+        mediaNetwork: Boolean = true,
+    ): PluginWireMapperV1 =
         PluginWireMapperV1(
             pluginId = "test.plugin",
+            mediaNetwork = mediaNetwork,
             platformId = "Test",
             accountKey = accountKey,
             originHost = "local.example",

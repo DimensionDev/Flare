@@ -72,6 +72,7 @@ import dev.dimension.flare.plugin_operation_failed
 import dev.dimension.flare.plugin_permission_account_origin
 import dev.dimension.flare.plugin_permission_account_origin_label
 import dev.dimension.flare.plugin_permission_cookie
+import dev.dimension.flare.plugin_permission_media_network
 import dev.dimension.flare.plugin_permissions
 import dev.dimension.flare.plugin_rebuild_index
 import dev.dimension.flare.plugin_restart_required
@@ -305,7 +306,7 @@ internal fun DesktopPluginManagementScreen(onBack: () -> Unit) {
 }
 
 @Composable
-private fun PluginInstallReviewDialog(
+internal fun PluginInstallReviewDialog(
     review: PluginInstallReviewV1,
     busy: Boolean,
     onConfirm: () -> Unit,
@@ -360,6 +361,9 @@ private fun PluginInstallReviewDialog(
 
 @Composable
 private fun PluginSensitivePermissionV1.localizedDescription(): String {
+    if (type == dev.dimension.flare.feature.plugin.installer.PluginSensitivePermissionTypeV1.MediaNetwork) {
+        return stringResource(Res.string.plugin_permission_media_network)
+    }
     val accountRelativePath =
         origin
             .takeIf { it == PluginAbiV1.ACCOUNT_ORIGIN || it.startsWith("${PluginAbiV1.ACCOUNT_ORIGIN}/") }

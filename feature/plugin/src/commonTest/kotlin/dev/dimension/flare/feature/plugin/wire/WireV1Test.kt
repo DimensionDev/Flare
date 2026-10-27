@@ -161,6 +161,13 @@ class WireV1Test {
                         packageHash = "a".repeat(64),
                         origin = "https://example.social",
                         accountId = "me",
+                        profile =
+                            dev.dimension.flare.feature.plugin.wire.ProfileV1(
+                                dev.dimension.flare.feature.plugin.wire
+                                    .EntityKeyV1("me", "example.social"),
+                                "me",
+                                "Me",
+                            ),
                         manifestCapabilities = mapOf("flare.datasource.timeline/v1" to setOf("page")),
                         negotiatedCapabilities = mapOf("flare.datasource.timeline/v1" to setOf("page")),
                         credentialSchemaVersion = 1,

@@ -69,6 +69,32 @@ class PluginDetailCapabilityTest {
         }
 
     @Test
+    fun composeWithoutProfileCapabilityKeepsThePersistedLoginProfile() =
+        runBlocking<Unit> {
+            val manifest =
+                MANIFEST.replace(
+                    "\"capabilities\": {",
+                    """
+                    "composeDefaults": { "text": { "maxLength": 1000 } },
+                    "capabilities": { "flare.datasource.compose/v1": { "operations": { "publish": {} } },
+                    """.trimIndent(),
+                )
+            val script =
+                SCRIPT.replace(
+                    "definePlugin({ capabilities: {",
+                    """
+                    definePlugin({ capabilities: {
+                    compose: { publish() { return { post: post("published") }; } },
+                    """.trimIndent(),
+                )
+            val dataSource = authenticated(install(manifest, script))
+            assertEquals(null, dataSource.capabilitySet.profile)
+            val profile = requireNotNull(dataSource.capabilitySet.compose).composeProfile
+            assertEquals(MicroBlogKey("account-1", "plugin.example"), profile?.key)
+            assertEquals("Test", profile?.name?.raw)
+        }
+
+    @Test
     fun coldListAndDirectMessageDetailsCallDedicatedPluginMethods() =
         runBlocking {
             val plugin = install()
@@ -249,9 +275,12 @@ class PluginDetailCapabilityTest {
         )
     }
 
-    private suspend fun install(): RunningPluginV1 {
+    private suspend fun install(
+        manifest: String = MANIFEST,
+        script: String = SCRIPT,
+    ): RunningPluginV1 {
         val input = root / "plugin.fpp"
-        TestFppFactory.write(input, TestFppFactory.validEntries(manifest = MANIFEST, script = SCRIPT))
+        TestFppFactory.write(input, TestFppFactory.validEntries(manifest = manifest, script = script))
         val namespace = root / "plugin-store"
         val store = PluginStateStore.open(fileSystem, namespace)
         PluginInstaller(fileSystem, store).let { installer -> installer.inspect(input).also { installer.commit(it, true) } }
@@ -294,6 +323,7 @@ private const val MANIFEST =
       "id": "dev.dimension.flare.test.detail",
       "version": "1.0.0",
       "name": "Detail test",
+      "permissions": { "mediaNetwork": true },
       "platform": {
         "id": "DetailTest",
         "name": "Detail test",

@@ -23,6 +23,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SegmentedListItem
 import androidx.compose.material3.Text
@@ -155,16 +156,13 @@ internal fun ProxySettingsContent(
                                             },
                                         )
                                         DropdownMenuItem(
-                                            text = {
-                                                Text(stringResource(R.string.proxy_delete), color = MaterialTheme.colorScheme.error)
-                                            },
-                                            leadingIcon = {
-                                                FAIcon(
-                                                    FontAwesomeIcons.Solid.Trash,
-                                                    contentDescription = null,
-                                                    tint = MaterialTheme.colorScheme.error,
-                                                )
-                                            },
+                                            text = { Text(stringResource(R.string.proxy_delete)) },
+                                            leadingIcon = { FAIcon(FontAwesomeIcons.Solid.Trash, contentDescription = null) },
+                                            colors =
+                                                MenuDefaults.itemColors(
+                                                    textColor = MaterialTheme.colorScheme.error,
+                                                    leadingIconColor = MaterialTheme.colorScheme.error,
+                                                ),
                                             enabled = state.operation?.isLoading != true && !inUse,
                                             onClick = {
                                                 showMenu = false

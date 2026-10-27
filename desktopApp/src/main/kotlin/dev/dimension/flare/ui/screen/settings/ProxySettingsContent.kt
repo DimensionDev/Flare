@@ -93,6 +93,7 @@ import io.github.composefluent.component.ComboBox
 import io.github.composefluent.component.ContentDialog
 import io.github.composefluent.component.ContentDialogButton
 import io.github.composefluent.component.FluentDialog
+import io.github.composefluent.component.ListItemDefaults
 import io.github.composefluent.component.MenuFlyoutContainer
 import io.github.composefluent.component.MenuFlyoutItem
 import io.github.composefluent.component.ProgressBar
@@ -140,16 +141,15 @@ internal fun ProxySettingsContent(
                                     },
                                 )
                                 MenuFlyoutItem(
-                                    text = {
-                                        Text(stringResource(Res.string.proxy_delete), color = FluentTheme.colors.system.critical)
-                                    },
-                                    icon = {
-                                        FAIcon(
-                                            FontAwesomeIcons.Solid.Trash,
-                                            contentDescription = null,
-                                            tint = FluentTheme.colors.system.critical,
-                                        )
-                                    },
+                                    text = { Text(stringResource(Res.string.proxy_delete)) },
+                                    icon = { FAIcon(FontAwesomeIcons.Solid.Trash, contentDescription = null) },
+                                    colors =
+                                        ListItemDefaults.defaultListItemColors(
+                                            default =
+                                                ListItemDefaults.defaultListItemColors().default.copy(
+                                                    contentColor = FluentTheme.colors.system.critical,
+                                                ),
+                                        ),
                                     enabled = state.operation?.isLoading != true && !inUse,
                                     onClick = {
                                         isFlyoutVisible = false

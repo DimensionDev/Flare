@@ -31,6 +31,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import compose.icons.FontAwesomeIcons
@@ -51,6 +52,7 @@ import dev.dimension.flare.feature.plugin.management.PluginInstallReviewV1
 import dev.dimension.flare.feature.plugin.management.PluginManagementItemV1
 import dev.dimension.flare.feature.plugin.management.PluginManagementPresenterV1
 import dev.dimension.flare.feature.plugin.management.PluginManagementStateV1
+import dev.dimension.flare.more
 import dev.dimension.flare.plugin_capabilities
 import dev.dimension.flare.plugin_check_updates
 import dev.dimension.flare.plugin_cleanup
@@ -99,6 +101,9 @@ import dev.dimension.flare.ui.component.resolveText
 import dev.dimension.flare.ui.theme.LocalComposeWindow
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import io.github.composefluent.FluentTheme
+import io.github.composefluent.ProvideTextStyle
+import io.github.composefluent.background.BackgroundSizing
+import io.github.composefluent.background.Layer
 import io.github.composefluent.component.AccentButton
 import io.github.composefluent.component.CardExpanderItem
 import io.github.composefluent.component.ComboBox
@@ -217,7 +222,7 @@ internal fun DesktopPluginManagementScreen(onBack: () -> Unit) {
                     ) {
                         FAIcon(
                             imageVector = FontAwesomeIcons.Solid.EllipsisVertical,
-                            contentDescription = null,
+                            contentDescription = stringResource(Res.string.more),
                         )
                     }
                     MenuFlyout(
@@ -225,6 +230,14 @@ internal fun DesktopPluginManagementScreen(onBack: () -> Unit) {
                         onDismissRequest = { showsMaintenanceMenu = false },
                         placement = FlyoutPlacement.BottomAlignedEnd,
                     ) {
+                        MenuFlyoutItem(
+                            text = { Text(stringResource(Res.string.plugin_install_github)) },
+                            onClick = {
+                                showsMaintenanceMenu = false
+                                presenter.clearGitHubRepository()
+                                showsGitHubInstall = true
+                            },
+                        )
                         MenuFlyoutItem(
                             text = { Text(stringResource(Res.string.plugin_check_updates)) },
                             enabled = state.plugins.any { it.sourceUrl != null },
@@ -252,13 +265,6 @@ internal fun DesktopPluginManagementScreen(onBack: () -> Unit) {
                         )
                     }
                 }
-                SubtleButton(
-                    disabled = state.busy,
-                    onClick = {
-                        presenter.clearGitHubRepository()
-                        showsGitHubInstall = true
-                    },
-                ) { Text(stringResource(Res.string.plugin_install_github)) }
                 AccentButton(
                     disabled = state.busy,
                     onClick = {
@@ -519,16 +525,23 @@ private fun PluginManagementList(
 }
 
 @Composable
-private fun PluginItem(
+internal fun PluginItem(
     plugin: PluginManagementItemV1,
     busy: Boolean,
     onSetEnabled: (String, Boolean) -> Unit,
     onUninstall: (String) -> Unit,
     onUpdate: (String) -> Unit,
 ) {
-    CardExpanderItem(
-        heading = { Text(plugin.nameText.resolveText()) },
-        icon = {
+    Layer(
+        modifier = Modifier.fillMaxWidth(),
+        color = FluentTheme.colors.background.card.default,
+        backgroundSizing = BackgroundSizing.InnerBorderEdge,
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
             AsyncImage(
                 model = File(plugin.iconPath),
                 contentDescription = plugin.name,
@@ -538,29 +551,28 @@ private fun PluginItem(
                         .size(40.dp)
                         .clip(RoundedCornerShape(8.dp)),
             )
-        },
-        caption = {
-            Column {
-                Text("${plugin.platformId} · ${plugin.version}")
-                plugin.sourceUrl?.let { Text(it) }
-                plugin.availableUpdate?.let { update ->
-                    SubtleButton(disabled = busy, onClick = { onUpdate(plugin.pluginId) }) {
-                        Text("${stringResource(Res.string.plugin_update)} ${update.tag}")
+            Column(Modifier.weight(1f)) {
+                Text(plugin.nameText.resolveText(), maxLines = 2, overflow = TextOverflow.Ellipsis)
+                ProvideTextStyle(FluentTheme.typography.caption.copy(color = FluentTheme.colors.text.text.secondary)) {
+                    Text("${plugin.platformId} · ${plugin.version}")
+                    plugin.sourceUrl?.let { Text(it, maxLines = 2, overflow = TextOverflow.Ellipsis) }
+                    plugin.availableUpdate?.let { update ->
+                        SubtleButton(disabled = busy, onClick = { onUpdate(plugin.pluginId) }) {
+                            Text("${stringResource(Res.string.plugin_update)} ${update.tag}")
+                        }
+                    }
+                    Text(
+                        if (plugin.running) {
+                            stringResource(Res.string.plugin_running)
+                        } else {
+                            stringResource(Res.string.plugin_inactive)
+                        },
+                    )
+                    if (plugin.pendingRestart) {
+                        Text(stringResource(Res.string.plugin_restart_required))
                     }
                 }
-                Text(
-                    if (plugin.running) {
-                        stringResource(Res.string.plugin_running)
-                    } else {
-                        stringResource(Res.string.plugin_inactive)
-                    },
-                )
-                if (plugin.pendingRestart) {
-                    Text(stringResource(Res.string.plugin_restart_required))
-                }
             }
-        },
-        trailing = {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
@@ -581,8 +593,8 @@ private fun PluginItem(
                     )
                 }
             }
-        },
-    )
+        }
+    }
 }
 
 @Composable

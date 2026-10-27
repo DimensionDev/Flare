@@ -10,6 +10,19 @@ plugins {
     alias(libs.plugins.compose.compiler)
 }
 
+tasks.withType<org.gradle.api.tasks.testing.Test>().configureEach {
+    val livePhase = providers.gradleProperty("flare.plugin.live.phase")
+    listOf("phase", "repository", "root").forEach { key ->
+        providers.gradleProperty("flare.plugin.live.$key").orNull?.let { systemProperty("flare.plugin.live.$key", it) }
+    }
+    if (livePhase.isPresent) {
+        systemProperty("java.net.useSystemProxies", "true")
+        outputs.upToDateWhen { false }
+        outputs.doNotCacheIf("Live GitHub verification must perform real requests") { true }
+        testLogging.showStandardStreams = true
+    }
+}
+
 kotlin {
     flare {
         namespace = "dev.dimension.flare.feature.plugin"

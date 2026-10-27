@@ -22,9 +22,13 @@ import dev.dimension.flare.testPlatformRegistry
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.home.RememberedAccountSelection
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collect
@@ -32,6 +36,8 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlin.test.AfterTest
@@ -380,11 +386,19 @@ class AccountRepositoryTest : RobolectricTest() {
         insertAccount()
         appDatabase.accountDao().insert(DbAccount(otherAccountKey, "{}", "Mastodon", last_active = 2L, sort_id = 1L))
         val keys = repository.allAccounts.first().map { it.accountKey }
-        val openPage = RememberedAccountSelection(preferences, this)
+        val openPage =
+            RememberedAccountSelection(preferences, this, repository.accountMutationMutex, accountExists = {
+                repository.find(it) !=
+                    null
+            })
         openPage.updateAccounts(keys)
         openPage.restore()
         openPage.selectAccount(otherAccountKey)
-        val closedPage = RememberedAccountSelection(preferences, this)
+        val closedPage =
+            RememberedAccountSelection(preferences, this, repository.accountMutationMutex, accountExists = {
+                repository.find(it) !=
+                    null
+            })
         closedPage.updateAccounts(keys)
         closedPage.restore()
         closedPage.selectAccount(accountKey)
@@ -401,9 +415,13 @@ class AccountRepositoryTest : RobolectricTest() {
             concurrentSelection.join()
 
             assertNull(repository.find(accountKey))
+            repository.addAccount(UiAccount(accountKey, "Mastodon"), "readded").join()
             assertEquals(expectedSaved, preferences.updateData { it }.selectedAccountKey)
-            appDatabase.accountDao().insert(DbAccount(accountKey, "{}", "Mastodon", last_active = 3L, sort_id = 2L))
-            val reopened = RememberedAccountSelection(preferences, this)
+            val reopened =
+                RememberedAccountSelection(preferences, this, repository.accountMutationMutex, accountExists = {
+                    repository.find(it) !=
+                        null
+                })
             reopened.updateAccounts(repository.allAccounts.first().map { it.accountKey })
             reopened.restore()
             assertEquals(otherAccountKey, reopened.selectedAccountKey.first())
@@ -411,6 +429,183 @@ class AccountRepositoryTest : RobolectricTest() {
             concurrentSelection.cancel()
         }
     }
+
+    @Test
+    fun lateNotificationSelectionCannotRestoreADeletedAccount() =
+        runTest {
+            checkLatePageSelection(appDataStore.notificationPreferences)
+        }
+
+    @Test
+    fun lateDiscoverSelectionCannotRestoreADeletedAccount() =
+        runTest {
+            checkLatePageSelection(appDataStore.discoverPreferences)
+        }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private suspend fun TestScope.checkLatePageSelection(preferences: DataStore<AccountSelectionPreferences>) {
+        val repository = createRepository(this)
+        insertAccount()
+        appDatabase.accountDao().insert(DbAccount(otherAccountKey, "{}", "Mastodon", last_active = 2L, sort_id = 1L))
+        preferences.updateData { it.copy(selectedAccountKey = otherAccountKey) }
+        val openPage =
+            RememberedAccountSelection(preferences, this, repository.accountMutationMutex, accountExists = {
+                repository.find(it) !=
+                    null
+            })
+        openPage.restore()
+        val removalObserved = CompletableDeferred<Unit>()
+        val deliverRemoval = CompletableDeferred<Unit>()
+        val saveEntered = CompletableDeferred<Unit>()
+        val releaseSave = CompletableDeferred<Unit>()
+        val pendingSave =
+            launch(start = CoroutineStart.LAZY) {
+                preferences.updateData {
+                    saveEntered.complete(Unit)
+                    releaseSave.await()
+                    it
+                }
+            }
+        val page =
+            launch {
+                repository.allAccounts.collect { accounts ->
+                    val keys = accounts.map { it.accountKey }
+                    if (accountKey !in keys) {
+                        removalObserved.complete(Unit)
+                        deliverRemoval.await()
+                    }
+                    openPage.updateAccounts(keys)
+                }
+            }
+        try {
+            openPage.selectedAccountKey.first { it == otherAccountKey }
+            repository.delete(accountKey).join()
+            removalObserved.await()
+            assertNull(repository.find(accountKey))
+            assertEquals(otherAccountKey, preferences.updateData { it }.selectedAccountKey)
+
+            pendingSave.start()
+            saveEntered.await()
+            openPage.selectAccount(accountKey)
+            page.cancelAndJoin()
+
+            val readded = repository.addAccount(UiAccount(accountKey, "Mastodon"), "readded")
+            runCurrent()
+            releaseSave.complete(Unit)
+            pendingSave.join()
+            readded.join()
+            val reopened =
+                RememberedAccountSelection(preferences, this, repository.accountMutationMutex, accountExists = {
+                    repository.find(it) !=
+                        null
+                })
+            reopened.updateAccounts(repository.allAccounts.first().map { it.accountKey })
+            reopened.restore()
+            assertEquals(otherAccountKey, reopened.selectedAccountKey.first())
+        } finally {
+            releaseSave.complete(Unit)
+            pendingSave.cancelAndJoin()
+            page.cancelAndJoin()
+            deliverRemoval.complete(Unit)
+        }
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun deletionPreservesAFreshSelectionAfterReaddingTheSameAccount() =
+        runTest {
+            val repository = createRepository(this)
+            insertAccount()
+            appDatabase.accountDao().insert(DbAccount(otherAccountKey, "{}", "Mastodon", last_active = 2L, sort_id = 1L))
+            appDataStore.notificationPreferences.updateData { it.copy(selectedAccountKey = otherAccountKey) }
+            appDataStore.discoverPreferences.updateData { it.copy(selectedAccountKey = otherAccountKey) }
+            val entered = CompletableDeferred<Unit>()
+            val release = CompletableDeferred<Unit>()
+            val pendingNotificationSave =
+                launch {
+                    appDataStore.notificationPreferences.updateData {
+                        entered.complete(Unit)
+                        release.await()
+                        it
+                    }
+                }
+            entered.await()
+            try {
+                val deletion = repository.delete(accountKey)
+                repository.allAccounts.first { accounts -> accounts.none { it.accountKey == accountKey } }
+                val readded = repository.addAccount(UiAccount(accountKey, "Mastodon"), "new credential")
+                runCurrent()
+                // Re-login may wait for removal to finish instead of overlapping its cleanup.
+                if (!readded.isCompleted) {
+                    release.complete(Unit)
+                    deletion.join()
+                }
+                readded.join()
+                val currentKeys = repository.allAccounts.first().map { it.accountKey }
+                assertEquals(listOf(otherAccountKey, accountKey), currentKeys)
+                val newPage =
+                    RememberedAccountSelection(appDataStore.discoverPreferences, this, repository.accountMutationMutex, accountExists = {
+                        repository.find(it) !=
+                            null
+                    })
+                newPage.updateAccounts(currentKeys)
+                newPage.restore()
+                newPage.selectAccount(accountKey)
+                assertEquals(accountKey, appDataStore.discoverPreferences.updateData { it }.selectedAccountKey)
+                release.complete(Unit)
+                deletion.join()
+                val reopened =
+                    RememberedAccountSelection(appDataStore.discoverPreferences, this, repository.accountMutationMutex, accountExists = {
+                        repository.find(it) !=
+                            null
+                    })
+                reopened.updateAccounts(repository.allAccounts.first().map { it.accountKey })
+                reopened.restore()
+                assertEquals(accountKey, reopened.selectedAccountKey.first())
+            } finally {
+                release.complete(Unit)
+                pendingNotificationSave.join()
+            }
+        }
+
+    @Test
+    fun delayedAccountRemovalDoesNotClearANewSelectionAfterReaddingAccount() =
+        runTest {
+            val repository = createRepository(this)
+            insertAccount()
+            appDatabase.accountDao().insert(DbAccount(otherAccountKey, "{}", "Mastodon", last_active = 2L, sort_id = 1L))
+            val preferences = appDataStore.discoverPreferences
+            val oldPage =
+                RememberedAccountSelection(preferences, this, repository.accountMutationMutex, accountExists = {
+                    repository.find(it) !=
+                        null
+                })
+            oldPage.updateAccounts(repository.allAccounts.first().map { it.accountKey })
+            oldPage.restore()
+            oldPage.selectAccount(accountKey)
+            preferences.updateData { it }
+            repository.delete(accountKey).join()
+            val delayedRemoval = repository.allAccounts.first().map { it.accountKey }
+            repository.addAccount(UiAccount(accountKey, "Mastodon"), "new credential").join()
+            val newPage =
+                RememberedAccountSelection(preferences, this, repository.accountMutationMutex, accountExists = {
+                    repository.find(it) !=
+                        null
+                })
+            newPage.updateAccounts(repository.allAccounts.first().map { it.accountKey })
+            newPage.restore()
+            newPage.selectAccount(accountKey)
+            preferences.updateData { it }
+
+            oldPage.updateAccounts(delayedRemoval)
+            val reopened =
+                RememberedAccountSelection(preferences, this, repository.accountMutationMutex, accountExists = {
+                    repository.find(it) != null
+                })
+            reopened.updateAccounts(repository.allAccounts.first().map { it.accountKey })
+            reopened.restore()
+            assertEquals(accountKey, reopened.selectedAccountKey.first())
+        }
 
     private fun createRepository(scope: CoroutineScope): AccountRepository =
         AccountRepository(

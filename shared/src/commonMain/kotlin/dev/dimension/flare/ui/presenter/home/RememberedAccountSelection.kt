@@ -13,10 +13,14 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 internal class RememberedAccountSelection(
     private val preferences: DataStore<AccountSelectionPreferences>,
     private val appScope: CoroutineScope,
+    private val accountMutationMutex: Mutex,
+    private val accountExists: suspend (MicroBlogKey) -> Boolean,
 ) {
     // null means restoration is pending; Guest means the account list is ready and empty.
     private val selected = MutableStateFlow<AccountType?>(null)
@@ -31,7 +35,9 @@ internal class RememberedAccountSelection(
         val saved =
             try {
                 // Wait behind saves from a closing page without changing the preference.
-                preferences.updateData { it }.selectedAccountKey
+                accountMutationMutex.withLock {
+                    preferences.updateData { it }.selectedAccountKey
+                }
             } catch (error: CancellationException) {
                 throw error
             } catch (error: Exception) {
@@ -55,7 +61,7 @@ internal class RememberedAccountSelection(
         restored = true
         initialAccountKey = null
         selected.value = AccountType.Specific(key)
-        persist { it.copy(selectedAccountKey = key) }
+        persist { if (accountExists(key)) it.copy(selectedAccountKey = key) else it }
     }
 
     private fun resolveAccount() {
@@ -66,16 +72,18 @@ internal class RememberedAccountSelection(
         selected.value = (previous?.takeIf { it in keys } ?: keys.firstOrNull()).toAccountType()
         if (previous != null && previous !in keys) {
             persist {
-                if (it.selectedAccountKey == previous) it.copy(selectedAccountKey = null) else it
+                if (it.selectedAccountKey == previous && !accountExists(previous)) it.copy(selectedAccountKey = null) else it
             }
         }
     }
 
-    private fun persist(transform: (AccountSelectionPreferences) -> AccountSelectionPreferences) {
+    private fun persist(transform: suspend (AccountSelectionPreferences) -> AccountSelectionPreferences) {
         // Enqueue in click order, with a lifetime independent of the page.
         appScope.launch(start = CoroutineStart.UNDISPATCHED) {
             try {
-                preferences.updateData { transform(it) }
+                accountMutationMutex.withLock {
+                    preferences.updateData { transform(it) }
+                }
             } catch (error: CancellationException) {
                 throw error
             } catch (error: Exception) {

@@ -54,7 +54,10 @@ public class DiscoverPresenter : PresenterBase<DiscoverState>() {
     private val appDataStore: AppDataStore by koinInject()
     private val appScope: CoroutineScope by koinInject()
     private val accountSelection by lazy {
-        RememberedAccountSelection(appDataStore.discoverPreferences, appScope)
+        RememberedAccountSelection(appDataStore.discoverPreferences, appScope, accountRepository.accountMutationMutex) {
+            accountRepository.find(it) !=
+                null
+        }
     }
 
     private val accountKeysFlow by lazy {

@@ -110,7 +110,10 @@ public class AllNotificationPresenter : PresenterBase<AllNotificationPresenter.S
     private val appDataStore: AppDataStore by koinInject()
     private val appScope: CoroutineScope by koinInject()
     private val accountSelection by lazy {
-        RememberedAccountSelection(appDataStore.notificationPreferences, appScope)
+        RememberedAccountSelection(appDataStore.notificationPreferences, appScope, accountRepository.accountMutationMutex) {
+            accountRepository.find(it) !=
+                null
+        }
     }
     private val selectedNotificationFilterFlow = MutableStateFlow<NotificationFilter?>(null)
 

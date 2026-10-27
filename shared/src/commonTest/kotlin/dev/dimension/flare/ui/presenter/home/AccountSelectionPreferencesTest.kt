@@ -16,6 +16,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.test.runTest
 import kotlin.test.AfterTest
 import kotlin.test.Test
@@ -23,6 +24,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
 class AccountSelectionPreferencesTest : RobolectricTest() {
+    private val accountMutationMutex = Mutex()
     private val root = createTestRootPath()
     private val fileStorage = OkioFileStorage(createTestFileSystem(), root)
 
@@ -48,8 +50,9 @@ class AccountSelectionPreferencesTest : RobolectricTest() {
             val dataStore = AppDataStore(fileStorage)
             val notificationKey = MicroBlogKey("alice", "example.social")
             val discoverKey = MicroBlogKey("bob", "example.social")
-            val notification = RememberedAccountSelection(dataStore.notificationPreferences, this)
-            val discover = RememberedAccountSelection(dataStore.discoverPreferences, this)
+            val notification =
+                RememberedAccountSelection(dataStore.notificationPreferences, this, accountMutationMutex, accountExists = { true })
+            val discover = RememberedAccountSelection(dataStore.discoverPreferences, this, accountMutationMutex, accountExists = { true })
             listOf(notification, discover).forEach {
                 it.updateAccounts(listOf(notificationKey, discoverKey))
                 it.restore()
@@ -69,7 +72,7 @@ class AccountSelectionPreferencesTest : RobolectricTest() {
                     .first { it.selectedAccountKey != null }
                     .selectedAccountKey,
             )
-            val reopened = RememberedAccountSelection(dataStore.discoverPreferences, this)
+            val reopened = RememberedAccountSelection(dataStore.discoverPreferences, this, accountMutationMutex, accountExists = { true })
             reopened.updateAccounts(listOf(notificationKey, discoverKey))
             reopened.restore()
             assertEquals(discoverKey, reopened.selectedAccountKey.first())
@@ -83,7 +86,7 @@ class AccountSelectionPreferencesTest : RobolectricTest() {
             val storeJob = Job(coroutineContext[Job])
             val originalStore = store(CoroutineScope(coroutineContext + storeJob))
             try {
-                val selection = RememberedAccountSelection(originalStore, this)
+                val selection = RememberedAccountSelection(originalStore, this, accountMutationMutex, accountExists = { true })
                 selection.updateAccounts(listOf(MicroBlogKey(key.id, "other.social"), key))
                 selection.restore()
                 selection.selectAccount(key)
@@ -94,7 +97,13 @@ class AccountSelectionPreferencesTest : RobolectricTest() {
 
             val reopenedJob = Job(coroutineContext[Job])
             try {
-                val reopened = RememberedAccountSelection(store(CoroutineScope(coroutineContext + reopenedJob)), this)
+                val reopened =
+                    RememberedAccountSelection(
+                        store(CoroutineScope(coroutineContext + reopenedJob)),
+                        this,
+                        accountMutationMutex,
+                        accountExists = { true },
+                    )
                 reopened.updateAccounts(listOf(MicroBlogKey(key.id, "other.social"), key))
                 reopened.restore()
                 assertEquals(key, reopened.selectedAccountKey.first())

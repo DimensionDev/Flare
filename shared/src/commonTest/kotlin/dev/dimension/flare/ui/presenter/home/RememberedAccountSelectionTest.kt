@@ -5,6 +5,7 @@ import dev.dimension.flare.data.datastore.model.AccountSelectionPreferences
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancelAndJoin
@@ -21,19 +22,21 @@ import kotlin.test.assertNull
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class RememberedAccountSelectionTest {
+    private val accountMutationMutex = Mutex()
+    private var existingAccounts = emptyList<MicroBlogKey>()
     private val firstAccount = MicroBlogKey("alice", "example.social")
     private val lastAccount = MicroBlogKey("bob", "example.social")
 
     @Test
     fun guestIsOnlyResolvedAfterBothPreferencesAndAccountsAreReady() =
         runTest {
-            val selection = RememberedAccountSelection(MemoryAccountSelectionPreferences(), this)
+            val selection = newSelection(MemoryAccountSelectionPreferences(), this)
             assertNull(selection.selectedAccountType.value)
             selection.restore()
             assertNull(selection.selectedAccountType.value)
-            selection.updateAccounts(emptyList())
+            updateAccounts(selection, emptyList())
             assertEquals(AccountType.Guest, selection.selectedAccountType.value)
-            selection.updateAccounts(listOf(firstAccount))
+            updateAccounts(selection, listOf(firstAccount))
             assertEquals(AccountType.Specific(firstAccount), selection.selectedAccountType.value)
         }
 
@@ -41,14 +44,14 @@ class RememberedAccountSelectionTest {
     fun recreatedSelectionRestoresLastManuallySelectedAccount() =
         runTest {
             val preferences = MemoryAccountSelectionPreferences()
-            val original = RememberedAccountSelection(preferences, this)
-            original.updateAccounts(listOf(firstAccount, lastAccount))
+            val original = newSelection(preferences, this)
+            updateAccounts(original, listOf(firstAccount, lastAccount))
             original.restore()
             original.selectAccount(lastAccount)
             assertEquals(lastAccount, original.selectedAccountKey.first())
 
-            val reopened = RememberedAccountSelection(preferences, this)
-            reopened.updateAccounts(listOf(firstAccount, lastAccount))
+            val reopened = newSelection(preferences, this)
+            updateAccounts(reopened, listOf(firstAccount, lastAccount))
             reopened.restore()
 
             assertEquals(lastAccount, reopened.selectedAccountKey.first())
@@ -59,8 +62,8 @@ class RememberedAccountSelectionTest {
         runTest {
             val readGate = CompletableDeferred<Unit>()
             val preferences = MemoryAccountSelectionPreferences(lastAccount, beforeRead = { readGate.await() })
-            val selection = RememberedAccountSelection(preferences, this)
-            selection.updateAccounts(listOf(firstAccount, lastAccount))
+            val selection = newSelection(preferences, this)
+            updateAccounts(selection, listOf(firstAccount, lastAccount))
             val restore = launch(start = CoroutineStart.UNDISPATCHED) { selection.restore() }
             assertNull(selection.selectedAccountKey.first())
 
@@ -73,12 +76,12 @@ class RememberedAccountSelectionTest {
     fun restorationWaitsForTheLocalAccountList() =
         runTest {
             val preferences = MemoryAccountSelectionPreferences(lastAccount)
-            val selection = RememberedAccountSelection(preferences, this)
+            val selection = newSelection(preferences, this)
             selection.restore()
             assertNull(selection.selectedAccountKey.first())
             assertEquals(lastAccount, preferences.snapshot.value.selectedAccountKey)
 
-            selection.updateAccounts(listOf(firstAccount, lastAccount))
+            updateAccounts(selection, listOf(firstAccount, lastAccount))
             assertEquals(lastAccount, selection.selectedAccountKey.first())
         }
 
@@ -87,8 +90,8 @@ class RememberedAccountSelectionTest {
         runTest {
             val readGate = CompletableDeferred<Unit>()
             val preferences = MemoryAccountSelectionPreferences(lastAccount, beforeRead = { readGate.await() })
-            val selection = RememberedAccountSelection(preferences, this)
-            selection.updateAccounts(listOf(firstAccount, lastAccount))
+            val selection = newSelection(preferences, this)
+            updateAccounts(selection, listOf(firstAccount, lastAccount))
             val restore = launch(start = CoroutineStart.UNDISPATCHED) { selection.restore() }
             selection.selectAccount(firstAccount)
 
@@ -103,12 +106,12 @@ class RememberedAccountSelectionTest {
     fun accountReorderingDoesNotChangeTheSelectionOrSaveAnAutomaticDefault() =
         runTest {
             val preferences = MemoryAccountSelectionPreferences()
-            val selection = RememberedAccountSelection(preferences, this)
-            selection.updateAccounts(listOf(firstAccount, lastAccount))
+            val selection = newSelection(preferences, this)
+            updateAccounts(selection, listOf(firstAccount, lastAccount))
             selection.restore()
             assertEquals(firstAccount, selection.selectedAccountKey.first())
 
-            selection.updateAccounts(listOf(lastAccount, firstAccount))
+            updateAccounts(selection, listOf(lastAccount, firstAccount))
             assertEquals(firstAccount, selection.selectedAccountKey.first())
             assertNull(preferences.snapshot.value.selectedAccountKey)
         }
@@ -117,15 +120,15 @@ class RememberedAccountSelectionTest {
     fun removingSelectedAccountClearsItsPreferenceAndDoesNotRestoreItOnReadd() =
         runTest {
             val preferences = MemoryAccountSelectionPreferences(lastAccount)
-            val selection = RememberedAccountSelection(preferences, this)
-            selection.updateAccounts(listOf(firstAccount, lastAccount))
+            val selection = newSelection(preferences, this)
+            updateAccounts(selection, listOf(firstAccount, lastAccount))
             selection.restore()
 
-            selection.updateAccounts(listOf(firstAccount))
+            updateAccounts(selection, listOf(firstAccount))
             assertEquals(firstAccount, selection.selectedAccountKey.first())
             assertNull(preferences.snapshot.value.selectedAccountKey)
 
-            selection.updateAccounts(listOf(firstAccount, lastAccount))
+            updateAccounts(selection, listOf(firstAccount, lastAccount))
             assertEquals(firstAccount, selection.selectedAccountKey.first())
         }
 
@@ -133,8 +136,8 @@ class RememberedAccountSelectionTest {
     fun missingSavedAccountFallsBackInAccountManagementOrder() =
         runTest {
             val preferences = MemoryAccountSelectionPreferences(MicroBlogKey("deleted", "example.social"))
-            val selection = RememberedAccountSelection(preferences, this)
-            selection.updateAccounts(listOf(lastAccount, firstAccount))
+            val selection = newSelection(preferences, this)
+            updateAccounts(selection, listOf(lastAccount, firstAccount))
             selection.restore()
             assertEquals(lastAccount, selection.selectedAccountKey.first())
             assertNull(preferences.snapshot.value.selectedAccountKey)
@@ -144,14 +147,14 @@ class RememberedAccountSelectionTest {
     fun removingAllAccountsClearsSelectionAndAddingOneSelectsIt() =
         runTest {
             val preferences = MemoryAccountSelectionPreferences(lastAccount)
-            val selection = RememberedAccountSelection(preferences, this)
-            selection.updateAccounts(listOf(lastAccount))
+            val selection = newSelection(preferences, this)
+            updateAccounts(selection, listOf(lastAccount))
             selection.restore()
-            selection.updateAccounts(emptyList())
+            updateAccounts(selection, emptyList())
             assertNull(selection.selectedAccountKey.first())
             assertNull(preferences.snapshot.value.selectedAccountKey)
 
-            selection.updateAccounts(listOf(firstAccount))
+            updateAccounts(selection, listOf(firstAccount))
             assertEquals(firstAccount, selection.selectedAccountKey.first())
         }
 
@@ -160,8 +163,8 @@ class RememberedAccountSelectionTest {
         runTest {
             val otherHost = firstAccount.copy(host = "other.social")
             val preferences = MemoryAccountSelectionPreferences(otherHost)
-            val selection = RememberedAccountSelection(preferences, this)
-            selection.updateAccounts(listOf(firstAccount, otherHost))
+            val selection = newSelection(preferences, this)
+            updateAccounts(selection, listOf(firstAccount, otherHost))
             selection.restore()
             selection.selectAccount(lastAccount)
             assertEquals(otherHost, selection.selectedAccountKey.first())
@@ -172,11 +175,11 @@ class RememberedAccountSelectionTest {
     fun anotherWindowDoesNotChangeAnAlreadyOpenSelection() =
         runTest {
             val preferences = MemoryAccountSelectionPreferences(firstAccount)
-            val firstWindow = RememberedAccountSelection(preferences, this)
-            firstWindow.updateAccounts(listOf(firstAccount, lastAccount))
+            val firstWindow = newSelection(preferences, this)
+            updateAccounts(firstWindow, listOf(firstAccount, lastAccount))
             firstWindow.restore()
-            val secondWindow = RememberedAccountSelection(preferences, this)
-            secondWindow.updateAccounts(listOf(firstAccount, lastAccount))
+            val secondWindow = newSelection(preferences, this)
+            updateAccounts(secondWindow, listOf(firstAccount, lastAccount))
             secondWindow.restore()
             secondWindow.selectAccount(lastAccount)
 
@@ -185,7 +188,7 @@ class RememberedAccountSelectionTest {
             assertEquals(lastAccount, secondWindow.selectedAccountKey.first())
             assertEquals(lastAccount, preferences.snapshot.value.selectedAccountKey)
 
-            firstWindow.updateAccounts(listOf(lastAccount))
+            updateAccounts(firstWindow, listOf(lastAccount))
             assertEquals(lastAccount, preferences.snapshot.value.selectedAccountKey)
         }
 
@@ -194,8 +197,8 @@ class RememberedAccountSelectionTest {
         runTest {
             val writeGate = CompletableDeferred<Unit>()
             val preferences = MemoryAccountSelectionPreferences(beforeWrite = { writeGate.await() })
-            val selection = RememberedAccountSelection(preferences, this)
-            selection.updateAccounts(listOf(firstAccount, lastAccount))
+            val selection = newSelection(preferences, this)
+            updateAccounts(selection, listOf(firstAccount, lastAccount))
             selection.restore()
             val page =
                 launch {
@@ -219,13 +222,13 @@ class RememberedAccountSelectionTest {
         runTest {
             val writeGate = CompletableDeferred<Unit>()
             val preferences = MemoryAccountSelectionPreferences(firstAccount, beforeWrite = { writeGate.await() })
-            val original = RememberedAccountSelection(preferences, this)
-            original.updateAccounts(listOf(firstAccount, lastAccount))
+            val original = newSelection(preferences, this)
+            updateAccounts(original, listOf(firstAccount, lastAccount))
             original.restore()
             original.selectAccount(lastAccount)
 
-            val reopened = RememberedAccountSelection(preferences, this)
-            reopened.updateAccounts(listOf(firstAccount, lastAccount))
+            val reopened = newSelection(preferences, this)
+            updateAccounts(reopened, listOf(firstAccount, lastAccount))
             val restore = launch(start = CoroutineStart.UNDISPATCHED) { reopened.restore() }
             try {
                 assertNull(reopened.selectedAccountKey.first())
@@ -241,11 +244,11 @@ class RememberedAccountSelectionTest {
         runTest {
             val writeGate = CompletableDeferred<Unit>()
             val preferences = MemoryAccountSelectionPreferences(beforeWrite = { writeGate.await() })
-            val selection = RememberedAccountSelection(preferences, this)
-            selection.updateAccounts(listOf(firstAccount, lastAccount))
+            val selection = newSelection(preferences, this)
+            updateAccounts(selection, listOf(firstAccount, lastAccount))
             selection.restore()
             selection.selectAccount(lastAccount)
-            selection.updateAccounts(listOf(firstAccount))
+            updateAccounts(selection, listOf(firstAccount))
 
             writeGate.complete(Unit)
             advanceUntilIdle()
@@ -257,8 +260,8 @@ class RememberedAccountSelectionTest {
     fun unreadablePreferencesUseTheDefaultWithoutBlockingManualSelection() =
         runTest {
             val preferences = MemoryAccountSelectionPreferences(beforeRead = { error("read failed") })
-            val selection = RememberedAccountSelection(preferences, this)
-            selection.updateAccounts(listOf(firstAccount, lastAccount))
+            val selection = newSelection(preferences, this)
+            updateAccounts(selection, listOf(firstAccount, lastAccount))
             selection.restore()
             assertEquals(firstAccount, selection.selectedAccountKey.first())
             selection.selectAccount(lastAccount)
@@ -269,13 +272,26 @@ class RememberedAccountSelectionTest {
     fun failedWriteKeepsTheCurrentSelectionUsable() =
         runTest {
             val preferences = MemoryAccountSelectionPreferences(beforeWrite = { error("write failed") })
-            val selection = RememberedAccountSelection(preferences, this)
-            selection.updateAccounts(listOf(firstAccount, lastAccount))
+            val selection = newSelection(preferences, this)
+            updateAccounts(selection, listOf(firstAccount, lastAccount))
             selection.restore()
             selection.selectAccount(lastAccount)
             assertEquals(lastAccount, selection.selectedAccountKey.first())
             assertNull(preferences.snapshot.value.selectedAccountKey)
         }
+
+    private fun newSelection(
+        preferences: DataStore<AccountSelectionPreferences>,
+        scope: CoroutineScope,
+    ) = RememberedAccountSelection(preferences, scope, accountMutationMutex) { it in existingAccounts }
+
+    private fun updateAccounts(
+        selection: RememberedAccountSelection,
+        keys: List<MicroBlogKey>,
+    ) {
+        existingAccounts = keys
+        selection.updateAccounts(keys)
+    }
 }
 
 private class MemoryAccountSelectionPreferences(

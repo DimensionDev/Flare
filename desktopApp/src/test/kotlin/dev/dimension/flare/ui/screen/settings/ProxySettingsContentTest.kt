@@ -85,6 +85,7 @@ class ProxySettingsContentTest {
         val state = State(ProxySettings(profiles = listOf(profile)))
         val editor = EditorState()
         show(state, editor)
+        compose.onNodeWithContentDescription("More: Office").performClick()
         compose.onNodeWithText("Edit proxy").performClick()
         compose.onNodeWithContentDescription("Name").performTextReplacement("Changed")
         compose.onNodeWithText("Cancel").performClick()
@@ -98,6 +99,7 @@ class ProxySettingsContentTest {
                     .single(),
             )
         }
+        compose.onNodeWithContentDescription("More: Office").performClick()
         compose.onNodeWithText("Edit proxy").performClick()
         compose
             .onNodeWithContentDescription("Name")
@@ -122,14 +124,23 @@ class ProxySettingsContentTest {
     }
 
     @Test
-    fun referencedProxyCannotBeDeleted() {
+    fun profileMenuKeepsInUseDeletionDisabled() {
         val state = State(ProxySettings(profiles = listOf(profile), global = ProxyPolicy(ProxyMode.PROXY, profile.id)))
         show(state)
+        compose.onNodeWithText("Edit proxy").assertDoesNotExist()
+        compose.onNodeWithText("Delete").assertDoesNotExist()
+        compose.onNodeWithContentDescription("More: Office").performClick()
+        compose.onNodeWithText("Edit proxy").assertIsEnabled()
+        compose.onNodeWithText("Delete").assertIsNotEnabled()
+        compose.onNodeWithText("Test connection").assertDoesNotExist()
         compose.onNodeWithText("Reassign global and account settings before deleting this proxy.").assertDoesNotExist()
-        compose.onNodeWithContentDescription("Delete").assertIsNotEnabled()
-        compose.runOnIdle { state.settings = UiState.Success(state.settings.takeSuccess()!!.copy(global = ProxyPolicy(ProxyMode.DIRECT))) }
-        compose.onNodeWithContentDescription("Delete").assertIsEnabled().performClick()
+        compose.runOnIdle {
+            assertNull(state.removed)
+            state.settings = UiState.Success(state.settings.takeSuccess()!!.copy(global = ProxyPolicy(ProxyMode.DIRECT)))
+        }
+        compose.onNodeWithText("Delete").assertIsEnabled().performClick()
         compose.runOnIdle { assertEquals(profile.id, state.removed) }
+        compose.onNodeWithText("Edit proxy").assertDoesNotExist()
     }
 
     @Test
@@ -145,6 +156,7 @@ class ProxySettingsContentTest {
             }
         val editor = EditorState()
         show(page, editor)
+        compose.onNodeWithContentDescription("More: Office").performClick()
         compose.onNodeWithText("Edit proxy").performClick()
         var initialPageReads = 0
         compose.runOnIdle {

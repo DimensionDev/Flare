@@ -23,23 +23,6 @@ public struct ProxySettingsView: View {
                 Section {
                     ForEach(settings.profiles, id: \.id) { profile in
                         profileRow(profile, settings: settings)
-                            .contextMenu {
-                                Button { editing = profile } label: {
-                                    Label { Text("proxy_edit", bundle: FlareAppleUILocalization.bundle) } icon: { Image(systemName: "pencil") }
-                                }
-                                Button(role: .destructive) { presenter.state.remove(id: profile.id) } label: {
-                                    Label { Text("proxy_delete", bundle: FlareAppleUILocalization.bundle) } icon: { Image(systemName: "trash") }
-                                }
-                                .disabled(inUse(profile, settings))
-                            }
-                            #if os(iOS)
-                            .swipeActions {
-                                Button(role: .destructive) { presenter.state.remove(id: profile.id) } label: {
-                                    Label { Text("proxy_delete", bundle: FlareAppleUILocalization.bundle) } icon: { Image(systemName: "trash") }
-                                }
-                                .disabled(inUse(profile, settings))
-                            }
-                            #endif
                     }
                     Button {
                         editing = ProxyProfile(id: UUID().uuidString, name: "", protocol: .https, host: "", port: 443)
@@ -98,33 +81,31 @@ public struct ProxySettingsView: View {
         editing = nil
     }
 
-    @ViewBuilder
     private func profileRow(_ profile: ProxyProfile, settings: ProxySettings) -> some View {
-        #if os(macOS)
         HStack {
             profileSummary(profile)
             Spacer()
-            Button { editing = profile } label: { Text("proxy_edit", bundle: FlareAppleUILocalization.bundle) }
-            Button(role: .destructive) { presenter.state.remove(id: profile.id) } label: {
-                Image(systemName: "trash")
-            }
-            .accessibilityLabel(Text("proxy_delete", bundle: FlareAppleUILocalization.bundle))
-            .disabled(inUse(profile, settings))
         }
-        #else
-        Button { editing = profile } label: {
-            HStack {
-                profileSummary(profile)
-                Spacer()
-                Image(systemName: "chevron.right")
-                    .font(.footnote.weight(.semibold))
-                    .foregroundStyle(.tertiary)
-                    .accessibilityHidden(true)
-            }
-            .contentShape(Rectangle())
+        .contentShape(Rectangle())
+        .contextMenu {
+            profileActionButtons(profile, settings: settings)
         }
-        .buttonStyle(.plain)
+        #if os(iOS)
+        .swipeActions {
+            profileActionButtons(profile, settings: settings)
+        }
         #endif
+    }
+
+    @ViewBuilder
+    private func profileActionButtons(_ profile: ProxyProfile, settings: ProxySettings) -> some View {
+        Button { editing = profile } label: {
+            Label { Text("proxy_edit", bundle: FlareAppleUILocalization.bundle) } icon: { Image(fontAwesome: .pen) }
+        }
+        Button(role: .destructive) { presenter.state.remove(id: profile.id) } label: {
+            Label { Text("proxy_delete", bundle: FlareAppleUILocalization.bundle) } icon: { Image(fontAwesome: .trash) }
+        }
+        .disabled(inUse(profile, settings))
     }
 
     private func profileSummary(_ profile: ProxyProfile) -> some View {

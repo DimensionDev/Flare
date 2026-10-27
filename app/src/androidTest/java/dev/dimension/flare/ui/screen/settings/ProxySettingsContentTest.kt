@@ -144,13 +144,23 @@ class ProxySettingsContentTest {
     }
 
     @Test
-    fun referencedProfileKeepsDeletionDisabledWithoutMoreOrInUseText() {
+    fun profileMenuKeepsInUseDeletionDisabled() {
         val state = State(ProxySettings(profiles = listOf(profile), global = ProxyPolicy(ProxyMode.PROXY, profile.id)))
         show(state)
-        compose.onNodeWithContentDescription("More: Office").assertDoesNotExist()
+        compose.onNodeWithText("Edit proxy").assertDoesNotExist()
+        compose.onNodeWithText("Delete").assertDoesNotExist()
+        compose.onNodeWithContentDescription("More: Office").performClick()
+        popupOption("Edit proxy").assertIsEnabled()
+        popupOption("Delete").assertIsNotEnabled()
+        popupOption("Test connection").assertDoesNotExist()
         compose.onNodeWithText("Reassign global and account settings before deleting this proxy.").assertDoesNotExist()
-        compose.onNodeWithContentDescription("Delete: Office").assertIsNotEnabled()
-        compose.runOnIdle { assertNull(state.removed) }
+        compose.runOnIdle {
+            assertNull(state.removed)
+            state.settings = UiState.Success(state.settings.takeSuccess()!!.copy(global = ProxyPolicy(ProxyMode.DIRECT)))
+        }
+        popupOption("Delete").assertIsEnabled().performClick()
+        compose.runOnIdle { assertEquals(profile.id, state.removed) }
+        popupOption("Edit proxy").assertDoesNotExist()
     }
 
     @Test
@@ -166,7 +176,8 @@ class ProxySettingsContentTest {
             }
         val editor = EditorState()
         show(page, editor)
-        compose.onNodeWithText("Office").performClick()
+        compose.onNodeWithContentDescription("More: Office").performClick()
+        popupOption("Edit proxy").performClick()
         var initialPageReads = 0
         compose.runOnIdle {
             initialPageReads = pageReads
@@ -194,7 +205,8 @@ class ProxySettingsContentTest {
     fun editorKeepsDraftDuringFailureAndCancelDiscardsIt() {
         val editor = EditorState()
         show(State(), editor)
-        compose.onNodeWithText("Office").performClick()
+        compose.onNodeWithContentDescription("More: Office").performClick()
+        popupOption("Edit proxy").performClick()
         compose.onNodeWithText("Name").performTextReplacement("Work")
         compose.runOnIdle { editor.saveState = UiState.Loading() }
         compose.onNodeWithText("Save").assertIsNotEnabled()
@@ -208,7 +220,8 @@ class ProxySettingsContentTest {
         compose.onNodeWithText("Cancel").performClick()
         compose.runOnIdle { assertNull(editor.saved) }
         compose.onNodeWithText("Proxy operation failed. Please try again.").assertDoesNotExist()
-        compose.onNodeWithText("Office").performClick()
+        compose.onNodeWithContentDescription("More: Office").performClick()
+        popupOption("Edit proxy").performClick()
         compose.onNodeWithText("Proxy operation failed. Please try again.").assertDoesNotExist()
         compose.onNodeWithText("Name").assertTextContains("Office")
     }
@@ -217,7 +230,8 @@ class ProxySettingsContentTest {
     fun editorSavesCurrentFieldsAndClosesOnSuccess() {
         val editor = EditorState()
         show(State(), editor)
-        compose.onNodeWithText("Office").performClick()
+        compose.onNodeWithContentDescription("More: Office").performClick()
+        popupOption("Edit proxy").performClick()
         compose.onNodeWithText("Name").performTextReplacement("Work")
         compose.onNodeWithText("Port").performScrollTo().performTextReplacement("8443")
         compose.onNodeWithText("Save").performClick()

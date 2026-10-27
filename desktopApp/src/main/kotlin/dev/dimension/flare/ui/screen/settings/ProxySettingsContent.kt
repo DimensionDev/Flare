@@ -31,6 +31,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.solid.EllipsisVertical
+import compose.icons.fontawesomeicons.solid.Pen
 import compose.icons.fontawesomeicons.solid.Trash
 import dev.dimension.flare.Res
 import dev.dimension.flare.data.model.ProxyMode
@@ -40,6 +42,7 @@ import dev.dimension.flare.data.model.ProxyProtocol
 import dev.dimension.flare.data.model.ProxySettings
 import dev.dimension.flare.data.model.ProxySettingsError
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.more
 import dev.dimension.flare.ok
 import dev.dimension.flare.proxy_accounts
 import dev.dimension.flare.proxy_add
@@ -90,6 +93,8 @@ import io.github.composefluent.component.ComboBox
 import io.github.composefluent.component.ContentDialog
 import io.github.composefluent.component.ContentDialogButton
 import io.github.composefluent.component.FluentDialog
+import io.github.composefluent.component.MenuFlyoutContainer
+import io.github.composefluent.component.MenuFlyoutItem
 import io.github.composefluent.component.ProgressBar
 import io.github.composefluent.component.SubtleButton
 import io.github.composefluent.component.Text
@@ -123,19 +128,44 @@ internal fun ProxySettingsContent(
                         Text("${profile.protocol.name} · ${profile.host}:${profile.port}")
                     },
                     trailing = {
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Button(
-                                onClick = { editing = profile },
-                                disabled = state.operation?.isLoading == true,
-                            ) { Text(stringResource(Res.string.proxy_edit)) }
+                        MenuFlyoutContainer(
+                            flyout = {
+                                MenuFlyoutItem(
+                                    text = { Text(stringResource(Res.string.proxy_edit)) },
+                                    icon = { FAIcon(FontAwesomeIcons.Solid.Pen, contentDescription = null) },
+                                    enabled = state.operation?.isLoading != true,
+                                    onClick = {
+                                        isFlyoutVisible = false
+                                        editing = profile
+                                    },
+                                )
+                                MenuFlyoutItem(
+                                    text = {
+                                        Text(stringResource(Res.string.proxy_delete), color = FluentTheme.colors.system.critical)
+                                    },
+                                    icon = {
+                                        FAIcon(
+                                            FontAwesomeIcons.Solid.Trash,
+                                            contentDescription = null,
+                                            tint = FluentTheme.colors.system.critical,
+                                        )
+                                    },
+                                    enabled = state.operation?.isLoading != true && !inUse,
+                                    onClick = {
+                                        isFlyoutVisible = false
+                                        state.remove(profile.id)
+                                    },
+                                )
+                            },
+                        ) {
                             SubtleButton(
-                                onClick = { state.remove(profile.id) },
-                                disabled = state.operation?.isLoading == true || inUse,
+                                onClick = { isFlyoutVisible = !isFlyoutVisible },
+                                disabled = state.operation?.isLoading == true,
                                 iconOnly = true,
                             ) {
                                 FAIcon(
-                                    FontAwesomeIcons.Solid.Trash,
-                                    contentDescription = stringResource(Res.string.proxy_delete),
+                                    FontAwesomeIcons.Solid.EllipsisVertical,
+                                    contentDescription = "${stringResource(Res.string.more)}: ${profile.name}",
                                 )
                             }
                         }

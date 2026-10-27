@@ -48,6 +48,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.solid.EllipsisVertical
+import compose.icons.fontawesomeicons.solid.Pen
 import compose.icons.fontawesomeicons.solid.Plus
 import compose.icons.fontawesomeicons.solid.Trash
 import dev.dimension.flare.R
@@ -124,9 +126,10 @@ internal fun ProxySettingsContent(
                 Text(stringResource(R.string.proxy_profiles), style = MaterialTheme.typography.titleSmall)
                 Column(verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap)) {
                     settings.profiles.forEachIndexed { index, profile ->
+                        var showMenu by remember(profile.id) { mutableStateOf(false) }
                         val inUse = settings.global.proxyId == profile.id || settings.accounts.values.any { it.proxyId == profile.id }
                         SegmentedListItem(
-                            onClick = { editingId = profile.id },
+                            onClick = { showMenu = true },
                             enabled = state.operation?.isLoading != true,
                             shapes = ListItemDefaults.segmentedShapes2(index, settings.profiles.size + 1),
                             content = { Text(profile.name) },
@@ -134,11 +137,41 @@ internal fun ProxySettingsContent(
                                 Text("${profile.protocol.name} · ${profile.host}:${profile.port}")
                             },
                             trailingContent = {
-                                IconButton(onClick = { state.remove(profile.id) }, enabled = state.operation?.isLoading != true && !inUse) {
-                                    FAIcon(
-                                        FontAwesomeIcons.Solid.Trash,
-                                        contentDescription = "${stringResource(R.string.proxy_delete)}: ${profile.name}",
-                                    )
+                                Box {
+                                    IconButton(onClick = { showMenu = true }, enabled = state.operation?.isLoading != true) {
+                                        FAIcon(
+                                            FontAwesomeIcons.Solid.EllipsisVertical,
+                                            contentDescription = "${stringResource(R.string.more)}: ${profile.name}",
+                                        )
+                                    }
+                                    DropdownMenu(expanded = showMenu, onDismissRequest = { showMenu = false }) {
+                                        DropdownMenuItem(
+                                            text = { Text(stringResource(R.string.proxy_edit)) },
+                                            leadingIcon = { FAIcon(FontAwesomeIcons.Solid.Pen, contentDescription = null) },
+                                            enabled = state.operation?.isLoading != true,
+                                            onClick = {
+                                                showMenu = false
+                                                editingId = profile.id
+                                            },
+                                        )
+                                        DropdownMenuItem(
+                                            text = {
+                                                Text(stringResource(R.string.proxy_delete), color = MaterialTheme.colorScheme.error)
+                                            },
+                                            leadingIcon = {
+                                                FAIcon(
+                                                    FontAwesomeIcons.Solid.Trash,
+                                                    contentDescription = null,
+                                                    tint = MaterialTheme.colorScheme.error,
+                                                )
+                                            },
+                                            enabled = state.operation?.isLoading != true && !inUse,
+                                            onClick = {
+                                                showMenu = false
+                                                state.remove(profile.id)
+                                            },
+                                        )
+                                    }
                                 }
                             },
                         )

@@ -14,7 +14,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.ComposeUiFlags
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.InputMode
+import androidx.compose.ui.input.InputModeManager
 import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.platform.LocalInputModeManager
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.assertCountEquals
@@ -134,6 +137,7 @@ class StatusShareContentTest {
         var selected by mutableStateOf(false)
         var confirmed = false
         var cancelled = false
+        lateinit var inputModeManager: InputModeManager
         val state =
             object : StatusSharePresenter.State {
                 override val status = UiState.Success<UiTimelineV2>(reply)
@@ -176,6 +180,7 @@ class StatusShareContentTest {
                 LocalTimelineAppearance provides TimelineAppearance(showTranslateButton = false),
             ) {
                 FlareTheme(darkTheme = false) {
+                    inputModeManager = LocalInputModeManager.current
                     StatusShareReplySheet(state)
                 }
             }
@@ -197,7 +202,11 @@ class StatusShareContentTest {
         composeRule.onNodeWithContentDescription("Selectable reply", substring = true).performClick().assertIsOff()
         composeRule.runOnIdle { assertFalse(selected) }
         val selector = composeRule.onNodeWithContentDescription("Selectable reply", substring = true)
-        selector.performKeyInput { pressKey(Key.Tab) }
+        // Synthetic key input does not switch Android out of touch mode.
+        composeRule.runOnIdle {
+            inputModeManager.requestInputMode(InputMode.Keyboard)
+            assertEquals(InputMode.Keyboard, inputModeManager.inputMode)
+        }
         selector.performSemanticsAction(SemanticsActions.RequestFocus) { it() }
         selector.assertIsFocused()
         selector.performKeyInput {

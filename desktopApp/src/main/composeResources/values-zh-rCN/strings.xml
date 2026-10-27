@@ -685,4 +685,12 @@
     <string name="home_timeline_view_latest">回到最新</string>
     <string name="settings_remember_home_timeline_position">记住首页阅读位置</string>
     <string name="settings_remember_home_timeline_position_description">刷新和重新打开后保留阅读位置。使用“回到最新”跳转到新内容。</string>
+    <string name="share_replies_too_large">图片过长，请减少所选回复。</string>
+    <string name="share_replies_render_failed">图片生成失败，请重试或移除媒体不可用的回复。</string>
+    <string name="share_replies_preparing">正在生成图片…</string>
+    <string name="share_replies_title">选择回复</string>
+    <string name="share_replies_count">已选 %1$d 条</string>
+    <string name="share_replies_cancel">取消</string>
+    <string name="share_replies_clear">清空</string>
+    <string name="share_replies_done">完成</string>
 </resources>

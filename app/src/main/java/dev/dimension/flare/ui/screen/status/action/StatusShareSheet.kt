@@ -43,6 +43,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionContext
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -83,6 +84,7 @@ import androidx.savedstate.compose.LocalSavedStateRegistryOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.solid.AngleRight
 import compose.icons.fontawesomeicons.solid.Download
 import compose.icons.fontawesomeicons.solid.Image
 import compose.icons.fontawesomeicons.solid.Link
@@ -95,13 +97,16 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.LocalNetworkImageAllowHardware
+import dev.dimension.flare.ui.component.LocalShareImageLoading
 import dev.dimension.flare.ui.component.LocalTimelineAppearance
+import dev.dimension.flare.ui.component.ShareImageLoading
 import dev.dimension.flare.ui.component.ViewBox
-import dev.dimension.flare.ui.component.status.StatusItem
+import dev.dimension.flare.ui.component.status.StatusShareContent
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.presenter.invoke
-import dev.dimension.flare.ui.presenter.status.StatusPresenter
+import dev.dimension.flare.ui.presenter.status.StatusShareImageLimits
+import dev.dimension.flare.ui.presenter.status.StatusSharePresenter
 import dev.dimension.flare.ui.screen.compose.ShortcutComposeActivity
 import dev.dimension.flare.ui.theme.FlareTheme
 import dev.dimension.flare.ui.theme.first
@@ -156,15 +161,19 @@ internal fun StatusShareSheet(
     val previewGraphicsLayer = rememberGraphicsLayer()
     var captureRequested by remember { mutableStateOf(false) }
     var isCrossPosting by remember { mutableStateOf(false) }
+    var isCapturing by remember { mutableStateOf(false) }
+    var captureFailed by remember { mutableStateOf(false) }
+    var imageAttempt by remember { mutableIntStateOf(0) }
     var previewContentHeightPx by remember { mutableIntStateOf(0) }
     var previewTheme by remember { mutableStateOf(SharePreviewTheme.Light) }
     var previewStyle by remember { mutableStateOf(SharePreviewStyle.Card) }
     val state by producePresenter("status_share_sheet_${statusKey}_$shareUrl") {
         remember(accountType, statusKey) {
-            StatusPresenter(accountType = accountType, statusKey = statusKey)
+            StatusSharePresenter(accountType = accountType, statusKey = statusKey)
         }.invoke()
     }
     val status = state.status.takeSuccess()
+    val imageLoading = remember(status, state.selectedReplies, previewTheme, previewStyle, imageAttempt) { ShareImageLoading() }
     val shareCaptureWidthPx =
         with(density) {
             when (previewStyle) {
@@ -173,41 +182,62 @@ internal fun StatusShareSheet(
             }.roundToPx()
         }
 
+    val captureFits = StatusShareImageLimits.canRender(shareCaptureWidthPx, previewContentHeightPx)
+
     suspend fun captureBitmap(): Bitmap? {
-        val isLongCapture =
-            previewContentHeightPx > SHARE_LONG_CAPTURE_HEIGHT_THRESHOLD_PX
-        return if (isLongCapture) {
-            captureOffscreenShareBitmap(
-                context = context,
-                view = view,
-                parentCompositionContext = parentCompositionContext,
-                lifecycleOwner = lifecycleOwner,
-                savedStateRegistryOwner = savedStateRegistryOwner,
-                viewModelStoreOwner = viewModelStoreOwner,
-                widthPx = shareCaptureWidthPx,
-            ) {
-                CompositionLocalProvider(
-                    LocalNetworkImageAllowHardware provides false,
+        if (isCapturing || !captureFits) return null
+        isCapturing = true
+        captureFailed = false
+        try {
+            withFrameNanos { }
+            imageLoading.awaitReady()
+            val isLongCapture =
+                previewContentHeightPx > SHARE_LONG_CAPTURE_HEIGHT_THRESHOLD_PX
+            return if (isLongCapture) {
+                captureOffscreenShareBitmap(
+                    context = context,
+                    view = view,
+                    parentCompositionContext = parentCompositionContext,
+                    lifecycleOwner = lifecycleOwner,
+                    savedStateRegistryOwner = savedStateRegistryOwner,
+                    viewModelStoreOwner = viewModelStoreOwner,
+                    widthPx = shareCaptureWidthPx,
                 ) {
-                    FlareTheme(
-                        darkTheme = previewTheme == SharePreviewTheme.Dark,
+                    CompositionLocalProvider(
+                        LocalNetworkImageAllowHardware provides false,
                     ) {
-                        StatusShareCard(
-                            statusKey = statusKey,
-                            status = status,
-                            previewStyle = previewStyle,
-                        )
+                        FlareTheme(
+                            darkTheme = previewTheme == SharePreviewTheme.Dark,
+                        ) {
+                            StatusShareCard(
+                                statusKey = statusKey,
+                                status = status,
+                                replies = state.selectedReplies,
+                                previewStyle = previewStyle,
+                            )
+                        }
                     }
                 }
+            } else {
+                capturePreviewShareBitmap(
+                    graphicsLayer = previewGraphicsLayer,
+                    onCaptureRequestedChange = { captureRequested = it },
+                )
             }
-        } else {
-            capturePreviewShareBitmap(
-                graphicsLayer = previewGraphicsLayer,
-                onCaptureRequestedChange = { captureRequested = it },
-            )
+        } catch (error: kotlinx.coroutines.CancellationException) {
+            throw error
+        } catch (_: Exception) {
+            captureFailed = true
+            imageAttempt++
+            return null
+        } finally {
+            isCapturing = false
         }
     }
 
+    if (state.selecting) {
+        StatusShareReplySheet(state)
+    }
     Column(
         modifier =
             modifier
@@ -217,18 +247,25 @@ internal fun StatusShareSheet(
         verticalArrangement = Arrangement.spacedBy(12.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        StatusSharePreview(
-            statusKey = statusKey,
-            status = status,
-            previewTheme = previewTheme,
-            previewStyle = previewStyle,
-            captureRequested = captureRequested,
-            previewGraphicsLayer = previewGraphicsLayer,
-            onContentHeightChanged = {
-                previewContentHeightPx = it
-            },
-        )
+        key(imageLoading) {
+            StatusSharePreview(
+                statusKey = statusKey,
+                status = status,
+                replies = state.selectedReplies,
+                imageLoading = imageLoading,
+                previewTheme = previewTheme,
+                previewStyle = previewStyle,
+                captureRequested = captureRequested,
+                previewGraphicsLayer = previewGraphicsLayer,
+                onContentHeightChanged = {
+                    previewContentHeightPx = it
+                },
+            )
+        }
 
+        if (isCapturing) Text(stringResource(R.string.share_replies_preparing))
+        if (previewContentHeightPx > 0 && !captureFits) Text(stringResource(R.string.share_replies_too_large))
+        if (captureFailed) Text(stringResource(R.string.share_replies_render_failed))
         Row(
             modifier =
                 Modifier
@@ -237,7 +274,7 @@ internal fun StatusShareSheet(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Button(
-                enabled = status != null && !isCrossPosting,
+                enabled = status != null && !isCrossPosting && !isCapturing && captureFits,
                 onClick = {
                     scope.launch {
                         isCrossPosting = true
@@ -317,6 +354,7 @@ internal fun StatusShareSheet(
                 Text(text = stringResource(id = R.string.rss_detail_share))
             }
             FilledTonalButton(
+                enabled = status != null && !isCapturing && !isCrossPosting && captureFits,
                 onClick = {
                     scope.launch {
                         val bitmap = captureBitmap()
@@ -371,6 +409,7 @@ internal fun StatusShareSheet(
             }
 
             FilledTonalButton(
+                enabled = status != null && !isCapturing && !isCrossPosting && captureFits,
                 onClick = {
                     scope.launch {
                         val bitmap = captureBitmap()
@@ -438,6 +477,7 @@ internal fun StatusShareSheet(
                         val entries = SharePreviewStyle.entries
                         entries.forEachIndexed { index, value ->
                             ToggleButton(
+                                enabled = !isCapturing && !isCrossPosting,
                                 checked = previewStyle == value,
                                 onCheckedChange = {
                                     if (it) previewStyle = value
@@ -468,7 +508,7 @@ internal fun StatusShareSheet(
             )
             SegmentedListItem(
                 onClick = {},
-                shapes = ListItemDefaults.last(),
+                shapes = ListItemDefaults.segmentedShapes(1, 3),
                 content = {
                     Text(
                         text = stringResource(id = R.string.status_share_sheet_theme_title),
@@ -481,6 +521,7 @@ internal fun StatusShareSheet(
                         val entries = SharePreviewTheme.entries
                         entries.forEachIndexed { index, value ->
                             ToggleButton(
+                                enabled = !isCapturing && !isCrossPosting,
                                 checked = previewTheme == value,
                                 onCheckedChange = {
                                     if (it) previewTheme = value
@@ -504,6 +545,18 @@ internal fun StatusShareSheet(
                     }
                 },
             )
+            SegmentedListItem(
+                onClick = state::selectReplies,
+                enabled = !isCapturing && !isCrossPosting,
+                shapes = ListItemDefaults.last(),
+                content = { Text(stringResource(R.string.share_replies_title)) },
+                trailingContent = {
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Text(stringResource(R.string.share_replies_count, state.selectedCount))
+                        FAIcon(FontAwesomeIcons.Solid.AngleRight, contentDescription = null, modifier = Modifier.size(16.dp))
+                    }
+                },
+            )
         }
     }
 }
@@ -512,6 +565,8 @@ internal fun StatusShareSheet(
 private fun StatusSharePreview(
     statusKey: MicroBlogKey,
     status: UiTimelineV2?,
+    replies: List<UiTimelineV2>,
+    imageLoading: ShareImageLoading,
     previewTheme: SharePreviewTheme,
     previewStyle: SharePreviewStyle,
     captureRequested: Boolean,
@@ -525,7 +580,8 @@ private fun StatusSharePreview(
         ViewBox(
             modifier =
                 modifier
-                    .sizeIn(maxHeight = SharePreviewMaxHeight),
+                    .sizeIn(maxHeight = SharePreviewMaxHeight)
+                    .verticalScroll(rememberScrollState()),
         ) {
             Box(
                 modifier =
@@ -541,12 +597,15 @@ private fun StatusSharePreview(
                             drawContent()
                         },
             ) {
-                StatusShareCard(
-                    statusKey = statusKey,
-                    status = status,
-                    previewStyle = previewStyle,
-                    blockInteractions = true,
-                )
+                CompositionLocalProvider(LocalShareImageLoading provides imageLoading) {
+                    StatusShareCard(
+                        statusKey = statusKey,
+                        status = status,
+                        replies = replies,
+                        previewStyle = previewStyle,
+                        blockInteractions = true,
+                    )
+                }
             }
         }
     }
@@ -556,6 +615,7 @@ private fun StatusSharePreview(
 private fun StatusShareCard(
     statusKey: MicroBlogKey,
     status: UiTimelineV2?,
+    replies: List<UiTimelineV2>,
     previewStyle: SharePreviewStyle,
     modifier: Modifier = Modifier,
     blockInteractions: Boolean = false,
@@ -573,10 +633,7 @@ private fun StatusShareCard(
                             videoAutoplay = VideoAutoplay.NEVER,
                         ),
                 ) {
-                    StatusItem(
-                        item = status,
-                        detailStatusKey = statusKey,
-                    )
+                    StatusShareContent(status = status, statusKey = statusKey, replies = replies)
                 }
                 if (blockInteractions) {
                     Box(
@@ -640,13 +697,14 @@ private suspend fun capturePreviewShareBitmap(
         withFrameNanos { }
         withFrameNanos { }
         runCatching {
+            check(StatusShareImageLimits.canRender(graphicsLayer.size.width, graphicsLayer.size.height))
             graphicsLayer.toImageBitmap().asAndroidBitmap()
         }.getOrNull()
     } finally {
         onCaptureRequestedChange(false)
     }
 
-private suspend fun captureOffscreenShareBitmap(
+internal suspend fun captureOffscreenShareBitmap(
     context: Context,
     view: View,
     parentCompositionContext: CompositionContext,
@@ -662,6 +720,7 @@ private suspend fun captureOffscreenShareBitmap(
             checkNotNull(view.findCaptureHostView()) {
                 "Unable to find a host view for share capture"
             }
+        val loading = ShareImageLoading()
         val composeView =
             ComposeView(themedContext).apply {
                 setParentCompositionContext(parentCompositionContext)
@@ -670,7 +729,9 @@ private suspend fun captureOffscreenShareBitmap(
                 viewModelStoreOwner?.let {
                     setViewTreeViewModelStoreOwner(it)
                 }
-                setContent(content)
+                setContent {
+                    CompositionLocalProvider(LocalShareImageLoading provides loading) { content() }
+                }
             }
         val container =
             FrameLayout(themedContext).apply {
@@ -714,10 +775,14 @@ private suspend fun captureOffscreenShareBitmap(
                 withFrameNanos { }
             }
 
+            loading.awaitReady()
+            withFrameNanos { }
+            container.measure(widthSpec, heightSpec)
+            container.layout(-container.measuredWidth * 2, 0, -container.measuredWidth, container.measuredHeight)
             val captureWidth = composeView.measuredWidth
             val captureHeight = composeView.measuredHeight
 
-            check(captureWidth > 0 && captureHeight > 0) {
+            check(StatusShareImageLimits.canRender(captureWidth, captureHeight)) {
                 "Unable to measure share content"
             }
 

@@ -23,6 +23,8 @@ public struct RichText: View {
     @ScaledMetric(relativeTo: .body) private var quoteBarWidth = 3
     @Environment(\.openURL) private var openURL
     @Environment(\.displayScale) private var displayScale
+    @Environment(\.shareImageLoading) private var shareImageLoading
+    @State private var shareImageID = UUID()
 
     public init(text: UiRichText) {
         self.text = text
@@ -114,8 +116,10 @@ public struct RichText: View {
             let urls = inlineImageURLs
             images = images.filter { urls.contains($0.key) }
             let targetHeight = imageSize
+            if !urls.isEmpty { shareImageLoading?.register(shareImageID) }
+            var succeeded = true
             for urlString in urls {
-                guard let url = URL(string: urlString) else { continue }
+                guard let url = URL(string: urlString) else { succeeded = false; continue }
                 do {
                     let processor = ImageDownsamplingProcessor(
                         pixelSize: CGSize(width: .greatestFiniteMagnitude, height: ceil(targetHeight * displayScale)),
@@ -128,11 +132,16 @@ public struct RichText: View {
                     let platformImage = result.image
                     let resized = platformImage.resize(height: targetHeight) ?? platformImage
                     images[urlString] = Image(platformImage: resized)
+                } catch is CancellationError {
+                    shareImageLoading?.remove(shareImageID)
+                    return
                 } catch {
-                    continue
+                    succeeded = false
                 }
             }
+            if !urls.isEmpty { shareImageLoading?.complete(shareImageID, success: succeeded) }
         }
+        .onDisappear { shareImageLoading?.remove(shareImageID) }
     }
 
     private var contents: [PlatformTextContent] {
@@ -237,6 +246,8 @@ private struct InlineImageRequest: Hashable {
 private struct RichTextBlockImage: View {
     let url: URL
     @Environment(\.displayScale) private var displayScale
+    @Environment(\.shareImageLoading) private var shareImageLoading
+    @State private var shareImageID = UUID()
     @State private var pixelWidth: CGFloat = 0
     @State private var loadedImage: (url: URL, image: KFCrossPlatformImage)?
 
@@ -249,7 +260,13 @@ private struct RichTextBlockImage: View {
             .flareAsyncCacheTypeCheck()
             .flareBackgroundDecodeIfSupported()
             .loadDiskFileSynchronously(false)
-            .onSuccess { loadedImage = (url, $0.image) }
+            .onSuccess {
+                loadedImage = (url, $0.image)
+                shareImageLoading?.complete(shareImageID, success: true)
+            }
+            .onFailure { _ in
+                if pixelWidth > 0 { shareImageLoading?.complete(shareImageID, success: false) }
+            }
             .placeholder {
                 if let loadedImage, loadedImage.url == url {
                     Image(platformImage: loadedImage.image).resizable().scaledToFit()
@@ -265,6 +282,8 @@ private struct RichTextBlockImage: View {
             } action: { width in
                 pixelWidth = max(pixelWidth, width)
             }
+            .onAppear { shareImageLoading?.register(shareImageID) }
+            .onDisappear { shareImageLoading?.remove(shareImageID) }
     }
 }
 

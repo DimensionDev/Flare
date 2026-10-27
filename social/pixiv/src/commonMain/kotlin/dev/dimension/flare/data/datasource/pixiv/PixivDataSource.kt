@@ -21,6 +21,7 @@ import dev.dimension.flare.data.datasource.microblog.handler.RelationHandler
 import dev.dimension.flare.data.datasource.microblog.handler.UserHandler
 import dev.dimension.flare.data.datasource.microblog.loader.RelationActionType
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
+import dev.dimension.flare.data.datasource.microblog.paging.ShareRepliesLoader
 import dev.dimension.flare.data.datasource.microblog.paging.notSupported
 import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.tab.ShortcutSpec
@@ -318,6 +319,9 @@ internal class PixivDataSource(
             userKey = userKey,
             type = PixivWorkType.Illust,
         )
+
+    override fun shareReplies(statusKey: MicroBlogKey): RemoteLoader<UiTimelineV2> =
+        ShareRepliesLoader(galleryComments(statusKey), statusKey, comments = true)
 
     override fun context(statusKey: MicroBlogKey): RemoteLoader<UiTimelineV2> =
         PixivStatusDetailLoader(

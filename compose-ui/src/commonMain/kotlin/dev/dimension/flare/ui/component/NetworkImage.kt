@@ -42,13 +42,18 @@ public fun NetworkImage(
     val platformContext = LocalPlatformContext.current
     val placeholderColor = PlatformTheme.colorScheme.outline
     val allowHardware = LocalNetworkImageAllowHardware.current
+    val shareObserver = shareImageObserver(model)
+    val crossfade = allowHardware && shareObserver == null
     AsyncImage(
+        onLoading = shareObserver,
+        onSuccess = shareObserver,
+        onError = shareObserver,
         model =
-            remember(model, platformContext, customHeaders, allowHardware) {
+            remember(model, platformContext, customHeaders, allowHardware, crossfade) {
                 ImageRequest
                     .Builder(platformContext)
                     .data(model)
-                    .crossfade(allowHardware)
+                    .crossfade(crossfade)
                     .let {
                         if (customHeaders != null) {
                             it.httpHeaders(
@@ -101,13 +106,18 @@ public fun SubcomposeNetworkImage(
 ) {
     val platformContext = LocalPlatformContext.current
     val allowHardware = LocalNetworkImageAllowHardware.current
+    val shareObserver = shareImageObserver(model)
+    val crossfade = allowHardware && shareObserver == null
     SubcomposeAsyncImage(
+        onLoading = shareObserver,
+        onSuccess = shareObserver,
+        onError = shareObserver,
         model =
-            remember(model, platformContext, customHeaders, allowHardware) {
+            remember(model, platformContext, customHeaders, allowHardware, crossfade) {
                 ImageRequest
                     .Builder(platformContext)
                     .data(model)
-                    .crossfade(allowHardware)
+                    .crossfade(crossfade)
                     .let {
                         if (customHeaders != null) {
                             it.httpHeaders(
@@ -149,6 +159,7 @@ internal fun EmojiImage(
     val platformContext = LocalPlatformContext.current
     val allowHardware = LocalNetworkImageAllowHardware.current
     AsyncImage(
+        onState = shareImageObserver(uri),
         model =
             remember(uri, platformContext, allowHardware) {
                 ImageRequest

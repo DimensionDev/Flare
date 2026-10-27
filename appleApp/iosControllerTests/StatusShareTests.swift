@@ -142,6 +142,17 @@ final class StatusShareTests: XCTestCase {
         XCTAssertEqual(image.size.width, 120)
     }
 
+    func testFailedBlockImageCannotBeSharedAsAPlaceholder() async throws {
+        let url = "file:///nonexistent-flare-share-block-image.png"
+        let text = UiRichText(renderRuns: [RenderContent.BlockImage(url: url, href: nil)],
+                              isRtl: false, raw: url, innerText: "", imageUrls: [url])
+        do {
+            _ = try await RichText(text: text).frame(width: 120).snapshot(colorScheme: .light)
+            XCTFail("Unavailable block images must fail")
+        } catch StatusShareRenderError.mediaUnavailable {
+        }
+    }
+
     func testCachedImageCanCompleteBeforeItAppears() async throws {
         let loading = ShareImageLoading()
         let key = UUID()

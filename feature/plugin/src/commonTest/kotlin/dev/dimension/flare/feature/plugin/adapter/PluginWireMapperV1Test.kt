@@ -51,6 +51,15 @@ class PluginWireMapperV1Test {
                     ),
             )
         assertEquals(ClickEvent.Noop, mapper.gallery(gallery).bookmarkAction)
+        val disabledBookmark =
+            gallery.copy(
+                actions =
+                    gallery.actions.map {
+                        it.copy(action = dev.dimension.flare.feature.plugin.wire.SemanticActionV1.Unbookmark, active = true)
+                    },
+            )
+        assertEquals(true, mapper.gallery(disabledBookmark).isBookmarked)
+        assertEquals(ClickEvent.Noop, mapper.gallery(disabledBookmark).bookmarkAction)
         val available = gallery.copy(actions = gallery.actions.map { it.copy(enabled = true) })
         assertNotEquals(ClickEvent.Noop, mapper.gallery(available).bookmarkAction)
         assertEquals(ClickEvent.Noop, createMapper(null).gallery(available).bookmarkAction)
@@ -58,6 +67,19 @@ class PluginWireMapperV1Test {
             ClickEvent.Noop,
             createMapper(MicroBlogKey("me", "local.example"), postMutationAvailable = false).gallery(available).bookmarkAction,
         )
+    }
+
+    @Test
+    fun selfProfileUsesTheCanonicalAccountKeyForCacheLookups() {
+        val key = MicroBlogKey("me", "local.example")
+        val profile = post.author.copy(key = EntityKeyV1(key.id, key.host.uppercase()))
+        assertEquals(key, mapper.profile(profile).key)
+        assertEquals(key, mapper.cachedProfile(profile).key)
+        assertEquals(
+            MicroBlogKey("other", key.host),
+            mapper.profile(profile.copy(key = profile.key.copy(id = "other"))).key,
+        )
+        assertEquals(post.author.key.host, mapper.profile(post.author).key.host)
     }
 
     @Test

@@ -63,8 +63,11 @@ public val MicroblogDataSource.accountKeyOrNull: MicroBlogKey?
 public fun MicroblogDataSource.accountProfileFlow(): Flow<UiState<UiProfile>>? {
     val accountKey = accountKeyOrNull ?: return null
     capabilities.profile?.let { return it.userHandler.userById(accountKey.id).toUi() }
-    val profile = (this as? DataSourceCapabilityProvider)?.authenticatedProfile?.takeIf { it.key == accountKey } ?: return null
-    return flowOf(UiState.Success(profile.withProxy(ProxyRef.Account(accountKey))))
+    val profile =
+        (this as? DataSourceCapabilityProvider)?.authenticatedProfile?.takeIf {
+            it.key.id == accountKey.id && it.key.host.equals(accountKey.host, ignoreCase = true)
+        } ?: return null
+    return flowOf(UiState.Success(profile.copy(key = accountKey).withProxy(ProxyRef.Account(accountKey))))
 }
 
 @HiddenFromObjC

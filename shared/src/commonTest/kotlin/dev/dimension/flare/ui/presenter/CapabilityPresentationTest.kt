@@ -66,6 +66,15 @@ class CapabilityPresentationTest {
         }
 
     @Test
+    fun savedAccountIdentityUsesTheCanonicalAccountHost() =
+        runTest {
+            val source = CapabilityOnlySource(key, profile.copy(key = MicroBlogKey(key.id, key.host.uppercase())))
+            val identity = source.accountProfileFlow()?.first()?.takeSuccess()
+            assertEquals(key, identity?.key)
+            assertEquals(ProxyRef.Account(key), identity?.avatar?.proxy)
+        }
+
+    @Test
     fun composeOnlyAccountsUseTheirLoginProfile() =
         runTest {
             val users = observeComposeUsers(flowOf(listOf(CapabilityOnlySource(key, profile)))).first()

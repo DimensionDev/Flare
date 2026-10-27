@@ -104,7 +104,11 @@ internal class PluginWireMapperV1(
     fun profile(value: ProfileV1): UiProfile {
         value.requireValid()
         value.requireSafeUrls()
-        val key = value.key.toMicroBlogKey()
+        val key =
+            MicroBlogKey(
+                id = value.key.id,
+                host = if (value.key.host.equals(originHost, ignoreCase = true)) originHost else value.key.host,
+            )
         val handleHost =
             value.handle
                 .trim()
@@ -234,8 +238,7 @@ internal class PluginWireMapperV1(
         val images = value.images.mapNotNull { it.toUi(value.actions.any { action -> action.active == true }) as? UiMedia.Image }
         val bookmark =
             value.actions.firstOrNull {
-                it.enabled &&
-                    (it.action == SemanticActionV1.Bookmark || it.action == SemanticActionV1.Unbookmark)
+                it.action == SemanticActionV1.Bookmark || it.action == SemanticActionV1.Unbookmark
             }
         val key = value.key.toMicroBlogKey()
         return GalleryDetail(
@@ -257,7 +260,7 @@ internal class PluginWireMapperV1(
                 accountKey
                     ?.takeIf { postMutationAvailable }
                     ?.let { account ->
-                        bookmark?.toSemanticPostAction()?.let { action ->
+                        bookmark?.takeIf { it.enabled }?.toSemanticPostAction()?.let { action ->
                             semanticPostActionMenu(key, action, bookmark.actionToken, bookmark.count ?: 0, account).clickEvent
                         }
                     } ?: ClickEvent.Noop,

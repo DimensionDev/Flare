@@ -7,7 +7,8 @@ import androidx.room3.RoomDatabase
 import androidx.room3.RoomDatabaseConstructor
 import androidx.room3.withWriteTransaction
 
-internal const val CACHE_DATABASE_VERSION = 51
+// Rebuild payloads written before plugin media ownership was recorded.
+internal const val CACHE_DATABASE_VERSION = 52
 
 @Database(
     entities = [

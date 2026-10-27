@@ -192,6 +192,7 @@ article history, and direct messages retain their plugin ownership and recheck
 the running package's grant when restored, including translated and nested media.
 Permission removal, disable, and uninstall take effect after restart, like the
 package change itself; absent plugins cannot restore media.
+Development caches predating ownership metadata are rebuilt on upgrade.
 
 Flare owns HTTP routing: detector, guest, and new-login requests follow the
 global proxy policy; account requests and relogin requests follow that account's

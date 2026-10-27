@@ -1,7 +1,6 @@
 import SwiftUI
 import FlareAppleUI
 import UIKit
-import Kingfisher
 import KotlinSharedUI
 import CHTCollectionViewWaterfallLayoutObjC
 import FlareAppleCore
@@ -1456,7 +1455,7 @@ private final class GalleryPlaceholderTileUIView: UIView {
     required init?(coder: NSCoder) { fatalError("init(coder:) not supported") }
 }
 
-private final class GalleryNetworkImageView: UIImageView {
+private final class GalleryNetworkImageView: NetworkImageView {
     override init(frame: CGRect) {
         super.init(frame: frame)
         contentMode = .scaleAspectFill
@@ -1466,26 +1465,11 @@ private final class GalleryNetworkImageView: UIImageView {
     required init?(coder: NSCoder) { fatalError("init(coder:) not supported") }
 
     func set(url: String, customHeaders: [String: String]?) {
-        guard let url = URL(string: url) else {
-            image = nil
-            return
-        }
-        var options: KingfisherOptionsInfo = [.transition(.fade(0.25)), .cacheOriginalImage, .backgroundDecode]
-        if let customHeaders, !customHeaders.isEmpty {
-            options.append(.requestModifier(AnyModifier { request in
-                var request = request
-                for (key, value) in customHeaders {
-                    request.setValue(value, forHTTPHeaderField: key)
-                }
-                return request
-            }))
-        }
-        kf.setImage(with: url, options: options)
+        setImage(with: URL(string: url), customHeaders: customHeaders)
     }
 
     func cancel() {
-        kf.cancelDownloadTask()
-        image = nil
+        cancelImageLoad()
     }
 }
 

@@ -216,7 +216,7 @@ final class TimelineUIKitCollectionViewCell: UICollectionViewCell {
     override func layoutSubviews() {
         super.layoutSubviews()
         hostedView?.frame = contentView.bounds
-        reportPreferredHeightIfNeeded()
+        reportPreferredHeightIfNeeded(width: contentView.bounds.width)
     }
 
     override func preferredLayoutAttributesFitting(_ attributes: UICollectionViewLayoutAttributes) -> UICollectionViewLayoutAttributes {
@@ -291,11 +291,11 @@ final class TimelineUIKitCollectionViewCell: UICollectionViewCell {
         return preferredHeight
     }
 
-    private func reportPreferredHeightIfNeeded() {
-        guard hostedView === timelineCardStorage, contentView.bounds.width > 1 else { return }
+    func reportPreferredHeightIfNeeded(width: CGFloat) {
+        guard hostedView === timelineCardStorage, width > 1 else { return }
         // A fresh measurement reports once, even if the height did not change:
         // the controller may be waiting for the new width/render to be measured.
-        _ = measuredHostedHeight(width: contentView.bounds.width)
+        _ = measuredHostedHeight(width: width)
     }
 
     private func handleLocalTimelineHeightInvalidated() {

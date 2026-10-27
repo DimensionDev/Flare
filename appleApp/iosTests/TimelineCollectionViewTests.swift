@@ -5,6 +5,181 @@ import CHTCollectionViewWaterfallLayoutObjC
 
 @MainActor
 final class TimelineCollectionViewTests: XCTestCase {
+    func testMeasuredHeightRefreshesFollowingVisibleCellAttributes() throws {
+        let fixture = Fixture(width: 390, columns: 1)
+        let view = fixture.collectionView
+        let layout = view.collectionViewLayout
+        fixture.heightOverride = { _, _ in 240 }
+        layout.invalidateLayout()
+        fixture.settle()
+        let following = IndexPath(item: 2, section: 0)
+        XCTAssertNotNil(view.cellForItem(at: following))
+        view.invalidateMeasuredHeights(at: [IndexPath(item: 1, section: 0)]) {
+            fixture.heightOverride = { id, _ in id == 1 ? 150 : 240 }
+            return true
+        }
+        let expected = try XCTUnwrap(layout.layoutAttributesForItem(at: following)).frame
+        XCTAssertEqual(view.layoutAttributesForItem(at: following)?.frame, expected,
+                       "UIKit must discard cached positions for following cells in the same layout transaction")
+        XCTAssertEqual(view.cellForItem(at: following)?.frame, expected)
+    }
+
+    func testSingleColumnHeightInvalidationOnlySizesChangedItems() throws {
+        let fixture = Fixture(width: 402, columns: 1, itemCount: 1_000)
+        let layout = try XCTUnwrap(fixture.collectionView.collectionViewLayout as? TimelineWaterfallLayout)
+        var snapshot = fixture.dataSource.snapshot()
+        snapshot.appendSections([1, 2])
+        snapshot.appendItems(["1000"], toSection: 2)
+        fixture.dataSource.apply(snapshot, animatingDifferences: false)
+        fixture.settle()
+        fixture.scroll(to: 2_500)
+        let changes = [7: CGFloat(90), 501: CGFloat(-50), 999: CGFloat(140)]
+        fixture.heightOverride = { id, width in
+            Cell.height(index: id, width: width) + (changes[id] ?? 0)
+        }
+        fixture.sizingQueries = 0
+        layout.invalidateMeasuredItems(at: changes.keys.map { IndexPath(item: $0, section: 0) })
+        fixture.settle()
+        XCTAssertEqual(fixture.sizingQueries, changes.count,
+                       "Measuring three cells must not query all 1,001 loaded items")
+
+        let paths = (0..<1_000).map { IndexPath(item: $0, section: 0) } + [IndexPath(item: 0, section: 2)]
+        let incremental = try paths.map { try XCTUnwrap(layout.layoutAttributesForItem(at: $0)).frame }
+        let contentSize = layout.collectionViewContentSize
+        let rect = CGRect(x: 0, y: 2_500, width: 402, height: 600)
+        let visible = Set((layout.layoutAttributesForElements(in: rect) ?? []).map(\.indexPath))
+        layout.invalidateLayout()
+        fixture.settle()
+        XCTAssertEqual(layout.collectionViewContentSize, contentSize)
+        for (path, frame) in zip(paths, incremental) {
+            XCTAssertEqual(layout.layoutAttributesForItem(at: path)?.frame, frame, "\(path)")
+        }
+        XCTAssertEqual(Set((layout.layoutAttributesForElements(in: rect) ?? []).map(\.indexPath)), visible)
+    }
+
+    func testMultiColumnHeightInvalidationReflowsColumnsWithoutSizingUnchangedItems() throws {
+        let fixture = Fixture(width: 900, columns: 2)
+        let layout = try XCTUnwrap(fixture.collectionView.collectionViewLayout as? TimelineWaterfallLayout)
+        fixture.heightOverride = { id, width in Cell.height(index: id, width: width) + (id == 0 ? 300 : 0) }
+        fixture.sizingQueries = 0
+        layout.invalidateMeasuredItems(at: [IndexPath(item: 0, section: 0)])
+        fixture.settle()
+        XCTAssertEqual(fixture.sizingQueries, 1)
+        let frames = (0..<120).map { layout.layoutAttributesForItem(at: IndexPath(item: $0, section: 0))?.frame }
+        layout.invalidateLayout()
+        fixture.settle()
+        XCTAssertEqual((0..<120).map { layout.layoutAttributesForItem(at: IndexPath(item: $0, section: 0))?.frame }, frames)
+    }
+
+    func testIncrementalGeometryMatchesFullLayoutWithFractionalSizesAndSectionColumns() throws {
+        for columns in [1, 2, 3] {
+            for direction in [CHTCollectionViewWaterfallLayoutItemRenderDirection.shortestFirst, .leftToRight, .rightToLeft] {
+                let fixture = Fixture(width: 901, columns: columns)
+                let layout = try XCTUnwrap(fixture.collectionView.collectionViewLayout as? TimelineWaterfallLayout)
+                fixture.sectionColumns = [2: 1]
+                layout.itemRenderDirection = direction
+                layout.sectionInset = UIEdgeInsets(top: 4.25, left: 17, bottom: 6.125, right: 19)
+                layout.headerInset.top = 1.125
+                layout.footerInset.top = 2.25
+                layout.minimumInteritemSpacing = 0.75
+                layout.minimumContentHeight = 1_000
+                var overrides: [Int: CGFloat] = [:]
+                fixture.heightOverride = { id, _ in overrides[id] ?? CGFloat(93 + id % 13 * 12) + 0.375 }
+                var snapshot = fixture.dataSource.snapshot()
+                snapshot.appendSections([1, 2])
+                snapshot.appendItems(["120", "121"], toSection: 2)
+                fixture.dataSource.apply(snapshot, animatingDifferences: false)
+                fixture.settle()
+                let paths = (0..<120).map { IndexPath(item: $0, section: 0) }
+                    + [IndexPath(item: 0, section: 2), IndexPath(item: 1, section: 2)]
+                for generation in 0..<3 {
+                    overrides[7] = CGFloat(95 + generation * 91) + 0.625
+                    overrides[33] = CGFloat(400 - generation * 80) + 0.125
+                    overrides[120] = CGFloat(130 + generation * 23) + 0.875
+                    let changed = [IndexPath(item: 7, section: 0), IndexPath(item: 33, section: 0), IndexPath(item: 0, section: 2)]
+                    fixture.sizingQueries = 0
+                    // Coalesce separate cell reports before the next layout pass.
+                    for path in changed {
+                        layout.invalidateMeasuredItems(at: [path])
+                    }
+                    fixture.settle()
+                    XCTAssertEqual(fixture.sizingQueries, changed.count)
+                    overrides[33]! += 19.125
+                    layout.invalidateMeasuredItems(at: [IndexPath(item: 33, section: 0)])
+                    fixture.settle()
+                    XCTAssertEqual(fixture.sizingQueries, changed.count + 1)
+                    let frames = paths.map { layout.layoutAttributesForItem(at: $0)?.frame }
+                    let size = layout.collectionViewContentSize
+                    let rects = stride(from: CGFloat(0), through: size.height, by: 421).map {
+                        CGRect(x: 0, y: $0, width: 901, height: 600)
+                    }
+                    let visible = rects.map { Set((layout.layoutAttributesForElements(in: $0) ?? []).map(\.indexPath)) }
+                    layout.invalidateLayout()
+                    fixture.settle()
+                    XCTAssertEqual(layout.collectionViewContentSize, size)
+                    XCTAssertEqual(paths.map { layout.layoutAttributesForItem(at: $0)?.frame }, frames,
+                                   "columns=\(columns), direction=\(direction), generation=\(generation)")
+                    XCTAssertEqual(rects.map { Set((layout.layoutAttributesForElements(in: $0) ?? []).map(\.indexPath)) }, visible)
+                }
+            }
+        }
+    }
+
+    func testSnapshotAndRotationSupersedeQueuedHeightInvalidations() throws {
+        let fixture = Fixture(width: 390, columns: 1)
+        let layout = try XCTUnwrap(fixture.collectionView.collectionViewLayout as? TimelineWaterfallLayout)
+        layout.invalidateMeasuredItems(at: [IndexPath(item: 119, section: 0)])
+        var snapshot = fixture.dataSource.snapshot()
+        snapshot.deleteItems(["119"])
+        snapshot.insertItems(["200"], beforeItem: "0")
+        fixture.dataSource.apply(snapshot, animatingDifferences: false)
+        fixture.settle()
+        let paths = (0..<120).map { IndexPath(item: $0, section: 0) }
+        let replacementFrames = paths.map { layout.layoutAttributesForItem(at: $0)?.frame }
+        layout.invalidateLayout()
+        fixture.settle()
+        XCTAssertEqual(paths.map { layout.layoutAttributesForItem(at: $0)?.frame }, replacementFrames)
+        fixture.resize(width: 901, columns: 3)
+        let frames = paths.map { layout.layoutAttributesForItem(at: $0)?.frame }
+        let size = layout.collectionViewContentSize
+        layout.invalidateLayout()
+        fixture.settle()
+        XCTAssertEqual(paths.map { layout.layoutAttributesForItem(at: $0)?.frame }, frames)
+        XCTAssertEqual(layout.collectionViewContentSize, size)
+    }
+
+    func testReorderingItemsAfterHeightRefinementMatchesFullLayout() throws {
+        let fixture = Fixture(width: 901, columns: 3)
+        let layout = fixture.collectionView.collectionViewLayout
+        fixture.collectionView.invalidateMeasuredHeights(at: [IndexPath(item: 1, section: 0)]) {
+            fixture.heightOverride = { id, width in Cell.height(index: id, width: width) + (id == 1 ? 220 : 0) }
+            return true
+        }
+        var snapshot = fixture.dataSource.snapshot()
+        snapshot.moveItem("1", afterItem: "77")
+        fixture.dataSource.apply(snapshot, animatingDifferences: false)
+        fixture.settle()
+        let paths = (0..<120).map { IndexPath(item: $0, section: 0) }
+        let frames = paths.map { layout.layoutAttributesForItem(at: $0)?.frame }
+        layout.invalidateLayout()
+        fixture.settle()
+        XCTAssertEqual(paths.map { layout.layoutAttributesForItem(at: $0)?.frame }, frames)
+    }
+
+    func testMinimumContentHeightCanChangeAfterIncrementalLayout() throws {
+        let fixture = Fixture(width: 390, columns: 2, itemCount: 3)
+        let layout = try XCTUnwrap(fixture.collectionView.collectionViewLayout as? TimelineWaterfallLayout)
+        fixture.collectionView.invalidateMeasuredHeights(at: [IndexPath(item: 1, section: 0)]) {
+            fixture.heightOverride = { id, width in Cell.height(index: id, width: width) + (id == 1 ? 400 : 0) }
+            return true
+        }
+        let naturalHeight = layout.collectionViewContentSize.height
+        layout.minimumContentHeight = naturalHeight + 100
+        XCTAssertEqual(layout.collectionViewContentSize.height, naturalHeight + 100)
+        layout.minimumContentHeight = 0
+        XCTAssertEqual(layout.collectionViewContentSize.height, naturalHeight)
+    }
+
     func testHeightPublicationDuringTopRefreshCollapseKeepsReadingPosition() async throws {
         let fixture = Fixture(width: 402, columns: 1)
         let window = fixture.showInWindow()
@@ -28,7 +203,7 @@ final class TimelineCollectionViewTests: XCTestCase {
         XCTAssertLessThan(view.contentOffset.y, -view.adjustedContentInset.top - 1)
         XCTAssertTrue(view.shouldDeferSnapshotChanges)
         let oldOffset = view.contentOffset.y
-        view.invalidateMeasuredHeights {
+        view.invalidateMeasuredHeights(at: [IndexPath(item: 0, section: 0)]) {
             fixture.heightOverride = { id, width in
                 Cell.height(index: id, width: width) + (id == 0 ? 35 : 0)
             }
@@ -890,12 +1065,13 @@ final class TimelineCollectionViewTests: XCTestCase {
         let collectionView: TimelineCollectionView
         var dataSource: UICollectionViewDiffableDataSource<Int, String>!
         var columns: Int
+        var sectionColumns: [Int: Int] = [:]
         var extraHeight: CGFloat = 0
         var heightOverride: ((Int, CGFloat) -> CGFloat)?
         var sizingQueries = 0
         var configuredItems: [String] = []
 
-        init(width: CGFloat, columns: Int) {
+        init(width: CGFloat, columns: Int, itemCount: Int = 120) {
             self.columns = columns
             collectionView = TimelineCollectionView(
                 frame: CGRect(x: 0, y: 0, width: width, height: 600),
@@ -916,7 +1092,7 @@ final class TimelineCollectionViewTests: XCTestCase {
             collectionView.readingIndexPath = { [weak self] in self?.dataSource.indexPath(for: $0) }
             var snapshot = NSDiffableDataSourceSnapshot<Int, String>()
             snapshot.appendSections([0])
-            snapshot.appendItems((0..<120).map(String.init))
+            snapshot.appendItems((0..<itemCount).map(String.init))
             dataSource.apply(snapshot, animatingDifferences: false)
             settle()
         }
@@ -983,6 +1159,10 @@ final class TimelineCollectionViewTests: XCTestCase {
             let width = (view.bounds.width - CGFloat(columns - 1) * 8) / CGFloat(columns)
             let index = Int(dataSource.itemIdentifier(for: path)!)!
             return CGSize(width: width, height: heightOverride?(index, width) ?? (Cell.height(index: index, width: width) + extraHeight))
+        }
+
+        func collectionView(_ view: UICollectionView, layout: UICollectionViewLayout, columnCountForSection section: Int) -> Int {
+            sectionColumns[section] ?? columns
         }
 
         func scrollViewDidEndScrollingAnimation(_ scrollView: UIScrollView) {

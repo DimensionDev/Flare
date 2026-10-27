@@ -3,6 +3,7 @@ import Kingfisher
 import KotlinSharedUI
 import SwiftUI
 import FlareAppleCore
+import FlareAppleUI
 
 /// Pure-UIKit renderer for the iOS `RichText` SwiftUI view.
 final class RichTextUIView: UIView, TimelineHeightProviding {
@@ -54,6 +55,7 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
         return stack
     }()
 
+    private var inlineImagePixelHeight: CGFloat = 0
     private var inlineImages: [String: UIImage] = [:]
     private var textBlocks: [RenderedTextBlock] = []
     private var measurementBlocks: [RichTextMeasurementBlock] = []
@@ -138,6 +140,7 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
             UITraitPreferredContentSizeCategory.self,
             UITraitLegibilityWeight.self,
             UITraitAccessibilityContrast.self,
+            UITraitDisplayScale.self,
         ]) { (view: RichTextUIView, _) in
             view.update(force: true)
         }
@@ -223,7 +226,6 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
             return
         }
 
-        inlineImages = inlineImages.filter { text.imageUrls.contains($0.key) }
         let generation = renderGeneration
         let contents = (text.platformText as? NSArray)?.compactMap { $0 as? PlatformTextContent } ?? []
         if usesCollapsedLayout, width > 0 {
@@ -241,7 +243,7 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
             }
         }
 
-        loadInlineImages(for: text, generation: generation)
+        loadInlineImages(generation: generation)
         invalidateIntrinsicContentSize()
     }
 
@@ -462,11 +464,16 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
             case let content as PlatformTextTextContent:
                 let textWidth = max(width - (content.isBlockQuote ? RichTextQuoteBlockView.horizontalInset : 0), 1)
                 let insets = content.isBlockQuote ? RichTextQuoteBlockView.verticalInset * 2 : 0
-                let layout = limitedLayout(for: content, width: textWidth,
+                let (layout, renderer) = limitedLayout(for: content, width: textWidth,
                     minimumLines: max((lineLimit ?? 1) - lineCount + 1, 1),
                     heightLimit: thresholdHeight - fullHeight - spacing - insets)
+                // A single block below the threshold is complete and needs no line clipping.
+                if contents.count == 1, layout.text.length > 0, layout.height + insets <= thresholdHeight {
+                    addTextContent(content, attributedText: layout.text, preparedRenderer: renderer)
+                    return
+                }
                 guard !layout.lines.isEmpty else { continue }
-                blocks.append(.text(content, layout))
+                blocks.append(.text(content, layout, renderer))
                 lineCount += layout.lines.count
                 fullHeight += spacing + insets + layout.height
             case let content as PlatformTextBlockImageContent:
@@ -489,13 +496,16 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
             guard remainingLines > 0 else { break }
             if !stack.arrangedSubviews.isEmpty { previewHeight += stack.spacing }
             switch block {
-            case .text(let content, let layout):
+            case .text(let content, let layout, let preparedRenderer):
                 let visibleLines = min(remainingLines, layout.lines.count)
                 // Keep lookahead for wrapping, but cap the renderer as well so
                 // tall glyphs on the next line cannot peek into the preview.
                 let attributedText = layout.prefix(throughLine: visibleLines + 1)
+                let prepared = attributedText === layout.text ? preparedRenderer
+                    : makeTextRenderer(content: content, attributedText: attributedText, reusing: preparedRenderer)
                 let renderer = addTextContent(content, attributedText: attributedText,
-                                              visibleLineLimit: isCollapsed ? visibleLines : nil)
+                                              visibleLineLimit: isCollapsed ? visibleLines : nil,
+                                              preparedRenderer: prepared)
                 let textWidth = max(width - (content.isBlockQuote ? RichTextQuoteBlockView.horizontalInset : 0), 1)
                 // Line-fragment metrics can be shorter than the renderer's CJK lines.
                 previewHeight += renderer.measuredSize(for: textWidth).height
@@ -516,16 +526,19 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
     }
 
     private func limitedLayout(for content: PlatformTextTextContent, width: CGFloat,
-                               minimumLines: Int, heightLimit: CGFloat) -> RichTextLineLayout {
+                               minimumLines: Int, heightLimit: CGFloat) -> (RichTextLineLayout, RichTextTextRendering) {
         var length = 256
+        var renderer: RichTextTextRendering?
         while true {
             let prefix = attributedPrefix(for: content, length: length)
             // Match the rendered block height, including fallback-font metrics.
-            let height = makeTextRenderer(content: content, attributedText: prefix.text).measuredSize(for: width).height
+            let prepared = makeTextRenderer(content: content, attributedText: prefix.text, reusing: renderer)
+            renderer = prepared
+            let height = prepared.measuredSize(for: width).height
             let layout = RichTextLineLayout(text: prefix.text, width: width, height: height)
             // Keep enough lines for the preview even if large glyphs exhaust the height budget first.
             if prefix.complete || (layout.height > heightLimit && layout.lines.count >= minimumLines) {
-                return layout
+                return (layout, prepared)
             }
             // This is a starting window, not a character truncation rule. Wide
             // columns and narrow/zero-width glyphs grow it until layout decides.
@@ -535,12 +548,13 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
 
     @discardableResult
     private func addTextContent(_ content: PlatformTextTextContent, attributedText: NSAttributedString? = nil,
-                                visibleLineLimit: Int? = nil) -> RichTextTextRendering {
+                                visibleLineLimit: Int? = nil,
+                                preparedRenderer: RichTextTextRendering? = nil) -> RichTextTextRendering {
         let attributedText = attributedText ?? attributedString(for: content)
         attributedText.enumerateAttribute(.richTextInlineImageURL, in: NSRange(location: 0, length: attributedText.length)) { value, _, _ in
             if let url = value as? String { renderedInlineImageURLs.insert(url) }
         }
-        let renderer = makeTextRenderer(
+        let renderer = preparedRenderer ?? makeTextRenderer(
             content: content,
             attributedText: attributedText
         )
@@ -606,7 +620,6 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
         }
         stack.addArrangedSubview(imageView)
         measurementBlocks.append(.blockImage(measurement))
-        imageView.loadImage()
     }
 
     private func attributedString(for content: RenderContent.Text) -> NSAttributedString {
@@ -729,11 +742,26 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
         return result
     }
 
-    private func loadInlineImages(for text: UiRichText, generation: Int) {
+    private func loadInlineImages(generation: Int) {
+        if !inlineImages.isEmpty {
+            inlineImages = inlineImages.filter { renderedInlineImageURLs.contains($0.key) }
+        }
+        guard !renderedInlineImageURLs.isEmpty else { return }
+        let scale = max(traitCollection.displayScale, 1)
+        let pixelHeight = ceil(inlineImageTargetHeight * scale)
+        if inlineImagePixelHeight != pixelHeight {
+            inlineImages.removeAll()
+            inlineImagePixelHeight = pixelHeight
+        }
+        let processor = ImageDownsamplingProcessor(
+            pixelSize: CGSize(width: .greatestFiniteMagnitude, height: pixelHeight), fillsBounds: false)
         for urlString in renderedInlineImageURLs where inlineImages[urlString] == nil && !loadingInlineImageURLs.contains(urlString) {
             guard let url = URL(string: urlString) else { continue }
             loadingInlineImageURLs.insert(urlString)
-            KingfisherManager.shared.retrieveImage(with: url) { [weak self] result in
+            KingfisherManager.shared.retrieveImage(with: url, options: [
+                .processor(processor), .scaleFactor(scale), .cacheOriginalImage,
+                .backgroundDecode, .asyncCacheTypeCheck,
+            ]) { [weak self] result in
                 Task { @MainActor [weak self] in
                     guard let self, self.renderGeneration == generation else { return }
                     self.loadingInlineImageURLs.remove(urlString)
@@ -977,7 +1005,8 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
         )
     }
 
-    private func makeTextRenderer(content: PlatformTextTextContent, attributedText: NSAttributedString) -> RichTextTextRendering {
+    private func makeTextRenderer(content: PlatformTextTextContent, attributedText: NSAttributedString,
+                                  reusing renderer: RichTextTextRendering? = nil) -> RichTextTextRendering {
         var needsTextView = isTextSelectionEnabled
         attributedText.enumerateAttributes(in: NSRange(location: 0, length: attributedText.length)) { attributes, _, stop in
             if attributes[.link] != nil || attributes[.attachment] != nil {
@@ -986,10 +1015,18 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
             }
         }
         if needsTextView {
+            if let textView = renderer as? RichTextTextView {
+                textView.applyAttributedText(attributedText)
+                return textView
+            }
             return makeTextView(
                 attributedText: attributedText,
                 alignment: textAlignment(from: content.alignment)
             )
+        }
+        if let label = renderer as? RichTextLabel {
+            label.applyAttributedText(attributedText)
+            return label
         }
         return makeLabel(
             attributedText: attributedText,
@@ -1041,25 +1078,29 @@ private extension NSAttributedString.Key {
 }
 
 private enum RichTextCollapsedBlock {
-    case text(PlatformTextTextContent, RichTextLineLayout)
+    case text(PlatformTextTextContent, RichTextLineLayout, RichTextTextRendering)
     case image(PlatformTextBlockImageContent, height: CGFloat, lines: Int)
 }
 
 /// Layout only a growing prefix, stopping once the caller can decide overflow.
 /// UIKit receives at most the preview plus one line of lookahead afterwards.
-private struct RichTextLineLayout {
+private final class RichTextLineLayout {
     struct Line {
         let characterEnd: Int
     }
 
     let text: NSAttributedString
-    let lines: [Line]
     let height: CGFloat
+    private let width: CGFloat
 
     init(text: NSAttributedString, width: CGFloat, height: CGFloat) {
         self.text = text
         self.height = height
-        guard text.length > 0 else { lines = []; return }
+        self.width = width
+    }
+
+    lazy var lines: [Line] = {
+        guard text.length > 0 else { return [] }
         let storage = NSTextStorage(attributedString: text)
         let manager = NSLayoutManager()
         let container = NSTextContainer(size: CGSize(width: width, height: .greatestFiniteMagnitude))
@@ -1075,8 +1116,8 @@ private struct RichTextLineLayout {
         if manager.extraLineFragmentTextContainer === container {
             lines.append(Line(characterEnd: text.length))
         }
-        self.lines = lines
-    }
+        return lines
+    }()
 
     func prefix(throughLine count: Int) -> NSAttributedString {
         guard count < lines.count else { return text }
@@ -1280,6 +1321,7 @@ private protocol RichTextFittingPreparing: AnyObject {
 
 private final class RichTextLabel: UILabel, RichTextTextRendering, RichTextFittingPreparing {
     private var lastLayoutWidth: CGFloat = 0
+    private var lastMeasurement: (width: CGFloat, lines: Int, size: CGSize)?
     var renderedView: UIView { self }
 
     init() {
@@ -1305,12 +1347,14 @@ private final class RichTextLabel: UILabel, RichTextTextRendering, RichTextFitti
 
     func applyAttributedText(_ attributedText: NSAttributedString) {
         self.attributedText = attributedText
+        lastMeasurement = nil
         lastLayoutWidth = 0
         setNeedsLayout()
         invalidateIntrinsicContentSize()
     }
 
     func update(lineLimit: Int?, selectionEnabled: Bool, linkColor: UIColor, onOpenURL: ((URL) -> Void)?) {
+        lastMeasurement = nil
         numberOfLines = lineLimit ?? 0
         lineBreakMode = lineLimit == nil ? .byWordWrapping : .byTruncatingTail
         setContentHuggingPriority(lineLimit == 1 ? .required : .defaultLow, for: .horizontal)
@@ -1360,9 +1404,14 @@ private final class RichTextLabel: UILabel, RichTextTextRendering, RichTextFitti
     }
 
     func measuredSize(for width: CGFloat) -> CGSize {
+        if let cached = lastMeasurement, cached.width == width, cached.lines == numberOfLines {
+            return cached.size
+        }
         preferredMaxLayoutWidth = width
         let size = sizeThatFits(CGSize(width: width, height: .greatestFiniteMagnitude))
-        return CGSize(width: size.width, height: ceil(size.height))
+        let measured = CGSize(width: size.width, height: ceil(size.height))
+        lastMeasurement = (width, numberOfLines, measured)
+        return measured
     }
 }
 
@@ -1371,6 +1420,7 @@ private final class RichTextTextView: UITextView, UITextViewDelegate, RichTextTe
     private var selectionEnabled = false
     private var lineLimit: Int?
     private var lastLayoutWidth: CGFloat = 0
+    private var lastMeasurement: (width: CGFloat, lines: Int, size: CGSize)?
     var renderedView: UIView { self }
 
     init() {
@@ -1412,6 +1462,7 @@ private final class RichTextTextView: UITextView, UITextViewDelegate, RichTextTe
 
     func applyAttributedText(_ attributedText: NSAttributedString) {
         self.attributedText = attributedText
+        lastMeasurement = nil
         lastLayoutWidth = 0
         invalidateIntrinsicContentSize()
     }
@@ -1422,6 +1473,7 @@ private final class RichTextTextView: UITextView, UITextViewDelegate, RichTextTe
         linkColor: UIColor,
         onOpenURL: ((URL) -> Void)?
     ) {
+        lastMeasurement = nil
         self.selectionEnabled = selectionEnabled
         self.lineLimit = lineLimit
         linkHandler = onOpenURL
@@ -1488,6 +1540,9 @@ private final class RichTextTextView: UITextView, UITextViewDelegate, RichTextTe
     }
 
     func measuredSize(for width: CGFloat) -> CGSize {
+        if let cached = lastMeasurement, cached.width == width, cached.lines == textContainer.maximumNumberOfLines {
+            return cached.size
+        }
         let height: CGFloat
         if let lineLimit {
             height = ceil(maxLineHeight() * CGFloat(max(lineLimit, 1)) + maxLineHeight())
@@ -1495,7 +1550,9 @@ private final class RichTextTextView: UITextView, UITextViewDelegate, RichTextTe
             height = .greatestFiniteMagnitude
         }
         let size = sizeThatFits(CGSize(width: width, height: height))
-        return CGSize(width: size.width, height: ceil(size.height))
+        let measured = CGSize(width: size.width, height: ceil(size.height))
+        lastMeasurement = (width, textContainer.maximumNumberOfLines, measured)
+        return measured
     }
 
     private func maxLineHeight() -> CGFloat {
@@ -1666,6 +1723,7 @@ private final class RichTextBlockImageView: UIView, RichTextFittingPreparing {
     private var aspectConstraint: NSLayoutConstraint?
     private var aspectRatio: CGFloat?
     private var lastLayoutWidth: CGFloat = 0
+    private var requestedPixelWidth: CGFloat = 0
 
     init(url: String, href: String?, aspectRatio: CGFloat? = nil) {
         self.url = url
@@ -1706,9 +1764,17 @@ private final class RichTextBlockImageView: UIView, RichTextFittingPreparing {
         }
     }
 
-    func loadImage() {
-        guard let imageURL = URL(string: url) else { return }
-        imageView.kf.setImage(with: imageURL, options: [.backgroundDecode]) { [weak self] result in
+    private func loadImage(width: CGFloat) {
+        let scale = max(traitCollection.displayScale, 1)
+        let pixelWidth = ceil(width * scale)
+        guard pixelWidth > requestedPixelWidth, let imageURL = URL(string: url) else { return }
+        requestedPixelWidth = pixelWidth
+        let processor = ImageDownsamplingProcessor(
+            pixelSize: CGSize(width: pixelWidth, height: .greatestFiniteMagnitude), fillsBounds: false)
+        imageView.kf.setImage(with: imageURL, options: [
+            .processor(processor), .scaleFactor(scale), .cacheOriginalImage,
+            .backgroundDecode, .asyncCacheTypeCheck, .keepCurrentImageWhileLoading,
+        ]) { [weak self] result in
             guard let self else { return }
             if case .success(let value) = result {
                 self.updateAspectRatio(for: value.image)
@@ -1729,6 +1795,7 @@ private final class RichTextBlockImageView: UIView, RichTextFittingPreparing {
 
     func prepareForFitting(width: CGFloat) {
         guard width.isFinite, width > 0 else { return }
+        loadImage(width: width)
         let widthKey = RichTextUIView.measurementWidthKey(width)
         guard widthKey != RichTextUIView.measurementWidthKey(lastLayoutWidth) else { return }
         lastLayoutWidth = width

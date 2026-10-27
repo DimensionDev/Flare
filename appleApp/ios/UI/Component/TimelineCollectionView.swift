@@ -13,7 +13,9 @@ final class TimelineCollectionView: UICollectionView {
     // The owner knows when the snapshot and measurements for this layout are ready.
     // A nil path denotes a restore to the top, without a target item.
     var isReadingLayoutReady: ((IndexPath?) -> Bool)?
+    var prepareVisibleCells: (() -> Bool)?
     var onReadingLayoutChanged: (() -> Void)?
+    private var isPreparingVisibleCells = false
     private var isExternalScrollInteractionActive = false
     var isScrollInteractionActive: Bool { hasScrollGesture || isProgrammaticScrolling || isExternalScrollInteractionActive }
     var onProgrammaticScrollBegan: (() -> Void)?
@@ -419,7 +421,7 @@ final class TimelineCollectionView: UICollectionView {
     /// Apply measured geometry without moving content under an active gesture.
     /// Publish heights after capturing the old anchor, outside cell measurement.
     /// Layouts triggered by offset compensation must see the same committed batch.
-    func invalidateMeasuredHeights(applying measurements: () -> Bool = { true }) {
+    func invalidateMeasuredHeights(at indexPaths: [IndexPath]? = nil, applying measurements: () -> Bool = { true }) {
         prepareForLayoutChange(preferringVisibleTop: true)
         UIView.performWithoutAnimation {
             performUpdatesPreservingReadingPosition(preferringVisibleTop: true) {
@@ -429,7 +431,11 @@ final class TimelineCollectionView: UICollectionView {
                     if hasReadingPosition { setNeedsLayout() }
                     return
                 }
-                collectionViewLayout.invalidateLayout()
+                if let indexPaths, let layout = collectionViewLayout as? TimelineWaterfallLayout {
+                    layout.invalidateMeasuredItems(at: indexPaths)
+                } else {
+                    collectionViewLayout.invalidateLayout()
+                }
                 layoutIfNeeded()
             }
         }
@@ -540,8 +546,16 @@ final class TimelineCollectionView: UICollectionView {
 
     override func layoutSubviews() {
         super.layoutSubviews()
+        guard !isPreparingVisibleCells else { return }
         startRefreshIfReady()
         restoreReadingPositionIfNeeded()
+        isPreparingVisibleCells = true
+        defer { isPreparingVisibleCells = false }
+        // A shorter newly measured card can expose another cold cell in its column.
+        while prepareVisibleCells?() == true {
+            super.layoutSubviews()
+            restoreReadingPositionIfNeeded()
+        }
         onReadingLayoutChanged?()
     }
 
@@ -612,6 +626,35 @@ final class TimelineCollectionView: UICollectionView {
 final class TimelineWaterfallLayout: CHTCollectionViewWaterfallLayout {
     var readingOffset: (() -> CGFloat?)?
     private var needsGeometryUpdate = true
+    private var measuredItems: Set<IndexPath> = []
+    private var sections: [SectionGeometry] = []
+    private var cachedSize: CGSize?
+
+    private struct SectionGeometry {
+        var frames: [CGRect]
+        var unions: [CGRect] = []
+        let columns: Int
+        let width: CGFloat
+        let left: CGFloat
+        let columnSpacing: CGFloat
+        let spacing: CGFloat
+        let topPadding: CGFloat
+        let bottomPadding: CGFloat
+        var startY: CGFloat
+
+        mutating func updateUnions(from item: Int) {
+            let first = item / 20
+            unions.removeSubrange(min(first, unions.count)..<unions.count)
+            for start in stride(from: first * 20, to: frames.count, by: 20) {
+                unions.append(frames[start..<min(start + 20, frames.count)].reduce(CGRect.null) { $0.union($1) })
+            }
+        }
+
+        func column(of frame: CGRect) -> Int {
+            guard columns > 1 else { return 0 }
+            return Int(((frame.minX - left) / (width + columnSpacing)).rounded())
+        }
+    }
 
     override func invalidateLayout() {
         needsGeometryUpdate = true
@@ -619,15 +662,30 @@ final class TimelineWaterfallLayout: CHTCollectionViewWaterfallLayout {
     }
 
     override func invalidateLayout(with context: UICollectionViewLayoutInvalidationContext) {
-        if !(context is ReadingOffsetInvalidationContext) { needsGeometryUpdate = true }
+        if let context = context as? MeasuredHeightInvalidationContext, cachedSize != nil {
+            measuredItems.formUnion(context.items)
+        } else if !(context is ReadingOffsetInvalidationContext) {
+            needsGeometryUpdate = true
+        }
         super.invalidateLayout(with: context)
     }
 
+    func invalidateMeasuredItems(at paths: [IndexPath]) {
+        invalidateLayout(with: MeasuredHeightInvalidationContext(items: paths))
+    }
+
     override func prepare() {
+        if !needsGeometryUpdate, !measuredItems.isEmpty, !updateMeasuredItems() {
+            needsGeometryUpdate = true
+        }
         if needsGeometryUpdate {
             needsGeometryUpdate = false
+            cachedSize = nil
+            sections = []
             super.prepare()
+            cacheGeometry()
         }
+        measuredItems.removeAll(keepingCapacity: true)
         guard let collectionView, let target = readingOffset?() else { return }
         let delta = target - collectionView.contentOffset.y
         guard abs(delta) > 0.5 / max(collectionView.traitCollection.displayScale, 1) else { return }
@@ -642,5 +700,137 @@ final class TimelineWaterfallLayout: CHTCollectionViewWaterfallLayout {
         return CGPoint(x: proposedContentOffset.x, y: target)
     }
 
+    override var collectionViewContentSize: CGSize {
+        guard let cachedSize else { return super.collectionViewContentSize }
+        guard !sections.isEmpty else { return .zero }
+        return CGSize(width: collectionView?.bounds.width ?? cachedSize.width,
+                      height: max(cachedSize.height, minimumContentHeight))
+    }
+
+    override func layoutAttributesForItem(at indexPath: IndexPath) -> UICollectionViewLayoutAttributes? {
+        guard cachedSize != nil else { return super.layoutAttributesForItem(at: indexPath) }
+        guard sections.indices.contains(indexPath.section),
+              sections[indexPath.section].frames.indices.contains(indexPath.item) else { return nil }
+        let attributes = UICollectionViewLayoutAttributes(forCellWith: indexPath)
+        attributes.frame = sections[indexPath.section].frames[indexPath.item]
+        return attributes
+    }
+
+    override func layoutAttributesForElements(in rect: CGRect) -> [UICollectionViewLayoutAttributes]? {
+        guard cachedSize != nil else { return super.layoutAttributesForElements(in: rect) }
+        var result: [UICollectionViewLayoutAttributes] = []
+        for (section, geometry) in sections.enumerated() {
+            for (group, bounds) in geometry.unions.enumerated() where bounds.intersects(rect) {
+                for item in (group * 20)..<min((group + 1) * 20, geometry.frames.count) where geometry.frames[item].intersects(rect) {
+                    if let attributes = layoutAttributesForItem(at: IndexPath(item: item, section: section)) {
+                        result.append(attributes)
+                    }
+                }
+            }
+        }
+        return result
+    }
+
+    private func cacheGeometry() {
+        guard let collectionView,
+              let delegate = collectionView.delegate as? CHTCollectionViewDelegateWaterfallLayout else { return }
+        var cached: [SectionGeometry] = []
+        var top: CGFloat = 0
+        for section in 0..<collectionView.numberOfSections {
+            // Timeline headers/footers are ordinary cells. Supplementary views
+            // retain CHT's complete layout until their geometry is cached too.
+            guard super.layoutAttributesForSupplementaryView(ofKind: CHTCollectionElementKindSectionHeader, at: IndexPath(item: 0, section: section)) == nil,
+                  super.layoutAttributesForSupplementaryView(ofKind: CHTCollectionElementKindSectionFooter, at: IndexPath(item: 0, section: section)) == nil else { return }
+            let columns = delegate.collectionView?(collectionView, layout: self, columnCountForSection: section) ?? columnCount
+            let inset = delegate.collectionView?(collectionView, layout: self, insetForSectionAt: section) ?? sectionInset
+            let header = delegate.collectionView?(collectionView, layout: self, insetForHeaderInSection: section) ?? headerInset
+            let footer = delegate.collectionView?(collectionView, layout: self, insetForFooterInSection: section) ?? footerInset
+            let spacing = delegate.collectionView?(collectionView, layout: self, minimumInteritemSpacingForSectionAt: section) ?? minimumInteritemSpacing
+            let columnSpacing = delegate.collectionView?(collectionView, layout: self, minimumColumnSpacingForSectionAt: section) ?? minimumColumnSpacing
+            let width = itemWidthInSection(at: section)
+            guard columns > 0, width > 0, width + columnSpacing > 0, spacing >= 0 else { return }
+            var frames: [CGRect] = []
+            for item in 0..<collectionView.numberOfItems(inSection: section) {
+                guard let frame = super.layoutAttributesForItem(at: IndexPath(item: item, section: section))?.frame else { return }
+                frames.append(frame)
+            }
+            top += header.top + inset.top
+            var geometry = SectionGeometry(frames: frames, columns: columns, width: width, left: inset.left,
+                                           columnSpacing: columnSpacing, spacing: spacing,
+                                           topPadding: header.top + inset.top, bottomPadding: inset.bottom + footer.top, startY: top)
+            geometry.updateUnions(from: 0)
+            // CHT reads NSNumber column heights through floatValue, including
+            // empty sections. Preserve that rounding when rebuilding a suffix.
+            let bottom = frames.map { Float($0.maxY + spacing) }.max() ?? Float(top)
+            top = CGFloat(bottom) - spacing + geometry.bottomPadding
+            cached.append(geometry)
+        }
+        sections = cached
+        cachedSize = CGSize(width: collectionView.bounds.width, height: CGFloat(Float(top)))
+    }
+
+    private func updateMeasuredItems() -> Bool {
+        guard let collectionView, let size = cachedSize, size.width == collectionView.bounds.width,
+              sections.count == collectionView.numberOfSections,
+              let delegate = collectionView.delegate as? CHTCollectionViewDelegateWaterfallLayout else { return false }
+        for section in sections.indices {
+            guard sections[section].frames.count == collectionView.numberOfItems(inSection: section) else { return false }
+        }
+        let paths = measuredItems.sorted()
+        var heights: [CGFloat] = []
+        for path in paths {
+            guard sections.indices.contains(path.section), sections[path.section].frames.indices.contains(path.item) else { return false }
+            let width = sections[path.section].width
+            let measured = delegate.collectionView(collectionView, layout: self, sizeForItemAt: path)
+            let scale = UIScreen.main.scale
+            let height = measured.width > 0 && measured.height > 0
+                ? floor(measured.height * width / measured.width * scale) / scale : 0
+            guard height.isFinite else { return false }
+            heights.append(height)
+        }
+        guard let first = paths.first else { return true }
+        for (path, height) in zip(paths, heights) { sections[path.section].frames[path.item].size.height = height }
+        var top = sections[first.section].startY
+        for section in first.section..<sections.count {
+            var geometry = sections[section]
+            if section != first.section { top += geometry.topPadding }
+            geometry.startY = top
+            var columns = Array(repeating: Float(top), count: geometry.columns)
+            let start = section == first.section ? first.item : 0
+            for frame in geometry.frames.prefix(start) {
+                columns[geometry.column(of: frame)] = Float(frame.maxY + geometry.spacing)
+            }
+            for item in start..<geometry.frames.count {
+                let column: Int
+                switch itemRenderDirection {
+                case .leftToRight: column = item % geometry.columns
+                case .rightToLeft: column = geometry.columns - 1 - item % geometry.columns
+                default: column = columns.indices.min { columns[$0] < columns[$1] } ?? 0
+                }
+                geometry.frames[item].origin = CGPoint(x: geometry.left + (geometry.width + geometry.columnSpacing) * CGFloat(column),
+                                                      y: CGFloat(columns[column]))
+                columns[column] = Float(geometry.frames[item].maxY + geometry.spacing)
+            }
+            top = CGFloat(columns.max() ?? Float(top)) - geometry.spacing + geometry.bottomPadding
+            geometry.updateUnions(from: start)
+            sections[section] = geometry
+        }
+        cachedSize?.height = CGFloat(Float(top))
+        return true
+    }
+
     private final class ReadingOffsetInvalidationContext: UICollectionViewLayoutInvalidationContext {}
+
+    private final class MeasuredHeightInvalidationContext: UICollectionViewLayoutInvalidationContext {
+        let items: [IndexPath]
+
+        init(items: [IndexPath]) {
+            self.items = items
+            super.init()
+        }
+
+        // Every following position may move, even though only these sizes changed.
+        // UIKit must drop its attributes too; the layout keeps its own geometry.
+        override var invalidateEverything: Bool { true }
+    }
 }

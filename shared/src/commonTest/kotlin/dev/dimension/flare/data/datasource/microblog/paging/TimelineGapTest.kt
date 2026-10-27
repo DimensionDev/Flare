@@ -41,6 +41,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withContext
@@ -75,6 +77,66 @@ class TimelineGapTest : RobolectricTest() {
     fun tearDown() {
         database.close()
     }
+
+    @Test
+    fun cursorOnlyWritesInvalidatePagingMetadata() =
+        runTest {
+            val dao = database.pagingTimelineDao()
+            dao.insertPagingKey(DbPagingKey("cursor-version", nextKey = "next", prevKey = "previous"))
+            val before = assertNotNull(dao.getPagingKeyMetadata("cursor-version"))
+            dao.updatePagingKeyNextKey("cursor-version", "replacement")
+            val appended = assertNotNull(dao.getPagingKeyMetadata("cursor-version"))
+            assertEquals(before.generation, appended.generation)
+            assertEquals(before.revision + 1, appended.revision)
+            dao.updatePagingKeyPrevKey("cursor-version", "new-previous")
+            val prepended = assertNotNull(dao.getPagingKeyMetadata("cursor-version"))
+            assertEquals(appended.revision + 1, prepended.revision)
+            assertEquals("replacement", dao.getNextKey("cursor-version"))
+            assertEquals("new-previous", prepended.prevKey)
+        }
+
+    @Test
+    fun mixedAppendHonorsADirectCursorWriterAfterCachingTheFrontier() =
+        runTest {
+            val source =
+                source("direct-frontier") { request ->
+                    assertEquals(PagingRequest.Refresh, request)
+                    PagingResult(listOf(datedPost(300), datedPost(200)))
+                }
+            val loader = MixedRemoteMediator(database, listOf(source), TimelineMergePolicy.Time)
+            val home = TimelineRemoteMediator(loader, database, false, retainHistory = false)
+            val one = PagingState<OffsetFromStartPagingKey, TimelinePageItem>(emptyList(), null, PagingConfig(1), 0)
+            home.load(LoadType.REFRESH, one)
+            database.pagingTimelineDao().updatePagingKeyNextKey(home.pagingKey, null)
+            val result = home.load(LoadType.APPEND, one)
+            assertTrue(assertIs<RemoteMediator.MediatorResult.Success>(result).endOfPaginationReached)
+            assertEquals(listOf("300"), contents(home).map { it.statusKey.id })
+        }
+
+    @Test
+    fun mixedAppendObservesAnotherWriterAndCanReopenAfterPendingIsConsumed() =
+        runTest {
+            val requests = mutableListOf<PagingRequest>()
+            val source =
+                source("shared-frontier") { request ->
+                    requests += request
+                    assertEquals(PagingRequest.Refresh, request)
+                    PagingResult(listOf(datedPost(300), datedPost(200), datedPost(100)))
+                }
+            val loader = MixedRemoteMediator(database, listOf(source), TimelineMergePolicy.Time)
+
+            fun home() = TimelineRemoteMediator(loader, database, false, retainHistory = true)
+            val oneItem = PagingState<OffsetFromStartPagingKey, TimelinePageItem>(emptyList(), null, PagingConfig(1), 0)
+            val first = home()
+            assertIs<RemoteMediator.MediatorResult.Success>(first.load(LoadType.REFRESH, oneItem))
+            assertEquals(listOf("300"), contents(first).map { it.statusKey.id })
+            assertIs<RemoteMediator.MediatorResult.Success>(home().load(LoadType.APPEND, oneItem))
+            assertEquals(listOf("300", "200"), contents(first).map { it.statusKey.id })
+            assertIs<RemoteMediator.MediatorResult.Success>(first.load(LoadType.APPEND, oneItem))
+            assertEquals(listOf("300", "200", "100"), contents(first).map { it.statusKey.id })
+            assertTrue(assertIs<RemoteMediator.MediatorResult.Success>(home().load(LoadType.APPEND, oneItem)).endOfPaginationReached)
+            assertEquals(listOf<PagingRequest>(PagingRequest.Refresh), requests)
+        }
 
     @Test
     fun timeMixedRefreshKeepsTheSamePagingFrontierWithOrWithoutRememberingPosition() =
@@ -765,9 +827,10 @@ class TimelineGapTest : RobolectricTest() {
             for (nestedPolicy in listOf(null, TimelineMergePolicy.Time, TimelineMergePolicy.TimePerPage)) {
                 var generation = 0
                 val requests = mutableListOf<Pair<String, PagingRequest>>()
+                val requestsMutex = Mutex()
                 val featured =
                     source("featured-$nestedPolicy", ordered = false, refreshGapOncePerSession = true) { request ->
-                        requests += "featured" to request
+                        requestsMutex.withLock { requests += "featured" to request }
                         if (request is PagingRequest.Append) {
                             PagingResult(listOf(datedPost(100)))
                         } else {
@@ -786,7 +849,7 @@ class TimelineGapTest : RobolectricTest() {
                     }
                 val ordered =
                     source("ordered-$nestedPolicy") { request ->
-                        requests += "ordered" to request
+                        requestsMutex.withLock { requests += "ordered" to request }
                         if (request is PagingRequest.Append) {
                             PagingResult(listOf(datedPost(50)), nextKey = "older")
                         } else {

@@ -759,7 +759,7 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
             guard let url = URL(string: urlString) else { continue }
             loadingInlineImageURLs.insert(urlString)
             KingfisherManager.shared.retrieveImage(with: url, options: [
-                .processor(processor), .scaleFactor(scale), .cacheOriginalImage, .cacheMemoryOnly,
+                .processor(processor), .scaleFactor(scale), .cacheOriginalImage,
                 .backgroundDecode, .asyncCacheTypeCheck,
             ]) { [weak self] result in
                 Task { @MainActor [weak self] in
@@ -1772,8 +1772,8 @@ private final class RichTextBlockImageView: UIView, RichTextFittingPreparing {
         let processor = ImageDownsamplingProcessor(
             pixelSize: CGSize(width: pixelWidth, height: .greatestFiniteMagnitude), fillsBounds: false)
         imageView.kf.setImage(with: imageURL, options: [
-            .processor(processor), .scaleFactor(scale), .cacheOriginalImage, .cacheMemoryOnly,
-            .backgroundDecode, .asyncCacheTypeCheck,
+            .processor(processor), .scaleFactor(scale), .cacheOriginalImage,
+            .backgroundDecode, .asyncCacheTypeCheck, .keepCurrentImageWhileLoading,
         ]) { [weak self] result in
             guard let self else { return }
             if case .success(let value) = result {

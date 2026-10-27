@@ -166,7 +166,7 @@ final class TimelineMediaPreviewTests: XCTestCase {
         }
     }
 
-    func testPreviewsKeepOriginalDiskDataWithoutWritingProcessedVariants() async throws {
+    func testColdPreviewsPersistOriginalAndProcessedImagesForOfflineReuse() async throws {
         for kind in ["uikit", "swiftui", "crossfade"] {
             let fixture = try Fixture()
             KingfisherManager.shared.defaultOptions.append(.waitForCache)
@@ -198,17 +198,105 @@ final class TimelineMediaPreviewTests: XCTestCase {
             let processor = ImageDownsamplingProcessor(pixelSize: CGSize(width: 540, height: 405), fillsBounds: true)
             XCTAssertEqual(fixture.cache.imageCachedType(forKey: url, processorIdentifier: processor.identifier), .memory, kind)
             fixture.cache.clearMemoryCache()
-            XCTAssertEqual(fixture.cache.imageCachedType(forKey: url, processorIdentifier: processor.identifier), .none,
-                           "A preview must not spend CPU encoding a second disk copy: \(kind)")
+            XCTAssertEqual(fixture.cache.imageCachedType(forKey: url, processorIdentifier: processor.identifier), .disk,
+                           "The processed preview must remain reusable after memory eviction: \(kind)")
             XCTAssertEqual(fixture.cache.imageCachedType(forKey: url), .disk,
                            "The original bytes must remain available offline: \(kind)")
-            let image = try await KingfisherManager.shared.retrieveImage(
+            let result = try await KingfisherManager.shared.retrieveImage(
                 with: URL(string: url)!,
                 options: [.targetCache(fixture.cache), .onlyFromCache,
-                          .processor(processor), .scaleFactor(3), .cacheMemoryOnly]
-            ).image
-            XCTAssertEqual(image.cgImage?.width, 540, kind)
-            XCTAssertEqual(image.cgImage?.height, 405, kind)
+                          .processor(processor), .scaleFactor(3)]
+            )
+            XCTAssertEqual(result.cacheType, .disk, kind)
+            XCTAssertEqual(result.image.cgImage?.width, 540, kind)
+            XCTAssertEqual(result.image.cgImage?.height, 405, kind)
+        }
+    }
+
+    func testRichTextBlockImagesStayVisibleAndKeepTheirHeightDuringWidthUpgrades() async throws {
+        for kind in ["uikit", "swiftui"] {
+            let fixture = try Fixture()
+            KingfisherManager.shared.defaultOptions.append(.requestModifier(AnyModifier { request in
+                var request = request
+                request.setValue("fixture", forHTTPHeaderField: "X-Preview-Test")
+                return request
+            }))
+            let url = fixture.media(path: "block-upgrade-\(kind).png").previewUrl
+            let text = UiRichText(renderRuns: [RenderContent.BlockImage(url: url, href: nil)],
+                isRtl: false, raw: url, innerText: "", imageUrls: [url])
+            let host: UIViewController
+            let resize: (CGFloat) -> Void
+            let height: () -> CGFloat
+            var native: RichTextUIView?
+            if kind == "uikit" {
+                host = UIViewController()
+                let view = RichTextUIView()
+                native = view
+                view.traitOverrides.displayScale = 3
+                host.view.addSubview(view)
+                view.configure(text: text, lineLimit: nil, isTextSelectionEnabled: false, onOpenURL: nil)
+                resize = { width in
+                    view.frame = CGRect(x: 0, y: 0, width: width, height: width * 0.75)
+                    view.prepareForFitting(width: width)
+                    view.layoutIfNeeded()
+                }
+                height = { view.timelineHeight(for: view.bounds.width) ?? 0 }
+            } else {
+                func content(width: CGFloat) -> some View {
+                    RichText(text: text).environment(\.displayScale, 3).frame(width: width)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                let controller = UIHostingController(rootView: content(width: 180))
+                host = controller
+                resize = { controller.rootView = content(width: $0) }
+                height = {
+                    controller.sizeThatFits(in: CGSize(width: 240, height: 1_000)).height
+                        - controller.view.safeAreaInsets.top - controller.view.safeAreaInsets.bottom
+                }
+            }
+            resize(180)
+            let window = try fixture.show(host)
+            defer { window.isHidden = true; window.rootViewController = nil }
+            for _ in 0..<300 {
+                host.view.layoutIfNeeded()
+                if fixture.cache.imageSize(for: url)?.width == 540, abs(height() - 135) < 0.5 { break }
+                try await Task.sleep(for: .milliseconds(10))
+            }
+            XCTAssertEqual(height(), 135, accuracy: 0.5, kind)
+            XCTAssertEqual(fixture.cache.imageSize(for: url)?.width, 540, kind)
+
+            let queue = DispatchQueue(label: "block-image-upgrade-\(kind)")
+            let gate = DispatchSemaphore(value: 0)
+            queue.async { gate.wait() }
+            defer { gate.signal() }
+            KingfisherManager.shared.defaultOptions.append(.processingQueue(.dispatch(queue)))
+            resize(240)
+            for _ in 0..<10 {
+                host.view.layoutIfNeeded()
+                try await Task.sleep(for: .milliseconds(10))
+            }
+            XCTAssertEqual(height(), 180, accuracy: 0.5, "The loaded image must keep its natural ratio: \(kind)")
+            let point = native.map { $0.convert(CGPoint(x: 120, y: 90), to: host.view) }
+                ?? CGPoint(x: host.view.bounds.midX, y: host.view.bounds.midY)
+            let format = UIGraphicsImageRendererFormat()
+            format.scale = 1
+            let snapshot = UIGraphicsImageRenderer(size: CGSize(width: 1, height: 1), format: format).image { context in
+                context.cgContext.translateBy(x: -point.x, y: -point.y)
+                host.view.drawHierarchy(in: host.view.bounds, afterScreenUpdates: true)
+            }
+            var rgba = [UInt8](repeating: 0, count: 4)
+            let context = try XCTUnwrap(CGContext(data: &rgba, width: 1, height: 1, bitsPerComponent: 8,
+                bytesPerRow: 4, space: CGColorSpaceCreateDeviceRGB(), bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue))
+            context.draw(try XCTUnwrap(snapshot.cgImage), in: CGRect(x: 0, y: 0, width: 1, height: 1))
+            XCTAssertGreaterThan(rgba[2], 200, "The blue image must stay visible while processing: \(kind)")
+            XCTAssertLessThan(rgba[0], 50, kind)
+            gate.signal()
+            for _ in 0..<300 {
+                if fixture.cache.imageSize(for: url)?.width == 720 { break }
+                try await Task.sleep(for: .milliseconds(10))
+            }
+            XCTAssertEqual(fixture.cache.imageSize(for: url)?.width, 720, kind)
+            XCTAssertEqual(height(), 180, accuracy: 0.5, kind)
         }
     }
 

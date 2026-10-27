@@ -99,7 +99,7 @@ private struct ReactionImage: View {
                     fillsBounds: false)
                 guard let imageURL = URL(string: requestedURL),
                       let result = try? await KingfisherManager.shared.retrieveImage(with: imageURL, options: [
-                        .processor(processor), .scaleFactor(displayScale), .cacheOriginalImage, .cacheMemoryOnly,
+                        .processor(processor), .scaleFactor(displayScale), .cacheOriginalImage,
                         .backgroundDecode, .asyncCacheTypeCheck,
                       ]),
                       !Task.isCancelled else { return }

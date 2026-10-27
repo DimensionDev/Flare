@@ -121,7 +121,7 @@ public struct RichText: View {
                         pixelSize: CGSize(width: .greatestFiniteMagnitude, height: ceil(targetHeight * displayScale)),
                         fillsBounds: false)
                     let result = try await KingfisherManager.shared.retrieveImage(with: url, options: [
-                        .processor(processor), .scaleFactor(displayScale), .cacheOriginalImage, .cacheMemoryOnly,
+                        .processor(processor), .scaleFactor(displayScale), .cacheOriginalImage,
                         .backgroundDecode, .asyncCacheTypeCheck,
                     ])
                     guard !Task.isCancelled else { return }
@@ -238,6 +238,7 @@ private struct RichTextBlockImage: View {
     let url: URL
     @Environment(\.displayScale) private var displayScale
     @State private var pixelWidth: CGFloat = 0
+    @State private var loadedImage: (url: URL, image: KFCrossPlatformImage)?
 
     var body: some View {
         KFImage(pixelWidth > 0 ? url : nil)
@@ -245,11 +246,17 @@ private struct RichTextBlockImage: View {
                 pixelSize: CGSize(width: pixelWidth, height: .greatestFiniteMagnitude), fillsBounds: false))
             .scaleFactor(displayScale)
             .cacheOriginalImage()
-            .cacheMemoryOnly()
             .flareAsyncCacheTypeCheck()
             .flareBackgroundDecodeIfSupported()
             .loadDiskFileSynchronously(false)
-            .placeholder { Color.clear.frame(height: 1) }
+            .onSuccess { loadedImage = (url, $0.image) }
+            .placeholder {
+                if let loadedImage, loadedImage.url == url {
+                    Image(platformImage: loadedImage.image).resizable().scaledToFit()
+                } else {
+                    Color.clear.frame(height: 1)
+                }
+            }
             .resizable()
             .scaledToFit()
             .frame(maxWidth: .infinity)

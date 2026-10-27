@@ -318,7 +318,7 @@ private final class ReactionChipView: UIControl, ManualLayoutMeasurable, Timelin
             pixelSize: CGSize(width: .greatestFiniteMagnitude, height: ceil(Self.imageHeight * scale)),
             fillsBounds: false)
         imageView.kf.setImage(with: url, options: [
-            .processor(processor), .scaleFactor(scale), .cacheOriginalImage, .cacheMemoryOnly,
+            .processor(processor), .scaleFactor(scale), .cacheOriginalImage,
             .backgroundDecode, .asyncCacheTypeCheck,
         ]) { [weak self] result in
             guard let self, self.imageURL == url,

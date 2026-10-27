@@ -60,7 +60,7 @@ open class NetworkImageView: AnimatedImageView {
         kf.cancelDownloadTask()
         var options: KingfisherOptionsInfo = [
             .processor(ImageDownsamplingProcessor(pixelSize: requestedSize, fillsBounds: contentMode != .scaleAspectFit)),
-            .scaleFactor(scale), .cacheOriginalImage, .cacheMemoryOnly, .backgroundDecode, .asyncCacheTypeCheck,
+            .scaleFactor(scale), .cacheOriginalImage, .backgroundDecode, .asyncCacheTypeCheck,
             .keepCurrentImageWhileLoading, .transition(.fade(0.25)),
         ]
         if let headers, !headers.isEmpty {

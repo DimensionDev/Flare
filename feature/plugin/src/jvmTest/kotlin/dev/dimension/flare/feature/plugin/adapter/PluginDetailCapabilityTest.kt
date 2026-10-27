@@ -7,6 +7,7 @@ import dev.dimension.flare.data.datasource.microblog.datasource.GalleryDetail
 import dev.dimension.flare.data.datasource.microblog.list.ListMetaData
 import dev.dimension.flare.data.datasource.microblog.loader.RelationActionType
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
+import dev.dimension.flare.feature.plugin.abi.PluginAbiV1
 import dev.dimension.flare.feature.plugin.host.PluginHttpTransport
 import dev.dimension.flare.feature.plugin.host.PluginTransportRequestV1
 import dev.dimension.flare.feature.plugin.host.PluginTransportResponseV1
@@ -19,8 +20,12 @@ import dev.dimension.flare.feature.plugin.wire.EntityKeyV1
 import dev.dimension.flare.feature.plugin.wire.LoginSuccessV1
 import dev.dimension.flare.feature.plugin.wire.PluginAccountCredentialV1
 import dev.dimension.flare.feature.plugin.wire.ProfileV1
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformDataSourceContext
+import dev.dimension.flare.ui.model.ClickEvent
+import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.route.DeeplinkRoute
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -68,26 +73,7 @@ class PluginDetailCapabilityTest {
         runBlocking {
             val plugin = install()
             val accountKey = MicroBlogKey("account-1", "plugin.example")
-            val success =
-                LoginSuccessV1(
-                    accountId = accountKey.id,
-                    origin = ORIGIN,
-                    credential = JsonObject(emptyMap()),
-                    profile = ProfileV1(EntityKeyV1(accountKey.id, accountKey.host), "test@plugin.example", "Test"),
-                    capabilities =
-                        plugin.installed.manifest.platform.capabilities
-                            .mapValues { it.value.operations.keys },
-                )
-            val context = MemoryPlatformContext(accountKey, plugin.accountCredential(success))
-            val dataSource =
-                PluginDataSourceV1.authenticated(
-                    plugin = plugin,
-                    runtimePool = runtimePool,
-                    context = context,
-                    timelineSpecs = emptyMap(),
-                    dynamicTimelineSpec = null,
-                    coroutineScope = scope,
-                )
+            val dataSource = authenticated(plugin)
 
             val listAdapter = requireNotNull(dataSource.extraCapabilities.listAdapter)
             assertEquals("Cold list", listAdapter.info("list-1").title)
@@ -173,6 +159,52 @@ class PluginDetailCapabilityTest {
         }
 
     @Test
+    fun mixedTimelinePostsUseTheirSelectedDetailRoutes() =
+        runBlocking {
+            val dataSource = authenticated(install())
+            val accountType = AccountType.Specific(MicroBlogKey("account-1", "plugin.example"))
+            val posts = detailPosts(dataSource)
+
+            assertEquals(
+                listOf(
+                    ClickEvent.Deeplink(DeeplinkRoute.Status.Detail(MicroBlogKey("default", "plugin.example"), accountType)),
+                    ClickEvent.Deeplink(DeeplinkRoute.Status.Detail(MicroBlogKey("post", "plugin.example"), accountType)),
+                    ClickEvent.Deeplink(DeeplinkRoute.Article(accountType, MicroBlogKey("article", "plugin.example"))),
+                    ClickEvent.Deeplink(DeeplinkRoute.Gallery.Detail(MicroBlogKey("gallery", "plugin.example"), accountType)),
+                ),
+                posts.map { it.clickEvent },
+            )
+        }
+
+    @Test
+    fun detailLinksRequireTheNegotiatedTargetCapability() =
+        runBlocking {
+            val dataSource =
+                authenticated(
+                    install(),
+                    unavailableCapabilities = setOf(PluginAbiV1.Capabilities.ARTICLE, PluginAbiV1.Capabilities.GALLERY),
+                )
+            val posts = detailPosts(dataSource)
+
+            assertIs<ClickEvent.Deeplink>(posts[0].clickEvent)
+            assertIs<ClickEvent.Deeplink>(posts[1].clickEvent)
+            assertEquals(ClickEvent.Noop, posts[2].clickEvent)
+            assertEquals(ClickEvent.Noop, posts[3].clickEvent)
+        }
+
+    @Test
+    fun articleAndGalleryLinksDoNotRequirePostDetail() =
+        runBlocking<Unit> {
+            val dataSource = authenticated(install(), unavailableCapabilities = setOf(PluginAbiV1.Capabilities.POST))
+            val posts = detailPosts(dataSource)
+
+            assertEquals(ClickEvent.Noop, posts[0].clickEvent)
+            assertEquals(ClickEvent.Noop, posts[1].clickEvent)
+            assertIs<DeeplinkRoute.Article>(DeeplinkRoute.parse(assertIs<ClickEvent.Deeplink>(posts[2].clickEvent).url))
+            assertIs<DeeplinkRoute.Gallery.Detail>(DeeplinkRoute.parse(assertIs<ClickEvent.Deeplink>(posts[3].clickEvent).url))
+        }
+
+    @Test
     fun packageMissingDedicatedDetailMethodIsRejected() =
         runBlocking {
             val input = root / "missing-detail.fpp"
@@ -183,6 +215,39 @@ class PluginDetailCapabilityTest {
 
             assertTrue(error != null && "capabilities.list.detail" in error.message.orEmpty())
         }
+
+    private suspend fun detailPosts(dataSource: PluginDataSourceV1): List<UiTimelineV2.Post> =
+        dataSource
+            .timeline("dynamic-feed", mapOf("kind" to "details"))
+            .load(20, PagingRequest.Refresh)
+            .data
+            .map { assertIs<UiTimelineV2.TimelinePostItem>(it).post }
+
+    private suspend fun authenticated(
+        plugin: RunningPluginV1,
+        unavailableCapabilities: Set<String> = emptySet(),
+    ): PluginDataSourceV1 {
+        val accountKey = MicroBlogKey("account-1", "plugin.example")
+        val success =
+            LoginSuccessV1(
+                accountId = accountKey.id,
+                origin = ORIGIN,
+                credential = JsonObject(emptyMap()),
+                profile = ProfileV1(EntityKeyV1(accountKey.id, accountKey.host), "test@plugin.example", "Test"),
+                capabilities =
+                    plugin.installed.manifest.platform.capabilities
+                        .filterKeys { it !in unavailableCapabilities }
+                        .mapValues { it.value.operations.keys },
+            )
+        return PluginDataSourceV1.authenticated(
+            plugin = plugin,
+            runtimePool = runtimePool,
+            context = MemoryPlatformContext(accountKey, plugin.accountCredential(success)),
+            timelineSpecs = emptyMap(),
+            dynamicTimelineSpec = null,
+            coroutineScope = scope,
+        )
+    }
 
     private suspend fun install(): RunningPluginV1 {
         val input = root / "plugin.fpp"
@@ -259,6 +324,7 @@ private const val MANIFEST =
           "flare.datasource.timeline/v1": {
             "operations": { "page": { "directions": ["refresh"] } }
           },
+          "flare.datasource.post/v1": { "operations": { "detail": {} } },
           "flare.datasource.tab-catalog/v1": {
             "operations": { "page": { "directions": ["refresh"] } }
           }
@@ -276,7 +342,13 @@ private const val LIST_DETAIL =
 private const val SCRIPT =
     """
     const profile = { key: { id: "account-1", host: "plugin.example" }, handle: "test@plugin.example", displayName: "Test" };
+    function post(id, detailType) {
+      const value = { key: { id, host: "plugin.example" }, author: profile, createdAt: "2026-01-01T00:00:00Z", content: { value: id } };
+      if (detailType) value.detailType = detailType;
+      return value;
+    }
     definePlugin({ capabilities: {
+      post: { detail(request) { return post(request.key.id); } },
       list: {
         page() { return { items: [] }; },
         $LIST_DETAIL
@@ -322,7 +394,9 @@ private const val SCRIPT =
       },
       timeline: {
         page(request) {
-          if (request.timelineId !== "dynamic-feed" || request.parameters.kind !== "photos") throw new Error("bad timeline");
+          if (request.timelineId !== "dynamic-feed") throw new Error("bad timeline");
+          if (request.parameters.kind === "details") return { items: [post("default"), post("post", "post"), post("article", "article"), post("gallery", "gallery")] };
+          if (request.parameters.kind !== "photos") throw new Error("bad timeline");
           return { items: [{ key: { id: "post-1", host: "plugin.example" }, author: profile, createdAt: "2026-01-01T00:00:00Z", content: { value: "Dynamic" } }] };
         },
       },

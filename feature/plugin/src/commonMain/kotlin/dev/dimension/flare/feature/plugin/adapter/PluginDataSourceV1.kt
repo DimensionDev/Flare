@@ -730,6 +730,16 @@ internal class PluginDataSourceV1 private constructor(
                         originHost = Url(origin).accountHost(),
                         profileAvailable = operations[PluginAbiV1.Capabilities.PROFILE].orEmpty().containsAll(PROFILE_LOOKUP_OPERATIONS),
                         postDetailAvailable = "detail" in operations[PluginAbiV1.Capabilities.POST].orEmpty(),
+                        articleDetailAvailable =
+                            PluginAbiV1.hasRequiredOperations(
+                                PluginAbiV1.Capabilities.ARTICLE,
+                                operations[PluginAbiV1.Capabilities.ARTICLE].orEmpty(),
+                            ),
+                        galleryDetailAvailable =
+                            PluginAbiV1.hasRequiredOperations(
+                                PluginAbiV1.Capabilities.GALLERY,
+                                operations[PluginAbiV1.Capabilities.GALLERY].orEmpty(),
+                            ),
                         postMutationAvailable = "mutate" in operations[PluginAbiV1.Capabilities.POST].orEmpty(),
                         postDeleteAvailable = "delete" in operations[PluginAbiV1.Capabilities.POST].orEmpty(),
                         composeAvailable = accountKey != null && "publish" in operations[PluginAbiV1.Capabilities.COMPOSE].orEmpty(),

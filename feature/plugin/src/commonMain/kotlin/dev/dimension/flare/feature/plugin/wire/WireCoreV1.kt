@@ -92,6 +92,18 @@ public enum class VisibilityV1 {
 }
 
 @Serializable
+public enum class PostDetailTypeV1 {
+    @SerialName("post")
+    Post,
+
+    @SerialName("article")
+    Article,
+
+    @SerialName("gallery")
+    Gallery,
+}
+
+@Serializable
 public data class PostV1(
     val key: EntityKeyV1,
     val author: ProfileV1,
@@ -109,6 +121,7 @@ public data class PostV1(
     val repliesCount: Long? = null,
     val entityToken: String? = null,
     val actions: List<ActionDescriptorV1> = emptyList(),
+    val detailType: PostDetailTypeV1 = PostDetailTypeV1.Post,
 )
 
 @Serializable

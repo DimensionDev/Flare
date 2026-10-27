@@ -373,6 +373,7 @@ public sealed class UiTimelineV2 {
                 .add(visibility)
                 .add(replyToHandle)
                 .add(references.renderSummaryHash { it.renderSummaryHash() })
+                .add(clickEvent)
                 .add(mediaClickPolicy)
                 .add(accountType)
                 .build()
@@ -570,6 +571,8 @@ private fun UiTimelineV2.Post.renderSummaryHash(): Int =
         .add(visibility)
         .add(translationDisplayState)
         .add(actions.renderSummaryHash { it.renderSummaryHash() })
+        .add(clickEvent)
+        .add(mediaClickPolicy)
         .add(createdAt.value.toEpochMilliseconds())
         .build()
 

@@ -200,6 +200,7 @@ interface ActionDescriptorV1 {
   count?: number;
   actionToken?: string;
 }
+type PostDetailTypeV1 = "post" | "article" | "gallery";
 interface PostV1 {
   key: EntityKeyV1;
   author: ProfileV1;
@@ -217,6 +218,8 @@ interface PostV1 {
   repliesCount?: number;
   entityToken?: string;
   actions?: ActionDescriptorV1[];
+  /** Defaults to "post"; opens the selected detail using this post's key. */
+  detailType?: PostDetailTypeV1;
 }
 interface HashtagV1 { name: string; url?: string }
 

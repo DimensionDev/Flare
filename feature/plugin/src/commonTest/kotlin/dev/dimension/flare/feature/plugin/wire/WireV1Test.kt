@@ -1,14 +1,50 @@
 package dev.dimension.flare.feature.plugin.wire
 
 import dev.dimension.flare.feature.plugin.abi.PluginJsonV1
+import kotlinx.serialization.SerializationException
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.JsonNull
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.decodeFromJsonElement
+import kotlinx.serialization.json.encodeToJsonElement
+import kotlinx.serialization.json.jsonObject
 import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
 class WireV1Test {
+    @Test
+    fun postDetailTypeDefaultsToPostWhenOmitted() {
+        val payload = JsonObject(PluginJsonV1.encodeToJsonElement(validPost()).jsonObject - "detailType")
+
+        assertEquals(PostDetailTypeV1.Post, PluginJsonV1.decodeFromJsonElement<PostV1>(payload).detailType)
+    }
+
+    @Test
+    fun postDetailTypesHaveStableWireNames() {
+        mapOf(PostDetailTypeV1.Post to "post", PostDetailTypeV1.Article to "article", PostDetailTypeV1.Gallery to "gallery")
+            .forEach { (type, name) ->
+                val post = validPost().copy(detailType = type)
+                val encoded = PluginJsonV1.encodeToString(post)
+
+                assertContains(encoded, "\"detailType\":\"$name\"")
+                assertEquals(post, PluginJsonV1.decodeFromString<PostV1>(encoded))
+            }
+    }
+
+    @Test
+    fun rejectsUnknownOrNullPostDetailTypes() {
+        val post = PluginJsonV1.encodeToJsonElement(validPost()).jsonObject
+
+        listOf(JsonPrimitive("external"), JsonPrimitive("Article"), JsonNull).forEach { invalidType ->
+            assertFailsWith<SerializationException> {
+                PluginJsonV1.decodeFromJsonElement<PostV1>(JsonObject(post + ("detailType" to invalidType)))
+            }
+        }
+    }
+
     @Test
     fun mutationResultHasStableDiscriminator() {
         val encoded =

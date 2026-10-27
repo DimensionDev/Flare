@@ -88,6 +88,22 @@ All values crossing the boundary are JSON Wire v1 DTOs. IDs use
 Rich text is `{ "format": "plain|html", "value": "..." }`; Flare sanitizes
 HTML before rendering.
 
+## Post detail navigation
+
+Each `PostV1` may set `detailType` to `"post"`, `"article"`, or `"gallery"`.
+Omitting it defaults to `"post"`.
+For example, a timeline may return an article preview with `detailType: "article"`
+alongside regular posts and gallery previews. The selected detail receives that
+post's `key` and uses the same account or guest origin. Reposted content keeps
+its own `detailType`.
+
+The target capability must be available for that account (or declared for guest
+access), including its required operations: `post.detail`; `article.detail` and
+`comments`; or `gallery.detail`, `comments`, and `recommendations`. Otherwise the
+post click does nothing; it does not fall back to another detail type. In media
+grids, article and gallery previews use the same detail click target.
+Unknown or null `detailType` values are invalid Wire results.
+
 ## Host API
 
 The frozen `flare` object exposes:

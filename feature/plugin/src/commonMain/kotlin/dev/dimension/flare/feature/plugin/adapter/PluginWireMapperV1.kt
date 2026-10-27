@@ -16,6 +16,7 @@ import dev.dimension.flare.feature.plugin.wire.MediaTypeV1
 import dev.dimension.flare.feature.plugin.wire.MediaV1
 import dev.dimension.flare.feature.plugin.wire.NotificationKindV1
 import dev.dimension.flare.feature.plugin.wire.NotificationV1
+import dev.dimension.flare.feature.plugin.wire.PostDetailTypeV1
 import dev.dimension.flare.feature.plugin.wire.PostV1
 import dev.dimension.flare.feature.plugin.wire.ProfileV1
 import dev.dimension.flare.feature.plugin.wire.RelationV1
@@ -63,6 +64,8 @@ internal class PluginWireMapperV1(
     private val originHost: String,
     private val profileAvailable: Boolean,
     private val postDetailAvailable: Boolean,
+    private val articleDetailAvailable: Boolean,
+    private val galleryDetailAvailable: Boolean,
     private val postMutationAvailable: Boolean,
     private val postDeleteAvailable: Boolean,
     private val composeAvailable: Boolean,
@@ -253,6 +256,12 @@ internal class PluginWireMapperV1(
 
     private fun PostV1.toUiPost(): UiTimelineV2.Post {
         val key = key.toMicroBlogKey()
+        val detailRoute =
+            when (detailType) {
+                PostDetailTypeV1.Post -> DeeplinkRoute.Status.Detail(key, accountType).takeIf { postDetailAvailable }
+                PostDetailTypeV1.Article -> DeeplinkRoute.Article(accountType, key).takeIf { articleDetailAvailable }
+                PostDetailTypeV1.Gallery -> DeeplinkRoute.Gallery.Detail(key, accountType).takeIf { galleryDetailAvailable }
+            }
         val resolvedUrl = url ?: "https://${key.host}/"
         val directActions = mutableListOf<ActionMenu>()
         val overflow = mutableListOf<ActionMenu>()
@@ -320,11 +329,12 @@ internal class PluginWireMapperV1(
                     ?.let(::listOf)
                     .orEmpty()
                     .toPersistentList(),
-            clickEvent =
-                if (postDetailAvailable) {
-                    ClickEvent.Deeplink(DeeplinkRoute.Status.Detail(key, accountType))
+            clickEvent = detailRoute?.let { ClickEvent.Deeplink(it) } ?: ClickEvent.Noop,
+            mediaClickPolicy =
+                if (detailType == PostDetailTypeV1.Post) {
+                    UiTimelineV2.Post.MediaClickPolicy.OpenStatusMedia
                 } else {
-                    ClickEvent.Noop
+                    UiTimelineV2.Post.MediaClickPolicy.OpenPostClickEvent
                 },
             accountType = accountType,
         )

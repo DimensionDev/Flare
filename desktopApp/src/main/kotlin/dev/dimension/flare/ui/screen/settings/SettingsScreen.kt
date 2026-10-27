@@ -115,7 +115,11 @@ import dev.dimension.flare.settings_ai_config_reasoning_effort_default
 import dev.dimension.flare.settings_ai_config_reasoning_effort_description
 import dev.dimension.flare.settings_ai_config_reasoning_effort_high
 import dev.dimension.flare.settings_ai_config_reasoning_effort_low
+import dev.dimension.flare.settings_ai_config_reasoning_effort_max
 import dev.dimension.flare.settings_ai_config_reasoning_effort_medium
+import dev.dimension.flare.settings_ai_config_reasoning_effort_minimal
+import dev.dimension.flare.settings_ai_config_reasoning_effort_none
+import dev.dimension.flare.settings_ai_config_reasoning_effort_xhigh
 import dev.dimension.flare.settings_ai_config_server
 import dev.dimension.flare.settings_ai_config_server_hint
 import dev.dimension.flare.settings_ai_config_server_url_requirement
@@ -2965,9 +2969,13 @@ private fun translateProviderOptionLabel(provider: TranslateProviderOption): Str
 private fun openAIReasoningEffortLabel(option: AiReasoningEffortOption): String =
     when (option) {
         AiReasoningEffortOption.Default -> stringResource(Res.string.settings_ai_config_reasoning_effort_default)
+        AiReasoningEffortOption.None -> stringResource(Res.string.settings_ai_config_reasoning_effort_none)
+        AiReasoningEffortOption.Minimal -> stringResource(Res.string.settings_ai_config_reasoning_effort_minimal)
         AiReasoningEffortOption.Low -> stringResource(Res.string.settings_ai_config_reasoning_effort_low)
         AiReasoningEffortOption.Medium -> stringResource(Res.string.settings_ai_config_reasoning_effort_medium)
         AiReasoningEffortOption.High -> stringResource(Res.string.settings_ai_config_reasoning_effort_high)
+        AiReasoningEffortOption.XHigh -> stringResource(Res.string.settings_ai_config_reasoning_effort_xhigh)
+        AiReasoningEffortOption.Max -> stringResource(Res.string.settings_ai_config_reasoning_effort_max)
     }
 
 private data class TextEditDialogState(

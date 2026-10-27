@@ -625,9 +625,13 @@ private fun presenter(agentConfig: Boolean = false) =
 private fun openAIReasoningEffortLabel(option: AiReasoningEffortOption): String =
     when (option) {
         AiReasoningEffortOption.Default -> stringResource(id = R.string.settings_ai_config_reasoning_effort_default)
+        AiReasoningEffortOption.None -> stringResource(id = R.string.settings_ai_config_reasoning_effort_none)
+        AiReasoningEffortOption.Minimal -> stringResource(id = R.string.settings_ai_config_reasoning_effort_minimal)
         AiReasoningEffortOption.Low -> stringResource(id = R.string.settings_ai_config_reasoning_effort_low)
         AiReasoningEffortOption.Medium -> stringResource(id = R.string.settings_ai_config_reasoning_effort_medium)
         AiReasoningEffortOption.High -> stringResource(id = R.string.settings_ai_config_reasoning_effort_high)
+        AiReasoningEffortOption.XHigh -> stringResource(id = R.string.settings_ai_config_reasoning_effort_xhigh)
+        AiReasoningEffortOption.Max -> stringResource(id = R.string.settings_ai_config_reasoning_effort_max)
     }
 
 private data class TextEditDialogState(

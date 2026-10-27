@@ -284,12 +284,20 @@ private struct AiConfigSettingsSectionsContent: View {
         switch option {
         case .default:
             "Default"
+        case .none:
+            "None"
+        case .minimal:
+            "Minimal"
         case .low:
             "Low"
         case .medium:
             "Medium"
         case .high:
             "High"
+        case .xhigh:
+            "Extra High"
+        case .max:
+            "Maximum"
         }
     }
 

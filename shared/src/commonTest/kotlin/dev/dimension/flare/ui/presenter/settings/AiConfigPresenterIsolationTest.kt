@@ -97,6 +97,9 @@ class AiConfigPresenterIsolationTest : RobolectricTest() {
                 val loaded = states.first { (base, override) -> base.hasModels(basic) && override.hasModels(agent) }
                 assertEquals(listOf(AiTypeOption.OnDevice, AiTypeOption.OpenAI), loaded.first.supportedTypes)
                 assertEquals(listOf(AiTypeOption.OpenAI), loaded.second.supportedTypes)
+                val reasoningEfforts = listOf("", "none", "minimal", "low", "medium", "high", "xhigh", "max")
+                assertEquals(reasoningEfforts, loaded.first.supportedOpenAIReasoningEfforts.map { it.value })
+                assertEquals(reasoningEfforts, loaded.second.supportedOpenAIReasoningEfforts.map { it.value })
 
                 // Dialog callbacks may outlive their snapshot; interleaved saves must use the latest stored config.
                 val updatedBasic =
@@ -104,7 +107,7 @@ class AiConfigPresenterIsolationTest : RobolectricTest() {
                         serverUrl = "https://new-basic.example/",
                         apiKey = "new-basic-key",
                         model = "new-light",
-                        reasoningEffort = "medium",
+                        reasoningEffort = "xhigh",
                         extraBody = "{\"seed\":3}",
                     )
                 val updatedAgent =
@@ -112,7 +115,7 @@ class AiConfigPresenterIsolationTest : RobolectricTest() {
                         serverUrl = "https://new-agent.example/",
                         apiKey = "new-agent-key",
                         model = "new-strong",
-                        reasoningEffort = "low",
+                        reasoningEffort = "max",
                         extraBody = "{\"seed\":4}",
                     )
                 initial.first.setOpenAIServerUrl(updatedBasic.serverUrl)
@@ -121,8 +124,8 @@ class AiConfigPresenterIsolationTest : RobolectricTest() {
                 initial.first.setOpenAIApiKey(updatedBasic.apiKey)
                 initial.first.setOpenAIModel(updatedBasic.model)
                 initial.second.setOpenAIModel(updatedAgent.model)
-                initial.second.setOpenAIReasoningEffort(AiReasoningEffortOption.Low)
-                initial.first.setOpenAIReasoningEffort(AiReasoningEffortOption.Medium)
+                initial.second.setOpenAIReasoningEffort(AiReasoningEffortOption.Max)
+                initial.first.setOpenAIReasoningEffort(AiReasoningEffortOption.XHigh)
                 initial.first.setOpenAIExtraBody(updatedBasic.extraBody)
                 initial.second.setOpenAIExtraBody(updatedAgent.extraBody)
                 states.first { (base, override) -> base.hasConfig(updatedBasic) && override.hasConfig(updatedAgent) }
@@ -161,6 +164,21 @@ class AiConfigPresenterIsolationTest : RobolectricTest() {
                         .first()
                         .aiConfig.type,
                 )
+                for ((basicEffort, agentEffort) in loaded.first.supportedOpenAIReasoningEfforts.zip(
+                    loaded.second.supportedOpenAIReasoningEfforts.reversed(),
+                )) {
+                    independent.first.setOpenAIReasoningEffort(basicEffort)
+                    independent.second.setOpenAIReasoningEffort(agentEffort)
+                    val expectedBasic = changedBasic.copy(reasoningEffort = basicEffort.value)
+                    val expectedAgent = changedBasic.copy(model = "independent-again", reasoningEffort = agentEffort.value)
+                    states.first { (base, override) -> base.hasConfig(expectedBasic) && override.hasConfig(expectedAgent) }
+                    assertEquals(
+                        AppSettings.AiConfig(type = expectedBasic, agentType = expectedAgent),
+                        dataStore.appSettingsStore.data
+                            .first()
+                            .aiConfig,
+                    )
+                }
             } finally {
                 scope.cancel()
                 stopKoin()

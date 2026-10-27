@@ -47,11 +47,16 @@ class AgentAiConfigurationTest {
     @Test
     fun realAgentRequestsUseResolvedSettingsAcrossToolCalls() =
         runTest {
-            for (config in listOf(
+            for (
+            config in listOf(
                 AppSettings.AiConfig(type = basic),
                 AppSettings.AiConfig(type = basic, agentType = independent),
                 AppSettings.AiConfig(type = AppSettings.AiConfig.Type.OnDevice, agentType = independent),
-            )) {
+            ) +
+                listOf("none", "minimal", "xhigh", "max").map { effort ->
+                    AppSettings.AiConfig(type = basic, agentType = independent.copy(reasoningEffort = effort))
+                }
+            ) {
                 val expected = config.effectiveAgentType as AppSettings.AiConfig.Type.OpenAI
                 val requests = mutableListOf<JsonObject>()
                 val engine =

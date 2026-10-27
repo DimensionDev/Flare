@@ -119,9 +119,13 @@
     <string name="settings_ai_config_reasoning_effort">推理程度</string>
     <string name="settings_ai_config_reasoning_effort_description">選擇模型使用的額外推理量。預設遵循供應商的設定。</string>
     <string name="settings_ai_config_reasoning_effort_default">預設</string>
+    <string name="settings_ai_config_reasoning_effort_none">關閉</string>
+    <string name="settings_ai_config_reasoning_effort_minimal">最低</string>
     <string name="settings_ai_config_reasoning_effort_low">低</string>
     <string name="settings_ai_config_reasoning_effort_medium">中</string>
     <string name="settings_ai_config_reasoning_effort_high">高</string>
+    <string name="settings_ai_config_reasoning_effort_xhigh">極高</string>
+    <string name="settings_ai_config_reasoning_effort_max">最高</string>
     <string name="settings_ai_config_extra_body">額外 Body</string>
     <string name="settings_ai_config_tap_to_edit">點擊以編輯</string>
     <string name="settings_ai_config_entable_translation">啟用 AI 翻譯</string>

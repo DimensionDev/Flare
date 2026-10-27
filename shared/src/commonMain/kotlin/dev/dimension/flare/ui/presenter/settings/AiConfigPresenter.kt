@@ -41,9 +41,13 @@ public enum class AiReasoningEffortOption(
     public val value: String,
 ) {
     Default(""),
+    None("none"),
+    Minimal("minimal"),
     Low("low"),
     Medium("medium"),
     High("high"),
+    XHigh("xhigh"),
+    Max("max"),
 }
 
 public enum class TranslateProviderOption {
@@ -166,12 +170,7 @@ public class AiConfigPresenter(
             }
         val supportedOpenAIReasoningEfforts =
             remember {
-                persistentListOf(
-                    AiReasoningEffortOption.Default,
-                    AiReasoningEffortOption.Low,
-                    AiReasoningEffortOption.Medium,
-                    AiReasoningEffortOption.High,
-                )
+                AiReasoningEffortOption.entries.toImmutableList()
             }
 
         LaunchedEffect(Unit) {

@@ -30,12 +30,20 @@
 
 	function reasoningLabel(value: AiReasoningEffortOption): string {
 		switch (value) {
+			case 'None':
+				return m.settingsAiReasoningNone();
+			case 'Minimal':
+				return m.settingsAiReasoningMinimal();
 			case 'Low':
 				return m.settingsAiReasoningLow();
 			case 'Medium':
 				return m.settingsAiReasoningMedium();
 			case 'High':
 				return m.settingsAiReasoningHigh();
+			case 'XHigh':
+				return m.settingsAiReasoningXHigh();
+			case 'Max':
+				return m.settingsAiReasoningMax();
 			case 'Default':
 				return m.settingsAiReasoningDefault();
 		}

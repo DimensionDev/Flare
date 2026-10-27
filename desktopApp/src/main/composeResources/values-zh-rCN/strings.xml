@@ -239,9 +239,13 @@
     <string name="settings_ai_config_reasoning_effort">推理程度</string>
     <string name="settings_ai_config_reasoning_effort_description">选择模型使用的额外推理程度。默认遵循提供商的设置。</string>
     <string name="settings_ai_config_reasoning_effort_default">默认</string>
+    <string name="settings_ai_config_reasoning_effort_none">关闭</string>
+    <string name="settings_ai_config_reasoning_effort_minimal">最低</string>
     <string name="settings_ai_config_reasoning_effort_low">低</string>
     <string name="settings_ai_config_reasoning_effort_medium">中</string>
     <string name="settings_ai_config_reasoning_effort_high">高</string>
+    <string name="settings_ai_config_reasoning_effort_xhigh">极高</string>
+    <string name="settings_ai_config_reasoning_effort_max">最高</string>
     <string name="settings_ai_config_extra_body">额外请求体</string>
     <string name="settings_ai_config_translate_prompt">翻译提示词</string>
     <string name="settings_ai_config_tldr_prompt">总结提示词</string>

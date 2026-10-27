@@ -699,7 +699,7 @@ private fun ArticleRssAuthor(
 }
 
 @Composable
-private fun ArticleBlock(
+internal fun ArticleBlock(
     block: UiArticleBlock,
     onOpenUrl: (String) -> Unit,
     onDownloadFile: (UiArticleBlock.File) -> Unit,
@@ -737,7 +737,7 @@ private fun ArticleBlock(
         is UiArticleBlock.Embed -> {
             ArticleEmbedBlock(
                 block = block,
-                onOpenUrl = onOpenUrl,
+                onOpenUrl = LocalUriHandler.current::openUri,
             )
         }
 

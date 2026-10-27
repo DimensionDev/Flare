@@ -74,8 +74,8 @@ import java.util.Locale
 @Composable
 internal fun AiConfigScreen(onBack: () -> Unit) {
     val topAppBarScrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
-    val baseState by producePresenter { presenter() }
-    val agentState by producePresenter { presenter(agentConfig = true) }
+    val baseState by producePresenter("ai_config_basic") { presenter() }
+    val agentState by producePresenter("ai_config_agent") { presenter(agentConfig = true) }
     val states = listOf(baseState, agentState)
     FlareScaffold(
         topBar = {

@@ -62,15 +62,16 @@ public struct CommonProfileHeader: View {
         ZStack(alignment: .top) {
             if let banner = user.banner {
                 Color.clear.overlay {
-                    NetworkImage(data: banner.url, customHeader: banner.customHeaders)
+                    NetworkImage(data: banner)
                         .frame(height: CommonProfileHeaderConstants.headerHeight)
                         .onTapGesture {
                             if let url = URL(
                                 string: DeeplinkRoute.Media.MediaImage(
                                     uri: banner.url,
                                     previewUrl: nil,
-                                    customHeaders: banner.customHeaders
-                                ).toUri()
+                                    customHeaders: banner.customHeaders,
+                                    proxy: banner.proxy
+                                    ).toUri()
                             ) {
                                 openURL.callAsFunction(url)
                             }
@@ -103,7 +104,7 @@ public struct CommonProfileHeader: View {
                                 height: CommonProfileHeaderConstants.headerHeight -
                                     CommonProfileHeaderConstants.avatarSize / 2
                             )
-                        AvatarView(data: user.avatar?.url, customHeader: user.avatar?.customHeaders)
+                        AvatarView(data: user.avatar)
                             .frame(width: CommonProfileHeaderConstants.avatarSize, height: CommonProfileHeaderConstants.avatarSize)
                             .onTapGesture {
                                 if let avatar = user.avatar,
@@ -111,8 +112,9 @@ public struct CommonProfileHeader: View {
                                        string: DeeplinkRoute.Media.MediaImage(
                                            uri: avatar.url,
                                            previewUrl: nil,
-                                           customHeaders: avatar.customHeaders
-                                       ).toUri()
+                                           customHeaders: avatar.customHeaders,
+                                           proxy: avatar.proxy
+                                           ).toUri()
                                    ) {
                                     openURL.callAsFunction(url)
                                 }

@@ -8,6 +8,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import dev.dimension.flare.data.datastore.PlatformOAuthPending
 import dev.dimension.flare.data.datastore.PlatformOAuthPendingRepository
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.data.network.bluesky.FLARE_BLUESKY_OAUTH_SCOPES
 import dev.dimension.flare.data.network.bluesky.OAuthCodeChallengeMethodS256
 import dev.dimension.flare.data.network.bluesky.requestBlueskyOAuthCredential
@@ -163,6 +164,7 @@ internal class BlueskyOAuthLoginPresenter(
                     code = code,
                     nonce = request.nonce,
                     codeVerifier = request.codeVerifier,
+                    proxy = ProxyRef.Global,
                 )
         val token = credential.oAuthToken
         token.requireFlareOAuthScopes()

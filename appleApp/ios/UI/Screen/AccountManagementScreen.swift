@@ -11,6 +11,9 @@ struct AccountManagementScreen: View {
 
     var body: some View {
         List {
+            if presenter.state.removalFailed {
+                Text("settings_accounts_remove_failed").foregroundStyle(.red)
+            }
             ForEach(tabItems, id: \.account.accountKey) { account in
                 StateView(state: account.profile) { user in
                     accountActions(for: account.account, accountName: user.handle.canonical) {

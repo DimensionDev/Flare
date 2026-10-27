@@ -41,6 +41,7 @@ import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiRssSource
 import dev.dimension.flare.ui.model.UiText
 import dev.dimension.flare.ui.model.asType
+import dev.dimension.flare.ui.model.toUiImage
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus.Quote
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus.Reply
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus.VVOComment
@@ -613,6 +614,7 @@ internal fun Router(
                                 Route.RawImage(
                                     rawImage = it.url,
                                     customHeaders = it.customHeaders,
+                                    proxy = it.proxy,
                                 ),
                             )
                         },
@@ -666,6 +668,7 @@ internal fun Router(
                                 Route.RawImage(
                                     rawImage = it.url,
                                     customHeaders = it.customHeaders,
+                                    proxy = it.proxy,
                                 ),
                             )
                         },
@@ -882,6 +885,7 @@ internal fun Router(
                                 Route.RawImage(
                                     rawImage = it.url,
                                     customHeaders = it.customHeaders,
+                                    proxy = it.proxy,
                                 ),
                             )
                         },
@@ -944,8 +948,7 @@ internal fun Router(
                     metadata = window(isDarkTheme = true),
                 ) { args ->
                     RawMediaScreen(
-                        url = args.rawImage,
-                        customHeaders = args.customHeaders,
+                        media = args.rawImage.toUiImage(args.customHeaders, args.proxy),
                     )
                 }
                 entry<Route.StatusMedia>(

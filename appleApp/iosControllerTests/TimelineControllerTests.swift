@@ -1861,7 +1861,7 @@ private func makeGap(revision: Int64 = 0, failed: Bool = false) -> UiTimelineV2.
 private func makeRow(_ index: Int, liked: Bool = false, imageHeight: Float = 600,
                      mediaCount: Int? = nil, textRepeatCount: Int? = nil) -> UiTimelineV2 {
     let text = "Post \(index): " + String(repeating: "Rotation should preserve this reading item while text wraps and media resizes. ", count: textRepeatCount ?? (index % 4 + 1))
-    let style = RenderTextStyle(link: nil, bold: false, italic: false, strikethrough: false, monospace: false, code: false, underline: false, small: false, time: false)
+    let style = RenderTextStyle(link: nil, bold: false, italic: false, strikethrough: false, monospace: false, code: false, underline: false, small: false, time: false, imageLink: nil)
     let rich = UiRichText(renderRuns: [RenderContent.Text(runs: [RenderRun.Text(text: text, style: style)], block: RenderBlockStyle())], isRtl: false, raw: text, innerText: text, imageUrls: [])
     let action = ActionMenu.Item(updateKey: "like", icon: liked ? .unlike : .like, text: nil, count: UiNumber(value: liked ? 2 : 1), color: liked ? .red : .contentColor, clickEvent: ClickEventNoop.shared, actionFamily: .like, enabled: true)
     let images: [UiMedia] = (0..<(mediaCount ?? (index % 3 == 0 ? 1 : 4))).map { i in UiMediaImage(url: "https://example.invalid/fixture-\(i).png", previewUrl: "https://example.invalid/fixture-\(i).png", description: nil, height: imageHeight, width: 800, sensitive: false, customHeaders: nil) }

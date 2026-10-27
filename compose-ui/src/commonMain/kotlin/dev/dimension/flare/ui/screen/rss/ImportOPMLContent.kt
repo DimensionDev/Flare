@@ -13,11 +13,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.listCard
 import dev.dimension.flare.ui.component.platform.PlatformLinearProgressIndicator
 import dev.dimension.flare.ui.component.platform.PlatformListItem
 import dev.dimension.flare.ui.component.platform.PlatformText
+import dev.dimension.flare.ui.model.toUiImage
 import dev.dimension.flare.ui.presenter.home.rss.ImportOPMLPresenter
 import dev.dimension.flare.ui.theme.PlatformTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
@@ -71,7 +73,7 @@ public fun ImportOPMLContent(
                         leadingContent = {
                             if (item.favIcon != null) {
                                 NetworkImage(
-                                    model = item.favIcon,
+                                    model = item.favIcon.toUiImage(proxy = ProxyRef.Global),
                                     contentDescription = null,
                                     modifier = Modifier.size(24.dp),
                                 )

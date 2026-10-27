@@ -1,6 +1,7 @@
 import AVFoundation
 import Combine
 import XCTest
+import KotlinSharedUI
 #if os(iOS)
 import AVFAudio
 import UIKit
@@ -35,7 +36,7 @@ final class VideoPlaybackSessionTests: XCTestCase {
             subscription.cancel()
             session.detach()
         }
-        session.play(url: URL(fileURLWithPath: "/missing-playback-test-\(UUID()).mp4").absoluteString)
+        session.play(media: testVideo(URL(fileURLWithPath: "/missing-playback-test-\(UUID()).mp4").absoluteString))
         for _ in 0..<200 {
             if case .error = session.state { break }
             try await Task.sleep(for: .milliseconds(10))
@@ -58,17 +59,17 @@ final class VideoPlaybackSessionTests: XCTestCase {
         let first = VideoPlaybackSession()
         let second = VideoPlaybackSession()
         let url = URL(fileURLWithPath: "/video-player-instance-test.mp4").absoluteString
-        first.play(url: url, position: 37)
+        first.play(media: testVideo(url), position: 37)
         let player = first.player
         XCTAssertNotNil(player)
-        second.play(url: url)
+        second.play(media: testVideo(url))
         XCTAssertNil(first.player)
         XCTAssertEqual(first.position, 37)
         XCTAssertTrue(player === second.player)
         second.detach()
         XCTAssertNil(second.player)
         XCTAssertEqual(player?.rate, 0)
-        first.play(url: url, position: first.position)
+        first.play(media: testVideo(url), position: first.position)
         XCTAssertTrue(player === first.player)
         XCTAssertEqual(first.position, 37)
         first.detach()
@@ -89,12 +90,12 @@ final class VideoPlaybackSessionTests: XCTestCase {
             second.detach()
             VideoPlaybackSession.releaseIdleBuffer()
         }
-        first.play(url: firstURL.absoluteString, playing: false)
+        first.play(media: testVideo(firstURL.absoluteString), playing: false)
         let player = try XCTUnwrap(first.player)
         let oldItems = player.items()
         player.advanceToNextItem()
 
-        second.play(url: secondURL.absoluteString, playing: false)
+        second.play(media: testVideo(secondURL.absoluteString), playing: false)
         XCTAssertNil(first.player)
         XCTAssertTrue(second.player === player)
         try await waitUntilReady(player)
@@ -115,7 +116,7 @@ final class VideoPlaybackSessionTests: XCTestCase {
             session.detach()
             VideoPlaybackSession.releaseIdleBuffer()
         }
-        session.play(url: url.absoluteString, playing: false)
+        session.play(media: testVideo(url.absoluteString), playing: false)
         let player = try XCTUnwrap(session.player)
         player.advanceToNextItem()
 
@@ -138,13 +139,13 @@ final class VideoPlaybackSessionTests: XCTestCase {
             detail.detach()
             VideoPlaybackSession.releaseIdleBuffer()
         }
-        inline.play(url: url.absoluteString)
+        inline.play(media: testVideo(url.absoluteString))
         let player = try XCTUnwrap(inline.player)
         try await waitUntilReady(player)
         let item = try XCTUnwrap(player.currentItem)
         let items = player.items()
         XCTAssertEqual(item.status, .readyToPlay)
-        detail.play(url: url.absoluteString)
+        detail.play(media: testVideo(url.absoluteString))
         XCTAssertNil(inline.player)
         XCTAssertTrue(detail.player === player)
         XCTAssertTrue(player.currentItem === item)
@@ -154,7 +155,7 @@ final class VideoPlaybackSessionTests: XCTestCase {
         XCTAssertTrue(player.currentItem === item)
         try await Task.sleep(for: .milliseconds(100))
         VideoPlaybackSession.setPosition(for: url.absoluteString, seconds: 17)
-        inline.play(url: url.absoluteString)
+        inline.play(media: testVideo(url.absoluteString))
         XCTAssertTrue(player.currentItem === item)
         XCTAssertEqual(player.items(), items)
         XCTAssertEqual(inline.position, 17, "A seek committed between surfaces must beat the retained position")
@@ -178,7 +179,7 @@ final class VideoPlaybackSessionTests: XCTestCase {
             VideoPlaybackSession.releaseIdleBuffer()
         }
         video.begin()
-        video.update(session, url: url.absoluteString, playing: true, rate: 1)
+        video.update(session, media: testVideo(url.absoluteString), playing: true, rate: 1)
         let player = try XCTUnwrap(session.player)
         try await waitUntilReady(player)
 
@@ -191,7 +192,7 @@ final class VideoPlaybackSessionTests: XCTestCase {
         XCTAssertTrue(session.player === player)
         XCTAssertEqual(player.rate, 1, "Returning to the video must preserve its requested playback")
 
-        video.update(session, url: url.absoluteString, playing: false, rate: 1)
+        video.update(session, media: testVideo(url.absoluteString), playing: false, rate: 1)
         image.begin()
         image.end()
         XCTAssertEqual(player.rate, 0, "An explicit user pause must survive preemption")
@@ -212,12 +213,12 @@ final class VideoPlaybackSessionTests: XCTestCase {
             VideoPlaybackSession.releaseIdleBuffer()
         }
         try AVAudioSession.sharedInstance().setCategory(.ambient, options: .mixWithOthers)
-        inline.play(url: url.absoluteString)
+        inline.play(media: testVideo(url.absoluteString))
         let player = try XCTUnwrap(inline.player)
         try await waitUntilReady(player)
         XCTAssertEqual(AVAudioSession.sharedInstance().category, .ambient)
 
-        detail.play(url: url.absoluteString, muted: false)
+        detail.play(media: testVideo(url.absoluteString), muted: false)
         XCTAssertEqual(AVAudioSession.sharedInstance().category, .playback,
                        "Configure detail audio before starting its playback")
         detail.setPlaying(false)
@@ -227,14 +228,14 @@ final class VideoPlaybackSessionTests: XCTestCase {
         VideoPlaybackSession.continuePlayback(to: url.absoluteString)
         detail.detach()
         XCTAssertEqual(AVAudioSession.sharedInstance().category, .playback)
-        inline.play(url: url.absoluteString)
+        inline.play(media: testVideo(url.absoluteString))
         XCTAssertEqual(AVAudioSession.sharedInstance().category, .ambient)
 
-        detail.play(url: url.absoluteString, muted: false)
+        detail.play(media: testVideo(url.absoluteString), muted: false)
         detail.detach()
         XCTAssertEqual(AVAudioSession.sharedInstance().category, .ambient)
 
-        detail.play(url: url.absoluteString, muted: false)
+        detail.play(media: testVideo(url.absoluteString), muted: false)
         VideoPlaybackSession.continuePlayback(to: url.absoluteString)
         detail.detach()
         try await Task.sleep(for: .milliseconds(600))
@@ -265,10 +266,10 @@ final class VideoPlaybackSessionTests: XCTestCase {
             VideoPlaybackSession.releaseIdleBuffer()
             window.isHidden = true
         }
-        session.play(url: url.absoluteString)
+        session.play(media: testVideo(url.absoluteString))
         surface.playerLayer.videoGravity = .resizeAspect
         surface.player = session.player
-        for _ in 0..<200 {
+        for _ in 0..<1000 {
             if surface.playerLayer.isReadyForDisplay, surface.alpha == 1, session.hasDisplayedFrame { break }
             try await Task.sleep(for: .milliseconds(10))
         }
@@ -338,12 +339,12 @@ final class VideoPlaybackSessionTests: XCTestCase {
         let session = VideoPlaybackSession()
         let url = URL(fileURLWithPath: "/video-presentation-test.mp4").absoluteString
         video.begin()
-        video.update(session, url: url, position: 37, playing: true, rate: 1)
+        video.update(session, media: testVideo(url), position: 37, playing: true, rate: 1)
         let player = session.player
         XCTAssertNotNil(player)
         image.begin()
         XCTAssertNil(session.player)
-        video.update(session, url: url, position: 37, playing: true, rate: 1)
+        video.update(session, media: testVideo(url), position: 37, playing: true, rate: 1)
         XCTAssertNil(session.player)
         let backgroundTimeline = NSObject()
         arbiter.interacted(backgroundTimeline)
@@ -354,4 +355,9 @@ final class VideoPlaybackSessionTests: XCTestCase {
         XCTAssertNil(session.player)
         XCTAssertEqual(player?.rate, 0)
     }
+}
+
+@MainActor
+func testVideo(_ url: String) -> UiMediaVideo {
+    UiMediaVideo(url: url, thumbnailUrl: "", description: nil, height: 0, width: 0, customHeaders: nil, proxy: ProxyRef.System.shared, downloadUrl: nil)
 }

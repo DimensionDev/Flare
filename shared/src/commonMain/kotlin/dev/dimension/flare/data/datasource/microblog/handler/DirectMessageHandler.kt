@@ -25,6 +25,7 @@ import dev.dimension.flare.data.datasource.microblog.paging.OffsetFromStartPagin
 import dev.dimension.flare.data.datasource.microblog.paging.OffsetFromStartPagingSource
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.createPagingRemoteMediator
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.model.AccountType
@@ -32,6 +33,7 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiDMItem
 import dev.dimension.flare.ui.model.UiDMRoom
 import dev.dimension.flare.ui.model.UiState
+import dev.dimension.flare.ui.model.withProxy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -85,7 +87,7 @@ public class DirectMessageHandler(
             },
         ).flow
             .map { paging ->
-                paging.map { it.content.copy(unreadCount = it.unreadCount) }
+                paging.map { it.content.copy(unreadCount = it.unreadCount).withProxy(ProxyRef.forAccount(accountKey)) }
             }.combine(loader.runtimeTransformer) { paging, transformer ->
                 paging.map(transformer.room)
             }.cachedIn(scope)
@@ -128,7 +130,7 @@ public class DirectMessageHandler(
             },
         ).flow
             .map { paging ->
-                paging.map { it.content }
+                paging.map { it.content.withProxy(ProxyRef.forAccount(accountKey)) }
             }.combine(loader.runtimeTransformer) { paging, transformer ->
                 paging.map(transformer.item)
             }.cachedIn(scope)
@@ -145,7 +147,7 @@ public class DirectMessageHandler(
                         roomKey = roomKey,
                         accountType = accountType,
                     ).distinctUntilChanged()
-                    .map { room -> room?.content?.copy(unreadCount = room.unreadCount) }
+                    .map { room -> room?.content?.copy(unreadCount = room.unreadCount)?.withProxy(ProxyRef.forAccount(accountKey)) }
                     .filterNotNull()
                     .combine(loader.runtimeTransformer) { room, transformer ->
                         transformer.room(room)

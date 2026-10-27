@@ -1,5 +1,12 @@
 package dev.dimension.flare.data.datasource.misskey
 
+import androidx.datastore.core.DataStore
+import dev.dimension.flare.data.model.ProxySettings
+import dev.dimension.flare.data.repository.ProxyRepository
+import kotlinx.coroutines.flow.flowOf
+import org.koin.core.context.startKoin
+import org.koin.core.context.stopKoin
+import org.koin.dsl.module
 import com.sun.net.httpserver.HttpExchange
 import com.sun.net.httpserver.HttpServer
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
@@ -14,6 +21,12 @@ class StatusDetailRemoteMediatorTest {
     @Test
     fun loadsAncestorsAndNestedDescendantsAroundDetailPost() =
         runTest {
+            val proxyRepository = ProxyRepository(object : DataStore<ProxySettings> {
+                override val data = flowOf(ProxySettings())
+                override suspend fun updateData(transform: suspend (ProxySettings) -> ProxySettings): ProxySettings =
+                    error("Read-only test proxy configuration")
+            })
+            startKoin { modules(module { single { proxyRepository } }) }
             val server = HttpServer.create(InetSocketAddress("127.0.0.1", 0), 0)
             server.createContext("/api/notes/show") { it.respond(DETAIL_JSON) }
             server.createContext("/api/notes/conversation") { it.respond("[$PARENT_JSON,$GRANDPARENT_JSON]") }
@@ -48,6 +61,7 @@ class StatusDetailRemoteMediatorTest {
                 assertEquals("child", append.nextKey)
             } finally {
                 server.stop(0)
+                stopKoin()
             }
         }
 

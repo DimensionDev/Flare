@@ -145,6 +145,11 @@ internal fun AccountsScreen(
             verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
             state = lazyListState,
         ) {
+            if (state.removalFailed) {
+                item {
+                    Text(stringResource(R.string.settings_accounts_remove_failed), color = MaterialTheme.colorScheme.error)
+                }
+            }
             itemsIndexed(state.currentItems, key = { _, item -> item.account.accountKey.toString() }) { index, (account, data) ->
                 val swipeState =
                     rememberSwipeToDismissBoxState()

@@ -659,7 +659,7 @@ private struct ServiceInstanceRow: View {
     @ViewBuilder
     private var instanceIcon: some View {
         if let iconUrl = instance.iconUrl, !iconUrl.isEmpty {
-            NetworkImage(data: iconUrl)
+            NetworkImage(data: UiMediaImage(url: iconUrl, proxy: ProxyRef.Global.shared))
                 .clipShape(RoundedRectangle(cornerRadius: 4))
         } else {
             Image(fontAwesome: icon)
@@ -736,20 +736,21 @@ private struct MacOSWebLoginScreen: View {
     }
 
     var body: some View {
-        VStack(spacing: 0) {
-            if let viewModel, viewModel.canShowWebView {
-                MacOSWebView(url: URL(string: url), configuration: viewModel.configuration) { webView in
-                    webView.navigationDelegate = viewModel.delegate
+        ProxyWebContent { route in
+            Group {
+                if let viewModel, viewModel.route === route {
+                    MacOSWebView(url: URL(string: url), configuration: viewModel.configuration) { webView in
+                        webView.navigationDelegate = viewModel.delegate
+                        route.bind(webView)
+                    }
+                } else {
+                    ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
-            } else {
-                ProgressView()
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
-        }
-        .task {
-            // Initialize after state is installed so view rebuilds don't clear cookies again.
-            guard viewModel == nil else { return }
-            viewModel = MacOSWebLoginViewModel(onCookie: onCookie, url: url)
+            .task(id: route.key) {
+                guard viewModel?.route !== route else { return }
+                viewModel = MacOSWebLoginViewModel(onCookie: onCookie, url: url, route: route)
+            }
         }
     }
 }
@@ -769,57 +770,67 @@ private struct MacOSWebView: NSViewRepresentable {
     }
 
     func updateNSView(_ nsView: WKWebView, context: Context) {}
+
+    static func dismantleNSView(_ nsView: WKWebView, coordinator: ()) {
+        nsView.stopLoading()
+        nsView.navigationDelegate = nil
+        nsView.loadHTMLString("", baseURL: nil)
+    }
 }
 
 private final class MacOSCookieNavigationDelegate: NSObject, WKNavigationDelegate {
     private let onNavigationResponse: () -> Void
+    private let route: WebViewProxyRoute
 
-    init(onNavigationResponse: @escaping () -> Void) {
+    init(route: WebViewProxyRoute, onNavigationResponse: @escaping () -> Void) {
+        self.route = route
         self.onNavigationResponse = onNavigationResponse
     }
 
+    func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction) async -> WKNavigationActionPolicy {
+        route.isValid ? .allow : .cancel
+    }
+
     func webView(_ webView: WKWebView, decidePolicyFor navigationResponse: WKNavigationResponse) async -> WKNavigationResponsePolicy {
+        guard route.isValid else { return .cancel }
         onNavigationResponse()
         return .allow
     }
+    func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
+        route.report(error)
+    }
+    func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
+        route.report(error)
+    }
+
 }
 
 @Observable
 private final class MacOSWebLoginViewModel {
-    var canShowWebView = false
+    let route: WebViewProxyRoute
 
     let delegate: MacOSCookieNavigationDelegate
 
     init(
         onCookie: @escaping (String) -> Void,
-        url: String
+        url: String,
+        route: WebViewProxyRoute
     ) {
-        self.delegate = MacOSCookieNavigationDelegate {
-            WKWebsiteDataStore.default().httpCookieStore.getAllCookies { cookies in
+        self.route = route
+        self.delegate = MacOSCookieNavigationDelegate(route: route) {
+            route.dataStore.httpCookieStore.getAllCookies { cookies in
+                guard route.isValid else { return }
                 let cookieString = MacOSWebLoginViewModel.cookieHeaderString(from: cookies, for: URL(string: url))
                 onCookie(cookieString)
             }
         }
-        clearCookie()
     }
 
     var configuration: WKWebViewConfiguration {
         let configuration = WKWebViewConfiguration()
         configuration.defaultWebpagePreferences.allowsContentJavaScript = true
+        configuration.websiteDataStore = route.dataStore
         return configuration
-    }
-
-    private func clearCookie() {
-        let dataStore = WKWebsiteDataStore.default()
-        dataStore.fetchDataRecords(ofTypes: WKWebsiteDataStore.allWebsiteDataTypes()) { records in
-            dataStore.removeData(
-                ofTypes: WKWebsiteDataStore.allWebsiteDataTypes(),
-                for: records,
-                completionHandler: {
-                    self.canShowWebView = true
-                }
-            )
-        }
     }
 
     private static func cookieHeaderString(from cookies: [HTTPCookie], for url: URL?) -> String {

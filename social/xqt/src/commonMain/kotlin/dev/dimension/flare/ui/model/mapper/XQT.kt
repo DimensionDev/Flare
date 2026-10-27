@@ -12,6 +12,7 @@ import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.PostActionFamily
 import dev.dimension.flare.data.datasource.microblog.PostEvent
 import dev.dimension.flare.data.datasource.microblog.userActionsMenu
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.data.network.xqt.model.Admin
 import dev.dimension.flare.data.network.xqt.model.AudioSpace
 import dev.dimension.flare.data.network.xqt.model.Entities
@@ -69,8 +70,10 @@ import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.UiTranslatableText
 import dev.dimension.flare.ui.model.asTimelinePostItem
+import dev.dimension.flare.ui.model.bindMediaProxy
 import dev.dimension.flare.ui.model.toUiImage
 import dev.dimension.flare.ui.model.uiArticleContentOf
+import dev.dimension.flare.ui.model.withProxy
 import dev.dimension.flare.ui.render.RenderBlockStyle
 import dev.dimension.flare.ui.render.RenderContent
 import dev.dimension.flare.ui.render.RenderRun
@@ -83,7 +86,6 @@ import dev.dimension.flare.ui.route.DeeplinkRoute
 import dev.dimension.flare.ui.route.toUri
 import io.ktor.http.Url
 import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.collections.immutable.toPersistentMap
@@ -229,7 +231,7 @@ private fun TimelineNotification.renderNotification(accountKey: MicroBlogKey): U
                     }
                 },
             accountType = AccountType.Specific(accountKey),
-        )
+        ).bindMediaProxy()
 
     return when {
         notificationIcon == "person_icon" && users.size == 1 -> {
@@ -239,7 +241,7 @@ private fun TimelineNotification.renderNotification(accountKey: MicroBlogKey): U
                 createdAt = createdAt,
                 statusKey = statusKey,
                 accountType = AccountType.Specific(accountKey),
-            )
+            ).bindMediaProxy()
         }
 
         notificationIcon == "person_icon" && users.isNotEmpty() -> {
@@ -250,7 +252,7 @@ private fun TimelineNotification.renderNotification(accountKey: MicroBlogKey): U
                 statusKey = statusKey,
                 post = null,
                 accountType = AccountType.Specific(accountKey),
-            )
+            ).bindMediaProxy()
         }
 
         post != null -> {
@@ -296,7 +298,7 @@ private fun TimelineTweet.renderMention(
                     ClickEvent.Noop
                 },
             accountType = AccountType.Specific(accountKey),
-        ),
+        ).bindMediaProxy(),
     )
 }
 
@@ -352,7 +354,7 @@ internal fun Tweet.render(accountKey: MicroBlogKey): UiTimelineV2 {
                     ),
                 statusKey = currentTweet.statusKey,
                 accountType = AccountType.Specific(accountKey),
-            )
+            ).bindMediaProxy()
         } else {
             null
         }
@@ -370,7 +372,7 @@ internal fun Tweet.render(accountKey: MicroBlogKey): UiTimelineV2 {
         UiTimelineV2.TimelinePostItem(
             post = currentTweet,
             presentation = presentation,
-        )
+        ).bindMediaProxy()
     } else {
         currentTweet
     }
@@ -428,7 +430,7 @@ internal fun XQTTimeline.render(accountKey: MicroBlogKey): UiTimelineV2? {
                     ),
                 statusKey = currentTweet.statusKey,
                 accountType = AccountType.Specific(accountKey),
-            )
+            ).bindMediaProxy()
         } else {
             null
         }
@@ -448,7 +450,7 @@ internal fun XQTTimeline.render(accountKey: MicroBlogKey): UiTimelineV2? {
         UiTimelineV2.TimelinePostItem(
             post = currentTweet,
             presentation = presentation,
-        )
+        ).bindMediaProxy()
     } else {
         currentTweet
     }
@@ -923,7 +925,7 @@ internal fun Tweet.renderStatus(
                 ),
             ),
         accountType = AccountType.Specific(accountKey),
-    )
+    ).bindMediaProxy()
 }
 
 internal fun User.render(accountKey: MicroBlogKey): UiProfile {
@@ -1042,7 +1044,7 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile {
                         userKey = userKey,
                     ),
             ),
-    )
+    ).withProxy(ProxyRef.forAccount(accountKey))
 }
 
 private fun TweetCardLegacy.get(key: String): TweetCardLegacyBindingValueData? = bindingValues.firstOrNull { it.key == key }?.value
@@ -1156,6 +1158,7 @@ internal fun TwitterList.render(accountKey: MicroBlogKey): UiList.List {
             }
         }
     return UiList.List(
+        proxy = ProxyRef.forAccount(accountKey),
         id = idStr.orEmpty(),
         title = name.orEmpty(),
         description = description.orEmpty(),
@@ -1315,7 +1318,7 @@ internal fun AudioSpace.render(
     accountKey: MicroBlogKey,
     url: String?,
 ) = UiPodcast(
-    id = metadata?.restID ?: throw Exception("No ID"),
+                        proxy = ProxyRef.forAccount(accountKey),    id = metadata?.restID ?: throw Exception("No ID"),
     title = metadata.title.orEmpty(),
     playbackUrl = url,
     creator =
@@ -1377,7 +1380,7 @@ private fun Admin.render(accountKey: MicroBlogKey): UiProfile {
         matrices = UiProfile.Matrices(0, 0, 0),
         mark = persistentListOf(),
         bottomContent = null,
-    )
+    ).withProxy(ProxyRef.forAccount(accountKey))
 }
 
 internal val User.name: String

@@ -5,6 +5,7 @@ import dev.dimension.flare.common.FileItem
 import dev.dimension.flare.common.FileType
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.platform.BlueskyCredential
+import dev.dimension.flare.di.startProxyTestStore
 import dev.dimension.flare.model.MicroBlogKey
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
@@ -12,12 +13,17 @@ import kotlinx.coroutines.withTimeout
 import java.net.InetSocketAddress
 import java.nio.file.Files
 import java.util.Collections
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
 class BlueskyComposeUploadTest {
+    private lateinit var proxyStore: AutoCloseable
+    @BeforeTest fun setUpProxy() { proxyStore = startProxyTestStore() }
+    @AfterTest fun tearDownProxy() { proxyStore.close() }
     @Test
     fun gifUsesVideoUploadWithoutImageCompression() =
         runBlocking {

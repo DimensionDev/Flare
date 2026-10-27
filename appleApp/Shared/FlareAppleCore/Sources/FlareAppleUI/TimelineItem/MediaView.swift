@@ -22,7 +22,7 @@ public struct MediaView: View {
             case .image(let image):
                 Color.gray
                     .overlay {
-                        NetworkImage(data: image.previewUrl, customHeader: image.customHeaders)
+                        NetworkImage(data: image.preview)
                             .allowsHitTesting(false)
                     }
                     .clipped()
@@ -31,7 +31,7 @@ public struct MediaView: View {
             case .gif(let gif):
                 Color.gray
                     .overlay {
-                        NetworkImage(data: gif.url, customHeader: gif.customHeaders)
+                        NetworkImage(data: gif)
                             .allowsHitTesting(false)
                     }
                     .clipped()
@@ -86,7 +86,7 @@ public struct MediaVideoView: View {
     public var body: some View {
         Color.gray
             .overlay {
-                NetworkImage(data: data.mediaPreviewURL, customHeader: data.customHeaders)
+                NetworkImage(data: data.preview)
                     .allowsHitTesting(false)
                     .opacity(data is UiMediaUgoira && ugoira.image != nil ? 0 : 1)
             }
@@ -166,7 +166,7 @@ public struct MediaVideoView: View {
         let ugoiraModel = ugoira
         coordinator.register(id: id) { playing in
             if playing {
-                if let animation { ugoiraModel.play(animation) } else { model.play(url: url) }
+                if let animation { ugoiraModel.play(animation) } else { model.play(media: data) }
             } else {
                 model.detach()
                 ugoiraModel.detach()
@@ -203,8 +203,11 @@ public struct MediaVideoView: View {
                     .font(.caption)
                     .foregroundStyle(.white)
                     .mediaVideoBadgeStyle()
-            case .error:
-                Image(systemName: "exclamationmark.triangle.fill").mediaVideoBadgeStyle()
+            case .error(let error):
+                Label(error.localizedDescription, systemImage: "exclamationmark.triangle.fill")
+                    .font(.caption)
+                    .lineLimit(2)
+                    .mediaVideoBadgeStyle()
             }
         }
     }

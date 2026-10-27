@@ -20,7 +20,7 @@ struct StatusReactionView: View {
                         if item.isUnicode {
                             Text(item.name)
                         } else {
-                            ReactionImage(url: item.url)
+                            ReactionImage(media: item.media)
                         }
                         Text(item.count.humanized)
                     }
@@ -61,7 +61,8 @@ struct StatusReactionView: View {
 private struct ReactionImage: View {
     private static let height = CGFloat(16)
 
-    let url: String
+    let media: UiMediaImage?
+    private var url: String { media?.url ?? "" }
     @State private var loadedImage: LoadedImage?
     @Environment(\.displayScale) private var displayScale
 
@@ -92,13 +93,13 @@ private struct ReactionImage: View {
         }
             .frame(width: imageWidth, height: Self.height)
             .clipped()
-            .task(id: "\(displayScale):\(url)") {
+            .task(id: "\(displayScale):\(url):\(String(describing: media?.proxy)):\(ProxyMediaImages.shared.revision)") {
                 let requestedURL = url
                 let processor = ImageDownsamplingProcessor(
                     pixelSize: CGSize(width: .greatestFiniteMagnitude, height: ceil(Self.height * displayScale)),
                     fillsBounds: false)
-                guard let imageURL = URL(string: requestedURL),
-                      let result = try? await KingfisherManager.shared.retrieveImage(with: imageURL, options: [
+                guard let media,
+                      let result = try? await ProxyMediaImages.shared.retrieve(media, options: [
                         .processor(processor), .scaleFactor(displayScale), .cacheOriginalImage,
                         .backgroundDecode, .asyncCacheTypeCheck,
                       ]),

@@ -4,6 +4,7 @@ import com.fleeksoft.ksoup.nodes.Element
 import com.fleeksoft.ksoup.nodes.Node
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.PostActionFamily
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.data.network.vvo.model.Attitude
 import dev.dimension.flare.data.network.vvo.model.Comment
 import dev.dimension.flare.data.network.vvo.model.Status
@@ -23,8 +24,10 @@ import dev.dimension.flare.ui.model.UiNumber
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.UiTranslatableText
+import dev.dimension.flare.ui.model.bindMediaProxy
 import dev.dimension.flare.ui.model.contentPostOrNull
 import dev.dimension.flare.ui.model.toUiImage
+import dev.dimension.flare.ui.model.withProxy
 import dev.dimension.flare.ui.render.UiRichText
 import dev.dimension.flare.ui.render.parseHtml
 import dev.dimension.flare.ui.render.toUi
@@ -65,13 +68,13 @@ internal fun Attitude.render(accountKey: MicroBlogKey): UiTimelineV2 {
                         ClickEvent.Noop
                     },
                 accountType = AccountType.Specific(accountKey),
-            ),
+            ).bindMediaProxy(),
         users = listOfNotNull(user).toImmutableList(),
         post = content,
         createdAt = createdAt?.toUi() ?: Clock.System.now().toUi(),
         statusKey = MicroBlogKey(id.toString(), accountKey.host),
         accountType = AccountType.Specific(accountKey),
-    )
+    ).bindMediaProxy()
 }
 
 private fun Status.renderStatusV2(accountKey: MicroBlogKey): UiTimelineV2 {
@@ -184,7 +187,7 @@ private fun Status.renderStatusV2(accountKey: MicroBlogKey): UiTimelineV2 {
                         ),
                     ),
                 accountType = AccountType.Specific(accountKey),
-            )
+            ).bindMediaProxy()
         }
 
     val quote = retweetedStatus?.renderStatusV2(accountKey)?.contentPostOrNull()
@@ -311,7 +314,7 @@ private fun Status.renderStatusV2(accountKey: MicroBlogKey): UiTimelineV2 {
                     ),
                 ),
             accountType = AccountType.Specific(accountKey),
-        )
+        ).bindMediaProxy()
     return if (message != null || quote != null) {
         UiTimelineV2.TimelinePostItem(
             post = post,
@@ -320,7 +323,7 @@ private fun Status.renderStatusV2(accountKey: MicroBlogKey): UiTimelineV2 {
                     message = message,
                     quotes = listOfNotNull(quote).toImmutableList(),
                 ),
-        )
+        ).bindMediaProxy()
     } else {
         post
     }
@@ -486,7 +489,7 @@ private fun Comment.renderStatusV2(accountKey: MicroBlogKey): UiTimelineV2 {
                     },
                 ),
             accountType = AccountType.Specific(accountKey),
-        )
+        ).bindMediaProxy()
     return if (quote.isNotEmpty()) {
         UiTimelineV2.TimelinePostItem(
             post = post,
@@ -494,7 +497,7 @@ private fun Comment.renderStatusV2(accountKey: MicroBlogKey): UiTimelineV2 {
                 UiTimelineV2.PostPresentation(
                     quotes = quote,
                 ),
-        )
+        ).bindMediaProxy()
     } else {
         post
     }
@@ -555,7 +558,7 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile {
                     userKey = userKey,
                 ),
             ),
-    )
+    ).withProxy(ProxyRef.forAccount(accountKey))
 }
 
 internal fun renderVVOText(
@@ -564,11 +567,12 @@ internal fun renderVVOText(
     sourceLanguages: List<String> = emptyList(),
 ): UiRichText {
     val element = parseHtml(text, baseUri = "https://$vvoHost/")
+    val imageLinks = mutableMapOf<String, UiMedia.Image>()
     extractImagesFromLinks(element)
     element.childNodes().forEach {
-        replaceMentionAndHashtag(element, it, accountKey)
+        replaceMentionAndHashtag(element, it, accountKey, imageLinks)
     }
-    return element.toUi(sourceLanguages)
+    return element.toUi(sourceLanguages, imageLinks)
 }
 
 private fun extractImagesFromLinks(element: Element) {
@@ -589,6 +593,7 @@ private fun replaceMentionAndHashtag(
     element: Element,
     node: Node,
     accountKey: MicroBlogKey,
+    imageLinks: MutableMap<String, UiMedia.Image>,
 ) {
     if (node is Element) {
         val href = node.attribute("href")?.value
@@ -625,16 +630,9 @@ private fun replaceMentionAndHashtag(
                 val url =
                     href.removePrefix("https://$vvoHostShort/sinaurl?u=").decodeURLPart()
                 if (url.contains("sinaimg.cn/")) {
-                    node.attributes().put(
-                        "href",
-                        DeeplinkRoute.Media.Image(uri = url, previewUrl = null).toUri(),
-                    )
-                } else {
-                    node.attributes().put(
-                        "href",
-                        url,
-                    )
+                    imageLinks[url] = requireNotNull(url.toUiImage(proxy = ProxyRef.forAccount(accountKey)))
                 }
+                node.attributes().put("href", url)
             } else if (href.startsWith("/status/")) {
                 // open the post
                 node.attributes().put(
@@ -648,7 +646,7 @@ private fun replaceMentionAndHashtag(
             }
         }
         node.childNodes().forEach {
-            replaceMentionAndHashtag(element, it, accountKey)
+            replaceMentionAndHashtag(element, it, accountKey, imageLinks)
         }
     }
 }

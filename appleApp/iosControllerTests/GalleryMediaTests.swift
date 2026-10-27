@@ -34,7 +34,7 @@ final class GalleryMediaTests: XCTestCase {
         let original = FileManager.default.temporaryDirectory
             .appendingPathComponent("missing-gallery-\(UUID()).png").absoluteString
         let media = UiMediaImage(url: original, previewUrl: preview, description: nil,
-                                 height: 560, width: 390, sensitive: false, customHeaders: nil)
+                                 height: 560, width: 390, sensitive: false, customHeaders: nil, proxy: ProxyRef.Global.shared)
 
         fixture.show(media)
         let pixels = try await fixture.waitForPixels(.blue)
@@ -48,7 +48,7 @@ final class GalleryMediaTests: XCTestCase {
         let preview = try await fixture.cacheImage(.blue)
         let original = try await fixture.cacheImage(.red)
         let media = UiMediaImage(url: original, previewUrl: preview, description: nil,
-                                 height: 560, width: 390, sensitive: false, customHeaders: nil)
+                                 height: 560, width: 390, sensitive: false, customHeaders: nil, proxy: ProxyRef.Global.shared)
 
         fixture.show(media)
         let pixels = try await fixture.waitForPixels(.red)

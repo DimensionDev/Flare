@@ -39,7 +39,6 @@ import dev.dimension.flare.ui.model.ClickContext
 import dev.dimension.flare.ui.model.TranslationDisplayState
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiTimelineV2
-import dev.dimension.flare.ui.model.toUiImage
 import dev.dimension.flare.ui.theme.PlatformTheme
 import org.jetbrains.compose.resources.stringResource
 
@@ -243,7 +242,7 @@ private fun GalleryFeedTile(
             }
         }
         GalleryBottomRow(
-            avatar = feed.source.icon.toUiImage(),
+            avatar = feed.source.media,
             name = feed.source.name,
             isCircle = false,
             modifier =
@@ -272,9 +271,8 @@ private fun GalleryBottomRow(
             )
         } else {
             NetworkImage(
-                model = avatar?.url,
+                model = avatar,
                 contentDescription = null,
-                customHeaders = avatar?.customHeaders,
                 modifier =
                     Modifier
                         .size(GalleryAvatarSize)

@@ -16,6 +16,7 @@ import dev.dimension.flare.data.datasource.microblog.loader.ListMemberLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.createPagingRemoteMediator
 import dev.dimension.flare.data.datasource.microblog.pagingConfig
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.model.AccountType
@@ -23,6 +24,7 @@ import dev.dimension.flare.model.DbAccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiProfile
+import dev.dimension.flare.ui.model.withProxy
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
@@ -81,7 +83,7 @@ public class ListMemberHandler(
             },
         ).flow.map {
             it.map {
-                it.user.content
+                it.user.content.withProxy(ProxyRef.forAccount(accountKey))
             }
         }
     }
@@ -93,7 +95,7 @@ public class ListMemberHandler(
                 listKey = MicroBlogKey(listId, accountKey.host),
             ).map { members ->
                 members.map { member ->
-                    member.user.content
+                    member.user.content.withProxy(ProxyRef.forAccount(accountKey))
                 }
             }
 
@@ -202,7 +204,7 @@ public class ListMemberHandler(
                     .getUserByKeyFlow(userKey)
                     .map {
                         it.listMemberships.map {
-                            it.list.content.data
+                            it.list.content.data.withProxy(ProxyRef.forAccount(accountKey))
                         }
                     }
             },

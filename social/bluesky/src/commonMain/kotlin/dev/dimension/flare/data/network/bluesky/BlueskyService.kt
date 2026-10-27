@@ -2,6 +2,7 @@ package dev.dimension.flare.data.network.bluesky
 
 import com.atproto.server.GetServiceAuthQueryParams
 import dev.dimension.flare.common.UploadMedia
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.data.network.ktorClient
 import dev.dimension.flare.data.platform.BlueskyCredential
 import dev.dimension.flare.model.MicroBlogKey
@@ -55,7 +56,7 @@ internal data class BlueskyService private constructor(
     private val authTokenFlow: Flow<BlueskyCredential>? = null,
     private val onCredentialRefreshed: suspend (BlueskyCredential) -> Unit = {},
 ) : BlueskyApi by XrpcBlueskyApi(
-        ktorClient {
+        ktorClient(ProxyRef.forAccount(accountKey)) {
             install(AtprotoProxyPlugin)
             install(BlueskyAuthPlugin) {
                 this.baseUrlFlow = baseUrlFlow
@@ -65,7 +66,7 @@ internal data class BlueskyService private constructor(
                 this.oauthApi =
                     OAuthApi(
                         httpClient =
-                            ktorClient {
+                            ktorClient(ProxyRef.forAccount(accountKey)) {
                                 install(BaseUrlPlugin) {
                                     this.baseUrlFlow = authTokenFlow?.map { it.baseUrl } ?: baseUrlFlow
                                 }
@@ -90,11 +91,13 @@ internal data class BlueskyService private constructor(
 
     constructor(
         baseUrl: String,
+        accountKey: MicroBlogKey? = null,
     ) : this(
+        accountKey = accountKey,
         baseUrlFlow = flowOf(baseUrl),
     )
 
-    private val videoUploader by lazy { BlueskyVideoUploader() }
+    private val videoUploader by lazy { BlueskyVideoUploader(client = ktorClient(ProxyRef.forAccount(accountKey))) }
 
     suspend fun uploadVideo(media: UploadMedia): Blob {
         media.validateBlueskyVideoInput()

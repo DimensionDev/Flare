@@ -8,14 +8,21 @@ import dev.dimension.flare.data.datasource.microblog.PostActionLayoutConfig
 import dev.dimension.flare.data.datasource.microblog.PostActionLayoutHelpers
 import dev.dimension.flare.data.datasource.microblog.PostActionPlacement
 import dev.dimension.flare.data.datasource.microblog.applyPostActionLayout
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.data.network.vvo.model.Large
 import dev.dimension.flare.data.network.vvo.model.Status
 import dev.dimension.flare.data.network.vvo.model.StatusPic
 import dev.dimension.flare.data.network.vvo.model.User
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.vvoHostShort
 import dev.dimension.flare.ui.humanizer.PlatformFormatter
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.withProxy
+import dev.dimension.flare.ui.render.RenderContent
+import dev.dimension.flare.ui.render.RenderRun
+import dev.dimension.flare.ui.render.UiRichText
+import dev.dimension.flare.ui.route.DeeplinkRoute
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
@@ -29,6 +36,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlin.time.Instant
 
@@ -127,6 +135,22 @@ class VVORenderTest {
                 .first()
                 .content.original.innerText,
         )
+    }
+
+    @Test
+    fun imageLinksDoNotPersistProcessSignatures() {
+        val text =
+            renderVVOText(
+                """<a href="https://$vvoHostShort/sinaurl?u=https://wx1.sinaimg.cn/large/photo.jpg">查看图片</a>""",
+                accountKey,
+            )
+        val restored = JSON.decodeFromString<UiRichText>(JSON.encodeToString(text)).withProxy(ProxyRef.Account(accountKey))
+        val block = assertIs<RenderContent.Text>(restored.renderRuns.single())
+        val run = assertIs<RenderRun.Text>(block.runs.single())
+        assertNull(run.style.link, "Process-signed links must not be persisted in rich text")
+        val route = assertIs<DeeplinkRoute.Media.Image>(DeeplinkRoute.parse(requireNotNull(run.style.resolvedLink)))
+        assertEquals("https://wx1.sinaimg.cn/large/photo.jpg", route.uri)
+        assertEquals(ProxyRef.Account(accountKey), route.proxy)
     }
 
     @Test

@@ -6,8 +6,10 @@ import app.bsky.embed.RecordWithMediaViewMediaUnion
 import app.bsky.embed.VideoView
 import app.bsky.feed.PostView
 import app.bsky.feed.PostViewEmbedUnion
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.data.network.bluesky.model.DidDoc
 import dev.dimension.flare.data.network.ktorClient
+import dev.dimension.flare.model.MicroBlogKey
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
@@ -28,19 +30,24 @@ import kotlin.time.Clock
 
 private val videoDownloadResolver by lazy { BlueskyVideoDownloadResolver() }
 
-internal suspend fun resolveBlueskyVideoDownloadUrls(posts: Collection<PostView>): Map<String, String> =
-    videoDownloadResolver.resolve(posts)
+internal suspend fun resolveBlueskyVideoDownloadUrls(
+    posts: Collection<PostView>,
+    accountKey: MicroBlogKey,
+): Map<String, String> = videoDownloadResolver.resolve(posts, ProxyRef.forAccount(accountKey))
 
 /** Resolves video blobs without making the pure UI mappers perform network requests. */
 internal class BlueskyVideoDownloadResolver(
-    private val client: HttpClient = ktorClient { followRedirects = false },
+    private val client: HttpClient? = null,
     private val nowMillis: () -> Long = { Clock.System.now().toEpochMilliseconds() },
 ) {
     private val mutex = Mutex()
     private val requests = Semaphore(4)
     private val pdsCache = linkedMapOf<String, CachedPds>()
 
-    suspend fun resolve(posts: Collection<PostView>): Map<String, String> {
+    suspend fun resolve(
+        posts: Collection<PostView>,
+        proxy: ProxyRef = ProxyRef.Global,
+    ): Map<String, String> {
         val videos = buildMap { posts.forEach { collectVideos(it) } }
         if (videos.isEmpty()) return emptyMap()
         val authors = videos.values.map { it.did }.distinct()
@@ -50,7 +57,7 @@ internal class BlueskyVideoDownloadResolver(
         withTimeoutOrNull(3_000L) {
             coroutineScope {
                 authors.forEach { did ->
-                    launch { requests.withPermit { resolvePds(did) } }
+                    launch { requests.withPermit { resolvePds(did, proxy) } }
                 }
             }
         }
@@ -72,10 +79,14 @@ internal class BlueskyVideoDownloadResolver(
             }.toMap()
     }
 
-    private suspend fun resolvePds(did: String) {
+    private suspend fun resolvePds(
+        did: String,
+        proxy: ProxyRef,
+    ) {
         if (mutex.withLock { cachedPds(did) } != null) return
+        val requestClient = client ?: ktorClient(proxy) { followRedirects = false }
         try {
-            val response = client.get(didDocumentUrl(did))
+            val response = requestClient.get(didDocumentUrl(did))
             if (!response.status.isSuccess()) return
             val document = BlueskyJson.decodeFromString<DidDoc>(response.bodyAsText())
             if (document.id != did) return
@@ -95,6 +106,11 @@ internal class BlueskyVideoDownloadResolver(
             throw error
         } catch (_: Exception) {
             // Download metadata is optional; playback and posts remain available.
+        } finally {
+            if (client == null) {
+                requestClient.close()
+                requestClient.engine.close()
+            }
         }
     }
 

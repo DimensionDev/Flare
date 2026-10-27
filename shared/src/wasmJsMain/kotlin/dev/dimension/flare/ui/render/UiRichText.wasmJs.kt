@@ -43,7 +43,7 @@ private fun StringBuilder.appendTextBlock(content: RenderContent.Text) {
 private fun StringBuilder.appendTextRun(run: RenderRun.Text) {
     val tags = mutableListOf<String>()
     val style = run.style
-    val href = style.link?.safeHref()
+    val href = style.resolvedLink?.safeHref()
     if (href != null) {
         appendAnchorStart(href)
         tags.add("a")

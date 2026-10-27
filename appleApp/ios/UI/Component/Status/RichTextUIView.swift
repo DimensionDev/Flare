@@ -1,9 +1,11 @@
+import FlareAppleUI
 import UIKit
 import Kingfisher
 import KotlinSharedUI
 import SwiftUI
 import FlareAppleCore
 import FlareAppleUI
+import Combine
 
 /// Pure-UIKit renderer for the iOS `RichText` SwiftUI view.
 final class RichTextUIView: UIView, TimelineHeightProviding {
@@ -72,6 +74,8 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
     private var collapsedPreviewHeight: CGFloat?
     private var renderedInlineImageURLs: Set<String> = []
     private var loadingInlineImageURLs: Set<String> = []
+    private var inlineImageRevision = 0
+    private var proxyObservation: AnyCancellable?
     private var blockImageAspectRatios: [String: CGFloat] = [:]
 
     private struct StructuralSignature: Equatable {
@@ -222,6 +226,7 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
         renderedWidthKey = Self.measurementWidthKey(width)
 
         guard let text else {
+            proxyObservation = nil
             invalidateIntrinsicContentSize()
             return
         }
@@ -236,14 +241,14 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
                 case let textContent as PlatformTextTextContent:
                     addTextContent(textContent)
                 case let imageContent as PlatformTextBlockImageContent:
-                    addBlockImage(url: imageContent.url, href: imageContent.href)
+                    addBlockImage(media: imageContent.media, href: imageContent.href)
                 default:
                     continue
                 }
             }
         }
 
-        loadInlineImages(generation: generation)
+        loadInlineImages(for: text, generation: generation)
         invalidateIntrinsicContentSize()
     }
 
@@ -517,7 +522,7 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
                 }
                 remainingLines -= visibleLines
             case .image(let content, let height, let lines):
-                addBlockImage(url: content.url, href: content.href)
+                addBlockImage(media: content.media, href: content.href)
                 previewHeight += lines <= remainingLines ? height : min(height, CGFloat(remainingLines) * lineHeight)
                 remainingLines -= min(lines, remainingLines)
             }
@@ -600,9 +605,10 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
         }
     }
 
-    private func addBlockImage(url: String, href: String?) {
+    private func addBlockImage(media: UiMediaImage, href: String?) {
+        let url = media.url
         guard URL(string: url) != nil else { return }
-        let imageView = RichTextBlockImageView(url: url, href: href, aspectRatio: blockImageAspectRatios[url])
+        let imageView = RichTextBlockImageView(media: media, href: href, aspectRatio: blockImageAspectRatios[url])
         let measurement = RichTextBlockImageMeasurement()
         if let ratio = blockImageAspectRatios[url] { measurement.update(aspectRatio: ratio) }
         let generation = renderGeneration
@@ -742,11 +748,11 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
         return result
     }
 
-    private func loadInlineImages(generation: Int) {
+    private func loadInlineImages(for text: UiRichText, generation: Int) {
         if !inlineImages.isEmpty {
             inlineImages = inlineImages.filter { renderedInlineImageURLs.contains($0.key) }
         }
-        guard !renderedInlineImageURLs.isEmpty else { return }
+        guard !renderedInlineImageURLs.isEmpty else { proxyObservation = nil; return }
         let scale = max(traitCollection.displayScale, 1)
         let pixelHeight = ceil(inlineImageTargetHeight * scale)
         if inlineImagePixelHeight != pixelHeight {
@@ -755,20 +761,30 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
         }
         let processor = ImageDownsamplingProcessor(
             pixelSize: CGSize(width: .greatestFiniteMagnitude, height: pixelHeight), fillsBounds: false)
+        if proxyObservation == nil {
+            proxyObservation = ProxyNetwork.shared.changes.toPublisher()
+                .receive(on: DispatchQueue.main)
+                .sink { [weak self] _ in
+                    guard let self, let text = self.text else { return }
+                    self.inlineImageRevision += 1
+                    self.loadingInlineImageURLs.removeAll()
+                    self.loadInlineImages(for: text, generation: self.renderGeneration)
+                }
+        }
+        let revision = inlineImageRevision
         for urlString in renderedInlineImageURLs where inlineImages[urlString] == nil && !loadingInlineImageURLs.contains(urlString) {
-            guard let url = URL(string: urlString) else { continue }
+            guard let media = text.imageMedias.first(where: { $0.url == urlString }) else { continue }
             loadingInlineImageURLs.insert(urlString)
-            KingfisherManager.shared.retrieveImage(with: url, options: [
-                .processor(processor), .scaleFactor(scale), .cacheOriginalImage,
-                .backgroundDecode, .asyncCacheTypeCheck,
-            ]) { [weak self] result in
-                Task { @MainActor [weak self] in
-                    guard let self, self.renderGeneration == generation else { return }
-                    self.loadingInlineImageURLs.remove(urlString)
-                    if case .success(let value) = result {
-                        self.inlineImages[urlString] = value.image
-                        self.refreshTextBlocks()
-                    }
+            Task { @MainActor [weak self] in
+                let result = try? await ProxyMediaImages.shared.retrieve(media, options: [
+                    .processor(processor), .scaleFactor(scale), .cacheOriginalImage,
+                    .backgroundDecode, .asyncCacheTypeCheck,
+                ])
+                guard let self, self.renderGeneration == generation, self.inlineImageRevision == revision else { return }
+                self.loadingInlineImageURLs.remove(urlString)
+                if let result {
+                    self.inlineImages[urlString] = result.image
+                    self.refreshTextBlocks()
                 }
             }
         }
@@ -802,7 +818,7 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
     private func attributes(for style: RenderTextStyle, block: RenderBlockStyle) -> [NSAttributedString.Key: Any] {
         var attributes = baseAttributes(font: font(for: style, block: block), color: color(for: style, block: block))
 
-        if let link = style.link, let url = URL(string: link) {
+        if let link = style.resolvedLink, let url = URL(string: link) {
             attributes[.link] = url
             attributes[.foregroundColor] = linkColor()
         }
@@ -1060,7 +1076,7 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
     private func hasLinks(in content: RenderContent.Text) -> Bool {
         content.runs.contains { run in
             guard let textRun = run as? RenderRun.Text,
-                  let link = textRun.style.link else {
+                  let link = textRun.style.resolvedLink else {
                 return false
             }
             return URL(string: link) != nil
@@ -1717,7 +1733,8 @@ private final class RichTextBlockImageView: UIView, RichTextFittingPreparing {
     var onOpenURL: ((URL) -> Void)?
     var onAspectRatioChanged: ((CGFloat) -> Void)?
 
-    private let url: String
+    private let media: UiMediaImage
+    private var url: String { media.url }
     private let href: String?
     private let imageView = UIImageView()
     private var aspectConstraint: NSLayoutConstraint?
@@ -1725,8 +1742,8 @@ private final class RichTextBlockImageView: UIView, RichTextFittingPreparing {
     private var lastLayoutWidth: CGFloat = 0
     private var requestedPixelWidth: CGFloat = 0
 
-    init(url: String, href: String?, aspectRatio: CGFloat? = nil) {
-        self.url = url
+    init(media: UiMediaImage, href: String?, aspectRatio: CGFloat? = nil) {
+        self.media = media
         self.href = href
         self.aspectRatio = aspectRatio
         super.init(frame: .zero)
@@ -1767,11 +1784,11 @@ private final class RichTextBlockImageView: UIView, RichTextFittingPreparing {
     private func loadImage(width: CGFloat) {
         let scale = max(traitCollection.displayScale, 1)
         let pixelWidth = ceil(width * scale)
-        guard pixelWidth > requestedPixelWidth, let imageURL = URL(string: url) else { return }
+        guard pixelWidth > requestedPixelWidth, URL(string: media.url) != nil else { return }
         requestedPixelWidth = pixelWidth
         let processor = ImageDownsamplingProcessor(
             pixelSize: CGSize(width: pixelWidth, height: .greatestFiniteMagnitude), fillsBounds: false)
-        imageView.kf.setImage(with: imageURL, options: [
+        imageView.setMedia(media, options: [
             .processor(processor), .scaleFactor(scale), .cacheOriginalImage,
             .backgroundDecode, .asyncCacheTypeCheck, .keepCurrentImageWhileLoading,
         ]) { [weak self] result in

@@ -110,7 +110,7 @@ internal fun EmojiPicker(
                         ) { index ->
                             val emoji = history[index]
                             NetworkImage(
-                                model = emoji.url,
+                                model = emoji.media,
                                 contentDescription = emoji.shortcode,
                                 modifier =
                                     Modifier
@@ -177,7 +177,7 @@ internal fun EmojiPicker(
                             ) { index ->
                                 val emoji = emojis[index]
                                 NetworkImage(
-                                    model = emoji.url,
+                                    model = emoji.media,
                                     contentDescription = emoji.shortcode,
                                     modifier =
                                         Modifier

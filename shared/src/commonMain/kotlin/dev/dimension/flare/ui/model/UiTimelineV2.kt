@@ -3,6 +3,7 @@ package dev.dimension.flare.ui.model
 import androidx.compose.runtime.Immutable
 import dev.dimension.flare.common.SerializableImmutableList
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.ReferenceType
@@ -237,7 +238,10 @@ public sealed class UiTimelineV2 {
         public data class Source public constructor(
             val name: String,
             val icon: String?,
-        )
+            @Transient val proxy: ProxyRef = ProxyRef.Unbound,
+        ) {
+            val media: UiMedia.Image? get() = icon.toUiImage(proxy = proxy)
+        }
     }
 
     @Serializable
@@ -397,7 +401,9 @@ public sealed class UiTimelineV2 {
             public val clickEvent: ClickEvent,
             val isUnicode: Boolean,
             val me: Boolean,
+            @Transient val proxy: ProxyRef = ProxyRef.Unbound,
         ) {
+            val media: UiMedia.Image get() = UiMedia.Image(url, proxy = proxy)
             val onClicked: ClickContext.() -> Unit by lazy {
                 clickEvent.onClicked
             }

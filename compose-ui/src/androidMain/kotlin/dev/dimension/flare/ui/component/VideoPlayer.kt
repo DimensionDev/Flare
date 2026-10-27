@@ -52,7 +52,7 @@ import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.CirclePlay
 import dev.dimension.flare.compose.ui.Res
 import dev.dimension.flare.compose.ui.media_play_video
-import kotlinx.collections.immutable.ImmutableMap
+import dev.dimension.flare.ui.model.UiMedia
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
@@ -75,9 +75,7 @@ private val audioAttributes by lazy {
 @OptIn(UnstableApi::class, ExperimentalFoundationApi::class)
 @Composable
 public fun VideoPlayer(
-    uri: String,
-    customHeaders: ImmutableMap<String, String>? = null,
-    previewUri: String?,
+    media: UiMedia,
     contentDescription: String?,
     modifier: Modifier = Modifier,
     muted: Boolean = false,
@@ -90,7 +88,7 @@ public fun VideoPlayer(
     autoPlay: Boolean = true,
     remainingTimeContent: @Composable (BoxScope.(Long) -> Unit)? = null,
     loadingPlaceholder: @Composable BoxScope.() -> Unit = {
-        if (previewUri != null) {
+        if (media.preview != null) {
             Box(
                 modifier =
                     Modifier
@@ -98,8 +96,7 @@ public fun VideoPlayer(
                 contentAlignment = Alignment.Center,
             ) {
                 NetworkImage(
-                    model = previewUri,
-                    customHeaders = customHeaders,
+                    model = media.preview,
                     contentScale = contentScale,
                     contentDescription = contentDescription,
                     modifier =
@@ -125,7 +122,7 @@ public fun VideoPlayer(
         }
     },
     idlePlaceholder: @Composable BoxScope.() -> Unit = {
-        if (previewUri != null) {
+        if (media.preview != null) {
             Box(
                 modifier =
                     Modifier
@@ -133,8 +130,7 @@ public fun VideoPlayer(
                 contentAlignment = Alignment.Center,
             ) {
                 NetworkImage(
-                    model = previewUri,
-                    customHeaders = customHeaders,
+                    model = media.preview,
                     contentScale = contentScale,
                     contentDescription = contentDescription,
                     modifier =
@@ -164,12 +160,14 @@ public fun VideoPlayer(
         }
     },
 ) {
+    val uri = media.url
     var started by remember { mutableStateOf(false) }
     var resumed by remember { mutableStateOf(false) }
+    val route = rememberMediaProxySnapshot(media)
     val playback = rememberTimelinePlayback()
     val request =
-        remember(uri, customHeaders) {
-            VideoRequest(uri = uri, customHeaders = customHeaders?.toMap().orEmpty())
+        remember(media, route) {
+            VideoRequest(media = media, routeKey = route?.getOrNull()?.key.orEmpty())
         }
     val binding = rememberSurfaceBinding(request, playback, muted)
     val player = binding.first
@@ -243,9 +241,11 @@ private fun rememberSurfaceBinding(
 }
 
 internal data class VideoRequest(
-    val uri: String,
-    val customHeaders: Map<String, String> = emptyMap(),
-)
+    val media: UiMedia,
+    val routeKey: String,
+) {
+    val uri: String get() = media.url
+}
 
 @Stable
 @Single
@@ -257,7 +257,6 @@ public class SurfaceBindingManager(
         lazy {
             ExoPlayer
                 .Builder(context.applicationContext)
-                .setMediaSourceFactory(media3VideoCacheManager.mediaSourceFactory())
                 .build()
                 .apply {
                     repeatMode = Player.REPEAT_MODE_ALL
@@ -276,7 +275,7 @@ public class SurfaceBindingManager(
     private val suspendedPlaybacks = Collections.newSetFromMap(WeakHashMap<TimelinePlaybackCoordinator, Boolean>())
     private val startedActivities = Collections.newSetFromMap(WeakHashMap<Activity, Boolean>())
 
-    public fun playerFor(uri: String): ExoPlayer? = if (activeBinding != null && activeRequest?.uri == uri) player else null
+    public fun playerFor(media: UiMedia): ExoPlayer? = if (activeBinding != null && activeRequest?.media == media) player else null
 
     public interface Binding {
         public fun setActive(active: Boolean)
@@ -312,7 +311,7 @@ public class SurfaceBindingManager(
                     if (activeRequest != request || player.playerError != null) {
                         val source =
                             media3VideoCacheManager
-                                .mediaSourceFactory(request.customHeaders)
+                                .mediaSourceFactory(request.media)
                                 .createMediaSource(MediaItem.fromUri(request.uri))
                         player.setMediaSource(source)
                         player.seekTo((playback.position(request.uri) * 1000).toLong())

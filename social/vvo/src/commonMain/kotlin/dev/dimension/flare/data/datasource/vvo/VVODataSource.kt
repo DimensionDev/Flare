@@ -31,6 +31,7 @@ import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.ShareRepliesLoader
 import dev.dimension.flare.data.model.IconType
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.data.model.tab.ShortcutSpec
 import dev.dimension.flare.data.model.tab.TimelineSpec
 import dev.dimension.flare.data.network.vvo.VVOService
@@ -84,7 +85,7 @@ internal class VVODataSource(
     private val imageCompressor: ImageCompressor by koinInject()
     private val service by lazy {
         VVOService(
-            credentialFlow = credentialFlow,
+            proxy = ProxyRef.forAccount(accountKey),            credentialFlow = credentialFlow,
             refreshCookieWhenStale = true,
             onCredentialRefreshed = { credential ->
                 updateCredential(credential)
@@ -179,6 +180,7 @@ internal class VVODataSource(
 
     override val userHandler by lazy {
         UserHandler(
+            proxy = ProxyRef.forAccount(accountKey),
             host = accountKey.host,
             loader = loader,
         )

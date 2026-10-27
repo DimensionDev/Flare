@@ -82,7 +82,7 @@ public struct EditRssSheet: View {
                     Section {
                         HStack(spacing: 10) {
                             if let favIcon = rssFeed.icon, !favIcon.isEmpty {
-                                NetworkImage(data: favIcon)
+                                NetworkImage(data: UiMediaImage(url: favIcon, proxy: ProxyRef.Global.shared))
                                     .frame(width: 24, height: 24)
                                     .clipShape(RoundedRectangle(cornerRadius: 4, style: .continuous))
                             } else {
@@ -365,7 +365,7 @@ private struct SelectableSubscriptionTypeRow: View {
     var body: some View {
         HStack(spacing: 12) {
             if let icon, !icon.isEmpty {
-                NetworkImage(data: icon)
+                NetworkImage(data: UiMediaImage(url: icon, proxy: ProxyRef.Global.shared))
                     .frame(width: 24, height: 24)
                     .clipShape(RoundedRectangle(cornerRadius: 4, style: .continuous))
             } else {

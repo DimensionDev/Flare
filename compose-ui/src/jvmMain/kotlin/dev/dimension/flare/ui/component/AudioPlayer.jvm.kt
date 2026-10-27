@@ -1,9 +1,10 @@
 package dev.dimension.flare.ui.component
 
 import androidx.compose.runtime.Composable
+import dev.dimension.flare.ui.model.UiMedia
 
 @Composable
-internal actual fun rememberPlayerState(uri: String): PlayerState {
+internal actual fun rememberPlayerState(media: UiMedia): PlayerState {
     // TODO: implementation for JVM
     return object : PlayerState {
         override val playing: Boolean

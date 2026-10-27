@@ -73,33 +73,29 @@ enum IOSTimelineMediaActions {
             MediaSaver.shared.saveUgoira(animation, fileName: fileName(post: post, media: media), showsSaveResult: showsSaveResult, completion: completion)
         case .image(let image):
             MediaSaver.shared.saveImage(
-                url: image.url,
-                customHeaders: image.customHeaders,
+                media: image,
                 showsDownloadStarted: showsDownloadStarted,
                 showsSaveResult: showsSaveResult,
                 completion: completion
             )
         case .gif(let gif):
             MediaSaver.shared.saveImage(
-                url: gif.url,
-                customHeaders: gif.customHeaders,
+                media: gif,
                 showsDownloadStarted: showsDownloadStarted,
                 showsSaveResult: showsSaveResult,
                 completion: completion
             )
         case .video(let video):
             MediaSaver.shared.saveVideo(
-                url: video.urlForDownload,
-                customHeaders: video.customHeaders,
+                media: video,
                 showsDownloadStarted: showsDownloadStarted,
                 showsSaveResult: showsSaveResult,
                 completion: completion
             )
         case .audio(let audio):
             MediaSaver.shared.saveFile(
-                url: audio.url,
+                media: audio,
                 fileName: fileName(post: post, media: media),
-                customHeaders: audio.customHeaders,
                 showsDownloadStarted: showsDownloadStarted,
                 showsSaveResult: showsSaveResult,
                 completion: completion
@@ -143,8 +139,7 @@ enum IOSTimelineMediaActions {
         }
         Task {
             guard let fileURL = try? await OriginalImageShareFile.make(
-                url: image.url,
-                customHeaders: image.customHeaders,
+                media: image,
                 statusKey: post.statusKey.description(),
                 userHandle: post.user?.handle.canonical,
                 onPreparingNeeded: {

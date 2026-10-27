@@ -14,7 +14,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.ComposeUiFlags
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.InputMode
+import androidx.compose.ui.input.InputModeManager
 import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.platform.LocalInputModeManager
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.assertCountEquals
@@ -32,18 +35,26 @@ import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.unit.dp
+import androidx.datastore.core.DataStore
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.savedstate.compose.LocalSavedStateRegistryOwner
 import androidx.test.platform.app.InstrumentationRegistry
+import dev.dimension.flare.data.model.ProxyMode
+import dev.dimension.flare.data.model.ProxyPolicy
+import dev.dimension.flare.data.model.ProxyRef
+import dev.dimension.flare.data.model.ProxySettings
 import dev.dimension.flare.data.model.appearance.GlobalAppearance
 import dev.dimension.flare.data.model.appearance.TimelineAppearance
+import dev.dimension.flare.data.repository.ProxyRepository
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.LocalGlobalAppearance
+import dev.dimension.flare.ui.component.LocalNetworkImageAllowHardware
 import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.humanizer.PlatformFormatter
 import dev.dimension.flare.ui.model.ClickEvent
+import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.UiTranslatableText
@@ -55,6 +66,8 @@ import dev.dimension.flare.ui.screen.status.action.StatusShareReplySheet
 import dev.dimension.flare.ui.screen.status.action.captureOffscreenShareBitmap
 import dev.dimension.flare.ui.theme.FlareTheme
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.flow.flow
 import org.junit.AfterClass
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -66,9 +79,15 @@ import org.koin.core.context.GlobalContext
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
+import java.io.ByteArrayOutputStream
 import java.io.File
+import java.net.InetAddress
+import java.net.ServerSocket
+import java.util.UUID
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
+import kotlin.concurrent.thread
 import kotlin.time.Instant
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -118,6 +137,7 @@ class StatusShareContentTest {
         var selected by mutableStateOf(false)
         var confirmed = false
         var cancelled = false
+        lateinit var inputModeManager: InputModeManager
         val state =
             object : StatusSharePresenter.State {
                 override val status = UiState.Success<UiTimelineV2>(reply)
@@ -160,6 +180,7 @@ class StatusShareContentTest {
                 LocalTimelineAppearance provides TimelineAppearance(showTranslateButton = false),
             ) {
                 FlareTheme(darkTheme = false) {
+                    inputModeManager = LocalInputModeManager.current
                     StatusShareReplySheet(state)
                 }
             }
@@ -181,7 +202,11 @@ class StatusShareContentTest {
         composeRule.onNodeWithContentDescription("Selectable reply", substring = true).performClick().assertIsOff()
         composeRule.runOnIdle { assertFalse(selected) }
         val selector = composeRule.onNodeWithContentDescription("Selectable reply", substring = true)
-        selector.performKeyInput { pressKey(Key.Tab) }
+        // Synthetic key input does not switch Android out of touch mode.
+        composeRule.runOnIdle {
+            inputModeManager.requestInputMode(InputMode.Keyboard)
+            assertEquals(InputMode.Keyboard, inputModeManager.inputMode)
+        }
         selector.performSemanticsAction(SemanticsActions.RequestFocus) { it() }
         selector.assertIsFocused()
         selector.performKeyInput {
@@ -288,6 +313,154 @@ class StatusShareContentTest {
         assertTrue("Text near the end of the reply must be painted", textPixels > 100)
         val directory = InstrumentationRegistry.getInstrumentation().targetContext.externalCacheDir
         File(directory, "selected-reply-long.png").outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
+    }
+
+    @Test
+    fun screenshotWaitsForMediaProxyPreparation() {
+        val routeRequested = AtomicBoolean(false)
+        val releaseRoute = CompletableDeferred<Unit>()
+        val settings = ProxySettings(global = ProxyPolicy(ProxyMode.DIRECT))
+        val store =
+            object : DataStore<ProxySettings> {
+                override val data =
+                    flow {
+                        routeRequested.set(true)
+                        releaseRoute.await()
+                        emit(settings)
+                    }
+
+                override suspend fun updateData(transform: suspend (ProxySettings) -> ProxySettings): ProxySettings =
+                    error("This fixture does not write proxy settings")
+            }
+        val koin = requireNotNull(GlobalContext.getOrNull())
+        val originalRepository = koin.getOrNull<ProxyRepository>()
+        val proxyModule = module { single { ProxyRepository(store) } }
+        val targetHits = AtomicInteger()
+        val png =
+            ByteArrayOutputStream().use { output ->
+                val image = Bitmap.createBitmap(32, 32, Bitmap.Config.ARGB_8888)
+                try {
+                    image.eraseColor(android.graphics.Color.rgb(0, 220, 80))
+                    check(image.compress(Bitmap.CompressFormat.PNG, 100, output))
+                    output.toByteArray()
+                } finally {
+                    image.recycle()
+                }
+            }
+        val target = ServerSocket(0, 10, InetAddress.getByName("127.0.0.1"))
+        val server =
+            thread(isDaemon = true) {
+                while (!target.isClosed) {
+                    val socket = runCatching { target.accept() }.getOrNull() ?: break
+                    socket.use { client ->
+                        runCatching {
+                            client.soTimeout = 5_000
+                            val input = client.getInputStream().bufferedReader()
+                            while (true) {
+                                if (input.readLine().isNullOrEmpty()) break
+                            }
+                            targetHits.incrementAndGet()
+                            client.getOutputStream().apply {
+                                write(
+                                    (
+                                        "HTTP/1.1 200 OK\r\nContent-Type: image/png\r\nContent-Length: ${png.size}\r\n" +
+                                            "Cache-Control: no-store\r\nConnection: close\r\n\r\n"
+                                    ).toByteArray(),
+                                )
+                                write(png)
+                                flush()
+                            }
+                        }
+                    }
+                }
+            }
+        val imageUrl = "http://127.0.0.1:${target.localPort}/${UUID.randomUUID()}.png"
+        val media =
+            UiMedia.Image(
+                url = imageUrl,
+                previewUrl = imageUrl,
+                description = "Proxy preparation fixture",
+                height = 32f,
+                width = 32f,
+                sensitive = false,
+                proxy = ProxyRef.Global,
+            )
+        val root = post("proxy-preparation", "Image capture").copy(images = persistentListOf(media))
+        val captured = AtomicReference<Bitmap?>()
+        val completed = AtomicInteger()
+        var attempt by mutableStateOf(0)
+        var mounted by mutableStateOf(true)
+        koin.loadModules(listOf(proxyModule))
+        try {
+            composeRule.setContent {
+                if (mounted) {
+                    CompositionLocalProvider(
+                        LocalGlobalAppearance provides GlobalAppearance(),
+                        LocalTimelineAppearance provides TimelineAppearance(showTranslateButton = false),
+                    ) {
+                        FlareTheme(darkTheme = false) {
+                            val view = LocalView.current
+                            val parent = rememberCompositionContext()
+                            val lifecycle = LocalLifecycleOwner.current
+                            val savedState = LocalSavedStateRegistryOwner.current
+                            val viewModelStore = LocalViewModelStoreOwner.current
+                            LaunchedEffect(attempt) {
+                                captured.set(
+                                    captureOffscreenShareBitmap(
+                                        context = view.context,
+                                        view = view,
+                                        parentCompositionContext = parent,
+                                        lifecycleOwner = lifecycle,
+                                        savedStateRegistryOwner = savedState,
+                                        viewModelStoreOwner = viewModelStore,
+                                        widthPx = 1080,
+                                    ) {
+                                        CompositionLocalProvider(LocalNetworkImageAllowHardware provides false) {
+                                            Surface { StatusShareContent(root, root.statusKey, emptyList()) }
+                                        }
+                                    },
+                                )
+                                completed.incrementAndGet()
+                            }
+                        }
+                    }
+                }
+            }
+            composeRule.waitUntil(timeoutMillis = 5_000) { routeRequested.get() }
+            composeRule.mainClock.advanceTimeBy(500)
+            composeRule.waitForIdle()
+            val finishedBeforeRouteReady = completed.get() > 0
+            assertEquals("No image request may start before its route is ready", 0, targetHits.get())
+            releaseRoute.complete(Unit)
+            // Let a failing first capture retry so this regression also proves real PNG loading.
+            if (finishedBeforeRouteReady) composeRule.runOnIdle { attempt++ }
+            composeRule.waitUntil(timeoutMillis = 20_000) { completed.get() > if (finishedBeforeRouteReady) 1 else 0 }
+            val bitmap = requireNotNull(captured.get()) { "The capture must succeed after routing becomes available" }
+            try {
+                assertTrue("The real image endpoint must be requested", targetHits.get() > 0)
+                var imagePixels = 0
+                for (y in 0 until bitmap.height step 4) {
+                    for (x in 0 until bitmap.width step 4) {
+                        val color = bitmap.getPixel(x, y)
+                        if (android.graphics.Color.green(color) > 180 && android.graphics.Color.red(color) < 30) imagePixels++
+                    }
+                }
+                assertTrue("The capture must contain the downloaded PNG", imagePixels > 100)
+                assertFalse("Capture must remain pending while its image route is being prepared", finishedBeforeRouteReady)
+            } finally {
+                bitmap.recycle()
+            }
+        } finally {
+            releaseRoute.complete(Unit)
+            try {
+                composeRule.runOnIdle { mounted = false }
+            } finally {
+                koin.unloadModules(listOf(proxyModule))
+                originalRepository?.let { original -> koin.loadModules(listOf(module { single { original } })) }
+                target.close()
+                server.join(1_000)
+            }
+        }
     }
 
     private fun post(

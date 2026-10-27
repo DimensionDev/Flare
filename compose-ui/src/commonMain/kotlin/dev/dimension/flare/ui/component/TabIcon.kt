@@ -76,6 +76,7 @@ import dev.dimension.flare.compose.ui.social_title
 import dev.dimension.flare.compose.ui.tab_settings_default
 import dev.dimension.flare.compose.ui.tab_settings_filter_repost
 import dev.dimension.flare.data.model.IconType
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.data.model.tab.UiTimelineTabItem
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.component.platform.PlatformText
@@ -84,6 +85,7 @@ import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.model.UiText
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
+import dev.dimension.flare.ui.model.toUiImage
 import dev.dimension.flare.ui.presenter.home.FavIconPresenter
 import dev.dimension.flare.ui.presenter.home.UserPresenter
 import dev.dimension.flare.ui.presenter.invoke
@@ -228,7 +230,7 @@ public fun TabIcon(
 
         is IconType.Url -> {
             NetworkImage(
-                icon.url,
+                icon.url.toUiImage(proxy = ProxyRef.Global),
                 contentDescription = text,
                 modifier =
                     modifier
@@ -261,7 +263,7 @@ public fun FavIcon(
     iconState
         .onSuccess {
             NetworkImage(
-                it,
+                it.toUiImage(proxy = ProxyRef.Global),
                 contentDescription =
                     when (title) {
                         is UiText.Localized -> stringResource(title.string.res)

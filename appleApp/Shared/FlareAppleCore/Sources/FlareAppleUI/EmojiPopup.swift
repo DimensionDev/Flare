@@ -116,7 +116,7 @@ private struct EmojiGrid: View {
     var body: some View {
         LazyVGrid(columns: [GridItem(.adaptive(minimum: 48))], spacing: 8) {
             ForEach(items, id: \.shortcode) { item in
-                NetworkImage(data: item.url)
+                NetworkImage(data: item.media)
                     .scaledToFit()
                     .frame(width: 32, height: 32)
                     .onTapGesture {

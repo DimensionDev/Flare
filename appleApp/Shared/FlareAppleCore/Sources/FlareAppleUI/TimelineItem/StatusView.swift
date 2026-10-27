@@ -180,7 +180,7 @@ public struct StatusView: View {
                 spacing: 8,
             ) {
                 if showAsFullWidth, let user {
-                    AvatarView(data: user.avatar?.url, customHeader: user.avatar?.customHeaders)
+                    AvatarView(data: user.avatar)
                         .frame(width: 44, height: 44)
                         .accessibilityLabel(
                             Text(

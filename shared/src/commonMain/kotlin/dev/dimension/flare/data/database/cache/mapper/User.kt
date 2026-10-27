@@ -2,7 +2,9 @@ package dev.dimension.flare.data.database.cache.mapper
 
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.model.DbUser
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.ui.model.UiProfile
+import dev.dimension.flare.ui.model.withProxy
 
 internal fun UiProfile.toDbUser(host: String = this.host ?: key.host) =
     DbUser(
@@ -10,7 +12,7 @@ internal fun UiProfile.toDbUser(host: String = this.host ?: key.host) =
         name = name.raw,
         canonicalHandle = handle.canonical,
         host = host,
-        content = this,
+        content = withProxy(ProxyRef.Unbound),
     )
 
 internal suspend fun CacheDatabase.upsertUser(user: DbUser) {

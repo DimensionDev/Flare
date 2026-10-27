@@ -19,11 +19,11 @@ public interface AccountService {
 
     public fun allAccountServicesFlow(): Flow<List<AccountMicroblogDataSource>>
 
-    public fun <T : Any> addAccount(
+    public suspend fun <T : Any> addAccount(
         account: UiAccount,
         credential: T,
         serializer: KSerializer<T>,
-    ): Job
+    ): Unit
 
     public fun <T : Any> credentialFlow(
         accountKey: MicroBlogKey,
@@ -45,10 +45,10 @@ public data class AccountMicroblogDataSource(
 )
 
 @HiddenFromObjC
-public inline fun <reified T : Any> AccountService.addAccount(
+public suspend inline fun <reified T : Any> AccountService.addAccount(
     account: UiAccount,
     credential: T,
-): Job =
+): Unit =
     addAccount(
         account = account,
         credential = credential,
@@ -95,11 +95,11 @@ internal class RepositoryAccountService(
             }
         }
 
-    override fun <T : Any> addAccount(
+    override suspend fun <T : Any> addAccount(
         account: UiAccount,
         credential: T,
         serializer: KSerializer<T>,
-    ): Job =
+    ): Unit =
         repository.addAccount(
             account = account,
             credential = credential,

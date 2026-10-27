@@ -14,6 +14,9 @@ import dev.dimension.flare.data.database.createDatabaseDriver
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.datastore.model.AccountSelectionPreferences
 import dev.dimension.flare.data.io.OkioFileStorage
+import dev.dimension.flare.data.model.ProxyMode
+import dev.dimension.flare.data.model.ProxyPolicy
+import dev.dimension.flare.data.model.ProxySettings
 import dev.dimension.flare.deleteTestRootPath
 import dev.dimension.flare.memoryDatabaseBuilder
 import dev.dimension.flare.model.MicroBlogKey
@@ -83,6 +86,115 @@ class AccountRepositoryTest : RobolectricTest() {
         cacheDatabase.close()
         deleteTestRootPath(root)
     }
+
+    @Test
+    fun startupCompletesInterruptedDeletionAndAllowsRelogin() =
+        runTest {
+            insertAccount()
+            val proxy = ProxyRepository(fileStorage)
+            proxy.selectAccount(accountKey, ProxyPolicy(ProxyMode.DIRECT))
+            appDataStore.composeConfigData.updateData { it.copy(lastAccounts = listOf(accountKey)) }
+            proxy.removeAccount(accountKey)
+            val repository = createRepository(this, proxy)
+            val other = MicroBlogKey("other", "example.social")
+            repository.addAccount(UiAccount(other, "Mastodon"), "unaffected credentials")
+            assertNull(appDatabase.accountDao().getAccount(accountKey))
+            assertEquals(
+                emptyList(),
+                appDataStore.composeConfigData.data
+                    .first()
+                    .lastAccounts,
+            )
+            assertEquals(setOf(accountKey.toString()), proxy.settings.first().removedAccounts)
+
+            repository.addAccount(UiAccount(accountKey, "Mastodon"), "new credentials")
+            assertEquals(accountKey, repository.find(accountKey)?.accountKey)
+            assertFalse(accountKey.toString() in proxy.settings.first().removedAccounts)
+        }
+
+    @Test
+    fun reloginWaitsForPendingDeletionRecovery() =
+        runTest {
+            insertAccount()
+            val proxy = ProxyRepository(fileStorage)
+            proxy.removeAccount(accountKey)
+            val repository = createRepository(this, proxy)
+            repository.addAccount(UiAccount(accountKey, "Mastodon"), "new credentials")
+            assertEquals(accountKey, repository.find(accountKey)?.accountKey)
+            assertFalse(accountKey.toString() in proxy.settings.first().removedAccounts)
+        }
+
+    @Test
+    fun accountAdditionIsPublishedBeforeTheNextAccountMutationStarts() =
+        runTest {
+            val store = ControlledProxyStore(ProxySettings(removedAccounts = setOf(accountKey.toString())))
+            val repository = createRepository(this, ProxyRepository(store))
+            repository.withAccountChanges { }
+            val writeEntered = CompletableDeferred<Unit>()
+            val releaseWrite = CompletableDeferred<Unit>()
+            store.beforeWrite = {
+                writeEntered.complete(Unit)
+                releaseWrite.await()
+            }
+            val events = Channel<String>(Channel.UNLIMITED)
+            val observer =
+                launch(Dispatchers.Unconfined) {
+                    repository.onAdded.collect { events.send("added") }
+                }
+            val addition = launch { repository.addAccount(UiAccount(accountKey, "Mastodon"), "restored") }
+            val nextMutation =
+                launch(Dispatchers.Unconfined, start = CoroutineStart.LAZY) {
+                    repository.withAccountChanges { events.send("mutation-start") }
+                }
+            try {
+                writeEntered.await()
+                // Run the queued mutation during unlock, exposing an announcement sent after the lock was released.
+                nextMutation.start()
+                assertNull(events.tryReceive().getOrNull(), "An account must not be announced before restoration commits")
+                assertFalse(nextMutation.isCompleted, "The next mutation must wait for restoration")
+
+                releaseWrite.complete(Unit)
+                addition.join()
+                nextMutation.join()
+
+                assertEquals(listOf("added", "mutation-start"), List(2) { events.tryReceive().getOrNull() })
+                assertEquals(accountKey, repository.find(accountKey)?.accountKey)
+                assertEquals(emptySet(), store.settings.value.removedAccounts)
+            } finally {
+                releaseWrite.complete(Unit)
+                addition.cancelAndJoin()
+                nextMutation.cancelAndJoin()
+                observer.cancelAndJoin()
+            }
+        }
+
+    @Test
+    fun failedAccountRestorationDoesNotPublishAdded() =
+        runTest {
+            val removed = setOf(accountKey.toString())
+            val store = ControlledProxyStore(ProxySettings(removedAccounts = removed))
+            val repository = createRepository(this, ProxyRepository(store))
+            repository.withAccountChanges { }
+            val failure = IllegalStateException("Proxy restoration failed")
+            store.beforeWrite = { throw failure }
+            val events = Channel<UiAccount>(Channel.UNLIMITED)
+            val observer =
+                launch(Dispatchers.Unconfined) {
+                    repository.onAdded.collect { events.send(it) }
+                }
+            try {
+                val thrown =
+                    assertFailsWith<IllegalStateException> {
+                        repository.addAccount(UiAccount(accountKey, "Mastodon"), "restored")
+                    }
+                assertEquals(failure.message, thrown.message)
+                assertNull(appDatabase.accountDao().getAccount(accountKey))
+                assertEquals(removed, store.settings.value.removedAccounts)
+                assertNull(events.tryReceive().getOrNull(), "A rolled-back account must not be announced")
+            } finally {
+                observer.cancelAndJoin()
+            }
+        }
 
     @Test
     fun allAccountsDoesNotReEmitWhenActiveTimestampChanges() =
@@ -242,7 +354,7 @@ class AccountRepositoryTest : RobolectricTest() {
             assertEquals("TestNet", activationError.platformId)
             assertEquals("{\"token\":\"kept\"}", appDatabase.accountDao().getAccount(unavailableKey)?.credential_json)
 
-            repository.delete(unavailableKey).join()
+            repository.delete(unavailableKey)
             assertNull(appDatabase.accountDao().getAccount(unavailableKey))
         }
 
@@ -290,7 +402,7 @@ class AccountRepositoryTest : RobolectricTest() {
             insertAccount()
             appDataStore.notificationPreferences.updateData { it.copy(selectedAccountKey = accountKey) }
 
-            repository.delete(accountKey).join()
+            repository.delete(accountKey)
 
             assertNull(
                 appDataStore.notificationPreferences.data
@@ -308,7 +420,7 @@ class AccountRepositoryTest : RobolectricTest() {
             val savedAccount = MicroBlogKey("bob", "another.social")
             appDataStore.notificationPreferences.updateData { it.copy(selectedAccountKey = savedAccount) }
 
-            repository.delete(accountKey).join()
+            repository.delete(accountKey)
 
             assertEquals(
                 savedAccount,
@@ -325,7 +437,7 @@ class AccountRepositoryTest : RobolectricTest() {
             insertAccount()
             appDataStore.discoverPreferences.updateData { it.copy(selectedAccountKey = accountKey) }
 
-            repository.delete(accountKey).join()
+            repository.delete(accountKey)
 
             assertNull(
                 appDataStore.discoverPreferences.data
@@ -343,7 +455,7 @@ class AccountRepositoryTest : RobolectricTest() {
             val savedAccount = MicroBlogKey("bob", "another.social")
             appDataStore.discoverPreferences.updateData { it.copy(selectedAccountKey = savedAccount) }
 
-            repository.delete(accountKey).join()
+            repository.delete(accountKey)
 
             assertEquals(
                 savedAccount,
@@ -411,11 +523,11 @@ class AccountRepositoryTest : RobolectricTest() {
                 // The page closes after this click; only the app-scoped save remains.
             }
         try {
-            repository.delete(accountKey).join()
+            repository.delete(accountKey)
             concurrentSelection.join()
 
             assertNull(repository.find(accountKey))
-            repository.addAccount(UiAccount(accountKey, "Mastodon"), "readded").join()
+            repository.addAccount(UiAccount(accountKey, "Mastodon"), "readded")
             assertEquals(expectedSaved, preferences.updateData { it }.selectedAccountKey)
             val reopened =
                 RememberedAccountSelection(preferences, this, repository.accountMutationMutex, accountExists = {
@@ -479,7 +591,7 @@ class AccountRepositoryTest : RobolectricTest() {
             }
         try {
             openPage.selectedAccountKey.first { it == otherAccountKey }
-            repository.delete(accountKey).join()
+            repository.delete(accountKey)
             removalObserved.await()
             assertNull(repository.find(accountKey))
             assertEquals(otherAccountKey, preferences.updateData { it }.selectedAccountKey)
@@ -489,7 +601,7 @@ class AccountRepositoryTest : RobolectricTest() {
             openPage.selectAccount(accountKey)
             page.cancelAndJoin()
 
-            val readded = repository.addAccount(UiAccount(accountKey, "Mastodon"), "readded")
+            val readded = launch { repository.addAccount(UiAccount(accountKey, "Mastodon"), "readded") }
             runCurrent()
             releaseSave.complete(Unit)
             pendingSave.join()
@@ -531,9 +643,9 @@ class AccountRepositoryTest : RobolectricTest() {
                 }
             entered.await()
             try {
-                val deletion = repository.delete(accountKey)
+                val deletion = launch { repository.delete(accountKey) }
                 repository.allAccounts.first { accounts -> accounts.none { it.accountKey == accountKey } }
-                val readded = repository.addAccount(UiAccount(accountKey, "Mastodon"), "new credential")
+                val readded = launch { repository.addAccount(UiAccount(accountKey, "Mastodon"), "new credential") }
                 runCurrent()
                 // Re-login may wait for removal to finish instead of overlapping its cleanup.
                 if (!readded.isCompleted) {
@@ -584,9 +696,9 @@ class AccountRepositoryTest : RobolectricTest() {
             oldPage.restore()
             oldPage.selectAccount(accountKey)
             preferences.updateData { it }
-            repository.delete(accountKey).join()
+            repository.delete(accountKey)
             val delayedRemoval = repository.allAccounts.first().map { it.accountKey }
-            repository.addAccount(UiAccount(accountKey, "Mastodon"), "new credential").join()
+            repository.addAccount(UiAccount(accountKey, "Mastodon"), "new credential")
             val newPage =
                 RememberedAccountSelection(preferences, this, repository.accountMutationMutex, accountExists = {
                     repository.find(it) !=
@@ -607,12 +719,31 @@ class AccountRepositoryTest : RobolectricTest() {
             assertEquals(accountKey, reopened.selectedAccountKey.first())
         }
 
-    private fun createRepository(scope: CoroutineScope): AccountRepository =
+    private class ControlledProxyStore(
+        initial: ProxySettings,
+    ) : DataStore<ProxySettings> {
+        val settings = MutableStateFlow(initial)
+        override val data = settings
+        var beforeWrite: suspend () -> Unit = {}
+
+        override suspend fun updateData(transform: suspend (ProxySettings) -> ProxySettings): ProxySettings {
+            val updated = transform(settings.value)
+            beforeWrite()
+            settings.value = updated
+            return updated
+        }
+    }
+
+    private fun createRepository(
+        scope: CoroutineScope,
+        proxy: ProxyRepository = ProxyRepository(fileStorage),
+    ): AccountRepository =
         AccountRepository(
             appDatabase = appDatabase,
             coroutineScope = scope,
             appDataStore = appDataStore,
             cacheDatabase = cacheDatabase,
+            proxyRepository = proxy,
             platformRegistry = testPlatformRegistry(),
         )
 

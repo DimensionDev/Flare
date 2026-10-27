@@ -3,10 +3,15 @@ package dev.dimension.flare.ui.render
 import androidx.compose.runtime.Immutable
 import de.cketti.codepoints.codePointCount
 import dev.dimension.flare.common.SerializableImmutableList
+import dev.dimension.flare.data.model.ProxyRef
+import dev.dimension.flare.ui.model.UiMedia
+import dev.dimension.flare.ui.route.DeeplinkRoute
+import dev.dimension.flare.ui.route.toUri
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 import kotlin.native.HiddenFromObjC
 
 public expect class PlatformText
@@ -21,13 +26,13 @@ public sealed class RenderContent {
         val block: RenderBlockStyle = RenderBlockStyle(),
     ) : RenderContent() {
         /**
-         * `true` when any text run carries a non-empty `link`. Used by platform
+         * `true` when any text run carries a non-empty link or an image target. Used by platform
          * renderers to decide whether the block needs a tappable text widget
          * (`UITextView` on iOS) or can fall back to a cheaper plain label.
          */
         public val hasLink: Boolean =
             runs.any { run ->
-                run is RenderRun.Text && !run.style.link.isNullOrEmpty()
+                run is RenderRun.Text && (run.style.imageLink != null || !run.style.link.isNullOrEmpty())
             }
 
         /**
@@ -43,7 +48,10 @@ public sealed class RenderContent {
     public data class BlockImage(
         val url: String,
         val href: String?,
-    ) : RenderContent()
+        @Transient val proxy: ProxyRef = ProxyRef.Unbound,
+    ) : RenderContent() {
+        val media: UiMedia.Image get() = UiMedia.Image(url, proxy = proxy)
+    }
 }
 
 @Serializable
@@ -58,7 +66,10 @@ public sealed class RenderRun {
     public data class Image(
         val url: String,
         val alt: String,
-    ) : RenderRun()
+        @Transient val proxy: ProxyRef = ProxyRef.Unbound,
+    ) : RenderRun() {
+        val media: UiMedia.Image get() = UiMedia.Image(url, proxy = proxy)
+    }
 }
 
 @Serializable
@@ -72,7 +83,12 @@ public data class RenderTextStyle(
     val underline: Boolean = false,
     val small: Boolean = false,
     val time: Boolean = false,
-)
+    val imageLink: UiMedia.Image? = null,
+) {
+    // Process signatures belong to rendered links, not persisted rich text.
+    public val resolvedLink: String?
+        get() = imageLink?.let { DeeplinkRoute.Media.Image(it.url, it.previewUrl, it.customHeaders, it.proxy).toUri() } ?: link
+}
 
 @Serializable
 public data class RenderBlockStyle(
@@ -98,6 +114,14 @@ public data class UiRichText(
     public val innerText: String,
     public val imageUrls: SerializableImmutableList<String>,
 ) {
+    public val imageMedias: List<UiMedia.Image>
+        get() = renderRuns.flatMap { content ->
+            when (content) {
+                is RenderContent.BlockImage -> listOf(content.media)
+                is RenderContent.Text -> content.runs.filterIsInstance<RenderRun.Image>().map { it.media }
+            }
+        }
+
     public val isEmpty: Boolean =
         renderRuns.all { content ->
             when (content) {

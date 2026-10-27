@@ -20,9 +20,8 @@ public fun AvatarComponent(
 ) {
     val appearanceSettings = LocalTimelineAppearance.current
     NetworkImage(
-        model = data?.url,
+        model = data,
         contentDescription = contentDescription,
-        customHeaders = data?.customHeaders,
         modifier =
             Modifier
                 .size(size)

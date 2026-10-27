@@ -395,7 +395,7 @@ private struct LinkOpenDefaultAccountRow: View {
             Label {
                 Text(user.handle.canonical)
             } icon: {
-                AvatarView(data: user.avatar?.url, customHeader: user.avatar?.customHeaders)
+                AvatarView(data: user.avatar)
             }
         } errorContent: { error in
             Text(error.message ?? "Unknown error")

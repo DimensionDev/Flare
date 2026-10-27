@@ -79,6 +79,8 @@ import dev.dimension.flare.import_error
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.ilink
 import dev.dimension.flare.ok
+import dev.dimension.flare.proxy_settings_subtitle
+import dev.dimension.flare.proxy_title
 import dev.dimension.flare.remove_account
 import dev.dimension.flare.save_completed
 import dev.dimension.flare.save_error
@@ -91,6 +93,7 @@ import dev.dimension.flare.settings_about_telegram
 import dev.dimension.flare.settings_about_telegram_description
 import dev.dimension.flare.settings_about_title
 import dev.dimension.flare.settings_accounts_remove_confirm
+import dev.dimension.flare.settings_accounts_remove_failed
 import dev.dimension.flare.settings_accounts_title
 import dev.dimension.flare.settings_agent_history_description
 import dev.dimension.flare.settings_agent_history_title
@@ -365,6 +368,7 @@ internal fun SettingsScreen(
     toNostrRelays: (MicroBlogKey) -> Unit,
     toPostActionLayout: () -> Unit,
 ) {
+    var showProxy by remember { mutableStateOf(false) }
     val window = LocalComposeWindow.current
     val state by producePresenter {
         presenter(
@@ -422,6 +426,9 @@ internal fun SettingsScreen(
                     .padding(horizontal = screenHorizontalPadding),
         ) {
             val activeAccount = state.accountState.user.takeSuccess()
+            if (state.accountState.removalFailed) {
+                Text(stringResource(Res.string.settings_accounts_remove_failed), color = FluentTheme.colors.system.critical)
+            }
             state.accountState.accounts
                 .onSuccess { accounts ->
                     Header(stringResource(Res.string.settings_accounts_title))
@@ -2510,6 +2517,15 @@ internal fun SettingsScreen(
                         }
                     }
                 }
+            }
+
+            Expander(
+                expanded = showProxy,
+                onExpandedChanged = { showProxy = it },
+                heading = { Text(stringResource(Res.string.proxy_title)) },
+                caption = { Text(stringResource(Res.string.proxy_settings_subtitle)) },
+            ) {
+                ProxySettingsContent()
             }
 
             Header(stringResource(Res.string.settings_about_title))

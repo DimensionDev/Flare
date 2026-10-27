@@ -768,4 +768,6 @@
     <string name="settings_ai_config_agent_title">AI Agent</string>
     <string name="settings_ai_config_use_shared">使用翻譯與摘要的 AI 設定</string>
     <string name="settings_ai_config_use_shared_description">關閉後，可為 Agent 單獨設定伺服器、模型和推理參數。</string>
+    <string name="proxy_webview_error">無法使用全域代理設定載入網頁。請檢查代理後重試。</string>
+    <string name="proxy_webview_unsupported">此 Android WebView 不支援應用程式內代理。請更新 Android 系統 WebView 以使用全域代理設定。</string>
 </resources>

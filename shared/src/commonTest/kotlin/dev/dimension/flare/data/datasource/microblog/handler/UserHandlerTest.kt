@@ -29,6 +29,7 @@ import dev.dimension.flare.data.datasource.microblog.loader.UserLoader
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.datastore.model.AppSettings
 import dev.dimension.flare.data.io.OkioFileStorage
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.data.network.ai.AiCompletionService
 import dev.dimension.flare.data.network.ai.OpenAIService
 import dev.dimension.flare.data.translation.OnlinePreTranslationService
@@ -50,6 +51,7 @@ import dev.dimension.flare.ui.model.UiHandle
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.toUi
+import dev.dimension.flare.ui.model.withProxy
 import dev.dimension.flare.ui.render.TranslationDocument
 import dev.dimension.flare.ui.render.TranslationTokenKind
 import dev.dimension.flare.ui.render.toUiPlainText
@@ -71,7 +73,6 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import okio.FileSystem
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
 import kotlin.test.AfterTest
@@ -143,6 +144,21 @@ class UserHandlerTest : RobolectricTest() {
     }
 
     @Test
+    fun sharedUserCacheBindsMediaToEachViewerWithoutPersistingThatViewer() = runTest {
+        val original = createProfile(id = "alice", host = "test.social", handle = "alice")
+        val first = ProxyRef.Account(accountKey)
+        val second = ProxyRef.Account(MicroBlogKey("account-2", accountKey.host))
+        loader.nextById = original.withProxy(first)
+        db.upsertUser(loader.nextById!!.toDbUser())
+        for (proxy in listOf(first, second)) {
+            val viewer = UserHandler(accountKey.host, loader, proxy)
+            val user = viewer.userById("alice").data.filterIsInstance<CacheState.Success<UiProfile>>().first().data
+            assertEquals(proxy, user.avatar?.proxy)
+        }
+        assertEquals(ProxyRef.Unbound, db.userDao().findByKey(original.key).first()?.content?.avatar?.proxy)
+    }
+
+    @Test
     fun userByHandleAndHostRefreshStoresAndEmitsUser() =
         runTest {
             val expected = createProfile(id = "alice", host = "test.social", handle = "alice")
@@ -183,7 +199,7 @@ class UserHandlerTest : RobolectricTest() {
             backgroundScope.launch { cacheable.toUi().collect { states.send(it) } }
 
             val resolved = states.receiveAsFlow().first { it !is UiState.Loading }
-            assertEquals(expected, assertIs<UiState.Success<UiProfile>>(resolved).data)
+            assertEquals(expected.withProxy(ProxyRef.Global), assertIs<UiState.Success<UiProfile>>(resolved).data)
             assertEquals(1, loader.byHandleCallCount)
             assertEquals(0, loader.byIdCallCount)
 
@@ -191,7 +207,7 @@ class UserHandlerTest : RobolectricTest() {
             db.upsertUser(updated.toDbUser())
 
             val changed = states.receiveAsFlow().first { it !is UiState.Loading && it != resolved }
-            assertEquals(updated, assertIs<UiState.Success<UiProfile>>(changed).data)
+            assertEquals(updated.withProxy(ProxyRef.Global), assertIs<UiState.Success<UiProfile>>(changed).data)
         }
 
     @Test
@@ -207,7 +223,7 @@ class UserHandlerTest : RobolectricTest() {
                         cacheable.collectAsState().toUi()
                     }.first { it !is UiState.Loading }
 
-                assertEquals(expected, assertIs<UiState.Success<UiProfile>>(resolved).data)
+                assertEquals(expected.withProxy(ProxyRef.Global), assertIs<UiState.Success<UiProfile>>(resolved).data)
             } finally {
                 Dispatchers.resetMain()
             }
@@ -230,13 +246,13 @@ class UserHandlerTest : RobolectricTest() {
                 }
             try {
                 val resolved = states.receiveAsFlow().first { it.first is LoadState.NotLoading && it.second !is UiState.Loading }
-                assertEquals(expected, assertIs<UiState.Success<UiProfile>>(resolved.second).data)
+                assertEquals(expected.withProxy(ProxyRef.Global), assertIs<UiState.Success<UiProfile>>(resolved.second).data)
 
                 loader.loadByHandle = { error("user lookup failed") }
                 cacheable.refresh()
                 val failed = states.receiveAsFlow().first { it.first is LoadState.Error }
 
-                assertEquals(expected, assertIs<UiState.Success<UiProfile>>(failed.second).data)
+                assertEquals(expected.withProxy(ProxyRef.Global), assertIs<UiState.Success<UiProfile>>(failed.second).data)
                 assertEquals(2, loader.byHandleCallCount)
             } finally {
                 job.cancelAndJoin()
@@ -269,13 +285,13 @@ class UserHandlerTest : RobolectricTest() {
 
             bobResponse.complete(bob)
             val resolvedBob = bobStates.receiveAsFlow().first { it !is UiState.Loading }
-            assertEquals(bob, assertIs<UiState.Success<UiProfile>>(resolvedBob).data)
+            assertEquals(bob.withProxy(ProxyRef.Global), assertIs<UiState.Success<UiProfile>>(resolvedBob).data)
             aliceResponse.complete(alice)
             val resolvedAlice = aliceStates.receiveAsFlow().first { it !is UiState.Loading }
-            assertEquals(alice, assertIs<UiState.Success<UiProfile>>(resolvedAlice).data)
+            assertEquals(alice.withProxy(ProxyRef.Global), assertIs<UiState.Success<UiProfile>>(resolvedAlice).data)
 
             val cachedBob = bobCache.data.filterIsInstance<CacheState.Success<UiProfile>>().first()
-            assertEquals(bob, cachedBob.data)
+            assertEquals(bob.withProxy(ProxyRef.Global), cachedBob.data)
         }
 
     @Test

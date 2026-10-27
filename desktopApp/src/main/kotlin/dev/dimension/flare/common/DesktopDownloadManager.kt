@@ -1,6 +1,7 @@
 package dev.dimension.flare.common
 
 import dev.dimension.flare.Res
+import dev.dimension.flare.data.network.applyMedia
 import dev.dimension.flare.data.network.ktorClient
 import dev.dimension.flare.media_download_started
 import dev.dimension.flare.media_save_fail
@@ -9,7 +10,6 @@ import dev.dimension.flare.ui.component.ComposeInAppNotification
 import dev.dimension.flare.ui.model.UiMedia
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
-import io.ktor.client.request.header
 import io.ktor.client.request.prepareGet
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.HttpHeaders
@@ -31,14 +31,14 @@ internal class DesktopDownloadManager(
     private val client: HttpClient = ktorClient(),
 ) : Closeable {
     suspend fun download(
-        url: String,
+        media: UiMedia,
         targetFile: File,
         overwrite: Boolean = true,
-        customHeaders: Map<String, String>? = null,
         onProgress: (DownloadProgress) -> Unit = {},
         notify: Boolean = true,
     ): Boolean =
         withContext(Dispatchers.IO) {
+            val url = media.urlForDownload
             require(url.isNotBlank()) { "url must not be blank" }
             require(targetFile.path.isNotBlank()) { "targetFile must not be blank" }
             if (targetFile.exists() && !overwrite) {
@@ -62,9 +62,7 @@ internal class DesktopDownloadManager(
                 }
                 client
                     .prepareGet(url) {
-                        customHeaders?.forEach { (key, value) ->
-                            header(key, value)
-                        }
+                        applyMedia(media)
                     }.execute { response ->
                         check(response.status.isSuccess()) { "Media download failed: HTTP ${response.status.value}" }
                         writeResponseToFile(
@@ -106,10 +104,9 @@ internal class DesktopDownloadManager(
             val success =
                 runCatching {
                     download(
-                        url = media.urlForDownload,
+                        media = media,
                         targetFile = targetFile,
                         overwrite = overwrite,
-                        customHeaders = media.customHeaders,
                         notify = false,
                     )
                 }.getOrDefault(false)
@@ -166,6 +163,7 @@ private suspend fun writeResponseToFile(
                 ),
             )
         }
+        channel.closedCause?.let { throw it }
         output.flush()
     }
 }

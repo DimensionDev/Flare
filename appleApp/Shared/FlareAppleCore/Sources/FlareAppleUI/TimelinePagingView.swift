@@ -298,7 +298,7 @@ public struct TimelineGalleryItemView: View {
 
             if let user = post.user {
                 HStack(spacing: 6) {
-                    AvatarView(data: user.avatar?.url, customHeader: user.avatar?.customHeaders)
+                    AvatarView(data: user.avatar)
                         .frame(width: 24, height: 24)
                     RichText(text: user.name)
                         .font(.caption)
@@ -336,7 +336,7 @@ public struct TimelineGalleryItemView: View {
     private func feedTile(_ feed: UiTimelineV2.Feed) -> some View {
         VStack(alignment: .leading, spacing: 0) {
             if showMedia, let media = feed.media {
-                NetworkImage(data: media.url, customHeader: media.customHeaders)
+                NetworkImage(data: media)
                     .aspectRatio(CGFloat(max(media.aspectRatio, 0.3)), contentMode: .fit)
                     .clipped()
             } else {
@@ -357,7 +357,7 @@ public struct TimelineGalleryItemView: View {
             }
 
             HStack(spacing: 6) {
-                if let icon = feed.source.icon, !icon.isEmpty {
+                if let icon = feed.source.media {
                     NetworkImage(data: icon)
                         .frame(width: 20, height: 20)
                         .clipShape(RoundedRectangle(cornerRadius: 4, style: .continuous))

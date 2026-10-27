@@ -1,3 +1,4 @@
+import FlareAppleUI
 import UIKit
 import Kingfisher
 import KotlinSharedUI
@@ -221,6 +222,8 @@ private final class ReactionChipView: UIControl, ManualLayoutMeasurable, Timelin
     private var showsImage = false
     private var isMyReaction = false
     private var imageURL: URL?
+    private var imageMedia: UiMediaImage?
+    private var imageProxy: ProxyRef?
     private var imageWidth: CGFloat = 0
 
     private static let horizontalPadding: CGFloat = 8
@@ -271,15 +274,17 @@ private final class ReactionChipView: UIControl, ManualLayoutMeasurable, Timelin
     }
 
     func configure(item: UiTimelineV2.PostEmojiReaction) {
+        imageMedia = item.isUnicode ? nil : item.media
         isMyReaction = item.me
         showsImage = !item.isUnicode
 
         if item.isUnicode {
             imageURL = nil
+            imageProxy = nil
             imageWidth = 0
             nameLabel.text = item.name
             nameLabel.isHidden = false
-            imageView.kf.cancelDownloadTask()
+            imageView.cancelMediaLoad()
             imageView.image = nil
             imageView.isHidden = true
         } else {
@@ -287,10 +292,11 @@ private final class ReactionChipView: UIControl, ManualLayoutMeasurable, Timelin
             nameLabel.isHidden = true
             imageView.isHidden = false
             let url = URL(string: item.url)
-            if imageURL != url {
+            if imageURL != url || imageProxy != item.media.proxy {
                 imageURL = url
+                imageProxy = item.media.proxy
                 imageWidth = 0
-                imageView.kf.cancelDownloadTask()
+                imageView.cancelMediaLoad()
                 imageView.image = nil
             }
             if let url, imageView.image == nil {
@@ -313,11 +319,12 @@ private final class ReactionChipView: UIControl, ManualLayoutMeasurable, Timelin
     }
 
     private func loadImage(_ url: URL) {
+        guard let media = imageMedia else { return }
         let scale = max(traitCollection.displayScale, 1)
         let processor = ImageDownsamplingProcessor(
             pixelSize: CGSize(width: .greatestFiniteMagnitude, height: ceil(Self.imageHeight * scale)),
             fillsBounds: false)
-        imageView.kf.setImage(with: url, options: [
+        imageView.setMedia(media, options: [
             .processor(processor), .scaleFactor(scale), .cacheOriginalImage,
             .backgroundDecode, .asyncCacheTypeCheck,
         ]) { [weak self] result in

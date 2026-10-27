@@ -259,9 +259,9 @@ struct HomeTimelineScreen: View {
                     Image(fontAwesome: .gear)
                 } else {
                     if #available(iOS 26.0, *) {
-                        AvatarView(data: user.avatar?.url, customHeader: user.avatar?.customHeaders)
+                        AvatarView(data: user.avatar)
                     } else {
-                        AvatarView(data: user.avatar?.url, customHeader: user.avatar?.customHeaders)
+                        AvatarView(data: user.avatar)
                             .frame(width: 24, height: 24)
                     }
                 }

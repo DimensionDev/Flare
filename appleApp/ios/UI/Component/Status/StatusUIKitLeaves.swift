@@ -24,8 +24,8 @@ final class AvatarUIView: UIView {
     }
     required init(coder: NSCoder) { fatalError("init(coder:) not supported") }
 
-    func set(url: String?, customHeaders: [String: String]? = nil) {
-        imageView.setImage(with: url.flatMap(URL.init(string:)), customHeaders: customHeaders)
+    func set(media: UiMedia?) {
+        imageView.setImage(media: media)
     }
 
     override func layoutSubviews() {
@@ -309,7 +309,7 @@ final class UserOnelineUIView: UIView, ManualLayoutMeasurable, TimelineHeightPro
     }
 
     func configure(data: UiProfile, trailing: UIView?, onClicked: (() -> Void)?) {
-        avatar.set(url: data.avatar?.url, customHeaders: data.avatar?.customHeaders)
+        avatar.set(media: data.avatar)
         name.text = data.name
         handleLabel.text = data.handle.canonical
         if trailingView !== trailing {
@@ -463,7 +463,7 @@ final class UserCompatUIView: UIStackView {
     required init(coder: NSCoder) { fatalError("init(coder:) not supported") }
 
     func configure(data: UiProfile, trailing: UIView?, onClicked: (() -> Void)?) {
-        avatar.set(url: data.avatar?.url, customHeaders: data.avatar?.customHeaders)
+        avatar.set(media: data.avatar)
         name.text = data.name
         handleLabel.text = data.handle.canonical
         if let trailing = trailing {

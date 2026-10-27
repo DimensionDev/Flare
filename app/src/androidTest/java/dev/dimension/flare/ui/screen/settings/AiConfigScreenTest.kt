@@ -28,7 +28,8 @@ class AiConfigScreenTest {
     @get:Rule
     val composeRule = createComposeRule()
 
-    private val settings by lazy { GlobalContext.get().get<SettingsRepository>() }
+    // The application supplies this dependency before instrumentation starts.
+    private val settings by lazy { requireNotNull(GlobalContext.get().getOrNull<SettingsRepository>()) }
     private lateinit var originalConfig: AppSettings.AiConfig
 
     @Before

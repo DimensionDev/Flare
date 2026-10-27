@@ -78,3 +78,21 @@ jobs:
           file_to_build=`echo $file_to_build | awk '{$1=$1;print}'`
           xcodebuild build-for-testing -scheme "$scheme" -"$filetype_parameter" "$file_to_build" -destination "platform=$platform,name=iPhone 17" -skipPackagePluginValidation -skipMacroValidation \
             GRADLE_JVM_ARGS="-Xmx16G -Dfile.encoding=UTF-8"
+      - name: Run native proxy and playback regressions
+        working-directory: ./appleApp
+        run: |
+          xcodebuild test -project Flare.xcodeproj -scheme TimelineControllerTests \
+            -destination 'platform=iOS Simulator,name=iPhone 17' \
+            -only-testing:TimelineControllerTests/ProxyPlaybackLifecycleTests \
+            -only-testing:TimelineControllerTests/ProxyImageLifecycleTests \
+            -only-testing:TimelineControllerTests/WebViewProxyTests \
+            -only-testing:TimelineControllerTests/UgoiraPlaybackTests \
+            -parallel-testing-enabled NO -skipPackagePluginValidation -skipMacroValidation \
+            GRADLE_JVM_ARGS="-Xmx16G -Dfile.encoding=UTF-8" CODE_SIGNING_ALLOWED=NO
+          xcodebuild test-without-building -project Flare.xcodeproj -scheme iOS \
+            -destination 'platform=iOS Simulator,name=iPhone 17' \
+            -only-testing:iOSTests/VideoPlaybackSessionTests \
+            -only-testing:iOSTests/MediaPlaybackMemoryTests \
+            -only-testing:iOSTests/TimelinePlaybackCoordinatorTests \
+            -only-testing:iOSTests/MediaTransferCancellationTests \
+            -parallel-testing-enabled NO

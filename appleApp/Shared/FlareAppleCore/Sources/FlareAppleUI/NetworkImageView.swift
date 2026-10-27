@@ -1,10 +1,11 @@
 #if os(iOS)
 import UIKit
 import Kingfisher
+import KotlinSharedUI
 
 open class NetworkImageView: AnimatedImageView {
-    private var url: URL?
-    private var headers: [String: String]?
+    private var media: (any UiMedia)?
+    private var identity: String?
     private var requestedSize: CGSize = .zero
     private var lastRequestFailed = false
     private var generation = 0
@@ -26,30 +27,31 @@ open class NetworkImageView: AnimatedImageView {
     }
     public required init?(coder: NSCoder) { fatalError("init(coder:) not supported") }
 
-    public func setImage(with url: URL?, customHeaders: [String: String]? = nil,
+    public func setImage(media: (any UiMedia)?,
                          completionHandler: (@MainActor @Sendable (Result<RetrieveImageResult, KingfisherError>) -> Void)? = nil) {
-        if self.url != url || headers != customHeaders { cancelImageLoad() }
+        let identity = media.map { "\(String(describing: $0.proxy))|\($0.cacheKey)" }
+        if self.identity != identity { cancelImageLoad() }
         if lastRequestFailed { requestedSize = .zero }
-        self.url = url
-        headers = customHeaders
+        self.media = media
+        self.identity = identity
         completion = completionHandler
         setNeedsLayout()
     }
 
     public func cancelImageLoad() {
         generation += 1
-        url = nil
-        headers = nil
+        media = nil
+        identity = nil
         completion = nil
         requestedSize = .zero
         lastRequestFailed = false
-        kf.cancelDownloadTask()
+        cancelMediaLoad()
         image = nil
     }
 
     public override func layoutSubviews() {
         super.layoutSubviews()
-        guard let url, bounds.width > 0, bounds.height > 0 else { return }
+        guard let media, bounds.width > 0, bounds.height > 0 else { return }
         let scale = max(traitCollection.displayScale, 1)
         let size = CGSize(width: ceil(bounds.width * scale), height: ceil(bounds.height * scale))
         guard size.width > requestedSize.width || size.height > requestedSize.height else { return }
@@ -58,19 +60,12 @@ open class NetworkImageView: AnimatedImageView {
         let currentGeneration = generation
         lastRequestFailed = false
         kf.cancelDownloadTask()
-        var options: KingfisherOptionsInfo = [
+        let options: KingfisherOptionsInfo = [
             .processor(ImageDownsamplingProcessor(pixelSize: requestedSize, fillsBounds: contentMode != .scaleAspectFit)),
             .scaleFactor(scale), .cacheOriginalImage, .backgroundDecode, .asyncCacheTypeCheck,
             .keepCurrentImageWhileLoading, .transition(.fade(0.25)),
         ]
-        if let headers, !headers.isEmpty {
-            options.append(.requestModifier(AnyModifier { request in
-                var request = request
-                headers.forEach { request.setValue($0.value, forHTTPHeaderField: $0.key) }
-                return request
-            }))
-        }
-        kf.setImage(with: url, options: options) { [weak self] result in
+        setMedia(media, options: options) { [weak self] result in
             guard let self, self.generation == currentGeneration else { return }
             if case .failure = result { self.lastRequestFailed = true }
             self.completion?(result)

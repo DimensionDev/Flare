@@ -72,6 +72,7 @@ dependencies {
 
     testImplementation(compose("org.jetbrains.compose.ui:ui-test-junit4"))
     testImplementation(libs.junit)
+    testImplementation(libs.ktor.client.mock)
 }
 
 val fdroid = rootProject.file("fdroid.properties")
@@ -120,6 +121,7 @@ buildConfig {
 
 nucleus.application {
     jvmArgs += "--enable-native-access=ALL-UNNAMED"
+    jvmArgs += "-Djava.net.useSystemProxies=true"
     mainClass = "dev.dimension.flare.MainKt"
     buildTypes {
         release {

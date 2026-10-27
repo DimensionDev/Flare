@@ -25,6 +25,7 @@ import dev.dimension.flare.compose.ui.media_play_audio
 import dev.dimension.flare.ui.component.platform.PlatformCircularProgressIndicator
 import dev.dimension.flare.ui.component.platform.PlatformIconButton
 import dev.dimension.flare.ui.component.platform.PlatformSlider
+import dev.dimension.flare.ui.model.UiMedia
 import org.jetbrains.compose.resources.stringResource
 import kotlin.math.roundToLong
 
@@ -59,12 +60,11 @@ internal interface PlayerState {
 // }
 
 @Composable
-internal expect fun rememberPlayerState(uri: String): PlayerState
+internal expect fun rememberPlayerState(media: UiMedia): PlayerState
 
 @Composable
 internal fun AudioPlayer(
-    uri: String,
-    previewUri: String?,
+    media: UiMedia,
     contentDescription: String?,
     modifier: Modifier = Modifier,
 ) {
@@ -84,7 +84,7 @@ internal fun AudioPlayer(
 //            player.release()
 //        }
 //    }
-    val state = rememberPlayerState(uri)
+    val state = rememberPlayerState(media)
     val playLabel = stringResource(Res.string.media_play_audio)
     val pauseLabel = stringResource(Res.string.media_pause_audio)
     val playbackPositionLabel = stringResource(Res.string.media_audio_playback_position)
@@ -95,9 +95,9 @@ internal fun AudioPlayer(
             },
         verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
     ) {
-        if (previewUri != null) {
+        if (media.preview != null) {
             NetworkImage(
-                model = previewUri,
+                model = media.preview,
                 contentDescription = contentDescription,
                 modifier =
                     Modifier

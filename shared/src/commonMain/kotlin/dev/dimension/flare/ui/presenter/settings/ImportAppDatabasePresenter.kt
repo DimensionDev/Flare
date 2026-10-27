@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.database.app.model.AppDatabaseExport
-import dev.dimension.flare.data.database.cache.connect
+import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.model.requireValidPlatformId
 import dev.dimension.flare.ui.presenter.ImportState
@@ -14,6 +14,7 @@ public class ImportAppDatabasePresenter(
     private val jsonContent: String,
 ) : PresenterBase<ImportState>() {
     private val appDatabase: AppDatabase by koinInject()
+    private val accountRepository: AccountRepository by koinInject()
 
     @Composable
     override fun body(): ImportState =
@@ -35,9 +36,7 @@ public class ImportAppDatabasePresenter(
         // Validate imported data
         validateImportData(export)
 
-        // Perform import within a transaction (automatically rolls back on error)
-        // Note: DAO insert methods use OnConflictStrategy.REPLACE - existing records with matching primary keys will be replaced
-        appDatabase.connect {
+        accountRepository.restoreAccounts(export.accounts.map { it.account_key }) {
             export.accounts.forEach { appDatabase.accountDao().insert(it) }
 
             export.keywordFilters.forEach { appDatabase.keywordFilterDao().insert(it) }

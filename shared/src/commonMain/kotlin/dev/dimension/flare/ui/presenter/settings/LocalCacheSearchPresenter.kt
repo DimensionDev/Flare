@@ -15,6 +15,7 @@ import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.model.TranslationDisplayOptions
 import dev.dimension.flare.data.datasource.microblog.paging.TimelinePagingMapper
 import dev.dimension.flare.data.datasource.microblog.pagingConfig
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.model.AccountType
@@ -24,6 +25,7 @@ import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.model.map
+import dev.dimension.flare.ui.model.withProxy
 import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.ui.presenter.status.LogStatusHistoryPresenter
 import dev.dimension.flare.web.shared.WebPresenter
@@ -114,7 +116,7 @@ public class LocalCacheSearchPresenter : PresenterBase<LocalCacheSearchPresenter
                         .filter {
                             it.data.accountType is AccountType.Specific
                         }.map {
-                            it.user.content
+                            it.user.content.withProxy(ProxyRef.forAccountType(it.data.accountType as AccountType))
                         }
                 }
             }.collectAsLazyPagingItems().toPagingState()
@@ -131,7 +133,7 @@ public class LocalCacheSearchPresenter : PresenterBase<LocalCacheSearchPresenter
                             database.userDao().searchUser(query)
                         }.flow.map {
                             it.map { user ->
-                                user.content
+                                user.content.withProxy(ProxyRef.Global)
                             }
                         },
                     )

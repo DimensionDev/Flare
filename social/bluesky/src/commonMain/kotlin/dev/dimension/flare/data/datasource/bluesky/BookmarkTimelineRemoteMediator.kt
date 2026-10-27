@@ -53,7 +53,7 @@ internal class BookmarkTimelineRemoteMediator(
             }
 
         val posts = response.bookmarks.mapNotNull { (it.item as? BookmarkViewItemUnion.PostView)?.value }
-        val downloadUrls = resolveBlueskyVideoDownloadUrls(posts)
+        val downloadUrls = resolveBlueskyVideoDownloadUrls(posts, accountKey)
         return PagingResult(
             endOfPaginationReached = response.bookmarks.isEmpty() || response.cursor == null,
             data = response.bookmarks.mapNotNull { it.render(accountKey, downloadUrls) },

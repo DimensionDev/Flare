@@ -61,11 +61,11 @@ internal fun unavailableAccountService(): AccountService =
         override fun allAccountServicesFlow(): Flow<List<AccountMicroblogDataSource>> =
             error("Account service is not available in this test")
 
-        override fun <T : Any> addAccount(
+        override suspend fun <T : Any> addAccount(
             account: UiAccount,
             credential: T,
             serializer: KSerializer<T>,
-        ): Job = error("Account service is not available in this test")
+        ): Unit = error("Account service is not available in this test")
 
         override fun <T : Any> credentialFlow(
             accountKey: MicroBlogKey,

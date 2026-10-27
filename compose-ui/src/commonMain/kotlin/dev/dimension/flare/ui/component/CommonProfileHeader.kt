@@ -81,9 +81,8 @@ internal fun CommonProfileHeader(
     ) {
         banner?.let {
             NetworkImage(
-                model = it.url,
+                model = it,
                 contentDescription = stringResource(Res.string.profile_banner, profileName),
-                customHeaders = it.customHeaders,
                 modifier =
                     Modifier
 //                        .sharedElement(

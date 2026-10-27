@@ -77,6 +77,7 @@ internal class StatusDetailRemoteMediator(
                             accountKey,
                             resolveBlueskyVideoDownloadUrls(
                                 context.thread.mapNotNull { (it.value as? GetPostThreadV2ThreadItemValueUnion.Post)?.value?.post },
+                                accountKey,
                             ),
                         )
                     }

@@ -35,9 +35,9 @@ struct EditListScreen: View {
                                     .frame(width: 96, height: 96)
                             } else {
                                 StateView(state: presenter.state.listInfo) { info in
-                                    let avatar: String? = switch onEnum(of: info) {
-                                    case .list(let data): data.avatar
-                                    case .feed(let data): data.avatar
+                                    let avatar: UiMediaImage? = switch onEnum(of: info) {
+                                    case .list(let data): data.media
+                                    case .feed(let data): data.media
                                     default: nil
                                     }
                                     if let remote = avatar {

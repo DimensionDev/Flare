@@ -71,12 +71,6 @@ struct StatusShareSheet: View {
                 .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
                 .listRowBackground(Color.clear)
 
-                Button {
-                    presenter.state.selectReplies()
-                } label: {
-                    Text(String(format: String(localized: "share_replies_select"), Int(presenter.state.selectedCount)))
-                }
-
                 Section {
                     Button {
                         crossPost()
@@ -121,15 +115,32 @@ struct StatusShareSheet: View {
                     }
                 }
                 
-                Picker("appearance_theme", selection: $theme) {
-                    Text("appearance_theme_system").tag(nil as ColorScheme?)
-                    Text("appearance_theme_light").tag(Optional(ColorScheme.light))
-                    Text("appearance_theme_dark").tag(Optional(ColorScheme.dark))
-                }
+                Section {
+                    Picker("appearance_layout_group_title", selection: $previewStyle) {
+                        Text("appearance_timeline_display_mode_card").tag(SharePreviewStyle.card)
+                        Text("status_share_sheet_preview_content").tag(SharePreviewStyle.content)
+                    }
 
-                Picker("appearance_layout_group_title", selection: $previewStyle) {
-                    Text("appearance_timeline_display_mode_card").tag(SharePreviewStyle.card)
-                    Text("status_share_sheet_preview_content").tag(SharePreviewStyle.content)
+                    Picker("appearance_theme", selection: $theme) {
+                        Text("appearance_theme_system").tag(nil as ColorScheme?)
+                        Text("appearance_theme_light").tag(Optional(ColorScheme.light))
+                        Text("appearance_theme_dark").tag(Optional(ColorScheme.dark))
+                    }
+
+                    Button {
+                        presenter.state.selectReplies()
+                    } label: {
+                        HStack {
+                            Text("share_replies_title")
+                                .foregroundStyle(.primary)
+                            Spacer()
+                            Text(String(format: String(localized: "share_replies_count"), Int(presenter.state.selectedCount)))
+                                .foregroundStyle(.secondary)
+                            Image(systemName: "chevron.forward")
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(.tertiary)
+                        }
+                    }
                 }
             } loadingContent: {
                 TimelinePlaceholderView()
@@ -192,7 +203,7 @@ struct StatusShareSheet: View {
             }
             .background(Color(.systemGroupedBackground))
             .environment(\.colorScheme, theme ?? colorScheme)
-            .environment(\.timelineAppearance, timelineAppearance.withSharePreviewDefaults())
+            .environment(\.timelineAppearance, timelineAppearance)
     }
     
     
@@ -211,35 +222,6 @@ struct StatusShareSheet: View {
                 imageData: imageData,
                 fileName: "flare-crosspost.png"
             )
-        )
-    }
-}
-
-private extension TimelineAppearance {
-    func withSharePreviewDefaults() -> TimelineAppearance {
-        doCopy(
-            avatarShape: avatarShape,
-            showMedia: showMedia,
-            showSensitiveContent: showSensitiveContent,
-            expandContentWarning: true,
-            expandMediaSize: expandMediaSize,
-            mediaLayout: mediaLayout,
-            limitMediaGridToNine: limitMediaGridToNine,
-            videoAutoplay: .never,
-            showLinkPreview: showLinkPreview,
-            compatLinkPreview: compatLinkPreview,
-            showEmojiReactions: showEmojiReactions,
-            showNumbers: showNumbers,
-            postActionStyle: postActionStyle,
-            postActionLayout: postActionLayout,
-            postActionFixedWidth: postActionFixedWidth,
-            fullWidthPost: fullWidthPost,
-            absoluteTimestamp: absoluteTimestamp,
-            showPlatformLogo: showPlatformLogo,
-            timelineDisplayMode: timelineDisplayMode,
-            aiConfig: aiConfig,
-            lineLimit: lineLimit,
-            showTranslateButton: showTranslateButton
         )
     }
 }

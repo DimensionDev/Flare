@@ -7,18 +7,34 @@
         "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "加载这条评论的回复" } }
       }
     },
-    "share_replies_select" : {
+    "share_replies_title" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Select replies · %lld selected"
+            "value" : "Select replies"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "选择回复 · 已选 %lld 条"
+            "value" : "选择回复"
+          }
+        }
+      }
+    },
+    "share_replies_count" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld selected"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已选 %lld 条"
           }
         }
       }

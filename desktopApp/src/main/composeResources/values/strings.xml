@@ -737,4 +737,9 @@
     <string name="share_replies_too_large">The image is too long. Select fewer replies.</string>
     <string name="share_replies_render_failed">Unable to prepare the image. Retry or remove replies with unavailable media.</string>
     <string name="share_replies_preparing">Preparing image…</string>
+    <string name="share_replies_title">Select replies</string>
+    <string name="share_replies_count">%1$d selected</string>
+    <string name="share_replies_cancel">Cancel</string>
+    <string name="share_replies_clear">Clear</string>
+    <string name="share_replies_done">Done</string>
 </resources>

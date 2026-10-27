@@ -7,8 +7,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
@@ -46,11 +47,15 @@ import dev.dimension.flare.copied_to_clipboard
 import dev.dimension.flare.data.model.VideoAutoplay
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.settings_appearance_layout_group_title
+import dev.dimension.flare.settings_appearance_theme
 import dev.dimension.flare.settings_appearance_theme_dark
 import dev.dimension.flare.settings_appearance_theme_light
 import dev.dimension.flare.settings_appearance_timeline_display_mode_card
+import dev.dimension.flare.share_replies_count
 import dev.dimension.flare.share_replies_preparing
 import dev.dimension.flare.share_replies_render_failed
+import dev.dimension.flare.share_replies_title
 import dev.dimension.flare.share_replies_too_large
 import dev.dimension.flare.status_share
 import dev.dimension.flare.status_share_crosspost
@@ -67,8 +72,6 @@ import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.ShareImageLoading
 import dev.dimension.flare.ui.component.ViewBox
 import dev.dimension.flare.ui.component.status.StatusShareContent
-import dev.dimension.flare.ui.component.status.StatusShareReplyButton
-import dev.dimension.flare.ui.component.status.StatusShareReplyPicker
 import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.status.StatusShareImageLimits
@@ -164,13 +167,13 @@ internal fun StatusShareSheet(
             isPreparingImage = false
         }
     }
+    if (state.selecting) {
+        StatusShareReplyDialog(state)
+        return
+    }
     FluentDialog(
         visible = true,
     ) {
-        if (state.selecting) {
-            StatusShareReplyPicker(state, Modifier.width(560.dp).height(640.dp).padding(16.dp))
-            return@FluentDialog
-        }
         Column(
             modifier =
                 modifier
@@ -178,42 +181,6 @@ internal fun StatusShareSheet(
             verticalArrangement = Arrangement.spacedBy(12.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            FlowRow(
-                modifier =
-                    Modifier
-                        .align(Alignment.End),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                LiteFilter {
-                    PillButton(
-                        selected = previewStyle == SharePreviewStyle.Card,
-                        onSelectedChanged = { if (!isPreparingImage) previewStyle = SharePreviewStyle.Card },
-                    ) {
-                        Text(stringResource(Res.string.settings_appearance_timeline_display_mode_card))
-                    }
-                    PillButton(
-                        selected = previewStyle == SharePreviewStyle.Content,
-                        onSelectedChanged = { if (!isPreparingImage) previewStyle = SharePreviewStyle.Content },
-                    ) {
-                        Text(stringResource(Res.string.status_share_sheet_preview_content))
-                    }
-                }
-                LiteFilter {
-                    PillButton(
-                        selected = previewTheme == SharePreviewTheme.Light,
-                        onSelectedChanged = { if (!isPreparingImage) previewTheme = SharePreviewTheme.Light },
-                    ) {
-                        Text(stringResource(Res.string.settings_appearance_theme_light))
-                    }
-                    PillButton(
-                        selected = previewTheme == SharePreviewTheme.Dark,
-                        onSelectedChanged = { if (!isPreparingImage) previewTheme = SharePreviewTheme.Dark },
-                    ) {
-                        Text(stringResource(Res.string.settings_appearance_theme_dark))
-                    }
-                }
-            }
-
             Box(
                 modifier = Modifier.weight(1f),
             ) {
@@ -296,7 +263,57 @@ internal fun StatusShareSheet(
                     }
                 }
             }
-            StatusShareReplyButton(state, enabled = !isPreparingImage && !isPreparingCrossPost)
+            Layer(Modifier.fillMaxWidth(), shape = RoundedCornerShape(8.dp)) {
+                Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                        Text(stringResource(Res.string.settings_appearance_layout_group_title))
+                        Spacer(Modifier.weight(1f))
+                        LiteFilter {
+                            PillButton(
+                                selected = previewStyle == SharePreviewStyle.Card,
+                                onSelectedChanged = { if (!isPreparingImage) previewStyle = SharePreviewStyle.Card },
+                            ) {
+                                Text(stringResource(Res.string.settings_appearance_timeline_display_mode_card))
+                            }
+                            PillButton(
+                                selected = previewStyle == SharePreviewStyle.Content,
+                                onSelectedChanged = { if (!isPreparingImage) previewStyle = SharePreviewStyle.Content },
+                            ) {
+                                Text(stringResource(Res.string.status_share_sheet_preview_content))
+                            }
+                        }
+                    }
+                    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                        Text(stringResource(Res.string.settings_appearance_theme))
+                        Spacer(Modifier.weight(1f))
+                        LiteFilter {
+                            PillButton(
+                                selected = previewTheme == SharePreviewTheme.Light,
+                                onSelectedChanged = { if (!isPreparingImage) previewTheme = SharePreviewTheme.Light },
+                            ) {
+                                Text(stringResource(Res.string.settings_appearance_theme_light))
+                            }
+                            PillButton(
+                                selected = previewTheme == SharePreviewTheme.Dark,
+                                onSelectedChanged = { if (!isPreparingImage) previewTheme = SharePreviewTheme.Dark },
+                            ) {
+                                Text(stringResource(Res.string.settings_appearance_theme_dark))
+                            }
+                        }
+                    }
+                    Button(
+                        onClick = state::selectReplies,
+                        disabled = isPreparingImage || isPreparingCrossPost,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                            Text(stringResource(Res.string.share_replies_title))
+                            Spacer(Modifier.weight(1f))
+                            Text(stringResource(Res.string.share_replies_count, state.selectedCount))
+                        }
+                    }
+                }
+            }
             if (isPreparingImage) Text(stringResource(Res.string.share_replies_preparing))
             imageError?.let { Text(stringResource(it)) }
             FlowRow(

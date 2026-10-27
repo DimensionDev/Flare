@@ -764,21 +764,17 @@ public struct MacStatusShareSheet: View {
     public var body: some View {
         StateView(state: presenter.state.status) { state in
             VStack(spacing: 0) {
-                if presenter.state.selecting {
-                    StatusShareReplyPicker(state: presenter.state)
-                } else {
-                    ScrollView {
-                        if let url = currentScreenshotURL, let image = NSImage(contentsOf: url) {
-                            Image(nsImage: image).resizable().scaledToFit()
-                        } else if isRenderingScreenshot {
-                            ProgressView("share_replies_preparing")
-                                .padding()
-                        }
+                ScrollView {
+                    if let url = currentScreenshotURL, let image = NSImage(contentsOf: url) {
+                        Image(nsImage: image).resizable().scaledToFit()
+                    } else if isRenderingScreenshot {
+                        ProgressView("share_replies_preparing")
+                            .padding()
                     }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    Divider()
-                    footer.padding(20)
                 }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                Divider()
+                footer.padding(20)
             }
             .frame(width: 560, height: 720)
             .task(id: previewRevision) {
@@ -800,6 +796,12 @@ public struct MacStatusShareSheet: View {
                 .frame(width: 560, height: 720)
         }
         .navigationTitle(navigationTitle)
+        .sheet(isPresented: Binding(
+            get: { presenter.state.selecting },
+            set: { if !$0 { presenter.state.cancelSelection() } }
+        )) {
+            StatusShareReplyPicker(state: presenter.state)
+        }
         .alert(item: $alert) { alert in
             Alert(
                 title: Text("share_screenshot_failed"),
@@ -825,22 +827,36 @@ public struct MacStatusShareSheet: View {
     @ViewBuilder
     private var footer: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Button {
-                presenter.state.selectReplies()
-            } label: {
-                Text(String(format: String(localized: "share_replies_select", bundle: FlareAppleUILocalization.bundle), Int(presenter.state.selectedCount)))
+            GroupBox {
+                VStack(spacing: 12) {
+                    LabeledContent("appearance_layout_group_title") {
+                        Picker("appearance_layout_group_title", selection: $previewStyle) {
+                            Text("appearance_timeline_display_mode_card").tag(MacStatusSharePreviewStyle.card)
+                            Text("status_share_sheet_preview_content").tag(MacStatusSharePreviewStyle.content)
+                        }
+                        .labelsHidden()
+                        .pickerStyle(.segmented)
+                    }
+                    LabeledContent("appearance_theme") {
+                        Picker("appearance_theme", selection: $theme) {
+                            Text("appearance_theme_system").tag(nil as ColorScheme?)
+                            Text("appearance_theme_light").tag(Optional(ColorScheme.light))
+                            Text("appearance_theme_dark").tag(Optional(ColorScheme.dark))
+                        }
+                        .labelsHidden()
+                        .pickerStyle(.segmented)
+                    }
+                    Divider()
+                    HStack {
+                        Text("share_replies_title", bundle: FlareAppleUILocalization.bundle)
+                        Spacer()
+                        Button { presenter.state.selectReplies() } label: {
+                            Text(String(format: String(localized: "share_replies_count", bundle: FlareAppleUILocalization.bundle), Int(presenter.state.selectedCount)))
+                        }
+                    }
+                }
+                .padding(8)
             }
-            Picker("appearance_layout_group_title", selection: $previewStyle) {
-                Text("appearance_timeline_display_mode_card").tag(MacStatusSharePreviewStyle.card)
-                Text("status_share_sheet_preview_content").tag(MacStatusSharePreviewStyle.content)
-            }
-            .pickerStyle(.segmented)
-            Picker("appearance_theme", selection: $theme) {
-                Text("appearance_theme_system").tag(nil as ColorScheme?)
-                Text("appearance_theme_light").tag(Optional(ColorScheme.light))
-                Text("appearance_theme_dark").tag(Optional(ColorScheme.dark))
-            }
-            .pickerStyle(.segmented)
             HStack {
                 Button("Cancel") { dismiss() }
                 Spacer()
@@ -932,7 +948,7 @@ private struct MacStatusSharePreview: View {
         }
         .background(Color.flareSystemGroupedBackground)
         .environment(\.colorScheme, colorScheme)
-        .environment(\.timelineAppearance, timelineAppearance.withSharePreviewDefaults())
+        .environment(\.timelineAppearance, timelineAppearance)
     }
 }
 
@@ -1023,32 +1039,4 @@ private struct MacStatusShareAlert: Identifiable {
     let message: String
 }
 
-private extension TimelineAppearance {
-    func withSharePreviewDefaults() -> TimelineAppearance {
-        doCopy(
-            avatarShape: avatarShape,
-            showMedia: showMedia,
-            showSensitiveContent: showSensitiveContent,
-            expandContentWarning: true,
-            expandMediaSize: expandMediaSize,
-            mediaLayout: mediaLayout,
-            limitMediaGridToNine: limitMediaGridToNine,
-            videoAutoplay: .never,
-            showLinkPreview: showLinkPreview,
-            compatLinkPreview: compatLinkPreview,
-            showEmojiReactions: showEmojiReactions,
-            showNumbers: showNumbers,
-            postActionStyle: postActionStyle,
-            postActionLayout: postActionLayout,
-            postActionFixedWidth: postActionFixedWidth,
-            fullWidthPost: fullWidthPost,
-            absoluteTimestamp: absoluteTimestamp,
-            showPlatformLogo: showPlatformLogo,
-            timelineDisplayMode: timelineDisplayMode,
-            aiConfig: aiConfig,
-            lineLimit: lineLimit,
-            showTranslateButton: showTranslateButton
-        )
-    }
-}
 #endif

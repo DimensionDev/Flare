@@ -14,10 +14,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.ComposeUiFlags
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.InputMode
-import androidx.compose.ui.input.InputModeManager
 import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.platform.LocalInputModeManager
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.assertCountEquals
@@ -54,6 +51,7 @@ import dev.dimension.flare.ui.model.createSampleUser
 import dev.dimension.flare.ui.presenter.status.StatusSharePresenter
 import dev.dimension.flare.ui.render.toUi
 import dev.dimension.flare.ui.render.toUiPlainText
+import dev.dimension.flare.ui.screen.status.action.StatusShareReplySheet
 import dev.dimension.flare.ui.screen.status.action.captureOffscreenShareBitmap
 import dev.dimension.flare.ui.theme.FlareTheme
 import kotlinx.collections.immutable.persistentListOf
@@ -118,7 +116,8 @@ class StatusShareContentTest {
     fun replyRowExposesOneToggleAndNeverNavigatesThePost() {
         val reply = post("reply", "Selectable reply").copy(user = createSampleUser().copy(avatar = null, banner = null))
         var selected by mutableStateOf(false)
-        lateinit var inputMode: InputModeManager
+        var confirmed = false
+        var cancelled = false
         val state =
             object : StatusSharePresenter.State {
                 override val status = UiState.Success<UiTimelineV2>(reply)
@@ -143,22 +142,25 @@ class StatusShareContentTest {
                     selected = false
                 }
 
-                override fun cancelSelection() {}
+                override fun cancelSelection() {
+                    cancelled = true
+                }
 
-                override fun confirmSelection() {}
+                override fun confirmSelection() {
+                    confirmed = true
+                }
 
                 override fun loadMore() {}
 
                 override fun loadReplyChildren(key: MicroBlogKey) {}
             }
         composeRule.setContent {
-            inputMode = LocalInputModeManager.current
             CompositionLocalProvider(
                 LocalGlobalAppearance provides GlobalAppearance(),
                 LocalTimelineAppearance provides TimelineAppearance(showTranslateButton = false),
             ) {
                 FlareTheme(darkTheme = false) {
-                    StatusShareReplyPicker(state, Modifier.width(360.dp).height(600.dp))
+                    StatusShareReplySheet(state)
                 }
             }
         }
@@ -168,23 +170,41 @@ class StatusShareContentTest {
             .performClick()
             .assertIsOn()
         composeRule.runOnIdle { assertTrue(selected) }
+        composeRule.mainClock.advanceTimeBy(500)
+        composeRule.waitForIdle()
+        val instrumentation = InstrumentationRegistry.getInstrumentation()
+        val screenshot = instrumentation.uiAutomation.takeScreenshot()
+        File(instrumentation.targetContext.externalCacheDir, "selected-reply-picker.png").outputStream().use {
+            screenshot.compress(Bitmap.CompressFormat.PNG, 100, it)
+        }
+        screenshot.recycle()
         composeRule.onNodeWithContentDescription("Selectable reply", substring = true).performClick().assertIsOff()
         composeRule.runOnIdle { assertFalse(selected) }
-        composeRule.runOnIdle { assertTrue(inputMode.requestInputMode(InputMode.Keyboard)) }
         val selector = composeRule.onNodeWithContentDescription("Selectable reply", substring = true)
+        selector.performKeyInput { pressKey(Key.Tab) }
         selector.performSemanticsAction(SemanticsActions.RequestFocus) { it() }
         selector.assertIsFocused()
-        composeRule.onRoot().performKeyInput {
+        selector.performKeyInput {
             keyDown(Key.ShiftLeft)
             pressKey(Key.Tab)
             keyUp(Key.ShiftLeft)
         }
-        composeRule.onNodeWithText("Done").assertIsFocused()
-        composeRule.onRoot().performKeyInput { pressKey(Key.Tab) }
+        composeRule
+            .onAllNodes(
+                androidx.compose.ui.test
+                    .isFocused(),
+            ).assertCountEquals(1)
+        selector.performKeyInput { pressKey(Key.Tab) }
         selector.assertIsFocused()
-        composeRule.onRoot().performKeyInput { pressKey(Key.Enter) }
+        selector.performKeyInput { pressKey(Key.Enter) }
         selector.assertIsOn()
         composeRule.runOnIdle { assertTrue(selected) }
+        composeRule.onNodeWithText("Clear").performClick()
+        selector.assertIsOff()
+        composeRule.onNodeWithText("Done").performClick()
+        composeRule.runOnIdle { assertTrue(confirmed) }
+        composeRule.onNodeWithText("Cancel").performClick()
+        composeRule.runOnIdle { assertTrue(cancelled) }
     }
 
     @Test
@@ -209,6 +229,11 @@ class StatusShareContentTest {
         assertEquals(8, layouts.single().lineCount)
         assertFalse(layouts.single().hasVisualOverflow)
         composeRule.onAllNodes(isToggleable()).assertCountEquals(0)
+        composeRule
+            .onAllNodes(
+                androidx.compose.ui.test
+                    .hasText(root.createdAt.full),
+            ).assertCountEquals(1)
     }
 
     @Test

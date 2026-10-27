@@ -20,8 +20,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -73,8 +71,6 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import androidx.core.content.FileProvider
 import androidx.core.graphics.createBitmap
 import androidx.lifecycle.LifecycleOwner
@@ -88,6 +84,7 @@ import androidx.savedstate.compose.LocalSavedStateRegistryOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.solid.AngleRight
 import compose.icons.fontawesomeicons.solid.Download
 import compose.icons.fontawesomeicons.solid.Image
 import compose.icons.fontawesomeicons.solid.Link
@@ -105,8 +102,6 @@ import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.ShareImageLoading
 import dev.dimension.flare.ui.component.ViewBox
 import dev.dimension.flare.ui.component.status.StatusShareContent
-import dev.dimension.flare.ui.component.status.StatusShareReplyButton
-import dev.dimension.flare.ui.component.status.StatusShareReplyPicker
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.presenter.invoke
@@ -241,11 +236,7 @@ internal fun StatusShareSheet(
     }
 
     if (state.selecting) {
-        Dialog(onDismissRequest = state::cancelSelection, properties = DialogProperties(usePlatformDefaultWidth = false)) {
-            Surface(Modifier.fillMaxWidth().fillMaxHeight(0.9f).padding(16.dp), shape = MaterialTheme.shapes.large) {
-                StatusShareReplyPicker(state, Modifier.fillMaxSize().padding(16.dp))
-            }
-        }
+        StatusShareReplySheet(state)
     }
     Column(
         modifier =
@@ -272,7 +263,6 @@ internal fun StatusShareSheet(
             )
         }
 
-        StatusShareReplyButton(state, enabled = !isCapturing && !isCrossPosting)
         if (isCapturing) Text(stringResource(R.string.share_replies_preparing))
         if (previewContentHeightPx > 0 && !captureFits) Text(stringResource(R.string.share_replies_too_large))
         if (captureFailed) Text(stringResource(R.string.share_replies_render_failed))
@@ -518,7 +508,7 @@ internal fun StatusShareSheet(
             )
             SegmentedListItem(
                 onClick = {},
-                shapes = ListItemDefaults.last(),
+                shapes = ListItemDefaults.segmentedShapes(1, 3),
                 content = {
                     Text(
                         text = stringResource(id = R.string.status_share_sheet_theme_title),
@@ -552,6 +542,18 @@ internal fun StatusShareSheet(
                                 )
                             }
                         }
+                    }
+                },
+            )
+            SegmentedListItem(
+                onClick = state::selectReplies,
+                enabled = !isCapturing && !isCrossPosting,
+                shapes = ListItemDefaults.last(),
+                content = { Text(stringResource(R.string.share_replies_title)) },
+                trailingContent = {
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Text(stringResource(R.string.share_replies_count, state.selectedCount))
+                        FAIcon(FontAwesomeIcons.Solid.AngleRight, contentDescription = null, modifier = Modifier.size(16.dp))
                     }
                 },
             )

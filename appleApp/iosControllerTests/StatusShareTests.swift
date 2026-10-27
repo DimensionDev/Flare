@@ -34,6 +34,77 @@ final class StatusShareTests: XCTestCase {
         }
     }
 
+    func testSelectedRepliesDoNotLeaveATrailingSeparator() async throws {
+        let root = post("root", text: "Original post")
+        for theme in [ColorScheme.light, .dark] {
+            for count in [1, 2] {
+                let replies = (0..<count).map { post("reply-\($0)", text: "Selected reply") }
+                let image = try await StatusShareContent(data: root, statusKey: root.statusKey, replies: replies)
+                    .frame(width: 360).background(Color.flareSystemGroupedBackground)
+                    .environment(\.colorScheme, theme).snapshot(colorScheme: theme)
+                let cgImage = try XCTUnwrap(image.cgImage)
+                let width = cgImage.width
+                let height = cgImage.height
+                var pixels = [UInt8](repeating: 0, count: width * height * 4)
+                let context = try XCTUnwrap(CGContext(data: &pixels, width: width, height: height,
+                                                    bitsPerComponent: 8, bytesPerRow: width * 4,
+                                                    space: CGColorSpaceCreateDeviceRGB(),
+                                                    bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue))
+                context.draw(cgImage, in: CGRect(x: 0, y: 0, width: width, height: height))
+                let x = width - 12
+                let background = Array(pixels[(x * 4)..<(x * 4 + 4)])
+                for y in (height - 3)..<height {
+                    let offset = (y * width + x) * 4
+                    XCTAssertEqual(Array(pixels[offset..<(offset + 4)]), background,
+                                   "The final reply must end with content, without a trailing separator")
+                }
+            }
+        }
+    }
+
+    func testReplyPickerUsesNativeNavigationAndList() async throws {
+        let state = ReplyPickerState(replies: [post("first", text: "A selected reply"), post("second", text: "Another reply")])
+        let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first)
+        let previousWindow = scene.windows.first(where: \.isKeyWindow)
+        let window = UIWindow(windowScene: scene)
+        let host = UIHostingController(rootView: Color.clear.sheet(isPresented: .constant(true)) {
+            StatusShareReplyPicker(state: state).presentationDetents([.large])
+        })
+        window.rootViewController = host
+        window.makeKeyAndVisible()
+        defer {
+            host.dismiss(animated: false)
+            window.isHidden = true
+            window.rootViewController = nil
+            previousWindow?.makeKey()
+        }
+        func descendants(_ view: UIView) -> [UIView] { [view] + view.subviews.flatMap(descendants) }
+        for _ in 0..<30 {
+            window.layoutIfNeeded()
+            try await Task.sleep(for: .milliseconds(20))
+        }
+        let views = descendants(window)
+        let navigationBar = try XCTUnwrap(views.compactMap { $0 as? UINavigationBar }.first)
+        let navigationItem = try XCTUnwrap(navigationBar.topItem)
+        let leadingButtons = (navigationItem.leftBarButtonItems ?? []) + navigationItem.leadingItemGroups.flatMap(\.barButtonItems)
+        let trailingButtons = (navigationItem.rightBarButtonItems ?? []) + navigationItem.trailingItemGroups.flatMap(\.barButtonItems)
+        XCTAssertFalse(leadingButtons.isEmpty, "Cancel must be available in the native navigation bar")
+        XCTAssertFalse(trailingButtons.isEmpty, "Done must be available in the native navigation bar")
+        XCTAssertFalse(views.compactMap { $0 as? UICollectionView }.isEmpty, "Reply choices must use the native list")
+        for style in [UIUserInterfaceStyle.light, .dark] {
+            window.overrideUserInterfaceStyle = style
+            try await Task.sleep(for: .milliseconds(150))
+            window.layoutIfNeeded()
+            let image = UIGraphicsImageRenderer(bounds: window.bounds).image { _ in
+                window.drawHierarchy(in: window.bounds, afterScreenUpdates: true)
+            }
+            let attachment = XCTAttachment(image: image)
+            attachment.name = "reply-picker-\(style.rawValue)"
+            attachment.lifetime = .keepAlways
+            add(attachment)
+        }
+    }
+
     func testFailedMediaCannotBeSharedAsAPlaceholder() async throws {
         do {
             _ = try await NetworkImage(data: "file:///nonexistent-flare-share-image.png")
@@ -86,5 +157,26 @@ final class StatusShareTests: XCTestCase {
                                 emojiReactions: [], sourceChannel: nil, visibility: nil, replyToHandle: nil,
                                 references: [], clickEvent: ClickEventNoop.shared, mediaClickPolicy: .openStatusMedia,
                                 accountType: AccountType.Guest.shared, itemKey: id)
+    }
+
+    private final class ReplyPickerState: NSObject, StatusSharePresenterState {
+        let replies: [UiTimelineV2]
+        var status: UiState<UiTimelineV2> { UiStateSuccess(data: replies[0]) }
+        var selectedReplies: [UiTimelineV2] { Array(replies.prefix(1)) }
+        var expandableReplies: [MicroBlogKey] { [] }
+        var selectedCount: Int32 { 1 }
+        var selecting: Bool { true }
+        var loading: Bool { false }
+        var hasMore: Bool { false }
+        var error: KotlinThrowable? { nil }
+        init(replies: [UiTimelineV2]) { self.replies = replies }
+        func isSelected(key: MicroBlogKey) -> Bool { key == replies.first?.statusKey }
+        func toggleReply(key: MicroBlogKey) {}
+        func selectReplies() {}
+        func clearSelection() {}
+        func cancelSelection() {}
+        func confirmSelection() {}
+        func loadMore() {}
+        func loadReplyChildren(key: MicroBlogKey) {}
     }
 }

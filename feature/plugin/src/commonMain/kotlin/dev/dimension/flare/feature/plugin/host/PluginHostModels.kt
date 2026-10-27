@@ -1,6 +1,9 @@
 package dev.dimension.flare.feature.plugin.host
 
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.feature.plugin.manifest.isValidLocaleTag
+import dev.dimension.flare.model.MicroBlogKey
+import io.ktor.http.Url
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonElement
@@ -58,6 +61,7 @@ public class PluginInvocationContextV1 private constructor(
     public val metadata: PluginInvocationMetadataV1,
     internal val credential: PluginCredentialAccess?,
     internal val assets: Map<String, PluginAsset>,
+    internal val proxy: ProxyRef,
 ) {
     public companion object {
         public fun detector(
@@ -83,6 +87,7 @@ public class PluginInvocationContextV1 private constructor(
             candidateOrigin: String,
             authOrigins: Set<String>,
             locale: String,
+            expectedAccountId: String? = null,
         ): PluginInvocationContextV1 =
             create(
                 pluginId = pluginId,
@@ -92,6 +97,7 @@ public class PluginInvocationContextV1 private constructor(
                 origin = candidateOrigin,
                 additionalOrigins = authOrigins,
                 locale = locale,
+                accountId = expectedAccountId,
             )
 
         public fun account(
@@ -168,7 +174,8 @@ public class PluginInvocationContextV1 private constructor(
                         packageHash = packageHash,
                         scope = scope,
                         origin = normalizedOrigin,
-                        accountId = accountId,
+                        // The relogin target selects routing without changing JavaScript login metadata.
+                        accountId = accountId.takeIf { scope == PluginInvocationScopeV1.Account },
                         locale = locale,
                         approvedOrigins = approvedOrigins,
                         credentialAvailable = credential != null,
@@ -176,6 +183,7 @@ public class PluginInvocationContextV1 private constructor(
                     ),
                 credential = credential,
                 assets = assets.toMap(),
+                proxy = accountId?.let { ProxyRef.Account(MicroBlogKey(it, Url(normalizedOrigin).accountHost())) } ?: ProxyRef.Global,
             )
         }
     }

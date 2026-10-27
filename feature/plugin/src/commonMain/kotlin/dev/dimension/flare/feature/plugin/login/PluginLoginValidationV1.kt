@@ -2,6 +2,7 @@ package dev.dimension.flare.feature.plugin.login
 
 import dev.dimension.flare.feature.plugin.abi.PluginAbiV1
 import dev.dimension.flare.feature.plugin.host.PluginUrlPolicy
+import dev.dimension.flare.feature.plugin.host.accountHost
 import dev.dimension.flare.feature.plugin.lifecycle.RunningPluginV1
 import dev.dimension.flare.feature.plugin.manifest.LoginInteractionV1
 import dev.dimension.flare.feature.plugin.manifest.LoginMethodManifestV1
@@ -64,5 +65,3 @@ public class PluginLoginException(
     message: String,
     cause: Throwable? = null,
 ) : IllegalStateException(message, cause)
-
-internal fun Url.accountHost(): String = host + if (specifiedPort == 0) "" else ":$specifiedPort"

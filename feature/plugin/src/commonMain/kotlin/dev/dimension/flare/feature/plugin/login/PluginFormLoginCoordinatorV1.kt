@@ -46,7 +46,7 @@ public class PluginFormLoginCoordinatorV1(
                 runtimePool.invoke(
                     plugin = plugin,
                     key = key,
-                    context = plugin.loginContext(canonicalOrigin, locale),
+                    context = plugin.loginContext(canonicalOrigin, locale, expectedAccountId),
                     method = "login.$methodId.begin",
                     request =
                         LoginBeginRequestV1(

@@ -11,6 +11,7 @@ import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.feature.plugin.host.PluginCallTimeoutV1
 import dev.dimension.flare.feature.plugin.host.PluginInvocationContextV1
 import dev.dimension.flare.feature.plugin.host.PluginUrlPolicy
+import dev.dimension.flare.feature.plugin.host.accountHost
 import dev.dimension.flare.feature.plugin.host.platformUuid
 import dev.dimension.flare.feature.plugin.lifecycle.PluginRunningSnapshotV1
 import dev.dimension.flare.feature.plugin.lifecycle.PluginStateIssueV1
@@ -23,7 +24,6 @@ import dev.dimension.flare.feature.plugin.login.PluginOAuthStartV1
 import dev.dimension.flare.feature.plugin.login.PluginWebCookieLoginCoordinatorV1
 import dev.dimension.flare.feature.plugin.login.PluginWebCookieRequestV1
 import dev.dimension.flare.feature.plugin.login.PluginWebCookieSessionV1
-import dev.dimension.flare.feature.plugin.login.accountHost
 import dev.dimension.flare.feature.plugin.login.parsePluginOAuthCallback
 import dev.dimension.flare.feature.plugin.manifest.DeepLinkManifestV1
 import dev.dimension.flare.feature.plugin.manifest.DeepLinkPathSegmentV1

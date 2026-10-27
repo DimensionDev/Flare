@@ -77,7 +77,7 @@ public class PluginWebCookieLoginCoordinatorV1(
         val method = plugin.requireLoginMethod(methodId, LoginInteractionV1.WebCookie)
         val cookie = requireNotNull(method.cookie)
         val canonicalOrigin = PluginUrlPolicy.requireOrigin(origin)
-        val context = plugin.loginContext(canonicalOrigin, locale)
+        val context = plugin.loginContext(canonicalOrigin, locale, expectedAccountId)
         val request =
             PluginWebCookieRequestV1(
                 startUrl = resolveManifestUrl(cookie.startUrl, canonicalOrigin, context.metadata.approvedOrigins),

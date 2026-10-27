@@ -1,5 +1,6 @@
 package dev.dimension.flare.feature.plugin.host
 
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.feature.plugin.abi.PluginJsonV1
 import dev.dimension.flare.feature.plugin.wire.HttpAuthorizationV1
 import dev.dimension.flare.feature.plugin.wire.HttpBodyV1
@@ -29,6 +30,7 @@ public data class PluginTransportRequestV1(
     val headers: Map<String, String>,
     val body: PluginTransportBodyV1?,
     val timeoutMillis: Long,
+    val proxy: ProxyRef = ProxyRef.Global,
 )
 
 @HiddenFromObjC
@@ -94,6 +96,7 @@ internal class PluginHttpHost(
                         headers = headers,
                         body = body,
                         timeoutMillis = timeout,
+                        proxy = context.proxy,
                     ),
                 )
             validateResponse(response)

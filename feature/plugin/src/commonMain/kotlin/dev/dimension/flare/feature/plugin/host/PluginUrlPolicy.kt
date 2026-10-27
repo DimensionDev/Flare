@@ -96,4 +96,7 @@ private fun normalizePath(value: String): String {
 }
 
 private const val MAX_URL_LENGTH = 8_192
+
+internal fun Url.accountHost(): String = host + if (specifiedPort == 0) "" else ":$specifiedPort"
+
 private val URI_SCHEME = Regex("^[A-Za-z][A-Za-z0-9+.-]*:")

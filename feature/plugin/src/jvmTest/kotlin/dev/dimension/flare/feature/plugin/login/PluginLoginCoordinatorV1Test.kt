@@ -1,6 +1,7 @@
 package dev.dimension.flare.feature.plugin.login
 
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.data.repository.AccountMicroblogDataSource
 import dev.dimension.flare.data.repository.AccountService
 import dev.dimension.flare.feature.plugin.adapter.PluginLoginMethodHandlerV1
@@ -70,6 +71,46 @@ class PluginLoginCoordinatorV1Test {
         runBlocking {
             pool.close()
             fileSystem.deleteRecursively(root, mustExist = false)
+        }
+
+    @Test
+    fun loginAndReloginHttpRequestsKeepPolicyAfterOAuthRecreation() =
+        runBlocking {
+            val httpProbe = "await flare.http.request({ url: request.origin + '/probe' });"
+            plugin =
+                install(
+                    LOGIN_SCRIPT
+                        .replace("async begin(request) {", "async begin(request) { $httpProbe")
+                        .replace("async resume(request) {", "async resume(request) { $httpProbe"),
+                )
+            val requests = mutableListOf<PluginTransportRequestV1>()
+            pool.close()
+            pool =
+                PluginRuntimePool(
+                    fileSystem,
+                    object : NoopTransport() {
+                        override suspend fun execute(request: PluginTransportRequestV1): PluginTransportResponseV1 {
+                            requests += request
+                            return super.execute(request)
+                        }
+                    },
+                )
+            for (expectedAccountId in listOf(null, ACCOUNT_ID)) {
+                requests.clear()
+                val start =
+                    assertIs<PluginOAuthStartV1.ExternalBrowser>(
+                        oauthCoordinator().begin(plugin, "oauth", ORIGIN, "en", expectedAccountId = expectedAccountId),
+                    )
+                oauthCoordinator().resume("${pluginOAuthRedirectUri(start.flowId)}?code=ok&state=$STATE", "en")
+                PluginFormLoginCoordinatorV1(pool, FixedEntropy)
+                    .login(plugin, "form", ORIGIN, "en", mapOf("token" to "secret"), expectedAccountId)
+                val cookie = PluginWebCookieLoginCoordinatorV1(pool, FixedEntropy).begin(plugin, "cookie", ORIGIN, "en", expectedAccountId)
+                assertIs<PluginCookieCheckResultV1.Success>(
+                    cookie.check(CookieSnapshotV1(listOf(CookieValueV1("$ORIGIN/api/cookie", "session", "valid")))),
+                )
+                val expected = expectedAccountId?.let { ProxyRef.Account(MicroBlogKey(it, "plugin.example")) } ?: ProxyRef.Global
+                assertEquals(List(5) { expected }, requests.map { it.proxy })
+            }
         }
 
     @Test

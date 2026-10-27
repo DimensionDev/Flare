@@ -1,5 +1,6 @@
 package dev.dimension.flare.feature.plugin.host
 
+import dev.dimension.flare.data.network.applyProxy
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.request.forms.FormDataContent
@@ -39,6 +40,7 @@ public class KtorPluginHttpTransport(
         withTimeout(request.timeoutMillis) {
             client
                 .prepareRequest(request.url) {
+                    applyProxy(request.proxy)
                     method = HttpMethod.parse(request.method)
                     request.headers.forEach { (name, value) -> headers.append(name, value) }
                     request.body?.let { setBody(it.toOutgoingContent()) }

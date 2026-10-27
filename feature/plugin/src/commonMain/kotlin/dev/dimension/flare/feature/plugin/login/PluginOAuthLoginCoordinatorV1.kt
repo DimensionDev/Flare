@@ -72,7 +72,7 @@ public class PluginOAuthLoginCoordinatorV1(
         val state = entropy.newState()
         val redirectUri = pluginOAuthRedirectUri(flowId)
         pendingStore.pruneCreatedBefore((nowEpochMillis() - OAUTH_TTL_MILLIS).coerceAtLeast(0))
-        val context = plugin.loginContext(canonicalOrigin, locale)
+        val context = plugin.loginContext(canonicalOrigin, locale, expectedAccountId)
         val key = plugin.loginKey(flowId)
         val transition =
             try {
@@ -167,7 +167,7 @@ public class PluginOAuthLoginCoordinatorV1(
         require(pending.redirectUri == pluginOAuthRedirectUri(pending.flowId)) { "Invalid OAuth pending redirect URI" }
         if (!pendingStore.consume(pending)) throw PluginLoginException("oauth.replay", "OAuth callback was already consumed")
 
-        val context = plugin.loginContext(pending.origin, locale)
+        val context = plugin.loginContext(pending.origin, locale, pending.expectedAccountId)
         val key = plugin.loginKey(pending.flowId)
         val transition =
             try {
@@ -234,6 +234,7 @@ public fun parsePluginOAuthCallback(value: String): PluginOAuthCallbackV1 {
 internal fun RunningPluginV1.loginContext(
     origin: String,
     locale: String,
+    expectedAccountId: String? = null,
 ): PluginInvocationContextV1 =
     PluginInvocationContextV1.login(
         pluginId = installed.pluginId,
@@ -242,6 +243,7 @@ internal fun RunningPluginV1.loginContext(
         candidateOrigin = origin,
         authOrigins = installed.manifest.permissions.authOrigins,
         locale = locale,
+        expectedAccountId = expectedAccountId,
     )
 
 internal fun RunningPluginV1.loginKey(flowId: String): PluginRuntimeKeyV1 =

@@ -48,16 +48,10 @@ kotlin {
         val androidJvmMain by getting {
             dependencies {
                 implementation(projects.composeUi)
-                implementation(libs.ktor.client.okhttp)
                 implementation(dependencies.platform(libs.compose.bom))
                 implementation(libs.compose.runtime)
                 implementation(libs.ui)
                 implementation(libs.material3)
-            }
-        }
-        val appleMain by getting {
-            dependencies {
-                implementation(libs.ktor.client.darwin)
             }
         }
         val commonTest by getting {
@@ -69,6 +63,8 @@ kotlin {
         val jvmTest by getting {
             dependencies {
                 implementation(libs.ktor.client.mock)
+                implementation(libs.ktor.client.okhttp)
+                implementation(libs.datastore.core)
             }
         }
         val androidDeviceTest by getting {

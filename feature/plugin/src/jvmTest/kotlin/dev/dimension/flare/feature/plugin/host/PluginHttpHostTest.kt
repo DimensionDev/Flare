@@ -1,19 +1,86 @@
 package dev.dimension.flare.feature.plugin.host
 
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.feature.plugin.wire.HttpAuthorizationV1
 import dev.dimension.flare.feature.plugin.wire.HttpBodyV1
 import dev.dimension.flare.feature.plugin.wire.HttpMultipartPartV1
 import dev.dimension.flare.feature.plugin.wire.HttpRequestV1
+import dev.dimension.flare.model.MicroBlogKey
 import kotlinx.coroutines.runBlocking
 import okio.Buffer
 import okio.Source
 import kotlin.test.Test
+import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.assertFails
+import kotlin.test.assertNull
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
 class PluginHttpHostTest {
+    @Test
+    fun hostSelectsRoutesForEveryScopeAndPreservesThemAcrossRedirectsAndAuthOrigins() =
+        runBlocking {
+            val origin = "https://instance.example:8443"
+            val account = ProxyRef.Account(MicroBlogKey("1", "instance.example:8443"))
+            val contexts =
+                listOf(
+                    PluginInvocationContextV1.detector(PLUGIN_ID, PLATFORM_ID, HASH, origin, "en") to ProxyRef.Global,
+                    PluginInvocationContextV1.guest(PLUGIN_ID, PLATFORM_ID, HASH, origin, "en") to ProxyRef.Global,
+                    PluginInvocationContextV1.login(PLUGIN_ID, PLATFORM_ID, HASH, origin, setOf("https://auth.example"), "en") to
+                        ProxyRef.Global,
+                    PluginInvocationContextV1.login(
+                        PLUGIN_ID,
+                        PLATFORM_ID,
+                        HASH,
+                        origin,
+                        setOf("https://auth.example"),
+                        "en",
+                        expectedAccountId = "1",
+                    ) to account,
+                    PluginInvocationContextV1.account(PLUGIN_ID, PLATFORM_ID, HASH, origin, "1", "en", MemoryCredential()) to account,
+                )
+            for ((context, expected) in contexts) {
+                val transport =
+                    RecordingTransport { request ->
+                        if (request.url.endsWith("/redirect")) {
+                            PluginTransportResponseV1(302, mapOf("Location" to listOf("/final")), ByteArray(0))
+                        } else {
+                            PluginTransportResponseV1(200, emptyMap(), "ok".encodeToByteArray())
+                        }
+                    }
+                val host = PluginHttpHost(transport)
+                host.execute(HttpRequestV1(url = "$origin/redirect"), context, 30_000)
+                assertEquals(listOf(expected, expected), transport.requests.map { it.proxy })
+                if (context.metadata.scope == PluginInvocationScopeV1.Login) {
+                    assertNull(context.metadata.accountId, "Relogin routing must stay outside JavaScript metadata")
+                    host.execute(HttpRequestV1(url = "https://auth.example/token", method = "POST"), context, 30_000)
+                    assertEquals(expected, transport.requests.last().proxy)
+                }
+            }
+        }
+
+    @Test
+    fun pluginWireArgumentsCannotOverrideTheHostProxy() =
+        runBlocking {
+            val transport = RecordingTransport()
+            val result =
+                PluginHostGateway(transport).call(
+                    "http.request",
+                    """{"url":"https://instance.example/api","proxy":{"type":"System"}}""",
+                    context(),
+                    30_000,
+                )
+            assertContains(result, "host.invalid-request")
+            assertTrue(transport.requests.isEmpty())
+        }
+
+    @Test
+    fun pluginAccountNamedNostrCannotBypassAppPolicy() {
+        val context = PluginInvocationContextV1.account(PLUGIN_ID, PLATFORM_ID, HASH, "https://nostr", "1", "en", MemoryCredential())
+        assertEquals(ProxyRef.Account(MicroBlogKey("1", "nostr")), context.proxy)
+    }
+
     @Test
     fun rejectsCrossOriginAndDangerousRawHeaders() =
         runBlocking {
@@ -154,6 +221,7 @@ class PluginHttpHostTest {
                             .parts
                             .single() as PluginTransportMultipartPartV1.Asset
                     assertSame(asset, part.value)
+                    assertEquals(ProxyRef.Account(MicroBlogKey("1", "instance.example")), request.proxy)
                     assertEquals(0, asset.openCount)
                     PluginTransportResponseV1(200, emptyMap(), "ok".encodeToByteArray())
                 }

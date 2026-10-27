@@ -125,6 +125,12 @@ Detector calls may access only the candidate origin. Login calls may also use
 exact HTTPS origins listed in `permissions.authOrigins`. Account and guest
 calls use the verified account origin. Redirects stay on the current origin.
 
+Flare owns HTTP routing: detector, guest, and new-login requests follow the
+global proxy policy; account requests and relogin requests follow that account's
+policy, including OAuth resumed after restart. Plugins cannot select a proxy.
+Proxy failures never fall back to direct connections, and changing a route may
+cancel its in-flight requests, including uploads.
+
 ## Login
 
 For OAuth, Flare owns `flowId`, state, callback validation, persistence,

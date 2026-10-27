@@ -6,8 +6,8 @@ import dev.dimension.flare.feature.plugin.abi.PluginAbiV1
 import dev.dimension.flare.feature.plugin.host.PluginCredentialAccess
 import dev.dimension.flare.feature.plugin.host.PluginInvocationContextV1
 import dev.dimension.flare.feature.plugin.host.PluginUrlPolicy
+import dev.dimension.flare.feature.plugin.host.accountHost
 import dev.dimension.flare.feature.plugin.lifecycle.RunningPluginV1
-import dev.dimension.flare.feature.plugin.login.accountHost
 import dev.dimension.flare.feature.plugin.manifest.PluginTextV1
 import dev.dimension.flare.feature.plugin.manifest.toUiText
 import dev.dimension.flare.feature.plugin.wire.AccountPluginSnapshotV1

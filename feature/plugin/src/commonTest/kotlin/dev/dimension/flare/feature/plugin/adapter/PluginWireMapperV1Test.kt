@@ -1,6 +1,7 @@
 package dev.dimension.flare.feature.plugin.adapter
 
 import dev.dimension.flare.data.model.ProxyRef
+import dev.dimension.flare.feature.plugin.abi.PluginAbiV1
 import dev.dimension.flare.feature.plugin.wire.ActionDescriptorV1
 import dev.dimension.flare.feature.plugin.wire.ArticleV1
 import dev.dimension.flare.feature.plugin.wire.EntityKeyV1
@@ -432,12 +433,14 @@ class PluginWireMapperV1Test {
             platformId = "Test",
             accountKey = accountKey,
             originHost = "local.example",
-            profileAvailable = true,
-            postDetailAvailable = true,
-            articleDetailAvailable = true,
-            galleryDetailAvailable = true,
-            postMutationAvailable = postMutationAvailable,
-            postDeleteAvailable = true,
-            composeAvailable = true,
+            capabilities =
+                PluginSessionCapabilitiesV1(
+                    declarations = emptyMap(),
+                    operations =
+                        PluginAbiV1.knownCapabilityOperations.mapValues { (id, operations) ->
+                            if (id == PluginAbiV1.Capabilities.POST && !postMutationAvailable) operations - "mutate" else operations
+                        },
+                    authenticated = accountKey != null,
+                ),
         )
 }

@@ -1,5 +1,7 @@
 package dev.dimension.flare.feature.plugin.runtime
 
+import dev.dimension.flare.feature.plugin.abi.PluginAbiV1
+import dev.dimension.flare.feature.plugin.adapter.PluginSessionCapabilitiesV1
 import dev.dimension.flare.feature.plugin.host.PluginCredentialAccess
 import dev.dimension.flare.feature.plugin.host.PluginHttpTransport
 import dev.dimension.flare.feature.plugin.host.PluginInvocationContextV1
@@ -98,13 +100,16 @@ class PluginRuntimePoolTest {
                             dev.dimension.flare.model
                                 .MicroBlogKey("first", "one.example"),
                         originHost = "one.example",
-                        profileAvailable = true,
-                        postDetailAvailable = true,
-                        articleDetailAvailable = false,
-                        galleryDetailAvailable = false,
-                        postMutationAvailable = false,
-                        postDeleteAvailable = false,
-                        composeAvailable = false,
+                        capabilities =
+                            PluginSessionCapabilitiesV1(
+                                declarations = plugin.installed.manifest.platform.capabilities,
+                                operations =
+                                    mapOf(
+                                        PluginAbiV1.Capabilities.PROFILE to setOf("byId", "byHandle"),
+                                        PluginAbiV1.Capabilities.POST to setOf("detail"),
+                                    ),
+                                authenticated = true,
+                            ),
                         mediaNetwork = plugin.installed.manifest.permissions.mediaNetwork,
                     )
                 assertFailsWith<IllegalArgumentException> { mapper.profile(profile) }

@@ -7,6 +7,7 @@ import dev.dimension.flare.data.datasource.microblog.datasource.GalleryDetail
 import dev.dimension.flare.data.datasource.microblog.datasource.GalleryOrientation
 import dev.dimension.flare.data.datasource.microblog.semanticPostActionMenu
 import dev.dimension.flare.data.model.ProxyRef
+import dev.dimension.flare.feature.plugin.abi.PluginAbiV1
 import dev.dimension.flare.feature.plugin.wire.ArticleV1
 import dev.dimension.flare.feature.plugin.wire.DirectMessageRoomV1
 import dev.dimension.flare.feature.plugin.wire.DirectMessageV1
@@ -64,13 +65,7 @@ internal class PluginWireMapperV1(
     private val platformId: String,
     private val accountKey: MicroBlogKey?,
     private val originHost: String,
-    private val profileAvailable: Boolean,
-    private val postDetailAvailable: Boolean,
-    private val articleDetailAvailable: Boolean,
-    private val galleryDetailAvailable: Boolean,
-    private val postMutationAvailable: Boolean,
-    private val postDeleteAvailable: Boolean,
-    private val composeAvailable: Boolean,
+    private val capabilities: PluginSessionCapabilitiesV1,
     private val mediaNetwork: Boolean = false,
 ) {
     private val accountType: AccountType = accountKey?.let(AccountType::Specific) ?: AccountType.GuestHost(originHost)
@@ -119,7 +114,7 @@ internal class PluginWireMapperV1(
             platformId = platformId,
             platformIcon = UiIcon.World,
             clickEvent =
-                if (profileAvailable) {
+                if (capabilities.canExpose(PluginAbiV1.Capabilities.PROFILE)) {
                     ClickEvent.Deeplink(DeeplinkRoute.Profile.User(accountType, key))
                 } else {
                     ClickEvent.Noop
@@ -250,7 +245,7 @@ internal class PluginWireMapperV1(
             isBookmarked = bookmark?.active == true || bookmark?.action == SemanticActionV1.Unbookmark,
             bookmarkAction =
                 accountKey
-                    ?.takeIf { postMutationAvailable }
+                    ?.takeIf { capabilities.hasOperation(PluginAbiV1.Capabilities.POST, "mutate") }
                     ?.let { account ->
                         bookmark?.takeIf { it.enabled }?.toSemanticPostAction()?.let { action ->
                             semanticPostActionMenu(key, action, bookmark.actionToken, bookmark.count ?: 0, account).clickEvent
@@ -278,7 +273,7 @@ internal class PluginWireMapperV1(
                 createdAt = Instant.parse(value.createdAt).toUi(),
                 clickEvent =
                     value.actor
-                        ?.takeIf { profileAvailable }
+                        ?.takeIf { capabilities.canExpose(PluginAbiV1.Capabilities.PROFILE) }
                         ?.let { ClickEvent.Deeplink(DeeplinkRoute.Profile.User(accountType, it.key.toMicroBlogKey())) }
                         ?: ClickEvent.Noop,
                 accountType = accountType,
@@ -293,19 +288,42 @@ internal class PluginWireMapperV1(
         val key = key.toMicroBlogKey()
         val detailRoute =
             when (detailType) {
-                PostDetailTypeV1.Post -> DeeplinkRoute.Status.Detail(key, accountType).takeIf { postDetailAvailable }
-                PostDetailTypeV1.Article -> DeeplinkRoute.Article(accountType, key).takeIf { articleDetailAvailable }
-                PostDetailTypeV1.Gallery -> DeeplinkRoute.Gallery.Detail(key, accountType).takeIf { galleryDetailAvailable }
-                PostDetailTypeV1.Link -> DeeplinkRoute.OpenLinkDirectly(requireNotNull(url))
+                PostDetailTypeV1.Post -> {
+                    DeeplinkRoute.Status
+                        .Detail(
+                            key,
+                            accountType,
+                        ).takeIf { capabilities.canExpose(PluginAbiV1.Capabilities.POST) }
+                }
+
+                PostDetailTypeV1.Article -> {
+                    DeeplinkRoute
+                        .Article(
+                            accountType,
+                            key,
+                        ).takeIf { capabilities.canExpose(PluginAbiV1.Capabilities.ARTICLE) }
+                }
+
+                PostDetailTypeV1.Gallery -> {
+                    DeeplinkRoute.Gallery.Detail(key, accountType).takeIf {
+                        capabilities.canExpose(PluginAbiV1.Capabilities.GALLERY)
+                    }
+                }
+
+                PostDetailTypeV1.Link -> {
+                    DeeplinkRoute.OpenLinkDirectly(requireNotNull(url))
+                }
             }
         val resolvedUrl = url ?: "https://${key.host}/"
         val directActions = mutableListOf<ActionMenu>()
         val overflow = mutableListOf<ActionMenu>()
         actions.filter { it.enabled }.forEach { descriptor ->
             val semantic = descriptor.toSemanticPostAction()
-            if (semantic != null && accountKey != null && postMutationAvailable) {
+            if (semantic != null && accountKey != null && capabilities.hasOperation(PluginAbiV1.Capabilities.POST, "mutate")) {
                 directActions += semanticPostActionMenu(key, semantic, descriptor.actionToken, descriptor.count ?: 0, accountKey)
-            } else if (descriptor.action == SemanticActionV1.Reply && composeAvailable && accountKey != null) {
+            } else if (descriptor.action == SemanticActionV1.Reply && capabilities.canExpose(PluginAbiV1.Capabilities.COMPOSE) &&
+                accountKey != null
+            ) {
                 directActions +=
                     ActionMenu.Item(
                         icon = UiIcon.Reply,
@@ -313,7 +331,9 @@ internal class PluginWireMapperV1(
                         clickEvent = ClickEvent.Deeplink(DeeplinkRoute.Compose.Reply(accountKey, key)),
                         actionFamily = PostActionFamily.Reply,
                     )
-            } else if (descriptor.action == SemanticActionV1.Delete && accountKey != null && postDeleteAvailable) {
+            } else if (descriptor.action == SemanticActionV1.Delete && accountKey != null &&
+                capabilities.hasOperation(PluginAbiV1.Capabilities.POST, "delete")
+            ) {
                 overflow +=
                     ActionMenu.Item(
                         icon = UiIcon.Delete,

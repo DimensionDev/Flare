@@ -88,7 +88,7 @@ internal class PluginDataSourceV1 private constructor(
     private val runtimePool: PluginRuntimePool,
     override val authenticatedAccountKey: MicroBlogKey?,
     private val origin: String,
-    private val operations: Map<String, Set<String>>,
+    private val capabilities: PluginSessionCapabilitiesV1,
     private val invoker: PluginAccountInvokerV1,
     private val mapper: PluginWireMapperV1,
     private val timelineSpecs: Map<String, TimelineSpec<TimelineSpec.AccountResourceData>>,
@@ -116,8 +116,7 @@ internal class PluginDataSourceV1 private constructor(
             invoker = invoker,
             mapper = mapper,
             accountKey = accountKey,
-            operations = operations,
-            directions = ::directions,
+            capabilities = capabilities,
             coroutineScope = coroutineScope,
             dynamicTimelineSpec = dynamicTimelineSpec,
         )
@@ -125,23 +124,11 @@ internal class PluginDataSourceV1 private constructor(
 
     override val capabilitySet: DataSourceCapabilitySet by lazy {
         DataSourceCapabilitySet(
-            timeline = capability(PluginAbiV1.Capabilities.TIMELINE)?.let { TimelineCapability(this) },
-            search =
-                capability(PluginAbiV1.Capabilities.SEARCH)
-                    ?.takeIf { PluginAbiV1.hasRequiredOperations(PluginAbiV1.Capabilities.SEARCH, it) }
-                    ?.let { SearchCapability(this) },
-            profile =
-                capability(PluginAbiV1.Capabilities.PROFILE)
-                    ?.takeIf { PluginAbiV1.hasRequiredOperations(PluginAbiV1.Capabilities.PROFILE, it) }
-                    ?.let { ProfileCapability(this, userDataSource) },
-            post =
-                capability(PluginAbiV1.Capabilities.POST)
-                    ?.takeIf { "detail" in it }
-                    ?.let { PostCapability(this, postDataSource) },
-            compose =
-                accountKey
-                    ?.takeIf { hasOperation(PluginAbiV1.Capabilities.COMPOSE, "publish") }
-                    ?.let { ComposeCapabilityAdapter() },
+            timeline = if (capabilities.canExpose(PluginAbiV1.Capabilities.TIMELINE)) TimelineCapability(this) else null,
+            search = if (capabilities.canExpose(PluginAbiV1.Capabilities.SEARCH)) SearchCapability(this) else null,
+            profile = if (capabilities.canExpose(PluginAbiV1.Capabilities.PROFILE)) ProfileCapability(this, userDataSource) else null,
+            post = if (capabilities.canExpose(PluginAbiV1.Capabilities.POST)) PostCapability(this, postDataSource) else null,
+            compose = if (capabilities.canExpose(PluginAbiV1.Capabilities.COMPOSE)) ComposeCapabilityAdapter() else null,
             relation = extraCapabilities.relation,
             notification = extraCapabilities.notification,
             list = extraCapabilities.list,
@@ -151,12 +138,12 @@ internal class PluginDataSourceV1 private constructor(
             tabCatalog =
                 if (
                     accountKey != null &&
-                    (hasOperation(PluginAbiV1.Capabilities.TIMELINE, "page") || extraCapabilities.pinnableTabs != null)
+                    (capabilities.hasOperation(PluginAbiV1.Capabilities.TIMELINE, "page") || extraCapabilities.pinnableTabs != null)
                 ) {
                     TabCatalogCapability(
                         configuration =
                             TabConfiguration().takeIf {
-                                hasOperation(PluginAbiV1.Capabilities.TIMELINE, "page")
+                                capabilities.hasOperation(PluginAbiV1.Capabilities.TIMELINE, "page")
                             },
                         pinnable = extraCapabilities.pinnableTabs,
                     )
@@ -175,7 +162,7 @@ internal class PluginDataSourceV1 private constructor(
                     loader =
                         object : UserLoader {
                             override suspend fun userByHandleAndHost(uiHandle: UiHandle): UiProfile {
-                                requireOperation(PluginAbiV1.Capabilities.PROFILE, "byHandle")
+                                capabilities.requireOperation(PluginAbiV1.Capabilities.PROFILE, "byHandle")
                                 return invoker
                                     .invoke(
                                         capabilityId = PluginAbiV1.Capabilities.PROFILE,
@@ -188,7 +175,7 @@ internal class PluginDataSourceV1 private constructor(
                             }
 
                             override suspend fun userById(id: String): UiProfile {
-                                requireOperation(PluginAbiV1.Capabilities.PROFILE, "byId")
+                                capabilities.requireOperation(PluginAbiV1.Capabilities.PROFILE, "byId")
                                 return invoker
                                     .invoke(
                                         capabilityId = PluginAbiV1.Capabilities.PROFILE,
@@ -211,7 +198,7 @@ internal class PluginDataSourceV1 private constructor(
                 updater: dev.dimension.flare.data.datasource.microblog.DatabaseUpdater,
             ) {
                 if (event !is PostEvent.Semantic) return
-                requireOperation(PluginAbiV1.Capabilities.POST, "mutate")
+                capabilities.requireOperation(PluginAbiV1.Capabilities.POST, "mutate")
                 val result =
                     invoker.invoke(
                         capabilityId = PluginAbiV1.Capabilities.POST,
@@ -262,7 +249,7 @@ internal class PluginDataSourceV1 private constructor(
                     loader =
                         object : PostLoader {
                             override suspend fun status(statusKey: MicroBlogKey): UiTimelineV2 {
-                                requireOperation(PluginAbiV1.Capabilities.POST, "detail")
+                                capabilities.requireOperation(PluginAbiV1.Capabilities.POST, "detail")
                                 return invoker
                                     .invoke(
                                         capabilityId = PluginAbiV1.Capabilities.POST,
@@ -275,7 +262,7 @@ internal class PluginDataSourceV1 private constructor(
                             }
 
                             override suspend fun deleteStatus(statusKey: MicroBlogKey) {
-                                requireOperation(PluginAbiV1.Capabilities.POST, "delete")
+                                capabilities.requireOperation(PluginAbiV1.Capabilities.POST, "delete")
                                 invoker.invoke(
                                     capabilityId = PluginAbiV1.Capabilities.POST,
                                     operation = "delete",
@@ -314,9 +301,9 @@ internal class PluginDataSourceV1 private constructor(
         val declared =
             plugin.installed.manifest.platform.timelines
                 .singleOrNull { it.id == timelineId }
-        val acceptsDynamicTimeline = hasOperation(PluginAbiV1.Capabilities.TAB_CATALOG, "page")
+        val acceptsDynamicTimeline = capabilities.hasOperation(PluginAbiV1.Capabilities.TAB_CATALOG, "page")
         if (declared == null && !acceptsDynamicTimeline) return notSupported()
-        if (!hasOperation(PluginAbiV1.Capabilities.TIMELINE, "page")) return notSupported()
+        if (!capabilities.hasOperation(PluginAbiV1.Capabilities.TIMELINE, "page")) return notSupported()
         val effectiveParameters = declared?.parameters.orEmpty() + parameters
         return postPageLoader(
             PluginAbiV1.Capabilities.TIMELINE,
@@ -338,7 +325,7 @@ internal class PluginDataSourceV1 private constructor(
         userKey: MicroBlogKey,
         mediaOnly: Boolean,
     ): RemoteLoader<UiTimelineV2> {
-        if (!hasOperation(PluginAbiV1.Capabilities.PROFILE, "timeline")) return notSupported()
+        if (!capabilities.hasOperation(PluginAbiV1.Capabilities.PROFILE, "timeline")) return notSupported()
         val manifestTab =
             plugin.installed.manifest.platform.profileTabs.firstOrNull {
                 mediaOnly == (it.display == TimelineDisplayV1.Grid)
@@ -347,7 +334,7 @@ internal class PluginDataSourceV1 private constructor(
     }
 
     override fun context(statusKey: MicroBlogKey): RemoteLoader<UiTimelineV2> {
-        if (!hasOperation(PluginAbiV1.Capabilities.POST, "context")) return notSupported()
+        if (!capabilities.hasOperation(PluginAbiV1.Capabilities.POST, "context")) return notSupported()
         return postPageLoader(PluginAbiV1.Capabilities.POST, "context", listOf(statusKey.id, statusKey.host)) { pageSize, request ->
             invoker.invoke(
                 capabilityId = PluginAbiV1.Capabilities.POST,
@@ -376,9 +363,9 @@ internal class PluginDataSourceV1 private constructor(
 
     override fun discoverHashtags(): RemoteLoader<UiHashtag> {
         val operation = "discoverHashtags"
-        if (!hasOperation(PluginAbiV1.Capabilities.SEARCH, operation)) return notSupported()
+        if (!capabilities.hasOperation(PluginAbiV1.Capabilities.SEARCH, operation)) return notSupported()
         return pluginRemoteLoader(
-            directions = directions(PluginAbiV1.Capabilities.SEARCH, operation),
+            directions = capabilities.directions(PluginAbiV1.Capabilities.SEARCH, operation),
             load = { pageSize, request ->
                 invoker.invoke(
                     capabilityId = PluginAbiV1.Capabilities.SEARCH,
@@ -399,7 +386,7 @@ internal class PluginDataSourceV1 private constructor(
 
     override suspend fun profileTabs(userKey: MicroBlogKey): ImmutableList<ProfileTab> =
         plugin.installed.manifest.platform.profileTabs
-            .takeIf { hasOperation(PluginAbiV1.Capabilities.PROFILE, "timeline") }
+            .takeIf { capabilities.hasOperation(PluginAbiV1.Capabilities.PROFILE, "timeline") }
             .orEmpty()
             .map { tab ->
                 ProfileTab(
@@ -443,9 +430,9 @@ internal class PluginDataSourceV1 private constructor(
         operation: String,
         userKey: MicroBlogKey,
     ): RemoteLoader<UiProfile> {
-        if (!hasOperation(PluginAbiV1.Capabilities.PROFILE, operation)) return notSupported()
+        if (!capabilities.hasOperation(PluginAbiV1.Capabilities.PROFILE, operation)) return notSupported()
         return pluginRemoteLoader(
-            directions = directions(PluginAbiV1.Capabilities.PROFILE, operation),
+            directions = capabilities.directions(PluginAbiV1.Capabilities.PROFILE, operation),
             load = { pageSize, request ->
                 invoker.invoke(
                     capabilityId = PluginAbiV1.Capabilities.PROFILE,
@@ -470,7 +457,7 @@ internal class PluginDataSourceV1 private constructor(
         operation: String,
         query: String,
     ): RemoteLoader<UiTimelineV2> {
-        if (!hasOperation(PluginAbiV1.Capabilities.SEARCH, operation)) return notSupported()
+        if (!capabilities.hasOperation(PluginAbiV1.Capabilities.SEARCH, operation)) return notSupported()
         return postPageLoader(PluginAbiV1.Capabilities.SEARCH, operation, listOf(query)) { pageSize, request ->
             invoker.invoke(
                 capabilityId = PluginAbiV1.Capabilities.SEARCH,
@@ -487,9 +474,9 @@ internal class PluginDataSourceV1 private constructor(
         operation: String,
         query: String,
     ): RemoteLoader<UiProfile> {
-        if (!hasOperation(PluginAbiV1.Capabilities.SEARCH, operation)) return notSupported()
+        if (!capabilities.hasOperation(PluginAbiV1.Capabilities.SEARCH, operation)) return notSupported()
         return pluginRemoteLoader(
-            directions = directions(PluginAbiV1.Capabilities.SEARCH, operation),
+            directions = capabilities.directions(PluginAbiV1.Capabilities.SEARCH, operation),
             load = { pageSize, request ->
                 invoker.invoke(
                     capabilityId = PluginAbiV1.Capabilities.SEARCH,
@@ -510,7 +497,7 @@ internal class PluginDataSourceV1 private constructor(
         identity: List<String>,
         load: suspend (pageSize: Int, request: PagingRequest) -> PageV1<PostV1>,
     ): RemoteLoader<UiTimelineV2> =
-        invoker.timelineLoader(capabilityId, operation, identity, directions(capabilityId, operation), load, mapper::post)
+        invoker.timelineLoader(capabilityId, operation, identity, capabilities.directions(capabilityId, operation), load, mapper::post)
 
     private inner class ComposeCapabilityAdapter :
         ComposeDataSource,
@@ -604,30 +591,6 @@ internal class PluginDataSourceV1 private constructor(
             }
         }
     }
-
-    private fun capability(id: String): Set<String>? = operations[id]?.takeIf(Set<String>::isNotEmpty)
-
-    private fun hasOperation(
-        capabilityId: String,
-        operation: String,
-    ): Boolean = operation in operations[capabilityId].orEmpty()
-
-    private fun requireOperation(
-        capabilityId: String,
-        operation: String,
-    ) {
-        require(hasOperation(capabilityId, operation)) { "Plugin operation is unavailable: $capabilityId/$operation" }
-    }
-
-    private fun directions(
-        capabilityId: String,
-        operation: String,
-    ): Set<PageDirectionV1> =
-        plugin.installed.manifest.platform.capabilities[capabilityId]
-            ?.operations
-            ?.get(operation)
-            ?.directions
-            .orEmpty()
 
     internal companion object {
         fun authenticated(
@@ -741,13 +704,14 @@ internal class PluginDataSourceV1 private constructor(
             coroutineScope: CoroutineScope?,
             composeConfig: ComposeConfigV1?,
             loginProfile: ProfileV1?,
-        ): PluginDataSourceV1 =
-            PluginDataSourceV1(
+        ): PluginDataSourceV1 {
+            val capabilities = PluginSessionCapabilitiesV1(plugin.installed.manifest.platform.capabilities, operations, accountKey != null)
+            return PluginDataSourceV1(
                 plugin = plugin,
                 runtimePool = runtimePool,
                 authenticatedAccountKey = accountKey,
                 origin = origin,
-                operations = operations,
+                capabilities = capabilities,
                 invoker = invoker,
                 mapper =
                     PluginWireMapperV1(
@@ -756,25 +720,7 @@ internal class PluginDataSourceV1 private constructor(
                         accountKey = accountKey,
                         mediaNetwork = plugin.installed.manifest.permissions.mediaNetwork,
                         originHost = Url(origin).accountHost(),
-                        profileAvailable =
-                            PluginAbiV1.hasRequiredOperations(
-                                PluginAbiV1.Capabilities.PROFILE,
-                                operations[PluginAbiV1.Capabilities.PROFILE].orEmpty(),
-                            ),
-                        postDetailAvailable = "detail" in operations[PluginAbiV1.Capabilities.POST].orEmpty(),
-                        articleDetailAvailable =
-                            PluginAbiV1.hasRequiredOperations(
-                                PluginAbiV1.Capabilities.ARTICLE,
-                                operations[PluginAbiV1.Capabilities.ARTICLE].orEmpty(),
-                            ),
-                        galleryDetailAvailable =
-                            PluginAbiV1.hasRequiredOperations(
-                                PluginAbiV1.Capabilities.GALLERY,
-                                operations[PluginAbiV1.Capabilities.GALLERY].orEmpty(),
-                            ),
-                        postMutationAvailable = "mutate" in operations[PluginAbiV1.Capabilities.POST].orEmpty(),
-                        postDeleteAvailable = "delete" in operations[PluginAbiV1.Capabilities.POST].orEmpty(),
-                        composeAvailable = accountKey != null && "publish" in operations[PluginAbiV1.Capabilities.COMPOSE].orEmpty(),
+                        capabilities = capabilities,
                     ),
                 timelineSpecs = timelineSpecs,
                 dynamicTimelineSpec = dynamicTimelineSpec,
@@ -782,6 +728,7 @@ internal class PluginDataSourceV1 private constructor(
                 cachedComposeConfig = composeConfig,
                 loginProfile = loginProfile,
             )
+        }
     }
 }
 

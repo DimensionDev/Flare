@@ -105,8 +105,7 @@ internal class PluginExtraCapabilitiesV1(
     private val invoker: PluginAccountInvokerV1,
     private val mapper: PluginWireMapperV1,
     private val accountKey: MicroBlogKey?,
-    private val operations: Map<String, Set<String>>,
-    private val directions: (String, String) -> Set<PageDirectionV1>,
+    private val capabilities: PluginSessionCapabilitiesV1,
     private val coroutineScope: CoroutineScope?,
     private val dynamicTimelineSpec: TimelineSpec<PluginTimelineDataV1>?,
 ) {
@@ -118,14 +117,14 @@ internal class PluginExtraCapabilitiesV1(
 
     val relation: RelationDataSource? by lazy {
         accountKey
-            ?.takeIf { hasRequiredOperations(PluginAbiV1.Capabilities.RELATION) }
+            ?.takeIf { capabilities.canExpose(PluginAbiV1.Capabilities.RELATION) }
             ?.let { RelationAdapter(it) }
     }
 
     val notification: NotificationCapability? by lazy {
         val account = accountKey ?: return@lazy null
-        val page = has(PluginAbiV1.Capabilities.NOTIFICATION, "page")
-        val badge = has(PluginAbiV1.Capabilities.NOTIFICATION, "badge")
+        val page = capabilities.hasOperation(PluginAbiV1.Capabilities.NOTIFICATION, "page")
+        val badge = capabilities.hasOperation(PluginAbiV1.Capabilities.NOTIFICATION, "badge")
         if (!page && !badge) return@lazy null
         val adapter = NotificationAdapter(account)
         NotificationCapability(
@@ -136,7 +135,7 @@ internal class PluginExtraCapabilitiesV1(
 
     internal val listAdapter: ListAdapter? by lazy {
         val account = accountKey ?: return@lazy null
-        if (!hasRequiredOperations(PluginAbiV1.Capabilities.LIST)) return@lazy null
+        if (!capabilities.canExpose(PluginAbiV1.Capabilities.LIST)) return@lazy null
         ListAdapter(account)
     }
 
@@ -145,26 +144,26 @@ internal class PluginExtraCapabilitiesV1(
     internal val directMessageAdapter: DirectMessageAdapter? by lazy {
         val account = accountKey ?: return@lazy null
         val scope = coroutineScope ?: return@lazy null
-        if (!hasRequiredOperations(PluginAbiV1.Capabilities.DIRECT_MESSAGE)) return@lazy null
+        if (!capabilities.canExpose(PluginAbiV1.Capabilities.DIRECT_MESSAGE)) return@lazy null
         DirectMessageAdapter(account, scope)
     }
 
     val directMessage: DirectMessageDataSource? get() = directMessageAdapter
 
     val article: ArticleDataSource? by lazy {
-        if (!hasRequiredOperations(PluginAbiV1.Capabilities.ARTICLE)) return@lazy null
+        if (!capabilities.canExpose(PluginAbiV1.Capabilities.ARTICLE)) return@lazy null
         ArticleAdapter()
     }
 
     val gallery: GalleryDataSource? by lazy {
-        if (!hasRequiredOperations(PluginAbiV1.Capabilities.GALLERY)) return@lazy null
+        if (!capabilities.canExpose(PluginAbiV1.Capabilities.GALLERY)) return@lazy null
         GalleryAdapter()
     }
 
     val pinnableTabs: PinnableTimelineTabDataSource? by lazy {
         val account = accountKey ?: return@lazy null
         val spec = dynamicTimelineSpec ?: return@lazy null
-        if (!has(PluginAbiV1.Capabilities.TAB_CATALOG, "page")) return@lazy null
+        if (!capabilities.hasOperation(PluginAbiV1.Capabilities.TAB_CATALOG, "page")) return@lazy null
         DynamicTabCatalog(account, spec)
     }
 
@@ -244,7 +243,7 @@ internal class PluginExtraCapabilitiesV1(
                 capability = PluginAbiV1.Capabilities.NOTIFICATION,
                 operation = "page",
                 identity = listOf(type.toWire().orEmpty()),
-                directions = directions(PluginAbiV1.Capabilities.NOTIFICATION, "page"),
+                directions = capabilities.directions(PluginAbiV1.Capabilities.NOTIFICATION, "page"),
                 load = { pageSize, request ->
                     invoker.invoke(
                         capabilityId = PluginAbiV1.Capabilities.NOTIFICATION,
@@ -467,7 +466,10 @@ internal class PluginExtraCapabilitiesV1(
                     request: PagingRequest,
                 ): PagingResult<UiDMItem> {
                     val pageRequest = request.toWire(pageSize)
-                    if (!pageRequest.direction.isSupportedBy(directions(PluginAbiV1.Capabilities.DIRECT_MESSAGE, "messages"))) {
+                    if (!pageRequest.direction.isSupportedBy(
+                            capabilities.directions(PluginAbiV1.Capabilities.DIRECT_MESSAGE, "messages"),
+                        )
+                    ) {
                         return PagingResult(endOfPaginationReached = true)
                     }
                     val page =
@@ -701,7 +703,7 @@ internal class PluginExtraCapabilitiesV1(
                     request: PagingRequest,
                 ): PagingResult<TimelineCandidate<*>> {
                     val pageRequest = request.toWire(pageSize)
-                    if (!pageRequest.direction.isSupportedBy(directions(PluginAbiV1.Capabilities.TAB_CATALOG, "page"))) {
+                    if (!pageRequest.direction.isSupportedBy(capabilities.directions(PluginAbiV1.Capabilities.TAB_CATALOG, "page"))) {
                         return PagingResult(endOfPaginationReached = true)
                     }
                     val page =
@@ -759,7 +761,7 @@ internal class PluginExtraCapabilitiesV1(
             capability = capability,
             operation = operation,
             identity = listOf(key.id, key.host),
-            directions = directions(capability, operation),
+            directions = capabilities.directions(capability, operation),
             load = { pageSize, request ->
                 invoker.invoke(
                     capabilityId = capability,
@@ -781,7 +783,7 @@ internal class PluginExtraCapabilitiesV1(
         entityToken: String? = null,
     ): PagingResult<UiProfile> {
         val pageRequest = request.toWire(pageSize)
-        if (!pageRequest.direction.isSupportedBy(directions(PluginAbiV1.Capabilities.LIST, operation))) {
+        if (!pageRequest.direction.isSupportedBy(capabilities.directions(PluginAbiV1.Capabilities.LIST, operation))) {
             return PagingResult(endOfPaginationReached = true)
         }
         val page =
@@ -807,7 +809,7 @@ internal class PluginExtraCapabilitiesV1(
         entity: MicroBlogKey? = null,
         onItem: (Wire) -> Unit = {},
     ): PagingResult<Ui> {
-        if (!page.direction.isSupportedBy(directions(capability, operation))) {
+        if (!page.direction.isSupportedBy(capabilities.directions(capability, operation))) {
             return PagingResult(endOfPaginationReached = true)
         }
         val response =
@@ -833,14 +835,6 @@ internal class PluginExtraCapabilitiesV1(
         response.items.forEach(onItem)
         return response.toPagingResult(map)
     }
-
-    private fun has(
-        capability: String,
-        operation: String,
-    ): Boolean = operation in operations[capability].orEmpty()
-
-    private fun hasRequiredOperations(capability: String): Boolean =
-        PluginAbiV1.hasRequiredOperations(capability, operations[capability].orEmpty())
 }
 
 @kotlinx.serialization.Serializable

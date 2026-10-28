@@ -84,6 +84,47 @@ class PluginDetailCapabilityTest {
         }
 
     @Test
+    fun partialCapabilitiesKeepHostEntrypointsAndMappedRoutesConsistent() =
+        runBlocking<Unit> {
+            val plugin = install()
+            for (missing in listOf("page", "badge")) {
+                val source =
+                    authenticated(
+                        plugin,
+                        unavailableOperations =
+                            mapOf(
+                                PluginAbiV1.Capabilities.NOTIFICATION to setOf(missing),
+                                PluginAbiV1.Capabilities.ARTICLE to setOf("comments"),
+                            ),
+                    )
+                val notification = requireNotNull(source.capabilitySet.notification)
+                assertEquals(missing != "page", notification.timeline != null)
+                assertEquals(missing != "badge", notification.events != null)
+                assertEquals(null, source.capabilitySet.article)
+                assertEquals(ClickEvent.Noop, detailPosts(source)[2].clickEvent)
+                assertIs<ClickEvent.Deeplink>(detailPosts(source)[3].clickEvent)
+            }
+        }
+
+    @Test
+    fun guestsKeepDetailRoutesWithoutAccountCapabilities() =
+        runBlocking<Unit> {
+            val plugin = install(manifest = MANIFEST.replace("\"capabilities\": {", "\"guest\": {\"enabled\": true}, \"capabilities\": {"))
+            val source = PluginDataSourceV1.guest(plugin, runtimePool, ORIGIN, "en", emptyMap(), null)
+            val capabilities = source.capabilitySet
+            assertEquals(null, capabilities.relation)
+            assertEquals(null, capabilities.list)
+            assertEquals(null, capabilities.notification)
+            assertEquals(null, capabilities.directMessage)
+            assertEquals(null, capabilities.tabCatalog)
+            assertTrue(capabilities.article != null)
+            assertTrue(capabilities.gallery != null)
+            val posts = detailPosts(source)
+            assertIs<DeeplinkRoute.Article>(DeeplinkRoute.parse(assertIs<ClickEvent.Deeplink>(posts[2].clickEvent).url))
+            assertIs<DeeplinkRoute.Gallery.Detail>(DeeplinkRoute.parse(assertIs<ClickEvent.Deeplink>(posts[3].clickEvent).url))
+        }
+
+    @Test
     fun pluginTimelinesRemainAvailableToMixedTimelineLoaders() =
         runBlocking<Unit> {
             val plugin = install()
@@ -528,6 +569,7 @@ class PluginDetailCapabilityTest {
     private suspend fun authenticated(
         plugin: RunningPluginV1,
         unavailableCapabilities: Set<String> = emptySet(),
+        unavailableOperations: Map<String, Set<String>> = emptyMap(),
         accountKey: MicroBlogKey = MicroBlogKey("account-1", "plugin.example"),
         origin: String = ORIGIN,
     ): PluginDataSourceV1 {
@@ -540,7 +582,7 @@ class PluginDetailCapabilityTest {
                 capabilities =
                     plugin.installed.manifest.platform.capabilities
                         .filterKeys { it !in unavailableCapabilities }
-                        .mapValues { it.value.operations.keys },
+                        .mapValues { (id, declaration) -> declaration.operations.keys - unavailableOperations[id].orEmpty() },
             )
         return PluginDataSourceV1.authenticated(
             plugin = plugin,

@@ -875,4 +875,20 @@
     <string name="plugin_development_review">Only load code you trust. This code temporarily replaces the installed plugin and uses your existing accounts and data. Account changes are real and are not undone when development stops. Restarting the app restores the installed version.</string>
     <string name="plugin_development_schema">The credential format changed. Existing accounts may need to sign in again, including after returning to the installed version.</string>
     <string name="plugin_development_diagnostics">Recent calls (no request or response data)</string>
+    <string name="plugin_ai_create">Create with AI</string>
+    <string name="plugin_ai_untitled">New plugin</string>
+    <string name="plugin_ai_edit">Continue creating</string>
+    <string name="plugin_ai_stop">Stop generating</string>
+    <string name="plugin_ai_allow">Allow and continue</string>
+    <string name="plugin_ai_enabled">Enabled</string>
+    <string name="plugin_ai_running">The current version is running</string>
+    <string name="plugin_ai_idle">Ready to edit</string>
+    <string name="plugin_ai_generating">Generating</string>
+    <string name="plugin_ai_validating">Validating</string>
+    <string name="plugin_ai_approval">Permission required</string>
+    <string name="plugin_ai_waiting">Waiting for login or writes to finish</string>
+    <string name="plugin_ai_applied">Up to date</string>
+    <string name="plugin_ai_failed">Changes could not be applied</string>
+    <string name="plugin_ai_credentials_changed">Account credentials changed. Existing accounts will need to sign in again.</string>
+    <string name="plugin_ai_delete_message">Delete %1$s and its local source? Existing accounts and conversation history are kept.</string>
 </resources>

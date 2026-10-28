@@ -55,6 +55,11 @@ public class PluginOAuthLoginCoordinatorV1(
     private val entropy: PluginLoginEntropyV1 = PlatformPluginLoginEntropyV1,
     private val nowEpochMillis: () -> Long = { Clock.System.now().toEpochMilliseconds() },
 ) {
+    internal suspend fun hasPending(pluginId: String): Boolean {
+        pendingStore.pruneCreatedBefore((nowEpochMillis() - OAUTH_TTL_MILLIS).coerceAtLeast(0))
+        return pendingStore.hasPending(pluginId)
+    }
+
     public suspend fun begin(
         plugin: RunningPluginV1,
         methodId: String,
@@ -175,6 +180,8 @@ public class PluginOAuthLoginCoordinatorV1(
         plugin.requireLoginMethod(pending.methodId, LoginInteractionV1.OAuth)
         require(PluginUrlPolicy.requireOrigin(pending.origin) == pending.origin) { "Invalid OAuth pending origin" }
         require(pending.redirectUri == pluginOAuthRedirectUri(pending.flowId)) { "Invalid OAuth pending redirect URI" }
+        // Retain the callback job before consuming its record so reload cannot slip between consumption and the exchange.
+        plugin.session.invoke("login.oauth.resume") { Unit }
         if (!pendingStore.consume(pending)) throw PluginLoginException("oauth.replay", "OAuth callback was already consumed")
 
         val context = plugin.loginContext(pending.origin, locale, pending.expectedAccountId)

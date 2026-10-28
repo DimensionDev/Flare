@@ -1,5 +1,6 @@
 package dev.dimension.flare.ui.screen.agent
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -65,18 +66,22 @@ internal fun AgentChatScreen(
         },
         modifier = modifier,
         topBar = {
-            FlareTopAppBar(
-                title = {
-                    Text(
-                        text = title,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                },
-                navigationIcon = {
-                    BackButton(onBack = onBack)
-                },
-            )
+            Column {
+                FlareTopAppBar(
+                    title = {
+                        Text(
+                            text = title,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    },
+                    navigationIcon = {
+                        BackButton(onBack = onBack)
+                    },
+                )
+                dev.dimension.flare.ui.component.agent
+                    .PluginAuthoringCard(state)
+            }
         },
     )
 }

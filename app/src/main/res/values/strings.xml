@@ -964,4 +964,20 @@
     <string name="plugin_warning_source_changed">This installation changes the plugin source</string>
     <string name="plugin_warning_tag_moved">This tag now points to a different commit</string>
     <string name="plugin_unverified_github_warning">This GitHub plugin has not been verified. Only install it if you trust the author.</string>
+    <string name="plugin_ai_create">Create with AI</string>
+    <string name="plugin_ai_untitled">New plugin</string>
+    <string name="plugin_ai_edit">Continue creating</string>
+    <string name="plugin_ai_stop">Stop generating</string>
+    <string name="plugin_ai_allow">Allow and continue</string>
+    <string name="plugin_ai_enabled">Enabled</string>
+    <string name="plugin_ai_running">The current version is running</string>
+    <string name="plugin_ai_idle">Ready to edit</string>
+    <string name="plugin_ai_generating">Generating</string>
+    <string name="plugin_ai_validating">Validating</string>
+    <string name="plugin_ai_approval">Permission required</string>
+    <string name="plugin_ai_waiting">Waiting for login or writes to finish</string>
+    <string name="plugin_ai_applied">Up to date</string>
+    <string name="plugin_ai_failed">Changes could not be applied</string>
+    <string name="plugin_ai_credentials_changed">Account credentials changed. Existing accounts will need to sign in again.</string>
+    <string name="plugin_ai_delete_message">Delete %1$s and its local source? Existing accounts and conversation history are kept.</string>
 </resources>

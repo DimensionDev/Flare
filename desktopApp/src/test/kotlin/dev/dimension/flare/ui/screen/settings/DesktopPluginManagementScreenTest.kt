@@ -20,7 +20,9 @@ import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.common.FileSystemUtilsExt
+import dev.dimension.flare.data.repository.PluginAuthoring
 import dev.dimension.flare.di.DesktopKoinApplication
+import dev.dimension.flare.di.koinGet
 import dev.dimension.flare.feature.plugin.PluginSubsystemV1
 import dev.dimension.flare.feature.plugin.github.GitHubPluginRepositoryV1
 import dev.dimension.flare.feature.plugin.github.GitHubPluginVersionV1
@@ -67,6 +69,46 @@ class DesktopPluginManagementScreenTest {
         stopKoin()
         System.setProperty("user.home", originalHome)
         root.toFile().deleteRecursively()
+    }
+
+    @Test
+    fun creatingAnAiPluginImmediatelySavesItAndOpensItsOwnConversation() {
+        var opened: String? = null
+        compose.setContent {
+            if (visible) {
+                CompositionLocalProvider(LocalComposeWindow provides null) {
+                    FlareTheme(isDarkTheme = false) {
+                        Box(Modifier.width(448.dp).height(800.dp)) {
+                            DesktopPluginManagementScreen(onBack = {}, onOpenPlugin = { opened = it })
+                        }
+                    }
+                }
+            }
+        }
+        compose.onNodeWithText("Create with AI").assertIsDisplayed().performClick()
+        val authoring = koinGet<PluginAuthoring>()
+        compose.waitUntil(5_000) { authoring.plugins.value.size == 1 && opened != null }
+        compose.runOnIdle {
+            assertEquals(
+                authoring.plugins.value
+                    .single()
+                    .conversationId,
+                opened,
+            )
+        }
+        compose.onNodeWithText("New plugin").assertIsDisplayed()
+        val firstConversation = opened
+        compose.onNodeWithText("Create with AI").performClick()
+        compose.waitUntil(5_000) { authoring.plugins.value.size == 2 && opened != firstConversation }
+        compose.runOnIdle {
+            assertEquals(
+                2,
+                authoring.plugins.value
+                    .map { it.conversationId }
+                    .toSet()
+                    .size,
+            )
+        }
     }
 
     @Test

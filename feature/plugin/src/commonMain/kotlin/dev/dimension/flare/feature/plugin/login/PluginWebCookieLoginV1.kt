@@ -142,6 +142,7 @@ public class PluginWebCookieSessionV1 internal constructor(
 ) {
     private val checkMutex = Mutex()
     private var closed = false
+    private val releaseInteraction = plugin.session.holdInteraction()
 
     /** Returns [PluginCookieCheckResultV1.Busy] instead of queuing overlapping poll ticks. */
     public suspend fun check(snapshot: CookieSnapshotV1): PluginCookieCheckResultV1 {
@@ -184,6 +185,7 @@ public class PluginWebCookieSessionV1 internal constructor(
                 is LoginTransitionV1.Success -> {
                     val success = plugin.requireLoginSuccess(transition.value, context.metadata.origin, expectedAccountId)
                     closed = true
+                    releaseInteraction()
                     withContext(NonCancellable) { runtimePool.close(key) }
                     PluginCookieCheckResultV1.Success(success)
                 }
@@ -203,6 +205,7 @@ public class PluginWebCookieSessionV1 internal constructor(
         checkMutex.withLock {
             if (closed) return
             closed = true
+            releaseInteraction()
             withContext(NonCancellable) { runtimePool.close(key) }
         }
     }

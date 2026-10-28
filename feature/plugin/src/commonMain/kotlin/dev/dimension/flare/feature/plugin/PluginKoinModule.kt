@@ -5,6 +5,7 @@ import dev.dimension.flare.common.Message
 import dev.dimension.flare.data.datastore.PlatformOAuthPendingRepository
 import dev.dimension.flare.data.io.AppFileStore
 import dev.dimension.flare.data.repository.AccountService
+import dev.dimension.flare.data.repository.PluginAuthoring
 import dev.dimension.flare.feature.plugin.login.PluginOAuthCallbackCoordinatorV1
 import dev.dimension.flare.model.PlatformSpecSource
 import kotlinx.coroutines.CoroutineScope
@@ -17,6 +18,9 @@ import kotlin.native.HiddenFromObjC
 @Module
 @Configuration
 internal class PluginKoinModule {
+    @Single
+    fun authoring(subsystem: PluginSubsystemV1): PluginAuthoring = subsystem.authoring
+
     @Single
     fun subsystem(
         appFiles: AppFileStore,

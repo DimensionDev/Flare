@@ -5,6 +5,7 @@ import dev.dimension.flare.data.io.AppFileStore
 import dev.dimension.flare.data.repository.AccountService
 import dev.dimension.flare.di.koinGet
 import dev.dimension.flare.feature.plugin.adapter.PluginPlatformSpecSourceV1
+import dev.dimension.flare.feature.plugin.authoring.PluginAuthoringServiceV1
 import dev.dimension.flare.feature.plugin.development.PluginDevelopmentSessionV1
 import dev.dimension.flare.feature.plugin.development.PluginDevelopmentStateV1
 import dev.dimension.flare.feature.plugin.github.GitHubPluginClient
@@ -64,6 +65,10 @@ public class PluginSubsystemV1 internal constructor(
     public val developmentState: StateFlow<PluginDevelopmentStateV1> = mutableDevelopmentState.asStateFlow()
     public val development: PluginDevelopmentSessionV1 by lazy {
         PluginDevelopmentSessionV1(this, koinGet<PlatformRegistry>(), koinGet<AccountService>(), koinGet<CoroutineScope>())
+    }
+
+    internal val authoring: PluginAuthoringServiceV1 by lazy {
+        PluginAuthoringServiceV1(this, { koinGet<PlatformRegistry>() }, { koinGet<AccountService>() }, { koinGet<CoroutineScope>() })
     }
 
     internal fun replaceRunning(

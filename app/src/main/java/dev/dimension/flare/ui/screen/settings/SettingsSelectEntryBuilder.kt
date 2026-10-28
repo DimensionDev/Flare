@@ -98,7 +98,7 @@ internal fun EntryProviderScope<NavKey>.settingsSelectEntryBuilder(
     entry<Route.Settings.Plugins>(
         metadata = ListDetailSceneStrategy.detailPane(sceneKey = "Settings")
     ) {
-        AndroidPluginManagementScreen(onBack = onBack)
+        AndroidPluginManagementScreen(onBack = onBack, onOpenPlugin = { navigate(Route.AgentChat(it, null)) })
     }
 
     entry<Route.Settings.AppearanceTheme>(

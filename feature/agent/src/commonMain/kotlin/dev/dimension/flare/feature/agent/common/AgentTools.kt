@@ -55,6 +55,7 @@ internal class AgentToolProvider(
     private val platformRegistry: PlatformRegistry,
 ) {
     fun resolve(context: AgentToolContext): AgentToolSet {
+        context.plugin?.let { return pluginAuthoringTools(it) }
         val statusContext = context.status
         val microblogDataSource = statusContext?.microblogDataSource
         val searchTargets =
@@ -489,6 +490,7 @@ internal class AgentToolProvider(
 internal data class AgentToolContext(
     val status: StatusContext? = null,
     val searchDataSources: List<AccountMicroblogDataSource> = emptyList(),
+    val plugin: AgentPluginContext? = null,
 ) {
     data class StatusContext(
         val postDataSource: PostDataSource,

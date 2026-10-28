@@ -14,6 +14,7 @@ public struct PluginManagementView: View {
     @State private var facade: PluginAppleFacadeV1
     @State private var presenter: KotlinPresenter<PluginManagementStateV1>
     @State private var importsPlugin = false
+    @State private var createdPluginConversation: String?
     @State private var showsGitHubInstall = false
     @State private var gitHubURL = ""
     @State private var selectedGitHubTag = ""
@@ -32,6 +33,28 @@ public struct PluginManagementView: View {
 
     public var body: some View {
         List {
+            Button("plugin_ai_create") {
+                Task {
+                    do { createdPluginConversation = try await facade.createPlugin() }
+                    catch { fileError = error.localizedDescription }
+                }
+            }
+            ForEach(presenter.state.authoredPlugins, id: \.id) { plugin in
+                NavigationLink {
+                    AuthoredPluginChatView(conversationId: plugin.conversationId)
+                } label: {
+                    VStack(alignment: .leading) {
+                        Text(plugin.name.isEmpty ? String(localized: "plugin_ai_untitled") : plugin.name)
+                        Text(pluginAuthoringLabel(plugin.phase)).font(.caption).foregroundStyle(.secondary)
+                    }
+                }
+                .contextMenu {
+                    Button("plugin_uninstall", role: .destructive) {
+                        pendingUninstallId = plugin.id
+                        pendingUninstallName = plugin.name
+                    }
+                }
+            }
             #if os(macOS)
             if showsDevelopment || presenter.state.development.directory != nil {
                 developmentSection
@@ -86,7 +109,7 @@ public struct PluginManagementView: View {
                 }
             }
 
-            if presenter.state.plugins.isEmpty {
+            if presenter.state.plugins.isEmpty && presenter.state.authoredPlugins.isEmpty {
                 ContentUnavailableView(
                     "plugin_empty",
                     systemImage: "puzzlepiece.extension",
@@ -95,13 +118,16 @@ public struct PluginManagementView: View {
                 .listRowBackground(Color.clear)
             } else {
                 Section {
-                    ForEach(presenter.state.plugins, id: \.pluginId) { plugin in
+                    ForEach(presenter.state.plugins.filter { installed in !presenter.state.authoredPlugins.contains { $0.id == installed.pluginId } }, id: \.pluginId) { plugin in
                         pluginRow(plugin)
                     }
                 }
             }
         }
         .navigationTitle("settings_plugins_title")
+        .navigationDestination(item: $createdPluginConversation) { conversationId in
+            AuthoredPluginChatView(conversationId: conversationId)
+        }
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Button {
@@ -208,7 +234,7 @@ public struct PluginManagementView: View {
         } message: {
             Text(
                 String(
-                    format: String(localized: "plugin_uninstall_confirm_message"),
+                    format: presenter.state.authoredPlugins.contains { $0.id == pendingUninstallId } ? String(localized: "plugin_ai_delete_message") : String(localized: "plugin_uninstall_confirm_message"),
                     pendingUninstallName ?? ""
                 )
             )
@@ -339,7 +365,7 @@ public struct PluginManagementView: View {
             .disabled(state.busy)
         } message: {
             Text(([String(localized: "plugin_development_review")]
-                  + state.permissions.map { "• " + permissionText($0) }
+                  + state.permissions.map { "• " + pluginPermissionText($0) }
                   + (state.credentialSchemaChanged ? [String(localized: "plugin_development_schema")] : []))
                 .joined(separator: "\n"))
         }
@@ -495,34 +521,10 @@ public struct PluginManagementView: View {
         if !review.permissions.isEmpty {
             lines.append("")
             lines.append(String(localized: "plugin_permissions"))
-            lines.append(contentsOf: review.permissions.map { "• " + permissionText($0) })
+            lines.append(contentsOf: review.permissions.map { "• " + pluginPermissionText($0) })
         }
         lines.append(contentsOf: review.warnings.compactMap(warningText))
         return lines.joined(separator: "\n")
-    }
-
-    private func permissionText(_ permission: PluginSensitivePermissionV1) -> String {
-        if permission.type == .mediaNetwork {
-            return String(localized: "plugin_permission_media_network")
-        }
-        let accountToken = "$accountOrigin"
-        let accountRelativePath =
-            permission.origin == accountToken || permission.origin.hasPrefix(accountToken + "/")
-                ? String(permission.origin.dropFirst(accountToken.count))
-                : nil
-        let origin = accountRelativePath.map {
-            String(localized: "plugin_permission_account_origin_label") + $0
-        } ?? permission.origin
-        guard let cookieName = permission.cookieName else {
-            return accountRelativePath == nil
-                ? origin
-                : String(localized: "plugin_permission_account_origin")
-        }
-        return String(
-            format: String(localized: "plugin_permission_cookie"),
-            origin,
-            cookieName
-        )
     }
 
     private func warningText(_ warning: PluginInstallWarningV1) -> String? {
@@ -567,3 +569,53 @@ private enum PluginDevelopmentDirectoryAccess {
     }
 }
 #endif
+
+private struct AuthoredPluginChatView: View {
+    @State private var presenter: KotlinPresenter<GenericChatPresenterState>
+
+    init(conversationId: String) {
+        _presenter = State(initialValue: KotlinPresenter(presenter: GenericChatPresenter(conversationId: conversationId, initialMessage: nil)))
+    }
+
+    var body: some View {
+        AgentChatView(
+            messages: presenter.state.messages,
+            isRunning: presenter.state.room.isRunning,
+            canSend: presenter.state.canSend,
+            errorMessage: presenter.state.room.errorMessage,
+            runningTrace: String(localized: "agent_chat_thinking"),
+            inputPlaceholder: String(localized: "agent_chat_input_placeholder"),
+            onInputChange: presenter.state.setInput,
+            onSend: presenter.state.sendMessage,
+            onInputRequestOptionSelected: presenter.state.selectInputRequestOption,
+            onPostClick: { _ in },
+            onUserClick: { _ in },
+            pluginState: presenter.state
+        )
+        .navigationTitle(presenter.state.plugin?.name.isEmpty == false ? presenter.state.plugin!.name : String(localized: "plugin_ai_untitled"))
+    }
+}
+
+func pluginPermissionText(_ permission: PluginSensitivePermissionV1) -> String {
+    if permission.type == .mediaNetwork {
+        return String(localized: "plugin_permission_media_network")
+    }
+    let accountToken = "$accountOrigin"
+    let accountRelativePath =
+        permission.origin == accountToken || permission.origin.hasPrefix(accountToken + "/")
+            ? String(permission.origin.dropFirst(accountToken.count))
+            : nil
+    let origin = accountRelativePath.map {
+        String(localized: "plugin_permission_account_origin_label") + $0
+    } ?? permission.origin
+    guard let cookieName = permission.cookieName else {
+        return accountRelativePath == nil
+            ? origin
+            : String(localized: "plugin_permission_account_origin")
+    }
+    return String(
+        format: String(localized: "plugin_permission_cookie"),
+        origin,
+        cookieName
+    )
+}

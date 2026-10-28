@@ -763,7 +763,7 @@ internal fun Router(
                 }
 
                 entry<Route.PluginManagement> {
-                    DesktopPluginManagementScreen(onBack = onBack)
+                    DesktopPluginManagementScreen(onBack = onBack, onOpenPlugin = { navigate(Route.AgentChat(it, null)) })
                 }
 
                 entry<Route.PostActionLayout> {

@@ -13,6 +13,20 @@ import kotlin.test.assertTrue
 
 class PluginSessionV1Test {
     @Test
+    fun protectedRetirementWaitsForBrowserInteraction() =
+        runBlocking<Unit> {
+            val session = PluginSessionV1()
+            val release = session.holdInteraction()
+            assertFailsWith<PluginSessionBusyException> { session.retire(protectInteractions = true) }
+            assertTrue(session.isActive)
+            release()
+            session.retire(protectInteractions = true)
+            assertFalse(session.isActive)
+            release()
+            assertFailsWith<PluginSessionRetiredException> { session.holdInteraction() }
+        }
+
+    @Test
     fun retirementCancelsDownstreamWritesAndRunsCleanup() =
         runBlocking {
             val session = PluginSessionV1()

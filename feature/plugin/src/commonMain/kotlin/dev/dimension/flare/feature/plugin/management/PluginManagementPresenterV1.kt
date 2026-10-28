@@ -1,5 +1,6 @@
 package dev.dimension.flare.feature.plugin.management
 
+import dev.dimension.flare.data.repository.AuthoredPlugin
 import dev.dimension.flare.feature.plugin.PluginSubsystemV1
 import dev.dimension.flare.feature.plugin.development.PluginDevelopmentStateV1
 import dev.dimension.flare.feature.plugin.github.GitHubPluginCatalogV1
@@ -46,6 +47,7 @@ public data class PluginManagementStateV1(
     val githubCatalog: GitHubPluginCatalogV1? = null,
     val updatesChecked: Boolean = false,
     val development: PluginDevelopmentStateV1 = PluginDevelopmentStateV1(),
+    val authoredPlugins: List<AuthoredPlugin> = emptyList(),
 )
 
 public data class PluginManagementItemV1(
@@ -100,6 +102,7 @@ public class PluginManagementPresenterV1(
             subsystem.running,
             subsystem.developmentState,
         ) { _, _, _, _, _ -> snapshot() }
+            .combine(subsystem.authoring.plugins) { _, _ -> snapshot() }
             .onEach { snapshot ->
                 val current = mutableState.value
                 mutableState.value =
@@ -235,6 +238,12 @@ public class PluginManagementPresenterV1(
         pluginId: String,
         enabled: Boolean,
     ) {
+        if (subsystem.authoring.plugins.value
+                .any { it.id == pluginId }
+        ) {
+            runAuthoringAction { subsystem.authoring.setEnabled(pluginId, enabled) }
+            return
+        }
         runAction {
             requireNotDeveloping(pluginId)
             subsystem.stateStore.setEnabled(pluginId, enabled)
@@ -242,7 +251,15 @@ public class PluginManagementPresenterV1(
         }
     }
 
+    public suspend fun createPlugin(): String = runAuthoringAction { subsystem.authoring.create().conversationId }
+
     public suspend fun uninstall(pluginId: String) {
+        if (subsystem.authoring.plugins.value
+                .any { it.id == pluginId }
+        ) {
+            runAuthoringAction { subsystem.authoring.delete(pluginId) }
+            return
+        }
         runAction {
             requireNotDeveloping(pluginId)
             subsystem.stateStore.uninstall(pluginId)
@@ -299,6 +316,7 @@ public class PluginManagementPresenterV1(
                     .sortedBy(PluginRuntimeIssueV1::pluginId),
             requiresRestart = subsystem.stateStore.requiresRestart,
             development = subsystem.developmentState.value,
+            authoredPlugins = subsystem.authoring.plugins.value,
             canRebuildIndex = !desired.indexHealthy,
             githubCatalog = githubCatalog,
             updatesChecked = updatesChecked,
@@ -317,6 +335,18 @@ public class PluginManagementPresenterV1(
         preview = null
         mutableState.value = mutableState.value.copy(pendingInstall = null)
         if (previous != null) subsystem.installer.discard(previous)
+    }
+
+    private suspend fun <T> runAuthoringAction(block: suspend () -> T): T {
+        try {
+            val result = block()
+            mutableState.value = snapshot().copy(busy = mutableState.value.busy)
+            return result
+        } catch (error: Exception) {
+            if (error is CancellationException) throw error
+            mutableState.value = snapshot().copy(busy = mutableState.value.busy, error = error.message ?: "Plugin operation failed")
+            throw error
+        }
     }
 
     private suspend fun <T> runAction(block: suspend () -> T): T =

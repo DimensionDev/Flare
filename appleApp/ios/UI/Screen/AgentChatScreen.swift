@@ -25,7 +25,8 @@ struct AgentChatScreen: View {
                 if let route = agentRoute(for: user) {
                     onNavigate(route)
                 }
-            }
+            },
+            pluginState: presenter.state
         )
         .navigationTitle(presenter.state.room.title.isEmpty ? String(localized: "agent_chat_title") : presenter.state.room.title)
         .navigationBarTitleDisplayMode(.inline)

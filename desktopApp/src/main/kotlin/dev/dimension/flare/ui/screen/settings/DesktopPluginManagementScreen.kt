@@ -54,6 +54,10 @@ import dev.dimension.flare.feature.plugin.management.PluginManagementItemV1
 import dev.dimension.flare.feature.plugin.management.PluginManagementPresenterV1
 import dev.dimension.flare.feature.plugin.management.PluginManagementStateV1
 import dev.dimension.flare.more
+import dev.dimension.flare.plugin_ai_create
+import dev.dimension.flare.plugin_ai_delete_message
+import dev.dimension.flare.plugin_ai_edit
+import dev.dimension.flare.plugin_ai_untitled
 import dev.dimension.flare.plugin_capabilities
 import dev.dimension.flare.plugin_check_updates
 import dev.dimension.flare.plugin_cleanup
@@ -108,6 +112,7 @@ import io.github.composefluent.ProvideTextStyle
 import io.github.composefluent.background.BackgroundSizing
 import io.github.composefluent.background.Layer
 import io.github.composefluent.component.AccentButton
+import io.github.composefluent.component.Button
 import io.github.composefluent.component.CardExpanderItem
 import io.github.composefluent.component.ComboBox
 import io.github.composefluent.component.ContentDialog
@@ -131,7 +136,10 @@ import java.awt.FileDialog
 import java.io.File
 
 @Composable
-internal fun DesktopPluginManagementScreen(onBack: () -> Unit) {
+internal fun DesktopPluginManagementScreen(
+    onBack: () -> Unit,
+    onOpenPlugin: (String) -> Unit = {},
+) {
     val window = LocalComposeWindow.current
     val subsystem = koinInject<PluginSubsystemV1>()
     val scope = rememberCoroutineScope()
@@ -147,6 +155,7 @@ internal fun DesktopPluginManagementScreen(onBack: () -> Unit) {
     var showsDevelopment by remember { mutableStateOf(false) }
     var pendingUninstallId by remember { mutableStateOf<String?>(null) }
     val pendingUninstall = state.plugins.firstOrNull { it.pluginId == pendingUninstallId }
+    val pendingAuthored = state.authoredPlugins.firstOrNull { it.id == pendingUninstallId }
 
     if (showsGitHubInstall) {
         GitHubInstallDialog(
@@ -171,12 +180,12 @@ internal fun DesktopPluginManagementScreen(onBack: () -> Unit) {
     }
     ContentDialog(
         title = stringResource(Res.string.plugin_uninstall_confirm_title),
-        visible = pendingUninstall != null,
+        visible = pendingUninstall != null || pendingAuthored != null,
         content = {
             Text(
                 stringResource(
-                    Res.string.plugin_uninstall_confirm_message,
-                    pendingUninstall?.nameText?.resolveText().orEmpty(),
+                    if (pendingAuthored != null) Res.string.plugin_ai_delete_message else Res.string.plugin_uninstall_confirm_message,
+                    pendingUninstall?.nameText?.resolveText() ?: pendingAuthored?.name.orEmpty(),
                 ),
             )
         },
@@ -184,7 +193,7 @@ internal fun DesktopPluginManagementScreen(onBack: () -> Unit) {
         closeButtonText = stringResource(Res.string.cancel),
         onButtonClick = { button ->
             if (button == ContentDialogButton.Primary) {
-                pendingUninstall?.pluginId?.let { pluginId ->
+                pendingUninstallId?.let { pluginId ->
                     scope.launchPresenterAction { presenter.uninstall(pluginId) }
                 }
             }
@@ -299,6 +308,17 @@ internal fun DesktopPluginManagementScreen(onBack: () -> Unit) {
             }
             PluginManagementList(
                 state = state,
+                onCreatePlugin = {
+                    scope.launchPresenterAction {
+                        onOpenPlugin(
+                            dev.dimension.flare.di
+                                .koinGet<dev.dimension.flare.data.repository.PluginAuthoring>()
+                                .create()
+                                .conversationId,
+                        )
+                    }
+                },
+                onOpenPlugin = onOpenPlugin,
                 development =
                     if (showsDevelopment || state.development.directory != null) {
                         {
@@ -470,6 +490,8 @@ private fun GitHubInstallDialog(
 @Composable
 private fun PluginManagementList(
     state: PluginManagementStateV1,
+    onCreatePlugin: () -> Unit,
+    onOpenPlugin: (String) -> Unit,
     onSetEnabled: (String, Boolean) -> Unit,
     onUninstall: (String) -> Unit,
     onUpdate: (String) -> Unit,
@@ -488,6 +510,29 @@ private fun PluginManagementList(
             verticalArrangement = Arrangement.spacedBy(8.dp),
             contentPadding = PaddingValues(vertical = 12.dp),
         ) {
+            item(key = "create-ai-plugin") {
+                Button(onClick = onCreatePlugin) { Text(stringResource(Res.string.plugin_ai_create)) }
+            }
+            items(state.authoredPlugins, key = { it.id }) { plugin ->
+                Layer(modifier = Modifier.fillMaxWidth(), color = FluentTheme.colors.background.card.default) {
+                    Row(
+                        Modifier.fillMaxWidth().padding(12.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Column(Modifier.weight(1f)) {
+                            Text(plugin.name.ifBlank { stringResource(Res.string.plugin_ai_untitled) })
+                            Text(
+                                dev.dimension.flare.ui.component.agent
+                                    .pluginAuthoringLabel(plugin.phase),
+                            )
+                        }
+                        Button(onClick = { onOpenPlugin(plugin.conversationId) }) { Text(stringResource(Res.string.plugin_ai_edit)) }
+                        SubtleButton(onClick = { onUninstall(plugin.id) }) { Text(stringResource(Res.string.plugin_uninstall)) }
+                    }
+                }
+            }
+
             if (development != null) {
                 item(key = "development") { development() }
             }
@@ -538,7 +583,7 @@ private fun PluginManagementList(
                     )
                 }
             }
-            if (state.plugins.isEmpty()) {
+            if (state.plugins.isEmpty() && state.authoredPlugins.isEmpty()) {
                 item(key = "empty") {
                     CardExpanderItem(
                         heading = { Text(stringResource(Res.string.plugin_empty)) },
@@ -547,7 +592,12 @@ private fun PluginManagementList(
                     )
                 }
             } else {
-                items(state.plugins, key = PluginManagementItemV1::pluginId) { plugin ->
+                items(
+                    state.plugins.filterNot { installed ->
+                        state.authoredPlugins.any { it.id == installed.pluginId }
+                    },
+                    key = PluginManagementItemV1::pluginId,
+                ) { plugin ->
                     PluginItem(
                         plugin = plugin,
                         busy = state.busy || (state.development.active && state.development.pluginId == plugin.pluginId),

@@ -80,7 +80,10 @@ import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun AndroidPluginManagementScreen(onBack: () -> Unit) {
+internal fun AndroidPluginManagementScreen(
+    onBack: () -> Unit,
+    onOpenPlugin: (String) -> Unit = {},
+) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val subsystem = koinGet<PluginSubsystemV1>()
@@ -93,6 +96,7 @@ internal fun AndroidPluginManagementScreen(onBack: () -> Unit) {
     var showsGitHubInstall by remember { mutableStateOf(false) }
     var pendingUninstallId by remember { mutableStateOf<String?>(null) }
     val pendingUninstall = state.plugins.firstOrNull { it.pluginId == pendingUninstallId }
+    val pendingAuthored = state.authoredPlugins.firstOrNull { it.id == pendingUninstallId }
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val picker =
         rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
@@ -132,15 +136,15 @@ internal fun AndroidPluginManagementScreen(onBack: () -> Unit) {
             onCancel = { scope.launchPresenterAction { presenter.cancelInstall() } },
         )
     }
-    if (pendingUninstall != null) {
+    if (pendingUninstall != null || pendingAuthored != null) {
         AlertDialog(
             onDismissRequest = { pendingUninstallId = null },
             title = { Text(stringResource(R.string.plugin_uninstall_confirm_title)) },
             text = {
                 Text(
                     stringResource(
-                        R.string.plugin_uninstall_confirm_message,
-                        pendingUninstall.nameText.resolveText(),
+                        if (pendingAuthored != null) R.string.plugin_ai_delete_message else R.string.plugin_uninstall_confirm_message,
+                        pendingUninstall?.nameText?.resolveText() ?: pendingAuthored?.name.orEmpty(),
                     ),
                 )
             },
@@ -148,7 +152,7 @@ internal fun AndroidPluginManagementScreen(onBack: () -> Unit) {
                 TextButton(
                     enabled = !state.busy,
                     onClick = {
-                        val pluginId = pendingUninstall.pluginId
+                        val pluginId = requireNotNull(pendingUninstallId)
                         pendingUninstallId = null
                         scope.launchPresenterAction { presenter.uninstall(pluginId) }
                     },
@@ -198,6 +202,14 @@ internal fun AndroidPluginManagementScreen(onBack: () -> Unit) {
         ) { padding ->
             PluginManagementList(
                 state = state,
+                onCreatePlugin = {
+                    scope.launchPresenterAction {
+                        onOpenPlugin(
+                            presenter.createPlugin(),
+                        )
+                    }
+                },
+                onOpenPlugin = onOpenPlugin,
                 onSetEnabled = { pluginId, enabled ->
                     scope.launchPresenterAction { presenter.setEnabled(pluginId, enabled) }
                 },
@@ -338,7 +350,7 @@ private fun PluginInstallReviewDialog(
 }
 
 @Composable
-private fun PluginSensitivePermissionV1.localizedDescription(): String {
+internal fun PluginSensitivePermissionV1.localizedDescription(): String {
     if (type == dev.dimension.flare.feature.plugin.installer.PluginSensitivePermissionTypeV1.MediaNetwork) {
         return stringResource(R.string.plugin_permission_media_network)
     }
@@ -433,6 +445,8 @@ private fun GitHubInstallDialog(
 @Composable
 private fun PluginManagementList(
     state: PluginManagementStateV1,
+    onCreatePlugin: () -> Unit,
+    onOpenPlugin: (String) -> Unit,
     onSetEnabled: (String, Boolean) -> Unit,
     onUninstall: (String) -> Unit,
     onUpdate: (String) -> Unit,
@@ -443,6 +457,29 @@ private fun PluginManagementList(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
     ) {
+        item(key = "create-ai-plugin") {
+            SegmentedListItem(
+                onClick = onCreatePlugin,
+                shapes = ListItemDefaults.segmentedShapes2(0, 1),
+                content = { Text(stringResource(R.string.plugin_ai_create)) },
+            )
+        }
+        itemsIndexed(state.authoredPlugins, key = { _, plugin -> plugin.id }) { index, plugin ->
+            SegmentedListItem(
+                onClick = { onOpenPlugin(plugin.conversationId) },
+                shapes = ListItemDefaults.segmentedShapes2(index, state.authoredPlugins.size),
+                content = { Text(plugin.name.ifBlank { stringResource(R.string.plugin_ai_untitled) }) },
+                supportingContent = {
+                    Text(
+                        dev.dimension.flare.ui.component.agent
+                            .pluginAuthoringLabel(plugin.phase),
+                    )
+                },
+                trailingContent = {
+                    TextButton(onClick = { onUninstall(plugin.id) }) { Text(stringResource(R.string.plugin_uninstall)) }
+                },
+            )
+        }
         if (state.requiresRestart) {
             item(key = "restart") {
                 MessageItem(
@@ -488,7 +525,7 @@ private fun PluginManagementList(
                 )
             }
         }
-        if (state.plugins.isEmpty()) {
+        if (state.plugins.isEmpty() && state.authoredPlugins.isEmpty()) {
             item(key = "empty") {
                 SegmentedListItem(
                     onClick = {},
@@ -499,14 +536,14 @@ private fun PluginManagementList(
             }
         } else {
             itemsIndexed(
-                items = state.plugins,
+                items = state.plugins.filterNot { installed -> state.authoredPlugins.any { it.id == installed.pluginId } },
                 key = { _, plugin -> plugin.pluginId },
             ) { index, plugin ->
                 PluginItem(
                     plugin = plugin,
                     busy = state.busy,
                     shapesIndex = index,
-                    shapesCount = state.plugins.size,
+                    shapesCount = state.plugins.count { installed -> state.authoredPlugins.none { it.id == installed.pluginId } },
                     onSetEnabled = onSetEnabled,
                     onUninstall = onUninstall,
                     onUpdate = onUpdate,

@@ -12,6 +12,9 @@ import kotlinx.coroutines.CoroutineScope
 
 /** Swift-facing management API; file import and confirmation UI remain native. */
 public class PluginAppleFacadeV1 : PresenterBase<PluginManagementStateV1>() {
+    @Throws(Exception::class)
+    public suspend fun createPlugin(): String = presenter.createPlugin()
+
     public fun prepareDevelopment() {
         koinGet<PluginSubsystemV1>().development
     }

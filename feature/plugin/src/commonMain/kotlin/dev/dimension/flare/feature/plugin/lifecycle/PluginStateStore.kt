@@ -9,6 +9,7 @@ import dev.dimension.flare.feature.plugin.manifest.validate
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.decodeFromString
@@ -29,6 +30,7 @@ public class PluginStateStore private constructor(
 ) {
     private val mutex = Mutex()
     private val startupPlugins = initialIndex?.plugins?.associateBy(InstalledPluginV1::pluginId).orEmpty()
+    private val appliedPlugins = MutableStateFlow(startupPlugins)
     private val mutableDesired =
         MutableStateFlow(
             PluginDesiredSnapshotV1(
@@ -41,9 +43,16 @@ public class PluginStateStore private constructor(
     public val running: PluginRunningSnapshotV1 = captureRunning(initialIndex, initialIssue)
 
     public val requiresRestart: Boolean
-        get() = startupPlugins != desired.value.plugins
+        get() = appliedPlugins.value != desired.value.plugins
 
-    public fun requiresRestart(pluginId: String): Boolean = startupPlugins[pluginId] != desired.value.plugins[pluginId]
+    public fun requiresRestart(pluginId: String): Boolean = appliedPlugins.value[pluginId] != desired.value.plugins[pluginId]
+
+    internal fun markApplied(
+        pluginId: String,
+        installed: InstalledPluginV1?,
+    ) {
+        appliedPlugins.update { if (installed == null) it - pluginId else it + (pluginId to installed) }
+    }
 
     public suspend fun setEnabled(
         pluginId: String,
@@ -97,7 +106,10 @@ public class PluginStateStore private constructor(
             if (!desiredSnapshot.indexHealthy) {
                 throw PluginIndexCorruptException("Plugin index is corrupt; cleanup is disabled")
             }
-            val protectedHashes = running.referencedPackageHashes + desiredSnapshot.plugins.values.map(InstalledPluginV1::packageHash)
+            val protectedHashes =
+                running.referencedPackageHashes +
+                    appliedPlugins.value.values.map(InstalledPluginV1::packageHash) +
+                    desiredSnapshot.plugins.values.map(InstalledPluginV1::packageHash)
             var packages = 0
             var icons = 0
             var staging = 0
@@ -195,6 +207,7 @@ public class PluginStateStore private constructor(
                         installed = installed,
                         packagePath = packagePath.toString(),
                         iconPath = iconPath.toString(),
+                        generation = installed.runtimeGeneration,
                     )
             }
         }
@@ -267,6 +280,7 @@ private fun validateIndex(index: PluginStateIndexV1) {
             .size == index.plugins.size,
     ) { "Duplicate plugin ID" }
     index.plugins.forEach { plugin ->
+        require(plugin.runtimeGeneration >= 0) { "Invalid plugin runtime generation" }
         require(plugin.pluginId == plugin.manifest.id && plugin.version == plugin.manifest.version) { "Plugin identity mismatch" }
         (plugin.source as? PluginInstallSourceV1.GitHub)?.let { source ->
             source.repository.requireValid()

@@ -78,6 +78,30 @@ class PluginLoginCoordinatorV1Test {
         }
 
     @Test
+    fun oauthConsumptionKeepsReloadBlockedUntilTheCallbackCompletes() =
+        runBlocking<Unit> {
+            val start =
+                assertIs<PluginOAuthStartV1.ExternalBrowser>(
+                    async { oauthCoordinator().begin(plugin, "oauth", ORIGIN, "en") }.await(),
+                )
+            assertFalse(plugin.session.hasWrites)
+            val consumed = CompletableDeferred<Unit>()
+            val release = CompletableDeferred<Unit>()
+            pendingStore.afterConsume = {
+                consumed.complete(Unit)
+                release.await()
+            }
+            val callback = async { oauthCoordinator().resume("${pluginOAuthRedirectUri(start.flowId)}?code=ok&state=$STATE", "en") }
+            consumed.await()
+            assertNull(pendingStore.load(start.flowId))
+            assertFailsWith<IllegalStateException> { plugin.session.retire(protectInteractions = true) }
+            release.complete(Unit)
+            assertEquals(ACCOUNT_ID, callback.await().accountId)
+            plugin.session.retire(protectInteractions = true)
+            assertFalse(plugin.session.isActive)
+        }
+
+    @Test
     fun loginAndReloginHttpRequestsKeepPolicyAfterOAuthRecreation() =
         runBlocking {
             val httpProbe = "await flare.http.request({ url: request.origin + '/probe' });"
@@ -618,6 +642,7 @@ private class RecordingAccountService : AccountService {
 }
 
 private class MemoryPendingStore : PluginOAuthPendingStoreV1 {
+    var afterConsume: suspend () -> Unit = {}
     private var pending: PluginOAuthPendingV1? = null
 
     override suspend fun save(pending: PluginOAuthPendingV1) {
@@ -629,6 +654,7 @@ private class MemoryPendingStore : PluginOAuthPendingStoreV1 {
     override suspend fun consume(pending: PluginOAuthPendingV1): Boolean {
         if (this.pending != pending) return false
         this.pending = null
+        afterConsume()
         return true
     }
 }

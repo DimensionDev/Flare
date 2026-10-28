@@ -17,6 +17,7 @@ public struct AgentChatView: View {
     let onPostClick: (UiTimelineV2.Post) -> Void
     let onUserClick: (UiProfile) -> Void
     let showsEmptyPlaceholder: Bool
+    let pluginState: GenericChatPresenterState?
 
     @State private var draft = ""
     @State private var scrollPosition: String?
@@ -33,7 +34,8 @@ public struct AgentChatView: View {
         onInputRequestOptionSelected: @escaping (AgentInputRequest.Option) -> Void,
         onPostClick: @escaping (UiTimelineV2.Post) -> Void,
         onUserClick: @escaping (UiProfile) -> Void,
-        showsEmptyPlaceholder: Bool = true
+        showsEmptyPlaceholder: Bool = true,
+        pluginState: GenericChatPresenterState? = nil
     ) {
         self.messages = messages
         self.isRunning = isRunning
@@ -47,6 +49,7 @@ public struct AgentChatView: View {
         self.onPostClick = onPostClick
         self.onUserClick = onUserClick
         self.showsEmptyPlaceholder = showsEmptyPlaceholder
+        self.pluginState = pluginState
     }
 
     public var body: some View {
@@ -101,6 +104,11 @@ public struct AgentChatView: View {
             }
         }
 //        .background(Color.flareSystemGroupedBackground)
+        .safeAreaInset(edge: .top, spacing: 0) {
+            if let pluginState, pluginState.plugin != nil {
+                PluginAuthoringStatusView(state: pluginState)
+            }
+        }
         .safeAreaInset(edge: .bottom, spacing: 0) {
             VStack(spacing: 0) {
                 if isRunning {
@@ -632,5 +640,59 @@ private struct ShimmeringTextModifier: ViewModifier {
 private extension View {
     func shimmeringText() -> some View {
         modifier(ShimmeringTextModifier())
+    }
+}
+
+func pluginAuthoringLabel(_ phase: PluginAuthoringPhase) -> LocalizedStringKey {
+    switch phase {
+    case .generating: return "plugin_ai_generating"
+    case .validating: return "plugin_ai_validating"
+    case .awaitingApproval: return "plugin_ai_approval"
+    case .waitingForOperations: return "plugin_ai_waiting"
+    case .applied: return "plugin_ai_applied"
+    case .failed: return "plugin_ai_failed"
+    default: return "plugin_ai_idle"
+    }
+}
+
+private struct PluginAuthoringStatusView: View {
+    let state: GenericChatPresenterState
+
+    var body: some View {
+        if let plugin = state.plugin {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(plugin.name.isEmpty ? String(localized: "plugin_ai_untitled") : plugin.name).font(.headline)
+                    Text(pluginAuthoringLabel(plugin.phase)).font(.subheadline)
+                    if plugin.running && plugin.phase != .applied {
+                        Text("plugin_ai_running").foregroundStyle(.secondary)
+                    }
+                    if let error = plugin.error { Text(verbatim: error).foregroundStyle(.red) }
+                    if plugin.credentialsChanged { Text("plugin_ai_credentials_changed") }
+                    ForEach(Array(plugin.permissions.enumerated()), id: \.offset) { _, permission in
+                        Text(pluginPermissionText(PluginSensitivePermissionV1(
+                            type: permission.kind == .mediaNetwork ? .mediaNetwork : (permission.kind == .cookie ? .cookie : .networkOrigin),
+                            origin: permission.origin,
+                            cookieName: permission.cookieName
+                        ))).font(.caption)
+                    }
+                    HStack {
+                        if plugin.phase == .awaitingApproval {
+                            Button("plugin_ai_allow", action: state.approvePlugin)
+                        }
+                        if state.room.isRunning || plugin.phase == .awaitingApproval || plugin.phase == .waitingForOperations {
+                            Button("plugin_ai_stop", action: state.stopPlugin)
+                        }
+                    }
+                    if plugin.revision > 0 {
+                        Toggle("plugin_ai_enabled", isOn: Binding(get: { plugin.enabled }, set: { state.setPluginEnabled(enabled: $0) }))
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding()
+            }
+            .frame(maxHeight: 220)
+            .background(.regularMaterial)
+        }
     }
 }

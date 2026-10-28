@@ -192,8 +192,11 @@ public class PluginRuntimePool(
         holder?.runtime?.close()
     }
 
-    internal suspend fun retire(plugin: RunningPluginV1) {
-        plugin.session.retire()
+    internal suspend fun retire(
+        plugin: RunningPluginV1,
+        protectInteractions: Boolean = false,
+    ) {
+        plugin.session.retire(protectInteractions)
         withContext(NonCancellable) {
             val retired =
                 mutex.withLock {

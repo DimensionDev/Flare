@@ -17,10 +17,21 @@ internal class PluginSessionV1 {
         val jobs: Set<Job> = emptySet(),
         val writes: Set<Job> = emptySet(),
         val cleanups: Set<suspend () -> Unit> = emptySet(),
+        val interactions: Set<Any> = emptySet(),
     )
 
     private val state = MutableStateFlow(State())
     val isActive: Boolean get() = state.value.active
+    val hasWrites: Boolean get() = state.value.writes.isNotEmpty() || state.value.interactions.isNotEmpty()
+
+    fun holdInteraction(): () -> Unit {
+        val token = Any()
+        state.update {
+            if (!it.active) throw PluginSessionRetiredException()
+            it.copy(interactions = it.interactions + token)
+        }
+        return { state.update { it.copy(interactions = it.interactions - token) } }
+    }
 
     fun onRetire(cleanup: suspend () -> Unit): () -> Unit {
         state.update {
@@ -65,7 +76,13 @@ internal class PluginSessionV1 {
         caller?.let(::track)
         state.update {
             if (!it.active) throw PluginSessionRetiredException()
-            if (caller != null && method.substringAfterLast('.') in WRITE_OPERATIONS) it.copy(writes = it.writes + caller) else it
+            if (caller != null &&
+                (method.substringAfterLast('.') in WRITE_OPERATIONS || method.startsWith("login.") || method.startsWith("media."))
+            ) {
+                it.copy(writes = it.writes + caller)
+            } else {
+                it
+            }
         }
         return block().also {
             ensureActive()
@@ -73,12 +90,12 @@ internal class PluginSessionV1 {
         }
     }
 
-    suspend fun retire() {
+    suspend fun retire(protectInteractions: Boolean = false) {
         var jobs: Set<Job>
         var cleanups: Set<suspend () -> Unit>
         while (true) {
             val before = state.value
-            check(before.writes.isEmpty()) { "Wait for publishing, uploads or other write operations to finish before reloading" }
+            if (before.writes.isNotEmpty() || (protectInteractions && before.interactions.isNotEmpty())) throw PluginSessionBusyException()
             if (!before.active) return
             if (state.compareAndSet(before, before.copy(active = false))) {
                 jobs = before.jobs
@@ -96,5 +113,7 @@ internal class PluginSessionV1 {
 }
 
 internal class PluginSessionRetiredException : CancellationException("Plugin session was reloaded")
+
+internal class PluginSessionBusyException : IllegalStateException("Wait for login, publishing or uploads to finish before reloading")
 
 private val WRITE_OPERATIONS = setOf("publish", "mutate", "delete", "send", "leave", "create", "update", "addMember", "removeMember")

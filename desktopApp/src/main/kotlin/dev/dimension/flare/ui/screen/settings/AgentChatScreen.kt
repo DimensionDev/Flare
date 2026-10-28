@@ -79,6 +79,8 @@ internal fun AgentChatScreen(
                 overflow = TextOverflow.Ellipsis,
             )
         }
+        dev.dimension.flare.ui.component.agent
+            .PluginAuthoringCard(state)
         AgentChatScaffold(
             messages = state.messages,
             input = state.input,

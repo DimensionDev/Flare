@@ -770,4 +770,20 @@
     <string name="settings_ai_config_use_shared_description">關閉後，可為 Agent 單獨設定伺服器、模型和推理參數。</string>
     <string name="proxy_webview_error">無法使用全域代理設定載入網頁。請檢查代理後重試。</string>
     <string name="proxy_webview_unsupported">此 Android WebView 不支援應用程式內代理。請更新 Android 系統 WebView 以使用全域代理設定。</string>
+    <string name="plugin_ai_create">用 AI 建立</string>
+    <string name="plugin_ai_untitled">新外掛程式</string>
+    <string name="plugin_ai_edit">繼續製作</string>
+    <string name="plugin_ai_stop">停止產生</string>
+    <string name="plugin_ai_allow">允許並繼續</string>
+    <string name="plugin_ai_enabled">已啟用</string>
+    <string name="plugin_ai_running">目前版本正在執行</string>
+    <string name="plugin_ai_idle">可以繼續製作</string>
+    <string name="plugin_ai_generating">正在產生</string>
+    <string name="plugin_ai_validating">正在驗證</string>
+    <string name="plugin_ai_approval">需要授權</string>
+    <string name="plugin_ai_waiting">等待登入或寫入完成</string>
+    <string name="plugin_ai_applied">已套用最新版本</string>
+    <string name="plugin_ai_failed">無法套用修改</string>
+    <string name="plugin_ai_credentials_changed">帳號憑證格式已變更，已有帳號需要重新登入。</string>
+    <string name="plugin_ai_delete_message">刪除 %1$s 及其本機原始碼？已有帳號和對話記錄會保留。</string>
 </resources>

@@ -14,6 +14,7 @@ import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import okio.Buffer
+import okio.ByteString.Companion.toByteString
 import okio.FileSystem
 import okio.HashingSink
 import okio.HashingSource
@@ -31,6 +32,41 @@ public class PluginInstaller(
     private val validator = PluginPackageValidator(fileSystem)
     private val mutex = Mutex()
     private var activePreview: PreparedPluginInstallV1? = null
+
+    /** Authored plugins already have an immutable, reviewed candidate; do not consume a file-import preview. */
+    internal suspend fun persistAuthored(
+        validated: ValidatedPluginPackage,
+        archive: ByteArray,
+        enabled: Boolean,
+        generation: Long,
+    ): InstalledPluginV1 =
+        mutex.withLock {
+            val hash = archive.toByteString().sha256().hex()
+            val record =
+                InstalledPluginV1(
+                    pluginId = validated.manifest.id,
+                    version = validated.manifest.version,
+                    packageHash = hash,
+                    packageSize = archive.size.toLong(),
+                    iconSize = validated.icon.size.toLong(),
+                    manifest = validated.manifest,
+                    catalogs = validated.catalogs,
+                    enabled = enabled,
+                    runtimeGeneration = generation,
+                )
+            stateStore.validateInstall(record)
+            ensureDirectories()
+            fileSystem.createDirectories(stateStore.paths.packages)
+            val temporary = stateStore.paths.staging / "$hash.authored"
+            try {
+                fileSystem.write(temporary) { write(archive) }
+                fileSystem.atomicMove(temporary, stateStore.paths.packagePath(hash))
+                persistIcon(stateStore.paths.iconPath(hash), validated.icon)
+            } finally {
+                fileSystem.delete(temporary, mustExist = false)
+            }
+            record
+        }
 
     public suspend fun inspect(
         path: Path,

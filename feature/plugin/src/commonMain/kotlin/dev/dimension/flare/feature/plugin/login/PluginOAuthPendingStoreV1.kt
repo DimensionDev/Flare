@@ -46,6 +46,8 @@ public data class PluginOAuthPendingV1(
 }
 
 public interface PluginOAuthPendingStoreV1 {
+    public suspend fun hasPending(pluginId: String): Boolean = false
+
     public suspend fun removePlugin(pluginId: String) {}
 
     public suspend fun save(pending: PluginOAuthPendingV1)
@@ -63,6 +65,9 @@ public class PlatformOAuthPluginPendingStoreV1(
     private val repository: PlatformOAuthPendingRepository,
 ) : PluginOAuthPendingStoreV1 {
     private val mutex = Mutex()
+
+    override suspend fun hasPending(pluginId: String): Boolean =
+        repository.allForPlatform(STORE_PLATFORM_ID).any { decode(it)?.pluginId == pluginId }
 
     override suspend fun removePlugin(pluginId: String) {
         repository.allForPlatform(STORE_PLATFORM_ID).forEach { record ->

@@ -39,6 +39,358 @@
     "Save" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Save" } }, "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "保存" } } } },
     "Pro" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Pro" } }, "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "Pro" } } } },
     "Lite" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Lite" } }, "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "Lite" } } } },
+  "plugin_ai_delete_message": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Delete %@ and its local source? Existing accounts and conversation history are kept."
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "删除 %@ 及其本地源码？已有账号和对话记录会保留。"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "刪除 %@ 及其本機原始碼？已有帳號和對話記錄會保留。"
+        }
+      }
+    }
+  },
+  "plugin_ai_credentials_changed": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Account credentials changed. Existing accounts will need to sign in again."
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "账号凭据格式已更改，已有账号需要重新登录。"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "帳號憑證格式已變更，已有帳號需要重新登入。"
+        }
+      }
+    }
+  },
+  "plugin_ai_create": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Create with AI"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "用 AI 创建"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "用 AI 建立"
+        }
+      }
+    }
+  },
+  "plugin_ai_untitled": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "New plugin"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "新插件"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "新外掛程式"
+        }
+      }
+    }
+  },
+  "plugin_ai_edit": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Continue creating"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "继续制作"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "繼續製作"
+        }
+      }
+    }
+  },
+  "plugin_ai_stop": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Stop generating"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "停止生成"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "停止產生"
+        }
+      }
+    }
+  },
+  "plugin_ai_allow": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Allow and continue"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "允许并继续"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "允許並繼續"
+        }
+      }
+    }
+  },
+  "plugin_ai_enabled": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Enabled"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "已启用"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "已啟用"
+        }
+      }
+    }
+  },
+  "plugin_ai_running": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "The current version is running"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "当前版本正在运行"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "目前版本正在執行"
+        }
+      }
+    }
+  },
+  "plugin_ai_idle": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Ready to edit"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "可以继续制作"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "可以繼續製作"
+        }
+      }
+    }
+  },
+  "plugin_ai_generating": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Generating"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "正在生成"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "正在產生"
+        }
+      }
+    }
+  },
+  "plugin_ai_validating": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Validating"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "正在校验"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "正在驗證"
+        }
+      }
+    }
+  },
+  "plugin_ai_approval": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Permission required"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "需要授权"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "需要授權"
+        }
+      }
+    }
+  },
+  "plugin_ai_waiting": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Waiting for login or writes to finish"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "等待登录或写操作完成"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "等待登入或寫入完成"
+        }
+      }
+    }
+  },
+  "plugin_ai_applied": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Up to date"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "已应用最新版本"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "已套用最新版本"
+        }
+      }
+    }
+  },
+  "plugin_ai_failed": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Changes could not be applied"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "修改未能生效"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "無法套用修改"
+        }
+      }
+    }
+  },
   "plugin_development": {
     "localizations": {
       "en": {

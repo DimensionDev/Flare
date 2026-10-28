@@ -1,6 +1,8 @@
 package dev.dimension.flare.ui.screen.settings
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
@@ -131,66 +133,70 @@ internal fun ImageTranslationSettingsContent(state: ImageTranslationSettingsPres
         val value = state.config.value(field.id)
         val title = imageTranslationText(field.title)
         val options = field.choices.ifEmpty { field.suggestions }
-        ExpanderItemSeparator()
-        if (options.isNotEmpty() || field.loading) {
-            ExpanderItem(
-                heading = { Text(title) },
-                trailing = {
-                    DropDownButton(onClick = { expandedChoice = field.id }) {
-                        Text(
-                            if (value.isBlank()) {
-                                stringResource(Res.string.settings_ai_config_value_empty_placeholder)
-                            } else {
-                                imageTranslationText(field.choiceTitle(value))
-                            },
+        AnimatedVisibility(visible = !state.useSharedConfig || !field.isSharedAIField) {
+            Column {
+                ExpanderItemSeparator()
+                if (options.isNotEmpty() || field.loading) {
+                    ExpanderItem(
+                        heading = { Text(title) },
+                        trailing = {
+                            DropDownButton(onClick = { expandedChoice = field.id }) {
+                                Text(
+                                    if (value.isBlank()) {
+                                        stringResource(Res.string.settings_ai_config_value_empty_placeholder)
+                                    } else {
+                                        imageTranslationText(field.choiceTitle(value))
+                                    },
+                                )
+                            }
+                            MenuFlyout(
+                                visible = expandedChoice == field.id,
+                                onDismissRequest = { expandedChoice = null },
+                                placement = FlyoutPlacement.BottomAlignedEnd,
+                                modifier = Modifier.heightIn(max = 200.dp),
+                            ) {
+                                if (field.loading) {
+                                    MenuFlyoutItem(
+                                        text = { Text(stringResource(Res.string.settings_ai_config_model_loading)) },
+                                        onClick = {},
+                                        enabled = false,
+                                    )
+                                }
+                                options.forEach { choice ->
+                                    MenuFlyoutItem(text = { Text(imageTranslationText(field.choiceTitle(choice))) }, onClick = {
+                                        state.setField(field.id, choice)
+                                        expandedChoice = null
+                                    })
+                                }
+                                if (field.choices.isEmpty()) {
+                                    MenuFlyoutItem(text = { Text(stringResource(Res.string.image_translation_manual_input)) }, onClick = {
+                                        expandedChoice = null
+                                        editing =
+                                            TextEditDialogState(
+                                                title = title,
+                                                placeholder = field.placeholder,
+                                                value = value,
+                                                singleLine = !field.multiline,
+                                                onConfirm = { state.setField(field.id, it.trim()) },
+                                            )
+                                    })
+                                }
+                            }
+                        },
+                    )
+                } else {
+                    key(state.config.provider, field.id) {
+                        AiConfigTextSetting(
+                            title = title,
+                            value = value,
+                            placeholder = field.placeholder,
+                            suggestions = field.editSuggestions,
+                            secret = field.secret,
+                            singleLine = !field.multiline,
+                            onConfirm = { state.setField(field.id, it.trim()) },
                         )
                     }
-                    MenuFlyout(
-                        visible = expandedChoice == field.id,
-                        onDismissRequest = { expandedChoice = null },
-                        placement = FlyoutPlacement.BottomAlignedEnd,
-                        modifier = Modifier.heightIn(max = 200.dp),
-                    ) {
-                        if (field.loading) {
-                            MenuFlyoutItem(
-                                text = { Text(stringResource(Res.string.settings_ai_config_model_loading)) },
-                                onClick = {},
-                                enabled = false,
-                            )
-                        }
-                        options.forEach { choice ->
-                            MenuFlyoutItem(text = { Text(imageTranslationText(field.choiceTitle(choice))) }, onClick = {
-                                state.setField(field.id, choice)
-                                expandedChoice = null
-                            })
-                        }
-                        if (field.choices.isEmpty()) {
-                            MenuFlyoutItem(text = { Text(stringResource(Res.string.image_translation_manual_input)) }, onClick = {
-                                expandedChoice = null
-                                editing =
-                                    TextEditDialogState(
-                                        title = title,
-                                        placeholder = field.placeholder,
-                                        value = value,
-                                        singleLine = !field.multiline,
-                                        onConfirm = { state.setField(field.id, it.trim()) },
-                                    )
-                            })
-                        }
-                    }
-                },
-            )
-        } else {
-            key(state.config.provider, field.id) {
-                AiConfigTextSetting(
-                    title = title,
-                    value = value,
-                    placeholder = field.placeholder,
-                    suggestions = field.editSuggestions,
-                    secret = field.secret,
-                    singleLine = !field.multiline,
-                    onConfirm = { state.setField(field.id, it.trim()) },
-                )
+                }
             }
         }
     }

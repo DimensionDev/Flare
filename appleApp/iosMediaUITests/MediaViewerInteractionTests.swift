@@ -90,6 +90,58 @@ final class MediaViewerInteractionTests: XCTestCase {
     }
 
     @MainActor
+    func testLeavingSharedImageConfigurationPrefillsFieldsAndRefreshesAfterSharingAgain() {
+        let app = XCUIApplication()
+        app.launchArguments = ["--media-viewer-test", "--translation-settings", "--image-translation-prefill-fixture", "-AppleLanguages", "(en)", "-AppleLocale", "en_US"]
+        app.launch()
+        defer { app.terminate() }
+        let open = app.buttons["media-fixture-open"]
+        XCTAssertTrue(open.waitForExistence(timeout: 15))
+        open.tap()
+        let sharedRow = app.switches.matching(NSPredicate(format: "label BEGINSWITH %@", "Use translation and summary AI settings")).firstMatch
+        let shared = sharedRow.switches.firstMatch
+        XCTAssertTrue(shared.waitForExistence(timeout: 5))
+        XCTAssertEqual(shared.value as? String, "1")
+        shared.tap()
+        app.swipeUp()
+        let server = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Service URL")).firstMatch
+        let apiKey = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "API key")).firstMatch
+        let model = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Image model")).firstMatch
+        XCTAssertTrue(server.waitForExistence(timeout: 5))
+        XCTAssertTrue(server.label.contains("http://127.0.0.1:18473/v1"))
+        XCTAssertTrue(apiKey.waitForExistence(timeout: 5))
+        XCTAssertTrue(apiKey.label.contains("••••••••"))
+        apiKey.tap()
+        let secure = app.secureTextFields.firstMatch
+        XCTAssertTrue(secure.waitForExistence(timeout: 5))
+        XCTAssertFalse((secure.value as? String ?? "").isEmpty)
+        app.navigationBars["API key"].buttons["Cancel"].tap()
+        app.swipeUp()
+        XCTAssertTrue(model.waitForExistence(timeout: 5))
+        XCTAssertTrue(model.label.contains("prefill-fixture-image"))
+        model.tap()
+        app.buttons["Enter manually…"].tap()
+        let editor = app.textFields.firstMatch
+        XCTAssertTrue(editor.waitForExistence(timeout: 5))
+        XCTAssertEqual(editor.value as? String, "prefill-fixture-image")
+        editor.coordinate(withNormalizedOffset: CGVector(dx: 0.95, dy: 0.5)).tap()
+        editor.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: "prefill-fixture-image".count) + "custom-image")
+        app.navigationBars["Image model"].buttons["Done"].tap()
+        XCTAssertTrue(model.waitForExistence(timeout: 5))
+        XCTAssertTrue(model.label.contains("custom-image"))
+        app.swipeDown()
+        shared.tap()
+        XCTAssertEqual(shared.value as? String, "1")
+        XCTAssertFalse(model.exists)
+        shared.tap()
+        XCTAssertEqual(shared.value as? String, "0")
+        app.swipeUp()
+        XCTAssertTrue(model.waitForExistence(timeout: 5))
+        XCTAssertTrue(model.label.contains("prefill-fixture-image"))
+        XCTAssertFalse(model.label.contains("custom-image"))
+    }
+
+    @MainActor
     func testImageTranslationServerEditorPrefillsAndCancelsSuggestedChanges() {
         let app = XCUIApplication()
         app.launchArguments = ["--media-viewer-test", "--translation-settings", "--image-translation-fixture", "-AppleLanguages", "(en)", "-AppleLocale", "en_US"]

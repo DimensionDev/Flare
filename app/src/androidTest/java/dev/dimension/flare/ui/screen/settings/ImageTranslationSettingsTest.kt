@@ -33,9 +33,11 @@ import dev.dimension.flare.R
 import dev.dimension.flare.data.datastore.model.AppSettings
 import dev.dimension.flare.data.datastore.model.ImageTranslationConfig
 import dev.dimension.flare.data.datastore.model.ImageTranslationProvider
+import dev.dimension.flare.data.datastore.model.imageTranslationFields
 import dev.dimension.flare.ui.presenter.settings.ImageTranslationSettingsPresenter
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -99,8 +101,14 @@ class ImageTranslationSettingsTest {
     }
 
     @Test
-    fun sharedConfigurationHidesConnectionFieldsAndCustomModeKeepsItsImageModel() {
-        val state = State(ImageTranslationConfig(ImageTranslationProvider.OpenAIImages, useSharedAIConfig = true))
+    fun leavingSharedConfigurationPrefillsEvenSavedEmptyFieldsAndRefreshesAfterSharingAgain() {
+        val state =
+            State(
+                ImageTranslationConfig(ImageTranslationProvider.OpenAIImages, useSharedAIConfig = true)
+                    .withValue("baseUrl", "")
+                    .withValue("apiKey", "")
+                    .withValue("model", ""),
+            )
         show(state)
         compose.onNodeWithText(label(R.string.image_translation_api_key)).assertDoesNotExist()
         compose.onNodeWithText(label(R.string.image_translation_model)).assertDoesNotExist()
@@ -115,7 +123,33 @@ class ImageTranslationSettingsTest {
         compose.onNodeWithText(label(R.string.image_translation_model)).assertDoesNotExist()
         compose.runOnIdle { assertEquals("basic-model", state.config.value("model")) }
         compose.onNodeWithText(label(R.string.settings_ai_config_use_shared)).performClick()
-        compose.runOnIdle { assertEquals("custom-image-model", state.config.value("model")) }
+        compose.runOnIdle { assertEquals("basic-model", state.config.value("model")) }
+    }
+
+    @Test
+    fun sharedConnectionFieldsExpandAndCollapseWithAnIntermediateLayout() {
+        val state = State(ImageTranslationConfig(ImageTranslationProvider.OpenAIImages, useSharedAIConfig = true))
+        show(state)
+        val prompt = compose.onNodeWithText(label(R.string.image_translation_prompt))
+        val closed = prompt.fetchSemanticsNode().boundsInRoot.top
+        compose.mainClock.autoAdvance = false
+        try {
+            compose.runOnIdle { state.setUseSharedConfig(false) }
+            compose.mainClock.advanceTimeBy(80)
+            val entering = prompt.fetchSemanticsNode().boundsInRoot.top
+            compose.mainClock.advanceTimeBy(1_000)
+            val opened = prompt.fetchSemanticsNode().boundsInRoot.top
+            assertTrue("Expected an intermediate expanded layout: $closed < $entering < $opened", closed < entering && entering < opened)
+            compose.runOnIdle { state.setUseSharedConfig(true) }
+            compose.mainClock.advanceTimeBy(80)
+            val leaving = prompt.fetchSemanticsNode().boundsInRoot.top
+            assertTrue("Expected an intermediate collapsed layout: $closed < $leaving < $opened", closed < leaving && leaving < opened)
+            compose.mainClock.advanceTimeBy(1_000)
+            assertEquals(closed, prompt.fetchSemanticsNode().boundsInRoot.top, 1f)
+            compose.onNodeWithText(label(R.string.image_translation_api_key)).assertDoesNotExist()
+        } finally {
+            compose.mainClock.autoAdvance = true
+        }
     }
 
     @Test
@@ -197,7 +231,7 @@ class ImageTranslationSettingsTest {
         override val config get() = saved.resolved(basic)
         override val providers = ImageTranslationProvider.entries.toList()
         override val fields get() =
-            config.editableFields.map {
+            imageTranslationFields(config.provider).map {
                 when {
                     it.id == "model" -> {
                         it.copy(suggestions = modelSuggestions, loading = modelLoading)

@@ -38,6 +38,38 @@ class ImageTranslationConfigTest {
     )
 
     @Test
+    fun leavingSharedModePrefillsPreviouslySavedEmptyConnectionFields() {
+        val inherited =
+            ImageTranslationConfig(ImageTranslationProvider.OpenAIImages, useSharedAIConfig = true)
+                .withValue("baseUrl", "")
+                .withValue("apiKey", "")
+                .withValue("model", "")
+        val detached = inherited.withSharedAIConfig(false, basic)
+        assertEquals("https://basic.example/v1", detached.value("baseUrl"))
+        assertEquals("basic-key", detached.value("apiKey"))
+        assertEquals("image-model", detached.value("model"))
+    }
+
+    @Test
+    fun leavingSharedModeUsesTheCurrentBasicConnectionInsteadOfAnOldCustomSnapshot() {
+        val oldCustom =
+            ImageTranslationConfig(ImageTranslationProvider.OpenAIImages)
+                .withValue("baseUrl", "https://old-custom.example/v1")
+                .withValue("apiKey", "old-custom-key")
+                .withValue("model", "old-custom-model")
+                .withValue("prompt", "Keep this image prompt")
+                .withValue("inputFormat", "Multipart")
+        val inherited = oldCustom.withSharedAIConfig(true, basic)
+        val changedBasic = basic.copy(type = AppSettings.AiConfig.Type.OpenAI("https://current.example/v1", "current-key", "current-model"))
+        val detached = inherited.withSharedAIConfig(false, changedBasic)
+        assertEquals("https://current.example/v1", detached.value("baseUrl"))
+        assertEquals("current-key", detached.value("apiKey"))
+        assertEquals("current-model", detached.value("model"))
+        assertEquals("Keep this image prompt", detached.value("prompt"))
+        assertEquals("Multipart", detached.value("inputFormat"))
+    }
+
+    @Test
     fun oldProtobufAndJsonKeepExistingSettingsAndDisableImageTranslation() {
         val old =
             PreviousSettings(
@@ -129,7 +161,7 @@ class ImageTranslationConfigTest {
     }
 
     @Test
-    fun firstCustomConfigurationCopiesBasicSettingsAndLaterSwitchesPreserveEdits() {
+    fun customEditsStayIndependentUntilSharingIsEnabledAgain() {
         val config =
             ImageTranslationConfig(
                 ImageTranslationProvider.OpenAIImages,
@@ -144,7 +176,21 @@ class ImageTranslationConfigTest {
         assertEquals(custom, custom.resolved(changed))
         val shared = custom.withSharedAIConfig(true, changed)
         assertEquals("new-model", shared.resolved(changed).value("model"))
-        assertEquals(custom, shared.withSharedAIConfig(false, changed))
+        val copied = shared.withSharedAIConfig(false, changed)
+        assertEquals("https://new.example/v1", copied.value("baseUrl"))
+        assertEquals("new-key", copied.value("apiKey"))
+        assertEquals("new-model", copied.value("model"))
+        assertEquals("Keep this prompt", copied.value("prompt"))
+    }
+
+    @Test
+    fun settingAlreadyCustomModeDoesNotOverwriteEdits() {
+        val custom =
+            ImageTranslationConfig(ImageTranslationProvider.OpenAIImages)
+                .withValue("baseUrl", "https://custom.example/v1")
+                .withValue("apiKey", "custom-key")
+                .withValue("model", "custom-image")
+        assertEquals(custom, custom.withSharedAIConfig(false, basic))
     }
 
     @Test

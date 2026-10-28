@@ -12,6 +12,7 @@ import dev.dimension.flare.data.datastore.model.AppSettings
 import dev.dimension.flare.data.datastore.model.ImageTranslationConfig
 import dev.dimension.flare.data.datastore.model.ImageTranslationField
 import dev.dimension.flare.data.datastore.model.ImageTranslationProvider
+import dev.dimension.flare.data.datastore.model.imageTranslationFields
 import dev.dimension.flare.data.translation.image.ImageTranslationModelDiscovery
 import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.ui.model.UiState
@@ -70,7 +71,8 @@ public class ImageTranslationSettingsPresenter : PresenterBase<ImageTranslationS
             override val config = config
             override val providers = ImageTranslationProvider.entries.toList()
             override val fields =
-                config.editableFields.map { field ->
+                // Retain hidden fields so clients can animate their removal.
+                imageTranslationFields(config.provider).map { field ->
                     when {
                         field.id == "model" && canDiscover -> {
                             field.copy(suggestions = (models as? UiState.Success)?.data.orEmpty(), loading = models is UiState.Loading)

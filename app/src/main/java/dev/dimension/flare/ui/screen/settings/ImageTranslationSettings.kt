@@ -1,5 +1,6 @@
 package dev.dimension.flare.ui.screen.settings
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.DropdownMenuItem
@@ -87,61 +88,63 @@ internal fun ImageTranslationSettingsSection(state: ImageTranslationSettingsPres
     state.fields.forEachIndexed { index, field ->
         val value = state.config.value(field.id)
         val options = field.choices.ifEmpty { field.suggestions }
-        if (options.isNotEmpty() || field.loading) {
-            SegmentedListItem(
-                checked = expandedChoice == field.id,
-                onCheckedChange = { expanded -> expandedChoice = if (expanded) field.id else null },
-                shapes = ListItemDefaults.segmentedShapes2(index + fieldOffset, rowCount),
-                content = { Text(imageTranslationText(field.title)) },
-                trailingContent = {
-                    Box {
-                        TextButton(onClick = { expandedChoice = field.id }) {
-                            Text(
-                                if (value.isBlank()) {
-                                    stringResource(
-                                        R.string.settings_ai_config_value_empty_placeholder,
-                                    )
-                                } else {
-                                    imageTranslationText(field.choiceTitle(value))
-                                },
-                            )
-                        }
-                        FlareDropdownMenu(expanded = expandedChoice == field.id, onDismissRequest = { expandedChoice = null }) {
-                            if (field.loading) {
-                                DropdownMenuItem(
-                                    text = { Text(stringResource(R.string.settings_ai_config_model_loading)) },
-                                    onClick = {},
-                                    enabled = false,
+        AnimatedVisibility(visible = !state.useSharedConfig || !field.isSharedAIField) {
+            if (options.isNotEmpty() || field.loading) {
+                SegmentedListItem(
+                    checked = expandedChoice == field.id,
+                    onCheckedChange = { expanded -> expandedChoice = if (expanded) field.id else null },
+                    shapes = ListItemDefaults.segmentedShapes2(index + fieldOffset, rowCount),
+                    content = { Text(imageTranslationText(field.title)) },
+                    trailingContent = {
+                        Box {
+                            TextButton(onClick = { expandedChoice = field.id }) {
+                                Text(
+                                    if (value.isBlank()) {
+                                        stringResource(
+                                            R.string.settings_ai_config_value_empty_placeholder,
+                                        )
+                                    } else {
+                                        imageTranslationText(field.choiceTitle(value))
+                                    },
                                 )
                             }
-                            options.forEach { choice ->
-                                DropdownMenuItem(text = { Text(imageTranslationText(field.choiceTitle(choice))) }, onClick = {
-                                    state.setField(field.id, choice)
-                                    expandedChoice = null
-                                })
-                            }
-                            if (field.choices.isEmpty()) {
-                                DropdownMenuItem(text = { Text(stringResource(R.string.image_translation_manual_input)) }, onClick = {
-                                    expandedChoice = null
-                                    editing = field
-                                })
+                            FlareDropdownMenu(expanded = expandedChoice == field.id, onDismissRequest = { expandedChoice = null }) {
+                                if (field.loading) {
+                                    DropdownMenuItem(
+                                        text = { Text(stringResource(R.string.settings_ai_config_model_loading)) },
+                                        onClick = {},
+                                        enabled = false,
+                                    )
+                                }
+                                options.forEach { choice ->
+                                    DropdownMenuItem(text = { Text(imageTranslationText(field.choiceTitle(choice))) }, onClick = {
+                                        state.setField(field.id, choice)
+                                        expandedChoice = null
+                                    })
+                                }
+                                if (field.choices.isEmpty()) {
+                                    DropdownMenuItem(text = { Text(stringResource(R.string.image_translation_manual_input)) }, onClick = {
+                                        expandedChoice = null
+                                        editing = field
+                                    })
+                                }
                             }
                         }
-                    }
-                },
-            )
-        } else {
-            key(state.config.provider, field.id) {
-                AiConfigTextSetting(
-                    title = imageTranslationText(field.title),
-                    value = value,
-                    shapes = ListItemDefaults.segmentedShapes2(index + fieldOffset, rowCount),
-                    placeholder = field.placeholder,
-                    suggestions = field.editSuggestions,
-                    secret = field.secret,
-                    singleLine = !field.multiline,
-                    onConfirm = { state.setField(field.id, it.trim()) },
+                    },
                 )
+            } else {
+                key(state.config.provider, field.id) {
+                    AiConfigTextSetting(
+                        title = imageTranslationText(field.title),
+                        value = value,
+                        shapes = ListItemDefaults.segmentedShapes2(index + fieldOffset, rowCount),
+                        placeholder = field.placeholder,
+                        suggestions = field.editSuggestions,
+                        secret = field.secret,
+                        singleLine = !field.multiline,
+                        onConfirm = { state.setField(field.id, it.trim()) },
+                    )
+                }
             }
         }
     }

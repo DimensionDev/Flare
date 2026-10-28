@@ -29,7 +29,7 @@ public data class ImageTranslationConfig(
         get() = provider == ImageTranslationProvider.OpenAIImages && useSharedAIConfig
 
     public val editableFields: List<ImageTranslationField>
-        get() = imageTranslationFields(provider).filterNot { usesSharedAIConfig && it.id in SHARED_AI_FIELDS }
+        get() = imageTranslationFields(provider).filterNot { usesSharedAIConfig && it.isSharedAIField }
 
     public fun resolved(aiConfig: AppSettings.AiConfig): ImageTranslationConfig {
         if (!usesSharedAIConfig) return this
@@ -44,14 +44,7 @@ public data class ImageTranslationConfig(
         aiConfig: AppSettings.AiConfig,
     ): ImageTranslationConfig {
         val current = copy(useSharedAIConfig = enabled)
-        val hasCustomConfig =
-            settings
-                .firstOrNull { it.provider == ImageTranslationProvider.OpenAIImages }
-                ?.values
-                ?.keys
-                .orEmpty()
-                .any { it in SHARED_AI_FIELDS }
-        if (enabled || hasCustomConfig) return current
+        if (enabled || !useSharedAIConfig) return current
         return copy(provider = ImageTranslationProvider.OpenAIImages, useSharedAIConfig = true)
             .resolved(aiConfig)
             .copy(provider = provider, useSharedAIConfig = false)
@@ -94,6 +87,9 @@ public data class ImageTranslationField(
     val loading: Boolean = false,
     val editSuggestions: List<String> = emptyList(),
 ) {
+    public val isSharedAIField: Boolean
+        get() = id in SHARED_AI_FIELDS
+
     public fun choiceTitle(value: String): String =
         when {
             id == "mode" -> if (value == "1") "Lite" else "Pro"

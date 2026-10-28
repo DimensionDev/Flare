@@ -56,6 +56,38 @@ struct MediaViewerTestFixture: View {
     @MainActor
     private func configureTranslationFixture() async {
         let settings = KotlinPresenter(presenter: ImageTranslationSettingsPresenter())
+        if ProcessInfo.processInfo.arguments.contains("--image-translation-prefill-fixture") {
+            let basic = KotlinPresenter(presenter: AiConfigPresenter(agentConfig: false))
+            basic.state.setOpenAIServerUrl(value: "http://127.0.0.1:18473/v1")
+            basic.state.setOpenAIApiKey(value: "prefill-fixture-key")
+            basic.state.setOpenAIModel(value: "prefill-fixture-image")
+            for _ in 0..<250 {
+                if basic.state.openAIModel == "prefill-fixture-image"
+                    && basic.state.openAIApiKey == "prefill-fixture-key"
+                    && basic.state.openAIServerUrl == "http://127.0.0.1:18473/v1" { break }
+                try? await Task.sleep(for: .milliseconds(20))
+            }
+            settings.state.selectProvider(provider: .openAiimages)
+            for _ in 0..<250 {
+                if settings.state.config.provider == .openAiimages { break }
+                try? await Task.sleep(for: .milliseconds(20))
+            }
+            let state = settings.state
+            state.setUseSharedConfig(value: true)
+            state.setField(id: "baseUrl", value: "")
+            state.setField(id: "apiKey", value: "")
+            state.setField(id: "model", value: "")
+            let prompt = "Keep the image prompt " + UUID().uuidString
+            state.setField(id: "prompt", value: prompt)
+            for _ in 0..<250 {
+                if settings.state.useSharedConfig
+                    && settings.state.config.value(id: "model") == "prefill-fixture-image"
+                    && settings.state.config.value(id: "prompt") == prompt { return }
+                try? await Task.sleep(for: .milliseconds(20))
+            }
+            assertionFailure("Could not prepare persisted empty fields with shared AI configuration")
+            return
+        }
         if translationSettings {
             settings.state.selectProvider(provider: .gemini)
             for _ in 0..<250 {

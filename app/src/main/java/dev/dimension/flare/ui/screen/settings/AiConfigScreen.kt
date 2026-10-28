@@ -14,6 +14,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -41,6 +42,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.R
 import dev.dimension.flare.ui.component.BackButton
@@ -654,7 +658,7 @@ private enum class AiConfigEditField {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun TextEditDialog(
+internal fun TextEditDialog(
     title: String,
     placeholder: String,
     value: String,
@@ -662,6 +666,8 @@ private fun TextEditDialog(
     hint: String,
     onDismiss: () -> Unit,
     onConfirm: (String) -> Unit,
+    secret: Boolean = false,
+    singleLine: Boolean = false,
 ) {
     var text by remember(value) { mutableStateOf(value) }
     var showSuggestions by remember(value) { mutableStateOf(false) }
@@ -685,6 +691,9 @@ private fun TextEditDialog(
                             text = it
                         },
                         modifier = Modifier.fillMaxWidth(),
+                        singleLine = singleLine,
+                        visualTransformation = if (secret) PasswordVisualTransformation() else VisualTransformation.None,
+                        keyboardOptions = if (secret) KeyboardOptions(keyboardType = KeyboardType.Password) else KeyboardOptions.Default,
                         placeholder = {
                             if (placeholder.isNotBlank()) {
                                 Text(text = placeholder)

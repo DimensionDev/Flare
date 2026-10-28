@@ -24,23 +24,29 @@ final class MediaViewerInteractionTests: XCTestCase {
     }
 
     @MainActor
-    func testImageTranslationOpensNativeProviderSettingsAndSecureEditor() {
-        assertImageTranslationSettings(withoutPost: false)
+    func testUnconfiguredImageTranslationOnlyShowsHintWithPost() {
+        assertUnconfiguredTranslation(withoutPost: false)
     }
 
     @MainActor
-    func testImageTranslationOpensNativeProviderSettingsWithoutPost() {
-        assertImageTranslationSettings(withoutPost: true)
+    func testUnconfiguredImageTranslationOnlyShowsHintWithoutPost() {
+        assertUnconfiguredTranslation(withoutPost: true)
     }
 
     @MainActor
-    private func assertImageTranslationSettings(withoutPost: Bool) {
-        let app = openMedia(withoutPost: withoutPost)
+    func testTranslationSettingsPagePresentsImageFieldEditor() {
+        let app = XCUIApplication()
+        app.launchArguments = ["--media-viewer-test", "--translation-settings", "-AppleLanguages", "(en)", "-AppleLocale", "en_US"]
+        app.launch()
         defer { app.terminate() }
-        let translate = app.buttons["Translate image"]
-        XCTAssertTrue(translate.waitForExistence(timeout: 5))
-        translate.tap()
-        XCTAssertTrue(app.navigationBars["Image translation"].waitForExistence(timeout: 5))
+        let open = app.buttons["media-fixture-open"]
+        XCTAssertTrue(open.waitForExistence(timeout: 15))
+        open.tap()
+        assertImageTranslationFields(in: app)
+    }
+
+    @MainActor
+    private func assertImageTranslationFields(in app: XCUIApplication) {
         let provider = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Image translation provider")).firstMatch
         XCTAssertTrue(provider.waitForExistence(timeout: 5))
         provider.tap()
@@ -48,20 +54,46 @@ final class MediaViewerInteractionTests: XCTestCase {
         let apiKey = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "API key")).firstMatch
         XCTAssertTrue(apiKey.waitForExistence(timeout: 5))
         apiKey.tap()
-        XCTAssertTrue(app.secureTextFields.firstMatch.waitForExistence(timeout: 5))
+        let secureField = app.secureTextFields.firstMatch
+        XCTAssertTrue(secureField.waitForExistence(timeout: 5))
+        let initialValue = secureField.value as? String
+        secureField.tap()
+        secureField.typeText("discarded")
         app.buttons["Cancel"].tap()
+        apiKey.tap()
+        XCTAssertTrue(secureField.waitForExistence(timeout: 5))
+        XCTAssertEqual(secureField.value as? String, initialValue)
+        secureField.tap()
+        secureField.typeText("offline-key")
+        app.navigationBars["API key"].buttons["Done"].tap()
+        XCTAssertTrue(apiKey.waitForExistence(timeout: 5))
+        let saved = NSPredicate { _, _ in apiKey.label.contains("••••••••") }
+        XCTAssertEqual(XCTWaiter.wait(for: [XCTNSPredicateExpectation(predicate: saved, object: nil)], timeout: 5), .completed)
+        XCTAssertFalse(apiKey.label.contains("offline-key"))
         let attachment = XCTAttachment(screenshot: app.screenshot())
         attachment.name = "image-translation-native-settings"
         attachment.lifetime = .keepAlways
         add(attachment)
         provider.tap()
         app.buttons["Off"].tap()
-        app.buttons["Save"].tap()
+    }
+
+    @MainActor
+    private func assertUnconfiguredTranslation(withoutPost: Bool) {
+        let app = openMedia(withoutPost: withoutPost)
+        defer { app.terminate() }
+        let translate = app.buttons["Translate image"]
+        translate.tap()
+        let alert = app.alerts["Image translation"]
+        XCTAssertTrue(alert.waitForExistence(timeout: 5))
+        XCTAssertTrue(alert.staticTexts["Configure image translation in Translation settings first."].exists)
+        XCTAssertFalse(app.navigationBars["Image translation"].exists)
+        XCTAssertFalse(app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Image translation provider")).firstMatch.exists)
+        alert.buttons["OK"].tap()
         XCTAssertTrue(translate.waitForExistence(timeout: 5))
         if !withoutPost {
             XCTAssertTrue(app.buttons["Sheet Grabber"].waitForExistence(timeout: 5))
             let postAction = app.buttons["More"].firstMatch
-            XCTAssertTrue(postAction.waitForExistence(timeout: 5))
             let restored = NSPredicate { _, _ in postAction.isHittable }
             XCTAssertEqual(XCTWaiter.wait(for: [XCTNSPredicateExpectation(predicate: restored, object: nil)], timeout: 5), .completed)
         }

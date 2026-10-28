@@ -29,7 +29,6 @@ struct MediaViewerScreen: View {
     let quotes: [UiTimelineV2.Post]
 
     @State private var imageTranslation: KotlinPresenter<ImageTranslationPresenterState>
-    @State private var showImageTranslationSettings = false
     @State private var selectedIndex: Int
     @State private var isPlaying: Bool = true
     @State private var videoState: VideoState = .idle
@@ -232,28 +231,9 @@ struct MediaViewerScreen: View {
         }
         .sheet(isPresented: $postSheetPresented) {
             mediaPostSheet
-                .sheet(isPresented: $showImageTranslationSettings) { ImageTranslationSettingsSheet() }
+                .imageTranslationErrorAlert(state: imageTranslation.state, media: selectedMedia, enabled: postSheetPresented)
         }
-        .sheet(isPresented: Binding(
-            get: { showImageTranslationSettings && !postSheetPresented },
-            set: { showImageTranslationSettings = $0 }
-        )) { ImageTranslationSettingsSheet() }
-        .alert(
-            Text("Image translation", bundle: .main),
-            isPresented: Binding(
-                get: { selectedMedia.map { imageTranslation.state.item(media: $0).error != nil } ?? false },
-                set: { if !$0, let selectedMedia { imageTranslation.state.clearError(media: selectedMedia) } }
-            )
-        ) {
-            Button("OK") { if let selectedMedia { imageTranslation.state.clearError(media: selectedMedia) } }
-            Button { showImageTranslationSettings = true } label: {
-                Text("Translation settings", bundle: .main)
-            }
-        } message: {
-            if let selectedMedia, let error = imageTranslation.state.item(media: selectedMedia).error {
-                Text(LocalizedStringKey(error.message), bundle: .main)
-            }
-        }
+        .imageTranslationErrorAlert(state: imageTranslation.state, media: selectedMedia, enabled: !postSheetPresented)
         .background(.black.opacity(opacity))
         .background(ClearFullScreenBackground())
         .toolbar(.hidden, for: .navigationBar)
@@ -321,11 +301,7 @@ struct MediaViewerScreen: View {
 
                     if let selectedMedia, case .image = onEnum(of: selectedMedia) {
                         topOverlayButton {
-                            if imageTranslation.state.configured {
-                                imageTranslation.state.toggle(media: selectedMedia)
-                            } else {
-                                showImageTranslationSettings = true
-                            }
+                            imageTranslation.state.toggle(media: selectedMedia)
                         } label: {
                             Image(systemName: "translate")
                         }

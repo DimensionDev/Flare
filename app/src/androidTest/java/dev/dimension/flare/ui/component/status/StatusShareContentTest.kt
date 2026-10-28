@@ -67,6 +67,9 @@ import dev.dimension.flare.ui.screen.status.action.captureOffscreenShareBitmap
 import dev.dimension.flare.ui.theme.FlareTheme
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.flow
 import org.junit.AfterClass
 import org.junit.Assert.assertEquals
@@ -96,6 +99,7 @@ class StatusShareContentTest {
 
     companion object {
         private var ownsKoin = false
+        private var formattingScope: CoroutineScope? = null
         private var mediaQueryEnabled = false
 
         @JvmStatic @BeforeClass
@@ -103,9 +107,13 @@ class StatusShareContentTest {
             mediaQueryEnabled = ComposeUiFlags.isMediaQueryIntegrationEnabled
             ComposeUiFlags.isMediaQueryIntegrationEnabled = true
             if (GlobalContext.getOrNull() == null) {
+                val scope = MainScope()
+                formattingScope = scope
                 startKoin {
                     modules(
                         module {
+                            // Instrumentation compilation also validates the viewer's app scope.
+                            single<CoroutineScope> { scope }
                             single<PlatformFormatter> {
                                 object : PlatformFormatter {
                                     override fun formatNumber(number: Long) = number.toString()
@@ -128,6 +136,8 @@ class StatusShareContentTest {
         fun stopFormatting() {
             ComposeUiFlags.isMediaQueryIntegrationEnabled = mediaQueryEnabled
             if (ownsKoin) stopKoin()
+            formattingScope?.cancel()
+            formattingScope = null
         }
     }
 

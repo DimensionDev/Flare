@@ -17,6 +17,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.input.TextFieldLineLimits
+import androidx.compose.foundation.text.input.TextObfuscationMode
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
@@ -335,6 +336,7 @@ import io.github.composefluent.component.MenuFlyoutContainer
 import io.github.composefluent.component.MenuFlyoutItem
 import io.github.composefluent.component.ProgressBar
 import io.github.composefluent.component.RadioButton
+import io.github.composefluent.component.SecureTextField
 import io.github.composefluent.component.SubtleButton
 import io.github.composefluent.component.Switcher
 import io.github.composefluent.component.Text
@@ -1675,96 +1677,7 @@ internal fun SettingsScreen(
             Header(stringResource(Res.string.settings_services_title))
             listOf(state.aiConfigState, state.agentConfigState).forEach { aiConfigState ->
                 aiConfigState.textEditDialog?.let { dialog ->
-                    val textState = rememberTextFieldState()
-                    var isSuggestionExpanded by remember(dialog) { mutableStateOf(false) }
-                    LaunchedEffect(dialog) {
-                        textState.edit {
-                            replace(0, length, dialog.value)
-                        }
-                    }
-                    val filteredSuggestions by remember(dialog) {
-                        snapshotFlow { textState.text.toString() }
-                            .map { query ->
-                                dialog.suggestions.filter { item ->
-                                    query.isBlank() || item.contains(query, ignoreCase = true)
-                                }
-                            }
-                    }.collectAsState(dialog.suggestions)
-                    ContentDialog(
-                        title = dialog.title,
-                        visible = true,
-                        content = {
-                            Column(
-                                modifier = Modifier.padding(16.dp),
-                            ) {
-                                if (dialog.placeholder.isNotBlank()) {
-                                    Text(
-                                        text = dialog.placeholder,
-                                    )
-                                    Spacer(modifier = Modifier.size(8.dp))
-                                }
-                                if (dialog.suggestions.isEmpty()) {
-                                    TextField(
-                                        state = textState,
-                                        modifier = Modifier.fillMaxWidth().heightIn(max = 480.dp),
-                                    )
-                                } else {
-                                    AutoSuggestionBox(
-                                        expanded = isSuggestionExpanded,
-                                        onExpandedChange = { isSuggestionExpanded = it },
-                                    ) {
-                                        TextField(
-                                            state = textState,
-                                            shape = AutoSuggestBoxDefaults.textFieldShape(isSuggestionExpanded),
-                                            modifier = Modifier.fillMaxWidth().flyoutAnchor().heightIn(max = 480.dp),
-                                            lineLimits = TextFieldLineLimits.SingleLine,
-                                        )
-                                        AutoSuggestBoxDefaults.suggestFlyout(
-                                            expanded = isSuggestionExpanded && filteredSuggestions.isNotEmpty(),
-                                            onDismissRequest = { isSuggestionExpanded = false },
-                                            itemsContent = {
-                                                items(filteredSuggestions) { item ->
-                                                    ListItem(
-                                                        onClick = {
-                                                            textState.edit {
-                                                                replace(0, length, item)
-                                                            }
-                                                            isSuggestionExpanded = false
-                                                        },
-                                                        text = { Text(item, maxLines = 1) },
-                                                        modifier = Modifier.fillMaxWidth(),
-                                                    )
-                                                }
-                                            },
-                                            modifier = Modifier.flyoutSize(matchAnchorWidth = true),
-                                        )
-                                    }
-                                }
-                                if (dialog.hint.isNotBlank()) {
-                                    Spacer(modifier = Modifier.size(8.dp))
-                                    Text(
-                                        dialog.hint,
-                                        style = FluentTheme.typography.caption,
-                                        color = FluentTheme.colors.text.text.secondary,
-                                    )
-                                }
-                            }
-                        },
-                        primaryButtonText = stringResource(Res.string.ok),
-                        closeButtonText = stringResource(Res.string.cancel),
-                        onButtonClick = {
-                            when (it) {
-                                ContentDialogButton.Primary -> {
-                                    dialog.onConfirm(textState.text.toString())
-                                    aiConfigState.setTextEditDialog(null)
-                                }
-
-                                else -> {
-                                    aiConfigState.setTextEditDialog(null)
-                                }
-                            }
-                        },
-                    )
+                    SettingsTextEditDialog(dialog, onDismiss = { aiConfigState.setTextEditDialog(null) })
                 }
             }
             if (state.aiConfigState.showExcludedLanguagesDialog) {
@@ -2518,6 +2431,7 @@ internal fun SettingsScreen(
                     }
                 }
                 ExpanderItemSeparator()
+                Header(imageTranslationText("Image translation"))
                 ImageTranslationSettingsContent()
             }
 
@@ -2996,12 +2910,119 @@ private fun openAIReasoningEffortLabel(option: AiReasoningEffortOption): String 
         AiReasoningEffortOption.Max -> stringResource(Res.string.settings_ai_config_reasoning_effort_max)
     }
 
-private data class TextEditDialogState(
+@Composable
+@OptIn(ExperimentalFluentApi::class)
+internal fun SettingsTextEditDialog(
+    dialog: TextEditDialogState,
+    onDismiss: () -> Unit,
+) {
+    val textState = rememberTextFieldState()
+    var isSuggestionExpanded by remember(dialog) { mutableStateOf(false) }
+    LaunchedEffect(dialog) {
+        textState.edit {
+            replace(0, length, dialog.value)
+        }
+    }
+    val filteredSuggestions by remember(dialog) {
+        snapshotFlow { textState.text.toString() }
+            .map { query ->
+                dialog.suggestions.filter { item ->
+                    query.isBlank() || item.contains(query, ignoreCase = true)
+                }
+            }
+    }.collectAsState(dialog.suggestions)
+    ContentDialog(
+        title = dialog.title,
+        visible = true,
+        content = {
+            Column(
+                modifier = Modifier.padding(16.dp),
+            ) {
+                if (dialog.placeholder.isNotBlank()) {
+                    Text(
+                        text = dialog.placeholder,
+                    )
+                    Spacer(modifier = Modifier.size(8.dp))
+                }
+                if (dialog.secret) {
+                    SecureTextField(
+                        state = textState,
+                        textObfuscationMode = TextObfuscationMode.Hidden,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                } else if (dialog.suggestions.isEmpty()) {
+                    TextField(
+                        state = textState,
+                        modifier = Modifier.fillMaxWidth().heightIn(max = 480.dp),
+                        lineLimits = if (dialog.singleLine) TextFieldLineLimits.SingleLine else TextFieldLineLimits.Default,
+                    )
+                } else {
+                    AutoSuggestionBox(
+                        expanded = isSuggestionExpanded,
+                        onExpandedChange = { isSuggestionExpanded = it },
+                    ) {
+                        TextField(
+                            state = textState,
+                            shape = AutoSuggestBoxDefaults.textFieldShape(isSuggestionExpanded),
+                            modifier = Modifier.fillMaxWidth().flyoutAnchor().heightIn(max = 480.dp),
+                            lineLimits = TextFieldLineLimits.SingleLine,
+                        )
+                        AutoSuggestBoxDefaults.suggestFlyout(
+                            expanded = isSuggestionExpanded && filteredSuggestions.isNotEmpty(),
+                            onDismissRequest = { isSuggestionExpanded = false },
+                            itemsContent = {
+                                items(filteredSuggestions) { item ->
+                                    ListItem(
+                                        onClick = {
+                                            textState.edit {
+                                                replace(0, length, item)
+                                            }
+                                            isSuggestionExpanded = false
+                                        },
+                                        text = { Text(item, maxLines = 1) },
+                                        modifier = Modifier.fillMaxWidth(),
+                                    )
+                                }
+                            },
+                            modifier = Modifier.flyoutSize(matchAnchorWidth = true),
+                        )
+                    }
+                }
+                if (dialog.hint.isNotBlank()) {
+                    Spacer(modifier = Modifier.size(8.dp))
+                    Text(
+                        dialog.hint,
+                        style = FluentTheme.typography.caption,
+                        color = FluentTheme.colors.text.text.secondary,
+                    )
+                }
+            }
+        },
+        primaryButtonText = stringResource(Res.string.ok),
+        closeButtonText = stringResource(Res.string.cancel),
+        onButtonClick = {
+            when (it) {
+                ContentDialogButton.Primary -> {
+                    dialog.onConfirm(textState.text.toString())
+                    onDismiss()
+                }
+
+                else -> {
+                    onDismiss()
+                }
+            }
+        },
+    )
+}
+
+internal data class TextEditDialogState(
     val title: String,
     val placeholder: String,
     val value: String,
     val suggestions: ImmutableList<String> = persistentListOf(),
     val hint: String = "",
+    val secret: Boolean = false,
+    val singleLine: Boolean = false,
     val onConfirm: (String) -> Unit,
 )
 

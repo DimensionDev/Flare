@@ -153,7 +153,6 @@ import dev.dimension.flare.ui.model.toUiImage
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.media.ImageTranslationPresenter
 import dev.dimension.flare.ui.presenter.status.StatusPresenter
-import dev.dimension.flare.ui.screen.settings.ImageTranslationSettingsSection
 import dev.dimension.flare.ui.screen.settings.imageTranslationText
 import dev.dimension.flare.ui.theme.FlareTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
@@ -282,7 +281,6 @@ internal fun MediaViewerScreen(
         mediaViewerPresenter(initialIndex = initialIndex)
     }
     val translation by producePresenter("image_translation_viewer") { remember { ImageTranslationPresenter(status?.accountType) }.invoke() }
-    var showImageTranslationSettings by remember { mutableStateOf(false) }
 
     fun translatedFileName(
         media: UiMedia,
@@ -582,12 +580,7 @@ internal fun MediaViewerScreen(
                                     if (current is UiMedia.Image) {
                                         FilledTonalIconButton(
                                             onClick = {
-                                                if (translation.configured) {
-                                                    translation.toggle(current)
-                                                } else {
-                                                    showImageTranslationSettings =
-                                                        true
-                                                }
+                                                translation.toggle(current)
                                             },
                                             enabled = !translation.item(current).loading,
                                         ) {
@@ -807,13 +800,6 @@ internal fun MediaViewerScreen(
                 }
             }
         }
-        if (showImageTranslationSettings) {
-            ModalBottomSheet(onDismissRequest = { showImageTranslationSettings = false }) {
-                Column(Modifier.verticalScroll(rememberScrollState()).padding(16.dp)) {
-                    ImageTranslationSettingsSection()
-                }
-            }
-        }
         val translationCurrent = medias.takeSuccess()?.getOrNull(state.currentPage)
         translationCurrent?.let { current ->
             translation.item(current).error?.let { error ->
@@ -825,13 +811,6 @@ internal fun MediaViewerScreen(
                         androidx.compose.material3.TextButton(
                             onClick = { translation.clearError(current) },
                         ) { Text(stringResource(android.R.string.ok)) }
-                    },
-                    dismissButton = {
-                        androidx.compose.material3.TextButton(onClick = {
-                            translation.clearError(current)
-                            showImageTranslationSettings =
-                                true
-                        }) { Text(imageTranslationText("Translation settings")) }
                     },
                 )
             }

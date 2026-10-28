@@ -16,7 +16,6 @@ struct MacMediaViewerScreen: View {
     let shareContext: MacMediaShareContext?
 
     @State private var imageTranslation: KotlinPresenter<ImageTranslationPresenterState>
-    @State private var showImageTranslationSettings = false
     @State private var selectedIndex: Int
     @State private var scrollPosition: Int?
     @State private var zoomScales: [Int: CGFloat] = [:]
@@ -93,11 +92,7 @@ struct MacMediaViewerScreen: View {
             ToolbarItemGroup(placement: .primaryAction) {
                 if let selectedMedia, selectedMedia is UiMediaImage {
                     Button {
-                        if imageTranslation.state.configured {
-                            imageTranslation.state.toggle(media: selectedMedia)
-                        } else {
-                            showImageTranslationSettings = true
-                        }
+                        imageTranslation.state.toggle(media: selectedMedia)
                     } label: {
                         Image(systemName: "translate")
                     }
@@ -170,23 +165,7 @@ struct MacMediaViewerScreen: View {
             }
 
         }
-        .sheet(isPresented: $showImageTranslationSettings) { ImageTranslationSettingsSheet() }
-        .alert(
-            Text("Image translation", bundle: .main),
-            isPresented: Binding(
-                get: { selectedMedia.map { imageTranslation.state.item(media: $0).error != nil } ?? false },
-                set: { if !$0, let selectedMedia { imageTranslation.state.clearError(media: selectedMedia) } }
-            )
-        ) {
-            Button("OK") { if let selectedMedia { imageTranslation.state.clearError(media: selectedMedia) } }
-            Button { showImageTranslationSettings = true } label: {
-                Text("Translation settings", bundle: .main)
-            }
-        } message: {
-            if let selectedMedia, let error = imageTranslation.state.item(media: selectedMedia).error {
-                Text(LocalizedStringKey(error.message), bundle: .main)
-            }
-        }
+        .imageTranslationErrorAlert(state: imageTranslation.state, media: selectedMedia)
         .onDisappear { imageTranslation.presenter.close() }
         .preferredColorScheme(.dark)
         .alert(item: $exportAlert) { alert in

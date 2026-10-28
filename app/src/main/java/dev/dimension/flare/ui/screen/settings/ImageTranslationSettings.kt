@@ -1,16 +1,11 @@
 package dev.dimension.flare.ui.screen.settings
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SegmentedListItem
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -21,9 +16,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.R
 import dev.dimension.flare.data.datastore.model.ImageTranslationField
@@ -31,25 +23,38 @@ import dev.dimension.flare.data.datastore.model.ImageTranslationProvider
 import dev.dimension.flare.ui.component.FlareDropdownMenu
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.settings.ImageTranslationSettingsPresenter
-import dev.dimension.flare.ui.theme.single
+import dev.dimension.flare.ui.theme.segmentedShapes2
+import kotlinx.collections.immutable.persistentListOf
 import moe.tlaster.precompose.molecule.producePresenter
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 internal fun ImageTranslationSettingsSection() {
     val state by producePresenter("image_translation_settings") { remember { ImageTranslationSettingsPresenter() }() }
+    ImageTranslationSettingsSection(state)
+}
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+internal fun ImageTranslationSettingsSection(state: ImageTranslationSettingsPresenter.State) {
     var showProviders by remember { mutableStateOf(false) }
     var editing by remember(state.config.provider) { mutableStateOf<ImageTranslationField?>(null) }
+    var expandedChoice by remember(state.config.provider) { mutableStateOf<String?>(null) }
     Text(
         imageTranslationText("Image translation"),
-        style = MaterialTheme.typography.titleSmall,
-        modifier = Modifier.padding(top = 24.dp, bottom = 8.dp),
+        style = MaterialTheme.typography.titleMedium,
+        modifier = Modifier.padding(vertical = 12.dp),
     )
     SegmentedListItem(
         checked = showProviders,
         onCheckedChange = { showProviders = it },
-        shapes = ListItemDefaults.single(),
+        shapes = ListItemDefaults.segmentedShapes2(0, state.fields.size + 1),
         content = { Text(imageTranslationText("Image translation provider")) },
+        supportingContent = {
+            Text(
+                stringResource(R.string.settings_ai_config_translate_provider_description),
+                style = MaterialTheme.typography.bodySmall,
+            )
+        },
         trailingContent = {
             Box {
                 TextButton(onClick = { showProviders = true }) { Text(imageTranslationText(state.config.provider.title)) }
@@ -64,89 +69,78 @@ internal fun ImageTranslationSettingsSection() {
             }
         },
     )
-    state.fields.forEach { field ->
-        SegmentedListItem(
-            checked = editing?.id == field.id,
-            onCheckedChange = { if (it) editing = field },
-            shapes = ListItemDefaults.single(),
-            content = { Text(imageTranslationText(field.title)) },
-            supportingContent = {
-                val value = state.config.value(field.id)
-                Text(
-                    if (field.secret && value.isNotEmpty()) {
-                        "••••••••"
-                    } else if (field.choices.isNotEmpty()) {
-                        imageTranslationText(field.choiceTitle(value))
-                    } else {
-                        value.ifEmpty { field.placeholder }
-                    },
-                    maxLines = 2,
-                )
-            },
-        )
+    state.fields.forEachIndexed { index, field ->
+        val value = state.config.value(field.id)
+        if (field.choices.isNotEmpty()) {
+            SegmentedListItem(
+                checked = expandedChoice == field.id,
+                onCheckedChange = { expanded -> expandedChoice = if (expanded) field.id else null },
+                shapes = ListItemDefaults.segmentedShapes2(index + 1, state.fields.size + 1),
+                content = { Text(imageTranslationText(field.title)) },
+                trailingContent = {
+                    Box {
+                        TextButton(onClick = { expandedChoice = field.id }) { Text(imageTranslationText(field.choiceTitle(value))) }
+                        FlareDropdownMenu(expanded = expandedChoice == field.id, onDismissRequest = { expandedChoice = null }) {
+                            field.choices.forEach { choice ->
+                                DropdownMenuItem(text = { Text(imageTranslationText(field.choiceTitle(choice))) }, onClick = {
+                                    state.setField(field.id, choice)
+                                    expandedChoice = null
+                                })
+                            }
+                        }
+                    }
+                },
+            )
+        } else {
+            SegmentedListItem(
+                checked = editing?.id == field.id,
+                onCheckedChange = { checked -> editing = if (checked) field else null },
+                shapes = ListItemDefaults.segmentedShapes2(index + 1, state.fields.size + 1),
+                content = { Text(imageTranslationText(field.title)) },
+                supportingContent = {
+                    Text(
+                        if (field.secret && value.isNotEmpty()) {
+                            "••••••••"
+                        } else {
+                            value.ifBlank {
+                                stringResource(R.string.settings_ai_config_value_empty_placeholder)
+                            }
+                        },
+                        style = MaterialTheme.typography.bodySmall,
+                        maxLines = 2,
+                    )
+                },
+            )
+        }
     }
     Text(
-        imageTranslationText(
-            "Original images, including private images, are sent to the selected service. Choose a model that returns images.",
-        ),
+        stringResource(R.string.image_translation_description),
         style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
         modifier = Modifier.padding(16.dp),
     )
     if (state.config.provider == ImageTranslationProvider.Qwen) {
         Text(
-            imageTranslationText(
-                "Qwen requires a publicly accessible original URL. Private images cannot be translated with this provider.",
-            ),
+            stringResource(R.string.image_translation_qwen_note),
             style = MaterialTheme.typography.bodySmall,
-            modifier = Modifier.padding(horizontal = 16.dp),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(16.dp),
         )
     }
     editing?.let { field ->
-        var text by remember(field.id) { mutableStateOf(state.config.value(field.id)) }
-        AlertDialog(
-            onDismissRequest = { editing = null },
-            title = { Text(imageTranslationText(field.title)) },
-            text = {
-                if (field.choices.isNotEmpty()) {
-                    Column {
-                        field.choices.forEach { choice ->
-                            TextButton(onClick = {
-                                state.setField(field.id, choice)
-                                editing = null
-                            }) {
-                                Text(
-                                    imageTranslationText(field.choiceTitle(choice)),
-                                )
-                            }
-                        }
-                    }
-                } else {
-                    OutlinedTextField(
-                        value = text,
-                        onValueChange = { text = it },
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = !field.multiline,
-                        minLines = if (field.multiline) 5 else 1,
-                        maxLines = if (field.multiline) 8 else 1,
-                        placeholder = { Text(field.placeholder) },
-                        visualTransformation = if (field.secret) PasswordVisualTransformation() else VisualTransformation.None,
-                        keyboardOptions =
-                            KeyboardOptions(
-                                autoCorrectEnabled = false,
-                                keyboardType = if (field.secret) KeyboardType.Password else KeyboardType.Text,
-                            ),
-                    )
-                }
+        TextEditDialog(
+            title = imageTranslationText(field.title),
+            placeholder = field.placeholder,
+            value = state.config.value(field.id),
+            suggestions = persistentListOf(),
+            hint = "",
+            secret = field.secret,
+            singleLine = !field.multiline,
+            onDismiss = { editing = null },
+            onConfirm = { value ->
+                state.setField(field.id, value.trim())
+                editing = null
             },
-            confirmButton = {
-                if (field.choices.isEmpty()) {
-                    TextButton(onClick = {
-                        state.setField(field.id, text.trim())
-                        editing = null
-                    }) { Text(imageTranslationText("Save")) }
-                }
-            },
-            dismissButton = { TextButton(onClick = { editing = null }) { Text(imageTranslationText("Cancel")) } },
         )
     }
 }

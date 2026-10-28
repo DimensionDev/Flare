@@ -7,7 +7,7 @@ import KotlinSharedUI
 import LazyPager
 import SwiftUI
 
-/// Offline fixtures exercise the real viewer, including its nested system sheet.
+/// Offline fixtures exercise the real viewer and translation settings.
 struct MediaViewerTestFixture: View {
     @State private var presented = false
     @State private var dismissed = false
@@ -16,6 +16,7 @@ struct MediaViewerTestFixture: View {
     private let indicator = ProcessInfo.processInfo.arguments.contains("--indicator")
     private let withoutPost = ProcessInfo.processInfo.arguments.contains("--without-post")
     private let hidePostActions = ProcessInfo.processInfo.arguments.contains("--hide-post-actions")
+    private let translationSettings = ProcessInfo.processInfo.arguments.contains("--translation-settings")
 
     var body: some View {
         VStack {
@@ -33,7 +34,9 @@ struct MediaViewerTestFixture: View {
         }
         .fullScreenCover(isPresented: $presented, onDismiss: { dismissed = true }) {
             NavigationStack {
-                if !medias.isEmpty {
+                if translationSettings {
+                    TranslationConfigScreen()
+                } else if !medias.isEmpty {
                     MediaViewerScreen(
                         medias: medias, initialIndex: 0, preview: nil,
                         post: withoutPost ? nil : makePost(medias: medias)

@@ -1,22 +1,17 @@
 package dev.dimension.flare.ui.screen.settings
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.Res
-import dev.dimension.flare.data.datastore.model.ImageTranslationField
 import dev.dimension.flare.data.datastore.model.ImageTranslationProvider
 import dev.dimension.flare.image_translation_action
 import dev.dimension.flare.image_translation_api_key
@@ -57,39 +52,43 @@ import dev.dimension.flare.image_translation_tencent
 import dev.dimension.flare.image_translation_timeout
 import dev.dimension.flare.image_translation_title
 import dev.dimension.flare.image_translation_unsupported
+import dev.dimension.flare.settings_ai_config_translate_provider_description
+import dev.dimension.flare.settings_ai_config_value_empty_placeholder
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.settings.ImageTranslationSettingsPresenter
 import io.github.composefluent.FluentTheme
 import io.github.composefluent.component.Button
-import io.github.composefluent.component.ContentDialog
-import io.github.composefluent.component.ContentDialogButton
 import io.github.composefluent.component.DropDownButton
 import io.github.composefluent.component.ExpanderItem
 import io.github.composefluent.component.ExpanderItemSeparator
+import io.github.composefluent.component.FlyoutPlacement
 import io.github.composefluent.component.MenuFlyout
 import io.github.composefluent.component.MenuFlyoutItem
-import io.github.composefluent.component.RadioButton
 import io.github.composefluent.component.Text
-import io.github.composefluent.component.TextField
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
 internal fun ImageTranslationSettingsContent() {
     val state = remember { ImageTranslationSettingsPresenter() }.invoke()
+    ImageTranslationSettingsContent(state)
+}
+
+@Composable
+internal fun ImageTranslationSettingsContent(state: ImageTranslationSettingsPresenter.State) {
     var showProviders by remember { mutableStateOf(false) }
-    var editing by remember(state.config.provider) { mutableStateOf<ImageTranslationField?>(null) }
+    var expandedChoice by remember(state.config.provider) { mutableStateOf<String?>(null) }
+    var editing by remember(state.config.provider) { mutableStateOf<TextEditDialogState?>(null) }
     ExpanderItem(
-        heading = { Text(imageTranslationText("Image translation")) },
-        caption = {
-            Text(
-                imageTranslationText(
-                    "Original images, including private images, are sent to the selected service. Choose a model that returns images.",
-                ),
-            )
-        },
+        heading = { Text(imageTranslationText("Image translation provider")) },
+        caption = { Text(stringResource(Res.string.settings_ai_config_translate_provider_description)) },
         trailing = {
             DropDownButton(onClick = { showProviders = !showProviders }) { Text(imageTranslationText(state.config.provider.title)) }
-            MenuFlyout(visible = showProviders, onDismissRequest = { showProviders = false }) {
+            MenuFlyout(
+                visible = showProviders,
+                onDismissRequest = { showProviders = false },
+                placement = FlyoutPlacement.BottomAlignedEnd,
+                modifier = Modifier.heightIn(max = 200.dp),
+            ) {
                 state.providers.forEach { provider ->
                     MenuFlyoutItem(text = { Text(imageTranslationText(provider.title)) }, onClick = {
                         state.selectProvider(provider)
@@ -100,74 +99,71 @@ internal fun ImageTranslationSettingsContent() {
         },
     )
     state.fields.forEach { field ->
+        val value = state.config.value(field.id)
+        val title = imageTranslationText(field.title)
         ExpanderItemSeparator()
         ExpanderItem(
             heading = { Text(imageTranslationText(field.title)) },
             caption = {
-                val value = state.config.value(field.id)
-                Text(
-                    if (field.secret && value.isNotEmpty()) {
-                        "••••••••"
-                    } else if (field.choices.isNotEmpty()) {
-                        imageTranslationText(field.choiceTitle(value))
-                    } else {
-                        value.ifEmpty { field.placeholder }
-                    },
-                    maxLines = 2,
-                )
+                if (field.choices.isEmpty()) {
+                    Text(
+                        if (field.secret && value.isNotEmpty()) {
+                            "••••••••"
+                        } else {
+                            value.ifBlank {
+                                stringResource(Res.string.settings_ai_config_value_empty_placeholder)
+                            }
+                        },
+                        maxLines = 2,
+                    )
+                }
             },
-            trailing = { Button(onClick = { editing = field }) { Text(imageTranslationText("Edit")) } },
+            trailing = {
+                if (field.choices.isNotEmpty()) {
+                    DropDownButton(onClick = { expandedChoice = field.id }) { Text(imageTranslationText(field.choiceTitle(value))) }
+                    MenuFlyout(
+                        visible = expandedChoice == field.id,
+                        onDismissRequest = { expandedChoice = null },
+                        placement = FlyoutPlacement.BottomAlignedEnd,
+                        modifier = Modifier.heightIn(max = 200.dp),
+                    ) {
+                        field.choices.forEach { choice ->
+                            MenuFlyoutItem(text = { Text(imageTranslationText(field.choiceTitle(choice))) }, onClick = {
+                                state.setField(field.id, choice)
+                                expandedChoice = null
+                            })
+                        }
+                    }
+                } else {
+                    Button(modifier = Modifier.semantics { contentDescription = title }, onClick = {
+                        editing =
+                            TextEditDialogState(
+                                title = title,
+                                placeholder = field.placeholder,
+                                value = value,
+                                secret = field.secret,
+                                singleLine = !field.multiline,
+                                onConfirm = { state.setField(field.id, it.trim()) },
+                            )
+                    }) { Text(imageTranslationText("Edit")) }
+                }
+            },
         )
     }
+    Text(
+        stringResource(Res.string.image_translation_description),
+        style = FluentTheme.typography.caption,
+        color = FluentTheme.colors.text.text.secondary,
+        modifier = Modifier.padding(16.dp),
+    )
     if (state.config.provider == ImageTranslationProvider.Qwen) {
         Text(
-            imageTranslationText(
-                "Qwen requires a publicly accessible original URL. Private images cannot be translated with this provider.",
-            ),
+            stringResource(Res.string.image_translation_qwen_note),
             style = FluentTheme.typography.caption,
             modifier = Modifier.padding(16.dp),
         )
     }
-    editing?.let { field ->
-        var text by remember(field.id) { mutableStateOf(state.config.value(field.id)) }
-        ContentDialog(
-            title = imageTranslationText(field.title),
-            visible = true,
-            content = {
-                Column(Modifier.padding(16.dp)) {
-                    if (field.choices.isNotEmpty()) {
-                        field.choices.forEach { choice ->
-                            RadioButton(
-                                selected = text == choice,
-                                onClick = { text = choice },
-                                label = imageTranslationText(field.choiceTitle(choice)),
-                            )
-                        }
-                    } else {
-                        TextField(
-                            value = text,
-                            onValueChange = { text = it },
-                            singleLine = !field.multiline,
-                            modifier = Modifier.fillMaxWidth().heightIn(max = 400.dp),
-                            placeholder = { Text(field.placeholder) },
-                            visualTransformation = if (field.secret) PasswordVisualTransformation() else VisualTransformation.None,
-                            keyboardOptions =
-                                KeyboardOptions(
-                                    autoCorrectEnabled = false,
-                                    keyboardType = if (field.secret) KeyboardType.Password else KeyboardType.Text,
-                                ),
-                        )
-                    }
-                }
-            },
-            primaryButtonText = imageTranslationText("Save"),
-            closeButtonText = imageTranslationText("Cancel"),
-            onButtonClick = { button ->
-                if (button == ContentDialogButton.Primary) state.setField(field.id, text.trim())
-                editing = null
-            },
-        )
-    }
+    editing?.let { dialog -> SettingsTextEditDialog(dialog, onDismiss = { editing = null }) }
 }
 
 @Composable

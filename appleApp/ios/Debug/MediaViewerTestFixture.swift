@@ -26,6 +26,7 @@ struct MediaViewerTestFixture: View {
             if dismissed { Text("Media dismissed") }
         }
         .task {
+            await configureTranslationFixture()
             var items = [await makeMedia()]
             if indicator { items.append(await makeMedia(index: 1)) }
             medias = items
@@ -47,6 +48,36 @@ struct MediaViewerTestFixture: View {
             .background(ClearFullScreenBackground())
             .colorScheme(.dark)
         }
+    }
+
+    @MainActor
+    private func configureTranslationFixture() async {
+        let settings = KotlinPresenter(presenter: ImageTranslationSettingsPresenter())
+        if !ProcessInfo.processInfo.arguments.contains("--image-translation-fixture") {
+            settings.state.selectProvider(provider: .disabled)
+            for _ in 0..<250 {
+                if settings.state.config.provider == .disabled { return }
+                try? await Task.sleep(for: .milliseconds(20))
+            }
+            assertionFailure("Could not disable providers for the offline fixture")
+            return
+        }
+        settings.state.selectProvider(provider: .openAiimages)
+        for _ in 0..<250 {
+            if settings.state.config.provider == .openAiimages { break }
+            try? await Task.sleep(for: .milliseconds(20))
+        }
+        let state = settings.state
+        let prompt = "Translate visible text into {targetLanguage}. Offline fixture " + UUID().uuidString
+        state.setField(id: "prompt", value: prompt)
+        state.setField(id: "baseUrl", value: "http://127.0.0.1:18473/v1")
+        state.setField(id: "apiKey", value: "offline-fixture-key")
+        state.setField(id: "model", value: "offline-fixture")
+        for _ in 0..<250 {
+            if settings.state.config.configured && settings.state.config.value(id: "baseUrl") == "http://127.0.0.1:18473/v1" && settings.state.config.value(id: "prompt") == prompt { return }
+            try? await Task.sleep(for: .milliseconds(20))
+        }
+        assertionFailure("Could not configure the local image translation fixture")
     }
 
     private func makeMedia(index: Int = 0) async -> any UiMedia {

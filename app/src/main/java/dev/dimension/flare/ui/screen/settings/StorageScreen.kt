@@ -343,7 +343,7 @@ private fun storagePresenter(context: Context) =
             imageCacheSize =
                 (
                     (context.imageLoader.diskCache?.size ?: 0) +
-                        presenter.ugoiraCacheSize()
+                        presenter.mediaCacheSize()
                 ) / (1024 * 1024)
         }
         object : StorageState by state {
@@ -361,7 +361,7 @@ private fun storagePresenter(context: Context) =
                     try {
                         withContext(Dispatchers.IO) {
                             context.imageLoader.diskCache?.clear()
-                            presenter.clearUgoiraCache()
+                            presenter.clearMediaCache()
                         }
                         imageCacheSize = 0L
                     } finally {

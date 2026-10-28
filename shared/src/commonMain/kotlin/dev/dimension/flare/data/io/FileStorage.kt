@@ -12,6 +12,8 @@ import okio.use
 import kotlin.uuid.Uuid
 
 internal interface FileStorage {
+    fun cacheDirectory(): Path = dataStoreFile("cache")
+
     fun dataStoreFile(fileName: String): Path
 
     fun draftMediaFile(
@@ -43,7 +45,10 @@ internal interface FileStorage {
 internal open class OkioFileStorage(
     val fileSystem: FileSystem,
     private val root: Path,
+    private val cacheRoot: Path = root.resolve("cache"),
 ) : FileStorage {
+    override fun cacheDirectory(): Path = cacheRoot
+
     override fun dataStoreFile(fileName: String): Path = root.resolve(fileName)
 
     override fun draftMediaFile(

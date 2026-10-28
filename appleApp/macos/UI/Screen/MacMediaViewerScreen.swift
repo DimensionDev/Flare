@@ -15,6 +15,8 @@ struct MacMediaViewerScreen: View {
     let previewProxy: ProxyRef
     let shareContext: MacMediaShareContext?
 
+    @State private var imageTranslation: KotlinPresenter<ImageTranslationPresenterState>
+    @State private var showImageTranslationSettings = false
     @State private var selectedIndex: Int
     @State private var scrollPosition: Int?
     @State private var zoomScales: [Int: CGFloat] = [:]
@@ -34,13 +36,15 @@ struct MacMediaViewerScreen: View {
         initialIndex: Int,
         preview: String?,
         previewProxy: ProxyRef = ProxyRef.Global.shared,
-        shareContext: MacMediaShareContext? = nil
+        shareContext: MacMediaShareContext? = nil,
+        accountType: AccountType? = nil
     ) {
         self.medias = medias
         self.initialIndex = initialIndex
         self.preview = preview
         self.previewProxy = previewProxy
         self.shareContext = shareContext
+        _imageTranslation = State(initialValue: KotlinPresenter(presenter: ImageTranslationPresenter(accountType: accountType)))
         let initialSelection = max(0, initialIndex)
         self.selectedIndex = initialSelection
         self._scrollPosition = .init(initialValue: initialSelection)
@@ -87,6 +91,21 @@ struct MacMediaViewerScreen: View {
             }
 
             ToolbarItemGroup(placement: .primaryAction) {
+                if let selectedMedia, selectedMedia is UiMediaImage {
+                    Button {
+                        if imageTranslation.state.configured {
+                            imageTranslation.state.toggle(media: selectedMedia)
+                        } else {
+                            showImageTranslationSettings = true
+                        }
+                    } label: {
+                        Image(systemName: "translate")
+                    }
+                    .disabled(imageTranslation.state.item(media: selectedMedia).loading)
+                    .accessibilityLabel(Text(imageTranslation.state.item(media: selectedMedia).showingTranslated ? "Show original" : "Translate image", bundle: .main))
+                    .accessibilityValue(Text(imageTranslation.state.item(media: selectedMedia).loading ? "Translating image" : "", bundle: .main))
+                    .help(Text("Image translation", bundle: .main))
+                }
                 if let selectedExportSource {
                     Button {
                         saveSelectedMedia()
@@ -151,6 +170,24 @@ struct MacMediaViewerScreen: View {
             }
 
         }
+        .sheet(isPresented: $showImageTranslationSettings) { ImageTranslationSettingsSheet() }
+        .alert(
+            Text("Image translation", bundle: .main),
+            isPresented: Binding(
+                get: { selectedMedia.map { imageTranslation.state.item(media: $0).error != nil } ?? false },
+                set: { if !$0, let selectedMedia { imageTranslation.state.clearError(media: selectedMedia) } }
+            )
+        ) {
+            Button("OK") { if let selectedMedia { imageTranslation.state.clearError(media: selectedMedia) } }
+            Button { showImageTranslationSettings = true } label: {
+                Text("Translation settings", bundle: .main)
+            }
+        } message: {
+            if let selectedMedia, let error = imageTranslation.state.item(media: selectedMedia).error {
+                Text(LocalizedStringKey(error.message), bundle: .main)
+            }
+        }
+        .onDisappear { imageTranslation.presenter.close() }
         .preferredColorScheme(.dark)
         .alert(item: $exportAlert) { alert in
             Alert(
@@ -182,17 +219,32 @@ struct MacMediaViewerScreen: View {
                 LazyHStack(spacing: 0) {
                     ForEach(medias.indices, id: \.self) { index in
                         let media = medias[index]
+                        let displayed = imageTranslation.state.displayed(media: media)
                         MacMediaViewerPage(
-                            media: media,
+                            media: displayed,
                             isSelected: selectedIndex == index,
                             zoomScale: zoomBinding(for: index),
                             isPlaying: $isPlaying,
                             videoState: $videoState,
                             currentTime: timeBinding(for: media.url),
-                            playbackRate: $playbackRate
+                            playbackRate: $playbackRate,
+                            onImageFailure: {
+                                if displayed.url != media.url { imageTranslation.state.imageFailed(media: media, url: displayed.url) }
+                            }
                         )
                         .frame(width: geometry.size.width, height: geometry.size.height)
+                        .overlay {
+                            if imageTranslation.state.item(media: media).loading {
+                                ProgressView()
+                                    .accessibilityLabel(Text("Translating image", bundle: .main))
+                            }
+                        }
                         .contextMenu {
+                            if media is UiMediaImage, imageTranslation.state.item(media: media).translated != nil {
+                                Button { imageTranslation.state.regenerate(media: media) } label: {
+                                    Text("Translate again", bundle: .main)
+                                }
+                            }
                             MacMediaViewerContextMenu(
                                 media: media,
                                 showsDownloadAll: medias.count > 1,
@@ -276,7 +328,7 @@ struct MacMediaViewerScreen: View {
             return nil
         }
         return MacMediaExportSource(
-            media: selectedMedia,
+            media: imageTranslation.state.displayed(media: selectedMedia),
             shareContext: shareContext
         )
     }
@@ -386,6 +438,11 @@ struct MacMediaViewerScreen: View {
     }
 
     private func saveMedia(_ media: any UiMedia) {
+        let media = imageTranslation.state.displayed(media: media)
+        let localURL = URL(string: media.url).flatMap { $0.isFileURL ? $0 : nil }
+        let preparedFile: URL?
+        do { preparedFile = try localURL.map { try ImageTranslationExportFile.prepare($0) } }
+        catch { exportAlert = MacMediaExportAlert(title: "Save Failed", message: error.localizedDescription); return }
         guard !isSavingSelectedMedia,
               let source = MacMediaExportSource(
                 media: media,
@@ -398,8 +455,10 @@ struct MacMediaViewerScreen: View {
         Task {
             do {
                 _ = try await MacMediaFileExporter.save(
-                    source: source
+                    source: source,
+                    existingFileURL: preparedFile
                 )
+                if let preparedFile { try? FileManager.default.removeItem(at: preparedFile.deletingLastPathComponent()) }
             } catch {
                 exportAlert = MacMediaExportAlert(
                     title: "Save Failed",
@@ -416,7 +475,17 @@ struct MacMediaViewerScreen: View {
             return
         }
 
-        let mediaByFileName = mediaFileNames()
+        let originals = mediaFileNames()
+        var mediaByFileName: [String: any UiMedia] = [:]
+        do {
+            for (name, original) in originals {
+                let displayed = imageTranslation.state.displayed(media: original)
+                if let url = URL(string: displayed.url), url.isFileURL {
+                    let file = try ImageTranslationExportFile.prepare(url)
+                    mediaByFileName[name.deletingPathExtensionForTranslation + "_" + file.lastPathComponent] = UiMediaImage(url: file.absoluteString, proxy: ProxyRef.Unbound.shared)
+                } else { mediaByFileName[name] = displayed }
+            }
+        } catch { exportAlert = MacMediaExportAlert(title: "Save Failed", message: error.localizedDescription); return }
         guard !mediaByFileName.isEmpty else {
             return
         }
@@ -447,6 +516,11 @@ struct MacMediaViewerScreen: View {
     }
 
     private func shareMedia(_ media: any UiMedia) {
+        let media = imageTranslation.state.displayed(media: media)
+        let localURL = URL(string: media.url).flatMap { $0.isFileURL ? $0 : nil }
+        let preparedFile: URL?
+        do { preparedFile = try localURL.map { try ImageTranslationExportFile.prepare($0) } }
+        catch { exportAlert = MacMediaExportAlert(title: "Share Failed", message: error.localizedDescription); return }
         guard !isSharingSelectedMedia,
               let source = MacMediaExportSource(
                 media: media,
@@ -459,7 +533,9 @@ struct MacMediaViewerScreen: View {
         isSharingSelectedMedia = true
         Task {
             do {
-                let fileURL = try await MacMediaFileExporter.makeShareFile(source: source)
+                let fileURL: URL
+                if let preparedFile { fileURL = preparedFile }
+                else { fileURL = try await MacMediaFileExporter.makeShareFile(source: source) }
                 guard selectedExportSource?.id == source.id else {
                     isSharingSelectedMedia = false
                     return
@@ -566,6 +642,7 @@ private struct MacMediaViewerPage: View {
     @Binding var videoState: VideoState
     @Binding var currentTime: CMTime
     @Binding var playbackRate: Float
+    var onImageFailure: (() -> Void)? = nil
     @State private var imageLoadingProgress: Double?
 
     var body: some View {
@@ -646,7 +723,7 @@ private struct MacMediaViewerPage: View {
     private func zoomableImage(media: any UiMedia) -> some View {
         MacZoomableScrollView(magnification: $zoomScale, minimumMagnification: macMediaMinimumZoomScale, maximumMagnification: macMediaMaximumZoomScale) {
             NetworkImage(data: media, placeholder: media.preview, contentMode: .fit, usesCrossfade: true,
-                         onProgress: handleImageLoadingProgress)
+                         onProgress: handleImageLoadingProgress, onImageFailure: onImageFailure, keepsCurrentImage: true)
                 .originalImage()
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
@@ -1163,4 +1240,8 @@ private struct MacSharePickerAnchorView: NSViewRepresentable {
             }
         }
     }
+}
+
+private extension String {
+    var deletingPathExtensionForTranslation: String { (self as NSString).deletingPathExtension }
 }

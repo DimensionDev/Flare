@@ -12,6 +12,7 @@ internal class AndroidFileStorage(
     @Provided private val context: Context,
 ) : OkioFileStorage(
         fileSystem = FileSystem.SYSTEM,
+        cacheRoot = context.cacheDir.toOkioPath(),
         root =
             context
                 .filesDir

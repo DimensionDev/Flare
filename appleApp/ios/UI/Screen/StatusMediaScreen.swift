@@ -143,7 +143,9 @@ struct AdaptiveKFImage: View {
     let data: any UiMedia
     let placeholder: UiMedia?
     let mediaAspectRatio: CGFloat?
+    var onImageFailure: (() -> Void)? = nil
     @State private var measuredImageSize: CGSize?
+    @State private var isLoading = false
 
     private var shouldFill: Bool {
         MediaViewerImageLayoutPolicy.shouldFillWidth(mediaAspectRatio: mediaAspectRatio, measuredImageSize: measuredImageSize)
@@ -156,7 +158,11 @@ struct AdaptiveKFImage: View {
     }
     private var image: some View {
         NetworkImage(data: data, placeholder: placeholder, contentMode: shouldFill ? .fill : .fit,
-                     onImageSize: { measuredImageSize = $0 })
+                     onProgress: { isLoading = $0.map { $0 < 1 } ?? false },
+                     onImageFailure: onImageFailure,
+                     onImageSize: { measuredImageSize = $0 },
+                     keepsCurrentImage: true)
             .originalImage()
+            .overlay { if isLoading, !data.isRemote { ProgressView() } }
     }
 }

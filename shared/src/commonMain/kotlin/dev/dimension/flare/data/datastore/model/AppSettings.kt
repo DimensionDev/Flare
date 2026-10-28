@@ -15,6 +15,7 @@ public data class AppSettings(
     val refreshHomeTimelineOnLaunch: Boolean = true,
     val homeTimelineAutoRefreshInterval: TimelineAutoRefreshInterval = TimelineAutoRefreshInterval.DISABLED,
     val rememberHomeTimelinePosition: Boolean = false,
+    val imageTranslationConfig: ImageTranslationConfig = ImageTranslationConfig(),
 ) {
     public companion object {
         // for SwiftUI environment defaults

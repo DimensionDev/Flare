@@ -1,6 +1,7 @@
 import Foundation
 import GSPlayer
 import Kingfisher
+import KotlinSharedUI
 import SwiftUI
 import UIKit
 
@@ -16,7 +17,9 @@ enum MediaCacheMaintenance {
     static func configure() {
         let cache = KingfisherManager.shared.cache
         cache.diskStorage.config.sizeLimit = kingfisherDiskLimit
-        cache.diskStorage.config.expiration = .days(14)
+        let retentionDays = 14
+        cache.diskStorage.config.expiration = .days(retentionDays)
+        ImageTranslationCachePolicy.shared.configure(ordinaryRetentionSeconds: Double(retentionDays) * 24 * 60 * 60)
         cache.cleanExpiredDiskCache()
     }
 

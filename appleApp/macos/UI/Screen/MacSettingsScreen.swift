@@ -996,7 +996,7 @@ private struct MacStorageSettingsPane: View {
         ) {}
         KingfisherManager.shared.cache.clearDiskCache {
             Task { @MainActor in
-                try? await storagePresenter.clearUgoiraCache()
+                try? await storagePresenter.clearMediaCache()
                 isClearingImageCache = false
             }
         }

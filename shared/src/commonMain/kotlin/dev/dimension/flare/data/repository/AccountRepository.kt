@@ -260,6 +260,11 @@ internal class AccountRepository internal constructor(
         }
 
     private suspend fun deleteAccount(accountKey: MicroBlogKey) {
+        org.koin.mp.KoinPlatformTools
+            .defaultContext()
+            .getOrNull()
+            ?.getOrNull<dev.dimension.flare.data.translation.image.ImageTranslationRepository>()
+            ?.removeOwner(accountKey)
         appDataStore.composeConfigData.updateData {
             it.copy(
                 lastAccounts = it.lastAccounts.filterNot { key -> key == accountKey },

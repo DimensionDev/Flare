@@ -117,6 +117,15 @@ private func configureKingfisherCache() {
     let memoryLimit = min(max(scaledLimit, minimumLimit), maximumLimit)
 
     KingfisherManager.shared.cache.memoryStorage.config.totalCostLimit = Int(memoryLimit)
+    let ordinaryRetention: TimeInterval
+    switch KingfisherManager.shared.cache.diskStorage.config.expiration {
+    case .days(let days): ordinaryRetention = TimeInterval(days) * 24 * 60 * 60
+    case .seconds(let seconds): ordinaryRetention = seconds
+    case .date(let date): ordinaryRetention = date.timeIntervalSinceNow
+    default: ordinaryRetention = 14 * 24 * 60 * 60
+    }
+    ImageTranslationCachePolicy.shared.configure(ordinaryRetentionSeconds: ordinaryRetention)
+
 }
 
 extension Scene {

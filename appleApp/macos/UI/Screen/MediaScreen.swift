@@ -6,6 +6,7 @@ struct RawMediaScreen: View {
     let initialIndex: Int
     let preview: String?
     let shareContext: MacMediaShareContext?
+    var accountType: AccountType? = nil
 
     var body: some View {
         MacMediaViewerScreen(
@@ -13,7 +14,8 @@ struct RawMediaScreen: View {
             initialIndex: initialIndex,
             preview: preview,
             previewProxy: medias.indices.contains(initialIndex) ? medias[initialIndex].proxy : ProxyRef.Unbound.shared,
-            shareContext: shareContext
+            shareContext: shareContext,
+            accountType: accountType
         )
     }
 }

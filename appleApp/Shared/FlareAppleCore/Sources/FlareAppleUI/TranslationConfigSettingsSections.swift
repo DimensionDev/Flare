@@ -202,6 +202,7 @@ private struct TranslationConfigSettingsSectionsContent: View {
         }
         .animation(.easeInOut(duration: 0.2), value: state.presenter.state.translateProvider.name)
         .animation(.easeInOut(duration: 0.2), value: state.presenter.state.preTranslate)
+        ImageTranslationSettingsSection()
     }
 
     @ViewBuilder

@@ -2517,6 +2517,8 @@ internal fun SettingsScreen(
                         }
                     }
                 }
+                ExpanderItemSeparator()
+                ImageTranslationSettingsContent()
             }
 
             Expander(
@@ -2760,7 +2762,7 @@ private fun storagePresenter(
                         ).diskCache
                         ?.size ?: 0
                 ) +
-                    presenter.ugoiraCacheSize()
+                    presenter.mediaCacheSize()
             ) /
             (1024 * 1024)
     }
@@ -2782,7 +2784,7 @@ private fun storagePresenter(
                 try {
                     withContext(Dispatchers.IO) {
                         SingletonImageLoader.get(PlatformContext.INSTANCE).diskCache?.clear()
-                        presenter.clearUgoiraCache()
+                        presenter.clearMediaCache()
                     }
                     refreshKey++
                 } finally {

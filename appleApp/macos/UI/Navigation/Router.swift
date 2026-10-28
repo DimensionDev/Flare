@@ -111,6 +111,7 @@ struct Router: View {
                             initialIndex: index,
                             preview: preview,
                             shareContext: shareContext,
+                            accountType: statusMediaResolveRequest.accountType,
                             openWindow: openWindow
                         )
                     },

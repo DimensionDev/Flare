@@ -32,6 +32,13 @@ internal suspend fun shareImageMedia(
         )
     val success =
         withContext(Dispatchers.IO) {
+            if (media.url.startsWith("file://")) {
+                if (!isImageTranslationFile(media, context.cacheDir)) return@withContext false
+                return@withContext runCatching {
+                    File(java.net.URI(media.url)).copyTo(targetFile, overwrite = true)
+                    true
+                }.getOrDefault(false)
+            }
             context.imageLoader.diskCache?.openSnapshot(media.cacheKey)?.use {
                 it.data.toFile().copyTo(targetFile, overwrite = true)
                 true

@@ -3,10 +3,11 @@ import XCTest
 
 final class MediaViewerInteractionTests: XCTestCase {
     @MainActor
-    private func openMedia(video: Bool = false, withoutPost: Bool = false, indicator: Bool = false, hidePostActions: Bool = false) -> XCUIApplication {
+    private func openMedia(video: Bool = false, withoutPost: Bool = false, indicator: Bool = false, hidePostActions: Bool = false, translation: Bool = false) -> XCUIApplication {
         let app = XCUIApplication()
         app.launchArguments = ["--media-viewer-test", "-AppleLanguages", "(en)", "-AppleLocale", "en_US"]
         if video { app.launchArguments.append("--video") }
+        if translation { app.launchArguments.append("--image-translation-fixture") }
         if withoutPost { app.launchArguments.append("--without-post") }
         if indicator { app.launchArguments.append("--indicator") }
         if hidePostActions { app.launchArguments.append("--hide-post-actions") }
@@ -20,6 +21,67 @@ final class MediaViewerInteractionTests: XCTestCase {
             if !hidePostActions { XCTAssertTrue(app.buttons["More"].firstMatch.waitForExistence(timeout: 10)) }
         }
         return app
+    }
+
+    @MainActor
+    func testImageTranslationOpensNativeProviderSettingsAndSecureEditor() {
+        let app = openMedia(withoutPost: true)
+        defer { app.terminate() }
+        let translate = app.buttons["Translate image"]
+        XCTAssertTrue(translate.waitForExistence(timeout: 5))
+        translate.tap()
+        XCTAssertTrue(app.navigationBars["Image translation"].waitForExistence(timeout: 5))
+        let provider = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Image translation provider")).firstMatch
+        XCTAssertTrue(provider.waitForExistence(timeout: 5))
+        provider.tap()
+        app.buttons["Gemini"].tap()
+        let apiKey = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "API key")).firstMatch
+        XCTAssertTrue(apiKey.waitForExistence(timeout: 5))
+        apiKey.tap()
+        XCTAssertTrue(app.secureTextFields.firstMatch.waitForExistence(timeout: 5))
+        app.buttons["Cancel"].tap()
+        let attachment = XCTAttachment(screenshot: app.screenshot())
+        attachment.name = "image-translation-native-settings"
+        attachment.lifetime = .keepAlways
+        add(attachment)
+        provider.tap()
+        app.buttons["Off"].tap()
+        app.buttons["Save"].tap()
+        XCTAssertTrue(translate.waitForExistence(timeout: 5))
+    }
+
+    @MainActor
+    func testVideoDoesNotOfferImageTranslation() {
+        let app = openMedia(video: true, withoutPost: true)
+        defer { app.terminate() }
+        XCTAssertFalse(app.buttons["Translate image"].exists)
+    }
+
+    @MainActor
+    func testLocalProviderReturnsDisplayedSavableImage() async throws {
+        let health = URL(string: "http://127.0.0.1:18473/health")!
+        var request = URLRequest(url: health)
+        request.timeoutInterval = 2
+        guard let (data, _) = try? await URLSession.shared.data(for: request),
+              (try? JSONDecoder().decode([String: Bool].self, from: data))?["fixture"] == true else {
+            throw XCTSkip("Start scripts/test_image_translation_server.py for the offline provider test")
+        }
+        let app = openMedia(withoutPost: true, translation: true)
+        defer { app.terminate() }
+        app.buttons["Translate image"].tap()
+        let loading = app.buttons.matching(NSPredicate(format: "value == %@", "Translating image")).firstMatch
+        XCTAssertTrue(loading.waitForExistence(timeout: 5))
+        let original = app.buttons["Show original"]
+        XCTAssertTrue(original.waitForExistence(timeout: 10))
+        let attachment = XCTAttachment(screenshot: app.screenshot())
+        attachment.name = "image-translation-local-provider-result"
+        attachment.lifetime = .keepAlways
+        add(attachment)
+        original.tap()
+        app.buttons["Translate image"].tap()
+        XCTAssertTrue(original.waitForExistence(timeout: 5))
+        app.buttons["Share image"].tap()
+        XCTAssertTrue(app.cells["Copy"].waitForExistence(timeout: 5))
     }
 
     @MainActor

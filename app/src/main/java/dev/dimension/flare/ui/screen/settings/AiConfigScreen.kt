@@ -1179,6 +1179,7 @@ internal fun TranslationConfigScreen(onBack: () -> Unit) {
                     }
                 }
             }
+            ImageTranslationSettingsSection()
         }
     }
     if (state.showExcludedLanguagesDialog) {

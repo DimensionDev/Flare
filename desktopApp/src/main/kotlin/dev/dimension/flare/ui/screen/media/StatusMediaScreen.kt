@@ -56,6 +56,7 @@ import androidx.compose.ui.unit.roundToIntSize
 import androidx.compose.ui.unit.toOffset
 import coil3.compose.AsyncImagePainter
 import coil3.compose.rememberAsyncImagePainter
+import coil3.memory.MemoryCache
 import coil3.request.crossfade
 import coil3.size.Size
 import compose.icons.FontAwesomeIcons
@@ -93,6 +94,7 @@ import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.presenter.invoke
+import dev.dimension.flare.ui.presenter.media.ImageTranslationPresenter
 import dev.dimension.flare.ui.presenter.status.StatusPresenter
 import dev.dimension.flare.ui.presenter.status.StatusState
 import dev.dimension.flare.ui.theme.LocalComposeWindow
@@ -145,6 +147,7 @@ private fun StatusMediaContent(
     statusKey: MicroBlogKey,
     index: Int,
 ) {
+    val translation = remember(accountType) { ImageTranslationPresenter(accountType) }.invoke()
     val scope = rememberCoroutineScope()
     val window = LocalComposeWindow.current
     val state by producePresenter(
@@ -217,11 +220,21 @@ private fun StatusMediaContent(
                     is UiMedia.Image -> {
                         ImageItem(
                             modifier = Modifier.fillMaxSize(),
-                            media = media,
+                            media = translation.displayed(media),
+                            onLoadError = {
+                                val result = translation.displayed(media)
+                                if (result.url != media.url) translation.imageFailed(media, result.url)
+                            },
                             description = media.accessibleDescription(),
                             isFocused = pagerState.currentPage == it,
                             setLockPager = state::setLockPager,
                         )
+                        if (translation.item(media).loading) {
+                            androidx.compose.foundation.layout.Box(
+                                Modifier.fillMaxSize(),
+                                contentAlignment = androidx.compose.ui.Alignment.Center,
+                            ) { ProgressRing() }
+                        }
                     }
 
                     is UiMedia.Video -> {
@@ -302,12 +315,15 @@ private fun StatusMediaContent(
                         CommandBarSeparator()
                     }
                 }
+                medias.getOrNull(pagerState.currentPage)?.let { current ->
+                    if (current is UiMedia.Image) item { ImageTranslationActions(translation, current) }
+                }
                 if (medias.getOrNull(pagerState.currentPage) !is UiMedia.Ugoira) {
                     item {
                         SubtleButton(
                             onClick = {
                                 val current = medias[pagerState.currentPage]
-                                state.save(current)
+                                state.save(current, translation.displayed(current))
                             },
                             content = {
                                 FAIcon(
@@ -474,11 +490,29 @@ internal fun ImageItem(
     isFocused: Boolean,
     modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null,
+    onLoadError: () -> Unit = {},
 ) {
-    val painter =
-        rememberAsyncImagePainter(
-            rememberMediaImageRequest(media, crossfade = false).newBuilder().size(Size.ORIGINAL).build(),
-        )
+    val currentOnLoadError by androidx.compose.runtime.rememberUpdatedState(onLoadError)
+    var previousCacheKey by remember { mutableStateOf<MemoryCache.Key?>(null) }
+    val currentMediaKey by androidx.compose.runtime.rememberUpdatedState(media?.cacheKey)
+    val baseRequest = rememberMediaImageRequest(media, crossfade = false)
+    val request =
+        remember(baseRequest) {
+            val requestedKey = media?.cacheKey
+            baseRequest
+                .newBuilder()
+                .size(Size.ORIGINAL)
+                .apply { previousCacheKey?.let { placeholderMemoryCacheKey(it) } }
+                .listener(onSuccess = { _, result -> previousCacheKey = result.memoryCacheKey }, onError = { _, _ ->
+                    if (requestedKey ==
+                        currentMediaKey
+                    ) {
+                        currentOnLoadError()
+                    }
+                })
+                .build()
+        }
+    val painter = rememberAsyncImagePainter(request)
     val focusRequester = remember { FocusRequester() }
     LaunchedEffect(isFocused) {
         if (isFocused) {
@@ -600,8 +634,17 @@ private fun presenter(
             lockPager = value
         }
 
-        fun save(item: UiMedia) {
+        fun save(
+            item: UiMedia,
+            displayed: UiMedia = item,
+        ) {
             if (item is UiMedia.Ugoira) return
+            val export =
+                dev.dimension.flare.common.prepareImageTranslationExport(
+                    displayed,
+                    dev.dimension.flare.common.FileSystemUtilsExt
+                        .flareCacheDirectory(),
+                )
             val status = state.status.takeSuccess()?.contentPostOrNull()
             if (status != null) {
                 val userHandle = status.user?.handle?.canonical ?: "unknown"
@@ -615,11 +658,19 @@ private fun presenter(
                 val targetFile =
                     DesktopSaveDialog.chooseFile(
                         window = window,
-                        defaultName = fileName,
+                        defaultName =
+                            if (displayed.url ==
+                                item.url
+                            ) {
+                                fileName
+                            } else {
+                                fileName.substringBeforeLast('.') + "_" +
+                                    MediaFileNamePolicy.rawMediaFileName(displayed)
+                            },
                     ) ?: return
                 scope.launch {
                     desktopDownloadManager.download(
-                        media = item,
+                        media = export,
                         targetFile = targetFile,
                     )
                 }

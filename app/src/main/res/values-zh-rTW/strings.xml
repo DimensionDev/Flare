@@ -557,7 +557,7 @@
     <string name="status_insight_trace_loading_post_context">正在載入貼文脈絡...</string>
     <string name="status_insight_trace_post_context_loaded">貼文脈絡已載入</string>
     <string name="status_insight_trace_preparing_images">正在準備圖片...</string>
-    <string name="status_insight_trace_images_unsupported_fallback">不支援圖片；正在改用文字重試...</string>
+    <string name="status_insight_trace_images_unsupported_fallback">圖片無法讀取，已改為文字分析…</string>
     <string name="status_insight_trace_agent_started">正在開始分析...</string>
     <string name="status_insight_trace_strategy_started">正在規劃分析...</string>
     <string name="status_insight_trace_strategy_completed">分析計畫已完成</string>

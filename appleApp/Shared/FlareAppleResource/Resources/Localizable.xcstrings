@@ -159223,7 +159223,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Images are unsupported; retrying with text…"
+            "value" : "Images could not be read; continuing with text only…"
           }
         },
         "fi" : {
@@ -159343,13 +159343,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "图像不支持；重试文本..."
+            "value" : "图片无法读取，已改为文字分析…"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "不支援圖片；正在改用文字重試..."
+            "value" : "圖片無法讀取，已改為文字分析…"
           }
         }
       }

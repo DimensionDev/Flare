@@ -2,21 +2,25 @@ package dev.dimension.flare.shared.image
 
 import dev.whyoleg.cryptography.CryptographyProviderApi
 import dev.whyoleg.cryptography.providers.base.toByteArray
-import dev.whyoleg.cryptography.providers.base.toNSData
 import kotlinx.cinterop.BetaInteropApi
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.useContents
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
 import org.koin.core.annotation.Single
+import platform.CoreGraphics.CGImageRelease
 import platform.CoreGraphics.CGRectMake
 import platform.CoreGraphics.CGSizeMake
 import platform.Foundation.NSData
+import platform.UIKit.UIColor
 import platform.UIKit.UIGraphicsBeginImageContextWithOptions
 import platform.UIKit.UIGraphicsEndImageContext
 import platform.UIKit.UIGraphicsGetImageFromCurrentImageContext
 import platform.UIKit.UIImage
 import platform.UIKit.UIImageJPEGRepresentation
+import platform.UIKit.UIRectFill
 import kotlin.math.min
 import kotlin.native.HiddenFromObjC
 
@@ -31,16 +35,22 @@ public class IosImageCompressor : ImageCompressor {
         maxDimensions: Pair<Int, Int>,
     ): ByteArray =
         withContext(Dispatchers.Default) {
-            val data = imageBytes.toNSData()
-            var image = UIImage(data = data)
+            require(maxSize > 0 && maxDimensions.first > 0 && maxDimensions.second > 0)
+            val thumbnail = requireNotNull(downsampleImage(imageBytes, maxDimensions)) { "Failed to decode image" }
+            var image =
+                try {
+                    UIImage.imageWithCGImage(thumbnail)
+                } finally {
+                    CGImageRelease(thumbnail)
+                }
 
             val currentW = image.size.useContents { width }
             val currentH = image.size.useContents { height }
             val maxW = maxDimensions.first.toDouble()
             val maxH = maxDimensions.second.toDouble()
 
-            if (currentW > maxW || currentH > maxH) {
-                val ratio = min(maxW / currentW, maxH / currentH)
+            run {
+                val ratio = min(1.0, min(maxW / currentW, maxH / currentH))
                 val newW = currentW * ratio
                 val newH = currentH * ratio
                 image = image.resize(newW, newH)
@@ -50,11 +60,13 @@ public class IosImageCompressor : ImageCompressor {
             var attempt = 0
 
             while (attempt < 5) {
+                currentCoroutineContext().ensureActive()
                 var minQ = 0.0
                 var maxQ = 1.0
                 var bestQ = 0.0
 
                 while (minQ <= maxQ + 0.01) {
+                    currentCoroutineContext().ensureActive()
                     val midQ = (minQ + maxQ) / 2.0
                     val currentData = UIImageJPEGRepresentation(image, midQ)
                     val size = currentData?.length ?: 0UL
@@ -92,6 +104,8 @@ public class IosImageCompressor : ImageCompressor {
     ): UIImage {
         val targetSize = CGSizeMake(width, height)
         UIGraphicsBeginImageContextWithOptions(targetSize, false, 1.0)
+        UIColor.whiteColor.setFill()
+        UIRectFill(CGRectMake(0.0, 0.0, width, height))
         this.drawInRect(CGRectMake(0.0, 0.0, width, height))
         val newImage = UIGraphicsGetImageFromCurrentImageContext()
         UIGraphicsEndImageContext()

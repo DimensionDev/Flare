@@ -23,6 +23,7 @@ import dev.dimension.flare.feature.agent.common.resolveAgentVisibleResult
 import dev.dimension.flare.feature.agent.presenter.AgentMessagePart
 import dev.dimension.flare.feature.agent.presenter.distinctAgentMessageParts
 import dev.dimension.flare.feature.agent.runtime.AgentAvailability
+import dev.dimension.flare.feature.agent.runtime.supportsAgentImageFallback
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiTimelineV2
@@ -109,7 +110,7 @@ internal class StatusInsightAgentUseCase(
                 if (throwable is CancellationException) {
                     throw throwable
                 }
-                if (imageAttachments.isEmpty() || !throwable.isImageContentUnsupported()) {
+                if (supportsAgentImageFallback || imageAttachments.isEmpty() || !throwable.isImageContentUnsupported()) {
                     throw throwable
                 }
                 send(AgentTrace(AgentPhase.ImagesUnsupportedFallback).toConversationEvent())
@@ -172,6 +173,11 @@ internal class StatusInsightAgentUseCase(
                         maxIterations = MAX_AGENT_ITERATIONS,
                         finishAfterToolResults = true,
                         chatMemoryWindowSize = CHAT_MEMORY_WINDOW_SIZE,
+                        images =
+                            toolContext.status
+                                ?.currentPost
+                                ?.aiImageAttachments()
+                                .orEmpty(),
                     ),
                 conversationId = conversationId,
                 onTrace = onEvent,

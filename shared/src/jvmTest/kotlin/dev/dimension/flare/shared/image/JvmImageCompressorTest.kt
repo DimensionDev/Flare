@@ -4,6 +4,7 @@ import dev.dimension.flare.common.UploadMedia
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import kotlinx.coroutines.test.runTest
 import okio.Buffer
+import java.awt.Color
 import java.awt.image.BufferedImage
 import java.io.ByteArrayOutputStream
 import javax.imageio.IIOImage
@@ -11,9 +12,76 @@ import javax.imageio.ImageIO
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
 class JvmImageCompressorTest {
+    @Test
+    fun jpegExifBeforeJfifRemainsDecodableAndOriented() =
+        runTest {
+            val output = ByteArrayOutputStream()
+            ImageIO.write(BufferedImage(40, 20, BufferedImage.TYPE_INT_RGB), "jpg", output)
+            val original = output.toByteArray().withTestExifOrientation(6, beforeJfif = true)
+            assertEquals(40, ImageIO.read(original.inputStream()).width)
+            assertEquals(6, imageMetadata(original)?.orientation)
+            val result = JvmImageCompressor().compress(original, 100_000, 40 to 40)
+            assertEquals(ImageMetadata(20, 40), imageMetadata(result))
+        }
+
+    @Test
+    fun jpegExifOrientationIsAppliedAndRemovedFromCompressedPixels() =
+        runTest {
+            val image = BufferedImage(40, 20, BufferedImage.TYPE_INT_RGB)
+            image.createGraphics().apply {
+                color = Color.RED
+                fillRect(0, 0, 20, 20)
+                color = Color.BLUE
+                fillRect(20, 0, 20, 20)
+                dispose()
+            }
+            val output = ByteArrayOutputStream()
+            ImageIO.write(image, "jpg", output)
+            val jpeg = output.toByteArray()
+            val original = jpeg.withTestExifOrientation(6)
+            assertEquals(6, imageMetadata(original)?.orientation)
+            val result = JvmImageCompressor().compress(original, 100_000, 40 to 40)
+            val decoded = ImageIO.read(result.inputStream())
+            assertEquals(20, decoded.width)
+            assertEquals(40, decoded.height)
+            assertEquals(1, imageMetadata(result)?.orientation)
+            assertTrue(Color(decoded.getRGB(10, 5)).red > 200)
+            assertTrue(Color(decoded.getRGB(10, 35)).blue > 200)
+        }
+
+    @Test
+    fun transparentImagesUseWhiteBackground() =
+        runTest {
+            val output = ByteArrayOutputStream()
+            ImageIO.write(BufferedImage(20, 20, BufferedImage.TYPE_INT_ARGB), "png", output)
+            val result = JvmImageCompressor().compress(output.toByteArray(), 100_000, 20 to 20)
+            val color = Color(ImageIO.read(result.inputStream()).getRGB(10, 10))
+            assertTrue(color.red > 245 && color.green > 245 && color.blue > 245)
+        }
+
+    @Test
+    fun impossibleSizeFailsInsteadOfReturningOversizedData() =
+        runTest {
+            val output = ByteArrayOutputStream()
+            ImageIO.write(BufferedImage(50, 50, BufferedImage.TYPE_INT_RGB), "png", output)
+            assertFailsWith<IllegalStateException> { JvmImageCompressor().compress(output.toByteArray(), 1, 50 to 50) }
+        }
+
+    @Test
+    fun longScreenshotKeepsAspectRatioAndFitsDimensions() =
+        runTest {
+            val output = ByteArrayOutputStream()
+            ImageIO.write(BufferedImage(100, 12000, BufferedImage.TYPE_INT_RGB), "png", output)
+            val result = JvmImageCompressor().compress(output.toByteArray(), 100_000, 1200 to 1200)
+            val decoded = ImageIO.read(result.inputStream())
+            assertEquals(10, decoded.width)
+            assertEquals(1200, decoded.height)
+        }
+
     @Test
     fun uploadPreparationPreservesBothGifFrames() =
         runTest {

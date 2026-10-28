@@ -4,9 +4,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import dev.dimension.flare.data.repository.PluginAuthoring
-import dev.dimension.flare.data.repository.authoredPluginId
-import dev.dimension.flare.di.koinGet
 import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.feature.agent.common.AgentChatHistoryProvider
 import dev.dimension.flare.feature.agent.common.AgentChatRoom
@@ -35,10 +32,6 @@ public class AgentChatHistoryPresenter : PresenterBase<AgentChatHistoryPresenter
             onDelete = { conversationId ->
                 AgentChatRunRegistry.cancel(conversationId)
                 scope.launch {
-                    authoredPluginId(conversationId)?.let { id ->
-                        val authoring = koinGet<PluginAuthoring>()
-                        if (authoring.plugins.value.any { it.id == id }) authoring.stop(id)
-                    }
                     historyProvider.deleteConversation(conversationId)
                 }
             },

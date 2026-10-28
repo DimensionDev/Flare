@@ -24,6 +24,7 @@ import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
 import java.nio.file.Files
+import java.util.UUID
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -125,7 +126,8 @@ class PluginManagementPresenterV1Test {
                 runCurrent()
                 assertNotNull(states.last().error)
 
-                facade.createPlugin()
+                val plugin = subsystem.authoring.create(UUID.randomUUID().toString())
+                facade.cancelPluginUpdate(plugin.id)
                 runCurrent()
                 assertNull(states.last().error)
                 assertEquals(1, states.last().authoredPlugins.size)
@@ -235,7 +237,8 @@ class PluginManagementPresenterV1Test {
                 runCurrent()
                 assertEquals(review, presenter.state.value.pendingInstall)
 
-                presenter.createPlugin()
+                val plugin = subsystem.authoring.create(UUID.randomUUID().toString())
+                presenter.cancelPluginUpdate(plugin.id)
                 runCurrent()
                 assertEquals(review, presenter.state.value.pendingInstall)
 

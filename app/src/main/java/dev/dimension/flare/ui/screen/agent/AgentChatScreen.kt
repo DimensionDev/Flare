@@ -79,8 +79,6 @@ internal fun AgentChatScreen(
                         BackButton(onBack = onBack)
                     },
                 )
-                dev.dimension.flare.ui.component.agent
-                    .PluginAuthoringCard(state)
             }
         },
     )

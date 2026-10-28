@@ -92,7 +92,7 @@ enum Route: Hashable, Identifiable {
         case .settings:
             SettingsScreen()
         case .pluginManagement:
-            PluginManagementView()
+            PluginManagementView { onNavigate(.agentChat(Self.newGenericChatConversationId(), nil)) }
         case .notification:
             NotificationScreen()
         case .discover:

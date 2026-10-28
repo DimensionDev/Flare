@@ -828,18 +828,17 @@
     <string name="plugin_development_diagnostics">最近调用（不记录请求和响应数据）</string>
     <string name="plugin_ai_create">用 AI 创建</string>
     <string name="plugin_ai_untitled">新插件</string>
-    <string name="plugin_ai_edit">继续制作</string>
-    <string name="plugin_ai_stop">停止生成</string>
+    <string name="plugin_ai_revision">修订 %1$d</string>
+    <string name="plugin_ai_stop">取消更新</string>
     <string name="plugin_ai_allow">允许并继续</string>
     <string name="plugin_ai_enabled">已启用</string>
     <string name="plugin_ai_running">当前版本正在运行</string>
     <string name="plugin_ai_idle">可以继续制作</string>
-    <string name="plugin_ai_generating">正在生成</string>
     <string name="plugin_ai_validating">正在校验</string>
     <string name="plugin_ai_approval">需要授权</string>
     <string name="plugin_ai_waiting">等待登录或写操作完成</string>
     <string name="plugin_ai_applied">已应用最新版本</string>
     <string name="plugin_ai_failed">修改未能生效</string>
     <string name="plugin_ai_credentials_changed">账号凭据格式已更改，已有账号需要重新登录。</string>
-    <string name="plugin_ai_delete_message">删除 %1$s 及其本地源码？已有账号和对话记录会保留。</string>
+    <string name="plugin_ai_delete_message">删除 %1$s 及其本地源码？已有账号会保留。</string>
 </resources>

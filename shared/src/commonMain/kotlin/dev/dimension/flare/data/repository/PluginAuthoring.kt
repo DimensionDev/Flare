@@ -2,31 +2,22 @@ package dev.dimension.flare.data.repository
 
 import dev.dimension.flare.data.model.PluginPermission
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.serialization.Serializable
 
 /** App-owned plugin files; the agent never receives filesystem or account access. */
 public interface PluginAuthoring {
     public val plugins: StateFlow<List<AuthoredPlugin>>
 
-    public suspend fun create(): AuthoredPlugin
+    /** Reusing a request key returns the same plugin, including after a restart. */
+    public suspend fun create(requestKey: String): AuthoredPlugin
 
-    public suspend fun begin(pluginId: String): String
-
-    public suspend fun read(
-        pluginId: String,
-        runId: String,
-    ): Map<String, String>
+    public suspend fun read(pluginId: String): PluginSource
 
     public suspend fun write(
         pluginId: String,
-        runId: String,
+        expectedRevision: Long,
         files: Map<String, String>,
-    ): String
-
-    public suspend fun finish(
-        pluginId: String,
-        runId: String,
-        apply: Boolean,
-    )
+    ): AuthoredPlugin
 
     public suspend fun documentation(path: String): String
 
@@ -44,9 +35,16 @@ public interface PluginAuthoring {
 
     public suspend fun delete(pluginId: String)
 
-    public suspend fun stop(pluginId: String)
+    public suspend fun cancelUpdate(pluginId: String)
 }
 
+@Serializable
+public data class PluginSource(
+    val plugin: AuthoredPlugin,
+    val files: Map<String, String>,
+)
+
+@Serializable
 public data class AuthoredPlugin(
     val id: String,
     val name: String,
@@ -57,21 +55,20 @@ public data class AuthoredPlugin(
     val error: String? = null,
     val permissions: List<PluginPermission> = emptyList(),
     val credentialsChanged: Boolean = false,
+    val platformId: String = id.removePrefix("local.").replace('.', '_'),
 ) {
-    public val conversationId: String get() = "$PLUGIN_CONVERSATION_PREFIX$id"
+    public val canSetEnabled: Boolean get() = revision > 0
+    public val canApprove: Boolean get() = phase == PluginAuthoringPhase.AwaitingApproval
+    public val canCancelUpdate: Boolean
+        get() = phase == PluginAuthoringPhase.Validating || canApprove || phase == PluginAuthoringPhase.WaitingForOperations
 }
 
+@Serializable
 public enum class PluginAuthoringPhase {
     Idle,
-    Generating,
     Validating,
     AwaitingApproval,
     WaitingForOperations,
     Applied,
     Failed,
 }
-
-private const val PLUGIN_CONVERSATION_PREFIX = "plugin-authoring:"
-
-public fun authoredPluginId(conversationId: String): String? =
-    conversationId.takeIf { it.startsWith(PLUGIN_CONVERSATION_PREFIX) }?.removePrefix(PLUGIN_CONVERSATION_PREFIX)

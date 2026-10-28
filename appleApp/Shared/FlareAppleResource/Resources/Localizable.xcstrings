@@ -44,19 +44,19 @@
       "en": {
         "stringUnit": {
           "state": "translated",
-          "value": "Delete %@ and its local source? Existing accounts and conversation history are kept."
+          "value": "Delete %@ and its local source? Existing accounts are kept."
         }
       },
       "zh-Hans": {
         "stringUnit": {
           "state": "translated",
-          "value": "删除 %@ 及其本地源码？已有账号和对话记录会保留。"
+          "value": "删除 %@ 及其本地源码？已有账号会保留。"
         }
       },
       "zh-Hant": {
         "stringUnit": {
           "state": "translated",
-          "value": "刪除 %@ 及其本機原始碼？已有帳號和對話記錄會保留。"
+          "value": "刪除 %@ 及其本機原始碼？已有帳號會保留。"
         }
       }
     }
@@ -127,24 +127,24 @@
       }
     }
   },
-  "plugin_ai_edit": {
+  "plugin_ai_revision": {
     "localizations": {
       "en": {
         "stringUnit": {
           "state": "translated",
-          "value": "Continue creating"
+          "value": "Revision %lld"
         }
       },
       "zh-Hans": {
         "stringUnit": {
           "state": "translated",
-          "value": "继续制作"
+          "value": "修订 %lld"
         }
       },
       "zh-Hant": {
         "stringUnit": {
           "state": "translated",
-          "value": "繼續製作"
+          "value": "修訂 %lld"
         }
       }
     }
@@ -154,19 +154,19 @@
       "en": {
         "stringUnit": {
           "state": "translated",
-          "value": "Stop generating"
+          "value": "Cancel update"
         }
       },
       "zh-Hans": {
         "stringUnit": {
           "state": "translated",
-          "value": "停止生成"
+          "value": "取消更新"
         }
       },
       "zh-Hant": {
         "stringUnit": {
           "state": "translated",
-          "value": "停止產生"
+          "value": "取消更新"
         }
       }
     }
@@ -255,28 +255,6 @@
         "stringUnit": {
           "state": "translated",
           "value": "可以繼續製作"
-        }
-      }
-    }
-  },
-  "plugin_ai_generating": {
-    "localizations": {
-      "en": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "Generating"
-        }
-      },
-      "zh-Hans": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "正在生成"
-        }
-      },
-      "zh-Hant": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "正在產生"
         }
       }
     }

@@ -5,9 +5,9 @@ import dev.dimension.flare.data.repository.AccountService
 import dev.dimension.flare.data.repository.AuthoredPlugin
 import dev.dimension.flare.data.repository.PluginAuthoring
 import dev.dimension.flare.data.repository.PluginAuthoringPhase
+import dev.dimension.flare.data.repository.PluginSource
 import dev.dimension.flare.feature.plugin.PluginSubsystemV1
 import dev.dimension.flare.feature.plugin.abi.PluginJsonV1
-import dev.dimension.flare.feature.plugin.host.platformUuid
 import dev.dimension.flare.feature.plugin.installer.FppArchive
 import dev.dimension.flare.feature.plugin.installer.FppArchiveEntry
 import dev.dimension.flare.feature.plugin.installer.FppLimits
@@ -52,6 +52,7 @@ internal class PluginAuthoringServiceV1(
     private val scope by lazy(scope)
     private val files = subsystem.appFiles.fileSystem
     private val root = subsystem.appFiles.directory("authored-plugins")
+    private val creationMutex = Mutex()
     private val entries = MutableStateFlow(load())
     private val mutablePlugins = MutableStateFlow(entries.value.values.map(::snapshot))
 
@@ -62,121 +63,54 @@ internal class PluginAuthoringServiceV1(
     private val switcher by lazy { PluginRuntimeSwitcherV1(subsystem, registry(), accounts(), this.scope) }
     private val validator = PluginPackageValidator(files)
 
-    override suspend fun create(): AuthoredPlugin =
+    override suspend fun create(requestKey: String): AuthoredPlugin =
         withContext(Dispatchers.Default) {
-            val record = Record(id = "local.ai.p${platformUuid().replace("-", "")}")
-            val entry = Entry(record)
-            save(record)
-            entries.update { it + (record.id to entry) }
-            publish(entry)
-            plugins.value.single { it.id == record.id }
+            require(Regex("[A-Za-z0-9_-]{16,128}").matches(requestKey)) {
+                "Use a unique request key of 16 to 128 letters, digits, underscores or hyphens"
+            }
+            val id = "local.ai.p${requestKey.encodeToByteArray().toByteString().sha256().hex().take(32)}"
+            creationMutex.withLock {
+                if (id !in entries.value) {
+                    val entry = Entry(Record(id = id))
+                    save(entry.record)
+                    entries.update { it + (id to entry) }
+                    publish(entry)
+                }
+                plugins.value.single { it.id == id }
+            }
         }
 
-    override suspend fun begin(pluginId: String): String {
+    override suspend fun read(pluginId: String): PluginSource {
         val entry = entry(pluginId)
-        val caller = currentCoroutineContext()[Job]
         return entry.mutex.withLock {
             check(entries.value[pluginId] === entry) { "Plugin no longer exists" }
-            check(entry.runId == null) { "This plugin already has a generation task" }
-            entry.application?.cancel()
-            entry.candidate = null
-            entry.approvedRevision = null
-            val run = platformUuid()
-            entry.runId = run
-            entry.caller = caller
-            entry.progress =
-                entry.progress.copy(
-                    phase = PluginAuthoringPhase.Generating,
-                    error = null,
-                    permissions = emptyList(),
-                    credentialsChanged = false,
-                )
-            publish(entry)
-            run
-        }
-    }
-
-    override suspend fun read(
-        pluginId: String,
-        runId: String,
-    ): Map<String, String> {
-        val entry = entry(pluginId)
-        return entry.mutex.withLock {
-            checkRun(entry, runId)
-            entry.record.sources
+            PluginSource(plugins.value.single { it.id == pluginId }, entry.record.sources)
         }
     }
 
     override suspend fun write(
         pluginId: String,
-        runId: String,
+        expectedRevision: Long,
         files: Map<String, String>,
-    ): String =
+    ): AuthoredPlugin =
         withContext(Dispatchers.Default) {
             val entry = entry(pluginId)
             validateSources(files)
-            val record =
-                entry.mutex.withLock {
-                    checkRun(entry, runId)
-                    val updated = entry.record.copy(sources = files.toMap(), revision = entry.record.revision + 1)
-                    save(updated)
-                    entry.record = updated
-                    entry.candidate = null
-                    entry.approvedRevision = null
-                    entry.progress =
-                        entry.progress.copy(
-                            phase = PluginAuthoringPhase.Validating,
-                            error = null,
-                            permissions = emptyList(),
-                            credentialsChanged = false,
-                        )
-                    publish(entry)
-                    updated
+            entry.mutex.withLock {
+                check(entries.value[pluginId] === entry) { "Plugin no longer exists" }
+                check(entry.record.revision == expectedRevision) {
+                    "Revision conflict: current revision is ${entry.record.revision}. Read the current source before retrying."
                 }
-            try {
-                val candidate = prepare(record)
-                entry.mutex.withLock {
-                    checkRun(entry, runId)
-                    check(entry.record.revision == record.revision) { "A newer plugin revision already exists" }
-                    accept(entry, candidate)
-                    entry.progress = entry.progress.copy(phase = PluginAuthoringPhase.Generating)
-                    publish(entry)
-                }
-                "Validation passed for revision ${record.revision}. It will be applied when this generation finishes, " +
-                    "subject to host permission and in-flight operation checks. Live website behavior has not been " +
-                    "tested."
-            } catch (error: Exception) {
-                if (error is CancellationException) throw error
-                entry.mutex.withLock {
-                    if (entry.runId == runId && entry.record.revision == record.revision) {
-                        entry.progress = entry.progress.copy(phase = PluginAuthoringPhase.Generating, error = error.message?.take(512))
-                        publish(entry)
-                    }
-                }
-                "Validation failed: ${error.message?.take(512)}"
-            }
-        }
-
-    override suspend fun finish(
-        pluginId: String,
-        runId: String,
-        apply: Boolean,
-    ) {
-        val entry = entries.value[pluginId] ?: return
-        entry.mutex.withLock {
-            if (entry.runId != runId) return
-            entry.runId = null
-            entry.caller = null
-            if (apply && entry.candidate != null) {
-                schedule(entry)
-            } else {
+                val updated = entry.record.copy(sources = files.toMap(), revision = entry.record.revision + 1)
+                save(updated)
+                entry.record = updated
                 entry.candidate = null
-                val phase = if (entry.progress.error == null) PluginAuthoringPhase.Idle else PluginAuthoringPhase.Failed
-                entry.progress = entry.progress.copy(phase = phase)
-                publish(entry)
+                entry.approvedRevision = null
+                // Accepted sources belong to the plugin, even when the caller stops waiting.
+                schedule(entry, revalidate = true)
+                plugins.value.single { it.id == pluginId }
             }
         }
-    }
 
     override suspend fun documentation(path: String): String =
         if (path.isBlank()) {
@@ -203,13 +137,10 @@ internal class PluginAuthoringServiceV1(
         }
     }
 
-    override suspend fun stop(pluginId: String) {
+    override suspend fun cancelUpdate(pluginId: String) {
         val entry = entry(pluginId)
         entry.mutex.withLock {
             if (entries.value[pluginId] !== entry) return
-            entry.runId = null
-            entry.caller?.cancel()
-            entry.caller = null
             entry.application?.cancel()
             entry.candidate = null
             entry.approvedRevision = null
@@ -249,14 +180,7 @@ internal class PluginAuthoringServiceV1(
                     entry.approvedRevision = null
                     entry.progress =
                         entry.progress.copy(
-                            phase =
-                                if (entry.runId ==
-                                    null
-                                ) {
-                                    PluginAuthoringPhase.Idle
-                                } else {
-                                    entry.progress.phase
-                                },
+                            phase = PluginAuthoringPhase.Idle,
                             permissions = emptyList(),
                             credentialsChanged = false,
                         )
@@ -264,16 +188,16 @@ internal class PluginAuthoringServiceV1(
                 entry.record = entry.record.copy(enabled = enabled)
                 publish(entry)
                 save(entry.record)
-                if (!enabled || entry.runId != null || entry.record.sources.isEmpty()) return@withLock
+                if (!enabled || entry.record.sources.isEmpty()) return@withLock
                 schedule(entry, revalidate = entry.candidate == null)
             }
         }
 
     override suspend fun delete(pluginId: String): Unit =
         withContext(Dispatchers.Default) {
-            stop(pluginId)
             val entry = entry(pluginId)
             entry.mutex.withLock {
+                check(entries.value[pluginId] === entry) { "Plugin no longer exists" }
                 subsystem.mutationMutex.withLock {
                     val previous = subsystem.running.value.plugins[pluginId]
                     check(previous?.developmentSource == null) { "Stop directory development before updating this plugin" }
@@ -282,6 +206,7 @@ internal class PluginAuthoringServiceV1(
                     ) { "Wait for login or write operations to finish" }
                     val installed = subsystem.stateStore.desired.value.plugins[pluginId]
                     if (previous != null || installed != null) switcher.switch(previous, null, null, pluginId)
+                    entry.application?.cancel()
                     files.delete(root / "$pluginId.json", mustExist = false)
                     entries.update { it - pluginId }
                     mutablePlugins.update { items -> items.filterNot { it.id == pluginId } }
@@ -329,7 +254,7 @@ internal class PluginAuthoringServiceV1(
                     if (error is CancellationException) throw error
                     entry.mutex.withLock {
                         currentCoroutineContext().ensureActive()
-                        if (entries.value[record.id] !== entry) return@launch
+                        if (entries.value[record.id] !== entry || entry.record.revision != record.revision) return@launch
                         entry.progress = entry.progress.copy(phase = PluginAuthoringPhase.Failed, error = error.message?.take(512))
                         publish(entry)
                     }
@@ -407,13 +332,6 @@ internal class PluginAuthoringServiceV1(
                 .toString(),
             generation = record.runtimeGeneration,
         )
-
-    private fun checkRun(
-        entry: Entry,
-        runId: String,
-    ) {
-        check(entries.value[entry.record.id] === entry && entry.runId == runId) { "Plugin generation was stopped or replaced" }
-    }
 
     private fun publish(entry: Entry) {
         mutablePlugins.update { items -> (items.filterNot { it.id == entry.record.id } + snapshot(entry)).sortedBy { it.id } }
@@ -523,8 +441,6 @@ internal class PluginAuthoringServiceV1(
     ) {
         val mutex = Mutex()
         var progress = Progress()
-        var runId: String? = null
-        var caller: Job? = null
         var application: Job? = null
         var candidate: Candidate? = null
         var approvedRevision: Long? = null

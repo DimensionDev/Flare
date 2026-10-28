@@ -17,6 +17,7 @@ import dev.dimension.flare.data.model.tab.createLoader
 import dev.dimension.flare.data.repository.AccountMicroblogDataSource
 import dev.dimension.flare.data.repository.AccountService
 import dev.dimension.flare.data.repository.LocalCacheRepository
+import dev.dimension.flare.data.repository.PluginAuthoring
 import dev.dimension.flare.feature.agent.presenter.AgentMessagePart
 import dev.dimension.flare.feature.agent.presenter.distinctAgentMessageParts
 import dev.dimension.flare.feature.agent.status.LoadDiscoverHashtagsTool
@@ -53,9 +54,9 @@ import org.koin.core.annotation.Single
 internal class AgentToolProvider(
     private val localCacheRepository: LocalCacheRepository,
     private val platformRegistry: PlatformRegistry,
+    private val pluginAuthoring: PluginAuthoring? = null,
 ) {
     fun resolve(context: AgentToolContext): AgentToolSet {
-        context.plugin?.let { return pluginAuthoringTools(it) }
         val statusContext = context.status
         val microblogDataSource = statusContext?.microblogDataSource
         val searchTargets =
@@ -135,6 +136,7 @@ internal class AgentToolProvider(
         return AgentToolSet(
             toolRegistry =
                 ToolRegistry {
+                    pluginAuthoring?.let { pluginAuthoringTools(it, session.inputRequestStore).forEach { tool -> tool(tool) } }
                     tool(LoadStatusContextTool(session))
                     tool(LoadPostContextTool(session))
                     tool(SearchPostsTool(session))
@@ -193,6 +195,7 @@ internal class AgentToolProvider(
                     AGENT_COMPOSE_BEHAVIOR_GUIDANCE,
                     AGENT_CONFIRMATION_BEHAVIOR_GUIDANCE,
                     AGENT_ATTACHMENT_GUIDANCE,
+                    if (pluginAuthoring != null) PLUGIN_TOOL_GUIDANCE else "",
                 ).joinToString(separator = "\n\n"),
             traceRegistry = AGENT_TOOL_TRACE_REGISTRY,
             messagePartStore = session.messagePartStore,
@@ -490,7 +493,6 @@ internal class AgentToolProvider(
 internal data class AgentToolContext(
     val status: StatusContext? = null,
     val searchDataSources: List<AccountMicroblogDataSource> = emptyList(),
-    val plugin: AgentPluginContext? = null,
 ) {
     data class StatusContext(
         val postDataSource: PostDataSource,
@@ -602,7 +604,7 @@ internal data class AgentToolSet(
 private const val AGENT_CONFIRMATION_BEHAVIOR_GUIDANCE =
     """
     Confirmation UI guidance:
-    - For any action that changes user data or performs a side effect, call the relevant tool with confirmed=false first.
+    - For tools that expose a confirmed argument, call the tool with confirmed=false first.
     - After a confirmed=false call, write the user-visible confirmation or selection copy yourself from the structured fields returned by the tool and include the required flare-agent-actions metadata comment. Do not return an empty assistant message.
     - If the action is about a concrete post or user, include the relevant attachmentRef in the visible response when available so Flare can render the post/user card.
     - Do not ask the user to manually type confirmation when a confirmation input request is available; let Flare show the confirmation button.

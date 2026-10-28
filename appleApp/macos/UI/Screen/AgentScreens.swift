@@ -185,8 +185,7 @@ struct AgentChatScreen: View {
                 if let route = agentRoute(for: user) {
                     openInMainWindow(route)
                 }
-            },
-            pluginState: presenter.state
+            }
         )
         .navigationTitle(presenter.state.room.title.isEmpty ? String(localized: "agent_chat_title", bundle: .main) : presenter.state.room.title)
     }

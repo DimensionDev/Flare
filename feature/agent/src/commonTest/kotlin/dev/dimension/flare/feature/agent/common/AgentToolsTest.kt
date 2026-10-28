@@ -81,6 +81,25 @@ internal class AgentToolsTest {
         )
 
     @Test
+    fun pluginToolsAreAvailableAlongsideOrdinaryToolsWithoutAChatContext() {
+        val authoring = TestAuthoring()
+        val tools =
+            AgentToolProvider(FakeLocalCacheRepository(), platformRegistry, authoring)
+                .resolve(AgentToolContext.Empty)
+        val names =
+            tools.toolRegistry.tools
+                .map { it.name }
+                .toSet()
+        assertTrue("create_plugin" in names)
+        assertTrue("search_posts" in names)
+        assertTrue("compose_post" in names)
+        assertTrue(authoring.plugins.value.isEmpty())
+        val withoutPlugins = AgentToolProvider(FakeLocalCacheRepository(), platformRegistry).resolve(AgentToolContext.Empty)
+        assertFalse(withoutPlugins.toolRegistry.tools.any { it.name == "create_plugin" })
+        assertTrue(withoutPlugins.toolRegistry.tools.any { it.name == "search_posts" })
+    }
+
+    @Test
     fun emptyPlatformListSearchesEveryTarget() {
         val targets = agentSearchTargets()
 

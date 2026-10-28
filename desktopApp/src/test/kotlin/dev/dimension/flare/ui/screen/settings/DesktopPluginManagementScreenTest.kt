@@ -72,42 +72,24 @@ class DesktopPluginManagementScreenTest {
     }
 
     @Test
-    fun creatingAnAiPluginImmediatelySavesItAndOpensItsOwnConversation() {
-        var opened: String? = null
+    fun createWithAiOpensTheGeneralAssistantWithoutCreatingAPlugin() {
+        var opens = 0
         compose.setContent {
             if (visible) {
                 CompositionLocalProvider(LocalComposeWindow provides null) {
                     FlareTheme(isDarkTheme = false) {
                         Box(Modifier.width(448.dp).height(800.dp)) {
-                            DesktopPluginManagementScreen(onBack = {}, onOpenPlugin = { opened = it })
+                            DesktopPluginManagementScreen(onBack = {}, onCreateWithAI = { opens++ })
                         }
                     }
                 }
             }
         }
         compose.onNodeWithText("Create with AI").assertIsDisplayed().performClick()
-        val authoring = koinGet<PluginAuthoring>()
-        compose.waitUntil(5_000) { authoring.plugins.value.size == 1 && opened != null }
-        compose.runOnIdle {
-            assertEquals(
-                authoring.plugins.value
-                    .single()
-                    .conversationId,
-                opened,
-            )
-        }
-        compose.onNodeWithText("New plugin").assertIsDisplayed()
-        val firstConversation = opened
         compose.onNodeWithText("Create with AI").performClick()
-        compose.waitUntil(5_000) { authoring.plugins.value.size == 2 && opened != firstConversation }
         compose.runOnIdle {
-            assertEquals(
-                2,
-                authoring.plugins.value
-                    .map { it.conversationId }
-                    .toSet()
-                    .size,
-            )
+            assertEquals(2, opens)
+            assertEquals(emptyList<dev.dimension.flare.data.repository.AuthoredPlugin>(), koinGet<PluginAuthoring>().plugins.value)
         }
     }
 

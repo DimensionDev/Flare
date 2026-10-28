@@ -14,7 +14,7 @@ public struct PluginManagementView: View {
     @State private var facade: PluginAppleFacadeV1
     @State private var presenter: KotlinPresenter<PluginManagementStateV1>
     @State private var importsPlugin = false
-    @State private var createdPluginConversation: String?
+    private let onCreateWithAI: () -> Void
     @State private var showsGitHubInstall = false
     @State private var gitHubURL = ""
     @State private var selectedGitHubTag = ""
@@ -24,7 +24,8 @@ public struct PluginManagementView: View {
     @State private var showsDevelopment = false
     #endif
 
-    public init() {
+    public init(onCreateWithAI: @escaping () -> Void) {
+        self.onCreateWithAI = onCreateWithAI
         let facade = PluginAppleFacadeV1()
         _facade = State(initialValue: facade)
         _presenter = State(initialValue: KotlinPresenter(presenter: facade))
@@ -32,26 +33,44 @@ public struct PluginManagementView: View {
 
     public var body: some View {
         List {
-            Button("plugin_ai_create") {
-                Task {
-                    createdPluginConversation = try? await facade.createPlugin()
-                }
-            }
+            Button("plugin_ai_create", action: onCreateWithAI)
             ForEach(presenter.state.authoredPlugins, id: \.id) { plugin in
-                NavigationLink {
-                    AuthoredPluginChatView(conversationId: plugin.conversationId)
-                } label: {
-                    VStack(alignment: .leading) {
-                        Text(plugin.name.isEmpty ? String(localized: "plugin_ai_untitled") : plugin.name)
+                Section {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text(plugin.name.isEmpty ? String(localized: "plugin_ai_untitled") : plugin.name).font(.headline)
+                        Text(plugin.id).font(.caption).textSelection(.enabled)
+                        Text(String(format: String(localized: "plugin_ai_revision"), plugin.revision)).font(.caption)
                         Text(pluginAuthoringLabel(plugin.phase)).font(.caption).foregroundStyle(.secondary)
+                        if plugin.running && plugin.phase != .applied {
+                            Text("plugin_ai_running").foregroundStyle(.secondary)
+                        }
+                        if let error = plugin.error { Text(verbatim: error).foregroundStyle(.red) }
+                        if plugin.credentialsChanged { Text("plugin_ai_credentials_changed") }
+                        ForEach(Array(plugin.permissions.enumerated()), id: \.offset) { _, permission in
+                            Text(pluginPermissionText(permission)).font(.caption)
+                        }
                     }
-                }
-                .contextMenu {
+                    if plugin.canApprove {
+                        Button("plugin_ai_allow") {
+                            Task { try? await facade.approvePlugin(pluginId: plugin.id, revision: plugin.revision) }
+                        }
+                    }
+                    if plugin.canCancelUpdate {
+                        Button("plugin_ai_stop") {
+                            Task { try? await facade.cancelPluginUpdate(pluginId: plugin.id) }
+                        }
+                    }
+                    if plugin.canSetEnabled {
+                        Toggle("plugin_ai_enabled", isOn: Binding(get: { plugin.enabled }, set: { enabled in
+                            Task { try? await facade.setEnabled(pluginId: plugin.id, enabled: enabled) }
+                        }))
+                    }
                     Button("plugin_uninstall", role: .destructive) {
                         pendingUninstallId = plugin.id
-                        pendingUninstallName = plugin.name
+                        pendingUninstallName = "\(plugin.name)\n\(plugin.id)"
                     }
                 }
+                .disabled(presenter.state.busy)
             }
             #if os(macOS)
             if showsDevelopment || presenter.state.development.directory != nil {
@@ -121,9 +140,6 @@ public struct PluginManagementView: View {
             }
         }
         .navigationTitle("settings_plugins_title")
-        .navigationDestination(item: $createdPluginConversation) { conversationId in
-            AuthoredPluginChatView(conversationId: conversationId)
-        }
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Button {
@@ -561,29 +577,14 @@ private enum PluginDevelopmentDirectoryAccess {
 }
 #endif
 
-private struct AuthoredPluginChatView: View {
-    @State private var presenter: KotlinPresenter<GenericChatPresenterState>
-
-    init(conversationId: String) {
-        _presenter = State(initialValue: KotlinPresenter(presenter: GenericChatPresenter(conversationId: conversationId, initialMessage: nil)))
-    }
-
-    var body: some View {
-        AgentChatView(
-            messages: presenter.state.messages,
-            isRunning: presenter.state.room.isRunning,
-            canSend: presenter.state.canSend,
-            errorMessage: presenter.state.room.errorMessage,
-            runningTrace: String(localized: "agent_chat_thinking"),
-            inputPlaceholder: String(localized: "agent_chat_input_placeholder"),
-            onInputChange: presenter.state.setInput,
-            onSend: presenter.state.sendMessage,
-            onInputRequestOptionSelected: presenter.state.selectInputRequestOption,
-            onPostClick: { _ in },
-            onUserClick: { _ in },
-            pluginState: presenter.state
-        )
-        .navigationTitle(presenter.state.plugin?.name.isEmpty == false ? presenter.state.plugin!.name : String(localized: "plugin_ai_untitled"))
+func pluginAuthoringLabel(_ phase: PluginAuthoringPhase) -> LocalizedStringKey {
+    switch phase {
+    case .validating: return "plugin_ai_validating"
+    case .awaitingApproval: return "plugin_ai_approval"
+    case .waitingForOperations: return "plugin_ai_waiting"
+    case .applied: return "plugin_ai_applied"
+    case .failed: return "plugin_ai_failed"
+    default: return "plugin_ai_idle"
     }
 }
 

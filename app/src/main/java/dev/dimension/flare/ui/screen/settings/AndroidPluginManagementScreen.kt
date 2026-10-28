@@ -82,7 +82,7 @@ import java.io.File
 @Composable
 internal fun AndroidPluginManagementScreen(
     onBack: () -> Unit,
-    onOpenPlugin: (String) -> Unit = {},
+    onCreateWithAI: () -> Unit = {},
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -144,7 +144,7 @@ internal fun AndroidPluginManagementScreen(
                 Text(
                     stringResource(
                         if (pendingAuthored != null) R.string.plugin_ai_delete_message else R.string.plugin_uninstall_confirm_message,
-                        pendingUninstall?.nameText?.resolveText() ?: pendingAuthored?.name.orEmpty(),
+                        pendingAuthored?.let { "${it.name}\n${it.id}" } ?: pendingUninstall?.nameText?.resolveText().orEmpty(),
                     ),
                 )
             },
@@ -202,14 +202,9 @@ internal fun AndroidPluginManagementScreen(
         ) { padding ->
             PluginManagementList(
                 state = state,
-                onCreatePlugin = {
-                    scope.launchPresenterAction {
-                        onOpenPlugin(
-                            presenter.createPlugin(),
-                        )
-                    }
-                },
-                onOpenPlugin = onOpenPlugin,
+                onCreatePlugin = onCreateWithAI,
+                onApprovePlugin = { id, revision -> scope.launchPresenterAction { presenter.approvePlugin(id, revision) } },
+                onCancelPluginUpdate = { id -> scope.launchPresenterAction { presenter.cancelPluginUpdate(id) } },
                 onSetEnabled = { pluginId, enabled ->
                     scope.launchPresenterAction { presenter.setEnabled(pluginId, enabled) }
                 },
@@ -446,7 +441,8 @@ private fun GitHubInstallDialog(
 private fun PluginManagementList(
     state: PluginManagementStateV1,
     onCreatePlugin: () -> Unit,
-    onOpenPlugin: (String) -> Unit,
+    onApprovePlugin: (String, Long) -> Unit,
+    onCancelPluginUpdate: (String) -> Unit,
     onSetEnabled: (String, Boolean) -> Unit,
     onUninstall: (String) -> Unit,
     onUpdate: (String) -> Unit,
@@ -466,13 +462,15 @@ private fun PluginManagementList(
         }
         itemsIndexed(state.authoredPlugins, key = { _, plugin -> plugin.id }) { index, plugin ->
             SegmentedListItem(
-                onClick = { onOpenPlugin(plugin.conversationId) },
+                onClick = {},
                 shapes = ListItemDefaults.segmentedShapes2(index, state.authoredPlugins.size),
-                content = { Text(plugin.name.ifBlank { stringResource(R.string.plugin_ai_untitled) }) },
-                supportingContent = {
-                    Text(
-                        dev.dimension.flare.ui.component.agent
-                            .pluginAuthoringLabel(plugin.phase),
+                content = {
+                    PluginAuthoringCard(
+                        plugin = plugin,
+                        busy = state.busy,
+                        onApprove = { onApprovePlugin(plugin.id, plugin.revision) },
+                        onCancelUpdate = { onCancelPluginUpdate(plugin.id) },
+                        onSetEnabled = { onSetEnabled(plugin.id, it) },
                     )
                 },
                 trailingContent = {

@@ -52,6 +52,7 @@ import okio.ForwardingFileSystem
 import okio.Path
 import okio.Path.Companion.toOkioPath
 import java.nio.file.Files
+import java.util.UUID
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import kotlin.test.AfterTest
@@ -121,13 +122,12 @@ class PluginAuthoringServiceV1Test {
     @Test
     fun directoryValidationDoesNotBlockAnotherPluginApplying() =
         runBlocking<Unit> {
-            val first = service.create()
+            val first = service.create(UUID.randomUUID().toString())
             generate(first)
             await(first.id, PluginAuthoringPhase.Applied)
             val development = startDevelopment(first)
-            val other = service.create()
-            val run = service.begin(other.id)
-            service.write(other.id, run, sources(other))
+            val other = service.create(UUID.randomUUID().toString())
+            val revision = service.read(other.id).plugin.revision
             val entered = CompletableDeferred<Unit>()
             val release = CountDownLatch(1)
             val script = root / "directory-plugin" / "plugin.js"
@@ -139,7 +139,7 @@ class PluginAuthoringServiceV1Test {
             }
             try {
                 withTimeout(5_000) { entered.await() }
-                service.finish(other.id, run, true)
+                service.write(other.id, revision, sources(other))
                 val approval = await(other.id, PluginAuthoringPhase.AwaitingApproval)
                 service.approve(other.id, approval.revision)
                 await(other.id, PluginAuthoringPhase.Applied)
@@ -174,7 +174,7 @@ class PluginAuthoringServiceV1Test {
             val importing = async { presenter.inspect(source) }
             try {
                 withTimeout(5_000) { entered.await() }
-                val plugin = service.create()
+                val plugin = service.create(UUID.randomUUID().toString())
                 generate(plugin)
                 await(plugin.id, PluginAuthoringPhase.Applied)
                 subsystem.installer.cleanup()
@@ -221,7 +221,7 @@ class PluginAuthoringServiceV1Test {
             val download = launch { presenter.inspectGitHub("v1.0.0") }
             try {
                 withTimeout(5_000) { entered.await() }
-                val plugin = service.create()
+                val plugin = service.create(UUID.randomUUID().toString())
                 generate(plugin)
                 await(plugin.id, PluginAuthoringPhase.Applied)
                 assertTrue(presenter.state.value.busy)
@@ -241,8 +241,8 @@ class PluginAuthoringServiceV1Test {
     @Test
     fun multiplePluginsApplyIndependentlyAndSurviveRestartAndCleanup() =
         runBlocking<Unit> {
-            val a = service.create()
-            val b = service.create()
+            val a = service.create(UUID.randomUUID().toString())
+            val b = service.create(UUID.randomUUID().toString())
             coroutineScope {
                 val first = async { generate(a, "A") }
                 val second = async { generate(b, "B") }
@@ -268,15 +268,15 @@ class PluginAuthoringServiceV1Test {
     @Test
     fun invalidEditKeepsRunningAndPersistedVersion() =
         runBlocking<Unit> {
-            val plugin = service.create()
+            val plugin = service.create(UUID.randomUUID().toString())
             generate(plugin)
             await(plugin.id, PluginAuthoringPhase.Applied)
             val before =
                 subsystem.running.value.plugins
                     .getValue(plugin.id)
-            val run = service.begin(plugin.id)
-            assertTrue(service.write(plugin.id, run, sources(plugin) + ("plugin.js" to "invalid {{{")).startsWith("Validation failed"))
-            service.finish(plugin.id, run, true)
+            val revision = service.read(plugin.id).plugin.revision
+            service.write(plugin.id, revision, sources(plugin) + ("plugin.js" to "invalid {{{"))
+            await(plugin.id, PluginAuthoringPhase.Failed)
             assertEquals(before, subsystem.running.value.plugins[plugin.id])
             assertEquals(before.installed, subsystem.stateStore.desired.value.plugins[plugin.id])
             assertEquals(PluginAuthoringPhase.Failed, state(plugin.id).phase)
@@ -289,8 +289,8 @@ class PluginAuthoringServiceV1Test {
     @Test
     fun approvalsArePerPluginAndCannotAuthorizeNewerCode() =
         runBlocking<Unit> {
-            val a = service.create()
-            val b = service.create()
+            val a = service.create(UUID.randomUUID().toString())
+            val b = service.create(UUID.randomUUID().toString())
             generate(a, media = true)
             generate(b, media = true)
             val first = await(a.id, PluginAuthoringPhase.AwaitingApproval)
@@ -309,7 +309,7 @@ class PluginAuthoringServiceV1Test {
     @Test
     fun reloadWaitsForWritesAndOnlyAppliesLatestRevision() =
         runBlocking<Unit> {
-            val plugin = service.create()
+            val plugin = service.create(UUID.randomUUID().toString())
             generate(plugin)
             await(plugin.id, PluginAuthoringPhase.Applied)
             val previous =
@@ -342,7 +342,7 @@ class PluginAuthoringServiceV1Test {
     @Test
     fun reloadWaitsForOAuthWithoutConsumingItsPendingRecord() =
         runBlocking<Unit> {
-            val plugin = service.create()
+            val plugin = service.create(UUID.randomUUID().toString())
             generate(plugin)
             await(plugin.id, PluginAuthoringPhase.Applied)
             pending.busy = plugin.id
@@ -354,9 +354,9 @@ class PluginAuthoringServiceV1Test {
         }
 
     @Test
-    fun disabledPluginIsNotReenabledByGeneration() =
+    fun disabledPluginIsNotReenabledBySourceUpdate() =
         runBlocking<Unit> {
-            val plugin = service.create()
+            val plugin = service.create(UUID.randomUUID().toString())
             generate(plugin)
             await(plugin.id, PluginAuthoringPhase.Applied)
             service.setEnabled(plugin.id, false)
@@ -373,12 +373,11 @@ class PluginAuthoringServiceV1Test {
     @Test
     fun deletedPluginRejectsLateWritesAndDoesNotCancelOtherPlugins() =
         runBlocking<Unit> {
-            val a = service.create()
-            val b = service.create()
-            val run = coroutineScope { async { service.begin(a.id) }.await() }
+            val a = service.create(UUID.randomUUID().toString())
+            val b = service.create(UUID.randomUUID().toString())
+            val revision = service.read(a.id).plugin.revision
             service.delete(a.id)
-            assertFailsWith<IllegalArgumentException> { service.write(a.id, run, sources(a)) }
-            service.finish(a.id, run, true)
+            assertFailsWith<IllegalArgumentException> { service.write(a.id, revision, sources(a)) }
             generate(b)
             await(b.id, PluginAuthoringPhase.Applied)
             assertEquals(listOf(b.id), service.plugins.value.map { it.id })
@@ -390,7 +389,7 @@ class PluginAuthoringServiceV1Test {
             val path = root / "import.fpp"
             TestFppFactory.write(path)
             val preview = subsystem.installer.inspect(path)
-            val plugin = service.create()
+            val plugin = service.create(UUID.randomUUID().toString())
             generate(plugin)
             await(plugin.id, PluginAuthoringPhase.Applied)
             subsystem.installer.commit(preview, true)
@@ -400,12 +399,11 @@ class PluginAuthoringServiceV1Test {
     @Test
     fun rejectsEscapingPathsAndChangedIdentity() =
         runBlocking<Unit> {
-            val plugin = service.create()
-            val run = service.begin(plugin.id)
-            assertFailsWith<IllegalArgumentException> { service.write(plugin.id, run, sources(plugin) + ("../token" to "no")) }
-            val result = service.write(plugin.id, run, sources(plugin) + ("manifest.json" to TestFppFactory.validManifest))
-            assertTrue(result.startsWith("Validation failed"))
-            service.finish(plugin.id, run, true)
+            val plugin = service.create(UUID.randomUUID().toString())
+            val revision = service.read(plugin.id).plugin.revision
+            assertFailsWith<IllegalArgumentException> { service.write(plugin.id, revision, sources(plugin) + ("../token" to "no")) }
+            service.write(plugin.id, revision, sources(plugin) + ("manifest.json" to TestFppFactory.validManifest))
+            await(plugin.id, PluginAuthoringPhase.Failed)
             assertTrue(
                 subsystem.running.value.plugins
                     .isEmpty(),
@@ -424,10 +422,10 @@ class PluginAuthoringServiceV1Test {
     @Test
     fun stoppingAnApprovalPreventsItFromApplying() =
         runBlocking<Unit> {
-            val plugin = service.create()
+            val plugin = service.create(UUID.randomUUID().toString())
             generate(plugin, media = true)
             val revision = await(plugin.id, PluginAuthoringPhase.AwaitingApproval).revision
-            service.stop(plugin.id)
+            service.cancelUpdate(plugin.id)
             assertFailsWith<IllegalStateException> { service.approve(plugin.id, revision) }
             assertFalse(plugin.id in subsystem.running.value.plugins)
             assertEquals(PluginAuthoringPhase.Idle, state(plugin.id).phase)
@@ -436,7 +434,7 @@ class PluginAuthoringServiceV1Test {
     @Test
     fun busyDisableKeepsRuntimeAndPersistedEnabledState() =
         runBlocking<Unit> {
-            val plugin = service.create()
+            val plugin = service.create(UUID.randomUUID().toString())
             generate(plugin)
             await(plugin.id, PluginAuthoringPhase.Applied)
             val running =
@@ -458,15 +456,13 @@ class PluginAuthoringServiceV1Test {
         }
 
     @Test
-    fun reenablingDuringGenerationDoesNotReplaceItsRun() =
+    fun reenablingDoesNotChangeSourceRevision() =
         runBlocking<Unit> {
-            val plugin = service.create()
+            val plugin = service.create(UUID.randomUUID().toString())
             service.setEnabled(plugin.id, false)
-            val run = service.begin(plugin.id)
-            assertFailsWith<IllegalStateException> { service.begin(plugin.id) }
+            val revision = service.read(plugin.id).plugin.revision
             service.setEnabled(plugin.id, true)
-            assertTrue(service.write(plugin.id, run, sources(plugin)).startsWith("Validation passed"))
-            service.finish(plugin.id, run, true)
+            service.write(plugin.id, revision, sources(plugin))
             service.approve(plugin.id, await(plugin.id, PluginAuthoringPhase.AwaitingApproval).revision)
             await(plugin.id, PluginAuthoringPhase.Applied)
         }
@@ -474,8 +470,8 @@ class PluginAuthoringServiceV1Test {
     @Test
     fun damagedSourceDoesNotPreventOtherPluginsFromLoading() =
         runBlocking<Unit> {
-            val damaged = service.create()
-            val healthy = service.create()
+            val damaged = service.create(UUID.randomUUID().toString())
+            val healthy = service.create(UUID.randomUUID().toString())
             FileSystem.SYSTEM.write(root / "authored-plugins" / "${damaged.id}.json") { writeUtf8("broken {") }
             val reloaded = PluginAuthoringServiceV1(subsystem, { error("not needed") }, { accounts }, { scope })
             assertEquals(
@@ -494,18 +490,25 @@ class PluginAuthoringServiceV1Test {
         }
 
     @Test
-    fun severalPluginsCanGenerateAtOnceWithoutAnApplicationQueue() =
+    fun severalPluginsCanBeUpdatedWithoutAnApplicationQueue() =
         runBlocking<Unit> {
-            val plugins = List(4) { service.create() }
-            val runs = plugins.associate { it.id to service.begin(it.id) }
-            assertTrue(service.plugins.value.all { it.phase == PluginAuthoringPhase.Generating })
-            plugins.forEach { service.finish(it.id, runs.getValue(it.id), false) }
+            val plugins =
+                List(4) {
+                    service.create(
+                        UUID.randomUUID().toString(),
+                    )
+                }
+            coroutineScope {
+                plugins.map { async { service.write(it.id, 0, sources(it)) } }.forEach { it.await() }
+            }
+            plugins.forEach { await(it.id, PluginAuthoringPhase.AwaitingApproval) }
+            assertEquals(4, service.plugins.value.size)
         }
 
     @Test
     fun failedIndexCommitRestoresWorkingVersionAndRestartIdentity() =
         runBlocking<Unit> {
-            val plugin = service.create()
+            val plugin = service.create(UUID.randomUUID().toString())
             generate(plugin)
             await(plugin.id, PluginAuthoringPhase.Applied)
             val before =
@@ -532,30 +535,80 @@ class PluginAuthoringServiceV1Test {
         }
 
     @Test
-    fun stopCancelsGeneratingTaskAndPreventsLateApplication() =
+    fun acceptedUpdateContinuesAfterItsCallerIsCancelled() =
         runBlocking<Unit> {
-            val plugin = service.create()
-            val ready = CompletableDeferred<String>()
-            val run =
-                scope.async {
-                    val token = service.begin(plugin.id)
-                    service.write(plugin.id, token, sources(plugin))
-                    ready.complete(token)
-                    kotlinx.coroutines.awaitCancellation()
+            val plugin = service.create(UUID.randomUUID().toString())
+            generate(plugin)
+            await(plugin.id, PluginAuthoringPhase.Applied)
+            pending.busy = plugin.id
+            val submitted = CompletableDeferred<Unit>()
+            val caller =
+                launch {
+                    service.write(plugin.id, 1, sources(plugin, "Survives caller"))
+                    submitted.complete(Unit)
+                    awaitCancellation()
                 }
-            val token = ready.await()
-            service.stop(plugin.id)
-            run.join()
-            assertTrue(run.isCancelled)
-            service.finish(plugin.id, token, true)
-            assertFalse(plugin.id in subsystem.running.value.plugins)
-            assertEquals(PluginAuthoringPhase.Idle, state(plugin.id).phase)
+            submitted.await()
+            caller.cancelAndJoin()
+            await(plugin.id, PluginAuthoringPhase.WaitingForOperations)
+            pending.busy = null
+            await(plugin.id, PluginAuthoringPhase.Applied)
+            assertEquals("Survives caller", state(plugin.id).name)
+        }
+
+    @Test
+    fun concurrentUpdatesRejectStaleRevisionsAndKeepTheWinningSources() =
+        runBlocking<Unit> {
+            val plugin = service.create(UUID.randomUUID().toString())
+            val firstRead = service.read(plugin.id)
+            val secondRead = service.read(plugin.id)
+            val updates = listOf(sources(plugin, "First"), sources(plugin, "Second"))
+            val results =
+                coroutineScope {
+                    updates
+                        .mapIndexed { index, files ->
+                            async {
+                                runCatching { service.write(plugin.id, listOf(firstRead, secondRead)[index].plugin.revision, files) }
+                            }
+                        }.map { it.await() }
+                }
+            assertEquals(1, results.count { it.isSuccess })
+            assertTrue(
+                results
+                    .single { it.isFailure }
+                    .exceptionOrNull()!!
+                    .message!!
+                    .contains("current revision is 1"),
+            )
+            val current = service.read(plugin.id)
+            assertEquals(1, current.plugin.revision)
+            assertEquals(updates[results.indexOfFirst { it.isSuccess }], current.files)
+            await(plugin.id, PluginAuthoringPhase.AwaitingApproval)
+            service.write(plugin.id, current.plugin.revision, sources(plugin, "Reconciled"))
+            assertEquals(2, service.read(plugin.id).plugin.revision)
+            await(plugin.id, PluginAuthoringPhase.AwaitingApproval)
+        }
+
+    @Test
+    fun createRetriesAreIdempotentAcrossCallersAndRestart() =
+        runBlocking<Unit> {
+            val key =
+                UUID.randomUUID().toString()
+            val created =
+                coroutineScope {
+                    List(4) { async { service.create(key) } }.map { it.await() }
+                }
+            assertEquals(1, created.map { it.id }.distinct().size)
+            assertEquals(1, service.plugins.value.size)
+            val restarted = PluginAuthoringServiceV1(subsystem, { registry }, { accounts }, { scope })
+            assertEquals(created.first().id, restarted.create(key).id)
+            assertEquals(1, restarted.plugins.value.size)
         }
 
     @Test
     fun directoryDevelopmentBlocksDisableAndDeleteUntilStopped() =
         runBlocking<Unit> {
-            val plugin = service.create()
+            val plugin = service.create(UUID.randomUUID().toString())
             generate(plugin)
             await(plugin.id, PluginAuthoringPhase.Applied)
             val installed =
@@ -589,7 +642,7 @@ class PluginAuthoringServiceV1Test {
     @Test
     fun reenablingUnchangedSourcePreservesRevisionAndRestoresOnlyOneSession() =
         runBlocking<Unit> {
-            val plugin = service.create()
+            val plugin = service.create(UUID.randomUUID().toString())
             generate(plugin)
             val applied = await(plugin.id, PluginAuthoringPhase.Applied)
             service.setEnabled(plugin.id, false)
@@ -620,7 +673,7 @@ class PluginAuthoringServiceV1Test {
     @Test
     fun stoppingRevalidationKeepsRestoredSessionAndCancelsPendingApplication() =
         runBlocking<Unit> {
-            val plugin = service.create()
+            val plugin = service.create(UUID.randomUUID().toString())
             generate(plugin)
             val applied = await(plugin.id, PluginAuthoringPhase.Applied)
             val scheduler = TestCoroutineScheduler()
@@ -639,7 +692,7 @@ class PluginAuthoringServiceV1Test {
                     subsystem.running.value.plugins
                         .getValue(plugin.id)
                 val invalidations = accounts.invalidations
-                queued.stop(plugin.id)
+                queued.cancelUpdate(plugin.id)
                 scheduler.runCurrent()
                 val stopped = queued.plugins.value.single()
                 assertEquals(PluginAuthoringPhase.Idle, stopped.phase)
@@ -659,15 +712,14 @@ class PluginAuthoringServiceV1Test {
     @Test
     fun stoppedApprovalDoesNotAuthorizeReenabledSourceAtTheSameRevision() =
         runBlocking<Unit> {
-            val plugin = service.create()
-            val run = service.begin(plugin.id)
-            service.write(plugin.id, run, sources(plugin, media = true))
-            service.finish(plugin.id, run, true)
+            val plugin = service.create(UUID.randomUUID().toString())
+            val revision = service.read(plugin.id).plugin.revision
+            service.write(plugin.id, revision, sources(plugin, media = true))
             val review = await(plugin.id, PluginAuthoringPhase.AwaitingApproval)
             pending.busy = plugin.id
             service.approve(plugin.id, review.revision)
             await(plugin.id, PluginAuthoringPhase.WaitingForOperations)
-            service.stop(plugin.id)
+            service.cancelUpdate(plugin.id)
             pending.busy = null
             service.setEnabled(plugin.id, false)
             service.setEnabled(plugin.id, true)
@@ -683,7 +735,7 @@ class PluginAuthoringServiceV1Test {
     @Test
     fun directoryOverrideUpdatesAuthoredRunningStateWithoutChangingItsRecord() =
         runBlocking<Unit> {
-            val plugin = service.create()
+            val plugin = service.create(UUID.randomUUID().toString())
             val development = startDevelopment(plugin)
             withTimeoutOrNull(5_000) { service.plugins.first { it.single().running } }
                 ?: error("Directory override was not reflected in authored plugins")
@@ -698,15 +750,15 @@ class PluginAuthoringServiceV1Test {
     @Test
     fun reenablingAfterInvalidEditRestoresWorkingVersionAndRestartState() =
         runBlocking<Unit> {
-            val plugin = service.create()
+            val plugin = service.create(UUID.randomUUID().toString())
             generate(plugin)
             await(plugin.id, PluginAuthoringPhase.Applied)
             val before =
                 subsystem.running.value.plugins
                     .getValue(plugin.id)
-            val run = service.begin(plugin.id)
-            assertTrue(service.write(plugin.id, run, sources(plugin) + ("plugin.js" to "invalid {{{")).startsWith("Validation failed"))
-            service.finish(plugin.id, run, true)
+            val revision = service.read(plugin.id).plugin.revision
+            service.write(plugin.id, revision, sources(plugin) + ("plugin.js" to "invalid {{{"))
+            await(plugin.id, PluginAuthoringPhase.Failed)
             service.setEnabled(plugin.id, false)
             service.setEnabled(plugin.id, true)
             await(plugin.id, PluginAuthoringPhase.Failed)
@@ -736,7 +788,7 @@ class PluginAuthoringServiceV1Test {
     @Test
     fun reenablingKeepsWorkingVersionWhileAdditionalPermissionAwaitsApproval() =
         runBlocking<Unit> {
-            val plugin = service.create()
+            val plugin = service.create(UUID.randomUUID().toString())
             generate(plugin)
             await(plugin.id, PluginAuthoringPhase.Applied)
             val before =
@@ -769,7 +821,7 @@ class PluginAuthoringServiceV1Test {
     @Test
     fun failedCommitDoesNotAdmitWritesToTheReplacementBeforeRollback() =
         runBlocking<Unit> {
-            val plugin = service.create()
+            val plugin = service.create(UUID.randomUUID().toString())
             generate(plugin)
             await(plugin.id, PluginAuthoringPhase.Applied)
             val before =
@@ -842,9 +894,8 @@ class PluginAuthoringServiceV1Test {
         media: Boolean = false,
     ) {
         val firstInstall = plugin.id !in subsystem.stateStore.desired.value.plugins
-        val run = service.begin(plugin.id)
-        assertTrue(service.write(plugin.id, run, sources(plugin, name, media)).startsWith("Validation passed"))
-        service.finish(plugin.id, run, true)
+        val revision = service.read(plugin.id).plugin.revision
+        service.write(plugin.id, revision, sources(plugin, name, media))
         if (firstInstall && !media) {
             val approval = await(plugin.id, PluginAuthoringPhase.AwaitingApproval)
             service.approve(plugin.id, approval.revision)

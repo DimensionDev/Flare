@@ -56,8 +56,6 @@ import dev.dimension.flare.feature.plugin.management.PluginManagementStateV1
 import dev.dimension.flare.more
 import dev.dimension.flare.plugin_ai_create
 import dev.dimension.flare.plugin_ai_delete_message
-import dev.dimension.flare.plugin_ai_edit
-import dev.dimension.flare.plugin_ai_untitled
 import dev.dimension.flare.plugin_capabilities
 import dev.dimension.flare.plugin_check_updates
 import dev.dimension.flare.plugin_cleanup
@@ -138,7 +136,7 @@ import java.io.File
 @Composable
 internal fun DesktopPluginManagementScreen(
     onBack: () -> Unit,
-    onOpenPlugin: (String) -> Unit = {},
+    onCreateWithAI: () -> Unit = {},
 ) {
     val window = LocalComposeWindow.current
     val subsystem = koinInject<PluginSubsystemV1>()
@@ -185,7 +183,7 @@ internal fun DesktopPluginManagementScreen(
             Text(
                 stringResource(
                     if (pendingAuthored != null) Res.string.plugin_ai_delete_message else Res.string.plugin_uninstall_confirm_message,
-                    pendingUninstall?.nameText?.resolveText() ?: pendingAuthored?.name.orEmpty(),
+                    pendingAuthored?.let { "${it.name}\n${it.id}" } ?: pendingUninstall?.nameText?.resolveText().orEmpty(),
                 ),
             )
         },
@@ -308,17 +306,9 @@ internal fun DesktopPluginManagementScreen(
             }
             PluginManagementList(
                 state = state,
-                onCreatePlugin = {
-                    scope.launchPresenterAction {
-                        onOpenPlugin(
-                            dev.dimension.flare.di
-                                .koinGet<dev.dimension.flare.data.repository.PluginAuthoring>()
-                                .create()
-                                .conversationId,
-                        )
-                    }
-                },
-                onOpenPlugin = onOpenPlugin,
+                onCreatePlugin = onCreateWithAI,
+                onApprovePlugin = { id, revision -> scope.launchPresenterAction { presenter.approvePlugin(id, revision) } },
+                onCancelPluginUpdate = { id -> scope.launchPresenterAction { presenter.cancelPluginUpdate(id) } },
                 development =
                     if (showsDevelopment || state.development.directory != null) {
                         {
@@ -491,7 +481,8 @@ private fun GitHubInstallDialog(
 private fun PluginManagementList(
     state: PluginManagementStateV1,
     onCreatePlugin: () -> Unit,
-    onOpenPlugin: (String) -> Unit,
+    onApprovePlugin: (String, Long) -> Unit,
+    onCancelPluginUpdate: (String) -> Unit,
     onSetEnabled: (String, Boolean) -> Unit,
     onUninstall: (String) -> Unit,
     onUpdate: (String) -> Unit,
@@ -521,13 +512,14 @@ private fun PluginManagementList(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Column(Modifier.weight(1f)) {
-                            Text(plugin.name.ifBlank { stringResource(Res.string.plugin_ai_untitled) })
-                            Text(
-                                dev.dimension.flare.ui.component.agent
-                                    .pluginAuthoringLabel(plugin.phase),
+                            PluginAuthoringCard(
+                                plugin = plugin,
+                                busy = state.busy,
+                                onApprove = { onApprovePlugin(plugin.id, plugin.revision) },
+                                onCancelUpdate = { onCancelPluginUpdate(plugin.id) },
+                                onSetEnabled = { onSetEnabled(plugin.id, it) },
                             )
                         }
-                        Button(onClick = { onOpenPlugin(plugin.conversationId) }) { Text(stringResource(Res.string.plugin_ai_edit)) }
                         SubtleButton(onClick = { onUninstall(plugin.id) }) { Text(stringResource(Res.string.plugin_uninstall)) }
                     }
                 }

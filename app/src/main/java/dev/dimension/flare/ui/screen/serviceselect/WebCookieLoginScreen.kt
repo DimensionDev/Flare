@@ -16,6 +16,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
@@ -68,6 +69,13 @@ internal fun WebCookieLoginScreen(
     var errorMessage by remember { mutableStateOf<Int?>(null) }
     var retry by remember { mutableStateOf(0) }
     var cookiesCleared by remember { mutableStateOf(false) }
+    DisposableEffect(Unit) {
+        onDispose {
+            WebStorage.getInstance().deleteAllData()
+            CookieManager.getInstance().removeAllCookies(null)
+            CookieManager.getInstance().flush()
+        }
+    }
     LaunchedEffect(retry) {
         route = null
         errorMessage = null
@@ -146,7 +154,7 @@ private fun ProxyLoginWebView(
     onOriginChange: (String) -> Unit,
     onError: () -> Unit,
 ) {
-    val webViewState = rememberWebViewState("about:blank")
+    val webViewState = rememberWebViewState(request.url.takeIf { it.httpsOriginOrNull() != null } ?: "about:blank")
     LaunchedEffect(webViewState.lastLoadedUrl) {
         webViewState.lastLoadedUrl?.httpsOriginOrNull()?.let(onOriginChange)
     }
@@ -233,7 +241,6 @@ private fun ProxyLoginWebView(
                         view.loadUrl("about:blank")
                     }
                 }
-            if (route.isValid && request.url.httpsOriginOrNull() != null) view.loadUrl(request.url)
         },
         onDispose = { view ->
             disposed = true
@@ -248,9 +255,6 @@ private fun clearLoginWebView(webView: android.webkit.WebView) {
     webView.stopLoading()
     webView.clearHistory()
     webView.clearCache(true)
-    WebStorage.getInstance().deleteAllData()
-    CookieManager.getInstance().removeAllCookies(null)
-    CookieManager.getInstance().flush()
     webView.destroy()
 }
 

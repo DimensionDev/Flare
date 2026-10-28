@@ -25,6 +25,7 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformDataSourceContext
 import dev.dimension.flare.ui.model.ClickEvent
+import dev.dimension.flare.ui.model.UiDMItem
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.route.DeeplinkRoute
 import kotlinx.coroutines.CoroutineScope
@@ -45,6 +46,7 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertIs
 import kotlin.test.assertTrue
 
@@ -145,6 +147,114 @@ class PluginDetailCapabilityTest {
             assertEquals(MicroBlogKey("account-1", "plugin.example"), profile?.key)
             assertEquals("Test", profile?.name?.raw)
         }
+
+    @Test
+    fun directMessagePollingAdvancesPageCursorsEvenWhenThePageIsEmpty() =
+        runBlocking {
+            val source = authenticated(install(script = directMessagePagingScript()))
+            val loader = requireNotNull(source.extraCapabilities.directMessageAdapter).loader
+            val room = MicroBlogKey("room-1", "plugin.example")
+            val page = loader.loadMessages(room, 20, PagingRequest.Refresh)
+            val persistedCursor = page.data.single().remoteCursor
+            assertEquals("room-1-after-refresh", page.previousKey)
+            assertEquals(page.previousKey, persistedCursor)
+            assertTrue(loader.fetchNewMessages(room, persistedCursor).messages.isEmpty())
+
+            val next = loader.fetchNewMessages(room, persistedCursor).messages.single()
+            assertEquals("newer:room-1-after-empty", assertIs<UiDMItem.Message.Text>(next.content).text.raw)
+            assertEquals("room-1-after-newer", next.remoteCursor)
+            loader.deleteMessage(room, next.key)
+        }
+
+    @Test
+    fun directMessagePollingKeepsRoomCursorsWhenLoadingHistoryOrSending() =
+        runBlocking {
+            val source = authenticated(install(script = directMessagePagingScript()))
+            val loader = requireNotNull(source.extraCapabilities.directMessageAdapter).loader
+            val firstRoom = MicroBlogKey("room-1", "plugin.example")
+            val secondRoom = MicroBlogKey("room-2", "plugin.example")
+            loader.loadMessages(firstRoom, 20, PagingRequest.Refresh)
+            loader.loadMessages(secondRoom, 20, PagingRequest.Refresh)
+            loader.loadMessages(firstRoom, 20, PagingRequest.Append("older"))
+            val sent = loader.sendMessage(firstRoom, "hello")
+            assertEquals("room-1-after-refresh", sent.remoteCursor)
+            assertTrue(loader.fetchNewMessages(firstRoom, sent.remoteCursor).messages.isEmpty())
+            assertTrue(loader.fetchNewMessages(secondRoom, null).messages.isEmpty())
+        }
+
+    @Test
+    fun directMessagePollingResumesAPersistedCursorWithANewAdapter() =
+        runBlocking {
+            val plugin = install(script = directMessagePagingScript())
+            val first = requireNotNull(authenticated(plugin).extraCapabilities.directMessageAdapter).loader
+            val room = MicroBlogKey("room-1", "plugin.example")
+            val persisted = first.loadMessages(room, 20, PagingRequest.Refresh).data.single()
+            val restored = requireNotNull(authenticated(plugin).extraCapabilities.directMessageAdapter).loader
+            assertTrue(restored.fetchNewMessages(room, persisted.remoteCursor).messages.isEmpty())
+            val next = restored.fetchNewMessages(room, persisted.remoteCursor).messages.single()
+            assertEquals("newer:room-1-after-empty", assertIs<UiDMItem.Message.Text>(next.content).text.raw)
+        }
+
+    @Test
+    fun directMessagePollingRetriesTheCursorWhenMappingFails() =
+        runBlocking {
+            val script =
+                "var attempts = 0;\n" +
+                    directMessagePagingScript().replace(
+                        "sender: profile,",
+                        """
+                        sender: direction === "newer" && attempts++ === 0
+                          ? Object.assign({}, profile, { avatarUrl: "https://plugin.example/denied.png" }) : profile,
+                        """.trimIndent(),
+                    )
+            val source = authenticated(install(MANIFEST.replace("\"mediaNetwork\": true", "\"mediaNetwork\": false"), script))
+            val loader = requireNotNull(source.extraCapabilities.directMessageAdapter).loader
+            val room = MicroBlogKey("room-1", "plugin.example")
+            val cursor =
+                loader
+                    .loadMessages(room, 20, PagingRequest.Refresh)
+                    .data
+                    .single()
+                    .remoteCursor
+            assertTrue(loader.fetchNewMessages(room, cursor).messages.isEmpty())
+            assertFailsWith<IllegalArgumentException> { loader.fetchNewMessages(room, cursor) }
+            val retried = loader.fetchNewMessages(room, cursor).messages.single()
+            assertEquals("newer:room-1-after-empty", assertIs<UiDMItem.Message.Text>(retried.content).text.raw)
+        }
+
+    private fun directMessagePagingScript(): String =
+        SCRIPT
+            .replace(
+                "messages() { return { items: [] }; },",
+                """
+                messages(request) {
+                  const room = request.roomKey.id;
+                  const direction = request.page.direction;
+                  if (direction === "newer" && request.page.cursor === room + "-after-refresh") {
+                    return { items: [], newerCursor: room + "-after-empty" };
+                  }
+                  return {
+                    items: [{
+                      key: { id: room + "-" + direction, host: "plugin.example" },
+                      roomKey: request.roomKey,
+                      sender: profile,
+                      createdAt: "2026-01-01T00:00:00Z",
+                      content: { value: direction + ":" + (request.page.cursor || "initial") },
+                      entityToken: "message-token"
+                    }],
+                    newerCursor: room + "-after-" + direction
+                  };
+                },
+                """.trimIndent(),
+            ).replace(
+                "delete() { return { type: \"deleted\" }; },",
+                """
+                delete(request) {
+                  if (request.messageEntityToken !== "message-token") throw new Error("Missing message entity token");
+                  return { type: "deleted" };
+                },
+                """.trimIndent(),
+            )
 
     @Test
     fun coldListAndDirectMessageDetailsCallDedicatedPluginMethods() =

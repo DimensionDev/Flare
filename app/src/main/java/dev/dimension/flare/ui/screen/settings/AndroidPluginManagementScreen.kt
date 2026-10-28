@@ -91,7 +91,6 @@ internal fun AndroidPluginManagementScreen(onBack: () -> Unit) {
     val state by presenter.state.collectAsState()
     LaunchedEffect(presenter) { scope.launchPresenterAction { presenter.checkUpdates(forceRefresh = false) } }
     var showsGitHubInstall by remember { mutableStateOf(false) }
-    var showsMaintenanceMenu by remember { mutableStateOf(false) }
     var pendingUninstallId by remember { mutableStateOf<String?>(null) }
     val pendingUninstall = state.plugins.firstOrNull { it.pluginId == pendingUninstallId }
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
@@ -181,55 +180,16 @@ internal fun AndroidPluginManagementScreen(onBack: () -> Unit) {
                                 contentDescription = stringResource(R.string.plugin_install),
                             )
                         }
-                        Box {
-                            IconButton(
-                                enabled = !state.busy,
-                                onClick = { showsMaintenanceMenu = true },
-                            ) {
-                                DropdownMenuItem(
-                                    text = { Text(stringResource(R.string.plugin_install_github)) },
-                                    onClick = {
-                                        showsMaintenanceMenu = false
-                                        presenter.clearGitHubRepository()
-                                        showsGitHubInstall = true
-                                    },
-                                )
-                                DropdownMenuItem(
-                                    text = { Text(stringResource(R.string.plugin_check_updates)) },
-                                    enabled = state.plugins.any { it.sourceUrl != null },
-                                    onClick = {
-                                        showsMaintenanceMenu = false
-                                        scope.launchPresenterAction { presenter.checkUpdates() }
-                                    },
-                                )
-                                FAIcon(
-                                    imageVector = FontAwesomeIcons.Solid.EllipsisVertical,
-                                    contentDescription = stringResource(R.string.more),
-                                )
-                            }
-                            DropdownMenu(
-                                expanded = showsMaintenanceMenu,
-                                onDismissRequest = { showsMaintenanceMenu = false },
-                            ) {
-                                if (state.canRebuildIndex) {
-                                    DropdownMenuItem(
-                                        text = { Text(stringResource(R.string.plugin_rebuild_index)) },
-                                        onClick = {
-                                            showsMaintenanceMenu = false
-                                            scope.launchPresenterAction { presenter.rebuildIndex() }
-                                        },
-                                    )
-                                }
-                                DropdownMenuItem(
-                                    text = { Text(stringResource(R.string.plugin_cleanup)) },
-                                    enabled = !state.canRebuildIndex,
-                                    onClick = {
-                                        showsMaintenanceMenu = false
-                                        scope.launchPresenterAction { presenter.cleanup() }
-                                    },
-                                )
-                            }
-                        }
+                        PluginManagementMenu(
+                            state = state,
+                            onGitHubInstall = {
+                                presenter.clearGitHubRepository()
+                                showsGitHubInstall = true
+                            },
+                            onCheckUpdates = { scope.launchPresenterAction { presenter.checkUpdates() } },
+                            onRebuildIndex = { scope.launchPresenterAction { presenter.rebuildIndex() } },
+                            onCleanup = { scope.launchPresenterAction { presenter.cleanup() } },
+                        )
                     },
                     scrollBehavior = scrollBehavior,
                 )
@@ -255,6 +215,65 @@ internal fun AndroidPluginManagementScreen(onBack: () -> Unit) {
         }
         if (state.busy) {
             CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+        }
+    }
+}
+
+@Composable
+internal fun PluginManagementMenu(
+    state: PluginManagementStateV1,
+    onGitHubInstall: () -> Unit,
+    onCheckUpdates: () -> Unit,
+    onRebuildIndex: () -> Unit,
+    onCleanup: () -> Unit,
+) {
+    var showsMaintenanceMenu by remember { mutableStateOf(false) }
+    Box {
+        IconButton(
+            enabled = !state.busy,
+            onClick = { showsMaintenanceMenu = true },
+        ) {
+            FAIcon(
+                imageVector = FontAwesomeIcons.Solid.EllipsisVertical,
+                contentDescription = stringResource(R.string.more),
+            )
+        }
+        DropdownMenu(
+            expanded = showsMaintenanceMenu,
+            onDismissRequest = { showsMaintenanceMenu = false },
+        ) {
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.plugin_install_github)) },
+                onClick = {
+                    showsMaintenanceMenu = false
+                    onGitHubInstall()
+                },
+            )
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.plugin_check_updates)) },
+                enabled = state.plugins.any { it.sourceUrl != null },
+                onClick = {
+                    showsMaintenanceMenu = false
+                    onCheckUpdates()
+                },
+            )
+            if (state.canRebuildIndex) {
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.plugin_rebuild_index)) },
+                    onClick = {
+                        showsMaintenanceMenu = false
+                        onRebuildIndex()
+                    },
+                )
+            }
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.plugin_cleanup)) },
+                enabled = !state.canRebuildIndex,
+                onClick = {
+                    showsMaintenanceMenu = false
+                    onCleanup()
+                },
+            )
         }
     }
 }

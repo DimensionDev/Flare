@@ -12,11 +12,12 @@ import kotlinx.coroutines.CoroutineScope
 
 /** Swift-facing management API; file import and confirmation UI remain native. */
 public class PluginAppleFacadeV1 : PresenterBase<PluginManagementStateV1>() {
-    private val presenter =
+    private val presenter by lazy {
         PluginManagementPresenterV1(
             subsystem = koinGet<PluginSubsystemV1>(),
             scope = koinGet<CoroutineScope>(),
         )
+    }
 
     @Composable
     override fun body(): PluginManagementStateV1 {

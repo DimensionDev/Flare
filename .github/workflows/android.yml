@@ -72,6 +72,7 @@ jobs:
           script: |
             for test_class in \
               dev.dimension.flare.ui.screen.settings.ProxySettingsContentTest \
+              dev.dimension.flare.ui.screen.settings.PluginManagementMenuTest \
               dev.dimension.flare.common.WebViewProxyTest \
               dev.dimension.flare.ui.screen.gallery.GalleryDetailScreenTest; do
               ./gradlew :app:connectedDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=$test_class" || exit 1

@@ -152,7 +152,7 @@ internal class PluginWireMapperV1(
         )
     }
 
-    fun post(value: PostV1): UiTimelineV2 {
+    fun post(value: PostV1): UiTimelineV2.TimelinePostItem {
         value.requireValid()
         value.requireSafeUrls()
         return UiTimelineV2.TimelinePostItem(
@@ -206,7 +206,6 @@ internal class PluginWireMapperV1(
             isFromMe = value.fromCurrentAccount,
             sendState = null,
             showSender = true,
-            remoteCursor = value.entityToken,
         )
 
     fun article(value: ArticleV1): UiArticle {
@@ -274,27 +273,27 @@ internal class PluginWireMapperV1(
     }
 
     fun notification(value: NotificationV1): UiTimelineV2 {
-        value.post?.let { return post(it) }
         val key = MicroBlogKey(value.id, originHost)
-        return UiTimelineV2.Message(
-            user = value.actor?.let(::profile),
-            statusKey = key,
-            icon = value.kind.toUiIcon(),
-            type =
-                UiTimelineV2.Message.Type.Raw(
-                    value.message
-                        ?.toUi()
-                        ?.raw
-                        .orEmpty(),
-                ),
-            createdAt = Instant.parse(value.createdAt).toUi(),
-            clickEvent =
-                value.actor
-                    ?.takeIf { profileAvailable }
-                    ?.let { ClickEvent.Deeplink(DeeplinkRoute.Profile.User(accountType, it.key.toMicroBlogKey())) }
-                    ?: ClickEvent.Noop,
-            accountType = accountType,
-        )
+        val message =
+            UiTimelineV2.Message(
+                user = value.actor?.let(::profile),
+                statusKey = key,
+                icon = value.kind.toUiIcon(),
+                type =
+                    value.message?.let { UiTimelineV2.Message.Type.Raw(it.toUi().raw) }
+                        ?: value.kind.toMessageType(),
+                createdAt = Instant.parse(value.createdAt).toUi(),
+                clickEvent =
+                    value.actor
+                        ?.takeIf { profileAvailable }
+                        ?.let { ClickEvent.Deeplink(DeeplinkRoute.Profile.User(accountType, it.key.toMicroBlogKey())) }
+                        ?: ClickEvent.Noop,
+                accountType = accountType,
+            )
+        return value.post?.let { content ->
+            val item = post(content)
+            item.copy(presentation = item.presentation.copy(message = message, notificationKey = key))
+        } ?: message
     }
 
     private fun PostV1.toUiPost(): UiTimelineV2.Post {
@@ -491,6 +490,19 @@ private fun SemanticActionV1.toUiIcon(): UiIcon? =
         SemanticActionV1.Unmute,
         -> UiIcon.Mute
     }
+
+private fun NotificationKindV1.toMessageType(): UiTimelineV2.Message.Type {
+    val id =
+        when (this) {
+            NotificationKindV1.Mention -> UiTimelineV2.Message.Type.Localized.MessageId.Mention
+            NotificationKindV1.Reply -> UiTimelineV2.Message.Type.Localized.MessageId.Reply
+            NotificationKindV1.Favourite -> UiTimelineV2.Message.Type.Localized.MessageId.Favourite
+            NotificationKindV1.Repost -> UiTimelineV2.Message.Type.Localized.MessageId.Repost
+            NotificationKindV1.Follow -> UiTimelineV2.Message.Type.Localized.MessageId.Follow
+            NotificationKindV1.Other -> return UiTimelineV2.Message.Type.Raw("")
+        }
+    return UiTimelineV2.Message.Type.Localized(id)
+}
 
 private fun NotificationKindV1.toUiIcon(): UiIcon =
     when (this) {

@@ -7,6 +7,8 @@ import dev.dimension.flare.feature.plugin.wire.EntityKeyV1
 import dev.dimension.flare.feature.plugin.wire.GalleryV1
 import dev.dimension.flare.feature.plugin.wire.MediaTypeV1
 import dev.dimension.flare.feature.plugin.wire.MediaV1
+import dev.dimension.flare.feature.plugin.wire.NotificationKindV1
+import dev.dimension.flare.feature.plugin.wire.NotificationV1
 import dev.dimension.flare.feature.plugin.wire.PostDetailTypeV1
 import dev.dimension.flare.feature.plugin.wire.PostV1
 import dev.dimension.flare.feature.plugin.wire.ProfileV1
@@ -17,6 +19,7 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiArticleBlock
+import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.route.DeeplinkRoute
 import kotlin.test.Test
@@ -24,6 +27,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertIs
 import kotlin.test.assertNotEquals
+import kotlin.time.Instant
 
 class PluginWireMapperV1Test {
     private val mapper = createMapper(MicroBlogKey("me", "local.example"))
@@ -34,6 +38,63 @@ class PluginWireMapperV1Test {
             createdAt = "2026-10-27T00:00:00Z",
             content = RichTextV1(value = "Preview"),
         )
+
+    @Test
+    fun notificationsForTheSamePostKeepTheirIdentityActorAndTime() {
+        val actor = post.author.copy(key = EntityKeyV1("reactor", "remote.example"))
+        val notification =
+            NotificationV1(
+                id = "notice-1",
+                createdAt = "2026-10-28T00:00:00Z",
+                kind = NotificationKindV1.Favourite,
+                actor = actor,
+                post = post,
+            )
+        val first = assertIs<UiTimelineV2.TimelinePostItem>(mapper.notification(notification))
+        val second = assertIs<UiTimelineV2.TimelinePostItem>(mapper.notification(notification.copy(id = "notice-2")))
+        assertEquals(2, listOf(first, second).distinctBy { it.stableItemKey }.size)
+        assertEquals(MicroBlogKey(notification.id, "local.example"), first.presentation.notificationKey)
+        assertEquals(
+            actor.key.id,
+            first.presentation.message
+                ?.user
+                ?.key
+                ?.id,
+        )
+        assertEquals(Instant.parse(notification.createdAt), first.createdAt.value)
+        assertEquals(UiIcon.Heart, first.presentation.message?.icon)
+        assertEquals(
+            UiTimelineV2.Message.Type.Localized(UiTimelineV2.Message.Type.Localized.MessageId.Favourite),
+            first.presentation.message?.type,
+        )
+        assertEquals(post.key.id, first.post.statusKey.id)
+        assertEquals(mapper.post(post).let { assertIs<UiTimelineV2.TimelinePostItem>(it).post.clickEvent }, first.post.clickEvent)
+    }
+
+    @Test
+    fun notificationKeepsCustomTextRepostsAndStandaloneActors() {
+        val repost = post.copy(key = EntityKeyV1("reposted", "remote.example"))
+        val notification =
+            NotificationV1(
+                id = "notice",
+                createdAt = post.createdAt,
+                kind = NotificationKindV1.Repost,
+                actor = post.author,
+                post = post.copy(repost = repost),
+                message = RichTextV1(RichTextFormatV1.Html, "<p>Shared your post</p>"),
+            )
+        val item = assertIs<UiTimelineV2.TimelinePostItem>(mapper.notification(notification))
+        assertEquals(
+            repost.key.id,
+            item.presentation.repost
+                ?.statusKey
+                ?.id,
+        )
+        assertEquals(UiTimelineV2.Message.Type.Raw("Shared your post"), item.presentation.message?.type)
+        val standalone = assertIs<UiTimelineV2.Message>(mapper.notification(notification.copy(post = null)))
+        assertEquals(item.presentation.message, standalone)
+        assertEquals(mapper.profile(post.author).clickEvent, standalone.clickEvent)
+    }
 
     @Test
     fun disabledOrUnsupportedGalleryBookmarkDoesNotCreateAMutation() {

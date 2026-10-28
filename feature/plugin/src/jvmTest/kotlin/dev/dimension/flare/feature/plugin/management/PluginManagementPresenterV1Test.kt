@@ -5,16 +5,28 @@ import dev.dimension.flare.feature.plugin.PluginSubsystemV1
 import dev.dimension.flare.feature.plugin.installer.TestFppFactory
 import dev.dimension.flare.feature.plugin.login.PluginOAuthPendingStoreV1
 import dev.dimension.flare.feature.plugin.login.PluginOAuthPendingV1
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.job
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import okio.FileSystem
 import okio.Path
 import okio.Path.Companion.toOkioPath
 import okio.Path.Companion.toPath
+import org.koin.core.context.startKoin
+import org.koin.core.context.stopKoin
+import org.koin.dsl.module
 import java.nio.file.Files
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertFails
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
@@ -37,6 +49,50 @@ class PluginManagementPresenterV1Test {
     fun tearDown() {
         FileSystem.SYSTEM.deleteRecursively(root, mustExist = false)
     }
+
+    @Test
+    fun unusedAppleFacadesStartNoObserversAndTheRetainedFacadeDisposesItsObserver() =
+        runTest {
+            val subsystem = subsystem()
+            val appScope = CoroutineScope(SupervisorJob() + StandardTestDispatcher(testScheduler))
+            startKoin {
+                modules(
+                    module {
+                        single { subsystem }
+                        single<CoroutineScope> { appScope }
+                    },
+                )
+            }
+            try {
+                val retained = PluginAppleFacadeV1()
+                repeat(5) { PluginAppleFacadeV1() }
+                runCurrent()
+                assertEquals(
+                    0,
+                    appScope.coroutineContext.job.children
+                        .count(),
+                )
+
+                val collection = backgroundScope.launch { retained.moleculeFlow.collect() }
+                runCurrent()
+                assertEquals(
+                    1,
+                    appScope.coroutineContext.job.children
+                        .count(),
+                )
+                collection.cancelAndJoin()
+                runCurrent()
+                assertEquals(
+                    0,
+                    appScope.coroutineContext.job.children
+                        .count(),
+                )
+            } finally {
+                appScope.cancel()
+                stopKoin()
+                subsystem.runtimePool.close()
+            }
+        }
 
     @Test
     fun installCancelAndUninstallExposeAccurateDesiredAndRunningState() =

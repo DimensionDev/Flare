@@ -435,7 +435,8 @@ internal class PluginExtraCapabilitiesV1(
         MicroblogDataSource by base {
         private val rooms = MutableStateFlow<Map<MicroBlogKey, DirectMessageRoomV1>>(emptyMap())
         private val messages = MutableStateFlow<Map<MicroBlogKey, DirectMessageV1>>(emptyMap())
-        private val loader =
+        private val newerCursors = MutableStateFlow<Map<MicroBlogKey, String?>>(emptyMap())
+        internal val loader =
             object : DirectMessageLoader {
                 override val platformId: String = plugin.installed.manifest.platform.id
 
@@ -477,8 +478,12 @@ internal class PluginExtraCapabilitiesV1(
                                 responseSerializer = PageV1.serializer(DirectMessageV1.serializer()),
                                 validate = { value -> value.requireValid(DirectMessageV1::requireValid) },
                             )
+                    val result = page.toPagingResult { mapper.directMessage(it).copy(remoteCursor = page.newerCursor) }
                     page.items.forEach { value -> messages.update { it + (value.key.toKey() to value) } }
-                    return page.toPagingResult(mapper::directMessage)
+                    if (request !is PagingRequest.Append) {
+                        newerCursors.update { it + (roomKey to page.newerCursor) }
+                    }
+                    return result
                 }
 
                 override suspend fun fetchRoomInfo(roomKey: MicroBlogKey): UiDMRoom = this@DirectMessageAdapter.roomInfo(roomKey)
@@ -498,12 +503,15 @@ internal class PluginExtraCapabilitiesV1(
                 override suspend fun fetchNewMessages(
                     roomKey: MicroBlogKey,
                     cursor: String?,
-                ): DirectMessageDelta =
-                    loadMessages(
+                ): DirectMessageDelta {
+                    val cursors = newerCursors.value
+                    val newerCursor = if (roomKey in cursors) cursors[roomKey] else cursor
+                    return loadMessages(
                         roomKey,
                         100,
-                        cursor?.let(PagingRequest::Prepend) ?: PagingRequest.Refresh,
+                        newerCursor?.let(PagingRequest::Prepend) ?: PagingRequest.Refresh,
                     ).data.let(::DirectMessageDelta)
+                }
 
                 override suspend fun leaveRoom(roomKey: MicroBlogKey) {
                     this@DirectMessageAdapter.leaveRoom(roomKey)
@@ -558,7 +566,7 @@ internal class PluginExtraCapabilitiesV1(
                     responseSerializer = DirectMessageV1.serializer(),
                     validate = DirectMessageV1::requireValid,
                 ).also { value -> messages.update { it + (value.key.toKey() to value) } }
-                .let(mapper::directMessage)
+                .let { mapper.directMessage(it).copy(remoteCursor = newerCursors.value[roomKey]) }
 
         private suspend fun deleteMessage(
             roomKey: MicroBlogKey,
@@ -591,6 +599,7 @@ internal class PluginExtraCapabilitiesV1(
                 validate = MutationResultV1::requireDeleteResult,
             )
             rooms.update { it - roomKey }
+            newerCursors.update { it - roomKey }
         }
 
         private fun createRoom(userKey: MicroBlogKey): Flow<UiState<UiDMRoom>> =

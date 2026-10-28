@@ -26,8 +26,8 @@ import dev.dimension.flare.di.koinGet
 import dev.dimension.flare.feature.plugin.PluginSubsystemV1
 import dev.dimension.flare.feature.plugin.github.GitHubPluginRepositoryV1
 import dev.dimension.flare.feature.plugin.github.GitHubPluginVersionV1
-import dev.dimension.flare.feature.plugin.lifecycle.PluginInstallSourceV1
 import dev.dimension.flare.feature.plugin.management.PluginManagementItemV1
+import dev.dimension.flare.ui.component.LocalExternalTextResolver
 import dev.dimension.flare.ui.model.UiText
 import dev.dimension.flare.ui.theme.FlareTheme
 import dev.dimension.flare.ui.theme.LocalComposeWindow
@@ -154,20 +154,17 @@ class DesktopPluginManagementScreenTest {
     }
 
     @Test
-    fun longRepositoryUrlKeepsUninstallAndUpdateActionsVisible() {
+    fun localizedPluginNameAndActionsRemainVisibleWithLongRepositoryUrl() {
         val repository = GitHubPluginRepositoryV1(1, "Tlaster", "flare-plugin-github-e2e-20261028")
         val plugin =
             PluginManagementItemV1(
                 pluginId = "fixture.plugin",
                 platformId = "Fixture",
-                name = "Fixture plugin",
-                nameText = UiText.Raw("Fixture plugin"),
+                nameText = UiText.ExternalRef("fixture.plugin", "name", "Fixture plugin"),
                 version = "1.0.0",
                 enabled = true,
                 running = true,
                 pendingRestart = false,
-                source = PluginInstallSourceV1.GitHub(repository, "v1.0.0", "a".repeat(40)),
-                capabilities = emptySet(),
                 iconPath = root.resolve("missing-icon.png").toString(),
                 sourceUrl = repository.url,
                 availableUpdate = GitHubPluginVersionV1("v1.1.0", "1.1.0", "b".repeat(40)),
@@ -177,18 +174,22 @@ class DesktopPluginManagementScreenTest {
         compose.setContent {
             if (visible) {
                 FlareTheme(isDarkTheme = false) {
-                    Box(Modifier.width(448.dp).height(800.dp).clipToBounds()) {
-                        PluginItem(
-                            plugin = plugin,
-                            busy = false,
-                            onSetEnabled = { _, _ -> },
-                            onUninstall = { removed = it },
-                            onUpdate = { updated = it },
-                        )
+                    CompositionLocalProvider(LocalExternalTextResolver provides { "Localized plugin" }) {
+                        Box(Modifier.width(448.dp).height(800.dp).clipToBounds()) {
+                            PluginItem(
+                                plugin = plugin,
+                                busy = false,
+                                onSetEnabled = { _, _ -> },
+                                onUninstall = { removed = it },
+                                onUpdate = { updated = it },
+                            )
+                        }
                     }
                 }
             }
         }
+        compose.onNodeWithText("Localized plugin").assertIsDisplayed()
+        compose.onNodeWithContentDescription("Localized plugin").assertExists()
         compose.onNodeWithText("Update v1.1.0").assertIsDisplayed().performClick()
         assertEquals(plugin.pluginId, updated)
         compose.onNodeWithContentDescription("Uninstall").assertIsDisplayed().performClick()

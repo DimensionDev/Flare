@@ -31,11 +31,13 @@ import okio.FileSystem
 import okio.Path
 import okio.Path.Companion.toOkioPath
 import java.nio.file.Files
+import java.util.UUID
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFails
+import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertNotNull
@@ -88,6 +90,43 @@ class PluginGitHubManagementTest {
         client.close()
         fileSystem.deleteRecursively(root, mustExist = false)
     }
+
+    @Test
+    fun githubCommitRechecksOwnershipAfterInspection() =
+        runBlocking {
+            withPresenter { subsystem, presenter ->
+                val key = UUID.randomUUID().toString()
+                val plugin = subsystem.authoring.create(key)
+                subsystem.authoring.delete(plugin.id)
+                archives[FIRST_SHA] = archive("1.0.0", id = plugin.id)
+                presenter.loadGitHubRepository(REPOSITORY_URL)
+                presenter.inspectGitHub("v1.0.0")
+                val review = assertNotNull(presenter.state.value.pendingInstall)
+                val recreated = subsystem.authoring.create(key)
+
+                assertFailsWith<IllegalStateException> { presenter.confirmInstall() }
+                assertTrue(
+                    subsystem.stateStore.desired.value.plugins
+                        .isEmpty(),
+                )
+                assertEquals(recreated, subsystem.authoring.read(plugin.id).plugin)
+                assertEquals(review, presenter.state.value.pendingInstall)
+                assertNotNull(presenter.state.value.error)
+                assertFalse(presenter.state.value.busy)
+                presenter.cancelInstall()
+                assertNull(presenter.state.value.pendingInstall)
+
+                archives[FIRST_SHA] = archive("1.0.0")
+                install(presenter)
+                assertEquals(
+                    PLUGIN_ID,
+                    presenter.state.value.importedPlugins
+                        .single()
+                        .pluginId,
+                )
+                assertNull(presenter.state.value.error)
+            }
+        }
 
     @Test
     fun cachedMediaGrantIsRevokedOnlyAfterTheConfirmedUpdateRestarts() =

@@ -13,7 +13,6 @@ import dev.dimension.flare.feature.plugin.installer.compareSemVer
 import dev.dimension.flare.feature.plugin.lifecycle.InstalledPluginV1
 import dev.dimension.flare.feature.plugin.lifecycle.PluginInstallSourceV1
 import dev.dimension.flare.feature.plugin.lifecycle.PluginStateIssueV1
-import dev.dimension.flare.feature.plugin.manifest.fallbackText
 import dev.dimension.flare.feature.plugin.manifest.toUiText
 import dev.dimension.flare.feature.plugin.runtime.PluginRuntimeIssueV1
 import dev.dimension.flare.ui.model.UiText
@@ -57,14 +56,11 @@ public data class PluginManagementStateV1(
 public data class PluginManagementItemV1(
     val pluginId: String,
     val platformId: String,
-    val name: String,
     val nameText: UiText,
     val version: String,
     val enabled: Boolean,
     val running: Boolean,
     val pendingRestart: Boolean,
-    val source: PluginInstallSourceV1,
-    val capabilities: Set<String>,
     val iconPath: String,
     val sourceUrl: String?,
     val availableUpdate: GitHubPluginVersionV1?,
@@ -221,6 +217,12 @@ public class PluginManagementPresenterV1(
         runMutation {
             val prepared = requireNotNull(preview) { "No plugin installation is pending" }
             requireNotDeveloping(prepared.pluginId)
+            check(
+                subsystem.authoring.plugins.value
+                    .none { it.id == prepared.pluginId },
+            ) {
+                "Delete the editable local plugin before installing another package with this ID"
+            }
             subsystem.installer.commit(prepared, confirmed = true)
             updates.remove(prepared.pluginId)
             preview = null
@@ -351,11 +353,10 @@ public class PluginManagementPresenterV1(
         if (previous != null) subsystem.installer.discard(previous)
     }
 
-    private suspend fun <T> runAuthoringAction(block: suspend () -> T): T {
+    private suspend fun runAuthoringAction(block: suspend () -> Unit) {
         try {
-            val result = block()
+            block()
             mutableState.value = snapshot().copy(busy = mutableState.value.busy)
-            return result
         } catch (error: Exception) {
             if (error is CancellationException) throw error
             mutableState.value = snapshot().copy(busy = mutableState.value.busy, error = error.message ?: "Plugin operation failed")
@@ -389,14 +390,11 @@ private fun InstalledPluginV1.toItem(
     PluginManagementItemV1(
         pluginId = pluginId,
         platformId = manifest.platform.id,
-        name = manifest.name.fallbackText,
         nameText = manifest.name.toUiText(pluginId),
         version = version,
         enabled = enabled,
         running = running != null,
         pendingRestart = pendingRestart,
-        source = source,
-        capabilities = manifest.platform.capabilities.keys,
         iconPath = iconPath,
         sourceUrl = (source as? PluginInstallSourceV1.GitHub)?.repository?.url,
         availableUpdate = availableUpdate,

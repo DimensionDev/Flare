@@ -609,6 +609,7 @@ internal fun PluginItem(
     onUninstall: (String) -> Unit,
     onUpdate: (String) -> Unit,
 ) {
+    val name = plugin.nameText.resolveText()
     Layer(
         modifier = Modifier.fillMaxWidth(),
         color = FluentTheme.colors.background.card.default,
@@ -621,7 +622,7 @@ internal fun PluginItem(
         ) {
             AsyncImage(
                 model = File(plugin.iconPath),
-                contentDescription = plugin.name,
+                contentDescription = name,
                 contentScale = ContentScale.Fit,
                 modifier =
                     Modifier
@@ -629,7 +630,7 @@ internal fun PluginItem(
                         .clip(RoundedCornerShape(8.dp)),
             )
             Column(Modifier.weight(1f)) {
-                Text(plugin.nameText.resolveText(), maxLines = 2, overflow = TextOverflow.Ellipsis)
+                Text(name, maxLines = 2, overflow = TextOverflow.Ellipsis)
                 ProvideTextStyle(FluentTheme.typography.caption.copy(color = FluentTheme.colors.text.text.secondary)) {
                     Text("${plugin.platformId} · ${plugin.version}")
                     plugin.sourceUrl?.let { Text(it, maxLines = 2, overflow = TextOverflow.Ellipsis) }

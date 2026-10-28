@@ -561,13 +561,14 @@ private fun PluginItem(
     onUninstall: (String) -> Unit,
     onUpdate: (String) -> Unit,
 ) {
+    val name = plugin.nameText.resolveText()
     SegmentedListItem(
         onClick = {},
         shapes = ListItemDefaults.segmentedShapes2(shapesIndex, shapesCount),
         leadingContent = {
             AsyncImage(
                 model = File(plugin.iconPath),
-                contentDescription = plugin.name,
+                contentDescription = name,
                 contentScale = ContentScale.Fit,
                 modifier =
                     Modifier
@@ -575,7 +576,7 @@ private fun PluginItem(
                         .clip(RoundedCornerShape(8.dp)),
             )
         },
-        content = { Text(plugin.nameText.resolveText()) },
+        content = { Text(name) },
         supportingContent = {
             Column {
                 Text("${plugin.platformId} · ${plugin.version}")

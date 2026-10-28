@@ -55,13 +55,15 @@ public data class AuthoredPlugin(
     val error: String? = null,
     val permissions: List<PluginPermission> = emptyList(),
     val credentialsChanged: Boolean = false,
-    val platformId: String = id.removePrefix("local.").replace('.', '_'),
+    val platformId: String = authoredPluginPlatformId(id),
 ) {
     public val canSetEnabled: Boolean get() = revision > 0
     public val canApprove: Boolean get() = phase == PluginAuthoringPhase.AwaitingApproval
     public val canCancelUpdate: Boolean
         get() = phase == PluginAuthoringPhase.Validating || canApprove || phase == PluginAuthoringPhase.WaitingForOperations
 }
+
+public fun authoredPluginPlatformId(id: String): String = id.removePrefix("local.").replace('.', '_')
 
 @Serializable
 public enum class PluginAuthoringPhase {

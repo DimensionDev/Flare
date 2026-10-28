@@ -11,6 +11,11 @@ plugin, including after a restart. Different requests can create multiple plugin
 with the same display name. Tools list and manage only editable local plugins;
 imported and GitHub-installed plugins are outside their scope.
 
+An external package cannot replace an editable local plugin with the same ID;
+delete the local plugin first to install that package. Creation also rejects IDs
+already used by imported plugins. Ownership is checked again when committing an
+installation, so a pending review cannot bypass this boundary.
+
 The assistant reads a plugin's complete source and revision before submitting a
 replacement. Each accepted update atomically saves the complete file set and
 increments its revision. Concurrent updates to the same plugin are serialized;

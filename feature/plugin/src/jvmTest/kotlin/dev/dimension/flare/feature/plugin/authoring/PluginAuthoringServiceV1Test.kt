@@ -120,6 +120,84 @@ class PluginAuthoringServiceV1Test {
         }
 
     @Test
+    fun sameIdFileImportPreservesAuthoredSourceAndRunningVersion() =
+        runBlocking<Unit> {
+            val plugin = service.create(UUID.randomUUID().toString())
+            generate(plugin)
+            await(plugin.id, PluginAuthoringPhase.Applied)
+            val source = service.read(plugin.id)
+            val installed =
+                subsystem.stateStore.desired.value.plugins
+                    .getValue(plugin.id)
+            val running =
+                subsystem.running.value.plugins
+                    .getValue(plugin.id)
+            val archive = root / "same-id.fpp"
+            TestFppFactory.write(
+                archive,
+                TestFppFactory.validEntries(manifest = sources(plugin, "Imported").getValue("manifest.json").replace("1.0.0", "2.0.0")),
+            )
+            val presenter = PluginManagementPresenterV1(subsystem, scope)
+            try {
+                val review = presenter.inspect(archive.toString())
+                assertFailsWith<IllegalStateException> { presenter.confirmInstall() }
+                assertEquals(installed, subsystem.stateStore.desired.value.plugins[plugin.id])
+                assertEquals(running, subsystem.running.value.plugins[plugin.id])
+                assertEquals(source, service.read(plugin.id))
+                assertEquals(review, presenter.state.value.pendingInstall)
+                assertNotNull(presenter.state.value.error)
+                assertFalse(presenter.state.value.busy)
+                presenter.cancelInstall()
+                service.write(plugin.id, source.plugin.revision, sources(plugin, "Updated source"))
+                await(plugin.id, PluginAuthoringPhase.Applied)
+                assertEquals(source.plugin.revision + 1, service.read(plugin.id).plugin.revision)
+            } finally {
+                presenter.close()
+            }
+        }
+
+    @Test
+    fun creationCannotClaimAnImportedPluginIdentity() =
+        runBlocking<Unit> {
+            val key = UUID.randomUUID().toString()
+            val plugin = service.create(key)
+            service.delete(plugin.id)
+            val archive = root / "imported-identity.fpp"
+            TestFppFactory.write(archive, TestFppFactory.validEntries(manifest = sources(plugin).getValue("manifest.json")))
+            val presenter = PluginManagementPresenterV1(subsystem, scope)
+            try {
+                presenter.inspect(archive.toString())
+                presenter.confirmInstall()
+                val installed =
+                    subsystem.stateStore.desired.value.plugins
+                        .getValue(plugin.id)
+                assertFailsWith<IllegalStateException> { service.create(key) }
+                assertTrue(service.plugins.value.isEmpty())
+                assertFalse(fileSystem.exists(root / "authored-plugins" / "${plugin.id}.json"))
+                assertEquals(installed, subsystem.stateStore.desired.value.plugins[plugin.id])
+                assertEquals(
+                    plugin.id,
+                    presenter.state.value.importedPlugins
+                        .single()
+                        .pluginId,
+                )
+
+                val restarted = PluginSubsystemV1(appFiles, pending)
+                try {
+                    restarted.stateStore.uninstall(plugin.id)
+                    val authoring = PluginAuthoringServiceV1(restarted, { registry }, { accounts }, { scope })
+                    assertFailsWith<IllegalStateException> { authoring.create(key) }
+                    assertTrue(authoring.plugins.value.isEmpty())
+                    assertTrue(plugin.id in restarted.running.value.plugins)
+                } finally {
+                    restarted.runtimePool.close()
+                }
+            } finally {
+                presenter.close()
+            }
+        }
+
+    @Test
     fun directoryValidationDoesNotBlockAnotherPluginApplying() =
         runBlocking<Unit> {
             val first = service.create(UUID.randomUUID().toString())
@@ -910,7 +988,7 @@ class PluginAuthoringServiceV1Test {
         "manifest.json" to
             TestFppFactory.validManifest
                 .replace("dev.dimension.flare.test.plugin", plugin.id)
-                .replace("TestPlugin", PluginAuthoringServiceV1.platformId(plugin.id))
+                .replace("TestPlugin", plugin.platformId)
                 .replace("Test plugin", name)
                 .let {
                     if (media) {

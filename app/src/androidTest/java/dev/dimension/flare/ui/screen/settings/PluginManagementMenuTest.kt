@@ -18,7 +18,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import dev.dimension.flare.R
 import dev.dimension.flare.feature.plugin.github.GitHubPluginRepositoryV1
-import dev.dimension.flare.feature.plugin.lifecycle.PluginInstallSourceV1
 import dev.dimension.flare.feature.plugin.management.PluginManagementItemV1
 import dev.dimension.flare.feature.plugin.management.PluginManagementStateV1
 import dev.dimension.flare.ui.model.UiText
@@ -45,14 +44,11 @@ class PluginManagementMenuTest {
                         PluginManagementItemV1(
                             pluginId = "example.plugin",
                             platformId = "Example",
-                            name = "Example",
                             nameText = UiText.Raw("Example"),
                             version = "1.0.0",
                             enabled = true,
                             running = true,
                             pendingRestart = false,
-                            source = PluginInstallSourceV1.GitHub(repository, "v1.0.0", "a".repeat(40)),
-                            capabilities = emptySet(),
                             iconPath = "",
                             sourceUrl = repository.url,
                             availableUpdate = null,

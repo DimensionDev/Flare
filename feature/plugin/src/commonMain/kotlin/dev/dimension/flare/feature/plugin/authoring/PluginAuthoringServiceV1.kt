@@ -6,6 +6,7 @@ import dev.dimension.flare.data.repository.AuthoredPlugin
 import dev.dimension.flare.data.repository.PluginAuthoring
 import dev.dimension.flare.data.repository.PluginAuthoringPhase
 import dev.dimension.flare.data.repository.PluginSource
+import dev.dimension.flare.data.repository.authoredPluginPlatformId
 import dev.dimension.flare.feature.plugin.PluginSubsystemV1
 import dev.dimension.flare.feature.plugin.abi.PluginJsonV1
 import dev.dimension.flare.feature.plugin.installer.FppArchive
@@ -52,7 +53,6 @@ internal class PluginAuthoringServiceV1(
     private val scope by lazy(scope)
     private val files = subsystem.appFiles.fileSystem
     private val root = subsystem.appFiles.directory("authored-plugins")
-    private val creationMutex = Mutex()
     private val entries = MutableStateFlow(load())
     private val mutablePlugins = MutableStateFlow(entries.value.values.map(::snapshot))
 
@@ -69,8 +69,11 @@ internal class PluginAuthoringServiceV1(
                 "Use a unique request key of 16 to 128 letters, digits, underscores or hyphens"
             }
             val id = "local.ai.p${requestKey.encodeToByteArray().toByteString().sha256().hex().take(32)}"
-            creationMutex.withLock {
+            subsystem.mutationMutex.withLock {
                 if (id !in entries.value) {
+                    check(id !in subsystem.stateStore.desired.value.plugins && id !in subsystem.running.value.plugins) {
+                        "An installed plugin already uses this ID; use a different creation request key"
+                    }
                     val entry = Entry(Record(id = id))
                     save(entry.record)
                     entries.update { it + (id to entry) }
@@ -374,7 +377,7 @@ internal class PluginAuthoringServiceV1(
                 bytes,
             )
         val validated = validator.validate(archive)
-        require(validated.manifest.id == record.id && validated.manifest.platform.id == platformId(record.id)) {
+        require(validated.manifest.id == record.id && validated.manifest.platform.id == authoredPluginPlatformId(record.id)) {
             "Keep the host-assigned plugin and platform IDs"
         }
         return Candidate(record.revision, validated, encodePluginArchive(bytes))
@@ -470,9 +473,7 @@ internal class PluginAuthoringServiceV1(
         val packageHash = archive.toByteString().sha256().hex()
     }
 
-    companion object {
-        fun platformId(id: String): String = id.removePrefix("local.").replace('.', '_')
-
+    private companion object {
         private val PLUGIN_ID = Regex("local\\.ai\\.p[a-f0-9]{32}")
         private val CATALOG = Regex("locales/[A-Za-z0-9_-]+\\.json")
         private const val MAX_RECORD_BYTES = 32L * 1024 * 1024

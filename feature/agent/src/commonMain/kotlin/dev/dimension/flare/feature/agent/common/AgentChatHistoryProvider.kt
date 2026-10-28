@@ -24,9 +24,14 @@ import org.koin.core.annotation.Single
 import kotlin.time.Clock
 
 @Single
+internal fun provideAgentChatHistoryProvider(
+    database: AgentDatabase,
+    titleGenerator: AgentConversationTitleGenerator,
+): AgentChatHistoryProvider = AgentChatHistoryProvider(database, titleGenerator::generate)
+
 internal class AgentChatHistoryProvider(
     private val database: AgentDatabase,
-    private val titleGenerator: AgentConversationTitleGenerator,
+    private val generateTitle: suspend (List<AgentChatHistoryMessage>) -> String?,
 ) : ChatHistoryProvider {
     fun observeRooms(): Flow<List<AgentChatRoom>> =
         database
@@ -331,14 +336,45 @@ internal class AgentChatHistoryProvider(
     override suspend fun store(
         conversationId: String,
         messages: List<Message>,
+    ) = storeMessages(conversationId, messages)
+
+    suspend fun storeAssistantResponse(
+        conversationId: String,
+        messages: List<Message>,
+        supportingParts: List<AgentMessagePart>,
+        inputRequest: AgentPendingInputRequest?,
+    ) {
+        val response = messages.last() as Message.Assistant
+        val visibleResult =
+            resolveAgentVisibleResult(
+                response.textContent(),
+                inputRequest.takeIf { response.parts.none { it is MessagePart.Tool.Call } },
+            )
+        storeMessages(
+            conversationId,
+            messages,
+            lastResponseParts = buildAgentMessageParts(visibleResult.text, supportingParts, visibleResult.inputRequest),
+        )
+    }
+
+    private suspend fun storeMessages(
+        conversationId: String,
+        messages: List<Message>,
+        lastResponseParts: List<AgentMessagePart>? = null,
     ) {
         val now = Clock.System.now().toEpochMilliseconds()
         val latestMessageAt = messages.latestVisibleMessageCreatedAt() ?: now
         val existing = database.conversationDao().getConversation(conversationId)
-        val existingUiContent =
-            MessageUiContentIndex(
-                database.conversationDao().getMessagesChronological(conversationId),
-            )
+        val existingMessages = database.conversationDao().getMessagesChronological(conversationId)
+        val existingById = existingMessages.associateBy { it.toMessage()?.id ?: it.messageId() }
+        val pendingUiMessages =
+            existingMessages
+                .filter { it.messageJson.isEmpty() }
+                .groupBy { MessageUiContentKey(it.role, it.text) }
+                .mapValues { (_, messages) -> ArrayDeque(messages) }
+        var nextPosition = (existingMessages.maxOfOrNull { it.position } ?: -1) + 1
+        // Keep optimistic user positions while placing new system messages before them.
+        var nextSystemPosition = (existingMessages.minOfOrNull { it.position } ?: 0) - messages.count { it is Message.System }
         val historyMessages = messages.mapNotNull { it.toHistoryMessage(conversationId) }
         val fallbackTitle =
             existing.agentTitleOrFallback(
@@ -362,13 +398,25 @@ internal class AgentChatHistoryProvider(
                     errorMessage = existing?.errorMessage,
                 ),
             )
-            database.conversationDao().deleteMessages(conversationId)
             database.conversationDao().insertMessages(
                 messages.mapIndexed { index, message ->
+                    val previous =
+                        existingById[message.id]
+                            ?: pendingUiMessages[
+                                MessageUiContentKey(
+                                    message.role.name,
+                                    message.displayText(conversationId),
+                                ),
+                            ]?.removeFirstOrNull()
                     message.toDbMessage(
                         conversationId = conversationId,
-                        position = index,
-                        existingUiContent = existingUiContent,
+                        position = previous?.position ?: if (message is Message.System) nextSystemPosition++ else nextPosition++,
+                        existingUiContent =
+                            if (index == messages.lastIndex && lastResponseParts != null) {
+                                encodeContent(lastResponseParts)
+                            } else {
+                                previous?.contentJson
+                            },
                     )
                 },
             )
@@ -379,8 +427,11 @@ internal class AgentChatHistoryProvider(
         database
             .conversationDao()
             .getMessagesChronological(conversationId)
-            .mapNotNull { it.toMessage() }
-            .sanitizeForReplay()
+            .mapNotNull { stored ->
+                stored.toMessage()?.let { message ->
+                    if (message.id == null) message.withAgentMessageId(stored.messageId()) else message
+                }
+            }.sanitizeForReplay()
 
     suspend fun generateTitleIfNeeded(conversationId: String) {
         val existing = database.conversationDao().getConversation(conversationId) ?: return
@@ -396,7 +447,7 @@ internal class AgentChatHistoryProvider(
             return
         }
         val generatedTitle =
-            titleGenerator.generate(historyMessages)
+            generateTitle(historyMessages)
                 ?: run {
                     updateFallbackTitleIfNeeded(
                         conversationId = conversationId,
@@ -436,7 +487,7 @@ internal class AgentChatHistoryProvider(
     private fun Message.toDbMessage(
         conversationId: String,
         position: Int,
-        existingUiContent: MessageUiContentIndex,
+        existingUiContent: String?,
     ): DbAgentMessage {
         val text = displayText(conversationId)
         val roleName = role.name
@@ -446,7 +497,7 @@ internal class AgentChatHistoryProvider(
             role = roleName,
             text = text,
             contentJson =
-                existingUiContent.take(roleName, text)
+                existingUiContent
                     ?: encodeContent(text.toAgentTextParts()),
             messageJson = json.encodeToString<Message>(this),
             createdAt = metaInfo.timestamp.toEpochMilliseconds(),
@@ -461,6 +512,8 @@ internal class AgentChatHistoryProvider(
         runCatching {
             json.decodeFromString<Message>(messageJson)
         }.getOrNull()
+
+    private fun DbAgentMessage.messageId(): String = "$conversationId:$position"
 
     private fun List<Message>.sanitizeForReplay(): List<Message> =
         mapNotNull { message ->
@@ -636,28 +689,14 @@ internal class AgentChatHistoryProvider(
         val role: String,
         val text: String,
     )
-
-    private class MessageUiContentIndex(
-        messages: List<DbAgentMessage>,
-    ) {
-        private val contentByKey: Map<MessageUiContentKey, List<String>> =
-            messages.groupBy(
-                keySelector = { message -> MessageUiContentKey(message.role, message.text) },
-                valueTransform = { message -> message.contentJson },
-            )
-        private val nextIndexByKey = mutableMapOf<MessageUiContentKey, Int>()
-
-        fun take(
-            role: String,
-            text: String,
-        ): String? {
-            val key = MessageUiContentKey(role, text)
-            val index = nextIndexByKey[key] ?: 0
-            nextIndexByKey[key] = index + 1
-            return contentByKey[key]?.getOrNull(index)
-        }
-    }
 }
+
+internal fun Message.withAgentMessageId(id: String): Message =
+    when (this) {
+        is Message.System -> copy(id = id)
+        is Message.User -> copy(id = id)
+        is Message.Assistant -> copy(id = id)
+    }
 
 @Immutable
 public data class AgentChatRoom(

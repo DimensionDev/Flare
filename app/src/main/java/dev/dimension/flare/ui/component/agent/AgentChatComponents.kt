@@ -309,6 +309,13 @@ internal fun AgentChatMessageList(
     contentPadding: PaddingValues = PaddingValues(0.dp),
 ) {
     val listState = rememberLazyListState()
+    val newestMessageId = (messages as? PagingState.Success)?.peek(0)?.id
+    val wasAtBottom = !listState.canScrollBackward
+    LaunchedEffect(newestMessageId) {
+        if (newestMessageId != null && wasAtBottom) {
+            listState.scrollToItem(0)
+        }
+    }
 
     LazyColumn(
         modifier =

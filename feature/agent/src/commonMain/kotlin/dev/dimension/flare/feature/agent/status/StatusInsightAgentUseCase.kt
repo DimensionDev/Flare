@@ -173,6 +173,7 @@ internal class StatusInsightAgentUseCase(
                         maxIterations = MAX_AGENT_ITERATIONS,
                         finishAfterToolResults = true,
                         chatMemoryWindowSize = CHAT_MEMORY_WINDOW_SIZE,
+                        supportingParts = listOfNotNull(toolContext.status?.currentPost?.let { AgentMessagePart.PostCard(it) }),
                         images =
                             toolContext.status
                                 ?.currentPost

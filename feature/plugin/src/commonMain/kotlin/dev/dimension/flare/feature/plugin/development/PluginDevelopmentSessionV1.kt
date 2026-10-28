@@ -11,7 +11,7 @@ import dev.dimension.flare.feature.plugin.installer.sensitivePermissions
 import dev.dimension.flare.feature.plugin.lifecycle.InstalledPluginV1
 import dev.dimension.flare.feature.plugin.lifecycle.PluginRuntimeSwitcherV1
 import dev.dimension.flare.feature.plugin.lifecycle.RunningPluginV1
-import dev.dimension.flare.feature.plugin.manifest.PluginTextV1
+import dev.dimension.flare.feature.plugin.manifest.fallbackText
 import dev.dimension.flare.model.PlatformRegistry
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
@@ -191,11 +191,7 @@ public class PluginDevelopmentSessionV1 internal constructor(
             mutableState.update {
                 it.copy(
                     pluginId = validated.manifest.id,
-                    name =
-                        when (val name = validated.manifest.name) {
-                            is PluginTextV1.Literal -> name.value
-                            is PluginTextV1.Localized -> name.fallback
-                        },
+                    name = validated.manifest.name.fallbackText,
                     candidateHash = source.hash,
                     error = null,
                 )

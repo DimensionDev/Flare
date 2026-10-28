@@ -175,6 +175,33 @@ class PluginManagementPresenterV1Test {
         }
 
     @Test
+    fun unrelatedUpdatesPreserveTheInstallReviewUntilCancellation() =
+        runTest {
+            val subsystem = subsystem()
+            val presenter = PluginManagementPresenterV1(subsystem, backgroundScope)
+            try {
+                presenter.inspect(packagePath.toString())
+                val review = assertNotNull(presenter.state.value.pendingInstall)
+
+                presenter.checkUpdates()
+                runCurrent()
+                assertEquals(review, presenter.state.value.pendingInstall)
+
+                presenter.createPlugin()
+                runCurrent()
+                assertEquals(review, presenter.state.value.pendingInstall)
+
+                presenter.cancelInstall()
+                runCurrent()
+                assertNull(presenter.state.value.pendingInstall)
+                assertFails { presenter.confirmInstall() }
+            } finally {
+                presenter.close()
+                subsystem.runtimePool.close()
+            }
+        }
+
+    @Test
     fun failedInspectionCannotLeaveAStalePreviewConfirmable() =
         runTest {
             val subsystem = subsystem()

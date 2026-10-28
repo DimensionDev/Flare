@@ -10,6 +10,7 @@ import dev.dimension.flare.feature.plugin.lifecycle.PluginCleanupResultV1
 import dev.dimension.flare.feature.plugin.lifecycle.PluginInstallSourceV1
 import dev.dimension.flare.feature.plugin.lifecycle.PluginStateStore
 import dev.dimension.flare.feature.plugin.manifest.PluginManifestV1
+import dev.dimension.flare.feature.plugin.manifest.fallbackText
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
@@ -116,17 +117,8 @@ public class PluginInstaller(
                 }
                 val preview =
                     PreparedPluginInstallV1(
-                        pluginId = validated.manifest.id,
-                        platformId = validated.manifest.platform.id,
-                        nameFallback = validated.manifest.name.fallback,
-                        version = validated.manifest.version,
                         packageHash = hash,
                         packageSize = packageSize,
-                        capabilities =
-                            validated.manifest.platform.capabilities.mapValues { (_, capability) ->
-                                capability.operations.keys
-                            },
-                        permissions = validated.manifest.sensitivePermissions(),
                         warnings = buildWarnings(validated.manifest, hash, existing, validated.warnings, installSource),
                         requiresConfirmation = existing?.packageHash != hash || existing.source != installSource,
                         existingVersion = existing?.version,
@@ -322,20 +314,23 @@ public class PluginInstaller(
 }
 
 public class PreparedPluginInstallV1 internal constructor(
-    public val pluginId: String,
-    public val platformId: String,
-    public val nameFallback: String,
-    public val version: String,
     public val packageHash: String,
     public val packageSize: Long,
-    public val capabilities: Map<String, Set<String>>,
-    public val permissions: Set<PluginPermission>,
     public val warnings: List<PluginInstallWarningV1>,
     public val requiresConfirmation: Boolean,
     public val existingVersion: String?,
     public val source: PluginInstallSourceV1,
     internal val validated: ValidatedPluginPackage,
-)
+) {
+    public val pluginId: String get() = validated.manifest.id
+    public val platformId: String get() = validated.manifest.platform.id
+    public val nameFallback: String get() = validated.manifest.name.fallbackText
+    public val version: String get() = validated.manifest.version
+    public val capabilities: Map<String, Set<String>> =
+        validated.manifest.platform.capabilities
+            .mapValues { (_, capability) -> capability.operations.keys }
+    public val permissions: Set<PluginPermission> = validated.manifest.sensitivePermissions()
+}
 
 public data class PluginInstallWarningV1(
     val type: PluginInstallWarningTypeV1,
@@ -478,13 +473,6 @@ private data class RecoveredPlugin(
         return version > 0 || (version == 0 && record.packageHash > other.record.packageHash)
     }
 }
-
-private val dev.dimension.flare.feature.plugin.manifest.PluginTextV1.fallback: String
-    get() =
-        when (this) {
-            is dev.dimension.flare.feature.plugin.manifest.PluginTextV1.Literal -> value
-            is dev.dimension.flare.feature.plugin.manifest.PluginTextV1.Localized -> fallback
-        }
 
 private const val COPY_BUFFER_BYTES = 8_192L
 private const val PACKAGE_SUFFIX = ".fpp"

@@ -1,7 +1,9 @@
 package dev.dimension.flare.feature.plugin.installer
 
 import dev.dimension.flare.data.model.PluginPermissionType
+import dev.dimension.flare.feature.plugin.abi.PluginJsonV1
 import dev.dimension.flare.feature.plugin.lifecycle.PluginIndexCorruptException
+import dev.dimension.flare.feature.plugin.lifecycle.PluginStateIndexV1
 import dev.dimension.flare.feature.plugin.lifecycle.PluginStateStore
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
@@ -46,6 +48,45 @@ class PluginInstallerTest {
     fun tearDown() {
         fileSystem.deleteRecursively(root, mustExist = false)
     }
+
+    @Test
+    fun invalidLocaleCatalogsAreRejectedAtImportAndStartup() =
+        runBlocking {
+            val manifest = TestFppFactory.validManifest.replace("\"Test plugin\"", """{"key":"name","fallback":"Test plugin"}""")
+            val entries = TestFppFactory.validEntries(manifest = manifest)
+            TestFppFactory.write(input, entries + ("locales/en.json" to """{"name":"Localized plugin"}""".encodeToByteArray()))
+            val preview = installer.inspect(input)
+            assertEquals("Test plugin", preview.nameFallback)
+            val installed = installer.commit(preview, confirmed = true)
+            val invalidCatalogs =
+                listOf(
+                    emptyMap(),
+                    mapOf("en" to emptyMap()),
+                    mapOf("invalid_tag" to mapOf("name" to "Name")),
+                    mapOf("en" to mapOf("name" to "Name"), "EN" to mapOf("name" to "Name")),
+                    mapOf("en" to mapOf("name" to " ")),
+                    mapOf("en" to mapOf("name" to "x".repeat(4_097))),
+                    mapOf("en" to mapOf("name" to "Name", "invalid key" to "Value")),
+                    mapOf("en" to (1..2_048).associate { "key$it" to "Value" } + ("name" to "Name")),
+                )
+            invalidCatalogs.forEach { catalogs ->
+                TestFppFactory.write(
+                    input,
+                    entries +
+                        catalogs.map { (locale, values) ->
+                            "locales/$locale.json" to PluginJsonV1.encodeToString(values).encodeToByteArray()
+                        },
+                )
+                assertFails { installer.inspect(input) }
+
+                val index = PluginStateIndexV1(plugins = listOf(installed.copy(catalogs = catalogs)))
+                fileSystem.write(stateStore.paths.index) { writeUtf8(PluginJsonV1.encodeToString(index)) }
+                val restarted = PluginStateStore.open(fileSystem, stateStore.paths.root)
+                assertFalse(restarted.desired.value.indexHealthy)
+                assertTrue(restarted.running.plugins.isEmpty())
+                assertTrue(fileSystem.exists(stateStore.paths.packagePath(installed.packageHash)))
+            }
+        }
 
     @Test
     fun installChangesDesiredOnlyUntilStoreIsReopened() =

@@ -70,16 +70,14 @@ internal fun PluginAuthoringCard(state: GenericChatPresenter.State) {
         }
         if (plugin.credentialsChanged) Text(stringResource(Res.string.plugin_ai_credentials_changed))
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            if (plugin.phase == PluginAuthoringPhase.AwaitingApproval) {
+            if (state.canApprovePlugin) {
                 Button(onClick = state::approvePlugin) { Text(stringResource(Res.string.plugin_ai_allow)) }
             }
-            if (state.room.isRunning ||
-                plugin.phase in listOf(PluginAuthoringPhase.AwaitingApproval, PluginAuthoringPhase.WaitingForOperations)
-            ) {
+            if (state.canStopPlugin) {
                 Button(onClick = state::stopPlugin) { Text(stringResource(Res.string.plugin_ai_stop)) }
             }
         }
-        if (plugin.revision > 0) {
+        if (state.canSetPluginEnabled) {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Switcher(checked = plugin.enabled, onCheckStateChange = state::setPluginEnabled)
                 Text(enabledLabel)

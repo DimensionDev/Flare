@@ -266,8 +266,8 @@ public class PluginRuntimePool(
         }
     }
 
-    private fun createRuntime(plugin: RunningPluginV1): RuntimeHandle =
-        RuntimeHandle(IsolatedPluginRuntime(plugin, loader, gateway.value, dispatcher))
+    private fun createRuntime(plugin: RunningPluginV1): IsolatedPluginRuntime =
+        IsolatedPluginRuntime(plugin, loader, gateway.value, dispatcher)
 
     private suspend fun handleFatal(
         pluginId: String,
@@ -365,27 +365,10 @@ public class PluginRuntimePool(
     }
 
     private class Holder(
-        val runtime: RuntimeHandle,
+        val runtime: IsolatedPluginRuntime,
         var activeCalls: Int = 0,
         var lastUsedMillis: Long = 0,
     )
-
-    private class RuntimeHandle(
-        private val value: IsolatedPluginRuntime,
-    ) {
-        val heapBytes: Long
-            get() = value.heapBytes
-
-        suspend fun invoke(
-            method: String,
-            request: JsonElement,
-            context: PluginInvocationContextV1,
-            timeout: PluginCallTimeoutV1,
-            validate: (JsonElement) -> Unit,
-        ): JsonElement = value.invoke(method, request, context, timeout, validate)
-
-        suspend fun close() = value.close()
-    }
 }
 
 public class PluginRuntimePausedException(

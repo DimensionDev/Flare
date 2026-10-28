@@ -673,14 +673,14 @@ private struct PluginAuthoringStatusView: View {
                         Text(pluginPermissionText(permission)).font(.caption)
                     }
                     HStack {
-                        if plugin.phase == .awaitingApproval {
+                        if state.canApprovePlugin {
                             Button("plugin_ai_allow", action: state.approvePlugin)
                         }
-                        if state.room.isRunning || plugin.phase == .awaitingApproval || plugin.phase == .waitingForOperations {
+                        if state.canStopPlugin {
                             Button("plugin_ai_stop", action: state.stopPlugin)
                         }
                     }
-                    if plugin.revision > 0 {
+                    if state.canSetPluginEnabled {
                         Toggle("plugin_ai_enabled", isOn: Binding(get: { plugin.enabled }, set: { state.setPluginEnabled(enabled: $0) }))
                     }
                 }

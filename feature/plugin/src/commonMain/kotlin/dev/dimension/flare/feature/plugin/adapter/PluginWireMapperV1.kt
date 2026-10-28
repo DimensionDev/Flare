@@ -98,7 +98,6 @@ internal class PluginWireMapperV1(
 
     fun profile(value: ProfileV1): UiProfile {
         value.requireValid()
-        value.requireSafeUrls()
         val key =
             MicroBlogKey(
                 id = value.key.id,
@@ -149,7 +148,6 @@ internal class PluginWireMapperV1(
 
     fun post(value: PostV1): UiTimelineV2.TimelinePostItem {
         value.requireValid()
-        value.requireSafeUrls()
         return UiTimelineV2.TimelinePostItem(
             post = value.toUiPost(),
             presentation = UiTimelineV2.PostPresentation(repost = value.repost?.toUiPost()),
@@ -513,22 +511,6 @@ private fun NotificationKindV1.toUiIcon(): UiIcon =
 
         NotificationKindV1.Other -> UiIcon.Notification
     }
-
-private fun ProfileV1.requireSafeUrls() {
-    avatarUrl.requireHttpsUrl()
-    bannerUrl.requireHttpsUrl()
-    url.requireHttpsUrl()
-}
-
-private fun PostV1.requireSafeUrls() {
-    url.requireHttpsUrl()
-    author.requireSafeUrls()
-    media.forEach { media ->
-        media.url.requireHttpsUrl()
-        media.previewUrl.requireHttpsUrl()
-    }
-    repost?.requireSafeUrls()
-}
 
 private fun String?.requireHttpsUrl() {
     if (isNullOrBlank()) return

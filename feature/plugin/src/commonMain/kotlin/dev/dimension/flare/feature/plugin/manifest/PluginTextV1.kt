@@ -32,6 +32,13 @@ public sealed interface PluginTextV1 {
     ) : PluginTextV1
 }
 
+internal val PluginTextV1.fallbackText: String
+    get() =
+        when (this) {
+            is PluginTextV1.Literal -> value
+            is PluginTextV1.Localized -> fallback
+        }
+
 public object PluginTextV1Serializer : KSerializer<PluginTextV1> {
     override val descriptor: SerialDescriptor =
         buildClassSerialDescriptor("PluginTextV1") {

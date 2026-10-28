@@ -132,7 +132,7 @@ internal class PluginDataSourceV1 private constructor(
                     ?.let { SearchCapability(this) },
             profile =
                 capability(PluginAbiV1.Capabilities.PROFILE)
-                    ?.takeIf { it.containsAll(PROFILE_LOOKUP_OPERATIONS) }
+                    ?.takeIf { PluginAbiV1.hasRequiredOperations(PluginAbiV1.Capabilities.PROFILE, it) }
                     ?.let { ProfileCapability(this, userDataSource) },
             post =
                 capability(PluginAbiV1.Capabilities.POST)
@@ -756,7 +756,11 @@ internal class PluginDataSourceV1 private constructor(
                         accountKey = accountKey,
                         mediaNetwork = plugin.installed.manifest.permissions.mediaNetwork,
                         originHost = Url(origin).accountHost(),
-                        profileAvailable = operations[PluginAbiV1.Capabilities.PROFILE].orEmpty().containsAll(PROFILE_LOOKUP_OPERATIONS),
+                        profileAvailable =
+                            PluginAbiV1.hasRequiredOperations(
+                                PluginAbiV1.Capabilities.PROFILE,
+                                operations[PluginAbiV1.Capabilities.PROFILE].orEmpty(),
+                            ),
                         postDetailAvailable = "detail" in operations[PluginAbiV1.Capabilities.POST].orEmpty(),
                         articleDetailAvailable =
                             PluginAbiV1.hasRequiredOperations(
@@ -780,8 +784,6 @@ internal class PluginDataSourceV1 private constructor(
             )
     }
 }
-
-private val PROFILE_LOOKUP_OPERATIONS = setOf("byId", "byHandle")
 
 internal interface PluginNamedTimelineDataSourceV1 {
     fun timeline(

@@ -11,6 +11,7 @@ import dev.dimension.flare.data.repository.AccountMicroblogDataSource
 import dev.dimension.flare.data.repository.AccountService
 import dev.dimension.flare.data.repository.AuthoredPlugin
 import dev.dimension.flare.data.repository.PluginAuthoring
+import dev.dimension.flare.data.repository.PluginAuthoringPhase
 import dev.dimension.flare.data.repository.authoredPluginId
 import dev.dimension.flare.di.koinGet
 import dev.dimension.flare.di.koinInject
@@ -45,6 +46,21 @@ public class GenericChatPresenter(
         public val input: String
         public val canSend: Boolean
         public val plugin: AuthoredPlugin?
+        public val canApprovePlugin: Boolean get() = plugin?.phase == PluginAuthoringPhase.AwaitingApproval
+        public val canStopPlugin: Boolean
+            get() =
+                plugin?.let {
+                    room.isRunning ||
+                        when (it.phase) {
+                            PluginAuthoringPhase.Validating,
+                            PluginAuthoringPhase.AwaitingApproval,
+                            PluginAuthoringPhase.WaitingForOperations,
+                            -> true
+
+                            else -> false
+                        }
+                } == true
+        public val canSetPluginEnabled: Boolean get() = (plugin?.revision ?: 0) > 0
 
         public fun approvePlugin()
 

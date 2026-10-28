@@ -19,7 +19,7 @@ import dev.dimension.flare.feature.plugin.installer.sensitivePermissions
 import dev.dimension.flare.feature.plugin.lifecycle.InstalledPluginV1
 import dev.dimension.flare.feature.plugin.lifecycle.PluginRuntimeSwitcherV1
 import dev.dimension.flare.feature.plugin.lifecycle.RunningPluginV1
-import dev.dimension.flare.feature.plugin.manifest.PluginTextV1
+import dev.dimension.flare.feature.plugin.manifest.fallbackText
 import dev.dimension.flare.feature.plugin.runtime.PluginSessionBusyException
 import dev.dimension.flare.model.PlatformRegistry
 import kotlinx.coroutines.CancellationException
@@ -482,12 +482,7 @@ internal class PluginAuthoringServiceV1(
         entry: Entry,
         candidate: Candidate,
     ) {
-        val name =
-            when (val text = candidate.validated.manifest.name) {
-                is PluginTextV1.Literal -> text.value
-                is PluginTextV1.Localized -> text.fallback
-            }
-        val record = entry.record.copy(name = name)
+        val record = entry.record.copy(name = candidate.validated.manifest.name.fallbackText)
         save(record)
         entry.record = record
         entry.candidate = candidate

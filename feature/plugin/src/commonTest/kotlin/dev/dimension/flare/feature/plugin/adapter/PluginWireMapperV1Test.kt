@@ -40,6 +40,27 @@ class PluginWireMapperV1Test {
         )
 
     @Test
+    fun unsafeProfileAndNestedPostUrlsAreRejectedBeforeMapping() {
+        listOf("http://remote.example/asset", "https://user:secret@remote.example/asset", "javascript:alert(1)").forEach { url ->
+            listOf(
+                post.author.copy(avatarUrl = url),
+                post.author.copy(bannerUrl = url),
+                post.author.copy(url = url),
+            ).forEach { profile ->
+                assertFailsWith<IllegalArgumentException>(url) { mapper.profile(profile) }
+                assertFailsWith<IllegalArgumentException>(url) { mapper.post(post.copy(repost = post.copy(author = profile))) }
+            }
+            listOf(
+                post.copy(url = url),
+                post.copy(media = listOf(MediaV1("image", MediaTypeV1.Image, url))),
+                post.copy(media = listOf(MediaV1("image", MediaTypeV1.Image, "https://remote.example/image", previewUrl = url))),
+            ).forEach { nested ->
+                assertFailsWith<IllegalArgumentException>(url) { mapper.post(post.copy(repost = nested)) }
+            }
+        }
+    }
+
+    @Test
     fun notificationsForTheSamePostKeepTheirIdentityActorAndTime() {
         val actor = post.author.copy(key = EntityKeyV1("reactor", "remote.example"))
         val notification =

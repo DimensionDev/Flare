@@ -13,7 +13,7 @@ import dev.dimension.flare.feature.plugin.installer.compareSemVer
 import dev.dimension.flare.feature.plugin.lifecycle.InstalledPluginV1
 import dev.dimension.flare.feature.plugin.lifecycle.PluginInstallSourceV1
 import dev.dimension.flare.feature.plugin.lifecycle.PluginStateIssueV1
-import dev.dimension.flare.feature.plugin.manifest.PluginTextV1
+import dev.dimension.flare.feature.plugin.manifest.fallbackText
 import dev.dimension.flare.feature.plugin.manifest.toUiText
 import dev.dimension.flare.feature.plugin.runtime.PluginRuntimeIssueV1
 import dev.dimension.flare.ui.model.UiText
@@ -91,10 +91,10 @@ public class PluginManagementPresenterV1(
     private var githubCatalog: GitHubPluginCatalogV1? = null
     private val updates = mutableMapOf<String, GitHubPluginVersionV1>()
     private var updatesChecked = false
+    private var preview: PreparedPluginInstallV1? = null
     private val mutableState = MutableStateFlow(snapshot())
     public val state: StateFlow<PluginManagementStateV1> = mutableState.asStateFlow()
 
-    private var preview: PreparedPluginInstallV1? = null
     private val actionMutex = subsystem.mutationMutex
 
     private val observation: Job =
@@ -104,13 +104,12 @@ public class PluginManagementPresenterV1(
             subsystem.runtimePool.issues,
             subsystem.running,
             subsystem.developmentState,
-        ) { _, _, _, _, _ -> snapshot() }
-            .combine(subsystem.authoring.plugins) { _, _ -> snapshot() }
-            .onEach { snapshot ->
+        ) { _, _, _, _, _ -> Unit }
+            .combine(subsystem.authoring.plugins) { _, _ -> Unit }
+            .onEach {
                 val current = mutableState.value
                 mutableState.value =
-                    snapshot.copy(
-                        pendingInstall = current.pendingInstall,
+                    snapshot().copy(
                         busy = current.busy,
                         error = current.error,
                     )
@@ -191,7 +190,7 @@ public class PluginManagementPresenterV1(
         val source = PluginInstallSourceV1.GitHub(catalog.repository, version.tag, version.commitSha)
         val prepared = subsystem.installer.inspect(Buffer().write(bytes), source, expectedPluginId)
         preview = prepared
-        mutableState.value = snapshot().copy(pendingInstall = prepared.toReview())
+        mutableState.value = snapshot()
     }
 
     @HiddenFromObjC
@@ -202,7 +201,7 @@ public class PluginManagementPresenterV1(
                 .inspect(source)
                 .also { prepared ->
                     preview = prepared
-                    mutableState.value = snapshot().copy(pendingInstall = prepared.toReview())
+                    mutableState.value = snapshot()
                 }.toReview()
         }
 
@@ -213,7 +212,7 @@ public class PluginManagementPresenterV1(
                 .inspect(path.toPath())
                 .also { prepared ->
                     preview = prepared
-                    mutableState.value = snapshot().copy(pendingInstall = prepared.toReview())
+                    mutableState.value = snapshot()
                 }.toReview()
         }
 
@@ -323,6 +322,7 @@ public class PluginManagementPresenterV1(
             canRebuildIndex = !desired.indexHealthy,
             githubCatalog = githubCatalog,
             updatesChecked = updatesChecked,
+            pendingInstall = preview?.toReview(),
         )
     }
 
@@ -336,7 +336,8 @@ public class PluginManagementPresenterV1(
     private suspend fun clearPreview() {
         val previous = preview
         preview = null
-        mutableState.value = mutableState.value.copy(pendingInstall = null)
+        val current = mutableState.value
+        mutableState.value = snapshot().copy(busy = current.busy, error = current.error)
         if (previous != null) subsystem.installer.discard(previous)
     }
 
@@ -376,7 +377,7 @@ private fun InstalledPluginV1.toItem(
     PluginManagementItemV1(
         pluginId = pluginId,
         platformId = manifest.platform.id,
-        name = manifest.name.fallbackValue(),
+        name = manifest.name.fallbackText,
         nameText = manifest.name.toUiText(pluginId),
         version = version,
         enabled = enabled,
@@ -388,12 +389,6 @@ private fun InstalledPluginV1.toItem(
         sourceUrl = (source as? PluginInstallSourceV1.GitHub)?.repository?.url,
         availableUpdate = availableUpdate,
     )
-
-private fun PluginTextV1.fallbackValue(): String =
-    when (this) {
-        is PluginTextV1.Literal -> value
-        is PluginTextV1.Localized -> fallback
-    }
 
 private fun PreparedPluginInstallV1.toReview(): PluginInstallReviewV1 =
     PluginInstallReviewV1(

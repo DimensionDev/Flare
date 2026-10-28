@@ -65,13 +65,9 @@ public class PluginOAuthLoginCoordinatorV1(
         methodId: String,
         origin: String,
         locale: String,
-        values: Map<String, String> = emptyMap(),
         expectedAccountId: String? = null,
     ): PluginOAuthStartV1 {
         plugin.requireLoginMethod(methodId, LoginInteractionV1.OAuth)
-        require(values.size <= 32 && values.all { (key, value) -> FIELD_ID.matches(key) && value.length <= 16_384 }) {
-            "Invalid OAuth login values"
-        }
         val canonicalOrigin = PluginUrlPolicy.requireOrigin(origin)
         val flowId = entropy.newFlowId()
         val state = entropy.newState()
@@ -93,7 +89,6 @@ public class PluginOAuthLoginCoordinatorV1(
                             flowId = flowId,
                             state = state,
                             redirectUri = redirectUri,
-                            values = values,
                         ),
                     requestSerializer = LoginBeginRequestV1.serializer(),
                     responseSerializer = LoginTransitionV1.serializer(),
@@ -146,11 +141,6 @@ public class PluginOAuthLoginCoordinatorV1(
     internal suspend fun cancelPlugin(pluginId: String) {
         pendingStore.removePlugin(pluginId)
     }
-
-    public suspend fun resume(
-        callbackUrl: String,
-        locale: String,
-    ): LoginSuccessV1 = resumeResult(callbackUrl, locale).success
 
     internal suspend fun resumeResult(
         callbackUrl: String,

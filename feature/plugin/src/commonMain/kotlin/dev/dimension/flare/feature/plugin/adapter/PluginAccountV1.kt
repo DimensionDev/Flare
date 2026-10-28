@@ -8,7 +8,7 @@ import dev.dimension.flare.feature.plugin.host.PluginInvocationContextV1
 import dev.dimension.flare.feature.plugin.host.PluginUrlPolicy
 import dev.dimension.flare.feature.plugin.host.accountHost
 import dev.dimension.flare.feature.plugin.lifecycle.RunningPluginV1
-import dev.dimension.flare.feature.plugin.manifest.PluginTextV1
+import dev.dimension.flare.feature.plugin.manifest.fallbackText
 import dev.dimension.flare.feature.plugin.manifest.toUiText
 import dev.dimension.flare.feature.plugin.wire.AccountPluginSnapshotV1
 import dev.dimension.flare.feature.plugin.wire.LoginSuccessV1
@@ -110,13 +110,6 @@ private fun RunningPluginV1.stableAccountIconUrl(): String? =
         }
         "file://$target"
     }.getOrNull()
-
-private val PluginTextV1.fallbackText: String
-    get() =
-        when (this) {
-            is PluginTextV1.Literal -> value
-            is PluginTextV1.Localized -> fallback
-        }
 
 internal fun PluginAccountCredentialV1.requireValid(plugin: RunningPluginV1) {
     val manifest = plugin.installed.manifest

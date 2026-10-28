@@ -118,7 +118,7 @@ internal class PluginExtraCapabilitiesV1(
 
     val relation: RelationDataSource? by lazy {
         accountKey
-            ?.takeIf { hasAll(PluginAbiV1.Capabilities.RELATION, "state", "mutate") }
+            ?.takeIf { hasRequiredOperations(PluginAbiV1.Capabilities.RELATION) }
             ?.let { RelationAdapter(it) }
     }
 
@@ -136,7 +136,7 @@ internal class PluginExtraCapabilitiesV1(
 
     internal val listAdapter: ListAdapter? by lazy {
         val account = accountKey ?: return@lazy null
-        if (!hasAll(PluginAbiV1.Capabilities.LIST, *LIST_OPERATIONS)) return@lazy null
+        if (!hasRequiredOperations(PluginAbiV1.Capabilities.LIST)) return@lazy null
         ListAdapter(account)
     }
 
@@ -145,19 +145,19 @@ internal class PluginExtraCapabilitiesV1(
     internal val directMessageAdapter: DirectMessageAdapter? by lazy {
         val account = accountKey ?: return@lazy null
         val scope = coroutineScope ?: return@lazy null
-        if (!hasAll(PluginAbiV1.Capabilities.DIRECT_MESSAGE, *DIRECT_MESSAGE_OPERATIONS)) return@lazy null
+        if (!hasRequiredOperations(PluginAbiV1.Capabilities.DIRECT_MESSAGE)) return@lazy null
         DirectMessageAdapter(account, scope)
     }
 
     val directMessage: DirectMessageDataSource? get() = directMessageAdapter
 
     val article: ArticleDataSource? by lazy {
-        if (!hasAll(PluginAbiV1.Capabilities.ARTICLE, "detail", "comments")) return@lazy null
+        if (!hasRequiredOperations(PluginAbiV1.Capabilities.ARTICLE)) return@lazy null
         ArticleAdapter()
     }
 
     val gallery: GalleryDataSource? by lazy {
-        if (!hasAll(PluginAbiV1.Capabilities.GALLERY, "detail", "comments", "recommendations")) return@lazy null
+        if (!hasRequiredOperations(PluginAbiV1.Capabilities.GALLERY)) return@lazy null
         GalleryAdapter()
     }
 
@@ -839,10 +839,8 @@ internal class PluginExtraCapabilitiesV1(
         operation: String,
     ): Boolean = operation in operations[capability].orEmpty()
 
-    private fun hasAll(
-        capability: String,
-        vararg required: String,
-    ): Boolean = operations[capability].orEmpty().containsAll(required.asList())
+    private fun hasRequiredOperations(capability: String): Boolean =
+        PluginAbiV1.hasRequiredOperations(capability, operations[capability].orEmpty())
 }
 
 @kotlinx.serialization.Serializable
@@ -885,7 +883,3 @@ private fun <Wire : Any, Ui : Any> PageV1<Wire>.toPagingResult(map: (Wire) -> Ui
         nextKey = olderCursor.takeUnless { endReached },
         previousKey = newerCursor,
     )
-
-private val LIST_OPERATIONS =
-    arrayOf("page", "detail", "create", "update", "delete", "timeline", "members", "memberships", "addMember", "removeMember")
-private val DIRECT_MESSAGE_OPERATIONS = arrayOf("rooms", "room", "messages", "send", "delete", "leave", "create", "badge", "canSend")

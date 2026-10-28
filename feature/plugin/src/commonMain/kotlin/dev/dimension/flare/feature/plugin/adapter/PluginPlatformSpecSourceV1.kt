@@ -31,8 +31,8 @@ import dev.dimension.flare.feature.plugin.manifest.DeepLinkTargetTypeV1
 import dev.dimension.flare.feature.plugin.manifest.LoginFieldTypeV1
 import dev.dimension.flare.feature.plugin.manifest.LoginInteractionV1
 import dev.dimension.flare.feature.plugin.manifest.LoginMethodManifestV1
-import dev.dimension.flare.feature.plugin.manifest.PluginTextV1
 import dev.dimension.flare.feature.plugin.manifest.TimelineManifestV1
+import dev.dimension.flare.feature.plugin.manifest.fallbackText
 import dev.dimension.flare.feature.plugin.manifest.toUiText
 import dev.dimension.flare.feature.plugin.runtime.PluginRuntimeKeyV1
 import dev.dimension.flare.feature.plugin.runtime.PluginRuntimePool
@@ -251,35 +251,40 @@ private class PluginPlatformSpecV1(
             override suspend fun detect(host: String): NodeDetection? {
                 if (platform.detector == null) return null
                 val origin = host.toHttpsOrigin()
-                val result =
-                    runtimePool.invoke(
-                        plugin = plugin,
-                        key = PluginRuntimeKeyV1.detector(manifest.id, plugin.installed.packageHash, platformUuid()),
-                        context =
-                            PluginInvocationContextV1.detector(
-                                pluginId = manifest.id,
-                                platformId = platformId,
-                                packageHash = plugin.installed.packageHash,
-                                candidateOrigin = origin,
-                                locale = Locale.language,
-                            ),
-                        method = "detector.detect",
-                        request = DetectorRequestV1(origin),
-                        requestSerializer = DetectorRequestV1.serializer(),
-                        responseSerializer = DetectorResultV1.serializer(),
-                        timeout = PluginCallTimeoutV1.Detector,
-                        validate = DetectorResultV1::requireValid,
-                    )
+                val result = invokeDetector(origin, PluginCallTimeoutV1.Detector)
                 if (result.match == DetectorMatchV1.None) return null
                 val canonicalOrigin = PluginUrlPolicy.requireOrigin(result.canonicalOrigin)
                 require(canonicalOrigin == origin) { "Detector changed the selected instance origin" }
                 return NodeDetection(
                     host = Url(canonicalOrigin).accountHost(),
-                    software = result.software ?: platform.name.fallback,
+                    software = result.software ?: platform.name.fallbackText,
                     compatibleMode = result.compatibleMode,
                 )
             }
         }
+
+    private suspend fun invokeDetector(
+        origin: String,
+        timeout: PluginCallTimeoutV1,
+    ): DetectorResultV1 =
+        runtimePool.invoke(
+            plugin = plugin,
+            key = PluginRuntimeKeyV1.detector(manifest.id, plugin.installed.packageHash, platformUuid()),
+            context =
+                PluginInvocationContextV1.detector(
+                    pluginId = manifest.id,
+                    platformId = platformId,
+                    packageHash = plugin.installed.packageHash,
+                    candidateOrigin = origin,
+                    locale = Locale.language,
+                ),
+            method = "detector.detect",
+            request = DetectorRequestV1(origin),
+            requestSerializer = DetectorRequestV1.serializer(),
+            responseSerializer = DetectorResultV1.serializer(),
+            timeout = timeout,
+            validate = DetectorResultV1::requireValid,
+        )
 
     override val methods: List<LoginMethodSpec> =
         platform.loginMethods.map { method ->
@@ -299,25 +304,7 @@ private class PluginPlatformSpecV1(
             if (platform.detector == null) {
                 null
             } else {
-                val result =
-                    runtimePool
-                        .invoke(
-                            plugin = plugin,
-                            key = PluginRuntimeKeyV1.detector(manifest.id, plugin.installed.packageHash, platformUuid()),
-                            context =
-                                PluginInvocationContextV1.detector(
-                                    pluginId = manifest.id,
-                                    platformId = platformId,
-                                    packageHash = plugin.installed.packageHash,
-                                    candidateOrigin = origin,
-                                    locale = Locale.language,
-                                ),
-                            method = "detector.detect",
-                            request = DetectorRequestV1(origin),
-                            requestSerializer = DetectorRequestV1.serializer(),
-                            responseSerializer = DetectorResultV1.serializer(),
-                            validate = DetectorResultV1::requireValid,
-                        )
+                val result = invokeDetector(origin, PluginCallTimeoutV1.Normal)
                 require(PluginUrlPolicy.requireOrigin(result.canonicalOrigin) == origin) {
                     "Detector changed the selected instance origin"
                 }
@@ -793,13 +780,6 @@ private fun LoginFieldTypeV1.toLoginFieldType(): LoginFieldType =
 
         LoginFieldTypeV1.Otp -> LoginFieldType.OtpInput
     }
-
-private val PluginTextV1.fallback: String
-    get() =
-        when (this) {
-            is PluginTextV1.Literal -> value
-            is PluginTextV1.Localized -> fallback
-        }
 
 private fun String.toHttpsOrigin(): String =
     PluginUrlPolicy.requireOrigin(

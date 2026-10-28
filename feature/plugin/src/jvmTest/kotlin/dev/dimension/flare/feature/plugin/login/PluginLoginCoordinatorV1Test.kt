@@ -91,12 +91,12 @@ class PluginLoginCoordinatorV1Test {
                 consumed.complete(Unit)
                 release.await()
             }
-            val callback = async { oauthCoordinator().resume("${pluginOAuthRedirectUri(start.flowId)}?code=ok&state=$STATE", "en") }
+            val callback = async { oauthCoordinator().resumeResult("${pluginOAuthRedirectUri(start.flowId)}?code=ok&state=$STATE", "en") }
             consumed.await()
             assertNull(pendingStore.load(start.flowId))
             assertFailsWith<IllegalStateException> { plugin.session.retire(protectInteractions = true) }
             release.complete(Unit)
-            assertEquals(ACCOUNT_ID, callback.await().accountId)
+            assertEquals(ACCOUNT_ID, callback.await().success.accountId)
             plugin.session.retire(protectInteractions = true)
             assertFalse(plugin.session.isActive)
         }
@@ -129,7 +129,7 @@ class PluginLoginCoordinatorV1Test {
                     assertIs<PluginOAuthStartV1.ExternalBrowser>(
                         oauthCoordinator().begin(plugin, "oauth", ORIGIN, "en", expectedAccountId = expectedAccountId),
                     )
-                oauthCoordinator().resume("${pluginOAuthRedirectUri(start.flowId)}?code=ok&state=$STATE", "en")
+                oauthCoordinator().resumeResult("${pluginOAuthRedirectUri(start.flowId)}?code=ok&state=$STATE", "en")
                 PluginFormLoginCoordinatorV1(pool, FixedEntropy)
                     .login(plugin, "form", ORIGIN, "en", mapOf("token" to "secret"), expectedAccountId)
                 val cookie = PluginWebCookieLoginCoordinatorV1(pool, FixedEntropy).begin(plugin, "cookie", ORIGIN, "en", expectedAccountId)
@@ -153,7 +153,7 @@ class PluginLoginCoordinatorV1Test {
 
             val recreated = oauthCoordinator()
             val callback = "${pluginOAuthRedirectUri(start.flowId)}?code=ok&state=$STATE"
-            val success = recreated.resume(callback, "en")
+            val success = recreated.resumeResult(callback, "en").success
             assertEquals(ACCOUNT_ID, success.accountId)
             assertEquals(
                 "oauth",
@@ -162,7 +162,7 @@ class PluginLoginCoordinatorV1Test {
                     ?.content,
             )
             assertNull(pendingStore.load(start.flowId))
-            assertEquals("oauth.missing", assertFailsWith<PluginLoginException> { recreated.resume(callback, "en") }.code)
+            assertEquals("oauth.missing", assertFailsWith<PluginLoginException> { recreated.resumeResult(callback, "en") }.code)
         }
 
     @Test
@@ -308,11 +308,11 @@ class PluginLoginCoordinatorV1Test {
             assertEquals(
                 "oauth.state",
                 assertFailsWith<PluginLoginException> {
-                    coordinator.resume("$redirect?code=ok&state=${"0".repeat(64)}", "en")
+                    coordinator.resumeResult("$redirect?code=ok&state=${"0".repeat(64)}", "en")
                 }.code,
             )
             assertTrue(pendingStore.load(start.flowId) != null)
-            assertEquals(ACCOUNT_ID, coordinator.resume("$redirect?code=ok&state=$STATE", "en").accountId)
+            assertEquals(ACCOUNT_ID, coordinator.resumeResult("$redirect?code=ok&state=$STATE", "en").success.accountId)
         }
 
     @Test
@@ -324,7 +324,7 @@ class PluginLoginCoordinatorV1Test {
             assertEquals(
                 "oauth.package",
                 assertFailsWith<PluginLoginException> {
-                    coordinator.resume("${pluginOAuthRedirectUri(start.flowId)}?code=ok&state=$STATE", "en")
+                    coordinator.resumeResult("${pluginOAuthRedirectUri(start.flowId)}?code=ok&state=$STATE", "en")
                 }.code,
             )
             assertNull(pendingStore.load(start.flowId))
@@ -339,7 +339,7 @@ class PluginLoginCoordinatorV1Test {
             assertEquals(
                 "oauth.expired",
                 assertFailsWith<PluginLoginException> {
-                    coordinator.resume("${pluginOAuthRedirectUri(expired.flowId)}?state=$STATE", "en")
+                    coordinator.resumeResult("${pluginOAuthRedirectUri(expired.flowId)}?state=$STATE", "en")
                 }.code,
             )
             assertNull(pendingStore.load(expired.flowId))
@@ -350,7 +350,7 @@ class PluginLoginCoordinatorV1Test {
             assertEquals(
                 "oauth.package",
                 assertFailsWith<PluginLoginException> {
-                    missingPluginCoordinator.resume("${pluginOAuthRedirectUri(changed.flowId)}?state=$STATE", "en")
+                    missingPluginCoordinator.resumeResult("${pluginOAuthRedirectUri(changed.flowId)}?state=$STATE", "en")
                 }.code,
             )
             assertNull(pendingStore.load(changed.flowId))
@@ -365,7 +365,7 @@ class PluginLoginCoordinatorV1Test {
                     oauth.begin(plugin, "oauth", ORIGIN, "en", expectedAccountId = "different"),
                 )
             assertFailsWith<IllegalArgumentException> {
-                oauth.resume("${pluginOAuthRedirectUri(start.flowId)}?state=$STATE", "en")
+                oauth.resumeResult("${pluginOAuthRedirectUri(start.flowId)}?state=$STATE", "en")
             }
 
             val forms = PluginFormLoginCoordinatorV1(pool, FixedEntropy)

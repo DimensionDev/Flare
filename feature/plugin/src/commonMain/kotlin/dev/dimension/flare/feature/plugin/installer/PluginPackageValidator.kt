@@ -1,7 +1,6 @@
 package dev.dimension.flare.feature.plugin.installer
 
 import dev.dimension.flare.feature.plugin.abi.PluginJsonV1
-import dev.dimension.flare.feature.plugin.manifest.PluginCatalogBundleV1
 import dev.dimension.flare.feature.plugin.manifest.PluginManifestV1
 import dev.dimension.flare.feature.plugin.manifest.PluginTextV1
 import dev.dimension.flare.feature.plugin.manifest.isValidLocaleTag
@@ -58,15 +57,7 @@ internal class PluginPackageValidator(
                 val name = path.removePrefix(FppPaths.LOCALE_PREFIX)
                 require('/' !in name && name.endsWith(".json")) { "Invalid locale catalog path: $path" }
                 val locale = name.removeSuffix(".json")
-                require(isValidLocaleTag(locale)) { "Invalid locale tag: $locale" }
                 val values = PluginJsonV1.decodeFromString<Map<String, String>>(decodeUtf8(bytes, path))
-                require(values.size <= MAX_CATALOG_KEYS) { "Too many strings in $path" }
-                values.forEach { (key, value) ->
-                    require(CATALOG_KEY.matches(key)) { "Invalid localization key in $path: $key" }
-                    require(value.isNotBlank() && value.length <= MAX_CATALOG_VALUE_LENGTH) {
-                        "Invalid localized value in $path: $key"
-                    }
-                }
                 locale to values
             }.toMap()
 }
@@ -100,9 +91,6 @@ internal fun validatePluginCatalogs(
         val missing = requiredKeys - defaultCatalog.keys
         require(missing.isEmpty()) { "Default locale is missing keys: ${missing.sorted().joinToString()}" }
     }
-
-    // Constructing the bundle here also guarantees the exact persisted shape remains decodable.
-    PluginCatalogBundleV1(manifest.id, manifest.defaultLocale, catalogs)
 }
 
 private fun decodeUtf8(

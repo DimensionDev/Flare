@@ -56,6 +56,10 @@ public class PluginAppleFacadeV1 : PresenterBase<PluginManagementStateV1>() {
     @Throws(Exception::class)
     public suspend fun inspect(path: String): PluginInstallReviewV1 = presenter.inspect(path)
 
+    public fun reportOperationFailure() {
+        presenter.reportOperationFailure()
+    }
+
     public fun clearGitHubRepository() {
         presenter.clearGitHubRepository()
     }

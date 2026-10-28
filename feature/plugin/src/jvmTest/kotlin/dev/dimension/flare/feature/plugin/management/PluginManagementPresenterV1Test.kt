@@ -96,6 +96,54 @@ class PluginManagementPresenterV1Test {
         }
 
     @Test
+    fun appleFailuresClearAfterSuccessfulManagementActions() =
+        runTest {
+            val subsystem = subsystem()
+            val appScope = CoroutineScope(SupervisorJob() + StandardTestDispatcher(testScheduler))
+            startKoin {
+                modules(
+                    module {
+                        single { subsystem }
+                        single<CoroutineScope> { appScope }
+                    },
+                )
+            }
+            val facade = PluginAppleFacadeV1()
+            val states = mutableListOf<PluginManagementStateV1>()
+            val collection = backgroundScope.launch { facade.moleculeFlow.collect { states += it } }
+            try {
+                runCurrent()
+                facade.reportOperationFailure()
+                runCurrent()
+                assertNotNull(states.last().error)
+
+                facade.checkUpdates(forceRefresh = false)
+                runCurrent()
+                assertNull(states.last().error)
+
+                assertFails { facade.inspect((root / "missing.fpp").toString()) }
+                runCurrent()
+                assertNotNull(states.last().error)
+
+                facade.createPlugin()
+                runCurrent()
+                assertNull(states.last().error)
+                assertEquals(1, states.last().authoredPlugins.size)
+
+                facade.reportOperationFailure()
+                facade.inspect(packagePath.toString())
+                runCurrent()
+                assertNull(states.last().error)
+                assertNotNull(states.last().pendingInstall)
+            } finally {
+                collection.cancelAndJoin()
+                appScope.cancel()
+                stopKoin()
+                subsystem.runtimePool.close()
+            }
+        }
+
+    @Test
     fun authoredRowsReplaceInstalledRowsWithoutLosingInstalledMetadata() =
         runTest {
             val subsystem = subsystem()

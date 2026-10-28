@@ -18,7 +18,6 @@ public struct PluginManagementView: View {
     @State private var showsGitHubInstall = false
     @State private var gitHubURL = ""
     @State private var selectedGitHubTag = ""
-    @State private var fileError: String?
     @State private var pendingUninstallId: String?
     @State private var pendingUninstallName: String?
     #if os(macOS)
@@ -35,8 +34,7 @@ public struct PluginManagementView: View {
         List {
             Button("plugin_ai_create") {
                 Task {
-                    do { createdPluginConversation = try await facade.createPlugin() }
-                    catch { fileError = error.localizedDescription }
+                    createdPluginConversation = try? await facade.createPlugin()
                 }
             }
             ForEach(presenter.state.authoredPlugins, id: \.id) { plugin in
@@ -71,13 +69,11 @@ public struct PluginManagementView: View {
                 }
             }
 
-            if presenter.state.error != nil || fileError != nil {
+            if let error = presenter.state.error {
                 Section {
                     Label("plugin_operation_failed", systemImage: "exclamationmark.triangle")
                         .foregroundStyle(.red)
-                    if let error = presenter.state.error {
-                        Text(String(error.prefix(512))).font(.caption)
-                    }
+                    Text(String(error.prefix(512))).font(.caption)
                 }
             }
 
@@ -444,10 +440,9 @@ public struct PluginManagementView: View {
     private func importPlugin(_ result: Result<[URL], Error>) {
         switch result {
         case .failure:
-            fileError = String(localized: "plugin_operation_failed")
+            facade.reportOperationFailure()
         case .success(let urls):
             guard let url = urls.first else { return }
-            fileError = nil
             Task { @MainActor in
                 let accessed = url.startAccessingSecurityScopedResource()
                 defer {
@@ -455,11 +450,7 @@ public struct PluginManagementView: View {
                         url.stopAccessingSecurityScopedResource()
                     }
                 }
-                do {
-                    _ = try await facade.inspect(path: url.path(percentEncoded: false))
-                } catch {
-                    fileError = String(localized: "plugin_operation_failed")
-                }
+                _ = try? await facade.inspect(path: url.path(percentEncoded: false))
             }
         }
     }

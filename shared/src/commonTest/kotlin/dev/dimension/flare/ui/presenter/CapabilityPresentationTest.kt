@@ -1,7 +1,5 @@
 package dev.dimension.flare.ui.presenter
 
-import dev.dimension.flare.data.datasource.microblog.ArticleCapability
-import dev.dimension.flare.data.datasource.microblog.ComposeCapability
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.datasource.microblog.ComposeDataSource
@@ -93,33 +91,29 @@ private class CapabilityOnlySource(
     override val capabilitySet: DataSourceCapabilitySet by lazy {
         DataSourceCapabilitySet(
             article =
-                ArticleCapability(
-                    object : ArticleDataSource {
-                        override suspend fun article(articleKey: MicroBlogKey) =
-                            UiArticle(
-                                key = articleKey.id,
-                                title = "Article",
-                                content = uiArticleContentOf(emptyList()),
-                                cover = UiMedia.Image("https://cdn.example/cover.png"),
-                                author = UiArticleAuthor.Profile(loginProfile),
-                            )
+                object : ArticleDataSource {
+                    override suspend fun article(articleKey: MicroBlogKey) =
+                        UiArticle(
+                            key = articleKey.id,
+                            title = "Article",
+                            content = uiArticleContentOf(emptyList()),
+                            cover = UiMedia.Image("https://cdn.example/cover.png"),
+                            author = UiArticleAuthor.Profile(loginProfile),
+                        )
 
-                        override fun articleComments(articleKey: MicroBlogKey): RemoteLoader<UiTimelineV2> = error("Unused")
-                    },
-                ),
+                    override fun articleComments(articleKey: MicroBlogKey): RemoteLoader<UiTimelineV2> = error("Unused")
+                },
             compose =
-                ComposeCapability(
-                    object : ComposeDataSource, MicroblogDataSource by this {
-                        override val accountKey = loginProfile.key
+                object : ComposeDataSource, MicroblogDataSource by this {
+                    override val accountKey = loginProfile.key
 
-                        override fun composeConfig(type: ComposeType) = ComposeConfig()
+                    override fun composeConfig(type: ComposeType) = ComposeConfig()
 
-                        override suspend fun publish(
-                            data: ComposeData,
-                            progress: () -> Unit,
-                        ) = Unit
-                    },
-                ),
+                    override suspend fun publish(
+                        data: ComposeData,
+                        progress: () -> Unit,
+                    ) = Unit
+                },
         )
     }
 

@@ -1,25 +1,22 @@
 package dev.dimension.flare.feature.plugin.development
 
+import dev.dimension.flare.data.model.PluginPermission
 import dev.dimension.flare.data.repository.AccountService
 import dev.dimension.flare.feature.plugin.PluginSubsystemV1
-import dev.dimension.flare.feature.plugin.adapter.PluginPlatformSpecSourceV1
 import dev.dimension.flare.feature.plugin.installer.FppPaths
 import dev.dimension.flare.feature.plugin.installer.PluginDevelopmentSourceV1
 import dev.dimension.flare.feature.plugin.installer.PluginPackageValidator
-import dev.dimension.flare.feature.plugin.installer.PluginSensitivePermissionV1
 import dev.dimension.flare.feature.plugin.installer.ValidatedPluginPackage
 import dev.dimension.flare.feature.plugin.installer.sensitivePermissions
 import dev.dimension.flare.feature.plugin.lifecycle.InstalledPluginV1
-import dev.dimension.flare.feature.plugin.lifecycle.PluginRunningSnapshotV1
+import dev.dimension.flare.feature.plugin.lifecycle.PluginRuntimeSwitcherV1
 import dev.dimension.flare.feature.plugin.lifecycle.RunningPluginV1
 import dev.dimension.flare.feature.plugin.manifest.PluginTextV1
 import dev.dimension.flare.model.PlatformRegistry
-import dev.dimension.flare.model.PlatformSpec
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -45,7 +42,7 @@ public data class PluginDevelopmentStateV1(
     val generation: Long = 0,
     val error: String? = null,
     val reviewHash: String? = null,
-    val permissions: List<PluginSensitivePermissionV1> = emptyList(),
+    val permissions: List<PluginPermission> = emptyList(),
     val credentialSchemaChanged: Boolean = false,
     val messages: List<String> = emptyList(),
 )
@@ -55,7 +52,7 @@ public data class PluginDevelopmentStateV1(
 public class PluginDevelopmentSessionV1 internal constructor(
     private val subsystem: PluginSubsystemV1,
     private val registry: PlatformRegistry,
-    private val accounts: AccountService,
+    accounts: AccountService,
     private val scope: CoroutineScope,
 ) {
     private val files = subsystem.appFiles.fileSystem
@@ -73,6 +70,7 @@ public class PluginDevelopmentSessionV1 internal constructor(
         }
     public val state: StateFlow<PluginDevelopmentStateV1> = mutableState.asStateFlow()
     private val mutex = subsystem.mutationMutex
+    private val switcher = PluginRuntimeSwitcherV1(subsystem, registry, accounts, scope)
     private var watcher: Job? = null
     private var candidate: Candidate? = null
     private var lastCheckedHash: String? = null
@@ -265,57 +263,18 @@ public class PluginDevelopmentSessionV1 internal constructor(
         replacement: RunningPluginV1?,
     ) {
         val pluginId = requireNotNull(replacement?.installed?.pluginId ?: previous?.installed?.pluginId)
-        val platformId =
-            requireNotNull(
-                replacement
-                    ?.installed
-                    ?.manifest
-                    ?.platform
-                    ?.id ?: previous
-                    ?.installed
-                    ?.manifest
-                    ?.platform
-                    ?.id,
-            )
-        var retired = false
         try {
-            val spec = replacement?.let { platform(it) }
-            withContext(NonCancellable) {
-                if (previous != null) subsystem.runtimePool.retire(previous)
-                retired = true
-                subsystem.oauth.cancelPlugin(pluginId)
-                accounts.invalidatePlatform(platformId)
-                subsystem.replaceRunning(pluginId, replacement)
-                registry.replaceExternal(platformId, spec)
-            }
+            switcher.switch(previous, replacement, temporary = true)
         } catch (error: Throwable) {
-            withContext(NonCancellable) {
-                replacement?.session?.retire()
-                if (retired || previous?.session?.isActive == false) {
-                    val restored = previous?.copy(generation = ++generation)
-                    subsystem.replaceRunning(pluginId, restored)
-                    registry.replaceExternal(platformId, restored?.let(::platform))
-                    if (active != null) {
-                        active = restored
-                        mutableState.update { it.copy(generation = generation, runningHash = restored?.installed?.packageHash) }
-                    }
-                }
+            val restored = subsystem.running.value.plugins[pluginId]
+            generation = maxOf(generation, restored?.generation ?: 0)
+            if (active != null) {
+                active = restored
+                mutableState.update { it.copy(generation = generation, runningHash = restored?.installed?.packageHash) }
             }
             throw error
         }
     }
-
-    private fun platform(plugin: RunningPluginV1): PlatformSpec =
-        PluginPlatformSpecSourceV1(
-            running = PluginRunningSnapshotV1(mapOf(plugin.installed.pluginId to plugin), emptySet(), emptyList(), true),
-            runtimePool = subsystem.runtimePool,
-            oauth = subsystem.oauth,
-            form = subsystem.form,
-            webCookie = subsystem.webCookie,
-            coroutineScope = scope,
-        ).load(
-            registry.all.filterNot { it.platformId == plugin.installed.manifest.platform.id }.mapTo(mutableSetOf()) { it.platformId },
-        ).single()
 
     private suspend fun action(block: suspend () -> Unit): Unit =
         withContext(Dispatchers.Default) {

@@ -1,5 +1,6 @@
 package dev.dimension.flare.feature.plugin.management
 
+import dev.dimension.flare.data.model.PluginPermission
 import dev.dimension.flare.data.repository.AuthoredPlugin
 import dev.dimension.flare.feature.plugin.PluginSubsystemV1
 import dev.dimension.flare.feature.plugin.development.PluginDevelopmentStateV1
@@ -7,7 +8,6 @@ import dev.dimension.flare.feature.plugin.github.GitHubPluginCatalogV1
 import dev.dimension.flare.feature.plugin.github.GitHubPluginClient
 import dev.dimension.flare.feature.plugin.github.GitHubPluginVersionV1
 import dev.dimension.flare.feature.plugin.installer.PluginInstallWarningV1
-import dev.dimension.flare.feature.plugin.installer.PluginSensitivePermissionV1
 import dev.dimension.flare.feature.plugin.installer.PreparedPluginInstallV1
 import dev.dimension.flare.feature.plugin.installer.compareSemVer
 import dev.dimension.flare.feature.plugin.lifecycle.InstalledPluginV1
@@ -48,7 +48,10 @@ public data class PluginManagementStateV1(
     val updatesChecked: Boolean = false,
     val development: PluginDevelopmentStateV1 = PluginDevelopmentStateV1(),
     val authoredPlugins: List<AuthoredPlugin> = emptyList(),
-)
+) {
+    public val importedPlugins: List<PluginManagementItemV1> =
+        plugins.filterNot { installed -> authoredPlugins.any { it.id == installed.pluginId } }
+}
 
 public data class PluginManagementItemV1(
     val pluginId: String,
@@ -73,7 +76,7 @@ public data class PluginInstallReviewV1(
     val version: String,
     val existingVersion: String?,
     val capabilities: List<String>,
-    val permissions: List<PluginSensitivePermissionV1>,
+    val permissions: List<PluginPermission>,
     val warnings: List<PluginInstallWarningV1>,
     val sourceUrl: String?,
 )

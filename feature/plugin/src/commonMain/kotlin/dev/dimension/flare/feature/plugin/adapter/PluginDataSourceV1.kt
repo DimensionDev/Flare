@@ -2,7 +2,6 @@ package dev.dimension.flare.feature.plugin.adapter
 
 import dev.dimension.flare.common.FileItem
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
-import dev.dimension.flare.data.datasource.microblog.ComposeCapability
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.datasource.microblog.ComposeDataSource
@@ -142,8 +141,7 @@ internal class PluginDataSourceV1 private constructor(
             compose =
                 accountKey
                     ?.takeIf { hasOperation(PluginAbiV1.Capabilities.COMPOSE, "publish") }
-                    ?.let { ComposeCapabilityAdapter() }
-                    ?.let(::ComposeCapability),
+                    ?.let { ComposeCapabilityAdapter() },
             relation = extraCapabilities.relation,
             notification = extraCapabilities.notification,
             list = extraCapabilities.list,

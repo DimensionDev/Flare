@@ -212,6 +212,36 @@ class PluginDevelopmentSessionV1Test {
         }
 
     @Test
+    fun manualReloadRetiresLoginAndRollbackPreservesTemporaryOwnership() =
+        runBlocking {
+            prepare(installed = true)
+            val installed = subsystem.stateStore.desired.value
+            writeSource("development")
+            session.open(directory.toString())
+            session.reload()
+            val original = current
+            val release = original.session.holdInteraction()
+            try {
+                session.reload(confirmed = true)
+                assertFalse(original.session.isActive)
+                val active = current
+                accounts.failNext = true
+                assertFailsWith<IllegalStateException> { session.reload() }
+                assertFalse(active.session.isActive)
+                assertTrue(current.session.isActive)
+                assertTrue(session.state.value.active)
+                assertEquals(current.generation, session.state.value.generation)
+                assertEquals("development", page()["marker"]!!.jsonPrimitive.content)
+                assertEquals(installed, subsystem.stateStore.desired.value)
+                session.stop()
+                assertEquals("installed", page()["marker"]!!.jsonPrimitive.content)
+                assertEquals(installed, subsystem.stateStore.desired.value)
+            } finally {
+                release()
+            }
+        }
+
+    @Test
     fun directoryWatchingSurvivesClosingTheManagementPageDuringValidation() =
         runBlocking<Unit> {
             prepare()

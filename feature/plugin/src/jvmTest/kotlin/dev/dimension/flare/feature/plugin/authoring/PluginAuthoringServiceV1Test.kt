@@ -36,6 +36,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.KSerializer
 import okio.ByteString.Companion.decodeBase64
@@ -450,6 +452,115 @@ class PluginAuthoringServiceV1Test {
         }
 
     @Test
+    fun reenablingUnchangedSourcePreservesRevisionAndRestoresOnlyOneSession() =
+        runBlocking<Unit> {
+            val plugin = service.create()
+            generate(plugin)
+            val applied = await(plugin.id, PluginAuthoringPhase.Applied)
+            service.setEnabled(plugin.id, false)
+            val invalidations = accounts.invalidations
+            service.setEnabled(plugin.id, true)
+            val restored =
+                subsystem.running.value.plugins
+                    .getValue(plugin.id)
+            val validated = await(plugin.id, PluginAuthoringPhase.Applied)
+            assertEquals(applied.revision, validated.revision)
+            assertEquals(invalidations + 1, accounts.invalidations)
+            assertEquals(
+                restored,
+                subsystem.running.value.plugins
+                    .getValue(plugin.id),
+            )
+            assertTrue(validated.enabled && validated.running)
+            val reloaded = PluginAuthoringServiceV1(subsystem, { registry }, { accounts }, { scope })
+            assertEquals(
+                validated.revision,
+                reloaded.plugins.value
+                    .single()
+                    .revision,
+            )
+        }
+
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    @Test
+    fun stoppingRevalidationKeepsRestoredSessionAndCancelsPendingApplication() =
+        runBlocking<Unit> {
+            val plugin = service.create()
+            generate(plugin)
+            val applied = await(plugin.id, PluginAuthoringPhase.Applied)
+            val scheduler = TestCoroutineScheduler()
+            val queuedScope = CoroutineScope(SupervisorJob() + StandardTestDispatcher(scheduler))
+            try {
+                val queued = PluginAuthoringServiceV1(subsystem, { registry }, { accounts }, { queuedScope })
+                queued.setEnabled(plugin.id, false)
+                queued.setEnabled(plugin.id, true)
+                assertEquals(
+                    PluginAuthoringPhase.Validating,
+                    queued.plugins.value
+                        .single()
+                        .phase,
+                )
+                val restored =
+                    subsystem.running.value.plugins
+                        .getValue(plugin.id)
+                val invalidations = accounts.invalidations
+                queued.stop(plugin.id)
+                scheduler.runCurrent()
+                val stopped = queued.plugins.value.single()
+                assertEquals(PluginAuthoringPhase.Idle, stopped.phase)
+                assertEquals(applied.revision, stopped.revision)
+                assertEquals(invalidations, accounts.invalidations)
+                assertEquals(
+                    restored,
+                    subsystem.running.value.plugins
+                        .getValue(plugin.id),
+                )
+                assertTrue(stopped.running)
+            } finally {
+                queuedScope.coroutineContext[Job]!!.cancelAndJoin()
+            }
+        }
+
+    @Test
+    fun stoppedApprovalDoesNotAuthorizeReenabledSourceAtTheSameRevision() =
+        runBlocking<Unit> {
+            val plugin = service.create()
+            val run = service.begin(plugin.id)
+            service.write(plugin.id, run, sources(plugin, media = true))
+            service.finish(plugin.id, run, true)
+            val review = await(plugin.id, PluginAuthoringPhase.AwaitingApproval)
+            pending.busy = plugin.id
+            service.approve(plugin.id, review.revision)
+            await(plugin.id, PluginAuthoringPhase.WaitingForOperations)
+            service.stop(plugin.id)
+            pending.busy = null
+            service.setEnabled(plugin.id, false)
+            service.setEnabled(plugin.id, true)
+            val reopened = await(plugin.id, PluginAuthoringPhase.AwaitingApproval)
+            assertEquals(review.revision, reopened.revision)
+            assertFalse(reopened.running)
+            assertEquals(review.permissions, reopened.permissions)
+            pending.busy = null
+            service.approve(plugin.id, reopened.revision)
+            await(plugin.id, PluginAuthoringPhase.Applied)
+        }
+
+    @Test
+    fun directoryOverrideUpdatesAuthoredRunningStateWithoutChangingItsRecord() =
+        runBlocking<Unit> {
+            val plugin = service.create()
+            val development = startDevelopment(plugin)
+            withTimeoutOrNull(5_000) { service.plugins.first { it.single().running } }
+                ?: error("Directory override was not reflected in authored plugins")
+            assertEquals(plugin.revision, state(plugin.id).revision)
+            assertEquals(plugin.name, state(plugin.id).name)
+            development.stop()
+            withTimeoutOrNull(5_000) { service.plugins.first { !it.single().running } }
+                ?: error("Stopped override was not reflected in authored plugins")
+            assertEquals(plugin, state(plugin.id))
+        }
+
+    @Test
     fun reenablingAfterInvalidEditRestoresWorkingVersionAndRestartState() =
         runBlocking<Unit> {
             val plugin = service.create()
@@ -682,7 +793,11 @@ private object AuthoringGuest : PlatformSpec {
 }
 
 private class AuthoringAccounts : AccountService {
-    override suspend fun invalidatePlatform(platformId: String) = Unit
+    @Volatile var invalidations = 0
+
+    override suspend fun invalidatePlatform(platformId: String) {
+        invalidations++
+    }
 
     override fun accountServiceFlow(accountType: AccountType): Flow<MicroblogDataSource> = error("unused")
 

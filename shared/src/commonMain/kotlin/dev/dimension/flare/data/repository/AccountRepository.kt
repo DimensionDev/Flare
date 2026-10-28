@@ -128,6 +128,18 @@ internal class AccountRepository internal constructor(
         mutableMapOf<MicroBlogKey, Pair<PlatformSpec, MicroblogDataSource>>()
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
+    internal val allAccountServices: Flow<ImmutableList<AccountMicroblogDataSource>> by lazy {
+        combine(allAccounts, platformRegistry.platforms, dataSourceRevisions) { accounts, _, _ -> accounts }
+            .mapLatest { accounts ->
+                accounts
+                    .filter { it.platformAvailable }
+                    .map { account ->
+                        AccountMicroblogDataSource(account.accountKey, account.platformId, getOrCreateDataSource(account))
+                    }.toImmutableList()
+            }.distinctUntilChanged()
+    }
+
     private val accountChangeChannel = Channel<AccountChange>(Channel.UNLIMITED)
     internal val accountChanges: Flow<AccountChange> = accountChangeChannel.receiveAsFlow()
 
@@ -573,10 +585,4 @@ internal fun activeAccountFlow(repository: AccountRepository): Flow<UiAccount?> 
         .distinctUntilChangedBy { it?.accountKey }
 
 internal fun allAccountServicesFlow(repository: AccountRepository): Flow<ImmutableList<MicroblogDataSource>> =
-    combine(repository.allAccounts, repository.platformRegistry.platforms, repository.dataSourceRevisions) { accounts, _, _ ->
-        accounts
-            .filter { it.platformAvailable }
-            .map {
-                repository.getOrCreateDataSource(it)
-            }.toImmutableList()
-    }.distinctUntilChanged()
+    repository.allAccountServices.map { accounts -> accounts.map { it.dataSource }.toImmutableList() }.distinctUntilChanged()

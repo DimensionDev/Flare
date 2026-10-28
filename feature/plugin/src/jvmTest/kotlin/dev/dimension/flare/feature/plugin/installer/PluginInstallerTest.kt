@@ -1,5 +1,6 @@
 package dev.dimension.flare.feature.plugin.installer
 
+import dev.dimension.flare.data.model.PluginPermissionType
 import dev.dimension.flare.feature.plugin.lifecycle.PluginIndexCorruptException
 import dev.dimension.flare.feature.plugin.lifecycle.PluginStateStore
 import kotlinx.coroutines.CoroutineStart
@@ -239,7 +240,7 @@ class PluginInstallerTest {
         runBlocking<Unit> {
             TestFppFactory.write(input)
             val previous = installer.inspect(input)
-            assertFalse(previous.permissions.any { it.type == PluginSensitivePermissionTypeV1.MediaNetwork })
+            assertFalse(previous.permissions.any { it.type == PluginPermissionType.MediaNetwork })
             installer.commit(previous, confirmed = true)
             val changed =
                 TestFppFactory.validManifest.replace(
@@ -248,7 +249,7 @@ class PluginInstallerTest {
                 )
             TestFppFactory.write(input, TestFppFactory.validEntries(manifest = changed))
             val preview = installer.inspect(input)
-            assertTrue(preview.permissions.any { it.type == PluginSensitivePermissionTypeV1.MediaNetwork })
+            assertTrue(preview.permissions.any { it.type == PluginPermissionType.MediaNetwork })
             assertTrue(preview.warnings.any { it.type == PluginInstallWarningTypeV1.AddedPermission })
             assertFailsWith<IllegalArgumentException> { installer.commit(preview, confirmed = false) }
         }

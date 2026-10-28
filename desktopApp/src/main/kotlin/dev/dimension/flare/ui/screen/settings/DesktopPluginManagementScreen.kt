@@ -44,11 +44,11 @@ import dev.dimension.flare.LocalWindowPadding
 import dev.dimension.flare.Res
 import dev.dimension.flare.cancel
 import dev.dimension.flare.common.DesktopSaveDialog
+import dev.dimension.flare.data.model.PluginPermission
 import dev.dimension.flare.feature.plugin.PluginSubsystemV1
 import dev.dimension.flare.feature.plugin.abi.PluginAbiV1
 import dev.dimension.flare.feature.plugin.installer.PluginInstallWarningTypeV1
 import dev.dimension.flare.feature.plugin.installer.PluginInstallWarningV1
-import dev.dimension.flare.feature.plugin.installer.PluginSensitivePermissionV1
 import dev.dimension.flare.feature.plugin.management.PluginInstallReviewV1
 import dev.dimension.flare.feature.plugin.management.PluginManagementItemV1
 import dev.dimension.flare.feature.plugin.management.PluginManagementPresenterV1
@@ -409,8 +409,8 @@ internal fun PluginInstallReviewDialog(
 }
 
 @Composable
-internal fun PluginSensitivePermissionV1.localizedDescription(): String {
-    if (type == dev.dimension.flare.feature.plugin.installer.PluginSensitivePermissionTypeV1.MediaNetwork) {
+internal fun PluginPermission.localizedDescription(): String {
+    if (type == dev.dimension.flare.data.model.PluginPermissionType.MediaNetwork) {
         return stringResource(Res.string.plugin_permission_media_network)
     }
     val accountRelativePath =
@@ -593,9 +593,7 @@ private fun PluginManagementList(
                 }
             } else {
                 items(
-                    state.plugins.filterNot { installed ->
-                        state.authoredPlugins.any { it.id == installed.pluginId }
-                    },
+                    state.importedPlugins,
                     key = PluginManagementItemV1::pluginId,
                 ) { plugin ->
                     PluginItem(

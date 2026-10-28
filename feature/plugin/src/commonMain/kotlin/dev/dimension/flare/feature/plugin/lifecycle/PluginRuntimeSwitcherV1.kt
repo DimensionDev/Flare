@@ -18,9 +18,10 @@ internal class PluginRuntimeSwitcherV1(
     suspend fun switch(
         previous: RunningPluginV1?,
         replacement: RunningPluginV1?,
-        installed: InstalledPluginV1?,
+        installed: InstalledPluginV1? = replacement?.installed,
         pluginId: String =
             requireNotNull(installed?.pluginId ?: previous?.installed?.pluginId),
+        temporary: Boolean = false,
     ) {
         val before = subsystem.stateStore.desired.value.plugins[pluginId]
         val platformId =
@@ -39,15 +40,17 @@ internal class PluginRuntimeSwitcherV1(
         var retired = false
         try {
             withContext(NonCancellable) {
-                previous?.let { subsystem.runtimePool.retire(it, protectInteractions = true) }
+                previous?.let { subsystem.runtimePool.retire(it, protectInteractions = !temporary) }
                 retired = true
                 subsystem.oauth.cancelPlugin(pluginId)
                 accounts.invalidatePlatform(platformId)
                 // A published replacement can immediately start writes that prevent rollback.
-                if (installed == null) subsystem.stateStore.uninstall(pluginId) else subsystem.stateStore.install(installed)
+                if (!temporary) {
+                    if (installed == null) subsystem.stateStore.uninstall(pluginId) else subsystem.stateStore.install(installed)
+                }
                 subsystem.replaceRunning(pluginId, replacement)
                 registry.replaceExternal(platformId, spec)
-                subsystem.stateStore.markApplied(pluginId, installed)
+                if (!temporary) subsystem.stateStore.markApplied(pluginId, installed)
             }
         } catch (error: Throwable) {
             withContext(NonCancellable) {
@@ -56,13 +59,13 @@ internal class PluginRuntimeSwitcherV1(
                     val generation = maxOf(previous?.generation ?: 0, replacement?.generation ?: 0) + 1
                     val restored =
                         previous?.copy(
-                            installed = previous.installed.copy(runtimeGeneration = generation),
+                            installed = if (temporary) previous.installed else previous.installed.copy(runtimeGeneration = generation),
                             generation = generation,
                         )
                     subsystem.replaceRunning(pluginId, restored)
                     registry.replaceExternal(platformId, restored?.let(::platform))
                     // Preserve the restored session's identity for OAuth continuations after a restart.
-                    if (restored != null) {
+                    if (!temporary && restored != null) {
                         val record = restored.installed.copy(runtimeGeneration = restored.generation)
                         runCatching {
                             subsystem.stateStore.install(record)

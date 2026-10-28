@@ -118,7 +118,7 @@ public struct PluginManagementView: View {
                 .listRowBackground(Color.clear)
             } else {
                 Section {
-                    ForEach(presenter.state.plugins.filter { installed in !presenter.state.authoredPlugins.contains { $0.id == installed.pluginId } }, id: \.pluginId) { plugin in
+                    ForEach(presenter.state.importedPlugins, id: \.pluginId) { plugin in
                         pluginRow(plugin)
                     }
                 }
@@ -596,7 +596,7 @@ private struct AuthoredPluginChatView: View {
     }
 }
 
-func pluginPermissionText(_ permission: PluginSensitivePermissionV1) -> String {
+func pluginPermissionText(_ permission: PluginPermission) -> String {
     if permission.type == .mediaNetwork {
         return String(localized: "plugin_permission_media_network")
     }

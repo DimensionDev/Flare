@@ -155,8 +155,8 @@ class DesktopPluginManagementScreenTest {
                                 sourceUrl = null,
                                 permissions =
                                     listOf(
-                                        dev.dimension.flare.feature.plugin.installer.PluginSensitivePermissionV1(
-                                            dev.dimension.flare.feature.plugin.installer.PluginSensitivePermissionTypeV1.MediaNetwork,
+                                        dev.dimension.flare.data.model.PluginPermission(
+                                            dev.dimension.flare.data.model.PluginPermissionType.MediaNetwork,
                                             "*",
                                         ),
                                     ),

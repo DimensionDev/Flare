@@ -15,7 +15,6 @@ import dev.dimension.flare.data.database.createDatabaseDriver
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.DataSourceCapabilityProvider
 import dev.dimension.flare.data.datasource.microblog.DataSourceCapabilitySet
-import dev.dimension.flare.data.datasource.microblog.DirectMessageCapability
 import dev.dimension.flare.data.datasource.microblog.DirectMessageDataSource
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.NotificationCapability
@@ -610,13 +609,11 @@ class DiscoverAccountRestorationTest {
                             events = null,
                         ),
                     directMessage =
-                        DirectMessageCapability(
-                            object : DirectMessageDataSource, MicroblogDataSource by this {
-                                override val accountKey = authenticatedAccountKey
-                                override val directMessageHandler: DirectMessageHandler get() = error("Unused")
-                                override val directMessageBadgeCount = Cacheable(fetchSource = {}, cacheSource = { flowOf(0) })
-                            },
-                        ),
+                        object : DirectMessageDataSource, MicroblogDataSource by this {
+                            override val accountKey = authenticatedAccountKey
+                            override val directMessageHandler: DirectMessageHandler get() = error("Unused")
+                            override val directMessageBadgeCount = Cacheable(fetchSource = {}, cacheSource = { flowOf(0) })
+                        },
                 )
         }
 

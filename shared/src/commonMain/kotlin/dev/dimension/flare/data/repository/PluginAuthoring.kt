@@ -1,5 +1,6 @@
 package dev.dimension.flare.data.repository
 
+import dev.dimension.flare.data.model.PluginPermission
 import kotlinx.coroutines.flow.StateFlow
 
 /** App-owned plugin files; the agent never receives filesystem or account access. */
@@ -54,7 +55,7 @@ public data class AuthoredPlugin(
     val enabled: Boolean = true,
     val running: Boolean = false,
     val error: String? = null,
-    val permissions: List<AuthoredPluginPermission> = emptyList(),
+    val permissions: List<PluginPermission> = emptyList(),
     val credentialsChanged: Boolean = false,
 ) {
     public val conversationId: String get() = "$PLUGIN_CONVERSATION_PREFIX$id"
@@ -74,15 +75,3 @@ private const val PLUGIN_CONVERSATION_PREFIX = "plugin-authoring:"
 
 public fun authoredPluginId(conversationId: String): String? =
     conversationId.takeIf { it.startsWith(PLUGIN_CONVERSATION_PREFIX) }?.removePrefix(PLUGIN_CONVERSATION_PREFIX)
-
-public data class AuthoredPluginPermission(
-    val kind: AuthoredPluginPermissionKind,
-    val origin: String,
-    val cookieName: String? = null,
-)
-
-public enum class AuthoredPluginPermissionKind {
-    NetworkOrigin,
-    MediaNetwork,
-    Cookie,
-}

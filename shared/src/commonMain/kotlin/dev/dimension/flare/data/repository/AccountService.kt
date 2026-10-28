@@ -4,12 +4,8 @@ import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiAccount
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.mapLatest
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.serializer
 import org.koin.core.annotation.Single
@@ -89,19 +85,7 @@ internal class RepositoryAccountService(
             repository = repository,
         )
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    override fun allAccountServicesFlow(): Flow<List<AccountMicroblogDataSource>> =
-        combine(repository.allAccounts, repository.platformRegistry.platforms, repository.dataSourceRevisions) { accounts, _, _ ->
-            accounts
-        }.mapLatest { accounts ->
-            accounts.filter { it.platformAvailable }.map { account ->
-                AccountMicroblogDataSource(
-                    accountKey = account.accountKey,
-                    platformId = account.platformId,
-                    dataSource = repository.getOrCreateDataSource(account),
-                )
-            }
-        }.distinctUntilChanged()
+    override fun allAccountServicesFlow(): Flow<List<AccountMicroblogDataSource>> = repository.allAccountServices
 
     override suspend fun <T : Any> addAccount(
         account: UiAccount,

@@ -54,12 +54,12 @@ import compose.icons.fontawesomeicons.solid.EllipsisVertical
 import compose.icons.fontawesomeicons.solid.Plus
 import compose.icons.fontawesomeicons.solid.Trash
 import dev.dimension.flare.R
+import dev.dimension.flare.data.model.PluginPermission
 import dev.dimension.flare.di.koinGet
 import dev.dimension.flare.feature.plugin.PluginSubsystemV1
 import dev.dimension.flare.feature.plugin.abi.PluginAbiV1
 import dev.dimension.flare.feature.plugin.installer.PluginInstallWarningTypeV1
 import dev.dimension.flare.feature.plugin.installer.PluginInstallWarningV1
-import dev.dimension.flare.feature.plugin.installer.PluginSensitivePermissionV1
 import dev.dimension.flare.feature.plugin.management.PluginInstallReviewV1
 import dev.dimension.flare.feature.plugin.management.PluginManagementItemV1
 import dev.dimension.flare.feature.plugin.management.PluginManagementPresenterV1
@@ -350,8 +350,8 @@ private fun PluginInstallReviewDialog(
 }
 
 @Composable
-internal fun PluginSensitivePermissionV1.localizedDescription(): String {
-    if (type == dev.dimension.flare.feature.plugin.installer.PluginSensitivePermissionTypeV1.MediaNetwork) {
+internal fun PluginPermission.localizedDescription(): String {
+    if (type == dev.dimension.flare.data.model.PluginPermissionType.MediaNetwork) {
         return stringResource(R.string.plugin_permission_media_network)
     }
     val accountRelativePath =
@@ -536,14 +536,14 @@ private fun PluginManagementList(
             }
         } else {
             itemsIndexed(
-                items = state.plugins.filterNot { installed -> state.authoredPlugins.any { it.id == installed.pluginId } },
+                items = state.importedPlugins,
                 key = { _, plugin -> plugin.pluginId },
             ) { index, plugin ->
                 PluginItem(
                     plugin = plugin,
                     busy = state.busy,
                     shapesIndex = index,
-                    shapesCount = state.plugins.count { installed -> state.authoredPlugins.none { it.id == installed.pluginId } },
+                    shapesCount = state.importedPlugins.size,
                     onSetEnabled = onSetEnabled,
                     onUninstall = onUninstall,
                     onUpdate = onUpdate,

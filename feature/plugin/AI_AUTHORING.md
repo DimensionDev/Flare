@@ -24,7 +24,10 @@ plugin. Restart restores the last applied version, without resuming unfinished
 Agent tasks. Deleting a plugin removes its local source and installation, while
 keeping account records and conversation history.
 
-Re-enabling restores the last working installation while newer source is validated.
+Re-enabling restores the last working installation while saved source is validated,
+without creating another generation task or increasing the source revision. Unchanged
+source keeps the restored session; changed source follows the same approval and
+in-flight operation checks.
 Stop directory development before changing an AI plugin's enabled state or deleting it.
 
 Android uses the existing Compose settings/chat components; iOS and native macOS

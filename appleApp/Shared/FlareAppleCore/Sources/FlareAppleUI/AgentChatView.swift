@@ -670,11 +670,7 @@ private struct PluginAuthoringStatusView: View {
                     if let error = plugin.error { Text(verbatim: error).foregroundStyle(.red) }
                     if plugin.credentialsChanged { Text("plugin_ai_credentials_changed") }
                     ForEach(Array(plugin.permissions.enumerated()), id: \.offset) { _, permission in
-                        Text(pluginPermissionText(PluginSensitivePermissionV1(
-                            type: permission.kind == .mediaNetwork ? .mediaNetwork : (permission.kind == .cookie ? .cookie : .networkOrigin),
-                            origin: permission.origin,
-                            cookieName: permission.cookieName
-                        ))).font(.caption)
+                        Text(pluginPermissionText(permission)).font(.caption)
                     }
                     HStack {
                         if plugin.phase == .awaitingApproval {

@@ -20,8 +20,6 @@ import androidx.compose.ui.unit.dp
 import dev.dimension.flare.R
 import dev.dimension.flare.data.repository.PluginAuthoringPhase
 import dev.dimension.flare.feature.agent.presenter.chat.GenericChatPresenter
-import dev.dimension.flare.feature.plugin.installer.PluginSensitivePermissionTypeV1
-import dev.dimension.flare.feature.plugin.installer.PluginSensitivePermissionV1
 import dev.dimension.flare.ui.screen.settings.localizedDescription
 
 @Composable
@@ -55,13 +53,7 @@ internal fun PluginAuthoringCard(state: GenericChatPresenter.State) {
         if (plugin.running && plugin.phase != PluginAuthoringPhase.Applied) Text(stringResource(R.string.plugin_ai_running))
         plugin.error?.let { Text(it) }
         plugin.permissions.forEach {
-            Text(
-                PluginSensitivePermissionV1(
-                    PluginSensitivePermissionTypeV1.valueOf(it.kind.name),
-                    it.origin,
-                    it.cookieName,
-                ).localizedDescription(),
-            )
+            Text(it.localizedDescription())
         }
         if (plugin.credentialsChanged) Text(stringResource(R.string.plugin_ai_credentials_changed))
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {

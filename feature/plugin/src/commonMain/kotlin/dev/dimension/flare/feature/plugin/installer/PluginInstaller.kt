@@ -1,5 +1,7 @@
 package dev.dimension.flare.feature.plugin.installer
 
+import dev.dimension.flare.data.model.PluginPermission
+import dev.dimension.flare.data.model.PluginPermissionType
 import dev.dimension.flare.feature.plugin.abi.PluginAbiV1
 import dev.dimension.flare.feature.plugin.github.COMMIT_SHA
 import dev.dimension.flare.feature.plugin.github.stableGitHubVersion
@@ -327,25 +329,13 @@ public class PreparedPluginInstallV1 internal constructor(
     public val packageHash: String,
     public val packageSize: Long,
     public val capabilities: Map<String, Set<String>>,
-    public val permissions: Set<PluginSensitivePermissionV1>,
+    public val permissions: Set<PluginPermission>,
     public val warnings: List<PluginInstallWarningV1>,
     public val requiresConfirmation: Boolean,
     public val existingVersion: String?,
     public val source: PluginInstallSourceV1,
     internal val validated: ValidatedPluginPackage,
 )
-
-public data class PluginSensitivePermissionV1(
-    val type: PluginSensitivePermissionTypeV1,
-    val origin: String,
-    val cookieName: String? = null,
-)
-
-public enum class PluginSensitivePermissionTypeV1 {
-    NetworkOrigin,
-    MediaNetwork,
-    Cookie,
-}
 
 public data class PluginInstallWarningV1(
     val type: PluginInstallWarningTypeV1,
@@ -408,21 +398,21 @@ private fun buildWarnings(
         validationWarnings.forEach { add(PluginInstallWarningV1(PluginInstallWarningTypeV1.Compatibility, it)) }
     }
 
-internal fun PluginManifestV1.sensitivePermissions(): Set<PluginSensitivePermissionV1> =
+internal fun PluginManifestV1.sensitivePermissions(): Set<PluginPermission> =
     buildSet {
-        add(PluginSensitivePermissionV1(PluginSensitivePermissionTypeV1.NetworkOrigin, PluginAbiV1.ACCOUNT_ORIGIN))
+        add(PluginPermission(PluginPermissionType.NetworkOrigin, PluginAbiV1.ACCOUNT_ORIGIN))
         permissions.authOrigins.forEach { origin ->
-            add(PluginSensitivePermissionV1(PluginSensitivePermissionTypeV1.NetworkOrigin, origin))
+            add(PluginPermission(PluginPermissionType.NetworkOrigin, origin))
         }
         if (permissions.mediaNetwork) {
-            add(PluginSensitivePermissionV1(PluginSensitivePermissionTypeV1.MediaNetwork, "*"))
+            add(PluginPermission(PluginPermissionType.MediaNetwork, "*"))
         }
         platform.loginMethods.forEach { method ->
             method.cookie?.probes?.forEach { probe ->
                 probe.cookies.forEach { cookie ->
                     add(
-                        PluginSensitivePermissionV1(
-                            type = PluginSensitivePermissionTypeV1.Cookie,
+                        PluginPermission(
+                            type = PluginPermissionType.Cookie,
                             origin = probe.url,
                             cookieName = cookie.name,
                         ),

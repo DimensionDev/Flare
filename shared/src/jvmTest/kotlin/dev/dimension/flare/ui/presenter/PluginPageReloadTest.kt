@@ -11,12 +11,9 @@ import dev.dimension.flare.createTestRootPath
 import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.createDatabaseDriver
-import dev.dimension.flare.data.datasource.microblog.ArticleCapability
 import dev.dimension.flare.data.datasource.microblog.DataSourceCapabilityProvider
 import dev.dimension.flare.data.datasource.microblog.DataSourceCapabilitySet
-import dev.dimension.flare.data.datasource.microblog.DirectMessageCapability
 import dev.dimension.flare.data.datasource.microblog.DirectMessageDataSource
-import dev.dimension.flare.data.datasource.microblog.GalleryCapability
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.NotificationCapability
 import dev.dimension.flare.data.datasource.microblog.ProfileCapability
@@ -362,75 +359,69 @@ class PluginPageReloadTest {
                         },
                     ),
                 directMessage =
-                    DirectMessageCapability(
-                        object : DirectMessageDataSource, MicroblogDataSource by this {
-                            override val accountKey = this@PluginPageReloadTest.accountKey
-                            override val directMessageHandler get() = error("Unused")
+                    object : DirectMessageDataSource, MicroblogDataSource by this {
+                        override val accountKey = this@PluginPageReloadTest.accountKey
+                        override val directMessageHandler get() = error("Unused")
 
-                            override fun directMessageConversation(
-                                roomKey: MicroBlogKey,
-                                scope: CoroutineScope,
-                            ) = flowOf(PagingData.empty<UiDMItem>())
+                        override fun directMessageConversation(
+                            roomKey: MicroBlogKey,
+                            scope: CoroutineScope,
+                        ) = flowOf(PagingData.empty<UiDMItem>())
 
-                            override fun getDirectMessageConversationInfo(roomKey: MicroBlogKey) =
-                                Cacheable(
-                                    fetchSource = {},
-                                    cacheSource = { flowOf(UiDMRoom(roomKey, persistentListOf(authenticatedProfile), null, 0)) },
-                                )
+                        override fun getDirectMessageConversationInfo(roomKey: MicroBlogKey) =
+                            Cacheable(
+                                fetchSource = {},
+                                cacheSource = { flowOf(UiDMRoom(roomKey, persistentListOf(authenticatedProfile), null, 0)) },
+                            )
 
-                            override suspend fun fetchNewDirectMessageForConversation(roomKey: MicroBlogKey) {
-                                polls.value += 1
-                            }
+                        override suspend fun fetchNewDirectMessageForConversation(roomKey: MicroBlogKey) {
+                            polls.value += 1
+                        }
 
-                            override suspend fun canSendDirectMessage(userKey: MicroBlogKey) = false
-                        },
-                    ),
+                        override suspend fun canSendDirectMessage(userKey: MicroBlogKey) = false
+                    },
                 article =
-                    ArticleCapability(
-                        object : ArticleDataSource {
-                            override suspend fun article(articleKey: MicroBlogKey) =
-                                UiArticle(
-                                    key = articleKey.id,
-                                    title = marker,
-                                    content = uiArticleContentOf(emptyList()),
-                                )
+                    object : ArticleDataSource {
+                        override suspend fun article(articleKey: MicroBlogKey) =
+                            UiArticle(
+                                key = articleKey.id,
+                                title = marker,
+                                content = uiArticleContentOf(emptyList()),
+                            )
 
-                            override fun articleComments(articleKey: MicroBlogKey) = comments
-                        },
-                    ),
+                        override fun articleComments(articleKey: MicroBlogKey) = comments
+                    },
                 gallery =
-                    GalleryCapability(
-                        object : GalleryDataSource {
-                            override fun galleryDetail(statusKey: MicroBlogKey) =
-                                Cacheable(
-                                    fetchSource = {},
-                                    cacheSource = {
-                                        flowOf(
-                                            GalleryDetail(
-                                                orientation = GalleryOrientation.Horizontal,
-                                                statusKey = statusKey,
-                                                accountType = accountType,
-                                                url = "https://${accountKey.host}/$marker",
-                                                images = persistentListOf(),
-                                                title = marker,
-                                                author = authenticatedProfile,
-                                                createdAt = Instant.fromEpochMilliseconds(1).toUi(),
-                                                content = null,
-                                                isBookmarked = false,
-                                                bookmarkAction = ClickEvent.Noop,
-                                                matrix = persistentListOf(),
-                                            ),
-                                        )
-                                    },
-                                )
+                    object : GalleryDataSource {
+                        override fun galleryDetail(statusKey: MicroBlogKey) =
+                            Cacheable(
+                                fetchSource = {},
+                                cacheSource = {
+                                    flowOf(
+                                        GalleryDetail(
+                                            orientation = GalleryOrientation.Horizontal,
+                                            statusKey = statusKey,
+                                            accountType = accountType,
+                                            url = "https://${accountKey.host}/$marker",
+                                            images = persistentListOf(),
+                                            title = marker,
+                                            author = authenticatedProfile,
+                                            createdAt = Instant.fromEpochMilliseconds(1).toUi(),
+                                            content = null,
+                                            isBookmarked = false,
+                                            bookmarkAction = ClickEvent.Noop,
+                                            matrix = persistentListOf(),
+                                        ),
+                                    )
+                                },
+                            )
 
-                            override fun galleryComments(statusKey: MicroBlogKey) = comments
+                        override fun galleryComments(statusKey: MicroBlogKey) = comments
 
-                            override fun galleryRecommendations(statusKey: MicroBlogKey) = comments
+                        override fun galleryRecommendations(statusKey: MicroBlogKey) = comments
 
-                            override suspend fun ugoiraMetadata(statusKey: MicroBlogKey): Nothing = error("unused")
-                        },
-                    ),
+                        override suspend fun ugoiraMetadata(statusKey: MicroBlogKey): Nothing = error("unused")
+                    },
                 profile =
                     ProfileCapability(
                         this,

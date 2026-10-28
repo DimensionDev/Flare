@@ -1,6 +1,7 @@
 package dev.dimension.flare.feature.plugin.management
 
 import dev.dimension.flare.data.io.AppFileStore
+import dev.dimension.flare.data.repository.AuthoredPlugin
 import dev.dimension.flare.feature.plugin.PluginSubsystemV1
 import dev.dimension.flare.feature.plugin.installer.TestFppFactory
 import dev.dimension.flare.feature.plugin.login.PluginOAuthPendingStoreV1
@@ -90,6 +91,32 @@ class PluginManagementPresenterV1Test {
             } finally {
                 appScope.cancel()
                 stopKoin()
+                subsystem.runtimePool.close()
+            }
+        }
+
+    @Test
+    fun authoredRowsReplaceInstalledRowsWithoutLosingInstalledMetadata() =
+        runTest {
+            val subsystem = subsystem()
+            val presenter = PluginManagementPresenterV1(subsystem, backgroundScope)
+            try {
+                presenter.inspect(packagePath.toString())
+                presenter.confirmInstall()
+                val installed =
+                    presenter.state.value.plugins
+                        .single()
+                val imported = installed.copy(pluginId = "other.plugin")
+                val state =
+                    presenter.state.value.copy(
+                        plugins = listOf(installed, imported),
+                        authoredPlugins = listOf(AuthoredPlugin(installed.pluginId, "Edited name")),
+                    )
+                assertEquals(listOf(imported), state.importedPlugins)
+                assertEquals(installed.nameText, state.plugins.first().nameText)
+                assertEquals(listOf(installed, imported), state.copy(authoredPlugins = emptyList()).importedPlugins)
+            } finally {
+                presenter.close()
                 subsystem.runtimePool.close()
             }
         }

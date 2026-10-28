@@ -3,16 +3,11 @@ package dev.dimension.flare.feature.plugin.adapter
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import dev.dimension.flare.common.Cacheable
-import dev.dimension.flare.data.datasource.microblog.ArticleCapability
-import dev.dimension.flare.data.datasource.microblog.DirectMessageCapability
 import dev.dimension.flare.data.datasource.microblog.DirectMessageDataSource
-import dev.dimension.flare.data.datasource.microblog.GalleryCapability
-import dev.dimension.flare.data.datasource.microblog.ListCapability
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.NotificationCapability
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
 import dev.dimension.flare.data.datasource.microblog.NotificationTimelineDataSource
-import dev.dimension.flare.data.datasource.microblog.RelationCapability
 import dev.dimension.flare.data.datasource.microblog.datasource.ArticleDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.GalleryDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.GalleryDetail
@@ -121,10 +116,10 @@ internal class PluginExtraCapabilitiesV1(
         galleryChanges.emit(key)
     }
 
-    val relation: RelationCapability? by lazy {
+    val relation: RelationDataSource? by lazy {
         accountKey
             ?.takeIf { hasAll(PluginAbiV1.Capabilities.RELATION, "state", "mutate") }
-            ?.let { RelationCapability(RelationAdapter(it)) }
+            ?.let { RelationAdapter(it) }
     }
 
     val notification: NotificationCapability? by lazy {
@@ -145,7 +140,7 @@ internal class PluginExtraCapabilitiesV1(
         ListAdapter(account)
     }
 
-    val list: ListCapability? by lazy { listAdapter?.let(::ListCapability) }
+    val list: ListDataSource? get() = listAdapter
 
     internal val directMessageAdapter: DirectMessageAdapter? by lazy {
         val account = accountKey ?: return@lazy null
@@ -154,16 +149,16 @@ internal class PluginExtraCapabilitiesV1(
         DirectMessageAdapter(account, scope)
     }
 
-    val directMessage: DirectMessageCapability? by lazy { directMessageAdapter?.let(::DirectMessageCapability) }
+    val directMessage: DirectMessageDataSource? get() = directMessageAdapter
 
-    val article: ArticleCapability? by lazy {
+    val article: ArticleDataSource? by lazy {
         if (!hasAll(PluginAbiV1.Capabilities.ARTICLE, "detail", "comments")) return@lazy null
-        ArticleCapability(ArticleAdapter())
+        ArticleAdapter()
     }
 
-    val gallery: GalleryCapability? by lazy {
+    val gallery: GalleryDataSource? by lazy {
         if (!hasAll(PluginAbiV1.Capabilities.GALLERY, "detail", "comments", "recommendations")) return@lazy null
-        GalleryCapability(GalleryAdapter())
+        GalleryAdapter()
     }
 
     val pinnableTabs: PinnableTimelineTabDataSource? by lazy {

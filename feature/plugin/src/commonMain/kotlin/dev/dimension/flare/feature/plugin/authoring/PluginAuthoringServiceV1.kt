@@ -1,9 +1,8 @@
 package dev.dimension.flare.feature.plugin.authoring
 
+import dev.dimension.flare.data.model.PluginPermission
 import dev.dimension.flare.data.repository.AccountService
 import dev.dimension.flare.data.repository.AuthoredPlugin
-import dev.dimension.flare.data.repository.AuthoredPluginPermission
-import dev.dimension.flare.data.repository.AuthoredPluginPermissionKind
 import dev.dimension.flare.data.repository.PluginAuthoring
 import dev.dimension.flare.data.repository.PluginAuthoringPhase
 import dev.dimension.flare.feature.plugin.PluginSubsystemV1
@@ -26,13 +25,17 @@ import dev.dimension.flare.model.PlatformRegistry
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalForInheritanceCoroutinesApi
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -42,6 +45,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import okio.ByteString.Companion.decodeBase64
+import okio.ByteString.Companion.toByteString
 
 internal class PluginAuthoringServiceV1(
     private val subsystem: PluginSubsystemV1,
@@ -53,8 +57,24 @@ internal class PluginAuthoringServiceV1(
     private val files = subsystem.appFiles.fileSystem
     private val root = subsystem.appFiles.directory("authored-plugins")
     private val entries = MutableStateFlow(load())
-    private val mutablePlugins = MutableStateFlow(entries.value.values.map { it.state })
-    override val plugins = mutablePlugins.asStateFlow()
+    private val mutablePlugins = MutableStateFlow(entries.value.values.map(::snapshot))
+
+    // Derive runtime flags on reads and collection without an application-scope observer.
+    @OptIn(ExperimentalForInheritanceCoroutinesApi::class)
+    override val plugins: StateFlow<List<AuthoredPlugin>> =
+        object : StateFlow<List<AuthoredPlugin>> {
+            override val value: List<AuthoredPlugin>
+                get() {
+                    val running = subsystem.running.value.plugins
+                    return mutablePlugins.value.map { it.copy(running = it.id in running) }
+                }
+            override val replayCache get() = listOf(value)
+
+            override suspend fun collect(collector: FlowCollector<List<AuthoredPlugin>>): Nothing {
+                combine(mutablePlugins, subsystem.running) { _, _ -> value }.distinctUntilChanged().collect(collector)
+                awaitCancellation()
+            }
+        }
     private val switcher by lazy { PluginRuntimeSwitcherV1(subsystem, registry(), accounts(), this.scope) }
     private val validator = PluginPackageValidator(files)
 
@@ -65,7 +85,7 @@ internal class PluginAuthoringServiceV1(
             save(record)
             entries.update { it + (record.id to entry) }
             publish(entry)
-            entry.state
+            plugins.value.single { it.id == record.id }
         }
 
     override suspend fun begin(pluginId: String): String {
@@ -76,11 +96,12 @@ internal class PluginAuthoringServiceV1(
             check(entry.runId == null) { "This plugin already has a generation task" }
             entry.application?.cancel()
             entry.candidate = null
+            entry.approvedRevision = null
             val run = platformUuid()
             entry.runId = run
             entry.caller = caller
-            entry.state =
-                entry.state.copy(
+            entry.progress =
+                entry.progress.copy(
                     phase = PluginAuthoringPhase.Generating,
                     error = null,
                     permissions = emptyList(),
@@ -109,15 +130,7 @@ internal class PluginAuthoringServiceV1(
     ): String =
         withContext(Dispatchers.Default) {
             val entry = entry(pluginId)
-            require(files.keys.containsAll(listOf(FppPaths.MANIFEST, FppPaths.ENTRY))) { "Submit manifest.json and plugin.js together" }
-            require(
-                files.size <= FppLimits.MAX_CATALOG_COUNT + 2 &&
-                    files.all { (path, text) ->
-                        (path == FppPaths.MANIFEST || path == FppPaths.ENTRY || CATALOG.matches(path)) &&
-                            text.encodeToByteArray().size <=
-                            if (path == FppPaths.ENTRY) FppLimits.MAX_SCRIPT_BYTES else FppLimits.MAX_CATALOG_BYTES
-                    },
-            ) { "Invalid plugin file or size" }
+            validateSources(files)
             val record =
                 entry.mutex.withLock {
                     checkRun(entry, runId)
@@ -125,9 +138,9 @@ internal class PluginAuthoringServiceV1(
                     save(updated)
                     entry.record = updated
                     entry.candidate = null
-                    entry.state =
-                        entry.state.copy(
-                            revision = updated.revision,
+                    entry.approvedRevision = null
+                    entry.progress =
+                        entry.progress.copy(
                             phase = PluginAuthoringPhase.Validating,
                             error = null,
                             permissions = emptyList(),
@@ -137,33 +150,12 @@ internal class PluginAuthoringServiceV1(
                     updated
                 }
             try {
-                val bytes =
-                    record.sources.mapValues { it.value.encodeToByteArray() } +
-                        (FppPaths.ICON to requireNotNull(BundledPluginSdk.icon.decodeBase64()).toByteArray())
-                val archive =
-                    FppArchive(
-                        bytes.map { (path, value) ->
-                            FppArchiveEntry(path, false, value.size.toLong(), value.size.toLong(), 0)
-                        },
-                        bytes,
-                    )
-                val validated = validator.validate(archive)
-                require(validated.manifest.id == pluginId && validated.manifest.platform.id == platformId(pluginId)) {
-                    "Keep the host-assigned plugin and platform IDs"
-                }
-                val candidate = Candidate(record.revision, validated, encodePluginArchive(bytes))
+                val candidate = prepare(record)
                 entry.mutex.withLock {
                     checkRun(entry, runId)
                     check(entry.record.revision == record.revision) { "A newer plugin revision already exists" }
-                    entry.candidate = candidate
-                    val name =
-                        when (val text = validated.manifest.name) {
-                            is PluginTextV1.Literal -> text.value
-                            is PluginTextV1.Localized -> text.fallback
-                        }
-                    entry.record = entry.record.copy(name = name)
-                    save(entry.record)
-                    entry.state = entry.state.copy(name = entry.record.name, phase = PluginAuthoringPhase.Generating)
+                    accept(entry, candidate)
+                    entry.progress = entry.progress.copy(phase = PluginAuthoringPhase.Generating)
                     publish(entry)
                 }
                 "Validation passed for revision ${record.revision}. It will be applied when this generation finishes, " +
@@ -173,7 +165,7 @@ internal class PluginAuthoringServiceV1(
                 if (error is CancellationException) throw error
                 entry.mutex.withLock {
                     if (entry.runId == runId && entry.record.revision == record.revision) {
-                        entry.state = entry.state.copy(phase = PluginAuthoringPhase.Generating, error = error.message?.take(512))
+                        entry.progress = entry.progress.copy(phase = PluginAuthoringPhase.Generating, error = error.message?.take(512))
                         publish(entry)
                     }
                 }
@@ -195,8 +187,8 @@ internal class PluginAuthoringServiceV1(
                 schedule(entry)
             } else {
                 entry.candidate = null
-                entry.state =
-                    entry.state.copy(phase = if (entry.state.error == null) PluginAuthoringPhase.Idle else PluginAuthoringPhase.Failed)
+                val phase = if (entry.progress.error == null) PluginAuthoringPhase.Idle else PluginAuthoringPhase.Failed
+                entry.progress = entry.progress.copy(phase = phase)
                 publish(entry)
             }
         }
@@ -219,7 +211,7 @@ internal class PluginAuthoringServiceV1(
         entry.mutex.withLock {
             check(entries.value[pluginId] === entry) { "Plugin no longer exists" }
             check(
-                entry.state.phase == PluginAuthoringPhase.AwaitingApproval && entry.candidate?.revision == revision &&
+                entry.progress.phase == PluginAuthoringPhase.AwaitingApproval && entry.candidate?.revision == revision &&
                     entry.record.revision == revision,
             ) { "The plugin changed; review its current version" }
             entry.approvedRevision = revision
@@ -236,7 +228,8 @@ internal class PluginAuthoringServiceV1(
             entry.caller = null
             entry.application?.cancel()
             entry.candidate = null
-            entry.state = entry.state.copy(phase = PluginAuthoringPhase.Idle, permissions = emptyList(), credentialsChanged = false)
+            entry.approvedRevision = null
+            entry.progress = entry.progress.copy(phase = PluginAuthoringPhase.Idle, permissions = emptyList(), credentialsChanged = false)
             publish(entry)
         }
     }
@@ -264,58 +257,31 @@ internal class PluginAuthoringServiceV1(
                                 runtimeGeneration = maxOf(previous?.generation ?: 0, installed.runtimeGeneration) + 1,
                             )
                         switcher.switch(previous, if (enabled) running(record) else null, record)
-                        entry.state = entry.state.copy(running = enabled)
                     }
                 }
                 if (!enabled) {
                     entry.application?.cancel()
                     entry.candidate = null
-                    entry.state =
-                        entry.state.copy(
-                            running = false,
+                    entry.approvedRevision = null
+                    entry.progress =
+                        entry.progress.copy(
                             phase =
                                 if (entry.runId ==
                                     null
                                 ) {
                                     PluginAuthoringPhase.Idle
                                 } else {
-                                    entry.state.phase
+                                    entry.progress.phase
                                 },
                             permissions = emptyList(),
                             credentialsChanged = false,
                         )
                 }
                 entry.record = entry.record.copy(enabled = enabled)
-                entry.state = entry.state.copy(enabled = enabled)
                 publish(entry)
                 save(entry.record)
                 if (!enabled || entry.runId != null || entry.record.sources.isEmpty()) return@withLock
-                if (entry.candidate != null) {
-                    schedule(entry)
-                } else {
-                    // Revalidate persisted source after an explicit re-enable, including after process restart.
-                    val run = platformUuid()
-                    entry.runId = run
-                    entry.state = entry.state.copy(phase = PluginAuthoringPhase.Validating, error = null)
-                    publish(entry)
-                    entry.caller =
-                        scope.launch {
-                            try {
-                                write(pluginId, run, entry.record.sources)
-                                finish(pluginId, run, true)
-                            } catch (error: Exception) {
-                                withContext(NonCancellable) {
-                                    entry.mutex.withLock {
-                                        if (entry.runId == run && error !is CancellationException) {
-                                            entry.state = entry.state.copy(error = error.message?.take(512))
-                                        }
-                                    }
-                                    finish(pluginId, run, false)
-                                }
-                                if (error is CancellationException) throw error
-                            }
-                        }
-                }
+                schedule(entry, revalidate = entry.candidate == null)
             }
         }
 
@@ -339,18 +305,35 @@ internal class PluginAuthoringServiceV1(
             }
         }
 
-    private fun schedule(entry: Entry) {
+    private fun schedule(
+        entry: Entry,
+        revalidate: Boolean = false,
+    ) {
         entry.application?.cancel()
+        val record = entry.record
+        if (revalidate) {
+            entry.progress = Progress(phase = PluginAuthoringPhase.Validating)
+            publish(entry)
+        }
         entry.application =
-            scope.launch(Dispatchers.Default) {
+            scope.launch {
                 try {
+                    if (revalidate) {
+                        val candidate = prepare(record)
+                        entry.mutex.withLock {
+                            currentCoroutineContext().ensureActive()
+                            if (entries.value[record.id] !== entry || entry.record.revision != record.revision) return@launch
+                            accept(entry, candidate)
+                        }
+                    }
                     while (true) {
                         val complete =
                             entry.mutex.withLock {
+                                currentCoroutineContext().ensureActive()
                                 try {
                                     apply(entry)
                                 } catch (_: PluginSessionBusyException) {
-                                    entry.state = entry.state.copy(phase = PluginAuthoringPhase.WaitingForOperations)
+                                    entry.progress = entry.progress.copy(phase = PluginAuthoringPhase.WaitingForOperations)
                                     publish(entry)
                                     false
                                 }
@@ -361,7 +344,9 @@ internal class PluginAuthoringServiceV1(
                 } catch (error: Exception) {
                     if (error is CancellationException) throw error
                     entry.mutex.withLock {
-                        entry.state = entry.state.copy(phase = PluginAuthoringPhase.Failed, error = error.message?.take(512))
+                        currentCoroutineContext().ensureActive()
+                        if (entries.value[record.id] !== entry) return@launch
+                        entry.progress = entry.progress.copy(phase = PluginAuthoringPhase.Failed, error = error.message?.take(512))
                         publish(entry)
                     }
                 }
@@ -373,7 +358,7 @@ internal class PluginAuthoringServiceV1(
         val id = entry.record.id
         if (entries.value[id] !== entry || candidate.revision != entry.record.revision) return true
         if (!entry.record.enabled) {
-            entry.state = entry.state.copy(phase = PluginAuthoringPhase.Idle)
+            entry.progress = entry.progress.copy(phase = PluginAuthoringPhase.Idle)
             publish(entry)
             return true
         }
@@ -388,36 +373,34 @@ internal class PluginAuthoringServiceV1(
                 baseline != null &&
                     baseline.manifest.platform.credentialSchemaVersion != candidate.validated.manifest.platform.credentialSchemaVersion
             if ((additional.isNotEmpty() || schemaChanged) && entry.approvedRevision != candidate.revision) {
-                entry.state =
-                    entry.state.copy(
+                entry.progress =
+                    entry.progress.copy(
                         phase = PluginAuthoringPhase.AwaitingApproval,
-                        permissions =
-                            additional.map {
-                                AuthoredPluginPermission(AuthoredPluginPermissionKind.valueOf(it.type.name), it.origin, it.cookieName)
-                            },
+                        permissions = additional.toList(),
                         credentialsChanged = schemaChanged,
                     )
                 publish(entry)
                 return@withLock true
             }
-            if (previous?.session?.hasWrites == true || subsystem.oauth.hasPending(id)) {
-                entry.state =
-                    entry.state.copy(
-                        phase = PluginAuthoringPhase.WaitingForOperations,
-                        permissions = emptyList(),
-                        credentialsChanged = false,
-                    )
-                publish(entry)
-                return@withLock false
+            if (previous?.installed?.packageHash != candidate.packageHash) {
+                if (previous?.session?.hasWrites == true || subsystem.oauth.hasPending(id)) {
+                    entry.progress =
+                        entry.progress.copy(
+                            phase = PluginAuthoringPhase.WaitingForOperations,
+                            permissions = emptyList(),
+                            credentialsChanged = false,
+                        )
+                    publish(entry)
+                    return@withLock false
+                }
+                val generation = maxOf(previous?.generation ?: 0, installed?.runtimeGeneration ?: 0) + 1
+                val record = subsystem.installer.persistAuthored(candidate.validated, candidate.archive, true, generation)
+                switcher.switch(previous, running(record), record)
             }
-            val generation = maxOf(previous?.generation ?: 0, installed?.runtimeGeneration ?: 0) + 1
-            val record = subsystem.installer.persistAuthored(candidate.validated, candidate.archive, true, generation)
-            switcher.switch(previous, running(record), record)
             entry.candidate = null
-            entry.state =
-                entry.state.copy(
+            entry.progress =
+                entry.progress.copy(
                     phase = PluginAuthoringPhase.Applied,
-                    running = true,
                     permissions = emptyList(),
                     credentialsChanged = false,
                     error = null,
@@ -449,7 +432,65 @@ internal class PluginAuthoringServiceV1(
     }
 
     private fun publish(entry: Entry) {
-        mutablePlugins.update { items -> (items.filterNot { it.id == entry.record.id } + entry.state).sortedBy { it.id } }
+        mutablePlugins.update { items -> (items.filterNot { it.id == entry.record.id } + snapshot(entry)).sortedBy { it.id } }
+    }
+
+    private fun snapshot(entry: Entry) =
+        AuthoredPlugin(
+            id = entry.record.id,
+            name = entry.record.name,
+            revision = entry.record.revision,
+            enabled = entry.record.enabled,
+            phase = entry.progress.phase,
+            error = entry.progress.error,
+            permissions = entry.progress.permissions,
+            credentialsChanged = entry.progress.credentialsChanged,
+        )
+
+    private fun validateSources(files: Map<String, String>) {
+        require(files.keys.containsAll(listOf(FppPaths.MANIFEST, FppPaths.ENTRY))) { "Submit manifest.json and plugin.js together" }
+        require(
+            files.size <= FppLimits.MAX_CATALOG_COUNT + 2 &&
+                files.all { (path, text) ->
+                    (path == FppPaths.MANIFEST || path == FppPaths.ENTRY || CATALOG.matches(path)) &&
+                        text.encodeToByteArray().size <=
+                        if (path == FppPaths.ENTRY) FppLimits.MAX_SCRIPT_BYTES else FppLimits.MAX_CATALOG_BYTES
+                },
+        ) { "Invalid plugin file or size" }
+    }
+
+    private suspend fun prepare(record: Record): Candidate {
+        validateSources(record.sources)
+        val bytes =
+            record.sources.mapValues { it.value.encodeToByteArray() } +
+                (FppPaths.ICON to requireNotNull(BundledPluginSdk.icon.decodeBase64()).toByteArray())
+        val archive =
+            FppArchive(
+                bytes.map { (path, value) ->
+                    FppArchiveEntry(path, false, value.size.toLong(), value.size.toLong(), 0)
+                },
+                bytes,
+            )
+        val validated = validator.validate(archive)
+        require(validated.manifest.id == record.id && validated.manifest.platform.id == platformId(record.id)) {
+            "Keep the host-assigned plugin and platform IDs"
+        }
+        return Candidate(record.revision, validated, encodePluginArchive(bytes))
+    }
+
+    private fun accept(
+        entry: Entry,
+        candidate: Candidate,
+    ) {
+        val name =
+            when (val text = candidate.validated.manifest.name) {
+                is PluginTextV1.Literal -> text.value
+                is PluginTextV1.Localized -> text.fallback
+            }
+        val record = entry.record.copy(name = name)
+        save(record)
+        entry.record = record
+        entry.candidate = candidate
     }
 
     private fun save(record: Record) {
@@ -489,10 +530,8 @@ internal class PluginAuthoringServiceV1(
                             )
                         }.let { it.copy(enabled = installed?.enabled ?: it.enabled) }
                 val entry = Entry(record)
-                val running = subsystem.running.value.plugins[id] != null
-                entry.state =
-                    entry.state.copy(
-                        running = running,
+                entry.progress =
+                    entry.progress.copy(
                         error = loaded.exceptionOrNull()?.message?.take(512),
                         // Saved source may be newer than the last working installation.
                         phase = if (loaded.isFailure) PluginAuthoringPhase.Failed else PluginAuthoringPhase.Idle,
@@ -504,13 +543,20 @@ internal class PluginAuthoringServiceV1(
         var record: Record,
     ) {
         val mutex = Mutex()
-        var state = AuthoredPlugin(record.id, record.name, revision = record.revision, enabled = record.enabled)
+        var progress = Progress()
         var runId: String? = null
         var caller: Job? = null
         var application: Job? = null
         var candidate: Candidate? = null
         var approvedRevision: Long? = null
     }
+
+    private data class Progress(
+        val phase: PluginAuthoringPhase = PluginAuthoringPhase.Idle,
+        val error: String? = null,
+        val permissions: List<PluginPermission> = emptyList(),
+        val credentialsChanged: Boolean = false,
+    )
 
     @Serializable
     private data class Record(
@@ -525,7 +571,9 @@ internal class PluginAuthoringServiceV1(
         val revision: Long,
         val validated: ValidatedPluginPackage,
         val archive: ByteArray,
-    )
+    ) {
+        val packageHash = archive.toByteString().sha256().hex()
+    }
 
     companion object {
         fun platformId(id: String): String = id.removePrefix("local.").replace('.', '_')

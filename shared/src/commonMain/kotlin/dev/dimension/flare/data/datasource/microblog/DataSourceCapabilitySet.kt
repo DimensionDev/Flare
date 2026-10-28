@@ -29,13 +29,13 @@ public data class DataSourceCapabilitySet(
     public val search: SearchCapability? = null,
     public val profile: ProfileCapability? = null,
     public val post: PostCapability? = null,
-    public val relation: RelationCapability? = null,
-    public val compose: ComposeCapability? = null,
+    public val relation: RelationDataSource? = null,
+    public val compose: ComposeDataSource? = null,
     public val notification: NotificationCapability? = null,
-    public val list: ListCapability? = null,
-    public val directMessage: DirectMessageCapability? = null,
-    public val article: ArticleCapability? = null,
-    public val gallery: GalleryCapability? = null,
+    public val list: ListDataSource? = null,
+    public val directMessage: DirectMessageDataSource? = null,
+    public val article: ArticleDataSource? = null,
+    public val gallery: GalleryDataSource? = null,
     public val tabCatalog: TabCatalogCapability? = null,
 )
 
@@ -118,40 +118,10 @@ public class PostCapability(
 }
 
 @HiddenFromObjC
-public class RelationCapability(
-    delegate: RelationDataSource,
-) : RelationDataSource by delegate
-
-@HiddenFromObjC
-public class ComposeCapability(
-    delegate: ComposeDataSource,
-) : ComposeDataSource by delegate
-
-@HiddenFromObjC
 public data class NotificationCapability(
     public val timeline: NotificationTimelineDataSource?,
     public val events: NotificationDataSource?,
 )
-
-@HiddenFromObjC
-public class ListCapability(
-    delegate: ListDataSource,
-) : ListDataSource by delegate
-
-@HiddenFromObjC
-public class DirectMessageCapability(
-    delegate: DirectMessageDataSource,
-) : DirectMessageDataSource by delegate
-
-@HiddenFromObjC
-public class ArticleCapability(
-    delegate: ArticleDataSource,
-) : ArticleDataSource by delegate
-
-@HiddenFromObjC
-public class GalleryCapability(
-    delegate: GalleryDataSource,
-) : GalleryDataSource by delegate
 
 @HiddenFromObjC
 public data class TabCatalogCapability(
@@ -169,18 +139,18 @@ private fun MicroblogDataSource.legacyCapabilitySet(): DataSourceCapabilitySet {
         search = SearchCapability(this),
         profile = (this as? UserDataSource)?.let { ProfileCapability(this, it) },
         post = (this as? PostDataSource)?.let { PostCapability(this, it) },
-        relation = (this as? RelationDataSource)?.let(::RelationCapability),
-        compose = (this as? ComposeDataSource)?.let(::ComposeCapability),
+        relation = this as? RelationDataSource,
+        compose = this as? ComposeDataSource,
         notification =
             if (notificationTimeline != null || notificationEvents != null) {
                 NotificationCapability(notificationTimeline, notificationEvents)
             } else {
                 null
             },
-        list = (this as? ListDataSource)?.let(::ListCapability),
-        directMessage = (this as? DirectMessageDataSource)?.let(::DirectMessageCapability),
-        article = (this as? ArticleDataSource)?.let(::ArticleCapability),
-        gallery = (this as? GalleryDataSource)?.let(::GalleryCapability),
+        list = this as? ListDataSource,
+        directMessage = this as? DirectMessageDataSource,
+        article = this as? ArticleDataSource,
+        gallery = this as? GalleryDataSource,
         tabCatalog =
             if (tabConfiguration != null || pinnableTabs != null) {
                 TabCatalogCapability(tabConfiguration, pinnableTabs)

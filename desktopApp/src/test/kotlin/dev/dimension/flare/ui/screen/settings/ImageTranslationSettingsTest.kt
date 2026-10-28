@@ -42,53 +42,52 @@ import javax.imageio.ImageIO
 
 class ImageTranslationSettingsTest {
     @get:Rule val compose = createComposeRule()
+    private val media =
+        UiMedia.Image(
+            url = "https://example.invalid/image.png",
+            previewUrl = "https://example.invalid/image.png",
+            description = null,
+            height = 1f,
+            width = 1f,
+            sensitive = false,
+        )
 
     @Test
-    fun unconfiguredViewerOnlyShowsHintAndNeverOpensConfiguration() {
-        var requested = 0
-        var error by mutableStateOf<ImageTranslationError?>(null)
-        val media =
-            UiMedia.Image(
-                url = "https://example.invalid/image.png",
-                previewUrl = "https://example.invalid/image.png",
-                description = null,
-                height = 1f,
-                width = 1f,
-                sensitive = false,
-            )
-        val translation =
-            object : ImageTranslationPresenter.State {
-                override val configured = false
-
-                override fun item(media: UiMedia) = ImageTranslationItem(error = error)
-
-                override fun displayed(media: UiMedia) = media
-
-                override fun toggle(media: UiMedia) {
-                    requested++
-                    error = ImageTranslationError.NotConfigured
-                }
-
-                override fun regenerate(media: UiMedia) = Unit
-
-                override fun clearError(media: UiMedia) {
-                    error = null
-                }
-
-                override fun imageFailed(
-                    media: UiMedia,
-                    url: String,
-                ) = Unit
-            }
-        compose.setContent { FlareTheme(isDarkTheme = false) { ImageTranslationActions(translation, media) } }
-        compose.onNodeWithText("Translate image").performClick()
-        compose.onNodeWithText("Configure image translation in Translation settings first.").assertExists()
+    fun viewerUpdatesTranslationControlsFromLocalReadinessOnly() {
+        val state = TranslationState()
+        compose.setContent { FlareTheme(isDarkTheme = false) { ImageTranslationActions(state, media) } }
+        compose.onNodeWithText("Translate image").assertDoesNotExist()
+        compose.onNodeWithText("Translate again").assertDoesNotExist()
+        compose.runOnIdle { state.configured = true }
+        compose.onNodeWithText("Translate image").assertExists()
+        compose.runOnIdle { state.entry = ImageTranslationItem(error = ImageTranslationError.Authentication) }
+        compose.onNodeWithText("Translate image").assertExists()
+        compose.onNodeWithText("Check the provider credentials and service access.").assertExists()
+        compose.onNodeWithText("OK").performClick()
+        compose.runOnIdle { state.configured = false }
+        compose.onNodeWithText("Translate image").assertDoesNotExist()
         compose.onNodeWithText("Image translation provider").assertDoesNotExist()
         compose.onNodeWithText("Translation settings").assertDoesNotExist()
-        compose.onNodeWithText("OK").performClick()
+        compose.runOnIdle { assertEquals(0, state.toggles) }
+    }
+
+    @Test
+    fun unconfiguredViewerKeepsTranslationSwitchAndHidesRegeneration() {
+        val state = TranslationState()
+        state.entry = ImageTranslationItem(translated = media.copy(url = "file:///translated.png"), showingTranslated = true)
+        compose.setContent { FlareTheme(isDarkTheme = false) { ImageTranslationActions(state, media) } }
+        compose.onNodeWithText("Translate image").assertDoesNotExist()
+        compose.onNodeWithText("Translate again").assertDoesNotExist()
+        compose.onNodeWithText("Show original").performClick()
+        compose.onNodeWithText("Show translation").performClick()
+        compose.onNodeWithText("Show original").assertExists()
+        compose.runOnIdle { state.configured = true }
+        compose.onNodeWithText("Translate again").assertExists()
+        compose.runOnIdle { state.configured = false }
+        compose.onNodeWithText("Translate again").assertDoesNotExist()
         compose.runOnIdle {
-            assertEquals(1, requested)
-            assertEquals(null, error)
+            assertEquals(2, state.toggles)
+            assertEquals(0, state.regenerations)
         }
     }
 
@@ -260,6 +259,35 @@ class ImageTranslationSettingsTest {
                 }
             }
         }
+    }
+
+    private class TranslationState : ImageTranslationPresenter.State {
+        override var configured by mutableStateOf(false)
+        var entry by mutableStateOf(ImageTranslationItem())
+        var toggles = 0
+        var regenerations = 0
+
+        override fun item(media: UiMedia) = entry
+
+        override fun displayed(media: UiMedia) = if (entry.showingTranslated) entry.translated ?: media else media
+
+        override fun toggle(media: UiMedia) {
+            toggles++
+            entry = entry.copy(showingTranslated = !entry.showingTranslated)
+        }
+
+        override fun regenerate(media: UiMedia) {
+            regenerations++
+        }
+
+        override fun clearError(media: UiMedia) {
+            entry = entry.copy(error = null)
+        }
+
+        override fun imageFailed(
+            media: UiMedia,
+            url: String,
+        ) = Unit
     }
 
     private class State(

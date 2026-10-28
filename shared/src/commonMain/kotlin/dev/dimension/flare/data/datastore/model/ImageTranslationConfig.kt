@@ -1,5 +1,7 @@
 package dev.dimension.flare.data.datastore.model
 
+import io.ktor.http.URLBuilder
+import io.ktor.http.takeFrom
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -68,8 +70,20 @@ public data class ImageTranslationConfig(
         get() =
             provider != ImageTranslationProvider.Disabled &&
                 imageTranslationFields(provider).all {
-                    (!it.required || value(it.id).isNotBlank()) && (it.choices.isEmpty() || value(it.id) in it.choices)
+                    (!it.required || value(it.id).isNotBlank()) &&
+                        (it.choices.isEmpty() || value(it.id) in it.choices) &&
+                        (it.id != "baseUrl" || isValidImageTranslationServiceUrl(value(it.id)))
                 }
+}
+
+internal fun isValidImageTranslationServiceUrl(value: String): Boolean {
+    if ((!value.startsWith("https://", ignoreCase = true) && !value.startsWith("http://", ignoreCase = true)) ||
+        value.any(Char::isWhitespace) || '?' in value || '#' in value
+    ) {
+        return false
+    }
+    val url = runCatching { URLBuilder().takeFrom(value) }.getOrNull() ?: return false
+    return url.host.isNotBlank() && url.user.isNullOrEmpty() && url.password.isNullOrEmpty()
 }
 
 private val SHARED_AI_FIELDS = setOf("baseUrl", "apiKey", "model")

@@ -220,6 +220,48 @@ class ImageTranslationConfigTest {
     }
 
     @Test
+    fun readinessUsesLocalFieldsAndAbsoluteServiceUrlsOnly() {
+        val config =
+            ImageTranslationConfig(
+                ImageTranslationProvider.OpenAIImages,
+            ).withValue("apiKey", "key").withValue("model", "unknown-image")
+        assertTrue(config.configured)
+        listOf(
+            "",
+            "relative/v1",
+            "service.example/v1",
+            "//service.example/v1",
+            "ftp://service.example",
+            "https://",
+            "https://:443/v1",
+            "https://bad host/v1",
+            "https://user:password@service.example/v1",
+            "https://service.example/v1?key=secret",
+            "https://service.example/v1?",
+            "https://service.example/v1#fragment",
+            "https://service.example/v1#",
+            "https://service.example:invalid/v1",
+        ).forEach { url ->
+            assertFalse(config.withValue("baseUrl", url).configured, url)
+        }
+        listOf("https://service.example/custom/v1/", "http://127.0.0.1:18473/v1").forEach { url ->
+            assertTrue(config.withValue("baseUrl", url).configured, url)
+        }
+        listOf("apiKey", "model", "prompt").forEach { field ->
+            assertFalse(config.withValue(field, " ").configured, field)
+        }
+        assertFalse(config.withValue("inputFormat", "unsupported").configured)
+        assertFalse(config.copy(provider = ImageTranslationProvider.Disabled).configured)
+        assertFalse(
+            config
+                .copy(
+                    useSharedAIConfig = true,
+                ).resolved(basic.copy(type = AppSettings.AiConfig.Type.OpenAI("bad-url", "key", "model")))
+                .configured,
+        )
+    }
+
+    @Test
     fun dedicatedProviderCredentialsStayIndependentOfBasicSettings() {
         listOf(ImageTranslationProvider.Gemini, ImageTranslationProvider.Tencent, ImageTranslationProvider.Qwen).forEach { provider ->
             val config = ImageTranslationConfig(provider, useSharedAIConfig = true).withValue("apiKey", "provider-key")

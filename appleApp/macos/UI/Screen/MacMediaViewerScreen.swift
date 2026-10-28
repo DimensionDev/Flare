@@ -90,15 +90,16 @@ struct MacMediaViewerScreen: View {
             }
 
             ToolbarItemGroup(placement: .primaryAction) {
-                if let selectedMedia, selectedMedia is UiMediaImage {
+                if let selectedMedia, imageTranslation.state.canToggle(media: selectedMedia) {
+                    let translationItem = imageTranslation.state.item(media: selectedMedia)
                     Button {
                         imageTranslation.state.toggle(media: selectedMedia)
                     } label: {
                         Image(systemName: "translate")
                     }
-                    .disabled(imageTranslation.state.item(media: selectedMedia).loading)
-                    .accessibilityLabel(Text(imageTranslation.state.item(media: selectedMedia).showingTranslated ? "Show original" : "Translate image", bundle: .main))
-                    .accessibilityValue(Text(imageTranslation.state.item(media: selectedMedia).loading ? "Translating image" : "", bundle: .main))
+                    .disabled(translationItem.loading)
+                    .accessibilityLabel(Text(translationItem.showingTranslated ? "Show original" : translationItem.translated != nil ? "Show translation" : "Translate image", bundle: .main))
+                    .accessibilityValue(Text(translationItem.loading ? "Translating image" : "", bundle: .main))
                     .help(Text("Image translation", bundle: .main))
                 }
                 if let selectedExportSource {
@@ -219,7 +220,7 @@ struct MacMediaViewerScreen: View {
                             }
                         }
                         .contextMenu {
-                            if media is UiMediaImage, imageTranslation.state.item(media: media).translated != nil {
+                            if imageTranslation.state.canRegenerate(media: media) {
                                 Button { imageTranslation.state.regenerate(media: media) } label: {
                                     Text("Translate again", bundle: .main)
                                 }

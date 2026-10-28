@@ -361,7 +361,7 @@ class ImageTranslationRepositoryTest {
         }
 
     @Test
-    fun presenterDeduplicatesAndKeepsResultsOnTheirOwnImagesAcrossPaging() =
+    fun presenterDeduplicatesAndKeepsResultsAcrossPagingAndInvalidConfiguration() =
         runBlocking {
             withTimeout(10_000) {
                 fixture().use { f ->
@@ -418,12 +418,47 @@ class ImageTranslationRepositoryTest {
                         assertTrue(state.item(a).loading)
                         assertEquals(a, state.displayed(a))
                         assertEquals(bResult, state.displayed(b))
+                        store.appSettingsStore.updateData {
+                            it.copy(imageTranslationConfig = config.copy(provider = ImageTranslationProvider.Disabled))
+                        }
+                        state = models.first { !it.configured }
+                        assertFalse(state.canToggle(a))
+                        assertTrue(state.canToggle(b))
+                        assertFalse(state.canRegenerate(b))
+                        assertTrue(state.item(a).loading)
+                        assertEquals(bResult, state.displayed(b))
+                        state.toggle(b)
+                        state = models.first { !it.item(b).showingTranslated }
+                        assertEquals(b, state.displayed(b))
+                        state.toggle(b)
+                        state = models.first { it.item(b).showingTranslated }
+                        assertEquals(bResult, state.displayed(b))
+                        val untouched = a.copy(url = "https://source.example/untouched.png")
+                        state.toggle(untouched)
+                        state.regenerate(b)
                         aFinish.complete(Unit)
                         state = models.first { it.item(a).translated != null }
+                        assertFalse(state.configured)
+                        assertEquals(2, f.calls)
+                        assertEquals(null, state.item(untouched).error)
+                        assertFalse(state.item(untouched).loading)
+                        assertEquals(null, state.item(b).error)
+                        assertEquals(bResult, state.displayed(b))
+                        val cachedSession = repository.newSession()
+                        try {
+                            repository.translate(a, null, config, dev.dimension.flare.common.Locale.language, cachedSession, false)
+                            assertEquals(2, f.calls)
+                        } finally {
+                            repository.closeSession(cachedSession)
+                        }
+                        store.appSettingsStore.updateData { it.copy(imageTranslationConfig = config) }
+                        state = models.first { it.configured }
                         assertEquals(bResult, state.displayed(b))
                         f.behavior = { throw ImageTranslationException(ImageTranslationError.Rejected) }
                         state.regenerate(b)
                         state = models.first { it.item(b).error == ImageTranslationError.Rejected }
+                        assertTrue(state.canToggle(b))
+                        assertTrue(state.canRegenerate(b))
                         assertEquals(bResult, state.displayed(b))
                         f.behavior = { ImageTranslationOutput.Encoded(f.output.base64()) }
                         state.regenerate(b)
@@ -584,7 +619,8 @@ class ImageTranslationRepositoryTest {
                     try {
                         models.first().selectProvider(ImageTranslationProvider.OpenAIImages)
                         var state = models.first { it.useSharedConfig && it.config.value("model") == "basic-model" }
-                        assertEquals(listOf("inputFormat", "prompt"), state.fields.map { it.id })
+                        assertEquals(listOf("baseUrl", "apiKey", "model", "inputFormat", "prompt"), state.fields.map { it.id })
+                        assertEquals(listOf("inputFormat", "prompt"), state.config.editableFields.map { it.id })
                         assertTrue(
                             store.appSettingsStore.data
                                 .first()
@@ -608,10 +644,10 @@ class ImageTranslationRepositoryTest {
                         )
                         state = models.first { it.useSharedConfig }
                         state.setUseSharedConfig(false)
-                        models.first { !it.useSharedConfig && it.config.value("model") == "custom-image-model" }
+                        models.first { !it.useSharedConfig && it.config.value("model") == "new-basic-model" }
                         val saved = store.appSettingsStore.data.first()
                         assertFalse(saved.imageTranslationConfig.useSharedAIConfig)
-                        assertEquals("custom-image-model", saved.imageTranslationConfig.value("model"))
+                        assertEquals("new-basic-model", saved.imageTranslationConfig.value("model"))
                         assertEquals("basic-key", saved.imageTranslationConfig.value("apiKey"))
                     } finally {
                         withContext(NonCancellable) {

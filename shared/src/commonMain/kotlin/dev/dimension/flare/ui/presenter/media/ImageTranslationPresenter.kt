@@ -4,8 +4,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import dev.dimension.flare.common.Locale
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.datastore.model.AppSettings
@@ -46,6 +48,10 @@ public class ImageTranslationPresenter(
 
         public fun item(media: UiMedia): ImageTranslationItem
 
+        public fun canToggle(media: UiMedia): Boolean = media is UiMedia.Image && (configured || item(media).translated != null)
+
+        public fun canRegenerate(media: UiMedia): Boolean = media is UiMedia.Image && configured && item(media).translated != null
+
         public fun displayed(media: UiMedia): UiMedia
 
         public fun toggle(media: UiMedia)
@@ -68,13 +74,18 @@ public class ImageTranslationPresenter(
         val snapshot = entries.collectAsState().value
         val settings by store.appSettingsStore.data.collectAsState(AppSettings(version = ""))
         val config = settings.imageTranslationConfig.resolved(settings.aiConfig)
+        val isConfigured = config.configured
         val target = Locale.language
         val requestIdentity =
             remember(config, target) {
                 (config.fingerprint() + target).encodeUtf8().sha256().hex()
             }
 
-        fun key(media: UiMedia) = media.cacheKey + "|" + requestIdentity
+        var retainedIdentity by remember { mutableStateOf(requestIdentity) }
+        if (isConfigured) retainedIdentity = requestIdentity
+        val displayIdentity = retainedIdentity
+
+        fun key(media: UiMedia) = media.cacheKey + "|" + displayIdentity
         DisposableEffect(session) {
             onDispose {
                 scope.launch(start = kotlinx.coroutines.CoroutineStart.UNDISPATCHED) {
@@ -102,6 +113,7 @@ public class ImageTranslationPresenter(
                         return
                     }
                 } else {
+                    if (!isConfigured) return
                     if (entries.compareAndSet(before, before + (key to item.copy(loading = true, error = null)))) break
                 }
             }
@@ -146,7 +158,7 @@ public class ImageTranslationPresenter(
             }
         }
         return object : State {
-            override val configured = config.configured
+            override val configured = isConfigured
 
             override fun item(media: UiMedia) = snapshot[key(media)] ?: ImageTranslationItem()
 

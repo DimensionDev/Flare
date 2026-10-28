@@ -130,7 +130,7 @@ struct MediaViewerScreen: View {
                                                 UIPasteboard.general.string = media.url
                                             }
                                         )
-                                        if media is UiMediaImage, imageTranslation.state.item(media: media).translated != nil {
+                                        if imageTranslation.state.canRegenerate(media: media) {
                                             Button { imageTranslation.state.regenerate(media: media) } label: {
                                                 Text("Translate again", bundle: .main)
                                             }
@@ -300,14 +300,17 @@ struct MediaViewerScreen: View {
                     .accessibilityLabel(Text(verbatim: isLandscapeViewing ? "Exit landscape view" : "Landscape view"))
 
                     if let selectedMedia, case .image = onEnum(of: selectedMedia) {
-                        topOverlayButton {
-                            imageTranslation.state.toggle(media: selectedMedia)
-                        } label: {
-                            Image(systemName: "translate")
+                        if imageTranslation.state.canToggle(media: selectedMedia) {
+                            let translationItem = imageTranslation.state.item(media: selectedMedia)
+                            topOverlayButton {
+                                imageTranslation.state.toggle(media: selectedMedia)
+                            } label: {
+                                Image(systemName: "translate")
+                            }
+                            .disabled(translationItem.loading)
+                            .accessibilityLabel(Text(translationItem.showingTranslated ? "Show original" : translationItem.translated != nil ? "Show translation" : "Translate image", bundle: .main))
+                            .accessibilityValue(Text(translationItem.loading ? "Translating image" : "", bundle: .main))
                         }
-                        .disabled(imageTranslation.state.item(media: selectedMedia).loading)
-                        .accessibilityLabel(Text(imageTranslation.state.item(media: selectedMedia).showingTranslated ? "Show original" : "Translate image", bundle: .main))
-                        .accessibilityValue(Text(imageTranslation.state.item(media: selectedMedia).loading ? "Translating image" : "", bundle: .main))
                         topOverlayButton {
                             saveMedia(selectedMedia)
                         } label: {

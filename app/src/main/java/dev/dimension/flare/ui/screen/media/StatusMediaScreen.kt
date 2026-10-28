@@ -577,23 +577,22 @@ internal fun MediaViewerScreen(
                                                 if (state.isLandscapeViewing) "Exit landscape view" else "Landscape view",
                                         )
                                     }
-                                    if (current is UiMedia.Image) {
+                                    val translationItem = translation.item(current)
+                                    if (translation.canToggle(current)) {
                                         FilledTonalIconButton(
                                             onClick = {
                                                 translation.toggle(current)
                                             },
-                                            enabled = !translation.item(current).loading,
+                                            enabled = !translationItem.loading,
                                         ) {
                                             FAIcon(
                                                 FontAwesomeIcons.Solid.Language,
                                                 contentDescription =
                                                     imageTranslationText(
-                                                        if (translation
-                                                                .item(
-                                                                    current,
-                                                                ).showingTranslated
-                                                        ) {
+                                                        if (translationItem.showingTranslated) {
                                                             "Show original"
+                                                        } else if (translationItem.translated != null) {
+                                                            "Show translation"
                                                         } else {
                                                             "Translate image"
                                                         },
@@ -893,7 +892,7 @@ internal fun MediaViewerScreen(
 
                     val current = medias.getOrNull(state.currentPage)
                     if (current is UiMedia.Image) {
-                        if (translation.item(current).translated != null) {
+                        if (translation.canRegenerate(current)) {
                             ListItem(
                                 modifier =
                                     Modifier.clickable {

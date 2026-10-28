@@ -1,6 +1,7 @@
 package dev.dimension.flare.data.translation.image
 
 import dev.dimension.flare.common.JSON
+import dev.dimension.flare.data.datastore.model.isValidImageTranslationServiceUrl
 import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.data.network.mediaHttpClient
 import io.ktor.client.HttpClient
@@ -10,7 +11,6 @@ import io.ktor.client.request.preparePost
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsChannel
 import io.ktor.http.ContentType
-import io.ktor.http.Url
 import io.ktor.http.content.OutgoingContent
 import io.ktor.http.content.TextContent
 import io.ktor.utils.io.ByteWriteChannel
@@ -34,10 +34,7 @@ internal fun imageTranslationHttpClient(): HttpClient =
     }
 
 internal fun checkedImageServiceUrl(value: String): String {
-    val url = runCatching { Url(value) }.getOrNull()
-    if (url == null || url.protocol.name !in listOf("https", "http") || url.host.isBlank() ||
-        !url.user.isNullOrEmpty() || !url.password.isNullOrEmpty() || url.fragment.isNotEmpty() || url.parameters.names().isNotEmpty()
-    ) {
+    if (!isValidImageTranslationServiceUrl(value)) {
         throw ImageTranslationException(ImageTranslationError.NotConfigured)
     }
     return value.trimEnd('/')

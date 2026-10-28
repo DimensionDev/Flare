@@ -23,25 +23,27 @@ internal fun ImageTranslationActions(
     if (media !is UiMedia.Image) return
     val item = translation.item(media)
     Row {
-        SubtleButton(
-            onClick = { translation.toggle(media) },
-            disabled = item.loading,
-        ) {
-            Text(
-                imageTranslationText(
-                    if (item.showingTranslated) {
-                        "Show original"
-                    } else if (item.translated !=
-                        null
-                    ) {
-                        "Show translation"
-                    } else {
-                        "Translate image"
-                    },
-                ),
-            )
+        if (translation.canToggle(media)) {
+            SubtleButton(
+                onClick = { translation.toggle(media) },
+                disabled = item.loading,
+            ) {
+                Text(
+                    imageTranslationText(
+                        if (item.showingTranslated) {
+                            "Show original"
+                        } else if (item.translated !=
+                            null
+                        ) {
+                            "Show translation"
+                        } else {
+                            "Translate image"
+                        },
+                    ),
+                )
+            }
         }
-        if (item.translated != null) {
+        if (translation.canRegenerate(media)) {
             SubtleButton(
                 onClick = { translation.regenerate(media) },
                 disabled = item.loading,

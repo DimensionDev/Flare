@@ -24,12 +24,12 @@ final class MediaViewerInteractionTests: XCTestCase {
     }
 
     @MainActor
-    func testUnconfiguredImageTranslationOnlyShowsHintWithPost() {
+    func testUnconfiguredImageTranslationIsHiddenWithPost() {
         assertUnconfiguredTranslation(withoutPost: false)
     }
 
     @MainActor
-    func testUnconfiguredImageTranslationOnlyShowsHintWithoutPost() {
+    func testUnconfiguredImageTranslationIsHiddenWithoutPost() {
         assertUnconfiguredTranslation(withoutPost: true)
     }
 
@@ -237,15 +237,12 @@ final class MediaViewerInteractionTests: XCTestCase {
     private func assertUnconfiguredTranslation(withoutPost: Bool) {
         let app = openMedia(withoutPost: withoutPost)
         defer { app.terminate() }
-        let translate = app.buttons["Translate image"]
-        translate.tap()
-        let alert = app.alerts["Image translation"]
-        XCTAssertTrue(alert.waitForExistence(timeout: 5))
-        XCTAssertTrue(alert.staticTexts["Configure image translation in Translation settings first."].exists)
+        XCTAssertFalse(app.buttons["Translate image"].exists)
+        XCTAssertFalse(app.buttons["Translate again"].exists)
+        XCTAssertFalse(app.alerts["Image translation"].exists)
+        XCTAssertTrue(app.buttons["Share image"].exists)
         XCTAssertFalse(app.navigationBars["Image translation"].exists)
         XCTAssertFalse(app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Image translation provider")).firstMatch.exists)
-        alert.buttons["OK"].tap()
-        XCTAssertTrue(translate.waitForExistence(timeout: 5))
         if !withoutPost {
             XCTAssertTrue(app.buttons["Sheet Grabber"].waitForExistence(timeout: 5))
             let postAction = app.buttons["More"].firstMatch
@@ -282,7 +279,7 @@ final class MediaViewerInteractionTests: XCTestCase {
         attachment.lifetime = .keepAlways
         add(attachment)
         original.tap()
-        app.buttons["Translate image"].tap()
+        app.buttons["Show translation"].tap()
         XCTAssertTrue(original.waitForExistence(timeout: 5))
         app.buttons["Share image"].tap()
         XCTAssertTrue(app.cells["Copy"].waitForExistence(timeout: 5))

@@ -45,6 +45,27 @@ class ImageTranslationAdaptersTest {
             .withValue("secretKey", "test-secret")
 
     @Test
+    fun requestUrlValidationMatchesLocalReadiness() {
+        listOf(
+            "missing-scheme.example/v1",
+            "ftp://service.example/v1",
+            "https://user:password@service.example/v1",
+            "https://service.example/v1?key=secret",
+            "https://service.example/v1#fragment",
+        ).forEach { url ->
+            val config = config(ImageTranslationProvider.OpenAIImages).withValue("baseUrl", url)
+            assertFalse(config.configured)
+            assertEquals(
+                ImageTranslationError.NotConfigured,
+                assertFailsWith<ImageTranslationException> { checkedImageServiceUrl(url) }.reason,
+            )
+        }
+        val localUrl = "http://127.0.0.1:18473/v1/"
+        assertTrue(config(ImageTranslationProvider.OpenAIImages).withValue("baseUrl", localUrl).configured)
+        assertEquals(localUrl.dropLast(1), checkedImageServiceUrl(localUrl))
+    }
+
+    @Test
     fun openAIUsesImageEditsAndOriginalBytesForPrivateImage() =
         runTest {
             val client =

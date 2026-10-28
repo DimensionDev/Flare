@@ -613,22 +613,32 @@ internal class PluginLoginMethodHandlerV1(
             } == true
 
     override suspend fun checkCookies(snapshot: LoginCookieSnapshot): Boolean {
-        val session = cookieSession ?: error("Cookie login has not started")
-        val result =
-            session.check(
-                CookieSnapshotV1(
-                    cookies =
-                        snapshot.values.map { cookie ->
-                            CookieValueV1(
-                                sourceUrl = cookie.sourceUrl,
-                                name = cookie.name,
-                                value = cookie.value,
-                            )
-                        },
-                ),
-            )
-        if (result is PluginCookieCheckResultV1.Success) complete(result.value)
-        return result is PluginCookieCheckResultV1.Success
+        val session = cookieSession ?: return false
+        return try {
+            val result =
+                session.check(
+                    CookieSnapshotV1(
+                        cookies =
+                            snapshot.values.map { cookie ->
+                                CookieValueV1(
+                                    sourceUrl = cookie.sourceUrl,
+                                    name = cookie.name,
+                                    value = cookie.value,
+                                )
+                            },
+                    ),
+                )
+            if (result is PluginCookieCheckResultV1.Success) {
+                complete(result.value)
+            } else if (result !is PluginCookieCheckResultV1.Busy) {
+                mutableState.value = state()
+            }
+            result is PluginCookieCheckResultV1.Success
+        } catch (error: Throwable) {
+            if (error is CancellationException) throw error
+            mutableState.value = state(error = error.message ?: "Plugin login failed")
+            false
+        }
     }
 
     override fun clear() {

@@ -20,8 +20,12 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.presenter.login.LoginContext
+import dev.dimension.flare.ui.presenter.login.LoginCookieSnapshot
+import dev.dimension.flare.ui.presenter.login.LoginCookieValue
 import dev.dimension.flare.ui.presenter.login.LoginMethodType
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
@@ -375,6 +379,43 @@ class PluginLoginCoordinatorV1Test {
         }
 
     @Test
+    fun cookieFlowCombinesRequirementsFromProbesWithTheSameUrl() =
+        runBlocking {
+            plugin =
+                install(
+                    LOGIN_SCRIPT,
+                    manifest =
+                        LOGIN_MANIFEST.replace(
+                            "\"probes\": [{",
+                            """"probes": [{ "url": "${'$'}accountOrigin/api/cookie", "cookies": [{ "name": "csrf", "required": true }] }, {""",
+                        ),
+                )
+            val session = PluginWebCookieLoginCoordinatorV1(pool, FixedEntropy).begin(plugin, "cookie", ORIGIN, "en")
+            try {
+                val cookies = listOf(CookieValueV1("$ORIGIN/api/cookie", "session", "valid"))
+                val waiting = assertIs<PluginCookieCheckResultV1.AwaitingCookies>(session.check(CookieSnapshotV1(cookies)))
+                assertEquals(listOf("csrf"), waiting.missing.map { it.name })
+                val success =
+                    assertIs<PluginCookieCheckResultV1.Success>(
+                        session.check(
+                            CookieSnapshotV1(
+                                cookies + CookieValueV1("$ORIGIN/api/cookie", "csrf", "token") +
+                                    CookieValueV1("$ORIGIN/api/cookie", "undeclared", "must-not-leak"),
+                            ),
+                        ),
+                    )
+                assertEquals(
+                    listOf("csrf", "session"),
+                    success.value.credential.jsonObject["cookies"]!!
+                        .jsonArray
+                        .map { it.jsonObject["name"]!!.jsonPrimitive.content },
+                )
+            } finally {
+                session.close()
+            }
+        }
+
+    @Test
     fun overlappingCookiePollIsSkippedInsteadOfQueued() =
         runBlocking {
             pool.close()
@@ -404,6 +445,107 @@ class PluginLoginCoordinatorV1Test {
         assertTrue(!PluginWebCookieNavigationPolicyV1.isAllowed("file:///tmp/test"))
     }
 
+    @Test
+    fun cookieHandlerReportsCheckFailureAndRecoversOnLaterChecks() =
+        runBlocking {
+            plugin =
+                install(
+                    "let checks = 0;\n" +
+                        LOGIN_SCRIPT.replace(
+                            "async check(request) {",
+                            """async check(request) {
+                        if (++checks === 1) throw flare.error({ code: "Network", message: { key: "error.network", fallback: "temporary network failure" } });
+                    """,
+                        ),
+                )
+            val accounts = RecordingAccountService()
+            var completed = 0
+            val handler = cookieHandler(accounts) { completed++ }
+            try {
+                assertFalse(handler.checkCookies(cookieSnapshot("valid")))
+                handler.perform("login")
+                assertFalse(handler.checkCookies(cookieSnapshot("valid")))
+                assertTrue(
+                    handler.state.value.error
+                        .orEmpty()
+                        .contains("temporary network failure"),
+                )
+                assertTrue(accounts.added.isEmpty())
+                assertEquals(0, completed)
+
+                assertFalse(handler.checkCookies(cookieSnapshot("pending")))
+                assertNull(handler.state.value.error)
+                assertTrue(handler.checkCookies(cookieSnapshot("valid")))
+                assertNull(handler.state.value.error)
+                assertEquals(1, accounts.added.size)
+                assertEquals(1, completed)
+            } finally {
+                handler.close()
+            }
+        }
+
+    @Test
+    fun cookieHandlerReportsAccountSaveFailureAndAllowsLoginRetry() =
+        runBlocking {
+            val accounts = RecordingAccountService().apply { addFailure = IllegalStateException("save failed") }
+            var completed = 0
+            val handler = cookieHandler(accounts) { completed++ }
+            try {
+                handler.perform("login")
+                assertFalse(handler.checkCookies(cookieSnapshot("valid")))
+                assertEquals("save failed", handler.state.value.error)
+                assertTrue(accounts.added.isEmpty())
+                assertEquals(0, completed)
+
+                accounts.addFailure = null
+                handler.perform("login")
+                assertTrue(handler.checkCookies(cookieSnapshot("valid")))
+                assertNull(handler.state.value.error)
+                assertEquals(1, accounts.added.size)
+                assertEquals(1, completed)
+            } finally {
+                handler.close()
+            }
+        }
+
+    @Test
+    fun cookieHandlerPropagatesCancellation() =
+        runBlocking {
+            val accounts = RecordingAccountService().apply { addFailure = CancellationException("cancelled") }
+            val handler = cookieHandler(accounts)
+            try {
+                handler.perform("login")
+                assertFailsWith<CancellationException> { handler.checkCookies(cookieSnapshot("valid")) }
+                assertNull(handler.state.value.error)
+                assertTrue(accounts.added.isEmpty())
+            } finally {
+                handler.close()
+            }
+        }
+
+    private fun cookieSnapshot(value: String) =
+        LoginCookieSnapshot(values = listOf(LoginCookieValue("$ORIGIN/api/cookie", "session", value)))
+
+    private fun CoroutineScope.cookieHandler(
+        accounts: AccountService,
+        onSuccess: () -> Unit = {},
+    ): PluginLoginMethodHandlerV1 {
+        val oauth = oauthCoordinator()
+        return PluginLoginMethodHandlerV1(
+            plugin = plugin,
+            method =
+                plugin.installed.manifest.platform.loginMethods
+                    .single { it.id == "cookie" },
+            context = LoginContext(host = "plugin.example", methodType = LoginMethodType.WebCookie, onSuccess = onSuccess),
+            oauth = oauth,
+            oauthCallbacks = PluginOAuthCallbackCoordinatorV1(oauth, accounts),
+            form = PluginFormLoginCoordinatorV1(pool, FixedEntropy),
+            webCookie = PluginWebCookieLoginCoordinatorV1(pool, FixedEntropy),
+            accountService = accounts,
+            coroutineScope = this,
+        )
+    }
+
     private fun oauthCoordinator(
         runningPlugin: (String) -> RunningPluginV1? = { id -> plugin.takeIf { it.installed.pluginId == id } },
     ): PluginOAuthLoginCoordinatorV1 =
@@ -415,8 +557,11 @@ class PluginLoginCoordinatorV1Test {
             nowEpochMillis = { now },
         )
 
-    private suspend fun install(script: String): RunningPluginV1 {
-        TestFppFactory.write(input, TestFppFactory.validEntries(manifest = LOGIN_MANIFEST, script = script))
+    private suspend fun install(
+        script: String,
+        manifest: String = LOGIN_MANIFEST,
+    ): RunningPluginV1 {
+        TestFppFactory.write(input, TestFppFactory.validEntries(manifest = manifest, script = script))
         val namespace = root / "social-plugins-v2"
         val store = PluginStateStore.open(fileSystem, namespace)
         val installer = PluginInstaller(fileSystem, store)
@@ -430,6 +575,7 @@ class PluginLoginCoordinatorV1Test {
 
 private class RecordingAccountService : AccountService {
     val added = mutableListOf<Pair<UiAccount, Any>>()
+    var addFailure: Throwable? = null
 
     override fun accountServiceFlow(accountType: AccountType): Flow<MicroblogDataSource> = emptyFlow()
 
@@ -440,6 +586,7 @@ private class RecordingAccountService : AccountService {
         credential: T,
         serializer: KSerializer<T>,
     ) {
+        addFailure?.let { throw it }
         added += account to credential
     }
 

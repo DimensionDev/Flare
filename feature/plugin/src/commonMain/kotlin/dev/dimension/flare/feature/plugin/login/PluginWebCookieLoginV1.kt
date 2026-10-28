@@ -208,7 +208,10 @@ public class PluginWebCookieSessionV1 internal constructor(
     }
 
     private fun filter(snapshot: CookieSnapshotV1): CookieSnapshotV1 {
-        val allowed = request.probes.associate { probe -> probe.url to probe.cookies.mapTo(linkedSetOf()) { it.name } }
+        val allowed =
+            request.probes.groupBy { it.url }.mapValues { (_, probes) ->
+                probes.flatMap { it.cookies }.mapTo(linkedSetOf()) { it.name }
+            }
         val cookies =
             snapshot.cookies.mapNotNull { cookie ->
                 val canonicalUrl =

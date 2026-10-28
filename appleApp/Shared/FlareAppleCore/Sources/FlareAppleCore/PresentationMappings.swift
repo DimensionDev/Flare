@@ -13,15 +13,23 @@ public func loginCookieSnapshot(
             .filter { $0.matchesLogin(url: fallbackURL) }
             .map { "\($0.name)=\($0.value)" }
             .joined(separator: "; ")
+    let preferredCookies = cookies.sorted {
+        if $0.path.count != $1.path.count { return $0.path.count > $1.path.count }
+        let domains = [$0.domain, $1.domain].map { $0.trimmingCharacters(in: CharacterSet(charactersIn: ".")) }
+        if domains[0].count != domains[1].count { return domains[0].count > domains[1].count }
+        return !$0.domain.hasPrefix(".") && $1.domain.hasPrefix(".")
+    }
     let values = probes.flatMap { probe -> [LoginCookieValue] in
         let url = URL(string: probe.url)
-        let names = Set(probe.names)
-        return cookies.compactMap { cookie in
-            guard names.contains(cookie.name), cookie.matchesLogin(url: url) else { return nil }
+        var names = Set(probe.names)
+        return preferredCookies.compactMap { cookie in
+            guard cookie.matchesLogin(url: url), names.remove(cookie.name) != nil else { return nil }
             return LoginCookieValue(sourceUrl: probe.url, name: cookie.name, value: cookie.value)
         }
     }
-    return LoginCookieSnapshot(values: values, rawHeader: rawHeader.isEmpty ? nil : rawHeader)
+    var capturedNames: [String: Set<String>] = [:]
+    let uniqueValues = values.filter { capturedNames[$0.sourceUrl, default: []].insert($0.name).inserted }
+    return LoginCookieSnapshot(values: uniqueValues, rawHeader: rawHeader.isEmpty ? nil : rawHeader)
 }
 
 private extension HTTPCookie {

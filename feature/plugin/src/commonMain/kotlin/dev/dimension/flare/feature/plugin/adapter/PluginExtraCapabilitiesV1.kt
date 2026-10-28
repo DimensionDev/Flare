@@ -15,6 +15,7 @@ import dev.dimension.flare.data.datasource.microblog.NotificationTimelineDataSou
 import dev.dimension.flare.data.datasource.microblog.RelationCapability
 import dev.dimension.flare.data.datasource.microblog.datasource.ArticleDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.GalleryDataSource
+import dev.dimension.flare.data.datasource.microblog.datasource.GalleryDetail
 import dev.dimension.flare.data.datasource.microblog.datasource.ListDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.NotificationDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.PinnableTimelineTabDataSource
@@ -92,12 +93,16 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 internal class PluginExtraCapabilitiesV1(
     private val plugin: RunningPluginV1,
@@ -110,6 +115,12 @@ internal class PluginExtraCapabilitiesV1(
     private val coroutineScope: CoroutineScope?,
     private val dynamicTimelineSpec: TimelineSpec<PluginTimelineDataV1>?,
 ) {
+    private val galleryChanges = MutableSharedFlow<MicroBlogKey>()
+
+    suspend fun refreshGallery(key: MicroBlogKey) {
+        galleryChanges.emit(key)
+    }
+
     val relation: RelationCapability? by lazy {
         accountKey
             ?.takeIf { hasAll(PluginAbiV1.Capabilities.RELATION, "state", "mutate") }
@@ -647,25 +658,33 @@ internal class PluginExtraCapabilitiesV1(
         override suspend fun ugoiraMetadata(statusKey: MicroBlogKey): Nothing =
             throw UnsupportedOperationException("Plugin API v1 does not support Ugoira")
 
-        override fun galleryDetail(
-            statusKey: MicroBlogKey,
-        ): Cacheable<dev.dimension.flare.data.datasource.microblog.datasource.GalleryDetail> {
-            val cache = MutableStateFlow<dev.dimension.flare.data.datasource.microblog.datasource.GalleryDetail?>(null)
-            return Cacheable(
-                fetchSource = {
-                    cache.value =
-                        invoker
-                            .invoke(
-                                capabilityId = PluginAbiV1.Capabilities.GALLERY,
-                                operation = "detail",
-                                request = EntityRequestV1(statusKey.toWire()),
-                                requestSerializer = EntityRequestV1.serializer(),
-                                responseSerializer = GalleryV1.serializer(),
-                                validate = GalleryV1::requireValid,
-                            ).let(mapper::gallery)
-                },
-                cacheSource = { cache.filterNotNull() },
-            )
+        override fun galleryDetail(statusKey: MicroBlogKey): Cacheable<GalleryDetail> {
+            val cache = MutableStateFlow<GalleryDetail?>(null)
+            lateinit var detail: Cacheable<GalleryDetail>
+            detail =
+                Cacheable(
+                    fetchSource = {
+                        cache.value =
+                            invoker
+                                .invoke(
+                                    capabilityId = PluginAbiV1.Capabilities.GALLERY,
+                                    operation = "detail",
+                                    request = EntityRequestV1(statusKey.toWire()),
+                                    requestSerializer = EntityRequestV1.serializer(),
+                                    responseSerializer = GalleryV1.serializer(),
+                                    validate = GalleryV1::requireValid,
+                                ).let(mapper::gallery)
+                    },
+                    cacheSource = {
+                        channelFlow {
+                            launch(start = CoroutineStart.UNDISPATCHED) {
+                                galleryChanges.collect { key -> if (key == statusKey) detail.refresh() }
+                            }
+                            cache.filterNotNull().collect { send(it) }
+                        }
+                    },
+                )
+            return detail
         }
 
         override fun galleryComments(statusKey: MicroBlogKey): RemoteLoader<UiTimelineV2> =

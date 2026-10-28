@@ -66,6 +66,12 @@ jobs:
           fi
       - name: Generate Xcode project
         run: xcodegen generate --spec appleApp/project.yml
+      - name: Prepare HTTPS login test simulator
+        run: |
+          simulator=$(xcrun simctl create FlareNativeTests com.apple.CoreSimulator.SimDeviceType.iPhone-17)
+          echo "FLARE_TEST_SIMULATOR=$simulator" >> "$GITHUB_ENV"
+          xcrun simctl bootstatus "$simulator" -b
+          xcrun simctl keychain "$simulator" add-root-cert shared/src/jvmTest/resources/proxy/localhost-cert.pem
       - name: Build
         working-directory: ./appleApp
         env:
@@ -76,23 +82,27 @@ jobs:
           device=`xcrun xctrace list devices 2>&1 | grep -oE 'iPhone.*?[^\(]+' | head -1 | awk '{$1=$1;print}' | sed -e "s/ Simulator$//"`
           if [ "`ls -A | grep -i \\.xcworkspace\$`" ]; then filetype_parameter="workspace" && file_to_build="`ls -A | grep -i \\.xcworkspace\$`"; else filetype_parameter="project" && file_to_build="`ls -A | grep -i \\.xcodeproj\$`"; fi
           file_to_build=`echo $file_to_build | awk '{$1=$1;print}'`
-          xcodebuild build-for-testing -scheme "$scheme" -"$filetype_parameter" "$file_to_build" -destination "platform=$platform,name=iPhone 17" -skipPackagePluginValidation -skipMacroValidation \
+          xcodebuild build-for-testing -scheme "$scheme" -"$filetype_parameter" "$file_to_build" -destination "platform=$platform,id=$FLARE_TEST_SIMULATOR" -skipPackagePluginValidation -skipMacroValidation \
             GRADLE_JVM_ARGS="-Xmx16G -Dfile.encoding=UTF-8"
       - name: Run native proxy and playback regressions
         working-directory: ./appleApp
         run: |
           xcodebuild test -project Flare.xcodeproj -scheme TimelineControllerTests \
-            -destination 'platform=iOS Simulator,name=iPhone 17' \
+            -destination "platform=iOS Simulator,id=$FLARE_TEST_SIMULATOR" \
             -only-testing:TimelineControllerTests/ProxyPlaybackLifecycleTests \
             -only-testing:TimelineControllerTests/ProxyImageLifecycleTests \
             -only-testing:TimelineControllerTests/WebViewProxyTests \
+            -only-testing:TimelineControllerTests/LoginCookieSnapshotTests \
             -only-testing:TimelineControllerTests/UgoiraPlaybackTests \
-            -parallel-testing-enabled NO -skipPackagePluginValidation -skipMacroValidation \
+            -parallel-testing-enabled NO -collect-test-diagnostics never -skipPackagePluginValidation -skipMacroValidation \
             GRADLE_JVM_ARGS="-Xmx16G -Dfile.encoding=UTF-8" CODE_SIGNING_ALLOWED=NO
           xcodebuild test-without-building -project Flare.xcodeproj -scheme iOS \
-            -destination 'platform=iOS Simulator,name=iPhone 17' \
+            -destination "platform=iOS Simulator,id=$FLARE_TEST_SIMULATOR" \
             -only-testing:iOSTests/VideoPlaybackSessionTests \
             -only-testing:iOSTests/MediaPlaybackMemoryTests \
             -only-testing:iOSTests/TimelinePlaybackCoordinatorTests \
             -only-testing:iOSTests/MediaTransferCancellationTests \
-            -parallel-testing-enabled NO
+            -parallel-testing-enabled NO -collect-test-diagnostics never
+      - name: Remove test simulator
+        if: always() && env.FLARE_TEST_SIMULATOR != ''
+        run: xcrun simctl delete "$FLARE_TEST_SIMULATOR"

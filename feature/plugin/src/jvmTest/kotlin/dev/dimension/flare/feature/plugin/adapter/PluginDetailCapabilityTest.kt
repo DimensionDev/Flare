@@ -2,7 +2,10 @@ package dev.dimension.flare.feature.plugin.adapter
 
 import androidx.paging.LoadState
 import dev.dimension.flare.common.CacheState
+import dev.dimension.flare.data.datasource.microblog.ActionMenu
+import dev.dimension.flare.data.datasource.microblog.DatabaseUpdater
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
+import dev.dimension.flare.data.datasource.microblog.PostEvent
 import dev.dimension.flare.data.datasource.microblog.datasource.GalleryDetail
 import dev.dimension.flare.data.datasource.microblog.list.ListMetaData
 import dev.dimension.flare.data.datasource.microblog.loader.RelationActionType
@@ -16,6 +19,7 @@ import dev.dimension.flare.feature.plugin.installer.PluginInstaller
 import dev.dimension.flare.feature.plugin.installer.TestFppFactory
 import dev.dimension.flare.feature.plugin.lifecycle.PluginStateStore
 import dev.dimension.flare.feature.plugin.lifecycle.RunningPluginV1
+import dev.dimension.flare.feature.plugin.runtime.PluginCallException
 import dev.dimension.flare.feature.plugin.runtime.PluginRuntimePool
 import dev.dimension.flare.feature.plugin.wire.EntityKeyV1
 import dev.dimension.flare.feature.plugin.wire.LoginSuccessV1
@@ -27,14 +31,22 @@ import dev.dimension.flare.model.PlatformDataSourceContext
 import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiDMItem
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.postEventOrNull
 import dev.dimension.flare.ui.route.DeeplinkRoute
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.job
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.JsonObject
 import okio.FileSystem
@@ -425,6 +437,87 @@ class PluginDetailCapabilityTest {
             assertTrue(error != null && "capabilities.list.detail" in error.message.orEmpty())
         }
 
+    @Test
+    fun galleryBookmarkRefreshesOpenDetailsAfterUpdatedPostAndFailedMutation() =
+        assertGalleryMutationRefreshes("{ type: 'updatedPost', post: post(request.key.id) }")
+
+    @Test
+    fun galleryBookmarkRefreshesOpenDetailsAfterInvalidation() =
+        assertGalleryMutationRefreshes("{ type: 'invalidate', keys: [request.key] }")
+
+    @Test
+    fun galleryBookmarkRefreshesOpenDetailsWhenMutationReturnsNoPost() = assertGalleryMutationRefreshes("{ type: 'noChange' }")
+
+    private fun assertGalleryMutationRefreshes(result: String) =
+        runBlocking {
+            val plugin =
+                install(
+                    manifest = MANIFEST.replace("\"detail\": {} } },", "\"detail\": {}, \"mutate\": {} } },"),
+                    script =
+                        "let bookmarked = false;\n" +
+                            SCRIPT
+                                .replace(
+                                    "post: { detail(request)",
+                                    """post: { mutate(request) {
+                                if (request.actionToken === "fail") throw flare.error({ code: "Network", message: { key: "error.network", fallback: "temporary failure" } });
+                                if (request.action !== (bookmarked ? "Unbookmark" : "Bookmark")) throw new Error("stale bookmark action");
+                                bookmarked = !bookmarked;
+                                return $result;
+                            }, detail(request)""",
+                                ).replace(
+                                    "title: \"Plugin gallery\",",
+                                    "title: \"Plugin gallery\", actions: [{ action: bookmarked ? 'Unbookmark' : 'Bookmark', active: bookmarked }],",
+                                ),
+                )
+            val source = authenticated(plugin)
+            val gallery = requireNotNull(source.capabilitySet.gallery)
+            val key = MicroBlogKey("gallery-1", "plugin.example")
+            val cache = gallery.galleryDetail(key)
+            val observer = CoroutineScope(coroutineContext + Job(coroutineContext.job))
+            val visible = cache.data.stateIn(observer, SharingStarted.Eagerly, CacheState.Empty())
+            val anotherView = gallery.galleryDetail(key)
+            val secondObserver = CoroutineScope(coroutineContext + Job(coroutineContext.job))
+            val secondVisible = anotherView.data.stateIn(secondObserver, SharingStarted.Eagerly, CacheState.Empty())
+            val secondRefresh = launch { anotherView.refreshState.collect { if (it is LoadState.Error) throw it.error } }
+            val refresh = launch { cache.refreshState.collect { if (it is LoadState.Error) throw it.error } }
+            try {
+                suspend fun detail(bookmarked: Boolean): GalleryDetail =
+                    withTimeout(10_000) {
+                        assertIs<CacheState.Success<GalleryDetail>>(
+                            visible.first { it is CacheState.Success && it.data.isBookmarked == bookmarked },
+                        ).data
+                    }
+                val before = detail(false)
+                withTimeout(10_000) { secondVisible.first { it is CacheState.Success } }
+                val handler = source.postMutationHandler
+                val updater = RecordingDatabaseUpdater()
+                val bookmark = assertIs<PostEvent.Semantic>(requireNotNull(before.bookmarkAction.postEventOrNull()).postEvent)
+                assertFailsWith<PluginCallException> { handler.handle(bookmark.copy(actionToken = "fail"), updater) }
+                assertEquals(0, updater.updates)
+                assertEquals(
+                    false,
+                    assertIs<CacheState.Success<GalleryDetail>>(visible.first { it is CacheState.Success }).data.isBookmarked,
+                )
+
+                handler.handle(bookmark, updater)
+                assertEquals(if (result.contains("noChange")) 0 else 1, updater.updates)
+                val bookmarked = detail(true)
+                withTimeout(10_000) { secondVisible.first { it is CacheState.Success && it.data.isBookmarked } }
+                secondObserver.coroutineContext.job.cancelAndJoin()
+                handler.handle(requireNotNull(bookmarked.bookmarkAction.postEventOrNull()).postEvent, updater)
+                assertEquals(false, detail(false).isBookmarked)
+                assertEquals(
+                    true,
+                    assertIs<CacheState.Success<GalleryDetail>>(anotherView.data.first { it is CacheState.Success }).data.isBookmarked,
+                )
+            } finally {
+                observer.coroutineContext.job.cancelAndJoin()
+                secondObserver.coroutineContext.job.cancelAndJoin()
+                secondRefresh.cancelAndJoin()
+                refresh.cancelAndJoin()
+            }
+        }
+
     private suspend fun detailPosts(dataSource: PluginDataSourceV1): List<UiTimelineV2.Post> =
         dataSource
             .timeline("dynamic-feed", mapOf("kind" to "details"))
@@ -623,3 +716,23 @@ private const val SCRIPT =
 
 private const val PLUGIN_ID = "dev.dimension.flare.test.detail"
 private const val ORIGIN = "https://plugin.example"
+
+private class RecordingDatabaseUpdater : DatabaseUpdater {
+    var updates = 0
+
+    override suspend fun updateCache(
+        postKey: MicroBlogKey,
+        update: suspend (UiTimelineV2) -> UiTimelineV2,
+    ) {
+        updates++
+    }
+
+    override suspend fun deleteFromCache(postKey: MicroBlogKey) {
+        updates++
+    }
+
+    override suspend fun updateActionMenu(
+        postKey: MicroBlogKey,
+        newActionMenu: ActionMenu.Item,
+    ) = Unit
+}

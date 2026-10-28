@@ -206,6 +206,56 @@ internal class PluginDataSourceV1 private constructor(
         }
     }
 
+    internal val postMutationHandler: PostEventHandler.Handler by lazy {
+        object : PostEventHandler.Handler {
+            override suspend fun handle(
+                event: PostEvent,
+                updater: dev.dimension.flare.data.datasource.microblog.DatabaseUpdater,
+            ) {
+                if (event !is PostEvent.Semantic) return
+                requireOperation(PluginAbiV1.Capabilities.POST, "mutate")
+                val result =
+                    invoker.invoke(
+                        capabilityId = PluginAbiV1.Capabilities.POST,
+                        operation = "mutate",
+                        request =
+                            MutationRequestV1(
+                                key = event.postKey.toWire(),
+                                action = event.action.toWire(),
+                                actionToken = event.actionToken,
+                            ),
+                        requestSerializer = MutationRequestV1.serializer(),
+                        responseSerializer = MutationResultV1.serializer(),
+                        validate = { it.requirePostMutationResult(event.postKey.toWire()) },
+                    )
+                when (result) {
+                    is MutationResultV1.UpdatedPost -> {
+                        val updated = mapper.post(result.post)
+                        updater.updateCache(event.postKey) { updated }
+                    }
+
+                    MutationResultV1.Deleted -> {
+                        updater.deleteFromCache(event.postKey)
+                    }
+
+                    is MutationResultV1.Invalidate -> {
+                        result.keys.forEach {
+                            updater.deleteFromCache(it.toKey())
+                            extraCapabilities.refreshGallery(it.toKey())
+                        }
+                    }
+
+                    MutationResultV1.NoChange,
+                    is MutationResultV1.UpdatedProfile,
+                    is MutationResultV1.UpdatedRelation,
+                    -> {
+                    }
+                }
+                if (result !is MutationResultV1.Invalidate) extraCapabilities.refreshGallery(event.postKey)
+            }
+        }
+    }
+
     private val postDataSource: PostDataSource by lazy {
         object : PostDataSource {
             override val postHandler: PostHandler =
@@ -242,49 +292,7 @@ internal class PluginDataSourceV1 private constructor(
             override val postEventHandler: PostEventHandler =
                 PostEventHandler(
                     accountType,
-                    object : PostEventHandler.Handler {
-                        override suspend fun handle(
-                            event: PostEvent,
-                            updater: dev.dimension.flare.data.datasource.microblog.DatabaseUpdater,
-                        ) {
-                            if (event !is PostEvent.Semantic) return
-                            requireOperation(PluginAbiV1.Capabilities.POST, "mutate")
-                            val result =
-                                invoker.invoke(
-                                    capabilityId = PluginAbiV1.Capabilities.POST,
-                                    operation = "mutate",
-                                    request =
-                                        MutationRequestV1(
-                                            key = event.postKey.toWire(),
-                                            action = event.action.toWire(),
-                                            actionToken = event.actionToken,
-                                        ),
-                                    requestSerializer = MutationRequestV1.serializer(),
-                                    responseSerializer = MutationResultV1.serializer(),
-                                    validate = { it.requirePostMutationResult(event.postKey.toWire()) },
-                                )
-                            when (result) {
-                                is MutationResultV1.UpdatedPost -> {
-                                    val updated = mapper.post(result.post)
-                                    updater.updateCache(event.postKey) { updated }
-                                }
-
-                                MutationResultV1.Deleted -> {
-                                    updater.deleteFromCache(event.postKey)
-                                }
-
-                                is MutationResultV1.Invalidate -> {
-                                    result.keys.forEach { updater.deleteFromCache(it.toKey()) }
-                                }
-
-                                MutationResultV1.NoChange,
-                                is MutationResultV1.UpdatedProfile,
-                                is MutationResultV1.UpdatedRelation,
-                                -> {
-                                }
-                            }
-                        }
-                    },
+                    postMutationHandler,
                 )
         }
     }

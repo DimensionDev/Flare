@@ -1,6 +1,6 @@
-package dev.dimension.flare.feature.agent.runtime
+package dev.dimension.flare.data.network.ai
 
-import ai.koog.prompt.message.AttachmentContent
+import dev.dimension.flare.common.UploadMedia
 import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.shared.image.ImageCompressor
@@ -28,7 +28,21 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
-class AgentImagePreparerTest {
+class AiImagePreparerTest {
+    @Test
+    fun localFileExceedingReadBudgetIsRejectedWithoutReadingItsContents() =
+        runTest {
+            var reads = 0
+            val media =
+                UploadMedia.fromSource("large.jpg", "image/jpeg", 65L * 1024 * 1024) {
+                    reads++
+                    okio.Buffer()
+                }
+            reads = 0
+            assertFailsWith<IllegalStateException> { AiImagePreparer(noCompression).prepare(media) }
+            assertEquals(0, reads)
+        }
+
     @Test
     fun downloadUsesMediaHeadersAndAccountProxyAndPreservesSmallImage() =
         runTest {
@@ -38,7 +52,7 @@ class AgentImagePreparerTest {
                     customHeaders = persistentMapOf("Referer" to "https://weibo.example/", "Cookie" to "media-cookie"),
                 )
             val preparer =
-                AgentImagePreparer(noCompression) { ref ->
+                AiImagePreparer(noCompression) { ref ->
                     assertEquals(media.proxy, ref)
                     mockClient { request ->
                         assertEquals(media.url, request.url.toString())
@@ -50,8 +64,7 @@ class AgentImagePreparerTest {
                 }
             val result = preparer.prepare(media, 1024)
             assertEquals("image/png", result.mimeType)
-            assertEquals("png", result.format)
-            assertContentEquals(png, (result.content as AttachmentContent.Binary).asBytes())
+            assertContentEquals(png, result.bytes)
         }
 
     @Test
@@ -72,9 +85,9 @@ class AgentImagePreparerTest {
                         return png
                     }
                 }
-            val result = AgentImagePreparer(compressor) { mockClient { respond(widePng) } }.prepare(image, 1024)
+            val result = AiImagePreparer(compressor) { mockClient { respond(widePng) } }.prepare(image, 1024)
             assertEquals(1, calls)
-            assertContentEquals(png, (result.content as AttachmentContent.Binary).asBytes())
+            assertContentEquals(png, result.bytes)
         }
 
     @Test
@@ -89,7 +102,7 @@ class AgentImagePreparerTest {
                     ): ByteArray = widePng
                 }
             assertFailsWith<IllegalStateException> {
-                AgentImagePreparer(compressor) { mockClient { respond(widePng) } }.prepare(image, 1024)
+                AiImagePreparer(compressor) { mockClient { respond(widePng) } }.prepare(image, 1024)
             }
         }
 
@@ -98,7 +111,7 @@ class AgentImagePreparerTest {
         runTest {
             for (status in listOf(HttpStatusCode.Forbidden, HttpStatusCode.OK)) {
                 assertFailsWith<Exception> {
-                    AgentImagePreparer(noCompression) {
+                    AiImagePreparer(noCompression) {
                         mockClient { respond("<html>Access denied</html>", status, headersOf("Content-Type", "image/jpeg")) }
                     }.prepare(image, 1024)
                 }
@@ -109,7 +122,7 @@ class AgentImagePreparerTest {
     fun downloadSafetyLimitIsIndependentOfCompressionBudget() =
         runTest {
             assertFailsWith<IllegalStateException> {
-                AgentImagePreparer(noCompression) {
+                AiImagePreparer(noCompression) {
                     mockClient { respond(png, headers = headersOf("Content-Length", "67108865")) }
                 }.prepare(image, 1024)
             }
@@ -126,7 +139,7 @@ class AgentImagePreparerTest {
                         return png
                     }
                 }
-            AgentImagePreparer(compressor) { mockClient { respond(padded) } }.prepare(image, 1024)
+            AiImagePreparer(compressor) { mockClient { respond(padded) } }.prepare(image, 1024)
             assertEquals(1, calls)
         }
 
@@ -134,7 +147,7 @@ class AgentImagePreparerTest {
     fun downloadTimeoutAndUserCancellationRemainDistinct() =
         runTest {
             assertFailsWith<IllegalStateException> {
-                AgentImagePreparer(noCompression) {
+                AiImagePreparer(noCompression) {
                     mockClient {
                         delay(31_000)
                         respond(png)
@@ -142,7 +155,7 @@ class AgentImagePreparerTest {
                 }.prepare(image, 1024)
             }
             assertFailsWith<CancellationException> {
-                AgentImagePreparer(
+                AiImagePreparer(
                     noCompression,
                 ) { mockClient { throw CancellationException("cancelled") } }.prepare(image, 1024)
             }
@@ -164,7 +177,7 @@ class AgentImagePreparerTest {
             try {
                 val failure =
                     assertFailsWith<IllegalStateException> {
-                        AgentImagePreparer(noCompression) { mockClient { respond(channel) } }.prepare(image, 1024)
+                        AiImagePreparer(noCompression) { mockClient { respond(channel) } }.prepare(image, 1024)
                     }
                 assertTrue(failure.message.orEmpty().contains("safety limit"))
             } finally {
@@ -177,7 +190,7 @@ class AgentImagePreparerTest {
     fun nonHttpUrlsNeverStartDownload() =
         runTest {
             assertFailsWith<IllegalArgumentException> {
-                AgentImagePreparer(
+                AiImagePreparer(
                     noCompression,
                 ) { error("Must not create HTTP client") }.prepare(image.copy(url = "file:///secret.png"), 1024)
             }

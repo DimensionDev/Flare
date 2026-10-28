@@ -2,6 +2,7 @@ package dev.dimension.flare.data.translation.image
 
 import dev.dimension.flare.data.datastore.model.ImageTranslationConfig
 import dev.dimension.flare.data.datastore.model.ImageTranslationProvider
+import dev.dimension.flare.data.network.ai.AiImageFailure
 import io.ktor.client.HttpClient
 import io.ktor.client.request.header
 import kotlinx.coroutines.delay
@@ -31,6 +32,7 @@ internal class TencentImageTranslationAdapter(
     ): ImageTranslationOutput =
         mutex.withLock {
             suspend fun request(url: String?): kotlinx.serialization.json.JsonObject {
+                val input = if (url == null) input.prepared() else input
                 delay((lastRequest + 1000 - Clock.System.now().toEpochMilliseconds()).coerceAtLeast(0))
                 val body =
                     buildJsonObject {
@@ -47,33 +49,33 @@ internal class TencentImageTranslationAdapter(
                     }
                 val timestamp = Clock.System.now().epochSeconds
                 lastRequest = Clock.System.now().toEpochMilliseconds()
-                return client
-                    .imagePost("https://tmt.tencentcloudapi.com/", body) {
-                        header("X-TC-Action", "ImageTranslateLLM")
-                        header("X-TC-Version", "2018-03-21")
-                        header("X-TC-Region", config.value("region"))
-                        header("X-TC-Timestamp", timestamp)
-                        header(
-                            "Authorization",
-                            tencentImageAuthorization(config.value("secretId"), config.value("secretKey"), timestamp, body.toString()),
-                        )
-                    }["Response"]
-                    ?.jsonObject ?: throw ImageTranslationException(ImageTranslationError.NoImage)
+                val response =
+                    client
+                        .imagePost("https://tmt.tencentcloudapi.com/", body) {
+                            header("X-TC-Action", "ImageTranslateLLM")
+                            header("X-TC-Version", "2018-03-21")
+                            header("X-TC-Region", config.value("region"))
+                            header("X-TC-Timestamp", timestamp)
+                            header(
+                                "Authorization",
+                                tencentImageAuthorization(config.value("secretId"), config.value("secretKey"), timestamp, body.toString()),
+                            )
+                        }["Response"]
+                        ?.jsonObject ?: throw ImageTranslationException(ImageTranslationError.NoImage)
+                response["Error"]?.let { error ->
+                    val code = error.jsonObject.text("Code").orEmpty()
+                    throw ImageTranslationException(
+                        when {
+                            code.startsWith("AuthFailure") || code.startsWith("Unauthorized") -> ImageTranslationError.Authentication
+                            code.startsWith("RequestLimit") || code.startsWith("LimitExceeded") -> ImageTranslationError.RateLimited
+                            else -> ImageTranslationError.Rejected
+                        },
+                        imageFailure = if (code == "FailedOperation.DownloadErr") AiImageFailure.RetryWithBytes else null,
+                    )
+                }
+                return response
             }
-            var response = request(input.publicUrl)
-            if (input.publicUrl != null && response["Error"]?.jsonObject?.text("Code") == "FailedOperation.DownloadErr") {
-                response = request(null)
-            }
-            response["Error"]?.let { error ->
-                val code = error.jsonObject.text("Code").orEmpty()
-                throw ImageTranslationException(
-                    when {
-                        code.startsWith("AuthFailure") || code.startsWith("Unauthorized") -> ImageTranslationError.Authentication
-                        code.startsWith("RequestLimit") || code.startsWith("LimitExceeded") -> ImageTranslationError.RateLimited
-                        else -> ImageTranslationError.Rejected
-                    },
-                )
-            }
+            val response = input.withImageFallback(::request)
             response.text("Data")?.let(ImageTranslationOutput::Encoded)
                 ?: throw ImageTranslationException(ImageTranslationError.NoImage)
         }

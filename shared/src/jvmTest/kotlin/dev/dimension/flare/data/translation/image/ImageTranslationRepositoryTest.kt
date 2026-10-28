@@ -124,6 +124,9 @@ class ImageTranslationRepositoryTest {
                 listOf(adapter),
                 cache,
                 sourceClient = { HttpClient(MockEngine { respond(original.toByteArray()) }) },
+                imageCompressor =
+                    dev.dimension.flare.shared.image
+                        .JvmImageCompressor(),
             )
 
         val media = UiMedia.Image("https://source.example/original.png")

@@ -14,12 +14,14 @@ import ai.koog.agents.core.tools.ToolRegistry
 import ai.koog.agents.core.utils.ConfigureAction
 import ai.koog.agents.features.eventHandler.feature.EventHandler
 import ai.koog.prompt.Prompt
+import ai.koog.prompt.message.AttachmentContent
 import ai.koog.prompt.message.AttachmentSource
 import ai.koog.prompt.message.Message
+import dev.dimension.flare.common.MimeTypes
+import dev.dimension.flare.data.network.ai.AiImagePreparer
 import dev.dimension.flare.feature.agent.presenter.AgentMessagePart
 import dev.dimension.flare.feature.agent.runtime.AgentAvailability
 import dev.dimension.flare.feature.agent.runtime.AgentImageFallback
-import dev.dimension.flare.feature.agent.runtime.AgentImagePreparer
 import dev.dimension.flare.feature.agent.runtime.FlareAgentRuntime
 import dev.dimension.flare.feature.agent.runtime.FlareAgentRuntimeProvider
 import dev.dimension.flare.feature.agent.runtime.supportsAgentImageFallback
@@ -55,7 +57,21 @@ internal class FlareAgentRunner(
                 resolvedRequest,
                 onTrace,
                 chatHistoryProvider,
-                prepareImage = if (supportsAgentImageFallback) AgentImagePreparer(imageCompressor)::prepare else null,
+                prepareImage =
+                    if (supportsAgentImageFallback) {
+                        { media, maxBytes ->
+                            val image = AiImagePreparer(imageCompressor).prepare(media, maxBytes)
+                            val format = requireNotNull(MimeTypes.extensionFor(image.mimeType))
+                            AttachmentSource.Image(
+                                AttachmentContent.Binary.Bytes(image.bytes),
+                                format,
+                                image.mimeType,
+                                "post-image.$format",
+                            )
+                        }
+                    } else {
+                        null
+                    },
             )
         return try {
             AgentRunResult(

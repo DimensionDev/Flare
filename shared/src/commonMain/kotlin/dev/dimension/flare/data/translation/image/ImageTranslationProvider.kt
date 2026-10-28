@@ -2,7 +2,11 @@ package dev.dimension.flare.data.translation.image
 
 import dev.dimension.flare.data.datastore.model.ImageTranslationConfig
 import dev.dimension.flare.data.datastore.model.ImageTranslationProvider
+import dev.dimension.flare.data.network.ai.AiImageFailure
+import dev.dimension.flare.data.network.ai.AiImageFallback
 import io.ktor.utils.io.writeFully
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.withTimeoutOrNull
 import okio.ByteString
 import okio.ByteString.Companion.encodeUtf8
 import okio.ByteString.Companion.toByteString
@@ -20,9 +24,46 @@ internal interface ImageTranslationAdapter {
 internal class ImageTranslationInput(
     val publicUrl: String?,
     val media: dev.dimension.flare.common.UploadMedia,
+    private val prepareImage: suspend (dev.dimension.flare.common.UploadMedia) -> dev.dimension.flare.common.UploadMedia,
 ) {
+    private var prepared: ImageTranslationInput? = null
+
     val mimeType: String get() = media.mimeType
     val size: Long get() = media.size
+
+    suspend fun prepared(): ImageTranslationInput =
+        prepared ?: (
+            withTimeoutOrNull(60_000) {
+                val preparedMedia =
+                    try {
+                        prepareImage(media)
+                    } catch (error: Exception) {
+                        when (error) {
+                            is CancellationException -> {
+                                throw error
+                            }
+
+                            is IllegalArgumentException, is IllegalStateException -> {
+                                throw ImageTranslationException(ImageTranslationError.UnsupportedInput).also { it.addSuppressed(error) }
+                            }
+
+                            else -> {
+                                throw error
+                            }
+                        }
+                    }
+                ImageTranslationInput(null, preparedMedia, prepareImage)
+            }
+                ?: throw ImageTranslationException(ImageTranslationError.Timeout)
+        ).also { prepared = it }
+
+    suspend fun <T> withImageFallback(request: suspend (String?) -> T): T =
+        AiImageFallback(
+            allowTextFallback = false,
+            initialMode = if (publicUrl == null) AiImageFallback.Mode.Inline else AiImageFallback.Mode.Url,
+        ).execute(
+            imageFailure = { (it as? ImageTranslationException)?.imageFailure },
+        ) { mode -> request(if (mode == AiImageFallback.Mode.Url) publicUrl else null) }
 
     suspend fun readBytes(maxBytes: Long): ByteString {
         if (size > maxBytes) throw ImageTranslationException(ImageTranslationError.UnsupportedInput)
@@ -77,7 +118,7 @@ public enum class ImageTranslationError {
 
 internal class ImageTranslationException(
     val reason: ImageTranslationError,
-    val retryWithBytes: Boolean = false,
+    val imageFailure: AiImageFailure? = null,
     val retryWithFile: Boolean = false,
 ) : Exception(reason.name)
 

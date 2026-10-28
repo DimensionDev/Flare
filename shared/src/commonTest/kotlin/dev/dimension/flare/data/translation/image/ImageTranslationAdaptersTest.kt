@@ -11,6 +11,7 @@ import io.ktor.http.content.OutgoingContent
 import io.ktor.http.content.TextContent
 import io.ktor.utils.io.ByteChannel
 import io.ktor.utils.io.readBuffer
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
@@ -35,6 +36,7 @@ class ImageTranslationAdaptersTest {
             if (public) "https://source.example/image.png" else null,
             dev.dimension.flare.common.UploadMedia
                 .fromBytes("original.png", original.toByteArray(), "image/png"),
+            prepareImage = { it },
         )
 
     private fun config(provider: ImageTranslationProvider) =
@@ -43,6 +45,60 @@ class ImageTranslationAdaptersTest {
             .withValue("model", "image-model")
             .withValue("secretId", "test-id")
             .withValue("secretKey", "test-secret")
+
+    @Test
+    fun preparationValidationHasInputErrorAndDoesNotRetryProvider() =
+        runTest {
+            for (failure in listOf(IllegalArgumentException("invalid image"), IllegalStateException("image limit"))) {
+                var calls = 0
+                val client =
+                    HttpClient(
+                        MockEngine {
+                            calls++
+                            respond("""{"error":{"code":"image_download_failed"}}""", HttpStatusCode.BadRequest)
+                        },
+                    )
+                try {
+                    val input = input(public = true).let { ImageTranslationInput(it.publicUrl, it.media) { throw failure } }
+                    val error =
+                        assertFailsWith<ImageTranslationException> {
+                            OpenAIImageTranslationAdapter(client).translate(input, config(ImageTranslationProvider.OpenAIImages), "en")
+                        }
+                    assertEquals(ImageTranslationError.UnsupportedInput, error.reason)
+                    assertTrue(error.suppressedExceptions.any { it === failure })
+                    assertEquals(1, calls)
+                } finally {
+                    client.close()
+                }
+            }
+        }
+
+    @Test
+    fun preparationCancellationAndIoFailureRemainUnchanged() =
+        runTest {
+            for (failure in listOf(CancellationException("cancelled"), okio.IOException("file read failed"))) {
+                var calls = 0
+                val client =
+                    HttpClient(
+                        MockEngine {
+                            calls++
+                            respond("""{"error":{"code":"image_download_failed"}}""", HttpStatusCode.BadRequest)
+                        },
+                    )
+                try {
+                    val input = input(public = true).let { ImageTranslationInput(it.publicUrl, it.media) { throw failure } }
+                    val error =
+                        assertFailsWith<Exception> {
+                            OpenAIImageTranslationAdapter(client).translate(input, config(ImageTranslationProvider.OpenAIImages), "en")
+                        }
+                    assertEquals(failure::class, error::class)
+                    assertEquals(failure.message, error.message)
+                    assertEquals(1, calls)
+                } finally {
+                    client.close()
+                }
+            }
+        }
 
     @Test
     fun requestUrlValidationMatchesLocalReadiness() {
@@ -281,6 +337,192 @@ class ImageTranslationAdaptersTest {
         }
 
     @Test
+    fun imageFailuresSharePreparedBytesAcrossProviders() =
+        runTest {
+            val errors =
+                listOf(
+                    """
+                    {"error":{
+                      "message":".messages[1].image[0]: Failed to download image from https://source.example/unsupported.jpg",
+                      "code":"invalid_request_error"
+                    }}
+                    """.trimIndent(),
+                    """{"error":{"message":"Image dimensions exceed the limit"}}""",
+                    """{"error":{"details":[{"fieldViolations":[{"field":"input[1].uri"}]}]}}""",
+                )
+            for (provider in listOf(
+                ImageTranslationProvider.OpenAIImages,
+                ImageTranslationProvider.Gemini,
+                ImageTranslationProvider.Tencent,
+            )) {
+                for (error in errors) {
+                    var calls = 0
+                    var preparations = 0
+                    val resized = "prepared bytes".encodeUtf8()
+                    val preparedMedia =
+                        dev.dimension.flare.common.UploadMedia
+                            .fromBytes("prepared.png", resized.toByteArray(), "image/png")
+                    val input =
+                        ImageTranslationInput(
+                            "https://source.example/image.png",
+                            dev.dimension.flare.common.UploadMedia
+                                .fromBytes("original.png", original.toByteArray(), "image/png"),
+                            prepareImage = {
+                                preparations++
+                                preparedMedia
+                            },
+                        )
+                    val client =
+                        HttpClient(
+                            MockEngine { request ->
+                                calls++
+                                val body = (request.body as TextContent).text
+                                if (calls == 1) {
+                                    assertTrue(body.contains("https://source.example/image.png"))
+                                    respond(error, HttpStatusCode.BadRequest)
+                                } else {
+                                    assertTrue(body.contains(resized.base64()))
+                                    assertFalse(body.contains(original.base64()))
+                                    assertFalse(body.contains("https://source.example/image.png"))
+                                    respond(
+                                        when (provider) {
+                                            ImageTranslationProvider.OpenAIImages -> {
+                                                """{"data":[{"b64_json":"cmVzdWx0"}]}"""
+                                            }
+
+                                            ImageTranslationProvider.Gemini -> {
+                                                """
+                                                {"steps":[{"type":"model_output","content":[
+                                                  {"type":"image","data":"cmVzdWx0"}
+                                                ]}]}
+                                                """.trimIndent()
+                                            }
+
+                                            else -> {
+                                                """{"Response":{"Data":"cmVzdWx0"}}"""
+                                            }
+                                        },
+                                    )
+                                }
+                            },
+                        )
+                    try {
+                        val adapter =
+                            when (provider) {
+                                ImageTranslationProvider.OpenAIImages -> OpenAIImageTranslationAdapter(client)
+                                ImageTranslationProvider.Gemini -> GeminiImageTranslationAdapter(client)
+                                else -> TencentImageTranslationAdapter(client)
+                            }
+                        assertEquals(ImageTranslationOutput.Encoded("cmVzdWx0"), adapter.translate(input, config(provider), "en"))
+                        assertEquals(2, calls)
+                        assertEquals(1, preparations)
+                    } finally {
+                        client.close()
+                    }
+                }
+            }
+        }
+
+    @Test
+    fun failedInlineRetryStopsWithoutSendingTextOnlyImageTranslation() =
+        runTest {
+            var calls = 0
+            val client =
+                HttpClient(
+                    MockEngine {
+                        calls++
+                        respond(
+                            """{"error":{"message":"Failed to download image","code":"invalid_request_error"}}""",
+                            HttpStatusCode.BadRequest,
+                        )
+                    },
+                )
+            try {
+                assertFailsWith<ImageTranslationException> {
+                    OpenAIImageTranslationAdapter(
+                        client,
+                    ).translate(input(public = true), config(ImageTranslationProvider.OpenAIImages), "en")
+                }
+                assertEquals(2, calls)
+            } finally {
+                client.close()
+            }
+        }
+
+    @Test
+    fun multipartRetryReusesPreparedImage() =
+        runTest {
+            var calls = 0
+            var preparations = 0
+            val prepared =
+                dev.dimension.flare.common.UploadMedia
+                    .fromBytes("prepared.png", "prepared-file".encodeToByteArray(), "image/png")
+            val input =
+                ImageTranslationInput(input(public = true).publicUrl, input().media) {
+                    preparations++
+                    prepared
+                }
+            val client =
+                HttpClient(
+                    MockEngine { request ->
+                        calls++
+                        when (calls) {
+                            1 -> {
+                                respond("""{"error":{"code":"image_download_failed"}}""", HttpStatusCode.BadRequest)
+                            }
+
+                            2 -> {
+                                respond("""{"error":{"code":"unsupported_parameter","param":"images"}}""", HttpStatusCode.BadRequest)
+                            }
+
+                            else -> {
+                                val body = (request.body as OutgoingContent.WriteChannelContent).readBody().decodeToString()
+                                assertTrue(body.contains("prepared-file"))
+                                respond("""{"data":[{"b64_json":"cmVzdWx0"}]}""")
+                            }
+                        }
+                    },
+                )
+            try {
+                assertEquals(
+                    ImageTranslationOutput.Encoded("cmVzdWx0"),
+                    OpenAIImageTranslationAdapter(client).translate(input, config(ImageTranslationProvider.OpenAIImages), "en"),
+                )
+                assertEquals(3, calls)
+                assertEquals(1, preparations)
+            } finally {
+                client.close()
+            }
+        }
+
+    @Test
+    fun tencentBodyDownloadFailureUsesSharedRecovery() =
+        runTest {
+            var calls = 0
+            val client =
+                HttpClient(
+                    MockEngine { request ->
+                        calls++
+                        if (calls == 1) {
+                            respond("""{"Response":{"Error":{"Code":"FailedOperation.DownloadErr"}}}""")
+                        } else {
+                            assertTrue((request.body as TextContent).text.contains(original.base64()))
+                            respond("""{"Response":{"Data":"cmVzdWx0"}}""")
+                        }
+                    },
+                )
+            try {
+                assertEquals(
+                    ImageTranslationOutput.Encoded("cmVzdWx0"),
+                    TencentImageTranslationAdapter(client).translate(input(public = true), config(ImageTranslationProvider.Tencent), "en"),
+                )
+                assertEquals(2, calls)
+            } finally {
+                client.close()
+            }
+        }
+
+    @Test
     fun streamedBase64PreservesEveryByteAcrossChunkBoundaries() =
         runTest {
             val bytes = ByteArray(1024 * 1024 + 7) { (it % 251).toByte() }
@@ -319,6 +561,7 @@ class ImageTranslationAdaptersTest {
                             null,
                             dev.dimension.flare.common.UploadMedia
                                 .fromBytes("source.png", bytes, "image/png"),
+                            prepareImage = { it },
                         )
                     val adapter =
                         if (provider == ImageTranslationProvider.OpenAIImages) {

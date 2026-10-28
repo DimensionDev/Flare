@@ -1,6 +1,10 @@
 package dev.dimension.flare.feature.plugin.installer
 
+import dev.dimension.flare.feature.plugin.lifecycle.PluginIndexCorruptException
 import dev.dimension.flare.feature.plugin.lifecycle.PluginStateStore
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import okio.Buffer
 import okio.FileSystem
@@ -302,6 +306,59 @@ class PluginInstallerTest {
 
             assertFails { installer.inspect(source) }
             assertFalse(fileSystem.exists(stateStore.paths.incoming))
+        }
+
+    @Test
+    fun cancelledRecoveryPreservesCorruptIndexAndPackagesForRetry() = assertCancelledRecoveryPreservesIndex(cancelOnIconWrite = false)
+
+    @Test
+    fun cancelledRecoveryAfterValidationDoesNotCommitIndex() = assertCancelledRecoveryPreservesIndex(cancelOnIconWrite = true)
+
+    private fun assertCancelledRecoveryPreservesIndex(cancelOnIconWrite: Boolean) =
+        runBlocking<Unit> {
+            TestFppFactory.write(input)
+            val installed = installer.inspect(input).let { installer.commit(it, confirmed = true) }
+            fileSystem.write(stateStore.paths.index) { writeUtf8("not-json") }
+            val corruptStore = PluginStateStore.open(fileSystem, root / "social-plugins-v2")
+            lateinit var recoveryJob: Job
+            var cancelled = false
+            val cancellingFileSystem =
+                object : ForwardingFileSystem(fileSystem) {
+                    override fun source(file: Path): Source {
+                        if (!cancelOnIconWrite && !cancelled && file.parent == corruptStore.paths.packages) {
+                            cancelled = true
+                            recoveryJob.cancel()
+                        }
+                        return super.source(file)
+                    }
+
+                    override fun atomicMove(
+                        source: Path,
+                        target: Path,
+                    ) {
+                        super.atomicMove(source, target)
+                        if (cancelOnIconWrite && !cancelled && target.parent == corruptStore.paths.icons) {
+                            cancelled = true
+                            recoveryJob.cancel()
+                        }
+                    }
+                }
+            val recovery = PluginInstaller(cancellingFileSystem, corruptStore)
+
+            recoveryJob = launch(start = CoroutineStart.LAZY) { recovery.rebuildIndex() }
+            recoveryJob.start()
+            recoveryJob.join()
+
+            assertTrue(cancelled)
+            assertTrue(recoveryJob.isCancelled)
+            assertFalse(corruptStore.desired.value.indexHealthy)
+            assertEquals("not-json", fileSystem.read(corruptStore.paths.index) { readUtf8() })
+            assertFailsWith<PluginIndexCorruptException> { recovery.cleanup() }
+            assertTrue(fileSystem.exists(corruptStore.paths.packagePath(installed.packageHash)))
+            assertTrue(fileSystem.exists(corruptStore.paths.iconPath(installed.packageHash)))
+
+            assertEquals(1, recovery.rebuildIndex().restored)
+            assertNotNull(PluginStateStore.open(fileSystem, root / "social-plugins-v2").running.plugins[installed.pluginId])
         }
 
     @Test

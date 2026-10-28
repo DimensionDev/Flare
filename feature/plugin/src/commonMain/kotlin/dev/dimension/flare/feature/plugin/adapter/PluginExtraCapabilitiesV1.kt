@@ -224,6 +224,7 @@ internal class PluginExtraCapabilitiesV1(
                         )
                     if (result is MutationResultV1.UpdatedRelation) {
                         tokens.update { it + (userKey to result.relation.actionTokens) }
+                        relationHandler.setRelation(userKey, mapper.relation(result.relation))
                     }
                 }
             }

@@ -8,6 +8,9 @@ import dev.dimension.flare.feature.plugin.lifecycle.PluginCleanupResultV1
 import dev.dimension.flare.feature.plugin.lifecycle.PluginInstallSourceV1
 import dev.dimension.flare.feature.plugin.lifecycle.PluginStateStore
 import dev.dimension.flare.feature.plugin.manifest.PluginManifestV1
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import okio.Buffer
@@ -178,6 +181,7 @@ public class PluginInstaller(
                     candidate.icon,
                 )
             }
+            currentCoroutineContext().ensureActive()
             stateStore.rebuild(recovered.values.map(RecoveredPlugin::record))
             PluginIndexRebuildResultV1(restored = recovered.size, skipped = skipped)
         }
@@ -225,7 +229,10 @@ public class PluginInstaller(
                     ),
                 icon = validated.icon,
             )
-        }.getOrNull()
+        }.getOrElse { error ->
+            if (error is CancellationException) throw error
+            null
+        }
 
     private fun hash(path: Path): String {
         val hashingSource = HashingSource.sha256(fileSystem.source(path))

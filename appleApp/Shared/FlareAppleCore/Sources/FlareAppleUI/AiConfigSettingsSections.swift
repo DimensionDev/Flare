@@ -218,57 +218,10 @@ private struct AiConfigSettingsSectionsContent: View {
     }
 
     private func editButton(field: AiConfigEditableField, value: String) -> some View {
-        #if os(macOS)
-        HStack(spacing: 16) {
-            Label {
-                Text(field.titleKey, bundle: FlareAppleUILocalization.bundle)
-                if field == .extraBody {
-                    if !value.isEmpty {
-                        Text(value)
-                    }
-                } else {
-                    Text(field.displayValue(value))
-                }
-            } icon: {
-                EmptyView()
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-
-            Button {
-                state.beginEditing(field: field, value: value)
-            } label: {
-                Label {
-                    Text("edit", bundle: FlareAppleUILocalization.bundle)
-                } icon: {
-                    Image(fontAwesome: .pen)
-                }
-            }
-            .buttonStyle(.bordered)
-            .controlSize(.small)
-            .help(Text("edit", bundle: FlareAppleUILocalization.bundle))
-        }
-        .transition(.opacity.combined(with: .move(edge: .top)))
-        #else
-        Button {
+        AiConfigEditButton(title: field.titleKey, value: value) {
             state.beginEditing(field: field, value: value)
-        } label: {
-            Label {
-                Text(field.titleKey, bundle: FlareAppleUILocalization.bundle)
-                if field == .extraBody {
-                    if !value.isEmpty {
-                        Text(value)
-                    }
-                } else {
-                    Text(field.displayValue(value))
-                }
-            } icon: {
-                EmptyView()
-            }
-
         }
-        .buttonStyle(.plain)
         .transition(.opacity.combined(with: .move(edge: .top)))
-        #endif
     }
 
     private func aiTypeOptionTitleKey(option: AiTypeOption) -> LocalizedStringKey {
@@ -319,79 +272,135 @@ private struct AiConfigEditSheet: View {
     let field: AiConfigEditableField
 
     var body: some View {
+        SettingsTextEditSheet(
+            title: field.titleKey,
+            text: $state.editingText,
+            placeholder: field.placeholder,
+            multiline: field.isMultiline,
+            suggestions: field == .serverUrl
+                ? (state.presenter.state.serverSuggestions as NSArray).cast(NSString.self).map(String.init)
+                : [],
+            footer: footer
+        ) { value in
+            state.applyEdit(field: field, value: value)
+        }
+    }
+
+    private var footer: Text? {
+        if let key = field.footerKey {
+            return Text(key, bundle: FlareAppleUILocalization.bundle)
+        }
+        return field.footerText.map { Text($0) }
+    }
+}
+
+struct AiConfigEditButton: View {
+    let title: LocalizedStringKey
+    let value: String
+    var secret = false
+    let onEdit: () -> Void
+
+    var body: some View {
+        #if os(macOS)
+        HStack(spacing: 16) {
+            fieldLabel.frame(maxWidth: .infinity, alignment: .leading)
+            Button(action: onEdit) {
+                Label {
+                    Text("edit", bundle: FlareAppleUILocalization.bundle)
+                } icon: {
+                    Image(fontAwesome: .pen)
+                }
+            }
+            .buttonStyle(.bordered)
+            .controlSize(.small)
+            .help(Text("edit", bundle: FlareAppleUILocalization.bundle))
+            .accessibilityLabel(Text(title, bundle: FlareAppleUILocalization.bundle))
+        }
+        #else
+        Button(action: onEdit) {
+            fieldLabel
+        }
+        .buttonStyle(.plain)
+        #endif
+    }
+
+    private var fieldLabel: some View {
+        Label {
+            Text(title, bundle: FlareAppleUILocalization.bundle)
+            Text(value.isEmpty ? FlareAppleUILocalization.string("Not set") : secret ? "••••••••" : value)
+                .lineLimit(2)
+        } icon: {
+            EmptyView()
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .contentShape(Rectangle())
+    }
+}
+
+struct SettingsTextEditSheet: View {
+    let title: LocalizedStringKey
+    @Binding var text: String
+    var placeholder = ""
+    var secret = false
+    var multiline = false
+    var suggestions: [String] = []
+    var footer: Text?
+    let onSave: (String) -> Void
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
         NavigationStack {
             Form {
                 Section {
-                    if field.isMultiline {
-                        TextEditor(text: $state.editingText)
-                            .frame(minHeight: 180)
+                    if secret {
+                        SecureField(placeholder, text: $text)
+                            .accessibilityLabel(Text(title, bundle: FlareAppleUILocalization.bundle))
+                    } else if multiline {
+                        TextEditor(text: $text).frame(minHeight: 180)
+                            .accessibilityLabel(Text(title, bundle: FlareAppleUILocalization.bundle))
                     } else {
-                        TextField(field.placeholder, text: $state.editingText)
+                        TextField(placeholder, text: $text)
+                            .accessibilityLabel(Text(title, bundle: FlareAppleUILocalization.bundle))
                     }
                 } footer: {
-                    if let footerKey = field.footerKey {
-                        Text(footerKey, bundle: FlareAppleUILocalization.bundle)
-                            .font(.footnote)
-                    } else if let footerText = field.footerText {
-                        Text(footerText)
-                            .font(.footnote)
-                    }
+                    footer?.font(.footnote)
                 }
 
-                if field == .serverUrl {
-                    let suggestions = filteredServerSuggestions(query: state.editingText)
-                    if !suggestions.isEmpty {
-                        Section {
-                            ForEach(suggestions, id: \.self) { suggestion in
-                                Button {
-                                    state.editingText = suggestion
-                                } label: {
-                                    Text(suggestion)
-                                        .font(.callout.monospaced())
-                                        .lineLimit(1)
-                                }
-                                .buttonStyle(.plain)
+                let matches = suggestions.filter { text.isEmpty || $0.localizedCaseInsensitiveContains(text) }
+                if !matches.isEmpty {
+                    Section {
+                        ForEach(matches, id: \.self) { suggestion in
+                            Button {
+                                text = suggestion
+                            } label: {
+                                Text(suggestion).font(.callout.monospaced()).lineLimit(1)
                             }
-                        } header: {
-                            Text("Suggestions", bundle: FlareAppleUILocalization.bundle)
+                            .buttonStyle(.plain)
                         }
+                    } header: {
+                        Text("Suggestions", bundle: FlareAppleUILocalization.bundle)
                     }
                 }
             }
             .formStyle(.grouped)
-            .navigationTitle(Text(field.titleKey, bundle: FlareAppleUILocalization.bundle))
+            #if os(iOS)
+            .textInputAutocapitalization(.never)
+            .autocorrectionDisabled()
+            #endif
+            .navigationTitle(Text(title, bundle: FlareAppleUILocalization.bundle))
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button {
-                        state.editingField = nil
-                    } label: {
-                        Image(fontAwesome: .xmark)
-                    }
-                    .accessibilityLabel(Text("Cancel", bundle: FlareAppleUILocalization.bundle))
+                    Button { dismiss() } label: { Image(fontAwesome: .xmark) }
+                        .accessibilityLabel(Text("Cancel", bundle: FlareAppleUILocalization.bundle))
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button {
-                        state.applyEdit(field: field, value: state.editingText)
-                        state.editingField = nil
-                    } label: {
-                        Image(fontAwesome: .check)
-                    }
-                    .accessibilityLabel(Text("done", bundle: FlareAppleUILocalization.bundle))
+                        onSave(text)
+                        dismiss()
+                    } label: { Image(fontAwesome: .check) }
+                        .accessibilityLabel(Text("done", bundle: FlareAppleUILocalization.bundle))
                 }
             }
-        }
-    }
-
-    private var serverSuggestions: [String] {
-        (state.presenter.state.serverSuggestions as NSArray).cast(NSString.self).map(String.init)
-    }
-
-    private func filteredServerSuggestions(query: String) -> [String] {
-        if query.isEmpty {
-            return serverSuggestions
-        }
-        return serverSuggestions.filter {
-            $0.localizedCaseInsensitiveContains(query)
         }
     }
 }

@@ -285,6 +285,17 @@ internal class AndroidDownloadManager(
             }
 
             val mimeType = getMimeType(uri = uri, fileName = fileName)
+            if (uri.startsWith("file://")) {
+                if (!isImageTranslationFile(media, context.cacheDir)) return@withContext false
+                onDownloadStarted()
+                return@withContext saveFile(fileName = fileName, mimeType = mimeType, askDirectoryUri = askDirectoryUri) { output ->
+                    java.io
+                        .File(java.net.URI(uri))
+                        .inputStream()
+                        .use { it.copyTo(output) }
+                    true
+                }
+            }
 
             if (media3VideoCacheManager.isFullyCached(media)) {
                 val saveMode = mediaSaveLocationRepository.state.value.mode

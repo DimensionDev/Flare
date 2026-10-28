@@ -60,17 +60,22 @@ internal class DesktopDownloadManager(
                 if (notify) {
                     inAppNotification.message(Res.string.media_download_started)
                 }
-                client
-                    .prepareGet(url) {
-                        applyMedia(media)
-                    }.execute { response ->
-                        check(response.status.isSuccess()) { "Media download failed: HTTP ${response.status.value}" }
-                        writeResponseToFile(
-                            response = response,
-                            outputFile = tempFile,
-                            onProgress = onProgress,
-                        )
-                    }
+                if (url.startsWith("file://")) {
+                    require(isImageTranslationFile(media, FileSystemUtilsExt.flareCacheDirectory())) { "Unsupported local media" }
+                    File(java.net.URI(url)).copyTo(tempFile, overwrite = true)
+                } else {
+                    client
+                        .prepareGet(url) {
+                            applyMedia(media)
+                        }.execute { response ->
+                            check(response.status.isSuccess()) { "Media download failed: HTTP ${response.status.value}" }
+                            writeResponseToFile(
+                                response = response,
+                                outputFile = tempFile,
+                                onProgress = onProgress,
+                            )
+                        }
+                }
                 moveIntoPlace(tempFile = tempFile, targetFile = targetFile, overwrite = overwrite)
                 if (notify) {
                     inAppNotification.message(Res.string.media_save_success)

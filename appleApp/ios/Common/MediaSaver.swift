@@ -49,6 +49,19 @@ class MediaSaver: NSObject, UIDocumentPickerDelegate {
         if showsDownloadStarted {
             showDownloadStarted(mediaType: .image)
         }
+        if remoteUrl.isFileURL {
+            guard ImageTranslationExportFile.isOwned(remoteUrl) else {
+                finishSave(success: false, mediaType: .image, showsSaveResult: showsSaveResult, completion: completion)
+                return
+            }
+            do {
+                let data = try Data(contentsOf: remoteUrl, options: .mappedIfSafe)
+                saveOriginalDataToPhotos(data, fileName: remoteUrl.lastPathComponent, showsSaveResult: showsSaveResult, completion: completion)
+            } catch {
+                finishSave(success: false, mediaType: .image, showsSaveResult: showsSaveResult, completion: completion)
+            }
+            return
+        }
         saveRemoteOriginalDataToPhotos(
             media: media,
             showsSaveResult: showsSaveResult,
@@ -234,12 +247,15 @@ class MediaSaver: NSObject, UIDocumentPickerDelegate {
 
     nonisolated private func saveOriginalDataToPhotos(
         _ data: Data,
+        fileName: String? = nil,
         showsSaveResult: Bool = true,
         completion: (@Sendable (Bool) -> Void)? = nil
     ) {
         PHPhotoLibrary.shared().performChanges {
             let request = PHAssetCreationRequest.forAsset()
-            request.addResource(with: .photo, data: data, options: nil)
+            let options = PHAssetResourceCreationOptions()
+            options.originalFilename = fileName
+            request.addResource(with: .photo, data: data, options: options)
         } completionHandler: { success, error in
             self.finishSave(
                 success: success && error == nil,

@@ -7,7 +7,7 @@ import KotlinSharedUI
 import LazyPager
 import SwiftUI
 
-/// Offline fixtures exercise the real viewer, including its nested system sheet.
+/// Offline fixtures exercise the real viewer and translation settings.
 struct MediaViewerTestFixture: View {
     @State private var presented = false
     @State private var dismissed = false
@@ -16,6 +16,7 @@ struct MediaViewerTestFixture: View {
     private let indicator = ProcessInfo.processInfo.arguments.contains("--indicator")
     private let withoutPost = ProcessInfo.processInfo.arguments.contains("--without-post")
     private let hidePostActions = ProcessInfo.processInfo.arguments.contains("--hide-post-actions")
+    private let translationSettings = ProcessInfo.processInfo.arguments.contains("--translation-settings")
 
     var body: some View {
         VStack {
@@ -26,13 +27,16 @@ struct MediaViewerTestFixture: View {
             if dismissed { Text("Media dismissed") }
         }
         .task {
+            await configureTranslationFixture()
             var items = [await makeMedia()]
             if indicator { items.append(await makeMedia(index: 1)) }
             medias = items
         }
         .fullScreenCover(isPresented: $presented, onDismiss: { dismissed = true }) {
             NavigationStack {
-                if !medias.isEmpty {
+                if translationSettings {
+                    TranslationConfigScreen()
+                } else if !medias.isEmpty {
                     MediaViewerScreen(
                         medias: medias, initialIndex: 0, preview: nil,
                         post: withoutPost ? nil : makePost(medias: medias)
@@ -47,6 +51,81 @@ struct MediaViewerTestFixture: View {
             .background(ClearFullScreenBackground())
             .colorScheme(.dark)
         }
+    }
+
+    @MainActor
+    private func configureTranslationFixture() async {
+        let settings = KotlinPresenter(presenter: ImageTranslationSettingsPresenter())
+        if ProcessInfo.processInfo.arguments.contains("--image-translation-prefill-fixture") {
+            let basic = KotlinPresenter(presenter: AiConfigPresenter(agentConfig: false))
+            basic.state.setOpenAIServerUrl(value: "http://127.0.0.1:18473/v1")
+            basic.state.setOpenAIApiKey(value: "prefill-fixture-key")
+            basic.state.setOpenAIModel(value: "prefill-fixture-image")
+            for _ in 0..<250 {
+                if basic.state.openAIModel == "prefill-fixture-image"
+                    && basic.state.openAIApiKey == "prefill-fixture-key"
+                    && basic.state.openAIServerUrl == "http://127.0.0.1:18473/v1" { break }
+                try? await Task.sleep(for: .milliseconds(20))
+            }
+            settings.state.selectProvider(provider: .openAiimages)
+            for _ in 0..<250 {
+                if settings.state.config.provider == .openAiimages { break }
+                try? await Task.sleep(for: .milliseconds(20))
+            }
+            let state = settings.state
+            state.setUseSharedConfig(value: true)
+            state.setField(id: "baseUrl", value: "")
+            state.setField(id: "apiKey", value: "")
+            state.setField(id: "model", value: "")
+            let prompt = "Keep the image prompt " + UUID().uuidString
+            state.setField(id: "prompt", value: prompt)
+            for _ in 0..<250 {
+                if settings.state.useSharedConfig
+                    && settings.state.config.value(id: "model") == "prefill-fixture-image"
+                    && settings.state.config.value(id: "prompt") == prompt { return }
+                try? await Task.sleep(for: .milliseconds(20))
+            }
+            assertionFailure("Could not prepare persisted empty fields with shared AI configuration")
+            return
+        }
+        if translationSettings {
+            settings.state.selectProvider(provider: .gemini)
+            for _ in 0..<250 {
+                if settings.state.config.provider == .gemini { break }
+                try? await Task.sleep(for: .milliseconds(20))
+            }
+            settings.state.setField(id: "baseUrl", value: "http://127.0.0.1:18473/v1beta")
+            for _ in 0..<250 {
+                if settings.state.config.value(id: "baseUrl") == "http://127.0.0.1:18473/v1beta" { break }
+                try? await Task.sleep(for: .milliseconds(20))
+            }
+        }
+        if !ProcessInfo.processInfo.arguments.contains("--image-translation-fixture") {
+            settings.state.selectProvider(provider: .disabled)
+            for _ in 0..<250 {
+                if settings.state.config.provider == .disabled { return }
+                try? await Task.sleep(for: .milliseconds(20))
+            }
+            assertionFailure("Could not disable providers for the offline fixture")
+            return
+        }
+        settings.state.selectProvider(provider: .openAiimages)
+        for _ in 0..<250 {
+            if settings.state.config.provider == .openAiimages { break }
+            try? await Task.sleep(for: .milliseconds(20))
+        }
+        let state = settings.state
+        state.setUseSharedConfig(value: false)
+        let prompt = "Translate visible text into {targetLanguage}. Offline fixture " + UUID().uuidString
+        state.setField(id: "prompt", value: prompt)
+        state.setField(id: "baseUrl", value: "http://127.0.0.1:18473/v1")
+        state.setField(id: "apiKey", value: "offline-fixture-key")
+        state.setField(id: "model", value: "offline-fixture")
+        for _ in 0..<250 {
+            if settings.state.config.configured && settings.state.config.value(id: "baseUrl") == "http://127.0.0.1:18473/v1" && settings.state.config.value(id: "prompt") == prompt { return }
+            try? await Task.sleep(for: .milliseconds(20))
+        }
+        assertionFailure("Could not configure the local image translation fixture")
     }
 
     private func makeMedia(index: Int = 0) async -> any UiMedia {

@@ -17,6 +17,7 @@ struct MediaViewerScreen: View {
     @Environment(\.timelineAppearance.postActionStyle) private var postActionStyle
     @Environment(\.openURL) private var openURL
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     let medias: [any UiMedia]
     let initialIndex: Int
@@ -28,6 +29,7 @@ struct MediaViewerScreen: View {
     let post: UiTimelineV2.Post?
     let quotes: [UiTimelineV2.Post]
 
+    @State private var imageTranslation: KotlinPresenter<ImageTranslationPresenterState>
     @State private var selectedIndex: Int
     @State private var isPlaying: Bool = true
     @State private var videoState: VideoState = .idle
@@ -64,6 +66,7 @@ struct MediaViewerScreen: View {
         self.previewIsImage = previewIsImage
         self.shareContext = shareContext
         self.post = post
+        self._imageTranslation = State(initialValue: KotlinPresenter(presenter: ImageTranslationPresenter(accountType: post?.accountType)))
         self.quotes = quotes
         self.selectedIndex = max(0, initialIndex)
         self.protectInitialPagerSelection = initialIndex > 0
@@ -100,7 +103,17 @@ struct MediaViewerScreen: View {
                     // LazyPager 1.2.1 only supports downward dismissal.
                     ZStack(alignment: .bottom) {
                         LazyPager(data: medias, page: pagerSelectedIndex) { media in
+                            let translating = imageTranslation.state.item(media: media).loading
                             mediaContent(media)
+                                .blur(radius: translating ? 8 : 0)
+                                .overlay {
+                                    if translating {
+                                        ProgressView()
+                                            .accessibilityLabel(Text("Translating image", bundle: .main))
+                                            .transition(.opacity)
+                                    }
+                                }
+                                .animation(reduceMotion ? nil : .easeInOut(duration: 0.2), value: translating)
                                 .accessibilityLabel(Text(verbatim: media.accessibleDescription))
                                 .contextMenu {
                                     // Video long presses are reserved for temporary double-speed playback.
@@ -122,6 +135,11 @@ struct MediaViewerScreen: View {
                                                 UIPasteboard.general.string = media.url
                                             }
                                         )
+                                        if imageTranslation.state.canRegenerate(media: media) {
+                                            Button { imageTranslation.state.regenerate(media: media) } label: {
+                                                Text("Translate again", bundle: .main)
+                                            }
+                                        }
                                     }
                                 }
                                 // Move the content, keeping the pager's safe-area insets stable.
@@ -207,6 +225,7 @@ struct MediaViewerScreen: View {
             MediaOrientationController.setLandscape(newValue)
         }
         .onDisappear {
+            imageTranslation.presenter.close()
             if isLandscapeViewing {
                 MediaOrientationController.setLandscape(false)
             }
@@ -217,7 +236,9 @@ struct MediaViewerScreen: View {
         }
         .sheet(isPresented: $postSheetPresented) {
             mediaPostSheet
+                .imageTranslationErrorAlert(state: imageTranslation.state, media: selectedMedia, enabled: postSheetPresented)
         }
+        .imageTranslationErrorAlert(state: imageTranslation.state, media: selectedMedia, enabled: !postSheetPresented)
         .background(.black.opacity(opacity))
         .background(ClearFullScreenBackground())
         .toolbar(.hidden, for: .navigationBar)
@@ -225,14 +246,17 @@ struct MediaViewerScreen: View {
 
     @ViewBuilder
     private func mediaContent(_ media: any UiMedia) -> some View {
-        switch onEnum(of: media) {
+        switch onEnum(of: imageTranslation.state.displayed(media: media)) {
         case .ugoira(let animation):
             UgoiraPlayer(media: animation, active: selectedMedia?.url == animation.url)
         case .image(let image):
             AdaptiveKFImage(
                 data: image,
                 placeholder: image.preview,
-                mediaAspectRatio: CGFloat(image.aspectRatio)
+                mediaAspectRatio: CGFloat(image.aspectRatio),
+                onImageFailure: {
+                    if image.url != media.url { imageTranslation.state.imageFailed(media: media, url: image.url) }
+                }
             )
         case .video(let video):
             if medias.indices.contains(selectedIndex), medias[selectedIndex].url == video.url {
@@ -281,6 +305,17 @@ struct MediaViewerScreen: View {
                     .accessibilityLabel(Text(verbatim: isLandscapeViewing ? "Exit landscape view" : "Landscape view"))
 
                     if let selectedMedia, case .image = onEnum(of: selectedMedia) {
+                        if imageTranslation.state.canToggle(media: selectedMedia) {
+                            let translationItem = imageTranslation.state.item(media: selectedMedia)
+                            topOverlayButton {
+                                imageTranslation.state.toggle(media: selectedMedia)
+                            } label: {
+                                Image(systemName: "translate")
+                            }
+                            .disabled(translationItem.loading)
+                            .accessibilityLabel(Text(translationItem.showingTranslated ? "Show original" : translationItem.translated != nil ? "Show translation" : "Translate image", bundle: .main))
+                            .accessibilityValue(Text(translationItem.loading ? "Translating image" : "", bundle: .main))
+                        }
                         topOverlayButton {
                             saveMedia(selectedMedia)
                         } label: {
@@ -578,6 +613,7 @@ struct MediaViewerScreen: View {
         showsSaveResult: Bool = true,
         completion: (@Sendable (Bool) -> Void)? = nil
     ) {
+        let media = imageTranslation.state.displayed(media: media)
         switch onEnum(of: media) {
         case .ugoira(let animation):
             MediaSaver.shared.saveUgoira(animation, fileName: fileName(for: media), showsSaveResult: showsSaveResult, completion: completion)
@@ -655,6 +691,15 @@ struct MediaViewerScreen: View {
     }
 
     private func shareSelectedImage(_ media: any UiMedia) {
+        let displayed = imageTranslation.state.displayed(media: media)
+        if let url = URL(string: displayed.url), url.isFileURL {
+            guard let file = try? ImageTranslationExportFile.prepare(url), let presenter = topViewController() else { return }
+            let controller = UIActivityViewController(activityItems: [file], applicationActivities: nil)
+            controller.popoverPresentationController?.sourceView = presenter.view
+            controller.popoverPresentationController?.sourceRect = presenter.view.bounds
+            presenter.present(controller, animated: true)
+            return
+        }
         guard !isPreparingShare,
               case .image(let image) = onEnum(of: media) else {
             return

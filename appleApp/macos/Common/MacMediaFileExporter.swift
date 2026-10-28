@@ -397,6 +397,11 @@ enum MacMediaFileExporter {
     }
 
     private static func writeSource(_ source: MacMediaExportSource, to destinationURL: URL) async throws {
+        if let url = URL(string: source.url), url.isFileURL {
+            guard ImageTranslationExportFile.isOwned(url) else { throw MacMediaExportError.downloadFailed }
+            try copyReplacingItem(at: url, to: destinationURL)
+            return
+        }
         if let animation = source.ugoira {
             let success: Bool = await withCheckedContinuation { continuation in
                 UgoiraExporter.shared.save(animation, fileName: destinationURL.lastPathComponent, write: { url in

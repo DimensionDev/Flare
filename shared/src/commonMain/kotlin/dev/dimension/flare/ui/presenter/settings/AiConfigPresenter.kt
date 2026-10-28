@@ -254,7 +254,7 @@ public class AiConfigPresenter(
                 supportedOpenAIReasoningEfforts
             override val supportedTranslateProviders: ImmutableList<TranslateProviderOption> =
                 supportedTranslateProviders
-            override val serverSuggestions: ImmutableList<String> = SERVER_SUGGESTIONS
+            override val serverSuggestions: ImmutableList<String> = AI_SERVER_SUGGESTIONS
             override val aiType: AiTypeOption =
                 when (editingType) {
                     AppSettings.AiConfig.Type.OnDevice -> AiTypeOption.OnDevice
@@ -586,7 +586,7 @@ internal fun normalizeExcludedLanguages(languages: List<String>): List<String> =
         .distinctBy { canonicalTranslationLanguage(it) ?: it.lowercase() }
         .toList()
 
-private val SERVER_SUGGESTIONS =
+internal val AI_SERVER_SUGGESTIONS =
     persistentListOf(
         "https://api.openai.com/v1/",
         "https://generativelanguage.googleapis.com/v1beta/openai/",

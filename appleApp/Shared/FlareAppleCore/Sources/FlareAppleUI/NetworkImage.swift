@@ -12,32 +12,38 @@ public struct NetworkImage: View {
     private let usesCrossfade: Bool
     private let onProgress: ((Double?) -> Void)?
     private let onImageSize: ((CGSize) -> Void)?
+    private let onImageFailure: (() -> Void)?
     private var downsamplingEnabled = true
+    private let keepsCurrentImage: Bool
     @State private var prepared: PreparedMediaImage?
     @State private var preparedIdentity: String?
 
     public init(data: UiMedia?, placeholder: UiMedia? = nil,
                 contentMode: SwiftUI.ContentMode = .fill, usesCrossfade: Bool = false,
-                onProgress: ((Double?) -> Void)? = nil, onImageSize: ((CGSize) -> Void)? = nil) {
+                onProgress: ((Double?) -> Void)? = nil, onImageFailure: (() -> Void)? = nil, onImageSize: ((CGSize) -> Void)? = nil,
+                keepsCurrentImage: Bool = false) {
         self.data = data
         self.placeholder = placeholder
         self.contentMode = contentMode
         self.usesCrossfade = usesCrossfade
         self.onProgress = onProgress
+        self.onImageFailure = onImageFailure
         self.onImageSize = onImageSize
+        self.keepsCurrentImage = keepsCurrentImage
     }
 
     public var body: some View {
         let identity = "\(String(describing: data?.proxy))|\(data?.cacheKey ?? "")"
         let taskIdentity = "\(identity)|\(ProxyMediaImages.shared.revision)"
         Group {
-            if let prepared, preparedIdentity == identity {
+            if let prepared, preparedIdentity == identity || keepsCurrentImage {
                 ResolvedNetworkImage(source: prepared.source, downloader: prepared.downloader, redirectHandler: prepared.redirectHandler,
                     mediaPlaceholder: placeholder, data: data.flatMap { URL(string: $0.url) },
                     customHeader: data?.customHeaders, contentMode: contentMode,
-                    usesCrossfade: usesCrossfade, onProgress: onProgress, onImageSize: onImageSize,
-                    downsamplingEnabled: downsamplingEnabled, shareImageID: shareImageID)
-                    .id(prepared.key)
+                    usesCrossfade: usesCrossfade && !keepsCurrentImage, onProgress: onProgress, onImageSize: onImageSize,
+                    onImageFailure: preparedIdentity == identity ? onImageFailure : nil,
+                    downsamplingEnabled: downsamplingEnabled, shareImageID: shareImageID, keepsCurrentImage: keepsCurrentImage)
+                    .id(keepsCurrentImage ? shareImageID.uuidString : prepared.key)
             } else {
                 Rectangle().fill(.placeholder).redacted(reason: .placeholder)
             }
@@ -47,6 +53,7 @@ public struct NetworkImage: View {
         .task(id: taskIdentity) {
             guard let data else { prepared = nil; return }
             do {
+                if keepsCurrentImage { onProgress?(0) }
                 let result = try await ProxyMediaImages.shared.prepare(data)
                 guard !Task.isCancelled else { return }
                 if preparedIdentity != identity || prepared?.key != result.key {
@@ -55,9 +62,10 @@ public struct NetworkImage: View {
                 preparedIdentity = identity
             } catch {
                 guard !Task.isCancelled else { return }
-                prepared = nil
+                if !keepsCurrentImage { prepared = nil }
                 shareImageLoading?.complete(shareImageID, success: false)
                 onProgress?(nil)
+                onImageFailure?()
             }
         }
     }
@@ -74,8 +82,10 @@ private struct ResolvedNetworkImage: View {
     let usesCrossfade: Bool
     let onProgress: ((Double?) -> Void)?
     let onImageSize: ((CGSize) -> Void)?
+    var onImageFailure: (() -> Void)? = nil
     let downsamplingEnabled: Bool
     let shareImageID: UUID
+    let keepsCurrentImage: Bool
     @Environment(\.shareImageLoading) private var shareImageLoading
     @Environment(\.displayScale) private var displayScale
     @State private var measuredPixels: CGSize = .zero
@@ -87,6 +97,7 @@ private struct ResolvedNetworkImage: View {
             if AppleMediaFileExtension.isGIF(url: data) {
                 KFAnimatedImage(source: source)
                     .downloader(downloader)
+                    .cacheMemoryOnly(data.map(ImageTranslationExportFile.isOwned) == true)
                     .redirectHandler(redirectHandler)
                     .configure { view in
                         view.needsPrescaling = downsamplingEnabled
@@ -96,7 +107,7 @@ private struct ResolvedNetworkImage: View {
                     }
                     .flareAsyncCacheTypeCheck()
                     .loadDiskFileSynchronously(false)
-                    .fade(duration: shareImageLoading == nil ? 0.25 : 0)
+                    .fade(duration: keepsCurrentImage ? 0 : (shareImageLoading == nil ? 0.25 : 0))
                     .requestModifier { request in
                         customHeader?.forEach { request.setValue($0.value, forHTTPHeaderField: $0.key) }
                     }
@@ -108,7 +119,8 @@ private struct ResolvedNetworkImage: View {
                         shareImageLoading?.complete(shareImageID, success: true)
                         onProgress?(1)
                     }
-                    .onFailure { _ in
+                    .onFailure { error in
+                        if !error.isTaskCancelled { onImageFailure?() }
                         if data != nil { shareImageLoading?.complete(shareImageID, success: false) }
                         onProgress?(nil)
                     }
@@ -121,12 +133,13 @@ private struct ResolvedNetworkImage: View {
                 CrossfadeNetworkImage(
                     source: source, downloader: downloader, redirectHandler: redirectHandler,
                     mediaPlaceholder: mediaPlaceholder, data: data, customHeader: customHeader,
-                    contentMode: contentMode, onProgress: onProgress, onImageSize: onImageSize,
+                    contentMode: contentMode, onProgress: onProgress, onImageSize: onImageSize, onImageFailure: onImageFailure,
                     processor: processor, displayScale: displayScale
                 )
             } else {
                 KFImage(source: source)
                     .downloader(downloader)
+                    .cacheMemoryOnly(data.map(ImageTranslationExportFile.isOwned) == true)
                     .redirectHandler(redirectHandler)
                     .setProcessor(processor)
                     .scaleFactor(displayScale)
@@ -135,7 +148,7 @@ private struct ResolvedNetworkImage: View {
                     .flareBackgroundDecodeIfSupported()
                     .loadDiskFileSynchronously(false)
                     .resizable()
-                    .fade(duration: shareImageLoading == nil ? 0.25 : 0)
+                    .fade(duration: keepsCurrentImage ? 0 : (shareImageLoading == nil ? 0.25 : 0))
                     .requestModifier { request in
                         customHeader?.forEach { request.setValue($0.value, forHTTPHeaderField: $0.key) }
                     }
@@ -148,7 +161,8 @@ private struct ResolvedNetworkImage: View {
                         shareImageLoading?.complete(shareImageID, success: true)
                         onProgress?(1)
                     }
-                    .onFailure { _ in
+                    .onFailure { error in
+                        if !error.isTaskCancelled { onImageFailure?() }
                         if data != nil { shareImageLoading?.complete(shareImageID, success: false) }
                         onProgress?(nil)
                     }
@@ -166,7 +180,7 @@ private struct ResolvedNetworkImage: View {
         }
         .onChange(of: data) { _, _ in
             requestedPixels = measuredPixels
-            previousImage = nil
+            if !keepsCurrentImage { previousImage = nil }
         }
     }
 
@@ -178,7 +192,7 @@ private struct ResolvedNetworkImage: View {
 
     @ViewBuilder
     private var placeholderView: some View {
-        if let previousImage, previousImage.url == data {
+        if let previousImage, previousImage.url == data || keepsCurrentImage {
             #if os(macOS)
             Image(nsImage: previousImage.image).resizable()
             #else
@@ -224,6 +238,7 @@ private struct CrossfadeNetworkImage: View {
     let contentMode: SwiftUI.ContentMode
     let onProgress: ((Double?) -> Void)?
     let onImageSize: ((CGSize) -> Void)?
+    var onImageFailure: (() -> Void)? = nil
     let processor: any ImageProcessor
     let displayScale: CGFloat
 
@@ -243,6 +258,7 @@ private struct CrossfadeNetworkImage: View {
 
             KFImage(source: source)
                 .downloader(downloader)
+                .cacheMemoryOnly(data.map(ImageTranslationExportFile.isOwned) == true)
                 .redirectHandler(redirectHandler)
                 .setProcessor(processor)
                 .scaleFactor(displayScale)
@@ -274,7 +290,8 @@ private struct CrossfadeNetworkImage: View {
                     }
                     schedulePlaceholderRemoval(for: data)
                 }
-                .onFailure { _ in
+                .onFailure { error in
+                    if !error.isTaskCancelled { onImageFailure?() }
                     onProgress?(nil)
                     placeholderRemovalTask?.cancel()
                     keepsPlaceholder = true

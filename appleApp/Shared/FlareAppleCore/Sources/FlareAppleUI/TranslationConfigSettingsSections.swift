@@ -30,6 +30,7 @@ public struct TranslationConfigSettingsSections: View {
 @Observable
 private final class TranslationConfigSettingsState {
     let presenter = KotlinPresenter(presenter: AiConfigPresenter())
+    let imageTranslation = ImageTranslationSettingsState()
     let aiTranslationTestPresenter = KotlinPresenter(presenter: AiTranslationTestPresenter())
     var editingField: TranslationConfigEditableField?
     var editingText = ""
@@ -202,6 +203,7 @@ private struct TranslationConfigSettingsSectionsContent: View {
         }
         .animation(.easeInOut(duration: 0.2), value: state.presenter.state.translateProvider.name)
         .animation(.easeInOut(duration: 0.2), value: state.presenter.state.preTranslate)
+        ImageTranslationSettingsSection(state: state.imageTranslation)
     }
 
     @ViewBuilder
@@ -434,6 +436,7 @@ private extension View {
         .sheet(isPresented: $state.showExcludedLanguagesPicker) {
             TranslationExcludedLanguagesSheet(state: state)
         }
+        .imageTranslationSettingsSheets(state: state.imageTranslation)
     }
 }
 

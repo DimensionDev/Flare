@@ -18,6 +18,16 @@ public class StoragePresenter : PresenterBase<StorageState>() {
     private val appDataStore by koinInject<dev.dimension.flare.data.datastore.AppDataStore>()
     private val cacheDatabase by koinInject<CacheDatabase>()
     private val ugoiraRepository by koinInject<UgoiraRepository>()
+    private val imageTranslationRepository by koinInject<dev.dimension.flare.data.translation.image.ImageTranslationRepository>()
+
+    @Throws(Exception::class)
+    public suspend fun clearMediaCache() {
+        imageTranslationRepository.clear()
+        ugoiraRepository.clear()
+    }
+
+    @Throws(Exception::class)
+    public suspend fun mediaCacheSize(): Long = imageTranslationRepository.size() + ugoiraRepository.size()
 
     @Throws(Exception::class)
     public suspend fun clearUgoiraCache(): Unit = ugoiraRepository.clear()

@@ -14,6 +14,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -41,6 +42,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.R
 import dev.dimension.flare.ui.component.BackButton
@@ -234,75 +238,23 @@ internal fun AiConfigScreen(onBack: () -> Unit) {
                         },
                     )
                     AnimatedVisibility(visible = state.aiType == AiTypeOption.OpenAI) {
-                        SegmentedListItem(
-                            checked = state.textEditDialog?.field == AiConfigEditField.ServerUrl,
-                            onCheckedChange = { checked ->
-                                if (checked) {
-                                    state.setTextEditDialog(
-                                        TextEditDialogState(
-                                            field = AiConfigEditField.ServerUrl,
-                                            title = serverTitle,
-                                            placeholder = serverHint,
-                                            value = state.openAIServerUrl,
-                                            suggestions = state.serverSuggestions,
-                                            hint = serverRequirementHint,
-                                            onConfirm = { newValue ->
-                                                state.setOpenAIServerUrl(newValue)
-                                            },
-                                        ),
-                                    )
-                                } else if (state.textEditDialog?.field == AiConfigEditField.ServerUrl) {
-                                    state.setTextEditDialog(null)
-                                }
-                            },
+                        AiConfigTextSetting(
+                            title = serverTitle,
+                            value = state.openAIServerUrl,
                             shapes = ListItemDefaults.item(),
-                            content = {
-                                Text(text = serverTitle)
-                            },
-                            supportingContent = {
-                                Text(
-                                    text =
-                                        state.openAIServerUrl.ifBlank {
-                                            stringResource(id = R.string.settings_ai_config_value_empty_placeholder)
-                                        },
-                                    style = MaterialTheme.typography.bodySmall,
-                                )
-                            },
+                            placeholder = serverHint,
+                            suggestions = state.serverSuggestions,
+                            hint = serverRequirementHint,
+                            onConfirm = state::setOpenAIServerUrl,
                         )
                     }
                     AnimatedVisibility(visible = state.aiType == AiTypeOption.OpenAI) {
-                        SegmentedListItem(
-                            checked = state.textEditDialog?.field == AiConfigEditField.ApiKey,
-                            onCheckedChange = { checked ->
-                                if (checked) {
-                                    state.setTextEditDialog(
-                                        TextEditDialogState(
-                                            field = AiConfigEditField.ApiKey,
-                                            title = apiKeyTitle,
-                                            placeholder = apiKeyHint,
-                                            value = state.openAIApiKey,
-                                            onConfirm = { newValue ->
-                                                state.setOpenAIApiKey(newValue)
-                                            },
-                                        ),
-                                    )
-                                } else if (state.textEditDialog?.field == AiConfigEditField.ApiKey) {
-                                    state.setTextEditDialog(null)
-                                }
-                            },
+                        AiConfigTextSetting(
+                            title = apiKeyTitle,
+                            value = state.openAIApiKey,
                             shapes = ListItemDefaults.item(),
-                            content = {
-                                Text(text = apiKeyTitle)
-                            },
-                            supportingContent = {
-                                Text(
-                                    text =
-                                        state.openAIApiKey.ifBlank {
-                                            stringResource(id = R.string.settings_ai_config_value_empty_placeholder)
-                                        },
-                                    style = MaterialTheme.typography.bodySmall,
-                                )
-                            },
+                            placeholder = apiKeyHint,
+                            onConfirm = state::setOpenAIApiKey,
                         )
                     }
                     AnimatedVisibility(visible = state.aiType == AiTypeOption.OpenAI) {
@@ -463,38 +415,12 @@ internal fun AiConfigScreen(onBack: () -> Unit) {
                         )
                     }
                     AnimatedVisibility(visible = state.aiType == AiTypeOption.OpenAI && shouldShowManualModelInput) {
-                        SegmentedListItem(
-                            checked = state.textEditDialog?.field == AiConfigEditField.Model,
-                            onCheckedChange = { checked ->
-                                if (checked) {
-                                    state.setTextEditDialog(
-                                        TextEditDialogState(
-                                            field = AiConfigEditField.Model,
-                                            title = modelTitle,
-                                            placeholder = modelPlaceholder,
-                                            value = state.openAIModel,
-                                            onConfirm = { newValue ->
-                                                state.setOpenAIModel(newValue)
-                                            },
-                                        ),
-                                    )
-                                } else if (state.textEditDialog?.field == AiConfigEditField.Model) {
-                                    state.setTextEditDialog(null)
-                                }
-                            },
+                        AiConfigTextSetting(
+                            title = modelTitle,
+                            value = state.openAIModel,
                             shapes = ListItemDefaults.last(),
-                            content = {
-                                Text(text = stringResource(id = R.string.settings_ai_config_model_manual_input))
-                            },
-                            supportingContent = {
-                                Text(
-                                    text =
-                                        state.openAIModel.ifBlank {
-                                            stringResource(id = R.string.settings_ai_config_value_empty_placeholder)
-                                        },
-                                    style = MaterialTheme.typography.bodySmall,
-                                )
-                            },
+                            placeholder = modelPlaceholder,
+                            onConfirm = state::setOpenAIModel,
                         )
                     }
                 }
@@ -645,16 +571,13 @@ private data class TextEditDialogState(
 )
 
 private enum class AiConfigEditField {
-    ServerUrl,
-    ApiKey,
     ExtraBody,
-    Model,
     TldrPrompt,
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun TextEditDialog(
+internal fun TextEditDialog(
     title: String,
     placeholder: String,
     value: String,
@@ -662,6 +585,8 @@ private fun TextEditDialog(
     hint: String,
     onDismiss: () -> Unit,
     onConfirm: (String) -> Unit,
+    secret: Boolean = false,
+    singleLine: Boolean = false,
 ) {
     var text by remember(value) { mutableStateOf(value) }
     var showSuggestions by remember(value) { mutableStateOf(false) }
@@ -685,6 +610,9 @@ private fun TextEditDialog(
                             text = it
                         },
                         modifier = Modifier.fillMaxWidth(),
+                        singleLine = singleLine,
+                        visualTransformation = if (secret) PasswordVisualTransformation() else VisualTransformation.None,
+                        keyboardOptions = if (secret) KeyboardOptions(keyboardType = KeyboardType.Password) else KeyboardOptions.Default,
                         placeholder = {
                             if (placeholder.isNotBlank()) {
                                 Text(text = placeholder)
@@ -706,6 +634,7 @@ private fun TextEditDialog(
                                 Modifier
                                     .fillMaxWidth()
                                     .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable),
+                            singleLine = singleLine,
                             placeholder = {
                                 if (placeholder.isNotBlank()) {
                                     Text(text = placeholder)
@@ -1179,6 +1108,7 @@ internal fun TranslationConfigScreen(onBack: () -> Unit) {
                     }
                 }
             }
+            ImageTranslationSettingsSection()
         }
     }
     if (state.showExcludedLanguagesDialog) {

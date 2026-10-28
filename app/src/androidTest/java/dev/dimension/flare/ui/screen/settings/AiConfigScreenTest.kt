@@ -3,6 +3,7 @@ package dev.dimension.flare.ui.screen.settings
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
@@ -74,6 +75,29 @@ class AiConfigScreenTest {
         composeRule.waitUntil(5_000) { (currentConfig().type as? AppSettings.AiConfig.Type.OpenAI)?.model == "updated-basic" }
         assertEquals(basic.copy(model = "updated-basic"), currentConfig().type)
         assertEquals(agent.copy(model = "updated-agent"), currentConfig().agentType)
+    }
+
+    @Test
+    fun agentConnectionUsesCurrentValueAndCancelKeepsBothConfigurationsUnchanged() {
+        val basic = AppSettings.AiConfig.Type.OpenAI("https://basic.example/v1/", "", "basic-model")
+        val agent = AppSettings.AiConfig.Type.OpenAI("https://agent.example/v1/", "", "agent-model")
+        setConfig(AppSettings.AiConfig(type = basic, agentType = agent))
+        showScreen()
+
+        composeRule.onNodeWithText(agent.serverUrl).performScrollTo().performClick()
+        composeRule.onNode(hasSetTextAction()).assertTextEquals(agent.serverUrl)
+        composeRule.onNode(hasSetTextAction()).performTextReplacement("https://changed.example/v1/")
+        composeRule.onNodeWithText(label(android.R.string.cancel)).performClick()
+        assertEquals(basic, currentConfig().type)
+        assertEquals(agent, currentConfig().agentType)
+
+        composeRule.onNodeWithText(agent.serverUrl).performScrollTo().performClick()
+        composeRule.onNode(hasSetTextAction()).assertTextEquals(agent.serverUrl)
+        composeRule.onNode(hasSetTextAction()).performTextReplacement("https://changed.example/v1/")
+        composeRule.onNodeWithText(label(android.R.string.ok)).performClick()
+        composeRule.waitUntil(5_000) { currentConfig().agentType?.serverUrl == "https://changed.example/v1/" }
+        assertEquals(basic, currentConfig().type)
+        assertEquals(agent.copy(serverUrl = "https://changed.example/v1/"), currentConfig().agentType)
     }
 
     private fun showScreen() {

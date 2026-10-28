@@ -100,52 +100,19 @@ struct ImageTranslationSettingsSection: View {
     }
 
     private func editButton(_ field: ImageTranslationField) -> some View {
-        #if os(macOS)
-        HStack(spacing: 16) {
-            fieldLabel(field)
-                .frame(maxWidth: .infinity, alignment: .leading)
-            Button {
-                state.beginEditing(field)
-            } label: {
-                Label {
-                    Text("edit", bundle: FlareAppleUILocalization.bundle)
-                } icon: {
-                    Image(fontAwesome: .pen)
-                }
-            }
-            .buttonStyle(.bordered)
-            .controlSize(.small)
-            .help(Text("edit", bundle: FlareAppleUILocalization.bundle))
-            .accessibilityLabel(Text(LocalizedStringKey(field.title), bundle: FlareAppleUILocalization.bundle))
-        }
-        #else
-        Button {
+        AiConfigEditButton(
+            title: LocalizedStringKey(field.title),
+            value: state.presenter.state.config.value(id: field.id),
+            secret: field.secret
+        ) {
             state.beginEditing(field)
-        } label: {
-            fieldLabel(field)
         }
-        .buttonStyle(.plain)
-        #endif
-    }
-
-    private func fieldLabel(_ field: ImageTranslationField) -> some View {
-        let value = state.presenter.state.config.value(id: field.id)
-        return Label {
-            Text(LocalizedStringKey(field.title), bundle: FlareAppleUILocalization.bundle)
-            Text(value.isEmpty ? FlareAppleUILocalization.string("Not set") : field.secret ? "••••••••" : value)
-                .lineLimit(2)
-        } icon: {
-            EmptyView()
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .contentShape(Rectangle())
     }
 }
 
 private struct ImageTranslationFieldEditor: View {
     let editing: ImageTranslationEditingField
     @State private var text: String
-    @Environment(\.dismiss) private var dismiss
 
     init(editing: ImageTranslationEditingField) {
         self.editing = editing
@@ -153,37 +120,15 @@ private struct ImageTranslationFieldEditor: View {
     }
 
     var body: some View {
-        NavigationStack {
-            Form {
-                Section {
-                    if editing.field.secret {
-                        SecureField(LocalizedStringKey(editing.field.title), text: $text)
-                    } else if editing.field.multiline {
-                        TextEditor(text: $text).frame(minHeight: 180)
-                    } else {
-                        TextField(editing.field.placeholder, text: $text)
-                    }
-                }
-            }
-            .formStyle(.grouped)
-            #if os(iOS)
-            .textInputAutocapitalization(.never)
-            .autocorrectionDisabled()
-            #endif
-            .navigationTitle(Text(LocalizedStringKey(editing.field.title), bundle: FlareAppleUILocalization.bundle))
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button { dismiss() } label: { Image(fontAwesome: .xmark) }
-                        .accessibilityLabel(Text("Cancel", bundle: FlareAppleUILocalization.bundle))
-                }
-                ToolbarItem(placement: .confirmationAction) {
-                    Button {
-                        editing.onSave(text.trimmingCharacters(in: .whitespacesAndNewlines))
-                        dismiss()
-                    } label: { Image(fontAwesome: .check) }
-                        .accessibilityLabel(Text("done", bundle: FlareAppleUILocalization.bundle))
-                }
-            }
+        SettingsTextEditSheet(
+            title: LocalizedStringKey(editing.field.title),
+            text: $text,
+            placeholder: editing.field.placeholder,
+            secret: editing.field.secret,
+            multiline: editing.field.multiline,
+            suggestions: editing.field.editSuggestions
+        ) { value in
+            editing.onSave(value.trimmingCharacters(in: .whitespacesAndNewlines))
         }
     }
 }

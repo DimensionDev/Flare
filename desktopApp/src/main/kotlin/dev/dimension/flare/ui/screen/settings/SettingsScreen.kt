@@ -1836,64 +1836,21 @@ internal fun SettingsScreen(
                         ExpanderItemSeparator()
                         AnimatedVisibility(aiConfigState.aiType == AiTypeOption.OpenAI) {
                             Column {
-                                ExpanderItem(
-                                    heading = { Text(stringResource(Res.string.settings_ai_config_server)) },
-                                    caption = {
-                                        Text(
-                                            aiConfigState.openAIServerUrl.ifBlank {
-                                                stringResource(Res.string.settings_ai_config_value_empty_placeholder)
-                                            },
-                                        )
-                                    },
-                                    trailing = {
-                                        Button(
-                                            onClick = {
-                                                aiConfigState.setTextEditDialog(
-                                                    TextEditDialogState(
-                                                        title = serverTitle,
-                                                        placeholder = serverHint,
-                                                        value = aiConfigState.openAIServerUrl,
-                                                        suggestions = aiConfigState.serverSuggestions,
-                                                        hint = serverRequirementHint,
-                                                        onConfirm = { newValue ->
-                                                            aiConfigState.setOpenAIServerUrl(newValue)
-                                                        },
-                                                    ),
-                                                )
-                                            },
-                                        ) {
-                                            Text(stringResource(Res.string.edit))
-                                        }
-                                    },
+                                AiConfigTextSetting(
+                                    title = serverTitle,
+                                    value = aiConfigState.openAIServerUrl,
+                                    placeholder = serverHint,
+                                    suggestions = aiConfigState.serverSuggestions,
+                                    hint = serverRequirementHint,
+                                    onConfirm = aiConfigState::setOpenAIServerUrl,
                                 )
                                 ExpanderItemSeparator()
-                                ExpanderItem(
-                                    heading = { Text(stringResource(Res.string.settings_ai_config_api_key)) },
-                                    caption = {
-                                        Text(
-                                            aiConfigState.openAIApiKey.ifBlank {
-                                                stringResource(Res.string.settings_ai_config_value_empty_placeholder)
-                                            },
-                                        )
-                                    },
-                                    trailing = {
-                                        Button(
-                                            onClick = {
-                                                aiConfigState.setTextEditDialog(
-                                                    TextEditDialogState(
-                                                        title = apiKeyTitle,
-                                                        placeholder = apiKeyHint,
-                                                        value = aiConfigState.openAIApiKey,
-                                                        onConfirm = { newValue ->
-                                                            aiConfigState.setOpenAIApiKey(newValue)
-                                                        },
-                                                    ),
-                                                )
-                                            },
-                                        ) {
-                                            Text(stringResource(Res.string.edit))
-                                        }
-                                    },
+                                AiConfigTextSetting(
+                                    title = apiKeyTitle,
+                                    value = aiConfigState.openAIApiKey,
+                                    placeholder = apiKeyHint,
+                                    secret = true,
+                                    onConfirm = aiConfigState::setOpenAIApiKey,
                                 )
                                 ExpanderItemSeparator()
                                 val shouldShowManualModelInput =
@@ -1903,31 +1860,11 @@ internal fun SettingsScreen(
                                         is UiState.Loading -> false
                                     }
                                 if (shouldShowManualModelInput) {
-                                    ExpanderItem(
-                                        heading = { Text(stringResource(Res.string.settings_ai_config_model_manual_input)) },
-                                        caption = {
-                                            Text(
-                                                aiConfigState.openAIModel.ifBlank {
-                                                    stringResource(Res.string.settings_ai_config_value_empty_placeholder)
-                                                },
-                                            )
-                                        },
-                                        trailing = {
-                                            Button(
-                                                onClick = {
-                                                    aiConfigState.setTextEditDialog(
-                                                        TextEditDialogState(
-                                                            title = modelTitle,
-                                                            placeholder = modelPlaceholder,
-                                                            value = aiConfigState.openAIModel,
-                                                            onConfirm = aiConfigState::setOpenAIModel,
-                                                        ),
-                                                    )
-                                                },
-                                            ) {
-                                                Text(stringResource(Res.string.edit))
-                                            }
-                                        },
+                                    AiConfigTextSetting(
+                                        title = modelTitle,
+                                        value = aiConfigState.openAIModel,
+                                        placeholder = modelPlaceholder,
+                                        onConfirm = aiConfigState::setOpenAIModel,
                                     )
                                     ExpanderItemSeparator()
                                 } else {

@@ -238,75 +238,24 @@ internal fun AiConfigScreen(onBack: () -> Unit) {
                         },
                     )
                     AnimatedVisibility(visible = state.aiType == AiTypeOption.OpenAI) {
-                        SegmentedListItem(
-                            checked = state.textEditDialog?.field == AiConfigEditField.ServerUrl,
-                            onCheckedChange = { checked ->
-                                if (checked) {
-                                    state.setTextEditDialog(
-                                        TextEditDialogState(
-                                            field = AiConfigEditField.ServerUrl,
-                                            title = serverTitle,
-                                            placeholder = serverHint,
-                                            value = state.openAIServerUrl,
-                                            suggestions = state.serverSuggestions,
-                                            hint = serverRequirementHint,
-                                            onConfirm = { newValue ->
-                                                state.setOpenAIServerUrl(newValue)
-                                            },
-                                        ),
-                                    )
-                                } else if (state.textEditDialog?.field == AiConfigEditField.ServerUrl) {
-                                    state.setTextEditDialog(null)
-                                }
-                            },
+                        AiConfigTextSetting(
+                            title = serverTitle,
+                            value = state.openAIServerUrl,
                             shapes = ListItemDefaults.item(),
-                            content = {
-                                Text(text = serverTitle)
-                            },
-                            supportingContent = {
-                                Text(
-                                    text =
-                                        state.openAIServerUrl.ifBlank {
-                                            stringResource(id = R.string.settings_ai_config_value_empty_placeholder)
-                                        },
-                                    style = MaterialTheme.typography.bodySmall,
-                                )
-                            },
+                            placeholder = serverHint,
+                            suggestions = state.serverSuggestions,
+                            hint = serverRequirementHint,
+                            onConfirm = state::setOpenAIServerUrl,
                         )
                     }
                     AnimatedVisibility(visible = state.aiType == AiTypeOption.OpenAI) {
-                        SegmentedListItem(
-                            checked = state.textEditDialog?.field == AiConfigEditField.ApiKey,
-                            onCheckedChange = { checked ->
-                                if (checked) {
-                                    state.setTextEditDialog(
-                                        TextEditDialogState(
-                                            field = AiConfigEditField.ApiKey,
-                                            title = apiKeyTitle,
-                                            placeholder = apiKeyHint,
-                                            value = state.openAIApiKey,
-                                            onConfirm = { newValue ->
-                                                state.setOpenAIApiKey(newValue)
-                                            },
-                                        ),
-                                    )
-                                } else if (state.textEditDialog?.field == AiConfigEditField.ApiKey) {
-                                    state.setTextEditDialog(null)
-                                }
-                            },
+                        AiConfigTextSetting(
+                            title = apiKeyTitle,
+                            value = state.openAIApiKey,
                             shapes = ListItemDefaults.item(),
-                            content = {
-                                Text(text = apiKeyTitle)
-                            },
-                            supportingContent = {
-                                Text(
-                                    text =
-                                        state.openAIApiKey.ifBlank {
-                                            stringResource(id = R.string.settings_ai_config_value_empty_placeholder)
-                                        },
-                                    style = MaterialTheme.typography.bodySmall,
-                                )
-                            },
+                            placeholder = apiKeyHint,
+                            secret = true,
+                            onConfirm = state::setOpenAIApiKey,
                         )
                     }
                     AnimatedVisibility(visible = state.aiType == AiTypeOption.OpenAI) {
@@ -467,38 +416,12 @@ internal fun AiConfigScreen(onBack: () -> Unit) {
                         )
                     }
                     AnimatedVisibility(visible = state.aiType == AiTypeOption.OpenAI && shouldShowManualModelInput) {
-                        SegmentedListItem(
-                            checked = state.textEditDialog?.field == AiConfigEditField.Model,
-                            onCheckedChange = { checked ->
-                                if (checked) {
-                                    state.setTextEditDialog(
-                                        TextEditDialogState(
-                                            field = AiConfigEditField.Model,
-                                            title = modelTitle,
-                                            placeholder = modelPlaceholder,
-                                            value = state.openAIModel,
-                                            onConfirm = { newValue ->
-                                                state.setOpenAIModel(newValue)
-                                            },
-                                        ),
-                                    )
-                                } else if (state.textEditDialog?.field == AiConfigEditField.Model) {
-                                    state.setTextEditDialog(null)
-                                }
-                            },
+                        AiConfigTextSetting(
+                            title = modelTitle,
+                            value = state.openAIModel,
                             shapes = ListItemDefaults.last(),
-                            content = {
-                                Text(text = stringResource(id = R.string.settings_ai_config_model_manual_input))
-                            },
-                            supportingContent = {
-                                Text(
-                                    text =
-                                        state.openAIModel.ifBlank {
-                                            stringResource(id = R.string.settings_ai_config_value_empty_placeholder)
-                                        },
-                                    style = MaterialTheme.typography.bodySmall,
-                                )
-                            },
+                            placeholder = modelPlaceholder,
+                            onConfirm = state::setOpenAIModel,
                         )
                     }
                 }
@@ -649,10 +572,7 @@ private data class TextEditDialogState(
 )
 
 private enum class AiConfigEditField {
-    ServerUrl,
-    ApiKey,
     ExtraBody,
-    Model,
     TldrPrompt,
 }
 
@@ -715,6 +635,7 @@ internal fun TextEditDialog(
                                 Modifier
                                     .fillMaxWidth()
                                     .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable),
+                            singleLine = singleLine,
                             placeholder = {
                                 if (placeholder.isNotBlank()) {
                                     Text(text = placeholder)

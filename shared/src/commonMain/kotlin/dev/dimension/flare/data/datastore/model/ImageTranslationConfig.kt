@@ -92,6 +92,7 @@ public data class ImageTranslationField(
     val choices: List<String> = emptyList(),
     val suggestions: List<String> = emptyList(),
     val loading: Boolean = false,
+    val editSuggestions: List<String> = emptyList(),
 ) {
     public fun choiceTitle(value: String): String =
         when {

@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -66,7 +67,6 @@ import dev.dimension.flare.settings_ai_config_value_empty_placeholder
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.settings.ImageTranslationSettingsPresenter
 import io.github.composefluent.FluentTheme
-import io.github.composefluent.component.Button
 import io.github.composefluent.component.DropDownButton
 import io.github.composefluent.component.ExpanderItem
 import io.github.composefluent.component.ExpanderItemSeparator
@@ -131,43 +131,15 @@ internal fun ImageTranslationSettingsContent(state: ImageTranslationSettingsPres
         val value = state.config.value(field.id)
         val title = imageTranslationText(field.title)
         val options = field.choices.ifEmpty { field.suggestions }
-        val selectable = options.isNotEmpty() || field.loading
-        val editField = {
-            editing =
-                TextEditDialogState(
-                    title = title,
-                    placeholder = field.placeholder,
-                    value = value,
-                    secret = field.secret,
-                    singleLine = !field.multiline,
-                    onConfirm = { state.setField(field.id, it.trim()) },
-                )
-        }
         ExpanderItemSeparator()
-        ExpanderItem(
-            heading = { Text(imageTranslationText(field.title)) },
-            caption = {
-                if (!selectable) {
-                    Text(
-                        if (field.secret && value.isNotEmpty()) {
-                            "••••••••"
-                        } else {
-                            value.ifBlank {
-                                stringResource(Res.string.settings_ai_config_value_empty_placeholder)
-                            }
-                        },
-                        maxLines = 2,
-                    )
-                }
-            },
-            trailing = {
-                if (selectable) {
+        if (options.isNotEmpty() || field.loading) {
+            ExpanderItem(
+                heading = { Text(title) },
+                trailing = {
                     DropDownButton(onClick = { expandedChoice = field.id }) {
                         Text(
                             if (value.isBlank()) {
-                                stringResource(
-                                    Res.string.settings_ai_config_value_empty_placeholder,
-                                )
+                                stringResource(Res.string.settings_ai_config_value_empty_placeholder)
                             } else {
                                 imageTranslationText(field.choiceTitle(value))
                             },
@@ -195,18 +167,32 @@ internal fun ImageTranslationSettingsContent(state: ImageTranslationSettingsPres
                         if (field.choices.isEmpty()) {
                             MenuFlyoutItem(text = { Text(stringResource(Res.string.image_translation_manual_input)) }, onClick = {
                                 expandedChoice = null
-                                editField()
+                                editing =
+                                    TextEditDialogState(
+                                        title = title,
+                                        placeholder = field.placeholder,
+                                        value = value,
+                                        singleLine = !field.multiline,
+                                        onConfirm = { state.setField(field.id, it.trim()) },
+                                    )
                             })
                         }
                     }
-                } else {
-                    Button(
-                        modifier = Modifier.semantics { contentDescription = title },
-                        onClick = editField,
-                    ) { Text(imageTranslationText("Edit")) }
-                }
-            },
-        )
+                },
+            )
+        } else {
+            key(state.config.provider, field.id) {
+                AiConfigTextSetting(
+                    title = title,
+                    value = value,
+                    placeholder = field.placeholder,
+                    suggestions = field.editSuggestions,
+                    secret = field.secret,
+                    singleLine = !field.multiline,
+                    onConfirm = { state.setField(field.id, it.trim()) },
+                )
+            }
+        }
     }
     Text(
         stringResource(Res.string.image_translation_description),

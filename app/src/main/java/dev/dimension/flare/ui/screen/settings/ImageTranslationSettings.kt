@@ -12,6 +12,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -25,7 +26,7 @@ import dev.dimension.flare.ui.component.FlareDropdownMenu
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.settings.ImageTranslationSettingsPresenter
 import dev.dimension.flare.ui.theme.segmentedShapes2
-import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
 import moe.tlaster.precompose.molecule.producePresenter
 
 @Composable
@@ -130,25 +131,18 @@ internal fun ImageTranslationSettingsSection(state: ImageTranslationSettingsPres
                 },
             )
         } else {
-            SegmentedListItem(
-                checked = editing?.id == field.id,
-                onCheckedChange = { checked -> editing = if (checked) field else null },
-                shapes = ListItemDefaults.segmentedShapes2(index + fieldOffset, rowCount),
-                content = { Text(imageTranslationText(field.title)) },
-                supportingContent = {
-                    Text(
-                        if (field.secret && value.isNotEmpty()) {
-                            "••••••••"
-                        } else {
-                            value.ifBlank {
-                                stringResource(R.string.settings_ai_config_value_empty_placeholder)
-                            }
-                        },
-                        style = MaterialTheme.typography.bodySmall,
-                        maxLines = 2,
-                    )
-                },
-            )
+            key(state.config.provider, field.id) {
+                AiConfigTextSetting(
+                    title = imageTranslationText(field.title),
+                    value = value,
+                    shapes = ListItemDefaults.segmentedShapes2(index + fieldOffset, rowCount),
+                    placeholder = field.placeholder,
+                    suggestions = field.editSuggestions,
+                    secret = field.secret,
+                    singleLine = !field.multiline,
+                    onConfirm = { state.setField(field.id, it.trim()) },
+                )
+            }
         }
     }
     Text(
@@ -170,7 +164,7 @@ internal fun ImageTranslationSettingsSection(state: ImageTranslationSettingsPres
             title = imageTranslationText(field.title),
             placeholder = field.placeholder,
             value = state.config.value(field.id),
-            suggestions = persistentListOf(),
+            suggestions = field.editSuggestions.toImmutableList(),
             hint = "",
             secret = field.secret,
             singleLine = !field.multiline,

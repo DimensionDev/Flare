@@ -71,10 +71,18 @@ public class ImageTranslationSettingsPresenter : PresenterBase<ImageTranslationS
             override val providers = ImageTranslationProvider.entries.toList()
             override val fields =
                 config.editableFields.map { field ->
-                    if (field.id == "model" && canDiscover) {
-                        field.copy(suggestions = (models as? UiState.Success)?.data.orEmpty(), loading = models is UiState.Loading)
-                    } else {
-                        field
+                    when {
+                        field.id == "model" && canDiscover -> {
+                            field.copy(suggestions = (models as? UiState.Success)?.data.orEmpty(), loading = models is UiState.Loading)
+                        }
+
+                        field.id == "baseUrl" && config.provider == ImageTranslationProvider.OpenAIImages -> {
+                            field.copy(editSuggestions = AI_SERVER_SUGGESTIONS)
+                        }
+
+                        else -> {
+                            field
+                        }
                     }
                 }
             override val useSharedConfig = config.usesSharedAIConfig

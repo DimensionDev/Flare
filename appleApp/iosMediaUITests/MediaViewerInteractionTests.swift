@@ -90,6 +90,39 @@ final class MediaViewerInteractionTests: XCTestCase {
     }
 
     @MainActor
+    func testImageTranslationServerEditorPrefillsAndCancelsSuggestedChanges() {
+        let app = XCUIApplication()
+        app.launchArguments = ["--media-viewer-test", "--translation-settings", "--image-translation-fixture", "-AppleLanguages", "(en)", "-AppleLocale", "en_US"]
+        app.launch()
+        defer { app.terminate() }
+        let open = app.buttons["media-fixture-open"]
+        XCTAssertTrue(open.waitForExistence(timeout: 15))
+        open.tap()
+        app.swipeUp()
+        let server = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Service URL")).firstMatch
+        XCTAssertTrue(server.waitForExistence(timeout: 5))
+        server.tap()
+        let editor = app.textFields.firstMatch
+        XCTAssertTrue(editor.waitForExistence(timeout: 5))
+        let original = "http://127.0.0.1:18473/v1"
+        XCTAssertEqual(editor.value as? String, original)
+        // Place the caret after the prefilled URL before replacing it.
+        editor.coordinate(withNormalizedOffset: CGVector(dx: 0.95, dy: 0.5)).tap()
+        editor.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: original.count) + "api.openai")
+        XCTAssertEqual(editor.value as? String, "api.openai")
+        let suggestion = app.buttons["https://api.openai.com/v1/"]
+        XCTAssertTrue(suggestion.waitForExistence(timeout: 5))
+        suggestion.tap()
+        XCTAssertEqual(editor.value as? String, "https://api.openai.com/v1/")
+        app.navigationBars["Service URL"].buttons["Cancel"].tap()
+        XCTAssertTrue(server.waitForExistence(timeout: 5))
+        server.tap()
+        XCTAssertTrue(editor.waitForExistence(timeout: 5))
+        XCTAssertEqual(editor.value as? String, original)
+        app.navigationBars["Service URL"].buttons["Cancel"].tap()
+    }
+
+    @MainActor
     func testImageTranslationDiscoversModelsAndAllowsManualInputAndRegionSelection() {
         let app = XCUIApplication()
         app.launchArguments = ["--media-viewer-test", "--translation-settings", "--image-translation-fixture", "-AppleLanguages", "(en)", "-AppleLocale", "en_US"]

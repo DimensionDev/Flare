@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.isDialog
 import androidx.compose.ui.test.junit4.v2.createComposeRule
@@ -118,6 +119,32 @@ class ImageTranslationSettingsTest {
     }
 
     @Test
+    fun customConnectionEditorPrefillsCurrentSettingsAndCommitsServerSuggestionsOnlyOnSave() {
+        val state = State(ImageTranslationConfig(ImageTranslationProvider.OpenAIImages, useSharedAIConfig = true))
+        show(state)
+        compose.onNodeWithText(label(R.string.settings_ai_config_use_shared)).performScrollTo().performClick()
+        compose.onNodeWithText(label(R.string.image_translation_service_url)).performScrollTo().performClick()
+        compose.onNode(hasSetTextAction()).assertTextEquals("https://basic.example/v1")
+        compose.onNode(hasSetTextAction()).performClick()
+        compose.onNode(hasSetTextAction()).performTextReplacement("api.openai")
+        compose.onNodeWithText("https://api.openai.com/v1/").performClick()
+        compose.onNode(hasSetTextAction()).assertTextEquals("https://api.openai.com/v1/")
+        compose.onNodeWithText(label(android.R.string.cancel)).performClick()
+        compose.runOnIdle { assertEquals("https://basic.example/v1", state.config.value("baseUrl")) }
+        compose.onNodeWithText(label(R.string.image_translation_service_url)).performScrollTo().performClick()
+        compose.onNode(hasSetTextAction()).assertTextEquals("https://basic.example/v1")
+        compose.onNode(hasSetTextAction()).performClick()
+        compose.onNode(hasSetTextAction()).performTextReplacement("api.openai")
+        compose.onNodeWithText("https://api.openai.com/v1/").performClick()
+        compose.onNodeWithText(label(android.R.string.ok)).performClick()
+        compose.runOnIdle {
+            assertEquals("https://api.openai.com/v1/", state.config.value("baseUrl"))
+            assertEquals("basic-key", state.config.value("apiKey"))
+            assertEquals("basic-model", state.config.value("model"))
+        }
+    }
+
+    @Test
     fun discoveredModelsCanBeSelectedAndManualInputSurvivesLoadingAndEmptyResults() {
         val state = State()
         state.modelLoading = true
@@ -171,7 +198,19 @@ class ImageTranslationSettingsTest {
         override val providers = ImageTranslationProvider.entries.toList()
         override val fields get() =
             config.editableFields.map {
-                if (it.id == "model") it.copy(suggestions = modelSuggestions, loading = modelLoading) else it
+                when {
+                    it.id == "model" -> {
+                        it.copy(suggestions = modelSuggestions, loading = modelLoading)
+                    }
+
+                    it.id == "baseUrl" && config.provider == ImageTranslationProvider.OpenAIImages -> {
+                        it.copy(editSuggestions = listOf("https://api.openai.com/v1/"))
+                    }
+
+                    else -> {
+                        it
+                    }
+                }
             }
         override val useSharedConfig get() = config.usesSharedAIConfig
 

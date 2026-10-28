@@ -249,6 +249,7 @@ class PluginDetailCapabilityTest {
                     ClickEvent.Deeplink(DeeplinkRoute.Status.Detail(MicroBlogKey("post", "plugin.example"), accountType)),
                     ClickEvent.Deeplink(DeeplinkRoute.Article(accountType, MicroBlogKey("article", "plugin.example"))),
                     ClickEvent.Deeplink(DeeplinkRoute.Gallery.Detail(MicroBlogKey("gallery", "plugin.example"), accountType)),
+                    ClickEvent.Deeplink(DeeplinkRoute.OpenLinkDirectly("https://plugin.example/posts/link")),
                 ),
                 posts.map { it.clickEvent },
             )
@@ -268,6 +269,7 @@ class PluginDetailCapabilityTest {
             assertIs<ClickEvent.Deeplink>(posts[1].clickEvent)
             assertEquals(ClickEvent.Noop, posts[2].clickEvent)
             assertEquals(ClickEvent.Noop, posts[3].clickEvent)
+            assertEquals(ClickEvent.Deeplink(DeeplinkRoute.OpenLinkDirectly("https://plugin.example/posts/link")), posts[4].clickEvent)
         }
 
     @Test
@@ -280,6 +282,25 @@ class PluginDetailCapabilityTest {
             assertEquals(ClickEvent.Noop, posts[1].clickEvent)
             assertIs<DeeplinkRoute.Article>(DeeplinkRoute.parse(assertIs<ClickEvent.Deeplink>(posts[2].clickEvent).url))
             assertIs<DeeplinkRoute.Gallery.Detail>(DeeplinkRoute.parse(assertIs<ClickEvent.Deeplink>(posts[3].clickEvent).url))
+        }
+
+    @Test
+    fun linkPostsDoNotRequireAnyDetailCapability() =
+        runBlocking {
+            val source =
+                authenticated(
+                    install(),
+                    unavailableCapabilities =
+                        setOf(
+                            PluginAbiV1.Capabilities.POST,
+                            PluginAbiV1.Capabilities.ARTICLE,
+                            PluginAbiV1.Capabilities.GALLERY,
+                        ),
+                )
+            val posts = detailPosts(source)
+            assertTrue(posts.take(4).all { it.clickEvent == ClickEvent.Noop })
+            assertEquals(ClickEvent.Deeplink(DeeplinkRoute.OpenLinkDirectly("https://plugin.example/posts/link")), posts[4].clickEvent)
+            assertEquals(UiTimelineV2.Post.MediaClickPolicy.OpenPostClickEvent, posts[4].mediaClickPolicy)
         }
 
     @Test
@@ -428,6 +449,7 @@ private const val SCRIPT =
     function post(id, detailType) {
       const value = { key: { id, host: "plugin.example" }, author: profile, createdAt: "2026-01-01T00:00:00Z", content: { value: id } };
       if (detailType) value.detailType = detailType;
+      if (detailType === "link") value.url = "https://plugin.example/posts/" + id;
       return value;
     }
     definePlugin({ capabilities: {
@@ -478,7 +500,7 @@ private const val SCRIPT =
       timeline: {
         page(request) {
           if (request.timelineId !== "dynamic-feed") throw new Error("bad timeline");
-          if (request.parameters.kind === "details") return { items: [post("default"), post("post", "post"), post("article", "article"), post("gallery", "gallery")] };
+          if (request.parameters.kind === "details") return { items: [post("default"), post("post", "post"), post("article", "article"), post("gallery", "gallery"), post("link", "link")] };
           if (request.parameters.kind !== "photos") throw new Error("bad timeline");
           return { items: [{ key: { id: "post-1", host: "plugin.example" }, author: profile, createdAt: "2026-01-01T00:00:00Z", content: { value: "Dynamic" } }] };
         },

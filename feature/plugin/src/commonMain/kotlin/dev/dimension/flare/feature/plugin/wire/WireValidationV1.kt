@@ -89,7 +89,7 @@ public fun PostV1.requireValid(depth: Int = 0) {
     author.requireValid()
     createdAt.requireTimestamp()
     content.requireValid()
-    url.requireHttpsUrl()
+    url.requireHttpsUrl(required = detailType == PostDetailTypeV1.Link)
     require(media.size <= 100) { "Too many media items" }
     media.forEach(MediaV1::requireValid)
     repost?.requireValid(depth + 1)
@@ -411,6 +411,9 @@ private fun String?.requireHttpsUrl(required: Boolean = false) {
         return
     }
     require(length <= 8_192) { "URL is too long" }
+    require(startsWith("https://", ignoreCase = true) && none(Char::isISOControl)) { "URL must be absolute HTTPS" }
+    val authority = substringAfter("://").substringBefore('/').substringBefore('?').substringBefore('#')
+    require(authority.isNotBlank() && authority.none(Char::isWhitespace)) { "URL must have a valid host" }
     val parsed = Url(this)
     require(parsed.protocol == URLProtocol.HTTPS && parsed.host.isNotBlank() && parsed.user == null && parsed.password == null) {
         "URL must use HTTPS without credentials"

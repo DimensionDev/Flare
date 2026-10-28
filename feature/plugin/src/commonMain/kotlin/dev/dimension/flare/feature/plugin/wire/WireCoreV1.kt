@@ -101,6 +101,9 @@ public enum class PostDetailTypeV1 {
 
     @SerialName("gallery")
     Gallery,
+
+    @SerialName("link")
+    Link,
 }
 
 @Serializable

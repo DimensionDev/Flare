@@ -1,6 +1,7 @@
 package dev.dimension.flare.feature.plugin.adapter
 
 import dev.dimension.flare.data.model.ProxyRef
+import dev.dimension.flare.feature.plugin.wire.ActionDescriptorV1
 import dev.dimension.flare.feature.plugin.wire.ArticleV1
 import dev.dimension.flare.feature.plugin.wire.EntityKeyV1
 import dev.dimension.flare.feature.plugin.wire.GalleryV1
@@ -11,6 +12,7 @@ import dev.dimension.flare.feature.plugin.wire.PostV1
 import dev.dimension.flare.feature.plugin.wire.ProfileV1
 import dev.dimension.flare.feature.plugin.wire.RichTextFormatV1
 import dev.dimension.flare.feature.plugin.wire.RichTextV1
+import dev.dimension.flare.feature.plugin.wire.SemanticActionV1
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.ClickEvent
@@ -241,12 +243,41 @@ class PluginWireMapperV1Test {
     }
 
     @Test
-    fun articleAndGalleryPreviewsUseTheSelectedDetailClickInMediaGrids() {
-        val previews = listOf(post, post.copy(detailType = PostDetailTypeV1.Article), post.copy(detailType = PostDetailTypeV1.Gallery))
+    fun linkPostsOpenTheExplicitBrowserTargetForAccountsAndGuests() {
+        val url = "https://remote.example/posts/post-1?source=plugin#content"
+        val value = post.copy(detailType = PostDetailTypeV1.Link, url = url)
+        listOf(createMapper(MicroBlogKey("me", "local.example"), mediaNetwork = false), createMapper(null, mediaNetwork = false)).forEach {
+            val mapped = assertIs<UiTimelineV2.TimelinePostItem>(it.post(value)).post
+            assertEquals(ClickEvent.Deeplink(DeeplinkRoute.OpenLinkDirectly(url)), mapped.clickEvent)
+            assertEquals(UiTimelineV2.Post.MediaClickPolicy.OpenPostClickEvent, mapped.mediaClickPolicy)
+        }
+    }
+
+    @Test
+    fun linkPostsKeepIndependentAuthorAndActionClicks() {
+        val value = post.copy(url = "https://remote.example/post", actions = listOf(ActionDescriptorV1(SemanticActionV1.Favourite)))
+        val internal = assertIs<UiTimelineV2.TimelinePostItem>(mapper.post(value)).post
+        val linked = assertIs<UiTimelineV2.TimelinePostItem>(mapper.post(value.copy(detailType = PostDetailTypeV1.Link))).post
+        assertIs<ClickEvent.Deeplink>(linked.user?.clickEvent)
+        assertEquals(internal.user?.clickEvent, linked.user?.clickEvent)
+        assertEquals(internal.actions, linked.actions)
+        assertNotEquals(internal.clickEvent, linked.clickEvent)
+    }
+
+    @Test
+    fun nonPostPreviewsUseTheSelectedClickInMediaGrids() {
+        val previews =
+            listOf(
+                post,
+                post.copy(detailType = PostDetailTypeV1.Article),
+                post.copy(detailType = PostDetailTypeV1.Gallery),
+                post.copy(detailType = PostDetailTypeV1.Link, url = "https://remote.example/post"),
+            )
 
         assertEquals(
             listOf(
                 UiTimelineV2.Post.MediaClickPolicy.OpenStatusMedia,
+                UiTimelineV2.Post.MediaClickPolicy.OpenPostClickEvent,
                 UiTimelineV2.Post.MediaClickPolicy.OpenPostClickEvent,
                 UiTimelineV2.Post.MediaClickPolicy.OpenPostClickEvent,
             ),
@@ -262,6 +293,34 @@ class PluginWireMapperV1Test {
         assertEquals(article.stableItemKey, gallery.stableItemKey)
         assertNotEquals(article.renderHash, gallery.renderHash)
         assertNotEquals(article.post.renderHash, gallery.post.renderHash)
+    }
+
+    @Test
+    fun linkUrlUpdatesInvalidateCachedTimelineRows() {
+        val value = post.copy(detailType = PostDetailTypeV1.Link, url = "https://remote.example/first")
+        val first = assertIs<UiTimelineV2.TimelinePostItem>(mapper.post(value))
+        val second = assertIs<UiTimelineV2.TimelinePostItem>(mapper.post(value.copy(url = "https://remote.example/second")))
+        assertEquals(first.stableItemKey, second.stableItemKey)
+        assertNotEquals(first.renderHash, second.renderHash)
+        assertNotEquals(first.post.renderHash, second.post.renderHash)
+    }
+
+    @Test
+    fun repostCanOpenALinkWhileTheParentKeepsPostDetail() {
+        val url = "https://remote.example/reposted"
+        val nested = post.copy(key = EntityKeyV1("linked", "remote.example"), detailType = PostDetailTypeV1.Link, url = url)
+        val mapped = assertIs<UiTimelineV2.TimelinePostItem>(mapper.post(post.copy(repost = nested)))
+        assertEquals(
+            ClickEvent.Deeplink(
+                DeeplinkRoute.Status.Detail(
+                    MicroBlogKey(post.key.id, post.key.host),
+                    AccountType.Specific(MicroBlogKey("me", "local.example")),
+                ),
+            ),
+            mapped.post.clickEvent,
+        )
+        assertEquals(ClickEvent.Deeplink(DeeplinkRoute.OpenLinkDirectly(url)), mapped.presentation.repost?.clickEvent)
+        assertEquals(UiTimelineV2.Post.MediaClickPolicy.OpenPostClickEvent, mapped.presentation.repost?.mediaClickPolicy)
     }
 
     @Test

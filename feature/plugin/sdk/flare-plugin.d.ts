@@ -200,12 +200,13 @@ interface ActionDescriptorV1 {
   count?: number;
   actionToken?: string;
 }
-type PostDetailTypeV1 = "post" | "article" | "gallery";
+type PostDetailTypeV1 = "post" | "article" | "gallery" | "link";
 interface PostV1 {
   key: EntityKeyV1;
   author: ProfileV1;
   createdAt: string;
   content: RichTextV1;
+  /** Required for detailType "link"; absolute HTTPS URL without URL credentials. */
   url?: string;
   media?: MediaV1[];
   repost?: PostV1;
@@ -218,7 +219,7 @@ interface PostV1 {
   repliesCount?: number;
   entityToken?: string;
   actions?: ActionDescriptorV1[];
-  /** Defaults to "post"; opens the selected detail using this post's key. */
+  /** Defaults to "post"; internal details use key, while "link" opens url in the browser. */
   detailType?: PostDetailTypeV1;
 }
 interface HashtagV1 { name: string; url?: string }

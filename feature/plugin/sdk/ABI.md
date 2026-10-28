@@ -130,19 +130,32 @@ URLs resolve against the selected instance. Local files, `content:`, `data:`,
 
 ## Post detail navigation
 
-Each `PostV1` may set `detailType` to `"post"`, `"article"`, or `"gallery"`.
+Each `PostV1` may set `detailType` to `"post"`, `"article"`, `"gallery"`, or `"link"`.
 Omitting it defaults to `"post"`.
 For example, a timeline may return an article preview with `detailType: "article"`
 alongside regular posts and gallery previews. The selected detail receives that
 post's `key` and uses the same account or guest origin. Reposted content keeps
 its own `detailType`.
 
-The target capability must be available for that account (or declared for guest
-access), including its required operations: `post.detail`; `article.detail` and
+For internal details, the target capability must be available for that account
+(or declared for guest access), including its required operations: `post.detail`; `article.detail` and
 `comments`; or `gallery.detail`, `comments`, and `recommendations`. Otherwise the
 post click does nothing; it does not fall back to another detail type. In media
 grids, article and gallery previews use the same detail click target.
-Unknown or null `detailType` values are invalid Wire results.
+
+For `"link"`, the existing `url` field is required and must contain an absolute
+HTTPS URL without URL credentials. The Host opens it through the existing browser
+flow, following the user's browser settings and bypassing internal detail-link
+matching. No post/article/gallery detail capability is required. Post and grid
+cover clicks use this target; author and action buttons keep their own behavior.
+For example (other required post fields omitted):
+
+```js
+{ detailType: "link", url: "https://example.com/article/123" }
+```
+
+The URL remains optional for the three internal detail types. Missing or invalid
+link URLs, and unknown or null `detailType` values, are invalid Wire results.
 
 ## Host API
 

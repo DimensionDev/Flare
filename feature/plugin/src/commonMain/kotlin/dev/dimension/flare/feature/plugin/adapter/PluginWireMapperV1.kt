@@ -304,6 +304,7 @@ internal class PluginWireMapperV1(
                 PostDetailTypeV1.Post -> DeeplinkRoute.Status.Detail(key, accountType).takeIf { postDetailAvailable }
                 PostDetailTypeV1.Article -> DeeplinkRoute.Article(accountType, key).takeIf { articleDetailAvailable }
                 PostDetailTypeV1.Gallery -> DeeplinkRoute.Gallery.Detail(key, accountType).takeIf { galleryDetailAvailable }
+                PostDetailTypeV1.Link -> DeeplinkRoute.OpenLinkDirectly(requireNotNull(url))
             }
         val resolvedUrl = url ?: "https://${key.host}/"
         val directActions = mutableListOf<ActionMenu>()

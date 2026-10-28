@@ -23,15 +23,69 @@ class WireV1Test {
     }
 
     @Test
-    fun postDetailTypesHaveStableWireNames() {
-        mapOf(PostDetailTypeV1.Post to "post", PostDetailTypeV1.Article to "article", PostDetailTypeV1.Gallery to "gallery")
-            .forEach { (type, name) ->
-                val post = validPost().copy(detailType = type)
-                val encoded = PluginJsonV1.encodeToString(post)
+    fun linkDetailTypeUsesTheExistingUrlField() {
+        val payload = JsonObject(PluginJsonV1.encodeToJsonElement(validPost()).jsonObject + ("detailType" to JsonPrimitive("link")))
+        val post = PluginJsonV1.decodeFromJsonElement<PostV1>(payload)
 
-                assertContains(encoded, "\"detailType\":\"$name\"")
-                assertEquals(post, PluginJsonV1.decodeFromString<PostV1>(encoded))
-            }
+        post.requireValid()
+        assertEquals(validPost().url, post.url)
+        assertContains(PluginJsonV1.encodeToString(post), "\"detailType\":\"link\"")
+        assertEquals(post, PluginJsonV1.decodeFromString<PostV1>(PluginJsonV1.encodeToString(post)))
+    }
+
+    @Test
+    fun linkDetailTypeRequiresAnAbsoluteHttpsUrlWithoutCredentials() {
+        val payload = JsonObject(PluginJsonV1.encodeToJsonElement(validPost()).jsonObject + ("detailType" to JsonPrimitive("link")))
+        val post = PluginJsonV1.decodeFromJsonElement<PostV1>(payload)
+        listOf(
+            null,
+            "",
+            " ",
+            "/relative",
+            "//example.social/post",
+            "https:example.social/post",
+            "https:/example.social/post",
+            "https://",
+            "https:///post",
+            "https://?query=post",
+            "https://#post",
+            "https://bad host/post",
+            "http://example.social/post",
+            "file:///private/tmp/post",
+            "content://post/1",
+            "data:text/html,post",
+            "javascript:alert(1)",
+            "flare://status/1",
+            "https://user:password@example.social/post",
+            "https://example.social/\npost",
+        ).forEach { url ->
+            assertFailsWith<IllegalArgumentException>("url=$url") { post.copy(url = url).requireValid() }
+        }
+        post.copy(url = "HTTPS://example.social/post?tag=hello#content").requireValid()
+        post.copy(url = "https://[::1]:8443/post").requireValid()
+    }
+
+    @Test
+    fun internalPostDetailsKeepUrlOptional() {
+        listOf(PostDetailTypeV1.Post, PostDetailTypeV1.Article, PostDetailTypeV1.Gallery).forEach { type ->
+            validPost().copy(detailType = type, url = null).requireValid()
+        }
+    }
+
+    @Test
+    fun postDetailTypesHaveStableWireNames() {
+        mapOf(
+            PostDetailTypeV1.Post to "post",
+            PostDetailTypeV1.Article to "article",
+            PostDetailTypeV1.Gallery to "gallery",
+            PostDetailTypeV1.Link to "link",
+        ).forEach { (type, name) ->
+            val post = validPost().copy(detailType = type)
+            val encoded = PluginJsonV1.encodeToString(post)
+
+            assertContains(encoded, "\"detailType\":\"$name\"")
+            assertEquals(post, PluginJsonV1.decodeFromString<PostV1>(encoded))
+        }
     }
 
     @Test

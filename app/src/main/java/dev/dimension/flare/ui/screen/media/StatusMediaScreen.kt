@@ -9,6 +9,7 @@ import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
@@ -51,6 +52,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Slider
@@ -74,6 +76,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -403,6 +406,7 @@ internal fun MediaViewerScreen(
                                             }
                                             if (pagerState.currentPage != index || media is UiMedia.Image || media is UiMedia.Gif) {
                                                 ImageItem(
+                                                    translating = translation.item(media).loading,
                                                     modifier =
                                                         Modifier
                                                             .fillMaxSize(),
@@ -437,17 +441,6 @@ internal fun MediaViewerScreen(
                                                         state.setShowSheet(true)
                                                     },
                                                 )
-                                                if (translation.item(media).loading) {
-                                                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                                                        androidx.compose.material3.CircularProgressIndicator(
-                                                            modifier =
-                                                                Modifier.semantics {
-                                                                    contentDescription =
-                                                                        context.getString(R.string.image_translation_loading)
-                                                                },
-                                                        )
-                                                    }
-                                                }
                                             } else if (media is UiMedia.Ugoira) {
                                                 val zoom = rememberZoomableState(zoomSpec = ZoomSpec(maxZoomFactor = 10f))
                                                 LaunchedEffect(zoom.zoomFraction) { state.setLockPager((zoom.zoomFraction ?: 0f) > .01f) }
@@ -1373,7 +1366,7 @@ private const val MEDIA_VIEWER_PRESENTER_KEY = "media_viewer"
 
 @OptIn(ExperimentalTelephotoApi::class)
 @Composable
-private fun ImageItem(
+internal fun ImageItem(
     media: UiMedia?,
     description: String?,
     onClick: () -> Unit,
@@ -1381,7 +1374,14 @@ private fun ImageItem(
     setLockPager: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
     onLoadError: () -> Unit = {},
+    translating: Boolean = false,
 ) {
+    val loadingEffect by animateFloatAsState(
+        targetValue = if (translating) 1f else 0f,
+        animationSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
+        label = "Image translation loading",
+    )
+    val loadingDescription = stringResource(R.string.image_translation_loading)
     val currentOnLoadError by rememberUpdatedState(onLoadError)
     val currentOnClick by rememberUpdatedState(onClick)
     val currentOnLongClick by rememberUpdatedState(onLongClick)
@@ -1436,7 +1436,11 @@ private fun ImageItem(
             model = request,
             contentDescription = description,
             state = rememberZoomableImageState(zoomableState),
-            modifier = Modifier.matchParentSize(),
+            modifier =
+                Modifier
+                    .matchParentSize()
+                    .blur((8 * loadingEffect).dp)
+                    .alpha(if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) 1f else 1f - 0.2f * loadingEffect),
             contentScale = contentScale,
             alignment = alignment,
             onClick = {
@@ -1447,8 +1451,15 @@ private fun ImageItem(
             },
             onDoubleClick = DoubleClickToZoomListener.cycle(2f),
         )
-        if (media != null && !media.isRemote && loadedMediaKey != media.cacheKey) {
-            androidx.compose.material3.CircularProgressIndicator(Modifier.align(Alignment.Center))
+        AnimatedVisibility(
+            visible = translating || (media != null && !media.isRemote && loadedMediaKey != media.cacheKey),
+            modifier = Modifier.align(Alignment.Center),
+            enter = fadeIn(MaterialTheme.motionScheme.defaultEffectsSpec()),
+            exit = fadeOut(MaterialTheme.motionScheme.defaultEffectsSpec()),
+        ) {
+            LoadingIndicator(
+                modifier = if (translating) Modifier.semantics { contentDescription = loadingDescription } else Modifier,
+            )
         }
     }
 }

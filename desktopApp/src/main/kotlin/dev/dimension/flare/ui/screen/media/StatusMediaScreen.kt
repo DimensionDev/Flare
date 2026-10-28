@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.screen.media
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
@@ -40,6 +41,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.awt.ComposeWindow
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Rect
@@ -97,6 +99,7 @@ import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.media.ImageTranslationPresenter
 import dev.dimension.flare.ui.presenter.status.StatusPresenter
 import dev.dimension.flare.ui.presenter.status.StatusState
+import dev.dimension.flare.ui.screen.settings.imageTranslationText
 import dev.dimension.flare.ui.theme.LocalComposeWindow
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import io.github.composefluent.FluentTheme
@@ -219,6 +222,7 @@ private fun StatusMediaContent(
 
                     is UiMedia.Image -> {
                         ImageItem(
+                            translating = translation.item(media).loading,
                             modifier = Modifier.fillMaxSize(),
                             media = translation.displayed(media),
                             onLoadError = {
@@ -229,12 +233,6 @@ private fun StatusMediaContent(
                             isFocused = pagerState.currentPage == it,
                             setLockPager = state::setLockPager,
                         )
-                        if (translation.item(media).loading) {
-                            androidx.compose.foundation.layout.Box(
-                                Modifier.fillMaxSize(),
-                                contentAlignment = androidx.compose.ui.Alignment.Center,
-                            ) { ProgressRing() }
-                        }
                     }
 
                     is UiMedia.Video -> {
@@ -491,7 +489,10 @@ internal fun ImageItem(
     modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null,
     onLoadError: () -> Unit = {},
+    translating: Boolean = false,
 ) {
+    val translationBlur by animateDpAsState(if (translating) 8.dp else 0.dp, label = "Image translation blur")
+    val loadingDescription = imageTranslationText("Translating image")
     val currentOnLoadError by androidx.compose.runtime.rememberUpdatedState(onLoadError)
     var previousCacheKey by remember { mutableStateOf<MemoryCache.Key?>(null) }
     val currentMediaKey by androidx.compose.runtime.rememberUpdatedState(media?.cacheKey)
@@ -582,6 +583,7 @@ internal fun ImageItem(
             modifier =
                 Modifier
                     .matchParentSize()
+                    .blur(translationBlur)
                     .focusRequester(focusRequester)
                     .zoomable(
                         state = zoomableState,
@@ -594,8 +596,14 @@ internal fun ImageItem(
             contentScale = ContentScale.Fit,
             alignment = Alignment.Center,
         )
-        if (state is AsyncImagePainter.State.Loading) {
-            ProgressRing()
+        AnimatedVisibility(
+            visible = translating || state is AsyncImagePainter.State.Loading,
+            enter = fadeIn(),
+            exit = fadeOut(),
+        ) {
+            ProgressRing(
+                modifier = if (translating) Modifier.semantics { contentDescription = loadingDescription } else Modifier,
+            )
         }
     }
 }

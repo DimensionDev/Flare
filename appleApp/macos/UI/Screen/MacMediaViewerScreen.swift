@@ -9,6 +9,7 @@ private let macMediaMinimumZoomScale: CGFloat = 1
 private let macMediaMaximumZoomScale: CGFloat = 5
 
 struct MacMediaViewerScreen: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     let medias: [any UiMedia]
     let initialIndex: Int
     let preview: String?
@@ -200,9 +201,11 @@ struct MacMediaViewerScreen: View {
                     ForEach(medias.indices, id: \.self) { index in
                         let media = medias[index]
                         let displayed = imageTranslation.state.displayed(media: media)
+                        let translating = imageTranslation.state.item(media: media).loading
                         MacMediaViewerPage(
                             media: displayed,
                             isSelected: selectedIndex == index,
+                            translating: translating,
                             zoomScale: zoomBinding(for: index),
                             isPlaying: $isPlaying,
                             videoState: $videoState,
@@ -214,11 +217,13 @@ struct MacMediaViewerScreen: View {
                         )
                         .frame(width: geometry.size.width, height: geometry.size.height)
                         .overlay {
-                            if imageTranslation.state.item(media: media).loading {
+                            if translating {
                                 ProgressView()
                                     .accessibilityLabel(Text("Translating image", bundle: .main))
+                                    .transition(.opacity)
                             }
                         }
+                        .animation(reduceMotion ? nil : .easeInOut(duration: 0.2), value: translating)
                         .contextMenu {
                             if imageTranslation.state.canRegenerate(media: media) {
                                 Button { imageTranslation.state.regenerate(media: media) } label: {
@@ -617,6 +622,7 @@ private struct MacMediaViewerContextMenu: View {
 private struct MacMediaViewerPage: View {
     let media: any UiMedia
     let isSelected: Bool
+    let translating: Bool
     @Binding var zoomScale: CGFloat
     @Binding var isPlaying: Bool
     @Binding var videoState: VideoState
@@ -629,6 +635,7 @@ private struct MacMediaViewerPage: View {
         ZStack {
             Color.black
             mediaContent
+                .blur(radius: translating ? 8 : 0)
         }
         .contentShape(Rectangle())
         .accessibilityLabel(Text(verbatim: media.accessibleDescription))

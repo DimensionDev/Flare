@@ -16,7 +16,6 @@ import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.media.ImageTranslationPresenter
 import dev.dimension.flare.ui.screen.settings.imageTranslationText
 import dev.dimension.flare.ui.theme.LocalComposeWindow
-import io.github.composefluent.component.ProgressRing
 import io.github.composefluent.component.SubtleButton
 import io.github.composefluent.component.Text
 import kotlinx.coroutines.CoroutineScope
@@ -32,6 +31,7 @@ internal fun RawMediaScreen(media: UiMedia?) {
     MediaViewerPlayback {
         Box(Modifier.fillMaxSize()) {
             ImageItem(
+                translating = media?.let { translation.item(it).loading } == true,
                 media = media?.let { translation.displayed(it) },
                 onLoadError = {
                     if (media != null) {
@@ -45,7 +45,6 @@ internal fun RawMediaScreen(media: UiMedia?) {
                 modifier = Modifier.fillMaxSize(),
             )
             if (media != null) {
-                if (translation.item(media).loading) ProgressRing(Modifier.align(Alignment.Center))
                 Row(Modifier.align(Alignment.BottomCenter)) {
                     ImageTranslationActions(translation, media)
                     if (translation.item(media).translated != null) {

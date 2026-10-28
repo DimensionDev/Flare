@@ -269,9 +269,17 @@ final class MediaViewerInteractionTests: XCTestCase {
         }
         let app = openMedia(withoutPost: true, translation: true)
         defer { app.terminate() }
+        let before = XCTAttachment(screenshot: app.screenshot())
+        before.name = "image-translation-before-loading"
+        before.lifetime = .keepAlways
+        add(before)
         app.buttons["Translate image"].tap()
         let loading = app.buttons.matching(NSPredicate(format: "value == %@", "Translating image")).firstMatch
         XCTAssertTrue(loading.waitForExistence(timeout: 5))
+        let processing = XCTAttachment(screenshot: app.screenshot())
+        processing.name = "image-translation-loading-blur"
+        processing.lifetime = .keepAlways
+        add(processing)
         let original = app.buttons["Show original"]
         XCTAssertTrue(original.waitForExistence(timeout: 10))
         let attachment = XCTAttachment(screenshot: app.screenshot())

@@ -17,6 +17,7 @@ struct MediaViewerScreen: View {
     @Environment(\.timelineAppearance.postActionStyle) private var postActionStyle
     @Environment(\.openURL) private var openURL
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     let medias: [any UiMedia]
     let initialIndex: Int
@@ -102,13 +103,17 @@ struct MediaViewerScreen: View {
                     // LazyPager 1.2.1 only supports downward dismissal.
                     ZStack(alignment: .bottom) {
                         LazyPager(data: medias, page: pagerSelectedIndex) { media in
+                            let translating = imageTranslation.state.item(media: media).loading
                             mediaContent(media)
+                                .blur(radius: translating ? 8 : 0)
                                 .overlay {
-                                    if imageTranslation.state.item(media: media).loading {
+                                    if translating {
                                         ProgressView()
                                             .accessibilityLabel(Text("Translating image", bundle: .main))
+                                            .transition(.opacity)
                                     }
                                 }
+                                .animation(reduceMotion ? nil : .easeInOut(duration: 0.2), value: translating)
                                 .accessibilityLabel(Text(verbatim: media.accessibleDescription))
                                 .contextMenu {
                                     // Video long presses are reserved for temporary double-speed playback.

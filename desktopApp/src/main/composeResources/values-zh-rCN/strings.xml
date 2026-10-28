@@ -105,7 +105,7 @@
     <string name="agent_chat_send">发送</string>
     <string name="status_insight_error">无法分析此帖子。</string>
     <string name="status_insight_trace_post_context_loaded">帖子上下文已加载</string>
-    <string name="status_insight_trace_images_unsupported_fallback">图像不被支持；重试文本…</string>
+    <string name="status_insight_trace_images_unsupported_fallback">图片无法读取，已改为文字分析…</string>
     <string name="status_insight_trace_agent_started">开始分析…</string>
     <string name="status_insight_trace_strategy_started">规划分析…</string>
     <string name="status_insight_trace_strategy_completed">分析计划已完成</string>

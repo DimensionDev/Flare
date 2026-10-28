@@ -90,7 +90,7 @@
     <string name="status_insight_trace_loading_post_context">Loading post context…</string>
     <string name="status_insight_trace_post_context_loaded">Post context loaded</string>
     <string name="status_insight_trace_preparing_images">Preparing images…</string>
-    <string name="status_insight_trace_images_unsupported_fallback">Images are unsupported; retrying with text…</string>
+    <string name="status_insight_trace_images_unsupported_fallback">Images could not be read; continuing with text only…</string>
     <string name="status_insight_trace_agent_started">Starting analysis…</string>
     <string name="status_insight_trace_strategy_started">Planning analysis…</string>
     <string name="status_insight_trace_strategy_completed">Analysis plan completed</string>

@@ -14,11 +14,17 @@ import ai.koog.agents.core.tools.ToolRegistry
 import ai.koog.agents.core.utils.ConfigureAction
 import ai.koog.agents.features.eventHandler.feature.EventHandler
 import ai.koog.prompt.Prompt
+import ai.koog.prompt.message.AttachmentSource
 import ai.koog.prompt.message.Message
 import dev.dimension.flare.feature.agent.presenter.AgentMessagePart
 import dev.dimension.flare.feature.agent.runtime.AgentAvailability
+import dev.dimension.flare.feature.agent.runtime.AgentImageFallback
+import dev.dimension.flare.feature.agent.runtime.AgentImagePreparer
 import dev.dimension.flare.feature.agent.runtime.FlareAgentRuntime
 import dev.dimension.flare.feature.agent.runtime.FlareAgentRuntimeProvider
+import dev.dimension.flare.feature.agent.runtime.supportsAgentImageFallback
+import dev.dimension.flare.shared.image.ImageCompressor
+import dev.dimension.flare.ui.model.UiMedia
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.withContext
 import org.koin.core.annotation.Single
@@ -28,6 +34,7 @@ internal class FlareAgentRunner(
     private val runtimeProvider: FlareAgentRuntimeProvider,
     private val toolProvider: AgentToolProvider,
     private val chatHistoryProvider: AgentChatHistoryProvider,
+    private val imageCompressor: ImageCompressor,
 ) {
     suspend fun clearConversation(conversationId: String) {
         chatHistoryProvider.clear(conversationId)
@@ -43,7 +50,13 @@ internal class FlareAgentRunner(
                 ?: throw FlareAgentUnavailableException(runtimeProvider.availability())
         val toolSet = toolProvider.resolve(request.toolContext)
         val resolvedRequest = request.withToolSet(toolSet)
-        val agent = runtime.createAgent(resolvedRequest, onTrace, chatHistoryProvider)
+        val agent =
+            runtime.createAgent(
+                resolvedRequest,
+                onTrace,
+                chatHistoryProvider,
+                prepareImage = if (supportsAgentImageFallback) AgentImagePreparer(imageCompressor)::prepare else null,
+            )
         return try {
             AgentRunResult(
                 text = agent.run(request.prompt, conversationId),
@@ -66,11 +79,13 @@ internal fun FlareAgentRuntime.createAgent(
     request: FlareAgentRequest,
     onTrace: suspend (AgentTrace) -> Unit,
     chatHistoryProvider: ChatHistoryProvider,
+    prepareImage: (suspend (UiMedia.Image, Int) -> AttachmentSource.Image)? = null,
 ): AIAgent<Prompt, String> =
     AIAgent
         .builder()
-        .promptExecutor(promptExecutor)
-        .llmModel(model)
+        .promptExecutor(
+            if (prepareImage == null) promptExecutor else AgentImageFallback(promptExecutor, request.images, prepareImage, onTrace),
+        ).llmModel(model)
         .toolRegistry(request.toolRegistry)
         .id(request.agentId)
         .prompt(
@@ -203,6 +218,7 @@ internal data class FlareAgentRequest(
     val maxIterations: Int = 16,
     val finishAfterToolResults: Boolean = false,
     val chatMemoryWindowSize: Int = 20,
+    val images: List<UiMedia.Image> = emptyList(),
     private val toolSet: AgentToolSet = AgentToolSet.Empty,
 ) {
     val toolRegistry: ToolRegistry = toolSet.toolRegistry

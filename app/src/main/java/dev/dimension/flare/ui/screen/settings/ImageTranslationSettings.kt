@@ -7,6 +7,7 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedListItem
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -39,6 +40,8 @@ internal fun ImageTranslationSettingsSection(state: ImageTranslationSettingsPres
     var showProviders by remember { mutableStateOf(false) }
     var editing by remember(state.config.provider) { mutableStateOf<ImageTranslationField?>(null) }
     var expandedChoice by remember(state.config.provider) { mutableStateOf<String?>(null) }
+    val fieldOffset = if (state.config.provider == ImageTranslationProvider.OpenAIImages) 2 else 1
+    val rowCount = state.fields.size + fieldOffset
     Text(
         imageTranslationText("Image translation"),
         style = MaterialTheme.typography.titleMedium,
@@ -47,7 +50,7 @@ internal fun ImageTranslationSettingsSection(state: ImageTranslationSettingsPres
     SegmentedListItem(
         checked = showProviders,
         onCheckedChange = { showProviders = it },
-        shapes = ListItemDefaults.segmentedShapes2(0, state.fields.size + 1),
+        shapes = ListItemDefaults.segmentedShapes2(0, rowCount),
         content = { Text(imageTranslationText("Image translation provider")) },
         supportingContent = {
             Text(
@@ -69,13 +72,24 @@ internal fun ImageTranslationSettingsSection(state: ImageTranslationSettingsPres
             }
         },
     )
+    if (state.config.provider == ImageTranslationProvider.OpenAIImages) {
+        SegmentedListItem(
+            onClick = { state.setUseSharedConfig(!state.useSharedConfig) },
+            shapes = ListItemDefaults.segmentedShapes2(1, rowCount),
+            content = { Text(stringResource(R.string.settings_ai_config_use_shared)) },
+            supportingContent = { Text(stringResource(R.string.image_translation_use_shared_description)) },
+            trailingContent = {
+                Switch(checked = state.useSharedConfig, onCheckedChange = state::setUseSharedConfig)
+            },
+        )
+    }
     state.fields.forEachIndexed { index, field ->
         val value = state.config.value(field.id)
         if (field.choices.isNotEmpty()) {
             SegmentedListItem(
                 checked = expandedChoice == field.id,
                 onCheckedChange = { expanded -> expandedChoice = if (expanded) field.id else null },
-                shapes = ListItemDefaults.segmentedShapes2(index + 1, state.fields.size + 1),
+                shapes = ListItemDefaults.segmentedShapes2(index + fieldOffset, rowCount),
                 content = { Text(imageTranslationText(field.title)) },
                 trailingContent = {
                     Box {
@@ -95,7 +109,7 @@ internal fun ImageTranslationSettingsSection(state: ImageTranslationSettingsPres
             SegmentedListItem(
                 checked = editing?.id == field.id,
                 onCheckedChange = { checked -> editing = if (checked) field else null },
-                shapes = ListItemDefaults.segmentedShapes2(index + 1, state.fields.size + 1),
+                shapes = ListItemDefaults.segmentedShapes2(index + fieldOffset, rowCount),
                 content = { Text(imageTranslationText(field.title)) },
                 supportingContent = {
                     Text(

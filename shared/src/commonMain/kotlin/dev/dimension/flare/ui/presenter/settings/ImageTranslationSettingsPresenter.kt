@@ -8,7 +8,6 @@ import dev.dimension.flare.data.datastore.model.AppSettings
 import dev.dimension.flare.data.datastore.model.ImageTranslationConfig
 import dev.dimension.flare.data.datastore.model.ImageTranslationField
 import dev.dimension.flare.data.datastore.model.ImageTranslationProvider
-import dev.dimension.flare.data.datastore.model.imageTranslationFields
 import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.coroutines.launch
@@ -21,6 +20,9 @@ public class ImageTranslationSettingsPresenter : PresenterBase<ImageTranslationS
         public val config: ImageTranslationConfig
         public val providers: List<ImageTranslationProvider>
         public val fields: List<ImageTranslationField>
+        public val useSharedConfig: Boolean
+
+        public fun setUseSharedConfig(value: Boolean)
 
         public fun selectProvider(provider: ImageTranslationProvider)
 
@@ -34,17 +36,34 @@ public class ImageTranslationSettingsPresenter : PresenterBase<ImageTranslationS
     override fun body(): State {
         val settings by store.appSettingsStore.data.collectAsState(AppSettings(version = ""))
         val scope = persistenceScope
-        val config = settings.imageTranslationConfig
+        val config = settings.imageTranslationConfig.resolved(settings.aiConfig)
         return object : State {
             override val config = config
             override val providers = ImageTranslationProvider.entries.toList()
-            override val fields = imageTranslationFields(config.provider)
+            override val fields = config.editableFields
+            override val useSharedConfig = config.usesSharedAIConfig
+
+            override fun setUseSharedConfig(value: Boolean) {
+                scope.launch(start = kotlinx.coroutines.CoroutineStart.UNDISPATCHED) {
+                    store.appSettingsStore.updateData { current ->
+                        current.copy(imageTranslationConfig = current.imageTranslationConfig.withSharedAIConfig(value, current.aiConfig))
+                    }
+                }
+            }
 
             override fun selectProvider(provider: ImageTranslationProvider) {
                 scope.launch(start = kotlinx.coroutines.CoroutineStart.UNDISPATCHED) {
                     store.appSettingsStore.updateData {
+                        val config = it.imageTranslationConfig
+                        val firstOpenAIConfig =
+                            provider == ImageTranslationProvider.OpenAIImages &&
+                                config.settings.none { saved -> saved.provider == ImageTranslationProvider.OpenAIImages }
                         it.copy(
-                            imageTranslationConfig = it.imageTranslationConfig.copy(provider = provider),
+                            imageTranslationConfig =
+                                config.copy(
+                                    provider = provider,
+                                    useSharedAIConfig = if (firstOpenAIConfig) true else config.useSharedAIConfig,
+                                ),
                         )
                     }
                 }

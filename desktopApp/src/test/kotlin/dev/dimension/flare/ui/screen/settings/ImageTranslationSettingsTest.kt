@@ -21,9 +21,9 @@ import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextReplacement
+import dev.dimension.flare.data.datastore.model.AppSettings
 import dev.dimension.flare.data.datastore.model.ImageTranslationConfig
 import dev.dimension.flare.data.datastore.model.ImageTranslationProvider
-import dev.dimension.flare.data.datastore.model.imageTranslationFields
 import dev.dimension.flare.data.translation.image.ImageTranslationError
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.presenter.media.ImageTranslationItem
@@ -132,6 +132,26 @@ class ImageTranslationSettingsTest {
         )
     }
 
+    @Test
+    fun sharedConfigurationHidesConnectionFieldsAndCustomModeKeepsItsImageModel() {
+        val state = State(ImageTranslationConfig(ImageTranslationProvider.OpenAIImages, useSharedAIConfig = true))
+        show(state)
+        compose.onNodeWithContentDescription("API key").assertDoesNotExist()
+        compose.onNodeWithContentDescription("Image model").assertDoesNotExist()
+        compose.onNodeWithContentDescription("Service URL").assertDoesNotExist()
+        compose.onNodeWithContentDescription("Translation prompt").assertExists()
+        compose.onNode(SemanticsMatcher.keyIsDefined(SemanticsProperties.ToggleableState)).performScrollTo().performClick()
+        compose.runOnIdle { assertEquals("basic-key", state.config.value("apiKey")) }
+        compose.onNodeWithContentDescription("Image model").performScrollTo().performClick()
+        compose.onNode(hasSetTextAction()).performTextReplacement("custom-image-model")
+        compose.onNodeWithText("OK").performClick()
+        compose.onNode(SemanticsMatcher.keyIsDefined(SemanticsProperties.ToggleableState)).performScrollTo().performClick()
+        compose.onNodeWithContentDescription("Image model").assertDoesNotExist()
+        compose.runOnIdle { assertEquals("basic-model", state.config.value("model")) }
+        compose.onNode(SemanticsMatcher.keyIsDefined(SemanticsProperties.ToggleableState)).performClick()
+        compose.runOnIdle { assertEquals("custom-image-model", state.config.value("model")) }
+    }
+
     private fun show(state: State) {
         compose.setContent {
             FlareTheme(isDarkTheme = false) {
@@ -142,22 +162,32 @@ class ImageTranslationSettingsTest {
         }
     }
 
-    private class State : ImageTranslationSettingsPresenter.State {
-        override var config by mutableStateOf(
-            ImageTranslationConfig(ImageTranslationProvider.OpenAIImages).withValue("apiKey", "saved-key"),
-        )
+    private class State(
+        initial: ImageTranslationConfig = ImageTranslationConfig(ImageTranslationProvider.OpenAIImages).withValue("apiKey", "saved-key"),
+    ) : ImageTranslationSettingsPresenter.State {
+        private var saved by mutableStateOf(initial)
+        private val basic =
+            AppSettings.AiConfig(
+                type = AppSettings.AiConfig.Type.OpenAI("https://basic.example/v1", "basic-key", "basic-model"),
+            )
+        override val config get() = saved.resolved(basic)
         override val providers = ImageTranslationProvider.entries.toList()
-        override val fields get() = imageTranslationFields(config.provider)
+        override val fields get() = config.editableFields
+        override val useSharedConfig get() = config.usesSharedAIConfig
+
+        override fun setUseSharedConfig(value: Boolean) {
+            saved = saved.withSharedAIConfig(value, basic)
+        }
 
         override fun selectProvider(provider: ImageTranslationProvider) {
-            config = config.copy(provider = provider)
+            saved = saved.copy(provider = provider)
         }
 
         override fun setField(
             id: String,
             value: String,
         ) {
-            config = config.withValue(id, value)
+            saved = saved.withValue(id, value)
         }
     }
 }

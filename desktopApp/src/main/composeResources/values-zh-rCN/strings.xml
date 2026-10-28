@@ -770,4 +770,5 @@
     <string name="image_translation_lite">Lite</string>
     <string name="image_translation_automatic">自动</string>
     <string name="image_translation_original_file">原文件上传</string>
+    <string name="image_translation_use_shared_description">共用服务地址、API 密钥和模型。服务与模型需要支持输出图片；关闭后可单独配置。</string>
 </resources>

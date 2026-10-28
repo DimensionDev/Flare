@@ -1,5 +1,6 @@
 package dev.dimension.flare.ui.screen.settings
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
@@ -8,8 +9,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.toggleableState
+import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.Res
 import dev.dimension.flare.data.datastore.model.ImageTranslationProvider
@@ -52,7 +57,9 @@ import dev.dimension.flare.image_translation_tencent
 import dev.dimension.flare.image_translation_timeout
 import dev.dimension.flare.image_translation_title
 import dev.dimension.flare.image_translation_unsupported
+import dev.dimension.flare.image_translation_use_shared_description
 import dev.dimension.flare.settings_ai_config_translate_provider_description
+import dev.dimension.flare.settings_ai_config_use_shared
 import dev.dimension.flare.settings_ai_config_value_empty_placeholder
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.settings.ImageTranslationSettingsPresenter
@@ -64,6 +71,7 @@ import io.github.composefluent.component.ExpanderItemSeparator
 import io.github.composefluent.component.FlyoutPlacement
 import io.github.composefluent.component.MenuFlyout
 import io.github.composefluent.component.MenuFlyoutItem
+import io.github.composefluent.component.Switcher
 import io.github.composefluent.component.Text
 import org.jetbrains.compose.resources.stringResource
 
@@ -98,6 +106,25 @@ internal fun ImageTranslationSettingsContent(state: ImageTranslationSettingsPres
             }
         },
     )
+    if (state.config.provider == ImageTranslationProvider.OpenAIImages) {
+        val sharedTitle = stringResource(Res.string.settings_ai_config_use_shared)
+        ExpanderItemSeparator()
+        ExpanderItem(
+            heading = { Text(sharedTitle) },
+            caption = { Text(stringResource(Res.string.image_translation_use_shared_description)) },
+            trailing = {
+                Box(
+                    Modifier.semantics(mergeDescendants = true) {
+                        contentDescription = sharedTitle
+                        role = Role.Switch
+                        toggleableState = if (state.useSharedConfig) ToggleableState.On else ToggleableState.Off
+                    },
+                ) {
+                    Switcher(state.useSharedConfig, state::setUseSharedConfig)
+                }
+            },
+        )
+    }
     state.fields.forEach { field ->
         val value = state.config.value(field.id)
         val title = imageTranslationText(field.title)

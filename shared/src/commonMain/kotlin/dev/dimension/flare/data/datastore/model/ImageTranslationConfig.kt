@@ -23,7 +23,40 @@ public data class ImageTranslationProviderSettings(
 public data class ImageTranslationConfig(
     val provider: ImageTranslationProvider = ImageTranslationProvider.Disabled,
     val settings: List<ImageTranslationProviderSettings> = emptyList(),
+    val useSharedAIConfig: Boolean = false,
 ) {
+    public val usesSharedAIConfig: Boolean
+        get() = provider == ImageTranslationProvider.OpenAIImages && useSharedAIConfig
+
+    public val editableFields: List<ImageTranslationField>
+        get() = imageTranslationFields(provider).filterNot { usesSharedAIConfig && it.id in SHARED_AI_FIELDS }
+
+    public fun resolved(aiConfig: AppSettings.AiConfig): ImageTranslationConfig {
+        if (!usesSharedAIConfig) return this
+        val basic = aiConfig.type as? AppSettings.AiConfig.Type.OpenAI
+        return withValue("baseUrl", basic?.serverUrl.orEmpty())
+            .withValue("apiKey", basic?.apiKey.orEmpty())
+            .withValue("model", basic?.model.orEmpty())
+    }
+
+    public fun withSharedAIConfig(
+        enabled: Boolean,
+        aiConfig: AppSettings.AiConfig,
+    ): ImageTranslationConfig {
+        val current = copy(useSharedAIConfig = enabled)
+        val hasCustomConfig =
+            settings
+                .firstOrNull { it.provider == ImageTranslationProvider.OpenAIImages }
+                ?.values
+                ?.keys
+                .orEmpty()
+                .any { it in SHARED_AI_FIELDS }
+        if (enabled || hasCustomConfig) return current
+        return copy(provider = ImageTranslationProvider.OpenAIImages, useSharedAIConfig = true)
+            .resolved(aiConfig)
+            .copy(provider = provider, useSharedAIConfig = false)
+    }
+
     public fun value(id: String): String =
         settings.firstOrNull { it.provider == provider }?.values?.get(id)
             ?: imageTranslationFields(provider).firstOrNull { it.id == id }?.defaultValue.orEmpty()
@@ -45,6 +78,8 @@ public data class ImageTranslationConfig(
                     (!it.required || value(it.id).isNotBlank()) && (it.choices.isEmpty() || value(it.id) in it.choices)
                 }
 }
+
+private val SHARED_AI_FIELDS = setOf("baseUrl", "apiKey", "model")
 
 public data class ImageTranslationField(
     val id: String,

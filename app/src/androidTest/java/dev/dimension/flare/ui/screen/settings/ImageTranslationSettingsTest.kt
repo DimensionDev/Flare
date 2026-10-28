@@ -29,9 +29,9 @@ import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.unit.dp
 import androidx.test.platform.app.InstrumentationRegistry
 import dev.dimension.flare.R
+import dev.dimension.flare.data.datastore.model.AppSettings
 import dev.dimension.flare.data.datastore.model.ImageTranslationConfig
 import dev.dimension.flare.data.datastore.model.ImageTranslationProvider
-import dev.dimension.flare.data.datastore.model.imageTranslationFields
 import dev.dimension.flare.ui.presenter.settings.ImageTranslationSettingsPresenter
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -94,6 +94,26 @@ class ImageTranslationSettingsTest {
         screenshot.recycle()
     }
 
+    @Test
+    fun sharedConfigurationHidesConnectionFieldsAndCustomModeKeepsItsImageModel() {
+        val state = State(ImageTranslationConfig(ImageTranslationProvider.OpenAIImages, useSharedAIConfig = true))
+        show(state)
+        compose.onNodeWithText(label(R.string.image_translation_api_key)).assertDoesNotExist()
+        compose.onNodeWithText(label(R.string.image_translation_model)).assertDoesNotExist()
+        compose.onNodeWithText(label(R.string.image_translation_service_url)).assertDoesNotExist()
+        compose.onNodeWithText(label(R.string.image_translation_prompt)).assertExists()
+        compose.onNodeWithText(label(R.string.settings_ai_config_use_shared)).performScrollTo().performClick()
+        compose.runOnIdle { assertEquals("basic-key", state.config.value("apiKey")) }
+        compose.onNodeWithText(label(R.string.image_translation_model)).performScrollTo().performClick()
+        compose.onNode(hasSetTextAction()).performTextReplacement("custom-image-model")
+        compose.onNodeWithText(label(android.R.string.ok)).performClick()
+        compose.onNodeWithText(label(R.string.settings_ai_config_use_shared)).performScrollTo().performClick()
+        compose.onNodeWithText(label(R.string.image_translation_model)).assertDoesNotExist()
+        compose.runOnIdle { assertEquals("basic-model", state.config.value("model")) }
+        compose.onNodeWithText(label(R.string.settings_ai_config_use_shared)).performClick()
+        compose.runOnIdle { assertEquals("custom-image-model", state.config.value("model")) }
+    }
+
     private fun show(state: State) {
         compose.setContent {
             MaterialTheme {
@@ -107,22 +127,32 @@ class ImageTranslationSettingsTest {
 
     private fun label(id: Int) = InstrumentationRegistry.getInstrumentation().targetContext.getString(id)
 
-    private class State : ImageTranslationSettingsPresenter.State {
-        override var config by mutableStateOf(
-            ImageTranslationConfig(ImageTranslationProvider.OpenAIImages).withValue("apiKey", "saved-key"),
-        )
+    private class State(
+        initial: ImageTranslationConfig = ImageTranslationConfig(ImageTranslationProvider.OpenAIImages).withValue("apiKey", "saved-key"),
+    ) : ImageTranslationSettingsPresenter.State {
+        private var saved by mutableStateOf(initial)
+        private val basic =
+            AppSettings.AiConfig(
+                type = AppSettings.AiConfig.Type.OpenAI("https://basic.example/v1", "basic-key", "basic-model"),
+            )
+        override val config get() = saved.resolved(basic)
         override val providers = ImageTranslationProvider.entries.toList()
-        override val fields get() = imageTranslationFields(config.provider)
+        override val fields get() = config.editableFields
+        override val useSharedConfig get() = config.usesSharedAIConfig
+
+        override fun setUseSharedConfig(value: Boolean) {
+            saved = saved.withSharedAIConfig(value, basic)
+        }
 
         override fun selectProvider(provider: ImageTranslationProvider) {
-            config = config.copy(provider = provider)
+            saved = saved.copy(provider = provider)
         }
 
         override fun setField(
             id: String,
             value: String,
         ) {
-            config = config.withValue(id, value)
+            saved = saved.withValue(id, value)
         }
     }
 }

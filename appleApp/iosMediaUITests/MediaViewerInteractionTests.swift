@@ -46,6 +46,50 @@ final class MediaViewerInteractionTests: XCTestCase {
     }
 
     @MainActor
+    func testImageTranslationCanSwitchBetweenSharedAndCustomConfiguration() {
+        let app = XCUIApplication()
+        app.launchArguments = ["--media-viewer-test", "--translation-settings", "-AppleLanguages", "(en)", "-AppleLocale", "en_US"]
+        app.launch()
+        defer { app.terminate() }
+        let open = app.buttons["media-fixture-open"]
+        XCTAssertTrue(open.waitForExistence(timeout: 15))
+        open.tap()
+        let provider = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Image translation provider")).firstMatch
+        XCTAssertTrue(provider.waitForExistence(timeout: 5))
+        provider.tap()
+        app.buttons["OpenAI Images compatible"].tap()
+        let sharedRow = app.switches.matching(NSPredicate(format: "label BEGINSWITH %@", "Use translation and summary AI settings")).firstMatch
+        let shared = sharedRow.switches.firstMatch
+        XCTAssertTrue(shared.waitForExistence(timeout: 5))
+        if shared.value as? String == "0" { shared.tap() }
+        XCTAssertEqual(shared.value as? String, "1")
+        let model = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Image model")).firstMatch
+        let apiKey = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "API key")).firstMatch
+        XCTAssertFalse(model.exists)
+        XCTAssertFalse(apiKey.exists)
+        let attachment = XCTAttachment(screenshot: app.screenshot())
+        attachment.name = "image-translation-shared-ai-settings"
+        attachment.lifetime = .keepAlways
+        add(attachment)
+        shared.tap()
+        XCTAssertEqual(shared.value as? String, "0")
+        app.swipeUp()
+        XCTAssertTrue(model.waitForExistence(timeout: 5))
+        XCTAssertTrue(apiKey.waitForExistence(timeout: 5))
+        app.swipeDown()
+        shared.tap()
+        XCTAssertEqual(shared.value as? String, "1")
+        XCTAssertFalse(model.exists)
+        XCTAssertFalse(apiKey.exists)
+        provider.tap()
+        app.buttons["Gemini"].tap()
+        XCTAssertFalse(sharedRow.exists)
+        XCTAssertTrue(apiKey.waitForExistence(timeout: 5))
+        provider.tap()
+        app.buttons["Off"].tap()
+    }
+
+    @MainActor
     private func assertImageTranslationFields(in app: XCUIApplication) {
         let provider = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Image translation provider")).firstMatch
         XCTAssertTrue(provider.waitForExistence(timeout: 5))

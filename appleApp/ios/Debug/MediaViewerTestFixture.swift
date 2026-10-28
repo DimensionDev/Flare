@@ -71,6 +71,7 @@ struct MediaViewerTestFixture: View {
             try? await Task.sleep(for: .milliseconds(20))
         }
         let state = settings.state
+        state.setUseSharedConfig(value: false)
         let prompt = "Translate visible text into {targetLanguage}. Offline fixture " + UUID().uuidString
         state.setField(id: "prompt", value: prompt)
         state.setField(id: "baseUrl", value: "http://127.0.0.1:18473/v1")

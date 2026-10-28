@@ -42,6 +42,16 @@ struct ImageTranslationSettingsSection: View {
                 Text("Choose which service handles translation", bundle: FlareAppleUILocalization.bundle)
             }
 
+            if state.presenter.state.config.provider == .openAiimages {
+                Toggle(isOn: Binding(
+                    get: { state.presenter.state.useSharedConfig },
+                    set: { state.presenter.state.setUseSharedConfig(value: $0) }
+                )) {
+                    Text("settings_ai_config_use_shared", bundle: FlareAppleUILocalization.bundle)
+                    Text("image_translation_use_shared_description", bundle: FlareAppleUILocalization.bundle)
+                }
+            }
+
             ForEach(state.presenter.state.fields, id: \.id) { field in
                 if !field.choices.isEmpty {
                     Picker(selection: Binding(
@@ -69,6 +79,7 @@ struct ImageTranslationSettingsSection: View {
             }
         }
         .animation(.easeInOut(duration: 0.2), value: state.presenter.state.config.provider.name)
+        .animation(.easeInOut(duration: 0.2), value: state.presenter.state.useSharedConfig)
     }
 
     private func editButton(_ field: ImageTranslationField) -> some View {

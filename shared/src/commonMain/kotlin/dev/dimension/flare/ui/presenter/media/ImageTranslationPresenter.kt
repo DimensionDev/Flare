@@ -67,7 +67,7 @@ public class ImageTranslationPresenter(
         val entries = remember { MutableStateFlow<Map<String, ImageTranslationItem>>(emptyMap()) }
         val snapshot = entries.collectAsState().value
         val settings by store.appSettingsStore.data.collectAsState(AppSettings(version = ""))
-        val config = settings.imageTranslationConfig
+        val config = settings.imageTranslationConfig.resolved(settings.aiConfig)
         val target = Locale.language
         val requestIdentity =
             remember(config, target) {

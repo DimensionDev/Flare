@@ -6,6 +6,7 @@ import app.cash.molecule.launchMolecule
 import dev.dimension.flare.common.isImageTranslationFile
 import dev.dimension.flare.common.prepareImageTranslationExport
 import dev.dimension.flare.data.datastore.AppDataStore
+import dev.dimension.flare.data.datastore.model.AppSettings
 import dev.dimension.flare.data.datastore.model.ImageTranslationConfig
 import dev.dimension.flare.data.datastore.model.ImageTranslationProvider
 import dev.dimension.flare.data.io.OkioFileStorage
@@ -49,6 +50,7 @@ import java.io.File
 import java.io.IOException
 import java.net.URI
 import java.nio.file.Files
+import java.util.concurrent.ConcurrentLinkedQueue
 import javax.imageio.ImageIO
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -87,6 +89,7 @@ class ImageTranslationRepositoryTest {
             java.util.concurrent.atomic
                 .AtomicInteger()
         val calls: Int get() = count.get()
+        val configs = ConcurrentLinkedQueue<ImageTranslationConfig>()
         val output =
             ByteArrayOutputStream()
                 .also {
@@ -105,6 +108,7 @@ class ImageTranslationRepositoryTest {
                     target: String,
                 ): ImageTranslationOutput {
                     count.incrementAndGet()
+                    configs.add(config)
                     assertEquals(original, input.readBytes(1024 * 1024))
                     return behavior(input)
                 }
@@ -536,6 +540,163 @@ class ImageTranslationRepositoryTest {
                         scope.coroutineContext[Job]!!.cancelAndJoin()
                         val saved = store.appSettingsStore.data.first { it.imageTranslationConfig.value("apiKey") == "last-complete-key" }
                         assertEquals(config.value("model"), saved.imageTranslationConfig.value("model"))
+                    } finally {
+                        withContext(NonCancellable) {
+                            scope.coroutineContext[Job]!!.cancelAndJoin()
+                            stopKoin()
+                        }
+                    }
+                }
+            }
+        }
+
+    @Test
+    fun settingsInheritBasicConfigurationAndPersistCustomModeAcrossProviderSwitches() =
+        runBlocking {
+            withTimeout(10_000) {
+                fixture().use { f ->
+                    val store = AppDataStore(f.storage)
+                    val basic = AppSettings.AiConfig.Type.OpenAI("https://basic.example/v1", "basic-key", "basic-model")
+                    store.appSettingsStore.updateData { it.copy(aiConfig = it.aiConfig.copy(type = basic)) }
+                    val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
+                    startKoin {
+                        modules(
+                            module {
+                                testSingle { store }
+                                testSingle<CoroutineScope> { scope }
+                            },
+                        )
+                    }
+                    scope.launch {
+                        while (isActive) {
+                            Snapshot.sendApplyNotifications()
+                            delay(5)
+                        }
+                    }
+                    val models = scope.launchMolecule(RecompositionMode.Immediate) { ImageTranslationSettingsPresenter().body() }
+                    try {
+                        models.first().selectProvider(ImageTranslationProvider.OpenAIImages)
+                        var state = models.first { it.useSharedConfig && it.config.value("model") == "basic-model" }
+                        assertEquals(listOf("inputFormat", "prompt"), state.fields.map { it.id })
+                        assertTrue(
+                            store.appSettingsStore.data
+                                .first()
+                                .imageTranslationConfig.settings
+                                .isEmpty(),
+                        )
+                        state.setUseSharedConfig(false)
+                        state = models.first { !it.useSharedConfig && it.config.value("apiKey") == "basic-key" }
+                        state.setField("model", "custom-image-model")
+                        models.first { it.config.value("model") == "custom-image-model" }
+                        store.appSettingsStore.updateData {
+                            it.copy(
+                                aiConfig = it.aiConfig.copy(type = basic.copy(model = "new-basic-model")),
+                            )
+                        }
+                        state.setUseSharedConfig(true)
+                        state = models.first { it.useSharedConfig && it.config.value("model") == "new-basic-model" }
+                        state.selectProvider(ImageTranslationProvider.Gemini)
+                        models.first { it.config.provider == ImageTranslationProvider.Gemini }.selectProvider(
+                            ImageTranslationProvider.OpenAIImages,
+                        )
+                        state = models.first { it.useSharedConfig }
+                        state.setUseSharedConfig(false)
+                        models.first { !it.useSharedConfig && it.config.value("model") == "custom-image-model" }
+                        val saved = store.appSettingsStore.data.first()
+                        assertFalse(saved.imageTranslationConfig.useSharedAIConfig)
+                        assertEquals("custom-image-model", saved.imageTranslationConfig.value("model"))
+                        assertEquals("basic-key", saved.imageTranslationConfig.value("apiKey"))
+                    } finally {
+                        withContext(NonCancellable) {
+                            scope.coroutineContext[Job]!!.cancelAndJoin()
+                            stopKoin()
+                        }
+                    }
+                }
+            }
+        }
+
+    @Test
+    fun basicConfigurationChangeScopesSubmittedResultsToTheirOriginalModel() =
+        runBlocking {
+            withTimeout(10_000) {
+                fixture().use { f ->
+                    val repository = f.repository()
+                    val store = AppDataStore(f.storage)
+                    val basic = AppSettings.AiConfig.Type.OpenAI("https://basic.example/v1", "basic-key", "first-image-model")
+                    store.appSettingsStore.updateData {
+                        it.copy(
+                            aiConfig = it.aiConfig.copy(type = basic),
+                            imageTranslationConfig =
+                                ImageTranslationConfig(
+                                    ImageTranslationProvider.OpenAIImages,
+                                    useSharedAIConfig = true,
+                                ),
+                        )
+                    }
+                    val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
+                    startKoin {
+                        modules(
+                            module {
+                                testSingle { store }
+                                testSingle { repository }
+                                testSingle<CoroutineScope> { scope }
+                            },
+                        )
+                    }
+                    scope.launch {
+                        while (isActive) {
+                            Snapshot.sendApplyNotifications()
+                            delay(5)
+                        }
+                    }
+                    val firstStarted = CompletableDeferred<Unit>()
+                    val finishFirst = CompletableDeferred<Unit>()
+                    f.behavior = {
+                        if (f.calls == 1) {
+                            firstStarted.complete(Unit)
+                            finishFirst.await()
+                        }
+                        ImageTranslationOutput.Encoded(f.output.base64())
+                    }
+                    val models =
+                        scope.launchMolecule(RecompositionMode.Immediate) {
+                            ImageTranslationPresenter().body() to ImageTranslationSettingsPresenter().body()
+                        }
+                    try {
+                        var state = models.first { it.second.config.value("model") == "first-image-model" }.first
+                        state.toggle(f.media)
+                        firstStarted.await()
+                        store.appSettingsStore.updateData {
+                            it.copy(
+                                aiConfig = it.aiConfig.copy(type = basic.copy(model = "second-image-model")),
+                            )
+                        }
+                        state = models.first { it.second.config.value("model") == "second-image-model" }.first
+                        assertFalse(state.item(f.media).loading)
+                        state.toggle(f.media)
+                        state = models.first { it.first.item(f.media).translated != null }.first
+                        val secondResult = state.displayed(f.media)
+                        finishFirst.complete(Unit)
+                        store.appSettingsStore.updateData { it.copy(aiConfig = it.aiConfig.copy(type = basic)) }
+                        state =
+                            models
+                                .first {
+                                    it.second.config.value(
+                                        "model",
+                                    ) == "first-image-model" && it.first.item(f.media).translated != null
+                                }.first
+                        assertTrue(state.displayed(f.media) != secondResult)
+                        store.appSettingsStore.updateData {
+                            it.copy(
+                                aiConfig = it.aiConfig.copy(type = basic.copy(model = "second-image-model")),
+                            )
+                        }
+                        state = models.first { it.second.config.value("model") == "second-image-model" }.first
+                        assertEquals(secondResult, state.displayed(f.media))
+                        assertEquals(2, f.calls)
+                        assertEquals(listOf("first-image-model", "second-image-model"), f.configs.map { it.value("model") })
+                        assertTrue(f.configs.all { it.value("baseUrl") == basic.serverUrl && it.value("apiKey") == basic.apiKey })
                     } finally {
                         withContext(NonCancellable) {
                             scope.coroutineContext[Job]!!.cancelAndJoin()

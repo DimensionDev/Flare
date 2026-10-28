@@ -29,6 +29,7 @@ internal class OpenAIImageTranslationAdapter(
 
         suspend fun multipartRequest() =
             coroutineScope {
+                val input = input.prepared()
                 if (input.size >= 50L * 1024 * 1024) throw ImageTranslationException(ImageTranslationError.UnsupportedInput)
                 val uploadScope = this
                 client.imagePost(
@@ -56,6 +57,7 @@ internal class OpenAIImageTranslationAdapter(
             ) { bearerAuth(config.value("apiKey")) }
 
         suspend fun inlineRequest(): kotlinx.serialization.json.JsonObject {
+            val input = input.prepared()
             // JSON image_url is limited to 20 MiB of characters; multipart accepts larger original files.
             val maxInlineBytes = (20L * 1024 * 1024 - 64) / 4 * 3
             if (input.size > maxInlineBytes) {
@@ -81,15 +83,8 @@ internal class OpenAIImageTranslationAdapter(
                 multipartRequest()
             } else {
                 try {
-                    if (input.publicUrl == null) {
-                        inlineRequest()
-                    } else {
-                        try {
-                            request(input.publicUrl)
-                        } catch (error: ImageTranslationException) {
-                            if (!error.retryWithBytes) throw error
-                            inlineRequest()
-                        }
+                    input.withImageFallback { url ->
+                        if (url == null) inlineRequest() else request(url)
                     }
                 } catch (error: ImageTranslationException) {
                     if (format != "Automatic" || !error.retryWithFile) throw error

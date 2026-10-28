@@ -23,6 +23,7 @@ internal class GeminiImageTranslationAdapter(
         val endpoint = checkedImageServiceUrl(config.value("baseUrl")) + "/interactions"
 
         suspend fun request(url: String?): kotlinx.serialization.json.JsonObject {
+            val input = if (url == null) input.prepared() else input
             if (url == null && input.size > 1024 * 1024) {
                 val metadata =
                     buildJsonObject {
@@ -71,13 +72,7 @@ internal class GeminiImageTranslationAdapter(
                 },
             ) { header("x-goog-api-key", config.value("apiKey")) }
         }
-        val result =
-            try {
-                request(input.publicUrl)
-            } catch (error: ImageTranslationException) {
-                if (input.publicUrl == null || !error.retryWithBytes) throw error
-                request(null)
-            }
+        val result = input.withImageFallback(::request)
         val image =
             result["steps"]
                 ?.jsonArray

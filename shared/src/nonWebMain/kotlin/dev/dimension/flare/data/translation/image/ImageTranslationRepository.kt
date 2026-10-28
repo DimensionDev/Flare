@@ -6,9 +6,11 @@ import dev.dimension.flare.data.datastore.model.ImageTranslationConfig
 import dev.dimension.flare.data.io.FileStorage
 import dev.dimension.flare.data.io.OkioFileStorage
 import dev.dimension.flare.data.model.ProxyRef
+import dev.dimension.flare.data.network.ai.AiImagePreparer
 import dev.dimension.flare.data.network.applyMedia
 import dev.dimension.flare.data.network.mediaHttpClient
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.shared.image.ImageCompressor
 import dev.dimension.flare.ui.model.UiMedia
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
@@ -45,11 +47,12 @@ import kotlin.uuid.Uuid
 internal fun imageTranslationRepository(
     fileStorage: FileStorage,
     scope: CoroutineScope,
+    imageCompressor: ImageCompressor,
 ): ImageTranslationRepository {
     val storage = requireNotNull(fileStorage as? OkioFileStorage)
     val client = imageTranslationHttpClient()
     scope.coroutineContext[Job]?.invokeOnCompletion { client.close() }
-    return ImageTranslationRepository(storage, client)
+    return ImageTranslationRepository(storage, client, imageCompressor = imageCompressor)
 }
 
 internal actual class ImageTranslationRepository(
@@ -68,7 +71,9 @@ internal actual class ImageTranslationRepository(
             storage.cacheDirectory() / "image_translation",
         ),
     private val sourceClient: (ProxyRef) -> HttpClient = ::mediaHttpClient,
+    imageCompressor: ImageCompressor,
 ) {
+    private val imagePreparer = AiImagePreparer(imageCompressor)
     private val fs = storage.fileSystem
     private val sessions = storage.cacheDirectory() / "image_translation_sessions"
     private val mutex = Mutex()
@@ -164,6 +169,11 @@ internal actual class ImageTranslationRepository(
                                             size = fs.metadata(original).size,
                                             openSource = { fs.source(original) },
                                         ),
+                                    prepareImage = { media ->
+                                        val image = imagePreparer.prepare(media)
+                                        dev.dimension.flare.common.UploadMedia
+                                            .fromBytes("original", image.bytes, image.mimeType)
+                                    },
                                 )
                             val adapter =
                                 adapters.firstOrNull { it.provider == config.provider }

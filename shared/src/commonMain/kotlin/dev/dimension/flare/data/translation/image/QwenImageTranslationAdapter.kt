@@ -18,6 +18,7 @@ internal class QwenImageTranslationAdapter(
         config: ImageTranslationConfig,
         target: String,
     ): ImageTranslationOutput {
+        // shortcut: this contract accepts public URLs only; add byte-upload support before enabling local recovery.
         val url = input.publicUrl ?: throw ImageTranslationException(ImageTranslationError.UnsupportedInput)
         // The synchronous 2.0 contract avoids persisting or recreating cloud tasks.
         if (config.value("model") != "qwen-mt-image-2.0") throw ImageTranslationException(ImageTranslationError.UnsupportedInput)

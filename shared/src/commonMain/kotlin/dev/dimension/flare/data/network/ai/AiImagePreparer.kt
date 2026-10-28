@@ -1,9 +1,8 @@
-package dev.dimension.flare.feature.agent.runtime
+package dev.dimension.flare.data.network.ai
 
-import ai.koog.prompt.message.AttachmentContent
-import ai.koog.prompt.message.AttachmentSource
 import dev.dimension.flare.common.MimeTypes
 import dev.dimension.flare.common.PlatformDispatchers
+import dev.dimension.flare.common.UploadMedia
 import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.data.network.applyMedia
 import dev.dimension.flare.data.network.mediaHttpClient
@@ -20,17 +19,24 @@ import io.ktor.utils.io.readRemaining
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.io.readByteArray
+import okio.Buffer
+import kotlin.native.HiddenFromObjC
 
-internal expect val supportsAgentImageFallback: Boolean
+@HiddenFromObjC
+public data class PreparedAiImage(
+    public val bytes: ByteArray,
+    public val mimeType: String,
+)
 
-internal class AgentImagePreparer(
+@HiddenFromObjC
+public class AiImagePreparer(
     private val compressor: ImageCompressor,
     private val clientFactory: (ProxyRef) -> HttpClient = ::mediaHttpClient,
 ) {
-    suspend fun prepare(
+    public suspend fun prepare(
         media: UiMedia.Image,
         maxBytes: Int,
-    ): AttachmentSource.Image {
+    ): PreparedAiImage {
         val url = Url(media.url)
         require(url.protocol.name in setOf("http", "https") && url.user.isNullOrEmpty() && url.password.isNullOrEmpty())
         val bytes =
@@ -54,7 +60,25 @@ internal class AgentImagePreparer(
                     client.engine.close()
                 }
             } ?: error("Image download timed out")
-        return withContext(PlatformDispatchers.IO) {
+        return prepare(bytes, maxBytes)
+    }
+
+    public suspend fun prepare(
+        media: UploadMedia,
+        maxBytes: Int = MAX_IMAGE_BYTES,
+    ): PreparedAiImage {
+        check(media.size in 1..MAX_DOWNLOAD_BYTES.toLong()) { "Image exceeds preparation safety limit" }
+        val buffer = Buffer()
+        media.forEachChunk { bytes, count -> buffer.write(bytes, 0, count) }
+        return prepare(buffer.readByteArray(), maxBytes)
+    }
+
+    private suspend fun prepare(
+        bytes: ByteArray,
+        maxBytes: Int,
+    ): PreparedAiImage =
+        withContext(PlatformDispatchers.IO) {
+            require(maxBytes > 0)
             require(MimeTypes.detectFromBytes(bytes) in SUPPORTED_TYPES) { "Unsupported image data" }
             val metadata = requireNotNull(imageMetadata(bytes)) { "Invalid image data" }
             check(metadata.width > 0 && metadata.height > 0 && metadata.width.toLong() * metadata.height <= MAX_PIXELS) {
@@ -73,15 +97,14 @@ internal class AgentImagePreparer(
                 resultMetadata.width in 1..MAX_DIMENSION && resultMetadata.height in 1..MAX_DIMENSION,
             ) { "Compressed image exceeds dimension limit" }
             val mimeType = requireNotNull(MimeTypes.detectFromBytes(prepared)).also { require(it in SUPPORTED_TYPES) }
-            val format = requireNotNull(MimeTypes.extensionFor(mimeType))
-            AttachmentSource.Image(AttachmentContent.Binary.Bytes(prepared), format, mimeType, "post-image.$format")
+            PreparedAiImage(prepared, mimeType)
         }
-    }
 
-    private companion object {
-        const val MAX_DOWNLOAD_BYTES = 64 * 1024 * 1024
-        const val MAX_PIXELS = 64_000_000L
-        const val MAX_DIMENSION = 4096
-        val SUPPORTED_TYPES = setOf("image/jpeg", "image/png", "image/webp", "image/gif")
+    public companion object {
+        public const val MAX_IMAGE_BYTES: Int = 4 * 1024 * 1024
+        private const val MAX_DOWNLOAD_BYTES = 64 * 1024 * 1024
+        private const val MAX_PIXELS = 64_000_000L
+        private const val MAX_DIMENSION = 4096
+        private val SUPPORTED_TYPES = setOf("image/jpeg", "image/png", "image/webp", "image/gif")
     }
 }

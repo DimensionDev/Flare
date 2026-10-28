@@ -11,14 +11,16 @@ import ai.koog.prompt.message.AttachmentContent
 import ai.koog.prompt.message.AttachmentSource
 import ai.koog.prompt.message.Message
 import ai.koog.prompt.message.MessagePart
+import dev.dimension.flare.data.network.ai.AiImageFailure
+import dev.dimension.flare.data.network.ai.AiImageFallback
+import dev.dimension.flare.data.network.ai.AiImagePreparer
+import dev.dimension.flare.data.network.ai.classifyAiImageFailure
 import dev.dimension.flare.feature.agent.common.AgentPhase
 import dev.dimension.flare.feature.agent.common.AgentTrace
 import dev.dimension.flare.ui.model.UiMedia
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.withTimeoutOrNull
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.jsonPrimitive
+
+internal expect val supportsAgentImageFallback: Boolean
 
 internal class AgentImageFallback(
     private val delegate: PromptExecutor,
@@ -27,7 +29,8 @@ internal class AgentImageFallback(
     private val onTrace: suspend (AgentTrace) -> Unit,
 ) : PromptExecutor(),
     PromptExecutorAPI by delegate {
-    private var mode = Mode.Url
+    private val fallback = AiImageFallback(allowTextFallback = true)
+    private var textFallbackReported = false
     private val prepared = mutableMapOf<String, AttachmentSource.Image>()
 
     override suspend fun execute(
@@ -47,56 +50,30 @@ internal class AgentImageFallback(
         prompt: Prompt,
         execute: suspend (Prompt) -> Message.Assistant,
     ): Message.Assistant {
-        if (mode == Mode.Text) return execute(prompt.withoutImages())
         if (prompt.imageAttachments().isEmpty()) return execute(prompt)
-        var urlError: Exception? = null
-        if (mode == Mode.Url) {
-            try {
-                return execute(prompt)
-            } catch (error: Exception) {
-                if (error is CancellationException) throw error
-                when (error.imageFailure()) {
-                    ImageFailure.Unsupported -> {
-                        return executeText(prompt, execute, error)
-                    }
+        return fallback.execute(Exception::imageFailure) { mode ->
+            when (mode) {
+                AiImageFallback.Mode.Url -> {
+                    execute(prompt)
+                }
 
-                    ImageFailure.Download -> {
-                        mode = Mode.Inline
-                        urlError = error
-                    }
+                AiImageFallback.Mode.Inline -> {
+                    onTrace(AgentTrace(AgentPhase.PreparingImages))
+                    val inline =
+                        withTimeoutOrNull(60_000) { prompt.withInlineImages() }
+                            ?: error("Image preparation timed out")
+                    execute(inline)
+                }
 
-                    null -> {
-                        throw error
+                AiImageFallback.Mode.Text -> {
+                    prepared.clear()
+                    if (!textFallbackReported) {
+                        textFallbackReported = true
+                        onTrace(AgentTrace(AgentPhase.ImagesUnsupportedFallback))
                     }
+                    execute(prompt.withoutImages())
                 }
             }
-        }
-        try {
-            onTrace(AgentTrace(AgentPhase.PreparingImages))
-            val inline =
-                withTimeoutOrNull(60_000) { prompt.withInlineImages() }
-                    ?: error("Image preparation timed out")
-            return execute(inline)
-        } catch (error: Exception) {
-            if (error is CancellationException) throw error
-            urlError?.let(error::addSuppressed)
-            return executeText(prompt, execute, error)
-        }
-    }
-
-    private suspend fun executeText(
-        prompt: Prompt,
-        execute: suspend (Prompt) -> Message.Assistant,
-        previousError: Exception,
-    ): Message.Assistant {
-        mode = Mode.Text
-        prepared.clear()
-        onTrace(AgentTrace(AgentPhase.ImagesUnsupportedFallback))
-        try {
-            return execute(prompt.withoutImages())
-        } catch (error: Exception) {
-            if (error !is CancellationException) error.addSuppressed(previousError)
-            throw error
         }
     }
 
@@ -180,10 +157,8 @@ internal class AgentImageFallback(
         delegate.close()
     }
 
-    private enum class Mode { Url, Inline, Text }
-
     private companion object {
-        const val MAX_IMAGE_BYTES = 4 * 1024 * 1024
+        const val MAX_IMAGE_BYTES = AiImagePreparer.MAX_IMAGE_BYTES
         const val MAX_TOTAL_IMAGE_BYTES = 16 * 1024 * 1024
         const val TEXT_ONLY_NOTICE =
             "[Images could not be read. Analyze only the supplied text and image descriptions. " +
@@ -196,37 +171,7 @@ private fun UiMedia.Image.preparedKey(): String = "$proxy|$cacheKey"
 private fun AttachmentSource.Image.byteSize(): Int =
     (content as? AttachmentContent.Binary)?.asBytes()?.size ?: error("Expected inline image bytes")
 
-private enum class ImageFailure { Unsupported, Download }
-
-private fun Throwable.imageFailure(): ImageFailure? {
-    val error = generateSequence(this) { it.cause }.filterIsInstance<KoogHttpClientException>().firstOrNull() ?: return null
-    if (error.statusCode !in setOf(400, 413, 422)) return null
-    val body = error.errorBody.orEmpty()
-    val message =
-        runCatching {
-            Json
-                .parseToJsonElement(body)
-                .jsonObject["error"]
-                ?.jsonObject
-                ?.get("message")
-                ?.jsonPrimitive
-                ?.content
-        }.getOrNull()
-            .orEmpty()
-            .ifBlank { body }
-            .lowercase()
-            .replace(Regex("""https?://[^\s"<>]+"""), "")
-    if (!Regex("""\b(?:image|images|image_url)\b""").containsMatchIn(message)) return null
-    return when {
-        listOf("not support", "unsupported", "unknown variant", "expected `text`", "expected 'text'").any {
-            it in message
-        } -> ImageFailure.Unsupported
-
-        listOf("download", "fetch", "too large", "too big", "exceed", "image size", "image dimensions", "image resolution").any {
-            it in
-                message
-        } -> ImageFailure.Download
-
-        else -> null
-    }
+private fun Exception.imageFailure(): AiImageFailure? {
+    val error = generateSequence<Throwable>(this) { it.cause }.filterIsInstance<KoogHttpClientException>().firstOrNull() ?: return null
+    return classifyAiImageFailure(error.statusCode, error.errorBody.orEmpty())
 }

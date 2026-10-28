@@ -3,6 +3,7 @@ package dev.dimension.flare.data.translation.image
 import dev.dimension.flare.common.JSON
 import dev.dimension.flare.data.datastore.model.isValidImageTranslationServiceUrl
 import dev.dimension.flare.data.model.ProxyRef
+import dev.dimension.flare.data.network.ai.classifyAiImageFailure
 import dev.dimension.flare.data.network.mediaHttpClient
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.HttpTimeout
@@ -17,7 +18,6 @@ import io.ktor.utils.io.ByteWriteChannel
 import io.ktor.utils.io.readAvailable
 import io.ktor.utils.io.writeFully
 import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import okio.Buffer
@@ -65,19 +65,12 @@ internal suspend fun HttpClient.imagePost(
             payload.write(buffer, 0, read)
         }
         channel.closedCause?.let { throw it }
-        val parsed = runCatching { JSON.parseToJsonElement(payload.readUtf8()) as? JsonObject }.getOrNull()
+        val body = payload.readUtf8()
+        val parsed = runCatching { JSON.parseToJsonElement(body) as? JsonObject }.getOrNull()
         if (response.status.value !in 200..299) {
             val error = parsed?.get("error")?.let { runCatching { it.jsonObject }.getOrNull() }
             val code = error?.text("code")
             val parameter = error?.text("param").orEmpty()
-            val uriViolation =
-                runCatching {
-                    error?.get("details")?.jsonArray.orEmpty().any { detail ->
-                        detail.jsonObject["fieldViolations"]?.jsonArray.orEmpty().any {
-                            it.jsonObject.text("field")?.endsWith(".uri") == true
-                        }
-                    }
-                }.getOrDefault(false)
             throw ImageTranslationException(
                 when (response.status.value) {
                     401, 403 -> ImageTranslationError.Authentication
@@ -85,18 +78,7 @@ internal suspend fun HttpClient.imagePost(
                     400, 413, 415, 422 -> ImageTranslationError.UnsupportedInput
                     else -> ImageTranslationError.Network
                 },
-                retryWithBytes =
-                    response.status.value == 400 &&
-                        (
-                            code in
-                                setOf(
-                                    "invalid_image_url",
-                                    "image_url_unavailable",
-                                    "image_download_failed",
-                                    "failed_to_download_image",
-                                ) ||
-                                uriViolation
-                        ),
+                imageFailure = classifyAiImageFailure(response.status.value, body),
                 retryWithFile =
                     response.status.value == 415 ||
                         (

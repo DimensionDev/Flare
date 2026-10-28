@@ -85,7 +85,8 @@ internal fun ImageTranslationSettingsSection(state: ImageTranslationSettingsPres
     }
     state.fields.forEachIndexed { index, field ->
         val value = state.config.value(field.id)
-        if (field.choices.isNotEmpty()) {
+        val options = field.choices.ifEmpty { field.suggestions }
+        if (options.isNotEmpty() || field.loading) {
             SegmentedListItem(
                 checked = expandedChoice == field.id,
                 onCheckedChange = { expanded -> expandedChoice = if (expanded) field.id else null },
@@ -93,12 +94,35 @@ internal fun ImageTranslationSettingsSection(state: ImageTranslationSettingsPres
                 content = { Text(imageTranslationText(field.title)) },
                 trailingContent = {
                     Box {
-                        TextButton(onClick = { expandedChoice = field.id }) { Text(imageTranslationText(field.choiceTitle(value))) }
+                        TextButton(onClick = { expandedChoice = field.id }) {
+                            Text(
+                                if (value.isBlank()) {
+                                    stringResource(
+                                        R.string.settings_ai_config_value_empty_placeholder,
+                                    )
+                                } else {
+                                    imageTranslationText(field.choiceTitle(value))
+                                },
+                            )
+                        }
                         FlareDropdownMenu(expanded = expandedChoice == field.id, onDismissRequest = { expandedChoice = null }) {
-                            field.choices.forEach { choice ->
+                            if (field.loading) {
+                                DropdownMenuItem(
+                                    text = { Text(stringResource(R.string.settings_ai_config_model_loading)) },
+                                    onClick = {},
+                                    enabled = false,
+                                )
+                            }
+                            options.forEach { choice ->
                                 DropdownMenuItem(text = { Text(imageTranslationText(field.choiceTitle(choice))) }, onClick = {
                                     state.setField(field.id, choice)
                                     expandedChoice = null
+                                })
+                            }
+                            if (field.choices.isEmpty()) {
+                                DropdownMenuItem(text = { Text(stringResource(R.string.image_translation_manual_input)) }, onClick = {
+                                    expandedChoice = null
+                                    editing = field
                                 })
                             }
                         }

@@ -53,16 +53,33 @@ struct ImageTranslationSettingsSection: View {
             }
 
             ForEach(state.presenter.state.fields, id: \.id) { field in
-                if !field.choices.isEmpty {
+                if !field.choices.isEmpty || !field.suggestions.isEmpty || field.loading {
+                    let value = state.presenter.state.config.value(id: field.id)
+                    let options = field.choices.isEmpty ? field.suggestions : field.choices
                     Picker(selection: Binding(
-                        get: { state.presenter.state.config.value(id: field.id) },
-                        set: { state.presenter.state.setField(id: field.id, value: $0) }
+                        get: { Optional(value) },
+                        set: { selection in
+                            if let selection {
+                                state.presenter.state.setField(id: field.id, value: selection)
+                            } else {
+                                state.beginEditing(field)
+                            }
+                        }
                     )) {
-                        ForEach(field.choices, id: \.self) { value in
-                            Text(FlareAppleUILocalization.string(field.choiceTitle(value: value))).tag(value)
+                        if !options.contains(value) {
+                            Text(value.isEmpty ? FlareAppleUILocalization.string("Not set") : value).tag(Optional(value))
+                        }
+                        ForEach(options, id: \.self) { value in
+                            Text(FlareAppleUILocalization.string(field.choiceTitle(value: value))).tag(Optional(value))
+                        }
+                        if field.choices.isEmpty {
+                            Text("image_translation_manual_input", bundle: FlareAppleUILocalization.bundle).tag(nil as String?)
                         }
                     } label: {
                         Text(LocalizedStringKey(field.title), bundle: FlareAppleUILocalization.bundle)
+                        if field.loading {
+                            Text("Loading models...", bundle: FlareAppleUILocalization.bundle)
+                        }
                     }
                 } else {
                     editButton(field)

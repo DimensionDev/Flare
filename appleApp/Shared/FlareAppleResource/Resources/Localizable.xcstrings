@@ -1,6 +1,7 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "image_translation_manual_input" : {"localizations": {"en": {"stringUnit": {"state": "translated", "value": "Enter manually…"}}, "zh-Hans": {"stringUnit": {"state": "translated", "value": "手动输入…"}}}},
     "image_translation_use_shared_description" : {"localizations": {"en": {"stringUnit": {"state": "translated", "value": "Share the service URL, API key and model. The service and model must support image output. Turn off to configure image translation separately."}}, "zh-Hans": {"stringUnit": {"state": "translated", "value": "共用服务地址、API 密钥和模型。服务与模型需要支持输出图片；关闭后可单独配置。"}}}},
     "Automatic" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Automatic" } }, "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "自动" } } } },
     "Original file" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Original file" } }, "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "原文件上传" } } } },

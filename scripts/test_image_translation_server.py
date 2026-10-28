@@ -5,6 +5,7 @@ import struct
 import time
 import zlib
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from urllib.parse import urlsplit
 
 
 def chunk(kind, data):
@@ -28,6 +29,12 @@ class Handler(BaseHTTPRequestHandler):
         self.wfile.write(data)
 
     def do_GET(self):
+        if urlsplit(self.path).path == "/v1/models":
+            self.respond(200, {"data": [{"id": "offline-fixture"}, {"id": "offline-image-alt"}]})
+            return
+        if urlsplit(self.path).path == "/v1beta/models":
+            self.respond(200, {"models": [{"name": "models/offline-gemini-image"}]})
+            return
         self.respond(200 if self.path == "/health" else 404, {"fixture": True})
 
     def do_POST(self):

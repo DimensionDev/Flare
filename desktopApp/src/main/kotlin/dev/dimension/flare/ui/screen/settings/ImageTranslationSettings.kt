@@ -29,6 +29,7 @@ import dev.dimension.flare.image_translation_input_format
 import dev.dimension.flare.image_translation_invalid_image
 import dev.dimension.flare.image_translation_lite
 import dev.dimension.flare.image_translation_loading
+import dev.dimension.flare.image_translation_manual_input
 import dev.dimension.flare.image_translation_mode
 import dev.dimension.flare.image_translation_model
 import dev.dimension.flare.image_translation_network
@@ -58,6 +59,7 @@ import dev.dimension.flare.image_translation_timeout
 import dev.dimension.flare.image_translation_title
 import dev.dimension.flare.image_translation_unsupported
 import dev.dimension.flare.image_translation_use_shared_description
+import dev.dimension.flare.settings_ai_config_model_loading
 import dev.dimension.flare.settings_ai_config_translate_provider_description
 import dev.dimension.flare.settings_ai_config_use_shared
 import dev.dimension.flare.settings_ai_config_value_empty_placeholder
@@ -128,11 +130,24 @@ internal fun ImageTranslationSettingsContent(state: ImageTranslationSettingsPres
     state.fields.forEach { field ->
         val value = state.config.value(field.id)
         val title = imageTranslationText(field.title)
+        val options = field.choices.ifEmpty { field.suggestions }
+        val selectable = options.isNotEmpty() || field.loading
+        val editField = {
+            editing =
+                TextEditDialogState(
+                    title = title,
+                    placeholder = field.placeholder,
+                    value = value,
+                    secret = field.secret,
+                    singleLine = !field.multiline,
+                    onConfirm = { state.setField(field.id, it.trim()) },
+                )
+        }
         ExpanderItemSeparator()
         ExpanderItem(
             heading = { Text(imageTranslationText(field.title)) },
             caption = {
-                if (field.choices.isEmpty()) {
+                if (!selectable) {
                     Text(
                         if (field.secret && value.isNotEmpty()) {
                             "••••••••"
@@ -146,33 +161,49 @@ internal fun ImageTranslationSettingsContent(state: ImageTranslationSettingsPres
                 }
             },
             trailing = {
-                if (field.choices.isNotEmpty()) {
-                    DropDownButton(onClick = { expandedChoice = field.id }) { Text(imageTranslationText(field.choiceTitle(value))) }
+                if (selectable) {
+                    DropDownButton(onClick = { expandedChoice = field.id }) {
+                        Text(
+                            if (value.isBlank()) {
+                                stringResource(
+                                    Res.string.settings_ai_config_value_empty_placeholder,
+                                )
+                            } else {
+                                imageTranslationText(field.choiceTitle(value))
+                            },
+                        )
+                    }
                     MenuFlyout(
                         visible = expandedChoice == field.id,
                         onDismissRequest = { expandedChoice = null },
                         placement = FlyoutPlacement.BottomAlignedEnd,
                         modifier = Modifier.heightIn(max = 200.dp),
                     ) {
-                        field.choices.forEach { choice ->
+                        if (field.loading) {
+                            MenuFlyoutItem(
+                                text = { Text(stringResource(Res.string.settings_ai_config_model_loading)) },
+                                onClick = {},
+                                enabled = false,
+                            )
+                        }
+                        options.forEach { choice ->
                             MenuFlyoutItem(text = { Text(imageTranslationText(field.choiceTitle(choice))) }, onClick = {
                                 state.setField(field.id, choice)
                                 expandedChoice = null
                             })
                         }
+                        if (field.choices.isEmpty()) {
+                            MenuFlyoutItem(text = { Text(stringResource(Res.string.image_translation_manual_input)) }, onClick = {
+                                expandedChoice = null
+                                editField()
+                            })
+                        }
                     }
                 } else {
-                    Button(modifier = Modifier.semantics { contentDescription = title }, onClick = {
-                        editing =
-                            TextEditDialogState(
-                                title = title,
-                                placeholder = field.placeholder,
-                                value = value,
-                                secret = field.secret,
-                                singleLine = !field.multiline,
-                                onConfirm = { state.setField(field.id, it.trim()) },
-                            )
-                    }) { Text(imageTranslationText("Edit")) }
+                    Button(
+                        modifier = Modifier.semantics { contentDescription = title },
+                        onClick = editField,
+                    ) { Text(imageTranslationText("Edit")) }
                 }
             },
         )

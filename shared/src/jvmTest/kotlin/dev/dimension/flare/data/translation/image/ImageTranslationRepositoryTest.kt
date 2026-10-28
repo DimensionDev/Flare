@@ -10,6 +10,7 @@ import dev.dimension.flare.data.datastore.model.AppSettings
 import dev.dimension.flare.data.datastore.model.ImageTranslationConfig
 import dev.dimension.flare.data.datastore.model.ImageTranslationProvider
 import dev.dimension.flare.data.io.OkioFileStorage
+import dev.dimension.flare.data.network.ai.OpenAIService
 import dev.dimension.flare.di.startKoin
 import dev.dimension.flare.di.testSingle
 import dev.dimension.flare.model.MicroBlogKey
@@ -19,6 +20,7 @@ import dev.dimension.flare.ui.presenter.settings.ImageTranslationSettingsPresent
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
+import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -90,6 +92,7 @@ class ImageTranslationRepositoryTest {
                 .AtomicInteger()
         val calls: Int get() = count.get()
         val configs = ConcurrentLinkedQueue<ImageTranslationConfig>()
+        val modelDiscovery = ImageTranslationModelDiscovery(OpenAIService { HttpClient(MockEngine { respond("""{"data":[]}""") }) })
         val output =
             ByteArrayOutputStream()
                 .also {
@@ -369,6 +372,7 @@ class ImageTranslationRepositoryTest {
                         modules(
                             module {
                                 testSingle { store }
+                                testSingle { f.modelDiscovery }
                                 testSingle { repository }
                                 testSingle<CoroutineScope> { CoroutineScope(Dispatchers.Default + SupervisorJob()) }
                             },
@@ -452,6 +456,7 @@ class ImageTranslationRepositoryTest {
                         modules(
                             module {
                                 testSingle { store }
+                                testSingle { f.modelDiscovery }
                                 testSingle { repository }
                                 testSingle<CoroutineScope> { CoroutineScope(Dispatchers.Default + SupervisorJob()) }
                             },
@@ -519,6 +524,7 @@ class ImageTranslationRepositoryTest {
                         modules(
                             module {
                                 testSingle { store }
+                                testSingle { f.modelDiscovery }
                                 testSingle<CoroutineScope> { CoroutineScope(Dispatchers.Default + SupervisorJob()) }
                             },
                         )
@@ -563,6 +569,7 @@ class ImageTranslationRepositoryTest {
                         modules(
                             module {
                                 testSingle { store }
+                                testSingle { f.modelDiscovery }
                                 testSingle<CoroutineScope> { scope }
                             },
                         )
@@ -639,6 +646,7 @@ class ImageTranslationRepositoryTest {
                         modules(
                             module {
                                 testSingle { store }
+                                testSingle { f.modelDiscovery }
                                 testSingle { repository }
                                 testSingle<CoroutineScope> { scope }
                             },
@@ -698,6 +706,93 @@ class ImageTranslationRepositoryTest {
                         assertEquals(listOf("first-image-model", "second-image-model"), f.configs.map { it.value("model") })
                         assertTrue(f.configs.all { it.value("baseUrl") == basic.serverUrl && it.value("apiKey") == basic.apiKey })
                     } finally {
+                        withContext(NonCancellable) {
+                            scope.coroutineContext[Job]!!.cancelAndJoin()
+                            stopKoin()
+                        }
+                    }
+                }
+            }
+        }
+
+    @Test
+    fun modelDiscoveryTracksOnlyConnectionAndNeverOverwritesManualSelection() =
+        runBlocking {
+            withTimeout(10_000) {
+                fixture().use { f ->
+                    val store = AppDataStore(f.storage)
+                    store.appSettingsStore.updateData {
+                        it.copy(
+                            imageTranslationConfig = config.withValue("baseUrl", "https://old.example/v1"),
+                        )
+                    }
+                    val started = CompletableDeferred<Unit>()
+                    val finishOld = CompletableDeferred<Unit>()
+                    val calls = ConcurrentLinkedQueue<String>()
+                    val discovery =
+                        ImageTranslationModelDiscovery(
+                            OpenAIService {
+                                HttpClient(
+                                    MockEngine { request ->
+                                        calls.add(request.url.host)
+                                        if (request.url.host == "old.example") {
+                                            started.complete(Unit)
+                                            withContext(NonCancellable) { finishOld.await() }
+                                            respond("""{"data":[{"id":"stale-image"}]}""")
+                                        } else if (request.headers["Authorization"] == "Bearer bad-key") {
+                                            respond("{}", HttpStatusCode.Unauthorized)
+                                        } else {
+                                            respond("""{"data":[{"id":"detected-image"}]}""")
+                                        }
+                                    },
+                                )
+                            },
+                        )
+                    val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
+                    startKoin {
+                        modules(
+                            module {
+                                testSingle { store }
+                                testSingle { discovery }
+                                testSingle<CoroutineScope> { scope }
+                            },
+                        )
+                    }
+                    scope.launch {
+                        while (isActive) {
+                            Snapshot.sendApplyNotifications()
+                            delay(5)
+                        }
+                    }
+                    val models = scope.launchMolecule(RecompositionMode.Immediate) { ImageTranslationSettingsPresenter().body() }
+                    try {
+                        started.await()
+                        models.value.setField("baseUrl", "https://new.example/v1")
+                        var state = models.first { it.config.value("baseUrl") == "https://new.example/v1" }
+                        assertTrue(state.fields.single { it.id == "model" }.loading)
+                        assertEquals(emptyList(), state.fields.single { it.id == "model" }.suggestions)
+                        state = models.first { it.fields.single { it.id == "model" }.suggestions == listOf("detected-image") }
+                        finishOld.complete(Unit)
+                        state.setField("model", "manual-image")
+                        state = models.first { it.config.value("model") == "manual-image" }
+                        state.setField("prompt", "Changed image prompt")
+                        models.first { it.config.value("prompt") == "Changed image prompt" }
+                        delay(750)
+                        assertEquals(listOf("old.example", "new.example"), calls.toList())
+                        assertEquals(
+                            listOf("detected-image"),
+                            models.value.fields
+                                .single { it.id == "model" }
+                                .suggestions,
+                        )
+                        models.value.setField("apiKey", "bad-key")
+                        models.first { it.config.value("apiKey") == "bad-key" && it.fields.single { it.id == "model" }.loading }
+                        state = models.first { it.config.value("apiKey") == "bad-key" && !it.fields.single { it.id == "model" }.loading }
+                        assertEquals(emptyList(), state.fields.single { it.id == "model" }.suggestions)
+                        assertEquals("manual-image", state.config.value("model"))
+                        assertEquals(3, calls.size)
+                    } finally {
+                        finishOld.complete(Unit)
                         withContext(NonCancellable) {
                             scope.coroutineContext[Job]!!.cancelAndJoin()
                             stopKoin()

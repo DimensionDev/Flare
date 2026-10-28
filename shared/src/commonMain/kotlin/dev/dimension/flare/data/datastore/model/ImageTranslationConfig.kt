@@ -90,6 +90,8 @@ public data class ImageTranslationField(
     val multiline: Boolean = false,
     val required: Boolean = true,
     val choices: List<String> = emptyList(),
+    val suggestions: List<String> = emptyList(),
+    val loading: Boolean = false,
 ) {
     public fun choiceTitle(value: String): String =
         when {
@@ -118,7 +120,29 @@ public fun imageTranslationFields(provider: ImageTranslationProvider): List<Imag
             listOf(
                 ImageTranslationField("secretId", "Secret ID"),
                 ImageTranslationField("secretKey", "Secret key", secret = true),
-                ImageTranslationField("region", "Region", "ap-guangzhou"),
+                ImageTranslationField(
+                    "region",
+                    "Region",
+                    "ap-guangzhou",
+                    suggestions =
+                        listOf(
+                            "ap-bangkok",
+                            "ap-beijing",
+                            "ap-chengdu",
+                            "ap-chongqing",
+                            "ap-guangzhou",
+                            "ap-hongkong",
+                            "ap-seoul",
+                            "ap-shanghai",
+                            "ap-shanghai-fsi",
+                            "ap-shenzhen-fsi",
+                            "ap-singapore",
+                            "ap-tokyo",
+                            "eu-frankfurt",
+                            "na-ashburn",
+                            "na-siliconvalley",
+                        ),
+                ),
                 ImageTranslationField("mode", "Mode", "0", choices = listOf("0", "1")),
             )
         }
@@ -146,7 +170,7 @@ public fun imageTranslationFields(provider: ImageTranslationProvider): List<Imag
             listOf(
                 ImageTranslationField("baseUrl", "Service URL", placeholder = "https://{WorkspaceId}.cn-beijing.maas.aliyuncs.com/api/v1"),
                 key,
-                model.copy(defaultValue = "qwen-mt-image-2.0"),
+                model.copy(defaultValue = "qwen-mt-image-2.0", suggestions = listOf("qwen-mt-image-2.0")),
             )
         }
     }

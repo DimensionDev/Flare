@@ -90,6 +90,42 @@ final class MediaViewerInteractionTests: XCTestCase {
     }
 
     @MainActor
+    func testImageTranslationDiscoversModelsAndAllowsManualInputAndRegionSelection() {
+        let app = XCUIApplication()
+        app.launchArguments = ["--media-viewer-test", "--translation-settings", "--image-translation-fixture", "-AppleLanguages", "(en)", "-AppleLocale", "en_US"]
+        app.launch()
+        defer { app.terminate() }
+        let open = app.buttons["media-fixture-open"]
+        XCTAssertTrue(open.waitForExistence(timeout: 15))
+        open.tap()
+        app.swipeUp()
+        let model = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Image model")).firstMatch
+        XCTAssertTrue(model.waitForExistence(timeout: 5))
+        model.tap()
+        app.buttons["offline-image-alt"].tap()
+        XCTAssertTrue(model.label.contains("offline-image-alt"))
+        model.tap()
+        app.buttons["Enter manually…"].tap()
+        let editor = app.textFields.firstMatch
+        XCTAssertTrue(editor.waitForExistence(timeout: 5))
+        editor.tap()
+        editor.typeText("manual")
+        app.navigationBars["Image model"].buttons["Done"].tap()
+        XCTAssertTrue(model.waitForExistence(timeout: 5))
+        XCTAssertTrue(model.label.contains("manual"))
+        app.swipeDown()
+        let provider = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Image translation provider")).firstMatch
+        provider.tap()
+        app.buttons["Tencent Cloud"].tap()
+        app.swipeUp()
+        let region = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Region")).firstMatch
+        XCTAssertTrue(region.waitForExistence(timeout: 5))
+        region.tap()
+        app.buttons["ap-beijing"].tap()
+        XCTAssertTrue(region.label.contains("ap-beijing"))
+    }
+
+    @MainActor
     private func assertImageTranslationFields(in app: XCUIApplication) {
         let provider = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Image translation provider")).firstMatch
         XCTAssertTrue(provider.waitForExistence(timeout: 5))

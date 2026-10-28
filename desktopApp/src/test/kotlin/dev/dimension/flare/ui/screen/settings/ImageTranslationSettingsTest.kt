@@ -101,9 +101,12 @@ class ImageTranslationSettingsTest {
         compose.onNodeWithText("Tencent Cloud").performClick()
         compose.onNodeWithText("Pro").performScrollTo().performClick()
         compose.onNodeWithText("Lite").performClick()
+        compose.onNodeWithText("ap-guangzhou").performScrollTo().performClick()
+        compose.onNodeWithText("ap-beijing").performClick()
         compose.runOnIdle {
             assertEquals(ImageTranslationProvider.Tencent, state.config.provider)
             assertEquals("1", state.config.value("mode"))
+            assertEquals("ap-beijing", state.config.value("region"))
         }
     }
 
@@ -152,6 +155,33 @@ class ImageTranslationSettingsTest {
         compose.runOnIdle { assertEquals("custom-image-model", state.config.value("model")) }
     }
 
+    @Test
+    fun discoveredModelsCanBeSelectedAndManualInputSurvivesLoadingAndEmptyResults() {
+        val state = State()
+        state.modelLoading = true
+        show(state)
+        compose.onNodeWithText("Not set").performScrollTo().performClick()
+        compose.onNodeWithText("Loading models…").assertExists()
+        compose.onNodeWithText("Enter manually…").performClick()
+        compose.onNode(hasSetTextAction()).performTextReplacement("manual-image")
+        compose.onNodeWithText("OK").performClick()
+        compose.runOnIdle {
+            state.modelLoading = false
+            state.modelSuggestions = listOf("detected-image")
+            assertEquals("manual-image", state.config.value("model"))
+        }
+        compose.onNodeWithText("manual-image").performScrollTo().performClick()
+        compose.onNodeWithText("detected-image").performClick()
+        compose.runOnIdle {
+            assertEquals("detected-image", state.config.value("model"))
+            state.modelSuggestions = emptyList()
+        }
+        compose.onNodeWithContentDescription("Image model").performScrollTo().performClick()
+        compose.onNode(hasSetTextAction()).performTextReplacement("fallback-image")
+        compose.onNodeWithText("OK").performClick()
+        compose.runOnIdle { assertEquals("fallback-image", state.config.value("model")) }
+    }
+
     private fun show(state: State) {
         compose.setContent {
             FlareTheme(isDarkTheme = false) {
@@ -166,13 +196,18 @@ class ImageTranslationSettingsTest {
         initial: ImageTranslationConfig = ImageTranslationConfig(ImageTranslationProvider.OpenAIImages).withValue("apiKey", "saved-key"),
     ) : ImageTranslationSettingsPresenter.State {
         private var saved by mutableStateOf(initial)
+        var modelSuggestions by mutableStateOf(emptyList<String>())
+        var modelLoading by mutableStateOf(false)
         private val basic =
             AppSettings.AiConfig(
                 type = AppSettings.AiConfig.Type.OpenAI("https://basic.example/v1", "basic-key", "basic-model"),
             )
         override val config get() = saved.resolved(basic)
         override val providers = ImageTranslationProvider.entries.toList()
-        override val fields get() = config.editableFields
+        override val fields get() =
+            config.editableFields.map {
+                if (it.id == "model") it.copy(suggestions = modelSuggestions, loading = modelLoading) else it
+            }
         override val useSharedConfig get() = config.usesSharedAIConfig
 
         override fun setUseSharedConfig(value: Boolean) {

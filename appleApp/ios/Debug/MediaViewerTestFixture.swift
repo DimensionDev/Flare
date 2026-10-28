@@ -56,6 +56,18 @@ struct MediaViewerTestFixture: View {
     @MainActor
     private func configureTranslationFixture() async {
         let settings = KotlinPresenter(presenter: ImageTranslationSettingsPresenter())
+        if translationSettings {
+            settings.state.selectProvider(provider: .gemini)
+            for _ in 0..<250 {
+                if settings.state.config.provider == .gemini { break }
+                try? await Task.sleep(for: .milliseconds(20))
+            }
+            settings.state.setField(id: "baseUrl", value: "http://127.0.0.1:18473/v1beta")
+            for _ in 0..<250 {
+                if settings.state.config.value(id: "baseUrl") == "http://127.0.0.1:18473/v1beta" { break }
+                try? await Task.sleep(for: .milliseconds(20))
+            }
+        }
         if !ProcessInfo.processInfo.arguments.contains("--image-translation-fixture") {
             settings.state.selectProvider(provider: .disabled)
             for _ in 0..<250 {

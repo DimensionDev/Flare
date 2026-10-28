@@ -224,15 +224,30 @@ class PluginDevelopmentSessionV1Test {
             try {
                 session.reload(confirmed = true)
                 assertFalse(original.session.isActive)
-                val active = current
-                accounts.failNext = true
-                assertFailsWith<IllegalStateException> { session.reload() }
-                assertFalse(active.session.isActive)
-                assertTrue(current.session.isActive)
-                assertTrue(session.state.value.active)
-                assertEquals(current.generation, session.state.value.generation)
-                assertEquals("development", page()["marker"]!!.jsonPrimitive.content)
-                assertEquals(installed, subsystem.stateStore.desired.value)
+                repeat(3) {
+                    val active = current
+                    accounts.failNext = true
+                    assertFailsWith<IllegalStateException> { session.reload() }
+                    assertFalse(active.session.isActive)
+                    assertTrue(current.session.isActive)
+                    assertTrue(current.generation > active.generation)
+                    assertTrue(session.state.value.active)
+                    assertEquals(current.generation, session.state.value.generation)
+                    assertEquals(current.installed.packageHash, session.state.value.runningHash)
+                    val messages = session.state.value.messages
+                    active.diagnostic?.invoke(active, "retired diagnostic")
+                    assertEquals(messages, session.state.value.messages)
+                    assertEquals("development", page()["marker"]!!.jsonPrimitive.content)
+                    assertTrue(
+                        session.state.value.messages
+                            .last()
+                            .startsWith("#${current.generation} "),
+                    )
+                    assertEquals(installed, subsystem.stateStore.desired.value)
+                }
+                val restored = current
+                session.reload()
+                assertTrue(current.generation > restored.generation)
                 session.stop()
                 assertEquals("installed", page()["marker"]!!.jsonPrimitive.content)
                 assertEquals(installed, subsystem.stateStore.desired.value)

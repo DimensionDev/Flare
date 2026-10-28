@@ -53,7 +53,7 @@ public data class RunningPluginV1(
     val generation: Long = 0,
 ) {
     internal val session = PluginSessionV1()
-    internal var diagnostic: ((String) -> Unit)? = null
+    internal var diagnostic: ((RunningPluginV1, String) -> Unit)? = null
 }
 
 public data class PluginRunningSnapshotV1(

@@ -58,10 +58,11 @@ internal class PluginRuntimeSwitcherV1(
                 if (retired || previous?.session?.isActive == false) {
                     val generation = maxOf(previous?.generation ?: 0, replacement?.generation ?: 0) + 1
                     val restored =
-                        previous?.copy(
-                            installed = if (temporary) previous.installed else previous.installed.copy(runtimeGeneration = generation),
-                            generation = generation,
-                        )
+                        previous
+                            ?.copy(
+                                installed = if (temporary) previous.installed else previous.installed.copy(runtimeGeneration = generation),
+                                generation = generation,
+                            )?.also { it.diagnostic = previous.diagnostic }
                     subsystem.replaceRunning(pluginId, restored)
                     registry.replaceExternal(platformId, restored?.let(::platform))
                     // Preserve the restored session's identity for OAuth continuations after a restart.

@@ -14,6 +14,7 @@ import dev.dimension.flare.feature.plugin.installer.PluginInstaller
 import dev.dimension.flare.feature.plugin.lifecycle.PluginStateIssueV1
 import dev.dimension.flare.feature.plugin.lifecycle.PluginStateStore
 import dev.dimension.flare.feature.plugin.lifecycle.RunningPluginV1
+import dev.dimension.flare.feature.plugin.lifecycle.derivedPluginState
 import dev.dimension.flare.feature.plugin.login.PlatformOAuthPluginPendingStoreV1
 import dev.dimension.flare.feature.plugin.login.PluginFormLoginCoordinatorV1
 import dev.dimension.flare.feature.plugin.login.PluginOAuthLoginCoordinatorV1
@@ -62,7 +63,15 @@ public class PluginSubsystemV1 internal constructor(
     private val mutableRunning = MutableStateFlow(stateStore.running)
     public val running: StateFlow<dev.dimension.flare.feature.plugin.lifecycle.PluginRunningSnapshotV1> = mutableRunning.asStateFlow()
     internal val mutableDevelopmentState = MutableStateFlow(PluginDevelopmentStateV1())
-    public val developmentState: StateFlow<PluginDevelopmentStateV1> = mutableDevelopmentState.asStateFlow()
+    public val developmentState: StateFlow<PluginDevelopmentStateV1> =
+        derivedPluginState(mutableDevelopmentState, running) { state, running ->
+            val active = running.plugins[state.pluginId]?.takeIf { it.developmentSource != null }
+            state.copy(
+                active = active != null,
+                runningHash = active?.installed?.packageHash,
+                generation = active?.generation ?: 0,
+            )
+        }
     public val development: PluginDevelopmentSessionV1 by lazy {
         PluginDevelopmentSessionV1(this, koinGet<PlatformRegistry>(), koinGet<AccountService>(), koinGet<CoroutineScope>())
     }

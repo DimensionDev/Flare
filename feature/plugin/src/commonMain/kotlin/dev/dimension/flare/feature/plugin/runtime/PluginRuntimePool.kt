@@ -144,13 +144,16 @@ public class PluginRuntimePool(
     ): JsonElement =
         plugin.session.invoke(method) {
             // Record only method and outcome; arguments, responses and exception text may contain credentials.
-            plugin.diagnostic?.invoke("$method: started")
+            plugin.diagnostic?.invoke(plugin, "$method: started")
             try {
                 invokeCurrent(plugin, key, context, method, request, timeout, validate).also {
-                    plugin.diagnostic?.invoke("$method: completed")
+                    plugin.diagnostic?.invoke(plugin, "$method: completed")
                 }
             } catch (error: Throwable) {
-                plugin.diagnostic?.invoke("$method: ${if (error is kotlinx.coroutines.CancellationException) "cancelled" else "failed"}")
+                plugin.diagnostic?.invoke(
+                    plugin,
+                    "$method: ${if (error is kotlinx.coroutines.CancellationException) "cancelled" else "failed"}",
+                )
                 throw error
             }
         }

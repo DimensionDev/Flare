@@ -20,7 +20,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -68,14 +67,17 @@ public class PluginDevelopmentSessionV1 internal constructor(
                         }.getOrNull(),
                 )
         }
-    public val state: StateFlow<PluginDevelopmentStateV1> = mutableState.asStateFlow()
+    public val state: StateFlow<PluginDevelopmentStateV1> = subsystem.developmentState
     private val mutex = subsystem.mutationMutex
     private val switcher = PluginRuntimeSwitcherV1(subsystem, registry, accounts, scope)
     private var watcher: Job? = null
     private var candidate: Candidate? = null
     private var lastCheckedHash: String? = null
     private var baseline: RunningPluginV1? = null
-    private var active: RunningPluginV1? = null
+    private val active: RunningPluginV1?
+        get() =
+            subsystem.running.value.plugins[state.value.pluginId]
+                ?.takeIf { it.developmentSource != null }
     private var generation = 0L
 
     public suspend fun open(directory: String): Unit =
@@ -126,20 +128,20 @@ public class PluginDevelopmentSessionV1 internal constructor(
                     }
             if (needsReview && (!confirmed || state.value.reviewHash != prepared.source.hash)) {
                 mutableState.update {
-                    it.copy(reviewHash = prepared.source.hash, permissions = permissions.toList(), credentialSchemaChanged = changedSchema)
+                    it.copy(
+                        reviewHash = prepared.source.hash,
+                        permissions = permissions.toList(),
+                        credentialSchemaChanged = changedSchema,
+                    )
                 }
                 return@action
             }
             if (active == null) baseline = previous
-            val replacement = prepared.running(++generation)
-            switch(previous, replacement)
-            active = replacement
+            val replacement = prepared.running(nextGeneration(previous))
+            switcher.switch(previous, replacement, temporary = true)
             pruneIcons(replacement)
             mutableState.update {
                 it.copy(
-                    active = true,
-                    runningHash = replacement.installed.packageHash,
-                    generation = generation,
                     reviewHash = null,
                     credentialSchemaChanged = false,
                     error = null,
@@ -155,10 +157,9 @@ public class PluginDevelopmentSessionV1 internal constructor(
         action {
             val previous = active
             if (previous != null) {
-                val restored = baseline?.copy(generation = ++generation)
-                switch(previous, restored)
+                val restored = baseline?.copy(generation = nextGeneration(previous))
+                switcher.switch(previous, restored, temporary = true)
             }
-            active = null
             baseline = null
             candidate = null
             watcher?.cancel()
@@ -254,23 +255,8 @@ public class PluginDevelopmentSessionV1 internal constructor(
         }
     }
 
-    private suspend fun switch(
-        previous: RunningPluginV1?,
-        replacement: RunningPluginV1?,
-    ) {
-        val pluginId = requireNotNull(replacement?.installed?.pluginId ?: previous?.installed?.pluginId)
-        try {
-            switcher.switch(previous, replacement, temporary = true)
-        } catch (error: Throwable) {
-            val restored = subsystem.running.value.plugins[pluginId]
-            generation = maxOf(generation, restored?.generation ?: 0)
-            if (active != null) {
-                active = restored
-                mutableState.update { it.copy(generation = generation, runningHash = restored?.installed?.packageHash) }
-            }
-            throw error
-        }
-    }
+    private fun nextGeneration(previous: RunningPluginV1?): Long =
+        (maxOf(generation, previous?.generation ?: 0) + 1).also { generation = it }
 
     private suspend fun action(block: suspend () -> Unit): Unit =
         withContext(Dispatchers.Default) {
@@ -319,12 +305,12 @@ public class PluginDevelopmentSessionV1 internal constructor(
                         .decodeToString(throwOnInvalidSequence = true),
                 generation = generation,
             ).also { plugin ->
-                plugin.diagnostic = { message ->
+                plugin.diagnostic = { current, message ->
                     mutableState.update { state ->
-                        if (state.generation != generation) {
+                        if (active !== current) {
                             state
                         } else {
-                            state.copy(messages = (state.messages + "#$generation $message").takeLast(40))
+                            state.copy(messages = (state.messages + "#${current.generation} $message").takeLast(40))
                         }
                     }
                 }

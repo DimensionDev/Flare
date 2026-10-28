@@ -19,23 +19,19 @@ import dev.dimension.flare.feature.plugin.installer.sensitivePermissions
 import dev.dimension.flare.feature.plugin.lifecycle.InstalledPluginV1
 import dev.dimension.flare.feature.plugin.lifecycle.PluginRuntimeSwitcherV1
 import dev.dimension.flare.feature.plugin.lifecycle.RunningPluginV1
+import dev.dimension.flare.feature.plugin.lifecycle.derivedPluginState
 import dev.dimension.flare.feature.plugin.manifest.fallbackText
 import dev.dimension.flare.feature.plugin.runtime.PluginSessionBusyException
 import dev.dimension.flare.model.PlatformRegistry
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalForInheritanceCoroutinesApi
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
-import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -59,21 +55,9 @@ internal class PluginAuthoringServiceV1(
     private val entries = MutableStateFlow(load())
     private val mutablePlugins = MutableStateFlow(entries.value.values.map(::snapshot))
 
-    // Derive runtime flags on reads and collection without an application-scope observer.
-    @OptIn(ExperimentalForInheritanceCoroutinesApi::class)
     override val plugins: StateFlow<List<AuthoredPlugin>> =
-        object : StateFlow<List<AuthoredPlugin>> {
-            override val value: List<AuthoredPlugin>
-                get() {
-                    val running = subsystem.running.value.plugins
-                    return mutablePlugins.value.map { it.copy(running = it.id in running) }
-                }
-            override val replayCache get() = listOf(value)
-
-            override suspend fun collect(collector: FlowCollector<List<AuthoredPlugin>>): Nothing {
-                combine(mutablePlugins, subsystem.running) { _, _ -> value }.distinctUntilChanged().collect(collector)
-                awaitCancellation()
-            }
+        derivedPluginState(mutablePlugins, subsystem.running) { plugins, running ->
+            plugins.map { it.copy(running = it.id in running.plugins) }
         }
     private val switcher by lazy { PluginRuntimeSwitcherV1(subsystem, registry(), accounts(), this.scope) }
     private val validator = PluginPackageValidator(files)

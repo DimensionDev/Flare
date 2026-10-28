@@ -32,7 +32,6 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.ReferenceType
 import dev.dimension.flare.ui.model.ClickEvent
-import dev.dimension.flare.ui.model.PluginMediaPermissions
 import dev.dimension.flare.ui.model.UiArticle
 import dev.dimension.flare.ui.model.UiArticleAuthor
 import dev.dimension.flare.ui.model.UiArticleBlock
@@ -74,10 +73,6 @@ internal class PluginWireMapperV1(
     private val composeAvailable: Boolean,
     private val mediaNetwork: Boolean = false,
 ) {
-    init {
-        PluginMediaPermissions.register(pluginId, mediaNetwork)
-    }
-
     private val accountType: AccountType = accountKey?.let(AccountType::Specific) ?: AccountType.GuestHost(originHost)
     private val mediaProxy = ProxyRef.forAccountType(accountType)
 

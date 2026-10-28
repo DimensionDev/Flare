@@ -125,6 +125,53 @@ class AccountRepositoryTest : RobolectricTest() {
             )
         }
 
+    @Test
+    @OptIn(ExperimentalCoroutinesApi::class)
+    fun reloginRebindsExistingSingleAndAllAccountCollectorsWithoutRebindingTokenRefreshes() =
+        runTest {
+            val registry = testPlatformRegistry()
+            val first = object : MicroblogDataSource by UnavailableMicroblogDataSource {}
+            val second = object : MicroblogDataSource by UnavailableMicroblogDataSource {}
+            var current: MicroblogDataSource = first
+            registry.replaceExternal(
+                "PluginTest",
+                object : PlatformSpec by registry.defaultGuest {
+                    override val platformId = "PluginTest"
+                    override val isDefaultGuest = false
+
+                    override fun createDataSource(context: PlatformDataSourceContext) = current
+                },
+            )
+            val repository = createRepository(backgroundScope, registry = registry)
+            val account = UiAccount(accountKey, "PluginTest")
+            repository.addAccount(account, "first negotiated capabilities")
+            val single = Channel<MicroblogDataSource>(Channel.UNLIMITED)
+            val all = Channel<List<MicroblogDataSource>>(Channel.UNLIMITED)
+            val service = Channel<List<AccountMicroblogDataSource>>(Channel.UNLIMITED)
+            backgroundScope.launch {
+                accountServiceFlow(AccountType.Specific(accountKey), repository).collect(single::send)
+            }
+            backgroundScope.launch { allAccountServicesFlow(repository).collect(all::send) }
+            backgroundScope.launch { RepositoryAccountService(repository).allAccountServicesFlow().collect(service::send) }
+            assertSame(first, single.receive())
+            assertSame(first, all.receive().single())
+            assertSame(first, service.receive().single().dataSource)
+
+            current = second
+            repository.addAccount(account, "changed capabilities and stricter compose limits")
+            assertSame(second, withTimeoutOrNull(5_000) { single.receive() })
+            assertSame(second, withTimeoutOrNull(5_000) { all.receive() }?.single())
+            assertSame(second, withTimeoutOrNull(5_000) { service.receive() }?.single()?.dataSource)
+
+            repository.updateCredential(accountKey, "refreshed token").join()
+            assertEquals("refreshed token", repository.credentialFlow<String>(accountKey).first())
+            runCurrent()
+            assertSame(second, repository.getOrCreateDataSource(account))
+            assertTrue(single.tryReceive().isFailure)
+            assertTrue(all.tryReceive().isFailure)
+            assertTrue(service.tryReceive().isFailure)
+        }
+
     private val root = createTestRootPath()
     private val fileStorage = OkioFileStorage(createTestFileSystem(), root)
 

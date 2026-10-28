@@ -17,6 +17,7 @@ import dev.dimension.flare.feature.plugin.installer.PluginPackageValidator
 import dev.dimension.flare.feature.plugin.installer.ValidatedPluginPackage
 import dev.dimension.flare.feature.plugin.installer.encodePluginArchive
 import dev.dimension.flare.feature.plugin.installer.sensitivePermissions
+import dev.dimension.flare.feature.plugin.lifecycle.InstalledPluginV1
 import dev.dimension.flare.feature.plugin.lifecycle.PluginRuntimeSwitcherV1
 import dev.dimension.flare.feature.plugin.lifecycle.RunningPluginV1
 import dev.dimension.flare.feature.plugin.manifest.PluginTextV1
@@ -249,17 +250,24 @@ internal class PluginAuthoringServiceV1(
             entry.mutex.withLock {
                 check(entries.value[pluginId] === entry) { "Plugin no longer exists" }
                 if (entry.record.enabled == enabled) return@withLock
-                if (!enabled) {
-                    subsystem.mutationMutex.withLock {
-                        val previous = subsystem.running.value.plugins[pluginId]
-                        check(
-                            previous?.session?.hasWrites != true && !subsystem.oauth.hasPending(pluginId),
-                        ) { "Wait for login or write operations to finish" }
-                        val installed = subsystem.stateStore.desired.value.plugins[pluginId]
-                        if (installed != null) {
-                            switcher.switch(previous, null, installed.copy(enabled = false))
-                        }
+                subsystem.mutationMutex.withLock {
+                    val previous = subsystem.running.value.plugins[pluginId]
+                    check(previous?.developmentSource == null) { "Stop directory development before updating this plugin" }
+                    check(
+                        previous?.session?.hasWrites != true && !subsystem.oauth.hasPending(pluginId),
+                    ) { "Wait for login or write operations to finish" }
+                    val installed = subsystem.stateStore.desired.value.plugins[pluginId]
+                    if (installed != null) {
+                        val record =
+                            installed.copy(
+                                enabled = enabled,
+                                runtimeGeneration = maxOf(previous?.generation ?: 0, installed.runtimeGeneration) + 1,
+                            )
+                        switcher.switch(previous, if (enabled) running(record) else null, record)
+                        entry.state = entry.state.copy(running = enabled)
                     }
+                }
+                if (!enabled) {
                     entry.application?.cancel()
                     entry.candidate = null
                     entry.state =
@@ -318,6 +326,7 @@ internal class PluginAuthoringServiceV1(
             entry.mutex.withLock {
                 subsystem.mutationMutex.withLock {
                     val previous = subsystem.running.value.plugins[pluginId]
+                    check(previous?.developmentSource == null) { "Stop directory development before updating this plugin" }
                     check(
                         previous?.session?.hasWrites != true && !subsystem.oauth.hasPending(pluginId),
                     ) { "Wait for login or write operations to finish" }
@@ -403,18 +412,7 @@ internal class PluginAuthoringServiceV1(
             }
             val generation = maxOf(previous?.generation ?: 0, installed?.runtimeGeneration ?: 0) + 1
             val record = subsystem.installer.persistAuthored(candidate.validated, candidate.archive, true, generation)
-            val replacement =
-                RunningPluginV1(
-                    record,
-                    subsystem.stateStore.paths
-                        .packagePath(record.packageHash)
-                        .toString(),
-                    subsystem.stateStore.paths
-                        .iconPath(record.packageHash)
-                        .toString(),
-                    generation = generation,
-                )
-            switcher.switch(previous, replacement, record)
+            switcher.switch(previous, running(record), record)
             entry.candidate = null
             entry.state =
                 entry.state.copy(
@@ -430,6 +428,18 @@ internal class PluginAuthoringServiceV1(
     }
 
     private fun entry(id: String): Entry = requireNotNull(entries.value[id]) { "Plugin no longer exists" }
+
+    private fun running(record: InstalledPluginV1): RunningPluginV1 =
+        RunningPluginV1(
+            record,
+            subsystem.stateStore.paths
+                .packagePath(record.packageHash)
+                .toString(),
+            subsystem.stateStore.paths
+                .iconPath(record.packageHash)
+                .toString(),
+            generation = record.runtimeGeneration,
+        )
 
     private fun checkRun(
         entry: Entry,

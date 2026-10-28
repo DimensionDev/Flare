@@ -8,9 +8,11 @@ import dev.dimension.flare.data.repository.AccountService
 import dev.dimension.flare.data.repository.AuthoredPlugin
 import dev.dimension.flare.data.repository.PluginAuthoringPhase
 import dev.dimension.flare.feature.plugin.PluginSubsystemV1
+import dev.dimension.flare.feature.plugin.development.PluginDevelopmentSessionV1
 import dev.dimension.flare.feature.plugin.installer.TestFppFactory
 import dev.dimension.flare.feature.plugin.login.PluginOAuthPendingStoreV1
 import dev.dimension.flare.feature.plugin.login.PluginOAuthPendingV1
+import dev.dimension.flare.feature.plugin.runtime.PluginSessionRetiredException
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformDataSourceContext
@@ -32,9 +34,11 @@ import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.KSerializer
+import okio.ByteString.Companion.decodeBase64
 import okio.FileSystem
 import okio.ForwardingFileSystem
 import okio.Path
@@ -54,7 +58,9 @@ class PluginAuthoringServiceV1Test {
     private lateinit var scope: CoroutineScope
     private lateinit var subsystem: PluginSubsystemV1
     private lateinit var service: PluginAuthoringServiceV1
+    private lateinit var registry: PlatformRegistry
     private var failingIndexWrites = 0
+    private var onIndexFailure: (() -> Unit)? = null
     private val fileSystem =
         object : ForwardingFileSystem(FileSystem.SYSTEM) {
             override fun atomicMove(
@@ -63,6 +69,7 @@ class PluginAuthoringServiceV1Test {
             ) {
                 if (target.name == "index.json" && failingIndexWrites > 0) {
                     failingIndexWrites--
+                    onIndexFailure?.invoke()
                     error("synthetic index failure")
                 }
                 super.atomicMove(source, target)
@@ -82,7 +89,7 @@ class PluginAuthoringServiceV1Test {
         root = Files.createTempDirectory("plugin-authoring").toOkioPath()
         scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
         subsystem = PluginSubsystemV1(appFiles, pending)
-        val registry = PlatformRegistry(PlatformRuntimeData(listOf(AuthoringGuest), emptyList(), listOf(subsystem.platformSource(scope))))
+        registry = PlatformRegistry(PlatformRuntimeData(listOf(AuthoringGuest), emptyList(), listOf(subsystem.platformSource(scope))))
         service = PluginAuthoringServiceV1(subsystem, { registry }, { accounts }, { scope })
     }
 
@@ -407,6 +414,181 @@ class PluginAuthoringServiceV1Test {
             assertFalse(plugin.id in subsystem.running.value.plugins)
             assertEquals(PluginAuthoringPhase.Idle, state(plugin.id).phase)
         }
+
+    @Test
+    fun directoryDevelopmentBlocksDisableAndDeleteUntilStopped() =
+        runBlocking<Unit> {
+            val plugin = service.create()
+            generate(plugin)
+            await(plugin.id, PluginAuthoringPhase.Applied)
+            val installed =
+                subsystem.stateStore.desired.value.plugins
+                    .getValue(plugin.id)
+            val development = startDevelopment(plugin)
+            val override =
+                subsystem.running.value.plugins
+                    .getValue(plugin.id)
+
+            assertFailsWith<IllegalStateException> { service.setEnabled(plugin.id, false) }
+            assertFailsWith<IllegalStateException> { service.delete(plugin.id) }
+            assertEquals(installed, subsystem.stateStore.desired.value.plugins[plugin.id])
+            assertEquals(override, subsystem.running.value.plugins[plugin.id])
+            assertTrue(state(plugin.id).enabled)
+
+            development.stop()
+            assertEquals(
+                installed.packageHash,
+                subsystem.running.value.plugins
+                    .getValue(plugin.id)
+                    .installed.packageHash,
+            )
+            service.setEnabled(plugin.id, false)
+            service.delete(plugin.id)
+            assertFalse(plugin.id in subsystem.running.value.plugins)
+            assertFalse(plugin.id in subsystem.stateStore.desired.value.plugins)
+            assertTrue(service.plugins.value.isEmpty())
+        }
+
+    @Test
+    fun reenablingAfterInvalidEditRestoresWorkingVersionAndRestartState() =
+        runBlocking<Unit> {
+            val plugin = service.create()
+            generate(plugin)
+            await(plugin.id, PluginAuthoringPhase.Applied)
+            val before =
+                subsystem.running.value.plugins
+                    .getValue(plugin.id)
+            val run = service.begin(plugin.id)
+            assertTrue(service.write(plugin.id, run, sources(plugin) + ("plugin.js" to "invalid {{{")).startsWith("Validation failed"))
+            service.finish(plugin.id, run, true)
+            service.setEnabled(plugin.id, false)
+            service.setEnabled(plugin.id, true)
+            await(plugin.id, PluginAuthoringPhase.Failed)
+            assertTrue(state(plugin.id).enabled)
+            assertTrue(state(plugin.id).running)
+            assertEquals(
+                before.installed.packageHash,
+                subsystem.running.value.plugins
+                    .getValue(plugin.id)
+                    .installed.packageHash,
+            )
+            assertTrue(
+                subsystem.stateStore.desired.value.plugins
+                    .getValue(plugin.id)
+                    .enabled,
+            )
+            val restarted = PluginSubsystemV1(appFiles, pending)
+            assertEquals(
+                before.installed.packageHash,
+                restarted.running.value.plugins
+                    .getValue(plugin.id)
+                    .installed.packageHash,
+            )
+            restarted.runtimePool.close()
+        }
+
+    @Test
+    fun reenablingKeepsWorkingVersionWhileAdditionalPermissionAwaitsApproval() =
+        runBlocking<Unit> {
+            val plugin = service.create()
+            generate(plugin)
+            await(plugin.id, PluginAuthoringPhase.Applied)
+            val before =
+                subsystem.running.value.plugins
+                    .getValue(plugin.id)
+            service.setEnabled(plugin.id, false)
+            generate(plugin, "needs media", media = true)
+            await(plugin.id, PluginAuthoringPhase.Idle)
+            service.setEnabled(plugin.id, true)
+            val review = await(plugin.id, PluginAuthoringPhase.AwaitingApproval)
+            assertTrue(review.running)
+            assertEquals(
+                before.installed.packageHash,
+                subsystem.running.value.plugins
+                    .getValue(plugin.id)
+                    .installed.packageHash,
+            )
+            assertFalse(
+                dev.dimension.flare.ui.model.PluginMediaPermissions
+                    .isAllowed(plugin.id),
+            )
+            service.approve(plugin.id, review.revision)
+            await(plugin.id, PluginAuthoringPhase.Applied)
+            assertTrue(
+                dev.dimension.flare.ui.model.PluginMediaPermissions
+                    .isAllowed(plugin.id),
+            )
+        }
+
+    @Test
+    fun failedCommitDoesNotAdmitWritesToTheReplacementBeforeRollback() =
+        runBlocking<Unit> {
+            val plugin = service.create()
+            generate(plugin)
+            await(plugin.id, PluginAuthoringPhase.Applied)
+            val before =
+                subsystem.running.value.plugins
+                    .getValue(plugin.id)
+            val observed = CompletableDeferred<Unit>()
+            val release = CompletableDeferred<Unit>()
+            var writeStarted = false
+            onIndexFailure = {
+                val visible =
+                    subsystem.running.value.plugins
+                        .getValue(plugin.id)
+                scope.launch {
+                    try {
+                        visible.session.invoke("capabilities.compose.publish") {
+                            writeStarted = true
+                            observed.complete(Unit)
+                            release.await()
+                        }
+                    } catch (_: PluginSessionRetiredException) {
+                        observed.complete(Unit)
+                    }
+                }
+                runBlocking { observed.await() }
+            }
+            failingIndexWrites = 1
+            try {
+                generate(plugin, "failed replacement")
+                val failed =
+                    withTimeoutOrNull(5_000) {
+                        service.plugins
+                            .first { items ->
+                                items.any {
+                                    it.id == plugin.id &&
+                                        it.phase in setOf(PluginAuthoringPhase.Failed, PluginAuthoringPhase.WaitingForOperations)
+                                }
+                            }.single { it.id == plugin.id }
+                    }
+                assertEquals(PluginAuthoringPhase.Failed, failed?.phase)
+                assertFalse(writeStarted)
+                val restored =
+                    subsystem.running.value.plugins
+                        .getValue(plugin.id)
+                assertEquals(before.installed.packageHash, restored.installed.packageHash)
+                assertTrue(restored.session.isActive)
+                assertFalse(subsystem.stateStore.requiresRestart)
+            } finally {
+                release.complete(Unit)
+            }
+        }
+
+    private suspend fun startDevelopment(plugin: AuthoredPlugin): PluginDevelopmentSessionV1 {
+        val directory = root / "directory-plugin"
+        fileSystem.createDirectories(directory / "assets")
+        sources(plugin, "directory version").forEach { (name, text) ->
+            fileSystem.write(directory / name) { writeUtf8(text) }
+        }
+        fileSystem.write(directory / "assets/icon.png") { write(requireNotNull(BundledPluginSdk.icon.decodeBase64())) }
+        return PluginDevelopmentSessionV1(subsystem, registry, accounts, scope).also {
+            it.open(directory.toString())
+            it.reload()
+            it.reload(confirmed = true)
+            assertTrue(it.state.value.active)
+        }
+    }
 
     private suspend fun generate(
         plugin: AuthoredPlugin,

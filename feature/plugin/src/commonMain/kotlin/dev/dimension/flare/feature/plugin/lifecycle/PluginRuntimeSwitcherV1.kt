@@ -43,9 +43,10 @@ internal class PluginRuntimeSwitcherV1(
                 retired = true
                 subsystem.oauth.cancelPlugin(pluginId)
                 accounts.invalidatePlatform(platformId)
+                // A published replacement can immediately start writes that prevent rollback.
+                if (installed == null) subsystem.stateStore.uninstall(pluginId) else subsystem.stateStore.install(installed)
                 subsystem.replaceRunning(pluginId, replacement)
                 registry.replaceExternal(platformId, spec)
-                if (installed == null) subsystem.stateStore.uninstall(pluginId) else subsystem.stateStore.install(installed)
                 subsystem.stateStore.markApplied(pluginId, installed)
             }
         } catch (error: Throwable) {

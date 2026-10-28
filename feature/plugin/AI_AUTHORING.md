@@ -24,6 +24,9 @@ plugin. Restart restores the last applied version, without resuming unfinished
 Agent tasks. Deleting a plugin removes its local source and installation, while
 keeping account records and conversation history.
 
+Re-enabling restores the last working installation while newer source is validated.
+Stop directory development before changing an AI plugin's enabled state or deleting it.
+
 Android uses the existing Compose settings/chat components; iOS and native macOS
 use SwiftUI; Compose Desktop uses the existing Fluent components. The same SDK,
 validator, QuickJS runtime and permission rules serve all four interfaces.

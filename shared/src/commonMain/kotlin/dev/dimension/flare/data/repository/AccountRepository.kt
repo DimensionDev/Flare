@@ -39,6 +39,7 @@ import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.distinctUntilChangedBy
@@ -50,6 +51,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -121,6 +123,7 @@ internal class AccountRepository internal constructor(
             }.distinctUntilChanged()
     }
     private val dataSourceCacheMutex = Mutex()
+    internal val dataSourceRevisions = MutableStateFlow<Map<MicroBlogKey, Long>>(emptyMap())
     private val dataSourceCache by lazy {
         mutableMapOf<MicroBlogKey, Pair<PlatformSpec, MicroblogDataSource>>()
     }
@@ -228,6 +231,7 @@ internal class AccountRepository internal constructor(
                 dataSourceCacheMutex.withLock {
                     val dataSource = dataSourceCache.remove(account.accountKey)?.second
                     if (dataSource is AutoCloseable) dataSource.close()
+                    dataSourceRevisions.update { it + (account.accountKey to (it[account.accountKey] ?: 0) + 1) }
                 }
             }
         }
@@ -389,7 +393,8 @@ internal class AccountRepository internal constructor(
 
     internal suspend fun getOrCreateDataSource(account: UiAccount): MicroblogDataSource {
         val spec = platformRegistry.require(account.platformId)
-        val existing = dataSourceCacheMutex.withLock { dataSourceCache[account.accountKey] }
+        val (revision, existing) =
+            dataSourceCacheMutex.withLock { dataSourceRevisions.value[account.accountKey] to dataSourceCache[account.accountKey] }
         if (existing?.first === spec) return existing.second
         val dbAccount =
             appDatabase.accountDao().getAccount(account.accountKey)
@@ -397,7 +402,9 @@ internal class AccountRepository internal constructor(
         val created = spec.createDataSource(RepositoryPlatformDataSourceContext(account.accountKey, dbAccount.credential_json))
         val cached =
             dataSourceCacheMutex.withLock {
-                if (platformRegistry.get(account.platformId) !== spec) return@withLock null
+                if (platformRegistry.get(account.platformId) !== spec || dataSourceRevisions.value[account.accountKey] != revision) {
+                    return@withLock null
+                }
                 val current = dataSourceCache[account.accountKey]
                 if (current?.first === spec) {
                     current.second
@@ -552,6 +559,7 @@ internal fun accountServiceFlow(
                 .combine(repository.platformRegistry.platforms) { account, platforms ->
                     account to platforms.firstOrNull { it.platformId == account.platformId }
                 }.distinctUntilChanged()
+                .combine(repository.dataSourceRevisions.map { it[accountType.accountKey] }.distinctUntilChanged()) { account, _ -> account }
                 .mapLatest { (account, spec) ->
                     if (spec == null) UnavailableMicroblogDataSource else repository.getOrCreateDataSource(account)
                 }.distinctUntilChanged()
@@ -565,10 +573,10 @@ internal fun activeAccountFlow(repository: AccountRepository): Flow<UiAccount?> 
         .distinctUntilChangedBy { it?.accountKey }
 
 internal fun allAccountServicesFlow(repository: AccountRepository): Flow<ImmutableList<MicroblogDataSource>> =
-    repository.allAccounts.combine(repository.platformRegistry.platforms) { accounts, _ ->
+    combine(repository.allAccounts, repository.platformRegistry.platforms, repository.dataSourceRevisions) { accounts, _, _ ->
         accounts
             .filter { it.platformAvailable }
             .map {
                 repository.getOrCreateDataSource(it)
             }.toImmutableList()
-    }
+    }.distinctUntilChanged()

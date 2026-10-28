@@ -8,6 +8,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.serializer
@@ -90,7 +91,9 @@ internal class RepositoryAccountService(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun allAccountServicesFlow(): Flow<List<AccountMicroblogDataSource>> =
-        repository.allAccounts.combine(repository.platformRegistry.platforms) { accounts, _ -> accounts }.mapLatest { accounts ->
+        combine(repository.allAccounts, repository.platformRegistry.platforms, repository.dataSourceRevisions) { accounts, _, _ ->
+            accounts
+        }.mapLatest { accounts ->
             accounts.filter { it.platformAvailable }.map { account ->
                 AccountMicroblogDataSource(
                     accountKey = account.accountKey,
@@ -98,7 +101,7 @@ internal class RepositoryAccountService(
                     dataSource = repository.getOrCreateDataSource(account),
                 )
             }
-        }
+        }.distinctUntilChanged()
 
     override suspend fun <T : Any> addAccount(
         account: UiAccount,

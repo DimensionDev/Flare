@@ -305,6 +305,31 @@ class PluginDevelopmentSessionV1Test {
             assertTrue(session.state.value.active)
         }
 
+    @Test
+    fun retiredGuestSpecCannotRestoreRevokedMediaPermission() =
+        runBlocking {
+            prepare()
+            val guestManifest =
+                TestFppFactory.validManifest.replace(
+                    "\"detector\":",
+                    "\"guest\": { \"enabled\": true }, \"detector\":",
+                )
+            writeSource("first", permissions = true, manifest = guestManifest)
+            session.open(directory.toString())
+            session.reload()
+            session.reload(confirmed = true)
+            val oldSpec = registry.require(PLATFORM)
+            assertTrue(PluginMediaPermissions.isAllowed(ID))
+            writeSource("revoked", manifest = guestManifest)
+            session.reload()
+            assertFalse(PluginMediaPermissions.isAllowed(ID))
+            oldSpec.guestDataSource("test.example", "en")
+            assertFalse(PluginMediaPermissions.isAllowed(ID), "A retired guest spec restored media permission after revocation")
+            session.stop()
+            oldSpec.guestDataSource("test.example", "en")
+            assertFalse(PluginMediaPermissions.isAllowed(ID))
+        }
+
     private suspend fun prepare(installed: Boolean = false) {
         fun newSubsystem() =
             PluginSubsystemV1(

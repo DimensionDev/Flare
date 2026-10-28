@@ -820,10 +820,10 @@ class PixelfedSampleTest {
     }
 
     private fun locateSdk(): Path =
-        sequenceOf(Paths.get("sdk"), Paths.get("feature/plugin/sdk"))
+        sequenceOf(Paths.get("sdk/skill/flare-plugin"), Paths.get("feature/plugin/sdk/skill/flare-plugin"))
             .map(Path::toAbsolutePath)
             .firstOrNull { Files.isRegularFile(it.resolve("pack.mjs")) }
-            ?: error("feature/plugin/sdk was not found")
+            ?: error("feature/plugin/sdk/skill/flare-plugin was not found")
 }
 
 private class MemoryCredential(

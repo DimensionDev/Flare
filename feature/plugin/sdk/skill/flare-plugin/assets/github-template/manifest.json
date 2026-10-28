@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "apiVersion": 1,
+  "id": "dev.example.flare.feed",
+  "version": "0.1.0",
+  "name": "Example Feed",
+  "description": "Adapt this token-based feed template to your website API",
+  "platform": {
+    "id": "ExampleFeed",
+    "name": "Example Feed",
+    "loginMethods": [{
+      "id": "token",
+      "interaction": "CredentialImport",
+      "title": "Import an access token",
+      "fields": [{ "id": "token", "type": "Secret", "label": "Access token" }]
+    }],
+    "capabilities": {
+      "flare.datasource.timeline/v1": {
+        "operations": { "page": { "directions": ["refresh", "older"] } }
+      }
+    },
+    "timelines": [{
+      "id": "home",
+      "title": "Home",
+      "icon": "Home",
+      "defaultForNewAccount": true
+    }]
+  }
+}

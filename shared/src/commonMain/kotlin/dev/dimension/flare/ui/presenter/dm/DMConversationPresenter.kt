@@ -36,28 +36,29 @@ public class DMConversationPresenter(
     @Composable
     override fun body(): DMConversationState {
         val serviceState = accountServiceProvider(accountType = accountType, repository = accountRepository)
+        val directMessageState =
+            remember(serviceState) {
+                serviceState.map { requireNotNull(it.capabilities.directMessage) }
+            }
         val scope = rememberCoroutineScope()
         val items =
-            serviceState
-                .map { service ->
-                    val directMessage = requireNotNull(service.capabilities.directMessage)
-                    remember(service, roomKey) {
+            directMessageState
+                .map { directMessage ->
+                    remember(directMessage, roomKey) {
                         directMessage.directMessageConversation(roomKey, scope = scope)
                     }.collectAsLazyPagingItems()
                 }.toPagingState()
         val users =
-            serviceState
-                .flatMap { service ->
-                    val directMessage = requireNotNull(service.capabilities.directMessage)
-                    remember(service, roomKey) {
+            directMessageState
+                .flatMap { directMessage ->
+                    remember(directMessage, roomKey) {
                         directMessage.getDirectMessageConversationInfo(roomKey)
                     }.collectAsState().toUi()
                 }.map {
                     it.users
                 }
-        serviceState.onSuccess {
-            val directMessage = requireNotNull(it.capabilities.directMessage)
-            LaunchedEffect(Unit) {
+        directMessageState.onSuccess { directMessage ->
+            LaunchedEffect(directMessage, roomKey) {
                 while (true) {
                     delay(10.seconds)
                     runCatching {
@@ -72,20 +73,20 @@ public class DMConversationPresenter(
             override val users = users
 
             override fun send(message: String) {
-                serviceState.onSuccess {
-                    requireNotNull(it.capabilities.directMessage).sendDirectMessage(roomKey, message)
+                directMessageState.onSuccess {
+                    it.sendDirectMessage(roomKey, message)
                 }
             }
 
             override fun retry(key: MicroBlogKey) {
-                serviceState.onSuccess {
-                    requireNotNull(it.capabilities.directMessage).retrySendDirectMessage(key)
+                directMessageState.onSuccess {
+                    it.retrySendDirectMessage(key)
                 }
             }
 
             override fun leave() {
-                serviceState.onSuccess {
-                    requireNotNull(it.capabilities.directMessage).leaveDirectMessage(roomKey)
+                directMessageState.onSuccess {
+                    it.leaveDirectMessage(roomKey)
                 }
             }
         }

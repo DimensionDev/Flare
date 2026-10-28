@@ -49,13 +49,64 @@ class PluginAccountV1Test {
     }
 
     @Test
-    fun credentialSchemaChangeRequiresRelogin() {
-        val original = plugin(setOf("detail"))
-        val account = credential(original, previous = setOf("detail"), negotiated = setOf("detail"))
-        val changed = plugin(setOf("detail"), credentialSchemaVersion = 2)
+    fun credentialSchemaChangeKeepsCapabilitiesButRejectsAccessUntilRestoreOrRelogin() =
+        runTest {
+            val original = plugin(setOf("detail"))
+            val account = credential(original, previous = setOf("detail"), negotiated = setOf("detail"))
+            val changed =
+                plugin(setOf("detail"), credentialSchemaVersion = 2).let {
+                    it.copy(installed = it.installed.copy(packageHash = "b".repeat(64)))
+                }
+            val persisted = MutableStateFlow(account)
+            var writes = 0
+            var invalidations = 0
+            val context =
+                object : PlatformDataSourceContext {
+                    override val accountKey: MicroBlogKey = MicroBlogKey("me", "example.social")
 
-        assertFailsWith<RequireReLoginException> { account.effectiveCapabilities(changed) }
-    }
+                    @Suppress("UNCHECKED_CAST")
+                    override fun <T : Any> credential(serializer: KSerializer<T>): T = account as T
+
+                    @Suppress("UNCHECKED_CAST")
+                    override fun <T : Any> credentialFlow(serializer: KSerializer<T>): Flow<T> = persisted as Flow<T>
+
+                    override suspend fun <T : Any> updateCredential(
+                        serializer: KSerializer<T>,
+                        credential: T,
+                    ) {
+                        writes += 1
+                        persisted.value = credential as PluginAccountCredentialV1
+                    }
+
+                    override suspend fun invalidateCachedContent() {
+                        invalidations += 1
+                    }
+                }
+            val access = PlatformDataSourceCredentialAccessV1(changed, context)
+
+            assertEquals(
+                setOf("detail"),
+                access.initial().effectiveCapabilities(changed).getValue(PluginAbiV1.Capabilities.POST),
+            )
+            assertFailsWith<RequireReLoginException> { access.current() }
+            assertFailsWith<RequireReLoginException> { access.read() }
+            assertFailsWith<RequireReLoginException> { access.replace(JsonObject(emptyMap())) }
+            assertEquals(0, writes)
+            assertEquals(0, invalidations)
+            assertEquals(account, persisted.value)
+
+            assertEquals(account.credential, PlatformDataSourceCredentialAccessV1(original, context).read())
+            val refreshed = JsonObject(mapOf("token" to JsonPrimitive("new-schema")))
+            persisted.value =
+                credential(changed, previous = setOf("detail"), negotiated = setOf("detail"))
+                    .copy(credential = refreshed)
+            assertEquals(refreshed, access.read())
+            val rotated = JsonObject(mapOf("token" to JsonPrimitive("rotated")))
+            access.replace(rotated)
+            assertEquals(rotated, persisted.value.credential)
+            assertEquals(1, writes)
+            assertEquals(0, invalidations)
+        }
 
     @Test
     fun hostCredentialAccessReadsTheLatestPersistedEnvelope() =
@@ -230,7 +281,7 @@ class PluginAccountV1Test {
                         ),
                     manifestCapabilities = mapOf(PluginAbiV1.Capabilities.POST to previous),
                     negotiatedCapabilities = mapOf(PluginAbiV1.Capabilities.POST to negotiated),
-                    credentialSchemaVersion = 1,
+                    credentialSchemaVersion = plugin.installed.manifest.platform.credentialSchemaVersion,
                     timelineSchemaVersion = 1,
                 ),
             credential = JsonObject(emptyMap()),

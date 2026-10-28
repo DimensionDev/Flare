@@ -79,23 +79,25 @@ internal class PluginAccountInvokerV1(
         assets: Map<String, PluginAsset> = emptyMap(),
         validate: (Response) -> Unit = {},
     ): Response =
-        try {
-            runtimePool.invoke(
-                plugin = plugin,
-                key = runtimeKey,
-                context = context(Locale.language, assets),
-                method = requireNotNull(PluginAbiV1.capabilityMethod(capabilityId, operation)),
-                request = request,
-                requestSerializer = requestSerializer,
-                responseSerializer = responseSerializer,
-                timeout = timeout,
-                validate = validate,
-            )
-        } catch (error: PluginCallException) {
-            if (error.error.code == PluginErrorCodeV1.AuthenticationRequired && accountKey != null) {
-                throw RequireReLoginException(accountKey, plugin.installed.manifest.platform.id)
+        plugin.session.invoke(requireNotNull(PluginAbiV1.capabilityMethod(capabilityId, operation))) {
+            try {
+                runtimePool.invoke(
+                    plugin = plugin,
+                    key = runtimeKey,
+                    context = context(Locale.language, assets),
+                    method = requireNotNull(PluginAbiV1.capabilityMethod(capabilityId, operation)),
+                    request = request,
+                    requestSerializer = requestSerializer,
+                    responseSerializer = responseSerializer,
+                    timeout = timeout,
+                    validate = validate,
+                )
+            } catch (error: PluginCallException) {
+                if (error.error.code == PluginErrorCodeV1.AuthenticationRequired && accountKey != null) {
+                    throw RequireReLoginException(accountKey, plugin.installed.manifest.platform.id)
+                }
+                throw error
             }
-            throw error
         }
 }
 

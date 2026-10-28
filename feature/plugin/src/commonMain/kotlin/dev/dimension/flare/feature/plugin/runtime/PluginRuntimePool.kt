@@ -141,6 +141,28 @@ public class PluginRuntimePool(
         request: JsonElement,
         timeout: PluginCallTimeoutV1 = PluginCallTimeoutV1.Normal,
         validate: (JsonElement) -> Unit = {},
+    ): JsonElement =
+        plugin.session.invoke(method) {
+            // Record only method and outcome; arguments, responses and exception text may contain credentials.
+            plugin.diagnostic?.invoke("$method: started")
+            try {
+                invokeCurrent(plugin, key, context, method, request, timeout, validate).also {
+                    plugin.diagnostic?.invoke("$method: completed")
+                }
+            } catch (error: Throwable) {
+                plugin.diagnostic?.invoke("$method: ${if (error is kotlinx.coroutines.CancellationException) "cancelled" else "failed"}")
+                throw error
+            }
+        }
+
+    private suspend fun invokeCurrent(
+        plugin: RunningPluginV1,
+        key: PluginRuntimeKeyV1,
+        context: PluginInvocationContextV1,
+        method: String,
+        request: JsonElement,
+        timeout: PluginCallTimeoutV1,
+        validate: (JsonElement) -> Unit,
     ): JsonElement {
         validateInvocation(plugin, key, context)
         if (key.scope == PluginInvocationScopeV1.Detector) {
@@ -149,6 +171,7 @@ public class PluginRuntimePool(
         val holder =
             mutex.withLock {
                 check(!closed) { "Plugin Runtime pool is closed" }
+                plugin.session.ensureActive()
                 if (plugin.installed.pluginId in paused) throw PluginRuntimePausedException(plugin.installed.pluginId)
                 holders.getOrPut(key) { Holder(createRuntime(plugin)) }.also { it.activeCalls++ }
             }
@@ -167,6 +190,21 @@ public class PluginRuntimePool(
     public suspend fun close(key: PluginRuntimeKeyV1) {
         val holder = mutex.withLock { holders.remove(key) }
         holder?.runtime?.close()
+    }
+
+    internal suspend fun retire(plugin: RunningPluginV1) {
+        plugin.session.retire()
+        withContext(NonCancellable) {
+            val retired =
+                mutex.withLock {
+                    holders.entries
+                        .filter { it.key.pluginId == plugin.installed.pluginId }
+                        .map { it.key to it.value }
+                        .also { entries -> entries.forEach { holders.remove(it.first) } }
+                }
+            retired.forEach { it.second.runtime.close() }
+            retry(plugin.installed.pluginId)
+        }
     }
 
     /** Called by platform memory-pressure handlers. Active Runtimes remain alive. */

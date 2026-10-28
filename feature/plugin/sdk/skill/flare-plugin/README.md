@@ -170,8 +170,9 @@ cases matter. It should identify gaps rather than invent website endpoints.
 3. Implement the required capability methods and map the responses into
    [Wire data](references/wire-data.md). The starter uses token import and a
    read-only timeline whose posts open their website URLs.
-4. Follow [testing](references/testing.md), then commit the ready-to-run
-   `plugin.js` and publish a public GitHub repository with a stable version tag.
+4. Use [Desktop plugin development](references/testing.md#develop-locally-in-desktop)
+   to validate and reload a local directory. Follow the other testing checks, then
+   commit the ready-to-run `plugin.js` and publish a public GitHub repository with a stable version tag.
 5. In Flare's plugin management, install from `https://github.com/OWNER/REPO`,
    review the selected version/permissions, and restart Flare before using it.
    Follow the plugin's README to select the platform, origin, and login method.

@@ -602,19 +602,20 @@ public data class ShortcutSpec(
 
 @Single
 internal class TimelineResolver(
-    data: PlatformRuntimeData,
+    private val data: PlatformRuntimeData,
     accountService: AccountService,
 ) {
     private val loaderContext = TimelineLoaderContext(accountService)
 
-    private val specs: Map<String, TimelineSpec<out TimelineSpec.Data>> by lazy {
+    val platforms get() = data.platforms
+
+    private val specs: Map<String, TimelineSpec<out TimelineSpec.Data>> get() =
         data.timelineSpecs
             .groupBy { it.id }
             .mapNotNull { (id, candidates) ->
                 val first = candidates.first()
                 (id to first).takeIf { candidates.all { candidate -> candidate === first } }
             }.toMap()
-    }
 
     fun toTabItem(slot: TimelineSlot): UiTimelineTabItem =
         when (val content = slot.content) {
@@ -697,7 +698,8 @@ internal class TimelineResolver(
             }
         }
 
-    fun resolveLoader(target: TimelineTarget<out TimelineSpec.Data>): Flow<RemoteLoader<UiTimelineV2>> = target.createLoader()
+    fun resolveLoader(target: TimelineTarget<out TimelineSpec.Data>): Flow<RemoteLoader<UiTimelineV2>> =
+        resolveLoader(target.toSource(target.spec.title, target.spec.icon))
 
     @OptIn(ExperimentalSerializationApi::class)
     fun resolveAccountKey(item: UiTimelineTabItem): MicroBlogKey? =
@@ -713,10 +715,18 @@ internal class TimelineResolver(
             is TimelineSlotContent.Group -> null
         }
 
-    private fun resolveLoader(source: TimelineSourceRef): Flow<RemoteLoader<UiTimelineV2>> {
-        val spec = specs[source.specId] ?: return flowOf(notSupported())
-        return runCatching { spec.createLoader(source.data) }.getOrElse { flowOf(notSupported()) }
-    }
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private fun resolveLoader(source: TimelineSourceRef): Flow<RemoteLoader<UiTimelineV2>> =
+        data.platforms
+            .map { specs[source.specId] }
+            .distinctUntilChanged { before, after -> before === after }
+            .flatMapLatest { spec ->
+                if (spec == null) {
+                    flowOf(notSupported())
+                } else {
+                    runCatching { spec.createLoader(source.data) }.getOrElse { flowOf(notSupported()) }
+                }
+            }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun resolveGroupLoader(item: UiGroupTimelineTabItem): Flow<RemoteLoader<UiTimelineV2>> =

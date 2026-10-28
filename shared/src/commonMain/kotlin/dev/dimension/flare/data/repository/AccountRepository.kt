@@ -15,12 +15,14 @@ import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.clearHomeTimelinesForAccount
 import dev.dimension.flare.data.database.cache.connect
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
+import dev.dimension.flare.data.datasource.microblog.UnavailableMicroblogDataSource
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformCapability
 import dev.dimension.flare.model.PlatformDataSourceContext
 import dev.dimension.flare.model.PlatformRegistry
+import dev.dimension.flare.model.PlatformSpec
 import dev.dimension.flare.model.UnsupportedPlatformException
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiIcon
@@ -42,8 +44,10 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
@@ -77,31 +81,34 @@ internal class AccountRepository internal constructor(
     private val proxyRepository: ProxyRepository,
     @Provided internal val platformRegistry: PlatformRegistry,
 ) {
+    @OptIn(ExperimentalCoroutinesApi::class)
     internal val activeAccount: Flow<UiState<UiAccount>> by lazy {
-        combine(
-            appDatabase.accountDao().activeAccount(platformRegistry.all.map { it.platformId }),
-            appDatabase.accountDao().allAccounts(),
-        ) { active, accounts ->
-            when {
-                active != null -> {
-                    UiState.Success(active.toUi(platformRegistry))
-                }
+        platformRegistry.platforms.flatMapLatest { platforms ->
+            combine(
+                appDatabase.accountDao().activeAccount(platforms.map { it.platformId }),
+                appDatabase.accountDao().allAccounts(),
+            ) { active, accounts ->
+                when {
+                    active != null -> {
+                        UiState.Success(active.toUi(platformRegistry))
+                    }
 
-                accounts.isNotEmpty() -> {
-                    UiState.Error(
-                        NoAvailableAccountException(accounts.map { it.platformId }.distinct()),
-                    )
-                }
+                    accounts.isNotEmpty() -> {
+                        UiState.Error(
+                            NoAvailableAccountException(accounts.map { it.platformId }.distinct()),
+                        )
+                    }
 
-                else -> {
-                    UiState.Error(NoActiveAccountException)
+                    else -> {
+                        UiState.Error(NoActiveAccountException)
+                    }
                 }
-            }
-        }.distinctUntilChangedBy { state ->
-            when (state) {
-                is UiState.Success -> state.data.accountKey
-                is UiState.Error -> state.throwable
-                is UiState.Loading -> state
+            }.distinctUntilChangedBy { state ->
+                when (state) {
+                    is UiState.Success -> state.data.accountKey
+                    is UiState.Error -> state.throwable
+                    is UiState.Loading -> state
+                }
             }
         }
     }
@@ -109,13 +116,13 @@ internal class AccountRepository internal constructor(
         appDatabase
             .accountDao()
             .sortedAccounts()
-            .map {
-                it.map { it.toUi(platformRegistry) }.toImmutableList()
+            .combine(platformRegistry.platforms) { accounts, _ ->
+                accounts.map { it.toUi(platformRegistry) }.toImmutableList()
             }.distinctUntilChanged()
     }
     private val dataSourceCacheMutex = Mutex()
     private val dataSourceCache by lazy {
-        mutableMapOf<MicroBlogKey, MicroblogDataSource>()
+        mutableMapOf<MicroBlogKey, Pair<PlatformSpec, MicroblogDataSource>>()
     }
 
     private val accountChangeChannel = Channel<AccountChange>(Channel.UNLIMITED)
@@ -219,7 +226,7 @@ internal class AccountRepository internal constructor(
                 check(accountChangeChannel.trySend(AccountChange.Added(account)).isSuccess)
             } else {
                 dataSourceCacheMutex.withLock {
-                    val dataSource = dataSourceCache.remove(account.accountKey)
+                    val dataSource = dataSourceCache.remove(account.accountKey)?.second
                     if (dataSource is AutoCloseable) dataSource.close()
                 }
             }
@@ -292,7 +299,7 @@ internal class AccountRepository internal constructor(
             check(accountChangeChannel.trySend(AccountChange.Removed(accountKey)).isSuccess)
         }
         dataSourceCacheMutex.withLock {
-            val datasource = dataSourceCache.remove(accountKey)
+            val datasource = dataSourceCache.remove(accountKey)?.second
             if (datasource is AutoCloseable) {
                 datasource.close()
             }
@@ -333,11 +340,11 @@ internal class AccountRepository internal constructor(
     }
 
     internal fun getFlow(accountKey: MicroBlogKey): Flow<UiState<UiAccount>> =
-        appDatabase.accountDao().get(accountKey).map {
-            if (it == null) {
+        appDatabase.accountDao().get(accountKey).combine(platformRegistry.platforms) { account, _ ->
+            if (account == null) {
                 UiState.Error(NoActiveAccountException)
             } else {
-                UiState.Success(it.toUi(platformRegistry))
+                UiState.Success(account.toUi(platformRegistry))
             }
         }
 
@@ -366,43 +373,42 @@ internal class AccountRepository internal constructor(
                 it.credential_json.decodeJson(serializer)
             }
 
-    internal suspend fun getOrCreateDataSource(account: UiAccount): MicroblogDataSource {
-        if (!account.platformAvailable) {
-            throw UnsupportedPlatformException(account.platformId)
+    internal suspend fun invalidatePlatform(platformId: String) {
+        val accounts =
+            appDatabase
+                .accountDao()
+                .allAccounts()
+                .first()
+                .filter { it.platformId == platformId }
+        accounts.forEach { account ->
+            val previous = dataSourceCacheMutex.withLock { dataSourceCache.remove(account.account_key)?.second }
+            if (previous is AutoCloseable) previous.close()
+            invalidateCachedContent(account.account_key)
         }
-        val existingDataSource =
-            dataSourceCacheMutex.withLock {
-                dataSourceCache[account.accountKey]
-            }
-        if (existingDataSource != null) {
-            return existingDataSource
-        }
+    }
 
+    internal suspend fun getOrCreateDataSource(account: UiAccount): MicroblogDataSource {
+        val spec = platformRegistry.require(account.platformId)
+        val existing = dataSourceCacheMutex.withLock { dataSourceCache[account.accountKey] }
+        if (existing?.first === spec) return existing.second
         val dbAccount =
             appDatabase.accountDao().getAccount(account.accountKey)
                 ?: throw NoSuchElementException("Account not found: ${account.accountKey}")
-        val dataSource =
-            platformRegistry
-                .require(account.platformId)
-                .createDataSource(
-                    RepositoryPlatformDataSourceContext(
-                        accountKey = account.accountKey,
-                        credentialJson = dbAccount.credential_json,
-                    ),
-                )
-
+        val created = spec.createDataSource(RepositoryPlatformDataSourceContext(account.accountKey, dbAccount.credential_json))
         val cached =
             dataSourceCacheMutex.withLock {
-                dataSourceCache[account.accountKey]?.let {
-                    it
-                } ?: dataSource.also {
-                    dataSourceCache[account.accountKey] = it
+                if (platformRegistry.get(account.platformId) !== spec) return@withLock null
+                val current = dataSourceCache[account.accountKey]
+                if (current?.first === spec) {
+                    current.second
+                } else {
+                    (current?.second as? AutoCloseable)?.close()
+                    dataSourceCache[account.accountKey] = spec to created
+                    created
                 }
             }
-        if (cached !== dataSource && dataSource is AutoCloseable) {
-            dataSource.close()
-        }
-        return cached
+        if (cached !== created && created is AutoCloseable) created.close()
+        return cached ?: getOrCreateDataSource(account)
     }
 
     private inner class RepositoryPlatformDataSourceContext(
@@ -543,8 +549,12 @@ internal fun accountServiceFlow(
             repository
                 .getFlow(accountType.accountKey)
                 .mapNotNull { it.takeSuccess() }
-                .distinctUntilChangedBy { it.accountKey }
-                .map { account -> repository.getOrCreateDataSource(account) }
+                .combine(repository.platformRegistry.platforms) { account, platforms ->
+                    account to platforms.firstOrNull { it.platformId == account.platformId }
+                }.distinctUntilChanged()
+                .mapLatest { (account, spec) ->
+                    if (spec == null) UnavailableMicroblogDataSource else repository.getOrCreateDataSource(account)
+                }.distinctUntilChanged()
         }
     }
 
@@ -555,7 +565,7 @@ internal fun activeAccountFlow(repository: AccountRepository): Flow<UiAccount?> 
         .distinctUntilChangedBy { it?.accountKey }
 
 internal fun allAccountServicesFlow(repository: AccountRepository): Flow<ImmutableList<MicroblogDataSource>> =
-    repository.allAccounts.map { accounts ->
+    repository.allAccounts.combine(repository.platformRegistry.platforms) { accounts, _ ->
         accounts
             .filter { it.platformAvailable }
             .map {

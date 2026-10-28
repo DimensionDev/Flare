@@ -33,11 +33,12 @@ public class AllListPresenter(
     override fun body(): AllListState {
         val scope = rememberCoroutineScope()
         val serviceState = accountServiceProvider(accountType = accountType, repository = accountRepository)
+        val listState = remember(serviceState) { serviceState.map { requireNotNull(it.capabilities.list) } }
         val items =
-            serviceState
-                .map { service ->
-                    remember(service) {
-                        requireNotNull(service.capabilities.list).listHandler.data.cachedIn(scope)
+            listState
+                .map { list ->
+                    remember(list) {
+                        list.listHandler.data.cachedIn(scope)
                     }.collectAsLazyPagingItems()
                 }.toPagingState()
         return object : AllListState {

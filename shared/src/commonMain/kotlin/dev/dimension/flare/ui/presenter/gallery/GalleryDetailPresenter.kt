@@ -23,6 +23,7 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.flatMapLatestUiState
 import dev.dimension.flare.ui.model.flattenUiState
 import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
@@ -45,7 +46,7 @@ public class GalleryDetailPresenter(
     }
 
     private val detailCacheFlow by lazy {
-        serviceFlow.flatMapLatest { service ->
+        serviceFlow.flatMapLatestUiState { service ->
             val galleryDataSource =
                 service.capabilities.gallery
                     ?: error("Current service does not support gallery data source")

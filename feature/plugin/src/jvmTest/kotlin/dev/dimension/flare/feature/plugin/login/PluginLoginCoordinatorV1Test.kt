@@ -292,6 +292,21 @@ class PluginLoginCoordinatorV1Test {
         }
 
     @Test
+    fun oauthCallbackFromAnEarlierSessionIsRejectedEvenIfTheCodeIsUnchanged() =
+        runBlocking {
+            val start = assertIs<PluginOAuthStartV1.ExternalBrowser>(oauthCoordinator().begin(plugin, "oauth", ORIGIN, "en"))
+            val replacement = plugin.copy(generation = plugin.generation + 1)
+            val coordinator = oauthCoordinator(runningPlugin = { replacement })
+            assertEquals(
+                "oauth.package",
+                assertFailsWith<PluginLoginException> {
+                    coordinator.resume("${pluginOAuthRedirectUri(start.flowId)}?code=ok&state=$STATE", "en")
+                }.code,
+            )
+            assertNull(pendingStore.load(start.flowId))
+        }
+
+    @Test
     fun expiredOrChangedOAuthFlowIsConsumedBeforeRuntimeUse() =
         runBlocking {
             val coordinator = oauthCoordinator()

@@ -2,32 +2,41 @@ package dev.dimension.flare.feature.plugin
 
 import dev.dimension.flare.data.datastore.PlatformOAuthPendingRepository
 import dev.dimension.flare.data.io.AppFileStore
+import dev.dimension.flare.data.repository.AccountService
+import dev.dimension.flare.di.koinGet
 import dev.dimension.flare.feature.plugin.adapter.PluginPlatformSpecSourceV1
+import dev.dimension.flare.feature.plugin.development.PluginDevelopmentSessionV1
+import dev.dimension.flare.feature.plugin.development.PluginDevelopmentStateV1
 import dev.dimension.flare.feature.plugin.github.GitHubPluginClient
 import dev.dimension.flare.feature.plugin.host.createKtorPluginHttpTransport
 import dev.dimension.flare.feature.plugin.installer.PluginInstaller
 import dev.dimension.flare.feature.plugin.lifecycle.PluginStateIssueV1
 import dev.dimension.flare.feature.plugin.lifecycle.PluginStateStore
+import dev.dimension.flare.feature.plugin.lifecycle.RunningPluginV1
 import dev.dimension.flare.feature.plugin.login.PlatformOAuthPluginPendingStoreV1
 import dev.dimension.flare.feature.plugin.login.PluginFormLoginCoordinatorV1
 import dev.dimension.flare.feature.plugin.login.PluginOAuthLoginCoordinatorV1
 import dev.dimension.flare.feature.plugin.login.PluginOAuthPendingStoreV1
 import dev.dimension.flare.feature.plugin.login.PluginWebCookieLoginCoordinatorV1
 import dev.dimension.flare.feature.plugin.runtime.PluginRuntimePool
+import dev.dimension.flare.model.PlatformRegistry
 import dev.dimension.flare.model.PlatformSpecSource
 import dev.dimension.flare.ui.model.PluginMediaPermissions
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.sync.Mutex
 import kotlin.native.HiddenFromObjC
 
 /** Process-scoped plugin services. Opening this object reads only the bounded state index. */
 @HiddenFromObjC
 public class PluginSubsystemV1 internal constructor(
-    appFiles: AppFileStore,
+    internal val appFiles: AppFileStore,
     pendingStore: PluginOAuthPendingStoreV1,
 ) {
+    internal val mutationMutex = Mutex()
+
     public constructor(
         appFiles: AppFileStore,
         pendingRepository: PlatformOAuthPendingRepository,
@@ -49,6 +58,31 @@ public class PluginSubsystemV1 internal constructor(
     public val installer: PluginInstaller = PluginInstaller(appFiles.fileSystem, stateStore)
     public val github: GitHubPluginClient by lazy { GitHubPluginClient() }
 
+    private val mutableRunning = MutableStateFlow(stateStore.running)
+    public val running: StateFlow<dev.dimension.flare.feature.plugin.lifecycle.PluginRunningSnapshotV1> = mutableRunning.asStateFlow()
+    internal val mutableDevelopmentState = MutableStateFlow(PluginDevelopmentStateV1())
+    public val developmentState: StateFlow<PluginDevelopmentStateV1> = mutableDevelopmentState.asStateFlow()
+    public val development: PluginDevelopmentSessionV1 by lazy {
+        PluginDevelopmentSessionV1(this, koinGet<PlatformRegistry>(), koinGet<AccountService>(), koinGet<CoroutineScope>())
+    }
+
+    internal fun replaceRunning(
+        pluginId: String,
+        plugin: RunningPluginV1?,
+    ) {
+        val plugins = mutableRunning.value.plugins.toMutableMap()
+        if (plugin == null) plugins.remove(pluginId) else plugins[pluginId] = plugin
+        PluginMediaPermissions.register(
+            pluginId,
+            plugin
+                ?.installed
+                ?.manifest
+                ?.permissions
+                ?.mediaNetwork == true,
+        )
+        mutableRunning.value = mutableRunning.value.copy(plugins = plugins)
+    }
+
     private val mutableSourceIssues = MutableStateFlow(stateStore.running.issues)
     public val sourceIssues: StateFlow<List<PluginStateIssueV1>> = mutableSourceIssues.asStateFlow()
 
@@ -56,14 +90,14 @@ public class PluginSubsystemV1 internal constructor(
         PluginOAuthLoginCoordinatorV1(
             runtimePool = runtimePool,
             pendingStore = pendingStore,
-            runningPlugin = { pluginId -> stateStore.running.plugins[pluginId] },
+            runningPlugin = { pluginId -> running.value.plugins[pluginId] },
         )
     public val form: PluginFormLoginCoordinatorV1 = PluginFormLoginCoordinatorV1(runtimePool)
     public val webCookie: PluginWebCookieLoginCoordinatorV1 = PluginWebCookieLoginCoordinatorV1(runtimePool)
 
     public fun platformSource(scope: CoroutineScope): PlatformSpecSource =
         PluginPlatformSpecSourceV1(
-            running = stateStore.running,
+            running = running.value,
             runtimePool = runtimePool,
             oauth = oauth,
             form = form,

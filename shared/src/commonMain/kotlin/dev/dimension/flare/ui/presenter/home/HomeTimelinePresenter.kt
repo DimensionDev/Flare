@@ -2,6 +2,7 @@ package dev.dimension.flare.ui.presenter.home
 
 import dev.dimension.flare.data.datasource.microblog.capabilities
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
+import dev.dimension.flare.data.datasource.microblog.paging.notSupported
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceFlow
 import dev.dimension.flare.di.koinInject
@@ -20,7 +21,7 @@ public class HomeTimelinePresenter(
             accountType = accountType,
             repository = accountRepository,
         ).map {
-            requireNotNull(it.capabilities.timeline).homeTimeline()
+            it.capabilities.timeline?.homeTimeline() ?: notSupported()
         }
     }
 }

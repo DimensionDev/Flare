@@ -1,6 +1,7 @@
 package dev.dimension.flare.feature.plugin.management
 
 import dev.dimension.flare.feature.plugin.PluginSubsystemV1
+import dev.dimension.flare.feature.plugin.development.PluginDevelopmentStateV1
 import dev.dimension.flare.feature.plugin.github.GitHubPluginCatalogV1
 import dev.dimension.flare.feature.plugin.github.GitHubPluginClient
 import dev.dimension.flare.feature.plugin.github.GitHubPluginVersionV1
@@ -26,7 +27,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import okio.Buffer
@@ -45,6 +45,7 @@ public data class PluginManagementStateV1(
     val error: String? = null,
     val githubCatalog: GitHubPluginCatalogV1? = null,
     val updatesChecked: Boolean = false,
+    val development: PluginDevelopmentStateV1 = PluginDevelopmentStateV1(),
 )
 
 public data class PluginManagementItemV1(
@@ -89,14 +90,16 @@ public class PluginManagementPresenterV1(
     public val state: StateFlow<PluginManagementStateV1> = mutableState.asStateFlow()
 
     private var preview: PreparedPluginInstallV1? = null
-    private val actionMutex = Mutex()
+    private val actionMutex = subsystem.mutationMutex
 
     private val observation: Job =
         combine(
             subsystem.stateStore.desired,
             subsystem.sourceIssues,
             subsystem.runtimePool.issues,
-        ) { _, _, _ -> snapshot() }
+            subsystem.running,
+            subsystem.developmentState,
+        ) { _, _, _, _, _ -> snapshot() }
             .onEach { snapshot ->
                 val current = mutableState.value
                 mutableState.value =
@@ -211,6 +214,7 @@ public class PluginManagementPresenterV1(
     public suspend fun confirmInstall() {
         runAction {
             val prepared = requireNotNull(preview) { "No plugin installation is pending" }
+            requireNotDeveloping(prepared.pluginId)
             subsystem.installer.commit(prepared, confirmed = true)
             updates.remove(prepared.pluginId)
             preview = null
@@ -232,6 +236,7 @@ public class PluginManagementPresenterV1(
         enabled: Boolean,
     ) {
         runAction {
+            requireNotDeveloping(pluginId)
             subsystem.stateStore.setEnabled(pluginId, enabled)
             mutableState.value = snapshot()
         }
@@ -239,6 +244,7 @@ public class PluginManagementPresenterV1(
 
     public suspend fun uninstall(pluginId: String) {
         runAction {
+            requireNotDeveloping(pluginId)
             subsystem.stateStore.uninstall(pluginId)
             updates.remove(pluginId)
             mutableState.value = snapshot()
@@ -273,7 +279,7 @@ public class PluginManagementPresenterV1(
 
     private fun snapshot(): PluginManagementStateV1 {
         val desired = subsystem.stateStore.desired.value
-        val running = subsystem.stateStore.running.plugins
+        val running = subsystem.running.value.plugins
         return PluginManagementStateV1(
             plugins =
                 desired.plugins.values.sortedBy(InstalledPluginV1::pluginId).map { installed ->
@@ -292,10 +298,18 @@ public class PluginManagementPresenterV1(
                 subsystem.runtimePool.issues.value.values
                     .sortedBy(PluginRuntimeIssueV1::pluginId),
             requiresRestart = subsystem.stateStore.requiresRestart,
+            development = subsystem.developmentState.value,
             canRebuildIndex = !desired.indexHealthy,
             githubCatalog = githubCatalog,
             updatesChecked = updatesChecked,
         )
+    }
+
+    private fun requireNotDeveloping(pluginId: String) {
+        check(
+            subsystem.running.value.plugins[pluginId]
+                ?.developmentSource == null,
+        ) { "Stop development before changing the installed plugin" }
     }
 
     private suspend fun clearPreview() {

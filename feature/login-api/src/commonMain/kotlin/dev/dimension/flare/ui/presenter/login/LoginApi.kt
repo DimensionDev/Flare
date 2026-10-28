@@ -218,10 +218,11 @@ public interface LoginMethodHandler : AutoCloseable {
 @Single
 @HiddenFromObjC
 public class LoginPlatformRegistry(
-    @Provided platformRegistry: PlatformRegistry,
+    @Provided private val platformRegistry: PlatformRegistry,
 ) {
-    public val all: List<LoginPlatformProvider> = platformRegistry.all.filterIsInstance<LoginPlatformProvider>()
-    private val byId: Map<String, LoginPlatformProvider> = all.associateBy { it.platformId }
+    public val platforms: StateFlow<List<dev.dimension.flare.model.PlatformSpec>> get() = platformRegistry.platforms
+    public val all: List<LoginPlatformProvider> get() = platformRegistry.all.filterIsInstance<LoginPlatformProvider>()
+    private val byId: Map<String, LoginPlatformProvider> get() = all.associateBy { it.platformId }
 
     public fun get(platformId: String): LoginPlatformProvider? = byId[platformId]
 

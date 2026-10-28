@@ -12,6 +12,8 @@ import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.database.app.model.DbAccount
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.createDatabaseDriver
+import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
+import dev.dimension.flare.data.datasource.microblog.UnavailableMicroblogDataSource
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.datastore.model.AccountSelectionPreferences
 import dev.dimension.flare.data.io.OkioFileStorage
@@ -20,7 +22,11 @@ import dev.dimension.flare.data.model.ProxyPolicy
 import dev.dimension.flare.data.model.ProxySettings
 import dev.dimension.flare.deleteTestRootPath
 import dev.dimension.flare.memoryDatabaseBuilder
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.PlatformDataSourceContext
+import dev.dimension.flare.model.PlatformRegistry
+import dev.dimension.flare.model.PlatformSpec
 import dev.dimension.flare.model.UnsupportedPlatformException
 import dev.dimension.flare.testPlatformRegistry
 import dev.dimension.flare.ui.model.UiAccount
@@ -57,8 +63,68 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertNull
+import kotlin.test.assertSame
+import kotlin.test.assertTrue
 
 class AccountRepositoryTest : RobolectricTest() {
+    @Test
+    @OptIn(ExperimentalCoroutinesApi::class)
+    fun accountObserversRebindAcrossPluginReloadRemovalAndReattachment() =
+        runTest {
+            val registry = testPlatformRegistry()
+            val first =
+                object : MicroblogDataSource by
+                UnavailableMicroblogDataSource {}
+            val second =
+                object : MicroblogDataSource by
+                UnavailableMicroblogDataSource {}
+
+            fun platform(
+                source: MicroblogDataSource,
+                id: String = "PluginTest",
+            ) = object : PlatformSpec by registry.defaultGuest {
+                override val platformId = id
+                override val isDefaultGuest = false
+
+                override fun createDataSource(context: PlatformDataSourceContext) = source
+            }
+            registry.replaceExternal("PluginTest", platform(first))
+            val repository = createRepository(backgroundScope, registry = registry)
+            repository.addAccount(UiAccount(accountKey, "PluginTest"), "stored credential")
+            val emitted = Channel<MicroblogDataSource>(Channel.UNLIMITED)
+            backgroundScope.launch {
+                accountServiceFlow(
+                    AccountType
+                        .Specific(accountKey),
+                    repository,
+                ).collect(emitted::send)
+            }
+            assertSame(first, emitted.receive())
+            registry.replaceExternal("Unrelated", platform(first, "Unrelated"))
+            runCurrent()
+            assertTrue(emitted.tryReceive().isFailure)
+            repository.invalidatePlatform("PluginTest")
+            registry.replaceExternal("PluginTest", platform(second))
+            assertSame(second, emitted.receive())
+            assertEquals("stored credential", repository.credentialFlow<String>(accountKey).first())
+            registry.replaceExternal("PluginTest", null)
+            assertSame(UnavailableMicroblogDataSource, emitted.receive())
+            assertFalse(
+                repository.allAccounts
+                    .first()
+                    .single()
+                    .platformAvailable,
+            )
+            registry.replaceExternal("PluginTest", platform(first))
+            assertSame(first, emitted.receive())
+            assertTrue(
+                repository.allAccounts
+                    .first()
+                    .single()
+                    .platformAvailable,
+            )
+        }
+
     private val root = createTestRootPath()
     private val fileStorage = OkioFileStorage(createTestFileSystem(), root)
 
@@ -879,6 +945,7 @@ class AccountRepositoryTest : RobolectricTest() {
     private fun createRepository(
         scope: CoroutineScope,
         proxy: ProxyRepository = ProxyRepository(fileStorage),
+        registry: PlatformRegistry = testPlatformRegistry(),
     ): AccountRepository =
         AccountRepository(
             appDatabase = appDatabase,
@@ -886,7 +953,7 @@ class AccountRepositoryTest : RobolectricTest() {
             appDataStore = appDataStore,
             cacheDatabase = cacheDatabase,
             proxyRepository = proxy,
-            platformRegistry = testPlatformRegistry(),
+            platformRegistry = registry,
         )
 
     private suspend fun insertAccount() {

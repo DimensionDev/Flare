@@ -20,6 +20,9 @@ public struct PluginManagementView: View {
     @State private var fileError: String?
     @State private var pendingUninstallId: String?
     @State private var pendingUninstallName: String?
+    #if os(macOS)
+    @State private var showsDevelopment = false
+    #endif
 
     public init() {
         let facade = PluginAppleFacadeV1()
@@ -29,6 +32,11 @@ public struct PluginManagementView: View {
 
     public var body: some View {
         List {
+            #if os(macOS)
+            if showsDevelopment || presenter.state.development.directory != nil {
+                developmentSection
+            }
+            #endif
             if presenter.state.requiresRestart {
                 Section {
                     Label {
@@ -105,6 +113,12 @@ public struct PluginManagementView: View {
             }
             ToolbarItem(placement: .automatic) {
                 Menu {
+                    #if os(macOS)
+                    Button("plugin_development") {
+                        facade.prepareDevelopment()
+                        showsDevelopment = true
+                    }
+                    #endif
                     Button("plugin_install_github") {
                         gitHubURL = ""
                         selectedGitHubTag = ""
@@ -231,7 +245,7 @@ public struct PluginManagementView: View {
                     )
                 )
                 .labelsHidden()
-                .disabled(presenter.state.busy)
+                .disabled(presenter.state.busy || isDeveloping(plugin.pluginId))
             }
 
             if plugin.pendingRestart {
@@ -249,17 +263,101 @@ public struct PluginManagementView: View {
                 } label: {
                     Text("plugin_update") + Text(" " + update.tag)
                 }
-                .disabled(presenter.state.busy)
+                .disabled(presenter.state.busy || isDeveloping(plugin.pluginId))
             }
 
             Button("plugin_uninstall", role: .destructive) {
                 pendingUninstallId = plugin.pluginId
                 pendingUninstallName = plugin.nameText.text
             }
-            .disabled(presenter.state.busy)
+            .disabled(presenter.state.busy || isDeveloping(plugin.pluginId))
         }
         .padding(.vertical, 4)
     }
+
+    private func isDeveloping(_ pluginId: String) -> Bool {
+        presenter.state.development.active && presenter.state.development.pluginId == pluginId
+    }
+
+    #if os(macOS)
+    private var developmentSection: some View {
+        let state = presenter.state.development
+        return Section("plugin_development") {
+            Text("plugin_development_description").foregroundStyle(.secondary)
+            if let directory = state.directory ?? state.recentDirectory {
+                Text(directory).font(.caption).textSelection(.enabled)
+            }
+            if state.active {
+                Text("\(state.pluginId ?? "") · #\(state.generation)")
+            } else if let pluginId = state.pluginId {
+                Text("\(state.name ?? pluginId) (\(pluginId))")
+            }
+            if state.validating {
+                ProgressView("plugin_development_validating")
+            } else if state.candidateHash != nil {
+                Text(state.active && state.candidateHash == state.runningHash
+                     ? "plugin_development_current" : "plugin_development_ready")
+            }
+            if let error = state.error {
+                Text(error).font(.caption).foregroundStyle(.red).textSelection(.enabled)
+            }
+            HStack {
+                Button("plugin_development_open", action: openDevelopmentDirectory)
+                    .disabled(state.busy || state.active)
+                Button(state.active ? "plugin_development_reload" : "plugin_development_start") {
+                    Task { try? await facade.reloadDevelopment(confirmed: false) }
+                }
+                .disabled(state.busy || state.validating || state.candidateHash == nil)
+                if state.directory != nil {
+                    Button("plugin_development_stop") {
+                        Task {
+                            do {
+                                try await facade.stopDevelopment()
+                                PluginDevelopmentDirectoryAccess.release()
+                            } catch { /* The shared state displays the failure. */ }
+                        }
+                    }
+                    .disabled(state.busy)
+                }
+                if state.busy { ProgressView().controlSize(.small) }
+            }
+            if !state.messages.isEmpty {
+                DisclosureGroup("plugin_development_diagnostics") {
+                    Text(state.messages.joined(separator: "\n"))
+                        .font(.caption.monospaced()).textSelection(.enabled)
+                }
+            }
+        }
+        .alert("plugin_development", isPresented: Binding(
+            get: { presenter.state.development.reviewHash != nil },
+            set: { _ in }
+        )) {
+            Button("Cancel", role: .cancel) { facade.cancelDevelopmentReview() }
+            Button(state.active ? "plugin_development_reload" : "plugin_development_start") {
+                Task { try? await facade.reloadDevelopment(confirmed: true) }
+            }
+            .disabled(state.busy)
+        } message: {
+            Text(([String(localized: "plugin_development_review")]
+                  + state.permissions.map { "• " + permissionText($0) }
+                  + (state.credentialSchemaChanged ? [String(localized: "plugin_development_schema")] : []))
+                .joined(separator: "\n"))
+        }
+    }
+
+    private func openDevelopmentDirectory() {
+        let panel = NSOpenPanel()
+        panel.canChooseDirectories = true
+        panel.canChooseFiles = false
+        panel.allowsMultipleSelection = false
+        if let recent = presenter.state.development.recentDirectory {
+            panel.directoryURL = URL(fileURLWithPath: recent, isDirectory: true)
+        }
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+        PluginDevelopmentDirectoryAccess.retain(url)
+        Task { try? await facade.openDevelopmentDirectory(path: url.path(percentEncoded: false)) }
+    }
+    #endif
 
     private var selectedGitHubVersion: GitHubPluginVersionV1? {
         guard let versions = presenter.state.githubCatalog?.versions else { return nil }
@@ -453,3 +551,19 @@ public struct PluginManagementView: View {
         return "• " + (detail.map { "\(message): \($0)" } ?? message)
     }
 }
+
+#if os(macOS)
+// The directory watcher outlives this view; retain access until development stops.
+@MainActor
+private enum PluginDevelopmentDirectoryAccess {
+    private static var url: URL?
+    static func retain(_ selected: URL) {
+        release()
+        if selected.startAccessingSecurityScopedResource() { url = selected }
+    }
+    static func release() {
+        url?.stopAccessingSecurityScopedResource()
+        url = nil
+    }
+}
+#endif

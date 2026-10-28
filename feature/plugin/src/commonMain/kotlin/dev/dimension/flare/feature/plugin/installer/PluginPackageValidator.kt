@@ -25,6 +25,11 @@ internal class PluginPackageValidator(
 
     suspend fun validate(path: Path): ValidatedPluginPackage {
         val archive = archiveReader.read(path)
+        return validate(archive)
+    }
+
+    internal suspend fun validate(archive: FppArchive): ValidatedPluginPackage {
+        archiveReader.validateLayout(archive.entries)
         val manifest = decodeManifest(archive.files.getValue(FppPaths.MANIFEST))
         val source = decodeUtf8(archive.files.getValue(FppPaths.ENTRY), FppPaths.ENTRY)
         require('\u0000' !in source) { "plugin.js contains a null character" }

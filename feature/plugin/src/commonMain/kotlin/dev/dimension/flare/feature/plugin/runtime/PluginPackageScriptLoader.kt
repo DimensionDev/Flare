@@ -18,6 +18,8 @@ internal class PluginPackageScriptLoader(
 ) {
     suspend fun load(plugin: RunningPluginV1): String =
         withContext(dispatcher) {
+            plugin.session.ensureActive()
+            plugin.developmentSource?.let { return@withContext it }
             verify(plugin)
             val packagePath = plugin.packagePath.toPath()
             val zip = fileSystem.openZip(packagePath)

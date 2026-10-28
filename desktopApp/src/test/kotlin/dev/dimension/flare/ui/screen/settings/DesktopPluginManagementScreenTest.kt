@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
@@ -66,6 +67,32 @@ class DesktopPluginManagementScreenTest {
         stopKoin()
         System.setProperty("user.home", originalHome)
         root.toFile().deleteRecursively()
+    }
+
+    @Test
+    fun developmentValidatesWithoutReloadingUntilTheUserClicks() {
+        var state by mutableStateOf(
+            dev.dimension.flare.feature.plugin.development.PluginDevelopmentStateV1(
+                directory = "/tmp/plugin",
+                active = true,
+                pluginId = "fixture.plugin",
+                candidateHash = "new",
+                runningHash = "old",
+            ),
+        )
+        var reloads = 0
+        compose.setContent {
+            FlareTheme(isDarkTheme = false) {
+                PluginDevelopmentPanel(state, onOpen = {}, onReload = { reloads++ }, onCancel = {}, onStop = {})
+            }
+        }
+        compose.onNodeWithText("Validated · ready to load").assertIsDisplayed()
+        assertEquals(0, reloads)
+        compose.onNodeWithText("Reload plugin").performClick()
+        assertEquals(1, reloads)
+        compose.runOnIdle { state = state.copy(validating = true, candidateHash = null) }
+        compose.onNodeWithText("Reload plugin").assertIsNotEnabled()
+        compose.onNodeWithText("Choose folder…").assertIsNotEnabled()
     }
 
     @Test

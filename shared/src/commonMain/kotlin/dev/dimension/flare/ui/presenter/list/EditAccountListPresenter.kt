@@ -19,6 +19,7 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiState
+import dev.dimension.flare.ui.model.flatMapLatestUiState
 import dev.dimension.flare.ui.model.flattenUiState
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onSuccess
@@ -27,7 +28,6 @@ import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
@@ -44,7 +44,7 @@ public class EditAccountListPresenter(
     @OptIn(ExperimentalCoroutinesApi::class)
     private val userListFlow by lazy {
         accountServiceFlow(accountType, accountRepository)
-            .flatMapLatest { service ->
+            .flatMapLatestUiState { service ->
                 requireNotNull(service.capabilities.list).listMemberHandler.userLists(userKey).toUi()
             }.map {
                 it.map {
@@ -57,11 +57,11 @@ public class EditAccountListPresenter(
     override fun body(): EditAccountListState {
         val scope = rememberCoroutineScope()
         val serviceState = accountServiceProvider(accountType = accountType, repository = accountRepository)
+        val listState = remember(serviceState) { serviceState.map { requireNotNull(it.capabilities.list) } }
         val allList =
-            serviceState
-                .map { service ->
-                    val list = requireNotNull(service.capabilities.list)
-                    remember(service) {
+            listState
+                .map { list ->
+                    remember(list) {
                         list.listHandler.data.cachedIn(scope).map {
                             it.filter {
                                 !it.readonly

@@ -39,6 +39,198 @@
     "Save" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Save" } }, "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "保存" } } } },
     "Pro" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Pro" } }, "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "Pro" } } } },
     "Lite" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Lite" } }, "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "Lite" } } } },
+  "plugin_development": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Plugin development"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "插件开发"
+        }
+      }
+    }
+  },
+  "plugin_development_description": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Choose the build output folder containing manifest.json and plugin.js. Saves are validated automatically; reload applies them to all accounts and pages of this plugin."
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "选择包含 manifest.json 和 plugin.js 的构建输出目录。保存后自动校验，点击重载后应用到该插件的所有账号和页面。"
+        }
+      }
+    }
+  },
+  "plugin_development_open": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Choose folder…"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "选择目录…"
+        }
+      }
+    }
+  },
+  "plugin_development_start": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Start development"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "开始开发"
+        }
+      }
+    }
+  },
+  "plugin_development_reload": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Reload plugin"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "重载插件"
+        }
+      }
+    }
+  },
+  "plugin_development_stop": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Stop development"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "停止开发"
+        }
+      }
+    }
+  },
+  "plugin_development_validating": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Validating files…"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "正在校验文件…"
+        }
+      }
+    }
+  },
+  "plugin_development_ready": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Validated · ready to load"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "校验通过 · 可以加载"
+        }
+      }
+    }
+  },
+  "plugin_development_current": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Running the validated version"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "正在运行已校验版本"
+        }
+      }
+    }
+  },
+  "plugin_development_review": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Only load code you trust. This code temporarily replaces the installed plugin and uses your existing accounts and data. Account changes are real and are not undone when development stops. Restarting the app restores the installed version."
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "请只加载可信代码。开发代码会临时替换已安装插件，并使用现有账号和数据。账号操作真实生效，停止开发不会撤销这些操作。重启应用后恢复已安装版本。"
+        }
+      }
+    }
+  },
+  "plugin_development_schema": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "The credential format changed. Existing accounts may need to sign in again, including after returning to the installed version."
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "凭据格式已变化，现有账号可能需要重新登录，恢复已安装版本后也可能需要重新登录。"
+        }
+      }
+    }
+  },
+  "plugin_development_diagnostics": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Recent calls (no request or response data)"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "最近调用（不记录请求和响应数据）"
+        }
+      }
+    }
+  },
   "plugin_capabilities": {
     "localizations": {
       "en": {

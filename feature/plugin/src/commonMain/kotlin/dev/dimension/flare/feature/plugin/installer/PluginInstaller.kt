@@ -372,7 +372,7 @@ private fun buildWarnings(
         validationWarnings.forEach { add(PluginInstallWarningV1(PluginInstallWarningTypeV1.Compatibility, it)) }
     }
 
-private fun PluginManifestV1.sensitivePermissions(): Set<PluginSensitivePermissionV1> =
+internal fun PluginManifestV1.sensitivePermissions(): Set<PluginSensitivePermissionV1> =
     buildSet {
         add(PluginSensitivePermissionV1(PluginSensitivePermissionTypeV1.NetworkOrigin, PluginAbiV1.ACCOUNT_ORIGIN))
         permissions.authOrigins.forEach { origin ->

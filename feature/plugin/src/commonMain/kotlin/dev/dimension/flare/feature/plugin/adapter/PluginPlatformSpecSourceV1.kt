@@ -81,13 +81,16 @@ import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.descriptors.buildClassSerialDescriptor
@@ -133,7 +136,7 @@ public class PluginPlatformSpecSourceV1(
                             oauth = oauth,
                             form = form,
                             webCookie = webCookie,
-                            coroutineScope = coroutineScope,
+                            coroutineScope = plugin.session.scope(coroutineScope),
                         )
                     }.getOrElse { error ->
                         onIssue(
@@ -491,6 +494,20 @@ internal class PluginLoginMethodHandlerV1(
     private val mutableEffects = MutableSharedFlow<LoginEffect>(extraBufferCapacity = 1)
     private var cookieSession: PluginWebCookieSessionV1? = null
     private var oauthFlowId: String? = null
+    private var retired = false
+    private val removeCleanup =
+        plugin.session.onRetire {
+            retired = true
+            cookieSession?.close()
+            cookieSession = null
+            oauthFlowId?.let {
+                oauthCallbacks.unregister(it)
+                oauth.cancel(it)
+            }
+            oauthFlowId = null
+            values.keys.forEach { values[it] = "" }
+            mutableState.value = state(error = "Plugin reloaded. Start login again.")
+        }
 
     override val state: StateFlow<LoginFlowState> = mutableState
     override val effects: Flow<LoginEffect> = mutableEffects
@@ -505,6 +522,7 @@ internal class PluginLoginMethodHandlerV1(
     }
 
     override suspend fun perform(actionId: String) {
+        if (retired) return
         if (actionId != LOGIN_ACTION || mutableState.value.loading) return
         mutableState.value = state(loading = true)
         try {
@@ -642,6 +660,7 @@ internal class PluginLoginMethodHandlerV1(
     }
 
     override fun clear() {
+        if (retired) return
         values.keys.forEach { values[it] = "" }
         closeCookieSession()
         closeOAuthFlow()
@@ -649,11 +668,13 @@ internal class PluginLoginMethodHandlerV1(
     }
 
     override fun close() {
+        removeCleanup()
         closeCookieSession()
         closeOAuthFlow()
     }
 
     private suspend fun complete(success: LoginSuccessV1) {
+        plugin.session.ensureActive()
         val accountKey = MicroBlogKey(success.accountId, Url(success.origin).accountHost())
         context.requireReloginAccount(accountKey)
         accountService.addPluginAccount(plugin, success)
@@ -664,13 +685,15 @@ internal class PluginLoginMethodHandlerV1(
     private fun closeCookieSession(): Job? {
         val session = cookieSession ?: return null
         cookieSession = null
-        return coroutineScope.launch { session.close() }
+        return coroutineScope.launch(start = CoroutineStart.UNDISPATCHED) { withContext(NonCancellable) { session.close() } }
     }
 
     private fun closeOAuthFlow(): Job? {
         val flowId = oauthFlowId ?: return null
         oauthFlowId = null
-        return coroutineScope.launch { oauthCallbacks.unregister(flowId) }
+        return coroutineScope.launch(start = CoroutineStart.UNDISPATCHED) {
+            withContext(NonCancellable) { oauthCallbacks.unregister(flowId) }
+        }
     }
 
     private fun state(
@@ -693,7 +716,7 @@ internal class PluginLoginMethodHandlerV1(
                     LoginAction(
                         id = LOGIN_ACTION,
                         label = UiStrings.Next,
-                        enabled = !loading && method.fields.filter { it.required }.all { !values[it.id].isNullOrBlank() },
+                        enabled = !retired && !loading && method.fields.filter { it.required }.all { !values[it.id].isNullOrBlank() },
                     ),
                 ),
             loading = loading,

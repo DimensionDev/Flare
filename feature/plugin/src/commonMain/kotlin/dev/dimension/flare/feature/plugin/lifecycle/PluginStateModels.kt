@@ -2,6 +2,7 @@ package dev.dimension.flare.feature.plugin.lifecycle
 
 import dev.dimension.flare.feature.plugin.github.GitHubPluginRepositoryV1
 import dev.dimension.flare.feature.plugin.manifest.PluginManifestV1
+import dev.dimension.flare.feature.plugin.runtime.PluginSessionV1
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -47,7 +48,12 @@ public data class RunningPluginV1(
     val installed: InstalledPluginV1,
     val packagePath: String,
     val iconPath: String,
-)
+    val developmentSource: String? = null,
+    val generation: Long = 0,
+) {
+    internal val session = PluginSessionV1()
+    internal var diagnostic: ((String) -> Unit)? = null
+}
 
 public data class PluginRunningSnapshotV1(
     val plugins: Map<String, RunningPluginV1>,

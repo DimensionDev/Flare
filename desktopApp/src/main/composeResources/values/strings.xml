@@ -863,4 +863,16 @@
     <string name="plugin_warning_source_changed">This installation changes the plugin source</string>
     <string name="plugin_warning_tag_moved">This tag now points to a different commit</string>
     <string name="plugin_unverified_github_warning">This GitHub plugin has not been verified. Only install it if you trust the author.</string>
+    <string name="plugin_development">Plugin development</string>
+    <string name="plugin_development_description">Choose the build output folder containing manifest.json and plugin.js. Saves are validated automatically; reload applies them to all accounts and pages of this plugin.</string>
+    <string name="plugin_development_open">Choose folder…</string>
+    <string name="plugin_development_start">Start development</string>
+    <string name="plugin_development_reload">Reload plugin</string>
+    <string name="plugin_development_stop">Stop development</string>
+    <string name="plugin_development_validating">Validating files…</string>
+    <string name="plugin_development_ready">Validated · ready to load</string>
+    <string name="plugin_development_current">Running the validated version</string>
+    <string name="plugin_development_review">Only load code you trust. This code temporarily replaces the installed plugin and uses your existing accounts and data. Account changes are real and are not undone when development stops. Restarting the app restores the installed version.</string>
+    <string name="plugin_development_schema">The credential format changed. Existing accounts may need to sign in again, including after returning to the installed version.</string>
+    <string name="plugin_development_diagnostics">Recent calls (no request or response data)</string>
 </resources>

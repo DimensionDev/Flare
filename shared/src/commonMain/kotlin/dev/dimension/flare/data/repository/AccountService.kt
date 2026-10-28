@@ -7,6 +7,7 @@ import dev.dimension.flare.ui.model.UiAccount
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.serializer
@@ -15,6 +16,8 @@ import kotlin.native.HiddenFromObjC
 
 @HiddenFromObjC
 public interface AccountService {
+    public suspend fun invalidatePlatform(platformId: String) {}
+
     public fun accountServiceFlow(accountType: AccountType): Flow<MicroblogDataSource>
 
     public fun allAccountServicesFlow(): Flow<List<AccountMicroblogDataSource>>
@@ -77,6 +80,8 @@ public inline fun <reified T : Any> AccountService.updateCredential(
 internal class RepositoryAccountService(
     private val repository: AccountRepository,
 ) : AccountService {
+    override suspend fun invalidatePlatform(platformId: String) = repository.invalidatePlatform(platformId)
+
     override fun accountServiceFlow(accountType: AccountType): Flow<MicroblogDataSource> =
         accountServiceFlow(
             accountType = accountType,
@@ -85,7 +90,7 @@ internal class RepositoryAccountService(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun allAccountServicesFlow(): Flow<List<AccountMicroblogDataSource>> =
-        repository.allAccounts.mapLatest { accounts ->
+        repository.allAccounts.combine(repository.platformRegistry.platforms) { accounts, _ -> accounts }.mapLatest { accounts ->
             accounts.filter { it.platformAvailable }.map { account ->
                 AccountMicroblogDataSource(
                     accountKey = account.accountKey,

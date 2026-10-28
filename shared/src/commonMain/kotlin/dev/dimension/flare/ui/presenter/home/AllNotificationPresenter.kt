@@ -157,7 +157,11 @@ public class AllNotificationPresenter : PresenterBase<AllNotificationPresenter.S
                     flowOf(emptyList<NotificationFilter>().toImmutableList())
                 } else {
                     accountServiceFlow(AccountType.Specific(accountKey), accountRepository).map {
-                        requireNotNull(it.capabilities.notification?.timeline).supportedNotificationFilter.toImmutableList()
+                        it.capabilities.notification
+                            ?.timeline
+                            ?.supportedNotificationFilter
+                            .orEmpty()
+                            .toImmutableList()
                     }
                 }
             }.distinctUntilChanged()
@@ -173,7 +177,9 @@ public class AllNotificationPresenter : PresenterBase<AllNotificationPresenter.S
                     } else {
                         accountServiceFlow(AccountType.Specific(accountKey), accountRepository)
                             .flatMapLatest { source ->
-                                val timeline = requireNotNull(source.capabilities.notification?.timeline)
+                                val timeline =
+                                    source.capabilities.notification?.timeline
+                                        ?: return@flatMapLatest flowOf(notSupported())
                                 selectedNotificationFilterFlow
                                     .map { filter ->
                                         filter?.takeIf { it in timeline.supportedNotificationFilter }

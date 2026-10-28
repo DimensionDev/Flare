@@ -33,6 +33,32 @@ bundler to emit one classic script. Keep manifest/Host validation even when the
 type checker passes: TypeScript optional service properties do not express all
 capability requirements, and optionality does not make every null value valid.
 
+## Develop locally in Desktop
+
+In Settings > Plugins, open the overflow menu and choose **Plugin development**.
+Choose the directory containing `manifest.json`, `plugin.js`, and the plugin assets.
+Click **Start development** and review access to your existing accounts. Both Compose Desktop and native macOS support this flow.
+
+Edit `plugin.js`, `manifest.json`, `assets/icon.png`, or `locales/*.json`. Flare
+automatically validates the files; click **Reload plugin** to apply the validated
+snapshot to this plugin's accounts and open pages. An invalid edit keeps the last
+working version running. For TypeScript projects, select your build output directory
+and run your own compiler/watch command; Flare does not execute build scripts.
+
+Only one development directory can be active. Reload is refused while publishing,
+uploading, deleting, or sending is in progress; retry after the operation finishes.
+Reload clears this plugin's derived account caches and restarts its login flows;
+drafts, credentials, routes, and other plugins are retained. Changing the plugin ID
+or platform ID requires stopping first. An override must retain the installed
+plugin's platform ID. A credential schema change may require logging in again.
+
+**Stop development** restores the version that was running before development.
+Restarting the app loads its installed plugins normally; the last directory is
+remembered but never mounted automatically. Development uses real accounts and
+data: changes made by the plugin are not rolled back. Stop development before
+installing, updating, disabling, or uninstalling the same plugin. Recent-call
+diagnostics show method names and outcomes only, never request/response payloads.
+
 ## Checks with a Flare source checkout
 
 Run from the Flare repository root:

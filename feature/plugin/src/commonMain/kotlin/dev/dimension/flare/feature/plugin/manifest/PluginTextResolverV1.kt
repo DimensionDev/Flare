@@ -9,10 +9,11 @@ import dev.dimension.flare.ui.model.UiText
 public object PluginTextResolverV1 {
     public fun resolve(text: UiText.ExternalRef): String =
         runCatching {
-            val stateStore = koinGet<PluginSubsystemV1>().stateStore
+            val subsystem = koinGet<PluginSubsystemV1>()
             val installed =
-                stateStore.running.plugins[text.namespace]?.installed
-                    ?: stateStore.desired.value.plugins[text.namespace]
+                subsystem.running.value.plugins[text.namespace]
+                    ?.installed
+                    ?: subsystem.stateStore.desired.value.plugins[text.namespace]
                     ?: return text.fallbackText()
             PluginCatalogBundleV1(
                 pluginId = installed.pluginId,

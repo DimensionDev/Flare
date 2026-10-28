@@ -814,4 +814,16 @@
     <string name="plugin_warning_source_changed">此次安装将更改插件来源</string>
     <string name="plugin_warning_tag_moved">此 tag 现在指向不同的提交</string>
     <string name="plugin_unverified_github_warning">此 GitHub 插件未经验证。请仅在信任作者时安装。</string>
+    <string name="plugin_development">插件开发</string>
+    <string name="plugin_development_description">选择包含 manifest.json 和 plugin.js 的构建输出目录。保存后自动校验，点击重载后应用到该插件的所有账号和页面。</string>
+    <string name="plugin_development_open">选择目录…</string>
+    <string name="plugin_development_start">开始开发</string>
+    <string name="plugin_development_reload">重载插件</string>
+    <string name="plugin_development_stop">停止开发</string>
+    <string name="plugin_development_validating">正在校验文件…</string>
+    <string name="plugin_development_ready">校验通过 · 可以加载</string>
+    <string name="plugin_development_current">正在运行已校验版本</string>
+    <string name="plugin_development_review">请只加载可信代码。开发代码会临时替换已安装插件，并使用现有账号和数据。账号操作真实生效，停止开发不会撤销这些操作。重启应用后恢复已安装版本。</string>
+    <string name="plugin_development_schema">凭据格式已变化，现有账号可能需要重新登录，恢复已安装版本后也可能需要重新登录。</string>
+    <string name="plugin_development_diagnostics">最近调用（不记录请求和响应数据）</string>
 </resources>

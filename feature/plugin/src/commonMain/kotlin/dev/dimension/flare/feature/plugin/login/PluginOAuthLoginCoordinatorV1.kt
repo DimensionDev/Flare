@@ -106,6 +106,7 @@ public class PluginOAuthLoginCoordinatorV1(
                         pluginId = plugin.installed.pluginId,
                         platformId = plugin.installed.manifest.platform.id,
                         packageHash = plugin.installed.packageHash,
+                        generation = plugin.generation,
                         methodId = methodId,
                         flowId = flowId,
                         origin = canonicalOrigin,
@@ -133,6 +134,14 @@ public class PluginOAuthLoginCoordinatorV1(
         }
     }
 
+    internal suspend fun cancel(flowId: String) {
+        pendingStore.load(flowId)?.let { pendingStore.consume(it) }
+    }
+
+    internal suspend fun cancelPlugin(pluginId: String) {
+        pendingStore.removePlugin(pluginId)
+    }
+
     public suspend fun resume(
         callbackUrl: String,
         locale: String,
@@ -157,6 +166,7 @@ public class PluginOAuthLoginCoordinatorV1(
         if (
             plugin == null ||
             plugin.installed.packageHash != pending.packageHash ||
+            plugin.generation != pending.generation ||
             plugin.installed.manifest.platform.id != pending.platformId
         ) {
             pendingStore.consume(pending)

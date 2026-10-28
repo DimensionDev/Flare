@@ -30,7 +30,9 @@ import dev.dimension.flare.ui.model.UiText
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.flatMap
+import dev.dimension.flare.ui.model.flatMapLatestUiState
 import dev.dimension.flare.ui.model.flattenUiState
+import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.model.takeSuccessOr
@@ -47,14 +49,11 @@ import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.mapLatest
-import kotlinx.coroutines.flow.onStart
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @WebPresenter("profile")
@@ -70,7 +69,7 @@ public class ProfilePresenter(
     }
 
     private val userStateFlow by lazy {
-        serviceFlow.flatMapLatest { service ->
+        serviceFlow.flatMapLatestUiState { service ->
             val userId =
                 userKey?.id
                     ?: service.accountKeyOrNull?.id
@@ -84,14 +83,14 @@ public class ProfilePresenter(
     }
 
     private val relationStateFlow by lazy {
-        serviceFlow.flatMapLatest { service ->
+        serviceFlow.flatMapLatestUiState { service ->
             val actualUserKey =
                 userKey ?: service.accountKeyOrNull ?: run {
                     throw NoActiveAccountException
                 }
             val relation =
                 service.capabilities.relation
-                    ?: return@flatMapLatest flowOf(
+                    ?: return@flatMapLatestUiState flowOf(
                         UiState.Error(UnsupportedOperationException("Current service does not support relations")),
                     )
             relation.relationHandler.relation(actualUserKey).toUi()
@@ -125,58 +124,54 @@ public class ProfilePresenter(
 
     private val myAccountKeyFlow by lazy {
         serviceFlow.map { service ->
-            service.accountKeyOrNull ?: throw NoActiveAccountException
+            service.accountKeyOrNull?.let { UiState.Success(it) } ?: UiState.Error<MicroBlogKey>(NoActiveAccountException)
         }
     }
 
     private val tabsFlow by lazy {
         tabsReloadVersion.flatMapLatest {
             serviceFlow
-                .mapLatest { service ->
+                .flatMapLatestUiState { service ->
                     val actualUserKey =
                         userKey
                             ?: service.accountKeyOrNull ?: run {
                             throw NoActiveAccountException
                         }
 
-                    service.capabilities.profile
-                        ?.profileTabs(actualUserKey)
-                        .orEmpty()
-                        .map { tab ->
-                            val tabId = "${accountType}_${actualUserKey}_${tab.id}"
-                            val timelinePresenter =
-                                object : TimelinePresenter() {
-                                    override val loader: Flow<RemoteLoader<UiTimelineV2>>
-                                        get() = flowOf(tab.loader)
-                                }
-                            when (tab.displayType) {
-                                ProfileTab.DisplayType.Timeline -> {
-                                    ProfileState.Tab.Timeline(
-                                        id = tabId,
-                                        name = tab.name,
-                                        presenter = timelinePresenter,
-                                    )
-                                }
+                    val tabs =
+                        service.capabilities.profile
+                            ?.profileTabs(actualUserKey)
+                            .orEmpty()
+                            .map { tab ->
+                                val tabId = "${accountType}_${actualUserKey}_${tab.id}"
+                                val timelinePresenter =
+                                    object : TimelinePresenter() {
+                                        override val loader: Flow<RemoteLoader<UiTimelineV2>>
+                                            get() = flowOf(tab.loader)
+                                    }
+                                when (tab.displayType) {
+                                    ProfileTab.DisplayType.Timeline -> {
+                                        ProfileState.Tab.Timeline(
+                                            id = tabId,
+                                            name = tab.name,
+                                            presenter = timelinePresenter,
+                                        )
+                                    }
 
-                                ProfileTab.DisplayType.Gallery -> {
-                                    ProfileState.Tab.Media(
-                                        id = tabId,
-                                        name = tab.name,
-                                        presenter =
-                                            ProfileMediaPresenter(
-                                                mediaTimelinePresenter = timelinePresenter,
-                                                showAllImages = tab.showAllImagesInGallery,
-                                            ),
-                                    )
+                                    ProfileTab.DisplayType.Gallery -> {
+                                        ProfileState.Tab.Media(
+                                            id = tabId,
+                                            name = tab.name,
+                                            presenter =
+                                                ProfileMediaPresenter(
+                                                    mediaTimelinePresenter = timelinePresenter,
+                                                    showAllImages = tab.showAllImagesInGallery,
+                                                ),
+                                        )
+                                    }
                                 }
-                            }
-                        }.toImmutableList()
-                }.map<ImmutableList<ProfileState.Tab>, UiState<ImmutableList<ProfileState.Tab>>> {
-                    UiState.Success(it)
-                }.onStart {
-                    emit(UiState.Loading())
-                }.catch {
-                    emit(UiState.Error(it))
+                            }.toImmutableList()
+                    flowOf(UiState.Success(tabs))
                 }
         }
     }
@@ -212,7 +207,7 @@ public class ProfilePresenter(
             combine(
                 isListDataSourceFlow,
                 userStateFlow.map { it.takeSuccess() },
-                myAccountKeyFlow.map { it as MicroBlogKey? }.catch { emit(null) },
+                myAccountKeyFlow.map { it.takeSuccess() },
             ) { isListDataSource, user, myAccountKey ->
                 Pair(
                     isListDataSource,
@@ -245,7 +240,7 @@ public class ProfilePresenter(
         }
         val relationState by relationStateFlow.flattenUiState()
         val isMe by isMeFlow.collectAsUiState()
-        val myAccountKey by myAccountKeyFlow.collectAsUiState()
+        val myAccountKey by myAccountKeyFlow.flattenUiState()
         val profileMenus by profileMenusFlow.collectAsState(emptyList<ActionMenu>().toImmutableList())
         val tabs by tabsFlow.collectAsState(UiState.Loading())
         val followButtonState =
@@ -540,14 +535,16 @@ public class ProfileWithUserNameAndHostPresenter(
 
     @Composable
     override fun body(): UserState {
-        val userState =
+        val serviceState =
             accountServiceProvider(
                 accountType = accountType,
                 repository = accountRepository,
-            ).flatMap { service ->
-                remember(service) {
-                    requireNotNull(service.capabilities.profile)
-                        .userHandler
+            )
+        val profileState = remember(serviceState) { serviceState.map { requireNotNull(it.capabilities.profile) } }
+        val userState =
+            profileState.flatMap { profile ->
+                remember(profile) {
+                    profile.userHandler
                         .userByHandleAndHost(
                             UiHandle(
                                 raw = userName,

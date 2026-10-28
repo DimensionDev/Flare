@@ -25,6 +25,7 @@ public data class PluginOAuthPendingV1(
     val createdAtEpochMillis: Long,
     val pendingPayload: JsonElement,
     val expectedAccountId: String? = null,
+    val generation: Long = 0,
 ) {
     internal fun requireValid() {
         require(ID.matches(pluginId) && ID.matches(platformId) && ID.matches(methodId)) { "Invalid OAuth pending identity" }
@@ -45,6 +46,8 @@ public data class PluginOAuthPendingV1(
 }
 
 public interface PluginOAuthPendingStoreV1 {
+    public suspend fun removePlugin(pluginId: String) {}
+
     public suspend fun save(pending: PluginOAuthPendingV1)
 
     public suspend fun load(flowId: String): PluginOAuthPendingV1?
@@ -60,6 +63,13 @@ public class PlatformOAuthPluginPendingStoreV1(
     private val repository: PlatformOAuthPendingRepository,
 ) : PluginOAuthPendingStoreV1 {
     private val mutex = Mutex()
+
+    override suspend fun removePlugin(pluginId: String) {
+        repository.allForPlatform(STORE_PLATFORM_ID).forEach { record ->
+            val pending = decode(record)
+            if (pending?.pluginId == pluginId) consume(pending)
+        }
+    }
 
     override suspend fun save(pending: PluginOAuthPendingV1): Unit =
         mutex.withLock {

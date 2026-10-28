@@ -206,7 +206,7 @@ internal class FppArchiveReader(
             central.entry.localHeaderOffset + LOCAL_FIXED_BYTES + nameSize + extraSize
         }
 
-    private fun validateLayout(entries: List<FppArchiveEntry>) {
+    internal fun validateLayout(entries: List<FppArchiveEntry>) {
         val paths = entries.map(FppArchiveEntry::path)
         require(paths.distinct().size == paths.size) { "Duplicate ZIP path" }
         require(paths.map(String::lowercase).distinct().size == paths.size) { "Case-conflicting ZIP path" }

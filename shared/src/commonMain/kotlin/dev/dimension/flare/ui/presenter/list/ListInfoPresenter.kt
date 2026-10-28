@@ -12,6 +12,7 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.flatMap
+import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
 
@@ -27,10 +28,11 @@ public class ListInfoPresenter(
     @Composable
     override fun body(): ListInfoState {
         val serviceState = accountServiceProvider(accountType = accountType, repository = accountRepository)
+        val listState = remember(serviceState) { serviceState.map { requireNotNull(it.capabilities.list) } }
         val listInfo =
-            serviceState.flatMap {
+            listState.flatMap {
                 remember(it) {
-                    requireNotNull(it.capabilities.list).listHandler.listInfo(listId)
+                    it.listHandler.listInfo(listId)
                 }.collectAsState().toUi()
             }
 

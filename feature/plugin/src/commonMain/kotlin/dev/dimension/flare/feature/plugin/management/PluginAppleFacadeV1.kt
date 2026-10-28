@@ -12,6 +12,29 @@ import kotlinx.coroutines.CoroutineScope
 
 /** Swift-facing management API; file import and confirmation UI remain native. */
 public class PluginAppleFacadeV1 : PresenterBase<PluginManagementStateV1>() {
+    public fun prepareDevelopment() {
+        koinGet<PluginSubsystemV1>().development
+    }
+
+    @Throws(Exception::class)
+    public suspend fun openDevelopmentDirectory(path: String) {
+        koinGet<PluginSubsystemV1>().development.open(path)
+    }
+
+    @Throws(Exception::class)
+    public suspend fun reloadDevelopment(confirmed: Boolean) {
+        koinGet<PluginSubsystemV1>().development.reload(confirmed)
+    }
+
+    public fun cancelDevelopmentReview() {
+        koinGet<PluginSubsystemV1>().development.cancelReview()
+    }
+
+    @Throws(Exception::class)
+    public suspend fun stopDevelopment() {
+        koinGet<PluginSubsystemV1>().development.stop()
+    }
+
     private val presenter by lazy {
         PluginManagementPresenterV1(
             subsystem = koinGet<PluginSubsystemV1>(),

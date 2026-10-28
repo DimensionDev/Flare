@@ -10,6 +10,7 @@ import dev.dimension.flare.common.refreshSuspend
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
 import dev.dimension.flare.data.datasource.microblog.capabilities
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
+import dev.dimension.flare.data.datasource.microblog.paging.notSupported
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceFlow
 import dev.dimension.flare.di.koinInject
@@ -53,7 +54,11 @@ public class AccountNotificationPresenter(
             accountType = AccountType.Specific(accountKey),
             repository = accountRepository,
         ).map {
-            requireNotNull(it.capabilities.notification?.timeline).supportedNotificationFilter.toImmutableList()
+            it.capabilities.notification
+                ?.timeline
+                ?.supportedNotificationFilter
+                .orEmpty()
+                .toImmutableList()
         }.distinctUntilChanged()
     }
 
@@ -67,7 +72,9 @@ public class AccountNotificationPresenter(
                             accountType = AccountType.Specific(accountKey),
                             repository = accountRepository,
                         ).map {
-                            requireNotNull(it.capabilities.notification?.timeline).notification(filter)
+                            it.capabilities.notification
+                                ?.timeline
+                                ?.notification(filter) ?: notSupported()
                         }.distinctUntilChanged()
                     }
             }

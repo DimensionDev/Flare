@@ -13,6 +13,7 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.flatMap
+import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
 
@@ -25,10 +26,11 @@ public class StatusPresenter(
     @Composable
     override fun body(): StatusState {
         val serviceState = accountServiceProvider(accountType = accountType, repository = accountRepository)
+        val postState = remember(serviceState) { serviceState.map { requireNotNull(it.capabilities.post) } }
         val accountServiceState =
-            serviceState.flatMap { service ->
-                remember(service, statusKey) {
-                    requireNotNull(service.capabilities.post).postHandler.post(statusKey)
+            postState.flatMap { post ->
+                remember(post, statusKey) {
+                    post.postHandler.post(statusKey)
                 }.collectAsState().toUi()
             }
         remember { LogStatusHistoryPresenter(accountType = accountType, statusKey = statusKey) }.body()

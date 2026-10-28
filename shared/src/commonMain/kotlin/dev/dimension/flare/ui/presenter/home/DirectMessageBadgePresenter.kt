@@ -27,15 +27,14 @@ public class DirectMessageBadgePresenter(
     @Composable
     override fun body(): NotificationBadgeState {
         val serviceState = accountServiceProvider(accountType = accountType, repository = accountRepository)
+        val directMessageState = remember(serviceState) { serviceState.map { requireNotNull(it.capabilities.directMessage) } }
         val countState =
-            serviceState.map { service ->
-                remember(service) {
-                    requireNotNull(service.capabilities.directMessage).directMessageBadgeCount
-                }.collectAsState()
+            directMessageState.map { directMessage ->
+                remember(directMessage) { directMessage.directMessageBadgeCount }.collectAsState()
             }
         if (autoRefresh) {
             countState.onSuccess {
-                LaunchedEffect(Unit) {
+                LaunchedEffect(it) {
                     delay(1.minutes)
                     it.refresh()
                 }

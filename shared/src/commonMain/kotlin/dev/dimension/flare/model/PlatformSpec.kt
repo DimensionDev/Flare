@@ -10,6 +10,10 @@ import dev.dimension.flare.ui.route.DeeplinkRoute
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.serialization.KSerializer
 import org.koin.core.annotation.Provided
 import org.koin.core.annotation.Single
@@ -95,14 +99,16 @@ public class PlatformRuntimeData(
     public val extraTimelineSpecs: List<TimelineSpec<out TimelineSpec.Data>>,
     platformSpecSources: List<PlatformSpecSource> = emptyList(),
 ) {
-    public val platformSpecs: List<PlatformSpec> = mergePlatformSpecs(platformSpecs, platformSpecSources)
+    internal val builtInPlatformIds = platformSpecs.mapTo(mutableSetOf()) { it.platformId.lowercase() }
+    internal val mutablePlatforms = MutableStateFlow(mergePlatformSpecs(platformSpecs, platformSpecSources))
+    public val platforms: StateFlow<List<PlatformSpec>> = mutablePlatforms.asStateFlow()
+    public val platformSpecs: List<PlatformSpec> get() = platforms.value
 
-    internal val timelineSpecs by lazy {
-        this.platformSpecs
+    internal val timelineSpecs get() =
+        platformSpecs
             .sortedWith(compareBy<PlatformSpec> { it.order }.thenBy { it.platformId })
             .flatMap { it.timelineSpecs }
             .plus(extraTimelineSpecs)
-    }
 }
 
 @HiddenFromObjC
@@ -138,10 +144,31 @@ private class NonDefaultGuestPlatformSpec(
 @Single
 @HiddenFromObjC
 public class PlatformRegistry(
-    data: PlatformRuntimeData,
+    private val data: PlatformRuntimeData,
 ) {
-    public val all: List<PlatformSpec> =
-        data.platformSpecs
+    public val platforms: StateFlow<List<PlatformSpec>> get() = data.platforms
+    public val all: List<PlatformSpec> get() = validate(data.platformSpecs)
+
+    init {
+        validate(data.platformSpecs)
+    }
+
+    /** Replaces one external platform without disturbing built-in platforms or other sources. */
+    public fun replaceExternal(
+        platformId: String,
+        replacement: PlatformSpec?,
+    ) {
+        require(platformId.lowercase() !in data.builtInPlatformIds) { "Cannot replace a built-in platform" }
+        require(replacement == null || (replacement.platformId == platformId && !replacement.isDefaultGuest)) {
+            "Replacement platform identity mismatch"
+        }
+        data.mutablePlatforms.update { current ->
+            validate(current.filterNot { it.platformId == platformId } + listOfNotNull(replacement))
+        }
+    }
+
+    private fun validate(values: List<PlatformSpec>): List<PlatformSpec> =
+        values
             .also { specs ->
                 specs.forEach { requireValidPlatformId(it.platformId) }
                 val duplicateIds =
@@ -157,11 +184,12 @@ public class PlatformRegistry(
                     "Exactly one default guest platform is required: ${defaultGuests.joinToString { it.platformId }}"
                 }
             }.sortedWith(compareBy<PlatformSpec> { it.order }.thenBy { it.platformId })
-    private val byId: Map<String, PlatformSpec> = all.associateBy { it.platformId }
 
-    public val defaultGuest: PlatformSpec = all.single { it.isDefaultGuest }
+    private val byId: Map<String, PlatformSpec> get() = all.associateBy { it.platformId }
 
-    public val subscriptionTimelineSpecs: List<SubscriptionTimelineSpec> by lazy {
+    public val defaultGuest: PlatformSpec get() = all.single { it.isDefaultGuest }
+
+    public val subscriptionTimelineSpecs: List<SubscriptionTimelineSpec> get() =
         all
             .flatMap { it.subscriptionTimelineSpecs }
             .also { specs ->
@@ -174,11 +202,9 @@ public class PlatformRegistry(
                     "Duplicate subscription timeline specs: ${duplicateTypes.joinToString()}"
                 }
             }
-    }
 
-    private val subscriptionTimelineSpecsByType: Map<SubscriptionType, SubscriptionTimelineSpec> by lazy {
-        subscriptionTimelineSpecs.associateBy { it.type }
-    }
+    private val subscriptionTimelineSpecsByType: Map<SubscriptionType, SubscriptionTimelineSpec>
+        get() = subscriptionTimelineSpecs.associateBy { it.type }
 
     public fun get(platformId: String): PlatformSpec? = byId[platformId]
 

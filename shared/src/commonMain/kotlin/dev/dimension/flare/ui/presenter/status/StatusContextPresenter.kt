@@ -11,6 +11,7 @@ import dev.dimension.flare.data.database.cache.model.DbStatus
 import dev.dimension.flare.data.datasource.microblog.capabilities
 import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
+import dev.dimension.flare.data.datasource.microblog.paging.notSupported
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceFlow
 import dev.dimension.flare.di.koinInject
@@ -80,7 +81,7 @@ public class StatusContextPresenter(
                             accountType = accountType,
                             repository = accountRepository,
                         ).map { service ->
-                            val loader = requireNotNull(service.capabilities.post).context(key)
+                            val loader = service.capabilities.post?.context(key) ?: notSupported()
                             if (loader is CacheableRemoteLoader<UiTimelineV2>) {
                                 val pagingKey = loader.pagingKey
                                 val exists = database.pagingTimelineDao().existsPaging(accountType as DbAccountType, pagingKey)

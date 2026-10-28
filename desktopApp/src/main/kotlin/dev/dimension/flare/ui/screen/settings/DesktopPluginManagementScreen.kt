@@ -43,6 +43,7 @@ import compose.icons.fontawesomeicons.solid.Trash
 import dev.dimension.flare.LocalWindowPadding
 import dev.dimension.flare.Res
 import dev.dimension.flare.cancel
+import dev.dimension.flare.common.DesktopSaveDialog
 import dev.dimension.flare.feature.plugin.PluginSubsystemV1
 import dev.dimension.flare.feature.plugin.abi.PluginAbiV1
 import dev.dimension.flare.feature.plugin.installer.PluginInstallWarningTypeV1
@@ -57,6 +58,7 @@ import dev.dimension.flare.plugin_capabilities
 import dev.dimension.flare.plugin_check_updates
 import dev.dimension.flare.plugin_cleanup
 import dev.dimension.flare.plugin_confirm_install
+import dev.dimension.flare.plugin_development
 import dev.dimension.flare.plugin_empty
 import dev.dimension.flare.plugin_github_repository
 import dev.dimension.flare.plugin_inactive
@@ -142,6 +144,7 @@ internal fun DesktopPluginManagementScreen(onBack: () -> Unit) {
     var showsGitHubInstall by remember { mutableStateOf(false) }
     val installLabel = stringResource(Res.string.plugin_install)
     var showsMaintenanceMenu by remember { mutableStateOf(false) }
+    var showsDevelopment by remember { mutableStateOf(false) }
     var pendingUninstallId by remember { mutableStateOf<String?>(null) }
     val pendingUninstall = state.plugins.firstOrNull { it.pluginId == pendingUninstallId }
 
@@ -232,6 +235,14 @@ internal fun DesktopPluginManagementScreen(onBack: () -> Unit) {
                         placement = FlyoutPlacement.BottomAlignedEnd,
                     ) {
                         MenuFlyoutItem(
+                            text = { Text(stringResource(Res.string.plugin_development)) },
+                            onClick = {
+                                showsMaintenanceMenu = false
+                                subsystem.development
+                                showsDevelopment = true
+                            },
+                        )
+                        MenuFlyoutItem(
                             text = { Text(stringResource(Res.string.plugin_install_github)) },
                             onClick = {
                                 showsMaintenanceMenu = false
@@ -288,6 +299,24 @@ internal fun DesktopPluginManagementScreen(onBack: () -> Unit) {
             }
             PluginManagementList(
                 state = state,
+                development =
+                    if (showsDevelopment || state.development.directory != null) {
+                        {
+                            PluginDevelopmentPanel(
+                                state = state.development,
+                                onOpen = {
+                                    DesktopSaveDialog.chooseDirectory(window, state.development.recentDirectory)?.let { directory ->
+                                        scope.launchPresenterAction { subsystem.development.open(directory.absolutePath) }
+                                    }
+                                },
+                                onReload = { confirmed -> scope.launchPresenterAction { subsystem.development.reload(confirmed) } },
+                                onCancel = { subsystem.development.cancelReview() },
+                                onStop = { scope.launchPresenterAction { subsystem.development.stop() } },
+                            )
+                        }
+                    } else {
+                        null
+                    },
                 onSetEnabled = { pluginId, enabled ->
                     scope.launchPresenterAction { presenter.setEnabled(pluginId, enabled) }
                 },
@@ -360,7 +389,7 @@ internal fun PluginInstallReviewDialog(
 }
 
 @Composable
-private fun PluginSensitivePermissionV1.localizedDescription(): String {
+internal fun PluginSensitivePermissionV1.localizedDescription(): String {
     if (type == dev.dimension.flare.feature.plugin.installer.PluginSensitivePermissionTypeV1.MediaNetwork) {
         return stringResource(Res.string.plugin_permission_media_network)
     }
@@ -445,6 +474,7 @@ private fun PluginManagementList(
     onUninstall: (String) -> Unit,
     onUpdate: (String) -> Unit,
     onRetryRuntime: (String) -> Unit,
+    development: (@Composable () -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {
     val listState = rememberLazyListState()
@@ -458,6 +488,9 @@ private fun PluginManagementList(
             verticalArrangement = Arrangement.spacedBy(8.dp),
             contentPadding = PaddingValues(vertical = 12.dp),
         ) {
+            if (development != null) {
+                item(key = "development") { development() }
+            }
             if (state.requiresRestart) {
                 item(key = "restart") {
                     InfoBar(
@@ -517,7 +550,7 @@ private fun PluginManagementList(
                 items(state.plugins, key = PluginManagementItemV1::pluginId) { plugin ->
                     PluginItem(
                         plugin = plugin,
-                        busy = state.busy,
+                        busy = state.busy || (state.development.active && state.development.pluginId == plugin.pluginId),
                         onSetEnabled = onSetEnabled,
                         onUninstall = onUninstall,
                         onUpdate = onUpdate,

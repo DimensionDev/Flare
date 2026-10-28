@@ -20,6 +20,13 @@ The manifest explicitly requests `mediaNetwork` so avatars and federated/CDN
 images can load. Installation review discloses that media destinations may
 receive this plugin's account data.
 
+## Develop locally in Desktop
+
+In Settings > Plugins > Plugin development, select this directory and start
+development. File edits are validated automatically; use **Reload plugin** to
+apply them. See [local development](../../references/testing.md#develop-locally-in-desktop)
+for account access, reload boundaries, and restoring the installed version.
+
 ## Publish on GitHub and install
 
 Copy the contents of this directory to the root of your own public GitHub

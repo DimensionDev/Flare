@@ -159,13 +159,13 @@ struct ProfileScreen: View {
         switch onEnum(of: tab) {
         case .timeline(let timeline):
             ProfileTimelineTabContent(presenter: timeline.presenter)
-                .id(profileTimelineID(for: tab))
+                .id(ObjectIdentifier(timeline.presenter))
         case .media(let media):
             ProfileGalleryTabContent(
                 presenter: media.presenter,
                 accountType: accountType
             )
-            .id(profileTimelineID(for: tab))
+            .id(ObjectIdentifier(media.presenter))
         }
     }
 

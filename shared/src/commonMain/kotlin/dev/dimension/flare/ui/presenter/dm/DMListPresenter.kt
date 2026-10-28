@@ -27,11 +27,14 @@ public class DMListPresenter(
     override fun body(): DMListState {
         val scope = rememberCoroutineScope()
         val serviceState = accountServiceProvider(accountType = accountType, repository = accountRepository)
+        val directMessageState =
+            remember(serviceState) {
+                serviceState.map { requireNotNull(it.capabilities.directMessage) }
+            }
         val items =
-            serviceState
-                .map { service ->
-                    val directMessage = requireNotNull(service.capabilities.directMessage)
-                    remember(service) {
+            directMessageState
+                .map { directMessage ->
+                    remember(directMessage) {
                         directMessage.directMessageList(scope = scope)
                     }.collectAsLazyPagingItems()
                 }.toPagingState()

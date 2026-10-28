@@ -25,7 +25,17 @@ final class MediaViewerInteractionTests: XCTestCase {
 
     @MainActor
     func testImageTranslationOpensNativeProviderSettingsAndSecureEditor() {
-        let app = openMedia(withoutPost: true)
+        assertImageTranslationSettings(withoutPost: false)
+    }
+
+    @MainActor
+    func testImageTranslationOpensNativeProviderSettingsWithoutPost() {
+        assertImageTranslationSettings(withoutPost: true)
+    }
+
+    @MainActor
+    private func assertImageTranslationSettings(withoutPost: Bool) {
+        let app = openMedia(withoutPost: withoutPost)
         defer { app.terminate() }
         let translate = app.buttons["Translate image"]
         XCTAssertTrue(translate.waitForExistence(timeout: 5))
@@ -48,6 +58,13 @@ final class MediaViewerInteractionTests: XCTestCase {
         app.buttons["Off"].tap()
         app.buttons["Save"].tap()
         XCTAssertTrue(translate.waitForExistence(timeout: 5))
+        if !withoutPost {
+            XCTAssertTrue(app.buttons["Sheet Grabber"].waitForExistence(timeout: 5))
+            let postAction = app.buttons["More"].firstMatch
+            XCTAssertTrue(postAction.waitForExistence(timeout: 5))
+            let restored = NSPredicate { _, _ in postAction.isHittable }
+            XCTAssertEqual(XCTWaiter.wait(for: [XCTNSPredicateExpectation(predicate: restored, object: nil)], timeout: 5), .completed)
+        }
     }
 
     @MainActor

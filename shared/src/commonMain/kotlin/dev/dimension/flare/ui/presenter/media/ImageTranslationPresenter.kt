@@ -169,6 +169,7 @@ public class ImageTranslationPresenter(
                         state + (
                             key(media) to
                                 ImageTranslationItem(
+                                    loading = current.loading,
                                     translated = current.previous,
                                     showingTranslated = current.previousWasShown,
                                     error = ImageTranslationError.InvalidImage,

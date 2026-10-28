@@ -232,8 +232,12 @@ struct MediaViewerScreen: View {
         }
         .sheet(isPresented: $postSheetPresented) {
             mediaPostSheet
+                .sheet(isPresented: $showImageTranslationSettings) { ImageTranslationSettingsSheet() }
         }
-        .sheet(isPresented: $showImageTranslationSettings) { ImageTranslationSettingsSheet() }
+        .sheet(isPresented: Binding(
+            get: { showImageTranslationSettings && !postSheetPresented },
+            set: { showImageTranslationSettings = $0 }
+        )) { ImageTranslationSettingsSheet() }
         .alert(
             Text("Image translation", bundle: .main),
             isPresented: Binding(

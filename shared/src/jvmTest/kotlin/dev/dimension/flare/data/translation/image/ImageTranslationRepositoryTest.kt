@@ -38,6 +38,7 @@ import kotlinx.coroutines.withTimeout
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import okio.FileSystem
+import okio.ForwardingFileSystem
 import okio.Path
 import okio.Path.Companion.toPath
 import org.koin.core.context.stopKoin
@@ -45,6 +46,7 @@ import org.koin.dsl.module
 import java.awt.image.BufferedImage
 import java.io.ByteArrayOutputStream
 import java.io.File
+import java.io.IOException
 import java.net.URI
 import java.nio.file.Files
 import javax.imageio.ImageIO
@@ -72,8 +74,8 @@ class ImageTranslationRepositoryTest {
 
     private class Fixture(
         val root: Path,
+        val fs: FileSystem = FileSystem.SYSTEM,
     ) : AutoCloseable {
-        val fs = FileSystem.SYSTEM
         val storage = OkioFileStorage(fs, root, cacheRoot = root)
         var original =
             ByteArrayOutputStream()
@@ -125,7 +127,8 @@ class ImageTranslationRepositoryTest {
         }
     }
 
-    private fun fixture() = Fixture(Files.createTempDirectory("image-translation").toString().toPath())
+    private fun fixture(fs: FileSystem = FileSystem.SYSTEM) =
+        Fixture(Files.createTempDirectory("image-translation").toString().toPath(), fs)
 
     @Test
     fun cachesCompleteImageAcceptsDifferentAspectRatioAndInvalidatesChangedSourceBytes() =
@@ -214,6 +217,43 @@ class ImageTranslationRepositoryTest {
                 assertFalse(isImageTranslationFile(unowned, f.root.toFile()))
                 assertEquals(unowned, prepareImageTranslationExport(unowned, f.root.toFile()))
                 assertEquals(result, prepareImageTranslationExport(result, f.root.toFile()))
+            }
+        }
+
+    @Test
+    fun failedRegenerationFinalizationPreservesSuccessfulCache() =
+        runTest {
+            var failFinalMove = false
+            val fs =
+                object : ForwardingFileSystem(FileSystem.SYSTEM) {
+                    override fun atomicMove(
+                        source: Path,
+                        target: Path,
+                    ) {
+                        if (failFinalMove && target.name.contains("_translated_")) throw IOException("Cannot finalize translated image")
+                        super.atomicMove(source, target)
+                    }
+                }
+            fixture(fs).use { f ->
+                val repository = f.repository()
+                val session = repository.newSession()
+                f.behavior = { ImageTranslationOutput.Encoded(png(2, 4).base64()) }
+                val first = repository.translate(f.media, null, config, "en", session, false)
+                f.behavior = { ImageTranslationOutput.Encoded(f.output.base64()) }
+                failFinalMove = true
+                assertFailsWith<IOException> { repository.translate(f.media, null, config, "en", session, true) }
+                failFinalMove = false
+                val cached = repository.translate(f.media, null, config, "en", session, false)
+                assertEquals(2, f.calls)
+                assertEquals(first.width, cached.width)
+                assertEquals(first.height, cached.height)
+                val regenerated = repository.translate(f.media, null, config, "en", session, true)
+                val updatedCache = repository.translate(f.media, null, config, "en", session, false)
+                assertEquals(3, f.calls)
+                assertEquals(7f, regenerated.width)
+                assertEquals(regenerated.width, updatedCache.width)
+                assertEquals(regenerated.height, updatedCache.height)
+                repository.closeSession(session)
             }
         }
 
@@ -387,6 +427,74 @@ class ImageTranslationRepositoryTest {
                         state = models.first { it.item(b).error == ImageTranslationError.InvalidImage }
                         assertEquals(bResult, state.displayed(b))
                     } finally {
+                        withContext(NonCancellable) {
+                            scope.coroutineContext[Job]!!.cancelAndJoin()
+                            stopKoin()
+                        }
+                    }
+                }
+            }
+        }
+
+    @Test
+    fun displayFailureKeepsRegenerationInFlightAndRetainsFallback() =
+        runBlocking {
+            withTimeout(10_000) {
+                fixture().use { f ->
+                    val repository = f.repository()
+                    val store = AppDataStore(f.storage)
+                    store.appSettingsStore.updateData { it.copy(imageTranslationConfig = config) }
+                    startKoin {
+                        modules(
+                            module {
+                                testSingle { store }
+                                testSingle { repository }
+                                testSingle<CoroutineScope> { CoroutineScope(Dispatchers.Default + SupervisorJob()) }
+                            },
+                        )
+                    }
+                    val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
+                    scope.launch {
+                        while (isActive) {
+                            Snapshot.sendApplyNotifications()
+                            delay(5)
+                        }
+                    }
+                    val started = CompletableDeferred<Unit>()
+                    val finish = CompletableDeferred<Unit>()
+                    val models = scope.launchMolecule(RecompositionMode.Immediate) { ImageTranslationPresenter().body() }
+                    try {
+                        var state = models.first { it.configured }
+                        state.toggle(f.media)
+                        state = models.first { it.item(f.media).translated != null }
+                        val first = state.item(f.media).translated!!
+                        state.regenerate(f.media)
+                        state = models.first { it.item(f.media).translated?.url != first.url && it.item(f.media).translated != null }
+                        val previous = state.item(f.media).translated!!
+                        f.behavior = {
+                            started.complete(Unit)
+                            finish.await()
+                            ImageTranslationOutput.Encoded(png(3, 7).base64())
+                        }
+                        state.regenerate(f.media)
+                        started.await()
+                        state = models.first { it.item(f.media).loading }
+                        state.imageFailed(f.media, previous.url)
+                        state = models.first { it.item(f.media).error == ImageTranslationError.InvalidImage }
+                        assertTrue(state.item(f.media).loading)
+                        assertEquals(first, state.displayed(f.media))
+                        state.clearError(f.media)
+                        state.regenerate(f.media)
+                        state.toggle(f.media)
+                        finish.complete(Unit)
+                        state = models.first { !it.item(f.media).loading && it.item(f.media).error == null }
+                        assertEquals(3, f.calls)
+                        val translated = state.item(f.media).translated!!
+                        assertEquals(3f, translated.width)
+                        assertEquals(7f, translated.height)
+                        assertEquals(translated, state.displayed(f.media))
+                    } finally {
+                        finish.complete(Unit)
                         withContext(NonCancellable) {
                             scope.coroutineContext[Job]!!.cancelAndJoin()
                             stopKoin()

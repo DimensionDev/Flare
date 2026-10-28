@@ -148,6 +148,7 @@ internal actual class ImageTranslationRepository(
                             } else {
                                 null
                             }
+                        val cacheHit = resultInfo != null
                         if (resultInfo == null) {
                             val input =
                                 ImageTranslationInput(
@@ -201,7 +202,6 @@ internal actual class ImageTranslationRepository(
                             }
                             resultInfo = inspectStaticImage(output)
                             currentCoroutineContext().ensureActive()
-                            if (identified) cacheOrNull { cache.put(ticket, key, output, resultInfo) }
                         }
                         val finalInfo = requireNotNull(resultInfo)
                         val originalName =
@@ -219,14 +219,17 @@ internal actual class ImageTranslationRepository(
                         fs.atomicMove(output, file)
                         currentCoroutineContext().ensureActive()
                         val fileUrl = imageTranslationFileUrl(file.toString())
-                        media.copy(
-                            url = fileUrl,
-                            previewUrl = fileUrl,
-                            width = finalInfo.width.toFloat(),
-                            height = finalInfo.height.toFloat(),
-                            customHeaders = null,
-                            proxy = ProxyRef.Unbound,
-                        )
+                        val translated =
+                            media.copy(
+                                url = fileUrl,
+                                previewUrl = fileUrl,
+                                width = finalInfo.width.toFloat(),
+                                height = finalInfo.height.toFloat(),
+                                customHeaders = null,
+                                proxy = ProxyRef.Unbound,
+                            )
+                        if (identified && !cacheHit) cacheOrNull { cache.put(ticket, key, file, finalInfo) }
+                        translated
                     }
                 }
             } finally {

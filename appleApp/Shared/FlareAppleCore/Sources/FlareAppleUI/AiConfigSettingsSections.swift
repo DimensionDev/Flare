@@ -218,7 +218,7 @@ private struct AiConfigSettingsSectionsContent: View {
     }
 
     private func editButton(field: AiConfigEditableField, value: String) -> some View {
-        AiConfigEditButton(title: field.titleKey, value: value, secret: field == .apiKey) {
+        AiConfigEditButton(title: field.titleKey, value: value) {
             state.beginEditing(field: field, value: value)
         }
         .transition(.opacity.combined(with: .move(edge: .top)))
@@ -276,7 +276,6 @@ private struct AiConfigEditSheet: View {
             title: field.titleKey,
             text: $state.editingText,
             placeholder: field.placeholder,
-            secret: field == .apiKey,
             multiline: field.isMultiline,
             suggestions: field == .serverUrl
                 ? (state.presenter.state.serverSuggestions as NSArray).cast(NSString.self).map(String.init)

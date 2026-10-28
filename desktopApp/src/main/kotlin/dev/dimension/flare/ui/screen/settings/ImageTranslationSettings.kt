@@ -32,7 +32,6 @@ import dev.dimension.flare.image_translation_input_format
 import dev.dimension.flare.image_translation_invalid_image
 import dev.dimension.flare.image_translation_lite
 import dev.dimension.flare.image_translation_loading
-import dev.dimension.flare.image_translation_manual_input
 import dev.dimension.flare.image_translation_mode
 import dev.dimension.flare.image_translation_model
 import dev.dimension.flare.image_translation_network
@@ -62,7 +61,9 @@ import dev.dimension.flare.image_translation_timeout
 import dev.dimension.flare.image_translation_title
 import dev.dimension.flare.image_translation_unsupported
 import dev.dimension.flare.image_translation_use_shared_description
+import dev.dimension.flare.settings_ai_config_model_error
 import dev.dimension.flare.settings_ai_config_model_loading
+import dev.dimension.flare.settings_ai_config_model_no_models
 import dev.dimension.flare.settings_ai_config_translate_provider_description
 import dev.dimension.flare.settings_ai_config_use_shared
 import dev.dimension.flare.settings_ai_config_value_empty_placeholder
@@ -89,7 +90,6 @@ internal fun ImageTranslationSettingsContent() {
 internal fun ImageTranslationSettingsContent(state: ImageTranslationSettingsPresenter.State) {
     var showProviders by remember { mutableStateOf(false) }
     var expandedChoice by remember(state.config.provider) { mutableStateOf<String?>(null) }
-    var editing by remember(state.config.provider) { mutableStateOf<TextEditDialogState?>(null) }
     ExpanderItem(
         heading = { Text(imageTranslationText("Image translation provider")) },
         caption = { Text(stringResource(Res.string.settings_ai_config_translate_provider_description)) },
@@ -136,7 +136,7 @@ internal fun ImageTranslationSettingsContent(state: ImageTranslationSettingsPres
         AnimatedVisibility(visible = !state.useSharedConfig || !field.isSharedAIField) {
             Column {
                 ExpanderItemSeparator()
-                if (options.isNotEmpty() || field.loading) {
+                if (field.isSelectionField) {
                     ExpanderItem(
                         heading = { Text(title) },
                         trailing = {
@@ -168,18 +168,22 @@ internal fun ImageTranslationSettingsContent(state: ImageTranslationSettingsPres
                                         expandedChoice = null
                                     })
                                 }
-                                if (field.choices.isEmpty()) {
-                                    MenuFlyoutItem(text = { Text(stringResource(Res.string.image_translation_manual_input)) }, onClick = {
-                                        expandedChoice = null
-                                        editing =
-                                            TextEditDialogState(
-                                                title = title,
-                                                placeholder = field.placeholder,
-                                                value = value,
-                                                singleLine = !field.multiline,
-                                                onConfirm = { state.setField(field.id, it.trim()) },
+                                if (!field.loading && options.isEmpty()) {
+                                    MenuFlyoutItem(
+                                        text = {
+                                            Text(
+                                                stringResource(
+                                                    if (field.failed) {
+                                                        Res.string.settings_ai_config_model_error
+                                                    } else {
+                                                        Res.string.settings_ai_config_model_no_models
+                                                    },
+                                                ),
                                             )
-                                    })
+                                        },
+                                        onClick = {},
+                                        enabled = false,
+                                    )
                                 }
                             }
                         },
@@ -213,7 +217,6 @@ internal fun ImageTranslationSettingsContent(state: ImageTranslationSettingsPres
             modifier = Modifier.padding(16.dp),
         )
     }
-    editing?.let { dialog -> SettingsTextEditDialog(dialog, onDismiss = { editing = null }) }
 }
 
 @Composable

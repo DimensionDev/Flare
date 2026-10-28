@@ -70,6 +70,8 @@ class ImageTranslationSettingsTest {
         compose.onNode(isDialog()).assertDoesNotExist()
         compose.onNodeWithText(label(R.string.image_translation_lite)).performClick()
         compose.onNodeWithText("ap-guangzhou").performScrollTo().performClick()
+        compose.onNodeWithText("Enter manually…").assertDoesNotExist()
+        compose.onNode(hasSetTextAction()).assertDoesNotExist()
         compose.onNodeWithText("ap-beijing").performClick()
         compose.runOnIdle {
             assertEquals(ImageTranslationProvider.Tencent, state.config.provider)
@@ -79,11 +81,12 @@ class ImageTranslationSettingsTest {
     }
 
     @Test
-    fun commonEditorMasksCredentialsAndOnlyCommitsConfirmedEdits() {
+    fun apiKeyIsVisibleAndEditorOnlyCommitsConfirmedEdits() {
         val state = State()
         show(state)
         compose.onNodeWithText(label(R.string.image_translation_api_key)).performScrollTo().performClick()
-        compose.onNode(hasSetTextAction()).assert(SemanticsMatcher.keyIsDefined(SemanticsProperties.Password))
+        compose.onNode(hasSetTextAction()).assertTextEquals("saved-key")
+        compose.onNode(SemanticsMatcher.keyIsDefined(SemanticsProperties.Password)).assertDoesNotExist()
         compose.onNode(hasSetTextAction()).performTextReplacement("discarded")
         compose.onNodeWithText(label(android.R.string.cancel)).performClick()
         compose.runOnIdle { assertEquals("saved-key", state.config.value("apiKey")) }
@@ -91,7 +94,7 @@ class ImageTranslationSettingsTest {
         compose.onNode(hasSetTextAction()).performTextReplacement("updated-key")
         compose.onNodeWithText(label(android.R.string.ok)).performClick()
         compose.runOnIdle { assertEquals("updated-key", state.config.value("apiKey")) }
-        compose.onNodeWithText("updated-key").assertDoesNotExist()
+        compose.onNodeWithText("updated-key").assertExists()
         val instrumentation = InstrumentationRegistry.getInstrumentation()
         val screenshot = instrumentation.uiAutomation.takeScreenshot()
         File(instrumentation.targetContext.externalCacheDir, "image-translation-settings.png").outputStream().use {
@@ -109,6 +112,7 @@ class ImageTranslationSettingsTest {
                     .withValue("apiKey", "")
                     .withValue("model", ""),
             )
+        state.modelSuggestions = listOf("basic-model", "custom-image-model")
         show(state)
         compose.onNodeWithText(label(R.string.image_translation_api_key)).assertDoesNotExist()
         compose.onNodeWithText(label(R.string.image_translation_model)).assertDoesNotExist()
@@ -117,8 +121,7 @@ class ImageTranslationSettingsTest {
         compose.onNodeWithText(label(R.string.settings_ai_config_use_shared)).performScrollTo().performClick()
         compose.runOnIdle { assertEquals("basic-key", state.config.value("apiKey")) }
         compose.onNodeWithText(label(R.string.image_translation_model)).performScrollTo().performClick()
-        compose.onNode(hasSetTextAction()).performTextReplacement("custom-image-model")
-        compose.onNodeWithText(label(android.R.string.ok)).performClick()
+        compose.onNodeWithText("custom-image-model").performClick()
         compose.onNodeWithText(label(R.string.settings_ai_config_use_shared)).performScrollTo().performClick()
         compose.onNodeWithText(label(R.string.image_translation_model)).assertDoesNotExist()
         compose.runOnIdle { assertEquals("basic-model", state.config.value("model")) }
@@ -137,12 +140,29 @@ class ImageTranslationSettingsTest {
             compose.runOnIdle { state.setUseSharedConfig(false) }
             compose.mainClock.advanceTimeBy(80)
             val entering = prompt.fetchSemanticsNode().boundsInRoot.top
+            val enteringWidth =
+                compose
+                    .onNodeWithText(label(R.string.image_translation_api_key))
+                    .fetchSemanticsNode()
+                    .boundsInRoot.width
             compose.mainClock.advanceTimeBy(1_000)
             val opened = prompt.fetchSemanticsNode().boundsInRoot.top
+            val fullWidth =
+                compose
+                    .onNodeWithText(label(R.string.image_translation_api_key))
+                    .fetchSemanticsNode()
+                    .boundsInRoot.width
+            assertEquals("Column visibility must keep its full width while entering", fullWidth, enteringWidth, 1f)
             assertTrue("Expected an intermediate expanded layout: $closed < $entering < $opened", closed < entering && entering < opened)
             compose.runOnIdle { state.setUseSharedConfig(true) }
             compose.mainClock.advanceTimeBy(80)
             val leaving = prompt.fetchSemanticsNode().boundsInRoot.top
+            val leavingWidth =
+                compose
+                    .onNodeWithText(label(R.string.image_translation_api_key))
+                    .fetchSemanticsNode()
+                    .boundsInRoot.width
+            assertEquals("Column visibility must keep its full width while leaving", fullWidth, leavingWidth, 1f)
             assertTrue("Expected an intermediate collapsed layout: $closed < $leaving < $opened", closed < leaving && leaving < opened)
             compose.mainClock.advanceTimeBy(1_000)
             assertEquals(closed, prompt.fetchSemanticsNode().boundsInRoot.top, 1f)
@@ -179,30 +199,36 @@ class ImageTranslationSettingsTest {
     }
 
     @Test
-    fun discoveredModelsCanBeSelectedAndManualInputSurvivesLoadingAndEmptyResults() {
-        val state = State()
+    fun modelSelectorsNeverOfferTextInputWhileLoadingEmptyOrFailed() {
+        val state =
+            State(
+                ImageTranslationConfig(
+                    ImageTranslationProvider.OpenAIImages,
+                ).withValue("apiKey", "saved-key").withValue("model", "existing-image"),
+            )
         state.modelLoading = true
         show(state)
         compose.onNodeWithText(label(R.string.image_translation_model)).performScrollTo().performClick()
         compose.onNodeWithText(label(R.string.settings_ai_config_model_loading)).assertExists()
-        compose.onNodeWithText(label(R.string.image_translation_manual_input)).performClick()
-        compose.onNode(hasSetTextAction()).performTextReplacement("manual-image")
-        compose.onNodeWithText(label(android.R.string.ok)).performClick()
+        compose.onNodeWithText("Enter manually…").assertDoesNotExist()
+        compose.onNode(hasSetTextAction()).assertDoesNotExist()
         compose.runOnIdle {
             state.modelLoading = false
             state.modelSuggestions = listOf("detected-image")
-            assertEquals("manual-image", state.config.value("model"))
         }
-        compose.onNodeWithText("manual-image").performScrollTo().performClick()
         compose.onNodeWithText("detected-image").performClick()
         compose.runOnIdle {
             assertEquals("detected-image", state.config.value("model"))
             state.modelSuggestions = emptyList()
         }
-        compose.onNodeWithText(label(R.string.image_translation_model)).performScrollTo().performClick()
-        compose.onNode(hasSetTextAction()).performTextReplacement("fallback-image")
-        compose.onNodeWithText(label(android.R.string.ok)).performClick()
-        compose.runOnIdle { assertEquals("fallback-image", state.config.value("model")) }
+        compose.onNodeWithText("detected-image").performScrollTo().performClick()
+        compose.onNodeWithText(label(R.string.settings_ai_config_model_no_models)).assertExists()
+        compose.onNode(hasSetTextAction()).assertDoesNotExist()
+        compose.runOnIdle { state.modelFailed = true }
+        compose.onNodeWithText(label(R.string.settings_ai_config_model_error)).assertExists()
+        compose.onNodeWithText("Enter manually…").assertDoesNotExist()
+        compose.onNode(hasSetTextAction()).assertDoesNotExist()
+        compose.runOnIdle { assertEquals("detected-image", state.config.value("model")) }
     }
 
     private fun show(state: State) {
@@ -224,6 +250,7 @@ class ImageTranslationSettingsTest {
         private var saved by mutableStateOf(initial)
         var modelSuggestions by mutableStateOf(emptyList<String>())
         var modelLoading by mutableStateOf(false)
+        var modelFailed by mutableStateOf(false)
         private val basic =
             AppSettings.AiConfig(
                 type = AppSettings.AiConfig.Type.OpenAI("https://basic.example/v1", "basic-key", "basic-model"),
@@ -234,7 +261,7 @@ class ImageTranslationSettingsTest {
             imageTranslationFields(config.provider).map {
                 when {
                     it.id == "model" -> {
-                        it.copy(suggestions = modelSuggestions, loading = modelLoading)
+                        it.copy(suggestions = modelSuggestions, loading = modelLoading, failed = modelFailed)
                     }
 
                     it.id == "baseUrl" && config.provider == ImageTranslationProvider.OpenAIImages -> {

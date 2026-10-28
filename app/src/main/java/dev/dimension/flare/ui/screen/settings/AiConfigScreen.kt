@@ -254,7 +254,6 @@ internal fun AiConfigScreen(onBack: () -> Unit) {
                             value = state.openAIApiKey,
                             shapes = ListItemDefaults.item(),
                             placeholder = apiKeyHint,
-                            secret = true,
                             onConfirm = state::setOpenAIApiKey,
                         )
                     }

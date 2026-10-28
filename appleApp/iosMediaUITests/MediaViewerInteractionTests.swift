@@ -110,25 +110,21 @@ final class MediaViewerInteractionTests: XCTestCase {
         XCTAssertTrue(server.waitForExistence(timeout: 5))
         XCTAssertTrue(server.label.contains("http://127.0.0.1:18473/v1"))
         XCTAssertTrue(apiKey.waitForExistence(timeout: 5))
-        XCTAssertTrue(apiKey.label.contains("••••••••"))
+        XCTAssertTrue(apiKey.label.contains("prefill-fixture-key"))
         apiKey.tap()
-        let secure = app.secureTextFields.firstMatch
-        XCTAssertTrue(secure.waitForExistence(timeout: 5))
-        XCTAssertFalse((secure.value as? String ?? "").isEmpty)
+        let editor = app.textFields.firstMatch
+        XCTAssertTrue(editor.waitForExistence(timeout: 5))
+        XCTAssertEqual(editor.value as? String, "prefill-fixture-key")
+        XCTAssertFalse(app.secureTextFields.firstMatch.exists)
         app.navigationBars["API key"].buttons["Cancel"].tap()
         app.swipeUp()
         XCTAssertTrue(model.waitForExistence(timeout: 5))
         XCTAssertTrue(model.label.contains("prefill-fixture-image"))
         model.tap()
-        app.buttons["Enter manually…"].tap()
-        let editor = app.textFields.firstMatch
-        XCTAssertTrue(editor.waitForExistence(timeout: 5))
-        XCTAssertEqual(editor.value as? String, "prefill-fixture-image")
-        editor.coordinate(withNormalizedOffset: CGVector(dx: 0.95, dy: 0.5)).tap()
-        editor.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: "prefill-fixture-image".count) + "custom-image")
-        app.navigationBars["Image model"].buttons["Done"].tap()
+        XCTAssertFalse(app.buttons["Enter manually…"].exists)
+        app.buttons["offline-image-alt"].tap()
         XCTAssertTrue(model.waitForExistence(timeout: 5))
-        XCTAssertTrue(model.label.contains("custom-image"))
+        XCTAssertTrue(model.label.contains("offline-image-alt"))
         app.swipeDown()
         shared.tap()
         XCTAssertEqual(shared.value as? String, "1")
@@ -138,7 +134,7 @@ final class MediaViewerInteractionTests: XCTestCase {
         app.swipeUp()
         XCTAssertTrue(model.waitForExistence(timeout: 5))
         XCTAssertTrue(model.label.contains("prefill-fixture-image"))
-        XCTAssertFalse(model.label.contains("custom-image"))
+        XCTAssertFalse(model.label.contains("offline-image-alt"))
     }
 
     @MainActor
@@ -175,7 +171,7 @@ final class MediaViewerInteractionTests: XCTestCase {
     }
 
     @MainActor
-    func testImageTranslationDiscoversModelsAndAllowsManualInputAndRegionSelection() {
+    func testImageTranslationSelectsDiscoveredModelsAndRegionsWithoutManualInput() {
         let app = XCUIApplication()
         app.launchArguments = ["--media-viewer-test", "--translation-settings", "--image-translation-fixture", "-AppleLanguages", "(en)", "-AppleLocale", "en_US"]
         app.launch()
@@ -187,17 +183,9 @@ final class MediaViewerInteractionTests: XCTestCase {
         let model = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Image model")).firstMatch
         XCTAssertTrue(model.waitForExistence(timeout: 5))
         model.tap()
+        XCTAssertFalse(app.buttons["Enter manually…"].exists)
         app.buttons["offline-image-alt"].tap()
         XCTAssertTrue(model.label.contains("offline-image-alt"))
-        model.tap()
-        app.buttons["Enter manually…"].tap()
-        let editor = app.textFields.firstMatch
-        XCTAssertTrue(editor.waitForExistence(timeout: 5))
-        editor.tap()
-        editor.typeText("manual")
-        app.navigationBars["Image model"].buttons["Done"].tap()
-        XCTAssertTrue(model.waitForExistence(timeout: 5))
-        XCTAssertTrue(model.label.contains("manual"))
         app.swipeDown()
         let provider = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Image translation provider")).firstMatch
         provider.tap()
@@ -206,6 +194,8 @@ final class MediaViewerInteractionTests: XCTestCase {
         let region = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Region")).firstMatch
         XCTAssertTrue(region.waitForExistence(timeout: 5))
         region.tap()
+        XCTAssertFalse(app.buttons["Enter manually…"].exists)
+        XCTAssertFalse(app.textFields.firstMatch.exists)
         app.buttons["ap-beijing"].tap()
         XCTAssertTrue(region.label.contains("ap-beijing"))
     }
@@ -219,22 +209,22 @@ final class MediaViewerInteractionTests: XCTestCase {
         let apiKey = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "API key")).firstMatch
         XCTAssertTrue(apiKey.waitForExistence(timeout: 5))
         apiKey.tap()
-        let secureField = app.secureTextFields.firstMatch
-        XCTAssertTrue(secureField.waitForExistence(timeout: 5))
-        let initialValue = secureField.value as? String
-        secureField.tap()
-        secureField.typeText("discarded")
+        let editor = app.textFields.firstMatch
+        XCTAssertTrue(editor.waitForExistence(timeout: 5))
+        XCTAssertFalse(app.secureTextFields.firstMatch.exists)
+        let initialValue = editor.value as? String
+        editor.tap()
+        editor.typeText("discarded")
         app.buttons["Cancel"].tap()
         apiKey.tap()
-        XCTAssertTrue(secureField.waitForExistence(timeout: 5))
-        XCTAssertEqual(secureField.value as? String, initialValue)
-        secureField.tap()
-        secureField.typeText("offline-key")
+        XCTAssertTrue(editor.waitForExistence(timeout: 5))
+        XCTAssertEqual(editor.value as? String, initialValue)
+        editor.tap()
+        editor.typeText("offline-key")
         app.navigationBars["API key"].buttons["Done"].tap()
         XCTAssertTrue(apiKey.waitForExistence(timeout: 5))
-        let saved = NSPredicate { _, _ in apiKey.label.contains("••••••••") }
+        let saved = NSPredicate { _, _ in apiKey.label.contains("offline-key") }
         XCTAssertEqual(XCTWaiter.wait(for: [XCTNSPredicateExpectation(predicate: saved, object: nil)], timeout: 5), .completed)
-        XCTAssertFalse(apiKey.label.contains("offline-key"))
         let attachment = XCTAttachment(screenshot: app.screenshot())
         attachment.name = "image-translation-native-settings"
         attachment.lifetime = .keepAlways

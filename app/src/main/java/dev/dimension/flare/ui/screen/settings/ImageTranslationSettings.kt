@@ -2,6 +2,7 @@ package dev.dimension.flare.ui.screen.settings
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -21,26 +22,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.R
-import dev.dimension.flare.data.datastore.model.ImageTranslationField
 import dev.dimension.flare.data.datastore.model.ImageTranslationProvider
 import dev.dimension.flare.ui.component.FlareDropdownMenu
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.settings.ImageTranslationSettingsPresenter
 import dev.dimension.flare.ui.theme.segmentedShapes2
-import kotlinx.collections.immutable.toImmutableList
 import moe.tlaster.precompose.molecule.producePresenter
 
 @Composable
-internal fun ImageTranslationSettingsSection() {
+internal fun ColumnScope.ImageTranslationSettingsSection() {
     val state by producePresenter("image_translation_settings") { remember { ImageTranslationSettingsPresenter() }() }
     ImageTranslationSettingsSection(state)
 }
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-internal fun ImageTranslationSettingsSection(state: ImageTranslationSettingsPresenter.State) {
+internal fun ColumnScope.ImageTranslationSettingsSection(state: ImageTranslationSettingsPresenter.State) {
     var showProviders by remember { mutableStateOf(false) }
-    var editing by remember(state.config.provider) { mutableStateOf<ImageTranslationField?>(null) }
     var expandedChoice by remember(state.config.provider) { mutableStateOf<String?>(null) }
     val fieldOffset = if (state.config.provider == ImageTranslationProvider.OpenAIImages) 2 else 1
     val rowCount = state.fields.size + fieldOffset
@@ -89,7 +87,7 @@ internal fun ImageTranslationSettingsSection(state: ImageTranslationSettingsPres
         val value = state.config.value(field.id)
         val options = field.choices.ifEmpty { field.suggestions }
         AnimatedVisibility(visible = !state.useSharedConfig || !field.isSharedAIField) {
-            if (options.isNotEmpty() || field.loading) {
+            if (field.isSelectionField) {
                 SegmentedListItem(
                     checked = expandedChoice == field.id,
                     onCheckedChange = { expanded -> expandedChoice = if (expanded) field.id else null },
@@ -122,11 +120,22 @@ internal fun ImageTranslationSettingsSection(state: ImageTranslationSettingsPres
                                         expandedChoice = null
                                     })
                                 }
-                                if (field.choices.isEmpty()) {
-                                    DropdownMenuItem(text = { Text(stringResource(R.string.image_translation_manual_input)) }, onClick = {
-                                        expandedChoice = null
-                                        editing = field
-                                    })
+                                if (!field.loading && options.isEmpty()) {
+                                    DropdownMenuItem(
+                                        text = {
+                                            Text(
+                                                stringResource(
+                                                    if (field.failed) {
+                                                        R.string.settings_ai_config_model_error
+                                                    } else {
+                                                        R.string.settings_ai_config_model_no_models
+                                                    },
+                                                ),
+                                            )
+                                        },
+                                        onClick = {},
+                                        enabled = false,
+                                    )
                                 }
                             }
                         }
@@ -160,22 +169,6 @@ internal fun ImageTranslationSettingsSection(state: ImageTranslationSettingsPres
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(16.dp),
-        )
-    }
-    editing?.let { field ->
-        TextEditDialog(
-            title = imageTranslationText(field.title),
-            placeholder = field.placeholder,
-            value = state.config.value(field.id),
-            suggestions = field.editSuggestions.toImmutableList(),
-            hint = "",
-            secret = field.secret,
-            singleLine = !field.multiline,
-            onDismiss = { editing = null },
-            onConfirm = { value ->
-                state.setField(field.id, value.trim())
-                editing = null
-            },
         )
     }
 }

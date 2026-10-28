@@ -70,6 +70,19 @@ class ImageTranslationConfigTest {
     }
 
     @Test
+    fun modelAndRegionRemainSelectorsWithoutCandidatesAndApiKeysArePlainText() {
+        ImageTranslationProvider.entries.forEach { provider ->
+            imageTranslationFields(provider).forEach { field ->
+                if (field.id == "model" || field.id == "region") {
+                    assertTrue(field.copy(suggestions = emptyList(), choices = emptyList(), loading = false).isSelectionField)
+                }
+                if (field.id == "apiKey") assertFalse(field.secret)
+            }
+        }
+        assertTrue(imageTranslationFields(ImageTranslationProvider.Tencent).first { it.id == "secretKey" }.secret)
+    }
+
+    @Test
     fun oldProtobufAndJsonKeepExistingSettingsAndDisableImageTranslation() {
         val old =
             PreviousSettings(

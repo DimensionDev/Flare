@@ -1849,7 +1849,6 @@ internal fun SettingsScreen(
                                     title = apiKeyTitle,
                                     value = aiConfigState.openAIApiKey,
                                     placeholder = apiKeyHint,
-                                    secret = true,
                                     onConfirm = aiConfigState::setOpenAIApiKey,
                                 )
                                 ExpanderItemSeparator()

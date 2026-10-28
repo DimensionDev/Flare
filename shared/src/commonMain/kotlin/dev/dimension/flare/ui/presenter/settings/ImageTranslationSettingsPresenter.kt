@@ -75,7 +75,11 @@ public class ImageTranslationSettingsPresenter : PresenterBase<ImageTranslationS
                 imageTranslationFields(config.provider).map { field ->
                     when {
                         field.id == "model" && canDiscover -> {
-                            field.copy(suggestions = (models as? UiState.Success)?.data.orEmpty(), loading = models is UiState.Loading)
+                            field.copy(
+                                suggestions = (models as? UiState.Success)?.data.orEmpty(),
+                                loading = models is UiState.Loading,
+                                failed = models is UiState.Error,
+                            )
                         }
 
                         field.id == "baseUrl" && config.provider == ImageTranslationProvider.OpenAIImages -> {

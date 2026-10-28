@@ -105,6 +105,8 @@ class ImageTranslationSettingsTest {
         compose.onNodeWithText("Pro").performScrollTo().performClick()
         compose.onNodeWithText("Lite").performClick()
         compose.onNodeWithText("ap-guangzhou").performScrollTo().performClick()
+        compose.onNodeWithText("Enter manually…").assertDoesNotExist()
+        compose.onNode(hasSetTextAction()).assertDoesNotExist()
         compose.onNodeWithText("ap-beijing").performClick()
         compose.runOnIdle {
             assertEquals(ImageTranslationProvider.Tencent, state.config.provider)
@@ -114,11 +116,12 @@ class ImageTranslationSettingsTest {
     }
 
     @Test
-    fun commonEditorMasksCredentialsAndOnlyCommitsConfirmedEdits() {
+    fun apiKeyIsVisibleAndEditorOnlyCommitsConfirmedEdits() {
         val state = State()
         show(state)
         compose.onNodeWithContentDescription("API key").performScrollTo().performClick()
-        compose.onNode(hasSetTextAction()).assert(SemanticsMatcher.keyIsDefined(SemanticsProperties.Password))
+        compose.onNode(hasSetTextAction()).assertTextEquals("saved-key")
+        compose.onNode(SemanticsMatcher.keyIsDefined(SemanticsProperties.Password)).assertDoesNotExist()
         compose.onNode(hasSetTextAction()).performTextReplacement("discarded")
         compose.onNodeWithText("Cancel").performClick()
         compose.runOnIdle { assertEquals("saved-key", state.config.value("apiKey")) }
@@ -126,7 +129,7 @@ class ImageTranslationSettingsTest {
         compose.onNode(hasSetTextAction()).performTextReplacement("updated-key")
         compose.onNodeWithText("OK").performClick()
         compose.runOnIdle { assertEquals("updated-key", state.config.value("apiKey")) }
-        compose.onNodeWithText("updated-key").assertDoesNotExist()
+        compose.onNodeWithText("updated-key").assertExists()
         compose.onNodeWithContentDescription("Service URL").performScrollTo().performClick()
         compose.onNode(hasSetTextAction()).performTextReplacement("https://images.example/v1")
         compose.onNodeWithText("OK").performClick()
@@ -147,18 +150,18 @@ class ImageTranslationSettingsTest {
                     .withValue("apiKey", "")
                     .withValue("model", ""),
             )
+        state.modelSuggestions = listOf("basic-model", "custom-image-model")
         show(state)
         compose.onNodeWithContentDescription("API key").assertDoesNotExist()
-        compose.onNodeWithContentDescription("Image model").assertDoesNotExist()
+        compose.onNodeWithText("Image model").assertDoesNotExist()
         compose.onNodeWithContentDescription("Service URL").assertDoesNotExist()
         compose.onNodeWithContentDescription("Translation prompt").assertExists()
         compose.onNode(SemanticsMatcher.keyIsDefined(SemanticsProperties.ToggleableState)).performScrollTo().performClick()
         compose.runOnIdle { assertEquals("basic-key", state.config.value("apiKey")) }
-        compose.onNodeWithContentDescription("Image model").performScrollTo().performClick()
-        compose.onNode(hasSetTextAction()).performTextReplacement("custom-image-model")
-        compose.onNodeWithText("OK").performClick()
+        compose.onNodeWithText("basic-model").performScrollTo().performClick()
+        compose.onNodeWithText("custom-image-model").performClick()
         compose.onNode(SemanticsMatcher.keyIsDefined(SemanticsProperties.ToggleableState)).performScrollTo().performClick()
-        compose.onNodeWithContentDescription("Image model").assertDoesNotExist()
+        compose.onNodeWithText("Image model").assertDoesNotExist()
         compose.runOnIdle { assertEquals("basic-model", state.config.value("model")) }
         compose.onNode(SemanticsMatcher.keyIsDefined(SemanticsProperties.ToggleableState)).performClick()
         compose.runOnIdle { assertEquals("basic-model", state.config.value("model")) }
@@ -217,30 +220,36 @@ class ImageTranslationSettingsTest {
     }
 
     @Test
-    fun discoveredModelsCanBeSelectedAndManualInputSurvivesLoadingAndEmptyResults() {
-        val state = State()
+    fun modelSelectorsNeverOfferTextInputWhileLoadingEmptyOrFailed() {
+        val state =
+            State(
+                ImageTranslationConfig(
+                    ImageTranslationProvider.OpenAIImages,
+                ).withValue("apiKey", "saved-key").withValue("model", "existing-image"),
+            )
         state.modelLoading = true
         show(state)
-        compose.onNodeWithText("Not set").performScrollTo().performClick()
+        compose.onNodeWithText("existing-image").performScrollTo().performClick()
         compose.onNodeWithText("Loading models…").assertExists()
-        compose.onNodeWithText("Enter manually…").performClick()
-        compose.onNode(hasSetTextAction()).performTextReplacement("manual-image")
-        compose.onNodeWithText("OK").performClick()
+        compose.onNodeWithText("Enter manually…").assertDoesNotExist()
+        compose.onNode(hasSetTextAction()).assertDoesNotExist()
         compose.runOnIdle {
             state.modelLoading = false
             state.modelSuggestions = listOf("detected-image")
-            assertEquals("manual-image", state.config.value("model"))
         }
-        compose.onNodeWithText("manual-image").performScrollTo().performClick()
         compose.onNodeWithText("detected-image").performClick()
         compose.runOnIdle {
             assertEquals("detected-image", state.config.value("model"))
             state.modelSuggestions = emptyList()
         }
-        compose.onNodeWithContentDescription("Image model").performScrollTo().performClick()
-        compose.onNode(hasSetTextAction()).performTextReplacement("fallback-image")
-        compose.onNodeWithText("OK").performClick()
-        compose.runOnIdle { assertEquals("fallback-image", state.config.value("model")) }
+        compose.onNodeWithText("detected-image").performScrollTo().performClick()
+        compose.onNodeWithText("No models").assertExists()
+        compose.onNode(hasSetTextAction()).assertDoesNotExist()
+        compose.runOnIdle { state.modelFailed = true }
+        compose.onNodeWithText("Failed to load models").assertExists()
+        compose.onNodeWithText("Enter manually…").assertDoesNotExist()
+        compose.onNode(hasSetTextAction()).assertDoesNotExist()
+        compose.runOnIdle { assertEquals("detected-image", state.config.value("model")) }
     }
 
     private fun show(state: State) {
@@ -259,6 +268,7 @@ class ImageTranslationSettingsTest {
         private var saved by mutableStateOf(initial)
         var modelSuggestions by mutableStateOf(emptyList<String>())
         var modelLoading by mutableStateOf(false)
+        var modelFailed by mutableStateOf(false)
         private val basic =
             AppSettings.AiConfig(
                 type = AppSettings.AiConfig.Type.OpenAI("https://basic.example/v1", "basic-key", "basic-model"),
@@ -269,7 +279,7 @@ class ImageTranslationSettingsTest {
             imageTranslationFields(config.provider).map {
                 when {
                     it.id == "model" -> {
-                        it.copy(suggestions = modelSuggestions, loading = modelLoading)
+                        it.copy(suggestions = modelSuggestions, loading = modelLoading, failed = modelFailed)
                     }
 
                     it.id == "baseUrl" && config.provider == ImageTranslationProvider.OpenAIImages -> {

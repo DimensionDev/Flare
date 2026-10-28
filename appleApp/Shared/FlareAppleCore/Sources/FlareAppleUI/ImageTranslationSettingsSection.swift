@@ -55,16 +55,14 @@ struct ImageTranslationSettingsSection: View {
             ForEach(state.presenter.state.fields, id: \.id) { field in
                 if !state.presenter.state.useSharedConfig || !field.isSharedAIField {
                     Group {
-                        if !field.choices.isEmpty || !field.suggestions.isEmpty || field.loading {
+                        if field.isSelectionField {
                             let value = state.presenter.state.config.value(id: field.id)
                             let options = field.choices.isEmpty ? field.suggestions : field.choices
                             Picker(selection: Binding(
                                 get: { Optional(value) },
                                 set: { selection in
-                                    if let selection {
+                                    if let selection, options.contains(selection) {
                                         state.presenter.state.setField(id: field.id, value: selection)
-                                    } else {
-                                        state.beginEditing(field)
                                     }
                                 }
                             )) {
@@ -74,13 +72,21 @@ struct ImageTranslationSettingsSection: View {
                                 ForEach(options, id: \.self) { value in
                                     Text(FlareAppleUILocalization.string(field.choiceTitle(value: value))).tag(Optional(value))
                                 }
-                                if field.choices.isEmpty {
-                                    Text("image_translation_manual_input", bundle: FlareAppleUILocalization.bundle).tag(nil as String?)
+                                if field.loading || options.isEmpty {
+                                    Text(
+                                        field.loading ? "Loading models..." : field.failed ? "Failed to load models" : "No models available",
+                                        bundle: FlareAppleUILocalization.bundle
+                                    )
+                                    .tag(nil as String?)
+                                    .disabled(true)
                                 }
                             } label: {
                                 Text(LocalizedStringKey(field.title), bundle: FlareAppleUILocalization.bundle)
-                                if field.loading {
-                                    Text("Loading models...", bundle: FlareAppleUILocalization.bundle)
+                                if field.loading || options.isEmpty {
+                                    Text(
+                                        field.loading ? "Loading models..." : field.failed ? "Failed to load models" : "No models available",
+                                        bundle: FlareAppleUILocalization.bundle
+                                    )
                                 }
                             }
                         } else {

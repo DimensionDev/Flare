@@ -9,9 +9,11 @@ import dev.dimension.flare.data.repository.AuthoredPlugin
 import dev.dimension.flare.data.repository.PluginAuthoringPhase
 import dev.dimension.flare.feature.plugin.PluginSubsystemV1
 import dev.dimension.flare.feature.plugin.development.PluginDevelopmentSessionV1
+import dev.dimension.flare.feature.plugin.github.GitHubPluginClient
 import dev.dimension.flare.feature.plugin.installer.TestFppFactory
 import dev.dimension.flare.feature.plugin.login.PluginOAuthPendingStoreV1
 import dev.dimension.flare.feature.plugin.login.PluginOAuthPendingV1
+import dev.dimension.flare.feature.plugin.management.PluginManagementPresenterV1
 import dev.dimension.flare.feature.plugin.runtime.PluginSessionRetiredException
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -23,6 +25,8 @@ import dev.dimension.flare.model.PlatformRuntimeData
 import dev.dimension.flare.model.PlatformSpec
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiIcon
+import io.ktor.client.engine.mock.MockEngine
+import io.ktor.client.engine.mock.respond
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
@@ -30,6 +34,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -38,6 +43,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestCoroutineScheduler
+import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.KSerializer
 import okio.ByteString.Companion.decodeBase64
@@ -46,6 +52,8 @@ import okio.ForwardingFileSystem
 import okio.Path
 import okio.Path.Companion.toOkioPath
 import java.nio.file.Files
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -61,10 +69,17 @@ class PluginAuthoringServiceV1Test {
     private lateinit var subsystem: PluginSubsystemV1
     private lateinit var service: PluginAuthoringServiceV1
     private lateinit var registry: PlatformRegistry
+
+    @Volatile private var onRead: ((Path) -> Unit)? = null
     private var failingIndexWrites = 0
     private var onIndexFailure: (() -> Unit)? = null
     private val fileSystem =
         object : ForwardingFileSystem(FileSystem.SYSTEM) {
+            override fun source(file: Path): okio.Source {
+                onRead?.invoke(file)
+                return super.source(file)
+            }
+
             override fun atomicMove(
                 source: Path,
                 target: Path,
@@ -101,6 +116,126 @@ class PluginAuthoringServiceV1Test {
             scope.coroutineContext[Job]!!.cancelAndJoin()
             subsystem.runtimePool.close()
             FileSystem.SYSTEM.deleteRecursively(root)
+        }
+
+    @Test
+    fun directoryValidationDoesNotBlockAnotherPluginApplying() =
+        runBlocking<Unit> {
+            val first = service.create()
+            generate(first)
+            await(first.id, PluginAuthoringPhase.Applied)
+            val development = startDevelopment(first)
+            val other = service.create()
+            val run = service.begin(other.id)
+            service.write(other.id, run, sources(other))
+            val entered = CompletableDeferred<Unit>()
+            val release = CountDownLatch(1)
+            val script = root / "directory-plugin" / "plugin.js"
+            onRead = { path ->
+                if (path == script) {
+                    entered.complete(Unit)
+                    check(release.await(10, TimeUnit.SECONDS)) { "Directory read was not released" }
+                }
+            }
+            try {
+                withTimeout(5_000) { entered.await() }
+                service.finish(other.id, run, true)
+                val approval = await(other.id, PluginAuthoringPhase.AwaitingApproval)
+                service.approve(other.id, approval.revision)
+                await(other.id, PluginAuthoringPhase.Applied)
+                assertTrue(development.state.value.active)
+                assertTrue(other.id in subsystem.running.value.plugins)
+            } finally {
+                onRead = null
+                release.countDown()
+                development.stop()
+            }
+        }
+
+    @Test
+    fun localImportPreparationDoesNotBlockApplicationAndSurvivesCleanup() =
+        runBlocking<Unit> {
+            val archive = root / "import.fpp"
+            TestFppFactory.write(archive)
+            val entered = CompletableDeferred<Unit>()
+            val release = CountDownLatch(1)
+            val source =
+                object : okio.ForwardingSource(fileSystem.source(archive)) {
+                    override fun read(
+                        sink: okio.Buffer,
+                        byteCount: Long,
+                    ): Long {
+                        entered.complete(Unit)
+                        check(release.await(10, TimeUnit.SECONDS)) { "Import read was not released" }
+                        return super.read(sink, byteCount)
+                    }
+                }
+            val presenter = PluginManagementPresenterV1(subsystem, scope)
+            val importing = async { presenter.inspect(source) }
+            try {
+                withTimeout(5_000) { entered.await() }
+                val plugin = service.create()
+                generate(plugin)
+                await(plugin.id, PluginAuthoringPhase.Applied)
+                subsystem.installer.cleanup()
+                assertTrue(fileSystem.exists(subsystem.stateStore.paths.incoming))
+                release.countDown()
+                importing.await()
+                assertNotNull(presenter.state.value.pendingInstall)
+                presenter.confirmInstall()
+                assertTrue(plugin.id in subsystem.running.value.plugins)
+                assertEquals(2, subsystem.stateStore.desired.value.plugins.size)
+            } finally {
+                release.countDown()
+                importing.cancelAndJoin()
+                source.close()
+                presenter.close()
+            }
+        }
+
+    @Test
+    fun githubDownloadDoesNotBlockAnotherPluginApplying() =
+        runBlocking<Unit> {
+            val entered = CompletableDeferred<Unit>()
+            val client =
+                GitHubPluginClient(
+                    MockEngine { request ->
+                        when {
+                            request.url.encodedPath.endsWith("/tags") -> {
+                                respond("""[{"name":"v1.0.0","commit":{"sha":"${"a".repeat(40)}"}}]""")
+                            }
+
+                            "/zipball/" in request.url.encodedPath -> {
+                                entered.complete(Unit)
+                                awaitCancellation()
+                            }
+
+                            else -> {
+                                respond("""{"id":42,"name":"repo","owner":{"login":"owner"},"private":false}""")
+                            }
+                        }
+                    },
+                )
+            val presenter = PluginManagementPresenterV1(subsystem, scope, github = client)
+            presenter.loadGitHubRepository("https://github.com/owner/repo")
+            val download = launch { presenter.inspectGitHub("v1.0.0") }
+            try {
+                withTimeout(5_000) { entered.await() }
+                val plugin = service.create()
+                generate(plugin)
+                await(plugin.id, PluginAuthoringPhase.Applied)
+                assertTrue(presenter.state.value.busy)
+                assertTrue(plugin.id in subsystem.running.value.plugins)
+            } finally {
+                download.cancelAndJoin()
+                presenter.close()
+                client.close()
+            }
+            assertFalse(presenter.state.value.busy)
+            assertTrue(
+                subsystem.stateStore.desired.value.plugins
+                    .isNotEmpty(),
+            )
         }
 
     @Test

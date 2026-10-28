@@ -28,6 +28,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import okio.Buffer
@@ -95,7 +96,7 @@ public class PluginManagementPresenterV1(
     private val mutableState = MutableStateFlow(snapshot())
     public val state: StateFlow<PluginManagementStateV1> = mutableState.asStateFlow()
 
-    private val actionMutex = subsystem.mutationMutex
+    private val actionMutex = Mutex()
 
     private val observation: Job =
         combine(
@@ -217,7 +218,7 @@ public class PluginManagementPresenterV1(
         }
 
     public suspend fun confirmInstall() {
-        runAction {
+        runMutation {
             val prepared = requireNotNull(preview) { "No plugin installation is pending" }
             requireNotDeveloping(prepared.pluginId)
             subsystem.installer.commit(prepared, confirmed = true)
@@ -246,7 +247,7 @@ public class PluginManagementPresenterV1(
             runAuthoringAction { subsystem.authoring.setEnabled(pluginId, enabled) }
             return
         }
-        runAction {
+        runMutation {
             requireNotDeveloping(pluginId)
             subsystem.stateStore.setEnabled(pluginId, enabled)
             mutableState.value = snapshot()
@@ -262,7 +263,7 @@ public class PluginManagementPresenterV1(
             runAuthoringAction { subsystem.authoring.delete(pluginId) }
             return
         }
-        runAction {
+        runMutation {
             requireNotDeveloping(pluginId)
             subsystem.stateStore.uninstall(pluginId)
             updates.remove(pluginId)
@@ -271,18 +272,18 @@ public class PluginManagementPresenterV1(
     }
 
     public suspend fun retryRuntime(pluginId: String) {
-        runAction {
+        runMutation {
             subsystem.runtimePool.retry(pluginId)
             mutableState.value = snapshot()
         }
     }
 
     public suspend fun cleanup() {
-        runAction { subsystem.installer.cleanup() }
+        runMutation { subsystem.installer.cleanup() }
     }
 
     public suspend fun rebuildIndex() {
-        runAction {
+        runMutation {
             subsystem.installer.rebuildIndex()
             mutableState.value = snapshot()
         }
@@ -352,6 +353,8 @@ public class PluginManagementPresenterV1(
             throw error
         }
     }
+
+    private suspend fun <T> runMutation(block: suspend () -> T): T = runAction { subsystem.mutationMutex.withLock { block() } }
 
     private suspend fun <T> runAction(block: suspend () -> T): T =
         actionMutex.withLock {

@@ -23,6 +23,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import okio.Path.Companion.toPath
@@ -68,7 +69,7 @@ public class PluginDevelopmentSessionV1 internal constructor(
                 )
         }
     public val state: StateFlow<PluginDevelopmentStateV1> = subsystem.developmentState
-    private val mutex = subsystem.mutationMutex
+    private val mutex = Mutex()
     private val switcher = PluginRuntimeSwitcherV1(subsystem, registry, accounts, scope)
     private var watcher: Job? = null
     private var candidate: Candidate? = null
@@ -108,44 +109,47 @@ public class PluginDevelopmentSessionV1 internal constructor(
         action {
             validateDirectory(checkNotNull(state.value.directory))
             val prepared = checkNotNull(candidate) { "Fix validation errors before reloading" }
-            require(
-                !confirmed || state.value.reviewHash == prepared.source.hash,
-            ) { "Plugin files changed; review the new version before reloading" }
-            val previous = active ?: subsystem.running.value.plugins[prepared.validated.manifest.id]
-            val permissions = prepared.validated.manifest.sensitivePermissions()
-            val changedSchema =
-                previous != null && previous.installed.manifest.platform.credentialSchemaVersion !=
-                    prepared.validated.manifest.platform.credentialSchemaVersion
-            val needsReview =
-                active == null || changedSchema ||
-                    permissions.any {
-                        it !in
-                            previous
-                                ?.installed
-                                ?.manifest
-                                ?.sensitivePermissions()
-                                .orEmpty()
+            subsystem.mutationMutex.withLock {
+                validateIdentity(prepared.validated)
+                require(
+                    !confirmed || state.value.reviewHash == prepared.source.hash,
+                ) { "Plugin files changed; review the new version before reloading" }
+                val previous = active ?: subsystem.running.value.plugins[prepared.validated.manifest.id]
+                val permissions = prepared.validated.manifest.sensitivePermissions()
+                val changedSchema =
+                    previous != null && previous.installed.manifest.platform.credentialSchemaVersion !=
+                        prepared.validated.manifest.platform.credentialSchemaVersion
+                val needsReview =
+                    active == null || changedSchema ||
+                        permissions.any {
+                            it !in
+                                previous
+                                    ?.installed
+                                    ?.manifest
+                                    ?.sensitivePermissions()
+                                    .orEmpty()
+                        }
+                if (needsReview && (!confirmed || state.value.reviewHash != prepared.source.hash)) {
+                    mutableState.update {
+                        it.copy(
+                            reviewHash = prepared.source.hash,
+                            permissions = permissions.toList(),
+                            credentialSchemaChanged = changedSchema,
+                        )
                     }
-            if (needsReview && (!confirmed || state.value.reviewHash != prepared.source.hash)) {
+                    return@withLock
+                }
+                if (active == null) baseline = previous
+                val replacement = prepared.running(nextGeneration(previous))
+                switcher.switch(previous, replacement, temporary = true)
+                pruneIcons(replacement)
                 mutableState.update {
                     it.copy(
-                        reviewHash = prepared.source.hash,
-                        permissions = permissions.toList(),
-                        credentialSchemaChanged = changedSchema,
+                        reviewHash = null,
+                        credentialSchemaChanged = false,
+                        error = null,
                     )
                 }
-                return@action
-            }
-            if (active == null) baseline = previous
-            val replacement = prepared.running(nextGeneration(previous))
-            switcher.switch(previous, replacement, temporary = true)
-            pruneIcons(replacement)
-            mutableState.update {
-                it.copy(
-                    reviewHash = null,
-                    credentialSchemaChanged = false,
-                    error = null,
-                )
             }
         }
 
@@ -155,10 +159,12 @@ public class PluginDevelopmentSessionV1 internal constructor(
 
     public suspend fun stop(): Unit =
         action {
-            val previous = active
-            if (previous != null) {
-                val restored = baseline?.copy(generation = nextGeneration(previous))
-                switcher.switch(previous, restored, temporary = true)
+            subsystem.mutationMutex.withLock {
+                val previous = active
+                if (previous != null) {
+                    val restored = baseline?.copy(generation = nextGeneration(previous))
+                    switcher.switch(previous, restored, temporary = true)
+                }
             }
             baseline = null
             candidate = null

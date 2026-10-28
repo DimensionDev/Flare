@@ -50,6 +50,53 @@ class PluginInstallerTest {
     }
 
     @Test
+    fun cancelledImportReleasesItsStagingReservationAndAllowsRetry() =
+        runBlocking<Unit> {
+            TestFppFactory.write(input)
+            val importing =
+                launch(start = CoroutineStart.UNDISPATCHED) {
+                    val cancellation = coroutineContext[Job]!!
+                    val source =
+                        object : okio.ForwardingSource(fileSystem.source(input)) {
+                            override fun read(
+                                sink: Buffer,
+                                byteCount: Long,
+                            ): Long {
+                                cancellation.cancel()
+                                return super.read(sink, byteCount)
+                            }
+                        }
+                    source.use { installer.inspect(it) }
+                }
+            importing.join()
+            assertTrue(importing.isCancelled)
+            assertFalse(fileSystem.exists(stateStore.paths.incoming))
+            fileSystem.write(stateStore.paths.incoming) { writeUtf8("orphan") }
+            installer.cleanup()
+            assertFalse(fileSystem.exists(stateStore.paths.incoming))
+            val preview = installer.inspect(input)
+            installer.commit(preview, confirmed = true)
+            assertEquals(1, stateStore.desired.value.plugins.size)
+        }
+
+    @Test
+    fun commitRechecksIdentityChangedAfterInspection() =
+        runBlocking<Unit> {
+            TestFppFactory.write(input)
+            val installed = installer.commit(installer.inspect(input), confirmed = true)
+            val preview = installer.inspect(input)
+            val replacement =
+                installed.copy(
+                    manifest = installed.manifest.copy(platform = installed.manifest.platform.copy(id = "ChangedPlatform")),
+                )
+            stateStore.install(replacement)
+            assertFailsWith<IllegalArgumentException> { installer.commit(preview, confirmed = true) }
+            assertEquals(replacement, stateStore.desired.value.plugins[installed.pluginId])
+            installer.discard(preview)
+            assertFalse(fileSystem.exists(stateStore.paths.incoming))
+        }
+
+    @Test
     fun invalidLocaleCatalogsAreRejectedAtImportAndStartup() =
         runBlocking {
             val manifest = TestFppFactory.validManifest.replace("\"Test plugin\"", """{"key":"name","fallback":"Test plugin"}""")

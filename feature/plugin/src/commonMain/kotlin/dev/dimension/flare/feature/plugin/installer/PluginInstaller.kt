@@ -12,10 +12,12 @@ import dev.dimension.flare.feature.plugin.lifecycle.PluginStateStore
 import dev.dimension.flare.feature.plugin.manifest.PluginManifestV1
 import dev.dimension.flare.feature.plugin.manifest.fallbackText
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import okio.Buffer
 import okio.ByteString.Companion.toByteString
 import okio.FileSystem
@@ -34,6 +36,8 @@ public class PluginInstaller(
 ) {
     private val validator = PluginPackageValidator(fileSystem)
     private val mutex = Mutex()
+    private val preparationMutex = Mutex()
+    private var preparing = false
     private var activePreview: PreparedPluginInstallV1? = null
 
     /** Authored plugins already have an immutable, reviewed candidate; do not consume a file-import preview. */
@@ -82,12 +86,15 @@ public class PluginInstaller(
         installSource: PluginInstallSourceV1 = PluginInstallSourceV1.Local,
         expectedPluginId: String? = null,
     ): PreparedPluginInstallV1 =
-        mutex.withLock {
-            activePreview?.let { discardLocked(it) }
-            ensureDirectories()
-            fileSystem.delete(stateStore.paths.incoming, mustExist = false)
-            val stagedHash = stage(source)
+        preparationMutex.withLock {
+            mutex.withLock {
+                activePreview?.let { discardLocked(it) }
+                ensureDirectories()
+                fileSystem.delete(stateStore.paths.incoming, mustExist = false)
+                preparing = true
+            }
             try {
+                val stagedHash = stage(source)
                 val hash =
                     if (installSource is PluginInstallSourceV1.GitHub) {
                         installSource.repository.requireValid()
@@ -125,11 +132,18 @@ public class PluginInstaller(
                         source = installSource,
                         validated = validated,
                     )
-                activePreview = preview
-                preview
-            } catch (error: Exception) {
-                fileSystem.delete(stateStore.paths.incoming, mustExist = false)
-                throw error
+                mutex.withLock {
+                    currentCoroutineContext().ensureActive()
+                    activePreview = preview
+                    preview
+                }
+            } finally {
+                withContext(NonCancellable) {
+                    mutex.withLock {
+                        preparing = false
+                        if (activePreview == null) fileSystem.delete(stateStore.paths.incoming, mustExist = false)
+                    }
+                }
             }
         }
 
@@ -141,6 +155,9 @@ public class PluginInstaller(
             require(activePreview === preview) { "Install preview is no longer active" }
             require(!preview.requiresConfirmation || confirmed) { "Installation was not confirmed" }
             val existing = stateStore.desired.value.plugins[preview.pluginId]
+            require(existing == null || existing.manifest.platform.id == preview.platformId) {
+                "Plugin platform ID cannot change during an update"
+            }
             val packagePath = stateStore.paths.packagePath(preview.packageHash)
             val iconPath = stateStore.paths.iconPath(preview.packageHash)
             val record =
@@ -173,7 +190,7 @@ public class PluginInstaller(
 
     public suspend fun cleanup(): PluginCleanupResultV1 =
         mutex.withLock {
-            stateStore.cleanup(setOfNotNull(activePreview?.let { stateStore.paths.incoming }))
+            stateStore.cleanup(setOfNotNull(stateStore.paths.incoming.takeIf { preparing || activePreview != null }))
         }
 
     /** Explicit recovery for a corrupt index. It never runs during startup. */

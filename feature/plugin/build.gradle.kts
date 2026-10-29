@@ -1,5 +1,6 @@
 import dev.dimension.flare.buildlogic.FlarePlatform
 import dev.dimension.flare.buildlogic.flare
+import org.jetbrains.compose.compose
 import java.util.Base64
 
 plugins {
@@ -9,6 +10,7 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.koin.compiler)
     alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.composeMultiplatform)
 }
 
 val bundledSdkDirectory = layout.buildDirectory.dir("generated/pluginSdk")
@@ -143,6 +145,7 @@ kotlin {
     }
 
     android {
+        experimentalProperties["android.experimental.kmp.enableAndroidResources"] = true
         withDeviceTest {
             instrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
             execution = "HOST"
@@ -182,14 +185,21 @@ kotlin {
                 implementation(libs.kotlinx.coroutines.test)
             }
         }
+        val jvmMain by getting {
+            dependencies {
+                implementation(compose("org.jetbrains.compose.ui:ui"))
+            }
+        }
         val jvmTest by getting {
             dependencies {
+                runtimeOnly(compose.desktop.currentOs)
                 implementation(libs.ktor.client.mock)
                 implementation(libs.ktor.client.okhttp)
                 implementation(libs.datastore.core)
             }
         }
         val androidDeviceTest by getting {
+            dependsOn(commonTest)
             dependencies {
                 implementation(kotlin("test"))
                 implementation(libs.androidx.test.ext.junit)

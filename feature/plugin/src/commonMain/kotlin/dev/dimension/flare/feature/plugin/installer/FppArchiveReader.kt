@@ -217,8 +217,9 @@ internal class FppArchiveReader(
         }
 
         val files = entries.filterNot(FppArchiveEntry::isDirectory)
-        val required = setOf(FppPaths.MANIFEST, FppPaths.ENTRY, FppPaths.ICON)
+        val required = setOf(FppPaths.MANIFEST, FppPaths.ENTRY)
         require(files.map(FppArchiveEntry::path).containsAll(required)) { "Package is missing a required file" }
+        require(files.count { it.path in FppPaths.ICONS } == 1) { "Package must contain exactly one supported icon asset" }
         files.forEach { entry ->
             val limit =
                 when {
@@ -230,7 +231,7 @@ internal class FppArchiveReader(
                         FppLimits.MAX_SCRIPT_BYTES
                     }
 
-                    entry.path == FppPaths.ICON -> {
+                    entry.path in FppPaths.ICONS -> {
                         FppLimits.MAX_ICON_BYTES
                     }
 
@@ -319,6 +320,7 @@ internal object FppPaths {
     const val MANIFEST: String = "manifest.json"
     const val ENTRY: String = "plugin.js"
     const val ICON: String = "assets/icon.png"
+    val ICONS: Set<String> = setOf("png", "jpg", "jpeg", "webp", "gif", "ico").map { "assets/icon.$it" }.toSet()
     const val LOCALE_PREFIX: String = "locales/"
 }
 

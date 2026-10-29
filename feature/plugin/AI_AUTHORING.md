@@ -59,8 +59,16 @@ in through Flare's account UI; never paste credentials into a conversation or
 source. Plugin tools provide only scoped text files, local authoring references and a bounded
 HTTPS documentation reader, with no shell or general filesystem access. The
 assistant writes classic JavaScript directly, without Node/npm/TypeScript on the
-device. The host supplies a default icon. Validation checks the package and runtime
-contract, not live website behavior; runtime errors do not trigger AI edits.
+device. The host supplies a default icon. `read_plugin_documentation` also returns icons
+from the website head, resolving relative URLs against the final page URL and its
+HTML base. `write_plugin_files` accepts an optional public HTTPS `iconUrl`; omitted
+URLs preserve the current icon without another download. PNG, JPEG, WebP, GIF and
+ICO are stored unchanged (at most 2 MiB and 1024×1024); SVG is not supported.
+Downloads and validation belong to the accepted source revision. A failure leaves
+the previous running package untouched, and stale work cannot overwrite a newer
+revision. Saved icon bytes survive restart and are never returned to the model.
+There is no remote image loading on the UI path or fallback to a World icon.
+Validation checks the package and runtime contract, not live website behavior; runtime errors do not trigger AI edits.
 
 `read_plugin_sdk` lists the local reference files and reads one requested document,
 with line pagination. Start with its `README.md`, the in-app tool workflow from

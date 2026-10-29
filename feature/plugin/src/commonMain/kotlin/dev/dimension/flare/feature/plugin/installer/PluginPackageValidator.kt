@@ -13,6 +13,7 @@ internal data class ValidatedPluginPackage(
     val manifest: PluginManifestV1,
     val catalogs: Map<String, Map<String, String>>,
     val icon: ByteArray,
+    val iconExtension: String,
     val warnings: List<String>,
 )
 
@@ -38,12 +39,18 @@ internal class PluginPackageValidator(
 
         val catalogs = decodeCatalogs(archive)
         validatePluginCatalogs(manifest, catalogs)
-        val icon = archive.files.getValue(FppPaths.ICON)
-        validatePng(icon)
+        val (iconPath, icon) = archive.files.entries.single { it.key in FppPaths.ICONS }
+        val extension = pluginIconExtension(icon)
+        require(iconPath == "assets/icon.$extension" || (extension == "jpg" && iconPath == "assets/icon.jpeg")) {
+            "Platform icon extension does not match its contents"
+        }
+        if (extension == "png") validatePng(icon)
+        validatePluginIconImage(icon)
         return ValidatedPluginPackage(
             manifest = manifest,
             catalogs = catalogs,
             icon = icon,
+            iconExtension = extension,
             warnings = manifestValidation.warnings.map { "${it.path}: ${it.message}" },
         )
     }

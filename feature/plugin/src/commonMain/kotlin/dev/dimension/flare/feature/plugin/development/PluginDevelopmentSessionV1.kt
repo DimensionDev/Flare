@@ -257,7 +257,8 @@ public class PluginDevelopmentSessionV1 internal constructor(
             files
                 .list(icons)
                 .filter {
-                    Regex("[a-f0-9]{64}\\.png").matches(it.name) && it.toString() != plugin?.iconPath
+                    Regex("[a-f0-9]{64}").matches(it.name.substringBeforeLast('.')) &&
+                        "assets/icon.${it.name.substringAfterLast('.')}" in FppPaths.ICONS && it.toString() != plugin?.iconPath
                 }.forEach { runCatching { files.delete(it) } }
         }
     }
@@ -289,7 +290,7 @@ public class PluginDevelopmentSessionV1 internal constructor(
         fun running(generation: Long): RunningPluginV1 {
             val directory = root / "icons"
             files.createDirectories(directory)
-            val icon = directory / "${source.hash}.png"
+            val icon = directory / "${source.hash}.${validated.iconExtension}"
             files.write(icon) { write(validated.icon) }
             return RunningPluginV1(
                 installed =
@@ -301,6 +302,7 @@ public class PluginDevelopmentSessionV1 internal constructor(
                             source.archive.files.values
                                 .sumOf { it.size.toLong() },
                         iconSize = validated.icon.size.toLong(),
+                        iconExtension = validated.iconExtension,
                         manifest = validated.manifest,
                         catalogs = validated.catalogs,
                     ),

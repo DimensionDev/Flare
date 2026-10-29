@@ -17,7 +17,7 @@ node -e 'JSON.parse(require("node:fs").readFileSync("manifest.json", "utf8")); c
 These are syntax checks only: Node accepts APIs that the QuickJS Host does not
 provide, and parsing JSON does not validate the manifest. Also inspect:
 
-- Required root files and valid PNG; stable IDs and version/tag consistency.
+- Required root files and a valid supported icon; stable IDs and version/tag consistency.
 - Every declared known operation has its required registration and full method
   set. Login negotiates supported subsets with a displayable capability.
 - Top-level initialization has no Host calls; bundled output has no module or
@@ -39,7 +39,7 @@ In Settings > Plugins, open the overflow menu and choose **Plugin development**.
 Choose the directory containing `manifest.json`, `plugin.js`, and the plugin assets.
 Click **Start development** and review access to your existing accounts. Both Compose Desktop and native macOS support this flow.
 
-Edit `plugin.js`, `manifest.json`, `assets/icon.png`, or `locales/*.json`. Flare
+Edit `plugin.js`, `manifest.json`, `assets/icon.<extension>`, or `locales/*.json`. Flare
 automatically validates the files; click **Reload plugin** to apply the validated
 snapshot to this plugin's accounts and open pages. An invalid edit keeps the last
 working version running. For TypeScript projects, select your build output directory

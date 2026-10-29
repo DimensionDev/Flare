@@ -14,6 +14,7 @@ import okio.FileSystem
 import okio.ForwardingFileSystem
 import okio.Path
 import okio.Path.Companion.toOkioPath
+import okio.Path.Companion.toPath
 import okio.SYSTEM
 import okio.Source
 import okio.Timeout
@@ -22,6 +23,7 @@ import java.nio.file.Files
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertFails
 import kotlin.test.assertFailsWith
@@ -48,6 +50,49 @@ class PluginInstallerTest {
     fun tearDown() {
         fileSystem.deleteRecursively(root, mustExist = false)
     }
+
+    @Test
+    fun rasterIconsKeepTheirBytesFormatAndPathAcrossInstallRestartAndRecovery() =
+        runBlocking {
+            pluginIconFixtures.forEach { (extension, bytes) ->
+                val entries = TestFppFactory.validEntries().filterNot { it.first == FppPaths.ICON } + ("assets/icon.$extension" to bytes)
+                TestFppFactory.write(input, entries)
+                val installed = installer.commit(installer.inspect(input), confirmed = true)
+                assertEquals(extension, installed.iconExtension)
+                assertContentEquals(bytes, fileSystem.read(stateStore.paths.iconPath(installed.packageHash, extension)) { readByteArray() })
+                val restarted = PluginStateStore.open(fileSystem, stateStore.paths.root)
+                val running = restarted.running.plugins.getValue(installed.pluginId)
+                assertTrue(running.iconPath.endsWith(".$extension"))
+                assertContentEquals(bytes, fileSystem.read(running.iconPath.toPath()) { readByteArray() })
+                fileSystem.list(stateStore.paths.packages).filter { it != stateStore.paths.packagePath(installed.packageHash) }.forEach {
+                    fileSystem.delete(it)
+                }
+                fileSystem.write(stateStore.paths.index) { writeUtf8("invalid index") }
+                val corrupt = PluginStateStore.open(fileSystem, stateStore.paths.root)
+                PluginInstaller(fileSystem, corrupt).rebuildIndex()
+                assertEquals(
+                    extension,
+                    corrupt.desired.value.plugins
+                        .getValue(installed.pluginId)
+                        .iconExtension,
+                )
+            }
+        }
+
+    @Test
+    fun iconExtensionMustMatchAndPackageCannotHaveMultipleIcons() =
+        runBlocking<Unit> {
+            TestFppFactory.write(input, TestFppFactory.validEntries(icon = pluginIconFixtures.getValue("gif")))
+            assertFails { installer.inspect(input) }
+            TestFppFactory.write(input, TestFppFactory.validEntries() + ("assets/icon.gif" to pluginIconFixtures.getValue("gif")))
+            assertFails { installer.inspect(input) }
+            TestFppFactory.write(
+                input,
+                TestFppFactory.validEntries().filterNot { it.first == FppPaths.ICON } +
+                    ("assets/icon.svg" to "<svg/>".encodeToByteArray()),
+            )
+            assertFails { installer.inspect(input) }
+        }
 
     @Test
     fun cancelledImportReleasesItsStagingReservationAndAllowsRetry() =

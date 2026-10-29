@@ -21,6 +21,16 @@ internal class PluginAuthoringToolsTest {
     private val authoring = TestAuthoring()
 
     @Test
+    fun writesForwardOptionalIconUrlsAndOmissionKeepsTheDefaultContract() =
+        runTest {
+            val tool = WritePluginFilesTool(authoring)
+            tool.execute(WritePluginFilesTool.Args("plugin-a", 0, emptyList(), "https://example.com/favicon.ico"))
+            assertEquals("https://example.com/favicon.ico", authoring.iconUrl)
+            tool.execute(WritePluginFilesTool.Args("plugin-a", 1, emptyList()))
+            assertNull(authoring.iconUrl)
+        }
+
+    @Test
     fun toolsManageLocalPluginsWithoutExposingPermissionApproval() {
         assertEquals(
             setOf(
@@ -137,6 +147,7 @@ internal class PluginAuthoringToolsTest {
 internal class TestAuthoring : PluginAuthoring {
     override val plugins = MutableStateFlow(emptyList<AuthoredPlugin>())
     var written: Triple<String, Long, Map<String, String>>? = null
+    var iconUrl: String? = null
     var createdKey: String? = null
     var failure: Exception? = null
     var documentationPath: String? = null
@@ -146,9 +157,11 @@ internal class TestAuthoring : PluginAuthoring {
         pluginId: String,
         expectedRevision: Long,
         files: Map<String, String>,
+        iconUrl: String?,
     ): AuthoredPlugin {
         failure?.let { throw it }
         written = Triple(pluginId, expectedRevision, files)
+        this.iconUrl = iconUrl
         return AuthoredPlugin(pluginId, "Test", revision = expectedRevision + 1, phase = PluginAuthoringPhase.Validating).also {
             plugins.value = listOf(it)
         }

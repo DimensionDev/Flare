@@ -15,6 +15,7 @@ import dev.dimension.flare.feature.plugin.installer.FppPaths
 import dev.dimension.flare.feature.plugin.installer.PluginPackageValidator
 import dev.dimension.flare.feature.plugin.installer.ValidatedPluginPackage
 import dev.dimension.flare.feature.plugin.installer.encodePluginArchive
+import dev.dimension.flare.feature.plugin.installer.pluginIconExtension
 import dev.dimension.flare.feature.plugin.lifecycle.InstalledPluginV1
 import dev.dimension.flare.feature.plugin.lifecycle.PluginRuntimeSwitcherV1
 import dev.dimension.flare.feature.plugin.lifecycle.RunningPluginV1
@@ -48,6 +49,7 @@ internal class PluginAuthoringServiceV1(
     registry: () -> PlatformRegistry,
     accounts: () -> AccountService,
     scope: () -> CoroutineScope,
+    private val fetchIcon: suspend (String) -> ByteArray = { fetchPluginIcon(it) },
 ) : PluginAuthoring {
     private val scope by lazy(scope)
     private val files = subsystem.appFiles.fileSystem
@@ -86,7 +88,11 @@ internal class PluginAuthoringServiceV1(
         val entry = entry(pluginId)
         return entry.mutex.withLock {
             check(entries.value[pluginId] === entry) { "Plugin no longer exists" }
-            PluginSource(plugins.value.single { it.id == pluginId }, entry.record.sources)
+            PluginSource(
+                plugins.value.single { it.id == pluginId },
+                entry.record.sources,
+                entry.record.pendingIconUrl ?: entry.record.iconUrl,
+            )
         }
     }
 
@@ -94,16 +100,23 @@ internal class PluginAuthoringServiceV1(
         pluginId: String,
         expectedRevision: Long,
         files: Map<String, String>,
+        iconUrl: String?,
     ): AuthoredPlugin =
         withContext(Dispatchers.Default) {
             val entry = entry(pluginId)
             validateSources(files)
+            iconUrl?.let(::publicPluginResourceUrl)
             entry.mutex.withLock {
                 check(entries.value[pluginId] === entry) { "Plugin no longer exists" }
                 check(entry.record.revision == expectedRevision) {
                     "Revision conflict: current revision is ${entry.record.revision}. Read the current source before retrying."
                 }
-                val updated = entry.record.copy(sources = files.toMap(), revision = entry.record.revision + 1)
+                val updated =
+                    entry.record.copy(
+                        sources = files.toMap(),
+                        revision = entry.record.revision + 1,
+                        pendingIconUrl = iconUrl,
+                    )
                 save(updated)
                 entry.record = updated
                 entry.candidate = null
@@ -284,7 +297,7 @@ internal class PluginAuthoringServiceV1(
                 .packagePath(record.packageHash)
                 .toString(),
             files
-                .persistPlatformIcon(record.pluginId, subsystem.stateStore.paths.iconPath(record.packageHash))
+                .persistPlatformIcon(record.pluginId, subsystem.stateStore.paths.iconPath(record.packageHash, record.iconExtension))
                 .toString(),
             generation = record.runtimeGeneration,
         )
@@ -317,9 +330,13 @@ internal class PluginAuthoringServiceV1(
 
     private suspend fun prepare(record: Record): Candidate {
         validateSources(record.sources)
+        val icon =
+            record.pendingIconUrl?.let { fetchIcon(it) }
+                ?: record.iconBase64?.let { requireNotNull(it.decodeBase64()).toByteArray() }
+                ?: requireNotNull(DEFAULT_PLUGIN_ICON.decodeBase64()).toByteArray()
         val bytes =
             record.sources.mapValues { it.value.encodeToByteArray() } +
-                (FppPaths.ICON to requireNotNull(DEFAULT_PLUGIN_ICON.decodeBase64()).toByteArray())
+                ("assets/icon.${pluginIconExtension(icon)}" to icon)
         val archive =
             FppArchive(
                 bytes.map { (path, value) ->
@@ -331,14 +348,27 @@ internal class PluginAuthoringServiceV1(
         require(validated.manifest.id == record.id && validated.manifest.platform.id == authoredPluginPlatformId(record.id)) {
             "Keep the host-assigned plugin and platform IDs"
         }
-        return Candidate(record.revision, validated, encodePluginArchive(bytes))
+        return Candidate(
+            record.revision,
+            validated,
+            encodePluginArchive(bytes),
+            (record.pendingIconUrl ?: record.iconUrl)?.let {
+                icon.toByteString().base64()
+            },
+        )
     }
 
     private fun accept(
         entry: Entry,
         candidate: Candidate,
     ) {
-        val record = entry.record.copy(name = candidate.validated.manifest.name.fallbackText)
+        val record =
+            entry.record.copy(
+                name = candidate.validated.manifest.name.fallbackText,
+                iconBase64 = candidate.iconBase64,
+                iconUrl = entry.record.pendingIconUrl ?: entry.record.iconUrl,
+                pendingIconUrl = null,
+            )
         save(record)
         entry.record = record
         entry.candidate = candidate
@@ -409,6 +439,9 @@ internal class PluginAuthoringServiceV1(
         val id: String,
         val name: String = "",
         val sources: Map<String, String> = emptyMap(),
+        val iconUrl: String? = null,
+        val pendingIconUrl: String? = null,
+        val iconBase64: String? = null,
         val revision: Long = 0,
         val enabled: Boolean = true,
     )
@@ -417,6 +450,7 @@ internal class PluginAuthoringServiceV1(
         val revision: Long,
         val validated: ValidatedPluginPackage,
         val archive: ByteArray,
+        val iconBase64: String?,
     ) {
         val packageHash = archive.toByteString().sha256().hex()
     }

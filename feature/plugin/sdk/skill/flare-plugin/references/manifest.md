@@ -100,7 +100,7 @@ Icons use these Host semantic names:
 `Home`, `Notification`, `Search`, `Profile`, `Local`, `World`, `Featured`,
 `Bookmark`, `Heart`, `List`, `Messages`, `Channel`, `Like`, `Repost`, `Reply`,
 `Delete`, `Follow`, `Block`, `Mute`, `Info`. The platform icon itself is the
-package's `assets/icon.png`, not one of these names.
+package's `assets/icon.<extension>` (PNG, JPEG, WebP, GIF or ICO), not one of these names.
 
 ### Login methods
 

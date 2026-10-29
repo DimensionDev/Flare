@@ -6,8 +6,8 @@ import process from "node:process";
 
 const MAX_FILES = 256;
 const MAX_TOTAL_BYTES = 50 * 1024 * 1024;
-const ALLOWED_PATH = /^(?:manifest\.json|plugin\.js|assets\/icon\.png|locales\/[A-Za-z]{2,8}(?:-[A-Za-z0-9]{1,8})*\.json)$/;
-const REQUIRED_PATHS = new Set(["manifest.json", "plugin.js", "assets/icon.png"]);
+const ALLOWED_PATH = /^(?:manifest\.json|plugin\.js|assets\/icon\.(?:png|jpe?g|webp|gif|ico)|locales\/[A-Za-z]{2,8}(?:-[A-Za-z0-9]{1,8})*\.json)$/;
+const REQUIRED_PATHS = new Set(["manifest.json", "plugin.js"]);
 
 async function main() {
   const [inputArgument, outputArgument] = process.argv.slice(2);
@@ -25,6 +25,10 @@ async function main() {
   const names = files.map((file) => file.name);
   for (const required of REQUIRED_PATHS) {
     if (!names.includes(required)) throw new Error(`Missing required file: ${required}`);
+  }
+
+  if (names.filter((name) => name.startsWith("assets/icon.")).length !== 1) {
+    throw new Error("Package must contain exactly one PNG, JPEG, WebP, GIF or ICO icon");
   }
 
   const manifest = JSON.parse((await readFile(join(input, "manifest.json"))).toString("utf8"));

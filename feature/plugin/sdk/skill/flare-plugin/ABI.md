@@ -16,6 +16,11 @@ assets/icon.png
 locales/<bcp47>.json   # optional
 ```
 
+The package must contain exactly one `assets/icon.<extension>`: `png`, `jpg`,
+`jpeg`, `webp`, `gif`, or `ico`. Its extension must match its encoded contents.
+The icon is kept unchanged, limited to 2 MiB and 1024×1024 pixels. SVG is not
+supported. PNG remains the default in the templates.
+
 `plugin.js` is one self-contained classic script. Static modules, dynamic
 imports, remote code, filesystem access, and native access are unavailable.
 Run `node pack.mjs <directory> [output.fpp]` to produce a deterministic package
@@ -26,7 +31,7 @@ using only Node's standard library.
 Flare can install from a public `https://github.com/<owner>/<repository>` URL
 (an optional `.git` suffix is accepted). Each repository contains one plugin at
 its root: `manifest.json`, the self-contained, already-built `plugin.js`,
-`assets/icon.png`, and optional `locales/*.json`. Other development files are
+one supported `assets/icon.<extension>`, and optional `locales/*.json`. Other development files are
 ignored. Flare does not run package managers, build scripts, or repository code
 outside the existing plugin sandbox.
 
@@ -285,7 +290,7 @@ Localized keys must exist in the default locale catalog. Resolution uses exact
 BCP-47 tag, language-script, language, default locale, then fallback. The only
 formatting feature in v1 is named `{argument}` substitution.
 
-The PNG icon is the platform icon on every target. Other manifest icons use
+The packaged image is the platform icon on every target. Other manifest icons use
 Host semantic enum names. Deep Links, when needed, are manifest-only structured
 rules; JavaScript cannot resolve them.
 

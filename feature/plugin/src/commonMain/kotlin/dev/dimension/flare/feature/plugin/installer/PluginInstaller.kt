@@ -56,6 +56,7 @@ public class PluginInstaller(
                     packageHash = hash,
                     packageSize = archive.size.toLong(),
                     iconSize = validated.icon.size.toLong(),
+                    iconExtension = validated.iconExtension,
                     manifest = validated.manifest,
                     catalogs = validated.catalogs,
                     enabled = enabled,
@@ -68,7 +69,7 @@ public class PluginInstaller(
             try {
                 fileSystem.write(temporary) { write(archive) }
                 fileSystem.atomicMove(temporary, stateStore.paths.packagePath(hash))
-                persistIcon(stateStore.paths.iconPath(hash), validated.icon)
+                persistIcon(stateStore.paths.iconPath(hash, record.iconExtension), validated.icon)
             } finally {
                 fileSystem.delete(temporary, mustExist = false)
             }
@@ -159,7 +160,7 @@ public class PluginInstaller(
                 "Plugin platform ID cannot change during an update"
             }
             val packagePath = stateStore.paths.packagePath(preview.packageHash)
-            val iconPath = stateStore.paths.iconPath(preview.packageHash)
+            val iconPath = stateStore.paths.iconPath(preview.packageHash, preview.validated.iconExtension)
             val record =
                 InstalledPluginV1(
                     pluginId = preview.pluginId,
@@ -169,6 +170,7 @@ public class PluginInstaller(
                     iconSize =
                         preview.validated.icon.size
                             .toLong(),
+                    iconExtension = preview.validated.iconExtension,
                     source = preview.source,
                     enabled = existing?.enabled ?: true,
                     manifest = preview.validated.manifest,
@@ -224,7 +226,7 @@ public class PluginInstaller(
 
             recovered.values.forEach { candidate ->
                 persistIcon(
-                    stateStore.paths.iconPath(candidate.record.packageHash),
+                    stateStore.paths.iconPath(candidate.record.packageHash, candidate.record.iconExtension),
                     candidate.icon,
                 )
             }
@@ -269,6 +271,7 @@ public class PluginInstaller(
                         packageHash = packageHash,
                         packageSize = packageSize,
                         iconSize = validated.icon.size.toLong(),
+                        iconExtension = validated.iconExtension,
                         source = PluginInstallSourceV1.Local,
                         enabled = true,
                         manifest = validated.manifest,
@@ -308,7 +311,7 @@ public class PluginInstaller(
         icon: ByteArray,
     ) {
         fileSystem.createDirectories(stateStore.paths.icons)
-        val temp = stateStore.paths.staging / "icon.next.png"
+        val temp = stateStore.paths.staging / "icon.next"
         fileSystem.write(temp) { write(icon) }
         try {
             fileSystem.atomicMove(temp, target)

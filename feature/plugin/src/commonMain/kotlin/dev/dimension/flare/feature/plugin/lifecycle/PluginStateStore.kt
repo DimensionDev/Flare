@@ -4,6 +4,7 @@ import dev.dimension.flare.feature.plugin.abi.PluginJsonV1
 import dev.dimension.flare.feature.plugin.github.COMMIT_SHA
 import dev.dimension.flare.feature.plugin.github.stableGitHubVersion
 import dev.dimension.flare.feature.plugin.installer.FppLimits
+import dev.dimension.flare.feature.plugin.installer.FppPaths
 import dev.dimension.flare.feature.plugin.installer.validatePluginCatalogs
 import dev.dimension.flare.feature.plugin.manifest.validate
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -123,8 +124,10 @@ public class PluginStateStore private constructor(
                 }
             }
             fileSystem.listOrNull(paths.icons)?.forEach { path ->
-                val hash = path.name.removeSuffix(ICON_SUFFIX)
-                if (path.name.endsWith(ICON_SUFFIX) && HASH.matches(hash) && hash !in protectedHashes) {
+                val hash = path.name.substringBeforeLast('.')
+                if ("assets/icon.${path.name.substringAfterLast('.')}" in FppPaths.ICONS && HASH.matches(hash) &&
+                    hash !in protectedHashes
+                ) {
                     fileSystem.delete(path, mustExist = false)
                     icons++
                 }
@@ -193,7 +196,7 @@ public class PluginStateStore private constructor(
         val plugins = mutableMapOf<String, RunningPluginV1>()
         index.plugins.forEach { installed ->
             val packagePath = paths.packagePath(installed.packageHash)
-            val iconPath = paths.iconPath(installed.packageHash)
+            val iconPath = paths.iconPath(installed.packageHash, installed.iconExtension)
             val packageValid = fileSystem.metadataOrNull(packagePath)?.let { it.isRegularFile && it.size == installed.packageSize } == true
             val iconValid = fileSystem.metadataOrNull(iconPath)?.let { it.isRegularFile && it.size == installed.iconSize } == true
             if (!packageValid || !iconValid) {
@@ -269,7 +272,10 @@ internal data class PluginStoragePaths(
 
     fun packagePath(hash: String): Path = packages / "$hash$PACKAGE_SUFFIX"
 
-    fun iconPath(hash: String): Path = icons / "$hash$ICON_SUFFIX"
+    fun iconPath(
+        hash: String,
+        extension: String = "png",
+    ): Path = icons / "$hash.$extension"
 }
 
 internal fun FileSystem.persistPlatformIcon(
@@ -279,7 +285,8 @@ internal fun FileSystem.persistPlatformIcon(
     runCatching {
         val directory = requireNotNull(source.parent)
         val bytes = readBounded(source, FppLimits.MAX_ICON_BYTES)
-        val target = directory / "platform-${pluginId.encodeUtf8().sha256().hex()}-${bytes.toByteString().sha256().hex()}.png"
+        val extension = source.name.substringAfterLast('.')
+        val target = directory / "platform-${pluginId.encodeUtf8().sha256().hex()}-${bytes.toByteString().sha256().hex()}.$extension"
         if (!exists(target)) {
             val temp = directory / "${target.name}.next"
             write(temp) { write(bytes) }
@@ -314,6 +321,7 @@ private fun validateIndex(index: PluginStateIndexV1) {
         require(HASH.matches(plugin.packageHash)) { "Invalid package hash" }
         require(plugin.packageSize in 1..FppLimits.MAX_PACKAGE_BYTES) { "Invalid package size" }
         require(plugin.iconSize in 1..FppLimits.MAX_ICON_BYTES) { "Invalid icon size" }
+        require("assets/icon.${plugin.iconExtension}" in FppPaths.ICONS) { "Invalid icon extension" }
         plugin.manifest.validate().requireValid()
         validatePluginCatalogs(plugin.manifest, plugin.catalogs)
     }
@@ -347,5 +355,4 @@ private fun FileSystem.readBounded(
 }
 
 private const val PACKAGE_SUFFIX = ".fpp"
-private const val ICON_SUFFIX = ".png"
 private val HASH = Regex("[0-9a-f]{64}")

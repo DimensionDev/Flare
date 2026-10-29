@@ -21,7 +21,8 @@ internal data class PluginDevelopmentSourceV1(
             }
             directory(root)
             directory(root / "assets")
-            val names = mutableListOf(FppPaths.MANIFEST, FppPaths.ENTRY, FppPaths.ICON)
+            val names = mutableListOf(FppPaths.MANIFEST, FppPaths.ENTRY)
+            names += FppPaths.ICONS.filter { fileSystem.exists(root / it) }
             val locales = root / "locales"
             if (fileSystem.exists(locales)) {
                 directory(locales)

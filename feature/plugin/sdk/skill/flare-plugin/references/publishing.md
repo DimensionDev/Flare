@@ -12,6 +12,11 @@ locales/en.json       # optional; other BCP-47 catalogs as needed
 README.md            # author/user instructions, ignored by the importer
 ```
 
+The package must contain exactly one `assets/icon.<extension>`: `png`, `jpg`,
+`jpeg`, `webp`, `gif`, or `ico`. Its extension must match its encoded contents.
+The icon is kept unchanged, limited to 2 MiB and 1024×1024 pixels. SVG is not
+supported. PNG remains the default in the templates.
+
 Development files may coexist in the repository. Flare selects the plugin files;
 it does not run a package manager, build script, or client-side bundler. Commit
 the already-built classic script, including all runtime dependencies. A Flare
@@ -89,7 +94,7 @@ node pack.mjs assets/github-template /tmp/example-feed-0.1.0.fpp
 ```
 
 For an adapted plugin repository, create a staging directory containing only
-manifest.json, plugin.js, assets/icon.png, and optional locales/*.json, then pass
+manifest.json, plugin.js, one supported assets/icon.<extension>, and optional locales/*.json, then pass
 that directory to pack.mjs. The packer ignores only a root README.md; unlike
 GitHub import it rejects other development files, including .git, tests, and type
 declarations. Keep the output outside the input directory. Packaging success is

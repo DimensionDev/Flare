@@ -3,6 +3,8 @@ package dev.dimension.flare.feature.plugin.abi
 public object PluginAbiV1 {
     public const val API_VERSION: Int = 1
     public const val MANIFEST_SCHEMA_VERSION: Int = 1
+
+    /** Default template asset; packages may instead include one supported raster icon extension. */
     public const val ICON_PATH: String = "assets/icon.png"
     public const val ENTRY_PATH: String = "plugin.js"
     public const val MANIFEST_PATH: String = "manifest.json"

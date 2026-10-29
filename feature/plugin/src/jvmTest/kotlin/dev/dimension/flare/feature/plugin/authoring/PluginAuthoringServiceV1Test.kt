@@ -11,6 +11,7 @@ import dev.dimension.flare.feature.plugin.PluginSubsystemV1
 import dev.dimension.flare.feature.plugin.development.PluginDevelopmentSessionV1
 import dev.dimension.flare.feature.plugin.github.GitHubPluginClient
 import dev.dimension.flare.feature.plugin.installer.TestFppFactory
+import dev.dimension.flare.feature.plugin.installer.pluginIconFixtures
 import dev.dimension.flare.feature.plugin.login.PluginOAuthPendingStoreV1
 import dev.dimension.flare.feature.plugin.login.PluginOAuthPendingV1
 import dev.dimension.flare.feature.plugin.management.PluginManagementPresenterV1
@@ -52,6 +53,7 @@ import okio.FileSystem
 import okio.ForwardingFileSystem
 import okio.Path
 import okio.Path.Companion.toOkioPath
+import okio.Path.Companion.toPath
 import java.nio.file.Files
 import java.util.UUID
 import java.util.concurrent.CountDownLatch
@@ -59,6 +61,7 @@ import java.util.concurrent.TimeUnit
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
@@ -118,6 +121,100 @@ class PluginAuthoringServiceV1Test {
             scope.coroutineContext[Job]!!.cancelAndJoin()
             subsystem.runtimePool.close()
             FileSystem.SYSTEM.deleteRecursively(root)
+        }
+
+    @Test
+    fun iconsAreRetainedAcrossEditsAndRestartAndFailedDownloadsKeepRunningVersion() =
+        runBlocking<Unit> {
+            val downloads = mutableListOf<String>()
+            val icon = pluginIconFixtures.getValue("gif")
+            service =
+                PluginAuthoringServiceV1(subsystem, { registry }, { accounts }, { scope }) { url ->
+                    downloads += url
+                    check(!url.endsWith("missing")) { "Icon returned HTTP 404" }
+                    icon
+                }
+            val plugin = service.create(UUID.randomUUID().toString())
+            val url = "https://example.com/icon"
+            service.write(plugin.id, 0, sources(plugin), url)
+            await(plugin.id, PluginAuthoringPhase.Applied)
+            val running =
+                subsystem.running.value.plugins
+                    .getValue(plugin.id)
+            assertTrue(running.iconPath.endsWith(".gif"))
+            assertContentEquals(icon, fileSystem.read(running.iconPath.toPath()) { readByteArray() })
+            assertEquals(url, service.read(plugin.id).iconUrl)
+            assertEquals(setOf("manifest.json", "plugin.js"), service.read(plugin.id).files.keys)
+            service.write(plugin.id, 1, sources(plugin, "Changed source"))
+            await(plugin.id, PluginAuthoringPhase.Applied)
+            assertEquals(listOf(url), downloads)
+            assertEquals(
+                running.iconPath,
+                subsystem.running.value.plugins
+                    .getValue(plugin.id)
+                    .iconPath,
+            )
+
+            service = PluginAuthoringServiceV1(subsystem, { registry }, { accounts }, { scope }) { error("Must use saved icon") }
+            service.write(plugin.id, 2, sources(plugin, "After restart"))
+            await(plugin.id, PluginAuthoringPhase.Applied)
+            assertEquals(
+                running.iconPath,
+                subsystem.running.value.plugins
+                    .getValue(plugin.id)
+                    .iconPath,
+            )
+            val working =
+                subsystem.running.value.plugins
+                    .getValue(plugin.id)
+            service = PluginAuthoringServiceV1(subsystem, { registry }, { accounts }, { scope }) { error("Icon returned HTTP 404") }
+            service.write(plugin.id, 3, sources(plugin, "Failed icon"), "https://example.com/missing")
+            assertTrue(await(plugin.id, PluginAuthoringPhase.Failed).error.orEmpty().contains("HTTP 404"))
+            assertEquals(
+                working,
+                subsystem.running.value.plugins
+                    .getValue(plugin.id),
+            )
+            assertEquals(4, service.read(plugin.id).plugin.revision)
+            service.write(plugin.id, 4, sources(plugin, "Source edit after failed icon"))
+            await(plugin.id, PluginAuthoringPhase.Applied)
+            assertEquals(url, service.read(plugin.id).iconUrl)
+            assertEquals(
+                running.iconPath,
+                subsystem.running.value.plugins
+                    .getValue(plugin.id)
+                    .iconPath,
+            )
+        }
+
+    @Test
+    fun olderIconDownloadCannotReplaceNewerSourceAndIcon() =
+        runBlocking<Unit> {
+            val started = kotlinx.coroutines.CompletableDeferred<Job>()
+            val release = kotlinx.coroutines.CompletableDeferred<Unit>()
+            service =
+                PluginAuthoringServiceV1(subsystem, { registry }, { accounts }, { scope }) { url ->
+                    if (url.endsWith("old")) {
+                        started.complete(kotlinx.coroutines.currentCoroutineContext()[Job]!!)
+                        kotlinx.coroutines.withContext(kotlinx.coroutines.NonCancellable) { release.await() }
+                        pluginIconFixtures.getValue("gif")
+                    } else {
+                        pluginIconFixtures.getValue("webp")
+                    }
+                }
+            val plugin = service.create(UUID.randomUUID().toString())
+            service.write(plugin.id, 0, sources(plugin), "https://example.com/old")
+            started.await()
+            service.write(plugin.id, 1, sources(plugin, "Latest"), "https://example.com/new")
+            await(plugin.id, PluginAuthoringPhase.Applied)
+            release.complete(Unit)
+            started.await().join()
+            val current =
+                subsystem.running.value.plugins
+                    .getValue(plugin.id)
+            assertTrue(current.iconPath.endsWith(".webp"))
+            assertContentEquals(pluginIconFixtures.getValue("webp"), fileSystem.read(current.iconPath.toPath()) { readByteArray() })
+            assertEquals("https://example.com/new", service.read(plugin.id).iconUrl)
         }
 
     @Test

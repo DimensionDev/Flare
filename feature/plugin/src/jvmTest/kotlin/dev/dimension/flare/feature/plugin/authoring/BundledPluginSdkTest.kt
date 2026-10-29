@@ -26,7 +26,7 @@ class BundledPluginSdkTest {
         assertTrue(guide.contains("write_plugin_files"))
         assertTrue(guide.contains("expectedRevision"))
         assertTrue(guide.contains("complete file set"))
-        assertTrue(guide.contains("Flare supplies `assets/icon.png`"))
+        assertTrue(guide.contains("Flare supplies the icon asset"))
         assertTrue("assets/github-template/manifest.json" in BundledPluginSdk.paths)
         assertTrue("assets/github-template/plugin.js" in BundledPluginSdk.paths)
         BundledPluginSdk.paths.forEach { assertTrue(assertNotNull(BundledPluginSdk.read(it), it).isNotBlank(), it) }

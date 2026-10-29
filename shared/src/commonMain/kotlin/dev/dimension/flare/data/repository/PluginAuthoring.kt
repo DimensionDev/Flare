@@ -16,6 +16,7 @@ public interface PluginAuthoring {
         pluginId: String,
         expectedRevision: Long,
         files: Map<String, String>,
+        iconUrl: String? = null,
     ): AuthoredPlugin
 
     public suspend fun documentation(path: String): String
@@ -36,6 +37,7 @@ public interface PluginAuthoring {
 public data class PluginSource(
     val plugin: AuthoredPlugin,
     val files: Map<String, String>,
+    val iconUrl: String? = null,
 )
 
 @Serializable

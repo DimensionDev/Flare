@@ -11,7 +11,7 @@ logging API; do not invent `flare.log` or assume a developer console is availabl
 | Symptom / message | Check and repair |
 | --- | --- |
 | No stable version tags | Public repo, stable SemVer tag, matching manifest.version; branches/prereleases are not install choices |
-| Missing required file / nested plugin | Put manifest.json, plugin.js, assets/icon.png at the tagged repository root |
+| Missing required file / nested plugin | Put manifest.json, plugin.js, one supported assets/icon.<extension> at the tagged repository root |
 | Unknown field / unsupported schema | Use API/schema 1 and exact supported fields; strict JSON rejects extra keys |
 | Missing method / incomplete capability | Compare full capability ID, required operation set, registration path, and login negotiation |
 | Host API called during registration / undefined global | Keep top-level work to definitions and synchronous registration; move HTTP/crypto into methods |
@@ -80,7 +80,7 @@ requests/responses well below them.
 | GitHub source archive | 20 MiB compressed, 50 MiB uncompressed, 4096 entries |
 | Canonical plugin package | 20 MiB compressed, 50 MiB uncompressed, 256 files |
 | manifest / plugin.js / icon | 256 KiB / 4 MiB / 2 MiB |
-| PNG dimensions | 1..1024 for each dimension |
+| Icon dimensions | 1..1024 for each dimension |
 | Locale files | 32 catalogs; 256 KiB each; 2048 keys each; 4096 characters per value |
 | Registration | 2 seconds; 16 MiB heap; 256 KiB stack |
 | Runtime initialization | 2 seconds |

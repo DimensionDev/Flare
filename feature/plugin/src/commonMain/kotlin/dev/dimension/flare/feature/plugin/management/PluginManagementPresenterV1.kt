@@ -312,7 +312,7 @@ public class PluginManagementPresenterV1(
                         pendingRestart = subsystem.stateStore.requiresRestart(installed.pluginId),
                         iconPath =
                             subsystem.stateStore.paths
-                                .iconPath(installed.packageHash)
+                                .iconPath(installed.packageHash, installed.iconExtension)
                                 .toString(),
                         availableUpdate = updates[installed.pluginId],
                     )

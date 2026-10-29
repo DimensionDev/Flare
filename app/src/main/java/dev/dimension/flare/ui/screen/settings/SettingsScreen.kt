@@ -36,6 +36,7 @@ import compose.icons.fontawesomeicons.solid.Language
 import compose.icons.fontawesomeicons.solid.Newspaper
 import compose.icons.fontawesomeicons.solid.Palette
 import compose.icons.fontawesomeicons.solid.PhotoFilm
+import compose.icons.fontawesomeicons.solid.PuzzlePiece
 import compose.icons.fontawesomeicons.solid.Robot
 import compose.icons.fontawesomeicons.solid.Sliders
 import compose.icons.fontawesomeicons.solid.TableList
@@ -390,7 +391,7 @@ internal fun SettingsScreen(
                     content = { Text(text = stringResource(id = R.string.settings_plugins_title)) },
                     leadingContent = {
                         ThemedIcon(
-                            imageVector = FontAwesomeIcons.Solid.Gear,
+                            imageVector = FontAwesomeIcons.Solid.PuzzlePiece,
                             contentDescription = null,
                             color = ThemeIconData.Color.ForestGreen,
                         )

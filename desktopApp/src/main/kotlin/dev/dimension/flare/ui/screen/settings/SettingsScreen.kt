@@ -48,6 +48,7 @@ import compose.icons.fontawesomeicons.solid.Language
 import compose.icons.fontawesomeicons.solid.List
 import compose.icons.fontawesomeicons.solid.Lock
 import compose.icons.fontawesomeicons.solid.Plus
+import compose.icons.fontawesomeicons.solid.PuzzlePiece
 import compose.icons.fontawesomeicons.solid.Robot
 import compose.icons.fontawesomeicons.solid.Trash
 import dev.dimension.flare.BuildConfig
@@ -2419,6 +2420,7 @@ internal fun SettingsScreen(
             CardExpanderItem(
                 heading = { Text(stringResource(Res.string.settings_plugins_title)) },
                 caption = { Text(stringResource(Res.string.settings_plugins_subtitle)) },
+                icon = { FAIcon(FontAwesomeIcons.Solid.PuzzlePiece, contentDescription = null) },
                 onClick = toPlugins,
             )
 

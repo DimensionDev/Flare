@@ -70,7 +70,7 @@ public struct PluginManagementView: View {
                     Label {
                         Text("plugin_restart_required")
                     } icon: {
-                        Image(systemName: "arrow.clockwise.circle")
+                        Image(fontAwesome: .arrowsRotate)
                     }
                     .foregroundStyle(.tint)
                 }
@@ -78,14 +78,22 @@ public struct PluginManagementView: View {
 
             if let error = presenter.state.error {
                 Section {
-                    Label("plugin_operation_failed", systemImage: "exclamationmark.triangle")
-                        .foregroundStyle(.red)
+                    Label {
+                        Text("plugin_operation_failed")
+                    } icon: {
+                        Image(fontAwesome: .circleExclamation)
+                    }
+                    .foregroundStyle(.red)
                     Text(String(error.prefix(512))).font(.caption)
                 }
             }
 
             if presenter.state.updatesChecked && presenter.state.plugins.allSatisfy({ $0.availableUpdate == nil }) {
-                Label("plugin_up_to_date", systemImage: "checkmark.circle")
+                Label {
+                    Text("plugin_up_to_date")
+                } icon: {
+                    Image(fontAwesome: .circleCheck)
+                }
             }
 
             if !presenter.state.issues.isEmpty || !presenter.state.runtimeIssues.isEmpty {
@@ -113,11 +121,15 @@ public struct PluginManagementView: View {
             }
 
             if presenter.state.plugins.isEmpty && presenter.state.authoredPlugins.isEmpty {
-                ContentUnavailableView(
-                    "plugin_empty",
-                    systemImage: "puzzlepiece.extension",
-                    description: Text("settings_plugins_subtitle")
-                )
+                ContentUnavailableView {
+                    Label {
+                        Text("plugin_empty")
+                    } icon: {
+                        Image(fontAwesome: .puzzlePiece)
+                    }
+                } description: {
+                    Text("settings_plugins_subtitle")
+                }
                 .listRowBackground(Color.clear)
             } else {
                 Section {
@@ -278,7 +290,11 @@ public struct PluginManagementView: View {
         Menu {
             addActions
         } label: {
-            Label("plugin_add", systemImage: "plus")
+            Label {
+                Text("plugin_add")
+            } icon: {
+                Image(fontAwesome: .plus)
+            }
         }
         .labelStyle(.iconOnly)
         .accessibilityLabel(Text("plugin_add"))
@@ -294,17 +310,29 @@ public struct PluginManagementView: View {
                 facade.clearGitHubRepository()
                 showsGitHubInstall = true
             } label: {
-                Label("plugin_install_github", systemImage: "link")
+                Label {
+                    Text("plugin_install_github")
+                } icon: {
+                    Image(fontAwesome: .github)
+                }
             }
             if agentEnabled {
                 Button(action: onCreateWithAI) {
-                    Label("plugin_ai_create", systemImage: "sparkles")
+                    Label {
+                        Text("plugin_ai_create")
+                    } icon: {
+                        Image(fontAwesome: .robot)
+                    }
                 }
             }
             Button {
                 importsPlugin = true
             } label: {
-                Label("plugin_install", systemImage: "doc")
+                Label {
+                    Text("plugin_install")
+                } icon: {
+                    Image(fontAwesome: .fileImport)
+                }
             }
         }
     }
@@ -331,7 +359,11 @@ public struct PluginManagementView: View {
             }
             .disabled(presenter.state.canRebuildIndex)
         } label: {
-            Label("more", systemImage: "ellipsis.circle")
+            Label {
+                Text("more")
+            } icon: {
+                Image(fontAwesome: .ellipsis)
+            }
         }
         .accessibilityLabel(Text("more"))
         .help("more")
@@ -501,7 +533,7 @@ public struct PluginManagementView: View {
                 .resizable()
                 .scaledToFit()
         } else {
-            Image(systemName: "puzzlepiece.extension")
+            Image(fontAwesome: .puzzlePiece)
         }
         #elseif os(macOS)
         if let image = NSImage(contentsOfFile: path) {
@@ -509,10 +541,10 @@ public struct PluginManagementView: View {
                 .resizable()
                 .scaledToFit()
         } else {
-            Image(systemName: "puzzlepiece.extension")
+            Image(fontAwesome: .puzzlePiece)
         }
         #else
-        Image(systemName: "puzzlepiece.extension")
+        Image(fontAwesome: .puzzlePiece)
         #endif
     }
 

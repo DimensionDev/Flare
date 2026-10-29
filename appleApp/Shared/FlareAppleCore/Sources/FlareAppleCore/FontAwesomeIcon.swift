@@ -77,6 +77,7 @@ public enum FontAwesomeIcon: String, CaseIterable, Hashable, Identifiable, Senda
     case pixiv = "pixiv"
     case play = "play"
     case plus = "plus"
+    case puzzlePiece = "puzzle-piece"
     case rectangleList = "rectangle-list"
     case reply = "reply"
     case retweet = "retweet"

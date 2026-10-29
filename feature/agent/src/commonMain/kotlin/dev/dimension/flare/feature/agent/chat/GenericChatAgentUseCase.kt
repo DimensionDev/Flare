@@ -67,7 +67,6 @@ internal class GenericChatAgentUseCase(
                                         searchDataSources = searchDataSources,
                                     ),
                                 temperature = 0.5,
-                                maxIterations = MAX_AGENT_ITERATIONS,
                                 finishAfterToolResults = false,
                                 chatMemoryWindowSize = CHAT_MEMORY_WINDOW_SIZE,
                             ),
@@ -121,7 +120,6 @@ internal class GenericChatAgentUseCase(
         }
 
     private companion object {
-        const val MAX_AGENT_ITERATIONS = 32
         const val CHAT_MEMORY_WINDOW_SIZE = 30
 
         const val GENERIC_CHAT_SYSTEM_PROMPT =

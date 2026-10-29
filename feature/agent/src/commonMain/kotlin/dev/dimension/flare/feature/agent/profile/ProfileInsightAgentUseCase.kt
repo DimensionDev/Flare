@@ -136,7 +136,6 @@ internal class ProfileInsightAgentUseCase(
                     sendToolResultsNodeName = "send_profile_insight_tool_results",
                     toolContext = toolContext,
                     temperature = 0.2,
-                    maxIterations = MAX_AGENT_ITERATIONS,
                     finishAfterToolResults = false,
                     chatMemoryWindowSize = CHAT_MEMORY_WINDOW_SIZE,
                     supportingParts = supportingParts,
@@ -260,7 +259,6 @@ internal class ProfileInsightAgentUseCase(
     private fun AgentTrace.toConversationEvent(): AgentConversationEvent.Trace<AgentTrace> = AgentConversationEvent.Trace(this)
 
     private companion object {
-        const val MAX_AGENT_ITERATIONS = 32
         const val CHAT_MEMORY_WINDOW_SIZE = 20
 
         const val PROFILE_INSIGHT_SYSTEM_PROMPT =

@@ -3,20 +3,22 @@ package dev.dimension.flare.feature.agent.common
 import ai.koog.agents.chatMemory.feature.ChatHistoryProvider
 import ai.koog.agents.chatMemory.feature.ChatMemory
 import ai.koog.agents.core.agent.AIAgent
+import ai.koog.agents.core.agent.context.AIAgentGraphContextBase
 import ai.koog.agents.core.dsl.builder.node
 import ai.koog.agents.core.dsl.builder.strategy
+import ai.koog.agents.core.dsl.extension.ReceivedToolResults
 import ai.koog.agents.core.dsl.extension.nodeExecuteTools
-import ai.koog.agents.core.dsl.extension.nodeLLMSendToolResults
-import ai.koog.agents.core.dsl.extension.nodeLLMSendToolResultsWithoutTools
 import ai.koog.agents.core.dsl.extension.onTextMessage
 import ai.koog.agents.core.dsl.extension.onToolCalls
 import ai.koog.agents.core.tools.ToolRegistry
 import ai.koog.agents.core.utils.ConfigureAction
 import ai.koog.agents.features.eventHandler.feature.EventHandler
 import ai.koog.prompt.Prompt
+import ai.koog.prompt.dsl.PromptBuilder
 import ai.koog.prompt.message.AttachmentContent
 import ai.koog.prompt.message.AttachmentSource
 import ai.koog.prompt.message.Message
+import ai.koog.prompt.message.MessagePart
 import dev.dimension.flare.common.MimeTypes
 import dev.dimension.flare.data.network.ai.AiImagePreparer
 import dev.dimension.flare.feature.agent.presenter.AgentMessagePart
@@ -124,20 +126,18 @@ internal fun FlareAgentRuntime.createAgent(
         .graphStrategy(
             strategy<Prompt, String>(request.strategyName) {
                 val nodeAnalyze by node<Prompt, Message.Assistant>(request.analyzeNodeName) { prompt ->
-                    llm.writeSession {
-                        appendPrompt {
-                            messages(prompt.messages)
-                        }
-                        requestLLM()
+                    requestAgentResponse {
+                        messages(prompt.messages)
                     }
                 }
                 val nodeExecuteTools by nodeExecuteTools(request.executeToolsNodeName)
-                val nodeSendToolResults by
-                    if (request.finishAfterToolResults) {
-                        nodeLLMSendToolResultsWithoutTools(request.sendToolResultsNodeName)
-                    } else {
-                        nodeLLMSendToolResults(request.sendToolResultsNodeName)
+                val nodeSendToolResults by node<ReceivedToolResults, Message.Assistant>(request.sendToolResultsNodeName) { results ->
+                    requestAgentResponse(finishAfterToolResults = request.finishAfterToolResults) {
+                        user {
+                            results.toolResults.forEach { toolResult -> toolResult(toolResult.toMessagePart()) }
+                        }
                     }
+                }
 
                 edge(nodeStart forwardTo nodeAnalyze)
                 edge(nodeAnalyze forwardTo nodeExecuteTools onToolCalls { true })
@@ -240,6 +240,49 @@ internal fun FlareAgentRuntime.createAgent(
             },
         ).build()
 
+private suspend fun AIAgentGraphContextBase.requestAgentResponse(
+    finishAfterToolResults: Boolean = false,
+    input: PromptBuilder.() -> Unit,
+): Message.Assistant {
+    // Another tool round needs three more nodes: tools, model, and finish.
+    val summarize = !finishAfterToolResults && stateManager.withStateLock { it.iterations > config.maxAgentIterations - 3 }
+    return llm.writeSession {
+        appendPrompt(input)
+        when {
+            summarize -> {
+                val originalPrompt = prompt
+                val response =
+                    try {
+                        appendPrompt {
+                            system(
+                                """
+                                This run is reaching its step limit. Tools are disabled for this response.
+                                Summarize what has actually been completed, any remaining work, and the next steps in the user's language.
+                                Explain that the user can ask you to continue. Do not claim unfinished work is complete.
+                                """.trimIndent(),
+                            )
+                        }
+                        requestLLMWithoutTools()
+                    } finally {
+                        // The limit instruction must not constrain the next user turn.
+                        prompt = originalPrompt
+                    }
+                check(response.parts.none { it is MessagePart.Tool.Call }) { "Tools are disabled while summarizing at the step limit" }
+                appendPrompt { message(response) }
+                response
+            }
+
+            finishAfterToolResults -> {
+                requestLLMWithoutTools()
+            }
+
+            else -> {
+                requestLLM()
+            }
+        }
+    }
+}
+
 internal data class AgentRunResult(
     val text: String,
     val parts: List<AgentMessagePart>,
@@ -256,7 +299,7 @@ internal data class FlareAgentRequest(
     val sendToolResultsNodeName: String,
     val toolContext: AgentToolContext = AgentToolContext.Empty,
     val temperature: Double = 0.2,
-    val maxIterations: Int = 16,
+    val maxIterations: Int = 256,
     val finishAfterToolResults: Boolean = false,
     val chatMemoryWindowSize: Int = 20,
     val images: List<UiMedia.Image> = emptyList(),

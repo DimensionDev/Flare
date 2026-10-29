@@ -97,7 +97,6 @@ internal class LocalHistoryAgentUseCase(
                                     searchDataSources = searchDataSources,
                                 ),
                             temperature = 0.3,
-                            maxIterations = MAX_AGENT_ITERATIONS,
                             finishAfterToolResults = false,
                             chatMemoryWindowSize = CHAT_MEMORY_WINDOW_SIZE,
                         ),
@@ -258,7 +257,6 @@ internal class LocalHistoryAgentUseCase(
         }
 
     private companion object {
-        const val MAX_AGENT_ITERATIONS = 32
         const val CHAT_MEMORY_WINDOW_SIZE = 30
 
         const val LOCAL_HISTORY_SYSTEM_PROMPT =

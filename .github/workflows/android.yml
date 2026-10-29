@@ -70,13 +70,10 @@ jobs:
           arch: x86_64
           disable-animations: true
           script: |
-            for test_class in \
-              dev.dimension.flare.ui.screen.settings.ProxySettingsContentTest \
-              dev.dimension.flare.ui.screen.settings.PluginManagementMenuTest \
-              dev.dimension.flare.common.WebViewProxyTest \
-              dev.dimension.flare.ui.screen.gallery.GalleryDetailScreenTest; do
-              ./gradlew :app:connectedDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=$test_class" || exit 1
-            done
+            ./gradlew :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=dev.dimension.flare.ui.screen.settings.ProxySettingsContentTest
+            ./gradlew :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=dev.dimension.flare.ui.screen.settings.PluginManagementMenuTest
+            ./gradlew :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=dev.dimension.flare.common.WebViewProxyTest
+            ./gradlew :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=dev.dimension.flare.ui.screen.gallery.GalleryDetailScreenTest
 
       # Build with Gradle
       - name: Build with Gradle

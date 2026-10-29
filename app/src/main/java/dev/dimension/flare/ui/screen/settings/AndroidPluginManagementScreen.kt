@@ -100,7 +100,14 @@ internal fun AndroidPluginManagementScreen(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val subsystem = koinGet<PluginSubsystemV1>()
-    val presenter = remember(subsystem, scope) { PluginManagementPresenterV1(subsystem, scope) }
+    val presenter =
+        remember(subsystem) {
+            PluginManagementPresenterV1(
+                subsystem,
+                dev.dimension.flare.di
+                    .koinGet<kotlinx.coroutines.CoroutineScope>(),
+            )
+        }
     DisposableEffect(presenter) {
         onDispose { presenter.close() }
     }
@@ -520,14 +527,6 @@ internal fun PluginManagementList(
                 }
             }
         }
-        if (state.requiresRestart) {
-            item(key = "restart") {
-                MessageItem(
-                    title = stringResource(R.string.plugin_restart_required),
-                    isError = false,
-                )
-            }
-        }
         if (state.error != null) {
             item(key = "operation-error") {
                 MessageItem(
@@ -627,12 +626,6 @@ internal fun PluginItem(
                     TextButton(enabled = !busy, onClick = { onUpdate(plugin.pluginId) }) {
                         Text("${stringResource(R.string.plugin_update)} ${update.tag}")
                     }
-                }
-                if (plugin.pendingRestart) {
-                    Text(
-                        stringResource(R.string.plugin_restart_required),
-                        color = MaterialTheme.colorScheme.primary,
-                    )
                 }
                 plugin.authoring?.let { authoring ->
                     if (authoring.phase != PluginAuthoringPhase.Idle && authoring.phase != PluginAuthoringPhase.Applied) {

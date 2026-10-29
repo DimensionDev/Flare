@@ -71,7 +71,7 @@ Prefer GitHub distribution: one plugin at repository root, an already-built
 `plugin.js`, and a stable version tag matching `manifest.version`. Prepare files
 and release instructions; create/push repositories, commits, or tags only within
 the user's current authorization. See [publishing](references/publishing.md) for
-restart behavior and the optional local `.fpp` path.
+immediate activation, uninstall cleanup, and the optional local `.fpp` path.
 
 Deliver the complete repository files, feature-to-capability mapping, setup and
 installation instructions, checks performed, and remaining assumptions. A new

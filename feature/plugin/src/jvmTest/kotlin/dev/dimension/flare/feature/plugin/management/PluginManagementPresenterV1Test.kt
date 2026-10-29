@@ -151,7 +151,7 @@ class PluginManagementPresenterV1Test {
     fun allPluginSourcesShareItemsWithoutLosingInstalledMetadata() =
         runTest {
             val subsystem = subsystem()
-            val presenter = PluginManagementPresenterV1(subsystem, backgroundScope)
+            val presenter = testPluginManagementPresenter(subsystem, backgroundScope)
             try {
                 presenter.inspect(packagePath.toString())
                 presenter.confirmInstall()
@@ -185,7 +185,7 @@ class PluginManagementPresenterV1Test {
             val firstSubsystem = subsystem()
             var firstPresenter: PluginManagementPresenterV1? = null
             try {
-                val presenter = PluginManagementPresenterV1(firstSubsystem, backgroundScope)
+                val presenter = testPluginManagementPresenter(firstSubsystem, backgroundScope)
                 firstPresenter = presenter
                 presenter.inspect(packagePath.toString())
                 assertNotNull(presenter.state.value.pendingInstall)
@@ -201,9 +201,7 @@ class PluginManagementPresenterV1Test {
                     presenter.state.value.plugins
                         .single()
                 assertTrue(FileSystem.SYSTEM.exists(desired.iconPath.toPath()))
-                assertFalse(desired.running)
-                assertTrue(desired.pendingRestart)
-                assertTrue(presenter.state.value.requiresRestart)
+                assertTrue(desired.running)
             } finally {
                 firstPresenter?.close()
                 firstSubsystem.runtimePool.close()
@@ -212,20 +210,18 @@ class PluginManagementPresenterV1Test {
             val restartedSubsystem = subsystem()
             var restartedPresenter: PluginManagementPresenterV1? = null
             try {
-                val presenter = PluginManagementPresenterV1(restartedSubsystem, backgroundScope)
+                val presenter = testPluginManagementPresenter(restartedSubsystem, backgroundScope)
                 restartedPresenter = presenter
                 val running =
                     presenter.state.value.plugins
                         .single()
                 assertTrue(running.running)
-                assertFalse(running.pendingRestart)
 
                 presenter.uninstall(running.pluginId)
                 assertTrue(
                     presenter.state.value.plugins
                         .isEmpty(),
                 )
-                assertTrue(presenter.state.value.requiresRestart)
             } finally {
                 restartedPresenter?.close()
                 restartedSubsystem.runtimePool.close()
@@ -236,7 +232,7 @@ class PluginManagementPresenterV1Test {
     fun unrelatedUpdatesPreserveTheInstallReviewUntilCancellation() =
         runTest {
             val subsystem = subsystem()
-            val presenter = PluginManagementPresenterV1(subsystem, backgroundScope)
+            val presenter = testPluginManagementPresenter(subsystem, backgroundScope)
             try {
                 presenter.inspect(packagePath.toString())
                 val review = assertNotNull(presenter.state.value.pendingInstall)
@@ -266,7 +262,7 @@ class PluginManagementPresenterV1Test {
             val subsystem = subsystem()
             var presenter: PluginManagementPresenterV1? = null
             try {
-                val activePresenter = PluginManagementPresenterV1(subsystem, backgroundScope)
+                val activePresenter = testPluginManagementPresenter(subsystem, backgroundScope)
                 presenter = activePresenter
                 activePresenter.inspect(packagePath.toString())
                 assertNotNull(activePresenter.state.value.pendingInstall)
@@ -289,23 +285,23 @@ class PluginManagementPresenterV1Test {
     fun closeStopsThePresenterFromObservingGlobalPluginState() =
         runTest {
             val subsystem = subsystem()
-            val presenter = PluginManagementPresenterV1(subsystem, backgroundScope)
+            val presenter = testPluginManagementPresenter(subsystem, backgroundScope)
             try {
                 presenter.inspect(packagePath.toString())
                 presenter.confirmInstall()
                 val installed =
                     presenter.state.value.plugins
                         .single()
-                assertTrue(installed.enabled)
+                assertTrue(installed.running)
 
                 presenter.close()
-                subsystem.stateStore.setEnabled(installed.pluginId, false)
+                subsystem.stateStore.uninstall(installed.pluginId)
                 runCurrent()
 
                 assertTrue(
                     presenter.state.value.plugins
                         .single()
-                        .enabled,
+                        .running,
                 )
             } finally {
                 presenter.close()

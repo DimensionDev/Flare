@@ -1,7 +1,7 @@
 # Troubleshooting and limits
 
 First identify the stage: repository/version discovery, archive/manifest
-validation, registration, activation after restart, login, invocation, or UI
+validation, registration, immediate activation, login, invocation, or UI
 mapping. Record the running plugin version, operation, error code, and a redacted
 input/response. Avoid collecting credentials or private content. `flare` has no
 logging API; do not invent `flare.log` or assume a developer console is available.

@@ -68,6 +68,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.withTimeoutOrNull
+import okio.Path.Companion.toPath
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -80,6 +81,70 @@ import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
 class AccountRepositoryTest : RobolectricTest() {
+    @Test
+    fun platformDeletionRemovesOnlyOwnedAccountsAndTheirDraftTargets() =
+        runTest {
+            val repository = createRepository(this)
+            val drafts = DraftRepository(appDatabase, DraftMediaStore(fileStorage))
+            val owned = UiAccount(MicroBlogKey("owned", "same.example"), "TestPlugin")
+            val second = UiAccount(MicroBlogKey("second", "same.example"), "TestPlugin")
+            val foreign = UiAccount(MicroBlogKey("foreign", "same.example"), "TestPlugin")
+            val builtIn = UiAccount(MicroBlogKey("builtin", "same.example"), "Mastodon")
+            listOf(owned, second, builtIn).forEach { repository.addAccount(it, "owned") }
+            repository.addAccount(foreign, "foreign")
+            val content =
+                dev.dimension.flare.data.database.app.model.DraftContent(
+                    "keep shared content",
+                    dev.dimension.flare.ui.model.UiTimelineV2.Post.Visibility.Public,
+                    emptyList(),
+                    false,
+                )
+
+            fun media(group: String): SaveDraftMedia {
+                val path = fileStorage.draftMediaFile(group, "test.png")
+                fileStorage.createDirectories(requireNotNull(path.parent))
+                fileStorage.write(path, byteArrayOf(1, 2, 3))
+                return SaveDraftMedia(path.toString(), mediaType = dev.dimension.flare.data.database.app.model.DraftMediaType.IMAGE)
+            }
+            val sharedMedia = media("shared")
+            val ownedMedia = media("owned")
+            drafts.saveDraft(
+                SaveDraftInput(
+                    "shared",
+                    content,
+                    listOf(SaveDraftTarget(owned.accountKey), SaveDraftTarget(builtIn.accountKey)),
+                    listOf(sharedMedia),
+                ),
+            )
+            drafts.saveDraft(
+                SaveDraftInput(
+                    "owned",
+                    content,
+                    listOf(SaveDraftTarget(owned.accountKey), SaveDraftTarget(second.accountKey)),
+                    listOf(ownedMedia),
+                ),
+            )
+            repeat(2) { repository.deleteAccounts("TestPlugin") { it == "\"owned\"" } }
+            assertEquals(
+                setOf(foreign.accountKey, builtIn.accountKey),
+                repository.allAccounts
+                    .first()
+                    .map { it.accountKey }
+                    .toSet(),
+            )
+            assertNull(drafts.draft("owned").first())
+            assertEquals(
+                listOf(builtIn.accountKey),
+                drafts
+                    .draft("shared")
+                    .first()
+                    ?.targets
+                    ?.map { it.accountKey },
+            )
+            assertTrue(fileStorage.exists(sharedMedia.cachePath.toPath()))
+            assertFalse(fileStorage.exists(ownedMedia.cachePath.toPath()))
+        }
+
     @Test
     fun staleUnavailableAndFailedAccountEventsDoNotStopLaterTabSynchronization() =
         runTest {
@@ -545,7 +610,7 @@ class AccountRepositoryTest : RobolectricTest() {
 
             val account = repository.allAccounts.first().single()
             assertEquals("TestNet", account.platformDisplayName)
-            assertEquals(UiIcon.World.asType(), account.platformIcon)
+            assertEquals(UiIcon.Info.asType(), account.platformIcon)
             assertFalse(account.platformAvailable)
             assertFailsWith<UnsupportedPlatformException> {
                 repository.getOrCreateDataSource(account)
@@ -562,7 +627,7 @@ class AccountRepositoryTest : RobolectricTest() {
         }
 
     @Test
-    fun unavailableAccountUsesMetadataCapturedWhenItWasAdded() =
+    fun unavailableAccountUsesItsPlatformIdWithoutPersistedDisplayMetadata() =
         runTest {
             val repository = createRepository(this)
             val account =
@@ -576,18 +641,10 @@ class AccountRepositoryTest : RobolectricTest() {
 
             repository.addAccount(account, "credential")
 
-            val stored = requireNotNull(appDatabase.accountDao().getAccount(account.accountKey))
-            assertEquals("Future Network", stored.platformDisplayName)
-            assertNull(stored.platformIconName)
-            assertEquals(
-                UiText.Raw("Localized Future Network"),
-                requireNotNull(stored.platformDisplayNameTextJson).decodeJson<UiText>(),
-            )
-            assertEquals("file:///stable/future.png", stored.platformIconUrl)
             val restored = repository.allAccounts.first().single()
-            assertEquals("Future Network", restored.platformDisplayName)
-            assertEquals(account.platformIcon, restored.platformIcon)
-            assertEquals(UiText.Raw("Localized Future Network"), restored.platformDisplayNameText)
+            assertEquals("FutureNet", restored.platformDisplayName)
+            assertEquals(UiIcon.Info.asType(), restored.platformIcon)
+            assertEquals(UiText.Raw("FutureNet"), restored.platformDisplayNameText)
             assertFalse(restored.platformAvailable)
         }
 
@@ -992,7 +1049,6 @@ class AccountRepositoryTest : RobolectricTest() {
                 assertNull(withTimeoutOrNull(100) { events.receive() })
                 val stored = appDatabase.accountDao().getAccount(accountKey)
                 assertEquals("Mastodon", stored?.platformId)
-                assertEquals("Updated metadata", stored?.platformDisplayName)
                 assertEquals("\"refreshed\"", stored?.credential_json)
             } finally {
                 collection.cancel()
@@ -1077,6 +1133,7 @@ class AccountRepositoryTest : RobolectricTest() {
             cacheDatabase = cacheDatabase,
             proxyRepository = proxy,
             platformRegistry = registry,
+            draftRepository = DraftRepository(appDatabase, DraftMediaStore(fileStorage)),
         )
 
     private suspend fun insertAccount() {

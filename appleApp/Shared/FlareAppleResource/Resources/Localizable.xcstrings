@@ -396,19 +396,19 @@
       "en": {
         "stringUnit": {
           "state": "translated",
-          "value": "Delete %@ and its local source? Existing accounts are kept."
+          "value": "Delete %@, its local source, accounts, credentials, and account data from this device? This takes effect immediately."
         }
       },
       "zh-Hans": {
         "stringUnit": {
           "state": "translated",
-          "value": "删除 %@ 及其本地源码？已有账号会保留。"
+          "value": "从本机删除 %@、本地源码及其账号、凭据和账号数据？删除后立即生效。"
         }
       },
       "zh-Hant": {
         "stringUnit": {
           "state": "translated",
-          "value": "刪除 %@ 及其本機原始碼？已有帳號會保留。"
+          "value": "從本機刪除 %@、本機原始碼及其帳號、憑證和帳號資料？刪除後立即生效。"
         }
       }
     }
@@ -1149,22 +1149,6 @@
       }
     }
   },
-  "plugin_restart_required": {
-    "localizations": {
-      "en": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "Restart Flare to apply plugin changes."
-        }
-      },
-      "zh-Hans": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "重新启动 Flare 后应用插件更改。"
-        }
-      }
-    }
-  },
   "plugin_retry": {
     "localizations": {
       "en": {
@@ -1234,13 +1218,19 @@
       "en": {
         "stringUnit": {
           "state": "translated",
-          "value": "%@ will stop being available after Flare restarts. Accounts and credentials are kept."
+          "value": "Delete %@ and its accounts, credentials, and account data from this device? This takes effect immediately."
         }
       },
       "zh-Hans": {
         "stringUnit": {
           "state": "translated",
-          "value": "%@ 将在 Flare 重启后停止提供。账号和凭据会被保留。"
+          "value": "从本机删除 %@ 及其账号、凭据和账号数据？删除后立即生效。"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "從本機刪除 %@ 及其帳號、憑證和帳號資料？刪除後立即生效。"
         }
       }
     }

@@ -31,7 +31,7 @@ for account access, reload boundaries, and restoring the installed version.
 
 Copy the contents of this directory to the root of your own public GitHub
 repository. Publish a stable tag `v0.1.0` matching `manifest.version`, then install
-the repository URL from Flare's plugin management and restart Flare. The script
+the repository URL from Flare's plugin management. It becomes available immediately. The script
 is already built; a GitHub Release or uploaded `.fpp` asset is unnecessary.
 
 For a separately maintained fork, choose your own plugin ID and a distinct
@@ -54,7 +54,7 @@ node pack.mjs examples/pixelfed /tmp/pixelfed-0.1.0.fpp
 ```
 
 The output is deterministic: identical input bytes produce an identical `.fpp`.
-Install it from Flare's Settings > Plugins page, then restart Flare before
+Install it from Flare's Settings > Plugins page, then continue with
 logging in. Local packages are unverified and should be reviewed before use.
 
 The bundled icon comes from Pixelfed's official

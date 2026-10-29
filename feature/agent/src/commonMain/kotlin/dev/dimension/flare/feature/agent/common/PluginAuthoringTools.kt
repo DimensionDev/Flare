@@ -18,7 +18,6 @@ internal fun pluginAuthoringTools(
         CreatePluginTool(authoring),
         ReadPluginFilesTool(authoring),
         WritePluginFilesTool(authoring),
-        SetPluginEnabledTool(authoring),
         DeletePluginTool(authoring, inputRequestStore),
         ReadPluginSdkTool(authoring),
         ReadPluginDocumentationTool(authoring),
@@ -26,7 +25,7 @@ internal fun pluginAuthoringTools(
 
 internal const val PLUGIN_TOOL_GUIDANCE = """
     Use plugin tools to create and manage local Flare plugins when the user asks, from any conversation.
-    Create, update and enable/disable tools act on that request directly; delete_plugin requires its confirmation step.
+    Create and update tools act on that request directly; delete_plugin requires its confirmation step.
     List existing plugins and read their source before updating; ask which plugin if the target is ambiguous.
     Create only when a new plugin is needed, using a unique requestKey and reusing that key for retries.
     Preserve the returned plugin id and platformId in the manifest. Read README.md with read_plugin_sdk first; use exact
@@ -80,27 +79,6 @@ internal class CreatePluginTool(
         }
 }
 
-internal class SetPluginEnabledTool(
-    private val authoring: PluginAuthoring,
-) : SimpleTool<SetPluginEnabledTool.Args>(
-        argsType = typeToken<Args>(),
-        name = "set_plugin_enabled",
-        description =
-            "Enable or disable an editable local plugin when requested. Busy writes or login can prevent the change.",
-    ) {
-    @Serializable
-    internal data class Args(
-        val pluginId: String,
-        val enabled: Boolean,
-    )
-
-    override suspend fun execute(args: Args): String =
-        pluginToolResult {
-            authoring.setEnabled(args.pluginId, args.enabled)
-            JSON_WITH_ENCODE_DEFAULT.encodeToString(authoring.plugins.value.single { it.id == args.pluginId })
-        }
-}
-
 internal class DeletePluginTool(
     private val authoring: PluginAuthoring,
     private val inputRequestStore: AgentToolInputRequestStore,
@@ -108,7 +86,7 @@ internal class DeletePluginTool(
         argsType = typeToken<Args>(),
         name = "delete_plugin",
         description =
-            "Delete an editable local plugin's source and installation. Account records are retained. Ask the " +
+            "Delete an editable local plugin, its source, accounts, credentials and account data from this device. Ask the " +
                 "user to confirm the exact plugin first.",
     ) {
     @Serializable
@@ -139,7 +117,8 @@ internal class DeletePluginTool(
                     ),
                 )
                 "event=plugin_delete_confirmation_required\ninputRequestId=$requestId\ninputRequestOptions:\n" +
-                    "- optionId=confirm\n  optionKind=confirmation\npluginId=${plugin.id}\nname=${plugin.name}"
+                    "- optionId=confirm\n  optionKind=confirmation\npluginId=${plugin.id}\nname=${plugin.name}\n" +
+                    "Deletes local source, accounts, credentials and account data from this device immediately."
             } else {
                 authoring.delete(plugin.id)
                 "Plugin deleted: ${plugin.id}"

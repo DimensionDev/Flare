@@ -817,6 +817,11 @@ internal fun List<AccountMicroblogDataSource>.toAgentBuiltInTimelineTargets(): L
 private fun List<AccountMicroblogDataSource>.agentTimelineAccountService(): AccountService {
     val dataSources = associateBy { it.accountKey }
     return object : AccountService {
+        override suspend fun deleteAccounts(
+            platformId: String,
+            ownsCredential: (String) -> Boolean,
+        ): Unit = error("Account deletion is not available")
+
         override fun accountServiceFlow(accountType: dev.dimension.flare.model.AccountType): Flow<MicroblogDataSource> {
             val specific = accountType as? dev.dimension.flare.model.AccountType.Specific
             val dataSource = specific?.let { dataSources[it.accountKey]?.dataSource }

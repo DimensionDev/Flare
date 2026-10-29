@@ -3,6 +3,7 @@ package dev.dimension.flare.data.database.app
 import androidx.room3.Room
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import androidx.sqlite.execSQL
+import dev.dimension.flare.data.database.PLUGIN_DEVELOPMENT_DOWNGRADE
 import dev.dimension.flare.model.MicroBlogKey
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -13,22 +14,36 @@ import kotlin.test.assertEquals
 
 class AppDatabaseMigration11To12Test {
     @Test
-    fun migrationPreservesEveryExistingPlatformAccountField() =
+    fun migrationPreservesEveryExistingPlatformAccountField() = verifyMigration(11)
+
+    @Test
+    fun developmentDowngradePreservesAccountsAndUnrelatedData() = verifyMigration(13)
+
+    private fun verifyMigration(version: Int) =
         runTest {
             val databasePath = Files.createTempFile("flare-app-v11", ".db")
             val path = databasePath.toAbsolutePath().toString()
             val platformIds = listOf("Mastodon", "Misskey", "Bluesky", "Pixiv", "xQt", "VVo", "Nostr", "Fanbox")
             try {
-                createVersion11Fixture(path, platformIds)
+                createFixture(path, platformIds, version)
 
                 val database =
                     Room
                         .databaseBuilder<AppDatabase>(name = path)
-                        .addMigrations(AppDatabase.MIGRATION_11_12, AppDatabase.MIGRATION_12_13)
+                        .addMigrations(AppDatabase.MIGRATION_11_12, PLUGIN_DEVELOPMENT_DOWNGRADE)
                         .setDriver(BundledSQLiteDriver())
                         .setQueryCoroutineContext(Dispatchers.Unconfined)
                         .build()
                 try {
+                    assertEquals(
+                        "keep me",
+                        database
+                            .searchHistoryDao()
+                            .select()
+                            .first()
+                            .single()
+                            .search,
+                    )
                     val accounts = database.accountDao().sortedAccounts().first()
                     assertEquals(platformIds, accounts.map { it.platformId })
                     accounts.forEachIndexed { index, account ->
@@ -37,10 +52,6 @@ class AppDatabaseMigration11To12Test {
                         assertEquals("{\"token\":\"$platformId\"}", account.credential_json)
                         assertEquals(1_000L + index, account.last_active)
                         assertEquals(index.toLong(), account.sort_id)
-                        assertEquals(null, account.platformDisplayName)
-                        assertEquals(null, account.platformIconName)
-                        assertEquals(null, account.platformDisplayNameTextJson)
-                        assertEquals(null, account.platformIconUrl)
                     }
                 } finally {
                     database.close()
@@ -49,7 +60,7 @@ class AppDatabaseMigration11To12Test {
                 BundledSQLiteDriver().open(path).use { connection ->
                     connection.prepare("PRAGMA user_version").use { statement ->
                         assertEquals(true, statement.step())
-                        assertEquals(13L, statement.getLong(0))
+                        assertEquals(12L, statement.getLong(0))
                     }
                     connection.prepare("SELECT identity_hash FROM room_master_table WHERE id = 42").use { statement ->
                         assertEquals(true, statement.step())
@@ -61,13 +72,20 @@ class AppDatabaseMigration11To12Test {
             }
         }
 
-    private fun createVersion11Fixture(
+    private fun createFixture(
         path: String,
         platformIds: List<String>,
+        version: Int,
     ) {
         BundledSQLiteDriver().open(path).use { connection ->
             V11_SCHEMA.forEach(connection::execSQL)
-            connection.execSQL("PRAGMA user_version = 11")
+            if (version == 13) {
+                listOf("platform_display_name", "platform_icon_name", "platform_display_name_text_json", "platform_icon_url").forEach {
+                    connection.execSQL("ALTER TABLE DbAccount ADD COLUMN $it TEXT")
+                }
+            }
+            connection.execSQL("INSERT INTO DbSearchHistory(search, created_at) VALUES ('keep me', 123)")
+            connection.execSQL("PRAGMA user_version = $version")
             connection.execSQL("CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY, identity_hash TEXT)")
             connection.execSQL("INSERT OR REPLACE INTO room_master_table (id, identity_hash) VALUES(42, '$APP_DATABASE_IDENTITY_HASH')")
             connection
@@ -89,7 +107,7 @@ class AppDatabaseMigration11To12Test {
     }
 
     private companion object {
-        const val APP_DATABASE_IDENTITY_HASH = "3a0b6575e299aba82e79e2437fdf7f90"
+        const val APP_DATABASE_IDENTITY_HASH = "30af886dd6bd572e9c4c3d06afdb8a68"
 
         val V11_SCHEMA =
             listOf(

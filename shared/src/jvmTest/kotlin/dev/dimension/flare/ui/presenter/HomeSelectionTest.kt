@@ -116,7 +116,24 @@ class HomeSelectionTest {
                     appData.appSettingsStore.updateData { it.copy(rememberHomeTimelinePosition = enabled) }
                     val resolver = TimelineResolver(testPlatformRuntimeData(), unavailableAccountService())
                     val settings = SettingsRepository(storage, appData, resolver, cacheDb)
-                    val accounts = AccountRepository(appDb, appScope, appData, cacheDb, dev.dimension.flare.data.repository.ProxyRepository(storage), testPlatformRegistry())
+                    val accounts =
+                        AccountRepository(
+                            appDb,
+                            appScope,
+                            appData,
+                            cacheDb,
+                            dev.dimension.flare.data.repository
+                                .ProxyRepository(storage),
+                            testPlatformRegistry(),
+                            dev.dimension.flare.data.repository.DraftRepository(
+                                appDb,
+                                dev.dimension.flare.data.repository
+                                    .DraftMediaStore(
+                                        dev.dimension.flare.data.io
+                                            .InMemoryFileStorage(),
+                                    ),
+                            ),
+                        )
                     // Existing prerequisites have finished; only the added preferences barrier remains cold.
                     settings.homeTimelineTabs.first()
                     accounts.allAccounts.first()

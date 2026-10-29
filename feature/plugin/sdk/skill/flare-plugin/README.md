@@ -175,7 +175,7 @@ cases matter. It should identify gaps rather than invent website endpoints.
    commit the ready-to-run `plugin.js` and publish a public GitHub repository with a stable version tag.
 5. In Flare's plugin management, enter `https://github.com/OWNER/REPO` and click
    **Install**. Flare downloads the latest stable version and shows its source and
-   permissions in the same dialog. Confirm installation, then restart Flare.
+   permissions in the same dialog. Confirm installation to use the plugin immediately.
    Follow the plugin's README to select the platform, origin, and login method.
 
 See [publishing](references/publishing.md) for exact tag rules and updates. Flare

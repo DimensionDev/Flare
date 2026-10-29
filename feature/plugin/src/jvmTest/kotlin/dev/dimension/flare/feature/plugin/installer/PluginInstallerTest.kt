@@ -53,7 +53,7 @@ class PluginInstallerTest {
 
     @Test
     fun rasterIconsKeepTheirBytesFormatAndPathAcrossInstallRestartAndRecovery() =
-        runBlocking {
+        runBlocking<Unit> {
             pluginIconFixtures.forEach { (extension, bytes) ->
                 val entries = TestFppFactory.validEntries().filterNot { it.first == FppPaths.ICON } + ("assets/icon.$extension" to bytes)
                 TestFppFactory.write(input, entries)
@@ -143,7 +143,7 @@ class PluginInstallerTest {
 
     @Test
     fun invalidLocaleCatalogsAreRejectedAtImportAndStartup() =
-        runBlocking {
+        runBlocking<Unit> {
             val manifest = TestFppFactory.validManifest.replace("\"Test plugin\"", """{"key":"name","fallback":"Test plugin"}""")
             val entries = TestFppFactory.validEntries(manifest = manifest)
             TestFppFactory.write(input, entries + ("locales/en.json" to """{"name":"Localized plugin"}""".encodeToByteArray()))
@@ -181,8 +181,8 @@ class PluginInstallerTest {
         }
 
     @Test
-    fun installChangesDesiredOnlyUntilStoreIsReopened() =
-        runBlocking {
+    fun installPersistsAReviewedPackageForStartup() =
+        runBlocking<Unit> {
             TestFppFactory.write(input)
 
             val preview = installer.inspect(input)
@@ -197,23 +197,14 @@ class PluginInstallerTest {
                     .getValue(installed.pluginId),
             )
             assertTrue(stateStore.running.plugins.isEmpty())
-            assertTrue(stateStore.requiresRestart)
 
             val restarted = PluginStateStore.open(fileSystem, root / "social-plugins-v2")
             assertNotNull(restarted.running.plugins[installed.pluginId])
-            assertFalse(restarted.requiresRestart)
-
-            restarted.setEnabled(installed.pluginId, enabled = false)
-            assertNotNull(restarted.running.plugins[installed.pluginId])
-            assertTrue(restarted.requiresRestart)
-            val disabledAfterRestart = PluginStateStore.open(fileSystem, root / "social-plugins-v2")
-            assertTrue(disabledAfterRestart.running.plugins.isEmpty())
-            assertTrue(fileSystem.exists(disabledAfterRestart.paths.packagePath(installed.packageHash)))
         }
 
     @Test
     fun reinstallingIdenticalPackageIsIdempotent() =
-        runBlocking {
+        runBlocking<Unit> {
             TestFppFactory.write(input)
             val first = installer.inspect(input).let { installer.commit(it, confirmed = true) }
 
@@ -227,8 +218,8 @@ class PluginInstallerTest {
         }
 
     @Test
-    fun updateAndUninstallTakeEffectOnlyAfterRestartAndCleanUpOldFilesLater() =
-        runBlocking {
+    fun cleanupProtectsExplicitlyActivePackagesUntilTheyAreRetired() =
+        runBlocking<Unit> {
             TestFppFactory.write(input)
             val first = installer.inspect(input).let { installer.commit(it, confirmed = true) }
 
@@ -280,17 +271,17 @@ class PluginInstallerTest {
             assertFalse(fileSystem.exists(uninstalledStore.paths.packagePath(second.packageHash)))
             assertFalse(fileSystem.exists(uninstalledStore.paths.iconPath(second.packageHash)))
             assertEquals(
-                1,
+                0,
                 fileSystem
                     .list(uninstalledStore.paths.icons)
                     .count { it.name.startsWith("platform-") },
-                "Cached posts and accounts retain their shared icon after the package is removed",
+                "Orphaned platform icons are removed with their uninstalled package",
             )
         }
 
     @Test
     fun failedIndexCommitKeepsPreviousPluginAndLeavesOnlyCollectableOrphans() =
-        runBlocking {
+        runBlocking<Unit> {
             TestFppFactory.write(input)
             val first = installer.inspect(input).let { installer.commit(it, confirmed = true) }
             val failingFileSystem =
@@ -339,7 +330,7 @@ class PluginInstallerTest {
 
     @Test
     fun validatesRegistrationCatalogAndIcon() =
-        runBlocking {
+        runBlocking<Unit> {
             TestFppFactory.write(
                 input,
                 TestFppFactory.validEntries(script = "definePlugin({ detector: { detect() {} } });"),
@@ -366,7 +357,6 @@ class PluginInstallerTest {
                 TestFppFactory.validEntries(script = TestFppFactory.validScript + "\nasync function later() { return import('x'); }"),
             )
             assertFails { installer.inspect(input) }
-            Unit
         }
 
     @Test
@@ -390,7 +380,7 @@ class PluginInstallerTest {
 
     @Test
     fun updateWarningsIncludePermissionDowngradeAndChangedHash() =
-        runBlocking {
+        runBlocking<Unit> {
             TestFppFactory.write(input)
             installer.inspect(input).also { installer.commit(it, confirmed = true) }
 
@@ -417,7 +407,7 @@ class PluginInstallerTest {
 
     @Test
     fun updateCannotChangePersistedPlatformIdentity() =
-        runBlocking {
+        runBlocking<Unit> {
             TestFppFactory.write(input)
             val installed = installer.inspect(input).let { installer.commit(it, confirmed = true) }
             val renamedPlatform =
@@ -436,7 +426,7 @@ class PluginInstallerTest {
 
     @Test
     fun rejectsCompressedInputOverLimitWhileStreaming() =
-        runBlocking {
+        runBlocking<Unit> {
             val source = RepeatingSource(FppLimits.MAX_PACKAGE_BYTES + 1)
 
             assertFails { installer.inspect(source) }
@@ -498,7 +488,7 @@ class PluginInstallerTest {
 
     @Test
     fun explicitlyRebuildsCorruptIndexFromValidatedPackages() =
-        runBlocking {
+        runBlocking<Unit> {
             TestFppFactory.write(input)
             val installed = installer.inspect(input).let { installer.commit(it, confirmed = true) }
             fileSystem.write(stateStore.paths.index) { writeUtf8("not-json") }
@@ -516,13 +506,12 @@ class PluginInstallerTest {
                     .packageHash,
             )
             assertTrue(corruptStore.running.plugins.isEmpty())
-            assertTrue(corruptStore.requiresRestart)
+
             assertNotNull(
                 PluginStateStore
                     .open(fileSystem, root / "social-plugins-v2")
                     .running.plugins[installed.pluginId],
             )
-            Unit
         }
 }
 

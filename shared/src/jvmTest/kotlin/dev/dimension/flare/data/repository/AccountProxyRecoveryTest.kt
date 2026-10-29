@@ -420,7 +420,23 @@ class AccountProxyRecoveryTest {
     private fun repository(): Pair<AccountRepository, CoroutineScope> {
         val scope = CoroutineScope(Job() + Dispatchers.IO)
         scopes += scope
-        return AccountRepository(app, scope, AppDataStore(storage), cache, proxy, testPlatformRegistry()) to scope
+        return AccountRepository(
+            app,
+            scope,
+            AppDataStore(storage),
+            cache,
+            proxy,
+            testPlatformRegistry(),
+            dev.dimension.flare.data.repository.DraftRepository(
+                app,
+                dev.dimension.flare.data.repository
+                    .DraftMediaStore(
+                        dev.dimension.flare.data.io
+                            .InMemoryFileStorage(),
+                    ),
+            ),
+        ) to
+            scope
     }
 
     private fun install(accounts: AccountRepository) {

@@ -59,7 +59,6 @@ class PluginGitHubInstallTest {
             val installed = installer.commit(preview, confirmed = true)
             assertEquals(source, installed.source)
             assertTrue(store.running.plugins.isEmpty())
-            assertTrue(store.requiresRestart)
 
             val restarted = PluginStateStore.open(fileSystem, root / "store")
             assertEquals(
@@ -68,7 +67,7 @@ class PluginGitHubInstallTest {
                     .getValue(installed.pluginId)
                     .installed,
             )
-            assertFalse(restarted.requiresRestart)
+
             val bytes = fileSystem.read(restarted.paths.packagePath(installed.packageHash)) { readByteArray() }
             ZipInputStream(ByteArrayInputStream(bytes)).use { zip ->
                 val files = mutableMapOf<String, ByteArray>()

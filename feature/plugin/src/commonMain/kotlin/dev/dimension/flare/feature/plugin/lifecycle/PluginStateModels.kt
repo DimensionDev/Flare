@@ -24,7 +24,6 @@ public data class InstalledPluginV1(
     val packageSize: Long,
     val iconSize: Long,
     val source: PluginInstallSourceV1 = PluginInstallSourceV1.Local,
-    val enabled: Boolean = true,
     val manifest: PluginManifestV1,
     val catalogs: Map<String, Map<String, String>> = emptyMap(),
     val runtimeGeneration: Long = 0,

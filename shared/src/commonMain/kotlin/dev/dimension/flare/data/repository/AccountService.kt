@@ -15,6 +15,11 @@ import kotlin.native.HiddenFromObjC
 public interface AccountService {
     public suspend fun invalidatePlatform(platformId: String) {}
 
+    public suspend fun deleteAccounts(
+        platformId: String,
+        ownsCredential: (String) -> Boolean,
+    )
+
     public fun accountServiceFlow(accountType: AccountType): Flow<MicroblogDataSource>
 
     public fun allAccountServicesFlow(): Flow<List<AccountMicroblogDataSource>>
@@ -78,6 +83,11 @@ internal class RepositoryAccountService(
     private val repository: AccountRepository,
 ) : AccountService {
     override suspend fun invalidatePlatform(platformId: String) = repository.invalidatePlatform(platformId)
+
+    override suspend fun deleteAccounts(
+        platformId: String,
+        ownsCredential: (String) -> Boolean,
+    ) = repository.deleteAccounts(platformId, ownsCredential)
 
     override fun accountServiceFlow(accountType: AccountType): Flow<MicroblogDataSource> =
         accountServiceFlow(

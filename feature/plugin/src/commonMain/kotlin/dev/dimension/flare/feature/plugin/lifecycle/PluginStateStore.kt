@@ -10,7 +10,6 @@ import dev.dimension.flare.feature.plugin.manifest.validate
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.decodeFromString
@@ -32,8 +31,6 @@ public class PluginStateStore private constructor(
     initialIssue: PluginStateIssueV1?,
 ) {
     private val mutex = Mutex()
-    private val startupPlugins = initialIndex?.plugins?.associateBy(InstalledPluginV1::pluginId).orEmpty()
-    private val appliedPlugins = MutableStateFlow(startupPlugins)
     private val mutableDesired =
         MutableStateFlow(
             PluginDesiredSnapshotV1(
@@ -44,30 +41,6 @@ public class PluginStateStore private constructor(
 
     public val desired: StateFlow<PluginDesiredSnapshotV1> = mutableDesired.asStateFlow()
     public val running: PluginRunningSnapshotV1 = captureRunning(initialIndex, initialIssue)
-
-    public val requiresRestart: Boolean
-        get() = appliedPlugins.value != desired.value.plugins
-
-    public fun requiresRestart(pluginId: String): Boolean = appliedPlugins.value[pluginId] != desired.value.plugins[pluginId]
-
-    internal fun markApplied(
-        pluginId: String,
-        installed: InstalledPluginV1?,
-    ) {
-        appliedPlugins.update { if (installed == null) it - pluginId else it + (pluginId to installed) }
-    }
-
-    public suspend fun setEnabled(
-        pluginId: String,
-        enabled: Boolean,
-    ) {
-        mutate { index ->
-            require(index.plugins.any { it.pluginId == pluginId }) { "Plugin is not installed: $pluginId" }
-            index.copy(
-                plugins = index.plugins.map { if (it.pluginId == pluginId) it.copy(enabled = enabled) else it },
-            )
-        }
-    }
 
     public suspend fun uninstall(pluginId: String) {
         mutate { index -> index.copy(plugins = index.plugins.filterNot { it.pluginId == pluginId }) }
@@ -101,18 +74,23 @@ public class PluginStateStore private constructor(
         }
     }
 
-    public suspend fun cleanup(): PluginCleanupResultV1 = cleanup(emptySet())
+    public suspend fun cleanup(): PluginCleanupResultV1 = cleanup(emptySet(), running.plugins.values)
 
-    internal suspend fun cleanup(protectedStagingPaths: Set<Path>): PluginCleanupResultV1 =
+    internal suspend fun cleanup(
+        protectedStagingPaths: Set<Path>,
+        activePlugins: Collection<RunningPluginV1>,
+    ): PluginCleanupResultV1 =
         mutex.withLock {
             val desiredSnapshot = mutableDesired.value
             if (!desiredSnapshot.indexHealthy) {
                 throw PluginIndexCorruptException("Plugin index is corrupt; cleanup is disabled")
             }
             val protectedHashes =
-                running.referencedPackageHashes +
-                    appliedPlugins.value.values.map(InstalledPluginV1::packageHash) +
+                activePlugins.map { it.installed.packageHash } +
                     desiredSnapshot.plugins.values.map(InstalledPluginV1::packageHash)
+            val protectedIconPrefixes =
+                (desiredSnapshot.plugins.keys + activePlugins.map { it.installed.pluginId })
+                    .map { "platform-${it.encodeUtf8().sha256().hex()}-" }
             var packages = 0
             var icons = 0
             var staging = 0
@@ -125,8 +103,9 @@ public class PluginStateStore private constructor(
             }
             fileSystem.listOrNull(paths.icons)?.forEach { path ->
                 val hash = path.name.substringBeforeLast('.')
-                if ("assets/icon.${path.name.substringAfterLast('.')}" in FppPaths.ICONS && HASH.matches(hash) &&
-                    hash !in protectedHashes
+                val orphanedPlatformIcon = path.name.startsWith("platform-") && protectedIconPrefixes.none { path.name.startsWith(it) }
+                if ("assets/icon.${path.name.substringAfterLast('.')}" in FppPaths.ICONS &&
+                    ((HASH.matches(hash) && hash !in protectedHashes) || orphanedPlatformIcon)
                 ) {
                     fileSystem.delete(path, mustExist = false)
                     icons++
@@ -206,7 +185,7 @@ public class PluginStateStore private constructor(
                         pluginId = installed.pluginId,
                         message = "Plugin files are missing or changed",
                     )
-            } else if (installed.enabled) {
+            } else {
                 plugins[installed.pluginId] =
                     RunningPluginV1(
                         installed = installed,

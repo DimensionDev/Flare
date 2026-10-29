@@ -74,7 +74,7 @@ class GitHubTemplateTest {
             val store = PluginStateStore.open(FileSystem.SYSTEM, root / "store")
             val installer = PluginInstaller(FileSystem.SYSTEM, store)
             installer.commit(installer.inspect(archive, source), confirmed = true)
-            assertTrue(store.requiresRestart)
+
             plugin =
                 PluginStateStore
                     .open(FileSystem.SYSTEM, root / "store")

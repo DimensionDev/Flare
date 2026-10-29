@@ -67,8 +67,7 @@ confirmation are separate steps. GitHub metadata uses global proxy routing and
 rate-limit handling, not plugin account credentials. Excessive tag lists produce
 an error rather than an incomplete “latest version” answer.
 
-Install, update, enable, disable, and uninstall alter Desired State and take
-effect after restart. There are no plugin lifecycle/migration callbacks. Media
+Install, update, and uninstall take effect immediately. Installed plugins are always enabled. There are no plugin lifecycle/migration callbacks. Media
 grants follow the running package; cached media retains plugin ownership and
 rechecks that package's permission. Missing plugins cannot restore their media.
 
@@ -101,4 +100,4 @@ that directory to pack.mjs. The packer ignores only a root README.md; unlike
 GitHub import it rejects other development files, including .git, tests, and type
 declarations. Keep the output outside the input directory. Packaging success is
 not full manifest/registration/behavior validation. Local packages are unverified
-and still require review and restart; no GitHub source/update tracking is recorded.
+and still require review; installation takes effect immediately and no GitHub source/update tracking is recorded.

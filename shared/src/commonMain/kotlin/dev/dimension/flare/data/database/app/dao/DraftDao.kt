@@ -30,6 +30,9 @@ internal interface DraftDao {
     @Query("DELETE FROM DbDraftTarget WHERE group_id = :groupId")
     suspend fun deleteTargetsByGroup(groupId: String)
 
+    @Query("SELECT DISTINCT group_id FROM DbDraftTarget WHERE account_key = :accountKey")
+    suspend fun groupsForAccount(accountKey: dev.dimension.flare.model.MicroBlogKey): List<String>
+
     @Query("DELETE FROM DbDraftTarget WHERE target_id = :targetId")
     suspend fun deleteTarget(targetId: String)
 

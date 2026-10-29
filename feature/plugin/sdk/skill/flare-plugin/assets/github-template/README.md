@@ -62,7 +62,7 @@ the response's string `body` explicitly.
   any `locales/*.json` at the root of a public GitHub repository.
 - Publish a stable tag matching the manifest version, initially `v0.1.0`.
 - In Flare plugin management, install `https://github.com/OWNER/REPO`, confirm the
-  review, and restart Flare. A GitHub Release or `.fpp` asset is not required.
+  review. The plugin becomes available immediately. A GitHub Release or `.fpp` asset is not required.
 - Select your platform and HTTPS API origin, then import a real access token.
   Verify that the saved account, Home timeline, pagination, and link clicks work.
 

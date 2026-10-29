@@ -48,16 +48,6 @@ public struct PluginManagementView: View {
                 developmentSection
             }
             #endif
-            if presenter.state.requiresRestart {
-                Section {
-                    Label {
-                        Text("plugin_restart_required")
-                    } icon: {
-                        Image(fontAwesome: .arrowsRotate)
-                    }
-                    .foregroundStyle(.tint)
-                }
-            }
 
             if let error = presenter.state.error {
                 Section {
@@ -279,11 +269,6 @@ public struct PluginManagementView: View {
                 .disabled(busy)
             }
 
-            if plugin.pendingRestart {
-                Text("plugin_restart_required")
-                    .font(.caption)
-                    .foregroundStyle(.tint)
-            }
 
             if let source = plugin.sourceUrl {
                 Text(source).font(.caption).foregroundStyle(.secondary)

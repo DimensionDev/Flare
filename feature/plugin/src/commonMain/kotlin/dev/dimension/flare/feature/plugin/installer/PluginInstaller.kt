@@ -44,7 +44,6 @@ public class PluginInstaller(
     internal suspend fun persistAuthored(
         validated: ValidatedPluginPackage,
         archive: ByteArray,
-        enabled: Boolean,
         generation: Long,
     ): InstalledPluginV1 =
         mutex.withLock {
@@ -59,7 +58,6 @@ public class PluginInstaller(
                     iconExtension = validated.iconExtension,
                     manifest = validated.manifest,
                     catalogs = validated.catalogs,
-                    enabled = enabled,
                     runtimeGeneration = generation,
                 )
             stateStore.validateInstall(record)
@@ -151,6 +149,7 @@ public class PluginInstaller(
     public suspend fun commit(
         preview: PreparedPluginInstallV1,
         confirmed: Boolean,
+        activate: suspend (InstalledPluginV1) -> Unit = stateStore::install,
     ): InstalledPluginV1 =
         mutex.withLock {
             require(activePreview === preview) { "Install preview is no longer active" }
@@ -172,14 +171,13 @@ public class PluginInstaller(
                             .toLong(),
                     iconExtension = preview.validated.iconExtension,
                     source = preview.source,
-                    enabled = existing?.enabled ?: true,
                     manifest = preview.validated.manifest,
                     catalogs = preview.validated.catalogs,
                 )
             stateStore.validateInstall(record)
             persistPackage(packagePath, preview.packageSize)
             persistIcon(iconPath, preview.validated.icon)
-            stateStore.install(record)
+            activate(record)
             activePreview = null
             record
         }
@@ -190,9 +188,11 @@ public class PluginInstaller(
         }
     }
 
-    public suspend fun cleanup(): PluginCleanupResultV1 =
+    public suspend fun cleanup(
+        activePlugins: Collection<dev.dimension.flare.feature.plugin.lifecycle.RunningPluginV1> = stateStore.running.plugins.values,
+    ): PluginCleanupResultV1 =
         mutex.withLock {
-            stateStore.cleanup(setOfNotNull(stateStore.paths.incoming.takeIf { preparing || activePreview != null }))
+            stateStore.cleanup(setOfNotNull(stateStore.paths.incoming.takeIf { preparing || activePreview != null }), activePlugins)
         }
 
     /** Explicit recovery for a corrupt index. It never runs during startup. */
@@ -273,7 +273,6 @@ public class PluginInstaller(
                         iconSize = validated.icon.size.toLong(),
                         iconExtension = validated.iconExtension,
                         source = PluginInstallSourceV1.Local,
-                        enabled = true,
                         manifest = validated.manifest,
                         catalogs = validated.catalogs,
                     ),

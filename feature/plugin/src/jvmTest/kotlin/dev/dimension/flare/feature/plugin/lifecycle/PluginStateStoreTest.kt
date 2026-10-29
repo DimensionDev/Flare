@@ -56,18 +56,18 @@ class PluginStateStoreTest {
                 }
             val store = PluginStateStore.open(failingFileSystem, namespace)
 
-            assertFails { store.setEnabled(installed.pluginId, enabled = false) }
-            assertTrue(
+            assertFails { store.uninstall(installed.pluginId) }
+            assertEquals(
+                installed,
                 store.desired.value.plugins
-                    .getValue(installed.pluginId)
-                    .enabled,
+                    .getValue(installed.pluginId),
             )
-            assertTrue(
+            assertEquals(
+                installed,
                 PluginStateStore
                     .open(fileSystem, namespace)
                     .desired.value.plugins
-                    .getValue(installed.pluginId)
-                    .enabled,
+                    .getValue(installed.pluginId),
             )
         }
 
@@ -99,7 +99,6 @@ class PluginStateStoreTest {
         val store = PluginStateStore.open(fileSystem, namespace)
 
         assertFalse(store.desired.value.indexHealthy)
-        assertFalse(store.requiresRestart)
     }
 
     @Test

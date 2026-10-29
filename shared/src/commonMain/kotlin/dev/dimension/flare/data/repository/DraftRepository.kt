@@ -114,6 +114,10 @@ internal class DraftRepository(
         }
     }
 
+    suspend fun deleteAccount(accountKey: MicroBlogKey) {
+        database.draftDao().groupsForAccount(accountKey).forEach { deleteTarget(it, accountKey) }
+    }
+
     suspend fun deleteTarget(
         groupId: String,
         accountKey: MicroBlogKey,

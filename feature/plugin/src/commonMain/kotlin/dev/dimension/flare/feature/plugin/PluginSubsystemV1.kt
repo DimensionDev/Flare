@@ -28,6 +28,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.sync.Mutex
 import kotlin.native.HiddenFromObjC
 
@@ -94,11 +95,19 @@ public class PluginSubsystemV1 internal constructor(
                 ?.permissions
                 ?.mediaNetwork == true,
         )
-        mutableRunning.value = mutableRunning.value.copy(plugins = plugins)
+        mutableRunning.value =
+            mutableRunning.value.copy(
+                plugins = plugins,
+                indexHealthy = stateStore.desired.value.indexHealthy,
+            )
+        mutableSourceIssues.update { issues -> issues.filterNot { it.pluginId == pluginId } }
     }
 
     private val mutableSourceIssues = MutableStateFlow(stateStore.running.issues)
-    public val sourceIssues: StateFlow<List<PluginStateIssueV1>> = mutableSourceIssues.asStateFlow()
+    public val sourceIssues: StateFlow<List<PluginStateIssueV1>> =
+        derivedPluginState(mutableSourceIssues, stateStore.desired) { issues, desired ->
+            issues.filter { it.code != "index.corrupt" || !desired.indexHealthy }
+        }
 
     public val oauth: PluginOAuthLoginCoordinatorV1 =
         PluginOAuthLoginCoordinatorV1(

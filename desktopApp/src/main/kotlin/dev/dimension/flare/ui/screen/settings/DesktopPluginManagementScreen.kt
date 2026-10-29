@@ -94,7 +94,6 @@ import dev.dimension.flare.plugin_permission_media_network
 import dev.dimension.flare.plugin_permissions
 import dev.dimension.flare.plugin_rebuild_index
 import dev.dimension.flare.plugin_report_issue
-import dev.dimension.flare.plugin_restart_required
 import dev.dimension.flare.plugin_retry
 import dev.dimension.flare.plugin_runtime_fatal
 import dev.dimension.flare.plugin_runtime_paused
@@ -153,7 +152,14 @@ internal fun DesktopPluginManagementScreen(
     val window = LocalComposeWindow.current
     val subsystem = koinInject<PluginSubsystemV1>()
     val scope = rememberCoroutineScope()
-    val presenter = remember(subsystem, scope) { PluginManagementPresenterV1(subsystem, scope) }
+    val presenter =
+        remember(subsystem) {
+            PluginManagementPresenterV1(
+                subsystem,
+                dev.dimension.flare.di
+                    .koinGet<kotlinx.coroutines.CoroutineScope>(),
+            )
+        }
     DisposableEffect(presenter) {
         onDispose { presenter.close() }
     }
@@ -592,16 +598,6 @@ internal fun PluginManagementList(
             if (development != null) {
                 item(key = "development") { development() }
             }
-            if (state.requiresRestart) {
-                item(key = "restart") {
-                    InfoBar(
-                        title = { Text(stringResource(Res.string.plugin_restart_required)) },
-                        message = {},
-                        severity = InfoBarSeverity.Warning,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                }
-            }
             if (state.error != null) {
                 item(key = "operation-error") {
                     ErrorInfoBar("${stringResource(Res.string.plugin_operation_failed)}: ${state.error.orEmpty().take(512)}")
@@ -698,9 +694,6 @@ internal fun PluginItem(
                         SubtleButton(disabled = busy, onClick = { onUpdate(plugin.pluginId) }) {
                             Text("${stringResource(Res.string.plugin_update)} ${update.tag}")
                         }
-                    }
-                    if (plugin.pendingRestart) {
-                        Text(stringResource(Res.string.plugin_restart_required))
                     }
                     plugin.authoring?.let { authoring ->
                         if (authoring.phase != PluginAuthoringPhase.Idle && authoring.phase != PluginAuthoringPhase.Applied) {

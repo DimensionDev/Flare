@@ -51,7 +51,7 @@ and multiple archive roots are rejected, including in ignored files.
 GitHub installation records the repository ID, canonical owner/name, tag, and
 commit SHA. Updates must retain that repository ID, plugin ID, and platform ID.
 Checks only offer updates; downloading and confirming the existing install
-review remain separate user actions, and changes take effect after restart.
+review remain separate user actions, and changes take effect immediately.
 New permissions, source changes, and a tag pointing to a different commit are
 shown in the review. Cancellation or failure leaves the installed plugin intact.
 
@@ -130,8 +130,7 @@ or fatal handling. Engine availability, version differences, cancellation, and r
 limits are described in [Runtime and HTTP](references/runtime-http.md).
 
 Every method receives immutable request and context values. JavaScript globals
-are disposable cache only. There are no install, update, enable, disable, or
-uninstall lifecycle hooks.
+are disposable cache only. Plugins have no lifecycle or migration hooks.
 
 Runtime scopes are detector attempt, login flow, account, and guest origin.
 Calls in one Runtime serialize. A fatal JavaScript error, timeout, cancellation,
@@ -229,7 +228,7 @@ requires confirmation. It does not expand `flare.http.request` origins or permit
 local-file resources. Text-only plugins do not need it. Cached profiles, posts,
 article history, and direct messages retain their plugin ownership and recheck
 the running package's grant when restored, including translated and nested media.
-Permission removal, disable, and uninstall take effect after restart, like the
+Permission removal and uninstall take effect immediately, like the
 package change itself; absent plugins cannot restore media.
 Development caches predating ownership metadata are rebuilt on upgrade.
 
@@ -317,6 +316,15 @@ All five authentication interactions are covered in [authentication](references/
 
 ## Lifecycle and trust
 
-Install, update, enable, disable, and uninstall modify Desired State and take
-effect after restart. Local packages are always unverified. Repository trust is
+Install, update, and uninstall take effect immediately. Installed plugins are always enabled. Local packages are always unverified. Repository trust is
 Host-owned; a manifest cannot claim official status or broader runtime access.
+
+Uninstall removes the plugin's accounts, credentials, account-scoped caches,
+selections/tabs, and draft targets from this device, together with local source
+and package files. Shared drafts and attachments remain while another account
+uses them. Updates preserve accounts. Loading failures or restoring accounts
+without their plugin leave accounts unavailable; they do not delete them.
+Login, publishing, and uploads can delay or block replacement/removal. Closed
+sessions cannot recreate accounts through a late callback. Failed account cleanup
+keeps the installation available for retry. Filesystem cleanup is repeatable through
+plugin management's cleanup action.

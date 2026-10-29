@@ -35,7 +35,7 @@ Runtime scopes are detector attempt, login flow, account, and guest origin.
 Calls in one runtime serialize. Globals may cache derived data but are not
 persistent storage. Login begin/resume can use different runtime generations;
 OAuth state that your code needs belongs in `pendingPayload`. There are no
-install/update/enable/disable/uninstall hooks or general-purpose storage API.
+lifecycle hooks or general-purpose storage API.
 An unmarked exception, invalid Wire response, timeout, cancellation, or memory
 failure retires that generation. See [recovery](troubleshooting.md).
 
@@ -101,7 +101,7 @@ exchanges must use their final endpoint directly.
 audio/video, including HTML images and CDN/federated destinations. Installation
 review discloses this broad media access. Media can expose data embedded in its
 URL; keep secrets out of media and link URLs. Permission changes follow the
-running package after restart, including cached/nested media. Local-file and
+running package immediately, including cached/nested media. Local-file and
 non-HTTPS resources remain unavailable.
 
 Flare controls proxies, including resumed OAuth. A proxy failure does not fall

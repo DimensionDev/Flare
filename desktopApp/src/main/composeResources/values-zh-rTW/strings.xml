@@ -697,7 +697,7 @@
     <string name="plugin_ai_waiting">等待登入或寫入完成</string>
     <string name="plugin_ai_applied">已套用最新版本</string>
     <string name="plugin_ai_failed">無法套用修改</string>
-    <string name="plugin_ai_delete_message">刪除 %1$s 及其本機原始碼？已有帳號會保留。</string>
+    <string name="plugin_ai_delete_message">從本機刪除 %1$s、本機原始碼及其帳號、憑證和帳號資料？刪除後立即生效。</string>
     <string name="settings_ai_config_context_window">上下文視窗（token）</string>
     <string name="settings_ai_config_context_window_hint">留空使用已知模型的上限；未知模型使用 8192 token 的估算預算。手動設定至少為 1024 token。</string>
     <string name="agent_error_title">暫時無法繼續</string>
@@ -713,4 +713,5 @@
     <string name="agent_error_details">錯誤詳細資訊</string>
     <string name="agent_error_retry">重試</string>
     <string name="agent_error_interrupted">執行已中斷，請確認已完成的操作後再傳送新訊息。</string>
+    <string name="plugin_uninstall_confirm_message">從本機刪除 %1$s 及其帳號、憑證和帳號資料？刪除後立即生效。</string>
 </resources>

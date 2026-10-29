@@ -55,6 +55,11 @@ internal fun testTimelineSpecs(): List<TimelineSpec<out TimelineSpec.Data>> = te
 
 internal fun unavailableAccountService(): AccountService =
     object : AccountService {
+        override suspend fun deleteAccounts(
+            platformId: String,
+            ownsCredential: (String) -> Boolean,
+        ): Unit = error("Account deletion is not available")
+
         override fun accountServiceFlow(accountType: AccountType): Flow<MicroblogDataSource> =
             error("Account service is not available in this test")
 

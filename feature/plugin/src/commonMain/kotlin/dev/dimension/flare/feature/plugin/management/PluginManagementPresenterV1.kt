@@ -1,7 +1,9 @@
 package dev.dimension.flare.feature.plugin.management
 
 import dev.dimension.flare.data.model.PluginPermission
+import dev.dimension.flare.data.repository.AccountService
 import dev.dimension.flare.data.repository.AuthoredPlugin
+import dev.dimension.flare.di.koinGet
 import dev.dimension.flare.feature.plugin.PluginSubsystemV1
 import dev.dimension.flare.feature.plugin.development.PluginDevelopmentStateV1
 import dev.dimension.flare.feature.plugin.github.GitHubPluginCatalogV1
@@ -12,9 +14,11 @@ import dev.dimension.flare.feature.plugin.installer.PreparedPluginInstallV1
 import dev.dimension.flare.feature.plugin.installer.compareSemVer
 import dev.dimension.flare.feature.plugin.lifecycle.InstalledPluginV1
 import dev.dimension.flare.feature.plugin.lifecycle.PluginInstallSourceV1
+import dev.dimension.flare.feature.plugin.lifecycle.PluginRuntimeSwitcherV1
 import dev.dimension.flare.feature.plugin.lifecycle.PluginStateIssueV1
 import dev.dimension.flare.feature.plugin.manifest.toUiText
 import dev.dimension.flare.feature.plugin.runtime.PluginRuntimeIssueV1
+import dev.dimension.flare.model.PlatformRegistry
 import dev.dimension.flare.ui.model.UiText
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
@@ -27,6 +31,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -40,7 +45,6 @@ public data class PluginManagementStateV1(
     val issues: List<PluginStateIssueV1> = emptyList(),
     val runtimeIssues: List<PluginRuntimeIssueV1> = emptyList(),
     val pendingInstall: PluginInstallReviewV1? = null,
-    val requiresRestart: Boolean = false,
     val canRebuildIndex: Boolean = false,
     val busy: Boolean = false,
     val error: String? = null,
@@ -58,9 +62,7 @@ public data class PluginManagementStateV1(
                             platformId = authoring.platformId,
                             nameText = UiText.Raw(authoring.name),
                             version = "",
-                            enabled = authoring.enabled,
                             running = authoring.running,
-                            pendingRestart = false,
                             iconPath = "",
                             sourceUrl = null,
                             availableUpdate = null,
@@ -77,9 +79,7 @@ public data class PluginManagementItemV1(
     val platformId: String,
     val nameText: UiText,
     val version: String,
-    val enabled: Boolean,
     val running: Boolean,
-    val pendingRestart: Boolean,
     val iconPath: String,
     val sourceUrl: String?,
     val availableUpdate: GitHubPluginVersionV1?,
@@ -98,13 +98,17 @@ public data class PluginInstallReviewV1(
     val sourceUrl: String?,
 )
 
+/** The scope belongs to the application so installed platforms outlive the management screen. */
 @HiddenFromObjC
 public class PluginManagementPresenterV1(
     private val subsystem: PluginSubsystemV1,
     private val scope: CoroutineScope,
     private val operationDispatcher: CoroutineDispatcher = Dispatchers.Default,
     private val github: GitHubPluginClient = subsystem.github,
+    registry: () -> PlatformRegistry = { koinGet() },
+    accounts: () -> AccountService = { koinGet() },
 ) {
+    private val switcher by lazy { PluginRuntimeSwitcherV1(subsystem, registry(), accounts(), scope) }
     private val updates = mutableMapOf<String, GitHubPluginVersionV1>()
     private var preview: PreparedPluginInstallV1? = null
     private val mutableState = MutableStateFlow(snapshot())
@@ -123,12 +127,9 @@ public class PluginManagementPresenterV1(
         ) { _, _, _, _, _ -> Unit }
             .combine(subsystem.authoring.plugins) { _, _ -> Unit }
             .onEach {
-                val current = mutableState.value
-                mutableState.value =
-                    snapshot().copy(
-                        busy = current.busy,
-                        error = current.error,
-                    )
+                mutableState.update { current ->
+                    snapshot().copy(busy = current.busy, error = current.error)
+                }
             }.launchIn(scope)
 
     public fun close() {
@@ -232,7 +233,7 @@ public class PluginManagementPresenterV1(
             ) {
                 "Delete the editable local plugin before installing another package with this ID"
             }
-            subsystem.installer.commit(prepared, confirmed = true)
+            subsystem.installer.commit(prepared, confirmed = true, activate = switcher::install)
             updates.remove(prepared.pluginId)
             preview = null
             mutableState.value = snapshot().copy(busy = true)
@@ -245,23 +246,6 @@ public class PluginManagementPresenterV1(
             subsystem.installer.discard(prepared)
             preview = null
             mutableState.value = snapshot().copy(busy = true)
-        }
-    }
-
-    public suspend fun setEnabled(
-        pluginId: String,
-        enabled: Boolean,
-    ) {
-        if (subsystem.authoring.plugins.value
-                .any { it.id == pluginId }
-        ) {
-            runAuthoringAction { subsystem.authoring.setEnabled(pluginId, enabled) }
-            return
-        }
-        runMutation {
-            requireNotDeveloping(pluginId)
-            subsystem.stateStore.setEnabled(pluginId, enabled)
-            mutableState.value = snapshot()
         }
     }
 
@@ -278,7 +262,8 @@ public class PluginManagementPresenterV1(
         }
         runMutation {
             requireNotDeveloping(pluginId)
-            subsystem.stateStore.uninstall(pluginId)
+            val installed = requireNotNull(subsystem.stateStore.desired.value.plugins[pluginId]) { "Plugin is no longer installed" }
+            switcher.uninstall(pluginId, installed.manifest.platform.id)
             updates.remove(pluginId)
             mutableState.value = snapshot()
         }
@@ -292,12 +277,14 @@ public class PluginManagementPresenterV1(
     }
 
     public suspend fun cleanup() {
-        runMutation { subsystem.installer.cleanup() }
+        runMutation { subsystem.installer.cleanup(subsystem.running.value.plugins.values) }
     }
 
     public suspend fun rebuildIndex() {
         runMutation {
             subsystem.installer.rebuildIndex()
+            subsystem.stateStore.desired.value.plugins.values
+                .forEach { switcher.install(it) }
             mutableState.value = snapshot()
         }
     }
@@ -318,7 +305,6 @@ public class PluginManagementPresenterV1(
                 desired.plugins.values.sortedBy(InstalledPluginV1::pluginId).map { installed ->
                     installed.toItem(
                         running = running[installed.pluginId]?.installed,
-                        pendingRestart = subsystem.stateStore.requiresRestart(installed.pluginId),
                         iconPath =
                             subsystem.stateStore.paths
                                 .iconPath(installed.packageHash, installed.iconExtension)
@@ -330,7 +316,6 @@ public class PluginManagementPresenterV1(
             runtimeIssues =
                 subsystem.runtimePool.issues.value.values
                     .sortedBy(PluginRuntimeIssueV1::pluginId),
-            requiresRestart = subsystem.stateStore.requiresRestart,
             development = subsystem.developmentState.value,
             authoredPlugins = subsystem.authoring.plugins.value,
             canRebuildIndex = !desired.indexHealthy,
@@ -383,7 +368,6 @@ public class PluginManagementPresenterV1(
 
 private fun InstalledPluginV1.toItem(
     running: InstalledPluginV1?,
-    pendingRestart: Boolean,
     iconPath: String,
     availableUpdate: GitHubPluginVersionV1?,
 ): PluginManagementItemV1 =
@@ -392,9 +376,7 @@ private fun InstalledPluginV1.toItem(
         platformId = manifest.platform.id,
         nameText = manifest.name.toUiText(pluginId),
         version = version,
-        enabled = enabled,
         running = running != null,
-        pendingRestart = pendingRestart,
         iconPath = iconPath,
         sourceUrl = (source as? PluginInstallSourceV1.GitHub)?.repository?.url,
         availableUpdate = availableUpdate,

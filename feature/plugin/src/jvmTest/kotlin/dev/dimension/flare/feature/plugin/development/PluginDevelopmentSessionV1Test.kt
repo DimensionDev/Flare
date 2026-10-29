@@ -279,25 +279,21 @@ class PluginDevelopmentSessionV1Test {
             prepare(installed = true)
             val presenter =
                 dev.dimension.flare.feature.plugin.management
-                    .PluginManagementPresenterV1(subsystem, scope)
+                    .PluginManagementPresenterV1(subsystem, scope, registry = { registry }, accounts = { accounts })
             try {
                 writeSource("development")
                 session.open(directory.toString())
                 session.reload()
                 session.reload(confirmed = true)
                 val installed = subsystem.stateStore.desired.value
-                assertFailsWith<IllegalStateException> { presenter.setEnabled(ID, false) }
                 assertFailsWith<IllegalStateException> { presenter.uninstall(ID) }
                 presenter.inspect((root / "installed.fpp").toString())
                 assertFailsWith<IllegalStateException> { presenter.confirmInstall() }
                 assertEquals(installed, subsystem.stateStore.desired.value)
                 session.stop()
-                presenter.setEnabled(ID, false)
-                assertFalse(
-                    subsystem.stateStore.desired.value.plugins
-                        .getValue(ID)
-                        .enabled,
-                )
+                presenter.uninstall(ID)
+                assertFalse(ID in subsystem.stateStore.desired.value.plugins)
+                assertFalse(ID in subsystem.running.value.plugins)
             } finally {
                 presenter.close()
             }
@@ -465,6 +461,11 @@ class PluginDevelopmentSessionV1Test {
 }
 
 private class TestAccounts : AccountService {
+    override suspend fun deleteAccounts(
+        platformId: String,
+        ownsCredential: (String) -> Boolean,
+    ) = Unit
+
     val invalidated = mutableListOf<String>()
     var failNext = false
 

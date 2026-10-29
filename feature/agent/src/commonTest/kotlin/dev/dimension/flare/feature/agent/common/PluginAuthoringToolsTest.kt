@@ -38,7 +38,6 @@ internal class PluginAuthoringToolsTest {
                 "create_plugin",
                 "read_plugin_files",
                 "write_plugin_files",
-                "set_plugin_enabled",
                 "delete_plugin",
                 "read_plugin_sdk",
                 "read_plugin_documentation",
@@ -55,7 +54,7 @@ internal class PluginAuthoringToolsTest {
             val fields = JSON.parseToJsonElement(response).jsonObject
             assertEquals("plugin-a", fields["platformId"]?.jsonPrimitive?.content)
             assertEquals("0", fields["revision"]?.jsonPrimitive?.content)
-            assertEquals("true", fields["enabled"]?.jsonPrimitive?.content)
+            assertNull(fields["enabled"])
         }
 
     @Test
@@ -179,13 +178,6 @@ internal class TestAuthoring : PluginAuthoring {
     override suspend fun create(requestKey: String): AuthoredPlugin {
         createdKey = requestKey
         return AuthoredPlugin("plugin-a", "Test").also { plugins.value = listOf(it) }
-    }
-
-    override suspend fun setEnabled(
-        pluginId: String,
-        enabled: Boolean,
-    ) {
-        plugins.value = plugins.value.map { if (it.id == pluginId) it.copy(enabled = enabled) else it }
     }
 
     override suspend fun delete(pluginId: String) {

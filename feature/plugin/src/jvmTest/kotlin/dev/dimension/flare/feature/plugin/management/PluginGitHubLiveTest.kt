@@ -62,7 +62,7 @@ class PluginGitHubLiveTest {
                                 override suspend fun consume(pending: PluginOAuthPendingV1): Boolean = false
                             },
                     )
-                val presenter = PluginManagementPresenterV1(subsystem, scope)
+                val presenter = testPluginManagementPresenter(subsystem, scope)
                 try {
                     when (phase) {
                         "install" -> {
@@ -84,16 +84,14 @@ class PluginGitHubLiveTest {
                                     .single()
                                     .version,
                             )
-                            assertTrue(
-                                subsystem.stateStore.running.plugins
+                            assertFalse(
+                                subsystem.running.value.plugins
                                     .isEmpty(),
                             )
-                            assertTrue(presenter.state.value.requiresRestart)
                         }
 
                         "restart-v1" -> {
                             assertRunningVersion(subsystem, "1.0.0")
-                            assertFalse(presenter.state.value.requiresRestart)
                         }
 
                         "update" -> {
@@ -137,13 +135,13 @@ class PluginGitHubLiveTest {
                                     .single()
                                     .version,
                             )
-                            assertTrue(presenter.state.value.requiresRestart)
-                            assertRunningVersion(subsystem, "1.0.0")
+
+                            assertRunningVersion(subsystem, "1.1.0")
                         }
 
                         "restart-v2" -> {
                             assertRunningVersion(subsystem, "1.1.0")
-                            assertFalse(presenter.state.value.requiresRestart)
+
                             presenter.checkUpdates()
                             assertFalse(presenter.state.value.busy)
                             assertNull(presenter.state.value.error)
@@ -163,7 +161,7 @@ class PluginGitHubLiveTest {
                             .single()
                     val source = installed.source as PluginInstallSourceV1.GitHub
                     val running =
-                        subsystem.stateStore.running.plugins[PLUGIN_ID]
+                        subsystem.running.value.plugins[PLUGIN_ID]
                             ?.installed
                             ?.version ?: "none"
                     val evidence =
@@ -172,7 +170,7 @@ class PluginGitHubLiveTest {
                             "process=${ProcessHandle.current().pid()}",
                             "desired=${installed.version}",
                             "running=$running",
-                            "restart=${subsystem.stateStore.requiresRestart}",
+                            "activePlugins=${subsystem.running.value.plugins.size}",
                             "tag=${source.tag}",
                             "commit=${source.commitSha}",
                             "repository=${source.repository.url}",
@@ -194,7 +192,7 @@ class PluginGitHubLiveTest {
         expected: String,
     ) {
         val plugin =
-            subsystem.stateStore.running.plugins
+            subsystem.running.value.plugins
                 .getValue(PLUGIN_ID)
         assertEquals(expected, plugin.installed.version)
         val timeline =

@@ -16,11 +16,8 @@ import dev.dimension.flare.feature.plugin.installer.PluginPackageValidator
 import dev.dimension.flare.feature.plugin.installer.ValidatedPluginPackage
 import dev.dimension.flare.feature.plugin.installer.encodePluginArchive
 import dev.dimension.flare.feature.plugin.installer.pluginIconExtension
-import dev.dimension.flare.feature.plugin.lifecycle.InstalledPluginV1
 import dev.dimension.flare.feature.plugin.lifecycle.PluginRuntimeSwitcherV1
-import dev.dimension.flare.feature.plugin.lifecycle.RunningPluginV1
 import dev.dimension.flare.feature.plugin.lifecycle.derivedPluginState
-import dev.dimension.flare.feature.plugin.lifecycle.persistPlatformIcon
 import dev.dimension.flare.feature.plugin.manifest.fallbackText
 import dev.dimension.flare.feature.plugin.runtime.PluginSessionBusyException
 import dev.dimension.flare.model.PlatformRegistry
@@ -146,57 +143,13 @@ internal class PluginAuthoringServiceV1(
         }
     }
 
-    override suspend fun setEnabled(
-        pluginId: String,
-        enabled: Boolean,
-    ): Unit =
-        withContext(Dispatchers.Default) {
-            val entry = entry(pluginId)
-            entry.mutex.withLock {
-                check(entries.value[pluginId] === entry) { "Plugin no longer exists" }
-                if (entry.record.enabled == enabled) return@withLock
-                subsystem.mutationMutex.withLock {
-                    val previous = subsystem.running.value.plugins[pluginId]
-                    check(previous?.developmentSource == null) { "Stop directory development before updating this plugin" }
-                    check(
-                        previous?.session?.hasWrites != true && !subsystem.oauth.hasPending(pluginId),
-                    ) { "Wait for login or write operations to finish" }
-                    val installed = subsystem.stateStore.desired.value.plugins[pluginId]
-                    if (installed != null) {
-                        val record =
-                            installed.copy(
-                                enabled = enabled,
-                                runtimeGeneration = maxOf(previous?.generation ?: 0, installed.runtimeGeneration) + 1,
-                            )
-                        switcher.switch(previous, if (enabled) running(record) else null, record)
-                    }
-                }
-                if (!enabled) {
-                    entry.application?.cancel()
-                    entry.candidate = null
-                    entry.progress = entry.progress.copy(phase = PluginAuthoringPhase.Idle)
-                }
-                entry.record = entry.record.copy(enabled = enabled)
-                publish(entry)
-                save(entry.record)
-                if (!enabled || entry.record.sources.isEmpty()) return@withLock
-                schedule(entry, revalidate = entry.candidate == null)
-            }
-        }
-
     override suspend fun delete(pluginId: String): Unit =
         withContext(Dispatchers.Default) {
             val entry = entry(pluginId)
             entry.mutex.withLock {
                 check(entries.value[pluginId] === entry) { "Plugin no longer exists" }
                 subsystem.mutationMutex.withLock {
-                    val previous = subsystem.running.value.plugins[pluginId]
-                    check(previous?.developmentSource == null) { "Stop directory development before updating this plugin" }
-                    check(
-                        previous?.session?.hasWrites != true && !subsystem.oauth.hasPending(pluginId),
-                    ) { "Wait for login or write operations to finish" }
-                    val installed = subsystem.stateStore.desired.value.plugins[pluginId]
-                    if (previous != null || installed != null) switcher.switch(previous, null, null, pluginId)
+                    switcher.uninstall(pluginId, authoredPluginPlatformId(pluginId))
                     entry.application?.cancel()
                     files.delete(root / "$pluginId.json", mustExist = false)
                     entries.update { it - pluginId }
@@ -257,11 +210,6 @@ internal class PluginAuthoringServiceV1(
         val candidate = entry.candidate ?: return true
         val id = entry.record.id
         if (entries.value[id] !== entry || candidate.revision != entry.record.revision) return true
-        if (!entry.record.enabled) {
-            entry.progress = entry.progress.copy(phase = PluginAuthoringPhase.Idle)
-            publish(entry)
-            return true
-        }
         currentCoroutineContext().ensureActive()
         return subsystem.mutationMutex.withLock {
             val previous = subsystem.running.value.plugins[id]
@@ -274,8 +222,8 @@ internal class PluginAuthoringServiceV1(
                     return@withLock false
                 }
                 val generation = maxOf(previous?.generation ?: 0, installed?.runtimeGeneration ?: 0) + 1
-                val record = subsystem.installer.persistAuthored(candidate.validated, candidate.archive, true, generation)
-                switcher.switch(previous, running(record), record)
+                val record = subsystem.installer.persistAuthored(candidate.validated, candidate.archive, generation)
+                switcher.switch(previous, switcher.running(record), record)
             }
             entry.candidate = null
             entry.progress =
@@ -290,18 +238,6 @@ internal class PluginAuthoringServiceV1(
 
     private fun entry(id: String): Entry = requireNotNull(entries.value[id]) { "Plugin no longer exists" }
 
-    private fun running(record: InstalledPluginV1): RunningPluginV1 =
-        RunningPluginV1(
-            record,
-            subsystem.stateStore.paths
-                .packagePath(record.packageHash)
-                .toString(),
-            files
-                .persistPlatformIcon(record.pluginId, subsystem.stateStore.paths.iconPath(record.packageHash, record.iconExtension))
-                .toString(),
-            generation = record.runtimeGeneration,
-        )
-
     private fun publish(entry: Entry) {
         mutablePlugins.update { items -> (items.filterNot { it.id == entry.record.id } + snapshot(entry)).sortedBy { it.id } }
     }
@@ -311,7 +247,6 @@ internal class PluginAuthoringServiceV1(
             id = entry.record.id,
             name = entry.record.name,
             revision = entry.record.revision,
-            enabled = entry.record.enabled,
             phase = entry.progress.phase,
             error = entry.progress.error,
         )
@@ -394,7 +329,6 @@ internal class PluginAuthoringServiceV1(
             .mapNotNull { path ->
                 val id = path.name.removeSuffix(".json")
                 if (!path.name.endsWith(".json") || !PLUGIN_ID.matches(id)) return@mapNotNull null
-                val installed = subsystem.stateStore.desired.value.plugins[id]
                 val loaded =
                     runCatching {
                         require((files.metadata(path).size ?: 0) <= MAX_RECORD_BYTES) { "Plugin source exceeds its size limit" }
@@ -407,9 +341,8 @@ internal class PluginAuthoringServiceV1(
                         .getOrElse {
                             Record(
                                 id = id,
-                                enabled = false,
                             )
-                        }.let { it.copy(enabled = installed?.enabled ?: it.enabled) }
+                        }
                 val entry = Entry(record)
                 entry.progress =
                     entry.progress.copy(
@@ -443,7 +376,6 @@ internal class PluginAuthoringServiceV1(
         val pendingIconUrl: String? = null,
         val iconBase64: String? = null,
         val revision: Long = 0,
-        val enabled: Boolean = true,
     )
 
     private data class Candidate(

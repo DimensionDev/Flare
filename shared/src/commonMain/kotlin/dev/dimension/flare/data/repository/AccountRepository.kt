@@ -84,6 +84,7 @@ internal class AccountRepository internal constructor(
     private val cacheDatabase: CacheDatabase,
     private val proxyRepository: ProxyRepository,
     @Provided internal val platformRegistry: PlatformRegistry,
+    private val draftRepository: DraftRepository,
 ) {
     @OptIn(ExperimentalCoroutinesApi::class)
     internal val activeAccount: Flow<UiState<UiAccount>> by lazy {
@@ -222,19 +223,11 @@ internal class AccountRepository internal constructor(
                         platformId = account.platformId,
                         credential_json = credentialJson,
                         last_active = Clock.System.now().toEpochMilliseconds(),
-                        platformDisplayName = account.platformDisplayName,
-                        platformIconName = (account.platformIcon as? IconType.Material)?.icon?.name,
-                        platformDisplayNameTextJson = account.platformDisplayNameText.encodeJson(),
-                        platformIconUrl = (account.platformIcon as? IconType.Url)?.url,
                     ) ?: DbAccount(
                         account_key = account.accountKey,
                         platformId = account.platformId,
                         credential_json = credentialJson,
                         last_active = Clock.System.now().toEpochMilliseconds(),
-                        platformDisplayName = account.platformDisplayName,
-                        platformIconName = (account.platformIcon as? IconType.Material)?.icon?.name,
-                        platformDisplayNameTextJson = account.platformDisplayNameText.encodeJson(),
-                        platformIconUrl = (account.platformIcon as? IconType.Url)?.url,
                         sort_id = appDatabase.accountDao().getMaxSortId()?.plus(1) ?: 0L,
                     )
                 appDatabase.accountDao().insert(dbAccount)
@@ -302,6 +295,21 @@ internal class AccountRepository internal constructor(
             deleteAccount(accountKey)
         }
 
+    internal suspend fun deleteAccounts(
+        platformId: String,
+        ownsCredential: (String) -> Boolean,
+    ): Unit =
+        withAccountChanges {
+            val accounts =
+                appDatabase
+                    .accountDao()
+                    .allAccounts()
+                    .first()
+                    .filter { it.platformId == platformId && ownsCredential(it.credential_json) }
+            accounts.forEach { proxyRepository.removeAccount(it.account_key) }
+            accounts.forEach { deleteAccount(it.account_key) }
+        }
+
     private suspend fun deleteAccount(accountKey: MicroBlogKey) {
         org.koin.mp.KoinPlatformTools
             .defaultContext()
@@ -322,6 +330,7 @@ internal class AccountRepository internal constructor(
                 datasource.close()
             }
         }
+        draftRepository.deleteAccount(accountKey)
         invalidateCachedContent(accountKey)
         appDatabase.accountDao().delete(accountKey)
         // Finish selection cleanup before a replacement account can be added.
@@ -462,15 +471,9 @@ internal class AccountRepository internal constructor(
 
 private fun DbAccount.toUi(platformRegistry: PlatformRegistry): UiAccount {
     val registered = platformRegistry.get(platformId)?.metadata
-    val displayName = registered?.displayName ?: platformDisplayName ?: platformId
-    val icon =
-        registered?.icon
-            ?: platformIconUrl?.let(IconType::Url)
-            ?: (platformIconName?.let { name -> UiIcon.entries.firstOrNull { it.name == name } } ?: UiIcon.World).asType()
-    val displayNameText =
-        registered?.displayNameText
-            ?: platformDisplayNameTextJson?.let { runCatching { it.decodeJson<UiText>() }.getOrNull() }
-            ?: UiText.Raw(displayName)
+    val displayName = registered?.displayName ?: platformId
+    val icon = registered?.icon ?: UiIcon.Info.asType()
+    val displayNameText = registered?.displayNameText ?: UiText.Raw(displayName)
     return UiAccount(
         accountKey = account_key,
         platformId = platformId,

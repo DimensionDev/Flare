@@ -23,11 +23,6 @@ public interface PluginAuthoring {
 
     public suspend fun fetchDocumentation(url: String): String
 
-    public suspend fun setEnabled(
-        pluginId: String,
-        enabled: Boolean,
-    )
-
     public suspend fun delete(pluginId: String)
 
     public suspend fun cancelUpdate(pluginId: String)
@@ -46,7 +41,6 @@ public data class AuthoredPlugin(
     val name: String,
     val phase: PluginAuthoringPhase = PluginAuthoringPhase.Idle,
     val revision: Long = 0,
-    val enabled: Boolean = true,
     val running: Boolean = false,
     val error: String? = null,
     val platformId: String = authoredPluginPlatformId(id),

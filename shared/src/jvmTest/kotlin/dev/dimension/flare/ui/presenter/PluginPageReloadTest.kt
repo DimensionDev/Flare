@@ -265,7 +265,23 @@ class PluginPageReloadTest {
         val cache = Room.memoryDatabaseBuilder<CacheDatabase>().setDriver(createDatabaseDriver()).build()
         val appData = AppDataStore(storage)
         val registry = testPlatformRegistry()
-        val repository = AccountRepository(app, scope, appData, cache, ProxyRepository(storage), registry)
+        val repository =
+            AccountRepository(
+                app,
+                scope,
+                appData,
+                cache,
+                ProxyRepository(storage),
+                registry,
+                dev.dimension.flare.data.repository.DraftRepository(
+                    app,
+                    dev.dimension.flare.data.repository
+                        .DraftMediaStore(
+                            dev.dimension.flare.data.io
+                                .InMemoryFileStorage(),
+                        ),
+                ),
+            )
 
         init {
             startKoin {

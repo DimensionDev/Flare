@@ -927,7 +927,6 @@
     <string name="settings_plugins_subtitle">Install and manage social platform plugins</string>
     <string name="plugin_install">From file…</string>
     <string name="plugin_empty">No plugins installed</string>
-    <string name="plugin_restart_required">Restart Flare to apply plugin changes.</string>
     <string name="plugin_unverified_warning">This local plugin is unverified. It can access the listed accounts and network origins. Install only if you trust its author.</string>
     <string name="plugin_permissions">Permissions</string>
     <string name="plugin_permission_media_network">Load media from any website, which may receive this plugin’s account data</string>
@@ -937,7 +936,7 @@
     <string name="plugin_capabilities">Functions</string>
     <string name="plugin_uninstall">Uninstall</string>
     <string name="plugin_uninstall_confirm_title">Uninstall plugin?</string>
-    <string name="plugin_uninstall_confirm_message">%1$s will stop being available after Flare restarts. Accounts and credentials are kept.</string>
+    <string name="plugin_uninstall_confirm_message">Delete %1$s and its accounts, credentials, and account data from this device? This takes effect immediately.</string>
     <string name="plugin_confirm_install">Install</string>
     <string name="plugin_issues">Plugin issues</string>
     <string name="plugin_operation_failed">The plugin operation failed. Try again or restart Flare.</string>
@@ -974,7 +973,7 @@
     <string name="plugin_ai_waiting">Waiting for login or writes to finish</string>
     <string name="plugin_ai_applied">Up to date</string>
     <string name="plugin_ai_failed">Changes could not be applied</string>
-    <string name="plugin_ai_delete_message">Delete %1$s and its local source? Existing accounts are kept.</string>
+    <string name="plugin_ai_delete_message">Delete %1$s, its local source, accounts, credentials, and account data from this device? This takes effect immediately.</string>
     <string name="settings_ai_config_context_window">Context window (tokens)</string>
     <string name="settings_ai_config_context_window_hint">Leave blank to use the known model limit. Unknown models use an estimated budget of 8192 tokens. Enter at least 1024 tokens to override.</string>
     <string name="agent_error_title">Unable to continue</string>

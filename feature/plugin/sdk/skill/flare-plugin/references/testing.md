@@ -97,13 +97,13 @@ After an adapter has real endpoints and authorized credentials:
 1. Enter the GitHub repository URL and click **Install**. Confirm that Flare
    downloads the latest stable tag and shows source/version and permissions in
    the same dialog before confirmation. Check retry and cancellation, then
-   install, restart, and verify the expected platform/login/timeline entries.
+   install and verify the platform/login/timeline entries without restarting Flare.
 2. Verify each supported login method and account identity; exercise cancelled,
    rejected, or expired authentication where practical.
 3. Refresh, paginate, open internal/link details, and verify remote media where
    declared. Exercise only the advertised read/write capabilities, using safe
    test accounts/content authorized for those actions.
-4. For updates, test a new version and restart, including credential compatibility
+4. For updates, test a new version without restarting, including credential compatibility
    and removed permissions/capabilities that affect cached content.
 5. Record Android, JVM Desktop, iOS, and native macOS evidence separately.
    Simulator/compilation results do not establish physical-device UI behavior.

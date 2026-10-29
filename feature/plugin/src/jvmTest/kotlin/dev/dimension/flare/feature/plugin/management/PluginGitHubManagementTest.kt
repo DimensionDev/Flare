@@ -136,7 +136,7 @@ class PluginGitHubManagementTest {
         }
 
     @Test
-    fun cachedMediaGrantIsRevokedOnlyAfterTheConfirmedUpdateRestarts() =
+    fun confirmedUpdateRevokesCachedMediaImmediately() =
         runBlocking {
             archives[FIRST_SHA] = archive("1.0.0", mediaNetwork = true)
             val cache = createSampleUser().copy(pluginId = PLUGIN_ID).encodeJson()
@@ -149,8 +149,8 @@ class PluginGitHubManagementTest {
                 presenter.checkUpdates()
                 presenter.inspectGitHubUpdate(PLUGIN_ID)
                 presenter.confirmInstall()
-                assertTrue(PluginMediaPermissions.isAllowed(PLUGIN_ID))
-                assertNotNull(cache.decodeJson<UiProfile>().withProxy(ProxyRef.Global).avatar)
+                assertFalse(PluginMediaPermissions.isAllowed(PLUGIN_ID))
+                assertNull(cache.decodeJson<UiProfile>().withProxy(ProxyRef.Global).avatar)
             }
             withPresenter { _, _ ->
                 assertFalse(PluginMediaPermissions.isAllowed(PLUGIN_ID))
@@ -159,29 +159,24 @@ class PluginGitHubManagementTest {
         }
 
     @Test
-    fun disabledAndUninstalledPluginsLoseCachedMediaAfterRestart() =
+    fun uninstallRevokesCachedMediaImmediately() =
         runBlocking {
             archives[FIRST_SHA] = archive("1.0.0", mediaNetwork = true)
-            withPresenter { _, presenter -> install(presenter) }
-            withPresenter { _, presenter ->
-                assertTrue(PluginMediaPermissions.isAllowed(PLUGIN_ID))
-                presenter.setEnabled(PLUGIN_ID, false)
-                assertTrue(PluginMediaPermissions.isAllowed(PLUGIN_ID))
-            }
-            withPresenter { _, presenter ->
-                assertFalse(PluginMediaPermissions.isAllowed(PLUGIN_ID))
-                presenter.setEnabled(PLUGIN_ID, true)
-            }
-            withPresenter { _, presenter ->
+            withPresenter { subsystem, presenter ->
+                install(presenter)
                 assertTrue(PluginMediaPermissions.isAllowed(PLUGIN_ID))
                 presenter.uninstall(PLUGIN_ID)
-                assertTrue(PluginMediaPermissions.isAllowed(PLUGIN_ID))
+                assertFalse(PluginMediaPermissions.isAllowed(PLUGIN_ID))
+                assertTrue(
+                    subsystem.running.value.plugins
+                        .isEmpty(),
+                )
             }
             withPresenter { _, _ -> assertFalse(PluginMediaPermissions.isAllowed(PLUGIN_ID)) }
         }
 
     @Test
-    fun githubInstallCanBeCancelledAndOnlyRunsAfterConfirmationAndRestart() =
+    fun githubInstallOnlyRunsAfterConfirmation() =
         runBlocking {
             withPresenter { subsystem, presenter ->
                 presenter.inspectGitHub("$REPOSITORY_URL.git")
@@ -203,11 +198,11 @@ class PluginGitHubManagementTest {
 
                 presenter.inspectGitHub(REPOSITORY_URL)
                 presenter.confirmInstall()
-                assertTrue(
-                    subsystem.stateStore.running.plugins
+                assertFalse(
+                    subsystem.running.value.plugins
                         .isEmpty(),
                 )
-                assertTrue(presenter.state.value.requiresRestart)
+
                 val source =
                     assertIs<PluginInstallSourceV1.GitHub>(
                         subsystem.stateStore.desired.value.plugins.values
@@ -221,11 +216,10 @@ class PluginGitHubManagementTest {
             withPresenter { subsystem, presenter ->
                 assertEquals(
                     "1.0.0",
-                    subsystem.stateStore.running.plugins.values
+                    subsystem.running.value.plugins.values
                         .single()
                         .installed.version,
                 )
-                assertFalse(presenter.state.value.requiresRestart)
             }
         }
 
@@ -331,7 +325,7 @@ class PluginGitHubManagementTest {
         }
 
     @Test
-    fun updateChecksDoNotDownloadAndConfirmedUpdatesKeepTheRunningVersionUntilRestart() =
+    fun updateChecksDoNotDownloadAndConfirmedUpdatesReplaceTheRunningVersion() =
         runBlocking {
             withPresenter { _, presenter -> install(presenter) }
             archives[SECOND_SHA] = archive("1.1.0", addedPermission = true)
@@ -380,8 +374,8 @@ class PluginGitHubManagementTest {
                         .version,
                 )
                 assertEquals(
-                    "1.0.0",
-                    subsystem.stateStore.running.plugins.values
+                    "1.1.0",
+                    subsystem.running.value.plugins.values
                         .single()
                         .installed.version,
                 )
@@ -390,12 +384,11 @@ class PluginGitHubManagementTest {
                         .single()
                         .availableUpdate,
                 )
-                assertTrue(presenter.state.value.requiresRestart)
             }
             withPresenter { subsystem, _ ->
                 assertEquals(
                     "1.1.0",
-                    subsystem.stateStore.running.plugins.values
+                    subsystem.running.value.plugins.values
                         .single()
                         .installed.version,
                 )
@@ -455,7 +448,7 @@ class PluginGitHubManagementTest {
                 )
                 assertEquals(
                     installed,
-                    subsystem.stateStore.running.plugins.values
+                    subsystem.running.value.plugins.values
                         .single()
                         .installed,
                 )
@@ -682,13 +675,26 @@ class PluginGitHubManagementTest {
                     },
             )
         val scope = CoroutineScope(SupervisorJob() + Dispatchers.Unconfined)
-        val presenter = PluginManagementPresenterV1(subsystem, scope, github = client)
+        val registry = testPluginRegistry(subsystem, scope)
+        val accounts = PluginTestAccounts()
+        org.koin.core.context.startKoin {
+            modules(
+                org.koin.dsl.module {
+                    single { registry }
+                    single<dev.dimension.flare.data.repository.AccountService> { accounts }
+                    single<CoroutineScope> { scope }
+                },
+            )
+        }
+        val presenter = PluginManagementPresenterV1(subsystem, scope, github = client, registry = { registry }, accounts = { accounts })
         try {
             block(subsystem, presenter)
         } finally {
             presenter.close()
             scope.cancel()
             subsystem.runtimePool.close()
+            org.koin.core.context
+                .stopKoin()
         }
     }
 }

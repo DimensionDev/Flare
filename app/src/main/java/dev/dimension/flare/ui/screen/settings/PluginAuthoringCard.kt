@@ -74,7 +74,9 @@ internal fun PluginAuthoringCard(
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        Text(pluginAuthoringLabel(plugin.phase), style = MaterialTheme.typography.bodyMedium)
+        if (plugin.phase != PluginAuthoringPhase.Idle) {
+            Text(pluginAuthoringLabel(plugin.phase), style = MaterialTheme.typography.bodyMedium)
+        }
         if (plugin.running && plugin.phase != PluginAuthoringPhase.Applied) {
             Text(
                 stringResource(R.string.plugin_ai_running),

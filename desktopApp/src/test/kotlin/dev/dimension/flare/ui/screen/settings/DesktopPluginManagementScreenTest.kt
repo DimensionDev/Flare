@@ -43,6 +43,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -129,6 +130,9 @@ class DesktopPluginManagementScreenTest {
         }
         compose.onNodeWithText("Pixelfed").assertIsDisplayed()
         compose.onNodeWithText("Enabled").assertDoesNotExist()
+        val addBounds = compose.onNodeWithContentDescription("Add plugin").fetchSemanticsNode().boundsInRoot
+        val moreBounds = compose.onNodeWithContentDescription("More").fetchSemanticsNode().boundsInRoot
+        assertTrue("Add plugin must precede More", addBounds.right <= moreBounds.left)
         ImageIO.write(
             compose.onRoot().captureToImage().toAwtImage(),
             "png",

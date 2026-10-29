@@ -79,7 +79,9 @@ internal fun PluginAuthoringCard(
             style = FluentTheme.typography.caption,
             color = FluentTheme.colors.text.text.secondary,
         )
-        Text(pluginAuthoringLabel(plugin.phase))
+        if (plugin.phase != PluginAuthoringPhase.Idle) {
+            Text(pluginAuthoringLabel(plugin.phase))
+        }
         if (plugin.running && plugin.phase != PluginAuthoringPhase.Applied) {
             Text(
                 stringResource(Res.string.plugin_ai_running),

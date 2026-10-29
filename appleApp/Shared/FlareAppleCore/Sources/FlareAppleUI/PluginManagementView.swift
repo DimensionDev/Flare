@@ -40,7 +40,9 @@ public struct PluginManagementView: View {
                         Text(plugin.name.isEmpty ? String(localized: "plugin_ai_untitled") : plugin.name).font(.headline)
                         Text(plugin.id).font(.caption.monospaced()).foregroundStyle(.secondary).textSelection(.enabled)
                         Text(String(format: String(localized: "plugin_ai_revision"), plugin.revision)).font(.caption).foregroundStyle(.secondary)
-                        Text(pluginAuthoringLabel(plugin.phase)).font(.caption).foregroundStyle(.secondary)
+                        if plugin.phase != .idle {
+                            Text(pluginAuthoringLabel(plugin.phase)).font(.caption).foregroundStyle(.secondary)
+                        }
                         if plugin.running && plugin.phase != .applied {
                             Text("plugin_ai_running").foregroundStyle(.secondary)
                         }
@@ -129,20 +131,23 @@ public struct PluginManagementView: View {
         #if os(macOS)
         // The Settings window reserves its toolbar for pane selection.
         .safeAreaInset(edge: .top) {
-            HStack(spacing: 16) {
+            HStack(spacing: 8) {
                 Spacer()
-                maintenanceMenu.fixedSize()
-                addMenu.fixedSize()
+                addActions
+                maintenanceMenu.menuStyle(.borderedButton)
             }
-            .menuStyle(.borderlessButton)
-            .padding(.horizontal, 16)
-            .padding(.vertical, 8)
-            .background(.bar)
+            .buttonStyle(.bordered)
+            .controlSize(.small)
+            .labelStyle(.titleAndIcon)
+            .disabled(presenter.state.busy)
+            .padding()
         }
         #else
         .toolbar {
-            ToolbarItem(placement: .primaryAction) { addMenu }
-            ToolbarItem(placement: .automatic) { maintenanceMenu }
+            ToolbarItemGroup(placement: .primaryAction) {
+                addMenu
+                maintenanceMenu.labelStyle(.iconOnly)
+            }
         }
         #endif
         .overlay {
@@ -271,6 +276,18 @@ public struct PluginManagementView: View {
 
     private var addMenu: some View {
         Menu {
+            addActions
+        } label: {
+            Label("plugin_add", systemImage: "plus")
+        }
+        .labelStyle(.iconOnly)
+        .accessibilityLabel(Text("plugin_add"))
+        .help("plugin_add")
+        .disabled(presenter.state.busy)
+    }
+
+    private var addActions: some View {
+        Group {
             Button {
                 gitHubURL = ""
                 selectedGitHubTag = ""
@@ -289,13 +306,7 @@ public struct PluginManagementView: View {
             } label: {
                 Label("plugin_install", systemImage: "doc")
             }
-        } label: {
-            Label("plugin_add", systemImage: "plus")
         }
-        .labelStyle(.iconOnly)
-        .accessibilityLabel(Text("plugin_add"))
-        .help("plugin_add")
-        .disabled(presenter.state.busy)
     }
 
     private var maintenanceMenu: some View {
@@ -320,7 +331,7 @@ public struct PluginManagementView: View {
             }
             .disabled(presenter.state.canRebuildIndex)
         } label: {
-            Image(systemName: "ellipsis.circle")
+            Label("more", systemImage: "ellipsis.circle")
         }
         .accessibilityLabel(Text("more"))
         .help("more")

@@ -2,8 +2,10 @@
 
 Ask Flare's AI assistant to create or update a plugin from any conversation. The
 **Settings → Plugins → + → Create with Flare AI** shortcut opens the ordinary assistant;
-it does not create a plugin. The option is shown only when AI Agent is enabled. The assistant uses the existing Agent provider/model
-settings and can use plugin tools alongside the normal app tools.
+it does not create a plugin. Native macOS shows the add actions directly as buttons
+at the top of the Plugins settings pane. The AI option is shown only when AI Agent
+is enabled. The assistant uses the existing Agent provider/model settings and can
+use plugin tools alongside the normal app tools.
 
 Plugins are independent local resources. A creation tool call assigns immutable
 plugin and platform IDs. Repeating the same creation request key returns the same

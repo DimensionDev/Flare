@@ -225,6 +225,25 @@ internal fun DesktopPluginManagementScreen(
                     style = FluentTheme.typography.title,
                 )
                 Box(Modifier.weight(1f))
+                PluginAddMenu(
+                    busy = state.busy,
+                    agentEnabled = LocalTimelineAppearance.current.aiConfig.agent,
+                    onGitHubInstall = {
+                        presenter.clearGitHubRepository()
+                        showsGitHubInstall = true
+                    },
+                    onCreateWithAI = onCreateWithAI,
+                    onFileInstall = {
+                        FileDialog(window, installLabel, FileDialog.LOAD).apply {
+                            file = "*.fpp"
+                            isVisible = true
+                            if (directory != null && file != null) {
+                                val path = File(directory, file).absolutePath
+                                scope.launchPresenterAction { presenter.inspect(path) }
+                            }
+                        }
+                    },
+                )
                 Box {
                     SubtleButton(
                         onClick = { showsMaintenanceMenu = true },
@@ -276,25 +295,6 @@ internal fun DesktopPluginManagementScreen(
                         )
                     }
                 }
-                PluginAddMenu(
-                    busy = state.busy,
-                    agentEnabled = LocalTimelineAppearance.current.aiConfig.agent,
-                    onGitHubInstall = {
-                        presenter.clearGitHubRepository()
-                        showsGitHubInstall = true
-                    },
-                    onCreateWithAI = onCreateWithAI,
-                    onFileInstall = {
-                        FileDialog(window, installLabel, FileDialog.LOAD).apply {
-                            file = "*.fpp"
-                            isVisible = true
-                            if (directory != null && file != null) {
-                                val path = File(directory, file).absolutePath
-                                scope.launchPresenterAction { presenter.inspect(path) }
-                            }
-                        }
-                    },
-                )
             }
             PluginManagementList(
                 state = state,

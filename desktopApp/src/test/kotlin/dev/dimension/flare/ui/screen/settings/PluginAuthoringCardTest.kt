@@ -69,6 +69,7 @@ class PluginAuthoringCardTest {
         assertEquals(1, layouts.single().lineCount)
         compose.onNodeWithText("Cancel update").assertIsDisplayed().performClick()
         compose.onNodeWithText("Cancel update").assertDoesNotExist()
+        compose.onNodeWithText("Ready to edit").assertDoesNotExist()
         compose.runOnIdle { assertEquals(1, stops) }
     }
 }

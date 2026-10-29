@@ -67,13 +67,17 @@ internal fun AdaptiveGrid(
                 val placeable =
                     if (expandedSize) {
                         visibleMeasurables[0].measure(
-                            constraints.copy(
+                            Constraints(
+                                maxWidth = constraints.maxWidth,
                                 maxHeight = constraints.maxWidth * 21 / 9,
                             ),
                         )
                     } else {
                         visibleMeasurables[0].measure(
-                            constraints.copy(maxHeight = constraints.maxWidth * 9 / 16),
+                            Constraints(
+                                maxWidth = constraints.maxWidth,
+                                maxHeight = constraints.maxWidth * 9 / 16,
+                            ),
                         )
                     }
                 overflowWidth = placeable.width
@@ -94,7 +98,6 @@ internal fun AdaptiveGrid(
                 }
             }
 
-            val gapPx = spacing.roundToPx()
             if (visibleMeasurables.size in 2..4) {
                 val width = constraints.maxWidth
                 val height = (width * 9) / 16
@@ -104,6 +107,7 @@ internal fun AdaptiveGrid(
                     } else {
                         height
                     }
+                val gapPx = spacing.roundToPx().coerceIn(0, minOf(width, containerHeight))
 
                 val placeables =
                     when (visibleMeasurables.size) {
@@ -111,7 +115,7 @@ internal fun AdaptiveGrid(
                             val childWidth = (width - gapPx) / 2
                             visibleMeasurables.map { child ->
                                 child.measure(
-                                    constraints.copy(
+                                    Constraints(
                                         maxWidth = childWidth,
                                         maxHeight = containerHeight,
                                     ),
@@ -128,7 +132,7 @@ internal fun AdaptiveGrid(
                                 when (index) {
                                     0 -> {
                                         measurable.measure(
-                                            constraints.copy(
+                                            Constraints(
                                                 maxWidth = leftWidth,
                                                 maxHeight = containerHeight,
                                             ),
@@ -137,7 +141,7 @@ internal fun AdaptiveGrid(
 
                                     else -> {
                                         measurable.measure(
-                                            constraints.copy(
+                                            Constraints(
                                                 maxWidth = rightWidth,
                                                 maxHeight = rightHeight,
                                             ),
@@ -152,7 +156,7 @@ internal fun AdaptiveGrid(
                             val cellH = (containerHeight - gapPx) / 2
                             visibleMeasurables.map { child ->
                                 child.measure(
-                                    constraints.copy(
+                                    Constraints(
                                         maxWidth = cellW,
                                         maxHeight = cellH,
                                     ),
@@ -229,6 +233,7 @@ internal fun AdaptiveGrid(
 
             val maxColumns = 3
             val columns = maxColumns
+            val gapPx = spacing.roundToPx().coerceIn(0, constraints.maxWidth / (columns - 1))
             val itemSize = (constraints.maxWidth - gapPx * (columns - 1)) / columns
             val rows = (visibleMeasurables.size + columns - 1) / columns
 
@@ -247,7 +252,7 @@ internal fun AdaptiveGrid(
                         }
 
                     measurable.measure(
-                        constraints.copy(
+                        Constraints(
                             maxWidth = childWidth,
                             maxHeight = itemSize,
                         ),

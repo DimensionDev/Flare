@@ -248,15 +248,12 @@ public struct PluginManagementView: View {
             Image(fontAwesome: .circleInfo)
                 .foregroundStyle(.tint)
                 .accessibilityHidden(true)
-            VStack(alignment: .leading, spacing: 8) {
-                Text("plugin_beta_description")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
+            Text("plugin_beta_description")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .frame(maxWidth: .infinity, alignment: .leading)
                 // Feedback must bypass the app's social content routing.
-                Link("plugin_report_issue", destination: URL(string: "https://github.com/DimensionDev/Flare/issues")!)
-                    .environment(\.openURL, OpenURLAction { .systemAction($0) })
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
+                .environment(\.openURL, OpenURLAction { .systemAction($0) })
         }
         .padding(.vertical, 4)
     }

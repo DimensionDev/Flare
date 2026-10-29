@@ -10,6 +10,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.toAwtImage
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
@@ -20,6 +22,7 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performFirstLinkClick
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.unit.dp
@@ -113,10 +116,18 @@ class DesktopPluginManagementScreenTest {
 
     @Test
     fun generatedPluginAndAddMenuScreenshots() {
+        var openedUrl: String? = null
+        val uriHandler =
+            object : UriHandler {
+                override fun openUri(uri: String) {
+                    openedUrl = uri
+                }
+            }
         runBlocking { createScreenshotPlugin(koinGet<PluginAuthoring>()) }
         compose.setContent {
             if (visible) {
                 CompositionLocalProvider(
+                    LocalUriHandler provides uriHandler,
                     LocalComposeWindow provides null,
                     LocalTimelineAppearance provides TimelineAppearance(aiConfig = TimelineAppearance.AiConfig(agent = true)),
                 ) {
@@ -130,6 +141,12 @@ class DesktopPluginManagementScreenTest {
         }
         compose.onNodeWithText("Pixelfed").assertIsDisplayed()
         compose.onNodeWithText("Enabled").assertDoesNotExist()
+        compose
+            .onNodeWithText(
+                "Plugins are still in beta and may be incomplete. If you run into problems, report them on GitHub Issues.",
+            ).performFirstLinkClick()
+        compose.runOnIdle { assertEquals("https://github.com/DimensionDev/Flare/issues", openedUrl) }
+        compose.onNodeWithText("GitHub Issues").assertDoesNotExist()
         val addBounds = compose.onNodeWithContentDescription("Add plugin").fetchSemanticsNode().boundsInRoot
         val moreBounds = compose.onNodeWithContentDescription("More").fetchSemanticsNode().boundsInRoot
         assertTrue("Add plugin must precede More", addBounds.right <= moreBounds.left)

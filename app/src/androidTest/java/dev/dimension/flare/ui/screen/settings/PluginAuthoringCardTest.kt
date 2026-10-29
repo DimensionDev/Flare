@@ -13,6 +13,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.ComposeUiFlags
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
@@ -22,6 +24,7 @@ import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performFirstLinkClick
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.unit.dp
@@ -68,6 +71,13 @@ class PluginAuthoringCardTest {
 
     @Test
     fun generatedPluginAndAddMenuScreenshots() {
+        var openedUrl: String? = null
+        val uriHandler =
+            object : UriHandler {
+                override fun openUri(uri: String) {
+                    openedUrl = uri
+                }
+            }
         runBlocking {
             val authoring = koinGet<PluginAuthoring>()
             val plugin = authoring.create("plugin-management-ui-fixture")
@@ -78,6 +88,7 @@ class PluginAuthoringCardTest {
             CompositionLocalProvider(
                 LocalGlobalAppearance provides GlobalAppearance.Default,
                 LocalTimelineAppearance provides TimelineAppearance(aiConfig = TimelineAppearance.AiConfig(agent = true)),
+                LocalUriHandler provides uriHandler,
             ) {
                 FlareTheme(darkTheme = false, dynamicColor = false) {
                     AndroidPluginManagementScreen(onBack = {})
@@ -86,8 +97,12 @@ class PluginAuthoringCardTest {
         }
         compose.onNodeWithText("Pixelfed").assertIsDisplayed()
         compose.onAllNodes(isToggleable()).assertCountEquals(0)
-        screenshot("flare-plugins-android.png")
         val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val linkText = context.getString(R.string.plugin_report_issue)
+        compose.onNodeWithText(context.getString(R.string.plugin_beta_description, linkText)).performFirstLinkClick()
+        compose.runOnIdle { assertEquals("https://github.com/DimensionDev/Flare/issues", openedUrl) }
+        compose.onNodeWithText(linkText).assertDoesNotExist()
+        screenshot("flare-plugins-android.png")
         compose.onNodeWithContentDescription("${context.getString(R.string.more)}: Pixelfed").performClick()
         compose.onNodeWithText(context.getString(R.string.plugin_uninstall)).assertIsDisplayed()
         screenshot("flare-plugins-android-item-menu.png")

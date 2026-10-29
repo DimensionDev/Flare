@@ -1198,29 +1198,13 @@
       "en": {
         "stringUnit": {
           "state": "translated",
-          "value": "Plugins are still in beta and may be incomplete. If you run into problems, report them on GitHub Issues."
+          "value": "Plugins are still in beta and may be incomplete. If you run into problems, report them on [GitHub Issues](https://github.com/DimensionDev/Flare/issues)."
         }
       },
       "zh-Hans": {
         "stringUnit": {
           "state": "translated",
-          "value": "插件仍处于 Beta 阶段，功能尚不完善。遇到问题可前往 GitHub Issues 提交反馈。"
-        }
-      }
-    }
-  },
-  "plugin_report_issue": {
-    "localizations": {
-      "en": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "Report an issue on GitHub"
-        }
-      },
-      "zh-Hans": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "前往 GitHub Issues 反馈"
+          "value": "插件仍处于 Beta 阶段，功能尚不完善。遇到问题可前往 [GitHub Issues](https://github.com/DimensionDev/Flare/issues) 提交反馈。"
         }
       }
     }

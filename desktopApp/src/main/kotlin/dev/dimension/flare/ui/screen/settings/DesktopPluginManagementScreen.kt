@@ -31,6 +31,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.LinkAnnotation
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLinkStyles
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
@@ -119,7 +124,6 @@ import io.github.composefluent.component.ComboBox
 import io.github.composefluent.component.ContentDialog
 import io.github.composefluent.component.ContentDialogButton
 import io.github.composefluent.component.FlyoutPlacement
-import io.github.composefluent.component.HyperlinkButton
 import io.github.composefluent.component.InfoBar
 import io.github.composefluent.component.InfoBarSeverity
 import io.github.composefluent.component.MenuFlyout
@@ -530,13 +534,32 @@ private fun PluginManagementList(
             contentPadding = PaddingValues(vertical = 12.dp),
         ) {
             item(key = "beta-notice") {
+                val linkText = stringResource(Res.string.plugin_report_issue)
+                val description = stringResource(Res.string.plugin_beta_description, linkText)
                 InfoBar(
                     title = {},
-                    message = { Text(stringResource(Res.string.plugin_beta_description)) },
-                    action = {
-                        HyperlinkButton("https://github.com/DimensionDev/Flare/issues") {
-                            Text(stringResource(Res.string.plugin_report_issue))
-                        }
+                    message = {
+                        Text(
+                            buildAnnotatedString {
+                                append(description)
+                                val start = description.indexOf(linkText)
+                                if (start >= 0) {
+                                    addLink(
+                                        LinkAnnotation.Url(
+                                            "https://github.com/DimensionDev/Flare/issues",
+                                            TextLinkStyles(
+                                                SpanStyle(
+                                                    color = FluentTheme.colors.text.accent.primary,
+                                                    textDecoration = TextDecoration.Underline,
+                                                ),
+                                            ),
+                                        ),
+                                        start,
+                                        start + linkText.length,
+                                    )
+                                }
+                            },
+                        )
                     },
                     modifier = Modifier.fillMaxWidth(),
                 )

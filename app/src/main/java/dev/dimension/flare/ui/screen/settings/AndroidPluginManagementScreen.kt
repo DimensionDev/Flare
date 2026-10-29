@@ -48,8 +48,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.LinkAnnotation
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLinkStyles
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import compose.icons.FontAwesomeIcons
@@ -478,7 +482,6 @@ private fun PluginManagementList(
     onRetryRuntime: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val uriHandler = LocalUriHandler.current
     LazyColumn(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
@@ -490,12 +493,32 @@ private fun PluginManagementList(
             ) {
                 Row(Modifier.padding(16.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     FAIcon(FontAwesomeIcons.Solid.CircleInfo, contentDescription = null, modifier = Modifier.size(20.dp))
-                    Column(Modifier.weight(1f)) {
-                        Text(stringResource(R.string.plugin_beta_description), style = MaterialTheme.typography.bodyMedium)
-                        TextButton(onClick = { uriHandler.openUri("https://github.com/DimensionDev/Flare/issues") }) {
-                            Text(stringResource(R.string.plugin_report_issue))
-                        }
-                    }
+                    val linkText = stringResource(R.string.plugin_report_issue)
+                    val description = stringResource(R.string.plugin_beta_description, linkText)
+                    Text(
+                        text =
+                            buildAnnotatedString {
+                                append(description)
+                                val start = description.indexOf(linkText)
+                                if (start >= 0) {
+                                    addLink(
+                                        LinkAnnotation.Url(
+                                            "https://github.com/DimensionDev/Flare/issues",
+                                            TextLinkStyles(
+                                                SpanStyle(
+                                                    color = MaterialTheme.colorScheme.primary,
+                                                    textDecoration = TextDecoration.Underline,
+                                                ),
+                                            ),
+                                        ),
+                                        start,
+                                        start + linkText.length,
+                                    )
+                                }
+                            },
+                        modifier = Modifier.weight(1f),
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
                 }
             }
         }

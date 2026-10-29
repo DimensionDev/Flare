@@ -15,8 +15,8 @@ import coil3.video.VideoFrameDecoder
 import dev.dimension.flare.common.AnimatedPngDecoder
 import dev.dimension.flare.common.AnimatedWebPDecoder
 import dev.dimension.flare.common.CorruptImageRetryInterceptor
-import dev.dimension.flare.ui.component.proxyImageFetcherFactory
 import dev.dimension.flare.di.AndroidKoinApplication
+import dev.dimension.flare.ui.component.proxyImageFetcherFactory
 import org.koin.android.ext.koin.androidContext
 import org.koin.plugin.module.dsl.startKoin
 

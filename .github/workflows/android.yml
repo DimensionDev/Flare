@@ -62,14 +62,20 @@ jobs:
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
 
-      - name: Run proxy settings UI regressions
+      - name: Run Android UI regressions
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 36
           target: google_apis
           arch: x86_64
           disable-animations: true
-          script: ./gradlew :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=dev.dimension.flare.ui.screen.settings.ProxySettingsContentTest,dev.dimension.flare.common.WebViewProxyTest
+          script: |
+            for test_class in \
+              dev.dimension.flare.ui.screen.settings.ProxySettingsContentTest \
+              dev.dimension.flare.common.WebViewProxyTest \
+              dev.dimension.flare.ui.screen.gallery.GalleryDetailScreenTest; do
+              ./gradlew :app:connectedDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=$test_class" || exit 1
+            done
 
       # Build with Gradle
       - name: Build with Gradle

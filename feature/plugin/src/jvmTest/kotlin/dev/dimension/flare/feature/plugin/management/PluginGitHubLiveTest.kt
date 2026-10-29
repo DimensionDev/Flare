@@ -71,9 +71,7 @@ class PluginGitHubLiveTest {
                                     .isEmpty(),
                                 "Use an empty, isolated live-test root",
                             )
-                            presenter.loadGitHubRepository(repository)
-                            assertTrue(assertNotNull(presenter.state.value.githubCatalog).versions.any { it.tag == "v1.0.0" })
-                            presenter.inspectGitHub("v1.0.0")
+                            presenter.inspectGitHub(repository)
                             assertEquals("1.0.0", assertNotNull(presenter.state.value.pendingInstall).version)
                             assertTrue(
                                 subsystem.stateStore.desired.value.plugins

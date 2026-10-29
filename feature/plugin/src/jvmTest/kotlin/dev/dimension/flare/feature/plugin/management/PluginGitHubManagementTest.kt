@@ -106,8 +106,7 @@ class PluginGitHubManagementTest {
                 val plugin = subsystem.authoring.create(key)
                 subsystem.authoring.delete(plugin.id)
                 archives[FIRST_SHA] = archive("1.0.0", id = plugin.id)
-                presenter.loadGitHubRepository(REPOSITORY_URL)
-                presenter.inspectGitHub("v1.0.0")
+                presenter.inspectGitHub(REPOSITORY_URL)
                 val review = assertNotNull(presenter.state.value.pendingInstall)
                 val recreated = subsystem.authoring.create(key)
 
@@ -185,14 +184,7 @@ class PluginGitHubManagementTest {
     fun githubInstallCanBeCancelledAndOnlyRunsAfterConfirmationAndRestart() =
         runBlocking {
             withPresenter { subsystem, presenter ->
-                presenter.loadGitHubRepository("$REPOSITORY_URL.git")
-                assertEquals(
-                    42L,
-                    presenter.state.value.githubCatalog
-                        ?.repository
-                        ?.id,
-                )
-                presenter.inspectGitHub("v1.0.0")
+                presenter.inspectGitHub("$REPOSITORY_URL.git")
                 assertEquals(
                     REPOSITORY_URL,
                     presenter.state.value.pendingInstall
@@ -209,7 +201,7 @@ class PluginGitHubManagementTest {
                         .isEmpty(),
                 )
 
-                presenter.inspectGitHub("v1.0.0")
+                presenter.inspectGitHub(REPOSITORY_URL)
                 presenter.confirmInstall()
                 assertTrue(
                     subsystem.stateStore.running.plugins
@@ -222,6 +214,7 @@ class PluginGitHubManagementTest {
                             .single()
                             .source,
                     )
+                assertEquals(42L, source.repository.id)
                 assertEquals("v1.0.0", source.tag)
                 assertEquals(FIRST_SHA, source.commitSha)
             }
@@ -233,6 +226,107 @@ class PluginGitHubManagementTest {
                         .installed.version,
                 )
                 assertFalse(presenter.state.value.requiresRestart)
+            }
+        }
+
+    @Test
+    fun installResolvesTheLatestStableVersionAfreshBeforePermissionReview() =
+        runBlocking {
+            withPresenter { subsystem, presenter ->
+                presenter.inspectGitHub(REPOSITORY_URL)
+                assertEquals("1.0.0", assertNotNull(presenter.state.value.pendingInstall).version)
+                presenter.cancelInstall()
+
+                tags = listOf("v1.2.0" to FIRST_SHA, "v2.0.0-beta.1" to FIRST_SHA, "v1.10.0" to SECOND_SHA)
+                archives[FIRST_SHA] = archive("1.2.0")
+                archives[SECOND_SHA] = archive("1.10.0", addedPermission = true)
+                presenter.inspectGitHub(REPOSITORY_URL)
+                val review = assertNotNull(presenter.state.value.pendingInstall)
+                assertEquals("1.10.0", review.version)
+                assertEquals(REPOSITORY_URL, review.sourceUrl)
+                assertTrue(review.permissions.any { it.origin == "https://auth.example" })
+                assertTrue(
+                    subsystem.stateStore.desired.value.plugins
+                        .isEmpty(),
+                )
+                assertFalse(presenter.state.value.busy)
+                assertEquals(2, downloads)
+
+                presenter.confirmInstall()
+                val installed =
+                    subsystem.stateStore.desired.value.plugins.values
+                        .single()
+                val source = assertIs<PluginInstallSourceV1.GitHub>(installed.source)
+                assertEquals("1.10.0", installed.version)
+                assertEquals("v1.10.0", source.tag)
+                assertEquals(SECOND_SHA, source.commitSha)
+                assertNull(presenter.state.value.pendingInstall)
+            }
+        }
+
+    @Test
+    fun catalogFailuresDiscardPreviousReviewsForBothInstallsAndUpdatesAndAllowRetry() =
+        runBlocking {
+            withPresenter { subsystem, presenter ->
+                install(presenter)
+                val installed = subsystem.stateStore.desired.value.plugins
+                tags = listOf("v1.1.0" to SECOND_SHA)
+                archives[SECOND_SHA] = archive("1.1.0")
+                for (update in listOf(false, true)) {
+                    catalogStatus = null
+                    presenter.inspectGitHub(REPOSITORY_URL)
+                    assertNotNull(presenter.state.value.pendingInstall)
+                    catalogStatus = HttpStatusCode.ServiceUnavailable
+                    assertFails {
+                        if (update) presenter.inspectGitHubUpdate(PLUGIN_ID) else presenter.inspectGitHub(REPOSITORY_URL)
+                    }
+                    assertNull(presenter.state.value.pendingInstall)
+                    assertNotNull(presenter.state.value.error)
+                    assertFalse(presenter.state.value.busy)
+                    assertFalse(fileSystem.exists(subsystem.stateStore.paths.incoming))
+                    assertFails { presenter.confirmInstall() }
+                    assertEquals(installed, subsystem.stateStore.desired.value.plugins)
+                }
+                catalogStatus = null
+                presenter.inspectGitHub(REPOSITORY_URL)
+                assertNull(presenter.state.value.error)
+                presenter.confirmInstall()
+                assertEquals(
+                    "1.1.0",
+                    subsystem.stateStore.desired.value.plugins.values
+                        .single()
+                        .version,
+                )
+            }
+        }
+
+    @Test
+    fun invalidLatestVersionFailsWithoutFallingBackOrInstallingAndCanBeRetried() =
+        runBlocking {
+            tags = listOf("v1.0.0" to FIRST_SHA, "v1.1.0" to SECOND_SHA)
+            withPresenter { subsystem, presenter ->
+                assertFails { presenter.inspectGitHub(REPOSITORY_URL) }
+                assertNull(presenter.state.value.pendingInstall)
+                assertEquals(1, downloads)
+
+                archives[SECOND_SHA] = archive("1.0.0")
+                assertFails { presenter.inspectGitHub(REPOSITORY_URL) }
+                assertNull(presenter.state.value.pendingInstall)
+                assertTrue(
+                    subsystem.stateStore.desired.value.plugins
+                        .isEmpty(),
+                )
+
+                archives[SECOND_SHA] = archive("1.1.0")
+                presenter.inspectGitHub(REPOSITORY_URL)
+                assertEquals("1.1.0", assertNotNull(presenter.state.value.pendingInstall).version)
+                assertNull(presenter.state.value.error)
+                presenter.cancelInstall()
+                assertTrue(
+                    subsystem.stateStore.desired.value.plugins
+                        .isEmpty(),
+                )
+                assertFalse(fileSystem.exists(subsystem.stateStore.paths.incoming))
             }
         }
 
@@ -515,8 +609,8 @@ class PluginGitHubManagementTest {
                 assertEquals(previous, presenter.state.value)
 
                 catalogRelease = null
-                presenter.loadGitHubRepository(REPOSITORY_URL)
-                assertNotNull(presenter.state.value.githubCatalog)
+                presenter.inspectGitHub(REPOSITORY_URL)
+                assertNotNull(presenter.state.value.pendingInstall)
                 assertNull(presenter.state.value.error)
             }
         }
@@ -526,11 +620,10 @@ class PluginGitHubManagementTest {
         runBlocking {
             withPresenter { _, presenter -> install(presenter) }
             withPresenter { subsystem, presenter ->
-                presenter.loadGitHubRepository(REPOSITORY_URL)
-                presenter.inspectGitHub("v1.0.0")
+                presenter.inspectGitHub(REPOSITORY_URL)
                 assertNotNull(presenter.state.value.pendingInstall)
                 blocked = true
-                val job = launch { presenter.inspectGitHub("v1.0.0") }
+                val job = launch { presenter.inspectGitHub(REPOSITORY_URL) }
                 downloadStarted.await()
                 job.cancelAndJoin()
                 assertNull(presenter.state.value.pendingInstall)
@@ -547,8 +640,7 @@ class PluginGitHubManagementTest {
         }
 
     private suspend fun install(presenter: PluginManagementPresenterV1) {
-        presenter.loadGitHubRepository(REPOSITORY_URL)
-        presenter.inspectGitHub("v1.0.0")
+        presenter.inspectGitHub(REPOSITORY_URL)
         presenter.confirmInstall()
     }
 

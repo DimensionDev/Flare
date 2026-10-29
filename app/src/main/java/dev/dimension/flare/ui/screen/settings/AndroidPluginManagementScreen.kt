@@ -131,17 +131,24 @@ internal fun AndroidPluginManagementScreen(
     if (showsGitHubInstall) {
         GitHubInstallDialog(
             state = state,
-            onLoad = { url -> scope.launchPresenterAction { presenter.loadGitHubRepository(url) } },
-            onInstall = { tag ->
-                showsGitHubInstall = false
-                scope.launchPresenterAction { presenter.inspectGitHub(tag) }
+            onInstall = { url -> scope.launchPresenterAction { presenter.inspectGitHub(url) } },
+            onConfirm = {
+                scope.launchPresenterAction {
+                    presenter.confirmInstall()
+                    showsGitHubInstall = false
+                }
             },
-            onUrlChanged = presenter::clearGitHubRepository,
-            onDismiss = { showsGitHubInstall = false },
+            onUrlChanged = presenter::clearError,
+            onDismiss = {
+                scope.launchPresenterAction {
+                    presenter.cancelInstall()
+                    showsGitHubInstall = false
+                }
+            },
         )
     }
 
-    state.pendingInstall?.let { review ->
+    state.pendingInstall?.takeUnless { showsGitHubInstall }?.let { review ->
         PluginInstallReviewDialog(
             review = review,
             busy = state.busy,
@@ -192,7 +199,7 @@ internal fun AndroidPluginManagementScreen(
                             busy = state.busy,
                             agentEnabled = LocalTimelineAppearance.current.aiConfig.agent,
                             onGitHubInstall = {
-                                presenter.clearGitHubRepository()
+                                presenter.clearError()
                                 showsGitHubInstall = true
                             },
                             onCreateWithAI = onCreateWithAI,
@@ -225,7 +232,7 @@ internal fun AndroidPluginManagementScreen(
                         .padding(horizontal = screenHorizontalPadding),
             )
         }
-        if (state.busy) {
+        if (state.busy && !showsGitHubInstall) {
             CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
         }
     }
@@ -341,32 +348,7 @@ private fun PluginInstallReviewDialog(
                         .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                Text(
-                    stringResource(
-                        if (review.sourceUrl ==
-                            null
-                        ) {
-                            R.string.plugin_unverified_warning
-                        } else {
-                            R.string.plugin_unverified_github_warning
-                        },
-                    ),
-                    color = MaterialTheme.colorScheme.error,
-                )
-                review.sourceUrl?.let { Text(it) }
-                if (review.capabilities.isNotEmpty()) {
-                    Text(stringResource(R.string.plugin_capabilities), style = MaterialTheme.typography.titleSmall)
-                    review.capabilities.forEach { Text("• $it") }
-                }
-                if (review.permissions.isNotEmpty()) {
-                    Text(stringResource(R.string.plugin_permissions), style = MaterialTheme.typography.titleSmall)
-                    review.permissions.forEach { permission ->
-                        Text("• ${permission.localizedDescription()}")
-                    }
-                }
-                review.warnings
-                    .filterNot { it.type == PluginInstallWarningTypeV1.UnverifiedLocal }
-                    .forEach { Text("• ${it.localizedMessage()}") }
+                PluginInstallReviewContent(review)
             }
         },
         confirmButton = {
@@ -380,6 +362,36 @@ private fun PluginInstallReviewDialog(
             }
         },
     )
+}
+
+@Composable
+private fun PluginInstallReviewContent(review: PluginInstallReviewV1) {
+    Text(
+        stringResource(
+            if (review.sourceUrl ==
+                null
+            ) {
+                R.string.plugin_unverified_warning
+            } else {
+                R.string.plugin_unverified_github_warning
+            },
+        ),
+        color = MaterialTheme.colorScheme.error,
+    )
+    review.sourceUrl?.let { Text(it) }
+    if (review.capabilities.isNotEmpty()) {
+        Text(stringResource(R.string.plugin_capabilities), style = MaterialTheme.typography.titleSmall)
+        review.capabilities.forEach { Text("• $it") }
+    }
+    if (review.permissions.isNotEmpty()) {
+        Text(stringResource(R.string.plugin_permissions), style = MaterialTheme.typography.titleSmall)
+        review.permissions.forEach { permission ->
+            Text("• ${permission.localizedDescription()}")
+        }
+    }
+    review.warnings
+        .filterNot { it.type == PluginInstallWarningTypeV1.UnverifiedLocal }
+        .forEach { Text("• ${it.localizedMessage()}") }
 }
 
 @Composable
@@ -407,65 +419,49 @@ internal fun PluginPermission.localizedDescription(): String {
 }
 
 @Composable
-private fun GitHubInstallDialog(
+internal fun GitHubInstallDialog(
     state: PluginManagementStateV1,
-    onLoad: (String) -> Unit,
     onInstall: (String) -> Unit,
+    onConfirm: () -> Unit,
     onUrlChanged: () -> Unit,
     onDismiss: () -> Unit,
 ) {
     var url by remember { mutableStateOf("") }
-    var selectedTag by remember { mutableStateOf<String?>(null) }
-    var expanded by remember { mutableStateOf(false) }
-    val versions = state.githubCatalog?.versions.orEmpty()
-    val selection = versions.firstOrNull { it.tag == selectedTag } ?: versions.firstOrNull()
+    val review = state.pendingInstall
     AlertDialog(
         onDismissRequest = { if (!state.busy) onDismiss() },
-        title = { Text(stringResource(R.string.plugin_install_github)) },
+        title = { Text(review?.let { "${it.name} ${it.version}" } ?: stringResource(R.string.plugin_install_github)) },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedTextField(
-                    value = url,
-                    onValueChange = {
-                        url = it
-                        selectedTag = null
-                        onUrlChanged()
-                    },
-                    label = { Text(stringResource(R.string.plugin_github_repository)) },
-                    placeholder = { Text("https://github.com/owner/repository") },
-                    singleLine = true,
-                    enabled = !state.busy,
-                )
-                TextButton(enabled = !state.busy && url.isNotBlank(), onClick = { onLoad(url) }) {
-                    Text(stringResource(R.string.plugin_load_versions))
-                }
-                if (selection != null) {
-                    Box {
-                        TextButton(enabled = !state.busy, onClick = { expanded = true }) {
-                            Text("${stringResource(R.string.plugin_version)}: ${selection.tag}")
-                        }
-                        DropdownMenu(
-                            expanded = expanded,
-                            onDismissRequest = { expanded = false },
-                            modifier = Modifier.heightIn(max = 280.dp),
-                        ) {
-                            versions.forEach { version ->
-                                DropdownMenuItem(
-                                    text = { Text(version.tag) },
-                                    onClick = {
-                                        selectedTag = version.tag
-                                        expanded = false
-                                    },
-                                )
-                            }
-                        }
-                    }
+            Column(
+                modifier = Modifier.heightIn(max = 420.dp).verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                if (review == null) {
+                    OutlinedTextField(
+                        value = url,
+                        onValueChange = {
+                            url = it
+                            onUrlChanged()
+                        },
+                        label = { Text(stringResource(R.string.plugin_github_repository)) },
+                        placeholder = { Text("https://github.com/owner/repository") },
+                        singleLine = true,
+                        enabled = !state.busy,
+                    )
+                } else {
+                    PluginInstallReviewContent(review)
                 }
                 state.error?.let { Text(it.take(512), color = MaterialTheme.colorScheme.error) }
+                if (state.busy) {
+                    CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
+                }
             }
         },
         confirmButton = {
-            Button(enabled = !state.busy && selection != null, onClick = { selection?.let { onInstall(it.tag) } }) {
+            Button(
+                enabled = !state.busy && (review != null || url.isNotBlank()),
+                onClick = { if (review == null) onInstall(url) else onConfirm() },
+            ) {
                 Text(stringResource(R.string.plugin_confirm_install))
             }
         },

@@ -30,6 +30,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
@@ -80,7 +85,6 @@ import dev.dimension.flare.plugin_issue_index_corrupt
 import dev.dimension.flare.plugin_issue_platform_conflict
 import dev.dimension.flare.plugin_issue_platform_invalid
 import dev.dimension.flare.plugin_issues
-import dev.dimension.flare.plugin_load_versions
 import dev.dimension.flare.plugin_operation_failed
 import dev.dimension.flare.plugin_permission_account_origin
 import dev.dimension.flare.plugin_permission_account_origin_label
@@ -99,7 +103,6 @@ import dev.dimension.flare.plugin_uninstall_confirm_title
 import dev.dimension.flare.plugin_unverified_github_warning
 import dev.dimension.flare.plugin_unverified_warning
 import dev.dimension.flare.plugin_update
-import dev.dimension.flare.plugin_version
 import dev.dimension.flare.plugin_warning_added_permission
 import dev.dimension.flare.plugin_warning_changed_package
 import dev.dimension.flare.plugin_warning_compatibility
@@ -118,11 +121,12 @@ import io.github.composefluent.FluentTheme
 import io.github.composefluent.ProvideTextStyle
 import io.github.composefluent.background.BackgroundSizing
 import io.github.composefluent.background.Layer
+import io.github.composefluent.component.AccentButton
 import io.github.composefluent.component.Button
 import io.github.composefluent.component.CardExpanderItem
-import io.github.composefluent.component.ComboBox
 import io.github.composefluent.component.ContentDialog
 import io.github.composefluent.component.ContentDialogButton
+import io.github.composefluent.component.FluentDialog
 import io.github.composefluent.component.FlyoutPlacement
 import io.github.composefluent.component.InfoBar
 import io.github.composefluent.component.InfoBarSeverity
@@ -165,17 +169,24 @@ internal fun DesktopPluginManagementScreen(
     if (showsGitHubInstall) {
         GitHubInstallDialog(
             state = state,
-            onLoad = { url -> scope.launchPresenterAction { presenter.loadGitHubRepository(url) } },
-            onInstall = { tag ->
-                showsGitHubInstall = false
-                scope.launchPresenterAction { presenter.inspectGitHub(tag) }
+            onInstall = { url -> scope.launchPresenterAction { presenter.inspectGitHub(url) } },
+            onConfirm = {
+                scope.launchPresenterAction {
+                    presenter.confirmInstall()
+                    showsGitHubInstall = false
+                }
             },
-            onUrlChanged = presenter::clearGitHubRepository,
-            onDismiss = { showsGitHubInstall = false },
+            onUrlChanged = presenter::clearError,
+            onDismiss = {
+                scope.launchPresenterAction {
+                    presenter.cancelInstall()
+                    showsGitHubInstall = false
+                }
+            },
         )
     }
 
-    state.pendingInstall?.let { review ->
+    state.pendingInstall?.takeUnless { showsGitHubInstall }?.let { review ->
         PluginInstallReviewDialog(
             review = review,
             busy = state.busy,
@@ -236,7 +247,7 @@ internal fun DesktopPluginManagementScreen(
                     busy = state.busy,
                     agentEnabled = LocalTimelineAppearance.current.aiConfig.agent,
                     onGitHubInstall = {
-                        presenter.clearGitHubRepository()
+                        presenter.clearError()
                         showsGitHubInstall = true
                     },
                     onCreateWithAI = onCreateWithAI,
@@ -332,7 +343,7 @@ internal fun DesktopPluginManagementScreen(
                 modifier = Modifier.weight(1f),
             )
         }
-        if (state.busy) {
+        if (state.busy && !showsGitHubInstall) {
             ProgressRing(modifier = Modifier.align(Alignment.Center))
         }
     }
@@ -397,31 +408,7 @@ internal fun PluginInstallReviewDialog(
                         .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                Text(
-                    stringResource(
-                        if (review.sourceUrl ==
-                            null
-                        ) {
-                            Res.string.plugin_unverified_warning
-                        } else {
-                            Res.string.plugin_unverified_github_warning
-                        },
-                    ),
-                )
-                review.sourceUrl?.let { Text(it) }
-                if (review.capabilities.isNotEmpty()) {
-                    Text(stringResource(Res.string.plugin_capabilities), style = FluentTheme.typography.bodyStrong)
-                    review.capabilities.forEach { Text("• $it") }
-                }
-                if (review.permissions.isNotEmpty()) {
-                    Text(stringResource(Res.string.plugin_permissions), style = FluentTheme.typography.bodyStrong)
-                    review.permissions.forEach { permission ->
-                        Text("• ${permission.localizedDescription()}")
-                    }
-                }
-                review.warnings
-                    .filterNot { it.type == PluginInstallWarningTypeV1.UnverifiedLocal }
-                    .forEach { Text("• ${it.localizedMessage()}") }
+                PluginInstallReviewContent(review)
             }
         },
         primaryButtonText = stringResource(Res.string.plugin_confirm_install),
@@ -431,6 +418,35 @@ internal fun PluginInstallReviewDialog(
             if (button == ContentDialogButton.Primary) onConfirm() else onCancel()
         },
     )
+}
+
+@Composable
+private fun PluginInstallReviewContent(review: PluginInstallReviewV1) {
+    Text(
+        stringResource(
+            if (review.sourceUrl ==
+                null
+            ) {
+                Res.string.plugin_unverified_warning
+            } else {
+                Res.string.plugin_unverified_github_warning
+            },
+        ),
+    )
+    review.sourceUrl?.let { Text(it) }
+    if (review.capabilities.isNotEmpty()) {
+        Text(stringResource(Res.string.plugin_capabilities), style = FluentTheme.typography.bodyStrong)
+        review.capabilities.forEach { Text("• $it") }
+    }
+    if (review.permissions.isNotEmpty()) {
+        Text(stringResource(Res.string.plugin_permissions), style = FluentTheme.typography.bodyStrong)
+        review.permissions.forEach { permission ->
+            Text("• ${permission.localizedDescription()}")
+        }
+    }
+    review.warnings
+        .filterNot { it.type == PluginInstallWarningTypeV1.UnverifiedLocal }
+        .forEach { Text("• ${it.localizedMessage()}") }
 }
 
 @Composable
@@ -458,58 +474,66 @@ internal fun PluginPermission.localizedDescription(): String {
 }
 
 @Composable
-private fun GitHubInstallDialog(
+internal fun GitHubInstallDialog(
     state: PluginManagementStateV1,
-    onLoad: (String) -> Unit,
     onInstall: (String) -> Unit,
+    onConfirm: () -> Unit,
     onUrlChanged: () -> Unit,
     onDismiss: () -> Unit,
 ) {
     val url = rememberTextFieldState()
-    var selectedTag by remember { mutableStateOf<String?>(null) }
-    LaunchedEffect(url.text) {
-        selectedTag = null
-        onUrlChanged()
-    }
-    val versions = state.githubCatalog?.versions.orEmpty()
-    val selection = versions.firstOrNull { it.tag == selectedTag } ?: versions.firstOrNull()
-    ContentDialog(
-        visible = true,
-        title = stringResource(Res.string.plugin_install_github),
-        content = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                TextField(
-                    url,
-                    modifier = Modifier.fillMaxWidth(),
-                    header = { Text(stringResource(Res.string.plugin_github_repository)) },
-                    placeholder = { Text("https://github.com/owner/repository") },
-                    lineLimits = TextFieldLineLimits.SingleLine,
-                    enabled = !state.busy,
-                )
-                if (selection != null) {
-                    ComboBox(
-                        header = stringResource(Res.string.plugin_version),
-                        items = versions.map { it.tag },
-                        selected = versions.indexOf(selection),
-                        disabled = state.busy,
-                        onSelectionChange = { index, _ -> selectedTag = versions[index].tag },
+    LaunchedEffect(url.text) { onUrlChanged() }
+    val review = state.pendingInstall
+    FluentDialog(visible = true) {
+        Column(
+            modifier =
+                Modifier.fillMaxWidth().padding(24.dp).onKeyEvent {
+                    if (it.key == Key.Escape && it.type == KeyEventType.KeyUp && !state.busy) {
+                        onDismiss()
+                        true
+                    } else {
+                        false
+                    }
+                },
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            Text(
+                review?.let { "${it.name} ${it.version}" } ?: stringResource(Res.string.plugin_install_github),
+                style = FluentTheme.typography.subtitle,
+            )
+            Column(
+                modifier = Modifier.heightIn(max = 420.dp).verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                if (review == null) {
+                    TextField(
+                        url,
+                        modifier = Modifier.fillMaxWidth(),
+                        header = { Text(stringResource(Res.string.plugin_github_repository)) },
+                        placeholder = { Text("https://github.com/owner/repository") },
+                        lineLimits = TextFieldLineLimits.SingleLine,
+                        enabled = !state.busy,
                     )
-                }
-                state.error?.let { Text(it.take(512)) }
-            }
-        },
-        primaryButtonText = stringResource(if (selection == null) Res.string.plugin_load_versions else Res.string.plugin_confirm_install),
-        closeButtonText = stringResource(Res.string.cancel),
-        onButtonClick = { button ->
-            if (!state.busy) {
-                if (button == ContentDialogButton.Primary) {
-                    if (selection == null) onLoad(url.text.toString()) else onInstall(selection.tag)
                 } else {
-                    onDismiss()
+                    PluginInstallReviewContent(review)
+                }
+                state.error?.let { Text(it.take(512), color = FluentTheme.colors.system.critical) }
+            }
+            if (state.busy) ProgressRing(modifier = Modifier.align(Alignment.CenterHorizontally))
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                AccentButton(
+                    onClick = { if (review == null) onInstall(url.text.toString()) else onConfirm() },
+                    disabled = state.busy || (review == null && url.text.isBlank()),
+                    modifier = Modifier.weight(1f),
+                ) {
+                    Text(stringResource(Res.string.plugin_confirm_install))
+                }
+                Button(onClick = onDismiss, disabled = state.busy, modifier = Modifier.weight(1f)) {
+                    Text(stringResource(Res.string.cancel))
                 }
             }
-        },
-    )
+        }
+    }
 }
 
 @Composable

@@ -412,8 +412,7 @@ class PluginAuthoringServiceV1Test {
                     },
                 )
             val presenter = PluginManagementPresenterV1(subsystem, scope, github = client)
-            presenter.loadGitHubRepository("https://github.com/owner/repo")
-            val download = launch { presenter.inspectGitHub("v1.0.0") }
+            val download = launch { presenter.inspectGitHub("https://github.com/owner/repo") }
             try {
                 withTimeout(5_000) { entered.await() }
                 val plugin = service.create(UUID.randomUUID().toString())

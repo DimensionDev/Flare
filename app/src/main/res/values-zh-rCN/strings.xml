@@ -893,8 +893,6 @@
     <string name="plugin_warning_compatibility">兼容性警告</string>
     <string name="plugin_install_github">从 GitHub 安装</string>
     <string name="plugin_github_repository">GitHub 仓库链接</string>
-    <string name="plugin_load_versions">获取版本</string>
-    <string name="plugin_version">版本</string>
     <string name="plugin_check_updates">检查更新</string>
     <string name="plugin_update">更新</string>
     <string name="plugin_up_to_date">GitHub 插件均为最新版本</string>

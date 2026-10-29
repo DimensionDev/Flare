@@ -62,18 +62,13 @@ public class PluginAppleFacadeV1 : PresenterBase<PluginManagementStateV1>() {
         presenter.reportOperationFailure()
     }
 
-    public fun clearGitHubRepository() {
-        presenter.clearGitHubRepository()
+    public fun clearError() {
+        presenter.clearError()
     }
 
     @Throws(Exception::class)
-    public suspend fun loadGitHubRepository(url: String) {
-        presenter.loadGitHubRepository(url)
-    }
-
-    @Throws(Exception::class)
-    public suspend fun inspectGitHub(tag: String) {
-        presenter.inspectGitHub(tag)
+    public suspend fun inspectGitHub(url: String) {
+        presenter.inspectGitHub(url)
     }
 
     @Throws(Exception::class)

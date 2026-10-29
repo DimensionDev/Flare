@@ -958,8 +958,6 @@
     <string name="plugin_warning_compatibility">Compatibility warning</string>
     <string name="plugin_install_github">Install from GitHub</string>
     <string name="plugin_github_repository">GitHub repository URL</string>
-    <string name="plugin_load_versions">Load versions</string>
-    <string name="plugin_version">Version</string>
     <string name="plugin_check_updates">Check for updates</string>
     <string name="plugin_update">Update</string>
     <string name="plugin_up_to_date">GitHub plugins are up to date</string>

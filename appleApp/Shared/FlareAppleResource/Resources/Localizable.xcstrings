@@ -896,38 +896,6 @@
       }
     }
   },
-  "plugin_load_versions": {
-    "localizations": {
-      "en": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "Load versions"
-        }
-      },
-      "zh-Hans": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "获取版本"
-        }
-      }
-    }
-  },
-  "plugin_version": {
-    "localizations": {
-      "en": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "Version"
-        }
-      },
-      "zh-Hans": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "版本"
-        }
-      }
-    }
-  },
   "plugin_check_updates": {
     "localizations": {
       "en": {

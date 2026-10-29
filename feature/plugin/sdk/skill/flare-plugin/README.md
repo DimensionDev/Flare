@@ -173,8 +173,9 @@ cases matter. It should identify gaps rather than invent website endpoints.
 4. Use [Desktop plugin development](references/testing.md#develop-locally-in-desktop)
    to validate and reload a local directory. Follow the other testing checks, then
    commit the ready-to-run `plugin.js` and publish a public GitHub repository with a stable version tag.
-5. In Flare's plugin management, install from `https://github.com/OWNER/REPO`,
-   review the selected version/permissions, and restart Flare before using it.
+5. In Flare's plugin management, enter `https://github.com/OWNER/REPO` and click
+   **Install**. Flare downloads the latest stable version and shows its source and
+   permissions in the same dialog. Confirm installation, then restart Flare.
    Follow the plugin's README to select the platform, origin, and login method.
 
 See [publishing](references/publishing.md) for exact tag rules and updates. Flare

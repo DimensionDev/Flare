@@ -18,7 +18,6 @@ public struct PluginManagementView: View {
     private let onCreateWithAI: () -> Void
     @State private var showsGitHubInstall = false
     @State private var gitHubURL = ""
-    @State private var selectedGitHubTag = ""
     @State private var pendingUninstallId: String?
     @State private var pendingUninstallName: String?
     #if os(macOS)
@@ -139,7 +138,7 @@ public struct PluginManagementView: View {
         }
         #endif
         .overlay {
-            if presenter.state.busy {
+            if presenter.state.busy && !showsGitHubInstall {
                 ProgressView()
                     .padding()
                     .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
@@ -158,7 +157,7 @@ public struct PluginManagementView: View {
         .alert(
             presenter.state.pendingInstall.map { "\($0.name) \($0.version)" } ?? "",
             isPresented: Binding(
-                get: { presenter.state.pendingInstall != nil },
+                get: { presenter.state.pendingInstall != nil && !showsGitHubInstall },
                 set: { _ in }
             )
         ) {
@@ -339,8 +338,7 @@ public struct PluginManagementView: View {
         Group {
             Button {
                 gitHubURL = ""
-                selectedGitHubTag = ""
-                facade.clearGitHubRepository()
+                facade.clearError()
                 showsGitHubInstall = true
             } label: {
                 Label {
@@ -484,40 +482,28 @@ public struct PluginManagementView: View {
     }
     #endif
 
-    private var selectedGitHubVersion: GitHubPluginVersionV1? {
-        guard let versions = presenter.state.githubCatalog?.versions else { return nil }
-        return versions.first { $0.tag == selectedGitHubTag } ?? versions.first
-    }
-
     private var gitHubInstallSheet: some View {
         NavigationStack {
             Form {
-                TextField(
-                    "plugin_github_repository",
-                    text: $gitHubURL,
-                    prompt: Text(verbatim: "https://github.com/owner/repository")
-                )
+                if let review = presenter.state.pendingInstall {
+                    Section {
+                        Text(installReviewText(review))
+                    } header: {
+                        Text(verbatim: "\(review.name) \(review.version)")
+                    }
+                } else {
+                    TextField(
+                        "plugin_github_repository",
+                        text: $gitHubURL,
+                        prompt: Text(verbatim: "https://github.com/owner/repository")
+                    )
                     .autocorrectionDisabled()
                     #if os(iOS)
                     .textInputAutocapitalization(.never)
                     .keyboardType(.URL)
                     #endif
                     .onChange(of: gitHubURL) { _, _ in
-                        selectedGitHubTag = ""
-                        facade.clearGitHubRepository()
-                    }
-                Button("plugin_load_versions") {
-                    Task { try? await facade.loadGitHubRepository(url: gitHubURL) }
-                }
-                .disabled(gitHubURL.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                if let catalog = presenter.state.githubCatalog {
-                    Picker("plugin_version", selection: Binding(
-                        get: { selectedGitHubVersion?.tag ?? "" },
-                        set: { selectedGitHubTag = $0 }
-                    )) {
-                        ForEach(catalog.versions, id: \.tag) { version in
-                            Text(version.tag).tag(version.tag)
-                        }
+                        facade.clearError()
                     }
                 }
                 if let error = presenter.state.error {
@@ -528,7 +514,15 @@ public struct PluginManagementView: View {
             .navigationTitle("plugin_install_github")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button(role: .cancel) { showsGitHubInstall = false } label: {
+                    Button(role: .cancel) {
+                        let isReviewing = presenter.state.pendingInstall != nil
+                        Task {
+                            do {
+                                try await facade.cancelInstall()
+                                if !isReviewing { showsGitHubInstall = false }
+                            } catch { }
+                        }
+                    } label: {
                         Label {
                             Text("Cancel")
                         } icon: {
@@ -544,9 +538,16 @@ public struct PluginManagementView: View {
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button {
-                        guard let version = selectedGitHubVersion else { return }
-                        showsGitHubInstall = false
-                        Task { try? await facade.inspectGitHub(tag: version.tag) }
+                        let isConfirming = presenter.state.pendingInstall != nil
+                        Task {
+                            do {
+                                if isConfirming {
+                                    try await facade.confirmInstall()
+                                } else {
+                                    try await facade.inspectGitHub(url: gitHubURL)
+                                }
+                            } catch { }
+                        }
                     } label: {
                         Label {
                             Text("plugin_confirm_install")
@@ -559,12 +560,15 @@ public struct PluginManagementView: View {
                     #else
                     .labelStyle(.titleOnly)
                     #endif
-                    .disabled(presenter.state.busy || selectedGitHubVersion == nil)
+                    .disabled(presenter.state.busy || (presenter.state.pendingInstall == nil && gitHubURL.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty))
                 }
             }
             .overlay { if presenter.state.busy { ProgressView() } }
         }
-        .interactiveDismissDisabled(presenter.state.busy)
+        .interactiveDismissDisabled(presenter.state.busy || presenter.state.pendingInstall != nil)
+        .onChange(of: presenter.state.pendingInstall != nil) { wasReviewing, isReviewing in
+            if wasReviewing && !isReviewing { showsGitHubInstall = false }
+        }
         #if os(macOS)
         .frame(minWidth: 440, minHeight: 280)
         #endif

@@ -94,8 +94,10 @@ enable live writes without the user's current authorization.
 
 After an adapter has real endpoints and authorized credentials:
 
-1. Install the selected GitHub stable tag and restart. Confirm source/version and
-   permission review, then the expected platform/login/timeline entries.
+1. Enter the GitHub repository URL and click **Install**. Confirm that Flare
+   downloads the latest stable tag and shows source/version and permissions in
+   the same dialog before confirmation. Check retry and cancellation, then
+   install, restart, and verify the expected platform/login/timeline entries.
 2. Verify each supported login method and account identity; exercise cancelled,
    rejected, or expired authentication where practical.
 3. Refresh, paginate, open internal/link details, and verify remote media where

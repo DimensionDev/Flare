@@ -44,7 +44,6 @@ public data class PluginManagementStateV1(
     val canRebuildIndex: Boolean = false,
     val busy: Boolean = false,
     val error: String? = null,
-    val githubCatalog: GitHubPluginCatalogV1? = null,
     val development: PluginDevelopmentStateV1 = PluginDevelopmentStateV1(),
     val authoredPlugins: List<AuthoredPlugin> = emptyList(),
 ) {
@@ -106,7 +105,6 @@ public class PluginManagementPresenterV1(
     private val operationDispatcher: CoroutineDispatcher = Dispatchers.Default,
     private val github: GitHubPluginClient = subsystem.github,
 ) {
-    private var githubCatalog: GitHubPluginCatalogV1? = null
     private val updates = mutableMapOf<String, GitHubPluginVersionV1>()
     private var preview: PreparedPluginInstallV1? = null
     private val mutableState = MutableStateFlow(snapshot())
@@ -137,24 +135,11 @@ public class PluginManagementPresenterV1(
         observation.cancel()
     }
 
-    public fun clearGitHubRepository() {
-        githubCatalog = null
-        mutableState.value = mutableState.value.copy(githubCatalog = null)
-    }
-
-    public suspend fun loadGitHubRepository(url: String) {
+    public suspend fun inspectGitHub(url: String) {
         runAction {
-            clearGitHubRepository()
-            githubCatalog = github.catalog(url)
-            mutableState.value = snapshot()
-        }
-    }
-
-    public suspend fun inspectGitHub(tag: String) {
-        runAction {
-            val catalog = requireNotNull(githubCatalog) { "Load a GitHub repository first" }
-            val version = catalog.versions.single { it.tag == tag }
-            prepareGitHub(catalog, version)
+            clearPreview()
+            val catalog = github.catalog(url, forceRefresh = true)
+            prepareGitHub(catalog, catalog.versions.first())
         }
     }
 
@@ -193,6 +178,7 @@ public class PluginManagementPresenterV1(
 
     public suspend fun inspectGitHubUpdate(pluginId: String) {
         runAction {
+            clearPreview()
             val installed = requireNotNull(subsystem.stateStore.desired.value.plugins[pluginId]) { "Plugin is no longer installed" }
             val source = installed.source as? PluginInstallSourceV1.GitHub ?: error("Plugin is not installed from GitHub")
             val catalog = github.catalog(source.repository.url, forceRefresh = true, expectedRepositoryId = source.repository.id)
@@ -206,12 +192,11 @@ public class PluginManagementPresenterV1(
         version: GitHubPluginVersionV1,
         expectedPluginId: String? = null,
     ) {
-        clearPreview()
         val bytes = github.archive(catalog.repository, version)
         val source = PluginInstallSourceV1.GitHub(catalog.repository, version.tag, version.commitSha)
         val prepared = subsystem.installer.inspect(Buffer().write(bytes), source, expectedPluginId)
         preview = prepared
-        mutableState.value = snapshot()
+        mutableState.value = snapshot().copy(busy = true)
     }
 
     @HiddenFromObjC
@@ -250,16 +235,16 @@ public class PluginManagementPresenterV1(
             subsystem.installer.commit(prepared, confirmed = true)
             updates.remove(prepared.pluginId)
             preview = null
-            mutableState.value = snapshot()
+            mutableState.value = snapshot().copy(busy = true)
         }
     }
 
     public suspend fun cancelInstall() {
-        val prepared = preview ?: return
         runAction {
+            val prepared = preview ?: return@runAction
             subsystem.installer.discard(prepared)
             preview = null
-            mutableState.value = snapshot()
+            mutableState.value = snapshot().copy(busy = true)
         }
     }
 
@@ -349,7 +334,6 @@ public class PluginManagementPresenterV1(
             development = subsystem.developmentState.value,
             authoredPlugins = subsystem.authoring.plugins.value,
             canRebuildIndex = !desired.indexHealthy,
-            githubCatalog = githubCatalog,
             pendingInstall = preview?.toReview(),
         )
     }

@@ -38,15 +38,17 @@ copy that example's contents into a repository you own first.
 4. Share the repository URL. A GitHub Release page and uploaded `.fpp` asset are
    not required. Creating/pushing the repository or tag follows the user's
    authorization; a generated project alone is not permission to publish it.
-5. The user selects the version in Flare plugin management, reviews source and
-   permissions, confirms installation, then restarts Flare. Verify the actual
-   selected tag/version and running behavior after restart.
+5. The user enters the repository URL in Flare plugin management and clicks
+   **Install**. Flare selects and downloads the latest stable version, then shows
+   source and permission review in the same dialog. Only confirmation installs
+   the plugin; cancellation discards the download. Errors stay in the dialog for
+   retry. Restart Flare and verify the installed tag/version and running behavior.
 
 Private repositories, arbitrary branch tracking, prerelease tags, automatic
 installation, and build-on-device are unsupported. A public repo without a stable
 version tag has no installable version, even if its default branch has valid files.
 
-Flare resolves the selected tag to a commit SHA and downloads that source ZIP.
+Flare resolves the latest stable tag to a commit SHA and downloads that source ZIP.
 Archive checks also inspect ignored development files for unsafe paths/symlinks,
 duplicates, multiple roots, and size limits. Do not commit node_modules, build
 caches, or unrelated large assets. See [limits](troubleshooting.md#limits).

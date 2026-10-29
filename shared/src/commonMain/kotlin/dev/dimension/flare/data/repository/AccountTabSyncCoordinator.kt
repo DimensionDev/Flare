@@ -14,6 +14,7 @@ import dev.dimension.flare.data.model.tab.TimelineSlotContent
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiAccount
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -30,9 +31,15 @@ internal class AccountTabSyncCoordinator(
         coroutineScope.launch {
             removeTabsForDeletedAccounts()
             accountRepository.accountChanges.collect { change ->
-                when (change) {
-                    is AccountChange.Added -> addDefaultTabs(change.account)
-                    is AccountChange.Removed -> removeTabsForAccount(change.accountKey)
+                try {
+                    when (change) {
+                        is AccountChange.Added -> addDefaultTabs(change.account)
+                        is AccountChange.Removed -> removeTabsForAccount(change.accountKey)
+                    }
+                } catch (error: CancellationException) {
+                    throw error
+                } catch (error: Exception) {
+                    error.printStackTrace()
                 }
             }
         }
@@ -57,13 +64,19 @@ internal class AccountTabSyncCoordinator(
 
     private suspend fun addDefaultTabs(account: UiAccount) {
         val defaultTabs =
-            accountRepository
-                .getOrCreateDataSource(account)
-                .capabilities
-                .tabCatalog
-                ?.configuration
-                ?.defaultTabs
-                .orEmpty()
+            accountRepository.withAccountChanges {
+                val current = accountRepository.find(account.accountKey)
+                if (current == null || current.platformId != account.platformId || !current.platformAvailable) {
+                    return@withAccountChanges emptyList()
+                }
+                accountRepository
+                    .getOrCreateDataSource(current)
+                    .capabilities
+                    .tabCatalog
+                    ?.configuration
+                    ?.defaultTabs
+                    .orEmpty()
+            }
         if (defaultTabs.isEmpty()) {
             return
         }

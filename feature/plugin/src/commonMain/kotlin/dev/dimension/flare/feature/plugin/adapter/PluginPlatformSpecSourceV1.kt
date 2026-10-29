@@ -283,7 +283,7 @@ private class PluginPlatformSpecV1(
             requestSerializer = DetectorRequestV1.serializer(),
             responseSerializer = DetectorResultV1.serializer(),
             timeout = timeout,
-            validate = DetectorResultV1::requireValid,
+            validate = { it.requireValid(manifest.permissions.mediaNetwork) },
         )
 
     override val methods: List<LoginMethodSpec> =
@@ -746,7 +746,7 @@ private class PluginDeepLinkArgumentsSerializerV1(
     }
 }
 
-private fun DetectorResultV1.requireValid() {
+private fun DetectorResultV1.requireValid(mediaNetwork: Boolean) {
     require(canonicalOrigin.length <= 8_192) { "Detector origin is too long" }
     PluginUrlPolicy.requireOrigin(canonicalOrigin)
     require(software == null || software.length <= 1_024) { "Detector software name is too long" }
@@ -754,6 +754,7 @@ private fun DetectorResultV1.requireValid() {
         require(it.domain.isNotBlank() && it.domain.length <= 253) { "Invalid detected instance domain" }
         require(it.title.length <= 4_096 && (it.description?.length ?: 0) <= 64 * 1_024) { "Detected instance text is too long" }
         listOf(it.iconUrl, it.bannerUrl).filterNotNull().forEach { url ->
+            require(mediaNetwork) { "Plugin has no media network permission" }
             PluginUrlPolicy.requireRequestUrl(url, setOf(PluginUrlPolicy.requireOrigin(canonicalOrigin)))
         }
     }

@@ -14,6 +14,7 @@ import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.createDatabaseDriver
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.UnavailableMicroblogDataSource
+import dev.dimension.flare.data.datasource.microblog.datasource.TimelineTabConfigurationDataSource
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.datastore.model.AccountSelectionPreferences
 import dev.dimension.flare.data.io.OkioFileStorage
@@ -21,6 +22,10 @@ import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.ProxyMode
 import dev.dimension.flare.data.model.ProxyPolicy
 import dev.dimension.flare.data.model.ProxySettings
+import dev.dimension.flare.data.model.tab.ShortcutSpec
+import dev.dimension.flare.data.model.tab.TimelineResolver
+import dev.dimension.flare.data.model.tab.TimelineSpec
+import dev.dimension.flare.data.platform.CommonTimelineSpecs
 import dev.dimension.flare.deleteTestRootPath
 import dev.dimension.flare.memoryDatabaseBuilder
 import dev.dimension.flare.model.AccountType
@@ -30,17 +35,21 @@ import dev.dimension.flare.model.PlatformRegistry
 import dev.dimension.flare.model.PlatformSpec
 import dev.dimension.flare.model.UnsupportedPlatformException
 import dev.dimension.flare.testPlatformRegistry
+import dev.dimension.flare.testPlatformRuntimeData
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiText
 import dev.dimension.flare.ui.model.asType
 import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.home.RememberedAccountSelection
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.channels.Channel
@@ -56,6 +65,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -69,6 +80,71 @@ import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
 class AccountRepositoryTest : RobolectricTest() {
+    @Test
+    fun staleUnavailableAndFailedAccountEventsDoNotStopLaterTabSynchronization() =
+        runTest {
+            val registry = testPlatformRegistry()
+            val laterAccountCreated = CompletableDeferred<Unit>()
+            val failedAccountAttempted = CompletableDeferred<Unit>()
+
+            fun platform(id: String) =
+                object : PlatformSpec by registry.defaultGuest {
+                    override val platformId = id
+                    override val isDefaultGuest = false
+
+                    override fun createDataSource(context: PlatformDataSourceContext): MicroblogDataSource {
+                        if (id == "BrokenPlugin") {
+                            failedAccountAttempted.complete(Unit)
+                            throw IllegalArgumentException("Invalid plugin credential")
+                        }
+                        if (context.accountKey == otherAccountKey) laterAccountCreated.complete(Unit)
+                        return object : MicroblogDataSource by UnavailableMicroblogDataSource, TimelineTabConfigurationDataSource {
+                            override val defaultTabs =
+                                persistentListOf(CommonTimelineSpecs.home.candidate(TimelineSpec.AccountBasedData(context.accountKey)))
+                            override val builtInTimelineTabs = defaultTabs
+                            override val shortcuts = persistentListOf<ShortcutSpec>()
+                        }
+                    }
+                }
+
+            listOf("PluginTest", "UnavailablePlugin", "BrokenPlugin").forEach { registry.replaceExternal(it, platform(it)) }
+            val repository = createRepository(backgroundScope, registry = registry)
+            repository.addAccount(UiAccount(accountKey, "PluginTest"), "deleted")
+            repository.delete(accountKey)
+            repository.addAccount(UiAccount(MicroBlogKey("unavailable", "example.social"), "UnavailablePlugin"), "unavailable")
+            registry.replaceExternal("UnavailablePlugin", null)
+            repository.addAccount(UiAccount(MicroBlogKey("broken", "example.social"), "BrokenPlugin"), "invalid")
+            repository.addAccount(UiAccount(otherAccountKey, "PluginTest"), "valid")
+
+            val resolver = TimelineResolver(testPlatformRuntimeData(), RepositoryAccountService(repository))
+            val settings = SettingsRepository(fileStorage, appDataStore, resolver, cacheDatabase)
+            val job = SupervisorJob()
+            val scope =
+                CoroutineScope(
+                    backgroundScope.coroutineContext + job +
+                        CoroutineExceptionHandler { _, error -> laterAccountCreated.completeExceptionally(error) },
+                )
+            val tabId = "common.home:$otherAccountKey"
+            try {
+                AccountTabSyncCoordinator(repository, settings, scope, resolver)
+                withContext(Dispatchers.Default) {
+                    withTimeout(5_000) {
+                        laterAccountCreated.await()
+                        settings.tabSettingsV2.first { it.homeSlots.any { slot -> slot.id == tabId } }
+                    }
+                }
+                assertTrue(failedAccountAttempted.isCompleted)
+                repository.delete(otherAccountKey)
+                withContext(Dispatchers.Default) {
+                    withTimeout(5_000) {
+                        settings.tabSettingsV2.first { it.homeSlots.none { slot -> slot.id == tabId } }
+                    }
+                }
+            } finally {
+                job.cancelAndJoin()
+            }
+        }
+
     @Test
     @OptIn(ExperimentalCoroutinesApi::class)
     fun accountObserversRebindAcrossPluginReloadRemovalAndReattachment() =

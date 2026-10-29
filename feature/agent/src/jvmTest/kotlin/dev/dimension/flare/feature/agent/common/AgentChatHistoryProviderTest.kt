@@ -31,6 +31,93 @@ import kotlin.test.assertTrue
 
 class AgentChatHistoryProviderTest {
     @Test
+    fun currentRequestSurvivesCompactionFailureAndRetryAfterReopening() =
+        runTest {
+            val directory = Files.createTempDirectory("agent-compaction-retry")
+            val path = directory.resolve("agent.db").toString()
+            val currentRequest = "CURRENT USER REQUIREMENT: keep this exact constraint"
+            var currentRequestId: String? = null
+            var summaryText: String? = null
+            try {
+                Fixture(path).use { fixture ->
+                    var summarized = false
+                    AgentContextCompactionTest
+                        .Fixture(resultSize = 18_000, maxIterations = 11) { request, number ->
+                            when {
+                                request.toString().contains("Create a concise conversation checkpoint") -> {
+                                    summarized = true
+                                    """{"id":"summary","object":"chat.completion","created":0,"model":"test-model","choices":[{"index":0,"message":{"role":"assistant","content":"Saved progress; work remains"},"finish_reason":"stop"}]}"""
+                                }
+
+                                summarized -> {
+                                    """{"error":{"message":"Invalid parameter"}}"""
+                                }
+
+                                else -> {
+                                    """{"id":"response-$number","object":"chat.completion","created":0,"model":"test-model","choices":[{"index":0,"message":{"role":"assistant","tool_calls":[{"id":"call-$number","type":"function","function":{"name":"work","arguments":"{\"id\":\"call-$number\"}"}}]},"finish_reason":"tool_calls"}]}"""
+                                }
+                            }
+                        }.use { agent ->
+                            assertFailsWith<AgentRetryableException> {
+                                agent.run(
+                                    historyProvider = fixture.history,
+                                    userText = currentRequest,
+                                    storeCheckpoint = fixture.history::storeCheckpoint,
+                                )
+                            }
+                            assertTrue(summarized)
+                            assertTrue(currentRequest in agent.requests.last().toString())
+                            assertTrue(agent.toolCalls > 0)
+                        }
+                    val loaded = fixture.history.load(CONVERSATION)
+                    summaryText = loaded.first().textContent()
+                    currentRequestId = loaded.single { it.textContent() == currentRequest }.id
+                }
+                Fixture(path).use { fixture ->
+                    val loaded = fixture.history.load(CONVERSATION)
+                    assertEquals(currentRequestId, loaded.single { it.textContent() == currentRequest }.id)
+                    AgentContextCompactionTest
+                        .Fixture { _, _ ->
+                            """{"id":"retry","object":"chat.completion","created":0,"model":"test-model","choices":[{"index":0,"message":{"role":"assistant","content":"Recovered"},"finish_reason":"stop"}]}"""
+                        }.use { agent ->
+                            assertEquals(
+                                "Recovered",
+                                agent.run(
+                                    historyProvider = fixture.history,
+                                    userText = "MUST NOT APPEND A SECOND USER MESSAGE",
+                                    retryMode = AgentRetryMode.Resume,
+                                    storeCheckpoint = fixture.history::storeCheckpoint,
+                                ),
+                            )
+                            assertTrue(currentRequest in agent.requests.single().toString())
+                            assertFalse("MUST NOT APPEND" in agent.requests.single().toString())
+                            assertEquals(0, agent.toolCalls)
+                        }
+                    assertEquals(
+                        summaryText,
+                        fixture.history
+                            .load(CONVERSATION)
+                            .first()
+                            .textContent(),
+                    )
+                    fixture.history.store(CONVERSATION, fixture.history.load(CONVERSATION) + user("Next request", "next"))
+                    val next = fixture.history.load(CONVERSATION)
+                    assertTrue(next.any { it.id == "next" })
+                    assertFalse(next.any { it.id == currentRequestId })
+                    assertTrue(
+                        fixture.history
+                            .observeMessages(CONVERSATION)
+                            .first()
+                            .any { it.parts.agentMessageText() == currentRequest },
+                    )
+                }
+            } finally {
+                Files.list(directory).use { paths -> paths.forEach(Files::delete) }
+                Files.delete(directory)
+            }
+        }
+
+    @Test
     fun consumedRetryDoesNotBecomeAvailableAgainAfterAnInterruptedRunAndReopen() =
         runTest {
             val path = Files.createTempFile("agent-retry-interrupted", ".db")
@@ -348,7 +435,7 @@ class AgentChatHistoryProviderTest {
                             .any { it.parts.agentMessageText().contains("Saved progress") },
                     )
                     fixture.history.storeCheckpoint(CONVERSATION, loaded + next, AgentContextCheckpoint("Updated progress", "a2"))
-                    assertEquals(listOf(AGENT_CONTEXT_SUMMARY_ID, "a3"), fixture.history.load(CONVERSATION).map { it.id })
+                    assertEquals(listOf(AGENT_CONTEXT_SUMMARY_ID, "q2", "a3"), fixture.history.load(CONVERSATION).map { it.id })
                     fixture.history.clear(CONVERSATION)
                     assertTrue(fixture.history.load(CONVERSATION).isEmpty())
                     fixture.history.storeCheckpoint(CONVERSATION, messages, AgentContextCheckpoint("New progress", "a1"))
@@ -485,7 +572,7 @@ class AgentChatHistoryProviderTest {
                     AgentContextCheckpoint("Second summary", "q1"),
                 )
                 val restored = fixture.history.load(CONVERSATION)
-                assertEquals(listOf(AGENT_CONTEXT_SUMMARY_ID, "a2"), restored.map { it.id })
+                assertEquals(listOf(AGENT_CONTEXT_SUMMARY_ID, "q1", "a2"), restored.map { it.id })
                 assertTrue(restored.first().textContent().contains("Second summary"))
                 assertEquals(
                     3,

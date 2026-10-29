@@ -644,6 +644,8 @@ class AgentContextCompactionTest {
             finishAfterToolResults: Boolean = false,
             historyProvider: ChatHistoryProvider = history,
             userText: String = "CURRENT USER REQUIREMENT: finish the task",
+            retryMode: AgentRetryMode? = null,
+            storeCheckpoint: suspend (String, List<Message>, AgentContextCheckpoint) -> Unit = { _, _, _ -> },
         ): String {
             val request =
                 FlareAgentRequest(
@@ -656,6 +658,7 @@ class AgentContextCompactionTest {
                     sendToolResultsNodeName = "results",
                     maxIterations = maxIterations,
                     finishAfterToolResults = finishAfterToolResults,
+                    retryMode = retryMode,
                     toolSet = AgentToolSet.Empty.copy(toolRegistry = ToolRegistry { tool(tool) }),
                 )
             val agent =
@@ -667,8 +670,9 @@ class AgentContextCompactionTest {
                         progress += messages
                         historyProvider.store(id, messages)
                     },
-                    storeCheckpoint = { _, _, checkpoint ->
+                    storeCheckpoint = { id, messages, checkpoint ->
                         check(!failCheckpoint) { "persistence failed" }
+                        storeCheckpoint(id, messages, checkpoint)
                         checkpoints += checkpoint
                     },
                 )

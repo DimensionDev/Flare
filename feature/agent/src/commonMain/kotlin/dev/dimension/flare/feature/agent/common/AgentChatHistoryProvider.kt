@@ -461,11 +461,21 @@ internal class AgentChatHistoryProvider(
 
     override suspend fun load(conversationId: String): List<Message> {
         val checkpoint = database.conversationDao().getContext(conversationId)
+        val history = database.conversationDao().getMessagesChronological(conversationId)
+        // Compaction pins the current request even when it precedes the checkpoint.
+        val currentRequestPosition =
+            if (checkpoint != null) {
+                history
+                    .lastOrNull { stored ->
+                        stored.role == Message.Role.User.name &&
+                            stored.toMessage()?.parts?.any { it !is MessagePart.Tool.Result } == true
+                    }?.position
+            } else {
+                null
+            }
         val messages =
-            database
-                .conversationDao()
-                .getMessagesChronological(conversationId)
-                .filter { checkpoint == null || it.position > checkpoint.throughPosition }
+            history
+                .filter { checkpoint == null || it.position > checkpoint.throughPosition || it.position == currentRequestPosition }
                 .mapNotNull { stored ->
                     stored.toMessage()?.let { message ->
                         if (message.id == null) message.withAgentMessageId(stored.messageId()) else message

@@ -30,7 +30,11 @@ import dev.dimension.flare.feature.agent.runtime.FlareAgentRuntimeProvider
 import dev.dimension.flare.feature.agent.runtime.supportsAgentImageFallback
 import dev.dimension.flare.shared.image.ImageCompressor
 import dev.dimension.flare.ui.model.UiMedia
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
 import org.koin.core.annotation.Single
 import kotlin.uuid.Uuid
@@ -55,6 +59,13 @@ internal class FlareAgentRunner(
             runtimeProvider.createRuntime()
                 ?: throw FlareAgentUnavailableException(runtimeProvider.availability())
         val toolSet = toolProvider.resolve(request.toolContext)
+        if (request.retryMode != null) {
+            checkNotNull(chatHistoryProvider.consumeRetry(conversationId)) { "This attempt is no longer retryable" }.let { failure ->
+                toolSet.messagePartStore.addPosts(failure.supportingParts.filterIsInstance<AgentMessagePart.PostCard>().map { it.post })
+                toolSet.messagePartStore.addUsers(failure.supportingParts.filterIsInstance<AgentMessagePart.UserCard>().map { it.user })
+                failure.inputRequest?.let { toolSet.inputRequestStore.set(it) }
+            }
+        }
         val resolvedRequest = request.withToolSet(toolSet)
         val agent =
             runtime.createAgent(
@@ -92,6 +103,12 @@ internal class FlareAgentRunner(
                 parts = toolSet.messagePartStore.snapshot(),
                 inputRequest = toolSet.inputRequestStore.snapshot(),
             )
+        } catch (exception: Throwable) {
+            generateSequence(exception) { it.cause }.filterIsInstance<AgentRetryableException>().firstOrNull()?.let { failure ->
+                failure.supportingParts = toolSet.messagePartStore.snapshot()
+                failure.inputRequest = toolSet.inputRequestStore.snapshot()
+            }
+            throw exception
         } finally {
             withContext(NonCancellable) {
                 try {
@@ -116,7 +133,7 @@ internal fun FlareAgentRuntime.createAgent(
     return AIAgent
         .builder()
         .promptExecutor(
-            if (prepareImage == null) promptExecutor else AgentImageFallback(promptExecutor, request.images, prepareImage, onTrace),
+            AgentImageFallback(promptExecutor, request.images, prepareImage, onTrace),
         ).llmModel(model)
         .toolRegistry(request.toolRegistry)
         .id(request.agentId)
@@ -135,8 +152,15 @@ internal fun FlareAgentRuntime.createAgent(
                                 config.prompt.messages.filterIsInstance<Message.System>() + messages.filterNot { it is Message.System }
                             }
                     }
-                    requestAgentResponse(compaction, chatHistoryProvider, storeCheckpoint) {
-                        messages(inputPrompt.messages)
+                    requestAgentResponse(
+                        compaction,
+                        chatHistoryProvider,
+                        storeCheckpoint,
+                        finishAfterToolResults = request.retryMode == AgentRetryMode.Finish,
+                    ) {
+                        if (request.retryMode == null || request.retryMode == AgentRetryMode.Restart) {
+                            messages(inputPrompt.messages)
+                        }
                     }
                 }
                 val nodeExecuteTools by nodeExecuteTools(request.executeToolsNodeName)
@@ -269,47 +293,60 @@ private suspend fun AIAgentGraphContextBase.requestAgentResponse(
             prompt.withMessages { messages ->
                 messages.map { if (it.id == null) it.withAgentMessageId(Uuid.random().toString()) else it }
             }
-        if (prompt.messages
-                .last()
-                .parts
-                .any { it is MessagePart.Tool.Result }
-        ) {
-            // A failed model/summary request must not discard the effects of completed tools.
-            chatHistoryProvider.store(runId, prompt.messages)
-        }
-        compaction.request(this, { messages, checkpoint -> storeCheckpoint(runId, messages, checkpoint) }) {
-            when {
-                summarize -> {
-                    val originalPrompt = prompt
-                    val response =
-                        try {
-                            appendPrompt {
-                                system(
-                                    """
-                                    This run is reaching its step limit. Tools are disabled for this response.
-                                    Summarize what has actually been completed, any remaining work, and the next steps in the user's language.
-                                    Explain that the user can ask you to continue. Do not claim unfinished work is complete.
-                                    """.trimIndent(),
-                                )
+        // Retry only from a persisted model boundary, after the whole tool batch has completed.
+        chatHistoryProvider.store(runId, prompt.messages)
+        try {
+            compaction.request(this, { messages, checkpoint -> storeCheckpoint(runId, messages, checkpoint) }) {
+                when {
+                    summarize -> {
+                        val originalPrompt = prompt
+                        val response =
+                            try {
+                                appendPrompt {
+                                    system(
+                                        """
+                                        This run is reaching its step limit. Tools are disabled for this response.
+                                        Summarize completed work, remaining work, and next steps in the user's language.
+                                        Explain that the user can ask you to continue. Do not claim unfinished work is complete.
+                                        """.trimIndent(),
+                                    )
+                                }
+                                requestLLMWithoutTools()
+                            } finally {
+                                // The limit instruction must not constrain the next user turn.
+                                prompt = originalPrompt
                             }
-                            requestLLMWithoutTools()
-                        } finally {
-                            // The limit instruction must not constrain the next user turn.
-                            prompt = originalPrompt
-                        }
-                    check(response.parts.none { it is MessagePart.Tool.Call }) { "Tools are disabled while summarizing at the step limit" }
-                    appendPrompt { message(response) }
-                    response
-                }
+                        check(
+                            response.parts.none { it is MessagePart.Tool.Call },
+                        ) { "Tools are disabled while summarizing at the step limit" }
+                        appendPrompt { message(response) }
+                        response
+                    }
 
-                finishAfterToolResults -> {
-                    requestLLMWithoutTools()
-                }
+                    finishAfterToolResults -> {
+                        requestLLMWithoutTools()
+                    }
 
-                else -> {
-                    requestLLM()
+                    else -> {
+                        requestLLM()
+                    }
                 }
             }
+        } catch (exception: Throwable) {
+            if (exception is CancellationException) {
+                currentCoroutineContext().ensureActive()
+                if (exception !is TimeoutCancellationException) throw exception
+            }
+            throw AgentRetryableException(
+                exception,
+                if (summarize ||
+                    finishAfterToolResults
+                ) {
+                    AgentRetryMode.Finish
+                } else {
+                    AgentRetryMode.Resume
+                },
+            )
         }
     }
 }
@@ -334,6 +371,7 @@ internal data class FlareAgentRequest(
     val finishAfterToolResults: Boolean = false,
     val images: List<UiMedia.Image> = emptyList(),
     val supportingParts: List<AgentMessagePart> = emptyList(),
+    val retryMode: AgentRetryMode? = null,
     private val toolSet: AgentToolSet = AgentToolSet.Empty,
 ) {
     val toolRegistry: ToolRegistry = toolSet.toolRegistry
@@ -355,8 +393,8 @@ internal data class FlareAgentRequest(
         )
 }
 
-internal class FlareAgentUnavailableException(
-    val availability: AgentAvailability,
+public open class FlareAgentUnavailableException(
+    public val availability: AgentAvailability,
 ) : IllegalStateException("Flare agent is unavailable: $availability")
 
 private fun String.withToolGuidance(guidance: String): String =

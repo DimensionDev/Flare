@@ -31,6 +31,85 @@ import kotlin.test.assertTrue
 
 class AgentChatHistoryProviderTest {
     @Test
+    fun consumedRetryDoesNotBecomeAvailableAgainAfterAnInterruptedRunAndReopen() =
+        runTest {
+            val path = Files.createTempFile("agent-retry-interrupted", ".db")
+            val failure =
+                AgentRetryableException(
+                    IllegalStateException("Temporary failure"),
+                    AgentRetryMode.Resume,
+                ).toAgentFailure("Question")
+            try {
+                Fixture(path.toString()).use { fixture ->
+                    fixture.history.updateRoomState(CONVERSATION, errorMessage = failure.encode())
+                    assertEquals(failure, fixture.history.consumeRetry(CONVERSATION))
+                }
+                Fixture(path.toString()).use { fixture ->
+                    val interrupted =
+                        fixture.history
+                            .observeRoom(CONVERSATION)
+                            .first()!!
+                            .error!!
+                    assertEquals(AgentFailureKind.Interrupted, interrupted.kind)
+                    assertFalse(interrupted.canRetry)
+                    assertEquals(null, fixture.history.consumeRetry(CONVERSATION))
+                }
+            } finally {
+                Files.deleteIfExists(path)
+            }
+        }
+
+    @Test
+    fun retryFailureSurvivesReopenWithCardsAndCheckpointWithoutChangingVisibleHistory() =
+        runTest {
+            val path = Files.createTempFile("agent-retry", ".db")
+            val messages = listOf(user("Original question", "user"), assistant("Completed work", "reply"))
+            val failure =
+                AgentRetryableException(IllegalStateException("Upstream error"), AgentRetryMode.Resume)
+                    .apply {
+                        supportingParts = listOf(AgentMessagePart.PostCard(post()))
+                        inputRequest = AgentPendingInputRequest("pending", listOf(AgentPendingInputRequest.Option("confirm", "yes")))
+                    }.toAgentFailure("Original question")
+            try {
+                Fixture(path.toString()).use { fixture ->
+                    fixture.history.storeCheckpoint(CONVERSATION, messages, AgentContextCheckpoint("Completed work", "user"))
+                    fixture.history.updateRoomState(CONVERSATION, errorMessage = failure.encode())
+                }
+                Fixture(path.toString()).use { fixture ->
+                    val reopened =
+                        fixture.history
+                            .observeRoom(CONVERSATION)
+                            .first()!!
+                            .error!!
+                    assertEquals(failure.encode(), reopened.encode())
+                    assertTrue(reopened.canRetry)
+                    assertEquals(
+                        listOf("Completed work", "Original question"),
+                        fixture.history.observeMessages(CONVERSATION).first().map {
+                            it.parts.agentMessageText()
+                        },
+                    )
+                    assertEquals(
+                        AGENT_CONTEXT_SUMMARY_ID,
+                        fixture.history
+                            .load(CONVERSATION)
+                            .first()
+                            .id,
+                    )
+                    assertEquals(
+                        "reply",
+                        fixture.history
+                            .load(CONVERSATION)
+                            .last()
+                            .id,
+                    )
+                }
+            } finally {
+                Files.deleteIfExists(path)
+            }
+        }
+
+    @Test
     fun trimmedModelMemoryDoesNotRemoveVisibleRepliesOrChangeTheirIds() =
         runTest {
             Fixture().use { fixture ->

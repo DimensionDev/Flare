@@ -5,6 +5,7 @@ import dev.dimension.flare.common.Locale
 import dev.dimension.flare.data.repository.AccountMicroblogDataSource
 import dev.dimension.flare.feature.agent.common.AgentChatHistoryProvider
 import dev.dimension.flare.feature.agent.common.AgentConversationEvent
+import dev.dimension.flare.feature.agent.common.AgentRetryMode
 import dev.dimension.flare.feature.agent.common.AgentRunResult
 import dev.dimension.flare.feature.agent.common.AgentToolContext
 import dev.dimension.flare.feature.agent.common.AgentTrace
@@ -49,6 +50,7 @@ internal class LocalHistoryAgentUseCase(
         searchDataSources: List<AccountMicroblogDataSource>,
         userInput: String? = null,
         conversationId: String,
+        retryMode: AgentRetryMode? = null,
     ): Flow<AgentConversationEvent<Unit, AgentTrace>> =
         channelFlow {
             run(
@@ -57,6 +59,7 @@ internal class LocalHistoryAgentUseCase(
                 searchDataSources = searchDataSources,
                 userInput = userInput,
                 conversationId = conversationId,
+                retryMode = retryMode,
             )
         }
 
@@ -66,13 +69,14 @@ internal class LocalHistoryAgentUseCase(
         searchDataSources: List<AccountMicroblogDataSource>,
         userInput: String?,
         conversationId: String,
+        retryMode: AgentRetryMode?,
     ) {
         val normalizedQuery = query?.trim()?.takeIf { it.isNotBlank() }
         val userInputValue = userInput?.trim().orEmpty()
-        if (userInputValue.isBlank() && chatHistoryProvider.hasAssistantMessage(conversationId)) {
+        if (retryMode == null && userInputValue.isBlank() && chatHistoryProvider.hasAssistantMessage(conversationId)) {
             return
         }
-        if (userInputValue.isBlank()) {
+        if (retryMode == null && userInputValue.isBlank()) {
             agentRunner.clearConversation(conversationId)
         }
         val result =
@@ -80,6 +84,7 @@ internal class LocalHistoryAgentUseCase(
                 agentRunner.run(
                     request =
                         FlareAgentRequest(
+                            retryMode = retryMode,
                             prompt =
                                 toLocalHistoryPrompt(
                                     query = normalizedQuery,
@@ -287,5 +292,5 @@ internal class LocalHistoryAgentUseCase(
 }
 
 public class LocalHistoryAgentUnavailableException public constructor(
-    public val availability: AgentAvailability,
-) : IllegalStateException("Local history agent is unavailable: $availability")
+    availability: AgentAvailability,
+) : FlareAgentUnavailableException(availability)

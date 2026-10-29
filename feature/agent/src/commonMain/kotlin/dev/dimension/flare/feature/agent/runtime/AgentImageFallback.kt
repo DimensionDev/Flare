@@ -25,7 +25,7 @@ internal expect val supportsAgentImageFallback: Boolean
 internal class AgentImageFallback(
     private val delegate: PromptExecutor,
     private val images: List<UiMedia.Image>,
-    private val prepareImage: suspend (UiMedia.Image, Int) -> AttachmentSource.Image,
+    private val prepareImage: (suspend (UiMedia.Image, Int) -> AttachmentSource.Image)?,
     private val onTrace: suspend (AgentTrace) -> Unit,
 ) : PromptExecutor(),
     PromptExecutorAPI by delegate {
@@ -78,6 +78,7 @@ internal class AgentImageFallback(
     }
 
     private suspend fun Prompt.withInlineImages(): Prompt {
+        val prepareImage = checkNotNull(prepareImage) { "Image preparation is unavailable on this platform" }
         val attachments = imageAttachments()
         val maxBytes = minOf(MAX_IMAGE_BYTES, MAX_TOTAL_IMAGE_BYTES / attachments.size)
         val mediaByAttachment =

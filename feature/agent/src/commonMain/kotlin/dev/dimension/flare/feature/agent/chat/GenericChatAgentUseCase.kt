@@ -5,6 +5,7 @@ import dev.dimension.flare.common.Locale
 import dev.dimension.flare.data.repository.AccountMicroblogDataSource
 import dev.dimension.flare.feature.agent.common.AgentChatHistoryProvider
 import dev.dimension.flare.feature.agent.common.AgentConversationEvent
+import dev.dimension.flare.feature.agent.common.AgentRetryMode
 import dev.dimension.flare.feature.agent.common.AgentToolContext
 import dev.dimension.flare.feature.agent.common.AgentTrace
 import dev.dimension.flare.feature.agent.common.FlareAgentRequest
@@ -27,12 +28,14 @@ internal class GenericChatAgentUseCase(
         userInput: String,
         searchDataSources: List<AccountMicroblogDataSource>,
         conversationId: String,
+        retryMode: AgentRetryMode? = null,
     ): Flow<AgentConversationEvent<Unit, AgentTrace>> =
         channelFlow {
             run(
                 userInput = userInput,
                 searchDataSources = searchDataSources,
                 conversationId = conversationId,
+                retryMode = retryMode,
             )
         }
 
@@ -44,9 +47,10 @@ internal class GenericChatAgentUseCase(
         userInput: String,
         searchDataSources: List<AccountMicroblogDataSource>,
         conversationId: String,
+        retryMode: AgentRetryMode?,
     ) {
         val userInputValue = userInput.trim()
-        if (userInputValue.isBlank()) {
+        if (retryMode == null && userInputValue.isBlank()) {
             return
         }
         val result =
@@ -55,6 +59,7 @@ internal class GenericChatAgentUseCase(
                     .run(
                         request =
                             FlareAgentRequest(
+                                retryMode = retryMode,
                                 prompt = userInputValue.toGenericChatPrompt(),
                                 systemPrompt = GENERIC_CHAT_SYSTEM_PROMPT,
                                 agentId = "flare-generic-chat",
@@ -147,5 +152,5 @@ internal class GenericChatAgentUseCase(
 }
 
 public class GenericChatAgentUnavailableException public constructor(
-    public val availability: AgentAvailability,
-) : IllegalStateException("Generic chat agent is unavailable: $availability")
+    availability: AgentAvailability,
+) : FlareAgentUnavailableException(availability)

@@ -978,4 +978,17 @@
     <string name="plugin_ai_delete_message">Delete %1$s and its local source? Existing accounts are kept.</string>
     <string name="settings_ai_config_context_window">Context window (tokens)</string>
     <string name="settings_ai_config_context_window_hint">Leave blank to use the known model limit. Unknown models use an estimated budget of 8192 tokens. Enter at least 1024 tokens to override.</string>
+    <string name="agent_error_title">Unable to continue</string>
+    <string name="agent_error_history">Could not load this conversation. Try loading it again.</string>
+    <string name="agent_error_network">Could not connect to the AI service. Check your connection and try again.</string>
+    <string name="agent_error_rate_limited">The AI service is receiving too many requests. Wait a moment and try again.</string>
+    <string name="agent_error_service">The AI service is temporarily unavailable. Try again later.</string>
+    <string name="agent_error_configuration">Complete the AI Agent setup in Settings, then try again.</string>
+    <string name="agent_error_authentication">The AI service rejected your API key. Check it in AI settings, then try again.</string>
+    <string name="agent_error_access_denied">Your account cannot access this AI service or model. Check the provider permissions and AI settings.</string>
+    <string name="agent_error_quota">The AI service reports insufficient quota. Check your balance or usage limit with the provider.</string>
+    <string name="agent_error_unknown">The AI service did not return an error description.</string>
+    <string name="agent_error_details">Error details</string>
+    <string name="agent_error_retry">Retry</string>
+    <string name="agent_error_interrupted">This run was interrupted. Check what was completed before sending another message.</string>
 </resources>

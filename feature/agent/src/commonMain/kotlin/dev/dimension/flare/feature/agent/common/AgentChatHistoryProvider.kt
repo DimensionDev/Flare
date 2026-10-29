@@ -272,6 +272,19 @@ internal class AgentChatHistoryProvider(
         }
     }
 
+    suspend fun consumeRetry(conversationId: String): AgentFailure? {
+        val failure =
+            database
+                .conversationDao()
+                .getConversation(conversationId)
+                ?.errorMessage
+                ?.let(AgentFailure::decode)
+        if (failure?.canRetry != true) return null
+        // A crash during resumed tools must not expose the previous safe boundary again.
+        updateRoomState(conversationId, errorMessage = AgentFailure(AgentFailureKind.Interrupted, "").encode())
+        return failure
+    }
+
     suspend fun markInputRequestSelected(
         conversationId: String,
         requestId: String,
@@ -762,6 +775,8 @@ public data class AgentChatRoom(
     val currentTrace: AgentTrace?,
     val errorMessage: String?,
 ) {
+    public val error: AgentFailure? get() = errorMessage?.let(AgentFailure::decode)
+
     public companion object {
         public fun empty(id: String): AgentChatRoom =
             AgentChatRoom(

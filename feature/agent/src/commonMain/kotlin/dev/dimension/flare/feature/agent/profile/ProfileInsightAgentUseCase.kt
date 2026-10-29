@@ -8,6 +8,8 @@ import dev.dimension.flare.data.datasource.microblog.datasource.UserDataSource
 import dev.dimension.flare.data.repository.AccountMicroblogDataSource
 import dev.dimension.flare.feature.agent.common.AgentChatHistoryProvider
 import dev.dimension.flare.feature.agent.common.AgentConversationEvent
+import dev.dimension.flare.feature.agent.common.AgentRetryMode
+import dev.dimension.flare.feature.agent.common.AgentRetryableException
 import dev.dimension.flare.feature.agent.common.AgentRunResult
 import dev.dimension.flare.feature.agent.common.AgentToolContext
 import dev.dimension.flare.feature.agent.common.AgentTrace
@@ -43,9 +45,10 @@ internal class ProfileInsightAgentUseCase(
         searchDataSources: List<AccountMicroblogDataSource>,
         userInput: String? = null,
         conversationId: String = userKey.profileInsightConversationId(),
+        retryMode: AgentRetryMode? = null,
     ): Flow<AgentConversationEvent<UiProfile, AgentTrace>> =
         channelFlow {
-            run(userDataSource, userKey, searchDataSources, userInput, conversationId)
+            run(userDataSource, userKey, searchDataSources, userInput, conversationId, retryMode)
         }
 
     private suspend fun SendChannel<AgentConversationEvent<UiProfile, AgentTrace>>.run(
@@ -54,16 +57,24 @@ internal class ProfileInsightAgentUseCase(
         searchDataSources: List<AccountMicroblogDataSource>,
         userInput: String?,
         conversationId: String,
+        retryMode: AgentRetryMode?,
     ) {
         val userInputValue = userInput?.trim().orEmpty()
-        if (userInputValue.isBlank() && chatHistoryProvider.hasAssistantMessage(conversationId)) {
+        if (retryMode == null && userInputValue.isBlank() && chatHistoryProvider.hasAssistantMessage(conversationId)) {
             return
         }
-        if (userInputValue.isBlank()) {
+        if (retryMode == null && userInputValue.isBlank()) {
             agentRunner.clearConversation(conversationId)
         }
-        val profile = userDataSource.loadProfile(userKey)
-        if (userInputValue.isBlank()) {
+        val profile =
+            try {
+                userDataSource.loadProfile(userKey)
+            } catch (exception: CancellationException) {
+                throw exception
+            } catch (exception: Throwable) {
+                throw AgentRetryableException(exception, retryMode ?: AgentRetryMode.Restart)
+            }
+        if (retryMode == null && userInputValue.isBlank()) {
             chatHistoryProvider.ensureConversationTitle(conversationId, profile.insightConversationTitle())
         }
         send(AgentConversationEvent.ContentLoaded(profile))
@@ -81,6 +92,7 @@ internal class ProfileInsightAgentUseCase(
                             searchDataSources = searchDataSources,
                         ),
                     conversationId = conversationId,
+                    retryMode = retryMode,
                     supportingParts = listOf(AgentMessagePart.UserCard(profile)),
                 ) { event ->
                     send(event.toConversationEvent())
@@ -122,11 +134,13 @@ internal class ProfileInsightAgentUseCase(
         toolContext: AgentToolContext,
         conversationId: String,
         supportingParts: List<AgentMessagePart>,
+        retryMode: AgentRetryMode?,
         onEvent: suspend (AgentTrace) -> Unit,
     ): AgentRunResult =
         run(
             request =
                 FlareAgentRequest(
+                    retryMode = retryMode,
                     prompt = prompt,
                     systemPrompt = PROFILE_INSIGHT_SYSTEM_PROMPT,
                     agentId = "flare-profile-insight",
@@ -298,5 +312,5 @@ internal class ProfileInsightAgentUseCase(
 private fun MicroBlogKey.profileInsightConversationId(): String = "profile-insight:$host:$id"
 
 public class ProfileInsightAgentUnavailableException public constructor(
-    public val availability: AgentAvailability,
-) : IllegalStateException("Profile insight agent is unavailable: $availability")
+    availability: AgentAvailability,
+) : FlareAgentUnavailableException(availability)

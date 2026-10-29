@@ -36,6 +36,8 @@ public class GenericChatPresenter(
 
         public fun setInput(value: String)
 
+        public fun retry()
+
         public fun sendMessage()
 
         public fun selectInputRequestOption(option: AgentInputRequest.Option)
@@ -60,11 +62,12 @@ public class GenericChatPresenter(
                 conversationId = conversationId,
                 room = currentRoom,
                 contextFlow = contextFlow,
-                runAgent = { context, userInput, currentConversationId ->
+                runAgent = { context, userInput, currentConversationId, retryMode ->
                     genericChatAgentUseCase(
                         userInput = userInput.orEmpty(),
                         searchDataSources = context.searchDataSources,
                         conversationId = currentConversationId,
+                        retryMode = retryMode,
                     )
                 },
                 onUserMessageSubmitted = { text ->
@@ -106,6 +109,7 @@ public class GenericChatPresenter(
             canSend = controller.canSend,
             onSetInput = controller::setInput,
             onSendMessage = controller::sendMessage,
+            onRetry = controller::retry,
             onSelectInputRequestOption = controller::selectInputRequestOption,
         )
     }
@@ -118,10 +122,15 @@ public class GenericChatPresenter(
         override val canSend: Boolean,
         private val onSetInput: (String) -> Unit,
         private val onSendMessage: () -> Unit,
+        private val onRetry: () -> Unit,
         private val onSelectInputRequestOption: (AgentInputRequest.Option) -> Unit,
     ) : State {
         override fun setInput(value: String) {
             onSetInput.invoke(value)
+        }
+
+        override fun retry() {
+            onRetry()
         }
 
         override fun sendMessage() {

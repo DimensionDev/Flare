@@ -38,6 +38,8 @@ public class LocalHistoryAgentPresenter(
 
         public fun setInput(value: String)
 
+        public fun retry()
+
         public fun sendMessage()
 
         public fun selectInputRequestOption(option: AgentInputRequest.Option)
@@ -68,13 +70,14 @@ public class LocalHistoryAgentPresenter(
                 conversationId = conversationId,
                 room = currentRoom,
                 contextFlow = contextFlow,
-                runAgent = { context, userInput, currentConversationId ->
+                runAgent = { context, userInput, currentConversationId, retryMode ->
                     localHistoryAgentUseCase(
                         query = normalizedQuery,
                         target = target,
                         searchDataSources = context.searchDataSources,
                         userInput = userInput,
                         conversationId = currentConversationId,
+                        retryMode = retryMode,
                     )
                 },
                 onUserMessageSubmitted = { text ->
@@ -115,6 +118,7 @@ public class LocalHistoryAgentPresenter(
             canSend = controller.canSend,
             onSetInput = controller::setInput,
             onSendMessage = controller::sendMessage,
+            onRetry = controller::retry,
             onSelectInputRequestOption = controller::selectInputRequestOption,
         )
     }
@@ -127,10 +131,15 @@ public class LocalHistoryAgentPresenter(
         override val canSend: Boolean,
         private val onSetInput: (String) -> Unit,
         private val onSendMessage: () -> Unit,
+        private val onRetry: () -> Unit,
         private val onSelectInputRequestOption: (AgentInputRequest.Option) -> Unit,
     ) : State {
         override fun setInput(value: String) {
             onSetInput.invoke(value)
+        }
+
+        override fun retry() {
+            onRetry()
         }
 
         override fun sendMessage() {

@@ -49,6 +49,7 @@ public data class AgentInputRequest(
     )
 }
 
+@Serializable
 internal data class AgentPendingInputRequest(
     val requestId: String,
     val options: List<Option>,
@@ -56,6 +57,7 @@ internal data class AgentPendingInputRequest(
     val postPreview: UiTimelineV2.Post? = null,
     val userPreview: UiProfile? = null,
 ) {
+    @Serializable
     data class Option(
         val id: String,
         val value: String,

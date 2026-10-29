@@ -255,6 +255,9 @@ public struct PluginManagementView: View {
     @ViewBuilder
     private func pluginRow(_ plugin: PluginManagementItemV1) -> some View {
         let name = plugin.nameText.text.isEmpty ? String(localized: "plugin_ai_untitled") : plugin.nameText.text
+        let subtitle = plugin.authoring.map {
+            String(format: String(localized: "plugin_ai_source_revision"), $0.revision)
+        } ?? "\(plugin.platformId) · \(plugin.version)"
         let busy = presenter.state.busy || (plugin.authoring == nil && isDeveloping(plugin.pluginId))
         VStack(alignment: .leading, spacing: 8) {
             HStack {
@@ -264,11 +267,9 @@ public struct PluginManagementView: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(name)
                         .font(.headline)
-                    if plugin.authoring == nil {
-                        Text("\(plugin.platformId) · \(plugin.version)")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
+                    Text(subtitle)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 }
                 Spacer()
                 pluginMenu(name: name) {

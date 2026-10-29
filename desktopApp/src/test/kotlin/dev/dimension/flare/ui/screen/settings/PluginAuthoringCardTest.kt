@@ -28,7 +28,7 @@ class PluginAuthoringCardTest {
     @get:Rule val compose = createComposeRule()
 
     @Test
-    fun localPluginUsesTheCommonItemWithoutInternalMetadataOrEnableControls() {
+    fun localPluginUsesTheCommonItemWithSourceAndRevision() {
         val plugin = AuthoredPlugin("local.ai.example", "Same name", phase = PluginAuthoringPhase.Applied, revision = 7)
         var busy by mutableStateOf(false)
         var uninstalls = 0
@@ -46,7 +46,7 @@ class PluginAuthoringCardTest {
         compose.onNodeWithText(plugin.name).assertIsDisplayed()
         compose.onNodeWithContentDescription(plugin.name).assertExists()
         compose.onNodeWithText(plugin.id).assertDoesNotExist()
-        compose.onNodeWithText("Revision 7").assertDoesNotExist()
+        compose.onNodeWithText("Local AI-generated plugin · Revision 7").assertIsDisplayed()
         compose.onNodeWithText("Up to date").assertDoesNotExist()
         compose.onNodeWithText("Allow and continue").assertDoesNotExist()
         compose.onNodeWithText("Enabled").assertDoesNotExist()
@@ -91,6 +91,7 @@ class PluginAuthoringCardTest {
                 useUnmergedTree = true,
             ).performSemanticsAction(SemanticsActions.GetTextLayoutResult) { it(layouts) }
         assertEquals(1, layouts.single().lineCount)
+        compose.onNodeWithText("Local AI-generated plugin · Revision 1").assertIsDisplayed()
         compose.onNodeWithText("Cancel update").assertIsDisplayed().performClick()
         compose.onNodeWithText("Cancel update").assertDoesNotExist()
         compose.onNodeWithText("Ready to edit").assertDoesNotExist()

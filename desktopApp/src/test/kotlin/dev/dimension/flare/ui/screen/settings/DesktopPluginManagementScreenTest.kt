@@ -165,6 +165,7 @@ class DesktopPluginManagementScreenTest {
         assertEquals(authoredRow.left, githubRow.left)
         assertEquals(githubRow.left, fileRow.left)
         compose.onNodeWithText(authored.id).assertDoesNotExist()
+        compose.onNodeWithText("Local AI-generated plugin · Revision 0").assertIsDisplayed()
         compose.onNodeWithText("GitHub · 1.0.0").assertIsDisplayed()
         compose.onNodeWithText("File · 1.0.0").assertIsDisplayed()
         compose.onNodeWithText("Update v1.1.0").assertIsDisplayed().performClick()

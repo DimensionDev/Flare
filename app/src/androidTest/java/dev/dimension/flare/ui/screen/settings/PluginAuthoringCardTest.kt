@@ -149,6 +149,7 @@ class PluginAuthoringCardTest {
             }
         assertEquals(1, titleStarts.distinct().size)
         compose.onNodeWithText(authored.id).assertDoesNotExist()
+        compose.onNodeWithText(context.getString(R.string.plugin_ai_source_revision, authored.revision)).assertIsDisplayed()
         compose.onNodeWithText("GitHub · 1.0.0").assertIsDisplayed()
         compose.onNodeWithText("File · 1.0.0").assertIsDisplayed()
         compose.onNodeWithText("${context.getString(R.string.plugin_update)} v1.1.0").assertIsDisplayed().performClick()
@@ -244,7 +245,10 @@ class PluginAuthoringCardTest {
         }
         compose.onAllNodes(isToggleable()).assertCountEquals(0)
         compose.onNodeWithText("Allow and continue").assertDoesNotExist()
-        compose.onNodeWithText("Revision 1").assertDoesNotExist()
+        compose
+            .onNodeWithText(
+                InstrumentationRegistry.getInstrumentation().targetContext.getString(R.string.plugin_ai_source_revision, 1L),
+            ).assertIsDisplayed()
         compose.onNodeWithText("The current version is running").assertDoesNotExist()
         val layouts = mutableListOf<TextLayoutResult>()
         val cancelLabel = InstrumentationRegistry.getInstrumentation().targetContext.getString(R.string.plugin_ai_stop)

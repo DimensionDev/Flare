@@ -690,6 +690,7 @@
     <string name="plugin_add">新增外掛</string>
     <string name="plugin_ai_create">使用 Flare AI 建立</string>
     <string name="plugin_ai_untitled">新外掛程式</string>
+    <string name="plugin_ai_source_revision">本機 AI 產生 · 修訂版 %1$d</string>
     <string name="plugin_ai_stop">取消更新</string>
     <string name="plugin_ai_idle">可以繼續製作</string>
     <string name="plugin_ai_validating">正在驗證</string>

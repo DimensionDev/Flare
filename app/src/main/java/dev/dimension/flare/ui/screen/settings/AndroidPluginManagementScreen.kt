@@ -618,9 +618,10 @@ internal fun PluginItem(
         content = { Text(name) },
         supportingContent = {
             Column {
-                if (plugin.authoring == null) {
-                    Text("${plugin.platformId} · ${plugin.version}")
-                }
+                Text(
+                    plugin.authoring?.let { stringResource(R.string.plugin_ai_source_revision, it.revision) }
+                        ?: "${plugin.platformId} · ${plugin.version}",
+                )
                 plugin.sourceUrl?.let { Text(it) }
                 plugin.availableUpdate?.let { update ->
                     TextButton(enabled = !busy, onClick = { onUpdate(plugin.pluginId) }) {

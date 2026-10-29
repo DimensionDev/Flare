@@ -458,6 +458,28 @@
       }
     }
   },
+  "plugin_ai_source_revision": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Local AI-generated plugin · Revision %lld"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "本地 AI 生成 · 修订版 %lld"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "本機 AI 產生 · 修訂版 %lld"
+        }
+      }
+    }
+  },
   "plugin_ai_stop": {
     "localizations": {
       "en": {

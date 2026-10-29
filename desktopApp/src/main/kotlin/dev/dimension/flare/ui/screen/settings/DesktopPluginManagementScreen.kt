@@ -68,6 +68,7 @@ import dev.dimension.flare.more
 import dev.dimension.flare.plugin_add
 import dev.dimension.flare.plugin_ai_create
 import dev.dimension.flare.plugin_ai_delete_message
+import dev.dimension.flare.plugin_ai_source_revision
 import dev.dimension.flare.plugin_ai_stop
 import dev.dimension.flare.plugin_ai_untitled
 import dev.dimension.flare.plugin_beta_description
@@ -688,9 +689,10 @@ internal fun PluginItem(
             Column(Modifier.weight(1f)) {
                 Text(name, maxLines = 2, overflow = TextOverflow.Ellipsis)
                 ProvideTextStyle(FluentTheme.typography.caption.copy(color = FluentTheme.colors.text.text.secondary)) {
-                    if (plugin.authoring == null) {
-                        Text("${plugin.platformId} · ${plugin.version}")
-                    }
+                    Text(
+                        plugin.authoring?.let { stringResource(Res.string.plugin_ai_source_revision, it.revision) }
+                            ?: "${plugin.platformId} · ${plugin.version}",
+                    )
                     plugin.sourceUrl?.let { Text(it, maxLines = 2, overflow = TextOverflow.Ellipsis) }
                     plugin.availableUpdate?.let { update ->
                         SubtleButton(disabled = busy, onClick = { onUpdate(plugin.pluginId) }) {

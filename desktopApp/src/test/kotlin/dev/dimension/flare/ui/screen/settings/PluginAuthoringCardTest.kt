@@ -8,7 +8,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.v2.createComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performSemanticsAction
@@ -27,15 +29,26 @@ class PluginAuthoringCardTest {
     @Test
     fun localPluginShowsIdentityWithoutApprovalOrEnableControls() {
         val plugin = AuthoredPlugin("local.ai.example", "Same name", phase = PluginAuthoringPhase.Applied, revision = 7)
+        var busy by mutableStateOf(false)
+        var uninstalls = 0
         compose.setContent {
             FlareTheme(isDarkTheme = false) {
-                PluginAuthoringCard(plugin, busy = false, onCancelUpdate = {}, onUninstall = {})
+                PluginAuthoringCard(plugin, busy = busy, onCancelUpdate = {}, onUninstall = { uninstalls++ })
             }
         }
         compose.onNodeWithText(plugin.id).assertIsDisplayed()
-        compose.onNodeWithText("Revision 7").assertIsDisplayed()
+        compose.onNodeWithText("Revision 7").assertDoesNotExist()
         compose.onNodeWithText("Allow and continue").assertDoesNotExist()
         compose.onNodeWithText("Enabled").assertDoesNotExist()
+        compose.onNodeWithText("Uninstall").assertDoesNotExist()
+        compose.onNodeWithContentDescription("More: Same name").performClick()
+        compose.onNodeWithText("Uninstall").assertIsDisplayed()
+        compose.runOnIdle { busy = true }
+        compose.onNodeWithText("Uninstall").assertIsNotEnabled()
+        compose.runOnIdle { busy = false }
+        compose.onNodeWithText("Uninstall").performClick()
+        compose.onNodeWithText("Uninstall").assertDoesNotExist()
+        compose.runOnIdle { assertEquals(1, uninstalls) }
     }
 
     @Test
@@ -70,6 +83,7 @@ class PluginAuthoringCardTest {
         compose.onNodeWithText("Cancel update").assertIsDisplayed().performClick()
         compose.onNodeWithText("Cancel update").assertDoesNotExist()
         compose.onNodeWithText("Ready to edit").assertDoesNotExist()
+        compose.onNodeWithText("The current version is running").assertDoesNotExist()
         compose.runOnIdle { assertEquals(1, stops) }
     }
 }

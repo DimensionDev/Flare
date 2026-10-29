@@ -138,6 +138,15 @@ class DesktopPluginManagementScreenTest {
             "png",
             File(System.getProperty("java.io.tmpdir"), "flare-plugins-desktop.png"),
         )
+        compose.onNodeWithContentDescription("More: Pixelfed").performClick()
+        compose.onNodeWithText("Uninstall").assertIsDisplayed()
+        ImageIO.write(
+            compose.onNode(isPopup()).captureToImage().toAwtImage(),
+            "png",
+            File(System.getProperty("java.io.tmpdir"), "flare-plugins-desktop-item-menu.png"),
+        )
+        compose.onNodeWithText("Uninstall").performClick()
+        compose.onNodeWithText("Cancel").performClick()
         compose.onNodeWithContentDescription("Add plugin").performClick()
         compose.onNodeWithText("Create with Flare AI").assertIsDisplayed()
         ImageIO.write(
@@ -245,7 +254,9 @@ class DesktopPluginManagementScreenTest {
         compose.onNodeWithContentDescription("Localized plugin").assertExists()
         compose.onNodeWithText("Update v1.1.0").assertIsDisplayed().performClick()
         assertEquals(plugin.pluginId, updated)
-        compose.onNodeWithContentDescription("Uninstall").assertIsDisplayed().performClick()
+        compose.onNodeWithText("Uninstall").assertDoesNotExist()
+        compose.onNodeWithContentDescription("More: Localized plugin").assertIsDisplayed().performClick()
+        compose.onNodeWithText("Uninstall").assertIsDisplayed().performClick()
         assertEquals(plugin.pluginId, removed)
     }
 

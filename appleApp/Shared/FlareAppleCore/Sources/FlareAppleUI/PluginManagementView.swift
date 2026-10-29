@@ -35,27 +35,29 @@ public struct PluginManagementView: View {
     public var body: some View {
         List {
             Section {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("plugin_beta_description")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                    // Feedback must bypass the app's social content routing.
-                    Link("plugin_report_issue", destination: URL(string: "https://github.com/DimensionDev/Flare/issues")!)
-                        .environment(\.openURL, OpenURLAction { .systemAction($0) })
+                #if os(macOS)
+                GroupBox {
+                    betaNotice.padding(4)
                 }
+                .listRowBackground(Color.clear)
+                #else
+                betaNotice
+                #endif
             }
-            .listRowBackground(Color.clear)
             ForEach(presenter.state.authoredPlugins, id: \.id) { plugin in
                 Section {
                     VStack(alignment: .leading, spacing: 8) {
-                        Text(plugin.name.isEmpty ? String(localized: "plugin_ai_untitled") : plugin.name).font(.headline)
+                        HStack {
+                            Text(plugin.name.isEmpty ? String(localized: "plugin_ai_untitled") : plugin.name).font(.headline)
+                            Spacer()
+                            pluginMenu(name: plugin.name) {
+                                pendingUninstallId = plugin.id
+                                pendingUninstallName = "\(plugin.name)\n\(plugin.id)"
+                            }
+                        }
                         Text(plugin.id).font(.caption.monospaced()).foregroundStyle(.secondary).textSelection(.enabled)
-                        Text(String(format: String(localized: "plugin_ai_revision"), plugin.revision)).font(.caption).foregroundStyle(.secondary)
                         if plugin.phase != .idle {
                             Text(pluginAuthoringLabel(plugin.phase)).font(.caption).foregroundStyle(.secondary)
-                        }
-                        if plugin.running && plugin.phase != .applied {
-                            Text("plugin_ai_running").foregroundStyle(.secondary)
                         }
                         if let error = plugin.error { Text(verbatim: error).foregroundStyle(.red) }
                     }
@@ -63,10 +65,6 @@ public struct PluginManagementView: View {
                         Button("plugin_ai_stop") {
                             Task { try? await facade.cancelPluginUpdate(pluginId: plugin.id) }
                         }
-                    }
-                    Button("plugin_uninstall", role: .destructive) {
-                        pendingUninstallId = plugin.id
-                        pendingUninstallName = "\(plugin.name)\n\(plugin.id)"
                     }
                 }
                 .disabled(presenter.state.busy)
@@ -245,6 +243,52 @@ public struct PluginManagementView: View {
         }
     }
 
+    private var betaNotice: some View {
+        HStack(alignment: .top, spacing: 12) {
+            Image(fontAwesome: .circleInfo)
+                .foregroundStyle(.tint)
+                .accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: 8) {
+                Text("plugin_beta_description")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                // Feedback must bypass the app's social content routing.
+                Link("plugin_report_issue", destination: URL(string: "https://github.com/DimensionDev/Flare/issues")!)
+                    .environment(\.openURL, OpenURLAction { .systemAction($0) })
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .padding(.vertical, 4)
+    }
+
+    private func pluginMenu(name: String, onUninstall: @escaping () -> Void) -> some View {
+        Menu {
+            Button(role: .destructive, action: onUninstall) {
+                Label {
+                    Text("plugin_uninstall")
+                } icon: {
+                    Image(fontAwesome: .trash)
+                }
+            }
+        } label: {
+            Label {
+                Text("more")
+            } icon: {
+                Image(fontAwesome: .ellipsis)
+                    #if os(iOS)
+                    .frame(minWidth: 44, minHeight: 44)
+                    #endif
+            }
+        }
+        .labelStyle(.iconOnly)
+        .buttonStyle(.borderless)
+        .accessibilityLabel(Text(verbatim: "\(String(localized: "more")): \(name)"))
+        .help("more")
+        #if os(macOS)
+        .menuIndicator(.hidden)
+        #endif
+    }
+
     @ViewBuilder
     private func pluginRow(_ plugin: PluginManagementItemV1) -> some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -263,7 +307,11 @@ public struct PluginManagementView: View {
                         .foregroundStyle(.secondary)
                 }
                 Spacer()
-
+                pluginMenu(name: plugin.nameText.text) {
+                    pendingUninstallId = plugin.pluginId
+                    pendingUninstallName = plugin.nameText.text
+                }
+                .disabled(presenter.state.busy || isDeveloping(plugin.pluginId))
             }
 
             if plugin.pendingRestart {
@@ -283,12 +331,6 @@ public struct PluginManagementView: View {
                 }
                 .disabled(presenter.state.busy || isDeveloping(plugin.pluginId))
             }
-
-            Button("plugin_uninstall", role: .destructive) {
-                pendingUninstallId = plugin.pluginId
-                pendingUninstallName = plugin.nameText.text
-            }
-            .disabled(presenter.state.busy || isDeveloping(plugin.pluginId))
         }
         .padding(.vertical, 4)
     }

@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -16,13 +15,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
-import compose.icons.FontAwesomeIcons
-import compose.icons.fontawesomeicons.Solid
-import compose.icons.fontawesomeicons.solid.Trash
 import dev.dimension.flare.R
 import dev.dimension.flare.data.repository.AuthoredPlugin
 import dev.dimension.flare.data.repository.PluginAuthoringPhase
-import dev.dimension.flare.ui.component.FAIcon
 
 @Composable
 internal fun pluginAuthoringLabel(phase: PluginAuthoringPhase): String =
@@ -43,23 +38,18 @@ internal fun PluginAuthoringCard(
     onCancelUpdate: () -> Unit,
     onUninstall: () -> Unit,
 ) {
+    val name = plugin.name.ifBlank { stringResource(R.string.plugin_ai_untitled) }
     Column(
         Modifier.fillMaxWidth().padding(vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
-                plugin.name.ifBlank { stringResource(R.string.plugin_ai_untitled) },
+                name,
                 modifier = Modifier.weight(1f),
                 style = MaterialTheme.typography.titleMedium,
             )
-            IconButton(enabled = !busy, onClick = onUninstall) {
-                FAIcon(
-                    FontAwesomeIcons.Solid.Trash,
-                    contentDescription = stringResource(R.string.plugin_uninstall),
-                    tint = MaterialTheme.colorScheme.error,
-                )
-            }
+            PluginItemMenu(name = name, busy = busy, onUninstall = onUninstall)
         }
         SelectionContainer {
             Text(
@@ -69,20 +59,8 @@ internal fun PluginAuthoringCard(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
-        Text(
-            stringResource(R.string.plugin_ai_revision, plugin.revision),
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
         if (plugin.phase != PluginAuthoringPhase.Idle) {
             Text(pluginAuthoringLabel(plugin.phase), style = MaterialTheme.typography.bodyMedium)
-        }
-        if (plugin.running && plugin.phase != PluginAuthoringPhase.Applied) {
-            Text(
-                stringResource(R.string.plugin_ai_running),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
         }
         plugin.error?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error) }
         if (plugin.canCancelUpdate) {

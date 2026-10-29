@@ -172,28 +172,6 @@
       }
     }
   },
-  "plugin_ai_revision": {
-    "localizations": {
-      "en": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "Revision %lld"
-        }
-      },
-      "zh-Hans": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "修订 %lld"
-        }
-      },
-      "zh-Hant": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "修訂 %lld"
-        }
-      }
-    }
-  },
   "plugin_ai_stop": {
     "localizations": {
       "en": {
@@ -217,28 +195,6 @@
     }
   },
 
-  "plugin_ai_running": {
-    "localizations": {
-      "en": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "The current version is running"
-        }
-      },
-      "zh-Hans": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "当前版本正在运行"
-        }
-      },
-      "zh-Hant": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "目前版本正在執行"
-        }
-      }
-    }
-  },
   "plugin_ai_idle": {
     "localizations": {
       "en": {

@@ -7,12 +7,16 @@ import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedListItem
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.ComposeUiFlags
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.isToggleable
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -37,6 +41,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import org.junit.After
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
@@ -83,6 +88,11 @@ class PluginAuthoringCardTest {
         compose.onAllNodes(isToggleable()).assertCountEquals(0)
         screenshot("flare-plugins-android.png")
         val context = InstrumentationRegistry.getInstrumentation().targetContext
+        compose.onNodeWithContentDescription("${context.getString(R.string.more)}: Pixelfed").performClick()
+        compose.onNodeWithText(context.getString(R.string.plugin_uninstall)).assertIsDisplayed()
+        screenshot("flare-plugins-android-item-menu.png")
+        compose.onNodeWithText(context.getString(R.string.plugin_uninstall)).performClick()
+        compose.onNodeWithText(context.getString(android.R.string.cancel)).performClick()
         compose.onNodeWithContentDescription(context.getString(R.string.plugin_add)).performClick()
         compose.onNodeWithText(context.getString(R.string.plugin_ai_create)).assertIsDisplayed()
         screenshot("flare-plugins-android-menu.png")
@@ -100,6 +110,8 @@ class PluginAuthoringCardTest {
 
     @Test
     fun pendingActionsFitNarrowCard() {
+        var busy by mutableStateOf(false)
+        var uninstalls = 0
         compose.setContent {
             MaterialTheme {
                 Box(Modifier.width(320.dp)) {
@@ -113,10 +125,11 @@ class PluginAuthoringCardTest {
                                     "Pixelfed",
                                     phase = PluginAuthoringPhase.WaitingForOperations,
                                     revision = 1,
+                                    running = true,
                                 ),
-                                busy = false,
+                                busy = busy,
                                 onCancelUpdate = {},
-                                onUninstall = {},
+                                onUninstall = { uninstalls++ },
                             )
                         },
                     )
@@ -125,12 +138,25 @@ class PluginAuthoringCardTest {
         }
         compose.onAllNodes(isToggleable()).assertCountEquals(0)
         compose.onNodeWithText("Allow and continue").assertDoesNotExist()
+        compose.onNodeWithText("Revision 1").assertDoesNotExist()
+        compose.onNodeWithText("The current version is running").assertDoesNotExist()
         val layouts = mutableListOf<TextLayoutResult>()
         val cancelLabel = InstrumentationRegistry.getInstrumentation().targetContext.getString(R.string.plugin_ai_stop)
         compose
             .onNodeWithText(cancelLabel, useUnmergedTree = true)
             .performSemanticsAction(SemanticsActions.GetTextLayoutResult) { it(layouts) }
         assertTrue("Cancel update must remain readable", layouts.single().lineCount <= 2)
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val uninstall = context.getString(R.string.plugin_uninstall)
+        compose.onNodeWithText(uninstall).assertDoesNotExist()
+        compose.onNodeWithContentDescription("${context.getString(R.string.more)}: Pixelfed").performClick()
+        compose.onNodeWithText(uninstall).assertIsDisplayed()
+        compose.runOnIdle { busy = true }
+        compose.onNodeWithText(uninstall).assertIsNotEnabled()
+        compose.runOnIdle { busy = false }
+        compose.onNodeWithText(uninstall).performClick()
+        compose.onNodeWithText(uninstall).assertDoesNotExist()
+        compose.runOnIdle { assertEquals(1, uninstalls) }
     }
 }
 

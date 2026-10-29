@@ -969,9 +969,7 @@
     <string name="plugin_add">Add plugin</string>
     <string name="plugin_ai_create">Create with Flare AI</string>
     <string name="plugin_ai_untitled">New plugin</string>
-    <string name="plugin_ai_revision">Revision %1$d</string>
     <string name="plugin_ai_stop">Cancel update</string>
-    <string name="plugin_ai_running">The current version is running</string>
     <string name="plugin_ai_idle">Ready to edit</string>
     <string name="plugin_ai_validating">Validating</string>
     <string name="plugin_ai_waiting">Waiting for login or writes to finish</string>

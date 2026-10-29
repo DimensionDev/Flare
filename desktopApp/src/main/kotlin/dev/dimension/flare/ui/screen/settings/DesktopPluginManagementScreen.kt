@@ -530,12 +530,16 @@ private fun PluginManagementList(
             contentPadding = PaddingValues(vertical = 12.dp),
         ) {
             item(key = "beta-notice") {
-                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text(stringResource(Res.string.plugin_beta_description))
-                    HyperlinkButton("https://github.com/DimensionDev/Flare/issues") {
-                        Text(stringResource(Res.string.plugin_report_issue))
-                    }
-                }
+                InfoBar(
+                    title = {},
+                    message = { Text(stringResource(Res.string.plugin_beta_description)) },
+                    action = {
+                        HyperlinkButton("https://github.com/DimensionDev/Flare/issues") {
+                            Text(stringResource(Res.string.plugin_report_issue))
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                )
             }
             items(state.authoredPlugins, key = { it.id }) { plugin ->
                 Layer(modifier = Modifier.fillMaxWidth(), color = FluentTheme.colors.background.card.default) {
@@ -672,21 +676,32 @@ internal fun PluginItem(
                     }
                 }
             }
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-            ) {
-                SubtleButton(
-                    disabled = busy,
-                    iconOnly = true,
-                    onClick = { onUninstall(plugin.pluginId) },
-                ) {
-                    FAIcon(
-                        imageVector = FontAwesomeIcons.Solid.Trash,
-                        contentDescription = stringResource(Res.string.plugin_uninstall),
-                    )
-                }
-            }
+            PluginItemMenu(name = name, busy = busy, onUninstall = { onUninstall(plugin.pluginId) })
+        }
+    }
+}
+
+@Composable
+internal fun PluginItemMenu(
+    name: String,
+    busy: Boolean,
+    onUninstall: () -> Unit,
+) {
+    var expanded by remember { mutableStateOf(false) }
+    Box {
+        SubtleButton(disabled = busy, iconOnly = true, onClick = { expanded = true }) {
+            FAIcon(FontAwesomeIcons.Solid.EllipsisVertical, contentDescription = "${stringResource(Res.string.more)}: $name")
+        }
+        MenuFlyout(visible = expanded, onDismissRequest = { expanded = false }, placement = FlyoutPlacement.BottomAlignedEnd) {
+            MenuFlyoutItem(
+                text = { Text(stringResource(Res.string.plugin_uninstall)) },
+                icon = { FAIcon(FontAwesomeIcons.Solid.Trash, contentDescription = null) },
+                enabled = !busy,
+                onClick = {
+                    expanded = false
+                    onUninstall()
+                },
+            )
         }
     }
 }

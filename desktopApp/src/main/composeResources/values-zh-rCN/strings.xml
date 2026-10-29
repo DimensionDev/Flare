@@ -831,9 +831,7 @@
     <string name="plugin_add">添加插件</string>
     <string name="plugin_ai_create">使用 Flare AI 创建</string>
     <string name="plugin_ai_untitled">新插件</string>
-    <string name="plugin_ai_revision">修订 %1$d</string>
     <string name="plugin_ai_stop">取消更新</string>
-    <string name="plugin_ai_running">当前版本正在运行</string>
     <string name="plugin_ai_idle">可以继续制作</string>
     <string name="plugin_ai_validating">正在校验</string>
     <string name="plugin_ai_waiting">等待登录或写操作完成</string>

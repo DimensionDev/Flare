@@ -11,26 +11,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
-import compose.icons.FontAwesomeIcons
-import compose.icons.fontawesomeicons.Solid
-import compose.icons.fontawesomeicons.solid.Trash
 import dev.dimension.flare.Res
 import dev.dimension.flare.data.repository.AuthoredPlugin
 import dev.dimension.flare.data.repository.PluginAuthoringPhase
 import dev.dimension.flare.plugin_ai_applied
 import dev.dimension.flare.plugin_ai_failed
 import dev.dimension.flare.plugin_ai_idle
-import dev.dimension.flare.plugin_ai_revision
-import dev.dimension.flare.plugin_ai_running
 import dev.dimension.flare.plugin_ai_stop
 import dev.dimension.flare.plugin_ai_untitled
 import dev.dimension.flare.plugin_ai_validating
 import dev.dimension.flare.plugin_ai_waiting
-import dev.dimension.flare.plugin_uninstall
-import dev.dimension.flare.ui.component.FAIcon
 import io.github.composefluent.FluentTheme
 import io.github.composefluent.component.Button
-import io.github.composefluent.component.SubtleButton
 import io.github.composefluent.component.Text
 import org.jetbrains.compose.resources.stringResource
 
@@ -53,18 +45,15 @@ internal fun PluginAuthoringCard(
     onCancelUpdate: () -> Unit,
     onUninstall: () -> Unit,
 ) {
+    val name = plugin.name.ifBlank { stringResource(Res.string.plugin_ai_untitled) }
     Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
-                plugin.name.ifBlank {
-                    stringResource(Res.string.plugin_ai_untitled)
-                },
+                name,
                 modifier = Modifier.weight(1f),
                 style = FluentTheme.typography.bodyStrong,
             )
-            SubtleButton(disabled = busy, iconOnly = true, onClick = onUninstall) {
-                FAIcon(FontAwesomeIcons.Solid.Trash, contentDescription = stringResource(Res.string.plugin_uninstall))
-            }
+            PluginItemMenu(name = name, busy = busy, onUninstall = onUninstall)
         }
         SelectionContainer {
             Text(
@@ -74,20 +63,8 @@ internal fun PluginAuthoringCard(
                 color = FluentTheme.colors.text.text.secondary,
             )
         }
-        Text(
-            stringResource(Res.string.plugin_ai_revision, plugin.revision),
-            style = FluentTheme.typography.caption,
-            color = FluentTheme.colors.text.text.secondary,
-        )
         if (plugin.phase != PluginAuthoringPhase.Idle) {
             Text(pluginAuthoringLabel(plugin.phase))
-        }
-        if (plugin.running && plugin.phase != PluginAuthoringPhase.Applied) {
-            Text(
-                stringResource(Res.string.plugin_ai_running),
-                style = FluentTheme.typography.caption,
-                color = FluentTheme.colors.text.text.secondary,
-            )
         }
         plugin.error?.let { Text(it, style = FluentTheme.typography.caption) }
         if (plugin.canCancelUpdate) {

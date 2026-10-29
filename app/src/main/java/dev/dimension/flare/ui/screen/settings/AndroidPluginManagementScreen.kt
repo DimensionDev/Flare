@@ -18,6 +18,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -25,6 +27,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SegmentedListItem
 import androidx.compose.material3.Text
@@ -51,6 +54,7 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.solid.CircleInfo
 import compose.icons.fontawesomeicons.solid.EllipsisVertical
 import compose.icons.fontawesomeicons.solid.Plus
 import compose.icons.fontawesomeicons.solid.Trash
@@ -67,6 +71,7 @@ import dev.dimension.flare.feature.plugin.management.PluginManagementPresenterV1
 import dev.dimension.flare.feature.plugin.management.PluginManagementStateV1
 import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FAIcon
+import dev.dimension.flare.ui.component.FlareDropdownMenu
 import dev.dimension.flare.ui.component.FlareLargeFlexibleTopAppBar
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.LocalTimelineAppearance
@@ -479,14 +484,18 @@ private fun PluginManagementList(
         verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
     ) {
         item(key = "beta-notice") {
-            Column(Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
-                Text(
-                    stringResource(R.string.plugin_beta_description),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                TextButton(onClick = { uriHandler.openUri("https://github.com/DimensionDev/Flare/issues") }) {
-                    Text(stringResource(R.string.plugin_report_issue))
+            Card(
+                modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
+            ) {
+                Row(Modifier.padding(16.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    FAIcon(FontAwesomeIcons.Solid.CircleInfo, contentDescription = null, modifier = Modifier.size(20.dp))
+                    Column(Modifier.weight(1f)) {
+                        Text(stringResource(R.string.plugin_beta_description), style = MaterialTheme.typography.bodyMedium)
+                        TextButton(onClick = { uriHandler.openUri("https://github.com/DimensionDev/Flare/issues") }) {
+                            Text(stringResource(R.string.plugin_report_issue))
+                        }
+                    }
                 }
             }
         }
@@ -626,20 +635,39 @@ private fun PluginItem(
             }
         },
         trailingContent = {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                IconButton(
-                    enabled = !busy,
-                    onClick = { onUninstall(plugin.pluginId) },
-                ) {
-                    FAIcon(
-                        imageVector = FontAwesomeIcons.Solid.Trash,
-                        contentDescription = stringResource(R.string.plugin_uninstall),
-                        tint = MaterialTheme.colorScheme.error,
-                    )
-                }
-            }
+            PluginItemMenu(name = name, busy = busy, onUninstall = { onUninstall(plugin.pluginId) })
         },
     )
+}
+
+@Composable
+internal fun PluginItemMenu(
+    name: String,
+    busy: Boolean,
+    onUninstall: () -> Unit,
+) {
+    var expanded by remember { mutableStateOf(false) }
+    Box {
+        IconButton(enabled = !busy, onClick = { expanded = true }) {
+            FAIcon(FontAwesomeIcons.Solid.EllipsisVertical, contentDescription = "${stringResource(R.string.more)}: $name")
+        }
+        FlareDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.plugin_uninstall)) },
+                leadingIcon = { FAIcon(FontAwesomeIcons.Solid.Trash, contentDescription = null) },
+                colors =
+                    MenuDefaults.itemColors(
+                        textColor = MaterialTheme.colorScheme.error,
+                        leadingIconColor = MaterialTheme.colorScheme.error,
+                    ),
+                enabled = !busy,
+                onClick = {
+                    expanded = false
+                    onUninstall()
+                },
+            )
+        }
+    }
 }
 
 @Composable

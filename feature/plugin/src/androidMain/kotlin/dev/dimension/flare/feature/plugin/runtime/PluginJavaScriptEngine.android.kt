@@ -198,15 +198,18 @@ internal class AndroidPluginJavaScriptEngine private constructor(
             hostCall: PluginHostCall,
         ): PluginJavaScriptEngine {
             val generation = PluginAndroidSandbox.acquire(context)
-            val isolate = generation.sandbox.createIsolate()
+            var isolate: JavaScriptIsolate? = null
             var engine: AndroidPluginJavaScriptEngine? = null
             try {
+                isolate = generation.sandbox.createIsolate()
                 engine = AndroidPluginJavaScriptEngine(generation, isolate, dispatcher, hostCall)
                 engine.evaluate(HOST_BRIDGE, "flare-host.js", awaitResult = true)
                 return engine
             } catch (error: Throwable) {
-                engine?.close() ?: isolate.close()
-                throw error
+                engine?.close() ?: isolate?.close()
+                if (error is CancellationException) throw error
+                PluginAndroidSandbox.invalidate(generation)
+                throw PluginJavaScriptUnavailableException("Cannot initialize the plugin JavaScript sandbox", error)
             }
         }
     }

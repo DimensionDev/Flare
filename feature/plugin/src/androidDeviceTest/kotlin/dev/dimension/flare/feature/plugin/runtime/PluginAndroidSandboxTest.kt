@@ -13,6 +13,29 @@ import kotlin.test.assertTrue
 
 class PluginAndroidSandboxTest {
     @Test
+    fun sandboxClosedDuringStartupIsUnavailableAndNextAttemptReconnects() =
+        runBlocking<Unit> {
+            val context = InstrumentationRegistry.getInstrumentation().targetContext
+            val generation = PluginAndroidSandbox.acquire(context)
+            generation.sandbox.close()
+            try {
+                withTimeout(15_000) {
+                    assertFailsWith<PluginJavaScriptUnavailableException> {
+                        createTestPluginJavaScriptEngine { _, _, _ -> error("Host must not run during startup") }
+                    }
+                    val fresh = createTestPluginJavaScriptEngine { _, _, _ -> "{}" }
+                    try {
+                        assertEquals("fresh", fresh.evaluate("'fresh'", "fresh.js"))
+                    } finally {
+                        fresh.close()
+                    }
+                }
+            } finally {
+                PluginAndroidSandbox.invalidate(generation)
+            }
+        }
+
+    @Test
     fun sandboxRetirementInvalidatesPeersAndReconnectsWithoutReplayingHostWork() =
         runBlocking<Unit> {
             val context = InstrumentationRegistry.getInstrumentation().targetContext

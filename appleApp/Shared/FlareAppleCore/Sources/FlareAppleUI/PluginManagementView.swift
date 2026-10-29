@@ -509,8 +509,16 @@ public struct PluginManagementView: View {
     private var gitHubInstallSheet: some View {
         NavigationStack {
             Form {
-                TextField("plugin_github_repository", text: $gitHubURL, prompt: Text("https://github.com/owner/repository"))
+                TextField(
+                    "plugin_github_repository",
+                    text: $gitHubURL,
+                    prompt: Text(verbatim: "https://github.com/owner/repository")
+                )
                     .autocorrectionDisabled()
+                    #if os(iOS)
+                    .textInputAutocapitalization(.never)
+                    .keyboardType(.URL)
+                    #endif
                     .onChange(of: gitHubURL) { _, _ in
                         selectedGitHubTag = ""
                         facade.clearGitHubRepository()
@@ -537,15 +545,37 @@ public struct PluginManagementView: View {
             .navigationTitle("plugin_install_github")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { showsGitHubInstall = false }
-                        .disabled(presenter.state.busy)
+                    Button(role: .cancel) { showsGitHubInstall = false } label: {
+                        Label {
+                            Text("Cancel")
+                        } icon: {
+                            Image(fontAwesome: .xmark)
+                        }
+                    }
+                    #if os(iOS)
+                    .labelStyle(.iconOnly)
+                    #else
+                    .labelStyle(.titleOnly)
+                    #endif
+                    .disabled(presenter.state.busy)
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("plugin_confirm_install") {
+                    Button {
                         guard let version = selectedGitHubVersion else { return }
                         showsGitHubInstall = false
                         Task { try? await facade.inspectGitHub(tag: version.tag) }
+                    } label: {
+                        Label {
+                            Text("plugin_confirm_install")
+                        } icon: {
+                            Image(fontAwesome: .check)
+                        }
                     }
+                    #if os(iOS)
+                    .labelStyle(.iconOnly)
+                    #else
+                    .labelStyle(.titleOnly)
+                    #endif
                     .disabled(presenter.state.busy || selectedGitHubVersion == nil)
                 }
             }

@@ -137,7 +137,6 @@ internal class ProfileInsightAgentUseCase(
                     toolContext = toolContext,
                     temperature = 0.2,
                     finishAfterToolResults = false,
-                    chatMemoryWindowSize = CHAT_MEMORY_WINDOW_SIZE,
                     supportingParts = supportingParts,
                 ),
             conversationId = conversationId,
@@ -259,8 +258,6 @@ internal class ProfileInsightAgentUseCase(
     private fun AgentTrace.toConversationEvent(): AgentConversationEvent.Trace<AgentTrace> = AgentConversationEvent.Trace(this)
 
     private companion object {
-        const val CHAT_MEMORY_WINDOW_SIZE = 20
-
         const val PROFILE_INSIGHT_SYSTEM_PROMPT =
             """
             You explain social profiles for Flare users.

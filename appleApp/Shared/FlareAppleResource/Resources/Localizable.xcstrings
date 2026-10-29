@@ -1,6 +1,50 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+  "settings_ai_config_context_window": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Context window (tokens)"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "上下文窗口（token）"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "上下文視窗（token）"
+        }
+      }
+    }
+  },
+  "settings_ai_config_context_window_hint": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Leave blank for automatic detection. For custom models, enter the context limit in tokens (at least 1024)."
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "留空以自动识别。自定义模型可填写上下文 token 上限（至少 1024）。"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "留空以自動識別。自訂模型可填寫上下文 token 上限（至少 1024）。"
+        }
+      }
+    }
+  },
   "plugin_add": {
   "localizations": {
     "en": {

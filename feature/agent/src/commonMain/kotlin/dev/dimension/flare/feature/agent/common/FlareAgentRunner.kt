@@ -76,6 +76,7 @@ internal class FlareAgentRunner(
                     } else {
                         null
                     },
+                storeCheckpoint = chatHistoryProvider::storeCheckpoint,
                 storeMessages = { id, messages ->
                     chatHistoryProvider.storeAssistantResponse(
                         conversationId = id,
@@ -109,8 +110,10 @@ internal fun FlareAgentRuntime.createAgent(
     chatHistoryProvider: ChatHistoryProvider,
     prepareImage: (suspend (UiMedia.Image, Int) -> AttachmentSource.Image)? = null,
     storeMessages: suspend (String, List<Message>) -> Unit = chatHistoryProvider::store,
-): AIAgent<Prompt, String> =
-    AIAgent
+    storeCheckpoint: suspend (String, List<Message>, AgentContextCheckpoint) -> Unit = { _, _, _ -> },
+): AIAgent<Prompt, String> {
+    val compaction = AgentContextCompaction()
+    return AIAgent
         .builder()
         .promptExecutor(
             if (prepareImage == null) promptExecutor else AgentImageFallback(promptExecutor, request.images, prepareImage, onTrace),
@@ -125,14 +128,20 @@ internal fun FlareAgentRuntime.createAgent(
         .maxIterations(request.maxIterations)
         .graphStrategy(
             strategy<Prompt, String>(request.strategyName) {
-                val nodeAnalyze by node<Prompt, Message.Assistant>(request.analyzeNodeName) { prompt ->
-                    requestAgentResponse {
-                        messages(prompt.messages)
+                val nodeAnalyze by node<Prompt, Message.Assistant>(request.analyzeNodeName) { inputPrompt ->
+                    llm.writeSession {
+                        prompt =
+                            prompt.withMessages { messages ->
+                                config.prompt.messages.filterIsInstance<Message.System>() + messages.filterNot { it is Message.System }
+                            }
+                    }
+                    requestAgentResponse(compaction, storeCheckpoint) {
+                        messages(inputPrompt.messages)
                     }
                 }
                 val nodeExecuteTools by nodeExecuteTools(request.executeToolsNodeName)
                 val nodeSendToolResults by node<ReceivedToolResults, Message.Assistant>(request.sendToolResultsNodeName) { results ->
-                    requestAgentResponse(finishAfterToolResults = request.finishAfterToolResults) {
+                    requestAgentResponse(compaction, storeCheckpoint, finishAfterToolResults = request.finishAfterToolResults) {
                         user {
                             results.toolResults.forEach { toolResult -> toolResult(toolResult.toMessagePart()) }
                         }
@@ -152,7 +161,6 @@ internal fun FlareAgentRuntime.createAgent(
             ChatMemory,
             ConfigureAction { config ->
                 config.chatHistoryProvider = chatHistoryProvider
-                config.windowSize(request.chatMemoryWindowSize)
             },
         ).install(
             EventHandler,
@@ -239,8 +247,11 @@ internal fun FlareAgentRuntime.createAgent(
                 }
             },
         ).build()
+}
 
 private suspend fun AIAgentGraphContextBase.requestAgentResponse(
+    compaction: AgentContextCompaction,
+    storeCheckpoint: suspend (String, List<Message>, AgentContextCheckpoint) -> Unit,
     finishAfterToolResults: Boolean = false,
     input: PromptBuilder.() -> Unit,
 ): Message.Assistant {
@@ -248,36 +259,42 @@ private suspend fun AIAgentGraphContextBase.requestAgentResponse(
     val summarize = !finishAfterToolResults && stateManager.withStateLock { it.iterations > config.maxAgentIterations - 3 }
     return llm.writeSession {
         appendPrompt(input)
-        when {
-            summarize -> {
-                val originalPrompt = prompt
-                val response =
-                    try {
-                        appendPrompt {
-                            system(
-                                """
-                                This run is reaching its step limit. Tools are disabled for this response.
-                                Summarize what has actually been completed, any remaining work, and the next steps in the user's language.
-                                Explain that the user can ask you to continue. Do not claim unfinished work is complete.
-                                """.trimIndent(),
-                            )
+        prompt =
+            prompt.withMessages { messages ->
+                messages.map { if (it.id == null) it.withAgentMessageId(Uuid.random().toString()) else it }
+            }
+        compaction.request(this, { messages, checkpoint -> storeCheckpoint(runId, messages, checkpoint) }) {
+            when {
+                summarize -> {
+                    val originalPrompt = prompt
+                    val response =
+                        try {
+                            appendPrompt {
+                                system(
+                                    """
+                                    This run is reaching its step limit. Tools are disabled for this response.
+                                    Summarize what has actually been completed, any remaining work, and the next steps in the user's language.
+                                    Explain that the user can ask you to continue. Do not claim unfinished work is complete.
+                                    """.trimIndent(),
+                                )
+                            }
+                            requestLLMWithoutTools()
+                        } finally {
+                            // The limit instruction must not constrain the next user turn.
+                            prompt = originalPrompt
                         }
-                        requestLLMWithoutTools()
-                    } finally {
-                        // The limit instruction must not constrain the next user turn.
-                        prompt = originalPrompt
-                    }
-                check(response.parts.none { it is MessagePart.Tool.Call }) { "Tools are disabled while summarizing at the step limit" }
-                appendPrompt { message(response) }
-                response
-            }
+                    check(response.parts.none { it is MessagePart.Tool.Call }) { "Tools are disabled while summarizing at the step limit" }
+                    appendPrompt { message(response) }
+                    response
+                }
 
-            finishAfterToolResults -> {
-                requestLLMWithoutTools()
-            }
+                finishAfterToolResults -> {
+                    requestLLMWithoutTools()
+                }
 
-            else -> {
-                requestLLM()
+                else -> {
+                    requestLLM()
+                }
             }
         }
     }
@@ -301,7 +318,6 @@ internal data class FlareAgentRequest(
     val temperature: Double = 0.2,
     val maxIterations: Int = 256,
     val finishAfterToolResults: Boolean = false,
-    val chatMemoryWindowSize: Int = 20,
     val images: List<UiMedia.Image> = emptyList(),
     val supportingParts: List<AgentMessagePart> = emptyList(),
     private val toolSet: AgentToolSet = AgentToolSet.Empty,

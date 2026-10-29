@@ -58,6 +58,8 @@ private final class AiConfigSettingsState {
             presenter.state.setOpenAIServerUrl(value: value)
         case .apiKey:
             presenter.state.setOpenAIApiKey(value: value)
+        case .contextWindow:
+            presenter.state.setOpenAIContextWindow(value: value)
         case .extraBody:
             presenter.state.setOpenAIExtraBody(value: value)
         case .model:
@@ -142,6 +144,8 @@ private struct AiConfigSettingsSectionsContent: View {
                             )
                         }
                         .transition(.opacity.combined(with: .move(edge: .top)))
+
+                        editButton(field: .contextWindow, value: state.presenter.state.openAIContextWindow)
 
                         editButton(field: .extraBody, value: state.presenter.state.openAIExtraBody)
 
@@ -280,7 +284,8 @@ private struct AiConfigEditSheet: View {
             suggestions: field == .serverUrl
                 ? (state.presenter.state.serverSuggestions as NSArray).cast(NSString.self).map(String.init)
                 : [],
-            footer: footer
+            footer: footer,
+            isValid: { field != .contextWindow || state.presenter.state.isValidOpenAIContextWindow(value: $0) }
         ) { value in
             state.applyEdit(field: field, value: value)
         }
@@ -345,6 +350,7 @@ struct SettingsTextEditSheet: View {
     var multiline = false
     var suggestions: [String] = []
     var footer: Text?
+    var isValid: (String) -> Bool = { _ in true }
     let onSave: (String) -> Void
     @Environment(\.dismiss) private var dismiss
 
@@ -399,6 +405,7 @@ struct SettingsTextEditSheet: View {
                         dismiss()
                     } label: { Image(fontAwesome: .check) }
                         .accessibilityLabel(Text("done", bundle: FlareAppleUILocalization.bundle))
+                        .disabled(!isValid(text))
                 }
             }
         }
@@ -417,6 +424,7 @@ private extension View {
 private enum AiConfigEditableField: String, Identifiable {
     case serverUrl
     case apiKey
+    case contextWindow
     case extraBody
     case model
     case tldrPrompt
@@ -429,6 +437,8 @@ private enum AiConfigEditableField: String, Identifiable {
             "ai_config_server_provider_section_header"
         case .apiKey:
             "API Key"
+        case .contextWindow:
+            "settings_ai_config_context_window"
         case .extraBody:
             "Extra Body"
         case .model:
@@ -446,6 +456,8 @@ private enum AiConfigEditableField: String, Identifiable {
             "sk-..."
         case .extraBody:
             "{\"thinking\": {\"type\": \"enabled\"}}"
+        case .contextWindow:
+            "128000"
         case .model:
             "model-name"
         case .tldrPrompt:
@@ -459,6 +471,8 @@ private enum AiConfigEditableField: String, Identifiable {
 
     var footerKey: LocalizedStringKey? {
         switch self {
+        case .contextWindow:
+            "settings_ai_config_context_window_hint"
         case .serverUrl:
             "Server URL must end with '/' and support the AI-compatible v1/chat/completions API."
         default:

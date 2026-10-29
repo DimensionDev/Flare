@@ -40,6 +40,7 @@ kotlin {
                 implementation(libs.bundles.kotlinx)
                 implementation(libs.room.runtime)
                 implementation(libs.sqlite)
+                implementation(libs.sqlite.async)
                 implementation(dependencies.platform(libs.koin.bom))
                 implementation(libs.koin.core)
                 implementation(libs.koin.annotations)

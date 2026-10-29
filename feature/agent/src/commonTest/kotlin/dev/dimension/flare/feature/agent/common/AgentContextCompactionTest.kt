@@ -1,0 +1,430 @@
+package dev.dimension.flare.feature.agent.common
+
+import ai.koog.agents.chatMemory.feature.ChatHistoryProvider
+import ai.koog.agents.core.tools.SimpleTool
+import ai.koog.agents.core.tools.ToolRegistry
+import ai.koog.http.client.ktor.KtorKoogHttpClient
+import ai.koog.prompt.Prompt
+import ai.koog.prompt.message.Message
+import ai.koog.prompt.message.MessagePart
+import ai.koog.serialization.typeToken
+import dev.dimension.flare.data.datastore.model.AppSettings
+import dev.dimension.flare.feature.agent.runtime.AiConfigKoogBridge
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.mock.MockEngine
+import io.ktor.client.engine.mock.respond
+import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpStatusCode
+import io.ktor.http.content.TextContent
+import io.ktor.http.headersOf
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.test.runTest
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
+
+class AgentContextCompactionTest {
+    @Test
+    fun largeHistoryBecomesOneCheckpointAndRecentContextWithoutLosingTheCurrentRequest() =
+        runTest {
+            Fixture().use { fixture ->
+                fixture.history.messages = oldHistory()
+                assertEquals("Done", fixture.run())
+                assertEquals(1, fixture.checkpoints.size)
+                assertTrue(fixture.requests.first().isCompaction())
+                assertFalse(fixture.requests.first().hasTools())
+                val continued = fixture.requests.last().toString()
+                assertTrue("checkpoint-1" in continued)
+                assertTrue("CURRENT USER REQUIREMENT" in continued)
+                assertFalse("old-0" in continued)
+                assertFalse(fixture.progress.flatten().any { "Create a concise conversation checkpoint" in it.textContent() })
+                assertEquals(
+                    "Done",
+                    fixture.history.messages
+                        .last()
+                        .textContent(),
+                )
+            }
+        }
+
+    @Test
+    fun shortHistoryKeepsAllMessagesAndRefreshesSystemInstructions() =
+        runTest {
+            Fixture().use { fixture ->
+                fixture.history.messages =
+                    Prompt
+                        .build("old") {
+                            system("OBSOLETE SYSTEM")
+                            user("Prior requirement")
+                            assistant("Prior answer")
+                        }.messages
+                assertEquals("Done", fixture.run())
+                assertEquals(1, fixture.requests.size)
+                assertTrue(
+                    fixture.requests
+                        .single()
+                        .toString()
+                        .contains("CURRENT SYSTEM"),
+                )
+                assertFalse(
+                    fixture.requests
+                        .single()
+                        .toString()
+                        .contains("OBSOLETE SYSTEM"),
+                )
+                assertTrue(
+                    fixture.requests
+                        .single()
+                        .toString()
+                        .contains("Prior requirement"),
+                )
+                assertTrue(fixture.checkpoints.isEmpty())
+            }
+        }
+
+    @Test
+    fun repeatedCompactionDoesNotResetTheIterationLimitOrExecuteAToolTwice() =
+        runTest {
+            Fixture(maxIterations = 11, resultSize = 18_000) { request, number ->
+                when {
+                    request.isCompaction() -> textResponse("checkpoint-$number: continue remaining work")
+                    !request.hasTools() -> textResponse("Step limit reached; ask to continue")
+                    else -> toolResponse(number)
+                }
+            }.use { fixture ->
+                assertTrue(fixture.run().contains("Step limit"))
+                assertEquals(4, fixture.toolCalls)
+                assertTrue(fixture.checkpoints.size >= 2)
+                assertTrue(fixture.phases.count { it == AgentPhase.StepCompleted } <= 11)
+                assertTrue(
+                    fixture.requests
+                        .last()
+                        .toString()
+                        .contains("step limit"),
+                )
+                assertTrue(
+                    fixture.requests
+                        .filter { it.isCompaction() }
+                        .drop(1)
+                        .all { "checkpoint-" in it.toString() },
+                )
+                assertTrue(fixture.requests.filter { it.isCompaction() }.all { "CURRENT USER REQUIREMENT" in it.toString() })
+            }
+        }
+
+    @Test
+    fun compactionWaitsForTheWholeToolBatchAndKeepsCompletedResults() =
+        runTest {
+            Fixture(resultSize = 9_000) { request, number ->
+                when {
+                    request.isCompaction() -> textResponse("Batch completed")
+                    number == 1 -> toolResponse(number, 2)
+                    else -> textResponse("Done")
+                }
+            }.use { fixture ->
+                assertEquals("Done", fixture.run())
+                assertEquals(2, fixture.toolCalls)
+                val summary = fixture.requests.single { it.isCompaction() }.toString()
+                assertTrue("Completed call-1-1" in summary)
+                assertTrue("Completed call-1-2" in summary)
+                assertEquals(2, fixture.callsWhenCompacting.single())
+            }
+        }
+
+    @Test
+    fun overflowRetriesOnlyTheModelOnceAndKeepsTheToolResult() =
+        runTest {
+            var failures = 0
+            Fixture { request, number ->
+                when {
+                    request.isCompaction() -> textResponse("Completed call-1-1; waiting for the answer")
+                    number == 1 -> toolResponse(number)
+                    failures++ == 0 -> OVERFLOW
+                    else -> textResponse("Recovered")
+                }
+            }.use { fixture ->
+                assertEquals("Recovered", fixture.run())
+                assertEquals(1, fixture.toolCalls)
+                assertEquals(4, fixture.requests.size)
+                assertTrue("Completed call-1-1" in fixture.requests.last().toString())
+            }
+        }
+
+    @Test
+    fun repeatedOverflowStopsAfterOneRecoveryAttempt() =
+        runTest {
+            Fixture { request, number ->
+                when {
+                    request.isCompaction() -> textResponse("Completed tool; work remains")
+                    number == 1 -> toolResponse(number)
+                    else -> OVERFLOW
+                }
+            }.use { fixture ->
+                assertFailsWith<Exception> { fixture.run() }
+                assertEquals(1, fixture.toolCalls)
+                assertEquals(4, fixture.requests.size)
+                assertEquals(1, fixture.checkpoints.size)
+            }
+        }
+
+    @Test
+    fun failedOrCancelledSummaryDoesNotReplaceThePreviousCheckpoint() =
+        runTest {
+            for (failure in listOf("cancel", "error", "empty", "tool", "oversized")) {
+                Fixture { request, _ ->
+                    check(request.isCompaction())
+                    when (failure) {
+                        "cancel" -> throw CancellationException("cancelled compaction")
+                        "error" -> ERROR
+                        "tool" -> toolResponse(99)
+                        "oversized" -> textResponse("x".repeat(30_000))
+                        else -> textResponse("")
+                    }
+                }.use { fixture ->
+                    val previous = listOf(agentContextSummary("Previous checkpoint")) + oldHistory()
+                    fixture.history.messages = previous
+                    assertFailsWith<Exception> { fixture.run() }
+                    assertEquals(previous, fixture.history.messages)
+                    assertTrue(fixture.checkpoints.isEmpty())
+                    assertEquals(0, fixture.toolCalls)
+                    assertEquals(1, fixture.requests.size)
+                }
+            }
+        }
+
+    @Test
+    fun checkpointPersistenceFailureDoesNotContinueOrSavePartialReplacement() =
+        runTest {
+            Fixture(failCheckpoint = true).use { fixture ->
+                val original = oldHistory()
+                fixture.history.messages = original
+                assertFailsWith<IllegalStateException> { fixture.run() }
+                assertEquals(original, fixture.history.messages)
+                assertEquals(1, fixture.requests.size)
+                assertTrue(fixture.checkpoints.isEmpty())
+            }
+        }
+
+    @Test
+    fun singleToolTurnStillFinishesNormallyAfterCompaction() =
+        runTest {
+            Fixture(resultSize = 18_000) { request, number ->
+                when {
+                    request.isCompaction() -> textResponse("Tool completed")
+                    number == 1 -> toolResponse(number)
+                    else -> textResponse("Finished insight")
+                }
+            }.use { fixture ->
+                assertEquals("Finished insight", fixture.run(finishAfterToolResults = true))
+                assertEquals(1, fixture.toolCalls)
+                assertEquals(1, fixture.checkpoints.size)
+                assertFalse(fixture.requests.last().hasTools())
+                assertFalse("step limit" in fixture.requests.last().toString())
+            }
+        }
+
+    @Test
+    fun recentToolCallsAndResultsStayPairedAfterCompaction() =
+        runTest {
+            Fixture().use { fixture ->
+                val call =
+                    (Prompt.build("tool") { assistant("") }.messages.single() as Message.Assistant)
+                        .copy(id = "call-message", parts = listOf(MessagePart.Tool.Call("paired-call", "work", "{}")))
+                val result =
+                    Prompt
+                        .build("result") {
+                            user {
+                                toolResult(MessagePart.Tool.Result("paired-call", "work", "Completed exactly once"))
+                            }
+                        }.messages
+                        .single()
+                        .withAgentMessageId("result-message")
+                fixture.history.messages = oldHistory() + call + result
+                fixture.run()
+                val replay = fixture.history.messages.flatMap { it.parts }
+                assertEquals(listOf("paired-call"), replay.filterIsInstance<MessagePart.Tool.Call>().map { it.id })
+                assertEquals(listOf("paired-call"), replay.filterIsInstance<MessagePart.Tool.Result>().map { it.id })
+                assertEquals(0, fixture.toolCalls)
+            }
+        }
+
+    @Test
+    fun providerTokenUsageTriggersCompactionBeforeTheNextToolRound() =
+        runTest {
+            Fixture { request, number ->
+                when {
+                    request.isCompaction() -> {
+                        textResponse("Updated progress")
+                    }
+
+                    number == 1 -> {
+                        toolResponse(number).dropLast(1) +
+                            ",\"usage\":{\"prompt_tokens\":9900,\"completion_tokens\":20,\"total_tokens\":9920}}"
+                    }
+
+                    else -> {
+                        textResponse("Done")
+                    }
+                }
+            }.use { fixture ->
+                fixture.history.messages = oldHistory().take(3)
+                assertEquals("Done", fixture.run())
+                assertFalse(fixture.requests.first().isCompaction())
+                assertEquals(1, fixture.checkpoints.size)
+                assertEquals(1, fixture.toolCalls)
+            }
+        }
+
+    private class Fixture(
+        private val maxIterations: Int = 256,
+        private val resultSize: Int = 20,
+        private val failCheckpoint: Boolean = false,
+        private val response: (
+            JsonObject,
+            Int,
+        ) -> String = { request, _ -> if (request.isCompaction()) textResponse("checkpoint-1: remaining work") else textResponse("Done") },
+    ) : AutoCloseable {
+        val requests = mutableListOf<JsonObject>()
+        val checkpoints = mutableListOf<AgentContextCheckpoint>()
+        val progress = mutableListOf<List<Message>>()
+        val phases = mutableListOf<AgentPhase>()
+        val callsWhenCompacting = mutableListOf<Int>()
+        val history = History()
+        var toolCalls = 0
+        val tool =
+            object : SimpleTool<Args>(typeToken<Args>(), "work", "Perform one operation") {
+                override suspend fun execute(args: Args): String {
+                    toolCalls++
+                    return "Completed ${args.id}: " + "x".repeat(resultSize)
+                }
+            }
+        val client =
+            HttpClient(
+                MockEngine { request ->
+                    val body = Json.parseToJsonElement((request.body as TextContent).text).jsonObject
+                    requests += body
+                    if (body.isCompaction()) callsWhenCompacting += toolCalls
+                    val content = response(body, requests.size)
+                    respond(
+                        content,
+                        if (content == OVERFLOW || content == ERROR) HttpStatusCode.BadRequest else HttpStatusCode.OK,
+                        headers = headersOf(HttpHeaders.ContentType, ContentType.Application.Json.toString()),
+                    )
+                },
+            )
+        val runtime =
+            assertNotNull(
+                AiConfigKoogBridge().createRuntime(
+                    AppSettings.AiConfig(
+                        type = AppSettings.AiConfig.Type.OpenAI("https://agent.example/v1/", "key", "test-model", contextWindow = 16_384),
+                    ),
+                    KtorKoogHttpClient.Factory(baseClient = client),
+                ),
+            )
+
+        suspend fun run(finishAfterToolResults: Boolean = false): String {
+            val request =
+                FlareAgentRequest(
+                    prompt = Prompt.build("test") { user("CURRENT USER REQUIREMENT: finish the task") },
+                    systemPrompt = "CURRENT SYSTEM",
+                    agentId = "test",
+                    strategyName = "test",
+                    analyzeNodeName = "analyze",
+                    executeToolsNodeName = "tools",
+                    sendToolResultsNodeName = "results",
+                    maxIterations = maxIterations,
+                    finishAfterToolResults = finishAfterToolResults,
+                    toolSet = AgentToolSet.Empty.copy(toolRegistry = ToolRegistry { tool(tool) }),
+                )
+            val agent =
+                runtime.createAgent(
+                    request,
+                    { phases += it.phase },
+                    history,
+                    storeMessages = { _, messages -> progress += messages },
+                    storeCheckpoint = { _, _, checkpoint ->
+                        check(!failCheckpoint) { "persistence failed" }
+                        checkpoints += checkpoint
+                    },
+                )
+            return try {
+                agent.run(request.prompt, "conversation")
+            } finally {
+                agent.close()
+            }
+        }
+
+        override fun close() {
+            runtime.promptExecutor.close()
+            client.close()
+        }
+    }
+
+    private class History : ChatHistoryProvider {
+        var messages: List<Message> = emptyList()
+
+        override suspend fun store(
+            conversationId: String,
+            messages: List<Message>,
+        ) {
+            this.messages = messages
+        }
+
+        override suspend fun load(conversationId: String): List<Message> = messages
+    }
+
+    @Serializable private data class Args(
+        val id: String,
+    )
+
+    private companion object {
+        const val OVERFLOW = """{"error":{"code":"context_length_exceeded","message":"maximum context length exceeded"}}"""
+        const val ERROR = """{"error":{"message":"Invalid parameter"}}"""
+
+        fun oldHistory(): List<Message> =
+            (0..7).map { i ->
+                Prompt
+                    .build("old-$i") { user("old-$i " + "x".repeat(2_300)) }
+                    .messages
+                    .single()
+                    .withAgentMessageId("old-$i")
+            }
+
+        fun JsonObject.isCompaction(): Boolean = toString().contains("Create a concise conversation checkpoint")
+
+        fun JsonObject.hasTools(): Boolean = (get("tools") as? JsonArray).orEmpty().isNotEmpty()
+
+        fun textResponse(text: String): String =
+            """{"id":"response","object":"chat.completion","created":0,"model":"test-model","choices":[{"index":0,"message":{"role":"assistant","content":${Json.encodeToString(
+                text,
+            )}},"finish_reason":"stop"}]}"""
+
+        fun toolResponse(
+            number: Int,
+            count: Int = 1,
+        ): String {
+            val calls =
+                (1..count).joinToString(",") { i ->
+                    """{"id":"call-$number-$i","type":"function","function":{"name":"work","arguments":${Json.encodeToString(
+                        "{\"id\":\"call-$number-$i\"}",
+                    )}}}"""
+                }
+            return """
+                {"id":"response","object":"chat.completion","created":0,"model":"test-model","choices":[{
+                    "index":0,"message":{"role":"assistant","content":null,"tool_calls":[$calls]},"finish_reason":"tool_calls"
+                }]}
+                """.trimIndent()
+        }
+    }
+}

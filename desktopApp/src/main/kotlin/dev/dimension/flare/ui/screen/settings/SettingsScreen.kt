@@ -103,6 +103,8 @@ import dev.dimension.flare.settings_ai_config_agent_title
 import dev.dimension.flare.settings_ai_config_api_key
 import dev.dimension.flare.settings_ai_config_api_key_hint
 import dev.dimension.flare.settings_ai_config_basic_title
+import dev.dimension.flare.settings_ai_config_context_window
+import dev.dimension.flare.settings_ai_config_context_window_hint
 import dev.dimension.flare.settings_ai_config_description
 import dev.dimension.flare.settings_ai_config_enable_agent
 import dev.dimension.flare.settings_ai_config_enable_pre_translation
@@ -1756,6 +1758,8 @@ internal fun SettingsScreen(
                     val serverRequirementHint = stringResource(Res.string.settings_ai_config_server_url_requirement)
                     val apiKeyTitle = stringResource(Res.string.settings_ai_config_api_key)
                     val apiKeyHint = stringResource(Res.string.settings_ai_config_api_key_hint)
+                    val contextWindowTitle = stringResource(Res.string.settings_ai_config_context_window)
+                    val contextWindowHint = stringResource(Res.string.settings_ai_config_context_window_hint)
                     val extraBodyTitle = stringResource(Res.string.settings_ai_config_extra_body)
                     val modelTitle = stringResource(Res.string.settings_ai_config_model)
                     val modelPlaceholder = stringResource(Res.string.settings_ai_config_model_select)
@@ -1944,6 +1948,33 @@ internal fun SettingsScreen(
                                                     },
                                                 )
                                             }
+                                        }
+                                    },
+                                )
+                                ExpanderItemSeparator()
+                                ExpanderItem(
+                                    heading = { Text(contextWindowTitle) },
+                                    caption = {
+                                        if (aiConfigState.openAIContextWindow.isNotBlank()) {
+                                            Text(aiConfigState.openAIContextWindow)
+                                        }
+                                    },
+                                    trailing = {
+                                        Button(
+                                            onClick = {
+                                                aiConfigState.setTextEditDialog(
+                                                    TextEditDialogState(
+                                                        title = contextWindowTitle,
+                                                        placeholder = "",
+                                                        value = aiConfigState.openAIContextWindow,
+                                                        hint = contextWindowHint,
+                                                        isValid = aiConfigState::isValidOpenAIContextWindow,
+                                                        onConfirm = aiConfigState::setOpenAIContextWindow,
+                                                    ),
+                                                )
+                                            },
+                                        ) {
+                                            Text(stringResource(Res.string.edit))
                                         }
                                     },
                                 )
@@ -2950,6 +2981,7 @@ internal fun SettingsTextEditDialog(
         onButtonClick = {
             when (it) {
                 ContentDialogButton.Primary -> {
+                    if (!dialog.isValid(textState.text.toString())) return@ContentDialog
                     dialog.onConfirm(textState.text.toString())
                     onDismiss()
                 }
@@ -2963,6 +2995,7 @@ internal fun SettingsTextEditDialog(
 }
 
 internal data class TextEditDialogState(
+    val isValid: (String) -> Boolean = { true },
     val title: String,
     val placeholder: String,
     val value: String,

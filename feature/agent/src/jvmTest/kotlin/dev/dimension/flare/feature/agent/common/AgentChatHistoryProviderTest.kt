@@ -5,6 +5,8 @@ import ai.koog.prompt.message.Message
 import ai.koog.prompt.message.MessagePart
 import androidx.room3.Room
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
+import androidx.sqlite.execSQL
+import dev.dimension.flare.feature.agent.database.AGENT_CONTEXT_MIGRATION
 import dev.dimension.flare.feature.agent.database.AgentDatabase
 import dev.dimension.flare.feature.agent.presenter.AgentMessagePart
 import dev.dimension.flare.feature.agent.presenter.agentMessageText
@@ -22,6 +24,7 @@ import kotlinx.coroutines.test.runTest
 import java.nio.file.Files
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertTrue
@@ -215,11 +218,187 @@ class AgentChatHistoryProviderTest {
             }
         }
 
+    @Test
+    fun checkpointsSurviveReopenWithoutChangingVisibleHistoryAndClearWithTheConversation() =
+        runTest {
+            val directory = Files.createTempDirectory("flare-agent-checkpoint-")
+            val path = directory.resolve("agent.db").toString()
+            val messages =
+                listOf(
+                    user("Original requirement", "q1"),
+                    assistant("Completed step", "a1"),
+                    user("Recent question", "q2"),
+                    assistant("Recent answer", "a2"),
+                )
+            try {
+                var ids: List<String> = emptyList()
+                Fixture(path).use { fixture ->
+                    fixture.history.store(CONVERSATION, messages)
+                    ids =
+                        fixture.history
+                            .observeMessages(CONVERSATION)
+                            .first()
+                            .map { it.id }
+                    fixture.history.storeCheckpoint(CONVERSATION, messages, AgentContextCheckpoint("Saved progress", "a1"))
+                    assertEquals(
+                        ids,
+                        fixture.history
+                            .observeMessages(CONVERSATION)
+                            .first()
+                            .map { it.id },
+                    )
+                }
+                Fixture(path).use { fixture ->
+                    val loaded = fixture.history.load(CONVERSATION)
+                    assertEquals(listOf(AGENT_CONTEXT_SUMMARY_ID, "q2", "a2"), loaded.map { it.id })
+                    assertTrue(loaded.first().textContent().contains("Saved progress"))
+                    val next = assistant("Continued", "a3")
+                    fixture.history.store(CONVERSATION, loaded + next)
+                    assertEquals(
+                        ids,
+                        fixture.history
+                            .observeMessages(CONVERSATION)
+                            .first()
+                            .drop(1)
+                            .map { it.id },
+                    )
+                    assertFalse(
+                        fixture.history
+                            .observeMessages(CONVERSATION)
+                            .first()
+                            .any { it.parts.agentMessageText().contains("Saved progress") },
+                    )
+                    fixture.history.storeCheckpoint(CONVERSATION, loaded + next, AgentContextCheckpoint("Updated progress", "a2"))
+                    assertEquals(listOf(AGENT_CONTEXT_SUMMARY_ID, "a3"), fixture.history.load(CONVERSATION).map { it.id })
+                    fixture.history.clear(CONVERSATION)
+                    assertTrue(fixture.history.load(CONVERSATION).isEmpty())
+                    fixture.history.storeCheckpoint(CONVERSATION, messages, AgentContextCheckpoint("New progress", "a1"))
+                    fixture.history.deleteConversation(CONVERSATION)
+                    assertTrue(fixture.history.load(CONVERSATION).isEmpty())
+                }
+            } finally {
+                Files.list(directory).use { paths -> paths.forEach(Files::delete) }
+                Files.delete(directory)
+            }
+        }
+
+    @Test
+    fun invalidCheckpointRollsBackBothTheBoundaryAndNewMessages() =
+        runTest {
+            Fixture().use { fixture ->
+                val original = listOf(user("Question", "q"), assistant("Answer", "a"))
+                fixture.history.storeCheckpoint(CONVERSATION, original, AgentContextCheckpoint("Existing summary", "q"))
+                val before = fixture.history.load(CONVERSATION)
+                assertFailsWith<NoSuchElementException> {
+                    fixture.history.storeCheckpoint(
+                        CONVERSATION,
+                        original + assistant("Must not persist", "new"),
+                        AgentContextCheckpoint("Invalid", "missing"),
+                    )
+                }
+                assertEquals(before.map { it.textContent() }, fixture.history.load(CONVERSATION).map { it.textContent() })
+                assertEquals(
+                    2,
+                    fixture.history
+                        .observeMessages(CONVERSATION)
+                        .first()
+                        .size,
+                )
+            }
+        }
+
+    @Test
+    fun replayKeepsCompleteToolExchangesAndDropsOrphanCallsAndResults() =
+        runTest {
+            Fixture().use { fixture ->
+                val call = assistant("", "call").copy(parts = listOf(MessagePart.Tool.Call("tool-1", "lookup", "{}")))
+                val result =
+                    Prompt
+                        .build("results") {
+                            user { toolResult(MessagePart.Tool.Result("tool-1", "lookup", "Found item")) }
+                        }.messages
+                        .single()
+                        .withAgentMessageId("result")
+                val orphan =
+                    assistant(
+                        "Visible progress",
+                        "orphan",
+                    ).copy(parts = listOf(MessagePart.Text("Visible progress"), MessagePart.Tool.Call("tool-2", "lookup", "{}")))
+                fixture.history.storeCheckpoint(
+                    CONVERSATION,
+                    listOf(user("Requirement", "old"), call, result, orphan),
+                    AgentContextCheckpoint("Requirement", "old"),
+                )
+                val replay = fixture.history.load(CONVERSATION)
+                assertEquals(1, replay.flatMap { it.parts }.filterIsInstance<MessagePart.Tool.Call>().size)
+                assertEquals(1, replay.flatMap { it.parts }.filterIsInstance<MessagePart.Tool.Result>().size)
+                assertEquals("Visible progress", replay.last().textContent())
+                assertEquals(
+                    2,
+                    fixture.history
+                        .observeMessages(CONVERSATION)
+                        .first()
+                        .size,
+                )
+            }
+        }
+
+    @Test
+    fun versionNineMigrationPreservesExistingChatData() =
+        runTest {
+            val directory = Files.createTempDirectory("flare-agent-migration-")
+            val path = directory.resolve("agent.db").toString()
+            try {
+                BundledSQLiteDriver().open(path).use { connection ->
+                    connection.execSQL(
+                        "CREATE TABLE agent_conversations (conversationId TEXT NOT NULL PRIMARY KEY, title TEXT, titleGenerated INTEGER NOT NULL, createdAt INTEGER NOT NULL, updatedAt INTEGER NOT NULL, isRunning INTEGER NOT NULL, errorMessage TEXT)",
+                    )
+                    connection.execSQL(
+                        "CREATE TABLE agent_messages (conversationId TEXT NOT NULL, position INTEGER NOT NULL, role TEXT NOT NULL, text TEXT NOT NULL, contentJson TEXT NOT NULL, messageJson TEXT NOT NULL, createdAt INTEGER NOT NULL, PRIMARY KEY(conversationId, position))",
+                    )
+                    connection.execSQL("INSERT INTO agent_conversations VALUES ('conversation', 'Existing conversation', 1, 0, 0, 0, NULL)")
+                    connection.execSQL("INSERT INTO agent_messages VALUES ('conversation', 0, 'User', 'Existing question', '', '', 0)")
+                    connection.execSQL("PRAGMA user_version = 9")
+                }
+                Fixture(path).use { fixture ->
+                    assertEquals(
+                        "Existing conversation",
+                        fixture.history
+                            .observeRoom(CONVERSATION)
+                            .first()
+                            ?.title,
+                    )
+                    assertEquals(
+                        "Existing question",
+                        fixture.history
+                            .observeMessages(CONVERSATION)
+                            .first()
+                            .single()
+                            .parts
+                            .agentMessageText(),
+                    )
+                    val messages = listOf(user("Next", "q"), assistant("Answer", "a"))
+                    fixture.history.storeCheckpoint(CONVERSATION, messages, AgentContextCheckpoint("Migrated", "q"))
+                    assertTrue(
+                        fixture.history
+                            .load(CONVERSATION)
+                            .first()
+                            .textContent()
+                            .contains("Migrated"),
+                    )
+                }
+            } finally {
+                Files.list(directory).use { paths -> paths.forEach(Files::delete) }
+                Files.delete(directory)
+            }
+        }
+
     private class Fixture(
         path: String? = null,
     ) : AutoCloseable {
         private val database =
             (if (path == null) Room.inMemoryDatabaseBuilder<AgentDatabase>() else Room.databaseBuilder<AgentDatabase>(path))
+                .addMigrations(AGENT_CONTEXT_MIGRATION)
                 .setDriver(BundledSQLiteDriver())
                 .setQueryCoroutineContext(Dispatchers.IO)
                 .build()

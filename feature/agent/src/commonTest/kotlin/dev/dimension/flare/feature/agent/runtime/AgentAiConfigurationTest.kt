@@ -45,6 +45,37 @@ class AgentAiConfigurationTest {
         )
 
     @Test
+    fun contextWindowUsesAnOverrideKnownModelMetadataOrAConservativeFallback() {
+        val client = HttpClient(MockEngine { error("Model metadata must not require a request") })
+        try {
+            for ((config, expected) in listOf(
+                basic to 8_192L,
+                basic.copy(model = "gpt-4o") to 128_000L,
+                basic.copy(model = "gpt-4o", contextWindow = 32_768) to 32_768L,
+                basic.copy(contextWindow = 16_384) to 16_384L,
+            )) {
+                val runtime =
+                    assertNotNull(
+                        AiConfigKoogBridge().createRuntime(
+                            AppSettings.AiConfig(type = config),
+                            KtorKoogHttpClient.Factory(baseClient = client),
+                        ),
+                    )
+                assertEquals(expected, runtime.model.contextLength)
+                runtime.promptExecutor.close()
+            }
+            assertFailsWith<IllegalArgumentException> {
+                AiConfigKoogBridge().createRuntime(
+                    AppSettings.AiConfig(type = basic.copy(contextWindow = -1)),
+                    KtorKoogHttpClient.Factory(baseClient = client),
+                )
+            }
+        } finally {
+            client.close()
+        }
+    }
+
+    @Test
     fun realAgentRequestsUseResolvedSettingsAcrossToolCalls() =
         runTest {
             for (

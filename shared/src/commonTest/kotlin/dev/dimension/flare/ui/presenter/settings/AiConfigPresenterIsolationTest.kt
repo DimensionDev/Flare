@@ -109,6 +109,7 @@ class AiConfigPresenterIsolationTest : RobolectricTest() {
                         model = "new-light",
                         reasoningEffort = "xhigh",
                         extraBody = "{\"seed\":3}",
+                        contextWindow = 32768,
                     )
                 val updatedAgent =
                     agent.copy(
@@ -117,6 +118,7 @@ class AiConfigPresenterIsolationTest : RobolectricTest() {
                         model = "new-strong",
                         reasoningEffort = "max",
                         extraBody = "{\"seed\":4}",
+                        contextWindow = 131072,
                     )
                 initial.first.setOpenAIServerUrl(updatedBasic.serverUrl)
                 initial.second.setOpenAIServerUrl(updatedAgent.serverUrl)
@@ -126,6 +128,12 @@ class AiConfigPresenterIsolationTest : RobolectricTest() {
                 initial.second.setOpenAIModel(updatedAgent.model)
                 initial.second.setOpenAIReasoningEffort(AiReasoningEffortOption.Max)
                 initial.first.setOpenAIReasoningEffort(AiReasoningEffortOption.XHigh)
+                assertTrue(initial.first.isValidOpenAIContextWindow(""))
+                assertTrue(initial.first.isValidOpenAIContextWindow(" 32768 "))
+                assertFalse(initial.first.isValidOpenAIContextWindow("512"))
+                assertFalse(initial.first.isValidOpenAIContextWindow("invalid"))
+                initial.first.setOpenAIContextWindow("32768")
+                initial.second.setOpenAIContextWindow("131072")
                 initial.first.setOpenAIExtraBody(updatedBasic.extraBody)
                 initial.second.setOpenAIExtraBody(updatedAgent.extraBody)
                 states.first { (base, override) -> base.hasConfig(updatedBasic) && override.hasConfig(updatedAgent) }
@@ -205,7 +213,8 @@ class AiConfigPresenterIsolationTest : RobolectricTest() {
 
     private fun AiConfigPresenter.State.hasConfig(config: AppSettings.AiConfig.Type.OpenAI) =
         openAIServerUrl == config.serverUrl && openAIApiKey == config.apiKey && openAIModel == config.model &&
-            openAIReasoningEffort.value == config.reasoningEffort && openAIExtraBody == config.extraBody
+            openAIReasoningEffort.value == config.reasoningEffort && openAIExtraBody == config.extraBody &&
+            openAIContextWindow == config.contextWindow?.toString().orEmpty()
 
     private fun AiConfigPresenter.State.hasModels(config: AppSettings.AiConfig.Type.OpenAI) =
         (openAIModels as? UiState.Success)?.data ==

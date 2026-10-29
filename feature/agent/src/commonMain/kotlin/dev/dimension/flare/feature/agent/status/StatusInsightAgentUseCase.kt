@@ -175,7 +175,6 @@ internal class StatusInsightAgentUseCase(
                         toolContext = toolContext,
                         temperature = 0.2,
                         finishAfterToolResults = true,
-                        chatMemoryWindowSize = CHAT_MEMORY_WINDOW_SIZE,
                         supportingParts = listOfNotNull(toolContext.status?.currentPost?.let { AgentMessagePart.PostCard(it) }),
                         images =
                             toolContext.status
@@ -436,7 +435,6 @@ internal class StatusInsightAgentUseCase(
         const val MAX_RELATED_TEXT_LENGTH = 500
         const val MAX_IMAGE_ATTACHMENTS = 4
         val SUPPORTED_IMAGE_FORMATS = setOf("jpg", "jpeg", "png", "webp", "gif")
-        const val CHAT_MEMORY_WINDOW_SIZE = 20
 
         const val STATUS_INSIGHT_SYSTEM_PROMPT =
             """

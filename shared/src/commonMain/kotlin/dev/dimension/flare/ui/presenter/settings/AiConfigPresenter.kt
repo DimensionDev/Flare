@@ -75,6 +75,7 @@ public class AiConfigPresenter(
         public val openAIApiKey: String
         public val openAIModel: String
         public val openAIReasoningEffort: AiReasoningEffortOption
+        public val openAIContextWindow: String
         public val openAIExtraBody: String
         public val translateProvider: TranslateProviderOption
         public val deepLApiKey: String
@@ -113,6 +114,10 @@ public class AiConfigPresenter(
         public fun setOpenAIModel(value: String)
 
         public fun setOpenAIReasoningEffort(value: AiReasoningEffortOption)
+
+        public fun setOpenAIContextWindow(value: String)
+
+        public fun isValidOpenAIContextWindow(value: String): Boolean
 
         public fun setOpenAIExtraBody(value: String)
 
@@ -293,6 +298,9 @@ public class AiConfigPresenter(
                     it.value == (editingType as? AppSettings.AiConfig.Type.OpenAI)?.reasoningEffort.orEmpty()
                 } ?: AiReasoningEffortOption.Default
 
+            override val openAIContextWindow: String =
+                (editingType as? AppSettings.AiConfig.Type.OpenAI)?.contextWindow?.toString().orEmpty()
+
             override val openAIExtraBody: String =
                 (editingType as? AppSettings.AiConfig.Type.OpenAI)?.extraBody ?: ""
 
@@ -396,6 +404,14 @@ public class AiConfigPresenter(
 
             override fun setOpenAIReasoningEffort(value: AiReasoningEffortOption) {
                 update { updateOpenAIConfig(agentConfig) { copy(reasoningEffort = value.value) } }
+            }
+
+            override fun isValidOpenAIContextWindow(value: String): Boolean =
+                value.isBlank() || (value.trim().toIntOrNull()?.let { it >= 1024 } == true)
+
+            override fun setOpenAIContextWindow(value: String) {
+                require(isValidOpenAIContextWindow(value))
+                update { updateOpenAIConfig(agentConfig) { copy(contextWindow = value.trim().toIntOrNull()) } }
             }
 
             override fun setOpenAIExtraBody(value: String) {

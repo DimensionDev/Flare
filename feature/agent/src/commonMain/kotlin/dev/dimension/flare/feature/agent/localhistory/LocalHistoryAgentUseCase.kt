@@ -98,7 +98,6 @@ internal class LocalHistoryAgentUseCase(
                                 ),
                             temperature = 0.3,
                             finishAfterToolResults = false,
-                            chatMemoryWindowSize = CHAT_MEMORY_WINDOW_SIZE,
                         ),
                     conversationId = conversationId,
                 ) { trace ->
@@ -257,8 +256,6 @@ internal class LocalHistoryAgentUseCase(
         }
 
     private companion object {
-        const val CHAT_MEMORY_WINDOW_SIZE = 30
-
         const val LOCAL_HISTORY_SYSTEM_PROMPT =
             """
             You are Flare's local history assistant.

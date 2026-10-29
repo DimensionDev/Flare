@@ -699,4 +699,6 @@
     <string name="plugin_ai_applied">已套用最新版本</string>
     <string name="plugin_ai_failed">無法套用修改</string>
     <string name="plugin_ai_delete_message">刪除 %1$s 及其本機原始碼？已有帳號會保留。</string>
+    <string name="settings_ai_config_context_window">上下文視窗（token）</string>
+    <string name="settings_ai_config_context_window_hint">留空以自動識別。自訂模型可填寫上下文 token 上限（至少 1024）。</string>
 </resources>

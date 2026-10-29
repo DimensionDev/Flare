@@ -137,6 +137,7 @@ class AgentIterationLimitTest {
                 assertEquals(1, fixture.tool.calls)
                 assertEquals(2, fixture.requests.size)
                 assertFalse(fixture.requests.last().hasTools())
+                assertTrue(fixture.history.progress.isNotEmpty())
                 assertEquals(0, fixture.history.stores)
             }
         }
@@ -151,6 +152,7 @@ class AgentIterationLimitTest {
                 assertFailsWith<CancellationException> { fixture.run() }
                 assertEquals(1, fixture.tool.calls)
                 assertEquals(2, fixture.requests.size)
+                assertTrue(fixture.history.progress.isNotEmpty())
                 assertEquals(0, fixture.history.stores)
             }
         }
@@ -179,7 +181,15 @@ class AgentIterationLimitTest {
         private val runtime =
             assertNotNull(
                 AiConfigKoogBridge().createRuntime(
-                    AppSettings.AiConfig(type = AppSettings.AiConfig.Type.OpenAI("https://agent.example/v1/", "test-key", "test-model")),
+                    AppSettings.AiConfig(
+                        type =
+                            AppSettings.AiConfig.Type.OpenAI(
+                                "https://agent.example/v1/",
+                                "test-key",
+                                "test-model",
+                                contextWindow = 128_000,
+                            ),
+                    ),
                     KtorKoogHttpClient.Factory(baseClient = client),
                 ),
             )
@@ -196,7 +206,11 @@ class AgentIterationLimitTest {
             ).let { request -> maxIterations?.let { request.copy(maxIterations = it) } ?: request }
 
         suspend fun run(request: FlareAgentRequest = this.request): String {
-            val agent = runtime.createAgent(request, { phases += it.phase }, history)
+            val agent =
+                runtime.createAgent(request, { phases += it.phase }, history, storeMessages = { _, messages ->
+                    history.progress =
+                        messages
+                })
             return try {
                 agent.run(request.prompt, "conversation")
             } finally {
@@ -220,6 +234,7 @@ class AgentIterationLimitTest {
     }
 
     private class MemoryHistory : ChatHistoryProvider {
+        var progress: List<Message> = emptyList()
         var stores = 0
         var messages: List<Message> = emptyList()
 

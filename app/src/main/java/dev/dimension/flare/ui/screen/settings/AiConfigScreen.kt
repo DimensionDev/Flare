@@ -111,6 +111,8 @@ internal fun AiConfigScreen(onBack: () -> Unit) {
                 val serverRequirementHint = stringResource(id = R.string.settings_ai_config_server_url_requirement)
                 val apiKeyTitle = stringResource(id = R.string.settings_ai_config_api_key)
                 val apiKeyHint = stringResource(id = R.string.settings_ai_config_api_key_hint)
+                val contextWindowTitle = stringResource(id = R.string.settings_ai_config_context_window)
+                val contextWindowHint = stringResource(id = R.string.settings_ai_config_context_window_hint)
                 val extraBodyTitle = stringResource(id = R.string.settings_ai_config_extra_body)
                 val extraBodyHint = """{"thinking": {"type": "enabled"}}"""
                 val modelTitle = stringResource(id = R.string.settings_ai_config_model)
@@ -306,6 +308,45 @@ internal fun AiConfigScreen(onBack: () -> Unit) {
                     }
                     AnimatedVisibility(visible = state.aiType == AiTypeOption.OpenAI) {
                         SegmentedListItem(
+                            checked = state.textEditDialog?.field == AiConfigEditField.ContextWindow,
+                            onCheckedChange = { checked ->
+                                if (checked) {
+                                    state.setTextEditDialog(
+                                        TextEditDialogState(
+                                            field = AiConfigEditField.ContextWindow,
+                                            title = contextWindowTitle,
+                                            placeholder = contextWindowHint,
+                                            value = state.openAIContextWindow,
+                                            hint = contextWindowHint,
+                                            isValid = state::isValidOpenAIContextWindow,
+                                            onConfirm = { newValue ->
+                                                state.setOpenAIContextWindow(newValue)
+                                            },
+                                        ),
+                                    )
+                                } else if (state.textEditDialog?.field == AiConfigEditField.ContextWindow) {
+                                    state.setTextEditDialog(null)
+                                }
+                            },
+                            shapes = ListItemDefaults.item(),
+                            content = {
+                                Text(text = contextWindowTitle)
+                            },
+                            supportingContent =
+                                if (state.openAIContextWindow.isBlank()) {
+                                    null
+                                } else {
+                                    {
+                                        Text(
+                                            text = state.openAIContextWindow,
+                                            style = MaterialTheme.typography.bodySmall,
+                                        )
+                                    }
+                                },
+                        )
+                    }
+                    AnimatedVisibility(visible = state.aiType == AiTypeOption.OpenAI) {
+                        SegmentedListItem(
                             checked = state.textEditDialog?.field == AiConfigEditField.ExtraBody,
                             onCheckedChange = { checked ->
                                 if (checked) {
@@ -497,6 +538,7 @@ internal fun AiConfigScreen(onBack: () -> Unit) {
     states.forEach { state ->
         state.textEditDialog?.let { dialog ->
             TextEditDialog(
+                isValid = dialog.isValid,
                 title = dialog.title,
                 placeholder = dialog.placeholder,
                 value = dialog.value,
@@ -562,6 +604,7 @@ private fun openAIReasoningEffortLabel(option: AiReasoningEffortOption): String 
 
 private data class TextEditDialogState(
     val field: AiConfigEditField,
+    val isValid: (String) -> Boolean = { true },
     val title: String,
     val placeholder: String,
     val value: String,
@@ -571,6 +614,7 @@ private data class TextEditDialogState(
 )
 
 private enum class AiConfigEditField {
+    ContextWindow,
     ExtraBody,
     TldrPrompt,
 }
@@ -587,6 +631,7 @@ internal fun TextEditDialog(
     onConfirm: (String) -> Unit,
     secret: Boolean = false,
     singleLine: Boolean = false,
+    isValid: (String) -> Boolean = { true },
 ) {
     var text by remember(value) { mutableStateOf(value) }
     var showSuggestions by remember(value) { mutableStateOf(false) }
@@ -674,7 +719,7 @@ internal fun TextEditDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = { onConfirm(text) }) {
+            TextButton(enabled = isValid(text), onClick = { onConfirm(text) }) {
                 Text(text = stringResource(id = android.R.string.ok))
             }
         },

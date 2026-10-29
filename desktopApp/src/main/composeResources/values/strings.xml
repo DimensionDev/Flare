@@ -889,4 +889,6 @@
     <string name="plugin_ai_applied">Up to date</string>
     <string name="plugin_ai_failed">Changes could not be applied</string>
     <string name="plugin_ai_delete_message">Delete %1$s and its local source? Existing accounts are kept.</string>
+    <string name="settings_ai_config_context_window">Context window (tokens)</string>
+    <string name="settings_ai_config_context_window_hint">Leave blank for automatic detection. For custom models, enter the context limit in tokens (at least 1024).</string>
 </resources>

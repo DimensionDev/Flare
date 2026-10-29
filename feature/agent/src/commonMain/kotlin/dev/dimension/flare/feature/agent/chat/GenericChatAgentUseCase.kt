@@ -68,7 +68,6 @@ internal class GenericChatAgentUseCase(
                                     ),
                                 temperature = 0.5,
                                 finishAfterToolResults = false,
-                                chatMemoryWindowSize = CHAT_MEMORY_WINDOW_SIZE,
                             ),
                         conversationId = conversationId,
                     ) { trace ->
@@ -120,8 +119,6 @@ internal class GenericChatAgentUseCase(
         }
 
     private companion object {
-        const val CHAT_MEMORY_WINDOW_SIZE = 30
-
         const val GENERIC_CHAT_SYSTEM_PROMPT =
             """
             You are Flare's general-purpose chat assistant.

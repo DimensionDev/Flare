@@ -69,19 +69,18 @@ public fun ImageRequest.Builder.media(
 
 @Composable
 public fun rememberMediaProxySnapshot(media: UiMedia?): Result<ProxySnapshot>? {
+    if (media?.isRemote != true) return null
     val revision by ProxyNetwork.changes.collectAsState()
-    val route by key(media?.proxy, media?.isRemote) {
+    val route by key(media.proxy) {
         produceState<Result<ProxySnapshot>?>(null, revision) {
-            if (media?.isRemote == true) {
-                value =
-                    try {
-                        Result.success(ProxyNetwork.snapshot(media.proxy))
-                    } catch (error: CancellationException) {
-                        throw error
-                    } catch (error: Exception) {
-                        Result.failure(error)
-                    }
-            }
+            value =
+                try {
+                    Result.success(ProxyNetwork.snapshot(media.proxy))
+                } catch (error: CancellationException) {
+                    throw error
+                } catch (error: Exception) {
+                    Result.failure(error)
+                }
         }
     }
     return route

@@ -15,6 +15,7 @@ import dev.dimension.flare.model.RecommendedInstance
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiInstanceMetadata
 import dev.dimension.flare.ui.model.UiStrings
+import dev.dimension.flare.ui.model.asType
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.Dispatchers
@@ -100,7 +101,7 @@ class LoginSuccessDispatcherTest {
 
 private object TestLoginPlatform : PlatformSpec, LoginPlatformProvider {
     override val platformId = "Test"
-    override val metadata = PlatformMetadata("Test", UiIcon.Mastodon)
+    override val metadata = PlatformMetadata("Test", UiIcon.Mastodon.asType())
     override val isDefaultGuest = true
     override val timelineSpecs: ImmutableList<TimelineSpec<out TimelineSpec.Data>> = persistentListOf()
     override val methods = listOf(LoginMethodSpec(LoginMethodType.Password, UiStrings.PasswordLogin))

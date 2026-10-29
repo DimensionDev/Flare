@@ -235,10 +235,11 @@ class PluginInstallerTest {
             assertFalse(fileSystem.exists(uninstalledStore.paths.packagePath(second.packageHash)))
             assertFalse(fileSystem.exists(uninstalledStore.paths.iconPath(second.packageHash)))
             assertEquals(
-                0,
+                1,
                 fileSystem
                     .list(uninstalledStore.paths.icons)
                     .count { it.name.startsWith("platform-") },
+                "Cached posts and accounts retain their shared icon after the package is removed",
             )
         }
 

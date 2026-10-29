@@ -3,6 +3,7 @@ package dev.dimension.flare.ui.model
 import androidx.compose.runtime.Immutable
 import dev.dimension.flare.common.SerializableImmutableList
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
+import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -308,7 +309,7 @@ public sealed class UiTimelineV2 {
         val sensitive: Boolean,
         val contentWarning: UiTranslatableText?,
         val user: UiProfile?,
-        val platformIcon: UiIcon = user?.platformIcon ?: UiIcon.World,
+        val platformIcon: IconType = user?.platformIcon ?: UiIcon.World.asType(),
         public val sourceLanguages: SerializableImmutableList<String> = persistentListOf(),
         @Transient
         public val translationDisplayState: TranslationDisplayState = TranslationDisplayState.Hidden,
@@ -356,6 +357,7 @@ public sealed class UiTimelineV2 {
             renderHashBuilder()
                 .add(itemKey)
                 .add(platformId)
+                .add(platformIcon)
                 .add(images.renderSummaryHash { it.renderSummaryHash() })
                 .add(sensitive)
                 .add(contentWarning?.original?.renderSummaryHash())
@@ -557,6 +559,7 @@ private fun UiTimelineV2.Post.renderSummaryHash(): Int =
     renderHashBuilder()
         .add(itemKey)
         .add(platformId)
+        .add(platformIcon)
         .add(user?.renderSummaryHash())
         .add(contentWarning?.original?.renderSummaryHash())
         .add(contentWarning?.translation?.renderSummaryHash())
@@ -595,6 +598,7 @@ private fun UiProfile.renderSummaryHash(): Int =
         .add(avatar?.renderSummaryHash())
         .add(name.raw)
         .add(platformId)
+        .add(platformIcon)
         .add(banner?.renderSummaryHash())
         .add(description?.renderSummaryHash())
         .add(translationDisplayState)

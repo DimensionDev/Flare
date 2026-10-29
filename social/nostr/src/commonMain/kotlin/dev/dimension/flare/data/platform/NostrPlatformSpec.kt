@@ -10,6 +10,7 @@ import dev.dimension.flare.model.PlatformDeepLink
 import dev.dimension.flare.model.PlatformMetadata
 import dev.dimension.flare.model.PlatformSpec
 import dev.dimension.flare.ui.model.UiIcon
+import dev.dimension.flare.ui.model.asType
 import dev.dimension.flare.ui.presenter.login.LoginPlatformProvider
 import dev.dimension.flare.ui.presenter.login.NostrLoginProvider
 import kotlinx.collections.immutable.ImmutableList
@@ -26,7 +27,7 @@ public data object NostrPlatformSpec :
     public override val metadata: PlatformMetadata =
         PlatformMetadata(
             displayName = "Nostr",
-            icon = UiIcon.Nostr,
+            icon = UiIcon.Nostr.asType(),
             agentAliases = listOf("nostr"),
         )
     public override val order: Int = 0

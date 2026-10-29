@@ -41,9 +41,9 @@ public struct TabIcon: View {
                 .frame(width: size, height: size)
                 .id("\(avatar.accountKey.id)@\(avatar.accountKey.host)")
         case .url(let url):
-            NetworkImage(data: UiMediaImage(url: url.url, proxy: ProxyRef.Global.shared))
+            NetworkImage(data: UiMediaImage(url: url.url, proxy: ProxyRef.Global.shared), contentMode: .fit)
                 .frame(width: size, height: size)
-                .clipShape(RoundedRectangle(cornerRadius: faviconCornerRadius, style: .continuous))
+                .clipShape(RoundedRectangle(cornerRadius: min(faviconCornerRadius, size * 0.2), style: .continuous))
         case .mixed(let mixed):
             if iconOnly {
                 MaterialTabIcon(icon: mixed.icon)

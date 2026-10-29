@@ -17,6 +17,7 @@ import dev.dimension.flare.data.datasource.microblog.UnavailableMicroblogDataSou
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.datastore.model.AccountSelectionPreferences
 import dev.dimension.flare.data.io.OkioFileStorage
+import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.ProxyMode
 import dev.dimension.flare.data.model.ProxyPolicy
 import dev.dimension.flare.data.model.ProxySettings
@@ -32,6 +33,7 @@ import dev.dimension.flare.testPlatformRegistry
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiText
+import dev.dimension.flare.ui.model.asType
 import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.home.RememberedAccountSelection
 import kotlinx.coroutines.CompletableDeferred
@@ -467,7 +469,7 @@ class AccountRepositoryTest : RobolectricTest() {
 
             val account = repository.allAccounts.first().single()
             assertEquals("TestNet", account.platformDisplayName)
-            assertEquals(dev.dimension.flare.ui.model.UiIcon.World, account.platformIcon)
+            assertEquals(UiIcon.World.asType(), account.platformIcon)
             assertFalse(account.platformAvailable)
             assertFailsWith<UnsupportedPlatformException> {
                 repository.getOrCreateDataSource(account)
@@ -492,16 +494,15 @@ class AccountRepositoryTest : RobolectricTest() {
                     accountKey = MicroBlogKey("alice", "future.example"),
                     platformId = "FutureNet",
                     platformDisplayName = "Future Network",
-                    platformIcon = UiIcon.Mastodon,
+                    platformIcon = IconType.Url("file:///stable/future.png"),
                     platformDisplayNameText = UiText.Raw("Localized Future Network"),
-                    platformIconUrl = "file:///stable/future.png",
                 )
 
             repository.addAccount(account, "credential")
 
             val stored = requireNotNull(appDatabase.accountDao().getAccount(account.accountKey))
             assertEquals("Future Network", stored.platformDisplayName)
-            assertEquals(UiIcon.Mastodon.name, stored.platformIconName)
+            assertNull(stored.platformIconName)
             assertEquals(
                 UiText.Raw("Localized Future Network"),
                 requireNotNull(stored.platformDisplayNameTextJson).decodeJson<UiText>(),
@@ -509,9 +510,8 @@ class AccountRepositoryTest : RobolectricTest() {
             assertEquals("file:///stable/future.png", stored.platformIconUrl)
             val restored = repository.allAccounts.first().single()
             assertEquals("Future Network", restored.platformDisplayName)
-            assertEquals(UiIcon.Mastodon, restored.platformIcon)
+            assertEquals(account.platformIcon, restored.platformIcon)
             assertEquals(UiText.Raw("Localized Future Network"), restored.platformDisplayNameText)
-            assertEquals("file:///stable/future.png", restored.platformIconUrl)
             assertFalse(restored.platformAvailable)
         }
 

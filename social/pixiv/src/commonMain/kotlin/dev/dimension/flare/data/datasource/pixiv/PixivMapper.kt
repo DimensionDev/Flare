@@ -24,6 +24,7 @@ import dev.dimension.flare.ui.model.UiNumber
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.UiTranslatableText
+import dev.dimension.flare.ui.model.asType
 import dev.dimension.flare.ui.model.bindMediaProxy
 import dev.dimension.flare.ui.model.mapper.pixivFavourite
 import dev.dimension.flare.ui.model.toUiImage
@@ -156,7 +157,7 @@ internal fun PixivUser.toUiProfile(accountKey: MicroBlogKey? = null): UiProfile 
                 .toUiImage(persistentMapOf("Referer" to PIXIV_IMAGE_REFERER)),
         nameInternal = name.toUiPlainText(),
         platformId = PIXIV_PLATFORM_ID,
-        platformIcon = dev.dimension.flare.ui.model.UiIcon.Pixiv,
+        platformIcon = UiIcon.Pixiv.asType(),
         clickEvent =
             ClickEvent.Deeplink(
                 DeeplinkRoute.Profile.User(
@@ -188,7 +189,7 @@ internal fun PixivCredential.toUiProfile(accountKey: MicroBlogKey? = null): UiPr
         avatar = profileImageUrl.toUiImage(persistentMapOf("Referer" to PIXIV_IMAGE_REFERER)),
         nameInternal = (userName ?: userAccount ?: userId.toString()).toUiPlainText(),
         platformId = PIXIV_PLATFORM_ID,
-        platformIcon = dev.dimension.flare.ui.model.UiIcon.Pixiv,
+        platformIcon = UiIcon.Pixiv.asType(),
         clickEvent =
             ClickEvent.Deeplink(
                 DeeplinkRoute.Profile.User(

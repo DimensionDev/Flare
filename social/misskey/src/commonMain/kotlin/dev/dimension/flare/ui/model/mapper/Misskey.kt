@@ -37,6 +37,7 @@ import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.UiTranslatableText
 import dev.dimension.flare.ui.model.asTimelinePostItem
+import dev.dimension.flare.ui.model.asType
 import dev.dimension.flare.ui.model.bindMediaProxy
 import dev.dimension.flare.ui.model.toUiImage
 import dev.dimension.flare.ui.model.withProxy
@@ -866,7 +867,7 @@ internal fun UserLite.render(accountKey: MicroBlogKey): UiProfile {
         mark = persistentListOf(),
         bottomContent = null,
         platformId = MISSKEY_PLATFORM_ID,
-        platformIcon = dev.dimension.flare.ui.model.UiIcon.Misskey,
+        platformIcon = UiIcon.Misskey.asType(),
         clickEvent =
             ClickEvent.Deeplink(
                 DeeplinkRoute.Profile
@@ -940,7 +941,7 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile {
                     )
                 },
         platformId = MISSKEY_PLATFORM_ID,
-        platformIcon = dev.dimension.flare.ui.model.UiIcon.Misskey,
+        platformIcon = UiIcon.Misskey.asType(),
         clickEvent =
             ClickEvent.Deeplink(
                 DeeplinkRoute.Profile

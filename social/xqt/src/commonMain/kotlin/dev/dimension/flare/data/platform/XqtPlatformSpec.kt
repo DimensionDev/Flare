@@ -36,7 +36,7 @@ public data object XqtPlatformSpec :
     public override val metadata: PlatformMetadata =
         PlatformMetadata(
             displayName = "X",
-            icon = UiIcon.X,
+            icon = UiIcon.X.asType(),
             agentAliases = listOf("x", "x.com", "twitter", "twitter.com", "推特"),
         )
     public override val order: Int = 60

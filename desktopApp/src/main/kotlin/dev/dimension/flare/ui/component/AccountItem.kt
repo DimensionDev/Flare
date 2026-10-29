@@ -27,6 +27,7 @@ import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiState
+import dev.dimension.flare.ui.model.asType
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
@@ -117,26 +118,16 @@ fun AccountItem(
                 },
                 modifier = modifier,
                 icon = {
-                    if (throwable is UnsupportedPlatformException && unavailableAccount?.platformIconUrl != null) {
-                        NetworkImage(
-                            model = unavailableAccount.platformIconUrl.toUiImage(proxy = ProxyRef.Global),
-                            contentDescription = unavailableAccount.platformDisplayName,
-                            modifier = Modifier.size(avatarSize).clip(CircleShape),
+                    if (throwable is UnsupportedPlatformException) {
+                        TabIcon(
+                            icon = unavailableAccount?.platformIcon ?: UiIcon.World.asType(),
+                            contentDescription = unavailableAccount?.platformDisplayName ?: throwable.platformId,
+                            size = avatarSize,
                         )
                     } else {
                         FAIcon(
-                            imageVector =
-                                if (throwable is UnsupportedPlatformException) {
-                                    (unavailableAccount?.platformIcon ?: UiIcon.World).toImageVector()
-                                } else {
-                                    FontAwesomeIcons.Solid.FaceSadTear
-                                },
-                            contentDescription =
-                                if (throwable is UnsupportedPlatformException) {
-                                    unavailableAccount?.platformDisplayName ?: throwable.platformId
-                                } else {
-                                    stringResource(Res.string.account_item_error_title)
-                                },
+                            imageVector = FontAwesomeIcons.Solid.FaceSadTear,
+                            contentDescription = stringResource(Res.string.account_item_error_title),
                         )
                     }
                 },

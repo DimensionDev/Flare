@@ -716,6 +716,7 @@ internal class PluginDataSourceV1 private constructor(
                 mapper =
                     PluginWireMapperV1(
                         pluginId = plugin.installed.pluginId,
+                        platformIcon = plugin.platformMetadata().icon,
                         platformId = plugin.installed.manifest.platform.id,
                         accountKey = accountKey,
                         mediaNetwork = plugin.installed.manifest.permissions.mediaNetwork,

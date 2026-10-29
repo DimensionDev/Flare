@@ -50,6 +50,7 @@ import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiRssSource
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.UiTranslatableText
+import dev.dimension.flare.ui.model.asType
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus
 import dev.dimension.flare.ui.render.toUi
 import dev.dimension.flare.ui.render.toUiPlainText
@@ -1281,7 +1282,7 @@ private class AgentTestPlatformSpec(
     aliases: List<String> = emptyList(),
     override val isDefaultGuest: Boolean = false,
 ) : PlatformSpec {
-    override val metadata: PlatformMetadata = PlatformMetadata(platformId, UiIcon.World, aliases)
+    override val metadata: PlatformMetadata = PlatformMetadata(platformId, UiIcon.World.asType(), aliases)
     override val timelineSpecs: ImmutableList<TimelineSpec<out TimelineSpec.Data>> = persistentListOf()
 
     override fun deepLinks(accountKey: MicroBlogKey): ImmutableList<PlatformDeepLink<*>> = persistentListOf()

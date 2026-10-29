@@ -1,5 +1,7 @@
 package dev.dimension.flare.feature.plugin.lifecycle
 
+import dev.dimension.flare.data.model.IconType
+import dev.dimension.flare.feature.plugin.adapter.platformMetadata
 import dev.dimension.flare.feature.plugin.installer.PluginInstaller
 import dev.dimension.flare.feature.plugin.installer.TestFppFactory
 import kotlinx.coroutines.runBlocking
@@ -103,7 +105,7 @@ class PluginStateStoreTest {
     @Test
     fun startupReadsIndexButDoesNotOpenPackage() =
         runBlocking {
-            installValid(fileSystem)
+            val installed = installValid(fileSystem)
             val opened = mutableListOf<Path>()
             val tracing =
                 object : ForwardingFileSystem(fileSystem) {
@@ -115,8 +117,13 @@ class PluginStateStoreTest {
 
             val restarted = PluginStateStore.open(tracing, namespace)
 
-            assertEquals(listOf(namespace / "index.json"), opened)
+            assertEquals(listOf(namespace / "index.json", PluginStoragePaths(namespace).iconPath(installed.packageHash)), opened)
             assertEquals(1, restarted.running.plugins.size)
+            val plugin = restarted.running.plugins.getValue(installed.pluginId)
+            assertTrue(plugin.iconPath.contains("/platform-"))
+            opened.clear()
+            assertEquals(IconType.Url("file://${plugin.iconPath}"), plugin.platformMetadata().icon)
+            assertTrue(opened.isEmpty(), "Platform metadata must use the prepared icon without file I/O")
         }
 
     @Test

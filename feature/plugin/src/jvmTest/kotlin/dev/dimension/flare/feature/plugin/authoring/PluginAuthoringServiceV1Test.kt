@@ -25,6 +25,7 @@ import dev.dimension.flare.model.PlatformRuntimeData
 import dev.dimension.flare.model.PlatformSpec
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiIcon
+import dev.dimension.flare.ui.model.asType
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
 import kotlinx.collections.immutable.persistentListOf
@@ -1026,7 +1027,7 @@ private class AuthoringPending : PluginOAuthPendingStoreV1 {
 
 private object AuthoringGuest : PlatformSpec {
     override val platformId = "BuiltIn"
-    override val metadata = PlatformMetadata(platformId, UiIcon.World)
+    override val metadata = PlatformMetadata(platformId, UiIcon.World.asType())
     override val isDefaultGuest = true
     override val timelineSpecs = persistentListOf<TimelineSpec<out TimelineSpec.Data>>()
 

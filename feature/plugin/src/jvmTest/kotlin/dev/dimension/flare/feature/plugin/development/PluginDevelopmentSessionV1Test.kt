@@ -2,6 +2,7 @@ package dev.dimension.flare.feature.plugin.development
 
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.io.AppFileStore
+import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.tab.TimelineSpec
 import dev.dimension.flare.data.repository.AccountMicroblogDataSource
 import dev.dimension.flare.data.repository.AccountService
@@ -24,6 +25,7 @@ import dev.dimension.flare.model.PlatformSpec
 import dev.dimension.flare.ui.model.PluginMediaPermissions
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiIcon
+import dev.dimension.flare.ui.model.asType
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
@@ -47,6 +49,7 @@ import kotlinx.serialization.json.jsonPrimitive
 import okio.FileSystem
 import okio.Path
 import okio.Path.Companion.toOkioPath
+import okio.Path.Companion.toPath
 import java.nio.file.Files
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -107,6 +110,7 @@ class PluginDevelopmentSessionV1Test {
             assertFalse(session.state.value.active)
             session.reload(confirmed = true)
             val first = current
+            val icon = (registry.require(PLATFORM).metadata.icon as IconType.Url).url.removePrefix("file://").toPath()
             assertNotSame(originalSpec, registry.require(PLATFORM))
             assertEquals("development", page()["marker"]!!.jsonPrimitive.content)
             assertEquals(2, page()["count"]!!.jsonPrimitive.int)
@@ -136,7 +140,7 @@ class PluginDevelopmentSessionV1Test {
             assertNull(session.state.value.directory)
             assertEquals(directory.toString(), session.state.value.recentDirectory)
             assertTrue(accounts.invalidated.all { it == PLATFORM })
-            assertTrue(files.list(root / "plugin-development" / "icons").isEmpty())
+            assertEquals(listOf(icon), files.list(root / "plugin-development" / "icons"))
         }
 
     @Test
@@ -398,7 +402,7 @@ class PluginDevelopmentSessionV1Test {
         val guest =
             object : PlatformSpec {
                 override val platformId = "BuiltIn"
-                override val metadata = PlatformMetadata(platformId, UiIcon.World)
+                override val metadata = PlatformMetadata(platformId, UiIcon.World.asType())
                 override val isDefaultGuest = true
                 override val timelineSpecs = persistentListOf<TimelineSpec<out TimelineSpec.Data>>()
 

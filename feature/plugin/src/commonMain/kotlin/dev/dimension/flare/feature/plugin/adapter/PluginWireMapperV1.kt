@@ -6,6 +6,7 @@ import dev.dimension.flare.data.datasource.microblog.SemanticPostAction
 import dev.dimension.flare.data.datasource.microblog.datasource.GalleryDetail
 import dev.dimension.flare.data.datasource.microblog.datasource.GalleryOrientation
 import dev.dimension.flare.data.datasource.microblog.semanticPostActionMenu
+import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.feature.plugin.abi.PluginAbiV1
 import dev.dimension.flare.feature.plugin.wire.ArticleV1
@@ -46,6 +47,7 @@ import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.UiTranslatableText
+import dev.dimension.flare.ui.model.asType
 import dev.dimension.flare.ui.model.uiArticleContentOf
 import dev.dimension.flare.ui.model.withProxy
 import dev.dimension.flare.ui.render.RenderContent
@@ -67,6 +69,7 @@ internal class PluginWireMapperV1(
     private val originHost: String,
     private val capabilities: PluginSessionCapabilitiesV1,
     private val mediaNetwork: Boolean = false,
+    private val platformIcon: IconType = UiIcon.World.asType(),
 ) {
     private val accountType: AccountType = accountKey?.let(AccountType::Specific) ?: AccountType.GuestHost(originHost)
     private val mediaProxy = ProxyRef.forAccountType(accountType)
@@ -112,7 +115,7 @@ internal class PluginWireMapperV1(
             avatar = value.avatarUrl.toUiImage(),
             nameInternal = value.displayName.toUiPlainText(),
             platformId = platformId,
-            platformIcon = UiIcon.World,
+            platformIcon = platformIcon,
             clickEvent =
                 if (capabilities.canExpose(PluginAbiV1.Capabilities.PROFILE)) {
                     ClickEvent.Deeplink(DeeplinkRoute.Profile.User(accountType, key))
@@ -371,7 +374,7 @@ internal class PluginWireMapperV1(
             sensitive = sensitive,
             contentWarning = spoilerText?.takeIf(String::isNotBlank)?.let { UiTranslatableText(it.toUiPlainText()) },
             user = profile(author),
-            platformIcon = UiIcon.World,
+            platformIcon = platformIcon,
             content = UiTranslatableText(content.toUi()),
             actions = directActions.toPersistentList(),
             poll = null,

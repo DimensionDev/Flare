@@ -29,6 +29,7 @@ import dev.dimension.flare.ui.model.UiNumber
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.UiTranslatableText
+import dev.dimension.flare.ui.model.asType
 import dev.dimension.flare.ui.model.bindMediaProxy
 import dev.dimension.flare.ui.model.toUiImage
 import dev.dimension.flare.ui.model.uiArticleContentOf
@@ -224,7 +225,7 @@ internal fun FanboxCreatorDetailBody.toUiProfile(
         avatar = userEntity?.iconUrl.toUiImage(imageHeaders),
         nameInternal = (userEntity?.name ?: creatorId).toUiPlainText(),
         platformId = FANBOX_PLATFORM_ID,
-        platformIcon = dev.dimension.flare.ui.model.UiIcon.Fanbox,
+        platformIcon = UiIcon.Fanbox.asType(),
         clickEvent =
             ClickEvent.Deeplink(
                 DeeplinkRoute.Profile.User(
@@ -282,7 +283,7 @@ internal fun FanboxCredential.toUiProfile(
         avatar = iconUrl.toUiImage(imageHeaders),
         nameInternal = (name ?: profileId).toUiPlainText(),
         platformId = FANBOX_PLATFORM_ID,
-        platformIcon = dev.dimension.flare.ui.model.UiIcon.Fanbox,
+        platformIcon = UiIcon.Fanbox.asType(),
         clickEvent =
             ClickEvent.Deeplink(
                 DeeplinkRoute.Profile.User(
@@ -321,7 +322,7 @@ private fun FanboxUserEntity.toUiProfile(
         avatar = iconUrl.toUiImage(imageHeaders),
         nameInternal = (name.ifBlank { profileId }).toUiPlainText(),
         platformId = FANBOX_PLATFORM_ID,
-        platformIcon = dev.dimension.flare.ui.model.UiIcon.Fanbox,
+        platformIcon = UiIcon.Fanbox.asType(),
         clickEvent = ClickEvent.Deeplink(profileRoute(accountKey, creatorId)),
         banner = null,
         description = null,

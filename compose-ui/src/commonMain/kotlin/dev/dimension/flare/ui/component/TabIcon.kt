@@ -157,8 +157,18 @@ public fun TabIcon(
     color: Color = PlatformContentColor.current,
     size: Dp = 24.dp,
 ) {
-    val text =
-        title.resolveText()
+    TabIcon(icon, title.resolveText(), modifier, iconOnly, color, size)
+}
+
+@Composable
+public fun TabIcon(
+    icon: IconType,
+    contentDescription: String? = null,
+    modifier: Modifier = Modifier,
+    iconOnly: Boolean = false,
+    color: Color = PlatformContentColor.current,
+    size: Dp = 24.dp,
+) {
     when (icon) {
         is IconType.Avatar -> {
             val userState by producePresenter(key = "avatar:${icon.accountKey}") {
@@ -180,7 +190,7 @@ public fun TabIcon(
         is IconType.Material -> {
             FAIcon(
                 imageVector = icon.icon.toImageVector(),
-                contentDescription = text,
+                contentDescription = contentDescription,
                 modifier =
                     modifier
                         .size(size),
@@ -192,7 +202,7 @@ public fun TabIcon(
             if (iconOnly) {
                 FAIcon(
                     imageVector = icon.icon.toImageVector(),
-                    contentDescription = text,
+                    contentDescription = contentDescription,
                     modifier =
                         modifier
                             .size(size),
@@ -222,7 +232,7 @@ public fun TabIcon(
                         }
                     FAIcon(
                         imageVector = icon.icon.toImageVector(),
-                        contentDescription = text,
+                        contentDescription = contentDescription,
                         modifier =
                             Modifier
                                 .size(size / 2)
@@ -236,8 +246,8 @@ public fun TabIcon(
 
         is IconType.Url -> {
             NetworkImage(
-                icon.url.toUiImage(proxy = ProxyRef.Global),
-                contentDescription = text,
+                remember(icon.url) { icon.url.toUiImage(proxy = ProxyRef.Global) },
+                contentDescription = contentDescription,
                 modifier =
                     modifier
                         .size(size)
@@ -247,7 +257,7 @@ public fun TabIcon(
         }
 
         is IconType.FavIcon -> {
-            FavIcon(icon.host, modifier, title, size)
+            FavIcon(icon.host, modifier, contentDescription?.let(UiText::Raw), size)
         }
     }
 }

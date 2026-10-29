@@ -19,6 +19,7 @@ import dev.dimension.flare.ui.model.UiInstanceMetadata
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.asType
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.Flow
@@ -46,7 +47,10 @@ class TestNetKoinRegistrationTest {
 
                 assertEquals(setOf("Mastodon", "TestNet"), runtimeData.platformSpecs.map { it.platformId }.toSet())
                 assertIs<TestNetPlatformSpec>(registry.require("TestNet"))
-                assertEquals(PlatformMetadata("Test Network", UiIcon.World, listOf("testnet")), registry.metadataOrFallback("TestNet"))
+                assertEquals(
+                    PlatformMetadata("Test Network", UiIcon.World.asType(), listOf("testnet")),
+                    registry.metadataOrFallback("TestNet"),
+                )
 
                 val detected = loginRegistry.detectPlatformId("testnet.example")
                 assertEquals("TestNet", detected.platformId)
@@ -86,7 +90,7 @@ internal class TestNetKoinModule {
 internal class TestNetPlatformSpec :
     EmptyTestPlatformSpec("TestNet"),
     LoginPlatformProvider {
-    override val metadata: PlatformMetadata = PlatformMetadata("Test Network", UiIcon.World, listOf("testnet"))
+    override val metadata: PlatformMetadata = PlatformMetadata("Test Network", UiIcon.World.asType(), listOf("testnet"))
     override val detector: PlatformDetector =
         object : PlatformDetector {
             override suspend fun detect(host: String): NodeDetection? =
@@ -132,7 +136,7 @@ internal class TestDefaultGuestPlatformSpec : EmptyTestPlatformSpec("Mastodon") 
 internal abstract class EmptyTestPlatformSpec(
     final override val platformId: String,
 ) : PlatformSpec {
-    override val metadata: PlatformMetadata = PlatformMetadata(platformId, UiIcon.World)
+    override val metadata: PlatformMetadata = PlatformMetadata(platformId, UiIcon.World.asType())
     override val timelineSpecs: ImmutableList<TimelineSpec<out TimelineSpec.Data>> = persistentListOf()
 
     override fun deepLinks(accountKey: MicroBlogKey): ImmutableList<PlatformDeepLink<*>> = persistentListOf()

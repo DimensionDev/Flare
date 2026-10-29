@@ -15,6 +15,8 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import okio.Buffer
+import okio.ByteString.Companion.encodeUtf8
+import okio.ByteString.Companion.toByteString
 import okio.FileSystem
 import okio.Path
 import okio.buffer
@@ -206,7 +208,7 @@ public class PluginStateStore private constructor(
                     RunningPluginV1(
                         installed = installed,
                         packagePath = packagePath.toString(),
-                        iconPath = iconPath.toString(),
+                        iconPath = fileSystem.persistPlatformIcon(installed.pluginId, iconPath).toString(),
                         generation = installed.runtimeGeneration,
                     )
             }
@@ -269,6 +271,27 @@ internal data class PluginStoragePaths(
 
     fun iconPath(hash: String): Path = icons / "$hash$ICON_SUFFIX"
 }
+
+internal fun FileSystem.persistPlatformIcon(
+    pluginId: String,
+    source: Path,
+): Path =
+    runCatching {
+        val directory = requireNotNull(source.parent)
+        val bytes = readBounded(source, FppLimits.MAX_ICON_BYTES)
+        val target = directory / "platform-${pluginId.encodeUtf8().sha256().hex()}-${bytes.toByteString().sha256().hex()}.png"
+        if (!exists(target)) {
+            val temp = directory / "${target.name}.next"
+            write(temp) { write(bytes) }
+            try {
+                atomicMove(temp, target)
+            } catch (error: Exception) {
+                delete(temp, mustExist = false)
+                throw error
+            }
+        }
+        target
+    }.getOrDefault(source)
 
 private fun validateIndex(index: PluginStateIndexV1) {
     require(index.schemaVersion == PluginStateIndexV1.SCHEMA_VERSION) { "Unsupported plugin index schema" }

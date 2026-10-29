@@ -6,6 +6,7 @@ import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoade
 import dev.dimension.flare.data.model.tab.TimelineSpec
 import dev.dimension.flare.ui.model.UiInstance
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.asType
 import dev.dimension.flare.ui.route.DeeplinkRoute
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -216,7 +217,9 @@ public class PlatformRegistry(
         get(platformId)?.metadata
             ?: PlatformMetadata(
                 displayName = platformId,
-                icon = dev.dimension.flare.ui.model.UiIcon.World,
+                icon =
+                    dev.dimension.flare.ui.model.UiIcon.World
+                        .asType(),
             )
 
     public fun supports(

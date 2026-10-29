@@ -1,5 +1,6 @@
 package dev.dimension.flare.ui.presenter.login
 
+import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiText
 import kotlin.native.HiddenFromObjC
@@ -26,8 +27,7 @@ public data class NodeData(
     public val software: String,
     public val compatibleMode: Boolean,
     public val platformDisplayName: String,
-    public val platformIcon: UiIcon,
+    public val platformIcon: IconType,
     public val loginMethods: List<LoginMethodSpec>,
     public val platformDisplayNameText: UiText = UiText.Raw(platformDisplayName),
-    public val platformIconUrl: String? = null,
 )

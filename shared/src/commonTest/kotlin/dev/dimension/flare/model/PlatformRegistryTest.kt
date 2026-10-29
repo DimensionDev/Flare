@@ -8,6 +8,7 @@ import dev.dimension.flare.data.model.tab.TimelineSpec
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiText
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.asType
 import dev.dimension.flare.unavailableAccountService
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -161,7 +162,7 @@ class PlatformRegistryTest {
         val registry = registry(listOf(relay))
 
         assertEquals(relay.metadata, registry.metadataOrFallback("RelayNet"))
-        assertEquals(PlatformMetadata("UnknownNet", UiIcon.World), registry.metadataOrFallback("UnknownNet"))
+        assertEquals(PlatformMetadata("UnknownNet", UiIcon.World.asType()), registry.metadataOrFallback("UnknownNet"))
         assertTrue(registry.supports("RelayNet", PlatformCapability.RelayManagement))
         assertFalse(registry.supports("RelayNet", PlatformCapability.MxgaFiltering))
         assertFalse(registry.supports("UnknownNet", PlatformCapability.RelayManagement))
@@ -225,7 +226,7 @@ class PlatformRegistryTest {
     ): PlatformSpec =
         object : PlatformSpec {
             override val platformId: String = platformId
-            override val metadata: PlatformMetadata = PlatformMetadata(platformId, UiIcon.World)
+            override val metadata: PlatformMetadata = PlatformMetadata(platformId, UiIcon.World.asType())
             override val isDefaultGuest: Boolean = isDefaultGuest
             override val capabilities: Set<PlatformCapability> = capabilities
             override val timelineSpecs: ImmutableList<TimelineSpec<out TimelineSpec.Data>> = persistentListOf()

@@ -117,11 +117,7 @@ struct ServiceSelectionScreen: View {
         ZStack {
             switch onEnum(of: state.detectedPlatformId) {
             case .success(let success):
-                PluginPlatformIcon(
-                    iconURL: success.data.platformIconUrl,
-                    fallback: success.data.platformIcon,
-                    size: 24
-                )
+                TabIcon(icon: success.data.platformIcon, size: 24)
                     .transition(ServiceSelectionAnimation.inline)
                     .accessibilityLabel(
                         Text(
@@ -202,7 +198,7 @@ struct ServiceSelectionScreen: View {
 
     private func platformHeader(state: ServiceSelectState, node: NodeData) -> some View {
         HStack(spacing: 8) {
-            PluginPlatformIcon(iconURL: node.platformIconUrl, fallback: node.platformIcon, size: 24)
+            TabIcon(icon: node.platformIcon, size: 24)
             VStack(alignment: .leading, spacing: 2) {
                 Text(node.platformDisplayNameText.text)
                     .font(.headline)
@@ -219,8 +215,7 @@ struct ServiceSelectionScreen: View {
             data: state.instances,
             successContent: { instance in
                 ServiceInstanceRow(
-                    instance: instance,
-                    icon: instance.platformIcon.fontAwesomeIcon
+                    instance: instance
                 ) {
                     select(instance: instance, state: state)
                 }
@@ -321,11 +316,7 @@ struct ReloginScreen: View {
 
     private var header: some View {
         VStack(spacing: 8) {
-            PluginPlatformIcon(
-                iconURL: presenter.state.platformIconUrl(),
-                fallback: presenter.state.platformIcon(),
-                size: 36
-            )
+            TabIcon(icon: presenter.state.platformIcon(), size: 36)
             Text(ServiceSelectCopy.loginExpired)
                 .font(.title2.weight(.semibold))
                 .multilineTextAlignment(.center)
@@ -629,7 +620,6 @@ private struct QRLoginView: View {
 
 private struct ServiceInstanceRow: View {
     let instance: UiInstance
-    let icon: FontAwesomeIcon
     let onSelect: () -> Void
 
     var body: some View {
@@ -659,9 +649,7 @@ private struct ServiceInstanceRow: View {
                 .frame(maxWidth: 32)
                 .clipShape(RoundedRectangle(cornerRadius: 4))
         } else {
-            Image(fontAwesome: icon)
-                .resizable()
-                .scaledToFit()
+            TabIcon(icon: instance.platformIcon, size: 32)
         }
     }
 }

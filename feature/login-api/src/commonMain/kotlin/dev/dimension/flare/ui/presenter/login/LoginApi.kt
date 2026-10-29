@@ -255,7 +255,6 @@ public class LoginPlatformRegistry(
                                 platformIcon = provider.metadata.icon,
                                 loginMethods = provider.methods.sortedByDescending { it.priority },
                                 platformDisplayNameText = provider.metadata.displayNameText,
-                                platformIconUrl = provider.metadata.iconUrl,
                             )
                         }
                     }

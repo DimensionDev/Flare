@@ -1,5 +1,6 @@
 package dev.dimension.flare.feature.plugin.adapter
 
+import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.repository.AccountService
 import dev.dimension.flare.data.repository.RequireReLoginException
 import dev.dimension.flare.feature.plugin.abi.PluginAbiV1
@@ -19,15 +20,11 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformDataSourceContext
 import dev.dimension.flare.model.PlatformMetadata
 import dev.dimension.flare.ui.model.UiAccount
-import dev.dimension.flare.ui.model.UiIcon
 import io.ktor.http.Url
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.JsonElement
-import okio.ByteString.Companion.encodeUtf8
-import okio.FileSystem
-import okio.Path.Companion.toPath
 
 public fun RunningPluginV1.accountCredential(success: LoginSuccessV1): PluginAccountCredentialV1 {
     success.requireValid()
@@ -58,9 +55,8 @@ internal fun RunningPluginV1.platformMetadata(): PlatformMetadata {
     val platform = installed.manifest.platform
     return PlatformMetadata(
         displayName = platform.name.fallbackText,
-        icon = UiIcon.World,
+        icon = IconType.Url("file://$iconPath"),
         displayNameText = platform.name.toUiText(installed.pluginId),
-        iconUrl = "file://$iconPath",
     )
 }
 
@@ -75,41 +71,20 @@ internal suspend fun AccountService.addPluginAccount(
             success.accountId,
             Url(success.origin).accountHost(),
         )
-    val accountMetadata = metadata.copy(iconUrl = plugin.stableAccountIconUrl() ?: metadata.iconUrl)
     addAccount(
         account =
             UiAccount(
                 accountKey = accountKey,
                 platformId = plugin.installed.manifest.platform.id,
-                platformDisplayName = accountMetadata.displayName,
-                platformIcon = accountMetadata.icon,
-                platformDisplayNameText = accountMetadata.displayNameText,
-                platformIconUrl = accountMetadata.iconUrl,
+                platformDisplayName = metadata.displayName,
+                platformIcon = metadata.icon,
+                platformDisplayNameText = metadata.displayNameText,
             ),
         credential = plugin.accountCredential(success),
         serializer = PluginAccountCredentialV1.serializer(),
     )
     return accountKey
 }
-
-private fun RunningPluginV1.stableAccountIconUrl(): String? =
-    runCatching {
-        val source = iconPath.toPath()
-        val directory = requireNotNull(source.parent)
-        val target = directory / "platform-${installed.pluginId.encodeUtf8().sha256().hex()}.png"
-        if (source != target && !FileSystem.SYSTEM.exists(target)) {
-            val bytes = FileSystem.SYSTEM.read(source) { readByteArray() }
-            val temp = directory / "${target.name}.next"
-            FileSystem.SYSTEM.write(temp) { write(bytes) }
-            try {
-                FileSystem.SYSTEM.atomicMove(temp, target)
-            } catch (error: Throwable) {
-                FileSystem.SYSTEM.delete(temp, mustExist = false)
-                throw error
-            }
-        }
-        "file://$target"
-    }.getOrNull()
 
 internal fun PluginAccountCredentialV1.requireValid(plugin: RunningPluginV1) {
     val manifest = plugin.installed.manifest

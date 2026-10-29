@@ -743,10 +743,7 @@ private struct MacComposeAccountAvatar: View {
                 .clipShape(Circle())
                 .overlay(Circle().stroke(Color(nsColor: .windowBackgroundColor), lineWidth: 2))
 
-            Image(fontAwesome: user.platformIcon.fontAwesomeIcon)
-                .resizable()
-                .scaledToFit()
-                .frame(width: size * 0.34, height: size * 0.34)
+            TabIcon(icon: user.platformIcon, size: size * 0.34)
                 .padding(max(2, size * 0.08))
                 .background(Color(nsColor: .windowBackgroundColor))
                 .clipShape(Circle())

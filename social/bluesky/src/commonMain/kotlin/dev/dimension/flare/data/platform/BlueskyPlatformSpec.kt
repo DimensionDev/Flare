@@ -37,7 +37,7 @@ public data object BlueskyPlatformSpec :
     public override val metadata: PlatformMetadata =
         PlatformMetadata(
             displayName = "Bluesky",
-            icon = UiIcon.Bluesky,
+            icon = UiIcon.Bluesky.asType(),
             agentAliases = listOf("bsky", "blue sky", "蓝天"),
         )
     public override val order: Int = 30

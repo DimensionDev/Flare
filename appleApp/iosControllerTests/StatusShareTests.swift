@@ -6,6 +6,58 @@ import KotlinSharedUI
 
 @MainActor
 final class StatusShareTests: XCTestCase {
+    func testMissingPlatformImageLeavesLogoEmpty() async throws {
+        let view = StatusTopEndView(frame: CGRect(x: 0, y: 0, width: 100, height: 20))
+        let data = post("missing-icon", textBlocks: [""], platformIcon: IconType.Url(url: "file:///missing-platform-icon.png"))
+        view.configure(post: data, showPlatformLogo: true, absoluteTimestamp: false, isDetail: true, showAgentInsight: false, onInsightTapped: nil)
+        let logo = try XCTUnwrap(view.subviews.compactMap { $0 as? UIImageView }.first { !$0.isHidden && $0.isAccessibilityElement })
+        try await Task.sleep(for: .milliseconds(100))
+        XCTAssertNil(logo.image, "A failed plugin image must not become a World icon")
+        XCTAssertEqual(view.intrinsicContentSize, CGSize(width: 14, height: 14))
+    }
+
+    func testPlatformLogoLoadsLocalImageOnceAndKeepsLayoutStable() async throws {
+        let path = FileManager.default.temporaryDirectory.appendingPathComponent("platform-\(UUID().uuidString).png")
+        let source = UIGraphicsImageRenderer(size: CGSize(width: 512, height: 512)).image { context in
+            UIColor.red.setFill()
+            context.fill(CGRect(x: 0, y: 0, width: 512, height: 512))
+        }
+        try XCTUnwrap(source.pngData()).write(to: path)
+        defer { try? FileManager.default.removeItem(at: path) }
+        let view = StatusTopEndView(frame: CGRect(x: 0, y: 0, width: 100, height: 20))
+        let data = post("icon", textBlocks: [""], platformIcon: IconType.Url(url: path.absoluteString))
+        view.configure(post: data, showPlatformLogo: true, absoluteTimestamp: false, isDetail: true, showAgentInsight: false, onInsightTapped: nil)
+        let logo = try XCTUnwrap(view.subviews.compactMap { $0 as? UIImageView }.first { !$0.isHidden && $0.isAccessibilityElement })
+        XCTAssertNil(logo.image)
+        let size = view.sizeThatFits(CGSize(width: 100, height: 20))
+        for _ in 0..<100 {
+            if logo.image != nil { break }
+            try await Task.sleep(for: .milliseconds(20))
+        }
+        let image = try XCTUnwrap(logo.image)
+        XCTAssertEqual(image.size.width, 14, accuracy: 1)
+        XCTAssertLessThanOrEqual(try XCTUnwrap(image.cgImage).width, Int(14 * view.traitCollection.displayScale) + 1)
+        XCTAssertEqual(view.sizeThatFits(CGSize(width: 100, height: 20)), size)
+        view.configure(post: data, showPlatformLogo: true, absoluteTimestamp: false, isDetail: true, showAgentInsight: false, onInsightTapped: nil)
+        XCTAssertTrue(image === logo.image, "Rebinding an unchanged icon must not restart image loading")
+        view.configure(post: data, showPlatformLogo: false, absoluteTimestamp: false, isDetail: true, showAgentInsight: false, onInsightTapped: nil)
+        XCTAssertTrue(logo.isHidden)
+        XCTAssertNil(logo.image)
+    }
+
+    func testReusingPlatformLogoCancelsThePreviousImageAndKeepsTheBuiltinIcon() async throws {
+        let view = StatusTopEndView(frame: CGRect(x: 0, y: 0, width: 100, height: 20))
+        let loading = post("first", textBlocks: [""], platformIcon: IconType.Url(url: "file:///missing-platform-icon.png"))
+        view.configure(post: loading, showPlatformLogo: true, absoluteTimestamp: false, isDetail: true, showAgentInsight: false, onInsightTapped: nil)
+        let builtin = post("second", textBlocks: [""], platformIcon: IconType.Material(icon: .mastodon))
+        view.configure(post: builtin, showPlatformLogo: true, absoluteTimestamp: false, isDetail: true, showAgentInsight: false, onInsightTapped: nil)
+        let logo = try XCTUnwrap(view.subviews.compactMap { $0 as? UIImageView }.first { !$0.isHidden && $0.isAccessibilityElement })
+        let image = try XCTUnwrap(logo.image)
+        try await Task.sleep(for: .milliseconds(100))
+        XCTAssertTrue(image === logo.image, "A cancelled image failure must not overwrite the new icon")
+        XCTAssertNotNil(logo.accessibilityLabel)
+    }
+
     func testReplyScreenshotIncludesFullTextInBothThemes() async throws {
         let root = post("root", text: "Original post")
         let reply = post("reply", text: Array(repeating: "Reply line", count: 40).joined(separator: "\n"))
@@ -180,7 +232,7 @@ final class StatusShareTests: XCTestCase {
         post(id, textBlocks: [text])
     }
 
-    private func post(_ id: String, textBlocks: [String]) -> UiTimelineV2.Post {
+    private func post(_ id: String, textBlocks: [String], platformIcon: IconType = IconType.Material(icon: .world)) -> UiTimelineV2.Post {
         let style = RenderTextStyle(link: nil, bold: false, italic: false, strikethrough: false,
                                     monospace: false, code: false, underline: false, small: false, time: false, imageLink: nil)
         let text = textBlocks.joined(separator: "\n\n")
@@ -189,7 +241,7 @@ final class StatusShareTests: XCTestCase {
         },
                               isRtl: false, raw: text, innerText: text, imageUrls: [])
         return UiTimelineV2.Post(platformId: "mastodon", images: [], sensitive: false, contentWarning: nil,
-                                user: nil, platformIcon: .world, sourceLanguages: [], translationDisplayState: .hidden,
+                                user: nil, platformIcon: platformIcon, sourceLanguages: [], translationDisplayState: .hidden,
                                 content: UiTranslatableText(original: rich, translation: nil), actions: [], poll: nil,
                                 statusKey: MicroBlogKey(id: id, host: "example.invalid"), card: nil,
                                 createdAt: KotlinInstant.companion.fromEpochMilliseconds(epochMilliseconds: 0).toUi(),

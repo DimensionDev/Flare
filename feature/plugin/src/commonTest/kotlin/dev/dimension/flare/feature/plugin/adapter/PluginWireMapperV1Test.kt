@@ -1,5 +1,6 @@
 package dev.dimension.flare.feature.plugin.adapter
 
+import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.feature.plugin.abi.PluginAbiV1
 import dev.dimension.flare.feature.plugin.wire.ActionDescriptorV1
@@ -22,6 +23,7 @@ import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiArticleBlock
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.asType
 import dev.dimension.flare.ui.route.DeeplinkRoute
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -39,6 +41,17 @@ class PluginWireMapperV1Test {
             createdAt = "2026-10-27T00:00:00Z",
             content = RichTextV1(value = "Preview"),
         )
+
+    @Test
+    fun platformIconIsSharedByPostsProfilesAndNestedAuthors() {
+        val icon = IconType.Url("file:///plugins/platform-logo.png")
+        val mapper = createMapper(null, platformIcon = icon)
+        val mapped = assertIs<UiTimelineV2.TimelinePostItem>(mapper.post(post)).post
+        assertEquals(icon, mapped.platformIcon)
+        assertEquals(icon, mapped.user?.platformIcon)
+        assertEquals(icon, mapper.profile(post.author).platformIcon)
+        assertEquals(icon, mapper.cachedProfile(post.author).platformIcon)
+    }
 
     @Test
     fun unsafeProfileAndNestedPostUrlsAreRejectedBeforeMapping() {
@@ -426,9 +439,11 @@ class PluginWireMapperV1Test {
         accountKey: MicroBlogKey?,
         mediaNetwork: Boolean = true,
         postMutationAvailable: Boolean = true,
+        platformIcon: IconType = UiIcon.World.asType(),
     ): PluginWireMapperV1 =
         PluginWireMapperV1(
             pluginId = "test.plugin",
+            platformIcon = platformIcon,
             mediaNetwork = mediaNetwork,
             platformId = "Test",
             accountKey = accountKey,

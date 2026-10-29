@@ -11,6 +11,7 @@ import dev.dimension.flare.feature.plugin.installer.sensitivePermissions
 import dev.dimension.flare.feature.plugin.lifecycle.InstalledPluginV1
 import dev.dimension.flare.feature.plugin.lifecycle.PluginRuntimeSwitcherV1
 import dev.dimension.flare.feature.plugin.lifecycle.RunningPluginV1
+import dev.dimension.flare.feature.plugin.lifecycle.persistPlatformIcon
 import dev.dimension.flare.feature.plugin.manifest.fallbackText
 import dev.dimension.flare.model.PlatformRegistry
 import kotlinx.coroutines.CancellationException
@@ -304,7 +305,7 @@ public class PluginDevelopmentSessionV1 internal constructor(
                         catalogs = validated.catalogs,
                     ),
                 packagePath = directory.toString(),
-                iconPath = icon.toString(),
+                iconPath = files.persistPlatformIcon(validated.manifest.id, icon).toString(),
                 developmentSource =
                     source.archive.files
                         .getValue(FppPaths.ENTRY)

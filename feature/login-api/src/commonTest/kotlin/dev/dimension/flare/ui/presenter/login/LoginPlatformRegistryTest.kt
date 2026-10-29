@@ -13,6 +13,7 @@ import dev.dimension.flare.model.RecommendedInstance
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiInstanceMetadata
 import dev.dimension.flare.ui.model.UiStrings
+import dev.dimension.flare.ui.model.asType
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.CancellationException
@@ -146,7 +147,7 @@ class LoginPlatformRegistryTest {
 
             assertEquals("Misskey", detected.platformId)
             assertEquals("Misskey", detected.platformDisplayName)
-            assertEquals(UiIcon.Mastodon, detected.platformIcon)
+            assertEquals(UiIcon.Mastodon.asType(), detected.platformIcon)
             assertEquals(listOf(LoginMethodType.Password), detected.loginMethods.map { it.type })
             assertEquals(false, detected.compatibleMode)
         }
@@ -276,7 +277,7 @@ class LoginPlatformRegistryTest {
             override val metadata: PlatformMetadata =
                 PlatformMetadata(
                     displayName = platformId,
-                    icon = UiIcon.Mastodon,
+                    icon = UiIcon.Mastodon.asType(),
                 )
             override val detector: PlatformDetector =
                 object : PlatformDetector {
@@ -353,7 +354,7 @@ class LoginPlatformRegistryTest {
             override val metadata: PlatformMetadata =
                 PlatformMetadata(
                     displayName = platformId,
-                    icon = UiIcon.Mastodon,
+                    icon = UiIcon.Mastodon.asType(),
                 )
             override val timelineSpecs: ImmutableList<TimelineSpec<out TimelineSpec.Data>> = persistentListOf()
 

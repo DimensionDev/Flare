@@ -469,7 +469,7 @@ private struct MacAccountManagementSettingsPane: View {
     private func unavailableAccountRow(_ account: UiAccount) -> some View {
         Button(action: onManagePlugins) {
             HStack(spacing: 8) {
-                PluginPlatformIcon(iconURL: account.platformIconUrl, fallback: account.platformIcon, size: 24)
+                TabIcon(icon: account.platformIcon, size: 24)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(account.platformDisplayNameText.text)
                     Text(verbatim: account.accountKey.description())

@@ -175,7 +175,7 @@ private abstract class TestDeepLinkPlatformSpec(
     final override val metadata: PlatformMetadata =
         PlatformMetadata(
             displayName = displayName,
-            icon = icon,
+            icon = icon.asType(),
         )
     final override val timelineSpecs: ImmutableList<TimelineSpec<out TimelineSpec.Data>> = persistentListOf()
 

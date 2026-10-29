@@ -1,10 +1,12 @@
 package dev.dimension.flare.feature.plugin.login
 
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
+import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.data.repository.AccountMicroblogDataSource
 import dev.dimension.flare.data.repository.AccountService
 import dev.dimension.flare.feature.plugin.adapter.PluginLoginMethodHandlerV1
+import dev.dimension.flare.feature.plugin.adapter.platformMetadata
 import dev.dimension.flare.feature.plugin.host.PluginHttpTransport
 import dev.dimension.flare.feature.plugin.host.PluginTransportRequestV1
 import dev.dimension.flare.feature.plugin.host.PluginTransportResponseV1
@@ -40,7 +42,10 @@ import okio.Path
 import okio.Path.Companion.toOkioPath
 import okio.Path.Companion.toPath
 import okio.SYSTEM
+import java.awt.image.BufferedImage
+import java.io.ByteArrayOutputStream
 import java.nio.file.Files
+import javax.imageio.ImageIO
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -75,6 +80,31 @@ class PluginLoginCoordinatorV1Test {
         runBlocking {
             pool.close()
             fileSystem.deleteRecursively(root, mustExist = false)
+        }
+
+    @Test
+    fun platformIconsAreImmutableSnapshotsAcrossUpdatesAndPackageRemoval() =
+        runBlocking {
+            val original = plugin.platformMetadata().icon as IconType.Url
+            val bytes = fileSystem.read(plugin.iconPath.toPath()) { readByteArray() }
+            assertEquals(original, plugin.platformMetadata().icon)
+            val changedIcon =
+                ByteArrayOutputStream().use { output ->
+                    val image = BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).apply { setRGB(0, 0, 0xffff0000.toInt()) }
+                    ImageIO.write(image, "png", output)
+                    output.toByteArray()
+                }
+            val updatedPlugin = install(LOGIN_SCRIPT, icon = changedIcon)
+            val updated = updatedPlugin.platformMetadata().icon as IconType.Url
+            assertFalse(original == updated)
+            listOf(plugin, updatedPlugin).forEach {
+                fileSystem.delete(it.packagePath.toPath())
+                fileSystem.delete(root / "social-plugins-v2" / "icons" / "${it.installed.packageHash}.png")
+            }
+            assertEquals(original, plugin.platformMetadata().icon)
+            assertTrue(fileSystem.exists(original.url.removePrefix("file://").toPath()))
+            assertTrue(fileSystem.exists(updated.url.removePrefix("file://").toPath()))
+            assertTrue(bytes.contentEquals(fileSystem.read(original.url.removePrefix("file://").toPath()) { readByteArray() }))
         }
 
     @Test
@@ -194,12 +224,11 @@ class PluginLoginCoordinatorV1Test {
                     ?.content,
             )
             val iconUrl =
-                requireNotNull(
+                assertIs<IconType.Url>(
                     accounts.added
                         .single()
-                        .first
-                        .platformIconUrl,
-                )
+                        .first.platformIcon,
+                ).url
             assertTrue(iconUrl.contains("/platform-"))
             assertFalse(iconUrl.contains(plugin.installed.packageHash))
             assertTrue(FileSystem.SYSTEM.exists(iconUrl.removePrefix("file://").toPath()))
@@ -599,8 +628,9 @@ class PluginLoginCoordinatorV1Test {
     private suspend fun install(
         script: String,
         manifest: String = LOGIN_MANIFEST,
+        icon: ByteArray = TestFppFactory.validPng,
     ): RunningPluginV1 {
-        TestFppFactory.write(input, TestFppFactory.validEntries(manifest = manifest, script = script))
+        TestFppFactory.write(input, TestFppFactory.validEntries(manifest = manifest, script = script, icon = icon))
         val namespace = root / "social-plugins-v2"
         val store = PluginStateStore.open(fileSystem, namespace)
         val installer = PluginInstaller(fileSystem, store)

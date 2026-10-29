@@ -39,7 +39,7 @@ public data object MisskeyPlatformSpec :
     public override val metadata: PlatformMetadata =
         PlatformMetadata(
             displayName = "Misskey",
-            icon = UiIcon.Misskey,
+            icon = UiIcon.Misskey.asType(),
             agentAliases = listOf("mk"),
         )
     public override val order: Int = 20

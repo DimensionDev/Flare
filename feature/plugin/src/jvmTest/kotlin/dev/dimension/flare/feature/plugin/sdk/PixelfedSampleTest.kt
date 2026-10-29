@@ -6,6 +6,7 @@ import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.feature.plugin.abi.PluginJsonV1
 import dev.dimension.flare.feature.plugin.adapter.PluginPlatformSpecSourceV1
 import dev.dimension.flare.feature.plugin.adapter.accountCredential
+import dev.dimension.flare.feature.plugin.adapter.platformMetadata
 import dev.dimension.flare.feature.plugin.host.KtorPluginHttpTransport
 import dev.dimension.flare.feature.plugin.host.PluginAsset
 import dev.dimension.flare.feature.plugin.host.PluginCallTimeoutV1
@@ -199,7 +200,7 @@ class PixelfedSampleTest {
                 val accountContext = accountContext(plugin, credential)
                 val spec = plugin.platformSpec(pool, platformScope)
                 assertEquals("Pixelfed", spec.platformId)
-                assertEquals("file://${plugin.iconPath}", spec.metadata.iconUrl)
+                assertEquals(plugin.platformMetadata().icon, spec.metadata.icon)
                 val platformContext =
                     MemoryPlatformDataSourceContext(
                         accountKey = MicroBlogKey("42", "pixelfed.social"),

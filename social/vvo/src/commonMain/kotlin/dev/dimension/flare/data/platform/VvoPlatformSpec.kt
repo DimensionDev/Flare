@@ -35,7 +35,7 @@ public data object VvoPlatformSpec :
     public override val metadata: PlatformMetadata =
         PlatformMetadata(
             displayName = vvo,
-            icon = UiIcon.Weibo,
+            icon = UiIcon.Weibo.asType(),
             agentAliases = listOf("weibo", "sina weibo", "微博", "新浪微博"),
         )
     public override val order: Int = 70

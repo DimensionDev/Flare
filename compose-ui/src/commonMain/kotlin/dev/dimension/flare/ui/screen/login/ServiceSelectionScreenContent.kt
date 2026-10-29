@@ -80,6 +80,7 @@ import dev.dimension.flare.compose.ui.service_select_welcome_title
 import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.NetworkImage
+import dev.dimension.flare.ui.component.TabIcon
 import dev.dimension.flare.ui.component.placeholder
 import dev.dimension.flare.ui.component.platform.PlatformCircularProgressIndicator
 import dev.dimension.flare.ui.component.platform.PlatformFilledTonalButton
@@ -190,10 +191,9 @@ public fun ServiceSelectionScreenContent(
                     leadingIcon = {
                         state.detectedPlatformId
                             .onSuccess {
-                                PlatformIcon(
-                                    iconUrl = it.platformIconUrl,
-                                    fallback = it.platformIcon,
-                                    size = 24,
+                                TabIcon(
+                                    icon = it.platformIcon,
+                                    size = 24.dp,
                                     contentDescription = stringResource(Res.string.service_select_detected_platform, it.platformId),
                                 )
                             }.onError {
@@ -382,10 +382,9 @@ public fun ReloginScreenContent(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
-                PlatformIcon(
-                    iconUrl = state.platformIconUrl(),
-                    fallback = state.platformIcon(),
-                    size = 36,
+                TabIcon(
+                    icon = state.platformIcon(),
+                    size = 36.dp,
                 )
                 PlatformText(
                     text = stringResource(Res.string.login_expired),
@@ -426,32 +425,6 @@ public fun ReloginScreenContent(
                 )
             }
         }
-    }
-}
-
-@Composable
-private fun PlatformIcon(
-    iconUrl: String?,
-    fallback: dev.dimension.flare.ui.model.UiIcon,
-    size: Int,
-    contentDescription: String? = null,
-) {
-    if (iconUrl.isNullOrBlank()) {
-        FAIcon(
-            imageVector = fallback.toImageVector(),
-            contentDescription = contentDescription,
-            modifier = Modifier.size(size.dp),
-        )
-    } else {
-        NetworkImage(
-            model = iconUrl.toUiImage(proxy = ProxyRef.Global),
-            contentDescription = contentDescription,
-            contentScale = ContentScale.Fit,
-            modifier =
-                Modifier
-                    .size(size.dp)
-                    .clip(RoundedCornerShape((size / 5).dp)),
-        )
     }
 }
 
@@ -795,8 +768,8 @@ private fun ServiceSelectItem(
                                 .clip(RoundedCornerShape(4.dp)),
                     )
                 } else if (instance != null) {
-                    FAIcon(
-                        imageVector = instance.platformIcon.toImageVector(),
+                    TabIcon(
+                        icon = instance.platformIcon,
                         contentDescription = null,
                         modifier = Modifier.size(24.dp),
                     )

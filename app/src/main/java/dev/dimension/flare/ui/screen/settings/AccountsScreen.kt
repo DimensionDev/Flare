@@ -71,6 +71,7 @@ import dev.dimension.flare.ui.component.FlareLargeFlexibleTopAppBar
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.RichText
+import dev.dimension.flare.ui.component.TabIcon
 import dev.dimension.flare.ui.component.ThemeIconData
 import dev.dimension.flare.ui.component.ThemedIcon
 import dev.dimension.flare.ui.component.placeholder
@@ -80,6 +81,7 @@ import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiState
+import dev.dimension.flare.ui.model.asType
 import dev.dimension.flare.ui.model.isError
 import dev.dimension.flare.ui.model.isSuccess
 import dev.dimension.flare.ui.model.onError
@@ -484,20 +486,11 @@ fun AccountItem(
                     },
                     leadingContent = {
                         if (throwable is UnsupportedPlatformException) {
-                            if (unavailableAccount?.platformIconUrl != null) {
-                                NetworkImage(
-                                    model = unavailableAccount.platformIconUrl.toUiImage(proxy = ProxyRef.Global),
-                                    contentDescription = unavailableAccount.platformDisplayName,
-                                    modifier = Modifier.size(avatarSize).clip(CircleShape),
-                                )
-                            } else {
-                                ThemedIcon(
-                                    (unavailableAccount?.platformIcon ?: UiIcon.World).toImageVector(),
-                                    contentDescription = unavailableAccount?.platformDisplayName ?: throwable.platformId,
-                                    color = ThemeIconData.Color.ImperialMagenta,
-                                    size = avatarSize,
-                                )
-                            }
+                            TabIcon(
+                                icon = unavailableAccount?.platformIcon ?: UiIcon.World.asType(),
+                                contentDescription = unavailableAccount?.platformDisplayName ?: throwable.platformId,
+                                size = avatarSize,
+                            )
                         } else {
                             ThemedIcon(
                                 FontAwesomeIcons.Solid.FaceSadTear,

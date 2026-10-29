@@ -19,6 +19,7 @@ import dev.dimension.flare.feature.plugin.lifecycle.InstalledPluginV1
 import dev.dimension.flare.feature.plugin.lifecycle.PluginRuntimeSwitcherV1
 import dev.dimension.flare.feature.plugin.lifecycle.RunningPluginV1
 import dev.dimension.flare.feature.plugin.lifecycle.derivedPluginState
+import dev.dimension.flare.feature.plugin.lifecycle.persistPlatformIcon
 import dev.dimension.flare.feature.plugin.manifest.fallbackText
 import dev.dimension.flare.feature.plugin.runtime.PluginSessionBusyException
 import dev.dimension.flare.model.PlatformRegistry
@@ -282,8 +283,8 @@ internal class PluginAuthoringServiceV1(
             subsystem.stateStore.paths
                 .packagePath(record.packageHash)
                 .toString(),
-            subsystem.stateStore.paths
-                .iconPath(record.packageHash)
+            files
+                .persistPlatformIcon(record.pluginId, subsystem.stateStore.paths.iconPath(record.packageHash))
                 .toString(),
             generation = record.runtimeGeneration,
         )

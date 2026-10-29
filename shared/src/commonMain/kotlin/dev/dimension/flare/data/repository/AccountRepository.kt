@@ -17,6 +17,7 @@ import dev.dimension.flare.data.database.cache.connect
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.UnavailableMicroblogDataSource
 import dev.dimension.flare.data.datastore.AppDataStore
+import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformCapability
@@ -28,6 +29,7 @@ import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiText
+import dev.dimension.flare.ui.model.asType
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.takeSuccess
 import kotlinx.collections.immutable.ImmutableList
@@ -221,18 +223,18 @@ internal class AccountRepository internal constructor(
                         credential_json = credentialJson,
                         last_active = Clock.System.now().toEpochMilliseconds(),
                         platformDisplayName = account.platformDisplayName,
-                        platformIconName = account.platformIcon.name,
+                        platformIconName = (account.platformIcon as? IconType.Material)?.icon?.name,
                         platformDisplayNameTextJson = account.platformDisplayNameText.encodeJson(),
-                        platformIconUrl = account.platformIconUrl,
+                        platformIconUrl = (account.platformIcon as? IconType.Url)?.url,
                     ) ?: DbAccount(
                         account_key = account.accountKey,
                         platformId = account.platformId,
                         credential_json = credentialJson,
                         last_active = Clock.System.now().toEpochMilliseconds(),
                         platformDisplayName = account.platformDisplayName,
-                        platformIconName = account.platformIcon.name,
+                        platformIconName = (account.platformIcon as? IconType.Material)?.icon?.name,
                         platformDisplayNameTextJson = account.platformDisplayNameText.encodeJson(),
-                        platformIconUrl = account.platformIconUrl,
+                        platformIconUrl = (account.platformIcon as? IconType.Url)?.url,
                         sort_id = appDatabase.accountDao().getMaxSortId()?.plus(1) ?: 0L,
                     )
                 appDatabase.accountDao().insert(dbAccount)
@@ -461,7 +463,10 @@ internal class AccountRepository internal constructor(
 private fun DbAccount.toUi(platformRegistry: PlatformRegistry): UiAccount {
     val registered = platformRegistry.get(platformId)?.metadata
     val displayName = registered?.displayName ?: platformDisplayName ?: platformId
-    val icon = registered?.icon ?: platformIconName?.let { name -> UiIcon.entries.firstOrNull { it.name == name } } ?: UiIcon.World
+    val icon =
+        registered?.icon
+            ?: platformIconUrl?.let(IconType::Url)
+            ?: (platformIconName?.let { name -> UiIcon.entries.firstOrNull { it.name == name } } ?: UiIcon.World).asType()
     val displayNameText =
         registered?.displayNameText
             ?: platformDisplayNameTextJson?.let { runCatching { it.decodeJson<UiText>() }.getOrNull() }
@@ -472,7 +477,6 @@ private fun DbAccount.toUi(platformRegistry: PlatformRegistry): UiAccount {
         platformDisplayName = displayName,
         platformIcon = icon,
         platformDisplayNameText = displayNameText,
-        platformIconUrl = registered?.iconUrl ?: platformIconUrl,
         platformAvailable = platformRegistry.isRegistered(platformId),
         supportsRelayManagement = platformRegistry.supports(platformId, PlatformCapability.RelayManagement),
     )

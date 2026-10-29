@@ -505,7 +505,7 @@ public struct StatusView: View {
     private func topEndContent(
         visibility: UiTimelineV2.PostVisibility?,
         translationDisplayState: TranslationDisplayState,
-        platformIcon: UiIcon,
+        platformIcon: IconType,
         platformId: String,
         createdAt: UiDateTime,
         accountType: AccountType,
@@ -523,7 +523,7 @@ public struct StatusView: View {
                     .foregroundStyle(.secondary)
             }
             if showPlatformLogo {
-                Image(fontAwesome: platformIcon.fontAwesomeIcon)
+                TabIcon(icon: platformIcon, size: 14)
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .accessibilityLabel(

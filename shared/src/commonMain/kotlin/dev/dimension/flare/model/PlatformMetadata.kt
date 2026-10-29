@@ -1,7 +1,7 @@
 package dev.dimension.flare.model
 
 import androidx.compose.runtime.Immutable
-import dev.dimension.flare.ui.model.UiIcon
+import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.ui.model.UiText
 import kotlinx.serialization.Serializable
 
@@ -9,10 +9,9 @@ import kotlinx.serialization.Serializable
 @Serializable
 public data class PlatformMetadata(
     val displayName: String,
-    val icon: UiIcon,
+    val icon: IconType,
     val agentAliases: List<String> = emptyList(),
     val displayNameText: UiText = UiText.Raw(displayName),
-    val iconUrl: String? = null,
 )
 
 public enum class PlatformCapability {

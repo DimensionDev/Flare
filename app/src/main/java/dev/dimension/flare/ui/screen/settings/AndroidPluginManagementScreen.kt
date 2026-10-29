@@ -552,9 +552,6 @@ private fun PluginManagementList(
                 )
             }
         }
-        if (state.updatesChecked && state.plugins.none { it.availableUpdate != null }) {
-            item(key = "up-to-date") { MessageItem(title = stringResource(R.string.plugin_up_to_date), isError = false) }
-        }
         state.issues.forEach { issue ->
             item(key = "issue:${issue.code}:${issue.pluginId}") {
                 MessageItem(
@@ -642,13 +639,6 @@ private fun PluginItem(
                         Text("${stringResource(R.string.plugin_update)} ${update.tag}")
                     }
                 }
-                Text(
-                    if (plugin.running) {
-                        stringResource(R.string.plugin_running)
-                    } else {
-                        stringResource(R.string.plugin_inactive)
-                    },
-                )
                 if (plugin.pendingRestart) {
                     Text(
                         stringResource(R.string.plugin_restart_required),

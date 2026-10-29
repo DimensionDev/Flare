@@ -70,7 +70,6 @@ import dev.dimension.flare.plugin_confirm_install
 import dev.dimension.flare.plugin_development
 import dev.dimension.flare.plugin_empty
 import dev.dimension.flare.plugin_github_repository
-import dev.dimension.flare.plugin_inactive
 import dev.dimension.flare.plugin_install
 import dev.dimension.flare.plugin_install_github
 import dev.dimension.flare.plugin_issue_files_missing
@@ -89,7 +88,6 @@ import dev.dimension.flare.plugin_rebuild_index
 import dev.dimension.flare.plugin_report_issue
 import dev.dimension.flare.plugin_restart_required
 import dev.dimension.flare.plugin_retry
-import dev.dimension.flare.plugin_running
 import dev.dimension.flare.plugin_runtime_fatal
 import dev.dimension.flare.plugin_runtime_paused
 import dev.dimension.flare.plugin_uninstall
@@ -97,7 +95,6 @@ import dev.dimension.flare.plugin_uninstall_confirm_message
 import dev.dimension.flare.plugin_uninstall_confirm_title
 import dev.dimension.flare.plugin_unverified_github_warning
 import dev.dimension.flare.plugin_unverified_warning
-import dev.dimension.flare.plugin_up_to_date
 import dev.dimension.flare.plugin_update
 import dev.dimension.flare.plugin_version
 import dev.dimension.flare.plugin_warning_added_permission
@@ -593,15 +590,6 @@ private fun PluginManagementList(
                     ErrorInfoBar("${stringResource(Res.string.plugin_operation_failed)}: ${state.error.orEmpty().take(512)}")
                 }
             }
-            if (state.updatesChecked && state.plugins.none { it.availableUpdate != null }) {
-                item(key = "up-to-date") {
-                    InfoBar(
-                        title = { Text(stringResource(Res.string.plugin_up_to_date)) },
-                        message = {},
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                }
-            }
             state.issues.forEach { issue ->
                 item(key = "issue:${issue.code}:${issue.pluginId}") {
                     ErrorInfoBar(pluginIssueMessage(issue.code))
@@ -687,13 +675,6 @@ internal fun PluginItem(
                             Text("${stringResource(Res.string.plugin_update)} ${update.tag}")
                         }
                     }
-                    Text(
-                        if (plugin.running) {
-                            stringResource(Res.string.plugin_running)
-                        } else {
-                            stringResource(Res.string.plugin_inactive)
-                        },
-                    )
                     if (plugin.pendingRestart) {
                         Text(stringResource(Res.string.plugin_restart_required))
                     }

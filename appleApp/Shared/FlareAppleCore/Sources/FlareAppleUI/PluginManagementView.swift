@@ -97,14 +97,6 @@ public struct PluginManagementView: View {
                 }
             }
 
-            if presenter.state.updatesChecked && presenter.state.plugins.allSatisfy({ $0.availableUpdate == nil }) {
-                Label {
-                    Text("plugin_up_to_date")
-                } icon: {
-                    Image(fontAwesome: .circleCheck)
-                }
-            }
-
             if !presenter.state.issues.isEmpty || !presenter.state.runtimeIssues.isEmpty {
                 Section("plugin_issues") {
                     ForEach(Array(presenter.state.issues.enumerated()), id: \.offset) { _, issue in
@@ -271,7 +263,7 @@ public struct PluginManagementView: View {
             Label {
                 Text("more")
             } icon: {
-                Image(fontAwesome: .ellipsis)
+                Image(fontAwesome: .ellipsisVertical)
                     #if os(iOS)
                     .frame(minWidth: 44, minHeight: 44)
                     #endif
@@ -297,9 +289,6 @@ public struct PluginManagementView: View {
                     Text(plugin.nameText.text)
                         .font(.headline)
                     Text("\(plugin.platformId) · \(plugin.version)")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                    Text(plugin.running ? "plugin_running" : "plugin_inactive")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -412,7 +401,7 @@ public struct PluginManagementView: View {
             Label {
                 Text("more")
             } icon: {
-                Image(fontAwesome: .ellipsis)
+                Image(fontAwesome: .ellipsisVertical)
             }
         }
         .accessibilityLabel(Text("more"))

@@ -181,7 +181,7 @@ class AgentContextCompactionTest {
     @Test
     fun failedOrCancelledSummaryDoesNotReplaceThePreviousCheckpoint() =
         runTest {
-            for (failure in listOf("cancel", "error", "empty", "tool", "oversized")) {
+            for (failure in listOf("cancel", "error", "empty", "tool", "oversized", "truncated", "filtered")) {
                 Fixture { request, _ ->
                     check(request.isCompaction())
                     when (failure) {
@@ -189,6 +189,8 @@ class AgentContextCompactionTest {
                         "error" -> ERROR
                         "tool" -> toolResponse(99)
                         "oversized" -> textResponse("x".repeat(30_000))
+                        "truncated" -> textResponse("Only part of the checkpoint").replace("\"stop\"", "\"length\"")
+                        "filtered" -> textResponse("Filtered checkpoint").replace("\"stop\"", "\"content_filter\"")
                         else -> textResponse("")
                     }
                 }.use { fixture ->
@@ -286,10 +288,49 @@ class AgentContextCompactionTest {
             }
         }
 
+    @Test
+    fun summaryHasItsOwnOutputBudgetWithoutChangingNormalRequests() =
+        runTest {
+            var failures = 0
+            Fixture(extraBody = "{\"max_tokens\":17}") { request, number ->
+                when {
+                    request.isCompaction() -> textResponse("Completed the tool; work remains")
+                    number == 1 -> toolResponse(number)
+                    failures++ == 0 -> OVERFLOW
+                    else -> textResponse("Recovered")
+                }
+            }.use { fixture ->
+                assertEquals("Recovered", fixture.run())
+                val summary = fixture.requests.single { it.isCompaction() }
+                val outputBudget = (summary["max_completion_tokens"] ?: summary["max_tokens"])?.jsonPrimitive?.content?.toInt()
+                assertTrue(assertNotNull(outputBudget) > 17)
+                assertTrue(fixture.requests.filterNot { it.isCompaction() }.all { it["max_tokens"]?.jsonPrimitive?.content == "17" })
+            }
+        }
+
+    @Test
+    fun largeNormalOutputReservationDoesNotPreventSummarizingHistoryThatFitsTheModel() =
+        runTest {
+            Fixture(extraBody = "{\"max_tokens\":8000}").use { fixture ->
+                fixture.history.messages = oldHistory()
+                assertEquals("Done", fixture.run())
+                assertEquals(1, fixture.checkpoints.size)
+                assertTrue(fixture.requests.first().isCompaction())
+                assertEquals(
+                    "8000",
+                    fixture.requests
+                        .last()["max_tokens"]
+                        ?.jsonPrimitive
+                        ?.content,
+                )
+            }
+        }
+
     private class Fixture(
         private val maxIterations: Int = 256,
         private val resultSize: Int = 20,
         private val failCheckpoint: Boolean = false,
+        private val extraBody: String = "",
         private val response: (
             JsonObject,
             Int,
@@ -327,7 +368,14 @@ class AgentContextCompactionTest {
             assertNotNull(
                 AiConfigKoogBridge().createRuntime(
                     AppSettings.AiConfig(
-                        type = AppSettings.AiConfig.Type.OpenAI("https://agent.example/v1/", "key", "test-model", contextWindow = 16_384),
+                        type =
+                            AppSettings.AiConfig.Type.OpenAI(
+                                "https://agent.example/v1/",
+                                "key",
+                                "test-model",
+                                contextWindow = 16_384,
+                                extraBody = extraBody,
+                            ),
                     ),
                     KtorKoogHttpClient.Factory(baseClient = client),
                 ),

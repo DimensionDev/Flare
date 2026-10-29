@@ -438,7 +438,10 @@ internal class AgentChatHistoryProvider(
                         .getMessagesChronological(conversationId)
                         .first { it.toMessage()?.id == checkpoint.throughMessageId }
                         .position
-                database.conversationDao().upsertContext(DbAgentContext(conversationId, checkpoint.summary, throughPosition))
+                val previousPosition = database.conversationDao().getContext(conversationId)?.throughPosition ?: throughPosition
+                database.conversationDao().upsertContext(
+                    DbAgentContext(conversationId, checkpoint.summary, maxOf(previousPosition, throughPosition)),
+                )
             }
         }
     }
@@ -541,32 +544,46 @@ internal class AgentChatHistoryProvider(
     private fun DbAgentMessage.messageId(): String = "$conversationId:$position"
 
     private fun List<Message>.sanitizeForReplay(): List<Message> {
-        val calls = mutableSetOf<Pair<String?, String>>()
-        val completed = mutableSetOf<Pair<String?, String>>()
-        forEach { message ->
-            message.parts.forEach { part ->
+        val pending = mutableMapOf<Pair<String?, String>, Pair<Int, Int>>()
+        val completed = mutableSetOf<Pair<Int, Int>>()
+        forEachIndexed { messageIndex, message ->
+            if (message.parts.none { it is MessagePart.Tool.Result }) pending.clear()
+            message.parts.forEachIndexed { partIndex, part ->
+                val position = messageIndex to partIndex
                 when (part) {
-                    is MessagePart.Tool.Call -> calls += part.id to part.tool
-                    is MessagePart.Tool.Result -> if ((part.id to part.tool) in calls) completed += part.id to part.tool
-                    else -> Unit
+                    is MessagePart.Tool.Call -> {
+                        pending[part.id to part.tool] = position
+                    }
+
+                    is MessagePart.Tool.Result -> {
+                        pending.remove(part.id to part.tool)?.let { call ->
+                            completed += call
+                            completed += position
+                        }
+                    }
+
+                    else -> {}
                 }
             }
         }
-        return mapNotNull { message ->
+        return mapIndexedNotNull { messageIndex, message ->
             when (message) {
                 is Message.System -> {
                     message
                 }
 
                 is Message.User -> {
-                    val parts = message.parts.filterNot { it is MessagePart.Tool.Result && (it.id to it.tool) !in completed }
+                    val parts =
+                        message.parts.filterIndexed { partIndex, part ->
+                            part !is MessagePart.Tool.Result || (messageIndex to partIndex) in completed
+                        }
                     parts.takeIf { it.isNotEmpty() }?.let { message.copy(parts = it) }
                 }
 
                 is Message.Assistant -> {
                     val parts =
-                        message.parts.filterNot { part ->
-                            part is MessagePart.Reasoning || (part is MessagePart.Tool.Call && (part.id to part.tool) !in completed)
+                        message.parts.filterIndexed { partIndex, part ->
+                            part !is MessagePart.Reasoning && (part !is MessagePart.Tool.Call || (messageIndex to partIndex) in completed)
                         }
                     parts.takeIf { it.isNotEmpty() }?.let { message.copy(parts = it) }
                 }

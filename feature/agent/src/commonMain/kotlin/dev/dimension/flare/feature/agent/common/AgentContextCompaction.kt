@@ -85,13 +85,35 @@ internal class AgentContextCompaction {
         val summaryBudget = minOf(4_000L, budget / 16).coerceAtLeast(128)
         val required = original.messages.filterIsInstance<Message.System>() + listOfNotNull(latestUser)
         if (estimate(required) + toolTokens(session) + summaryBudget * 2 >= budget * 4 / 5) return false
+        val summaryOutputBudget = (summaryBudget * 2).toInt()
+        val summaryInputBudget =
+            ((session.model.contextLength ?: 8_192L) - summaryOutputBudget).let {
+                if (force) {
+                    minOf(
+                        budget,
+                        it,
+                    )
+                } else {
+                    it
+                }
+            }
         val summaryPrompt =
             original.withMessages { messages ->
                 messages.map { message -> message.forSummary(Int.MAX_VALUE) }
             }
         val response =
             try {
-                session.prompt = summaryPrompt
+                session.prompt =
+                    summaryPrompt.withParams(
+                        original.params.copy(
+                            maxTokens = summaryOutputBudget,
+                            schema = null,
+                            additionalProperties =
+                                original.params.additionalProperties?.filterKeys {
+                                    it !in setOf("max_tokens", "max_completion_tokens", "response_format")
+                                },
+                        ),
+                    )
                 session.appendPrompt {
                     system(
                         """
@@ -104,19 +126,22 @@ internal class AgentContextCompaction {
                         """.trimIndent(),
                     )
                 }
-                if (estimate(session.prompt.messages) >= budget) {
+                if (estimate(session.prompt.messages) >= summaryInputBudget) {
                     session.prompt =
                         session.prompt.withMessages { messages ->
                             original.messages.map { it.forSummary((budget / history.size).coerceIn(256, 8_000).toInt()) } + messages.last()
                         }
                 }
-                check(estimate(session.prompt.messages) < budget) {
+                check(estimate(session.prompt.messages) < summaryInputBudget) {
                     "The conversation is too large to summarize safely. Shorten the current request or tool output."
                 }
                 session.requestLLMWithoutTools()
             } finally {
                 session.prompt = original
             }
+        check(response.finishReason == null || response.finishReason?.lowercase() in setOf("stop", "end_turn")) {
+            "The model did not finish the context summary"
+        }
         check(response.parts.none { it is MessagePart.Tool.Call }) { "Tools are disabled during context compaction" }
         val summary = response.textContent().trim()
         check(
@@ -163,6 +188,7 @@ internal class AgentContextCompaction {
                 }
         }
 
+    // shortcut: estimate bytes and calibrate with reported usage until providers expose portable token counting.
     private fun estimateText(text: String): Long = ceil(text.encodeToByteArray().size / 2.0 * tokenEstimateScale).toLong()
 }
 

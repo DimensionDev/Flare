@@ -323,7 +323,7 @@ class AgentChatHistoryProviderTest {
                     assistant(
                         "Visible progress",
                         "orphan",
-                    ).copy(parts = listOf(MessagePart.Text("Visible progress"), MessagePart.Tool.Call("tool-2", "lookup", "{}")))
+                    ).copy(parts = listOf(MessagePart.Text("Visible progress"), MessagePart.Tool.Call("tool-1", "lookup", "{}")))
                 fixture.history.storeCheckpoint(
                     CONVERSATION,
                     listOf(user("Requirement", "old"), call, result, orphan),
@@ -390,6 +390,31 @@ class AgentChatHistoryProviderTest {
             } finally {
                 Files.list(directory).use { paths -> paths.forEach(Files::delete) }
                 Files.delete(directory)
+            }
+        }
+
+    @Test
+    fun aPinnedOldRequestCannotMoveTheCheckpointBoundaryBackwards() =
+        runTest {
+            Fixture().use { fixture ->
+                val original = listOf(user("Original requirement", "q1"), assistant("Completed", "a1"), assistant("Recent", "a2"))
+                fixture.history.storeCheckpoint(CONVERSATION, original, AgentContextCheckpoint("First summary", "a1"))
+                val loaded = fixture.history.load(CONVERSATION)
+                fixture.history.storeCheckpoint(
+                    CONVERSATION,
+                    listOf(loaded.first(), original.first()) + loaded.drop(1),
+                    AgentContextCheckpoint("Second summary", "q1"),
+                )
+                val restored = fixture.history.load(CONVERSATION)
+                assertEquals(listOf(AGENT_CONTEXT_SUMMARY_ID, "a2"), restored.map { it.id })
+                assertTrue(restored.first().textContent().contains("Second summary"))
+                assertEquals(
+                    3,
+                    fixture.history
+                        .observeMessages(CONVERSATION)
+                        .first()
+                        .size,
+                )
             }
         }
 

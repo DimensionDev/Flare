@@ -291,12 +291,12 @@ class PluginRuntimePoolTest {
             val context = accountContext(plugin, "first", "https://one.example", credential)
             try {
                 val result = invokePage(pool, plugin, context, request("host"))
-                assertEquals("new", result["credential"]!!.jsonObject["token"]!!.jsonPrimitive.content)
+                assertEquals("new 中文 👩‍💻", result["credential"]!!.jsonObject["token"]!!.jsonPrimitive.content)
                 assertEquals("ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad", result["hash"]!!.jsonPrimitive.content)
                 assertEquals(32, result["random"]!!.jsonPrimitive.content.length)
                 assertTrue(result["uuid"]!!.jsonPrimitive.content.matches(Regex("[0-9a-f-]{36}")))
                 assertEquals(
-                    "new",
+                    "new 中文 👩‍💻",
                     credential
                         .read()
                         .jsonObject["token"]!!
@@ -602,7 +602,7 @@ private const val STATEFUL_PAGE =
       if (request.mode === "eval") return (0, eval)("({ remote: true })");
       if (request.mode === "function") return (() => {}).constructor("return { remote: true }")();
       if (request.mode === "host") {
-        await flare.credential.replace({ token: "new" });
+        await flare.credential.replace({ token: "new 中文 👩‍💻" });
         return {
           credential: await flare.credential.read(),
           random: await flare.crypto.randomHex(16),

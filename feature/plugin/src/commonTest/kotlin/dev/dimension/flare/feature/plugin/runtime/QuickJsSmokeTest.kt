@@ -3,12 +3,15 @@ package dev.dimension.flare.feature.plugin.runtime
 import com.dokar.quickjs.QuickJs
 import com.dokar.quickjs.QuickJsException
 import com.dokar.quickjs.QuickJsInterruptedException
+import com.dokar.quickjs.binding.asyncFunction
 import dev.dimension.flare.feature.plugin.abi.DISABLE_DYNAMIC_CODE_PRELUDE
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.json.JsonPrimitive
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertTrue
 
 class QuickJsSmokeTest {
     @Test
@@ -21,6 +24,32 @@ class QuickJsSmokeTest {
     fun awaitsPromise() =
         withQuickJs { quickJs ->
             assertEquals("Flare", quickJs.evaluate<String>("await Promise.resolve('Flare')"))
+        }
+
+    @Test
+    fun preservesUnicodeAcrossJsonHostCalls() =
+        withQuickJs { quickJs ->
+            val text = "中文 e\u0301 👋🏽 👩‍💻\u0000end"
+            val json = JsonPrimitive(text).toString()
+            quickJs.asyncFunction<String>("echo") { arguments ->
+                assertEquals(json, arguments.single())
+                json
+            }
+
+            assertEquals(json, quickJs.evaluate<String>("await echo(JSON.stringify($json))"))
+        }
+
+    @Test
+    fun preservesUnicodeErrorsAndAllowsNextEvaluation() =
+        withQuickJs { quickJs ->
+            val message = "找不到内容 👩‍💻"
+            val error =
+                assertFailsWith<QuickJsException> {
+                    quickJs.evaluate<Unit>("throw new Error(${JsonPrimitive(message)})", "plugin.js")
+                }
+
+            assertTrue(error.message.orEmpty().contains(message), error.message)
+            assertEquals(42, quickJs.evaluate<Int>("21 * 2"))
         }
 
     @Test

@@ -1,37 +1,37 @@
 package dev.dimension.flare.feature.plugin.installer
 
-import com.dokar.quickjs.QuickJs
 import dev.dimension.flare.feature.plugin.abi.DISABLE_DYNAMIC_CODE_PRELUDE
 import dev.dimension.flare.feature.plugin.abi.PluginJsonV1
 import dev.dimension.flare.feature.plugin.manifest.PluginMethodTableV1
+import dev.dimension.flare.feature.plugin.runtime.PluginHostCall
+import dev.dimension.flare.feature.plugin.runtime.PluginJavaScriptEngine
+import dev.dimension.flare.feature.plugin.runtime.createPluginJavaScriptEngine
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import kotlinx.serialization.decodeFromString
 
 internal class PluginRegistrationInspector(
     private val dispatcher: CoroutineDispatcher = Dispatchers.Default,
+    private val engineFactory: suspend (PluginHostCall) -> PluginJavaScriptEngine = { createPluginJavaScriptEngine(dispatcher, it) },
 ) {
-    suspend fun inspect(source: String): PluginMethodTableV1 {
-        require(!containsDynamicImport(source)) { "Dynamic import is not supported" }
-        val quickJs = QuickJs.create(dispatcher)
-        try {
-            quickJs.memoryLimit = VALIDATION_MEMORY_BYTES
-            quickJs.maxStackSize = VALIDATION_STACK_BYTES
-            quickJs.evaluationTimeoutMillis = VALIDATION_TIMEOUT_MILLIS
-            val result =
-                withTimeout(VALIDATION_TIMEOUT_MILLIS) {
-                    quickJs.evaluate<String>(registrationPrelude + DISABLE_DYNAMIC_CODE_PRELUDE + source + registrationResult)
-                }
-            return PluginJsonV1.decodeFromString(result)
-        } finally {
-            quickJs.close()
+    suspend fun inspect(source: String): PluginMethodTableV1 =
+        withContext(dispatcher) {
+            require(!containsDynamicImport(source)) { "Dynamic import is not supported" }
+            val engine = engineFactory { _, _, _ -> error("Host API is unavailable during installation") }
+            try {
+                val result =
+                    withTimeout(VALIDATION_TIMEOUT_MILLIS) {
+                        engine.evaluate(registrationPrelude + DISABLE_DYNAMIC_CODE_PRELUDE + source + registrationResult, "plugin.js")
+                    }
+                PluginJsonV1.decodeFromString(result)
+            } finally {
+                engine.close()
+            }
         }
-    }
 }
 
-private const val VALIDATION_MEMORY_BYTES = 16L * 1024 * 1024
-private const val VALIDATION_STACK_BYTES = 256L * 1024
 private const val VALIDATION_TIMEOUT_MILLIS = 2_000L
 
 private val registrationPrelude =

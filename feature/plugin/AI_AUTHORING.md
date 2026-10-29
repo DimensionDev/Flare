@@ -51,7 +51,7 @@ state or deleting it.
 
 Android uses Compose settings components, iOS and native macOS use SwiftUI, and
 Compose Desktop uses Fluent components. All four use the same authoring references, validation,
-QuickJS runtime, version checks and permission rules. No data migration or legacy
+platform JavaScript runtime, version checks and permission rules. No data migration or legacy
 chat compatibility layer is included for the development-only previous workflow.
 
 Provide public API documentation or redacted response examples where needed. Log

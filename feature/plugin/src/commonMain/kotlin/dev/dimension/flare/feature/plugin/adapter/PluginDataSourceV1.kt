@@ -82,7 +82,7 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 
-/** Lazy proxy: construction reads only the Host-owned credential envelope and never starts QuickJS. */
+/** Lazy proxy: construction reads only the Host-owned credential envelope and never starts a JavaScript engine. */
 internal class PluginDataSourceV1 private constructor(
     private val plugin: RunningPluginV1,
     private val runtimePool: PluginRuntimePool,

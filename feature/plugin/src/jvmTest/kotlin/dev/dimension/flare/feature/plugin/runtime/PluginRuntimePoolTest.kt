@@ -228,14 +228,8 @@ class PluginRuntimePoolTest {
                 }
                 assertEquals(1, invokePage(pool, plugin, context, request("normal"))["count"]!!.jsonPrimitive.int)
 
-                assertFailsWith<PluginRuntimeUnavailableException> {
-                    invokePage(pool, plugin, context, request("oom"))
-                }
-                pool.retry(PLUGIN_ID)
-                assertEquals(1, invokePage(pool, plugin, context, request("normal"))["count"]!!.jsonPrimitive.int)
-
                 assertFailsWith<kotlinx.coroutines.TimeoutCancellationException> {
-                    withTimeout(100) { invokePage(pool, plugin, context, request("loop")) }
+                    withTimeout(100) { invokePage(pool, plugin, context, request("pendingPromise")) }
                 }
                 pool.retry(PLUGIN_ID)
                 assertEquals(1, invokePage(pool, plugin, context, request("normal"))["count"]!!.jsonPrimitive.int)
@@ -251,7 +245,7 @@ class PluginRuntimePoolTest {
             val pool = PluginRuntimePool(fileSystem, CapturingTransport())
             val context = accountContext(plugin, "first", "https://one.example", MemoryCredential())
             try {
-                val call = launch { invokePage(pool, plugin, context, request("loop")) }
+                val call = launch { invokePage(pool, plugin, context, request("pendingPromise")) }
                 delay(100)
                 call.cancelAndJoin()
 
@@ -594,11 +588,7 @@ private const val STATEFUL_PAGE =
         await flare.http.request({ url: "https://one.example/wait" });
         return { count: globalThis.__testCount };
       }
-      if (request.mode === "oom") {
-        const chunks = [];
-        while (true) chunks.push(new Uint8Array(1024 * 1024));
-      }
-      if (request.mode === "loop") while (true) {}
+      if (request.mode === "pendingPromise") await new Promise(() => {});
       if (request.mode === "eval") return (0, eval)("({ remote: true })");
       if (request.mode === "function") return (() => {}).constructor("return { remote: true }")();
       if (request.mode === "host") {

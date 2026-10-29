@@ -29,5 +29,10 @@ internal val DISABLE_DYNAMIC_CODE_PRELUDE: String =
         writable: false,
         value: undefined,
       });
+      Object.defineProperty(globalThis, "WebAssembly", {
+        configurable: false,
+        writable: false,
+        value: undefined,
+      });
     })();
     """.trimIndent() + "\n"

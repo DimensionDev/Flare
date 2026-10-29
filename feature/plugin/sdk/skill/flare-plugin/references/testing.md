@@ -1,7 +1,7 @@
 # Validation and acceptance
 
 Record checks against the actual plugin revision. Use the smallest checks that
-exercise the edited behavior. Distinguish syntax, mocked behavior, real QuickJS,
+exercise the edited behavior. Distinguish syntax, mocked behavior, real platform engines,
 installation, live website behavior, and platform UI; none proves all the others.
 No demonstration backend is required for authoring this SDK.
 
@@ -14,7 +14,7 @@ node --check plugin.js
 node -e 'JSON.parse(require("node:fs").readFileSync("manifest.json", "utf8")); console.log("Manifest JSON parses")'
 ```
 
-These are syntax checks only: Node accepts APIs that the QuickJS Host does not
+These are syntax checks only: Node accepts APIs that the plugin Host does not
 provide, and parsing JSON does not validate the manifest. Also inspect:
 
 - Required root files and a valid supported icon; stable IDs and version/tag consistency.
@@ -143,10 +143,32 @@ GitHub repository and stable tag, if publication was authorized and completed:
 | Quick start and AI workflow | README.md, SKILL.md, GitHub template |
 | Manifest fields, defaults, validation | manifest.md; template and Pixelfed manifests |
 | Capability/UI matrix and all twelve services | capabilities.md, recipes.md |
-| QuickJS, HTTP, credentials, permissions | runtime-http.md; template requestJson helper |
+| Platform engines, HTTP, credentials, permissions | runtime-http.md; template requestJson helper |
 | Five login methods and detection | authentication.md; template token login and Pixelfed OAuth |
 | Mapping, identity, paging, tokens | wire-data.md; template and Pixelfed |
 | Advanced features, guest, localization, Deep Links | recipes.md |
 | Failure diagnosis, limits, recovery | troubleshooting.md |
 | Verification and evidence boundaries | this document; Host SDK tests |
 | GitHub distribution and schema upgrades | publishing.md; ABI.md |
+
+## Platform engine regressions
+
+The same engine contract suite runs against actual backends. From the Flare repository:
+
+```sh
+./gradlew :feature:plugin:jvmTest
+./gradlew :feature:plugin:connectedAndroidDeviceTest
+./gradlew :feature:plugin:macosArm64Test :feature:plugin:iosSimulatorArm64Test
+```
+
+Android needs a connected supported device/emulator and its current WebView provider;
+Apple tests need macOS/Xcode and an available iOS simulator. These check string/JSON
+and Unicode transport, Host reply correlation, task draining, awaited versus detached
+errors, isolation, policy enforcement, and close/cancellation. The existing JVM
+package/proxy/account/lifecycle suite still runs against QuickJS. A Desktop fixture
+run does not prove Android or Apple behavior; record OS/provider versions and actual
+executed counts. Test UI/account/login flows separately on each shipping target.
+
+Do not assert uniform heap/stack quotas or interruption of infinite loops. Test
+cancellable Host work and retirement without running an unending loop in the test
+process. See [runtime semantics](runtime-http.md#async-completion-and-errors).

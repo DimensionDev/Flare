@@ -23,6 +23,10 @@ interface PluginInvocationContextV1 {
 
 /** Register once, synchronously. Run Host API calls only inside these methods.
  * Manifest operation names, registration paths, and login negotiation must agree.
+ * Await or return all work whose failure must fail the invocation. The Host drains
+ * started Host tasks, but detached Promise rejections do not fail the returned chain.
+ * Targets use JavaScriptCore (native Apple), AndroidX JavaScriptEngine (Android),
+ * or QuickJS (Compose Desktop). No uniform heap/stack cap or busy-loop interruption.
  * @see references/capabilities.md
  */
 interface PluginDefinitionV1 {

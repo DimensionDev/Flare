@@ -7,7 +7,6 @@ import dev.dimension.flare.feature.plugin.host.PluginHttpTransport
 import dev.dimension.flare.feature.plugin.host.PluginInvocationContextV1
 import dev.dimension.flare.feature.plugin.host.PluginInvocationScopeV1
 import dev.dimension.flare.feature.plugin.host.PluginUrlPolicy
-import dev.dimension.flare.feature.plugin.host.defaultPluginRuntimeHeapBudgetBytes
 import dev.dimension.flare.feature.plugin.lifecycle.RunningPluginV1
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -80,7 +79,6 @@ public data class PluginRuntimeIssueV1(
 public class PluginRuntimePool(
     fileSystem: FileSystem,
     private val transportFactory: () -> PluginHttpTransport,
-    private val softHeapBudgetBytes: Long = defaultPluginRuntimeHeapBudgetBytes(),
     private val dispatcher: CoroutineDispatcher = Dispatchers.Default,
     private val nowMillis: () -> Long = monotonicMillis(),
 ) {
@@ -96,17 +94,12 @@ public class PluginRuntimePool(
 
     public val issues: StateFlow<Map<String, PluginRuntimeIssueV1>> = mutableIssues.asStateFlow()
 
-    init {
-        require(softHeapBudgetBytes > 0) { "Invalid Runtime heap budget" }
-    }
-
     public constructor(
         fileSystem: FileSystem,
         transport: PluginHttpTransport,
-        softHeapBudgetBytes: Long = defaultPluginRuntimeHeapBudgetBytes(),
         dispatcher: CoroutineDispatcher = Dispatchers.Default,
         nowMillis: () -> Long = monotonicMillis(),
-    ) : this(fileSystem, { transport }, softHeapBudgetBytes, dispatcher, nowMillis)
+    ) : this(fileSystem, { transport }, dispatcher, nowMillis)
 
     public suspend fun <Request, Response> invoke(
         plugin: RunningPluginV1,
@@ -311,29 +304,7 @@ public class PluginRuntimePool(
     }
 
     private suspend fun release(holder: Holder) {
-        val close =
-            mutex.withLock {
-                holder.activeCalls--
-                holder.lastUsedMillis = nowMillis()
-                trimLocked()
-            }
-        close.forEach { it.runtime.close() }
-    }
-
-    private fun trimLocked(): List<Holder> {
-        var heap = holders.values.sumOf { it.runtime.heapBytes }
-        if (heap <= softHeapBudgetBytes) return emptyList()
-        val result = mutableListOf<Holder>()
-        holders.entries
-            .filter { it.value.activeCalls == 0 }
-            .sortedBy { it.value.lastUsedMillis }
-            .forEach { (key, holder) ->
-                if (heap <= softHeapBudgetBytes) return@forEach
-                holders.remove(key)
-                heap -= holder.runtime.heapBytes
-                result += holder
-            }
-        return result
+        mutex.withLock { holder.activeCalls-- }
     }
 
     private fun validateInvocation(
@@ -370,7 +341,6 @@ public class PluginRuntimePool(
     private class Holder(
         val runtime: IsolatedPluginRuntime,
         var activeCalls: Int = 0,
-        var lastUsedMillis: Long = 0,
     )
 }
 

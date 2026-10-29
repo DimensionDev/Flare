@@ -190,7 +190,7 @@ is not a plugin installation URL. A GitHub Release or `.fpp` upload is unnecessa
 | Exact JavaScript signatures and field comments | [flare-plugin.d.ts](flare-plugin.d.ts) |
 | Manifest fields, defaults, enums, and validation | [Manifest](references/manifest.md) |
 | All twelve capabilities, minimum methods, and UI requirements | [Capabilities](references/capabilities.md) |
-| QuickJS, HTTP, permissions, credentials, and state | [Runtime and HTTP](references/runtime-http.md) |
+| Platform engines, async completion, HTTP, permissions, credentials, and state | [Runtime and HTTP](references/runtime-http.md) |
 | Detection and all five login methods | [Authentication](references/authentication.md) |
 | DTO mapping, pagination, media, and opaque tokens | [Wire data](references/wire-data.md) |
 | Capability implementations, guest, localization, and Deep Links | [Recipes](references/recipes.md) |

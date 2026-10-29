@@ -32,6 +32,8 @@ logging API; do not invent `flare.log` or assume a developer console is availabl
 | DM polling repeats or crosses rooms | Newer page cursor is separate from roomEntityToken; advance empty successful pages and isolate rooms |
 | Actions show stale state | Return complete authoritative updatedPost/updatedRelation or appropriate invalidation; preserve action tokens |
 | Runtime retired/paused | Find an unmarked exception, invalid Wire output, or exceeded budget before retrying |
+| JavaScript unavailable on Android | Update Android System WebView; the provider must support message ports, Promise results, and large evaluations |
+| Invocation succeeds despite an async error | Put required work in the method's await/return chain; detached rejections do not automatically fail the call |
 
 ## Typed errors
 
@@ -66,6 +68,8 @@ Avoid returning raw server messages containing credentials or private data.
 Unmarked exceptions and invalid DTOs retire the runtime. Three counted fatal
 failures within 60 seconds pause the plugin for that process. Cancellation can
 retire a generation without counting as a failure; a deadline timeout can count.
+An unavailable Android provider or collateral sandbox death does not count as
+plugin misconduct. Retry after the provider/sandbox recovers; writes are not replayed.
 Fix the underlying issue, then use the Host's retry mechanism where available or
 restart. Global state is disposable, so recovery must not depend on it.
 
@@ -82,9 +86,9 @@ requests/responses well below them.
 | manifest / plugin.js / icon | 256 KiB / 4 MiB / 2 MiB |
 | Icon dimensions | 1..1024 for each dimension |
 | Locale files | 32 catalogs; 256 KiB each; 2048 keys each; 4096 characters per value |
-| Registration | 2 seconds; 16 MiB heap; 256 KiB stack |
+| Registration evaluation | 2-second caller deadline |
 | Runtime initialization | 2 seconds |
-| Runtime | 64 MiB heap; 512 KiB stack |
+| Runtime memory / stack | Engine/system limits; no uniform Host cap or heap-based pool eviction |
 | Invocation deadline | Detector 10 seconds; normal 30 seconds; extended 120 seconds where selected by the Host |
 | Invocation JSON request / response | 1 MiB / 5 MiB |
 | HTTP response body | 4 MiB |
@@ -106,3 +110,7 @@ their own Host/compose constraints, up to 1 GiB per asset at the bridge boundary
 the website and negotiated composer commonly impose much smaller limits.
 Repeated HTTP requests do not reset an invocation deadline. See
 [runtime/HTTP](runtime-http.md) before choosing a timeout or upload strategy.
+Deadlines retire a runtime and cancel its Host work; they do not guarantee that
+busy JavaScript stops. A JavaScriptCore loop can require an app restart to release
+its worker. Avoid recursion/large allocations and test bounded computation on all
+three engines.

@@ -2,12 +2,26 @@
 
 ## Execution environment
 
-Flare evaluates one self-contained classic `plugin.js` in isolated QuickJS.
+Flare evaluates one self-contained classic `plugin.js` in an isolated runtime:
+
+| Host target | JavaScript engine |
+| --- | --- |
+| Native iOS / macOS | System JavaScriptCore |
+| Android | AndroidX JavaScriptEngine, supplied by Android System WebView |
+| Compose Desktop (including macOS) | Bundled QuickJS |
+
+Android requires a provider supporting message ports, Promise results, and
+evaluation beyond the Binder transaction limit. Update Android System WebView
+when the Host reports that JavaScript is unavailable; there is no QuickJS fallback.
+Engine versions on Apple and Android follow the OS/provider. Use portable
+JavaScript and test on each target; newer syntax, `Intl` data, stack traces and
+engine-specific globals are not a cross-platform compatibility guarantee.
+
 Register exactly once with `definePlugin`. Use standard JavaScript data handling
 and the frozen `flare` Host facade. Browser/Node facilities (`fetch`, DOM,
 `localStorage`, `require`, `process`, `Buffer`, browser URL helpers, timers) are
 not part of the plugin contract. Do not assume them from your build environment.
-Static/dynamic imports, remote code, `eval`, and `Function` string compilation
+Static/dynamic imports, remote code, `eval`, `Function`, and WebAssembly compilation
 are unavailable. A TypeScript declaration file supplies types, not runtime code.
 If authoring with a bundler, commit its self-contained classic-script output at
 repository root and check the output for unsupported dependencies.
@@ -24,6 +38,36 @@ OAuth state that your code needs belongs in `pendingPayload`. There are no
 install/update/enable/disable/uninstall hooks or general-purpose storage API.
 An unmarked exception, invalid Wire response, timeout, cancellation, or memory
 failure retires that generation. See [recovery](troubleshooting.md).
+
+## Async completion and errors
+
+Flare waits for the registered method's returned/awaited Promise and for Host
+tasks started by that invocation to finish before returning its result, including
+when the method fails. This is completion tracking, not automatic error propagation:
+a rejected Promise outside the method's `await`/`return` chain does not by itself
+fail the invocation. This also applies to a Host call that the method did not await.
+Always await required HTTP requests and credential updates so their failures affect
+the result. Await dependent follow-up work; detached Promise chains are not a
+background-task API and cannot rely on the invocation remaining active.
+
+```js
+await flare.credential.replace({ token: newToken });
+return result; // returned only after persistence; a failed replacement fails this chain
+```
+
+Caught errors remain caught. A returned/awaited `flare.error(...)` remains a typed
+plugin error; other returned/awaited failures (including `throw null` or rejected
+`undefined`) retire the runtime. Detached failures may have no diagnostic.
+
+Host deadlines and cancellation still stop waiting for a result, cancel invocation
+Host work, and retire the runtime. They do not guarantee interruption of executing
+JavaScript. In particular, public JavaScriptCore cannot stop a synchronous loop;
+its worker may retain CPU/memory until the script returns or the process exits.
+There is no uniform per-runtime heap/stack cap or heap-based pool eviction. The
+system/provider still imposes its own limits. Android isolates share a sandbox
+process: its death can invalidate multiple runtimes, which are recreated on later
+calls. Failed operations are not automatically replayed. Keep computation bounded
+and persistent state in the Host's existing credential/account APIs.
 
 ## Invocation context
 

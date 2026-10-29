@@ -1,14 +1,12 @@
 package dev.dimension.flare.feature.plugin.runtime
 
-import com.dokar.quickjs.ExperimentalQuickJsApi
-import com.dokar.quickjs.QuickJs
-import com.dokar.quickjs.binding.asyncFunction
 import dev.dimension.flare.feature.plugin.abi.DISABLE_DYNAMIC_CODE_PRELUDE
 import dev.dimension.flare.feature.plugin.abi.PluginJsonV1
 import dev.dimension.flare.feature.plugin.host.PluginCallTimeoutV1
 import dev.dimension.flare.feature.plugin.host.PluginHostGateway
 import dev.dimension.flare.feature.plugin.host.PluginInvocationContextV1
 import dev.dimension.flare.feature.plugin.host.PluginInvocationMetadataV1
+import dev.dimension.flare.feature.plugin.host.platformUuid
 import dev.dimension.flare.feature.plugin.lifecycle.RunningPluginV1
 import dev.dimension.flare.feature.plugin.manifest.PluginCatalogBundleV1
 import dev.dimension.flare.feature.plugin.manifest.requiredMethods
@@ -18,12 +16,15 @@ import dev.dimension.flare.feature.plugin.wire.requireValid
 import dev.dimension.flare.ui.model.UiText
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.DisposableHandle
-import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -40,17 +41,13 @@ internal class IsolatedPluginRuntime(
     private val loader: PluginPackageScriptLoader,
     private val gateway: PluginHostGateway,
     private val dispatcher: CoroutineDispatcher = Dispatchers.Default,
+    private val engineFactory: suspend (PluginHostCall) -> PluginJavaScriptEngine = { createPluginJavaScriptEngine(dispatcher, it) },
 ) {
     private val mutex = Mutex()
-    private var quickJs: QuickJs? = null
+    private var engine: PluginJavaScriptEngine? = null
     private var poisoned: Boolean = false
-    private var activeContext: PluginInvocationContextV1? = null
-    private var activeTimeoutMillis: Long = PluginCallTimeoutV1.Normal.millis
+    private val activeInvocation = MutableStateFlow<Invocation?>(null)
 
-    var heapBytes: Long = 0
-        private set
-
-    @OptIn(ExperimentalQuickJsApi::class, InternalCoroutinesApi::class)
     suspend fun invoke(
         method: String,
         request: JsonElement,
@@ -69,48 +66,49 @@ internal class IsolatedPluginRuntime(
                 require(requestJson.encodeToByteArray().size <= MAX_INVOCATION_REQUEST_BYTES) { "Plugin request is too large" }
                 if (poisoned) throw PluginRuntimeFatalException(IllegalStateException("Runtime generation is retired"), false)
                 val invocationJob = currentCoroutineContext()[Job]
-                var interruptHandle: DisposableHandle? = null
                 try {
-                    val runtime = quickJs ?: createRuntime().also { quickJs = it }
-                    interruptHandle =
-                        invocationJob?.invokeOnCompletion(onCancelling = true, invokeImmediately = true) { cause ->
-                            if (cause != null) runtime.interruptEvaluation()
-                        }
+                    val runtime = engine ?: createRuntime().also { engine = it }
                     val contextJson = PluginJsonV1.encodeToString(PluginInvocationMetadataV1.serializer(), context.metadata)
-                    activeContext = context
-                    activeTimeoutMillis = timeout.millis
-                    runtime.evaluationTimeoutMillis = timeout.millis
                     val result =
                         withTimeout(timeout.millis) {
-                            runtime.evaluate<String>(
-                                "await globalThis.__flareInvokeV1(${JsonPrimitive(method)},$requestJson,$contextJson)",
-                                "flare-invocation.js",
-                            )
+                            coroutineScope {
+                                val invocation = Invocation(platformUuid(), context, timeout.millis, this)
+                                activeInvocation.value = invocation
+                                runtime.evaluate(
+                                    "globalThis.__flareInvokeV1(${JsonPrimitive(invocation.id)}," +
+                                        "${JsonPrimitive(method)},$requestJson,$contextJson)",
+                                    "flare-invocation.js",
+                                    awaitResult = true,
+                                )
+                            }
                         }
                     require(result.encodeToByteArray().size <= MAX_INVOCATION_RESPONSE_BYTES) { "Plugin response is too large" }
                     val value = decodeResult(result, plugin, context.metadata.locale)
                     validate(value)
-                    heapBytes = runtime.memoryUsage.memoryUsedSize
                     value
                 } catch (error: PluginCallException) {
-                    heapBytes = quickJs?.memoryUsage?.memoryUsedSize ?: 0
                     throw error
                 } catch (error: PluginRuntimeFatalException) {
                     throw error
                 } catch (error: Throwable) {
                     poisoned = true
                     closeLocked()
-                    val cancellation = invocationJob?.takeIf { it.isCancelled }?.getCancellationException()
+                    val cancellation =
+                        try {
+                            invocationJob?.ensureActive()
+                            null
+                        } catch (cancelled: CancellationException) {
+                            cancelled
+                        }
                     throw PluginRuntimeFatalException(
                         cause = cancellation ?: error,
                         countsTowardPause =
                             cancellation == null &&
+                                error !is PluginJavaScriptUnavailableException &&
                                 (error !is CancellationException || error is TimeoutCancellationException),
                     )
                 } finally {
-                    interruptHandle?.dispose()
-                    activeContext = null
-                    activeTimeoutMillis = PluginCallTimeoutV1.Normal.millis
+                    activeInvocation.value = null
                 }
             }
         }
@@ -119,28 +117,24 @@ internal class IsolatedPluginRuntime(
         withContext(dispatcher) { mutex.withLock { closeLocked() } }
     }
 
-    private suspend fun createRuntime(): QuickJs {
-        val runtime = QuickJs.create(dispatcher)
-        try {
-            runtime.memoryLimit = RUNTIME_MEMORY_BYTES
-            runtime.maxStackSize = RUNTIME_STACK_BYTES
-            runtime.evaluationTimeoutMillis = INITIALIZATION_TIMEOUT_MILLIS
-            runtime.asyncFunction<String>(HOST_BINDING) { arguments ->
-                val context = activeContext ?: error("Host API called outside an invocation")
-                require(arguments.size == 2 && arguments[0] is String && arguments[1] is String) { "Invalid Host call" }
-                gateway.call(
-                    operation = arguments[0] as String,
-                    argumentsJson = arguments[1] as String,
-                    context = context,
-                    callTimeoutMillis = activeTimeoutMillis,
-                )
+    private suspend fun createRuntime(): PluginJavaScriptEngine {
+        val runtime =
+            engineFactory { invocationId, operation, arguments ->
+                val invocation = activeInvocation.value
+                check(invocation != null && invocation.id == invocationId) { "Host API called outside its invocation" }
+                invocation.scope
+                    .async {
+                        // A catchable Host error must not cancel the invocation's coroutine scope.
+                        runCatching { gateway.call(operation, arguments, invocation.context, invocation.timeoutMillis) }
+                    }.await()
+                    .getOrThrow()
             }
+        try {
             val source = loader.load(plugin)
             withTimeout(INITIALIZATION_TIMEOUT_MILLIS) {
-                runtime.evaluate<Unit>(RUNTIME_PRELUDE + DISABLE_DYNAMIC_CODE_PRELUDE + source, "plugin.js")
-                runtime.evaluate<Boolean>("globalThis.__flareValidateRegistrationV1()", "flare-registration.js")
+                runtime.evaluate(RUNTIME_PRELUDE + DISABLE_DYNAMIC_CODE_PRELUDE + source + "\n;''", "plugin.js")
+                check(runtime.evaluate("String(globalThis.__flareValidateRegistrationV1())", "flare-registration.js") == "true")
             }
-            heapBytes = runtime.memoryUsage.memoryUsedSize
             return runtime
         } catch (error: Throwable) {
             runtime.close()
@@ -149,10 +143,17 @@ internal class IsolatedPluginRuntime(
     }
 
     private fun closeLocked() {
-        quickJs?.close()
-        quickJs = null
-        heapBytes = 0
+        activeInvocation.value = null
+        engine?.close()
+        engine = null
     }
+
+    private class Invocation(
+        val id: String,
+        val context: PluginInvocationContextV1,
+        val timeoutMillis: Long,
+        val scope: CoroutineScope,
+    )
 }
 
 public class PluginCallException(
@@ -177,6 +178,7 @@ private fun decodeResult(
         }
 
         false -> {
+            objectValue["fatal"]?.jsonPrimitive?.content?.let { throw PluginJavaScriptException(it) }
             val error = PluginJsonV1.decodeFromJsonElement(PluginErrorV1.serializer(), requireNotNull(objectValue["error"]))
             error.message.requireValid()
             require(error.retryAfterSeconds == null || error.retryAfterSeconds in 0..604_800) { "Invalid retry delay" }
@@ -200,15 +202,12 @@ private fun decodeResult(
     }
 }
 
-private const val HOST_BINDING = "__flareHostCallV1"
-private const val RUNTIME_MEMORY_BYTES = 64L * 1024 * 1024
-private const val RUNTIME_STACK_BYTES = 512L * 1024
 private const val INITIALIZATION_TIMEOUT_MILLIS = 2_000L
 private const val MAX_INVOCATION_REQUEST_BYTES = 1024 * 1_024
 private const val MAX_INVOCATION_RESPONSE_BYTES = 5 * 1_024 * 1_024
 private val METHOD_PATH = Regex("[A-Za-z][A-Za-z0-9_-]*(?:\\.[A-Za-z][A-Za-z0-9_-]*)+")
 
-private val RUNTIME_PRELUDE =
+internal val RUNTIME_PRELUDE =
     """
     (() => {
       const parse = JSON.parse.bind(JSON);
@@ -216,21 +215,36 @@ private val RUNTIME_PRELUDE =
       const freeze = Object.freeze.bind(Object);
       const keys = Object.keys.bind(Object);
       const owns = Function.call.bind(Object.prototype.hasOwnProperty);
+      const then = Function.call.bind(Promise.prototype.then);
+      const all = Promise.all.bind(Promise);
+      const push = Function.call.bind(Array.prototype.push);
+      const slice = Function.call.bind(Array.prototype.slice);
+      const nativeHostCall = globalThis.__flareHostCallV1;
+      const ignore = () => {};
       let registration;
+      let invocation;
       const deepFreeze = (value, seen = new Set()) => {
         if (value === null || (typeof value !== "object" && typeof value !== "function") || seen.has(value)) return value;
         seen.add(value);
         for (const key of keys(value)) deepFreeze(value[key], seen);
         return freeze(value);
       };
-      const hostCall = async (operation, value = {}) => {
-        const envelope = parse(await globalThis.__flareHostCallV1(operation, stringify(value)));
-        if (!envelope || envelope.ok !== true) {
-          const error = new Error(envelope?.error?.message || "Host operation failed");
-          error.code = envelope?.error?.code || "host.unavailable";
-          throw error;
-        }
-        return envelope.value;
+      const hostCall = (operation, value = {}) => {
+        const call = invocation;
+        const task = (async () => {
+          if (!call || call.closed) throw new Error("Host API called outside an invocation");
+          // Register this task before starting native Host work.
+          await undefined;
+          const envelope = parse(await nativeHostCall(call.id, operation, stringify(value)));
+          if (!envelope || envelope.ok !== true) {
+            const error = new Error(envelope?.error?.message || "Host operation failed");
+            error.code = envelope?.error?.code || "host.unavailable";
+            throw error;
+          }
+          return envelope.value;
+        })();
+        if (call && !call.closed) push(call.pending, then(task, ignore, ignore));
+        return task;
       };
       const facade = {
         http: { request: request => hostCall("http.request", request) },
@@ -271,17 +285,19 @@ private val RUNTIME_PRELUDE =
       Object.defineProperty(globalThis, "__flareInvokeV1", {
         configurable: false,
         writable: false,
-        async value(method, request, context) {
-          let owner = registration;
-          const parts = method.split(".");
-          for (let index = 0; index < parts.length - 1; index++) {
-            if (!owns(owner, parts[index])) throw new Error(`Missing plugin method ${'$'}{method}`);
-            owner = owner?.[parts[index]];
-          }
-          if (!owns(owner, parts[parts.length - 1])) throw new Error(`Missing plugin method ${'$'}{method}`);
-          const fn = owner?.[parts[parts.length - 1]];
-          if (typeof fn !== "function") throw new Error(`Missing plugin method ${'$'}{method}`);
+        async value(invocationId, method, request, context) {
+          const call = { id: invocationId, pending: [], closed: false };
+          invocation = call;
           try {
+            let owner = registration;
+            const parts = method.split(".");
+            for (let index = 0; index < parts.length - 1; index++) {
+              if (!owns(owner, parts[index])) throw new Error(`Missing plugin method ${'$'}{method}`);
+              owner = owner?.[parts[index]];
+            }
+            if (!owns(owner, parts[parts.length - 1])) throw new Error(`Missing plugin method ${'$'}{method}`);
+            const fn = owner?.[parts[parts.length - 1]];
+            if (typeof fn !== "function") throw new Error(`Missing plugin method ${'$'}{method}`);
             const value = await fn.call(owner, deepFreeze(request), deepFreeze(context));
             if (value === undefined) throw new Error(`Plugin method ${'$'}{method} returned undefined`);
             return stringify({ ok: true, value });
@@ -289,7 +305,19 @@ private val RUNTIME_PRELUDE =
             if (error?.__flarePluginErrorV1 !== undefined) {
               return stringify({ ok: false, error: error.__flarePluginErrorV1 });
             }
-            throw error;
+            return stringify({ ok: false, fatal: String(error?.stack || error).slice(0, 4096) });
+          } finally {
+            try {
+              let completed = 0;
+              while (completed < call.pending.length) {
+                const pending = slice(call.pending, completed);
+                completed = call.pending.length;
+                await all(pending);
+              }
+            } finally {
+              call.closed = true;
+              if (invocation === call) invocation = undefined;
+            }
           }
         },
       });

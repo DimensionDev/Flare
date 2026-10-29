@@ -121,6 +121,7 @@ val generatePluginSdk by tasks.registering {
 }
 
 tasks.withType<org.gradle.api.tasks.testing.Test>().configureEach {
+    jvmArgs("--enable-native-access=ALL-UNNAMED")
     val livePhase = providers.gradleProperty("flare.plugin.live.phase")
     listOf("phase", "repository", "root").forEach { key ->
         providers.gradleProperty("flare.plugin.live.$key").orNull?.let { systemProperty("flare.plugin.live.$key", it) }
@@ -159,7 +160,6 @@ kotlin {
                 api(projects.shared)
                 api(libs.okio)
                 implementation(projects.feature.loginApi)
-                implementation(libs.quickjs.kt)
                 implementation(libs.kotlinx.coroutines.core)
                 implementation(libs.kotlinx.serialization.json)
                 implementation(libs.kotlinx.immutable)
@@ -179,6 +179,11 @@ kotlin {
                 implementation(libs.material3)
             }
         }
+        val androidMain by getting {
+            dependencies {
+                implementation(libs.androidx.javascriptengine)
+            }
+        }
         val commonTest by getting {
             dependencies {
                 implementation(kotlin("test"))
@@ -187,6 +192,7 @@ kotlin {
         }
         val jvmMain by getting {
             dependencies {
+                implementation(libs.quickjs.kt)
                 implementation(compose("org.jetbrains.compose.ui:ui"))
             }
         }

@@ -8,7 +8,5 @@ internal expect fun platformUuid(): String
 
 internal expect fun platformSecureRandom(size: Int): ByteArray
 
-internal expect fun defaultPluginRuntimeHeapBudgetBytes(): Long
-
 @HiddenFromObjC
 public fun createKtorPluginHttpTransport(): KtorPluginHttpTransport = KtorPluginHttpTransport(proxyHttpClientEngine(ProxyRef.Global))

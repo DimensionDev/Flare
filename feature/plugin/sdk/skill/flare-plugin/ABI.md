@@ -122,6 +122,13 @@ decide which controls to show.
 
 ## Invocation and state
 
+Native Apple targets use system JavaScriptCore, Android uses AndroidX JavaScriptEngine,
+and Compose Desktop uses QuickJS. Await/return required asynchronous work: the Host
+waits for started Host tasks before completing the invocation, but detached Promise
+rejections do not automatically fail it. Returned/awaited errors retain normal typed
+or fatal handling. Engine availability, version differences, cancellation, and resource
+limits are described in [Runtime and HTTP](references/runtime-http.md).
+
 Every method receives immutable request and context values. JavaScript globals
 are disposable cache only. There are no install, update, enable, disable, or
 uninstall lifecycle hooks.

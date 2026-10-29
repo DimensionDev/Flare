@@ -6,6 +6,7 @@ import ai.koog.prompt.Prompt
 import ai.koog.prompt.message.Message
 import ai.koog.prompt.message.MessagePart
 import dev.dimension.flare.common.JSON
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 import kotlinx.serialization.encodeToString
@@ -38,19 +39,30 @@ internal class AgentContextCompaction {
         request: suspend () -> Message.Assistant,
     ): Message.Assistant {
         val inputBudget = inputBudget(session)
-        if (estimate(session) >= inputBudget * 4 / 5) {
-            compact(session, inputBudget, storeCheckpoint)
-        }
         var estimatedInput = estimate(session)
         val response =
             try {
+                if (estimatedInput >= inputBudget * 4 / 5) {
+                    compact(session, inputBudget, storeCheckpoint)
+                }
+                estimatedInput = estimate(session)
                 request()
             } catch (error: Exception) {
                 currentCoroutineContext().ensureActive()
-                if (!error.isContextOverflow() || !compact(session, inputBudget / 2, storeCheckpoint, force = true)) throw error
-                estimatedInput = estimate(session)
-                // Retry only the model request; completed tools must never run again here.
-                request()
+                if (error is CancellationException || !error.isContextOverflow()) throw error
+                val original = session.prompt
+                val recovery = recoverContext(session, inputBudget) ?: throw error
+                // The projection is request-only: never persist shortened messages under their original IDs.
+                val recovered =
+                    try {
+                        session.prompt = recovery
+                        estimatedInput = estimate(session)
+                        request()
+                    } finally {
+                        session.prompt = original
+                    }
+                session.appendPrompt { message(recovered) }
+                recovered
             }
         response.metaInfo.inputTokensCount?.let { actual ->
             if (estimatedInput > 0) {
@@ -64,7 +76,6 @@ internal class AgentContextCompaction {
         session: AIAgentLLMWriteSession,
         budget: Long,
         storeCheckpoint: suspend (List<Message>, AgentContextCheckpoint) -> Unit,
-        force: Boolean = false,
     ): Boolean {
         val original = session.prompt
         val history = original.messages.filterNot { it is Message.System || it.id == AGENT_CONTEXT_SUMMARY_ID }
@@ -79,24 +90,14 @@ internal class AgentContextCompaction {
         val keepFrom =
             boundaries
                 .firstOrNull { start -> suffixTokens[start] <= keepBudget }
-                ?.takeIf { it > 0 } ?: if (force) history.size else return false
+                ?.takeIf { it > 0 } ?: return false
         val tail = history.drop(keepFrom)
         val checkpointThrough = requireNotNull(history[keepFrom - 1].id)
         val summaryBudget = minOf(4_000L, budget / 16).coerceAtLeast(128)
         val required = original.messages.filterIsInstance<Message.System>() + listOfNotNull(latestUser)
         if (estimate(required) + toolTokens(session) + summaryBudget * 2 >= budget * 4 / 5) return false
         val summaryOutputBudget = (summaryBudget * 2).toInt()
-        val summaryInputBudget =
-            ((session.model.contextLength ?: 8_192L) - summaryOutputBudget).let {
-                if (force) {
-                    minOf(
-                        budget,
-                        it,
-                    )
-                } else {
-                    it
-                }
-            }
+        val summaryInputBudget = (session.model.contextLength ?: 8_192L) - summaryOutputBudget
         val summaryPrompt =
             original.withMessages { messages ->
                 messages.map { message -> message.forSummary(Int.MAX_VALUE) }
@@ -132,9 +133,8 @@ internal class AgentContextCompaction {
                             original.messages.map { it.forSummary((budget / history.size).coerceIn(256, 8_000).toInt()) } + messages.last()
                         }
                 }
-                check(estimate(session.prompt.messages) < summaryInputBudget) {
-                    "The conversation is too large to summarize safely. Shorten the current request or tool output."
-                }
+                // A fallback window is a trigger estimate, not evidence that the provider will reject the original request.
+                if (estimate(session.prompt.messages) >= summaryInputBudget) return false
                 session.requestLLMWithoutTools()
             } finally {
                 session.prompt = original
@@ -160,6 +160,61 @@ internal class AgentContextCompaction {
         storeCheckpoint(original.messages, checkpoint)
         session.prompt = replacement
         return true
+    }
+
+    private fun recoverContext(
+        session: AIAgentLLMWriteSession,
+        inputBudget: Long,
+    ): Prompt? {
+        val original = session.prompt
+        val messages = original.messages
+        val before = estimate(session)
+        val target = minOf(before / 2, if (session.model.contextLength == null) Long.MAX_VALUE else inputBudget * 4 / 5)
+        val boundaries = completeExchangeBoundaries(messages)
+        val latestUser = messages.indexOfLast { it is Message.User && it.parts.any { part -> part !is MessagePart.Tool.Result } }
+        val latestCall = messages.indexOfLast { it.parts.any { part -> part is MessagePart.Tool.Call } }
+        val latestBatchEnd = boundaries.firstOrNull { it > latestCall } ?: messages.size
+        val required =
+            messages.mapIndexed { index, message ->
+                message is Message.System || message.id == AGENT_CONTEXT_SUMMARY_ID || index == latestUser ||
+                    (latestCall >= 0 && index in latestCall until latestBatchEnd)
+            }
+        val projected =
+            messages
+                .mapIndexed { index, message ->
+                    if (required[index]) message else message.trimToolResults(2_000)
+                }.toMutableList()
+        val retained = BooleanArray(messages.size) { true }
+        val costs = projected.map { estimate(listOf(it)) }.toMutableList()
+        val notice =
+            Prompt
+                .build("context-recovery") {
+                    system(
+                        "Some earlier context was omitted or shortened to fit this request. The original history is retained; no new authorization is implied.",
+                    )
+                }.messages
+        var size = costs.sum() + toolTokens(session) + estimate(notice)
+        for ((start, end) in boundaries.zipWithNext()) {
+            if (size <= target) break
+            if ((start until end).any { required[it] }) continue
+            for (index in start until end) {
+                retained[index] = false
+                size -= costs[index]
+            }
+        }
+        // Keep the latest call/result batch, shortening only result text if that batch itself exceeds the budget.
+        for (limit in listOf(2_000, 512, 128)) {
+            if (size <= target) break
+            for (index in messages.indices.filter { retained[it] }) {
+                val shortened = messages[index].trimToolResults(limit)
+                projected[index] = shortened
+                val cost = estimate(listOf(shortened))
+                size += cost - costs[index]
+                costs[index] = cost
+            }
+        }
+        if (size > target || size >= before) return null
+        return original.withMessages { projected.filterIndexed { index, _ -> retained[index] } + notice }
     }
 
     private fun inputBudget(session: AIAgentLLMWriteSession): Long {
@@ -210,19 +265,31 @@ private fun completeExchangeBoundaries(messages: List<Message>): List<Int> {
     return boundaries
 }
 
-private fun Message.forSummary(maxToolCharacters: Int): Message {
-    fun String.bounded(): String {
-        if (length <= maxToolCharacters) return this
-        return take(maxToolCharacters / 2) + "\n[tool content shortened]\n" + takeLast(maxToolCharacters / 2)
-    }
+private fun Message.forSummary(limit: Int): Message {
     val summaryParts =
         parts.map { part ->
             when (part) {
-                is MessagePart.Tool.Call -> MessagePart.Text("Tool ${part.tool}, call ${part.id}: ${part.args.bounded()}")
-                is MessagePart.Tool.Result -> MessagePart.Text("Result ${part.tool}, call ${part.id}: ${part.output.bounded()}")
-                is MessagePart.Attachment -> MessagePart.Text("[Earlier attachment; read the original again if needed]")
-                is MessagePart.Reasoning -> MessagePart.Text("")
-                else -> part
+                is MessagePart.Tool.Call -> {
+                    MessagePart.Text("Tool ${part.tool}, call ${part.id}: ${part.args.boundedToolContent(limit)}")
+                }
+
+                is MessagePart.Tool.Result -> {
+                    MessagePart.Text(
+                        "Result ${part.tool}, call ${part.id}: ${part.output.boundedToolContent(limit)}",
+                    )
+                }
+
+                is MessagePart.Attachment -> {
+                    MessagePart.Text("[Earlier attachment; read the original again if needed]")
+                }
+
+                is MessagePart.Reasoning -> {
+                    MessagePart.Text("")
+                }
+
+                else -> {
+                    part
+                }
             }
         }
     return when (this) {
@@ -231,6 +298,34 @@ private fun Message.forSummary(maxToolCharacters: Int): Message {
         is Message.Assistant -> copy(parts = summaryParts.filterIsInstance<MessagePart.ResponsePart>())
     }
 }
+
+private fun Message.trimToolResults(limit: Int): Message =
+    if (this is Message.User) {
+        copy(
+            parts =
+                parts.map { part ->
+                    if (part is MessagePart.Tool.Result) {
+                        part.copy(
+                            parts =
+                                part.parts.map {
+                                    if (it is MessagePart.Text) {
+                                        it.copy(text = it.text.boundedToolContent(limit))
+                                    } else {
+                                        it
+                                    }
+                                },
+                        )
+                    } else {
+                        part
+                    }
+                },
+        )
+    } else {
+        this
+    }
+
+private fun String.boundedToolContent(limit: Int): String =
+    if (length <= limit) this else take(limit / 2) + "\n[tool content shortened]\n" + takeLast(limit / 2)
 
 private fun Throwable.isContextOverflow(): Boolean {
     val error = generateSequence(this) { it.cause }.filterIsInstance<KoogHttpClientException>().firstOrNull() ?: return false

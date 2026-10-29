@@ -28,19 +28,19 @@
       "en": {
         "stringUnit": {
           "state": "translated",
-          "value": "Leave blank to use the known model limit, or 8192 tokens for unknown models. Enter at least 1024 tokens to override."
+          "value": "Leave blank to use the known model limit. Unknown models use an estimated budget of 8192 tokens. Enter at least 1024 tokens to override."
         }
       },
       "zh-Hans": {
         "stringUnit": {
           "state": "translated",
-          "value": "留空使用已知模型的上限；未知模型默认为 8192 token。手动设置至少为 1024 token。"
+          "value": "留空使用已知模型的上限；未知模型使用 8192 token 的估算预算。手动设置至少为 1024 token。"
         }
       },
       "zh-Hant": {
         "stringUnit": {
           "state": "translated",
-          "value": "留空使用已知模型的上限；未知模型預設為 8192 token。手動設定至少為 1024 token。"
+          "value": "留空使用已知模型的上限；未知模型使用 8192 token 的估算預算。手動設定至少為 1024 token。"
         }
       }
     }

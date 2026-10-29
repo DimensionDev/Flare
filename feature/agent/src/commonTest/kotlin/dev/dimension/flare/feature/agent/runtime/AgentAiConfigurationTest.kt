@@ -45,11 +45,11 @@ class AgentAiConfigurationTest {
         )
 
     @Test
-    fun contextWindowUsesAnOverrideKnownModelMetadataOrAConservativeFallback() {
+    fun contextWindowUsesAnOverrideOrKnownMetadataAndLeavesUnknownModelsUnknown() {
         val client = HttpClient(MockEngine { error("Model metadata must not require a request") })
         try {
             for ((config, expected) in listOf(
-                basic to 8_192L,
+                basic to null,
                 basic.copy(model = "gpt-4o") to 128_000L,
                 basic.copy(model = "gpt-4o", contextWindow = 32_768) to 32_768L,
                 basic.copy(contextWindow = 16_384) to 16_384L,

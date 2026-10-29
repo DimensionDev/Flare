@@ -146,7 +146,7 @@ class AgentContextCompactionTest {
     fun overflowRetriesOnlyTheModelOnceAndKeepsTheToolResult() =
         runTest {
             var failures = 0
-            Fixture { request, number ->
+            Fixture(resultSize = 4_000) { request, number ->
                 when {
                     request.isCompaction() -> textResponse("Completed call-1-1; waiting for the answer")
                     number == 1 -> toolResponse(number)
@@ -156,7 +156,15 @@ class AgentContextCompactionTest {
             }.use { fixture ->
                 assertEquals("Recovered", fixture.run())
                 assertEquals(1, fixture.toolCalls)
-                assertEquals(4, fixture.requests.size)
+                assertEquals(3, fixture.requests.size)
+                assertTrue(fixture.requests.none { it.isCompaction() })
+                assertTrue(fixture.checkpoints.isEmpty())
+                assertTrue(
+                    fixture.requests
+                        .last()
+                        .toString()
+                        .length < fixture.requests[1].toString().length,
+                )
                 assertTrue("Completed call-1-1" in fixture.requests.last().toString())
             }
         }
@@ -164,7 +172,7 @@ class AgentContextCompactionTest {
     @Test
     fun repeatedOverflowStopsAfterOneRecoveryAttempt() =
         runTest {
-            Fixture { request, number ->
+            Fixture(resultSize = 4_000) { request, number ->
                 when {
                     request.isCompaction() -> textResponse("Completed tool; work remains")
                     number == 1 -> toolResponse(number)
@@ -173,25 +181,55 @@ class AgentContextCompactionTest {
             }.use { fixture ->
                 assertFailsWith<Exception> { fixture.run() }
                 assertEquals(1, fixture.toolCalls)
-                assertEquals(4, fixture.requests.size)
-                assertEquals(1, fixture.checkpoints.size)
+                assertEquals(3, fixture.requests.size)
+                assertTrue(fixture.checkpoints.isEmpty())
             }
         }
 
     @Test
     fun failedOrCancelledSummaryDoesNotReplaceThePreviousCheckpoint() =
         runTest {
-            for (failure in listOf("cancel", "error", "empty", "tool", "oversized", "truncated", "filtered")) {
+            for (failure in listOf("cancel", "error", "auth", "empty", "reasoning", "tool", "oversized", "truncated", "filtered")) {
                 Fixture { request, _ ->
                     check(request.isCompaction())
                     when (failure) {
-                        "cancel" -> throw CancellationException("cancelled compaction")
-                        "error" -> ERROR
-                        "tool" -> toolResponse(99)
-                        "oversized" -> textResponse("x".repeat(30_000))
-                        "truncated" -> textResponse("Only part of the checkpoint").replace("\"stop\"", "\"length\"")
-                        "filtered" -> textResponse("Filtered checkpoint").replace("\"stop\"", "\"content_filter\"")
-                        else -> textResponse("")
+                        "cancel" -> {
+                            throw CancellationException("cancelled compaction")
+                        }
+
+                        "error" -> {
+                            ERROR
+                        }
+
+                        "auth" -> {
+                            UNAUTHORIZED
+                        }
+
+                        "reasoning" -> {
+                            textResponse(
+                                "",
+                            ).replace("\"content\":\"\"", "\"content\":null,\"reasoning_content\":\"Thinking only\"")
+                        }
+
+                        "tool" -> {
+                            toolResponse(99)
+                        }
+
+                        "oversized" -> {
+                            textResponse("x".repeat(30_000))
+                        }
+
+                        "truncated" -> {
+                            textResponse("Only part of the checkpoint").replace("\"stop\"", "\"length\"")
+                        }
+
+                        "filtered" -> {
+                            textResponse("Filtered checkpoint").replace("\"stop\"", "\"content_filter\"")
+                        }
+
+                        else -> {
+                            textResponse("")
+                        }
                     }
                 }.use { fixture ->
                     val previous = listOf(agentContextSummary("Previous checkpoint")) + oldHistory()
@@ -291,12 +329,10 @@ class AgentContextCompactionTest {
     @Test
     fun summaryHasItsOwnOutputBudgetWithoutChangingNormalRequests() =
         runTest {
-            var failures = 0
-            Fixture(extraBody = "{\"max_tokens\":17}") { request, number ->
+            Fixture(resultSize = 28_000, extraBody = "{\"max_tokens\":17}") { request, number ->
                 when {
                     request.isCompaction() -> textResponse("Completed the tool; work remains")
                     number == 1 -> toolResponse(number)
-                    failures++ == 0 -> OVERFLOW
                     else -> textResponse("Recovered")
                 }
             }.use { fixture ->
@@ -369,11 +405,134 @@ class AgentContextCompactionTest {
             }
         }
 
-    private class Fixture(
+    @Test
+    fun summaryOverflowRecoversWithoutAnotherSummaryOrReplacingTheCheckpoint() =
+        runTest {
+            Fixture { request, _ -> if (request.isCompaction()) OVERFLOW else textResponse("Recovered") }.use { fixture ->
+                val original = listOf(agentContextSummary("PREVIOUS CHECKPOINT")) + oldHistory()
+                fixture.history.messages = original
+                assertEquals("Recovered", fixture.run())
+                assertEquals(2, fixture.requests.size)
+                assertTrue(fixture.requests.first().isCompaction())
+                assertFalse(fixture.requests.last().isCompaction())
+                assertTrue("PREVIOUS CHECKPOINT" in fixture.requests.last().toString())
+                assertTrue("CURRENT USER REQUIREMENT" in fixture.requests.last().toString())
+                assertTrue(fixture.checkpoints.isEmpty())
+                original.forEach { message -> assertTrue(message in fixture.history.messages) }
+            }
+        }
+
+    @Test
+    fun oversizedPlainTextHistoryCanRecoverWithoutSendingAnOversizedSummary() =
+        runTest {
+            Fixture { _, number -> if (number == 1) OVERFLOW else textResponse("Recovered") }.use { fixture ->
+                val original = Prompt.build("history") { assistant("OLD LARGE ANSWER " + "x".repeat(60_000)) }.messages
+                fixture.history.messages = original
+                assertEquals("Recovered", fixture.run())
+                assertEquals(2, fixture.requests.size)
+                assertTrue(fixture.requests.none { it.isCompaction() })
+                assertFalse("OLD LARGE ANSWER" in fixture.requests.last().toString())
+                assertTrue(fixture.history.messages.any { it.parts == original.single().parts })
+            }
+        }
+
+    @Test
+    fun unknownWindowFallbackDoesNotRejectHistoryThatTheProviderAccepts() =
+        runTest {
+            Fixture(contextWindow = null).use { fixture ->
+                val original = Prompt.build("history") { assistant("LARGE ANSWER " + "x".repeat(30_000)) }.messages
+                fixture.history.messages = original
+                assertEquals("Done", fixture.run())
+                assertEquals(1, fixture.requests.size)
+                assertFalse(fixture.requests.single().isCompaction())
+                assertTrue("LARGE ANSWER" in fixture.requests.single().toString())
+                assertTrue(fixture.checkpoints.isEmpty())
+            }
+        }
+
+    @Test
+    fun unknownWindowRecoveryUsesTheRejectedRequestSizeInsteadOfAFakeHardLimit() =
+        runTest {
+            Fixture(contextWindow = null) { _, number -> if (number == 1) OVERFLOW else textResponse("Recovered") }.use { fixture ->
+                fixture.history.messages = Prompt.build("history") { assistant("old " + "x".repeat(60_000)) }.messages
+                val currentRequest = "CURRENT LARGE REQUIREMENT " + "y".repeat(20_000)
+                assertEquals("Recovered", fixture.run(userText = currentRequest))
+                assertEquals(2, fixture.requests.size)
+                assertTrue(currentRequest in fixture.requests.last().toString())
+                assertTrue(fixture.checkpoints.isEmpty())
+            }
+        }
+
+    @Test
+    fun ruleRecoveryKeepsTheWholeToolBatchAndSavesOriginalResults() =
+        runTest {
+            Fixture(resultSize = 4_000) { _, number ->
+                when (number) {
+                    1 -> toolResponse(number, 2)
+                    2 -> OVERFLOW
+                    else -> textResponse("Recovered")
+                }
+            }.use { fixture ->
+                assertEquals("Recovered", fixture.run())
+                assertEquals(2, fixture.toolCalls)
+                assertEquals(3, fixture.requests.size)
+                val retry = fixture.requests.last().toString()
+                assertTrue("CURRENT USER REQUIREMENT" in retry)
+                assertTrue("call-1-1" in retry && "call-1-2" in retry)
+                assertTrue("Completed call-1-1" in retry && "Completed call-1-2" in retry)
+                assertFalse("x".repeat(4_000) in retry)
+                val stored =
+                    fixture.history.messages
+                        .flatMap { it.parts }
+                        .filterIsInstance<MessagePart.Tool.Result>()
+                assertEquals(2, stored.size)
+                assertTrue(stored.all { it.output.endsWith("x".repeat(4_000)) })
+                assertTrue(fixture.checkpoints.isEmpty())
+            }
+        }
+
+    @Test
+    fun recoveryDoesNotRetryAnUnchangedRequestOrDiscardTheCurrentRequest() =
+        runTest {
+            for (currentRequest in listOf("Keep this requirement", "x".repeat(30_000))) {
+                Fixture { _, _ -> OVERFLOW }.use { fixture ->
+                    assertFailsWith<Exception> { fixture.run(userText = currentRequest) }
+                    assertEquals(1, fixture.requests.size)
+                    assertTrue(currentRequest in fixture.requests.single().toString())
+                    assertTrue(fixture.checkpoints.isEmpty())
+                    assertEquals(0, fixture.toolCalls)
+                }
+            }
+        }
+
+    @Test
+    fun cancelledRecoveryRestoresOriginalResultsAndDoesNotRetryAgain() =
+        runTest {
+            Fixture(resultSize = 4_000) { _, number ->
+                when (number) {
+                    1 -> toolResponse(number)
+                    2 -> OVERFLOW
+                    else -> throw CancellationException("Cancelled recovery")
+                }
+            }.use { fixture ->
+                assertFailsWith<CancellationException> { fixture.run() }
+                assertEquals(3, fixture.requests.size)
+                assertEquals(1, fixture.toolCalls)
+                val stored =
+                    fixture.history.messages
+                        .flatMap { it.parts }
+                        .filterIsInstance<MessagePart.Tool.Result>()
+                assertTrue(stored.single().output.endsWith("x".repeat(4_000)))
+                assertTrue(fixture.checkpoints.isEmpty())
+            }
+        }
+
+    internal class Fixture(
         private val maxIterations: Int = 256,
         private val resultSize: Int = 20,
         private val failCheckpoint: Boolean = false,
         private val extraBody: String = "",
+        private val contextWindow: Int? = 16_384,
         private val response: (
             JsonObject,
             Int,
@@ -386,7 +545,7 @@ class AgentContextCompactionTest {
         val callsWhenCompacting = mutableListOf<Int>()
         val history = History()
         var toolCalls = 0
-        val tool =
+        private val tool =
             object : SimpleTool<Args>(typeToken<Args>(), "work", "Perform one operation") {
                 override suspend fun execute(args: Args): String {
                     toolCalls++
@@ -402,7 +561,11 @@ class AgentContextCompactionTest {
                     val content = response(body, requests.size)
                     respond(
                         content,
-                        if (content == OVERFLOW || content == ERROR) HttpStatusCode.BadRequest else HttpStatusCode.OK,
+                        when (content) {
+                            OVERFLOW, ERROR -> HttpStatusCode.BadRequest
+                            UNAUTHORIZED -> HttpStatusCode.Unauthorized
+                            else -> HttpStatusCode.OK
+                        },
                         headers = headersOf(HttpHeaders.ContentType, ContentType.Application.Json.toString()),
                     )
                 },
@@ -416,7 +579,7 @@ class AgentContextCompactionTest {
                                 "https://agent.example/v1/",
                                 "key",
                                 "test-model",
-                                contextWindow = 16_384,
+                                contextWindow = contextWindow,
                                 extraBody = extraBody,
                             ),
                     ),
@@ -424,10 +587,14 @@ class AgentContextCompactionTest {
                 ),
             )
 
-        suspend fun run(finishAfterToolResults: Boolean = false): String {
+        suspend fun run(
+            finishAfterToolResults: Boolean = false,
+            historyProvider: ChatHistoryProvider = history,
+            userText: String = "CURRENT USER REQUIREMENT: finish the task",
+        ): String {
             val request =
                 FlareAgentRequest(
-                    prompt = Prompt.build("test") { user("CURRENT USER REQUIREMENT: finish the task") },
+                    prompt = Prompt.build("test") { user(userText) },
                     systemPrompt = "CURRENT SYSTEM",
                     agentId = "test",
                     strategyName = "test",
@@ -442,8 +609,11 @@ class AgentContextCompactionTest {
                 runtime.createAgent(
                     request,
                     { phases += it.phase },
-                    history,
-                    storeMessages = { _, messages -> progress += messages },
+                    historyProvider,
+                    storeMessages = { id, messages ->
+                        progress += messages
+                        historyProvider.store(id, messages)
+                    },
                     storeCheckpoint = { _, _, checkpoint ->
                         check(!failCheckpoint) { "persistence failed" }
                         checkpoints += checkpoint
@@ -462,7 +632,7 @@ class AgentContextCompactionTest {
         }
     }
 
-    private class History : ChatHistoryProvider {
+    internal class History : ChatHistoryProvider {
         var messages: List<Message> = emptyList()
 
         override suspend fun store(
@@ -482,6 +652,7 @@ class AgentContextCompactionTest {
     private companion object {
         const val OVERFLOW = """{"error":{"code":"context_length_exceeded","message":"maximum context length exceeded"}}"""
         const val ERROR = """{"error":{"message":"Invalid parameter"}}"""
+        const val UNAUTHORIZED = """{"error":{"message":"Invalid API key"}}"""
 
         fun oldHistory(): List<Message> =
             (0..7).map { i ->

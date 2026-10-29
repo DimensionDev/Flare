@@ -841,5 +841,5 @@
     <string name="plugin_ai_failed">修改未能生效</string>
     <string name="plugin_ai_delete_message">删除 %1$s 及其本地源码？已有账号会保留。</string>
     <string name="settings_ai_config_context_window">上下文窗口（token）</string>
-    <string name="settings_ai_config_context_window_hint">留空使用已知模型的上限；未知模型默认为 8192 token。手动设置至少为 1024 token。</string>
+    <string name="settings_ai_config_context_window_hint">留空使用已知模型的上限；未知模型使用 8192 token 的估算预算。手动设置至少为 1024 token。</string>
 </resources>

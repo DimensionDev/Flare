@@ -979,5 +979,5 @@
     <string name="plugin_ai_failed">Changes could not be applied</string>
     <string name="plugin_ai_delete_message">Delete %1$s and its local source? Existing accounts are kept.</string>
     <string name="settings_ai_config_context_window">Context window (tokens)</string>
-    <string name="settings_ai_config_context_window_hint">Leave blank to use the known model limit, or 8192 tokens for unknown models. Enter at least 1024 tokens to override.</string>
+    <string name="settings_ai_config_context_window_hint">Leave blank to use the known model limit. Unknown models use an estimated budget of 8192 tokens. Enter at least 1024 tokens to override.</string>
 </resources>

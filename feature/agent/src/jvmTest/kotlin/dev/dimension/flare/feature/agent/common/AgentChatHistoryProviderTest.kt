@@ -418,6 +418,58 @@ class AgentChatHistoryProviderTest {
             }
         }
 
+    @Test
+    fun ruleRecoveryDoesNotOverwriteOriginalMessagesOrCheckpointAfterReopening() =
+        runTest {
+            val directory = Files.createTempDirectory("agent-recovery-history")
+            val path = directory.resolve("agent.db").toString()
+            val output = "Original completed output " + "x".repeat(6_000)
+            val toolResult = MessagePart.Tool.Result("completed-call", "work", output, isError = true)
+            val original =
+                listOf(
+                    user("Earlier request", "old-q"),
+                    assistant("Earlier answer", "old-a"),
+                    user("Current request", "q"),
+                    assistant(
+                        "",
+                        "call",
+                    ).copy(parts = listOf(MessagePart.Tool.Call("completed-call", "work", "{\"id\":\"completed-call\"}"))),
+                    user("", "result").copy(parts = listOf(toolResult)),
+                )
+            try {
+                Fixture(path).use { fixture ->
+                    fixture.history.storeCheckpoint(CONVERSATION, original, AgentContextCheckpoint("Existing summary", "old-a"))
+                    AgentContextCompactionTest
+                        .Fixture { _, number ->
+                            if (number == 1) {
+                                """{"error":{"code":"context_length_exceeded","message":"maximum context length exceeded"}}"""
+                            } else {
+                                """{"id":"response","object":"chat.completion","created":0,"model":"test-model","choices":[{"index":0,"message":{"role":"assistant","content":"Recovered"},"finish_reason":"stop"}]}"""
+                            }
+                        }.use { agent ->
+                            assertEquals("Recovered", agent.run(historyProvider = fixture.history))
+                            assertEquals(2, agent.requests.size)
+                            assertFalse(output in agent.requests.last().toString())
+                            assertTrue(agent.checkpoints.isEmpty())
+                            assertEquals(0, agent.toolCalls)
+                        }
+                }
+                Fixture(path).use { fixture ->
+                    val restored = fixture.history.load(CONVERSATION)
+                    assertEquals(toolResult, restored.flatMap { it.parts }.filterIsInstance<MessagePart.Tool.Result>().single())
+                    assertEquals(agentContextSummary("Existing summary").textContent(), restored.first().textContent())
+                    assertTrue(restored.none { it.textContent().contains("Some earlier context was omitted") })
+                    val visible = fixture.history.observeMessages(CONVERSATION).first()
+                    assertTrue(visible.any { it.parts.agentMessageText() == "Earlier request" })
+                    assertTrue(visible.any { it.parts.agentMessageText() == "Earlier answer" })
+                    assertTrue(visible.any { it.parts.agentMessageText() == "Recovered" })
+                }
+            } finally {
+                Files.list(directory).use { paths -> paths.forEach(Files::delete) }
+                Files.delete(directory)
+            }
+        }
+
     private class Fixture(
         path: String? = null,
     ) : AutoCloseable {

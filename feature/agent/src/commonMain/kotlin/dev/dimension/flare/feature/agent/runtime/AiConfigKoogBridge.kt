@@ -55,7 +55,6 @@ internal class AiConfigKoogBridge {
         val contextWindow =
             openAIConfig.contextWindow?.also { require(it >= 1_024) { "Context window must be at least 1024 tokens" } }?.toLong()
                 ?: OpenAIModels.models.firstOrNull { it.id == openAIConfig.model }?.contextLength
-                ?: DEFAULT_CONTEXT_LENGTH
         val extraBody = openAIConfig.extraBody.takeIf { it.isNotBlank() }?.let { JSON.parseToJsonElement(it).jsonObject }
         val params =
             LLMParams(
@@ -107,8 +106,6 @@ internal class AiConfigKoogBridge {
     }
 
     private companion object {
-        const val DEFAULT_CONTEXT_LENGTH = 8_192L
-
         // The agent owns conversation history, tool selection and response transport.
         val AGENT_REQUEST_FIELDS = setOf("model", "messages", "tools", "tool_choice", "stream", "stream_options", "n")
     }

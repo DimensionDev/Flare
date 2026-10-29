@@ -43,7 +43,7 @@ internal class AgentContextCompaction {
         val response =
             try {
                 if (estimatedInput >= inputBudget * 4 / 5) {
-                    compact(session, inputBudget, storeCheckpoint)
+                    compact(session, inputBudget, storeCheckpoint) { estimatedInput = it }
                 }
                 estimatedInput = estimate(session)
                 request()
@@ -51,7 +51,7 @@ internal class AgentContextCompaction {
                 currentCoroutineContext().ensureActive()
                 if (error is CancellationException || !error.isContextOverflow()) throw error
                 val original = session.prompt
-                val recovery = recoverContext(session, inputBudget) ?: throw error
+                val recovery = recoverContext(session, inputBudget, rejectedInput = estimatedInput) ?: throw error
                 // The projection is request-only: never persist shortened messages under their original IDs.
                 val recovered =
                     try {
@@ -76,6 +76,7 @@ internal class AgentContextCompaction {
         session: AIAgentLLMWriteSession,
         budget: Long,
         storeCheckpoint: suspend (List<Message>, AgentContextCheckpoint) -> Unit,
+        onSummaryRequest: (Long) -> Unit,
     ): Boolean {
         val original = session.prompt
         val history = original.messages.filterNot { it is Message.System || it.id == AGENT_CONTEXT_SUMMARY_ID }
@@ -135,6 +136,7 @@ internal class AgentContextCompaction {
                 }
                 // A fallback window is a trigger estimate, not evidence that the provider will reject the original request.
                 if (estimate(session.prompt.messages) >= summaryInputBudget) return false
+                onSummaryRequest(estimate(session.prompt.messages))
                 session.requestLLMWithoutTools()
             } finally {
                 session.prompt = original
@@ -153,9 +155,7 @@ internal class AgentContextCompaction {
                 messages.filterIsInstance<Message.System>() + agentContextSummary(checkpoint.summary) +
                     listOfNotNull(latestUser?.takeIf { it !in tail }) + tail
             }
-        check(estimate(replacement.messages) + toolTokens(session) < budget * 4 / 5) {
-            "The current request and tools leave too little room after context compaction"
-        }
+        if (estimate(replacement.messages) + toolTokens(session) >= budget * 4 / 5) return false
         currentCoroutineContext().ensureActive()
         storeCheckpoint(original.messages, checkpoint)
         session.prompt = replacement
@@ -165,11 +165,12 @@ internal class AgentContextCompaction {
     private fun recoverContext(
         session: AIAgentLLMWriteSession,
         inputBudget: Long,
+        rejectedInput: Long,
     ): Prompt? {
         val original = session.prompt
         val messages = original.messages
         val before = estimate(session)
-        val target = minOf(before / 2, if (session.model.contextLength == null) Long.MAX_VALUE else inputBudget * 4 / 5)
+        val target = minOf(before / 2, rejectedInput / 2, if (session.model.contextLength == null) Long.MAX_VALUE else inputBudget * 4 / 5)
         val boundaries = completeExchangeBoundaries(messages)
         val latestUser = messages.indexOfLast { it is Message.User && it.parts.any { part -> part !is MessagePart.Tool.Result } }
         val latestCall = messages.indexOfLast { it.parts.any { part -> part is MessagePart.Tool.Call } }

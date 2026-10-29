@@ -492,6 +492,59 @@ class AgentContextCompactionTest {
         }
 
     @Test
+    fun recoveryIsSmallerThanTheAlreadyShortenedSummaryThatWasRejected() =
+        runTest {
+            Fixture(contextWindow = null) { request, _ ->
+                if (request.isCompaction()) OVERFLOW else textResponse("Recovered")
+            }.use { fixture ->
+                fixture.history.messages =
+                    (1..8).flatMap { index ->
+                        Prompt
+                            .build("batch-$index") {
+                                assistant { toolCall(MessagePart.Tool.Call("old-$index", "work", "{\"id\":\"old-$index\"}")) }
+                                user { toolResult(MessagePart.Tool.Result("old-$index", "work", "Completed " + "x".repeat(30_000))) }
+                            }.messages
+                    }
+                assertEquals("Recovered", fixture.run())
+                assertEquals(2, fixture.requests.size)
+                assertTrue(fixture.requests.first().isCompaction())
+                assertTrue(
+                    fixture.requests
+                        .last()
+                        .toString()
+                        .length <
+                        fixture.requests
+                            .first()
+                            .toString()
+                            .length,
+                )
+                assertTrue(fixture.checkpoints.isEmpty())
+                assertEquals(0, fixture.toolCalls)
+            }
+        }
+
+    @Test
+    fun unknownWindowDeclinesAnOversizedReplacementWithoutRejectingTheNormalRequest() =
+        runTest {
+            var summaries = 0
+            var normalRequests = 0
+            Fixture(contextWindow = null, resultSize = 1_100) { request, number ->
+                when {
+                    request.isCompaction() -> textResponse(if (++summaries == 1) "A".repeat(1_050) else "B".repeat(1_400))
+                    ++normalRequests == 1 -> toolResponse(number)
+                    else -> textResponse("Done")
+                }
+            }.use { fixture ->
+                fixture.history.messages = oldHistory().take(2)
+                assertEquals("Done", fixture.run(userText = "Current requirement " + "x".repeat(6_000)))
+                assertEquals(2, summaries)
+                assertEquals(1, fixture.checkpoints.size)
+                assertTrue("A".repeat(1_050) in fixture.requests.last().toString())
+                assertFalse("B".repeat(1_400) in fixture.requests.last().toString())
+            }
+        }
+
+    @Test
     fun recoveryDoesNotRetryAnUnchangedRequestOrDiscardTheCurrentRequest() =
         runTest {
             for (currentRequest in listOf("Keep this requirement", "x".repeat(30_000))) {

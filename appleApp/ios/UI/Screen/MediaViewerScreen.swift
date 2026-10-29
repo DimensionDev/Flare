@@ -37,7 +37,7 @@ struct MediaViewerScreen: View {
     @State private var isDismissing = false
     @State private var showData = true
     @State private var chromeVisible = true
-    @State private var chromeCommitGeneration = 0
+    @State private var lastChromeTapAt = Date.distantPast
     @State private var protectInitialPagerSelection: Bool
     @State private var didApplyInitialSelection = false
     @State private var isPreparingShare = false
@@ -226,15 +226,6 @@ struct MediaViewerScreen: View {
             }
             guard hasMeasuredPostSummary else { return }
             presentPostSheet()
-        }
-        .task(id: chromeCommitGeneration) {
-            guard chromeCommitGeneration > 0 else { return }
-            let visible = chromeVisible
-            try? await Task.sleep(for: .milliseconds(320))
-            guard !Task.isCancelled else { return }
-            if showData != visible {
-                showData = visible
-            }
         }
         .task(id: postSummaryMeasureGeneration) {
             guard postSummaryMeasureGeneration > 0 else { return }
@@ -443,16 +434,19 @@ struct MediaViewerScreen: View {
     }
 
     private func toggleChrome() {
+        let now = Date()
+        // The second tap of a double tap scales the image. Dropping it keeps the
+        // chrome from hiding and showing again now that the toggle is immediate.
+        guard now.timeIntervalSince(lastChromeTapAt) >= 0.25 else { return }
+        lastChromeTapAt = now
+
         let next = !chromeVisible
-        // The glass moves now. The sheet waits out the double-tap window so zoom
-        // does not dismiss it and present it again.
+        // The card carries the bottom controls, so it has to commit in the same
+        // transaction; deferring it used to start the card 320 ms after the bar.
         withAnimation(.smooth(duration: 0.2)) {
             chromeVisible = next
-        }
-        if selectedMediaIsVideo {
             showData = next
         }
-        chromeCommitGeneration += 1
     }
 
     private func presentPostSheet() {

@@ -253,7 +253,7 @@ private fun GalleryCardTimeline(content: @Composable () -> Unit) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun CompactGalleryContent(
+internal fun CompactGalleryContent(
     detail: GalleryDetail,
     comments: PagingState<UiTimelineV2>,
     recommendations: PagingState<UiTimelineV2>,
@@ -263,31 +263,35 @@ private fun CompactGalleryContent(
     onDismissInfoSheet: () -> Unit,
 ) {
     val gridState = rememberLazyStaggeredGridState()
+    val uriHandler = LocalUriHandler.current
     if (showInfoSheet) {
         ModalBottomSheet(
             onDismissRequest = onDismissInfoSheet,
         ) {
-            LazyVerticalStaggeredGrid(
-                columns = StaggeredGridCells.Adaptive(164.dp),
-                contentPadding =
-                    PaddingValues(
-                        start = screenHorizontalPadding,
-                        end = screenHorizontalPadding,
-                        bottom = 32.dp,
-                    ),
-                horizontalArrangement = Arrangement.spacedBy(GalleryGridSpacing),
-                verticalItemSpacing = CompactTimelineSpacing,
-                modifier = Modifier.fillMaxHeight(0.9f),
-            ) {
-                galleryAfterImagesItems(
-                    detail = detail,
-                    comments = comments,
-                    recommendations = recommendations,
-                    navigate = { route ->
-                        onDismissInfoSheet()
-                        navigate(route)
-                    },
-                )
+            // Dialog roots replace LocalUriHandler; keep internal events in the app.
+            CompositionLocalProvider(LocalUriHandler provides uriHandler) {
+                LazyVerticalStaggeredGrid(
+                    columns = StaggeredGridCells.Adaptive(164.dp),
+                    contentPadding =
+                        PaddingValues(
+                            start = screenHorizontalPadding,
+                            end = screenHorizontalPadding,
+                            bottom = 32.dp,
+                        ),
+                    horizontalArrangement = Arrangement.spacedBy(GalleryGridSpacing),
+                    verticalItemSpacing = CompactTimelineSpacing,
+                    modifier = Modifier.fillMaxHeight(0.9f),
+                ) {
+                    galleryAfterImagesItems(
+                        detail = detail,
+                        comments = comments,
+                        recommendations = recommendations,
+                        navigate = { route ->
+                            onDismissInfoSheet()
+                            navigate(route)
+                        },
+                    )
+                }
             }
         }
     }

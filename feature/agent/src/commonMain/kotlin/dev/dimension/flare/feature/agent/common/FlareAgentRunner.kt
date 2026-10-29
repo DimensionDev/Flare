@@ -135,13 +135,18 @@ internal fun FlareAgentRuntime.createAgent(
                                 config.prompt.messages.filterIsInstance<Message.System>() + messages.filterNot { it is Message.System }
                             }
                     }
-                    requestAgentResponse(compaction, storeCheckpoint) {
+                    requestAgentResponse(compaction, chatHistoryProvider, storeCheckpoint) {
                         messages(inputPrompt.messages)
                     }
                 }
                 val nodeExecuteTools by nodeExecuteTools(request.executeToolsNodeName)
                 val nodeSendToolResults by node<ReceivedToolResults, Message.Assistant>(request.sendToolResultsNodeName) { results ->
-                    requestAgentResponse(compaction, storeCheckpoint, finishAfterToolResults = request.finishAfterToolResults) {
+                    requestAgentResponse(
+                        compaction,
+                        chatHistoryProvider,
+                        storeCheckpoint,
+                        finishAfterToolResults = request.finishAfterToolResults,
+                    ) {
                         user {
                             results.toolResults.forEach { toolResult -> toolResult(toolResult.toMessagePart()) }
                         }
@@ -251,6 +256,7 @@ internal fun FlareAgentRuntime.createAgent(
 
 private suspend fun AIAgentGraphContextBase.requestAgentResponse(
     compaction: AgentContextCompaction,
+    chatHistoryProvider: ChatHistoryProvider,
     storeCheckpoint: suspend (String, List<Message>, AgentContextCheckpoint) -> Unit,
     finishAfterToolResults: Boolean = false,
     input: PromptBuilder.() -> Unit,
@@ -263,6 +269,14 @@ private suspend fun AIAgentGraphContextBase.requestAgentResponse(
             prompt.withMessages { messages ->
                 messages.map { if (it.id == null) it.withAgentMessageId(Uuid.random().toString()) else it }
             }
+        if (prompt.messages
+                .last()
+                .parts
+                .any { it is MessagePart.Tool.Result }
+        ) {
+            // A failed model/summary request must not discard the effects of completed tools.
+            chatHistoryProvider.store(runId, prompt.messages)
+        }
         compaction.request(this, { messages, checkpoint -> storeCheckpoint(runId, messages, checkpoint) }) {
             when {
                 summarize -> {

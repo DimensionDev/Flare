@@ -242,7 +242,7 @@ class AgentIterationLimitTest {
             conversationId: String,
             messages: List<Message>,
         ) {
-            stores++
+            if (messages.lastOrNull() is Message.Assistant) stores++
             this.messages = messages
         }
 

@@ -326,6 +326,49 @@ class AgentContextCompactionTest {
             }
         }
 
+    @Test
+    fun failedSummaryPreservesCompletedToolsWhenTheAgentIsRecreated() =
+        runTest {
+            for (cancelled in listOf(false, true)) {
+                var failed = false
+                Fixture(resultSize = 18_000) { request, number ->
+                    when {
+                        number == 1 -> {
+                            toolResponse(number)
+                        }
+
+                        request.isCompaction() && !failed -> {
+                            failed = true
+                            if (cancelled) throw CancellationException("Cancelled after tools completed")
+                            ERROR
+                        }
+
+                        request.isCompaction() -> {
+                            textResponse("The tool completed; only a reply remains")
+                        }
+
+                        else -> {
+                            textResponse("Recovered without repeating the tool")
+                        }
+                    }
+                }.use { fixture ->
+                    fixture.history.messages = listOf(agentContextSummary("EXISTING CHECKPOINT"))
+                    assertFailsWith<Exception> { fixture.run() }
+                    val saved = fixture.history.messages.flatMap { it.parts }
+                    assertEquals(1, saved.filterIsInstance<MessagePart.Tool.Call>().size)
+                    assertEquals(1, saved.filterIsInstance<MessagePart.Tool.Result>().size)
+                    assertTrue(fixture.checkpoints.isEmpty())
+                    val resumeIndex = fixture.requests.size
+                    assertEquals("Recovered without repeating the tool", fixture.run())
+                    val resumed = fixture.requests[resumeIndex].toString()
+                    assertTrue("EXISTING CHECKPOINT" in resumed)
+                    assertTrue("Tool work, call call-1-1" in resumed)
+                    assertTrue("Completed call-1-1" in resumed)
+                    assertEquals(1, fixture.toolCalls)
+                }
+            }
+        }
+
     private class Fixture(
         private val maxIterations: Int = 256,
         private val resultSize: Int = 20,

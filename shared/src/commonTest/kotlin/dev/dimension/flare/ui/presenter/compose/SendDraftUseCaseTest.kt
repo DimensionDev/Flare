@@ -10,6 +10,7 @@ import dev.dimension.flare.createTestFileItem
 import dev.dimension.flare.createTestFileSystem
 import dev.dimension.flare.createTestRootPath
 import dev.dimension.flare.data.database.app.AppDatabase
+import dev.dimension.flare.data.database.app.model.DbAccount
 import dev.dimension.flare.data.database.app.model.DraftContent
 import dev.dimension.flare.data.database.app.model.DraftMediaType
 import dev.dimension.flare.data.database.app.model.DraftReferenceType
@@ -1308,14 +1309,14 @@ class SendDraftUseCaseTest : RobolectricTest() {
             reference = null,
         )
 
-    private fun mastodonAccount(
+    private suspend fun mastodonAccount(
         id: String,
         host: String,
     ): UiAccount =
         UiAccount(
             accountKey = MicroBlogKey(id, host),
             platformId = "Mastodon",
-        )
+        ).also { db.accountDao().insert(DbAccount(it.accountKey, "{}", it.platformId, 0)) }
 
     private fun media(
         name: String,

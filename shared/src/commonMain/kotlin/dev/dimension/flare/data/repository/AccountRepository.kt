@@ -330,9 +330,26 @@ internal class AccountRepository internal constructor(
                 datasource.close()
             }
         }
-        draftRepository.deleteAccount(accountKey)
-        invalidateCachedContent(accountKey)
-        appDatabase.accountDao().delete(accountKey)
+        cacheDatabase.connect {
+            val accountType = AccountType.Specific(accountKey)
+            cacheDatabase.messageDao().exclusiveRoomKeys(accountType).forEach { roomKey ->
+                cacheDatabase.messageDao().deleteRoomMessages(roomKey)
+                cacheDatabase.messageDao().deleteRoomReference(roomKey)
+                cacheDatabase.messageDao().deleteRoom(roomKey)
+            }
+            cacheDatabase.listDao().deleteExclusiveMembersByAccountType(accountType)
+            cacheDatabase.listDao().deletePagingByAccountType(accountType)
+            cacheDatabase.listDao().deleteByAccountType(accountType)
+            cacheDatabase.userDao().deleteRelationsByAccountType(accountType)
+            cacheDatabase.translationDao().deleteByAccountType(accountType)
+            cacheDatabase.statusReferenceDao().deleteByAccountType(accountType)
+            cacheDatabase.pagingTimelineDao().deletePresentationReferencesByAccountType(accountType)
+            invalidateCachedContent(accountKey)
+        }
+        appDatabase.connect {
+            draftRepository.deleteAccount(accountKey)
+            appDatabase.accountDao().delete(accountKey)
+        }
         // Finish selection cleanup before a replacement account can be added.
         listOf(appDataStore.notificationPreferences, appDataStore.discoverPreferences).forEach { preferences ->
             try {

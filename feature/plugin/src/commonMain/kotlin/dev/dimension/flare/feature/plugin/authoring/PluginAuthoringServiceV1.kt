@@ -35,9 +35,11 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.JsonIgnoreUnknownKeys
 import okio.ByteString.Companion.decodeBase64
 import okio.ByteString.Companion.toByteString
 
@@ -154,6 +156,7 @@ internal class PluginAuthoringServiceV1(
                     files.delete(root / "$pluginId.json", mustExist = false)
                     entries.update { it - pluginId }
                     mutablePlugins.update { items -> items.filterNot { it.id == pluginId } }
+                    subsystem.installer.cleanup(subsystem.running.value.plugins.values)
                 }
             }
         }
@@ -367,6 +370,8 @@ internal class PluginAuthoringServiceV1(
         val error: String? = null,
     )
 
+    @OptIn(ExperimentalSerializationApi::class)
+    @JsonIgnoreUnknownKeys
     @Serializable
     private data class Record(
         val id: String,

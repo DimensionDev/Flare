@@ -77,12 +77,21 @@ class PluginAuthoringServiceV1Test {
 
     @Volatile private var onRead: ((Path) -> Unit)? = null
     private var failingIndexWrites = 0
+    private var failCleanup = false
     private var onIndexFailure: (() -> Unit)? = null
     private val fileSystem =
         object : ForwardingFileSystem(FileSystem.SYSTEM) {
             override fun source(file: Path): okio.Source {
                 onRead?.invoke(file)
                 return super.source(file)
+            }
+
+            override fun delete(
+                path: Path,
+                mustExist: Boolean,
+            ) {
+                if (failCleanup && path.name.endsWith(".fpp")) error("synthetic cleanup failure")
+                super.delete(path, mustExist)
             }
 
             override fun atomicMove(
@@ -121,6 +130,49 @@ class PluginAuthoringServiceV1Test {
             scope.coroutineContext[Job]!!.cancelAndJoin()
             subsystem.runtimePool.close()
             FileSystem.SYSTEM.deleteRecursively(root)
+        }
+
+    @Test
+    fun oldDisabledSourceRecordStillHasItsSourceAndRevision() =
+        runBlocking<Unit> {
+            val plugin = service.create(UUID.randomUUID().toString())
+            generate(plugin)
+            await(plugin.id, PluginAuthoringPhase.Applied)
+            val before = service.read(plugin.id)
+            val path = root / "authored-plugins" / "${plugin.id}.json"
+            val old = fileSystem.read(path) { readUtf8() }.replace("\"revision\":", "\"enabled\":false,\"revision\":")
+            fileSystem.write(path) { writeUtf8(old) }
+            val restored = PluginAuthoringServiceV1(subsystem, { registry }, { accounts }, { scope }).read(plugin.id)
+            assertEquals(before.files, restored.files)
+            assertEquals(before.plugin.revision, restored.plugin.revision)
+            assertEquals(PluginAuthoringPhase.Idle, restored.plugin.phase)
+        }
+
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    @Test
+    fun cleanupFailureCannotReinstallADeletedPluginFromQueuedSource() =
+        runBlocking<Unit> {
+            val plugin = service.create(UUID.randomUUID().toString())
+            generate(plugin)
+            await(plugin.id, PluginAuthoringPhase.Applied)
+            val scheduler = TestCoroutineScheduler()
+            val queuedScope = CoroutineScope(SupervisorJob() + StandardTestDispatcher(scheduler))
+            try {
+                val queued = PluginAuthoringServiceV1(subsystem, { registry }, { accounts }, { queuedScope })
+                queued.write(plugin.id, queued.read(plugin.id).plugin.revision, sources(plugin, "queued"))
+                failCleanup = true
+                assertFailsWith<IllegalStateException> { queued.delete(plugin.id) }
+                scheduler.runCurrent()
+                assertTrue(queued.plugins.value.isEmpty())
+                assertFalse(plugin.id in subsystem.running.value.plugins)
+                assertFalse(plugin.id in subsystem.stateStore.desired.value.plugins)
+                assertFalse(fileSystem.exists(root / "authored-plugins" / "${plugin.id}.json"))
+                failCleanup = false
+                subsystem.installer.cleanup(subsystem.running.value.plugins.values)
+            } finally {
+                failCleanup = false
+                queuedScope.coroutineContext[Job]!!.cancelAndJoin()
+            }
         }
 
     @Test

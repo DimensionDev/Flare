@@ -47,7 +47,6 @@ internal class SendDraftUseCase(
         progress: suspend (ComposeProgressState) -> Unit,
     ) {
         withCancellationRecovery(bundle.groupId, bundle.accounts.map { it.accountKey }) { pendingTargets ->
-            val persistedMedia = draftMediaStore.persist(bundle.groupId, bundle.template.medias)
             val savedGroupId =
                 draftRepository.saveDraft(
                     input =
@@ -63,9 +62,8 @@ internal class SendDraftUseCase(
                                         lastAttemptAt = Clock.System.now().toEpochMilliseconds(),
                                     )
                                 },
-                            medias = persistedMedia,
                         ),
-                )
+                ) { draftMediaStore.persist(bundle.groupId, bundle.template.medias) }
             val data =
                 bundle.template.copy(
                     medias =

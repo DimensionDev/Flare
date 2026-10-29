@@ -265,6 +265,7 @@ public class PluginManagementPresenterV1(
             val installed = requireNotNull(subsystem.stateStore.desired.value.plugins[pluginId]) { "Plugin is no longer installed" }
             switcher.uninstall(pluginId, installed.manifest.platform.id)
             updates.remove(pluginId)
+            subsystem.installer.cleanup(subsystem.running.value.plugins.values)
             mutableState.value = snapshot()
         }
     }

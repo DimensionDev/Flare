@@ -153,6 +153,8 @@ public class PluginPlatformSpecSourceV1(
     }
 }
 
+internal fun PlatformSpec.belongsToPlugin(pluginId: String): Boolean = this is PluginPlatformSpecV1 && this.pluginId == pluginId
+
 private class PluginPlatformSpecV1(
     private val plugin: RunningPluginV1,
     private val runtimePool: PluginRuntimePool,
@@ -167,6 +169,7 @@ private class PluginPlatformSpecV1(
     private val manifest = plugin.installed.manifest
     private val platform = manifest.platform
 
+    val pluginId: String = plugin.installed.pluginId
     override val platformId: String = platform.id
     override val metadata: PlatformMetadata = plugin.platformMetadata()
     override val order: Int = 1_000 + (platform.detector?.priority ?: 0)

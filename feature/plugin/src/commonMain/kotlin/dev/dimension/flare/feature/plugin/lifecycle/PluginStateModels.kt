@@ -3,8 +3,10 @@ package dev.dimension.flare.feature.plugin.lifecycle
 import dev.dimension.flare.feature.plugin.github.GitHubPluginRepositoryV1
 import dev.dimension.flare.feature.plugin.manifest.PluginManifestV1
 import dev.dimension.flare.feature.plugin.runtime.PluginSessionV1
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonIgnoreUnknownKeys
 
 @Serializable
 public data class PluginStateIndexV1(
@@ -16,6 +18,8 @@ public data class PluginStateIndexV1(
     }
 }
 
+@OptIn(ExperimentalSerializationApi::class)
+@JsonIgnoreUnknownKeys
 @Serializable
 public data class InstalledPluginV1(
     val pluginId: String,

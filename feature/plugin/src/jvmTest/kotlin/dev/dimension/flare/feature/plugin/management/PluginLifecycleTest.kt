@@ -31,6 +31,33 @@ import kotlin.test.assertTrue
 
 class PluginLifecycleTest {
     @Test
+    fun conflictingPlatformCannotReplaceAnotherPluginOrBuiltIn() =
+        runTest {
+            withFixture(backgroundScope) { subsystem, presenter, _, input ->
+                val first = presenter.inspect(input.toString())
+                presenter.confirmInstall()
+                val before =
+                    subsystem.running.value.plugins
+                        .getValue(first.pluginId)
+                for (platform in listOf(first.platformId, "BuiltIn", first.platformId.lowercase())) {
+                    val manifest =
+                        TestFppFactory.validManifest
+                            .replace(
+                                first.pluginId,
+                                "test.conflicting.plugin",
+                            ).replace(first.platformId, platform)
+                    TestFppFactory.write(input, TestFppFactory.validEntries(manifest = manifest))
+                    presenter.inspect(input.toString())
+                    assertFailsWith<IllegalArgumentException> { presenter.confirmInstall() }
+                    assertEquals(setOf(first.pluginId), subsystem.stateStore.desired.value.plugins.keys)
+                    assertEquals(before, subsystem.running.value.plugins[first.pluginId])
+                    assertTrue(before.session.isActive)
+                    presenter.cancelInstall()
+                }
+            }
+        }
+
+    @Test
     fun installAndUninstallImmediatelyRefreshRegistryAndDeleteOnlyOwnedData() =
         runTest {
             withFixture(backgroundScope) { subsystem, presenter, accounts, input ->

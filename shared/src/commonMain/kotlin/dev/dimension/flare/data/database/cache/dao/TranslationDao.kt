@@ -9,6 +9,7 @@ import dev.dimension.flare.data.database.cache.model.TranslationDisplayMode
 import dev.dimension.flare.data.database.cache.model.TranslationEntityType
 import dev.dimension.flare.data.database.cache.model.TranslationPayload
 import dev.dimension.flare.data.database.cache.model.TranslationStatus
+import dev.dimension.flare.model.DbAccountType
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -145,6 +146,12 @@ internal interface TranslationDao {
 
     @Query("DELETE FROM DbTranslation WHERE targetLanguage = :targetLanguage")
     suspend fun deleteByLanguage(targetLanguage: String)
+
+    @Query(
+        "DELETE FROM DbTranslation WHERE entityType = 'Status' " +
+            "AND entityKey IN (SELECT id FROM DbStatus WHERE accountType = :accountType)",
+    )
+    suspend fun deleteByAccountType(accountType: DbAccountType)
 
     @Query("DELETE FROM DbTranslation")
     suspend fun clear()

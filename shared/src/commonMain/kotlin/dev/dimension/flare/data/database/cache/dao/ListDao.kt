@@ -47,7 +47,19 @@ internal interface ListDao {
     suspend fun deleteByPagingKey(pagingKey: String)
 
     @Query("DELETE FROM DbList WHERE accountType = :accountType")
-    suspend fun deleteByAccountType(accountType: String)
+    suspend fun deleteByAccountType(accountType: DbAccountType)
+
+    @Query("DELETE FROM DbListPaging WHERE accountType = :accountType")
+    suspend fun deletePagingByAccountType(accountType: DbAccountType)
+
+    @Query(
+        "DELETE FROM DbListMember WHERE listKey IN (" +
+            "SELECT listKey FROM DbList WHERE accountType = :accountType UNION " +
+            "SELECT listKey FROM DbListPaging WHERE accountType = :accountType) " +
+            "AND listKey NOT IN (SELECT listKey FROM DbList WHERE accountType != :accountType UNION " +
+            "SELECT listKey FROM DbListPaging WHERE accountType != :accountType)",
+    )
+    suspend fun deleteExclusiveMembersByAccountType(accountType: DbAccountType)
 
     @Query("DELETE FROM DbList WHERE listKey = :listKey AND accountType = :accountType")
     suspend fun deleteByListKey(

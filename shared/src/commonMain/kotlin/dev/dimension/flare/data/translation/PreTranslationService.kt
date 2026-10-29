@@ -385,7 +385,8 @@ internal class OnlinePreTranslationService(
         allowLongText: Boolean,
         preferredDisplayMode: TranslationDisplayMode? = null,
     ): List<PreparedTranslationCandidate> {
-        val deduplicated = statuses.distinctBy { it.translationEntityKey() }
+        val survivingIds = database.statusDao().getVersions(statuses.map { it.id }).mapTo(mutableSetOf()) { it.id }
+        val deduplicated = statuses.filter { it.id in survivingIds }.distinctBy { it.translationEntityKey() }
         if (deduplicated.isEmpty()) {
             return emptyList()
         }

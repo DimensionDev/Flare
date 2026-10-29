@@ -6,12 +6,30 @@ import dev.dimension.flare.RobolectricTest
 import dev.dimension.flare.common.Cacheable
 import dev.dimension.flare.common.combineLatestFlowLists
 import dev.dimension.flare.common.decodeJson
+import dev.dimension.flare.createTestFileItem
 import dev.dimension.flare.createTestFileSystem
 import dev.dimension.flare.createTestRootPath
 import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.database.app.model.DbAccount
 import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.database.cache.model.DbDirectMessageTimeline
+import dev.dimension.flare.data.database.cache.model.DbList
+import dev.dimension.flare.data.database.cache.model.DbListMember
+import dev.dimension.flare.data.database.cache.model.DbListPaging
+import dev.dimension.flare.data.database.cache.model.DbMessageItem
+import dev.dimension.flare.data.database.cache.model.DbMessageRoom
+import dev.dimension.flare.data.database.cache.model.DbMessageRoomReference
+import dev.dimension.flare.data.database.cache.model.DbPagingTimeline
+import dev.dimension.flare.data.database.cache.model.DbStatus
+import dev.dimension.flare.data.database.cache.model.DbStatusReference
+import dev.dimension.flare.data.database.cache.model.DbTimelineItemPresentationReference
+import dev.dimension.flare.data.database.cache.model.DbTimelineItemPresentationType
+import dev.dimension.flare.data.database.cache.model.DbTranslation
+import dev.dimension.flare.data.database.cache.model.DbUserRelation
+import dev.dimension.flare.data.database.cache.model.TranslationEntityType
+import dev.dimension.flare.data.database.cache.model.TranslationStatus
 import dev.dimension.flare.data.database.createDatabaseDriver
+import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.UnavailableMicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.TimelineTabConfigurationDataSource
@@ -33,15 +51,24 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformDataSourceContext
 import dev.dimension.flare.model.PlatformRegistry
 import dev.dimension.flare.model.PlatformSpec
+import dev.dimension.flare.model.ReferenceType
 import dev.dimension.flare.model.UnsupportedPlatformException
 import dev.dimension.flare.testPlatformRegistry
 import dev.dimension.flare.testPlatformRuntimeData
 import dev.dimension.flare.ui.model.UiAccount
+import dev.dimension.flare.ui.model.UiDMItem
+import dev.dimension.flare.ui.model.UiDMRoom
 import dev.dimension.flare.ui.model.UiIcon
+import dev.dimension.flare.ui.model.UiList
+import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiText
 import dev.dimension.flare.ui.model.asType
+import dev.dimension.flare.ui.model.createSampleStatus
+import dev.dimension.flare.ui.model.createSampleUser
 import dev.dimension.flare.ui.model.toUi
+import dev.dimension.flare.ui.presenter.compose.SaveDraftUseCase
 import dev.dimension.flare.ui.presenter.home.RememberedAccountSelection
+import dev.dimension.flare.ui.render.toUiPlainText
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -72,10 +99,12 @@ import okio.Path.Companion.toPath
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertIs
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
@@ -143,6 +172,168 @@ class AccountRepositoryTest : RobolectricTest() {
             )
             assertTrue(fileStorage.exists(sharedMedia.cachePath.toPath()))
             assertFalse(fileStorage.exists(ownedMedia.cachePath.toPath()))
+        }
+
+    @Test
+    fun deletingAccountsRemovesOwnedCachesAndPreservesSharedData() =
+        runTest {
+            val repository = createRepository(this)
+            val owned = AccountType.Specific(accountKey)
+            val survivor = AccountType.Specific(otherAccountKey)
+            repository.addAccount(UiAccount(accountKey, "Mastodon"), "owned")
+            repository.addAccount(UiAccount(otherAccountKey, "Mastodon"), "survivor")
+            val user = createSampleUser()
+            val sample = createSampleStatus(user)
+            val ownedRoom = MicroBlogKey("private-room", "example.social")
+            val sharedRoom = MicroBlogKey("shared-room", "example.social")
+            listOf(ownedRoom, sharedRoom).forEach { key ->
+                val message =
+                    UiDMItem(key, user, UiDMItem.Message.Text("private message".toUiPlainText()), sample.createdAt, false, null, false)
+                cacheDatabase.messageDao().insertMessages(listOf(DbMessageItem(key, key, user.key, 0, message, false)))
+                cacheDatabase.messageDao().insert(listOf(DbMessageRoom(key, "Mastodon", key)))
+                cacheDatabase.messageDao().insertReferences(listOf(DbMessageRoomReference(key, user.key)))
+                cacheDatabase.messageDao().insertTimeline(
+                    listOf(DbDirectMessageTimeline(owned, key, 0, 0, UiDMRoom(key, persistentListOf(user), message, 0))),
+                )
+                cacheDatabase.listDao().insertAllList(listOf(DbList(key, owned, DbList.ListContent(UiList.List(key.id, key.id)))))
+                cacheDatabase.listDao().insertAllPaging(listOf(DbListPaging(owned, "owned-lists", key)))
+                cacheDatabase.listDao().insertAllMember(listOf(DbListMember(key, user.key)))
+            }
+            cacheDatabase.messageDao().insertTimeline(
+                listOf(DbDirectMessageTimeline(survivor, sharedRoom, 0, 0, UiDMRoom(sharedRoom, persistentListOf(user), null, 0))),
+            )
+            cacheDatabase.listDao().insertAllList(
+                listOf(DbList(sharedRoom, survivor, DbList.ListContent(UiList.List(sharedRoom.id, sharedRoom.id)))),
+            )
+            cacheDatabase.listDao().insertAllPaging(listOf(DbListPaging(survivor, "surviving-lists", sharedRoom)))
+            val statuses =
+                listOf(owned, survivor).map { type ->
+                    val status = DbStatus(sample.statusKey, type, sample.copy(accountType = type), 0, "private post")
+                    cacheDatabase.statusDao().insertAll(listOf(status))
+                    cacheDatabase.userDao().insertUserRelation(DbUserRelation(type, user.key, UiRelation(following = true)))
+                    cacheDatabase.translationDao().insert(
+                        DbTranslation(TranslationEntityType.Status, status.id, "en", "hash", TranslationStatus.Completed, updatedAt = 0),
+                    )
+                    cacheDatabase.statusReferenceDao().insertAll(
+                        listOf(DbStatusReference(ReferenceType.Quote, status.id, status.id)),
+                    )
+                    val timeline = DbPagingTimeline("cache-test", status.id, 0)
+                    cacheDatabase.pagingTimelineDao().insertAll(listOf(timeline))
+                    cacheDatabase.pagingTimelineDao().insertPresentationReferences(
+                        listOf(
+                            DbTimelineItemPresentationReference(
+                                timeline.pagingKey,
+                                timeline._id,
+                                status.id,
+                                DbTimelineItemPresentationType.Quote,
+                            ),
+                        ),
+                    )
+                    status
+                }
+            repository.delete(accountKey)
+            assertNull(cacheDatabase.messageDao().getMessage(ownedRoom))
+            assertNotNull(cacheDatabase.messageDao().getMessage(sharedRoom))
+            assertTrue(
+                cacheDatabase
+                    .messageDao()
+                    .getRoomTimeline(owned)
+                    .first()
+                    .isEmpty(),
+            )
+            assertTrue(
+                cacheDatabase
+                    .listDao()
+                    .getListMemberKeysFlow(ownedRoom)
+                    .first()
+                    .isEmpty(),
+            )
+            assertEquals(listOf(user.key), cacheDatabase.listDao().getListMemberKeysFlow(sharedRoom).first())
+            assertTrue(
+                cacheDatabase
+                    .listDao()
+                    .getListKeysFlow("owned-lists")
+                    .first()
+                    .isEmpty(),
+            )
+            assertNull(cacheDatabase.listDao().getList(ownedRoom, owned).first())
+            assertNotNull(cacheDatabase.listDao().getList(sharedRoom, survivor).first())
+            assertNull(cacheDatabase.userDao().getUserRelation(owned, user.key).first())
+            assertNotNull(cacheDatabase.userDao().getUserRelation(survivor, user.key).first())
+            assertNull(cacheDatabase.translationDao().get(TranslationEntityType.Status, statuses[0].id, "en"))
+            assertNotNull(cacheDatabase.translationDao().get(TranslationEntityType.Status, statuses[1].id, "en"))
+            assertTrue(cacheDatabase.statusReferenceDao().getByStatusId(statuses[0].id).isEmpty())
+            assertEquals(1, cacheDatabase.statusReferenceDao().getByStatusId(statuses[1].id).size)
+            assertEquals(listOf(statuses[1].id), cacheDatabase.statusDao().getVersions(statuses.map { it.id }).map { it.id })
+            assertEquals(
+                listOf(statuses[1].id),
+                cacheDatabase
+                    .pagingTimelineDao()
+                    .getPresentationReferences(
+                        "cache-test",
+                        statuses.map {
+                            DbPagingTimeline.createId("cache-test", it.id)
+                        },
+                    ).map { it.referenceStatusId },
+            )
+            repository.delete(otherAccountKey)
+            assertNull(cacheDatabase.messageDao().getMessage(sharedRoom))
+            assertTrue(
+                cacheDatabase
+                    .listDao()
+                    .getListMemberKeysFlow(sharedRoom)
+                    .first()
+                    .isEmpty(),
+            )
+        }
+
+    @Test
+    fun staleDraftSavePreservesSurvivingSharedDraftAndMedia() =
+        runTest {
+            val repository = createRepository(this)
+            val mediaStore = DraftMediaStore(fileStorage)
+            val drafts = DraftRepository(appDatabase, mediaStore)
+            val saveDraft = SaveDraftUseCase(drafts, mediaStore)
+            val accounts = listOf(UiAccount(accountKey, "Mastodon"), UiAccount(otherAccountKey, "Mastodon"))
+            accounts.forEach { repository.addAccount(it, "credential") }
+            val bytes = byteArrayOf(1, 2, 3)
+            val originalMedia =
+                ComposeData.Media(
+                    file = createTestFileItem(root, "old.png", bytes, dev.dimension.flare.common.FileType.Image),
+                    altText = null,
+                )
+            val original =
+                ComposeDraftBundle(
+                    accounts,
+                    ComposeData(content = "keep shared draft", medias = listOf(originalMedia)),
+                    "shared-late-save",
+                )
+            saveDraft(original)
+            val before = assertNotNull(drafts.draft(original.groupId).first())
+            repository.delete(accountKey)
+            val changedMedia =
+                ComposeData.Media(
+                    file = createTestFileItem(root, "new.png", byteArrayOf(9), dev.dimension.flare.common.FileType.Image),
+                    altText = null,
+                )
+            val stale = original.copy(template = original.template.copy(medias = listOf(changedMedia)))
+            assertFailsWith<IllegalStateException> { saveDraft(stale) }
+            val after = assertNotNull(drafts.draft(original.groupId).first())
+            assertEquals(listOf(otherAccountKey), after.targets.map { it.accountKey })
+            assertEquals(before.content, after.content)
+            assertEquals(before.medias, after.medias)
+            assertContentEquals(
+                bytes,
+                fileStorage.read(
+                    after.medias
+                        .single()
+                        .cachePath
+                        .toPath(),
+                ),
+            )
+            assertFailsWith<IllegalStateException> { saveDraft(stale.copy(groupId = "new-late-save")) }
+            assertNull(drafts.draft("new-late-save").first())
+            assertFalse(fileStorage.exists(requireNotNull(fileStorage.draftMediaFile("new-late-save", "file").parent)))
         }
 
     @Test

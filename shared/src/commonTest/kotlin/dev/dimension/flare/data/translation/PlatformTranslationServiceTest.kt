@@ -58,6 +58,8 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 class PlatformTranslationServiceTest : RobolectricTest() {
@@ -90,6 +92,18 @@ class PlatformTranslationServiceTest : RobolectricTest() {
         db.close()
         deleteTestRootPath(root)
     }
+
+    @Test
+    fun queuedStatusSnapshotsCannotRecreateDeletedTranslations() =
+        runTest {
+            startService()
+            val status = save(post(platformTranslation = "deleted private translation"))
+            db.statusDao().deleteByAccountType(status.accountType)
+            service.enqueueStatuses(listOf(status))
+            runCurrent()
+            assertNull(db.translationDao().get(TranslationEntityType.Status, status.id, Locale.language))
+            assertTrue(requests.isEmpty())
+        }
 
     @Test
     fun platformUpdatesKeepTimelineAndDetailTranslated() =

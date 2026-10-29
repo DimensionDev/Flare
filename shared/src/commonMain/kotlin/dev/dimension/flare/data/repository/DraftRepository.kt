@@ -41,12 +41,20 @@ internal class DraftRepository(
             .draftGroup(groupId)
             .map { it?.toModel() }
 
-    suspend fun saveDraft(input: SaveDraftInput): String {
+    suspend fun saveDraft(
+        input: SaveDraftInput,
+        prepareMedias: suspend () -> List<SaveDraftMedia> = { input.medias },
+    ): String {
         val now = Clock.System.now().toEpochMilliseconds()
         val groupId = input.groupId
         val createdAt = input.createdAt ?: database.draftDao().getGroup(groupId)?.created_at ?: now
 
         database.connect {
+            check(input.targets.all { database.accountDao().getAccount(it.accountKey) != null }) {
+                "A draft account was removed. Select an available account and try again."
+            }
+            // Serialize media replacement with account deletion, before changing shared draft files.
+            val medias = prepareMedias()
             database.draftDao().upsertGroup(
                 DbDraftGroup(
                     group_id = groupId,
@@ -73,9 +81,9 @@ internal class DraftRepository(
                 )
             }
             database.draftDao().deleteMediasByGroup(groupId)
-            if (input.medias.isNotEmpty()) {
+            if (medias.isNotEmpty()) {
                 database.draftDao().insertMedias(
-                    input.medias.mapIndexed { index, media ->
+                    medias.mapIndexed { index, media ->
                         DbDraftMedia(
                             group_id = groupId,
                             cache_path = media.cachePath,
@@ -196,7 +204,7 @@ internal data class SaveDraftInput(
     val groupId: String,
     val content: DraftContent,
     val targets: List<SaveDraftTarget>,
-    val medias: List<SaveDraftMedia>,
+    val medias: List<SaveDraftMedia> = emptyList(),
     val createdAt: Long? = null,
 )
 

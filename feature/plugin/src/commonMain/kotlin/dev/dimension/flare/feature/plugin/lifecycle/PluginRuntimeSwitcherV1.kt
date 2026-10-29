@@ -4,6 +4,7 @@ import dev.dimension.flare.data.repository.AccountService
 import dev.dimension.flare.feature.plugin.PluginSubsystemV1
 import dev.dimension.flare.feature.plugin.abi.PluginJsonV1
 import dev.dimension.flare.feature.plugin.adapter.PluginPlatformSpecSourceV1
+import dev.dimension.flare.feature.plugin.adapter.belongsToPlugin
 import dev.dimension.flare.feature.plugin.wire.PluginAccountCredentialV1
 import dev.dimension.flare.model.PlatformRegistry
 import kotlinx.coroutines.CoroutineScope
@@ -34,8 +35,6 @@ internal class PluginRuntimeSwitcherV1(
         val previous = subsystem.running.value.plugins[pluginId]
         check(previous?.developmentSource == null) { "Stop development before deleting this plugin" }
         switch(previous, null, pluginId = pluginId, platformId = platformId)
-        // The running snapshot no longer protects retired packages or their account icons.
-        subsystem.installer.cleanup(subsystem.running.value.plugins.values)
     }
 
     fun running(record: InstalledPluginV1): RunningPluginV1 =
@@ -77,6 +76,18 @@ internal class PluginRuntimeSwitcherV1(
                         ?.id,
             ),
     ) {
+        val registered = registry.all.firstOrNull { it.platformId.equals(platformId, ignoreCase = true) }
+        val ownsRegistration = registered?.belongsToPlugin(pluginId) == true
+        if (replacement != null) {
+            require(registered == null || ownsRegistration) { "Platform ID is already registered by another plugin or a built-in platform" }
+            require(
+                subsystem.stateStore.desired.value.plugins.values.none {
+                    it.pluginId != pluginId &&
+                        it.manifest.platform.id
+                            .equals(platformId, ignoreCase = true)
+                },
+            ) { "Platform ID is already owned by another installed plugin" }
+        }
         val spec = replacement?.let(::platform)
         var retired = false
         try {
@@ -102,7 +113,7 @@ internal class PluginRuntimeSwitcherV1(
                     if (installed == null) subsystem.stateStore.uninstall(pluginId) else subsystem.stateStore.install(installed)
                 }
                 subsystem.replaceRunning(pluginId, replacement)
-                registry.replaceExternal(platformId, spec)
+                if (replacement != null || ownsRegistration) registry.replaceExternal(platformId, spec)
             }
         } catch (error: Throwable) {
             withContext(NonCancellable) {
@@ -116,7 +127,7 @@ internal class PluginRuntimeSwitcherV1(
                                 generation = generation,
                             )?.also { it.diagnostic = previous.diagnostic }
                     subsystem.replaceRunning(pluginId, restored)
-                    registry.replaceExternal(platformId, restored?.let(::platform))
+                    if (ownsRegistration || replacement != null) registry.replaceExternal(platformId, restored?.let(::platform))
                     // Preserve the restored session's identity for OAuth continuations after a restart.
                     if (!temporary && restored != null) {
                         val record = restored.installed.copy(runtimeGeneration = restored.generation)

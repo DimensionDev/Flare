@@ -143,19 +143,6 @@ internal fun SettingsScreen(
                     Text(text = stringResource(id = R.string.settings_accounts_subtitle))
                 },
             )
-            SegmentedListItem(
-                onClick = toPlugins,
-                shapes = ListItemDefaults.single(),
-                content = { Text(text = stringResource(id = R.string.settings_plugins_title)) },
-                leadingContent = {
-                    ThemedIcon(
-                        imageVector = FontAwesomeIcons.Solid.Gear,
-                        contentDescription = null,
-                        color = ThemeIconData.Color.ForestGreen,
-                    )
-                },
-                supportingContent = { Text(text = stringResource(id = R.string.settings_plugins_subtitle)) },
-            )
             Column(
                 verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
             ) {
@@ -386,7 +373,7 @@ internal fun SettingsScreen(
                 )
                 SegmentedListItem(
                     onClick = toProxy,
-                    shapes = ListItemDefaults.last(),
+                    shapes = ListItemDefaults.item(),
                     content = { Text(stringResource(R.string.proxy_title)) },
                     supportingContent = { Text(stringResource(R.string.proxy_settings_subtitle)) },
                     leadingContent = {
@@ -396,6 +383,19 @@ internal fun SettingsScreen(
                             color = ThemeIconData.Color.SapphireBlue,
                         )
                     },
+                )
+                SegmentedListItem(
+                    onClick = toPlugins,
+                    shapes = ListItemDefaults.last(),
+                    content = { Text(text = stringResource(id = R.string.settings_plugins_title)) },
+                    leadingContent = {
+                        ThemedIcon(
+                            imageVector = FontAwesomeIcons.Solid.Gear,
+                            contentDescription = null,
+                            color = ThemeIconData.Color.ForestGreen,
+                        )
+                    },
+                    supportingContent = { Text(text = stringResource(id = R.string.settings_plugins_subtitle)) },
                 )
             }
             Column(

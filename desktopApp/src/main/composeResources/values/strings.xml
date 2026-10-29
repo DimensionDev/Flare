@@ -820,7 +820,9 @@
     <string name="image_translation_automatic">Automatic</string>
     <string name="image_translation_original_file">Original file</string>
     <string name="image_translation_use_shared_description">Share the service URL, API key and model. The service and model must support image output. Turn off to configure image translation separately.</string>
-    <string name="settings_plugins_title">Plugins</string>
+    <string name="settings_plugins_title">Plugins (Beta)</string>
+    <string name="plugin_beta_description">Plugins are still in beta and may be incomplete. If you run into problems, report them on GitHub Issues.</string>
+    <string name="plugin_report_issue">Report an issue on GitHub</string>
     <string name="settings_plugins_subtitle">Install and manage social platform plugins</string>
     <string name="plugin_install">From file…</string>
     <string name="plugin_empty">No plugins installed</string>

@@ -642,13 +642,6 @@ internal fun SettingsScreen(
                 },
             )
 
-            Header(stringResource(Res.string.settings_plugins_title))
-            CardExpanderItem(
-                heading = { Text(stringResource(Res.string.settings_plugins_title)) },
-                caption = { Text(stringResource(Res.string.settings_plugins_subtitle)) },
-                onClick = toPlugins,
-            )
-
             Header(stringResource(Res.string.settings_appearance_title))
 
             CardExpanderItem(
@@ -2391,6 +2384,12 @@ internal fun SettingsScreen(
             ) {
                 ProxySettingsContent()
             }
+
+            CardExpanderItem(
+                heading = { Text(stringResource(Res.string.settings_plugins_title)) },
+                caption = { Text(stringResource(Res.string.settings_plugins_subtitle)) },
+                onClick = toPlugins,
+            )
 
             Header(stringResource(Res.string.settings_about_title))
             Expander(

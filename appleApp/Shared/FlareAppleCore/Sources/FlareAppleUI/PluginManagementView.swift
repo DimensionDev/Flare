@@ -34,6 +34,17 @@ public struct PluginManagementView: View {
 
     public var body: some View {
         List {
+            Section {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("plugin_beta_description")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                    // Feedback must bypass the app's social content routing.
+                    Link("plugin_report_issue", destination: URL(string: "https://github.com/DimensionDev/Flare/issues")!)
+                        .environment(\.openURL, OpenURLAction { .systemAction($0) })
+                }
+            }
+            .listRowBackground(Color.clear)
             ForEach(presenter.state.authoredPlugins, id: \.id) { plugin in
                 Section {
                     VStack(alignment: .leading, spacing: 8) {

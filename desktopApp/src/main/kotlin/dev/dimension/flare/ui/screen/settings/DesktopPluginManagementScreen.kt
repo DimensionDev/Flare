@@ -57,6 +57,7 @@ import dev.dimension.flare.more
 import dev.dimension.flare.plugin_add
 import dev.dimension.flare.plugin_ai_create
 import dev.dimension.flare.plugin_ai_delete_message
+import dev.dimension.flare.plugin_beta_description
 import dev.dimension.flare.plugin_capabilities
 import dev.dimension.flare.plugin_check_updates
 import dev.dimension.flare.plugin_cleanup
@@ -80,6 +81,7 @@ import dev.dimension.flare.plugin_permission_cookie
 import dev.dimension.flare.plugin_permission_media_network
 import dev.dimension.flare.plugin_permissions
 import dev.dimension.flare.plugin_rebuild_index
+import dev.dimension.flare.plugin_report_issue
 import dev.dimension.flare.plugin_restart_required
 import dev.dimension.flare.plugin_retry
 import dev.dimension.flare.plugin_running
@@ -117,6 +119,7 @@ import io.github.composefluent.component.ComboBox
 import io.github.composefluent.component.ContentDialog
 import io.github.composefluent.component.ContentDialogButton
 import io.github.composefluent.component.FlyoutPlacement
+import io.github.composefluent.component.HyperlinkButton
 import io.github.composefluent.component.InfoBar
 import io.github.composefluent.component.InfoBarSeverity
 import io.github.composefluent.component.MenuFlyout
@@ -526,6 +529,14 @@ private fun PluginManagementList(
             verticalArrangement = Arrangement.spacedBy(8.dp),
             contentPadding = PaddingValues(vertical = 12.dp),
         ) {
+            item(key = "beta-notice") {
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text(stringResource(Res.string.plugin_beta_description))
+                    HyperlinkButton("https://github.com/DimensionDev/Flare/issues") {
+                        Text(stringResource(Res.string.plugin_report_issue))
+                    }
+                }
+            }
             items(state.authoredPlugins, key = { it.id }) { plugin ->
                 Layer(modifier = Modifier.fillMaxWidth(), color = FluentTheme.colors.background.card.default) {
                     PluginAuthoringCard(

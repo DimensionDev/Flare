@@ -45,6 +45,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
@@ -472,10 +473,23 @@ private fun PluginManagementList(
     onRetryRuntime: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val uriHandler = LocalUriHandler.current
     LazyColumn(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
     ) {
+        item(key = "beta-notice") {
+            Column(Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+                Text(
+                    stringResource(R.string.plugin_beta_description),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                TextButton(onClick = { uriHandler.openUri("https://github.com/DimensionDev/Flare/issues") }) {
+                    Text(stringResource(R.string.plugin_report_issue))
+                }
+            }
+        }
         itemsIndexed(state.authoredPlugins, key = { _, plugin -> plugin.id }) { index, plugin ->
             SegmentedListItem(
                 onClick = {},

@@ -37,12 +37,12 @@ private enum MacSettingsPane: String, CaseIterable, Identifiable, Hashable {
     case accountManagement
     case appearance
     case behavior
-    case plugins
     case localFilter
     case storage
     case aiConfig
     case translationConfig
     case proxy
+    case plugins
     case about
 
     var id: String { rawValue }
@@ -104,7 +104,7 @@ private enum MacSettingsPane: String, CaseIterable, Identifiable, Hashable {
         case .behavior:
             .sliders
         case .plugins:
-            .rectangleList
+            .puzzlePiece
         case .localFilter:
             .filter
         case .proxy: .globe

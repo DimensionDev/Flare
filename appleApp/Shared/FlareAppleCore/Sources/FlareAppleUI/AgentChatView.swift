@@ -19,6 +19,7 @@ public struct AgentChatView: View {
     let showsEmptyPlaceholder: Bool
 
     @State private var draft = ""
+    @State private var scrollPosition: String?
 
     public init(
         messages: PagingState<AgentChatHistoryMessage>,
@@ -62,7 +63,19 @@ public struct AgentChatView: View {
                             PagingView(
                                 data: messages,
                                 reversed: true,
-                                successContent: { message in
+                                id: { $0.id },
+                                emptyContent: {
+                                    EmptyView()
+                                },
+                                errorContent: { error, retry in
+                                    ListErrorView(error: error, onRetry: retry)
+                                        .padding()
+                                        .frame(maxWidth: .infinity, alignment: .center)
+                                },
+                                loadingContent: { _, _ in
+                                    ProgressView()
+                                },
+                                successContent: { message, _, _ in
                                     AgentChatMessageBubble(
                                         parts: Array(message.parts),
                                         isUser: message.isUser,
@@ -70,23 +83,20 @@ public struct AgentChatView: View {
                                         onPostClick: onPostClick,
                                         onUserClick: onUserClick
                                     )
-                                },
-                                loadingContent: {
-                                    ProgressView()
-                                },
-                                errorContent: { error, retry in
-                                    ListErrorView(error: error, onRetry: retry)
-                                        .padding()
-                                        .frame(maxWidth: .infinity, alignment: .center)
-                                },
-                                emptyContent: {
-                                    EmptyView()
+                                    .id(message.id)
                                 }
                             )
                         }
+                        .scrollTargetLayout()
                         .padding()
                     }
                     .defaultScrollAnchor(.bottom)
+                    .scrollPosition(id: $scrollPosition, anchor: .bottom)
+                    .onChange(of: newestMessageId) { previous, next in
+                        if scrollPosition == nil || scrollPosition == previous {
+                            scrollPosition = next
+                        }
+                    }
                 }
             }
         }
@@ -112,6 +122,13 @@ public struct AgentChatView: View {
                 )
             }
         }
+    }
+
+    private var newestMessageId: String? {
+        if case .success(let success) = onEnum(of: messages) {
+            return success.peek(index: 0)?.id
+        }
+        return nil
     }
 
     private var isEmptyPlaceholderVisible: Bool {

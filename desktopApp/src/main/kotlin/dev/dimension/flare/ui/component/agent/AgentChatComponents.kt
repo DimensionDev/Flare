@@ -168,7 +168,7 @@ internal fun AgentChatScaffold(
 }
 
 @Composable
-private fun AgentChatMessageList(
+internal fun AgentChatMessageList(
     messages: PagingState<AgentChatHistoryMessage>,
     onInputRequestOptionSelected: (AgentInputRequest.Option) -> Unit,
     onPostClick: (UiTimelineV2.Post) -> Unit,
@@ -176,6 +176,13 @@ private fun AgentChatMessageList(
     modifier: Modifier = Modifier,
 ) {
     val listState = rememberLazyListState()
+    val newestMessageId = (messages as? PagingState.Success)?.peek(0)?.id
+    val wasAtBottom = !listState.canScrollBackward
+    LaunchedEffect(newestMessageId) {
+        if (newestMessageId != null && wasAtBottom) {
+            listState.scrollToItem(0)
+        }
+    }
 
     FlareScrollBar(
         state = listState,

@@ -20,6 +20,7 @@ import ai.koog.prompt.message.Message
 import dev.dimension.flare.common.MimeTypes
 import dev.dimension.flare.data.network.ai.AiImagePreparer
 import dev.dimension.flare.feature.agent.presenter.AgentMessagePart
+import dev.dimension.flare.feature.agent.presenter.distinctAgentMessageParts
 import dev.dimension.flare.feature.agent.runtime.AgentAvailability
 import dev.dimension.flare.feature.agent.runtime.AgentImageFallback
 import dev.dimension.flare.feature.agent.runtime.FlareAgentRuntime
@@ -30,6 +31,7 @@ import dev.dimension.flare.ui.model.UiMedia
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.withContext
 import org.koin.core.annotation.Single
+import kotlin.uuid.Uuid
 
 @Single
 internal class FlareAgentRunner(
@@ -72,6 +74,14 @@ internal class FlareAgentRunner(
                     } else {
                         null
                     },
+                storeMessages = { id, messages ->
+                    chatHistoryProvider.storeAssistantResponse(
+                        conversationId = id,
+                        messages = messages,
+                        supportingParts = (request.supportingParts + toolSet.messagePartStore.snapshot()).distinctAgentMessageParts(),
+                        inputRequest = toolSet.inputRequestStore.snapshot(),
+                    )
+                },
             )
         return try {
             AgentRunResult(
@@ -96,6 +106,7 @@ internal fun FlareAgentRuntime.createAgent(
     onTrace: suspend (AgentTrace) -> Unit,
     chatHistoryProvider: ChatHistoryProvider,
     prepareImage: (suspend (UiMedia.Image, Int) -> AttachmentSource.Image)? = null,
+    storeMessages: suspend (String, List<Message>) -> Unit = chatHistoryProvider::store,
 ): AIAgent<Prompt, String> =
     AIAgent
         .builder()
@@ -186,6 +197,20 @@ internal fun FlareAgentRuntime.createAgent(
                     onTrace(AgentTrace(AgentPhase.RunningStep))
                 }
                 config.onNodeExecutionCompleted {
+                    // LLM callbacks run before the reply is appended and while the write session is locked.
+                    if (it.output is Message.Assistant) {
+                        val messages =
+                            it.context.llm.writeSession {
+                                prompt =
+                                    prompt.withMessages { messages ->
+                                        messages.map { message ->
+                                            if (message.id == null) message.withAgentMessageId(Uuid.random().toString()) else message
+                                        }
+                                    }
+                                prompt.messages
+                            }
+                        storeMessages(it.context.runId, messages)
+                    }
                     onTrace(AgentTrace(AgentPhase.StepCompleted))
                 }
                 config.onNodeExecutionFailed {
@@ -235,6 +260,7 @@ internal data class FlareAgentRequest(
     val finishAfterToolResults: Boolean = false,
     val chatMemoryWindowSize: Int = 20,
     val images: List<UiMedia.Image> = emptyList(),
+    val supportingParts: List<AgentMessagePart> = emptyList(),
     private val toolSet: AgentToolSet = AgentToolSet.Empty,
 ) {
     val toolRegistry: ToolRegistry = toolSet.toolRegistry

@@ -81,6 +81,7 @@ internal class ProfileInsightAgentUseCase(
                             searchDataSources = searchDataSources,
                         ),
                     conversationId = conversationId,
+                    supportingParts = listOf(AgentMessagePart.UserCard(profile)),
                 ) { event ->
                     send(event.toConversationEvent())
                 }
@@ -120,6 +121,7 @@ internal class ProfileInsightAgentUseCase(
         prompt: Prompt,
         toolContext: AgentToolContext,
         conversationId: String,
+        supportingParts: List<AgentMessagePart>,
         onEvent: suspend (AgentTrace) -> Unit,
     ): AgentRunResult =
         run(
@@ -137,6 +139,7 @@ internal class ProfileInsightAgentUseCase(
                     maxIterations = MAX_AGENT_ITERATIONS,
                     finishAfterToolResults = false,
                     chatMemoryWindowSize = CHAT_MEMORY_WINDOW_SIZE,
+                    supportingParts = supportingParts,
                 ),
             conversationId = conversationId,
             onTrace = onEvent,

@@ -292,7 +292,13 @@ class AgentImageFallbackTest {
                 try {
                     assertEquals("done", agent.run(request.prompt, "conversation"))
                     assertEquals(1, tool.calls)
-                    assertEquals(1, history.stores)
+                    assertEquals(
+                        listOf("done"),
+                        history.messages
+                            .filterIsInstance<Message.Assistant>()
+                            .map { it.textContent() }
+                            .filter { it.isNotBlank() },
+                    )
                     assertEquals(3, fixture.requests.size)
                     assertEquals(listOf(INLINE), fixture.requests.last().imageUrls())
                     fixture.requests.forEach {
@@ -368,14 +374,12 @@ class AgentImageFallbackTest {
     }
 
     private class MemoryHistory : ChatHistoryProvider {
-        var stores = 0
         var messages: List<Message> = emptyList()
 
         override suspend fun store(
             conversationId: String,
             messages: List<Message>,
         ) {
-            stores++
             this.messages = messages
         }
 

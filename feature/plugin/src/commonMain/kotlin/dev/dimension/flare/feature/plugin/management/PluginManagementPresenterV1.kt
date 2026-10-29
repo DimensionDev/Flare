@@ -256,13 +256,6 @@ public class PluginManagementPresenterV1(
         }
     }
 
-    public suspend fun approvePlugin(
-        pluginId: String,
-        revision: Long,
-    ) {
-        runAuthoringAction { subsystem.authoring.approve(pluginId, revision) }
-    }
-
     public suspend fun cancelPluginUpdate(pluginId: String) {
         runAuthoringAction { subsystem.authoring.cancelUpdate(pluginId) }
     }

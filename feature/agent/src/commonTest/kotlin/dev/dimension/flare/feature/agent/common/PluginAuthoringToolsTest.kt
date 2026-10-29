@@ -146,11 +146,6 @@ internal class TestAuthoring : PluginAuthoring {
         return AuthoredPlugin("plugin-a", "Test").also { plugins.value = listOf(it) }
     }
 
-    override suspend fun approve(
-        pluginId: String,
-        revision: Long,
-    ) = error("Not exposed to the model")
-
     override suspend fun setEnabled(
         pluginId: String,
         enabled: Boolean,

@@ -9,18 +9,24 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.graphics.toAwtImage
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.captureToImage
+import androidx.compose.ui.test.isPopup
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.common.FileSystemUtilsExt
+import dev.dimension.flare.data.model.appearance.TimelineAppearance
 import dev.dimension.flare.data.repository.PluginAuthoring
+import dev.dimension.flare.data.repository.PluginAuthoringPhase
 import dev.dimension.flare.di.DesktopKoinApplication
 import dev.dimension.flare.di.koinGet
 import dev.dimension.flare.feature.plugin.PluginSubsystemV1
@@ -28,10 +34,13 @@ import dev.dimension.flare.feature.plugin.github.GitHubPluginRepositoryV1
 import dev.dimension.flare.feature.plugin.github.GitHubPluginVersionV1
 import dev.dimension.flare.feature.plugin.management.PluginManagementItemV1
 import dev.dimension.flare.ui.component.LocalExternalTextResolver
+import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.model.UiText
 import dev.dimension.flare.ui.theme.FlareTheme
 import dev.dimension.flare.ui.theme.LocalComposeWindow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -39,8 +48,10 @@ import org.junit.Rule
 import org.junit.Test
 import org.koin.core.context.stopKoin
 import org.koin.plugin.module.dsl.startKoin
+import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
+import javax.imageio.ImageIO
 
 class DesktopPluginManagementScreenTest {
     @get:Rule val compose = createComposeRule()
@@ -76,7 +87,10 @@ class DesktopPluginManagementScreenTest {
         var opens = 0
         compose.setContent {
             if (visible) {
-                CompositionLocalProvider(LocalComposeWindow provides null) {
+                CompositionLocalProvider(
+                    LocalComposeWindow provides null,
+                    LocalTimelineAppearance provides TimelineAppearance(aiConfig = TimelineAppearance.AiConfig(agent = true)),
+                ) {
                     FlareTheme(isDarkTheme = false) {
                         Box(Modifier.width(448.dp).height(800.dp)) {
                             DesktopPluginManagementScreen(onBack = {}, onCreateWithAI = { opens++ })
@@ -85,12 +99,48 @@ class DesktopPluginManagementScreenTest {
                 }
             }
         }
-        compose.onNodeWithText("Create with AI").assertIsDisplayed().performClick()
-        compose.onNodeWithText("Create with AI").performClick()
+        compose.onNodeWithText("Create with Flare AI").assertDoesNotExist()
+        compose.onNodeWithContentDescription("Add plugin").performClick()
+        compose.onNodeWithText("Create with Flare AI").assertIsDisplayed().performClick()
+        compose.onNodeWithContentDescription("Add plugin").performClick()
+        compose.onNodeWithText("Create with Flare AI").performClick()
         compose.runOnIdle {
             assertEquals(2, opens)
             assertEquals(emptyList<dev.dimension.flare.data.repository.AuthoredPlugin>(), koinGet<PluginAuthoring>().plugins.value)
         }
+    }
+
+    @Test
+    fun generatedPluginAndAddMenuScreenshots() {
+        runBlocking { createScreenshotPlugin(koinGet<PluginAuthoring>()) }
+        compose.setContent {
+            if (visible) {
+                CompositionLocalProvider(
+                    LocalComposeWindow provides null,
+                    LocalTimelineAppearance provides TimelineAppearance(aiConfig = TimelineAppearance.AiConfig(agent = true)),
+                ) {
+                    FlareTheme(isDarkTheme = false) {
+                        Box(Modifier.width(520.dp).height(660.dp)) {
+                            DesktopPluginManagementScreen(onBack = {})
+                        }
+                    }
+                }
+            }
+        }
+        compose.onNodeWithText("Pixelfed").assertIsDisplayed()
+        compose.onNodeWithText("Enabled").assertDoesNotExist()
+        ImageIO.write(
+            compose.onRoot().captureToImage().toAwtImage(),
+            "png",
+            File(System.getProperty("java.io.tmpdir"), "flare-plugins-desktop.png"),
+        )
+        compose.onNodeWithContentDescription("Add plugin").performClick()
+        compose.onNodeWithText("Create with Flare AI").assertIsDisplayed()
+        ImageIO.write(
+            compose.onNode(isPopup()).captureToImage().toAwtImage(),
+            "png",
+            File(System.getProperty("java.io.tmpdir"), "flare-plugins-desktop-menu.png"),
+        )
     }
 
     @Test
@@ -179,7 +229,6 @@ class DesktopPluginManagementScreenTest {
                             PluginItem(
                                 plugin = plugin,
                                 busy = false,
-                                onSetEnabled = { _, _ -> },
                                 onUninstall = { removed = it },
                                 onUpdate = { updated = it },
                             )
@@ -197,10 +246,10 @@ class DesktopPluginManagementScreenTest {
     }
 
     @Test
-    fun narrowWindowKeepsFileInstallOnOneLineAndGitHubInTheMenu() {
+    fun narrowWindowGroupsInstallSourcesAndHidesAiWhenDisabled() {
         compose.setContent {
             if (visible) {
-                CompositionLocalProvider(LocalComposeWindow provides null) {
+                CompositionLocalProvider(LocalComposeWindow provides null, LocalTimelineAppearance provides TimelineAppearance.Default) {
                     FlareTheme(isDarkTheme = false) {
                         // A 520 dp app window leaves 448 dp after its navigation rail.
                         Box(Modifier.width(448.dp).height(800.dp)) {
@@ -210,16 +259,43 @@ class DesktopPluginManagementScreenTest {
                 }
             }
         }
-        val install = compose.onNodeWithText("Install .fpp", useUnmergedTree = true)
-        install.assertIsDisplayed()
-        val layouts = mutableListOf<TextLayoutResult>()
-        install.performSemanticsAction(SemanticsActions.GetTextLayoutResult) { it(layouts) }
-        assertEquals(1, layouts.single().lineCount)
+        compose.onNodeWithText("From file…").assertDoesNotExist()
         compose.onNodeWithText("Install from GitHub").assertDoesNotExist()
-        compose.onNodeWithContentDescription("More").performClick()
+        compose.onNodeWithContentDescription("Add plugin").performClick()
+        compose.onNodeWithText("From file…").assertIsDisplayed()
+        compose.onNodeWithText("Create with Flare AI").assertDoesNotExist()
         compose.onNodeWithText("Install from GitHub").assertIsDisplayed().performClick()
         compose.onNodeWithText("GitHub repository URL").assertIsDisplayed()
         compose.onNodeWithText("Cancel").performClick()
         compose.onNodeWithText("GitHub repository URL").assertDoesNotExist()
+    }
+}
+
+private suspend fun createScreenshotPlugin(authoring: PluginAuthoring) {
+    val plugin = authoring.create("plugin-management-ui-fixture")
+    val current = authoring.read(plugin.id)
+    authoring.write(
+        plugin.id,
+        current.plugin.revision,
+        mapOf(
+            "manifest.json" to """{
+            "schemaVersion":1,"apiVersion":1,"id":"${plugin.id}","version":"1.0.0",
+            "defaultLocale":"en","name":"Pixelfed",
+            "platform":{"id":"${plugin.platformId}","name":"Pixelfed","detector":{"priority":10},
+                "loginMethods":[{"id":"oauth","interaction":"OAuth","title":"OAuth"}],
+                "capabilities":{"flare.datasource.timeline/v1":{"operations":{"page":{"directions":["refresh","older"]}}}},
+                "timelines":[{"id":"home","title":"Home","defaultForNewAccount":true}]}
+        }""",
+            "plugin.js" to """definePlugin({
+            detector:{async detect(){return {matched:true};}},
+            login:{oauth:{async begin(){return {type:"Pending"};},async resume(){return {type:"Pending"};}}},
+            capabilities:{timeline:{async page(){return {items:[]};}}}
+        });""",
+        ),
+    )
+    withTimeout(10_000) {
+        authoring.plugins.first { plugins ->
+            plugins.any { it.id == plugin.id && it.phase == PluginAuthoringPhase.Applied }
+        }
     }
 }

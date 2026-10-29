@@ -54,6 +54,7 @@ import dev.dimension.flare.feature.plugin.management.PluginManagementItemV1
 import dev.dimension.flare.feature.plugin.management.PluginManagementPresenterV1
 import dev.dimension.flare.feature.plugin.management.PluginManagementStateV1
 import dev.dimension.flare.more
+import dev.dimension.flare.plugin_add
 import dev.dimension.flare.plugin_ai_create
 import dev.dimension.flare.plugin_ai_delete_message
 import dev.dimension.flare.plugin_capabilities
@@ -102,6 +103,7 @@ import dev.dimension.flare.settings_plugins_subtitle
 import dev.dimension.flare.settings_plugins_title
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScrollBar
+import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.resolveText
 import dev.dimension.flare.ui.theme.LocalComposeWindow
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
@@ -109,7 +111,6 @@ import io.github.composefluent.FluentTheme
 import io.github.composefluent.ProvideTextStyle
 import io.github.composefluent.background.BackgroundSizing
 import io.github.composefluent.background.Layer
-import io.github.composefluent.component.AccentButton
 import io.github.composefluent.component.Button
 import io.github.composefluent.component.CardExpanderItem
 import io.github.composefluent.component.ComboBox
@@ -122,7 +123,6 @@ import io.github.composefluent.component.MenuFlyout
 import io.github.composefluent.component.MenuFlyoutItem
 import io.github.composefluent.component.ProgressRing
 import io.github.composefluent.component.SubtleButton
-import io.github.composefluent.component.Switcher
 import io.github.composefluent.component.Text
 import io.github.composefluent.component.TextField
 import kotlinx.coroutines.CancellationException
@@ -250,14 +250,6 @@ internal fun DesktopPluginManagementScreen(
                             },
                         )
                         MenuFlyoutItem(
-                            text = { Text(stringResource(Res.string.plugin_install_github)) },
-                            onClick = {
-                                showsMaintenanceMenu = false
-                                presenter.clearGitHubRepository()
-                                showsGitHubInstall = true
-                            },
-                        )
-                        MenuFlyoutItem(
                             text = { Text(stringResource(Res.string.plugin_check_updates)) },
                             enabled = state.plugins.any { it.sourceUrl != null },
                             onClick = {
@@ -284,9 +276,15 @@ internal fun DesktopPluginManagementScreen(
                         )
                     }
                 }
-                AccentButton(
-                    disabled = state.busy,
-                    onClick = {
+                PluginAddMenu(
+                    busy = state.busy,
+                    agentEnabled = LocalTimelineAppearance.current.aiConfig.agent,
+                    onGitHubInstall = {
+                        presenter.clearGitHubRepository()
+                        showsGitHubInstall = true
+                    },
+                    onCreateWithAI = onCreateWithAI,
+                    onFileInstall = {
                         FileDialog(window, installLabel, FileDialog.LOAD).apply {
                             file = "*.fpp"
                             isVisible = true
@@ -296,18 +294,10 @@ internal fun DesktopPluginManagementScreen(
                             }
                         }
                     },
-                ) {
-                    FAIcon(
-                        imageVector = FontAwesomeIcons.Solid.Plus,
-                        contentDescription = installLabel,
-                    )
-                    Text(installLabel)
-                }
+                )
             }
             PluginManagementList(
                 state = state,
-                onCreatePlugin = onCreateWithAI,
-                onApprovePlugin = { id, revision -> scope.launchPresenterAction { presenter.approvePlugin(id, revision) } },
                 onCancelPluginUpdate = { id -> scope.launchPresenterAction { presenter.cancelPluginUpdate(id) } },
                 development =
                     if (showsDevelopment || state.development.directory != null) {
@@ -327,9 +317,6 @@ internal fun DesktopPluginManagementScreen(
                     } else {
                         null
                     },
-                onSetEnabled = { pluginId, enabled ->
-                    scope.launchPresenterAction { presenter.setEnabled(pluginId, enabled) }
-                },
                 onUninstall = { pendingUninstallId = it },
                 onUpdate = { pluginId -> scope.launchPresenterAction { presenter.inspectGitHubUpdate(pluginId) } },
                 onRetryRuntime = { pluginId ->
@@ -340,6 +327,47 @@ internal fun DesktopPluginManagementScreen(
         }
         if (state.busy) {
             ProgressRing(modifier = Modifier.align(Alignment.Center))
+        }
+    }
+}
+
+@Composable
+internal fun PluginAddMenu(
+    busy: Boolean,
+    agentEnabled: Boolean,
+    onGitHubInstall: () -> Unit,
+    onCreateWithAI: () -> Unit,
+    onFileInstall: () -> Unit,
+) {
+    var expanded by remember { mutableStateOf(false) }
+    Box {
+        SubtleButton(disabled = busy, iconOnly = true, onClick = { expanded = true }) {
+            FAIcon(FontAwesomeIcons.Solid.Plus, contentDescription = stringResource(Res.string.plugin_add))
+        }
+        MenuFlyout(visible = expanded, onDismissRequest = { expanded = false }, placement = FlyoutPlacement.BottomAlignedEnd) {
+            MenuFlyoutItem(
+                text = { Text(stringResource(Res.string.plugin_install_github)) },
+                onClick = {
+                    expanded = false
+                    onGitHubInstall()
+                },
+            )
+            if (agentEnabled) {
+                MenuFlyoutItem(
+                    text = { Text(stringResource(Res.string.plugin_ai_create)) },
+                    onClick = {
+                        expanded = false
+                        onCreateWithAI()
+                    },
+                )
+            }
+            MenuFlyoutItem(
+                text = { Text(stringResource(Res.string.plugin_install)) },
+                onClick = {
+                    expanded = false
+                    onFileInstall()
+                },
+            )
         }
     }
 }
@@ -480,10 +508,7 @@ private fun GitHubInstallDialog(
 @Composable
 private fun PluginManagementList(
     state: PluginManagementStateV1,
-    onCreatePlugin: () -> Unit,
-    onApprovePlugin: (String, Long) -> Unit,
     onCancelPluginUpdate: (String) -> Unit,
-    onSetEnabled: (String, Boolean) -> Unit,
     onUninstall: (String) -> Unit,
     onUpdate: (String) -> Unit,
     onRetryRuntime: (String) -> Unit,
@@ -501,27 +526,14 @@ private fun PluginManagementList(
             verticalArrangement = Arrangement.spacedBy(8.dp),
             contentPadding = PaddingValues(vertical = 12.dp),
         ) {
-            item(key = "create-ai-plugin") {
-                Button(onClick = onCreatePlugin) { Text(stringResource(Res.string.plugin_ai_create)) }
-            }
             items(state.authoredPlugins, key = { it.id }) { plugin ->
                 Layer(modifier = Modifier.fillMaxWidth(), color = FluentTheme.colors.background.card.default) {
-                    Row(
-                        Modifier.fillMaxWidth().padding(12.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Column(Modifier.weight(1f)) {
-                            PluginAuthoringCard(
-                                plugin = plugin,
-                                busy = state.busy,
-                                onApprove = { onApprovePlugin(plugin.id, plugin.revision) },
-                                onCancelUpdate = { onCancelPluginUpdate(plugin.id) },
-                                onSetEnabled = { onSetEnabled(plugin.id, it) },
-                            )
-                        }
-                        SubtleButton(onClick = { onUninstall(plugin.id) }) { Text(stringResource(Res.string.plugin_uninstall)) }
-                    }
+                    PluginAuthoringCard(
+                        plugin = plugin,
+                        busy = state.busy,
+                        onCancelUpdate = { onCancelPluginUpdate(plugin.id) },
+                        onUninstall = { onUninstall(plugin.id) },
+                    )
                 }
             }
 
@@ -591,7 +603,6 @@ private fun PluginManagementList(
                     PluginItem(
                         plugin = plugin,
                         busy = state.busy || (state.development.active && state.development.pluginId == plugin.pluginId),
-                        onSetEnabled = onSetEnabled,
                         onUninstall = onUninstall,
                         onUpdate = onUpdate,
                     )
@@ -605,7 +616,6 @@ private fun PluginManagementList(
 internal fun PluginItem(
     plugin: PluginManagementItemV1,
     busy: Boolean,
-    onSetEnabled: (String, Boolean) -> Unit,
     onUninstall: (String) -> Unit,
     onUpdate: (String) -> Unit,
 ) {
@@ -655,11 +665,6 @@ internal fun PluginItem(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
             ) {
-                Switcher(
-                    checked = plugin.enabled,
-                    enabled = !busy,
-                    onCheckStateChange = { onSetEnabled(plugin.pluginId, it) },
-                )
                 SubtleButton(
                     disabled = busy,
                     iconOnly = true,

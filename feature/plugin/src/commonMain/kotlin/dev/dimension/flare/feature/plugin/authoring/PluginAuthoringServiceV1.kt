@@ -1,6 +1,5 @@
 package dev.dimension.flare.feature.plugin.authoring
 
-import dev.dimension.flare.data.model.PluginPermission
 import dev.dimension.flare.data.repository.AccountService
 import dev.dimension.flare.data.repository.AuthoredPlugin
 import dev.dimension.flare.data.repository.PluginAuthoring
@@ -16,7 +15,6 @@ import dev.dimension.flare.feature.plugin.installer.FppPaths
 import dev.dimension.flare.feature.plugin.installer.PluginPackageValidator
 import dev.dimension.flare.feature.plugin.installer.ValidatedPluginPackage
 import dev.dimension.flare.feature.plugin.installer.encodePluginArchive
-import dev.dimension.flare.feature.plugin.installer.sensitivePermissions
 import dev.dimension.flare.feature.plugin.lifecycle.InstalledPluginV1
 import dev.dimension.flare.feature.plugin.lifecycle.PluginRuntimeSwitcherV1
 import dev.dimension.flare.feature.plugin.lifecycle.RunningPluginV1
@@ -108,7 +106,6 @@ internal class PluginAuthoringServiceV1(
                 save(updated)
                 entry.record = updated
                 entry.candidate = null
-                entry.approvedRevision = null
                 // Accepted sources belong to the plugin, even when the caller stops waiting.
                 schedule(entry, revalidate = true)
                 plugins.value.single { it.id == pluginId }
@@ -124,30 +121,13 @@ internal class PluginAuthoringServiceV1(
 
     override suspend fun fetchDocumentation(url: String): String = fetchPluginDocumentation(url)
 
-    override suspend fun approve(
-        pluginId: String,
-        revision: Long,
-    ) {
-        val entry = entry(pluginId)
-        entry.mutex.withLock {
-            check(entries.value[pluginId] === entry) { "Plugin no longer exists" }
-            check(
-                entry.progress.phase == PluginAuthoringPhase.AwaitingApproval && entry.candidate?.revision == revision &&
-                    entry.record.revision == revision,
-            ) { "The plugin changed; review its current version" }
-            entry.approvedRevision = revision
-            schedule(entry)
-        }
-    }
-
     override suspend fun cancelUpdate(pluginId: String) {
         val entry = entry(pluginId)
         entry.mutex.withLock {
             if (entries.value[pluginId] !== entry) return
             entry.application?.cancel()
             entry.candidate = null
-            entry.approvedRevision = null
-            entry.progress = entry.progress.copy(phase = PluginAuthoringPhase.Idle, permissions = emptyList(), credentialsChanged = false)
+            entry.progress = entry.progress.copy(phase = PluginAuthoringPhase.Idle)
             publish(entry)
         }
     }
@@ -180,13 +160,7 @@ internal class PluginAuthoringServiceV1(
                 if (!enabled) {
                     entry.application?.cancel()
                     entry.candidate = null
-                    entry.approvedRevision = null
-                    entry.progress =
-                        entry.progress.copy(
-                            phase = PluginAuthoringPhase.Idle,
-                            permissions = emptyList(),
-                            credentialsChanged = false,
-                        )
+                    entry.progress = entry.progress.copy(phase = PluginAuthoringPhase.Idle)
                 }
                 entry.record = entry.record.copy(enabled = enabled)
                 publish(entry)
@@ -279,29 +253,9 @@ internal class PluginAuthoringServiceV1(
             val previous = subsystem.running.value.plugins[id]
             check(previous?.developmentSource == null) { "Stop directory development before updating this plugin" }
             val installed = subsystem.stateStore.desired.value.plugins[id]
-            val baseline = previous?.installed ?: installed
-            val additional = candidate.validated.manifest.sensitivePermissions() - baseline?.manifest?.sensitivePermissions().orEmpty()
-            val schemaChanged =
-                baseline != null &&
-                    baseline.manifest.platform.credentialSchemaVersion != candidate.validated.manifest.platform.credentialSchemaVersion
-            if ((additional.isNotEmpty() || schemaChanged) && entry.approvedRevision != candidate.revision) {
-                entry.progress =
-                    entry.progress.copy(
-                        phase = PluginAuthoringPhase.AwaitingApproval,
-                        permissions = additional.toList(),
-                        credentialsChanged = schemaChanged,
-                    )
-                publish(entry)
-                return@withLock true
-            }
             if (previous?.installed?.packageHash != candidate.packageHash) {
                 if (previous?.session?.hasWrites == true || subsystem.oauth.hasPending(id)) {
-                    entry.progress =
-                        entry.progress.copy(
-                            phase = PluginAuthoringPhase.WaitingForOperations,
-                            permissions = emptyList(),
-                            credentialsChanged = false,
-                        )
+                    entry.progress = entry.progress.copy(phase = PluginAuthoringPhase.WaitingForOperations)
                     publish(entry)
                     return@withLock false
                 }
@@ -313,8 +267,6 @@ internal class PluginAuthoringServiceV1(
             entry.progress =
                 entry.progress.copy(
                     phase = PluginAuthoringPhase.Applied,
-                    permissions = emptyList(),
-                    credentialsChanged = false,
                     error = null,
                 )
             publish(entry)
@@ -348,8 +300,6 @@ internal class PluginAuthoringServiceV1(
             enabled = entry.record.enabled,
             phase = entry.progress.phase,
             error = entry.progress.error,
-            permissions = entry.progress.permissions,
-            credentialsChanged = entry.progress.credentialsChanged,
         )
 
     private fun validateSources(files: Map<String, String>) {
@@ -446,14 +396,11 @@ internal class PluginAuthoringServiceV1(
         var progress = Progress()
         var application: Job? = null
         var candidate: Candidate? = null
-        var approvedRevision: Long? = null
     }
 
     private data class Progress(
         val phase: PluginAuthoringPhase = PluginAuthoringPhase.Idle,
         val error: String? = null,
-        val permissions: List<PluginPermission> = emptyList(),
-        val credentialsChanged: Boolean = false,
     )
 
     @Serializable

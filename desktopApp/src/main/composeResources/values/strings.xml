@@ -822,7 +822,7 @@
     <string name="image_translation_use_shared_description">Share the service URL, API key and model. The service and model must support image output. Turn off to configure image translation separately.</string>
     <string name="settings_plugins_title">Plugins</string>
     <string name="settings_plugins_subtitle">Install and manage social platform plugins</string>
-    <string name="plugin_install">Install .fpp</string>
+    <string name="plugin_install">From file…</string>
     <string name="plugin_empty">No plugins installed</string>
     <string name="plugin_restart_required">Restart Flare to apply plugin changes.</string>
     <string name="plugin_unverified_warning">This local plugin is unverified. It can access the listed accounts and network origins. Install only if you trust its author.</string>
@@ -875,19 +875,16 @@
     <string name="plugin_development_review">Only load code you trust. This code temporarily replaces the installed plugin and uses your existing accounts and data. Account changes are real and are not undone when development stops. Restarting the app restores the installed version.</string>
     <string name="plugin_development_schema">The credential format changed. Existing accounts may need to sign in again, including after returning to the installed version.</string>
     <string name="plugin_development_diagnostics">Recent calls (no request or response data)</string>
-    <string name="plugin_ai_create">Create with AI</string>
+    <string name="plugin_add">Add plugin</string>
+    <string name="plugin_ai_create">Create with Flare AI</string>
     <string name="plugin_ai_untitled">New plugin</string>
     <string name="plugin_ai_revision">Revision %1$d</string>
     <string name="plugin_ai_stop">Cancel update</string>
-    <string name="plugin_ai_allow">Allow and continue</string>
-    <string name="plugin_ai_enabled">Enabled</string>
     <string name="plugin_ai_running">The current version is running</string>
     <string name="plugin_ai_idle">Ready to edit</string>
     <string name="plugin_ai_validating">Validating</string>
-    <string name="plugin_ai_approval">Permission required</string>
     <string name="plugin_ai_waiting">Waiting for login or writes to finish</string>
     <string name="plugin_ai_applied">Up to date</string>
     <string name="plugin_ai_failed">Changes could not be applied</string>
-    <string name="plugin_ai_credentials_changed">Account credentials changed. Existing accounts will need to sign in again.</string>
     <string name="plugin_ai_delete_message">Delete %1$s and its local source? Existing accounts are kept.</string>
 </resources>

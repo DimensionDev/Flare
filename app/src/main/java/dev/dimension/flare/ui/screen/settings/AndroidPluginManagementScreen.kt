@@ -17,6 +17,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -26,7 +27,6 @@ import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SegmentedListItem
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
@@ -68,6 +68,7 @@ import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareLargeFlexibleTopAppBar
 import dev.dimension.flare.ui.component.FlareScaffold
+import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.resolveText
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import dev.dimension.flare.ui.theme.segmentedShapes2
@@ -175,21 +176,18 @@ internal fun AndroidPluginManagementScreen(
                     title = { Text(stringResource(R.string.settings_plugins_title)) },
                     navigationIcon = { BackButton(onBack = onBack) },
                     actions = {
-                        IconButton(
-                            enabled = !state.busy,
-                            onClick = { picker.launch(arrayOf("application/zip", "application/octet-stream")) },
-                        ) {
-                            FAIcon(
-                                imageVector = FontAwesomeIcons.Solid.Plus,
-                                contentDescription = stringResource(R.string.plugin_install),
-                            )
-                        }
-                        PluginManagementMenu(
-                            state = state,
+                        PluginAddMenu(
+                            busy = state.busy,
+                            agentEnabled = LocalTimelineAppearance.current.aiConfig.agent,
                             onGitHubInstall = {
                                 presenter.clearGitHubRepository()
                                 showsGitHubInstall = true
                             },
+                            onCreateWithAI = onCreateWithAI,
+                            onFileInstall = { picker.launch(arrayOf("application/zip", "application/octet-stream")) },
+                        )
+                        PluginManagementMenu(
+                            state = state,
                             onCheckUpdates = { scope.launchPresenterAction { presenter.checkUpdates() } },
                             onRebuildIndex = { scope.launchPresenterAction { presenter.rebuildIndex() } },
                             onCleanup = { scope.launchPresenterAction { presenter.cleanup() } },
@@ -202,12 +200,7 @@ internal fun AndroidPluginManagementScreen(
         ) { padding ->
             PluginManagementList(
                 state = state,
-                onCreatePlugin = onCreateWithAI,
-                onApprovePlugin = { id, revision -> scope.launchPresenterAction { presenter.approvePlugin(id, revision) } },
                 onCancelPluginUpdate = { id -> scope.launchPresenterAction { presenter.cancelPluginUpdate(id) } },
-                onSetEnabled = { pluginId, enabled ->
-                    scope.launchPresenterAction { presenter.setEnabled(pluginId, enabled) }
-                },
                 onUninstall = { pendingUninstallId = it },
                 onUpdate = { pluginId -> scope.launchPresenterAction { presenter.inspectGitHubUpdate(pluginId) } },
                 onRetryRuntime = { pluginId ->
@@ -227,9 +220,49 @@ internal fun AndroidPluginManagementScreen(
 }
 
 @Composable
+internal fun PluginAddMenu(
+    busy: Boolean,
+    agentEnabled: Boolean,
+    onGitHubInstall: () -> Unit,
+    onCreateWithAI: () -> Unit,
+    onFileInstall: () -> Unit,
+) {
+    var expanded by remember { mutableStateOf(false) }
+    Box {
+        IconButton(enabled = !busy, onClick = { expanded = true }) {
+            FAIcon(FontAwesomeIcons.Solid.Plus, contentDescription = stringResource(R.string.plugin_add))
+        }
+        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.plugin_install_github)) },
+                onClick = {
+                    expanded = false
+                    onGitHubInstall()
+                },
+            )
+            if (agentEnabled) {
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.plugin_ai_create)) },
+                    onClick = {
+                        expanded = false
+                        onCreateWithAI()
+                    },
+                )
+            }
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.plugin_install)) },
+                onClick = {
+                    expanded = false
+                    onFileInstall()
+                },
+            )
+        }
+    }
+}
+
+@Composable
 internal fun PluginManagementMenu(
     state: PluginManagementStateV1,
-    onGitHubInstall: () -> Unit,
     onCheckUpdates: () -> Unit,
     onRebuildIndex: () -> Unit,
     onCleanup: () -> Unit,
@@ -249,13 +282,6 @@ internal fun PluginManagementMenu(
             expanded = showsMaintenanceMenu,
             onDismissRequest = { showsMaintenanceMenu = false },
         ) {
-            DropdownMenuItem(
-                text = { Text(stringResource(R.string.plugin_install_github)) },
-                onClick = {
-                    showsMaintenanceMenu = false
-                    onGitHubInstall()
-                },
-            )
             DropdownMenuItem(
                 text = { Text(stringResource(R.string.plugin_check_updates)) },
                 enabled = state.plugins.any { it.sourceUrl != null },
@@ -332,7 +358,7 @@ private fun PluginInstallReviewDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = onConfirm, enabled = !busy) {
+            Button(onClick = onConfirm, enabled = !busy) {
                 Text(stringResource(R.string.plugin_confirm_install))
             }
         },
@@ -427,7 +453,7 @@ private fun GitHubInstallDialog(
             }
         },
         confirmButton = {
-            TextButton(enabled = !state.busy && selection != null, onClick = { selection?.let { onInstall(it.tag) } }) {
+            Button(enabled = !state.busy && selection != null, onClick = { selection?.let { onInstall(it.tag) } }) {
                 Text(stringResource(R.string.plugin_confirm_install))
             }
         },
@@ -440,10 +466,7 @@ private fun GitHubInstallDialog(
 @Composable
 private fun PluginManagementList(
     state: PluginManagementStateV1,
-    onCreatePlugin: () -> Unit,
-    onApprovePlugin: (String, Long) -> Unit,
     onCancelPluginUpdate: (String) -> Unit,
-    onSetEnabled: (String, Boolean) -> Unit,
     onUninstall: (String) -> Unit,
     onUpdate: (String) -> Unit,
     onRetryRuntime: (String) -> Unit,
@@ -453,13 +476,6 @@ private fun PluginManagementList(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
     ) {
-        item(key = "create-ai-plugin") {
-            SegmentedListItem(
-                onClick = onCreatePlugin,
-                shapes = ListItemDefaults.segmentedShapes2(0, 1),
-                content = { Text(stringResource(R.string.plugin_ai_create)) },
-            )
-        }
         itemsIndexed(state.authoredPlugins, key = { _, plugin -> plugin.id }) { index, plugin ->
             SegmentedListItem(
                 onClick = {},
@@ -468,13 +484,9 @@ private fun PluginManagementList(
                     PluginAuthoringCard(
                         plugin = plugin,
                         busy = state.busy,
-                        onApprove = { onApprovePlugin(plugin.id, plugin.revision) },
                         onCancelUpdate = { onCancelPluginUpdate(plugin.id) },
-                        onSetEnabled = { onSetEnabled(plugin.id, it) },
+                        onUninstall = { onUninstall(plugin.id) },
                     )
-                },
-                trailingContent = {
-                    TextButton(onClick = { onUninstall(plugin.id) }) { Text(stringResource(R.string.plugin_uninstall)) }
                 },
             )
         }
@@ -542,7 +554,6 @@ private fun PluginManagementList(
                     busy = state.busy,
                     shapesIndex = index,
                     shapesCount = state.importedPlugins.size,
-                    onSetEnabled = onSetEnabled,
                     onUninstall = onUninstall,
                     onUpdate = onUpdate,
                 )
@@ -557,7 +568,6 @@ private fun PluginItem(
     busy: Boolean,
     shapesIndex: Int,
     shapesCount: Int,
-    onSetEnabled: (String, Boolean) -> Unit,
     onUninstall: (String) -> Unit,
     onUpdate: (String) -> Unit,
 ) {
@@ -603,11 +613,6 @@ private fun PluginItem(
         },
         trailingContent = {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Switch(
-                    checked = plugin.enabled,
-                    enabled = !busy,
-                    onCheckedChange = { onSetEnabled(plugin.pluginId, it) },
-                )
                 IconButton(
                     enabled = !busy,
                     onClick = { onUninstall(plugin.pluginId) },

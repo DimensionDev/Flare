@@ -1,6 +1,5 @@
 package dev.dimension.flare.data.repository
 
-import dev.dimension.flare.data.model.PluginPermission
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.serialization.Serializable
 
@@ -22,11 +21,6 @@ public interface PluginAuthoring {
     public suspend fun documentation(path: String): String
 
     public suspend fun fetchDocumentation(url: String): String
-
-    public suspend fun approve(
-        pluginId: String,
-        revision: Long,
-    )
 
     public suspend fun setEnabled(
         pluginId: String,
@@ -53,14 +47,10 @@ public data class AuthoredPlugin(
     val enabled: Boolean = true,
     val running: Boolean = false,
     val error: String? = null,
-    val permissions: List<PluginPermission> = emptyList(),
-    val credentialsChanged: Boolean = false,
     val platformId: String = authoredPluginPlatformId(id),
 ) {
-    public val canSetEnabled: Boolean get() = revision > 0
-    public val canApprove: Boolean get() = phase == PluginAuthoringPhase.AwaitingApproval
     public val canCancelUpdate: Boolean
-        get() = phase == PluginAuthoringPhase.Validating || canApprove || phase == PluginAuthoringPhase.WaitingForOperations
+        get() = phase == PluginAuthoringPhase.Validating || phase == PluginAuthoringPhase.WaitingForOperations
 }
 
 public fun authoredPluginPlatformId(id: String): String = id.removePrefix("local.").replace('.', '_')
@@ -69,7 +59,6 @@ public fun authoredPluginPlatformId(id: String): String = id.removePrefix("local
 public enum class PluginAuthoringPhase {
     Idle,
     Validating,
-    AwaitingApproval,
     WaitingForOperations,
     Applied,
     Failed,

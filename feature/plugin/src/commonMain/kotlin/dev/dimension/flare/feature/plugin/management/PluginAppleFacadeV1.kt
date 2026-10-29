@@ -13,14 +13,6 @@ import kotlinx.coroutines.CoroutineScope
 /** Swift-facing management API; file import and confirmation UI remain native. */
 public class PluginAppleFacadeV1 : PresenterBase<PluginManagementStateV1>() {
     @Throws(Exception::class)
-    public suspend fun approvePlugin(
-        pluginId: String,
-        revision: Long,
-    ) {
-        presenter.approvePlugin(pluginId, revision)
-    }
-
-    @Throws(Exception::class)
     public suspend fun cancelPluginUpdate(pluginId: String) {
         presenter.cancelPluginUpdate(pluginId)
     }
@@ -102,14 +94,6 @@ public class PluginAppleFacadeV1 : PresenterBase<PluginManagementStateV1>() {
     @Throws(Exception::class)
     public suspend fun cancelInstall() {
         presenter.cancelInstall()
-    }
-
-    @Throws(Exception::class)
-    public suspend fun setEnabled(
-        pluginId: String,
-        enabled: Boolean,
-    ) {
-        presenter.setEnabled(pluginId, enabled)
     }
 
     @Throws(Exception::class)

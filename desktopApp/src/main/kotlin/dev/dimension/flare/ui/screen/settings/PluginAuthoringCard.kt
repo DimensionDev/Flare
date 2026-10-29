@@ -5,19 +5,19 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
+import compose.icons.FontAwesomeIcons
+import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.solid.Trash
 import dev.dimension.flare.Res
 import dev.dimension.flare.data.repository.AuthoredPlugin
 import dev.dimension.flare.data.repository.PluginAuthoringPhase
-import dev.dimension.flare.plugin_ai_allow
 import dev.dimension.flare.plugin_ai_applied
-import dev.dimension.flare.plugin_ai_approval
-import dev.dimension.flare.plugin_ai_credentials_changed
-import dev.dimension.flare.plugin_ai_enabled
 import dev.dimension.flare.plugin_ai_failed
 import dev.dimension.flare.plugin_ai_idle
 import dev.dimension.flare.plugin_ai_revision
@@ -26,8 +26,11 @@ import dev.dimension.flare.plugin_ai_stop
 import dev.dimension.flare.plugin_ai_untitled
 import dev.dimension.flare.plugin_ai_validating
 import dev.dimension.flare.plugin_ai_waiting
+import dev.dimension.flare.plugin_uninstall
+import dev.dimension.flare.ui.component.FAIcon
+import io.github.composefluent.FluentTheme
 import io.github.composefluent.component.Button
-import io.github.composefluent.component.Switcher
+import io.github.composefluent.component.SubtleButton
 import io.github.composefluent.component.Text
 import org.jetbrains.compose.resources.stringResource
 
@@ -37,7 +40,6 @@ internal fun pluginAuthoringLabel(phase: PluginAuthoringPhase): String =
         when (phase) {
             PluginAuthoringPhase.Idle -> Res.string.plugin_ai_idle
             PluginAuthoringPhase.Validating -> Res.string.plugin_ai_validating
-            PluginAuthoringPhase.AwaitingApproval -> Res.string.plugin_ai_approval
             PluginAuthoringPhase.WaitingForOperations -> Res.string.plugin_ai_waiting
             PluginAuthoringPhase.Applied -> Res.string.plugin_ai_applied
             PluginAuthoringPhase.Failed -> Res.string.plugin_ai_failed
@@ -48,47 +50,46 @@ internal fun pluginAuthoringLabel(phase: PluginAuthoringPhase): String =
 internal fun PluginAuthoringCard(
     plugin: AuthoredPlugin,
     busy: Boolean,
-    onApprove: () -> Unit,
     onCancelUpdate: () -> Unit,
-    onSetEnabled: (Boolean) -> Unit,
+    onUninstall: () -> Unit,
 ) {
-    val enabledLabel = stringResource(Res.string.plugin_ai_enabled)
-    Column(
-        Modifier
-            .fillMaxWidth()
-            .padding(12.dp),
-        verticalArrangement = Arrangement.spacedBy(6.dp),
-    ) {
-        Text(plugin.name.ifBlank { stringResource(Res.string.plugin_ai_untitled) })
-        Text(plugin.id)
-        Text(stringResource(Res.string.plugin_ai_revision, plugin.revision))
+    Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                plugin.name.ifBlank {
+                    stringResource(Res.string.plugin_ai_untitled)
+                },
+                modifier = Modifier.weight(1f),
+                style = FluentTheme.typography.bodyStrong,
+            )
+            SubtleButton(disabled = busy, iconOnly = true, onClick = onUninstall) {
+                FAIcon(FontAwesomeIcons.Solid.Trash, contentDescription = stringResource(Res.string.plugin_uninstall))
+            }
+        }
+        SelectionContainer {
+            Text(
+                plugin.id,
+                style = FluentTheme.typography.caption,
+                fontFamily = FontFamily.Monospace,
+                color = FluentTheme.colors.text.text.secondary,
+            )
+        }
+        Text(
+            stringResource(Res.string.plugin_ai_revision, plugin.revision),
+            style = FluentTheme.typography.caption,
+            color = FluentTheme.colors.text.text.secondary,
+        )
         Text(pluginAuthoringLabel(plugin.phase))
-        if (plugin.running && plugin.phase != PluginAuthoringPhase.Applied) Text(stringResource(Res.string.plugin_ai_running))
-        plugin.error?.let { Text(it) }
-        plugin.permissions.forEach {
-            Text(it.localizedDescription())
+        if (plugin.running && plugin.phase != PluginAuthoringPhase.Applied) {
+            Text(
+                stringResource(Res.string.plugin_ai_running),
+                style = FluentTheme.typography.caption,
+                color = FluentTheme.colors.text.text.secondary,
+            )
         }
-        if (plugin.credentialsChanged) Text(stringResource(Res.string.plugin_ai_credentials_changed))
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            if (plugin.canApprove) {
-                Button(disabled = busy, onClick = onApprove) { Text(stringResource(Res.string.plugin_ai_allow)) }
-            }
-            if (plugin.canCancelUpdate) {
-                Button(disabled = busy, onClick = onCancelUpdate) { Text(stringResource(Res.string.plugin_ai_stop)) }
-            }
-        }
-        if (plugin.canSetEnabled) {
-            Row(
-                modifier = Modifier.semantics(mergeDescendants = true) { contentDescription = enabledLabel },
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                Switcher(
-                    checked = plugin.enabled,
-                    enabled = !busy,
-                    onCheckStateChange = onSetEnabled,
-                )
-                Text(enabledLabel)
-            }
+        plugin.error?.let { Text(it, style = FluentTheme.typography.caption) }
+        if (plugin.canCancelUpdate) {
+            Button(disabled = busy, onClick = onCancelUpdate) { Text(stringResource(Res.string.plugin_ai_stop)) }
         }
     }
 }

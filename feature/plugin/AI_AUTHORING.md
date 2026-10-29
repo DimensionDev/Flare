@@ -1,8 +1,8 @@
 # Build a plugin in Flare
 
 Ask Flare's AI assistant to create or update a plugin from any conversation. The
-**Settings → Plugins → Create with AI** shortcut opens the ordinary assistant;
-it does not create a plugin. The assistant uses the existing Agent provider/model
+**Settings → Plugins → + → Create with Flare AI** shortcut opens the ordinary assistant;
+it does not create a plugin. The option is shown only when AI Agent is enabled. The assistant uses the existing Agent provider/model
 settings and can use plugin tools alongside the normal app tools.
 
 Plugins are independent local resources. A creation tool call assigns immutable
@@ -30,12 +30,12 @@ errors. Stopping, closing or deleting a conversation does not cancel accepted
 updates. Opening a different conversation can manage the same plugin by ID.
 Plugin names do not control chat titles.
 
-In **Settings → Plugins**, review and approve the first network permission,
-additional permissions, and credential format changes. Approval applies only to
-the displayed revision and cannot be granted by AI tools. A newer source update
-invalidates an older approval. Login, upload and writes already in progress delay
-switching; Flare does not cancel or repeat them. Approval and pending updates can
-be managed without reopening any conversation.
+Local AI plugins are enabled by default and automatically approved after source
+validation, including permission and credential format changes. Login, upload and
+writes already in progress still delay switching; Flare does not cancel or repeat
+them. Pending updates can be cancelled from Settings without opening a conversation.
+File and GitHub installations continue to require the normal installation review.
+The plugin management UI does not expose enable/disable switches.
 
 Invalid sources remain saved and editable while the last working installation
 continues running. A failed switch restores the working version. **Cancel update**

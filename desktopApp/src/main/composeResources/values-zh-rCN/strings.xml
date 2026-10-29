@@ -773,7 +773,7 @@
     <string name="image_translation_use_shared_description">共用服务地址、API 密钥和模型。服务与模型需要支持输出图片；关闭后可单独配置。</string>
     <string name="settings_plugins_title">插件</string>
     <string name="settings_plugins_subtitle">安装和管理社交平台插件</string>
-    <string name="plugin_install">安装 .fpp</string>
+    <string name="plugin_install">从文件添加…</string>
     <string name="plugin_empty">尚未安装插件</string>
     <string name="plugin_restart_required">重启 Flare 后插件变更才会生效。</string>
     <string name="plugin_unverified_warning">此本地插件未经验证，可以访问列出的账号和网络域名。请仅在信任作者时安装。</string>
@@ -826,19 +826,16 @@
     <string name="plugin_development_review">请只加载可信代码。开发代码会临时替换已安装插件，并使用现有账号和数据。账号操作真实生效，停止开发不会撤销这些操作。重启应用后恢复已安装版本。</string>
     <string name="plugin_development_schema">凭据格式已变化，现有账号可能需要重新登录，恢复已安装版本后也可能需要重新登录。</string>
     <string name="plugin_development_diagnostics">最近调用（不记录请求和响应数据）</string>
-    <string name="plugin_ai_create">用 AI 创建</string>
+    <string name="plugin_add">添加插件</string>
+    <string name="plugin_ai_create">使用 Flare AI 创建</string>
     <string name="plugin_ai_untitled">新插件</string>
     <string name="plugin_ai_revision">修订 %1$d</string>
     <string name="plugin_ai_stop">取消更新</string>
-    <string name="plugin_ai_allow">允许并继续</string>
-    <string name="plugin_ai_enabled">已启用</string>
     <string name="plugin_ai_running">当前版本正在运行</string>
     <string name="plugin_ai_idle">可以继续制作</string>
     <string name="plugin_ai_validating">正在校验</string>
-    <string name="plugin_ai_approval">需要授权</string>
     <string name="plugin_ai_waiting">等待登录或写操作完成</string>
     <string name="plugin_ai_applied">已应用最新版本</string>
     <string name="plugin_ai_failed">修改未能生效</string>
-    <string name="plugin_ai_credentials_changed">账号凭据格式已更改，已有账号需要重新登录。</string>
     <string name="plugin_ai_delete_message">删除 %1$s 及其本地源码？已有账号会保留。</string>
 </resources>

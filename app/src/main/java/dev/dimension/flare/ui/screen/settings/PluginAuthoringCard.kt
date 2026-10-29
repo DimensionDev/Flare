@@ -5,18 +5,24 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.Switch
+import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
+import compose.icons.FontAwesomeIcons
+import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.solid.Trash
 import dev.dimension.flare.R
 import dev.dimension.flare.data.repository.AuthoredPlugin
 import dev.dimension.flare.data.repository.PluginAuthoringPhase
+import dev.dimension.flare.ui.component.FAIcon
 
 @Composable
 internal fun pluginAuthoringLabel(phase: PluginAuthoringPhase): String =
@@ -24,7 +30,6 @@ internal fun pluginAuthoringLabel(phase: PluginAuthoringPhase): String =
         when (phase) {
             PluginAuthoringPhase.Idle -> R.string.plugin_ai_idle
             PluginAuthoringPhase.Validating -> R.string.plugin_ai_validating
-            PluginAuthoringPhase.AwaitingApproval -> R.string.plugin_ai_approval
             PluginAuthoringPhase.WaitingForOperations -> R.string.plugin_ai_waiting
             PluginAuthoringPhase.Applied -> R.string.plugin_ai_applied
             PluginAuthoringPhase.Failed -> R.string.plugin_ai_failed
@@ -35,49 +40,51 @@ internal fun pluginAuthoringLabel(phase: PluginAuthoringPhase): String =
 internal fun PluginAuthoringCard(
     plugin: AuthoredPlugin,
     busy: Boolean,
-    onApprove: () -> Unit,
     onCancelUpdate: () -> Unit,
-    onSetEnabled: (Boolean) -> Unit,
+    onUninstall: () -> Unit,
 ) {
-    val enabledLabel = stringResource(R.string.plugin_ai_enabled)
     Column(
-        Modifier
-            .fillMaxWidth()
-            .padding(12.dp),
-        verticalArrangement = Arrangement.spacedBy(6.dp),
+        Modifier.fillMaxWidth().padding(vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        Text(plugin.name.ifBlank { stringResource(R.string.plugin_ai_untitled) })
-        Text(plugin.id)
-        Text(stringResource(R.string.plugin_ai_revision, plugin.revision))
-        Text(pluginAuthoringLabel(plugin.phase))
-        if (plugin.running && plugin.phase != PluginAuthoringPhase.Applied) Text(stringResource(R.string.plugin_ai_running))
-        plugin.error?.let { Text(it) }
-        plugin.permissions.forEach {
-            Text(it.localizedDescription())
-        }
-        if (plugin.credentialsChanged) Text(stringResource(R.string.plugin_ai_credentials_changed))
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            if (plugin.canApprove) {
-                Button(enabled = !busy, onClick = onApprove) { Text(stringResource(R.string.plugin_ai_allow)) }
-            }
-            if (plugin.canCancelUpdate) {
-                Button(enabled = !busy, onClick = onCancelUpdate) { Text(stringResource(R.string.plugin_ai_stop)) }
-            }
-        }
-        if (plugin.canSetEnabled) {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Switch(
-                    checked = plugin.enabled,
-                    onCheckedChange = onSetEnabled,
-                    enabled = !busy,
-                    modifier =
-                        Modifier.semantics {
-                            contentDescription =
-                                enabledLabel
-                        },
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                plugin.name.ifBlank { stringResource(R.string.plugin_ai_untitled) },
+                modifier = Modifier.weight(1f),
+                style = MaterialTheme.typography.titleMedium,
+            )
+            IconButton(enabled = !busy, onClick = onUninstall) {
+                FAIcon(
+                    FontAwesomeIcons.Solid.Trash,
+                    contentDescription = stringResource(R.string.plugin_uninstall),
+                    tint = MaterialTheme.colorScheme.error,
                 )
-                Text(enabledLabel)
             }
+        }
+        SelectionContainer {
+            Text(
+                plugin.id,
+                style = MaterialTheme.typography.bodySmall,
+                fontFamily = FontFamily.Monospace,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        Text(
+            stringResource(R.string.plugin_ai_revision, plugin.revision),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Text(pluginAuthoringLabel(plugin.phase), style = MaterialTheme.typography.bodyMedium)
+        if (plugin.running && plugin.phase != PluginAuthoringPhase.Applied) {
+            Text(
+                stringResource(R.string.plugin_ai_running),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        plugin.error?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error) }
+        if (plugin.canCancelUpdate) {
+            OutlinedButton(enabled = !busy, onClick = onCancelUpdate) { Text(stringResource(R.string.plugin_ai_stop)) }
         }
     }
 }

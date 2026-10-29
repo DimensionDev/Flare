@@ -1,6 +1,28 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+  "plugin_add": {
+  "localizations": {
+    "en": {
+      "stringUnit": {
+        "state": "translated",
+        "value": "Add plugin"
+      }
+    },
+    "zh-Hans": {
+      "stringUnit": {
+        "state": "translated",
+        "value": "添加插件"
+      }
+    },
+    "zh-Hant": {
+      "stringUnit": {
+        "state": "translated",
+        "value": "新增外掛"
+      }
+    }
+  }
+},
     "image_translation_use_shared_description" : {"localizations": {"en": {"stringUnit": {"state": "translated", "value": "Share the service URL, API key and model. The service and model must support image output. Turn off to configure image translation separately."}}, "zh-Hans": {"stringUnit": {"state": "translated", "value": "共用服务地址、API 密钥和模型。服务与模型需要支持输出图片；关闭后可单独配置。"}}}},
     "Automatic" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Automatic" } }, "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "自动" } } } },
     "Original file" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Original file" } }, "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "原文件上传" } } } },
@@ -61,50 +83,29 @@
       }
     }
   },
-  "plugin_ai_credentials_changed": {
-    "localizations": {
-      "en": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "Account credentials changed. Existing accounts will need to sign in again."
-        }
-      },
-      "zh-Hans": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "账号凭据格式已更改，已有账号需要重新登录。"
-        }
-      },
-      "zh-Hant": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "帳號憑證格式已變更，已有帳號需要重新登入。"
-        }
-      }
-    }
-  },
+
   "plugin_ai_create": {
-    "localizations": {
-      "en": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "Create with AI"
-        }
-      },
-      "zh-Hans": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "用 AI 创建"
-        }
-      },
-      "zh-Hant": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "用 AI 建立"
-        }
+  "localizations": {
+    "en": {
+      "stringUnit": {
+        "state": "translated",
+        "value": "Create with Flare AI"
+      }
+    },
+    "zh-Hans": {
+      "stringUnit": {
+        "state": "translated",
+        "value": "使用 Flare AI 创建"
+      }
+    },
+    "zh-Hant": {
+      "stringUnit": {
+        "state": "translated",
+        "value": "使用 Flare AI 建立"
       }
     }
-  },
+  }
+},
   "plugin_ai_untitled": {
     "localizations": {
       "en": {
@@ -171,50 +172,7 @@
       }
     }
   },
-  "plugin_ai_allow": {
-    "localizations": {
-      "en": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "Allow and continue"
-        }
-      },
-      "zh-Hans": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "允许并继续"
-        }
-      },
-      "zh-Hant": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "允許並繼續"
-        }
-      }
-    }
-  },
-  "plugin_ai_enabled": {
-    "localizations": {
-      "en": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "Enabled"
-        }
-      },
-      "zh-Hans": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "已启用"
-        }
-      },
-      "zh-Hant": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "已啟用"
-        }
-      }
-    }
-  },
+
   "plugin_ai_running": {
     "localizations": {
       "en": {
@@ -281,28 +239,7 @@
       }
     }
   },
-  "plugin_ai_approval": {
-    "localizations": {
-      "en": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "Permission required"
-        }
-      },
-      "zh-Hans": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "需要授权"
-        }
-      },
-      "zh-Hant": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "需要授權"
-        }
-      }
-    }
-  },
+
   "plugin_ai_waiting": {
     "localizations": {
       "en": {
@@ -802,21 +739,27 @@
     }
   },
   "plugin_install": {
-    "localizations": {
-      "en": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "Install .fpp"
-        }
-      },
-      "zh-Hans": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "安装 .fpp"
-        }
+  "localizations": {
+    "en": {
+      "stringUnit": {
+        "state": "translated",
+        "value": "From file…"
+      }
+    },
+    "zh-Hans": {
+      "stringUnit": {
+        "state": "translated",
+        "value": "从文件添加…"
+      }
+    },
+    "zh-Hant": {
+      "stringUnit": {
+        "state": "translated",
+        "value": "從檔案加入…"
       }
     }
-  },
+  }
+},
   "plugin_issues": {
     "localizations": {
       "en": {

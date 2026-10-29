@@ -1,5 +1,6 @@
 package dev.dimension.flare.ui.screen.settings
 
+import androidx.compose.foundation.layout.Row
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -31,6 +32,9 @@ class PluginManagementMenuTest {
     @get:Rule val compose = createComposeRule()
     private val context = InstrumentationRegistry.getInstrumentation().targetContext
     private var state by mutableStateOf(PluginManagementStateV1())
+    private var agentEnabled by mutableStateOf(false)
+    private var aiCreates = 0
+    private var fileInstalls = 0
     private var installs = 0
     private var updateChecks = 0
 
@@ -59,7 +63,7 @@ class PluginManagementMenuTest {
         compose.onNodeWithText(context.getString(R.string.plugin_install_github)).assertDoesNotExist()
         compose.onNodeWithText(context.getString(R.string.plugin_check_updates)).assertDoesNotExist()
 
-        more().performClick()
+        add().performClick()
         popupItem(R.string.plugin_install_github).assertIsDisplayed().performClick()
         compose.onNode(isPopup()).assertDoesNotExist()
         compose.runOnIdle { assertEquals(1, installs) }
@@ -75,25 +79,52 @@ class PluginManagementMenuTest {
         state = state.copy(busy = true)
         show()
         more().assertIsNotEnabled()
+        add().assertIsNotEnabled()
         compose.runOnIdle { state = state.copy(busy = false) }
         more().assertIsEnabled().performClick()
-        popupItem(R.string.plugin_install_github).assertIsEnabled()
         popupItem(R.string.plugin_check_updates).assertIsNotEnabled()
+    }
+
+    @Test
+    fun addMenuGatesAiAndDismissesAfterEverySourceSelection() {
+        show()
+        add().performClick()
+        popupItem(R.string.plugin_ai_create).assertDoesNotExist()
+        popupItem(R.string.plugin_install).assertIsDisplayed().performClick()
+        compose.onNode(isPopup()).assertDoesNotExist()
+        compose.runOnIdle {
+            assertEquals(1, fileInstalls)
+            agentEnabled = true
+        }
+        add().performClick()
+        popupItem(R.string.plugin_ai_create).assertIsDisplayed().performClick()
+        compose.onNode(isPopup()).assertDoesNotExist()
+        compose.runOnIdle { assertEquals(1, aiCreates) }
     }
 
     private fun show() {
         compose.setContent {
             MaterialTheme {
-                PluginManagementMenu(
-                    state = state,
-                    onGitHubInstall = { installs++ },
-                    onCheckUpdates = { updateChecks++ },
-                    onRebuildIndex = {},
-                    onCleanup = {},
-                )
+                Row {
+                    PluginAddMenu(
+                        busy = state.busy,
+                        agentEnabled = agentEnabled,
+                        onGitHubInstall = { installs++ },
+                        onCreateWithAI = { aiCreates++ },
+                        onFileInstall = { fileInstalls++ },
+                    )
+                    PluginManagementMenu(
+                        state = state,
+                        onCheckUpdates = { updateChecks++ },
+                        onRebuildIndex = {},
+                        onCleanup = {},
+                    )
+                }
             }
         }
     }
+
+    private fun add() = compose.onNodeWithContentDescription(context.getString(R.string.plugin_add))
 
     private fun more() = compose.onNodeWithContentDescription(context.getString(R.string.more))
 

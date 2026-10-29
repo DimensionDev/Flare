@@ -11,6 +11,7 @@ import AppKit
 #endif
 
 public struct PluginManagementView: View {
+    @Environment(\.timelineAppearance.aiConfig.agent) private var agentEnabled
     @State private var facade: PluginAppleFacadeV1
     @State private var presenter: KotlinPresenter<PluginManagementStateV1>
     @State private var importsPlugin = false
@@ -33,37 +34,22 @@ public struct PluginManagementView: View {
 
     public var body: some View {
         List {
-            Button("plugin_ai_create", action: onCreateWithAI)
             ForEach(presenter.state.authoredPlugins, id: \.id) { plugin in
                 Section {
                     VStack(alignment: .leading, spacing: 8) {
                         Text(plugin.name.isEmpty ? String(localized: "plugin_ai_untitled") : plugin.name).font(.headline)
-                        Text(plugin.id).font(.caption).textSelection(.enabled)
-                        Text(String(format: String(localized: "plugin_ai_revision"), plugin.revision)).font(.caption)
+                        Text(plugin.id).font(.caption.monospaced()).foregroundStyle(.secondary).textSelection(.enabled)
+                        Text(String(format: String(localized: "plugin_ai_revision"), plugin.revision)).font(.caption).foregroundStyle(.secondary)
                         Text(pluginAuthoringLabel(plugin.phase)).font(.caption).foregroundStyle(.secondary)
                         if plugin.running && plugin.phase != .applied {
                             Text("plugin_ai_running").foregroundStyle(.secondary)
                         }
                         if let error = plugin.error { Text(verbatim: error).foregroundStyle(.red) }
-                        if plugin.credentialsChanged { Text("plugin_ai_credentials_changed") }
-                        ForEach(Array(plugin.permissions.enumerated()), id: \.offset) { _, permission in
-                            Text(pluginPermissionText(permission)).font(.caption)
-                        }
-                    }
-                    if plugin.canApprove {
-                        Button("plugin_ai_allow") {
-                            Task { try? await facade.approvePlugin(pluginId: plugin.id, revision: plugin.revision) }
-                        }
                     }
                     if plugin.canCancelUpdate {
                         Button("plugin_ai_stop") {
                             Task { try? await facade.cancelPluginUpdate(pluginId: plugin.id) }
                         }
-                    }
-                    if plugin.canSetEnabled {
-                        Toggle("plugin_ai_enabled", isOn: Binding(get: { plugin.enabled }, set: { enabled in
-                            Task { try? await facade.setEnabled(pluginId: plugin.id, enabled: enabled) }
-                        }))
                     }
                     Button("plugin_uninstall", role: .destructive) {
                         pendingUninstallId = plugin.id
@@ -140,48 +126,25 @@ public struct PluginManagementView: View {
             }
         }
         .navigationTitle("settings_plugins_title")
-        .toolbar {
-            ToolbarItem(placement: .primaryAction) {
-                Button {
-                    importsPlugin = true
-                } label: {
-                    Label("plugin_install", systemImage: "plus")
-                }
-                .disabled(presenter.state.busy)
+        #if os(macOS)
+        // The Settings window reserves its toolbar for pane selection.
+        .safeAreaInset(edge: .top) {
+            HStack(spacing: 16) {
+                Spacer()
+                maintenanceMenu.fixedSize()
+                addMenu.fixedSize()
             }
-            ToolbarItem(placement: .automatic) {
-                Menu {
-                    #if os(macOS)
-                    Button("plugin_development") {
-                        facade.prepareDevelopment()
-                        showsDevelopment = true
-                    }
-                    #endif
-                    Button("plugin_install_github") {
-                        gitHubURL = ""
-                        selectedGitHubTag = ""
-                        facade.clearGitHubRepository()
-                        showsGitHubInstall = true
-                    }
-                    Button("plugin_check_updates") {
-                        Task { try? await facade.checkUpdates(forceRefresh: true) }
-                    }
-                    .disabled(!presenter.state.plugins.contains { $0.sourceUrl != nil })
-                    if presenter.state.canRebuildIndex {
-                        Button("plugin_rebuild_index") {
-                            Task { try? await facade.rebuildIndex() }
-                        }
-                    }
-                    Button("plugin_cleanup") {
-                        Task { try? await facade.cleanup() }
-                    }
-                    .disabled(presenter.state.canRebuildIndex)
-                } label: {
-                    Image(systemName: "ellipsis.circle")
-                }
-                .disabled(presenter.state.busy)
-            }
+            .menuStyle(.borderlessButton)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 8)
+            .background(.bar)
         }
+        #else
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) { addMenu }
+            ToolbarItem(placement: .automatic) { maintenanceMenu }
+        }
+        #endif
         .overlay {
             if presenter.state.busy {
                 ProgressView()
@@ -213,6 +176,7 @@ public struct PluginManagementView: View {
             Button("plugin_confirm_install") {
                 Task { try? await facade.confirmInstall() }
             }
+            .keyboardShortcut(.defaultAction)
             .disabled(presenter.state.busy)
         } message: {
             if let review = presenter.state.pendingInstall {
@@ -271,19 +235,7 @@ public struct PluginManagementView: View {
                         .foregroundStyle(.secondary)
                 }
                 Spacer()
-                Toggle(
-                    "",
-                    isOn: Binding(
-                        get: { plugin.enabled },
-                        set: { enabled in
-                            Task {
-                                try? await facade.setEnabled(pluginId: plugin.pluginId, enabled: enabled)
-                            }
-                        }
-                    )
-                )
-                .labelsHidden()
-                .disabled(presenter.state.busy || isDeveloping(plugin.pluginId))
+
             }
 
             if plugin.pendingRestart {
@@ -315,6 +267,64 @@ public struct PluginManagementView: View {
 
     private func isDeveloping(_ pluginId: String) -> Bool {
         presenter.state.development.active && presenter.state.development.pluginId == pluginId
+    }
+
+    private var addMenu: some View {
+        Menu {
+            Button {
+                gitHubURL = ""
+                selectedGitHubTag = ""
+                facade.clearGitHubRepository()
+                showsGitHubInstall = true
+            } label: {
+                Label("plugin_install_github", systemImage: "link")
+            }
+            if agentEnabled {
+                Button(action: onCreateWithAI) {
+                    Label("plugin_ai_create", systemImage: "sparkles")
+                }
+            }
+            Button {
+                importsPlugin = true
+            } label: {
+                Label("plugin_install", systemImage: "doc")
+            }
+        } label: {
+            Label("plugin_add", systemImage: "plus")
+        }
+        .labelStyle(.iconOnly)
+        .accessibilityLabel(Text("plugin_add"))
+        .help("plugin_add")
+        .disabled(presenter.state.busy)
+    }
+
+    private var maintenanceMenu: some View {
+        Menu {
+            #if os(macOS)
+            Button("plugin_development") {
+                facade.prepareDevelopment()
+                showsDevelopment = true
+            }
+            #endif
+            Button("plugin_check_updates") {
+                Task { try? await facade.checkUpdates(forceRefresh: true) }
+            }
+            .disabled(!presenter.state.plugins.contains { $0.sourceUrl != nil })
+            if presenter.state.canRebuildIndex {
+                Button("plugin_rebuild_index") {
+                    Task { try? await facade.rebuildIndex() }
+                }
+            }
+            Button("plugin_cleanup") {
+                Task { try? await facade.cleanup() }
+            }
+            .disabled(presenter.state.canRebuildIndex)
+        } label: {
+            Image(systemName: "ellipsis.circle")
+        }
+        .accessibilityLabel(Text("more"))
+        .help("more")
+        .disabled(presenter.state.busy)
     }
 
     #if os(macOS)
@@ -374,6 +384,7 @@ public struct PluginManagementView: View {
             Button(state.active ? "plugin_development_reload" : "plugin_development_start") {
                 Task { try? await facade.reloadDevelopment(confirmed: true) }
             }
+            .keyboardShortcut(.defaultAction)
             .disabled(state.busy)
         } message: {
             Text(([String(localized: "plugin_development_review")]
@@ -580,7 +591,6 @@ private enum PluginDevelopmentDirectoryAccess {
 func pluginAuthoringLabel(_ phase: PluginAuthoringPhase) -> LocalizedStringKey {
     switch phase {
     case .validating: return "plugin_ai_validating"
-    case .awaitingApproval: return "plugin_ai_approval"
     case .waitingForOperations: return "plugin_ai_waiting"
     case .applied: return "plugin_ai_applied"
     case .failed: return "plugin_ai_failed"

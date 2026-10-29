@@ -44,31 +44,6 @@ public struct PluginManagementView: View {
                 betaNotice
                 #endif
             }
-            ForEach(presenter.state.authoredPlugins, id: \.id) { plugin in
-                Section {
-                    VStack(alignment: .leading, spacing: 8) {
-                        HStack {
-                            Text(plugin.name.isEmpty ? String(localized: "plugin_ai_untitled") : plugin.name).font(.headline)
-                            Spacer()
-                            pluginMenu(name: plugin.name) {
-                                pendingUninstallId = plugin.id
-                                pendingUninstallName = "\(plugin.name)\n\(plugin.id)"
-                            }
-                        }
-                        Text(plugin.id).font(.caption.monospaced()).foregroundStyle(.secondary).textSelection(.enabled)
-                        if plugin.phase != .idle {
-                            Text(pluginAuthoringLabel(plugin.phase)).font(.caption).foregroundStyle(.secondary)
-                        }
-                        if let error = plugin.error { Text(verbatim: error).foregroundStyle(.red) }
-                    }
-                    if plugin.canCancelUpdate {
-                        Button("plugin_ai_stop") {
-                            Task { try? await facade.cancelPluginUpdate(pluginId: plugin.id) }
-                        }
-                    }
-                }
-                .disabled(presenter.state.busy)
-            }
             #if os(macOS)
             if showsDevelopment || presenter.state.development.directory != nil {
                 developmentSection
@@ -121,7 +96,7 @@ public struct PluginManagementView: View {
                 }
             }
 
-            if presenter.state.plugins.isEmpty && presenter.state.authoredPlugins.isEmpty {
+            if presenter.state.items.isEmpty {
                 ContentUnavailableView {
                     Label {
                         Text("plugin_empty")
@@ -134,7 +109,7 @@ public struct PluginManagementView: View {
                 .listRowBackground(Color.clear)
             } else {
                 Section {
-                    ForEach(presenter.state.importedPlugins, id: \.pluginId) { plugin in
+                    ForEach(presenter.state.items, id: \.pluginId) { plugin in
                         pluginRow(plugin)
                     }
                 }
@@ -280,24 +255,28 @@ public struct PluginManagementView: View {
 
     @ViewBuilder
     private func pluginRow(_ plugin: PluginManagementItemV1) -> some View {
+        let name = plugin.nameText.text.isEmpty ? String(localized: "plugin_ai_untitled") : plugin.nameText.text
+        let busy = presenter.state.busy || (plugin.authoring == nil && isDeveloping(plugin.pluginId))
         VStack(alignment: .leading, spacing: 8) {
             HStack {
                 pluginIcon(path: plugin.iconPath)
                     .frame(width: 40, height: 40)
                     .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(plugin.nameText.text)
+                    Text(name)
                         .font(.headline)
-                    Text("\(plugin.platformId) · \(plugin.version)")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+                    if plugin.authoring == nil {
+                        Text("\(plugin.platformId) · \(plugin.version)")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
                 }
                 Spacer()
-                pluginMenu(name: plugin.nameText.text) {
+                pluginMenu(name: name) {
                     pendingUninstallId = plugin.pluginId
-                    pendingUninstallName = plugin.nameText.text
+                    pendingUninstallName = name
                 }
-                .disabled(presenter.state.busy || isDeveloping(plugin.pluginId))
+                .disabled(busy)
             }
 
             if plugin.pendingRestart {
@@ -315,7 +294,22 @@ public struct PluginManagementView: View {
                 } label: {
                     Text("plugin_update") + Text(" " + update.tag)
                 }
-                .disabled(presenter.state.busy || isDeveloping(plugin.pluginId))
+                .disabled(busy)
+            }
+            if let authoring = plugin.authoring {
+                if authoring.phase != .idle && authoring.phase != .applied {
+                    Text(pluginAuthoringLabel(authoring.phase)).font(.caption).foregroundStyle(.secondary)
+                }
+                if let error = authoring.error {
+                    Text(verbatim: error).font(.caption).foregroundStyle(.red)
+                }
+                if authoring.canCancelUpdate {
+                    Button("plugin_ai_stop") {
+                        Task { try? await facade.cancelPluginUpdate(pluginId: plugin.pluginId) }
+                    }
+                    .buttonStyle(.bordered)
+                    .disabled(busy)
+                }
             }
         }
         .padding(.vertical, 4)

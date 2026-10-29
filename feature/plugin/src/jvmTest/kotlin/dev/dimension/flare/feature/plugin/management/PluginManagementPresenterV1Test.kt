@@ -6,6 +6,7 @@ import dev.dimension.flare.feature.plugin.PluginSubsystemV1
 import dev.dimension.flare.feature.plugin.installer.TestFppFactory
 import dev.dimension.flare.feature.plugin.login.PluginOAuthPendingStoreV1
 import dev.dimension.flare.feature.plugin.login.PluginOAuthPendingV1
+import dev.dimension.flare.ui.model.UiText
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
@@ -97,7 +98,7 @@ class PluginManagementPresenterV1Test {
         }
 
     @Test
-    fun appleFailuresClearAfterSuccessfulManagementActions() =
+    fun appleUpdateChecksPreserveErrorsWhileSuccessfulActionsClearThem() =
         runTest {
             val subsystem = subsystem()
             val appScope = CoroutineScope(SupervisorJob() + StandardTestDispatcher(testScheduler))
@@ -116,11 +117,12 @@ class PluginManagementPresenterV1Test {
                 runCurrent()
                 facade.reportOperationFailure()
                 runCurrent()
-                assertNotNull(states.last().error)
+                val error = assertNotNull(states.last().error)
 
                 facade.checkUpdates(forceRefresh = false)
                 runCurrent()
-                assertNull(states.last().error)
+                assertEquals(error, states.last().error)
+                assertFalse(states.last().busy)
 
                 assertFails { facade.inspect((root / "missing.fpp").toString()) }
                 runCurrent()
@@ -146,7 +148,7 @@ class PluginManagementPresenterV1Test {
         }
 
     @Test
-    fun authoredRowsReplaceInstalledRowsWithoutLosingInstalledMetadata() =
+    fun allPluginSourcesShareItemsWithoutLosingInstalledMetadata() =
         runTest {
             val subsystem = subsystem()
             val presenter = PluginManagementPresenterV1(subsystem, backgroundScope)
@@ -157,14 +159,20 @@ class PluginManagementPresenterV1Test {
                     presenter.state.value.plugins
                         .single()
                 val imported = installed.copy(pluginId = "other.plugin")
+                val authoring = AuthoredPlugin(installed.pluginId, "Edited name")
+                val creating = AuthoredPlugin("local.ai.new", "New plugin")
                 val state =
                     presenter.state.value.copy(
                         plugins = listOf(installed, imported),
-                        authoredPlugins = listOf(AuthoredPlugin(installed.pluginId, "Edited name")),
+                        authoredPlugins = listOf(authoring, creating),
                     )
-                assertEquals(listOf(imported), state.importedPlugins)
+                assertEquals(listOf(installed.pluginId, creating.id, imported.pluginId), state.items.map { it.pluginId })
+                assertEquals(installed.copy(authoring = authoring), state.items.first())
+                assertEquals(creating, state.items[1].authoring)
+                assertEquals(UiText.Raw(creating.name), state.items[1].nameText)
+                assertEquals(imported, state.items.last())
                 assertEquals(installed.nameText, state.plugins.first().nameText)
-                assertEquals(listOf(installed, imported), state.copy(authoredPlugins = emptyList()).importedPlugins)
+                assertEquals(listOf(installed, imported), state.copy(authoredPlugins = emptyList()).items)
             } finally {
                 presenter.close()
                 subsystem.runtimePool.close()

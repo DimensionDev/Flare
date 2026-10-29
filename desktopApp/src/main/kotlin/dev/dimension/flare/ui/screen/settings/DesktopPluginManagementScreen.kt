@@ -50,6 +50,7 @@ import dev.dimension.flare.Res
 import dev.dimension.flare.cancel
 import dev.dimension.flare.common.DesktopSaveDialog
 import dev.dimension.flare.data.model.PluginPermission
+import dev.dimension.flare.data.repository.PluginAuthoringPhase
 import dev.dimension.flare.feature.plugin.PluginSubsystemV1
 import dev.dimension.flare.feature.plugin.abi.PluginAbiV1
 import dev.dimension.flare.feature.plugin.installer.PluginInstallWarningTypeV1
@@ -62,6 +63,8 @@ import dev.dimension.flare.more
 import dev.dimension.flare.plugin_add
 import dev.dimension.flare.plugin_ai_create
 import dev.dimension.flare.plugin_ai_delete_message
+import dev.dimension.flare.plugin_ai_stop
+import dev.dimension.flare.plugin_ai_untitled
 import dev.dimension.flare.plugin_beta_description
 import dev.dimension.flare.plugin_capabilities
 import dev.dimension.flare.plugin_check_updates
@@ -510,7 +513,7 @@ private fun GitHubInstallDialog(
 }
 
 @Composable
-private fun PluginManagementList(
+internal fun PluginManagementList(
     state: PluginManagementStateV1,
     onCancelPluginUpdate: (String) -> Unit,
     onUninstall: (String) -> Unit,
@@ -561,17 +564,6 @@ private fun PluginManagementList(
                     modifier = Modifier.fillMaxWidth(),
                 )
             }
-            items(state.authoredPlugins, key = { it.id }) { plugin ->
-                Layer(modifier = Modifier.fillMaxWidth(), color = FluentTheme.colors.background.card.default) {
-                    PluginAuthoringCard(
-                        plugin = plugin,
-                        busy = state.busy,
-                        onCancelUpdate = { onCancelPluginUpdate(plugin.id) },
-                        onUninstall = { onUninstall(plugin.id) },
-                    )
-                }
-            }
-
             if (development != null) {
                 item(key = "development") { development() }
             }
@@ -613,7 +605,7 @@ private fun PluginManagementList(
                     )
                 }
             }
-            if (state.plugins.isEmpty() && state.authoredPlugins.isEmpty()) {
+            if (state.items.isEmpty()) {
                 item(key = "empty") {
                     CardExpanderItem(
                         heading = { Text(stringResource(Res.string.plugin_empty)) },
@@ -623,12 +615,15 @@ private fun PluginManagementList(
                 }
             } else {
                 items(
-                    state.importedPlugins,
+                    state.items,
                     key = PluginManagementItemV1::pluginId,
                 ) { plugin ->
                     PluginItem(
                         plugin = plugin,
-                        busy = state.busy || (state.development.active && state.development.pluginId == plugin.pluginId),
+                        busy =
+                            state.busy ||
+                                (plugin.authoring == null && state.development.active && state.development.pluginId == plugin.pluginId),
+                        onCancelUpdate = onCancelPluginUpdate,
                         onUninstall = onUninstall,
                         onUpdate = onUpdate,
                     )
@@ -642,10 +637,11 @@ private fun PluginManagementList(
 internal fun PluginItem(
     plugin: PluginManagementItemV1,
     busy: Boolean,
+    onCancelUpdate: (String) -> Unit,
     onUninstall: (String) -> Unit,
     onUpdate: (String) -> Unit,
 ) {
-    val name = plugin.nameText.resolveText()
+    val name = plugin.nameText.resolveText().ifBlank { stringResource(Res.string.plugin_ai_untitled) }
     Layer(
         modifier = Modifier.fillMaxWidth(),
         color = FluentTheme.colors.background.card.default,
@@ -668,7 +664,9 @@ internal fun PluginItem(
             Column(Modifier.weight(1f)) {
                 Text(name, maxLines = 2, overflow = TextOverflow.Ellipsis)
                 ProvideTextStyle(FluentTheme.typography.caption.copy(color = FluentTheme.colors.text.text.secondary)) {
-                    Text("${plugin.platformId} · ${plugin.version}")
+                    if (plugin.authoring == null) {
+                        Text("${plugin.platformId} · ${plugin.version}")
+                    }
                     plugin.sourceUrl?.let { Text(it, maxLines = 2, overflow = TextOverflow.Ellipsis) }
                     plugin.availableUpdate?.let { update ->
                         SubtleButton(disabled = busy, onClick = { onUpdate(plugin.pluginId) }) {
@@ -677,6 +675,17 @@ internal fun PluginItem(
                     }
                     if (plugin.pendingRestart) {
                         Text(stringResource(Res.string.plugin_restart_required))
+                    }
+                    plugin.authoring?.let { authoring ->
+                        if (authoring.phase != PluginAuthoringPhase.Idle && authoring.phase != PluginAuthoringPhase.Applied) {
+                            Text(pluginAuthoringLabel(authoring.phase))
+                        }
+                        authoring.error?.let { Text(it) }
+                        if (authoring.canCancelUpdate) {
+                            Button(disabled = busy, onClick = { onCancelUpdate(plugin.pluginId) }) {
+                                Text(stringResource(Res.string.plugin_ai_stop))
+                            }
+                        }
                     }
                 }
             }

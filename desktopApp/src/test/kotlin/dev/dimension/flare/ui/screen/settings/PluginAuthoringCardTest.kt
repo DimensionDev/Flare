@@ -18,6 +18,7 @@ import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.data.repository.AuthoredPlugin
 import dev.dimension.flare.data.repository.PluginAuthoringPhase
+import dev.dimension.flare.feature.plugin.management.PluginManagementStateV1
 import dev.dimension.flare.ui.theme.FlareTheme
 import org.junit.Assert.assertEquals
 import org.junit.Rule
@@ -27,17 +28,26 @@ class PluginAuthoringCardTest {
     @get:Rule val compose = createComposeRule()
 
     @Test
-    fun localPluginShowsIdentityWithoutApprovalOrEnableControls() {
+    fun localPluginUsesTheCommonItemWithoutInternalMetadataOrEnableControls() {
         val plugin = AuthoredPlugin("local.ai.example", "Same name", phase = PluginAuthoringPhase.Applied, revision = 7)
         var busy by mutableStateOf(false)
         var uninstalls = 0
         compose.setContent {
             FlareTheme(isDarkTheme = false) {
-                PluginAuthoringCard(plugin, busy = busy, onCancelUpdate = {}, onUninstall = { uninstalls++ })
+                PluginItem(
+                    PluginManagementStateV1(authoredPlugins = listOf(plugin)).items.single(),
+                    busy = busy,
+                    onCancelUpdate = {},
+                    onUninstall = { uninstalls++ },
+                    onUpdate = {},
+                )
             }
         }
-        compose.onNodeWithText(plugin.id).assertIsDisplayed()
+        compose.onNodeWithText(plugin.name).assertIsDisplayed()
+        compose.onNodeWithContentDescription(plugin.name).assertExists()
+        compose.onNodeWithText(plugin.id).assertDoesNotExist()
         compose.onNodeWithText("Revision 7").assertDoesNotExist()
+        compose.onNodeWithText("Up to date").assertDoesNotExist()
         compose.onNodeWithText("Allow and continue").assertDoesNotExist()
         compose.onNodeWithText("Enabled").assertDoesNotExist()
         compose.onNodeWithText("Uninstall").assertDoesNotExist()
@@ -60,14 +70,15 @@ class PluginAuthoringCardTest {
         compose.setContent {
             FlareTheme(isDarkTheme = false) {
                 Box(Modifier.width(300.dp)) {
-                    PluginAuthoringCard(
-                        plugin = currentPlugin,
+                    PluginItem(
+                        plugin = PluginManagementStateV1(authoredPlugins = listOf(currentPlugin)).items.single(),
                         busy = false,
                         onCancelUpdate = {
                             stops++
                             currentPlugin = currentPlugin.copy(phase = PluginAuthoringPhase.Idle)
                         },
                         onUninstall = {},
+                        onUpdate = {},
                     )
                 }
             }

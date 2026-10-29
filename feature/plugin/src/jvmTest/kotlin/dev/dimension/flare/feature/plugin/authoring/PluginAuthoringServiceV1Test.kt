@@ -296,7 +296,7 @@ class PluginAuthoringServiceV1Test {
                 assertEquals(installed, subsystem.stateStore.desired.value.plugins[plugin.id])
                 assertEquals(
                     plugin.id,
-                    presenter.state.value.importedPlugins
+                    presenter.state.value.items
                         .single()
                         .pluginId,
                 )

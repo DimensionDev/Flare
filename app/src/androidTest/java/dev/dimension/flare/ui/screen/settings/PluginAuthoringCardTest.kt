@@ -2,10 +2,9 @@ package dev.dimension.flare.ui.screen.settings
 
 import android.graphics.Bitmap
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SegmentedListItem
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -13,12 +12,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.ComposeUiFlags
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.captureToImage
+import androidx.compose.ui.test.hasAnyDescendant
+import androidx.compose.ui.test.hasClickAction
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isToggleable
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -36,15 +40,19 @@ import dev.dimension.flare.data.repository.AuthoredPlugin
 import dev.dimension.flare.data.repository.PluginAuthoring
 import dev.dimension.flare.data.repository.PluginAuthoringPhase
 import dev.dimension.flare.di.koinGet
+import dev.dimension.flare.feature.plugin.github.GitHubPluginVersionV1
+import dev.dimension.flare.feature.plugin.management.PluginManagementItemV1
+import dev.dimension.flare.feature.plugin.management.PluginManagementStateV1
 import dev.dimension.flare.ui.component.LocalGlobalAppearance
 import dev.dimension.flare.ui.component.LocalTimelineAppearance
+import dev.dimension.flare.ui.model.UiText
 import dev.dimension.flare.ui.theme.FlareTheme
-import dev.dimension.flare.ui.theme.segmentedShapes2
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
@@ -67,6 +75,85 @@ class PluginAuthoringCardTest {
         } finally {
             ComposeUiFlags.isMediaQueryIntegrationEnabled = mediaQueryIntegration
         }
+    }
+
+    @Test
+    fun allPluginSourcesShareOneGroupWithUpdatesOnTheMatchingItem() {
+        val authored = AuthoredPlugin("local.ai.example", "AI plugin")
+        val github =
+            PluginManagementItemV1(
+                pluginId = "github.plugin",
+                platformId = "GitHub",
+                nameText = UiText.Raw("GitHub plugin"),
+                version = "1.0.0",
+                enabled = true,
+                running = true,
+                pendingRestart = false,
+                iconPath = "",
+                sourceUrl = "https://github.com/example/plugin",
+                availableUpdate = GitHubPluginVersionV1("v1.1.0", "1.1.0", "b".repeat(40)),
+            )
+        val state =
+            PluginManagementStateV1(
+                authoredPlugins = listOf(authored),
+                plugins =
+                    listOf(
+                        github.copy(pluginId = authored.id, nameText = UiText.Raw(authored.name), sourceUrl = null, availableUpdate = null),
+                        github,
+                        github.copy(
+                            pluginId = "file.plugin",
+                            platformId = "File",
+                            nameText = UiText.Raw("File plugin"),
+                            sourceUrl = null,
+                            availableUpdate = null,
+                        ),
+                    ),
+                error = "Import failed",
+            )
+        var updated: String? = null
+        compose.setContent {
+            MaterialTheme {
+                PluginManagementList(
+                    state = state,
+                    onCancelPluginUpdate = {},
+                    onUninstall = {},
+                    onUpdate = { updated = it },
+                    onRetryRuntime = {},
+                    modifier = Modifier.width(380.dp).height(800.dp),
+                )
+            }
+        }
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val error = compose.onNodeWithText("${context.getString(R.string.plugin_operation_failed)}: Import failed")
+        val authoredRow = compose.onNode(hasClickAction() and hasAnyDescendant(hasText("AI plugin")), useUnmergedTree = true)
+        val githubRow = compose.onNode(hasClickAction() and hasAnyDescendant(hasText("GitHub plugin")), useUnmergedTree = true)
+        val fileRow = compose.onNode(hasClickAction() and hasAnyDescendant(hasText("File plugin")), useUnmergedTree = true)
+        assertTrue(error.fetchSemanticsNode().boundsInRoot.bottom <= authoredRow.fetchSemanticsNode().boundsInRoot.top)
+        val inset = with(compose.density) { 4.dp.roundToPx() }
+        val first = authoredRow.captureToImage().toPixelMap()
+        val middle = githubRow.captureToImage().toPixelMap()
+        val last = fileRow.captureToImage().toPixelMap()
+        assertNotEquals(first[inset, first.height / 2], first[inset, inset])
+        assertEquals(first[inset, first.height / 2], first[inset, first.height - inset])
+        assertEquals(middle[inset, middle.height / 2], middle[inset, inset])
+        assertEquals(middle[inset, middle.height / 2], middle[inset, middle.height - inset])
+        assertEquals(last[inset, last.height / 2], last[inset, inset])
+        assertNotEquals(last[inset, last.height / 2], last[inset, last.height - inset])
+        val names = listOf("AI plugin", "GitHub plugin", "File plugin")
+        val titleStarts =
+            names.map {
+                compose
+                    .onNodeWithText(it, useUnmergedTree = true)
+                    .fetchSemanticsNode()
+                    .boundsInRoot.left
+            }
+        assertEquals(1, titleStarts.distinct().size)
+        compose.onNodeWithText(authored.id).assertDoesNotExist()
+        compose.onNodeWithText("GitHub · 1.0.0").assertIsDisplayed()
+        compose.onNodeWithText("File · 1.0.0").assertIsDisplayed()
+        compose.onNodeWithText("${context.getString(R.string.plugin_update)} v1.1.0").assertIsDisplayed().performClick()
+        assertEquals(github.pluginId, updated)
+        screenshot("flare-plugins-grouped-android.png")
     }
 
     @Test
@@ -96,6 +183,7 @@ class PluginAuthoringCardTest {
             }
         }
         compose.onNodeWithText("Pixelfed").assertIsDisplayed()
+        compose.onNodeWithText("Up to date").assertDoesNotExist()
         compose.onAllNodes(isToggleable()).assertCountEquals(0)
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         val linkText = context.getString(R.string.plugin_report_issue)
@@ -130,23 +218,26 @@ class PluginAuthoringCardTest {
         compose.setContent {
             MaterialTheme {
                 Box(Modifier.width(320.dp)) {
-                    SegmentedListItem(
-                        onClick = {},
-                        shapes = ListItemDefaults.segmentedShapes2(0, 1),
-                        content = {
-                            PluginAuthoringCard(
-                                AuthoredPlugin(
-                                    "local.ai.example",
-                                    "Pixelfed",
-                                    phase = PluginAuthoringPhase.WaitingForOperations,
-                                    revision = 1,
-                                    running = true,
-                                ),
-                                busy = busy,
-                                onCancelUpdate = {},
-                                onUninstall = { uninstalls++ },
-                            )
-                        },
+                    PluginItem(
+                        plugin =
+                            PluginManagementStateV1(
+                                authoredPlugins =
+                                    listOf(
+                                        AuthoredPlugin(
+                                            "local.ai.example",
+                                            "Pixelfed",
+                                            phase = PluginAuthoringPhase.WaitingForOperations,
+                                            revision = 1,
+                                            running = true,
+                                        ),
+                                    ),
+                            ).items.single(),
+                        shapesIndex = 0,
+                        shapesCount = 1,
+                        busy = busy,
+                        onCancelUpdate = {},
+                        onUninstall = { uninstalls++ },
+                        onUpdate = {},
                     )
                 }
             }

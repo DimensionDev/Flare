@@ -27,6 +27,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
 import okio.FileSystem
 import okio.Path
 import okio.Path.Companion.toOkioPath
@@ -54,6 +55,9 @@ class PluginGitHubManagementTest {
     private var downloads = 0
     private var blocked = false
     private val downloadStarted = CompletableDeferred<Unit>()
+    private var catalogStarted: CompletableDeferred<Unit>? = null
+    private var catalogRelease: CompletableDeferred<Unit>? = null
+    private var catalogStatus: HttpStatusCode? = null
 
     @BeforeTest
     fun setUp() {
@@ -78,6 +82,9 @@ class PluginGitHubManagementTest {
                         }
 
                         else -> {
+                            catalogStarted?.complete(Unit)
+                            catalogRelease?.await()
+                            catalogStatus?.let { return@MockEngine respond("{}", it) }
                             respond("""{"id":$repositoryId,"name":"repo","owner":{"login":"owner"},"private":false}""")
                         }
                     }
@@ -120,7 +127,8 @@ class PluginGitHubManagementTest {
                 install(presenter)
                 assertEquals(
                     PLUGIN_ID,
-                    presenter.state.value.importedPlugins
+                    presenter.state.value.items
+                        .filter { it.authoring == null }
                         .single()
                         .pluginId,
                 )
@@ -361,7 +369,7 @@ class PluginGitHubManagementTest {
         }
 
     @Test
-    fun repositoryReplacementAndDeletedVersionsCannotReportUpToDate() =
+    fun repositoryReplacementAndDeletedVersionsSilentlyClearUpdateCandidates() =
         runBlocking {
             withPresenter { _, presenter -> install(presenter) }
             tags = listOf("v1.1.0" to SECOND_SHA)
@@ -373,8 +381,9 @@ class PluginGitHubManagementTest {
                         .availableUpdate,
                 )
                 repositoryId = 999
-                assertFails { presenter.checkUpdates() }
-                assertFalse(presenter.state.value.updatesChecked)
+                presenter.checkUpdates()
+                assertNull(presenter.state.value.error)
+                assertFalse(presenter.state.value.busy)
                 assertNull(
                     presenter.state.value.plugins
                         .single()
@@ -384,13 +393,131 @@ class PluginGitHubManagementTest {
             repositoryId = 42
             tags = emptyList()
             withPresenter { _, presenter ->
-                assertFails { presenter.checkUpdates() }
-                assertFalse(presenter.state.value.updatesChecked)
+                presenter.checkUpdates()
+                assertNull(presenter.state.value.error)
+                assertNull(
+                    presenter.state.value.plugins
+                        .single()
+                        .availableUpdate,
+                )
             }
             tags = listOf("v0.9.0" to FIRST_SHA)
             withPresenter { _, presenter ->
-                assertFails { presenter.checkUpdates() }
-                assertFalse(presenter.state.value.updatesChecked)
+                presenter.checkUpdates()
+                assertNull(presenter.state.value.error)
+                assertNull(
+                    presenter.state.value.plugins
+                        .single()
+                        .availableUpdate,
+                )
+            }
+        }
+
+    @Test
+    fun updateChecksOnlyPublishAvailableUpdatesWithoutLoadingOrFailureMessages() =
+        runBlocking {
+            withPresenter { _, presenter ->
+                install(presenter)
+                tags = listOf("v1.1.0" to SECOND_SHA)
+                catalogStarted = CompletableDeferred()
+                catalogRelease = CompletableDeferred()
+                val check = launch { presenter.checkUpdates() }
+                try {
+                    withTimeout(10_000) { catalogStarted!!.await() }
+                    assertFalse(presenter.state.value.busy)
+                    assertNull(presenter.state.value.error)
+                    catalogRelease!!.complete(Unit)
+                    check.join()
+                    assertEquals(
+                        "v1.1.0",
+                        presenter.state.value.plugins
+                            .single()
+                            .availableUpdate
+                            ?.tag,
+                    )
+                    assertFalse(presenter.state.value.busy)
+                    assertNull(presenter.state.value.error)
+                } finally {
+                    check.cancelAndJoin()
+                }
+
+                catalogStatus = HttpStatusCode.TooManyRequests
+                presenter.checkUpdates()
+                assertFalse(presenter.state.value.busy)
+                assertNull(presenter.state.value.error)
+                assertNull(
+                    presenter.state.value.plugins
+                        .single()
+                        .availableUpdate,
+                )
+
+                presenter.reportOperationFailure()
+                val error = presenter.state.value.error
+                presenter.checkUpdates()
+                assertEquals(error, presenter.state.value.error)
+            }
+        }
+
+    @Test
+    fun slowUpdateChecksDoNotBlockFileInstallsOrRestoreStaleCandidates() =
+        runBlocking {
+            withPresenter { _, presenter ->
+                install(presenter)
+                val replacement = root / "replacement.fpp"
+                TestFppFactory.write(
+                    replacement,
+                    TestFppFactory.validEntries(
+                        manifest = TestFppFactory.validManifest.replace("\"version\": \"1.0.0\"", "\"version\": \"1.1.0\""),
+                    ),
+                )
+                tags = listOf("v1.1.0" to SECOND_SHA)
+                catalogStarted = CompletableDeferred()
+                catalogRelease = CompletableDeferred()
+                val check = launch { presenter.checkUpdates() }
+                try {
+                    withTimeout(10_000) { catalogStarted!!.await() }
+                    withTimeout(10_000) {
+                        presenter.inspect(replacement.toString())
+                        presenter.confirmInstall()
+                    }
+                    catalogRelease!!.complete(Unit)
+                    check.join()
+                    val installed =
+                        presenter.state.value.plugins
+                            .single()
+                    assertEquals("1.1.0", installed.version)
+                    assertNull(installed.sourceUrl)
+                    assertNull(installed.availableUpdate)
+                    assertNull(presenter.state.value.error)
+                } finally {
+                    check.cancelAndJoin()
+                }
+            }
+        }
+
+    @Test
+    fun cancellingAnUpdateCheckPreservesStateAndAllowsTheNextAction() =
+        runBlocking {
+            withPresenter { _, presenter ->
+                install(presenter)
+                presenter.reportOperationFailure()
+                val previous = presenter.state.value
+                catalogStarted = CompletableDeferred()
+                catalogRelease = CompletableDeferred()
+                val check = launch { presenter.checkUpdates() }
+                try {
+                    withTimeout(10_000) { catalogStarted!!.await() }
+                    assertEquals(previous, presenter.state.value)
+                } finally {
+                    check.cancelAndJoin()
+                }
+                assertTrue(check.isCancelled)
+                assertEquals(previous, presenter.state.value)
+
+                catalogRelease = null
+                presenter.loadGitHubRepository(REPOSITORY_URL)
+                assertNotNull(presenter.state.value.githubCatalog)
+                assertNull(presenter.state.value.error)
             }
         }
 

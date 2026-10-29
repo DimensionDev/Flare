@@ -147,7 +147,8 @@ class PluginGitHubLiveTest {
                             assertRunningVersion(subsystem, "1.1.0")
                             assertFalse(presenter.state.value.requiresRestart)
                             presenter.checkUpdates()
-                            assertTrue(presenter.state.value.updatesChecked)
+                            assertFalse(presenter.state.value.busy)
+                            assertNull(presenter.state.value.error)
                             assertNull(
                                 presenter.state.value.plugins
                                     .single()

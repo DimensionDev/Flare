@@ -45,12 +45,32 @@ public data class PluginManagementStateV1(
     val busy: Boolean = false,
     val error: String? = null,
     val githubCatalog: GitHubPluginCatalogV1? = null,
-    val updatesChecked: Boolean = false,
     val development: PluginDevelopmentStateV1 = PluginDevelopmentStateV1(),
     val authoredPlugins: List<AuthoredPlugin> = emptyList(),
 ) {
-    public val importedPlugins: List<PluginManagementItemV1> =
-        plugins.filterNot { installed -> authoredPlugins.any { it.id == installed.pluginId } }
+    public val items: List<PluginManagementItemV1> =
+        buildList {
+            val installed = plugins.associateByTo(linkedMapOf(), PluginManagementItemV1::pluginId)
+            authoredPlugins.forEach { authoring ->
+                add(
+                    installed.remove(authoring.id)?.copy(authoring = authoring)
+                        ?: PluginManagementItemV1(
+                            pluginId = authoring.id,
+                            platformId = authoring.platformId,
+                            nameText = UiText.Raw(authoring.name),
+                            version = "",
+                            enabled = authoring.enabled,
+                            running = authoring.running,
+                            pendingRestart = false,
+                            iconPath = "",
+                            sourceUrl = null,
+                            availableUpdate = null,
+                            authoring = authoring,
+                        ),
+                )
+            }
+            addAll(installed.values)
+        }
 }
 
 public data class PluginManagementItemV1(
@@ -64,6 +84,7 @@ public data class PluginManagementItemV1(
     val iconPath: String,
     val sourceUrl: String?,
     val availableUpdate: GitHubPluginVersionV1?,
+    val authoring: AuthoredPlugin? = null,
 )
 
 public data class PluginInstallReviewV1(
@@ -87,12 +108,12 @@ public class PluginManagementPresenterV1(
 ) {
     private var githubCatalog: GitHubPluginCatalogV1? = null
     private val updates = mutableMapOf<String, GitHubPluginVersionV1>()
-    private var updatesChecked = false
     private var preview: PreparedPluginInstallV1? = null
     private val mutableState = MutableStateFlow(snapshot())
     public val state: StateFlow<PluginManagementStateV1> = mutableState.asStateFlow()
 
     private val actionMutex = Mutex()
+    private val updateMutex = Mutex()
 
     private val observation: Job =
         combine(
@@ -138,32 +159,35 @@ public class PluginManagementPresenterV1(
     }
 
     public suspend fun checkUpdates(forceRefresh: Boolean = true) {
-        runAction {
-            updatesChecked = false
-            var failure: Exception? = null
-            val installed =
-                subsystem.stateStore.desired.value.plugins.values
-                    .filter { it.source is PluginInstallSourceV1.GitHub }
-            installed.forEach { plugin ->
-                val source = plugin.source as PluginInstallSourceV1.GitHub
-                try {
-                    val catalog =
-                        github.catalog(
-                            source.repository.url,
-                            forceRefresh = forceRefresh,
-                            expectedRepositoryId = source.repository.id,
-                        )
-                    val update = updateCandidate(plugin, catalog)
-                    if (update == null) updates.remove(plugin.pluginId) else updates[plugin.pluginId] = update
-                } catch (error: Exception) {
-                    if (error is CancellationException) throw error
-                    updates.remove(plugin.pluginId)
-                    failure = error
+        updateMutex.withLock {
+            withContext(operationDispatcher) {
+                val installed =
+                    subsystem.stateStore.desired.value.plugins.values
+                        .filter { it.source is PluginInstallSourceV1.GitHub }
+                installed.forEach { plugin ->
+                    val source = plugin.source as PluginInstallSourceV1.GitHub
+                    val update =
+                        try {
+                            val catalog =
+                                github.catalog(
+                                    source.repository.url,
+                                    forceRefresh = forceRefresh,
+                                    expectedRepositoryId = source.repository.id,
+                                )
+                            updateCandidate(plugin, catalog)
+                        } catch (error: Exception) {
+                            if (error is CancellationException) throw error
+                            null
+                        }
+                    actionMutex.withLock {
+                        if (subsystem.stateStore.desired.value.plugins[plugin.pluginId] == plugin) {
+                            if (update == null) updates.remove(plugin.pluginId) else updates[plugin.pluginId] = update
+                            val current = mutableState.value
+                            mutableState.value = snapshot().copy(busy = current.busy, error = current.error)
+                        }
+                    }
                 }
             }
-            updatesChecked = installed.isNotEmpty() && failure == null
-            failure?.let { throw it }
-            mutableState.value = snapshot()
         }
     }
 
@@ -326,7 +350,6 @@ public class PluginManagementPresenterV1(
             authoredPlugins = subsystem.authoring.plugins.value,
             canRebuildIndex = !desired.indexHealthy,
             githubCatalog = githubCatalog,
-            updatesChecked = updatesChecked,
             pendingInstall = preview?.toReview(),
         )
     }

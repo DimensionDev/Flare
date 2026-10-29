@@ -28,6 +28,7 @@ import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.common.FileSystemUtilsExt
 import dev.dimension.flare.data.model.appearance.TimelineAppearance
+import dev.dimension.flare.data.repository.AuthoredPlugin
 import dev.dimension.flare.data.repository.PluginAuthoring
 import dev.dimension.flare.data.repository.PluginAuthoringPhase
 import dev.dimension.flare.di.DesktopKoinApplication
@@ -36,6 +37,7 @@ import dev.dimension.flare.feature.plugin.PluginSubsystemV1
 import dev.dimension.flare.feature.plugin.github.GitHubPluginRepositoryV1
 import dev.dimension.flare.feature.plugin.github.GitHubPluginVersionV1
 import dev.dimension.flare.feature.plugin.management.PluginManagementItemV1
+import dev.dimension.flare.feature.plugin.management.PluginManagementStateV1
 import dev.dimension.flare.ui.component.LocalExternalTextResolver
 import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.model.UiText
@@ -84,6 +86,91 @@ class DesktopPluginManagementScreenTest {
         stopKoin()
         System.setProperty("user.home", originalHome)
         root.toFile().deleteRecursively()
+    }
+
+    @Test
+    fun allPluginSourcesRemainTogetherAfterOperationNotices() {
+        val authored = AuthoredPlugin("local.ai.example", "AI plugin", phase = PluginAuthoringPhase.Validating)
+        val github =
+            PluginManagementItemV1(
+                pluginId = "github.plugin",
+                platformId = "GitHub",
+                nameText = UiText.Raw("GitHub plugin"),
+                version = "1.0.0",
+                enabled = true,
+                running = true,
+                pendingRestart = false,
+                iconPath = "",
+                sourceUrl = "https://github.com/example/plugin",
+                availableUpdate = GitHubPluginVersionV1("v1.1.0", "1.1.0", "b".repeat(40)),
+            )
+        val state =
+            PluginManagementStateV1(
+                authoredPlugins = listOf(authored),
+                plugins =
+                    listOf(
+                        github.copy(pluginId = authored.id, nameText = UiText.Raw(authored.name), sourceUrl = null, availableUpdate = null),
+                        github,
+                        github.copy(
+                            pluginId = "file.plugin",
+                            platformId = "File",
+                            nameText = UiText.Raw("File plugin"),
+                            sourceUrl = null,
+                            availableUpdate = null,
+                        ),
+                    ),
+                error = "Import failed",
+                development =
+                    dev.dimension.flare.feature.plugin.development.PluginDevelopmentStateV1(
+                        active = true,
+                        pluginId = authored.id,
+                    ),
+            )
+        var updated: String? = null
+        var cancelled: String? = null
+        compose.setContent {
+            FlareTheme(isDarkTheme = false) {
+                PluginManagementList(
+                    state = state,
+                    onCancelPluginUpdate = { cancelled = it },
+                    onUninstall = {},
+                    onUpdate = { updated = it },
+                    onRetryRuntime = {},
+                    modifier = Modifier.width(520.dp).height(800.dp),
+                )
+            }
+        }
+        val error = compose.onNodeWithText("The plugin operation failed. Try again or restart Flare.: Import failed")
+        val authoredRow =
+            compose
+                .onNodeWithText("AI plugin")
+                .assertIsDisplayed()
+                .fetchSemanticsNode()
+                .boundsInRoot
+        val githubRow =
+            compose
+                .onNodeWithText("GitHub plugin")
+                .assertIsDisplayed()
+                .fetchSemanticsNode()
+                .boundsInRoot
+        val fileRow =
+            compose
+                .onNodeWithText("File plugin")
+                .assertIsDisplayed()
+                .fetchSemanticsNode()
+                .boundsInRoot
+        assertTrue(error.fetchSemanticsNode().boundsInRoot.bottom < authoredRow.top)
+        assertTrue(authoredRow.bottom < githubRow.top)
+        assertTrue(githubRow.bottom < fileRow.top)
+        assertEquals(authoredRow.left, githubRow.left)
+        assertEquals(githubRow.left, fileRow.left)
+        compose.onNodeWithText(authored.id).assertDoesNotExist()
+        compose.onNodeWithText("GitHub · 1.0.0").assertIsDisplayed()
+        compose.onNodeWithText("File · 1.0.0").assertIsDisplayed()
+        compose.onNodeWithText("Update v1.1.0").assertIsDisplayed().performClick()
+        assertEquals(github.pluginId, updated)
+        compose.onNodeWithText("Cancel update").assertIsDisplayed().performClick()
+        assertEquals(authored.id, cancelled)
     }
 
     @Test
@@ -259,6 +346,7 @@ class DesktopPluginManagementScreenTest {
                             PluginItem(
                                 plugin = plugin,
                                 busy = false,
+                                onCancelUpdate = {},
                                 onUninstall = { removed = it },
                                 onUpdate = { updated = it },
                             )

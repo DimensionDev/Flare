@@ -28,6 +28,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuDefaults
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SegmentedListItem
 import androidx.compose.material3.Text
@@ -64,6 +65,7 @@ import compose.icons.fontawesomeicons.solid.Plus
 import compose.icons.fontawesomeicons.solid.Trash
 import dev.dimension.flare.R
 import dev.dimension.flare.data.model.PluginPermission
+import dev.dimension.flare.data.repository.PluginAuthoringPhase
 import dev.dimension.flare.di.koinGet
 import dev.dimension.flare.feature.plugin.PluginSubsystemV1
 import dev.dimension.flare.feature.plugin.abi.PluginAbiV1
@@ -474,7 +476,7 @@ private fun GitHubInstallDialog(
 }
 
 @Composable
-private fun PluginManagementList(
+internal fun PluginManagementList(
     state: PluginManagementStateV1,
     onCancelPluginUpdate: (String) -> Unit,
     onUninstall: (String) -> Unit,
@@ -522,20 +524,6 @@ private fun PluginManagementList(
                 }
             }
         }
-        itemsIndexed(state.authoredPlugins, key = { _, plugin -> plugin.id }) { index, plugin ->
-            SegmentedListItem(
-                onClick = {},
-                shapes = ListItemDefaults.segmentedShapes2(index, state.authoredPlugins.size),
-                content = {
-                    PluginAuthoringCard(
-                        plugin = plugin,
-                        busy = state.busy,
-                        onCancelUpdate = { onCancelPluginUpdate(plugin.id) },
-                        onUninstall = { onUninstall(plugin.id) },
-                    )
-                },
-            )
-        }
         if (state.requiresRestart) {
             item(key = "restart") {
                 MessageItem(
@@ -578,7 +566,7 @@ private fun PluginManagementList(
                 )
             }
         }
-        if (state.plugins.isEmpty() && state.authoredPlugins.isEmpty()) {
+        if (state.items.isEmpty()) {
             item(key = "empty") {
                 SegmentedListItem(
                     onClick = {},
@@ -589,14 +577,15 @@ private fun PluginManagementList(
             }
         } else {
             itemsIndexed(
-                items = state.importedPlugins,
+                items = state.items,
                 key = { _, plugin -> plugin.pluginId },
             ) { index, plugin ->
                 PluginItem(
                     plugin = plugin,
                     busy = state.busy,
                     shapesIndex = index,
-                    shapesCount = state.importedPlugins.size,
+                    shapesCount = state.items.size,
+                    onCancelUpdate = onCancelPluginUpdate,
                     onUninstall = onUninstall,
                     onUpdate = onUpdate,
                 )
@@ -606,15 +595,16 @@ private fun PluginManagementList(
 }
 
 @Composable
-private fun PluginItem(
+internal fun PluginItem(
     plugin: PluginManagementItemV1,
     busy: Boolean,
     shapesIndex: Int,
     shapesCount: Int,
+    onCancelUpdate: (String) -> Unit,
     onUninstall: (String) -> Unit,
     onUpdate: (String) -> Unit,
 ) {
-    val name = plugin.nameText.resolveText()
+    val name = plugin.nameText.resolveText().ifBlank { stringResource(R.string.plugin_ai_untitled) }
     SegmentedListItem(
         onClick = {},
         shapes = ListItemDefaults.segmentedShapes2(shapesIndex, shapesCount),
@@ -632,7 +622,9 @@ private fun PluginItem(
         content = { Text(name) },
         supportingContent = {
             Column {
-                Text("${plugin.platformId} · ${plugin.version}")
+                if (plugin.authoring == null) {
+                    Text("${plugin.platformId} · ${plugin.version}")
+                }
                 plugin.sourceUrl?.let { Text(it) }
                 plugin.availableUpdate?.let { update ->
                     TextButton(enabled = !busy, onClick = { onUpdate(plugin.pluginId) }) {
@@ -644,6 +636,17 @@ private fun PluginItem(
                         stringResource(R.string.plugin_restart_required),
                         color = MaterialTheme.colorScheme.primary,
                     )
+                }
+                plugin.authoring?.let { authoring ->
+                    if (authoring.phase != PluginAuthoringPhase.Idle && authoring.phase != PluginAuthoringPhase.Applied) {
+                        Text(pluginAuthoringLabel(authoring.phase))
+                    }
+                    authoring.error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+                    if (authoring.canCancelUpdate) {
+                        OutlinedButton(enabled = !busy, onClick = { onCancelUpdate(plugin.pluginId) }) {
+                            Text(stringResource(R.string.plugin_ai_stop))
+                        }
+                    }
                 }
             }
         },

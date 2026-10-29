@@ -114,9 +114,9 @@ internal class PluginAuthoringServiceV1(
 
     override suspend fun documentation(path: String): String =
         if (path.isBlank()) {
-            "Available SDK documents:\n" + BundledPluginSdk.documents.keys.joinToString("\n")
+            "Available SDK documents (start with README.md):\n" + BundledPluginSdk.paths.joinToString("\n")
         } else {
-            requireNotNull(BundledPluginSdk.documents[path]) { "Unknown SDK document" }
+            requireNotNull(BundledPluginSdk.read(path)) { "Unknown SDK document" }
         }
 
     override suspend fun fetchDocumentation(url: String): String = fetchPluginDocumentation(url)
@@ -318,7 +318,7 @@ internal class PluginAuthoringServiceV1(
         validateSources(record.sources)
         val bytes =
             record.sources.mapValues { it.value.encodeToByteArray() } +
-                (FppPaths.ICON to requireNotNull(BundledPluginSdk.icon.decodeBase64()).toByteArray())
+                (FppPaths.ICON to requireNotNull(DEFAULT_PLUGIN_ICON.decodeBase64()).toByteArray())
         val archive =
             FppArchive(
                 bytes.map { (path, value) ->

@@ -50,14 +50,24 @@ retaining account records. Stop directory development before changing its enable
 state or deleting it.
 
 Android uses Compose settings components, iOS and native macOS use SwiftUI, and
-Compose Desktop uses Fluent components. All four use the same SDK, validation,
+Compose Desktop uses Fluent components. All four use the same authoring references, validation,
 QuickJS runtime, version checks and permission rules. No data migration or legacy
 chat compatibility layer is included for the development-only previous workflow.
 
 Provide public API documentation or redacted response examples where needed. Log
 in through Flare's account UI; never paste credentials into a conversation or
-source. Plugin tools provide only scoped text files, the bundled SDK and a bounded
+source. Plugin tools provide only scoped text files, local authoring references and a bounded
 HTTPS documentation reader, with no shell or general filesystem access. The
 assistant writes classic JavaScript directly, without Node/npm/TypeScript on the
 device. The host supplies a default icon. Validation checks the package and runtime
 contract, not live website behavior; runtime errors do not trigger AI edits.
+
+`read_plugin_sdk` lists the local reference files and reads one requested document,
+with line pagination. Start with its `README.md`, the in-app tool workflow from
+`agent/README.md`. The build includes an explicit set of shared SDK contracts,
+types and the small token-login template. It extracts the registration/runtime
+ABI and compatibility rules without the external installation/publication flow,
+and adapts references to the available files. Documents are assembled only when
+read; listing paths or supplying the default icon does not assemble the corpus.
+No SDK download or remote cache is used. The complete external SDK and skill at
+`sdk/skill/flare-plugin/`, including publishing tools and Pixelfed, remain intact.

@@ -491,6 +491,18 @@ class PluginAuthoringServiceV1Test {
     fun bundledSdkMatchesCurrentContractAndRejectsUnknownPaths() =
         runBlocking<Unit> {
             assertTrue(service.documentation("flare-plugin.d.ts").contains("definePlugin"))
+            val guide = service.documentation("README.md")
+            assertTrue(guide.contains("write_plugin_files"))
+            assertTrue(service.documentation("").contains("assets/github-template/manifest.json"))
+            listOf(
+                "SKILL.md",
+                "references/publishing.md",
+                "references/testing.md",
+                "examples/pixelfed/plugin.js",
+                "pack.mjs",
+            ).forEach { path ->
+                assertFailsWith<IllegalArgumentException> { service.documentation(path) }
+            }
             assertFailsWith<IllegalArgumentException> { service.documentation("../../credentials") }
             assertFailsWith<IllegalArgumentException> { service.fetchDocumentation("https://localhost/private") }
             assertFailsWith<IllegalArgumentException> { service.fetchDocumentation("https://127.0.0.1/private") }
@@ -934,7 +946,7 @@ class PluginAuthoringServiceV1Test {
         sources(plugin, "directory version").forEach { (name, text) ->
             fileSystem.write(directory / name) { writeUtf8(text) }
         }
-        fileSystem.write(directory / "assets/icon.png") { write(requireNotNull(BundledPluginSdk.icon.decodeBase64())) }
+        fileSystem.write(directory / "assets/icon.png") { write(requireNotNull(DEFAULT_PLUGIN_ICON.decodeBase64())) }
         return PluginDevelopmentSessionV1(subsystem, registry, accounts, scope).also {
             it.open(directory.toString())
             it.reload()

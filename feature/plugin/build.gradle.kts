@@ -14,11 +14,39 @@ plugins {
 val bundledSdkDirectory = layout.buildDirectory.dir("generated/pluginSdk")
 val generatePluginSdk by tasks.registering {
     val sdk = layout.projectDirectory.dir("sdk/skill/flare-plugin")
-    val sources = fileTree(sdk) { include("*.md", "*.d.ts", "references/*.md", "examples/pixelfed/plugin.js") }
+    val sources =
+        mapOf(
+            "README.md" to layout.projectDirectory.file("agent/README.md"),
+            "references/compatibility.md" to sdk.file("references/publishing.md"),
+        ) +
+            listOf(
+                "ABI.md",
+                "flare-plugin.d.ts",
+                "references/manifest.md",
+                "references/capabilities.md",
+                "references/runtime-http.md",
+                "references/authentication.md",
+                "references/wire-data.md",
+                "references/recipes.md",
+                "references/troubleshooting.md",
+                "assets/github-template/manifest.json",
+                "assets/github-template/plugin.js",
+            ).associateWith(sdk::file)
     val icon = sdk.file("assets/github-template/assets/icon.png")
-    inputs.files(sources, icon)
+    inputs.files(sources.values, icon)
     outputs.dir(bundledSdkDirectory)
     doLast {
+        fun excerpt(
+            text: String,
+            start: String,
+            end: String,
+        ): String {
+            val from = text.indexOf(start)
+            val until = text.indexOf(end, from + start.length)
+            require(from >= 0 && until > from) { "SDK excerpt boundaries are missing: $start / $end" }
+            return text.substring(from, until).trimEnd() + "\n"
+        }
+
         fun literal(value: String): String =
             value.chunked(12000).joinToString(prefix = "listOf(", postfix = ").joinToString(\"\")") { chunk ->
                 "\"" +
@@ -30,26 +58,64 @@ val generatePluginSdk by tasks.registering {
                         .replace("\n", "\\n")
                         .replace("\t", "\\t") + "\""
             }
+        val documents =
+            sources.mapValues { (path, file) ->
+                val text = file.asFile.readText().replace("\r\n", "\n")
+                // Keep the external SDK intact; only adapt the in-app reference set.
+                when (path) {
+                    "ABI.md" ->
+                        ("# Flare Social Plugin API v1\n\n" + excerpt(text, "## Registration\n", "## Lifecycle and trust\n"))
+                            .replace(
+                                "Installation review explicitly grants\n" +
+                                    "media requests to any website, including CDNs and federated servers; these URLs\n" +
+                                    "can transmit the plugin account's data. Adding this permission during an update\nrequires confirmation.",
+                                "Local AI plugins automatically approve this permission after validation, including updates.\n" +
+                                    "Media requests may reach any website, including CDNs and federated servers; these\n" +
+                                    "URLs can transmit the plugin account's data.",
+                            ).replace(
+                                "Permission removal, disable, and uninstall take effect after restart, like the\n" +
+                                    "package change itself; absent plugins cannot restore media.",
+                                "Media grants change with the running package; absent plugins cannot restore media.",
+                            )
+                    "references/compatibility.md" ->
+                        "# Compatibility\n\n## Updates and compatibility\n\n" +
+                            excerpt(text, "| Change | Author consequence |", "## Optional local installation\n")
+                    "references/authentication.md" ->
+                        text.replace(
+                            "and [Pixelfed](../examples/pixelfed/plugin.js) for complete OAuth.",
+                            "and the [OAuth recipe](#oauth) for that login flow.",
+                        )
+                    "references/runtime-http.md" ->
+                        text.replace(
+                            "Installation\nreview discloses this broad media access.",
+                            "Local AI plugins automatically approve this permission after validation.",
+                        ).replace("running package after restart", "running package")
+                    "references/recipes.md" ->
+                        text.replace("and Pixelfed's complete publish\nimplementation.", "for upload requests.")
+                    "references/troubleshooting.md" ->
+                        text.replace("activation after restart", "activation").replace(
+                            "Restart Flare; Desired State differs from the running package until then",
+                            "Check list_plugins for validation errors or pending activation; see [updating](../README.md#updating)",
+                        )
+                    else -> text
+                }.replace("publishing.md#updates-and-compatibility", "compatibility.md#updates-and-compatibility")
+            }
         val output = bundledSdkDirectory.get().file("dev/dimension/flare/feature/plugin/authoring/BundledPluginSdk.kt").asFile
         output.parentFile.mkdirs()
         output.writeText(
             buildString {
                 appendLine("package dev.dimension.flare.feature.plugin.authoring")
+                appendLine("internal const val DEFAULT_PLUGIN_ICON = \"${Base64.getEncoder().encodeToString(icon.asFile.readBytes())}\"")
                 appendLine("internal object BundledPluginSdk {")
-                appendLine("val documents: Map<String, String> = mapOf(")
-                sources.files.sortedBy { it.path }.forEach { file ->
-                    appendLine("${literal(file.relativeTo(sdk.asFile).invariantSeparatorsPath)} to ${literal(file.readText())},")
-                }
-                appendLine(")")
-                appendLine("val icon: String = ${literal(Base64.getEncoder().encodeToString(icon.asFile.readBytes()))}")
+                appendLine("val paths: List<String> = listOf(${documents.keys.joinToString { "\"$it\"" }})")
+                appendLine("fun read(path: String): String? = when (path) {")
+                documents.forEach { (path, text) -> appendLine("\"$path\" -> ${literal(text)}") }
+                appendLine("else -> null")
+                appendLine("}")
                 appendLine("}")
             },
         )
     }
-}
-
-tasks.matching { it.name.startsWith("compile") || it.name.startsWith("ksp") }.configureEach {
-    dependsOn(generatePluginSdk)
 }
 
 tasks.withType<org.gradle.api.tasks.testing.Test>().configureEach {
@@ -85,7 +151,7 @@ kotlin {
 
     sourceSets {
         val commonMain by getting {
-            kotlin.srcDir(bundledSdkDirectory)
+            kotlin.srcDir(generatePluginSdk)
             dependencies {
                 api(projects.shared)
                 api(libs.okio)

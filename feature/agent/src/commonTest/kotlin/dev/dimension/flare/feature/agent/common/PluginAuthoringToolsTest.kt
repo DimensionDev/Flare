@@ -14,6 +14,7 @@ import kotlinx.serialization.json.jsonPrimitive
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 internal class PluginAuthoringToolsTest {
@@ -113,7 +114,23 @@ internal class PluginAuthoringToolsTest {
         runTest {
             val tool = ReadPluginSdkTool(authoring)
             assertEquals("second", tool.execute(ReadPluginSdkTool.Args("api", 2, 1)))
+            assertEquals("api", authoring.documentationPath)
+            authoring.documentationPath = null
             assertTrue(tool.execute(ReadPluginSdkTool.Args("api", 0, 900)).startsWith("Plugin operation failed"))
+            assertNull(authoring.documentationPath)
+        }
+
+    @Test
+    fun sdkReadsKeepTheSelectedDocumentAndOutputBound() =
+        runTest {
+            val tool = ReadPluginSdkTool(authoring)
+            authoring.document = "README.md\nABI.md"
+            assertEquals(authoring.document, tool.execute(ReadPluginSdkTool.Args()))
+            assertEquals("", authoring.documentationPath)
+            authoring.document = "x".repeat(50_000)
+            assertEquals(48_000, tool.execute(ReadPluginSdkTool.Args("README.md")).length)
+            assertEquals("README.md", authoring.documentationPath)
+            assertEquals("", tool.execute(ReadPluginSdkTool.Args("README.md", 2, 1)))
         }
 }
 
@@ -122,6 +139,8 @@ internal class TestAuthoring : PluginAuthoring {
     var written: Triple<String, Long, Map<String, String>>? = null
     var createdKey: String? = null
     var failure: Exception? = null
+    var documentationPath: String? = null
+    var document = "first\nsecond\nthird"
 
     override suspend fun write(
         pluginId: String,
@@ -137,7 +156,10 @@ internal class TestAuthoring : PluginAuthoring {
 
     override suspend fun read(pluginId: String) = PluginSource(plugins.value.single { it.id == pluginId }, written?.third.orEmpty())
 
-    override suspend fun documentation(path: String) = "first\nsecond\nthird"
+    override suspend fun documentation(path: String): String {
+        documentationPath = path
+        return document
+    }
 
     override suspend fun fetchDocumentation(url: String) = "documentation"
 

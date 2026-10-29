@@ -566,11 +566,15 @@ internal class PluginDataSourceV1 private constructor(
     }
 
     private inner class TabConfiguration : TimelineTabConfigurationDataSource {
+        private val metadata = plugin.platformMetadata()
+
         override val defaultTabs: ImmutableList<TimelineCandidate<*>> =
             plugin.installed.manifest.platform.timelines
                 .filter(TimelineManifestV1::defaultForNewAccount)
                 .mapNotNull(::candidate)
-                .toImmutableList()
+                .mapIndexed { index, candidate ->
+                    if (index == 0) candidate.copy(title = metadata.displayNameText) else candidate
+                }.toImmutableList()
 
         override val builtInTimelineTabs: ImmutableList<TimelineCandidate<*>> =
             plugin.installed.manifest.platform.timelines
@@ -584,7 +588,7 @@ internal class PluginDataSourceV1 private constructor(
             val spec = timelineSpecs[timeline.id] ?: return null
             val data = TimelineSpec.AccountResourceData(key, timeline.id)
             val title = timeline.title.toUiText(plugin.installed.pluginId)
-            val icon = timeline.icon.toUiIcon().asType()
+            val icon = if (timeline.defaultForNewAccount) metadata.icon else timeline.icon.toUiIcon().asType()
             return when (timeline.display) {
                 TimelineDisplayV1.List -> spec.candidate(data, title, icon)
                 TimelineDisplayV1.Grid -> spec.galleryCandidate(data, title, icon)

@@ -290,9 +290,13 @@ Localized keys must exist in the default locale catalog. Resolution uses exact
 BCP-47 tag, language-script, language, default locale, then fallback. The only
 formatting feature in v1 is named `{argument}` substitution.
 
-The packaged image is the platform icon on every target. Other manifest icons use
-Host semantic enum names. Deep Links, when needed, are manifest-only structured
-rules; JavaScript cannot resolve them.
+The packaged image is the platform icon on every target and the icon for default
+timeline tabs. The first automatically added default tab uses `platform.name`;
+other defaults and the manual-add list retain timeline titles. Other manifest
+icons use Host semantic enum names. See the
+[tab presentation rules](references/manifest.md#default-and-manually-added-tabs).
+Deep Links, when needed, are manifest-only structured rules; JavaScript cannot
+resolve them.
 
 For full field defaults and validation, read the [manifest reference](references/manifest.md).
 All five authentication interactions are covered in [authentication](references/authentication.md).

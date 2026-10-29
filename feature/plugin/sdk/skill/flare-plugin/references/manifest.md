@@ -102,6 +102,34 @@ Icons use these Host semantic names:
 `Delete`, `Follow`, `Block`, `Mute`, `Info`. The platform icon itself is the
 package's `assets/icon.<extension>` (PNG, JPEG, WebP, GIF or ICO), not one of these names.
 
+#### Default and manually added tabs
+
+When a new account with timeline access is added, Flare adds every timeline with
+`defaultForNewAccount: true` in manifest order. The first default is also the
+account's main timeline. Multiple defaults are supported; other static timelines
+and dynamic `tabCatalog.page` entries remain available for manual addition.
+
+Default tabs follow the same presentation convention as built-in platforms on
+Android, iOS, native macOS and Compose Desktop:
+
+| Where the tab appears | Title | Icon |
+| --- | --- | --- |
+| First automatically added default | Localized `platform.name` | Packaged platform icon |
+| Other automatically added defaults | Declared timeline `title` | Packaged platform icon |
+| Default timeline in the manual-add list | Declared timeline `title` | Packaged platform icon |
+| Other timelines in the manual-add list | Declared timeline `title` | Declared timeline `icon` |
+
+Keep functional titles such as Home, Discover or Bookmarks in the timeline
+declarations; Flare supplies the platform name for the first automatic tab.
+The declared semantic `icon` is not used for default timelines in these lists.
+Timeline IDs, parameters and `List`/`Grid` presentation are unchanged by these rules.
+Profile tabs continue to use their own declared titles and icons.
+
+Automatic addition happens only when creating an account. Signing in again or
+updating/reloading a plugin does not recreate existing tabs or overwrite saved
+names, icons, ordering or user customizations. Updated declarations apply to
+newly added tabs.
+
 ### Login methods
 
 Each method has required `id`, `interaction`, `title`; optional `description`;

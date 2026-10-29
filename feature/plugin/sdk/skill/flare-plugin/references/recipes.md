@@ -21,6 +21,8 @@ For multiple timelines, use stable IDs such as home/local/bookmarks and a bounde
 switch over those IDs. Unknown IDs should produce Unsupported, not accidentally
 load the default timeline. Dynamic IDs come from [tab catalog](#tab-catalog).
 Test refresh, a second page, an empty continued page, and genuine exhaustion.
+For automatic tab selection, platform names/icons and manual-add labels, follow
+the [tab presentation rules](manifest.md#default-and-manually-added-tabs).
 
 ## Search
 

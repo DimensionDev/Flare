@@ -3,6 +3,11 @@ package dev.dimension.flare.feature.plugin.sdk
 import dev.dimension.flare.data.datasource.microblog.ComposeType
 import dev.dimension.flare.data.datasource.microblog.capabilities
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
+import dev.dimension.flare.data.model.IconType
+import dev.dimension.flare.data.model.TimelineDisplayMode
+import dev.dimension.flare.data.model.appearance.AppearanceKeys
+import dev.dimension.flare.data.model.tab.TimelineSpec
+import dev.dimension.flare.data.model.tab.toUiTimelineTabItem
 import dev.dimension.flare.feature.plugin.abi.PluginJsonV1
 import dev.dimension.flare.feature.plugin.adapter.PluginPlatformSpecSourceV1
 import dev.dimension.flare.feature.plugin.adapter.accountCredential
@@ -26,6 +31,7 @@ import dev.dimension.flare.feature.plugin.login.PluginOAuthLoginCoordinatorV1
 import dev.dimension.flare.feature.plugin.login.PluginOAuthPendingStoreV1
 import dev.dimension.flare.feature.plugin.login.PluginOAuthPendingV1
 import dev.dimension.flare.feature.plugin.login.PluginWebCookieLoginCoordinatorV1
+import dev.dimension.flare.feature.plugin.manifest.toUiText
 import dev.dimension.flare.feature.plugin.runtime.PluginCallException
 import dev.dimension.flare.feature.plugin.runtime.PluginRuntimeKeyV1
 import dev.dimension.flare.feature.plugin.runtime.PluginRuntimePool
@@ -42,6 +48,7 @@ import dev.dimension.flare.feature.plugin.wire.HandleRequestV1
 import dev.dimension.flare.feature.plugin.wire.HashtagV1
 import dev.dimension.flare.feature.plugin.wire.LoginBeginRequestV1
 import dev.dimension.flare.feature.plugin.wire.LoginResumeRequestV1
+import dev.dimension.flare.feature.plugin.wire.LoginSuccessV1
 import dev.dimension.flare.feature.plugin.wire.LoginTransitionV1
 import dev.dimension.flare.feature.plugin.wire.MutationRequestV1
 import dev.dimension.flare.feature.plugin.wire.MutationResultV1
@@ -55,10 +62,12 @@ import dev.dimension.flare.feature.plugin.wire.ProfileTimelineRequestV1
 import dev.dimension.flare.feature.plugin.wire.ProfileV1
 import dev.dimension.flare.feature.plugin.wire.SearchRequestV1
 import dev.dimension.flare.feature.plugin.wire.SemanticActionV1
+import dev.dimension.flare.feature.plugin.wire.TimelineDisplayV1
 import dev.dimension.flare.feature.plugin.wire.TimelinePageRequestV1
 import dev.dimension.flare.feature.plugin.wire.VisibilityV1
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformDataSourceContext
+import dev.dimension.flare.ui.model.UiIcon
 import io.ktor.client.engine.okhttp.OkHttp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -232,6 +241,21 @@ class PixelfedSampleTest {
                         ?.builtInTimelineTabs
                         ?.size,
                 )
+                val tabs = assertNotNull(capabilities.tabCatalog?.configuration)
+                val defaultTab = tabs.defaultTabs.single()
+                val homeTab = tabs.builtInTimelineTabs.first()
+                assertEquals(spec.metadata.displayNameText, defaultTab.title)
+                assertEquals(spec.metadata.icon, defaultTab.icon)
+                assertEquals(
+                    plugin.installed.manifest.platform.timelines
+                        .first()
+                        .title
+                        .toUiText(PLUGIN_ID),
+                    homeTab.title,
+                )
+                assertEquals(spec.metadata.icon, homeTab.icon)
+                assertEquals(defaultTab.id, homeTab.id)
+                assertEquals(IconType.Material(UiIcon.Featured), tabs.builtInTimelineTabs[1].icon)
                 assertEquals(
                     1,
                     capabilities.compose
@@ -656,6 +680,71 @@ class PixelfedSampleTest {
                     )
                 assertEquals(DetectorMatchV1.None, detector.match)
             } finally {
+                pool.close()
+            }
+        }
+
+    @Test
+    fun multipleDefaultTabsKeepTheirOrderTargetsAndGalleryPresentation() =
+        runBlocking {
+            val packagePath = root.resolve("default-tabs.fpp")
+            pack(packagePath)
+            val installed = install(packagePath)
+            val platform = installed.installed.manifest.platform
+            val timelines =
+                listOf(
+                    platform.timelines.single { it.id == "discover" },
+                    platform.timelines.single { it.id == "home" }.copy(display = TimelineDisplayV1.Grid),
+                    platform.timelines.single { it.id == "local" }.copy(defaultForNewAccount = true),
+                )
+            val plugin =
+                installed.copy(
+                    installed =
+                        installed.installed.copy(
+                            manifest = installed.installed.manifest.copy(platform = platform.copy(timelines = timelines)),
+                        ),
+                )
+            val pool = PluginRuntimePool(FileSystem.SYSTEM, PixelfedFixtureTransport())
+            val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+            try {
+                val accountKey = MicroBlogKey("42", "pixelfed.social")
+                val success =
+                    LoginSuccessV1(
+                        accountId = accountKey.id,
+                        origin = ORIGIN,
+                        credential = buildJsonObject {},
+                        profile = ProfileV1(EntityKeyV1(accountKey.id, accountKey.host), "alice@pixelfed.social", "Alice"),
+                        capabilities = platform.capabilities.mapValues { it.value.operations.keys },
+                    )
+                val spec = plugin.platformSpec(pool, scope)
+                val dataSource =
+                    spec.createDataSource(
+                        MemoryPlatformDataSourceContext(accountKey, plugin.accountCredential(success)),
+                    )
+                val tabs = assertNotNull(dataSource.capabilities.tabCatalog?.configuration)
+                val defaults = tabs.defaultTabs
+                val available = tabs.builtInTimelineTabs
+                assertEquals(
+                    listOf("home", "local"),
+                    defaults.map { assertIs<TimelineSpec.AccountResourceData>(it.target.data).resourceId },
+                )
+                assertEquals(listOf(spec.metadata.displayNameText, timelines[2].title.toUiText(PLUGIN_ID)), defaults.map { it.title })
+                assertEquals(listOf(spec.metadata.icon, spec.metadata.icon), defaults.map { it.icon })
+                assertEquals(timelines.map { it.title.toUiText(PLUGIN_ID) }, available.map { it.title })
+                assertEquals(
+                    listOf(IconType.Material(UiIcon.Featured), spec.metadata.icon, spec.metadata.icon),
+                    available.map { it.icon },
+                )
+                defaults.zip(available.drop(1)).forEach { (default, manual) ->
+                    assertEquals(manual.id, default.id)
+                    assertEquals(manual.toUiTimelineTabItem().contentSourceKey, default.toUiTimelineTabItem().contentSourceKey)
+                    assertEquals(accountKey, assertIs<TimelineSpec.AccountResourceData>(default.target.data).accountKey)
+                    assertEquals(manual.appearancePatch, default.appearancePatch)
+                }
+                assertEquals(TimelineDisplayMode.Gallery, assertNotNull(defaults[0].appearancePatch)[AppearanceKeys.TimelineDisplayMode])
+                assertNull(defaults[1].appearancePatch)
+            } finally {
+                scope.cancel()
                 pool.close()
             }
         }

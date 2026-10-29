@@ -13,8 +13,37 @@ import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertNull
 
 class WireV1Test {
+    @Test
+    fun postAuthorAndVisibilityAcceptOmissionAndNull() {
+        val payload = JsonObject(PluginJsonV1.encodeToJsonElement(validPost()).jsonObject - setOf("author", "visibility"))
+
+        listOf(payload, JsonObject(payload + mapOf("author" to JsonNull, "visibility" to JsonNull))).forEach { value ->
+            val post = PluginJsonV1.decodeFromJsonElement<PostV1>(value)
+
+            post.requireValid()
+            assertNull(post.author)
+            assertNull(post.visibility)
+            assertEquals(post, PluginJsonV1.decodeFromString<PostV1>(PluginJsonV1.encodeToString(post)))
+        }
+    }
+
+    @Test
+    fun optionalPostFieldsStillRejectMalformedValues() {
+        assertFailsWith<IllegalArgumentException> {
+            validPost().copy(author = validProfile().copy(handle = "")).requireValid()
+        }
+        val payload = PluginJsonV1.encodeToJsonElement(validPost()).jsonObject
+        listOf(
+            JsonObject(payload + ("author" to JsonObject(emptyMap()))),
+            JsonObject(payload + ("visibility" to JsonPrimitive("private"))),
+        ).forEach { value ->
+            assertFailsWith<SerializationException> { PluginJsonV1.decodeFromJsonElement<PostV1>(value) }
+        }
+    }
+
     @Test
     fun postDetailTypeDefaultsToPostWhenOmitted() {
         val payload = JsonObject(PluginJsonV1.encodeToJsonElement(validPost()).jsonObject - "detailType")

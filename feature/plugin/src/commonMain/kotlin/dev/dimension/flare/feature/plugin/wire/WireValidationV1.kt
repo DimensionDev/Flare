@@ -86,7 +86,7 @@ public fun ProfileV1.requireValid() {
 public fun PostV1.requireValid(depth: Int = 0) {
     require(depth <= 4) { "Post nesting is too deep" }
     key.requireValid()
-    author.requireValid()
+    author?.requireValid()
     createdAt.requireTimestamp()
     content.requireValid()
     url.requireHttpsUrl(required = detailType == PostDetailTypeV1.Link)

@@ -109,7 +109,7 @@ public enum class PostDetailTypeV1 {
 @Serializable
 public data class PostV1(
     val key: EntityKeyV1,
-    val author: ProfileV1,
+    val author: ProfileV1? = null,
     val createdAt: String,
     val content: RichTextV1,
     val url: String? = null,
@@ -118,7 +118,7 @@ public data class PostV1(
     val replyTo: EntityKeyV1? = null,
     val spoilerText: String? = null,
     val sensitive: Boolean = false,
-    val visibility: VisibilityV1 = VisibilityV1.Public,
+    val visibility: VisibilityV1? = null,
     val favouritesCount: Long? = null,
     val repostsCount: Long? = null,
     val repliesCount: Long? = null,

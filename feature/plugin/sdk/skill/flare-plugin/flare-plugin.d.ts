@@ -237,7 +237,8 @@ interface ActionDescriptorV1 {
 type PostDetailTypeV1 = "post" | "article" | "gallery" | "link";
 interface PostV1 {
   key: EntityKeyV1;
-  author: ProfileV1;
+  /** Defaults to null. When present, the complete ProfileV1 contract still applies. */
+  author?: ProfileV1 | null;
   createdAt: string;
   content: RichTextV1;
   /** Required for detailType "link"; absolute HTTPS URL without URL credentials. */
@@ -247,7 +248,8 @@ interface PostV1 {
   replyTo?: EntityKeyV1;
   spoilerText?: string;
   sensitive?: boolean;
-  visibility?: VisibilityV1;
+  /** Defaults to null; omitted visibility is not inferred as public. */
+  visibility?: VisibilityV1 | null;
   favouritesCount?: number;
   repostsCount?: number;
   repliesCount?: number;

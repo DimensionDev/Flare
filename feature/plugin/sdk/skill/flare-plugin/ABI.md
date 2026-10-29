@@ -143,6 +143,13 @@ All values crossing the boundary are JSON Wire v1 DTOs. IDs use
 Rich text is `{ "format": "plain|html", "value": "..." }`; Flare sanitizes
 HTML before rendering.
 
+`PostV1` requires `key`, `createdAt`, and `content`. Its `author` and `visibility`
+fields default to null and accept explicit null. A provided author must satisfy
+the complete `ProfileV1` contract. The Host does not synthesize an author or infer
+public visibility. These rules also apply to nested reposts and `updatedPost`
+results; an updated post is a complete snapshot, so omitted fields do not retain
+their previous values.
+
 HTML resource and link URLs must use HTTPS without URL credentials. Relative
 URLs resolve against the selected instance. Local files, `content:`, `data:`,
 `javascript:`, and other schemes are rejected before rendering.

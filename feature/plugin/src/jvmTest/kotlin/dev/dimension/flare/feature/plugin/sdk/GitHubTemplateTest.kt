@@ -38,6 +38,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -116,9 +117,7 @@ class GitHubTemplateTest {
             )
             assertEquals(
                 "feed.example",
-                first.items
-                    .single()
-                    .author.key.host,
+                assertNotNull(first.items.single().author).key.host,
             )
             assertEquals(PostDetailTypeV1.Link, first.items.single().detailType)
             assertEquals("https://example.org/posts/post-1", first.items.single().url)

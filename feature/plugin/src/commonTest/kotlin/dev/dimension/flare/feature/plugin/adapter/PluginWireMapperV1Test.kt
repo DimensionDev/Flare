@@ -17,6 +17,7 @@ import dev.dimension.flare.feature.plugin.wire.ProfileV1
 import dev.dimension.flare.feature.plugin.wire.RichTextFormatV1
 import dev.dimension.flare.feature.plugin.wire.RichTextV1
 import dev.dimension.flare.feature.plugin.wire.SemanticActionV1
+import dev.dimension.flare.feature.plugin.wire.VisibilityV1
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.ClickEvent
@@ -30,17 +31,75 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertIs
 import kotlin.test.assertNotEquals
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.time.Instant
 
 class PluginWireMapperV1Test {
     private val mapper = createMapper(MicroBlogKey("me", "local.example"))
+    private val author = ProfileV1(EntityKeyV1("author", "remote.example"), "alice", "Alice")
     private val post =
         PostV1(
             key = EntityKeyV1("post-1", "remote.example"),
-            author = ProfileV1(EntityKeyV1("author", "remote.example"), "alice", "Alice"),
+            author = author,
             createdAt = "2026-10-27T00:00:00Z",
             content = RichTextV1(value = "Preview"),
         )
+
+    @Test
+    fun postsWithoutAuthorOrVisibilityKeepNavigationActionsAndPlatformIcon() {
+        val icon = IconType.Url("file:///plugins/platform-logo.png")
+        listOf(MicroBlogKey("me", "local.example"), null).forEach { accountKey ->
+            val mapper = createMapper(accountKey, platformIcon = icon)
+            PostDetailTypeV1.entries.forEach { type ->
+                val value =
+                    post.copy(
+                        visibility = VisibilityV1.Followers,
+                        detailType = type,
+                        url = "https://remote.example/post",
+                        actions = listOf(ActionDescriptorV1(SemanticActionV1.Favourite)),
+                    )
+                val complete = mapper.post(value)
+                val withoutAuthor = mapper.post(value.copy(author = null, visibility = null))
+
+                assertEquals(complete.post.copy(user = null, visibility = null), withoutAuthor.post)
+                assertEquals(complete.stableItemKey, withoutAuthor.stableItemKey)
+                assertNotEquals(complete.renderHash, withoutAuthor.renderHash)
+            }
+        }
+    }
+
+    @Test
+    fun explicitPostVisibilitiesKeepTheirMapping() {
+        mapOf(
+            VisibilityV1.Public to UiTimelineV2.Post.Visibility.Public,
+            VisibilityV1.Unlisted to UiTimelineV2.Post.Visibility.Home,
+            VisibilityV1.Followers to UiTimelineV2.Post.Visibility.Followers,
+            VisibilityV1.Direct to UiTimelineV2.Post.Visibility.Specified,
+        ).forEach { (visibility, expected) ->
+            assertEquals(expected, mapper.post(post.copy(visibility = visibility)).post.visibility)
+        }
+    }
+
+    @Test
+    fun notificationsKeepTheirActorWhenPostsAndRepostsHaveNoAuthor() {
+        val value = PostV1(key = post.key, createdAt = post.createdAt, content = post.content)
+        val notification =
+            NotificationV1(
+                id = "notice",
+                createdAt = post.createdAt,
+                kind = NotificationKindV1.Repost,
+                actor = author,
+                post = value.copy(repost = value.copy(key = EntityKeyV1("original", "remote.example"))),
+            )
+        val mapped = assertIs<UiTimelineV2.TimelinePostItem>(mapper.notification(notification))
+
+        assertEquals(mapper.profile(author), mapped.presentation.message?.user)
+        listOf(mapped.post, assertNotNull(mapped.presentation.repost)).forEach {
+            assertNull(it.user)
+            assertNull(it.visibility)
+        }
+    }
 
     @Test
     fun platformIconIsSharedByPostsProfilesAndNestedAuthors() {
@@ -49,17 +108,17 @@ class PluginWireMapperV1Test {
         val mapped = assertIs<UiTimelineV2.TimelinePostItem>(mapper.post(post)).post
         assertEquals(icon, mapped.platformIcon)
         assertEquals(icon, mapped.user?.platformIcon)
-        assertEquals(icon, mapper.profile(post.author).platformIcon)
-        assertEquals(icon, mapper.cachedProfile(post.author).platformIcon)
+        assertEquals(icon, mapper.profile(author).platformIcon)
+        assertEquals(icon, mapper.cachedProfile(author).platformIcon)
     }
 
     @Test
     fun unsafeProfileAndNestedPostUrlsAreRejectedBeforeMapping() {
         listOf("http://remote.example/asset", "https://user:secret@remote.example/asset", "javascript:alert(1)").forEach { url ->
             listOf(
-                post.author.copy(avatarUrl = url),
-                post.author.copy(bannerUrl = url),
-                post.author.copy(url = url),
+                author.copy(avatarUrl = url),
+                author.copy(bannerUrl = url),
+                author.copy(url = url),
             ).forEach { profile ->
                 assertFailsWith<IllegalArgumentException>(url) { mapper.profile(profile) }
                 assertFailsWith<IllegalArgumentException>(url) { mapper.post(post.copy(repost = post.copy(author = profile))) }
@@ -76,7 +135,7 @@ class PluginWireMapperV1Test {
 
     @Test
     fun notificationsForTheSamePostKeepTheirIdentityActorAndTime() {
-        val actor = post.author.copy(key = EntityKeyV1("reactor", "remote.example"))
+        val actor = author.copy(key = EntityKeyV1("reactor", "remote.example"))
         val notification =
             NotificationV1(
                 id = "notice-1",
@@ -114,7 +173,7 @@ class PluginWireMapperV1Test {
                 id = "notice",
                 createdAt = post.createdAt,
                 kind = NotificationKindV1.Repost,
-                actor = post.author,
+                actor = author,
                 post = post.copy(repost = repost),
                 message = RichTextV1(RichTextFormatV1.Html, "<p>Shared your post</p>"),
             )
@@ -128,7 +187,7 @@ class PluginWireMapperV1Test {
         assertEquals(UiTimelineV2.Message.Type.Raw("Shared your post"), item.presentation.message?.type)
         val standalone = assertIs<UiTimelineV2.Message>(mapper.notification(notification.copy(post = null)))
         assertEquals(item.presentation.message, standalone)
-        assertEquals(mapper.profile(post.author).clickEvent, standalone.clickEvent)
+        assertEquals(mapper.profile(author).clickEvent, standalone.clickEvent)
     }
 
     @Test
@@ -170,14 +229,14 @@ class PluginWireMapperV1Test {
     @Test
     fun selfProfileUsesTheCanonicalAccountKeyForCacheLookups() {
         val key = MicroBlogKey("me", "local.example")
-        val profile = post.author.copy(key = EntityKeyV1(key.id, key.host.uppercase()))
+        val profile = author.copy(key = EntityKeyV1(key.id, key.host.uppercase()))
         assertEquals(key, mapper.profile(profile).key)
         assertEquals(key, mapper.cachedProfile(profile).key)
         assertEquals(
             MicroBlogKey("other", key.host),
             mapper.profile(profile.copy(key = profile.key.copy(id = "other"))).key,
         )
-        assertEquals(post.author.key.host, mapper.profile(post.author).key.host)
+        assertEquals(author.key.host, mapper.profile(author).key.host)
     }
 
     @Test
@@ -185,7 +244,7 @@ class PluginWireMapperV1Test {
         val denied = createMapper(MicroBlogKey("me", "local.example"), mediaNetwork = false)
         val profile =
             denied.cachedProfile(
-                post.author.copy(
+                author.copy(
                     avatarUrl = "https://cdn.example/avatar.png",
                     bannerUrl = "https://cdn.example/banner.png",
                     description = RichTextV1(RichTextFormatV1.Html, "<p>About<img src='https://cdn.example/old.png'></p>"),
@@ -194,7 +253,7 @@ class PluginWireMapperV1Test {
         assertEquals(null, profile.avatar)
         assertEquals(null, profile.banner)
         assertEquals("About", profile.description?.raw)
-        assertEquals(post.author.key.id, profile.key.id)
+        assertEquals(author.key.id, profile.key.id)
         assertEquals(
             false,
             dev.dimension.flare.ui.model.PluginMediaPermissions
@@ -206,7 +265,7 @@ class PluginWireMapperV1Test {
     fun remoteMediaRequiresAnExplicitNetworkGrant() {
         val denied = createMapper(MicroBlogKey("me", "local.example"), mediaNetwork = false)
         assertFailsWith<IllegalArgumentException> {
-            denied.profile(post.author.copy(avatarUrl = "https://unapproved.example/collect?token=dummy"))
+            denied.profile(author.copy(avatarUrl = "https://unapproved.example/collect?token=dummy"))
         }
         assertFailsWith<IllegalArgumentException> {
             denied.post(post.copy(media = listOf(MediaV1("image", MediaTypeV1.Image, "https://cdn.example/image.png"))))
@@ -217,7 +276,7 @@ class PluginWireMapperV1Test {
         assertIs<UiTimelineV2.TimelinePostItem>(denied.post(post))
         assertEquals(
             "https://cdn.example/avatar.png",
-            mapper.profile(post.author.copy(avatarUrl = "https://cdn.example/avatar.png")).avatar?.url,
+            mapper.profile(author.copy(avatarUrl = "https://cdn.example/avatar.png")).avatar?.url,
         )
     }
 
@@ -240,7 +299,7 @@ class PluginWireMapperV1Test {
                 title = "Gallery",
                 createdAt = post.createdAt,
                 url = "https://remote.example/gallery",
-                author = post.author.copy(avatarUrl = "https://remote.example/avatar.png"),
+                author = author.copy(avatarUrl = "https://remote.example/avatar.png"),
                 images = listOf(MediaV1("image", MediaTypeV1.Image, "https://remote.example/image.png")),
             )
         val detail = mapper.gallery(value)

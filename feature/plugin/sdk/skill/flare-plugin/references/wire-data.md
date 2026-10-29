@@ -49,10 +49,27 @@ const post = {
 ```
 
 Use ISO-8601 instants with a timezone, not epoch numbers or locale-formatted dates.
-`ProfileV1` requires key/handle/displayName; `PostV1` requires key/author/createdAt/
-content. Most collections default empty and booleans default false. Counts are
-nonnegative. Do not include unknown optional website fields by spreading objects.
+`ProfileV1` requires key/handle/displayName; `PostV1` requires key/createdAt/content.
+Post author and visibility default to null and may be omitted or explicitly null.
+When an author is provided, it must be a complete valid ProfileV1. The Host does
+not synthesize an author or infer public visibility. Most collections default
+empty and booleans default false. Counts are nonnegative. Do not include unknown
+optional website fields by spreading objects.
 See [navigation](capabilities.md#entry-points-and-actions) before choosing detailType.
+
+A minimal post without author or visibility is:
+
+```json
+{
+  "key": { "id": "post-17", "host": "example.org" },
+  "createdAt": "2026-01-01T00:00:00Z",
+  "content": { "value": "Hello" }
+}
+```
+
+The same defaults apply inside `repost`, notifications, and `updatedPost` results.
+An updated post is a complete snapshot: omitting author or visibility clears that
+value rather than retaining it from the cached post.
 
 ## Text and media
 

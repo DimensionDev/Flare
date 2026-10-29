@@ -373,7 +373,7 @@ internal class PluginWireMapperV1(
             images = media.map { it.toUi(sensitive) }.toPersistentList(),
             sensitive = sensitive,
             contentWarning = spoilerText?.takeIf(String::isNotBlank)?.let { UiTranslatableText(it.toUiPlainText()) },
-            user = profile(author),
+            user = author?.let(::profile),
             platformIcon = platformIcon,
             content = UiTranslatableText(content.toUi()),
             actions = directActions.toPersistentList(),
@@ -381,7 +381,7 @@ internal class PluginWireMapperV1(
             statusKey = key,
             card = null,
             createdAt = Instant.parse(createdAt).toUi(),
-            visibility = visibility.toUiVisibility(),
+            visibility = visibility?.toUiVisibility(),
             references =
                 replyTo
                     ?.toMicroBlogKey()

@@ -7,6 +7,7 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -370,7 +371,7 @@ internal fun AgentChatMessageList(
 private const val AGENT_CHAT_MESSAGE_LOADING_COUNT = 3
 
 @Composable
-private fun AgentChatMessageSkeleton(isUser: Boolean) {
+internal fun AgentChatMessageSkeleton(isUser: Boolean) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement =
@@ -380,36 +381,36 @@ private fun AgentChatMessageSkeleton(isUser: Boolean) {
                 Arrangement.Start
             },
     ) {
-        Card(
-            modifier = Modifier.fillMaxWidth(0.72f),
-            colors =
-                CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-                ),
+        Column(
+            modifier =
+                if (isUser) {
+                    Modifier
+                        .fillMaxWidth(0.72f)
+                        .background(MaterialTheme.colorScheme.surfaceContainerHigh, CardDefaults.shape)
+                        .padding(12.dp)
+                } else {
+                    Modifier.fillMaxWidth().padding(vertical = 4.dp)
+                },
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            Column(
-                modifier = Modifier.padding(12.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                Surface(
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .height(14.dp),
-                    shape = MaterialTheme.shapes.small,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.10f),
-                    content = {},
-                )
-                Surface(
-                    modifier =
-                        Modifier
-                            .fillMaxWidth(0.62f)
-                            .height(14.dp),
-                    shape = MaterialTheme.shapes.small,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f),
-                    content = {},
-                )
-            }
+            Surface(
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .height(14.dp),
+                shape = MaterialTheme.shapes.small,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.10f),
+                content = {},
+            )
+            Surface(
+                modifier =
+                    Modifier
+                        .fillMaxWidth(0.62f)
+                        .height(14.dp),
+                shape = MaterialTheme.shapes.small,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f),
+                content = {},
+            )
         }
     }
 }
@@ -433,7 +434,16 @@ internal fun AgentChatMessageBubble(
                 Arrangement.Start
             },
     ) {
-        if (previewOnlyUserMessage) {
+        if (!isUser) {
+            AgentChatMessageParts(
+                parts = parts,
+                isUser = false,
+                onPostClick = onPostClick,
+                onUserClick = onUserClick,
+                onInputRequestOptionSelected = onInputRequestOptionSelected,
+                modifier = Modifier.padding(vertical = 4.dp),
+            )
+        } else if (previewOnlyUserMessage) {
             Column(
                 modifier = Modifier.fillMaxWidth(0.88f),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
@@ -451,12 +461,7 @@ internal fun AgentChatMessageBubble(
                 modifier = Modifier.fillMaxWidth(0.88f),
                 colors =
                     CardDefaults.cardColors(
-                        containerColor =
-                            if (isUser) {
-                                MaterialTheme.colorScheme.primaryContainer
-                            } else {
-                                MaterialTheme.colorScheme.surfaceContainerHigh
-                            },
+                        containerColor = MaterialTheme.colorScheme.primaryContainer,
                     ),
             ) {
                 Column(

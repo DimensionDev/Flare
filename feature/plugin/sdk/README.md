@@ -1,12 +1,42 @@
 # Flare Plugin SDK
 
-`flare-plugin-sdk` contains editor types, a local package command,
+`flare-plugin-sdk` contains a project initializer, editor types, a local package command,
 templates, examples, and a portable AI authoring skill for Social Plugin API v1.
 Flare provides the plugin runtime. Supported targets are Android, JVM Desktop,
 iOS, and native macOS, not Web. Use a Flare build that includes Plugins in Settings;
 this SDK does not promise a minimum public app release.
 
-## Install for development
+## Create a plugin
+
+With Node 22 or newer, run:
+
+```sh
+npx flare-plugin-sdk@next init my-plugin
+```
+
+This copies the GitHub template bundled with that SDK version into `my-plugin`:
+
+```text
+my-plugin/
+  manifest.json
+  plugin.js
+  assets/icon.png
+  README.md
+```
+
+The directory name becomes the plugin and platform display name. The initializer
+generates unique plugin/platform IDs; keep them stable after publication. New and
+empty directories are accepted, including `init .` in an empty current directory.
+Non-empty directories, files, and symbolic links are rejected without overwriting
+them. The command uses bundled files only and does not install dependencies,
+initialize Git, contact your website, or publish anything. Run
+`npx flare-plugin-sdk@next --help` for usage.
+
+Adapt the illustrative API endpoints, replace the placeholder icon, and follow
+the generated README. In Desktop or native macOS, select the generated directory
+in Settings → Plugins → Plugin development to validate and reload it.
+
+## Install for editor types and packaging
 
 Install the npm preview:
 
@@ -29,9 +59,10 @@ These local checks and packaging commands do not publish anything.
 
 ## Create and develop a plugin
 
-1. Copy the contents of `node_modules/flare-plugin-sdk/skill/flare-plugin/assets/github-template/`
-   into your plugin repository. Replace its IDs, icon, and illustrative website
-   endpoints using evidence from the real API.
+1. Create a plugin with the initializer above, or manually copy the contents of
+   `node_modules/flare-plugin-sdk/skill/flare-plugin/assets/github-template/` into
+   your repository. Manual copies retain example IDs and names; replace them.
+   Adapt the icon and illustrative website endpoints using evidence from the real API.
 2. Read the [complete developer guide](https://github.com/DimensionDev/Flare/tree/feature/plugin/feature/plugin/sdk/skill/flare-plugin).
    The same guide is bundled at `skill/flare-plugin/README.md` inside the npm package,
    with all authentication, capability, runtime, data, testing, and publication references.
@@ -43,7 +74,7 @@ These local checks and packaging commands do not publish anything.
 5. For local file installation, package that directory from your plugin project:
 
    ```sh
-   npx flare-plugin-pack ./dist ./plugin.fpp
+   npx --package=flare-plugin-sdk@next flare-plugin-pack ./dist ./plugin.fpp
    ```
 
 The packer accepts plugin files only, so keep source, `.git`, `package.json`,
@@ -85,9 +116,11 @@ All documentation is in English. The complete Pixelfed adapter is bundled at
 
 From `feature/plugin/sdk`, run `npm ci` and `npm test` with Node 22 or newer.
 The tests build an npm tarball, check its complete resource set and license,
-install it offline in an empty project, type-check an actual consumer, and run
-the installed package command against the bundled template. They do not contact
-a website or publish to npm. Flare's Host and platform acceptance checks are
+install it offline in an empty project, invoke the actual npx initializer,
+type-check a consumer, and package both the generated project and bundled template.
+Initializer tests cover valid unique IDs, empty/nested/Unicode paths, invalid
+arguments, and preserving existing directories, files, and symlinks. They do not
+contact a website or publish to npm. Flare's Host and platform acceptance checks are
 documented in `skill/flare-plugin/references/testing.md`.
 
 ## Publish this SDK (maintainers)
@@ -121,8 +154,8 @@ Public OIDC publications from this public repository receive provenance automati
 For subsequent releases:
 
 1. Update the SDK version and lockfile together, for example with
-   `npm version 0.1.0-beta.2 --no-git-tag-version`, and commit the tested changes.
-2. Tag that commit `plugin-sdk-v0.1.0-beta.2` and push only that tag when ready to publish.
+   `npm version prerelease --preid beta --no-git-tag-version`, and commit the tested changes.
+2. Tag that commit `plugin-sdk-v<version>` using the new version and push only that tag when ready to publish.
    The workflow rejects a tag that does not exactly match `package.json`.
 3. The workflow validates the tarball first, then publishes prereleases to `next`
    and stable versions to `latest`. Existing app workflows exclude SDK tags.

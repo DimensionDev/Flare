@@ -101,6 +101,43 @@ class GitHubTemplateTest {
         }
 
     @Test
+    fun initializedProjectCanBePackagedAndInstalledByTheHost() =
+        runBlocking {
+            val sdk =
+                sequenceOf(Paths.get("sdk"), Paths.get("feature/plugin/sdk"))
+                    .map { it.toAbsolutePath() }
+                    .first { Files.isRegularFile(it.resolve("bin/cli.mjs")) }
+            val project = root / "generated project"
+            val archive = root / "generated.fpp"
+            listOf(
+                listOf(sdk.resolve("bin/cli.mjs").toString(), "init", project.toString()),
+                listOf(sdk.resolve("skill/flare-plugin/pack.mjs").toString(), project.toString(), archive.toString()),
+            ).forEach { arguments ->
+                val process =
+                    ProcessBuilder(listOf("node") + arguments)
+                        .redirectErrorStream(true)
+                        .start()
+                val output = process.inputStream.bufferedReader().use { it.readText() }
+                assertEquals(0, process.waitFor(), output)
+            }
+
+            val store = PluginStateStore.open(FileSystem.SYSTEM, root / "generated-store")
+            val installer = PluginInstaller(FileSystem.SYSTEM, store)
+            val preview = installer.inspect(archive)
+            assertTrue(preview.pluginId.startsWith("local.plugin.p"))
+            assertTrue(preview.platformId.startsWith("Plugin"))
+            assertEquals("generated project", preview.nameFallback)
+            assertEquals(mapOf("flare.datasource.timeline/v1" to setOf("page")), preview.capabilities)
+            installer.commit(preview, confirmed = true, activate = store::install)
+            val installed =
+                PluginStateStore
+                    .open(FileSystem.SYSTEM, root / "generated-store")
+                    .running.plugins
+                    .getValue(preview.pluginId)
+            assertEquals(preview.platformId, installed.installed.manifest.platform.id)
+        }
+
+    @Test
     fun githubTemplateVerifiesIdentityAndMapsLinkPostsWithOpaquePaging() =
         runBlocking {
             val credential = login()

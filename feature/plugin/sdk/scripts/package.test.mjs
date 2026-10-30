@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
 import { mkdtempSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join, resolve, sep } from "node:path";
+import { dirname, join, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import test from "node:test";
 
@@ -29,7 +29,7 @@ test("npm tarball preserves the complete SDK and works as an offline dependency"
     .map((path) => `skill/${path.split(sep).join("/")}`);
   assert.deepEqual(
     archive.files.map(({ path }) => path).sort(),
-    ["LICENSE", "README.md", "package.json", ...resources].sort(),
+    ["LICENSE", "README.md", "package.json", "bin/cli.mjs", ...resources].sort(),
   );
   assert.equal(
     readFileSync(join(sdk, "LICENSE"), "utf8"),
@@ -45,6 +45,19 @@ test("npm tarball preserves the complete SDK and works as an offline dependency"
   for (const path of resources) {
     assert.deepEqual(readFileSync(join(installed, path)), readFileSync(join(sdk, path)), path);
   }
+
+  const generated = join(directory, "my-plugin");
+  execFileSync(process.execPath, [
+    join(dirname(process.env.npm_execpath), "npx-cli.js"), "--offline", metadata.name, "init", "my-plugin",
+  ], {
+    cwd: directory,
+    env: { ...process.env, npm_config_cache: join(directory, "cache"), npm_config_update_notifier: "false" },
+  });
+  assert.equal(JSON.parse(readFileSync(join(generated, "manifest.json"), "utf8")).name, "my-plugin");
+  execFileSync(process.execPath, ["--check", join(generated, "plugin.js")]);
+  const generatedPackage = join(directory, "generated.fpp");
+  npm(["exec", "--offline", "--", "flare-plugin-pack", generated, generatedPackage]);
+  assert(readFileSync(generatedPackage).length > 0);
 
   writeFileSync(join(directory, "plugin.ts"), `
 const plugin: PluginDefinitionV1 = {};
@@ -76,5 +89,5 @@ flare.fetch("https://example.org");
   const direct = join(directory, "direct.fpp");
   execFileSync(process.execPath, [join(sdk, metadata.bin["flare-plugin-pack"]), template, direct]);
   assert.deepEqual(readFileSync(packaged), readFileSync(direct));
-  t.diagnostic(`Verified ${archive.files.length} packed files, consumer types, and installed CLI`);
+  t.diagnostic(`Verified ${archive.files.length} packed files, offline npx initialization, consumer types, and installed CLIs`);
 });

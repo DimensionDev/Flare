@@ -42,7 +42,8 @@ is not available in the Web client.
   [installation and update guide](feature/plugin/sdk/skill/flare-plugin/references/publishing.md).
 - **Create with Flare AI:** ask the configured AI assistant to build an adapter
   for your website. See [creating plugins in Flare](feature/plugin/AI_AUTHORING.md).
-- **Develop a plugin:** start with the [SDK quick start](feature/plugin/sdk/README.md),
+- **Develop a plugin:** run `npx flare-plugin-sdk@next init my-plugin` and follow
+  the [SDK quick start](feature/plugin/sdk/README.md),
   then use the [complete developer guide](feature/plugin/sdk/skill/flare-plugin/README.md)
   for authentication, capabilities, data types, desktop development, and examples.
 

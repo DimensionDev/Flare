@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
     inputs:
       target:
-        description: Build target (Linux includes Android, Desktop, and Web)
+        description: Build target (Linux includes Android, Desktop, Web, and F-Droid)
         type: choice
         default: all
         options:
@@ -28,10 +28,10 @@ concurrency:
 
 jobs:
   build-linux:
-    name: Linux (Android, Desktop, Web)
-    if: github.event_name == 'push' || inputs.target == 'all' || inputs.target == 'linux'
+    name: Linux (Android, Desktop, Web, F-Droid)
+    if: github.event_name == 'push' || inputs.target == 'all' || inputs.target == 'linux' || inputs.target == 'fdroid'
     runs-on: [ubuntu-latest]
-    timeout-minutes: 120
+    timeout-minutes: 180
     env: &build-env
       BUILD_NUMBER: ${{ github.run_number }}
       BUILD_VERSION: ${{ github.ref_name }}
@@ -50,21 +50,22 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          distribution: "jetbrains"
+          distribution: ${{ inputs.target == 'fdroid' && 'temurin' || 'jetbrains' }}
           java-version: 25
           cache: gradle
-      - &setup-android
-        name: Setup Android SDK
+      - name: Setup Android SDK
         uses: android-actions/setup-android@v4
         with:
           packages: platform-tools
 
       - name: Set up pnpm
+        if: inputs.target != 'fdroid'
         uses: pnpm/action-setup@v6
         with:
           version: 12.11.2
 
       - name: Set up Node
+        if: inputs.target != 'fdroid'
         uses: actions/setup-node@v7
         with:
           node-version: 24
@@ -72,10 +73,12 @@ jobs:
           cache-dependency-path: web/pnpm-lock.yaml
 
       - name: Install web dependencies
+        if: inputs.target != 'fdroid'
         working-directory: web
         run: pnpm install --frozen-lockfile
 
       - name: Apply Signing
+        if: inputs.target != 'fdroid'
         env:
           ALIAS: ${{ secrets.ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
@@ -85,15 +88,18 @@ jobs:
         run: ./.github/apply_signing.sh
 
       - name: Run shared and desktop tests
+        if: inputs.target != 'fdroid'
         run: ./gradlew allTests :desktopApp:test -x wasmJsBrowserTest --stacktrace
 
       - name: Enable emulator acceleration
+        if: inputs.target != 'fdroid'
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
 
       - name: Run Android UI regressions
+        if: inputs.target != 'fdroid'
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 36
@@ -107,25 +113,56 @@ jobs:
             ./gradlew :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=dev.dimension.flare.ui.screen.gallery.GalleryDetailScreenTest
 
       - name: Run Kotlin wasmJs tests
+        if: inputs.target != 'fdroid'
         run: ./gradlew :web-shared:wasmJsTest :shared:wasmJsBrowserTest --tests '*ProxyEngineCapabilitiesTest*' --stacktrace
 
       - name: Run Svelte codegen tests
+        if: inputs.target != 'fdroid'
         working-directory: web
         run: pnpm test:codegen
 
       - name: Check Svelte
+        if: inputs.target != 'fdroid'
         working-directory: web
         run: pnpm check
 
       - name: Build Svelte
+        if: inputs.target != 'fdroid'
         working-directory: web
         run: pnpm build
 
       - name: Build and package Android and Linux
+        if: inputs.target != 'fdroid'
         run: ./gradlew :app:assembleRelease :app:bundleRelease :app:check :app:lint :desktopApp:check :desktopApp:build :desktopApp:packageReleaseAppImage --stacktrace
 
+      - name: Stop Gradle before switching JDK
+        if: inputs.target != 'fdroid'
+        run: ./gradlew --stop
+      - name: Checkout clean F-Droid sources
+        uses: actions/checkout@v7
+        with:
+          submodules: true
+          path: fdroid
+      - name: Switch to Temurin for F-Droid
+        if: inputs.target != 'fdroid'
+        uses: actions/setup-java@v6
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          distribution: "temurin"
+          java-version: 25
+      - name: F-Droid prebuild
+        working-directory: fdroid
+        run: |
+          rm -f gradle/gradle-daemon-jvm.properties
+          sed -i -e '/poolborges/d' settings.gradle.kts
+          sed -i -e '/START Non-FOSS component/,/END Non-FOSS component/d' app/build.gradle.kts
+      - name: Build F-Droid variant
+        working-directory: fdroid
+        run: env -u BUILD_NUMBER -u BUILD_VERSION -u SENTRY_DSN ./gradlew :app:assembleRelease :app:check :app:lint --stacktrace
+
       - name: Upload AppImage package
-        if: startsWith(github.ref, 'refs/tags/')
+        if: inputs.target != 'fdroid' && startsWith(github.ref, 'refs/tags/')
         uses: actions/upload-artifact@v7
         with:
           name: Linux-package
@@ -134,7 +171,7 @@ jobs:
             desktopApp/build/compose/binaries/main-release/AppImage/*.AppImage
 
       - name: Publish to Google Play
-        if: startsWith(github.ref, 'refs/tags/')
+        if: inputs.target != 'fdroid' && startsWith(github.ref, 'refs/tags/')
         uses: r0adkll/upload-google-play@v1
         with:
           serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
@@ -432,32 +469,6 @@ jobs:
         with:
           name: Windows-package
           path: desktopApp/build/compose/binaries/main-release/appx/*.appxbundle
-
-  fdroid-build:
-    name: F-Droid
-    if: github.event_name == 'push' || inputs.target == 'all' || inputs.target == 'fdroid'
-    runs-on: [ubuntu-latest]
-    timeout-minutes: 60
-    steps:
-      - *clean-workspace
-      - *checkout
-      - name: Set up JDK
-        uses: actions/setup-java@v6
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          distribution: "temurin"
-          java-version: 25
-          cache: gradle
-      - *setup-android
-      - name: F-Droid prebuild
-        run: |
-          rm -f gradle/gradle-daemon-jvm.properties
-          sed -i -e '/poolborges/d' settings.gradle.kts
-          sed -i -e '/START Non-FOSS component/,/END Non-FOSS component/d' app/build.gradle.kts
-
-      - name: Build F-Droid variant
-        run: ./gradlew :app:assembleRelease :app:check :app:lint --stacktrace
 
   upload:
     if: startsWith(github.ref, 'refs/tags/')

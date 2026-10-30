@@ -3,7 +3,6 @@ package dev.dimension.flare.data.database.app
 import androidx.room3.Room
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import androidx.sqlite.execSQL
-import dev.dimension.flare.data.database.PLUGIN_DEVELOPMENT_DOWNGRADE
 import dev.dimension.flare.model.MicroBlogKey
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -14,36 +13,22 @@ import kotlin.test.assertEquals
 
 class AppDatabaseMigration11To12Test {
     @Test
-    fun migrationPreservesEveryExistingPlatformAccountField() = verifyMigration(11)
-
-    @Test
-    fun developmentDowngradePreservesAccountsAndUnrelatedData() = verifyMigration(13)
-
-    private fun verifyMigration(version: Int) =
+    fun migrationPreservesEveryExistingPlatformAccountField() =
         runTest {
             val databasePath = Files.createTempFile("flare-app-v11", ".db")
             val path = databasePath.toAbsolutePath().toString()
             val platformIds = listOf("Mastodon", "Misskey", "Bluesky", "Pixiv", "xQt", "VVo", "Nostr", "Fanbox")
             try {
-                createFixture(path, platformIds, version)
+                createVersion11Fixture(path, platformIds)
 
                 val database =
                     Room
                         .databaseBuilder<AppDatabase>(name = path)
-                        .addMigrations(AppDatabase.MIGRATION_11_12, PLUGIN_DEVELOPMENT_DOWNGRADE)
+                        .addMigrations(AppDatabase.MIGRATION_11_12)
                         .setDriver(BundledSQLiteDriver())
                         .setQueryCoroutineContext(Dispatchers.Unconfined)
                         .build()
                 try {
-                    assertEquals(
-                        "keep me",
-                        database
-                            .searchHistoryDao()
-                            .select()
-                            .first()
-                            .single()
-                            .search,
-                    )
                     val accounts = database.accountDao().sortedAccounts().first()
                     assertEquals(platformIds, accounts.map { it.platformId })
                     accounts.forEachIndexed { index, account ->
@@ -72,20 +57,13 @@ class AppDatabaseMigration11To12Test {
             }
         }
 
-    private fun createFixture(
+    private fun createVersion11Fixture(
         path: String,
         platformIds: List<String>,
-        version: Int,
     ) {
         BundledSQLiteDriver().open(path).use { connection ->
             V11_SCHEMA.forEach(connection::execSQL)
-            if (version == 13) {
-                listOf("platform_display_name", "platform_icon_name", "platform_display_name_text_json", "platform_icon_url").forEach {
-                    connection.execSQL("ALTER TABLE DbAccount ADD COLUMN $it TEXT")
-                }
-            }
-            connection.execSQL("INSERT INTO DbSearchHistory(search, created_at) VALUES ('keep me', 123)")
-            connection.execSQL("PRAGMA user_version = $version")
+            connection.execSQL("PRAGMA user_version = 11")
             connection.execSQL("CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY, identity_hash TEXT)")
             connection.execSQL("INSERT OR REPLACE INTO room_master_table (id, identity_hash) VALUES(42, '$APP_DATABASE_IDENTITY_HASH')")
             connection

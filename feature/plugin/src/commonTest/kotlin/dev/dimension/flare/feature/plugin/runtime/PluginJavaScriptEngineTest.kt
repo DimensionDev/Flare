@@ -89,6 +89,21 @@ class PluginJavaScriptEngineTest {
         }
 
     @Test
+    fun hostRequestTimeoutRemainsCatchableAndEngineStaysUsable() =
+        withEngine(hostCall = { _, _, _ -> withTimeout(100) { CompletableDeferred<String>().await() } }) { engine ->
+            register(engine, "try { await flare.locale.current(); } catch (_) { return 'caught'; } return 'wrong';")
+            assertEquals("caught", withTimeout(2_000) { invoke(engine) }.getValue("value").jsonPrimitive.content)
+            assertEquals("42", engine.evaluate("String(21 * 2)", "after-timeout.js"))
+        }
+
+    @Test
+    fun detachedHostTimeoutDoesNotPreventTaskDrain() =
+        withEngine(hostCall = { _, _, _ -> withTimeout(100) { CompletableDeferred<String>().await() } }) { engine ->
+            register(engine, "flare.locale.current(); return 'success';")
+            assertEquals("success", withTimeout(2_000) { invoke(engine) }.getValue("value").jsonPrimitive.content)
+        }
+
+    @Test
     fun caughtHostFailuresRemainCatchable() =
         withEngine(hostCall = { _, _, _ -> error("Host denied") }) { engine ->
             register(engine, "try { await flare.locale.current(); } catch (_) { return 'caught'; } return 'wrong';")

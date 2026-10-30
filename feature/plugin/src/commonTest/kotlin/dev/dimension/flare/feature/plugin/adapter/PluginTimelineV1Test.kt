@@ -166,6 +166,46 @@ class PluginTimelineV1Test {
     }
 
     @Test
+    fun nestedInlineParentsBecomeAnOrderedNativeChain() {
+        fun ancestor(
+            id: String,
+            vararg parents: TimelineItemV1.Post,
+        ) = TimelineItemV1.Post(
+            post.copy(key = key.copy(id = id)),
+            PostPresentationV1(
+                inlineParents = parents.toList(),
+                quotes = listOf(post.copy(key = key.copy(id = "$id-quote"))),
+            ),
+        )
+
+        val oldest = ancestor("oldest")
+        val older = ancestor("older", oldest)
+        val grandparent = ancestor("grandparent", older)
+        val parent = ancestor("parent", grandparent)
+        val value = ancestor("root", parent, ancestor("sibling", older))
+        value.requireValid()
+
+        val mapped = assertIs<UiTimelineV2.TimelinePostItem>(mapper().timelineItem(value))
+        val parents = mapped.presentation.inlineParents
+        assertEquals(listOf("oldest", "older", "grandparent", "parent", "sibling"), parents.map { it.statusKey.id })
+        assertTrue(parents.all { it.presentation.inlineParents.isEmpty() })
+        assertEquals(
+            parents.map { "${it.statusKey.id}-quote" },
+            parents.map {
+                it.presentation.quotes
+                    .single()
+                    .statusKey.id
+            },
+        )
+        assertEquals(
+            "root-quote",
+            mapped.presentation.quotes
+                .single()
+                .statusKey.id,
+        )
+    }
+
+    @Test
     fun fullPostsUseExistingPollCardReactionAndMediaModels() {
         val value =
             post.copy(

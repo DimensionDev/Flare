@@ -113,6 +113,7 @@ reposts, quotes, inlineParents and notification messages in PostPresentationV1.
 Inline parents are `{ post, presentation? }` bodies, without `type`. Do not put
 `repost` inside PostV1. At most 100 parents and 100 quotes per presentation, four
 nested parent levels, and 200 top-level items are accepted.
+The host displays nested parents as one ancestor-first chain, keeping each post once.
 
 | Item | Data |
 | --- | --- |

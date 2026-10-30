@@ -285,6 +285,7 @@ type TimelineItemV1 =
 interface TimelinePostV1 { post: PostV1; presentation?: PostPresentationV1 }
 interface PostPresentationV1 {
   message?: MessageV1;
+  /** Nested parents are displayed as one ancestor-first chain, keeping each post once. */
   inlineParents?: TimelinePostV1[];
   quotes?: PostV1[];
   repost?: PostV1;

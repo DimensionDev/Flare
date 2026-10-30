@@ -63,6 +63,63 @@ class NotificationTimelineTest : RobolectricTest() {
     }
 
     @Test
+    fun replyChainCollapsePreservesNotificationsInMixedPages() =
+        runTest {
+            val root = post("root")
+            val reply = post("reply", root)
+            val notifications = listOf(notification("like", root), notification("repost", root), notification("reply", reply))
+            val collapsed = (notifications + root + reply).collapseReplyChains()
+
+            assertEquals(notifications, collapsed.take(notifications.size))
+            val collapsedReply = assertIs<UiTimelineV2.TimelinePostItem>(collapsed.last())
+            assertEquals(reply.statusKey, collapsedReply.statusKey)
+            assertEquals(listOf(root.statusKey), collapsedReply.presentation.inlineParents.map { it.statusKey })
+            assertEquals(notifications.size + 1, collapsed.size)
+
+            saveToDatabase(database, TimelinePagingMapper.toDb(collapsed, pagingKey))
+            val restored = read()
+            assertEquals(setOf("like", "repost", "reply", null), restored.map { it.presentation.notificationKey?.id }.toSet())
+            assertEquals(4, restored.map { it.stableItemKey }.distinct().size)
+        }
+
+    @Test
+    fun flattenedAncestorsSurviveBothCacheReadersAndShareContentUpdates() =
+        runTest {
+            val ancestors = listOf("oldest", "older", "grandparent", "parent").map { post(it) }
+            val row = notification("reply", post("reply"), *ancestors.toTypedArray())
+            saveToDatabase(database, listOf(TimelinePagingMapper.toDb(row, pagingKey)))
+            val dao = database.pagingTimelineDao()
+
+            suspend fun projected(): UiTimelineV2.TimelinePostItem {
+                val stored = dao.getTimelinePage(pagingKey, 0, 20)
+                val projected =
+                    TimelinePagingMapper
+                        .toPageItems(stored, dao.getTimelinePageIdentities(pagingKey, 0, 20), pagingKey, mutableMapOf())
+                        .single()
+                        .toUi(options)
+                assertEquals(read().single(), projected)
+                return assertIs<UiTimelineV2.TimelinePostItem>(projected)
+            }
+
+            val before = projected()
+            assertEquals(ancestors.map { it.statusKey }, before.presentation.inlineParents.map { it.statusKey })
+            val revision = dao.getTimelinePageIdentities(pagingKey, 0, 20).single().contentRevision
+            val updated = ancestors.first().copy(content = UiTranslatableText("updated ancestor".toUiPlainText()))
+            saveToDatabase(database, listOf(TimelinePagingMapper.toDb(updated, "home")))
+
+            val after = projected()
+            assertEquals(ancestors.map { it.statusKey }, after.presentation.inlineParents.map { it.statusKey })
+            assertEquals(
+                "updated ancestor",
+                after.presentation.inlineParents
+                    .first()
+                    .post.content.original.raw,
+            )
+            assertTrue(dao.getTimelinePageIdentities(pagingKey, 0, 20).single().contentRevision > revision)
+            assertNotEquals(before.renderHash, after.renderHash)
+        }
+
+    @Test
     fun mixedPluginItemsAndInteractiveButtonsSurviveDatabaseHydration() =
         runTest {
             val profile =

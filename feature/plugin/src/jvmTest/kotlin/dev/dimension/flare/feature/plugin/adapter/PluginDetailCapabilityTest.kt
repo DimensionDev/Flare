@@ -92,6 +92,23 @@ class PluginDetailCapabilityTest {
         }
 
     @Test
+    fun notificationLoaderPreservesIndependentRows() =
+        runBlocking {
+            val source = authenticated(installShowcase())
+            val loader =
+                assertIs<CacheableRemoteLoader<UiTimelineV2>>(
+                    source.capabilitySet.notification!!
+                        .timeline!!
+                        .notification(),
+                )
+            assertFalse(loader.collapseReplyChains)
+            val notifications = loader.load(20, PagingRequest.Refresh).data
+            assertEquals(1, notifications.map { it.statusKey }.distinct().size)
+            assertEquals(2, notifications.map { it.stableItemKey }.distinct().size)
+            assertTrue(assertIs<CacheableRemoteLoader<UiTimelineV2>>(source.timeline("home")).collapseReplyChains)
+        }
+
+    @Test
     fun showcaseRoundTripsMixedItemsAndRoutesPollAndReactionClicksThroughTheRuntime() =
         runBlocking {
             val source = authenticated(installShowcase())

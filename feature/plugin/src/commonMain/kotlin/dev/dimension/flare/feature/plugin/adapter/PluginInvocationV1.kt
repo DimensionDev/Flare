@@ -66,6 +66,7 @@ internal class PluginAccountInvokerV1(
                         .sha256()
                         .hex()
             override val supportPrepend = PageDirectionV1.Newer.isSupportedBy(directions)
+            override val collapseReplyChains = capability != PluginAbiV1.Capabilities.NOTIFICATION
         }
     }
 

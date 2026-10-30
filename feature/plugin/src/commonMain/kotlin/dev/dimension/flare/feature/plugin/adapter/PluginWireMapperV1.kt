@@ -218,7 +218,14 @@ internal class PluginWireMapperV1(
                 value.presentation.let {
                     UiTimelineV2.PostPresentation(
                         message = it.message?.let(::message),
-                        inlineParents = it.inlineParents.map(::timelinePost).toImmutableList(),
+                        inlineParents =
+                            it.inlineParents
+                                .flatMap { parent ->
+                                    val mapped = timelinePost(parent)
+                                    mapped.presentation.inlineParents +
+                                        mapped.copy(presentation = mapped.presentation.copy(inlineParents = persistentListOf()))
+                                }.distinctBy { parent -> parent.statusKey }
+                                .toImmutableList(),
                         quotes = it.quotes.map { post -> post.toUiPost() }.toImmutableList(),
                         repost = it.repost?.toUiPost(),
                         notificationKey = it.notificationKey?.let { key -> rowKey("notification", key) },

@@ -18,6 +18,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.asExecutor
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.Mutex
@@ -166,9 +168,9 @@ internal class AndroidPluginJavaScriptEngine private constructor(
                         put("ok", true)
                         put("value", value)
                     }
-                } catch (error: CancellationException) {
-                    throw error
                 } catch (error: Throwable) {
+                    // A Host request timeout must reject its Promise while the bridge is still active.
+                    currentCoroutineContext().ensureActive()
                     buildJsonObject {
                         put("id", id)
                         put("ok", false)

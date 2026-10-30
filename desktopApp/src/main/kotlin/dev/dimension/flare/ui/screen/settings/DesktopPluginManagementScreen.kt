@@ -27,6 +27,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -138,6 +139,7 @@ import io.github.composefluent.component.Text
 import io.github.composefluent.component.TextField
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
@@ -165,7 +167,6 @@ internal fun DesktopPluginManagementScreen(
     }
     val state by presenter.state.collectAsState()
     LaunchedEffect(presenter) { scope.launchPresenterAction { presenter.checkUpdates(forceRefresh = false) } }
-    var showsGitHubInstall by remember { mutableStateOf(false) }
     val installLabel = stringResource(Res.string.plugin_install)
     var showsMaintenanceMenu by remember { mutableStateOf(false) }
     var showsDevelopment by remember { mutableStateOf(false) }
@@ -173,27 +174,17 @@ internal fun DesktopPluginManagementScreen(
     val pendingUninstall = state.plugins.firstOrNull { it.pluginId == pendingUninstallId }
     val pendingAuthored = state.authoredPlugins.firstOrNull { it.id == pendingUninstallId }
 
-    if (showsGitHubInstall) {
+    if (state.gitHubInstall != null) {
         GitHubInstallDialog(
             state = state,
             onInstall = { url -> scope.launchPresenterAction { presenter.inspectGitHub(url) } },
-            onConfirm = {
-                scope.launchPresenterAction {
-                    presenter.confirmInstall()
-                    showsGitHubInstall = false
-                }
-            },
-            onUrlChanged = presenter::clearError,
-            onDismiss = {
-                scope.launchPresenterAction {
-                    presenter.cancelInstall()
-                    showsGitHubInstall = false
-                }
-            },
+            onConfirm = { scope.launchPresenterAction { presenter.confirmInstall() } },
+            onUrlChanged = presenter::clearGitHubInstallError,
+            onDismiss = { scope.launchPresenterAction { presenter.cancelInstall() } },
         )
     }
 
-    state.pendingInstall?.takeUnless { showsGitHubInstall }?.let { review ->
+    state.pendingInstall?.takeIf { state.gitHubInstall == null }?.let { review ->
         PluginInstallReviewDialog(
             review = review,
             busy = state.busy,
@@ -253,10 +244,7 @@ internal fun DesktopPluginManagementScreen(
                 PluginAddMenu(
                     busy = state.busy,
                     agentEnabled = LocalTimelineAppearance.current.aiConfig.agent,
-                    onGitHubInstall = {
-                        presenter.clearError()
-                        showsGitHubInstall = true
-                    },
+                    onGitHubInstall = presenter::openGitHubInstall,
                     onCreateWithAI = onCreateWithAI,
                     onFileInstall = {
                         FileDialog(window, installLabel, FileDialog.LOAD).apply {
@@ -350,7 +338,7 @@ internal fun DesktopPluginManagementScreen(
                 modifier = Modifier.weight(1f),
             )
         }
-        if (state.busy && !showsGitHubInstall) {
+        if (state.busy) {
             ProgressRing(modifier = Modifier.align(Alignment.Center))
         }
     }
@@ -489,13 +477,16 @@ internal fun GitHubInstallDialog(
     onDismiss: () -> Unit,
 ) {
     val url = rememberTextFieldState()
-    LaunchedEffect(url.text) { onUrlChanged() }
+    LaunchedEffect(url) {
+        snapshotFlow { url.text.toString() }.drop(1).collect { onUrlChanged() }
+    }
+    val install = state.gitHubInstall ?: return
     val review = state.pendingInstall
     FluentDialog(visible = true) {
         Column(
             modifier =
                 Modifier.fillMaxWidth().padding(24.dp).onKeyEvent {
-                    if (it.key == Key.Escape && it.type == KeyEventType.KeyUp && !state.busy) {
+                    if (it.key == Key.Escape && it.type == KeyEventType.KeyUp && !install.busy) {
                         onDismiss()
                         true
                     } else {
@@ -519,23 +510,23 @@ internal fun GitHubInstallDialog(
                         header = { Text(stringResource(Res.string.plugin_github_repository)) },
                         placeholder = { Text("https://github.com/owner/repository") },
                         lineLimits = TextFieldLineLimits.SingleLine,
-                        enabled = !state.busy,
+                        enabled = !install.busy,
                     )
                 } else {
                     PluginInstallReviewContent(review)
                 }
-                state.error?.let { Text(it.take(512), color = FluentTheme.colors.system.critical) }
+                install.error?.let { Text(it.take(512), color = FluentTheme.colors.system.critical) }
             }
-            if (state.busy) ProgressRing(modifier = Modifier.align(Alignment.CenterHorizontally))
+            if (install.busy) ProgressRing(modifier = Modifier.align(Alignment.CenterHorizontally))
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 AccentButton(
                     onClick = { if (review == null) onInstall(url.text.toString()) else onConfirm() },
-                    disabled = state.busy || (review == null && url.text.isBlank()),
+                    disabled = install.busy || (review == null && url.text.isBlank()),
                     modifier = Modifier.weight(1f),
                 ) {
                     Text(stringResource(Res.string.plugin_confirm_install))
                 }
-                Button(onClick = onDismiss, disabled = state.busy, modifier = Modifier.weight(1f)) {
+                Button(onClick = onDismiss, disabled = install.busy, modifier = Modifier.weight(1f)) {
                     Text(stringResource(Res.string.cancel))
                 }
             }

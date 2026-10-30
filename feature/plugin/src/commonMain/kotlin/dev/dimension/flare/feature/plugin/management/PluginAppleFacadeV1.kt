@@ -62,8 +62,12 @@ public class PluginAppleFacadeV1 : PresenterBase<PluginManagementStateV1>() {
         presenter.reportOperationFailure()
     }
 
-    public fun clearError() {
-        presenter.clearError()
+    public fun openGitHubInstall() {
+        presenter.openGitHubInstall()
+    }
+
+    public fun clearGitHubInstallError() {
+        presenter.clearGitHubInstallError()
     }
 
     @Throws(Exception::class)

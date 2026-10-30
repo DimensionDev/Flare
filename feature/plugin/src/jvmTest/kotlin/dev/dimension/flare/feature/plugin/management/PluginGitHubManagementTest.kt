@@ -20,6 +20,7 @@ import io.ktor.client.engine.mock.respond
 import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.awaitCancellation
@@ -63,40 +64,114 @@ class PluginGitHubManagementTest {
     fun setUp() {
         root = Files.createTempDirectory("plugin-github-management").toOkioPath()
         archives[FIRST_SHA] = archive("1.0.0")
-        client =
-            GitHubPluginClient(
-                MockEngine { request ->
-                    when {
-                        request.url.encodedPath.endsWith("/tags") -> {
-                            respond(tags.joinToString(",", "[", "]") { (tag, sha) -> """{"name":"$tag","commit":{"sha":"$sha"}}""" })
-                        }
-
-                        "/zipball/" in request.url.encodedPath -> {
-                            downloads++
-                            if (blocked) {
-                                downloadStarted.complete(Unit)
-                                awaitCancellation()
-                            }
-                            val bytes = archives[request.url.encodedPath.substringAfterLast('/')]
-                            if (bytes == null) respond("", HttpStatusCode.NotFound) else respond(bytes)
-                        }
-
-                        else -> {
-                            catalogStarted?.complete(Unit)
-                            catalogRelease?.await()
-                            catalogStatus?.let { return@MockEngine respond("{}", it) }
-                            respond("""{"id":$repositoryId,"name":"repo","owner":{"login":"owner"},"private":false}""")
-                        }
-                    }
-                },
-            )
+        client = createClient()
     }
+
+    private fun createClient() =
+        GitHubPluginClient(
+            MockEngine { request ->
+                when {
+                    request.url.encodedPath.endsWith("/tags") -> {
+                        respond(tags.joinToString(",", "[", "]") { (tag, sha) -> """{"name":"$tag","commit":{"sha":"$sha"}}""" })
+                    }
+
+                    "/zipball/" in request.url.encodedPath -> {
+                        downloads++
+                        if (blocked) {
+                            downloadStarted.complete(Unit)
+                            awaitCancellation()
+                        }
+                        val bytes = archives[request.url.encodedPath.substringAfterLast('/')]
+                        if (bytes == null) respond("", HttpStatusCode.NotFound) else respond(bytes)
+                    }
+
+                    else -> {
+                        catalogStarted?.complete(Unit)
+                        catalogRelease?.await()
+                        catalogStatus?.let { return@MockEngine respond("{}", it) }
+                        respond("""{"id":$repositoryId,"name":"repo","owner":{"login":"owner"},"private":false}""")
+                    }
+                }
+            },
+        )
 
     @AfterTest
     fun tearDown() {
         client.close()
         fileSystem.deleteRecursively(root, mustExist = false)
     }
+
+    @Test
+    fun githubInstallFailureDoesNotPublishAnErrorOnTheManagementPage() =
+        runBlocking {
+            for (status in listOf(
+                HttpStatusCode.TooManyRequests,
+                HttpStatusCode.Forbidden,
+                HttpStatusCode.NotFound,
+                HttpStatusCode.ServiceUnavailable,
+            )) {
+                client.close()
+                client = createClient()
+                withPresenter { subsystem, presenter ->
+                    catalogStatus = status
+                    presenter.openGitHubInstall()
+                    assertFails { presenter.inspectGitHub(REPOSITORY_URL) }
+                    val error =
+                        assertNotNull(
+                            presenter.state.value.gitHubInstall
+                                ?.error,
+                        )
+                    assertNull(presenter.state.value.error)
+                    assertFalse(presenter.state.value.busy)
+                    assertFalse(assertNotNull(presenter.state.value.gitHubInstall).busy)
+                    assertNull(presenter.state.value.pendingInstall)
+                    subsystem.authoring.create(UUID.randomUUID().toString())
+                    presenter.checkUpdates()
+                    assertEquals(
+                        error,
+                        presenter.state.value.gitHubInstall
+                            ?.error,
+                    )
+                    presenter.cancelInstall()
+                    assertNull(presenter.state.value.gitHubInstall)
+                    assertNull(presenter.state.value.error)
+                    presenter.openGitHubInstall()
+                    assertNull(
+                        presenter.state.value.gitHubInstall
+                            ?.error,
+                    )
+                }
+            }
+            withPresenter { _, presenter ->
+                catalogStatus = null
+                presenter.inspectGitHub(REPOSITORY_URL)
+                assertNull(
+                    presenter.state.value.gitHubInstall
+                        ?.error,
+                )
+                presenter.confirmInstall()
+                assertNull(presenter.state.value.gitHubInstall)
+                assertNull(presenter.state.value.pendingInstall)
+            }
+        }
+
+    @Test
+    fun queuedConfirmationDoesNotReopenTheCompletedDialog() =
+        runBlocking {
+            withPresenter { subsystem, presenter ->
+                presenter.inspectGitHub(REPOSITORY_URL)
+                subsystem.mutationMutex.lock()
+                val first = launch(start = CoroutineStart.UNDISPATCHED) { presenter.confirmInstall() }
+                val second = launch(start = CoroutineStart.UNDISPATCHED) { assertFails { presenter.confirmInstall() } }
+                subsystem.mutationMutex.unlock()
+                first.join()
+                second.join()
+                assertNull(presenter.state.value.gitHubInstall)
+                assertNull(presenter.state.value.pendingInstall)
+                assertNull(presenter.state.value.error)
+                assertEquals(1, subsystem.stateStore.desired.value.plugins.size)
+            }
+        }
 
     @Test
     fun githubCommitRechecksOwnershipAfterInspection() =
@@ -117,7 +192,11 @@ class PluginGitHubManagementTest {
                 )
                 assertEquals(recreated, subsystem.authoring.read(plugin.id).plugin)
                 assertEquals(review, presenter.state.value.pendingInstall)
-                assertNotNull(presenter.state.value.error)
+                assertNotNull(
+                    presenter.state.value.gitHubInstall
+                        ?.error,
+                )
+                assertNull(presenter.state.value.error)
                 assertFalse(presenter.state.value.busy)
                 presenter.cancelInstall()
                 assertNull(presenter.state.value.pendingInstall)
@@ -275,15 +354,29 @@ class PluginGitHubManagementTest {
                         if (update) presenter.inspectGitHubUpdate(PLUGIN_ID) else presenter.inspectGitHub(REPOSITORY_URL)
                     }
                     assertNull(presenter.state.value.pendingInstall)
-                    assertNotNull(presenter.state.value.error)
+                    if (update) {
+                        assertNotNull(presenter.state.value.error)
+                    } else {
+                        assertNotNull(
+                            presenter.state.value.gitHubInstall
+                                ?.error,
+                        )
+                        assertNull(presenter.state.value.error)
+                    }
                     assertFalse(presenter.state.value.busy)
                     assertFalse(fileSystem.exists(subsystem.stateStore.paths.incoming))
                     assertFails { presenter.confirmInstall() }
                     assertEquals(installed, subsystem.stateStore.desired.value.plugins)
+                    presenter.cancelInstall()
                 }
                 catalogStatus = null
+                val previousError = presenter.state.value.error
                 presenter.inspectGitHub(REPOSITORY_URL)
-                assertNull(presenter.state.value.error)
+                assertEquals(previousError, presenter.state.value.error)
+                assertNull(
+                    presenter.state.value.gitHubInstall
+                        ?.error,
+                )
                 presenter.confirmInstall()
                 assertEquals(
                     "1.1.0",
@@ -604,7 +697,11 @@ class PluginGitHubManagementTest {
                 catalogRelease = null
                 presenter.inspectGitHub(REPOSITORY_URL)
                 assertNotNull(presenter.state.value.pendingInstall)
-                assertNull(presenter.state.value.error)
+                assertEquals(previous.error, presenter.state.value.error)
+                assertNull(
+                    presenter.state.value.gitHubInstall
+                        ?.error,
+                )
             }
         }
 
@@ -618,7 +715,17 @@ class PluginGitHubManagementTest {
                 blocked = true
                 val job = launch { presenter.inspectGitHub(REPOSITORY_URL) }
                 downloadStarted.await()
+                assertTrue(assertNotNull(presenter.state.value.gitHubInstall).busy)
+                presenter.openGitHubInstall()
+                assertTrue(assertNotNull(presenter.state.value.gitHubInstall).busy)
+                assertFalse(presenter.state.value.busy)
+                assertNull(presenter.state.value.error)
                 job.cancelAndJoin()
+                assertFalse(assertNotNull(presenter.state.value.gitHubInstall).busy)
+                assertNull(
+                    presenter.state.value.gitHubInstall
+                        ?.error,
+                )
                 assertNull(presenter.state.value.pendingInstall)
                 assertFalse(presenter.state.value.busy)
                 assertFalse(fileSystem.exists(subsystem.stateStore.paths.incoming))

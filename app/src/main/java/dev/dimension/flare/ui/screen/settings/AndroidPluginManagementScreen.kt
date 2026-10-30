@@ -24,7 +24,9 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuDefaults
@@ -113,7 +115,6 @@ internal fun AndroidPluginManagementScreen(
     }
     val state by presenter.state.collectAsState()
     LaunchedEffect(presenter) { scope.launchPresenterAction { presenter.checkUpdates(forceRefresh = false) } }
-    var showsGitHubInstall by remember { mutableStateOf(false) }
     var pendingUninstallId by remember { mutableStateOf<String?>(null) }
     val pendingUninstall = state.plugins.firstOrNull { it.pluginId == pendingUninstallId }
     val pendingAuthored = state.authoredPlugins.firstOrNull { it.id == pendingUninstallId }
@@ -135,27 +136,17 @@ internal fun AndroidPluginManagementScreen(
             }
         }
 
-    if (showsGitHubInstall) {
+    if (state.gitHubInstall != null) {
         GitHubInstallDialog(
             state = state,
             onInstall = { url -> scope.launchPresenterAction { presenter.inspectGitHub(url) } },
-            onConfirm = {
-                scope.launchPresenterAction {
-                    presenter.confirmInstall()
-                    showsGitHubInstall = false
-                }
-            },
-            onUrlChanged = presenter::clearError,
-            onDismiss = {
-                scope.launchPresenterAction {
-                    presenter.cancelInstall()
-                    showsGitHubInstall = false
-                }
-            },
+            onConfirm = { scope.launchPresenterAction { presenter.confirmInstall() } },
+            onUrlChanged = presenter::clearGitHubInstallError,
+            onDismiss = { scope.launchPresenterAction { presenter.cancelInstall() } },
         )
     }
 
-    state.pendingInstall?.takeUnless { showsGitHubInstall }?.let { review ->
+    state.pendingInstall?.takeIf { state.gitHubInstall == null }?.let { review ->
         PluginInstallReviewDialog(
             review = review,
             busy = state.busy,
@@ -205,10 +196,7 @@ internal fun AndroidPluginManagementScreen(
                         PluginAddMenu(
                             busy = state.busy,
                             agentEnabled = LocalTimelineAppearance.current.aiConfig.agent,
-                            onGitHubInstall = {
-                                presenter.clearError()
-                                showsGitHubInstall = true
-                            },
+                            onGitHubInstall = presenter::openGitHubInstall,
                             onCreateWithAI = onCreateWithAI,
                             onFileInstall = { picker.launch(arrayOf("application/zip", "application/octet-stream")) },
                         )
@@ -239,7 +227,7 @@ internal fun AndroidPluginManagementScreen(
                         .padding(horizontal = screenHorizontalPadding),
             )
         }
-        if (state.busy && !showsGitHubInstall) {
+        if (state.busy) {
             CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
         }
     }
@@ -425,6 +413,7 @@ internal fun PluginPermission.localizedDescription(): String {
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 internal fun GitHubInstallDialog(
     state: PluginManagementStateV1,
@@ -434,9 +423,10 @@ internal fun GitHubInstallDialog(
     onDismiss: () -> Unit,
 ) {
     var url by remember { mutableStateOf("") }
+    val install = state.gitHubInstall ?: return
     val review = state.pendingInstall
     AlertDialog(
-        onDismissRequest = { if (!state.busy) onDismiss() },
+        onDismissRequest = { if (!install.busy) onDismiss() },
         title = { Text(review?.let { "${it.name} ${it.version}" } ?: stringResource(R.string.plugin_install_github)) },
         text = {
             Column(
@@ -453,27 +443,27 @@ internal fun GitHubInstallDialog(
                         label = { Text(stringResource(R.string.plugin_github_repository)) },
                         placeholder = { Text("https://github.com/owner/repository") },
                         singleLine = true,
-                        enabled = !state.busy,
+                        enabled = !install.busy,
                     )
                 } else {
                     PluginInstallReviewContent(review)
                 }
-                state.error?.let { Text(it.take(512), color = MaterialTheme.colorScheme.error) }
-                if (state.busy) {
-                    CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
+                install.error?.let { Text(it.take(512), color = MaterialTheme.colorScheme.error) }
+                if (install.busy) {
+                    LinearWavyProgressIndicator(modifier = Modifier.fillMaxWidth())
                 }
             }
         },
         confirmButton = {
             Button(
-                enabled = !state.busy && (review != null || url.isNotBlank()),
+                enabled = !install.busy && (review != null || url.isNotBlank()),
                 onClick = { if (review == null) onInstall(url) else onConfirm() },
             ) {
                 Text(stringResource(R.string.plugin_confirm_install))
             }
         },
         dismissButton = {
-            TextButton(enabled = !state.busy, onClick = onDismiss) { Text(stringResource(android.R.string.cancel)) }
+            TextButton(enabled = !install.busy, onClick = onDismiss) { Text(stringResource(android.R.string.cancel)) }
         },
     )
 }

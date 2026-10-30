@@ -126,6 +126,17 @@ class PluginManagementPresenterV1Test {
                 assertEquals(error, states.last().error)
                 assertFalse(states.last().busy)
 
+                facade.openGitHubInstall()
+                assertFails { facade.inspectGitHub("invalid repository") }
+                runCurrent()
+                assertEquals(error, states.last().error)
+                assertNotNull(states.last().gitHubInstall?.error)
+                assertFalse(states.last().busy)
+                facade.cancelInstall()
+                runCurrent()
+                assertNull(states.last().gitHubInstall)
+                assertEquals(error, states.last().error)
+
                 assertFails { facade.inspect((root / "missing.fpp").toString()) }
                 runCurrent()
                 assertNotNull(states.last().error)

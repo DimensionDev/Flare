@@ -49,6 +49,7 @@ public data class PluginManagementStateV1(
     val canRebuildIndex: Boolean = false,
     val busy: Boolean = false,
     val error: String? = null,
+    val gitHubInstall: PluginGitHubInstallStateV1? = null,
     val development: PluginDevelopmentStateV1 = PluginDevelopmentStateV1(),
     val authoredPlugins: List<AuthoredPlugin> = emptyList(),
 ) {
@@ -73,6 +74,11 @@ public data class PluginManagementStateV1(
             addAll(installed.values)
         }
 }
+
+public data class PluginGitHubInstallStateV1(
+    val busy: Boolean = false,
+    val error: String? = null,
+)
 
 public data class PluginManagementItemV1(
     val pluginId: String,
@@ -124,11 +130,8 @@ public class PluginManagementPresenterV1(
             subsystem.developmentState,
         ) { _, _, _, _ -> Unit }
             .combine(subsystem.authoring.plugins) { _, _ -> Unit }
-            .onEach {
-                mutableState.update { current ->
-                    snapshot().copy(busy = current.busy, error = current.error)
-                }
-            }.launchIn(scope)
+            .onEach { refreshState() }
+            .launchIn(scope)
 
     public fun close() {
         if (!closed.compareAndSet(expect = false, update = true)) return
@@ -148,8 +151,14 @@ public class PluginManagementPresenterV1(
         }
     }
 
+    public fun openGitHubInstall() {
+        if (closed.value) return
+        mutableState.update { it.copy(gitHubInstall = it.gitHubInstall ?: PluginGitHubInstallStateV1()) }
+    }
+
     public suspend fun inspectGitHub(url: String) {
-        runAction {
+        openGitHubInstall()
+        runAction(gitHubInstall = true) {
             clearPreview()
             val catalog = github.catalog(url, forceRefresh = true)
             prepareGitHub(catalog, catalog.versions.first())
@@ -180,8 +189,7 @@ public class PluginManagementPresenterV1(
                     actionMutex.withLock {
                         if (subsystem.stateStore.desired.value.plugins[plugin.pluginId] == plugin) {
                             if (update == null) updates.remove(plugin.pluginId) else updates[plugin.pluginId] = update
-                            val current = mutableState.value
-                            mutableState.value = snapshot().copy(busy = current.busy, error = current.error)
+                            refreshState()
                         }
                     }
                 }
@@ -209,7 +217,6 @@ public class PluginManagementPresenterV1(
         val source = PluginInstallSourceV1.GitHub(catalog.repository, version.tag, version.commitSha)
         val prepared = subsystem.installer.inspect(Buffer().write(bytes), source, expectedPluginId)
         preview = prepared
-        mutableState.value = snapshot().copy(busy = true)
     }
 
     @HiddenFromObjC
@@ -220,7 +227,6 @@ public class PluginManagementPresenterV1(
                 .inspect(source)
                 .also { prepared ->
                     preview = prepared
-                    mutableState.value = snapshot()
                 }.toReview()
         }
 
@@ -231,12 +237,11 @@ public class PluginManagementPresenterV1(
                 .inspect(path.toPath())
                 .also { prepared ->
                     preview = prepared
-                    mutableState.value = snapshot()
                 }.toReview()
         }
 
     public suspend fun confirmInstall() {
-        runMutation {
+        runMutation(gitHubInstall = mutableState.value.gitHubInstall != null) {
             val prepared = requireNotNull(preview) { "No plugin installation is pending" }
             requireNotDeveloping(prepared.pluginId)
             check(
@@ -248,16 +253,14 @@ public class PluginManagementPresenterV1(
             subsystem.installer.commit(prepared, confirmed = true, activate = switcher::install)
             updates.remove(prepared.pluginId)
             preview = null
-            mutableState.value = snapshot().copy(busy = true)
+            mutableState.update { snapshot(it).copy(gitHubInstall = null) }
         }
     }
 
     public suspend fun cancelInstall() {
-        runAction {
-            val prepared = preview ?: return@runAction
-            subsystem.installer.discard(prepared)
-            preview = null
-            mutableState.value = snapshot().copy(busy = true)
+        runAction(gitHubInstall = mutableState.value.gitHubInstall != null) {
+            clearPreview()
+            mutableState.update { snapshot(it).copy(gitHubInstall = null) }
         }
     }
 
@@ -278,14 +281,12 @@ public class PluginManagementPresenterV1(
             switcher.uninstall(pluginId, installed.manifest.platform.id)
             updates.remove(pluginId)
             subsystem.installer.cleanup(subsystem.running.value.plugins.values)
-            mutableState.value = snapshot()
         }
     }
 
     public suspend fun retryRuntime(pluginId: String) {
         runMutation {
             subsystem.runtimePool.retry(pluginId)
-            mutableState.value = snapshot()
         }
     }
 
@@ -298,21 +299,24 @@ public class PluginManagementPresenterV1(
             subsystem.installer.rebuildIndex()
             subsystem.stateStore.desired.value.plugins.values
                 .forEach { switcher.install(it) }
-            mutableState.value = snapshot()
         }
     }
 
-    public fun clearError() {
-        mutableState.value = mutableState.value.copy(error = null)
+    public fun clearGitHubInstallError() {
+        mutableState.update { it.copy(gitHubInstall = it.gitHubInstall?.copy(error = null)) }
     }
 
     public fun reportOperationFailure() {
         mutableState.value = mutableState.value.copy(error = "Plugin operation failed")
     }
 
-    private fun snapshot(): PluginManagementStateV1 {
+    private fun refreshState() {
+        mutableState.update { snapshot(it) }
+    }
+
+    private fun snapshot(current: PluginManagementStateV1 = PluginManagementStateV1()): PluginManagementStateV1 {
         val desired = subsystem.stateStore.desired.value
-        return PluginManagementStateV1(
+        return current.copy(
             plugins =
                 desired.plugins.values.sortedBy(InstalledPluginV1::pluginId).map { installed ->
                     installed.toItem(
@@ -344,36 +348,55 @@ public class PluginManagementPresenterV1(
     private suspend fun clearPreview() {
         val previous = preview
         preview = null
-        val current = mutableState.value
-        mutableState.value = snapshot().copy(busy = current.busy, error = current.error)
+        refreshState()
         if (previous != null) subsystem.installer.discard(previous)
     }
 
     private suspend fun runAuthoringAction(block: suspend () -> Unit) {
         try {
             block()
-            mutableState.value = snapshot().copy(busy = mutableState.value.busy)
+            mutableState.update { snapshot(it).copy(error = null) }
         } catch (error: Exception) {
             if (error is CancellationException) throw error
-            mutableState.value = snapshot().copy(busy = mutableState.value.busy, error = error.message ?: "Plugin operation failed")
+            mutableState.update { snapshot(it).copy(error = error.message ?: "Plugin operation failed") }
             throw error
         }
     }
 
-    private suspend fun <T> runMutation(block: suspend () -> T): T = runAction { subsystem.mutationMutex.withLock { block() } }
+    private suspend fun <T> runMutation(
+        gitHubInstall: Boolean = false,
+        block: suspend () -> T,
+    ): T = runAction(gitHubInstall) { subsystem.mutationMutex.withLock { block() } }
 
-    private suspend fun <T> runAction(block: suspend () -> T): T =
+    private suspend fun <T> runAction(
+        gitHubInstall: Boolean = false,
+        block: suspend () -> T,
+    ): T =
         actionMutex.withLock {
             check(!closed.value) { "Plugin management is closed" }
-            mutableState.value = mutableState.value.copy(busy = true, error = null)
+            var failure: String? = null
+
+            fun publish(busy: Boolean) {
+                mutableState.update { current ->
+                    val refreshed = snapshot(current)
+                    if (gitHubInstall) {
+                        refreshed.copy(
+                            gitHubInstall = refreshed.gitHubInstall?.copy(busy = busy, error = failure),
+                        )
+                    } else {
+                        refreshed.copy(busy = busy, error = failure)
+                    }
+                }
+            }
+            publish(busy = true)
             try {
                 withContext(operationDispatcher) { block() }
             } catch (error: Throwable) {
                 if (error is CancellationException) throw error
-                mutableState.value = snapshot().copy(error = error.message ?: "Plugin operation failed")
+                failure = error.message ?: "Plugin operation failed"
                 throw error
             } finally {
-                mutableState.value = mutableState.value.copy(busy = false)
+                publish(busy = false)
             }
         }
 }

@@ -16,7 +16,7 @@ public struct PluginManagementView: View {
     @State private var presenter: KotlinPresenter<PluginManagementStateV1>
     @State private var importsPlugin = false
     private let onCreateWithAI: () -> Void
-    @State private var showsGitHubInstall = false
+    private var showsGitHubInstall: Bool { presenter.state.gitHubInstall != nil }
     @State private var gitHubURL = ""
     @State private var pendingUninstallId: String?
     @State private var pendingUninstallName: String?
@@ -128,7 +128,7 @@ public struct PluginManagementView: View {
         }
         #endif
         .overlay {
-            if presenter.state.busy && !showsGitHubInstall {
+            if presenter.state.busy {
                 ProgressView()
                     .padding()
                     .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
@@ -141,7 +141,12 @@ public struct PluginManagementView: View {
             onCompletion: importPlugin
         )
         .task { try? await facade.checkUpdates(forceRefresh: false) }
-        .sheet(isPresented: $showsGitHubInstall) {
+        .sheet(isPresented: Binding(
+            get: { showsGitHubInstall },
+            set: { visible in
+                if !visible && showsGitHubInstall { Task { try? await facade.cancelInstall() } }
+            }
+        )) {
             gitHubInstallSheet
         }
         .alert(
@@ -324,8 +329,7 @@ public struct PluginManagementView: View {
         Group {
             Button {
                 gitHubURL = ""
-                facade.clearError()
-                showsGitHubInstall = true
+                facade.openGitHubInstall()
             } label: {
                 Label {
                     Text("plugin_install_github")
@@ -469,7 +473,8 @@ public struct PluginManagementView: View {
     #endif
 
     private var gitHubInstallSheet: some View {
-        NavigationStack {
+        let busy = presenter.state.gitHubInstall?.busy == true
+        return NavigationStack {
             Form {
                 if let review = presenter.state.pendingInstall {
                     Section {
@@ -489,25 +494,19 @@ public struct PluginManagementView: View {
                     .keyboardType(.URL)
                     #endif
                     .onChange(of: gitHubURL) { _, _ in
-                        facade.clearError()
+                        facade.clearGitHubInstallError()
                     }
                 }
-                if let error = presenter.state.error {
+                if let error = presenter.state.gitHubInstall?.error {
                     Text(String(error.prefix(512))).foregroundStyle(.red)
                 }
             }
-            .disabled(presenter.state.busy)
+            .disabled(busy)
             .navigationTitle("plugin_install_github")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button(role: .cancel) {
-                        let isReviewing = presenter.state.pendingInstall != nil
-                        Task {
-                            do {
-                                try await facade.cancelInstall()
-                                if !isReviewing { showsGitHubInstall = false }
-                            } catch { }
-                        }
+                        Task { try? await facade.cancelInstall() }
                     } label: {
                         Label {
                             Text("Cancel")
@@ -520,7 +519,7 @@ public struct PluginManagementView: View {
                     #else
                     .labelStyle(.titleOnly)
                     #endif
-                    .disabled(presenter.state.busy)
+                    .disabled(busy)
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button {
@@ -546,15 +545,12 @@ public struct PluginManagementView: View {
                     #else
                     .labelStyle(.titleOnly)
                     #endif
-                    .disabled(presenter.state.busy || (presenter.state.pendingInstall == nil && gitHubURL.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty))
+                    .disabled(busy || (presenter.state.pendingInstall == nil && gitHubURL.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty))
                 }
             }
-            .overlay { if presenter.state.busy { ProgressView() } }
+            .overlay { if busy { ProgressView() } }
         }
-        .interactiveDismissDisabled(presenter.state.busy || presenter.state.pendingInstall != nil)
-        .onChange(of: presenter.state.pendingInstall != nil) { wasReviewing, isReviewing in
-            if wasReviewing && !isReviewing { showsGitHubInstall = false }
-        }
+        .interactiveDismissDisabled(busy || presenter.state.pendingInstall != nil)
         #if os(macOS)
         .frame(minWidth: 440, minHeight: 280)
         #endif

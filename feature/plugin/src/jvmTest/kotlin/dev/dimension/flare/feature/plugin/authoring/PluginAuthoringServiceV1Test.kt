@@ -453,13 +453,15 @@ class PluginAuthoringServiceV1Test {
                 val plugin = service.create(UUID.randomUUID().toString())
                 generate(plugin)
                 await(plugin.id, PluginAuthoringPhase.Applied)
-                assertTrue(presenter.state.value.busy)
+                assertTrue(assertNotNull(presenter.state.value.gitHubInstall).busy)
+                assertFalse(presenter.state.value.busy)
                 assertTrue(plugin.id in subsystem.running.value.plugins)
             } finally {
                 download.cancelAndJoin()
                 presenter.close()
                 client.close()
             }
+            assertFalse(assertNotNull(presenter.state.value.gitHubInstall).busy)
             assertFalse(presenter.state.value.busy)
             assertTrue(
                 subsystem.stateStore.desired.value.plugins

@@ -488,8 +488,7 @@ internal class PluginLoginMethodHandlerV1(
         try {
             when (method.interaction) {
                 LoginInteractionV1.OAuth -> {
-                    oauthFlowId?.let { oauthCallbacks.unregister(it) }
-                    oauthFlowId = null
+                    closeOAuthFlow(cancelPending = true)?.join()
                     when (
                         val result =
                             oauth.begin(
@@ -623,14 +622,15 @@ internal class PluginLoginMethodHandlerV1(
         if (retired) return
         values.keys.forEach { values[it] = "" }
         closeCookieSession()
-        closeOAuthFlow()
+        closeOAuthFlow(cancelPending = true)
         mutableState.value = state()
     }
 
     override fun close() {
         removeCleanup()
         closeCookieSession()
-        closeOAuthFlow()
+        // Keep the pending flow for unattended completion after its UI is disposed.
+        closeOAuthFlow(cancelPending = false)
     }
 
     private suspend fun complete(success: LoginSuccessV1) {
@@ -648,11 +648,14 @@ internal class PluginLoginMethodHandlerV1(
         return coroutineScope.launch(start = CoroutineStart.UNDISPATCHED) { withContext(NonCancellable) { session.close() } }
     }
 
-    private fun closeOAuthFlow(): Job? {
+    private fun closeOAuthFlow(cancelPending: Boolean): Job? {
         val flowId = oauthFlowId ?: return null
         oauthFlowId = null
         return coroutineScope.launch(start = CoroutineStart.UNDISPATCHED) {
-            withContext(NonCancellable) { oauthCallbacks.unregister(flowId) }
+            withContext(NonCancellable) {
+                if (cancelPending) oauth.cancel(flowId)
+                oauthCallbacks.unregister(flowId)
+            }
         }
     }
 

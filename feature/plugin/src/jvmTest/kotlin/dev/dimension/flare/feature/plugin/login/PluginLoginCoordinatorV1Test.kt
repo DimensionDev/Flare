@@ -30,9 +30,11 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.yield
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
@@ -289,25 +291,7 @@ class PluginLoginCoordinatorV1Test {
             val oauth = oauthCoordinator()
             val callbacks = PluginOAuthCallbackCoordinatorV1(oauth, accounts)
             var completed = false
-            val handler =
-                PluginLoginMethodHandlerV1(
-                    plugin = plugin,
-                    method =
-                        plugin.installed.manifest.platform.loginMethods
-                            .single { it.id == "oauth" },
-                    context =
-                        LoginContext(
-                            host = "plugin.example",
-                            methodType = LoginMethodType.OAuth,
-                            onSuccess = { completed = true },
-                        ),
-                    oauth = oauth,
-                    oauthCallbacks = callbacks,
-                    form = PluginFormLoginCoordinatorV1(pool, FixedEntropy),
-                    webCookie = PluginWebCookieLoginCoordinatorV1(pool, FixedEntropy),
-                    accountService = accounts,
-                    coroutineScope = this,
-                )
+            val handler = oauthHandler(oauth, callbacks, accounts) { completed = true }
             try {
                 handler.perform("login")
                 val callback = "${pluginOAuthRedirectUri(FLOW_ID)}?code=ok&state=$STATE"
@@ -325,6 +309,86 @@ class PluginLoginCoordinatorV1Test {
             } finally {
                 handler.close()
             }
+        }
+
+    @Test
+    fun explicitOAuthDismissalRemovesPendingLoginAndRejectsLateCallbacks() =
+        runBlocking {
+            for (browserError in listOf(null, "Browser authentication failed")) {
+                coroutineScope {
+                    val oauth = oauthCoordinator()
+                    val accounts = RecordingAccountService()
+                    val callbacks = PluginOAuthCallbackCoordinatorV1(oauth, accounts)
+                    val handler = oauthHandler(oauth, callbacks, accounts)
+                    try {
+                        handler.perform("login")
+                        assertTrue(oauth.hasPending(PLUGIN_ID))
+
+                        handler.onExternalAuthenticationDismissed(browserError)
+                        yield()
+
+                        assertFalse(oauth.hasPending(PLUGIN_ID))
+                        assertNull(pendingStore.load(FLOW_ID))
+                        val callback = "${pluginOAuthRedirectUri(FLOW_ID)}?code=ok&state=$STATE"
+                        assertFalse(handler.canResume(callback))
+                        assertEquals("oauth.missing", assertFailsWith<PluginLoginException> { callbacks.handle(callback, "en") }.code)
+                        assertTrue(accounts.added.isEmpty())
+                    } finally {
+                        handler.close()
+                    }
+                }
+            }
+        }
+
+    @Test
+    fun restartingOAuthCancelsTheOldFlowBeforeStartingItsReplacement() =
+        runBlocking {
+            val flowIds = listOf(FLOW_ID, OTHER_FLOW_ID).iterator()
+            val oauth =
+                oauthCoordinator(
+                    entropy =
+                        object : PluginLoginEntropyV1 {
+                            override fun newFlowId(): String = flowIds.next()
+
+                            override fun newState(): String = STATE
+                        },
+                )
+            val accounts = RecordingAccountService()
+            val callbacks = PluginOAuthCallbackCoordinatorV1(oauth, accounts)
+            val handler = oauthHandler(oauth, callbacks, accounts)
+            try {
+                handler.perform("login")
+                handler.perform("login")
+
+                assertNull(pendingStore.load(FLOW_ID))
+                assertTrue(pendingStore.load(OTHER_FLOW_ID) != null)
+                handler.resume("${pluginOAuthRedirectUri(OTHER_FLOW_ID)}?code=ok&state=$STATE")
+                assertEquals(1, accounts.added.size)
+                assertFalse(oauth.hasPending(PLUGIN_ID))
+            } finally {
+                handler.close()
+            }
+        }
+
+    @Test
+    fun closingOAuthUiPreservesPendingLoginForUnattendedCompletion() =
+        runBlocking {
+            val oauth = oauthCoordinator()
+            val accounts = RecordingAccountService()
+            val callbacks = PluginOAuthCallbackCoordinatorV1(oauth, accounts)
+            coroutineScope {
+                val handler = oauthHandler(oauth, callbacks, accounts) { error("Closed login UI must not receive callbacks") }
+                try {
+                    handler.perform("login")
+                } finally {
+                    handler.close()
+                }
+            }
+
+            assertTrue(oauth.hasPending(PLUGIN_ID))
+            assertTrue(callbacks.handle("${pluginOAuthRedirectUri(FLOW_ID)}?code=ok&state=$STATE", "en"))
+            assertEquals(1, accounts.added.size)
+            assertFalse(oauth.hasPending(PLUGIN_ID))
         }
 
     @Test
@@ -614,14 +678,35 @@ class PluginLoginCoordinatorV1Test {
         )
     }
 
+    private fun CoroutineScope.oauthHandler(
+        oauth: PluginOAuthLoginCoordinatorV1,
+        callbacks: PluginOAuthCallbackCoordinatorV1,
+        accounts: AccountService,
+        onSuccess: () -> Unit = {},
+    ): PluginLoginMethodHandlerV1 =
+        PluginLoginMethodHandlerV1(
+            plugin = plugin,
+            method =
+                plugin.installed.manifest.platform.loginMethods
+                    .single { it.id == "oauth" },
+            context = LoginContext(host = "plugin.example", methodType = LoginMethodType.OAuth, onSuccess = onSuccess),
+            oauth = oauth,
+            oauthCallbacks = callbacks,
+            form = PluginFormLoginCoordinatorV1(pool, FixedEntropy),
+            webCookie = PluginWebCookieLoginCoordinatorV1(pool, FixedEntropy),
+            accountService = accounts,
+            coroutineScope = this,
+        )
+
     private fun oauthCoordinator(
         runningPlugin: (String) -> RunningPluginV1? = { id -> plugin.takeIf { it.installed.pluginId == id } },
+        entropy: PluginLoginEntropyV1 = FixedEntropy,
     ): PluginOAuthLoginCoordinatorV1 =
         PluginOAuthLoginCoordinatorV1(
             runtimePool = pool,
             pendingStore = pendingStore,
             runningPlugin = runningPlugin,
-            entropy = FixedEntropy,
+            entropy = entropy,
             nowEpochMillis = { now },
         )
 
@@ -679,17 +764,19 @@ private class RecordingAccountService : AccountService {
 
 private class MemoryPendingStore : PluginOAuthPendingStoreV1 {
     var afterConsume: suspend () -> Unit = {}
-    private var pending: PluginOAuthPendingV1? = null
+    private val pending = mutableMapOf<String, PluginOAuthPendingV1>()
+
+    override suspend fun hasPending(pluginId: String): Boolean = pending.values.any { it.pluginId == pluginId }
 
     override suspend fun save(pending: PluginOAuthPendingV1) {
-        this.pending = pending
+        this.pending[pending.flowId] = pending
     }
 
-    override suspend fun load(flowId: String): PluginOAuthPendingV1? = pending?.takeIf { it.flowId == flowId }
+    override suspend fun load(flowId: String): PluginOAuthPendingV1? = pending[flowId]
 
     override suspend fun consume(pending: PluginOAuthPendingV1): Boolean {
-        if (this.pending != pending) return false
-        this.pending = null
+        if (this.pending[pending.flowId] != pending) return false
+        this.pending.remove(pending.flowId)
         afterConsume()
         return true
     }

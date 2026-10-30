@@ -52,10 +52,11 @@ node -e 'JSON.parse(require("node:fs").readFileSync("manifest.json", "utf8")); c
 The private package uses the SDK for ambient types, TypeScript for strict checking,
 and esbuild to bundle local TS modules into one ES2020 IIFE at root. The generated
 SDK dependency is version-pinned. Types such as `PostV1`, `ProfileV1`, and
-`PluginErrorCodeV1` are available directly, and `definePlugin` types its handlers.
+`PluginErrorCodeV1` are available directly, and `defineFlareSocialPlugin` types its
+handlers.
 The SDK is not imported at runtime; plugin code has no Node or browser globals.
 
-Flare supplies the `definePlugin` and `flare` globals and performs the actual
+Flare supplies the `defineFlareSocialPlugin` and `flare` globals and performs the actual
 manifest, registration, and runtime checks. Use a Flare build with Plugins in Settings.
 
 1. In Compose Desktop or native macOS, open **Settings → Plugins → More → Plugin

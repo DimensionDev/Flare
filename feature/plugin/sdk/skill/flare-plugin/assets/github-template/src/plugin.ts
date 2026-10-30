@@ -1,5 +1,5 @@
 // Adapt the illustrative website contract in README.md before publication.
-definePlugin({
+defineFlareSocialPlugin({
   login: {
     token: {
       async begin(request, context) {

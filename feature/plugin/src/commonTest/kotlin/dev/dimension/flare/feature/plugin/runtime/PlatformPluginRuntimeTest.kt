@@ -196,7 +196,7 @@ class PlatformPluginRuntimeTest {
                     ),
                 packagePath = "unused.fpp",
                 iconPath = "unused.png",
-                developmentSource = "definePlugin({ capabilities: { timeline: { async page(request, context) { $body } } } });",
+                developmentSource = "defineFlareSocialPlugin({ capabilities: { timeline: { async page(request, context) { $body } } } });",
             )
         return IsolatedPluginRuntime(
             plugin,

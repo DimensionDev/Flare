@@ -187,9 +187,9 @@ class PluginDetailCapabilityTest {
                 )
             val script =
                 SCRIPT.replace(
-                    "definePlugin({ capabilities: {",
+                    "defineFlareSocialPlugin({ capabilities: {",
                     """
-                    definePlugin({ capabilities: {
+                    defineFlareSocialPlugin({ capabilities: {
                     compose: { publish() { return { post: post("published") }; } },
                     """.trimIndent(),
                 )
@@ -699,7 +699,7 @@ private const val SCRIPT =
       if (detailType === "link") value.url = "https://plugin.example/posts/" + id;
       return value;
     }
-    definePlugin({ capabilities: {
+    defineFlareSocialPlugin({ capabilities: {
       post: { detail(request) { return post(request.key.id); } },
       list: {
         page() { return { items: [] }; },

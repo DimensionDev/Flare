@@ -288,13 +288,35 @@ class PluginJavaScriptEngineTest {
         }
 
     @Test
+    fun socialRegistrationUsesExplicitEntryPoint() =
+        withEngine { engine ->
+            engine.evaluate(RUNTIME_PRELUDE + "''", "runtime.js")
+            assertEquals(
+                "function,undefined",
+                engine.evaluate("[typeof defineFlareSocialPlugin, typeof definePlugin].join(',')", "globals.js"),
+            )
+            val missing = assertFails { engine.evaluate("__flareValidateRegistrationV1()", "missing.js") }
+            assertTrue(missing.message.orEmpty().contains("plugin.js did not call defineFlareSocialPlugin"), missing.message)
+            assertEquals(
+                "true",
+                engine.evaluate("defineFlareSocialPlugin({}); String(__flareValidateRegistrationV1())", "register.js"),
+            )
+            val duplicate = assertFails { engine.evaluate("defineFlareSocialPlugin({})", "duplicate.js") }
+            assertTrue(duplicate.message.orEmpty().contains("defineFlareSocialPlugin may only be called once"), duplicate.message)
+        }
+
+    @Test
     fun registrationInspectorUsesPlatformEngine() =
         runBlocking<Unit> {
             val inspector = PluginRegistrationInspector(engineFactory = { host -> createTestPluginJavaScriptEngine(host) })
-            val methods = inspector.inspect("definePlugin({ detector: { detect() {} } });")
+            val methods = inspector.inspect("defineFlareSocialPlugin({ detector: { detect() {} } });")
             assertEquals(setOf("detector.detect"), methods.methods)
-            assertFails { inspector.inspect("definePlugin({}); definePlugin({});") }
-            assertFails { inspector.inspect("eval('definePlugin({})')") }
+            val duplicate = assertFails { inspector.inspect("defineFlareSocialPlugin({}); defineFlareSocialPlugin({});") }
+            assertTrue(duplicate.message.orEmpty().contains("defineFlareSocialPlugin may only be called once"), duplicate.message)
+            val missing = assertFails { inspector.inspect("({});") }
+            assertTrue(missing.message.orEmpty().contains("plugin.js did not call defineFlareSocialPlugin"), missing.message)
+            assertFails { inspector.inspect("definePlugin({});") }
+            assertFails { inspector.inspect("eval('defineFlareSocialPlugin({})')") }
         }
 
     private fun withEngine(
@@ -314,7 +336,7 @@ class PluginJavaScriptEngineTest {
         body: String,
     ) {
         engine.evaluate(
-            RUNTIME_PRELUDE + DISABLE_DYNAMIC_CODE_PRELUDE + "definePlugin({ test: { async run(request) { $body } } }); ''",
+            RUNTIME_PRELUDE + DISABLE_DYNAMIC_CODE_PRELUDE + "defineFlareSocialPlugin({ test: { async run(request) { $body } } }); ''",
             "plugin.js",
         )
     }

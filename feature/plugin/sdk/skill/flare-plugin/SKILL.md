@@ -52,7 +52,7 @@ Read the references needed for the task:
 | Check the generated files and exercise behavior | [Testing](references/testing.md) |
 | Prepare a GitHub repository, version tag, update, or schema change | [Publishing](references/publishing.md) |
 
-Keep `plugin.js` a self-contained classic script and call `definePlugin` once.
+Keep `plugin.js` a self-contained classic script and call `defineFlareSocialPlugin` once.
 Use `flare.http.request` with structured authorization/Cookies; retain credentials
 through the Host account credential API. Map remote data explicitly into Wire
 DTOs. Do not add fields to the ABI or assume browser/Node globals exist. Perform

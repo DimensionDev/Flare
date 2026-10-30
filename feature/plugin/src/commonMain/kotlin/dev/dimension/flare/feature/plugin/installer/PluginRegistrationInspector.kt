@@ -38,11 +38,11 @@ private val registrationPrelude =
     """
     (() => {
       let registration;
-      Object.defineProperty(globalThis, "definePlugin", {
+      Object.defineProperty(globalThis, "defineFlareSocialPlugin", {
         configurable: false,
         writable: false,
         value(value) {
-          if (registration !== undefined) throw new Error("definePlugin may only be called once");
+          if (registration !== undefined) throw new Error("defineFlareSocialPlugin may only be called once");
           if (value === null || typeof value !== "object") throw new Error("Invalid plugin registration");
           registration = value;
         },
@@ -60,7 +60,7 @@ private val registrationResult =
 
     ;(() => {
       const registration = globalThis.__flareReadRegistrationV1();
-      if (registration === undefined) throw new Error("plugin.js did not call definePlugin");
+      if (registration === undefined) throw new Error("plugin.js did not call defineFlareSocialPlugin");
       const methods = [];
       const visit = (value, path) => {
         if (value === null || typeof value !== "object" || Array.isArray(value)) return;

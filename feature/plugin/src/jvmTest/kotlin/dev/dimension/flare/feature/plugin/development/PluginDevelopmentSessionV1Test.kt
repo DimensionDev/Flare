@@ -120,7 +120,7 @@ class PluginDevelopmentSessionV1Test {
             assertFailsWith<PluginSessionRetiredException> { page(original) }
             assertEquals(unchanged, subsystem.stateStore.desired.value)
 
-            files.write(directory / "plugin.js") { writeUtf8("definePlugin({ broken") }
+            files.write(directory / "plugin.js") { writeUtf8("defineFlareSocialPlugin({ broken") }
             awaitState { it.error != null }
             assertTrue(session.state.value.active)
             assertNull(session.state.value.candidateHash)

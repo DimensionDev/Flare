@@ -400,7 +400,7 @@ private suspend fun createScreenshotPlugin(authoring: PluginAuthoring) {
                 "capabilities":{"flare.datasource.timeline/v1":{"operations":{"page":{"directions":["refresh","older"]}}}},
                 "timelines":[{"id":"home","title":"Home","defaultForNewAccount":true}]}
         }""",
-            "plugin.js" to """definePlugin({
+            "plugin.js" to """defineFlareSocialPlugin({
             detector:{async detect(){return {matched:true};}},
             login:{oauth:{async begin(){return {type:"Pending"};},async resume(){return {type:"Pending"};}}},
             capabilities:{timeline:{async page(){return {items:[]};}}}

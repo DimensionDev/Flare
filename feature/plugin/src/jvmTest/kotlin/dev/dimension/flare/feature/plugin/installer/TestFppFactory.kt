@@ -39,7 +39,7 @@ internal object TestFppFactory {
 
     val validScript: String =
         """
-        definePlugin({
+        defineFlareSocialPlugin({
           detector: { async detect(request) { return { matched: true }; } },
           login: {
             oauth: {

@@ -369,7 +369,7 @@ class PluginInstallerTest {
         runBlocking<Unit> {
             TestFppFactory.write(
                 input,
-                TestFppFactory.validEntries(script = "definePlugin({ detector: { detect() {} } });"),
+                TestFppFactory.validEntries(script = "defineFlareSocialPlugin({ detector: { detect() {} } });"),
             )
             assertFails { installer.inspect(input) }
 

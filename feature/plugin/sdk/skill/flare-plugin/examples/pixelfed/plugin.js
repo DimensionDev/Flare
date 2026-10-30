@@ -12,7 +12,7 @@ const PIXELFED_CAPABILITIES = {
   "flare.datasource.compose/v1": ["publish"],
 };
 
-definePlugin({
+defineFlareSocialPlugin({
   detector: {
     async detect(request, context) {
       const origin = requireOrigin(request.origin || context.origin);

@@ -497,5 +497,6 @@ interface FlareHostV1 {
 
 type MaybePromise<T> = T | Promise<T>;
 
-declare function definePlugin(plugin: PluginDefinitionV1): void;
+/** Register this social plugin once when its classic script is evaluated. */
+declare function defineFlareSocialPlugin(plugin: PluginDefinitionV1): void;
 declare const flare: FlareHostV1;

@@ -785,7 +785,7 @@ private const val LOGIN_SCRIPT =
         }
       };
     }
-    definePlugin({
+    defineFlareSocialPlugin({
       login: {
         oauth: {
           async begin(request) {

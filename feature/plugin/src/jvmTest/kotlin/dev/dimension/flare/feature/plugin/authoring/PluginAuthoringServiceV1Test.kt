@@ -617,7 +617,7 @@ class PluginAuthoringServiceV1Test {
     @Test
     fun bundledSdkMatchesCurrentContractAndRejectsUnknownPaths() =
         runBlocking<Unit> {
-            assertTrue(service.documentation("flare-plugin.d.ts").contains("definePlugin"))
+            assertTrue(service.documentation("flare-plugin.d.ts").contains("defineFlareSocialPlugin"))
             val guide = service.documentation("README.md")
             assertTrue(guide.contains("write_plugin_files"))
             assertTrue(service.documentation("").contains("assets/github-template/manifest.json"))

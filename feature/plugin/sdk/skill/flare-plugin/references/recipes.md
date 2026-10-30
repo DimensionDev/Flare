@@ -5,7 +5,7 @@ Use the [capability matrix](capabilities.md) for required operation sets and
 receives `context`. Tables below describe all twelve services. Code fragments
 use site-specific helpers such as `api`, `mapPost`, and `mapProfile`; implement
 them from the website contract and [HTTP rules](runtime-http.md), then place
-the service in the single `definePlugin` registration. These are adaptation
+the service in the single `defineFlareSocialPlugin` registration. These are adaptation
 recipes, not seventeen separate installable plugins.
 
 ## Timeline

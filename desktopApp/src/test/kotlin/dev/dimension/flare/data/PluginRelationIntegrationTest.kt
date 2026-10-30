@@ -201,7 +201,7 @@ class PluginRelationIntegrationTest {
               }
               return {...current, profileKey: key, actionTokens};
             }
-            definePlugin({
+            defineFlareSocialPlugin({
               login: {oauth: {
                 async begin() { return {type: "Pending"}; },
                 async resume() { return {type: "Pending"}; }

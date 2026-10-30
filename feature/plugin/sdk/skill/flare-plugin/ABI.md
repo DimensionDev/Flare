@@ -64,11 +64,11 @@ branch tracking, client-side builds, and automatic installation are unsupported.
 
 ## Registration
 
-The script calls `definePlugin` once. It registers named services; it does not
-implement a universal dispatcher:
+The social plugin script calls `defineFlareSocialPlugin` once. It registers named
+services; it does not implement a universal dispatcher:
 
 ```js
-definePlugin({
+defineFlareSocialPlugin({
   detector: { async detect(request, context) {} },
   login: {
     oauth: {

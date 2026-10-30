@@ -72,7 +72,7 @@ for authentication, Host APIs, capabilities, and Wire data mapping.
    `check` uses the SDK's ambient types with strict TypeScript checking. `build`
    checks types and bundles local TS modules into one ES2020 IIFE at root.
    Actual execution and manifest/registration validation happen in Flare, which
-   provides `definePlugin` and `flare`.
+   provides `defineFlareSocialPlugin` and `flare`.
 2. In Compose Desktop or native macOS, open **Settings → Plugins → More → Plugin
    development**. Choose the `my-plugin` directory, click **Start development**,
    and confirm the access review.
@@ -169,9 +169,10 @@ registration, permissions, and behavior. File installs have no GitHub update tra
 ## SDK types and editor support
 
 The generated `tsconfig.json` already sets `types: ["flare-plugin-sdk"]`, strict
-checking, and an ES2020 library without browser or Node globals. `definePlugin`
-contextually types its handlers; `PostV1`, `ProfileV1`, and other SDK types are
-available directly. The SDK is a development dependency, not a runtime import.
+checking, and an ES2020 library without browser or Node globals.
+`defineFlareSocialPlugin` contextually types its handlers; `PostV1`, `ProfileV1`,
+and other SDK types are available directly. The SDK is a development dependency,
+not a runtime import.
 Local TS imports are bundled into `plugin.js`; imported code must also work
 without Node/browser APIs. `build` and `package` stop on type errors.
 
@@ -201,9 +202,9 @@ Add the package to your TypeScript project's compiler options:
 ```
 
 Append it to any existing `types` list. For JavaScript, enable `checkJs` as well.
-The declarations provide ambient `definePlugin`, `flare`, and wire types. Do not
-import the SDK at runtime: Flare supplies those globals, and plugin scripts must
-bundle their own runtime dependencies without Node or browser APIs.
+The declarations provide ambient `defineFlareSocialPlugin`, `flare`, and wire
+types. Do not import the SDK at runtime: Flare supplies those globals, and plugin
+scripts must bundle their own runtime dependencies without Node or browser APIs.
 
 ## Use the AI authoring skill
 

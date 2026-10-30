@@ -1,7 +1,7 @@
 "use strict";
 (() => {
   // src/plugin.ts
-  definePlugin({
+  defineFlareSocialPlugin({
     login: {
       token: {
         async begin(request, context) {

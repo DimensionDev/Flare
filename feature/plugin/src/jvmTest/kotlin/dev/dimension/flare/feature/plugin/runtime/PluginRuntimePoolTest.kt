@@ -534,7 +534,7 @@ private class GateTransport : CapturingTransport() {
 
 private fun pageScript(pageMethod: String): String =
     """
-    definePlugin({
+    defineFlareSocialPlugin({
       detector: { async detect(request, context) { return { match: "none", canonicalOrigin: context.origin }; } },
       login: {
         oauth: {

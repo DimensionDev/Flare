@@ -75,7 +75,7 @@ test("npm tarball preserves the SDK and creates a typed, buildable plugin projec
   assert.deepEqual(readFileSync(join(generated, "plugin.js")), prebuilt, "Rebuild and commit the canonical plugin.js when the TS source changes");
   let registrations = 0;
   vm.runInNewContext(prebuilt.toString("utf8"), {
-    definePlugin(plugin) {
+    defineFlareSocialPlugin(plugin) {
       registrations += 1;
       assert.equal(typeof plugin.login.token.begin, "function");
       assert.equal(typeof plugin.capabilities.timeline.page, "function");
@@ -140,7 +140,7 @@ process.cwd();
     await waitFor(() => readFileSync(join(generated, "plugin.js"), "utf8").includes("Watch rebuild marker"));
     const working = readFileSync(join(generated, "plugin.js"));
     log = "";
-    writeFileSync(sourcePath, "definePlugin({\n");
+    writeFileSync(sourcePath, "defineFlareSocialPlugin({\n");
     await waitFor(() => log.includes("[ERROR]"));
     assert.deepEqual(readFileSync(join(generated, "plugin.js")), working);
     writeFileSync(sourcePath, originalSource);
@@ -152,9 +152,11 @@ process.cwd();
 
   writeFileSync(join(directory, "plugin.ts"), `
 const plugin: PluginDefinitionV1 = {};
-definePlugin(plugin);
+defineFlareSocialPlugin(plugin);
 const host: FlareHostV1 = flare;
 void host.crypto.uuid();
+// @ts-expect-error Social plugins use the explicit registration entry point.
+definePlugin(plugin);
 // @ts-expect-error The Host exposes a fixed API, not arbitrary methods.
 flare.fetch("https://example.org");
 `);

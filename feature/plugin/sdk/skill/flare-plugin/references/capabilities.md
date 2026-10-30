@@ -2,7 +2,7 @@
 
 Each ID below has prefix `flare.datasource.` and suffix `/v1`; use the full ID
 in the manifest and negotiated login result. JavaScript methods live under
-`definePlugin({ capabilities: { <service>: ... } })`.
+`defineFlareSocialPlugin({ capabilities: { <service>: ... } })`.
 
 | ID middle | Service | Required operations | Additional operations | Host surface / dependency |
 | --- | --- | --- | --- | --- |
@@ -35,7 +35,7 @@ For the same timeline, these three shapes are intentionally different:
 ```
 
 ```js
-// Registration fragment: include inside the single definePlugin call.
+// Registration fragment: include inside the single defineFlareSocialPlugin call.
 const timelineService = {
   async page(request, context) {
     return loadTimeline(request.timelineId, request.page, context);

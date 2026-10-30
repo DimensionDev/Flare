@@ -7,15 +7,19 @@ No demonstration backend is required for authoring this SDK.
 
 ## Checks in a generated repository
 
-From the generated repository root, using Node:
+The generated TS project includes a prebuilt root `plugin.js`. From its root:
 
 ```sh
+npm install
+npm run check
+npm run build
 node --check plugin.js
 node -e 'JSON.parse(require("node:fs").readFileSync("manifest.json", "utf8")); console.log("Manifest JSON parses")'
 ```
 
-These are syntax checks only: Node accepts APIs that the plugin Host does not
-provide, and parsing JSON does not validate the manifest. Also inspect:
+The SDK types help check source code; building emits one self-contained ES2020
+IIFE. CI checks that it matches the committed prebuilt script. Type/syntax checks
+do not replace Host validation, and parsing JSON does not validate the manifest. Also inspect:
 
 - Required root files and a valid supported icon; stable IDs and version/tag consistency.
 - Every declared known operation has its required registration and full method
@@ -27,9 +31,8 @@ provide, and parsing JSON does not validate the manifest. Also inspect:
 - Auth/cursor/action data is not accidentally inserted into public content or
   media URLs. No real secrets enter checked-in fixtures.
 
-Use the shipped `.d.ts` as editor/reference input, outside the release package.
-For a TypeScript authoring project, reference that file and configure the actual
-bundler to emit one classic script. Keep manifest/Host validation even when the
+The generated tsconfig loads the SDK's ambient types with strict checking and no
+browser/Node globals. Keep manifest/Host validation even when the
 type checker passes: TypeScript optional service properties do not express all
 capability requirements, and optionality does not make every null value valid.
 
@@ -39,11 +42,15 @@ In Settings > Plugins, open the overflow menu and choose **Plugin development**.
 Choose the directory containing `manifest.json`, `plugin.js`, and the plugin assets.
 Click **Start development** and review access to your existing accounts. Both Compose Desktop and native macOS support this flow.
 
-Edit `plugin.js`, `manifest.json`, `assets/icon.<extension>`, or `locales/*.json`. Flare
-automatically validates the files; click **Reload plugin** to apply the validated
+For the TS starter, run `npm run dev` and edit `src/plugin.ts` or its local modules.
+The watcher rebuilds the root `plugin.js`; syntax/build failures preserve the last
+script through atomic replacement. Watch mode does not type-check; use editor
+diagnostics or `npm run check` separately. Changes to the built script,
+`manifest.json`, `assets/icon.<extension>`, or `locales/*.json` are automatically
+validated by Flare; click **Reload plugin** to apply the validated
 snapshot to this plugin's accounts and open pages. An invalid edit keeps the last
-working version running. For TypeScript projects, select your build output directory
-and run your own compiler/watch command; Flare does not execute build scripts.
+working version running. Keep the starter project root selected. Other build
+layouts must select their runtime output directory; Flare does not execute build scripts.
 
 Only one development directory can be active. Reload is refused while publishing,
 uploading, deleting, or sending is in progress; retry after the operation finishes.

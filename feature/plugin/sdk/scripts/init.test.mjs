@@ -9,6 +9,7 @@ import test from "node:test";
 const cli = fileURLToPath(new URL("../bin/cli.mjs", import.meta.url));
 const template = fileURLToPath(new URL("../skill/flare-plugin/assets/github-template/", import.meta.url));
 const original = JSON.parse(readFileSync(join(template, "manifest.json"), "utf8"));
+const originalPackage = JSON.parse(readFileSync(join(template, "package.json"), "utf8"));
 const { version } = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
 const run = (args, cwd) => spawnSync(process.execPath, [cli, ...args], { cwd, encoding: "utf8" });
 
@@ -45,8 +46,14 @@ test("init copies the bundled template and creates valid independent identities"
       },
       original,
     );
-    assert.deepEqual(readdirSync(project, { recursive: true }).sort(), readdirSync(template, { recursive: true }).sort());
-    for (const path of ["plugin.js", "README.md", "assets/icon.png"]) {
+    const metadata = JSON.parse(readFileSync(join(project, "package.json"), "utf8"));
+    assert.equal(metadata.private, true);
+    assert.equal(metadata.name, manifest.id);
+    assert.equal(metadata.devDependencies["flare-plugin-sdk"], version);
+    assert.deepEqual({ ...metadata, name: originalPackage.name, devDependencies: originalPackage.devDependencies }, originalPackage);
+    assert.deepEqual(readdirSync(project, { recursive: true }).sort(), readdirSync(template, { recursive: true }).map(path => path === "_gitignore" ? ".gitignore" : path).sort());
+    assert.equal(readFileSync(join(project, ".gitignore"), "utf8"), readFileSync(join(template, "_gitignore"), "utf8"));
+    for (const path of ["plugin.js", "README.md", "assets/icon.png", "src/plugin.ts", "tsconfig.json", "build.mjs"]) {
       assert.deepEqual(readFileSync(join(project, path)), readFileSync(join(template, path)));
     }
     manifests.push(manifest);

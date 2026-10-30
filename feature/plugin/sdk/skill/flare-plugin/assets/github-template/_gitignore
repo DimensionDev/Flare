@@ -1,0 +1,5 @@
+node_modules/
+dist/
+*.fpp
+.DS_Store
+.plugin-build-*/

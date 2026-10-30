@@ -168,10 +168,12 @@ cases matter. It should identify gaps rather than invent website endpoints.
    cd my-plugin
    ```
 
-   It generates unique plugin/platform IDs and needs no dependency installation
-   or build step for plain JavaScript. For manual copies of
+   It generates a TS project with SDK types and unique plugin/platform IDs. A
+   prebuilt root `plugin.js` makes it installable before dependencies are installed.
+   Run `npm install`, edit `src/plugin.ts`, and use `npm run dev` while developing;
+   `npm run build` checks types before rebuilding the root script. For manual copies of
    [assets/github-template](assets/github-template/README.md), replace its example
-   IDs and names first. The example API needs adaptation; no demonstration server
+   IDs and names first and rename `_gitignore` to `.gitignore`. The example API needs adaptation; no demonstration server
    is provided.
 2. Keep the generated IDs stable, replace the placeholder icon, and adapt
    authentication and data mapping to your website. See [manifest](references/manifest.md)
@@ -183,8 +185,9 @@ cases matter. It should identify gaps rather than invent website endpoints.
    to start the local directory, test an account, and apply saved edits with
    **Reload plugin** after automatic validation. Follow the syntax, behavior and
    platform checks. Stop development before installing/updating the same plugin.
-5. Prefer GitHub distribution: commit the ready-to-run files at a public repository
-   root, then push a stable tag matching `manifest.version`. In Flare's plugin
+5. Prefer GitHub distribution: run `npm run build`, commit the TS source, build
+   configuration, lockfile and root `plugin.js`, then push a stable tag matching
+   `manifest.version`. In Flare's plugin
    management, enter `https://github.com/OWNER/REPO` and click **Install**. Review
    source and permissions, then confirm to use the plugin immediately. Follow the
    plugin's README to select the platform, origin, and login method.

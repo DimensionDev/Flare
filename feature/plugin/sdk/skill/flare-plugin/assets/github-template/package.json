@@ -1,0 +1,16 @@
+{
+  "name": "flare-plugin",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "check": "tsc --noEmit",
+    "build": "npm run check && node build.mjs",
+    "dev": "node build.mjs --watch",
+    "package": "npm run check && node build.mjs --package"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2",
+    "flare-plugin-sdk": "next",
+    "typescript": "6.0.3"
+  }
+}

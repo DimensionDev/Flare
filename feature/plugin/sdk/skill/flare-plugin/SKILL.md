@@ -29,8 +29,13 @@ to the user's plugin repository.
 
 ## Implement the requested adapter
 
-Start a new repository from [the GitHub template](assets/github-template/README.md).
-Copy the **contents** of `assets/github-template/` to the new repository root.
+Start with `npx flare-plugin-sdk@next init my-plugin` and follow the
+[project workflow](assets/github-template/README.md). For manual copies, put the
+**contents** of `assets/github-template/` at root, replace example IDs and rename
+`_gitignore` to `.gitignore`. Install development dependencies, edit `src/plugin.ts`
+using the ambient SDK types, and run `npm run build`. Commit the resulting root
+`plugin.js` with the TS source and lockfile. `npm run dev` watches without type
+checking; `npm run check` and the type-checked build are the release gates.
 Its `/api/me` and `/api/posts` contract is illustrative, not a live service. Adapt
 it from verified website evidence before presenting it as an integration.
 Use [Pixelfed](examples/pixelfed/README.md) as a complete real-service example,

@@ -6,8 +6,10 @@ import dev.dimension.flare.feature.plugin.host.PluginHttpTransport
 import dev.dimension.flare.feature.plugin.host.PluginInvocationContextV1
 import dev.dimension.flare.feature.plugin.host.PluginTransportRequestV1
 import dev.dimension.flare.feature.plugin.host.PluginTransportResponseV1
+import dev.dimension.flare.feature.plugin.installer.PluginDevelopmentSourceV1
 import dev.dimension.flare.feature.plugin.installer.PluginInstaller
 import dev.dimension.flare.feature.plugin.installer.TestFppFactory
+import dev.dimension.flare.feature.plugin.installer.encodePluginArchive
 import dev.dimension.flare.feature.plugin.lifecycle.PluginInstallSourceV1
 import dev.dimension.flare.feature.plugin.lifecycle.PluginStateStore
 import dev.dimension.flare.feature.plugin.lifecycle.RunningPluginV1
@@ -109,17 +111,17 @@ class GitHubTemplateTest {
                     .first { Files.isRegularFile(it.resolve("bin/cli.mjs")) }
             val project = root / "generated project"
             val archive = root / "generated.fpp"
-            listOf(
-                listOf(sdk.resolve("bin/cli.mjs").toString(), "init", project.toString()),
-                listOf(sdk.resolve("skill/flare-plugin/pack.mjs").toString(), project.toString(), archive.toString()),
-            ).forEach { arguments ->
-                val process =
-                    ProcessBuilder(listOf("node") + arguments)
-                        .redirectErrorStream(true)
-                        .start()
-                val output = process.inputStream.bufferedReader().use { it.readText() }
-                assertEquals(0, process.waitFor(), output)
-            }
+            val process =
+                ProcessBuilder("node", sdk.resolve("bin/cli.mjs").toString(), "init", project.toString())
+                    .redirectErrorStream(true)
+                    .start()
+            val output = process.inputStream.bufferedReader().use { it.readText() }
+            assertEquals(0, process.waitFor(), output)
+            assertTrue(FileSystem.SYSTEM.exists(project / "src/plugin.ts"))
+            assertTrue(FileSystem.SYSTEM.exists(project / "package.json"))
+            val development = PluginDevelopmentSourceV1.read(FileSystem.SYSTEM, project)
+            assertEquals(setOf("manifest.json", "plugin.js", "assets/icon.png"), development.archive.files.keys)
+            FileSystem.SYSTEM.write(archive) { write(encodePluginArchive(development.archive.files)) }
 
             val store = PluginStateStore.open(FileSystem.SYSTEM, root / "generated-store")
             val installer = PluginInstaller(FileSystem.SYSTEM, store)
@@ -135,6 +137,31 @@ class GitHubTemplateTest {
                     .running.plugins
                     .getValue(preview.pluginId)
             assertEquals(preview.platformId, installed.installed.manifest.platform.id)
+
+            val directory = Paths.get(project.toString())
+            val entries =
+                Files.walk(directory).use { paths ->
+                    paths
+                        .filter(Files::isRegularFile)
+                        .map { file ->
+                            "repo-commit/${directory.relativize(file).toString().replace('\\', '/')}" to Files.readAllBytes(file)
+                        }.toList()
+                }
+            val sourceArchive = root / "generated-source.zip"
+            TestFppFactory.write(sourceArchive, entries)
+            val source = PluginInstallSourceV1.GitHub(GitHubPluginRepositoryV1(2, "example", "typed-feed"), "v0.1.0", "b".repeat(40))
+            val githubStore = PluginStateStore.open(FileSystem.SYSTEM, root / "generated-github")
+            val githubInstaller = PluginInstaller(FileSystem.SYSTEM, githubStore)
+            val githubPreview = githubInstaller.inspect(sourceArchive, source)
+            assertEquals(preview.pluginId, githubPreview.pluginId)
+            assertEquals(preview.platformId, githubPreview.platformId)
+            githubInstaller.commit(githubPreview, confirmed = true, activate = githubStore::install)
+            val githubInstalled =
+                PluginStateStore
+                    .open(FileSystem.SYSTEM, root / "generated-github")
+                    .running.plugins
+                    .getValue(preview.pluginId)
+            assertEquals(source, githubInstalled.installed.source)
         }
 
     @Test

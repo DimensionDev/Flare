@@ -39,20 +39,24 @@ async function main() {
   manifest.name = name;
   manifest.platform.id = `Plugin${identity}`;
   manifest.platform.name = name;
+  const project = JSON.parse(await readFile(join(template, "package.json"), "utf8"));
+  project.name = manifest.id;
+  project.devDependencies["flare-plugin-sdk"] = version;
 
   await mkdir(target, { recursive: true });
   for (const entry of await readdir(template)) {
-    if (entry === "manifest.json") continue;
-    await cp(join(template, entry), join(target, entry), {
+    if (["manifest.json", "package.json"].includes(entry)) continue;
+    await cp(join(template, entry), join(target, entry === "_gitignore" ? ".gitignore" : entry), {
       recursive: true,
       force: false,
       errorOnExist: true,
     });
   }
   await writeFile(join(target, "manifest.json"), `${JSON.stringify(manifest, null, 2)}\n`, { flag: "wx" });
+  await writeFile(join(target, "package.json"), `${JSON.stringify(project, null, 2)}\n`, { flag: "wx" });
 
   console.log(`Created ${target}\nPlugin ID: ${manifest.id}\nPlatform ID: ${manifest.platform.id}`);
-  console.log("Adapt the example API in plugin.js and README.md, then load this directory in Flare's Plugin development.");
+  console.log("Run npm install, edit src/plugin.ts, and use npm run dev to update plugin.js. Load this directory in Flare's Plugin development.");
 }
 
 main().catch((error) => {

@@ -31,6 +31,9 @@ copy that example's contents into a repository you own first.
    by `npx flare-plugin-sdk@next init my-plugin` stable.
    Keep real tokens, Cookies, passwords, and private fixtures out of Git history.
 2. Put the required files at root and check that a clean checkout contains them.
+   For the TS starter, run `npm run build` and commit `src/`, the build files,
+   `package-lock.json`, and the newly built root `plugin.js`. Keep `plugin.js`
+   tracked; the generated `.gitignore` excludes dependencies and local artifacts.
    Include README instructions for supported website/instances, token acquisition
    if relevant, features, permissions, and tests actually performed.
 3. Set a stable SemVer manifest version, for example `0.1.0`. Publish a tag
@@ -101,8 +104,19 @@ plugin authors do not control it.
 
 ## Optional local installation
 
-Use `.fpp` as an alternative for offline transfer or local testing. In your plugin
-project, create a new, empty `dist` directory. Copy only `manifest.json`, `plugin.js`,
+Use `.fpp` as an alternative for offline transfer or local testing. From the
+generated TS project, run:
+
+```sh
+npm run package
+```
+
+It checks types, rebuilds the root script, stages only runtime files in a fresh
+temporary directory and invokes the SDK packer. The result is `plugin.fpp` at
+project root; temporary staging is cleaned up. GitHub remains the recommended
+distribution path and this file has no GitHub update tracking.
+
+For other project layouts, create a new, empty `dist` directory. Copy only `manifest.json`, `plugin.js`,
 one supported `assets/icon.<extension>`, and optional `locales/*.json` into it,
 preserving those paths. From the project root:
 
@@ -114,7 +128,7 @@ The complete skill also includes the standard-library-only packer for use withou
 npm. For example, from this skill directory:
 
 ```sh
-node pack.mjs assets/github-template /tmp/example-feed-0.1.0.fpp
+node pack.mjs /path/to/runtime-directory /tmp/example-feed-0.1.0.fpp
 ```
 
 The packer ignores only a root README.md; unlike GitHub import it rejects other

@@ -59,8 +59,20 @@ They do not need a GitHub tag, an FPP export or an app restart to apply an updat
 The [compatibility rules](references/compatibility.md#updates-and-compatibility)
 still govern stored credentials, timeline identities and account capabilities.
 For failures consult [troubleshooting](references/troubleshooting.md). Cancelling
-a conversation does not cancel an accepted update. `delete_plugin` requires its
-confirmation step. Plugins belong to the app, not to a conversation.
+a conversation does not cancel an accepted update. Plugins belong to the app,
+not to a conversation. Publishing availability follows the running plugin's
+capabilities after an update or new login.
+
+`delete_plugin` immediately removes local source, installation, accounts,
+credentials and account data. First request its confirmation button, then wait
+for the user to select it before calling with `confirmed=true`. The host binds
+that single-use approval to the plugin and revision and supplies the deletion
+warning; neither a model-supplied flag nor a text reply grants approval. A changed
+revision or a failed/cancelled attempt requires a new confirmation. If account
+cleanup or the final index write fails after removal starts, the plugin remains
+stopped across restart. Retry deleting the same plugin to finish; do not try to
+reactivate it with an update. Package-file cleanup can be retried separately from
+plugin management after deletion completes.
 
 ## Small example
 

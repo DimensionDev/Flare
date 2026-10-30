@@ -109,7 +109,9 @@ internal fun List<AgentMessagePart>.markAgentInputRequestSelected(
     optionId: String,
 ): ImmutableList<AgentMessagePart> =
     map { part ->
-        if (part is AgentMessagePart.Actions && part.request.requestId == requestId) {
+        if (part is AgentMessagePart.Actions && !part.selected && part.request.requestId == requestId &&
+            part.request.options.any { it.id == optionId }
+        ) {
             part.copy(
                 selected = true,
                 selectedOptionId = optionId,

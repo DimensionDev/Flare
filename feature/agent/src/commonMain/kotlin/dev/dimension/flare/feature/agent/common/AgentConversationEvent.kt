@@ -44,6 +44,7 @@ public data class AgentInputRequest(
         val buttonType: AgentInputRequestOptionButtonType,
         val value: String,
         val submit: Boolean = true,
+        val confirmationKey: String? = null,
         val userPreview: UiProfile? = null,
         val postPreview: UiTimelineV2.Post? = null,
     )
@@ -62,6 +63,7 @@ internal data class AgentPendingInputRequest(
         val id: String,
         val value: String,
         val submit: Boolean = true,
+        val confirmationKey: String? = null,
         val userPreview: UiProfile? = null,
         val postPreview: UiTimelineV2.Post? = null,
     )

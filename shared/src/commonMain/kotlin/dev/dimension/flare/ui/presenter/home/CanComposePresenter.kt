@@ -15,12 +15,8 @@ public class CanComposePresenter : PresenterBase<CanComposeState>() {
     private val accountRepository: AccountRepository by koinInject()
 
     private val canComposeFlow by lazy {
-        accountRepository.allAccounts.map { accounts ->
-            accounts.any { account ->
-                runCatching {
-                    accountRepository.getOrCreateDataSource(account).capabilities.compose != null
-                }.getOrDefault(false)
-            }
+        accountRepository.allAccountServices.map { accounts ->
+            accounts.any { it.dataSource.capabilities.compose != null }
         }
     }
 

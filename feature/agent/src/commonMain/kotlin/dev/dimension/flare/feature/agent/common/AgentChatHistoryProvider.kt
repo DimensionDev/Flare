@@ -17,7 +17,10 @@ import dev.dimension.flare.ui.model.UiProfile
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.update
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -34,6 +37,10 @@ internal class AgentChatHistoryProvider(
     private val database: AgentDatabase,
     private val generateTitle: suspend (List<AgentChatHistoryMessage>) -> String?,
 ) : ChatHistoryProvider {
+    private val confirmations = MutableStateFlow<Map<String, String>>(emptyMap())
+
+    fun consumeConfirmation(conversationId: String): String? = confirmations.getAndUpdate { it - conversationId }[conversationId]
+
     fun observeRooms(): Flow<List<AgentChatRoom>> =
         database
             .conversationDao()
@@ -290,43 +297,31 @@ internal class AgentChatHistoryProvider(
         requestId: String,
         optionId: String,
     ) {
-        val messages = database.conversationDao().getMessages(conversationId)
-        val updated =
-            messages.mapNotNull { message ->
-                val content = message.decodeContent()
-                var changed = false
-                val updatedContent =
-                    if (content.any { part ->
-                            part is AgentMessagePart.Actions &&
-                                part.request.requestId == requestId &&
-                                !part.selected
-                        }
-                    ) {
-                        changed = true
-                        content.markAgentInputRequestSelected(
-                            requestId = requestId,
-                            optionId = optionId,
-                        )
-                    } else {
-                        content
+        val confirmation =
+            database.connect {
+                val messages = database.conversationDao().getMessages(conversationId)
+                val option =
+                    messages
+                        .asSequence()
+                        .flatMap { it.decodeContent().asSequence() }
+                        .filterIsInstance<AgentMessagePart.Actions>()
+                        .filter { it.request.requestId == requestId && !it.selected }
+                        .flatMap { it.request.options.asSequence() }
+                        .firstOrNull { it.id == optionId } ?: return@connect null
+                val updated =
+                    messages.mapNotNull { message ->
+                        val content = message.decodeContent()
+                        val selected = content.markAgentInputRequestSelected(requestId, optionId)
+                        if (content == selected) null else message.copy(contentJson = encodeContent(selected))
                     }
-                if (!changed) {
-                    null
-                } else {
-                    message.copy(
-                        contentJson = encodeContent(updatedContent),
-                    )
-                }
+                database.conversationDao().insertMessages(updated)
+                option.confirmationKey
             }
-        if (updated.isEmpty()) {
-            return
-        }
-        database.connect {
-            database.conversationDao().insertMessages(updated)
-        }
+        confirmations.update { if (confirmation == null) it - conversationId else it + (conversationId to confirmation) }
     }
 
     suspend fun clear(conversationId: String) {
+        confirmations.update { it - conversationId }
         val existing = database.conversationDao().getConversation(conversationId)
         database.connect {
             database.conversationDao().deleteContext(conversationId)
@@ -342,6 +337,7 @@ internal class AgentChatHistoryProvider(
     }
 
     suspend fun deleteConversation(conversationId: String) {
+        confirmations.update { it - conversationId }
         database.connect {
             database.conversationDao().deleteContext(conversationId)
             database.conversationDao().deleteMessages(conversationId)

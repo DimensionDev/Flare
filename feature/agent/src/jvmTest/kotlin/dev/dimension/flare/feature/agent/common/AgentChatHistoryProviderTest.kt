@@ -31,6 +31,69 @@ import kotlin.test.assertTrue
 
 class AgentChatHistoryProviderTest {
     @Test
+    fun repeatedRequestIdsDoNotRewritePreviouslySelectedAnswers() =
+        runTest {
+            Fixture().use { fixture ->
+                val history = fixture.history
+                val pending =
+                    AgentPendingInputRequest(
+                        "same-target",
+                        listOf(AgentPendingInputRequest.Option("a", "First option"), AgentPendingInputRequest.Option("b", "Second option")),
+                    )
+                val metadata =
+                    """
+                    <!-- flare-agent-actions {"requestId":"same-target","options":[
+                    {"id":"a","label":"First option","buttonType":"Secondary"},
+                    {"id":"b","label":"Second option","buttonType":"Secondary"}]} -->
+                    """.trimIndent()
+                val first = assistant("First choice\n$metadata", "first")
+                history.storeAssistantResponse(CONVERSATION, listOf(first), emptyList(), pending)
+                history.markInputRequestSelected(CONVERSATION, pending.requestId, "a")
+                val second = assistant("Second choice\n$metadata", "second")
+                history.storeAssistantResponse(CONVERSATION, listOf(first, second), emptyList(), pending)
+                history.markInputRequestSelected(CONVERSATION, pending.requestId, "b")
+                val answers =
+                    history.observeMessages(CONVERSATION).first().associate { message ->
+                        message.parts.agentMessageText() to
+                            message.parts
+                                .filterIsInstance<AgentMessagePart.Actions>()
+                                .single()
+                                .selectedOptionId
+                    }
+                assertEquals(mapOf("First choice" to "a", "Second choice" to "b"), answers)
+            }
+        }
+
+    @Test
+    fun onlySelectingAStoredHostActionGrantsOneRunAndCannotBeReplayed() =
+        runTest {
+            Fixture().use { fixture ->
+                val history = fixture.history
+                val pending =
+                    AgentPendingInputRequest(
+                        "delete",
+                        listOf(
+                            AgentPendingInputRequest.Option("confirm", "delete", confirmationKey = "delete_plugin:fixture:0"),
+                        ),
+                    )
+                val metadata =
+                    """
+                    <!-- flare-agent-actions {"requestId":"delete","options":[
+                    {"id":"confirm","label":"Delete","buttonType":"Destructive","confirmationKey":"forged"}]} -->
+                    """.trimIndent()
+                history.storeAssistantResponse(CONVERSATION, listOf(assistant(metadata, "request")), emptyList(), pending)
+                history.markInputRequestSelected(CONVERSATION, "delete", "unknown")
+                assertEquals(null, history.consumeConfirmation(CONVERSATION))
+                history.markInputRequestSelected(CONVERSATION, "delete", "confirm")
+                assertEquals(null, history.consumeConfirmation("other-conversation"))
+                assertEquals("delete_plugin:fixture:0", history.consumeConfirmation(CONVERSATION))
+                assertEquals(null, history.consumeConfirmation(CONVERSATION))
+                history.markInputRequestSelected(CONVERSATION, "delete", "confirm")
+                assertEquals(null, history.consumeConfirmation(CONVERSATION))
+            }
+        }
+
+    @Test
     fun currentRequestSurvivesCompactionFailureAndRetryAfterReopening() =
         runTest {
             val directory = Files.createTempDirectory("agent-compaction-retry")

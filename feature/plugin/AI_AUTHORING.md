@@ -40,14 +40,28 @@ File and GitHub installations continue to require the normal installation review
 The plugin management UI does not expose enable/disable switches.
 
 Invalid sources remain saved and editable while the last working installation
-continues running. A failed switch restores the working version. **Cancel update**
+continues running. A failed update restores the working version. **Cancel update**
 discards pending activation without affecting conversations or an applied version.
-Disabling prevents source updates from enabling the plugin. Re-enabling restores
-the last working installation and validates the saved source again. Restart
-restores the last applied version and saved source, without automatically applying
-an unfinished update. Deleting a plugin removes its source and installation while
-retaining account records. Stop directory development before changing its enabled
-state or deleting it.
+Restart restores the last applied version and saved source, without automatically
+applying an unfinished update. Publishing availability follows the current plugin's
+capabilities, including changes applied by updates or a new login.
+
+Deleting a plugin immediately removes its source, installation, accounts,
+credentials and account data. Shared drafts and attachments remain while another
+account uses them. The deletion tool requires the user to select the host-provided
+confirmation button for the exact plugin revision. The host controls its deletion
+warning and destructive action type; a model-supplied confirmation flag or text
+reply alone cannot authorize deletion. Approval is single-use and expires with
+that execution attempt, including startup failure or cancellation. A source change
+requires a new confirmation. Stop directory development before deleting.
+
+Flare validates account ownership and records removal before deleting account
+data. If that preparation fails, the working plugin and its accounts remain.
+Once removal is recorded, an account-cleanup or final-index-write failure leaves
+the plugin stopped, including after restart. Delete the same management entry
+again to finish removal; installation and updates cannot reactivate it while
+removal is incomplete. If only unused package-file cleanup fails after deletion
+finishes, retry the management cleanup action.
 
 Android uses Compose settings components, iOS and native macOS use SwiftUI, and
 Compose Desktop uses Fluent components. All four use the same authoring references, validation,

@@ -97,6 +97,37 @@ class AccountProxyRecoveryTest {
         }
 
     @Test
+    fun bulkDeletionValidatesOwnershipAndCommitsIntentBeforeChangingAccountData(): Unit =
+        runBlocking {
+            val (accounts, _) = repository()
+            accounts.withAccountChanges { }
+            app.accountDao().insert(row(deleted))
+            app.accountDao().insert(row(other).copy(credential_json = "invalid"))
+            proxy.selectAccount(deleted, ProxyPolicy(ProxyMode.DIRECT))
+            val previousPolicies = store.state.value
+            var prepared = false
+            assertFailsWith<IllegalStateException> {
+                accounts.deleteAccounts(
+                    "Mastodon",
+                    ownsCredential = {
+                        check(it != "invalid")
+                        true
+                    },
+                    beforeDelete = { prepared = true },
+                )
+            }
+            assertEquals(false, prepared)
+            assertFailsWith<IOException> {
+                accounts.deleteAccounts("Mastodon", ownsCredential = { true }) {
+                    throw IOException("Cannot persist removal intent")
+                }
+            }
+            assertNotNull(app.accountDao().getAccount(deleted))
+            assertNotNull(app.accountDao().getAccount(other))
+            assertEquals(previousPolicies, store.state.value)
+        }
+
+    @Test
     fun recoveryReadFailureDoesNotCancelSharedScopeOrLaterLogin(): Unit =
         runBlocking {
             store.failRead = true

@@ -325,6 +325,10 @@ and package files. Shared drafts and attachments remain while another account
 uses them. Updates preserve accounts. Loading failures or restoring accounts
 without their plugin leave accounts unavailable; they do not delete them.
 Login, publishing, and uploads can delay or block replacement/removal. Closed
-sessions cannot recreate accounts through a late callback. Failed account cleanup
-keeps the installation available for retry. Filesystem cleanup is repeatable through
-plugin management's cleanup action.
+sessions cannot recreate accounts through a late callback. Account ownership and
+the persisted removal intent are checked before any account data is changed.
+Once removal starts, an account-cleanup or final-index-write failure keeps the
+plugin stopped, including after restart, and its management entry remains
+available to retry deletion. Updates and installation cannot reactivate a plugin
+with incomplete removal. Unused package-file cleanup is repeatable through
+plugin management's cleanup action after deletion completes.

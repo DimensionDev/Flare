@@ -56,7 +56,7 @@ plugin's platform ID. A credential schema change may require logging in again.
 Restarting the app loads its installed plugins normally; the last directory is
 remembered but never mounted automatically. Development uses real accounts and
 data: changes made by the plugin are not rolled back. Stop development before
-installing, updating, disabling, or uninstalling the same plugin. Recent-call
+installing, updating, or uninstalling the same plugin. Recent-call
 diagnostics show method names and outcomes only, never request/response payloads.
 
 ## Checks with a Flare source checkout

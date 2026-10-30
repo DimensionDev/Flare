@@ -17,6 +17,10 @@ instance/API authority for IDs in its namespace. Do not substitute a display
 name, page position, timestamp, random UUID, or cursor as an entity key.
 Federated content may have a public URL on a different website while its ID is
 still local to the selected API. Profile identity at login must match that origin.
+The Host canonicalizes a profile's host to the selected origin when they differ
+only by case. A notification without a post uses its mapped actor's profile
+target, so tapping its row or avatar uses the same account key. Profile navigation
+remains unavailable when the session does not expose that capability.
 
 Example website response (illustrative):
 

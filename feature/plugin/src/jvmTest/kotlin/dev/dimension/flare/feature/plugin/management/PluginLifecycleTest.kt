@@ -18,6 +18,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.JsonObject
 import okio.FileSystem
+import okio.ForwardingFileSystem
 import okio.Path
 import okio.Path.Companion.toOkioPath
 import okio.Path.Companion.toPath
@@ -30,6 +31,102 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 class PluginLifecycleTest {
+    private var indexWritesUntilFailure: Int? = null
+    private val fileSystem =
+        object : ForwardingFileSystem(FileSystem.SYSTEM) {
+            override fun atomicMove(
+                source: Path,
+                target: Path,
+            ) {
+                if (target.name == "index.json") {
+                    indexWritesUntilFailure?.let {
+                        indexWritesUntilFailure = it - 1
+                        if (it == 0) {
+                            indexWritesUntilFailure = null
+                            error("synthetic index failure")
+                        }
+                    }
+                }
+                super.atomicMove(source, target)
+            }
+        }
+
+    @Test
+    fun removalIntentFailureKeepsAccountsAndTheWorkingPlugin() =
+        runTest {
+            withFixture(backgroundScope) { subsystem, presenter, accounts, input ->
+                val review = presenter.inspect(input.toString())
+                presenter.confirmInstall()
+                val owned = account(accounts, "one", review.pluginId, review.platformId)
+                indexWritesUntilFailure = 0
+                assertFailsWith<IllegalStateException> { presenter.uninstall(review.pluginId) }
+                assertTrue(owned in accounts.accounts)
+                assertTrue(
+                    subsystem.running.value.plugins
+                        .getValue(review.pluginId)
+                        .session.isActive,
+                )
+                assertFalse(
+                    subsystem.stateStore.desired.value.plugins
+                        .getValue(review.pluginId)
+                        .removing,
+                )
+            }
+        }
+
+    @Test
+    fun finalIndexFailureKeepsRemovalRetryableWithoutRestoringDeletedAccounts() =
+        runTest {
+            withFixture(backgroundScope) { subsystem, presenter, accounts, input ->
+                val review = presenter.inspect(input.toString())
+                presenter.confirmInstall()
+                account(accounts, "one", review.pluginId, review.platformId)
+                indexWritesUntilFailure = 1
+                assertFailsWith<IllegalStateException> { presenter.uninstall(review.pluginId) }
+                assertTrue(accounts.accounts.isEmpty())
+                assertFalse(review.pluginId in subsystem.running.value.plugins)
+                assertTrue(
+                    subsystem.stateStore.desired.value.plugins
+                        .getValue(review.pluginId)
+                        .removing,
+                )
+                val reopened =
+                    dev.dimension.flare.feature.plugin.lifecycle.PluginStateStore
+                        .open(fileSystem, subsystem.stateStore.paths.root)
+                assertFalse(review.pluginId in reopened.running.plugins)
+                assertTrue(reopened.running.issues.any { it.code == "uninstall.pending" })
+                presenter.inspect(input.toString())
+                assertFailsWith<IllegalStateException> { presenter.confirmInstall() }
+                assertFalse(review.pluginId in subsystem.running.value.plugins)
+                presenter.cancelInstall()
+                presenter.uninstall(review.pluginId)
+                assertFalse(review.pluginId in subsystem.stateStore.desired.value.plugins)
+            }
+        }
+
+    @Test
+    fun partialAccountCleanupStaysStoppedAndCanBeRetried() =
+        runTest {
+            withFixture(backgroundScope) { subsystem, presenter, accounts, input ->
+                val review = presenter.inspect(input.toString())
+                presenter.confirmInstall()
+                account(accounts, "one", review.pluginId, review.platformId)
+                account(accounts, "two", review.pluginId, review.platformId)
+                accounts.afterAccountDeleted = { error("synthetic partial cleanup") }
+                assertFailsWith<IllegalStateException> { presenter.uninstall(review.pluginId) }
+                assertEquals(1, accounts.accounts.size)
+                assertFalse(review.pluginId in subsystem.running.value.plugins)
+                assertTrue(
+                    subsystem.stateStore.desired.value.plugins
+                        .getValue(review.pluginId)
+                        .removing,
+                )
+                accounts.afterAccountDeleted = null
+                presenter.uninstall(review.pluginId)
+                assertTrue(accounts.accounts.isEmpty())
+            }
+        }
+
     @Test
     fun conflictingPlatformCannotReplaceAnotherPluginOrBuiltIn() =
         runTest {
@@ -194,7 +291,7 @@ class PluginLifecycleTest {
         val subsystem =
             PluginSubsystemV1(
                 object : AppFileStore {
-                    override val fileSystem = FileSystem.SYSTEM
+                    override val fileSystem = this@PluginLifecycleTest.fileSystem
 
                     override fun directory(name: String): Path = root / name
                 },

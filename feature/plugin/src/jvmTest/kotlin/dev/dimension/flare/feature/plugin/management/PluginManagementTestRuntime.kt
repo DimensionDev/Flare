@@ -45,13 +45,20 @@ internal fun testPluginRegistry(
 internal class PluginTestAccounts : AccountService {
     val accounts = mutableMapOf<MicroBlogKey, Pair<UiAccount, String>>()
     var deletionFailure: Exception? = null
+    var afterAccountDeleted: (() -> Unit)? = null
 
     override suspend fun deleteAccounts(
         platformId: String,
         ownsCredential: (String) -> Boolean,
+        beforeDelete: suspend () -> Unit,
     ) {
         deletionFailure?.let { throw it }
-        accounts.entries.removeAll { it.value.first.platformId == platformId && ownsCredential(it.value.second) }
+        val owned = accounts.filterValues { it.first.platformId == platformId && ownsCredential(it.second) }.keys
+        beforeDelete()
+        owned.forEach {
+            accounts.remove(it)
+            afterAccountDeleted?.invoke()
+        }
     }
 
     override fun accountServiceFlow(accountType: AccountType): Flow<MicroblogDataSource> = error("unused")

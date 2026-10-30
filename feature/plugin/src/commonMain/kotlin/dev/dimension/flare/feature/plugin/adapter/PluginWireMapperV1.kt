@@ -265,20 +265,17 @@ internal class PluginWireMapperV1(
 
     fun notification(value: NotificationV1): UiTimelineV2 {
         val key = MicroBlogKey(value.id, originHost)
+        val actor = value.actor?.let(::profile)
         val message =
             UiTimelineV2.Message(
-                user = value.actor?.let(::profile),
+                user = actor,
                 statusKey = key,
                 icon = value.kind.toUiIcon(),
                 type =
                     value.message?.let { UiTimelineV2.Message.Type.Raw(it.toUi().raw) }
                         ?: value.kind.toMessageType(),
                 createdAt = Instant.parse(value.createdAt).toUi(),
-                clickEvent =
-                    value.actor
-                        ?.takeIf { capabilities.canExpose(PluginAbiV1.Capabilities.PROFILE) }
-                        ?.let { ClickEvent.Deeplink(DeeplinkRoute.Profile.User(accountType, it.key.toMicroBlogKey())) }
-                        ?: ClickEvent.Noop,
+                clickEvent = actor?.clickEvent ?: ClickEvent.Noop,
                 accountType = accountType,
             )
         return value.post?.let { content ->

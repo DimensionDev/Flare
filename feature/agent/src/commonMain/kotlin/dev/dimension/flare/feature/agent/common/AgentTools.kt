@@ -131,7 +131,7 @@ internal class AgentToolProvider(
                 platformRegistry = platformRegistry,
                 userTargets = userTargets,
                 messagePartStore = AgentToolMessagePartStore(),
-                inputRequestStore = AgentToolInputRequestStore(),
+                inputRequestStore = AgentToolInputRequestStore(context.confirmedAction),
             )
         return AgentToolSet(
             toolRegistry =
@@ -491,6 +491,7 @@ internal class AgentToolProvider(
 }
 
 internal data class AgentToolContext(
+    val confirmedAction: String? = null,
     val status: StatusContext? = null,
     val searchDataSources: List<AccountMicroblogDataSource> = emptyList(),
 ) {
@@ -566,9 +567,18 @@ internal class AgentToolMessagePartStore {
         }
 }
 
-internal class AgentToolInputRequestStore {
+internal class AgentToolInputRequestStore(
+    private var confirmedAction: String? = null,
+) {
     private val mutex = Mutex()
     private var inputRequest: AgentPendingInputRequest? = null
+
+    suspend fun consumeConfirmation(key: String): Boolean =
+        mutex.withLock {
+            if (confirmedAction != key) return@withLock false
+            confirmedAction = null
+            true
+        }
 
     suspend fun set(request: AgentPendingInputRequest) {
         mutex.withLock {
@@ -820,6 +830,7 @@ private fun List<AccountMicroblogDataSource>.agentTimelineAccountService(): Acco
         override suspend fun deleteAccounts(
             platformId: String,
             ownsCredential: (String) -> Boolean,
+            beforeDelete: suspend () -> Unit,
         ): Unit = error("Account deletion is not available")
 
         override fun accountServiceFlow(accountType: dev.dimension.flare.model.AccountType): Flow<MicroblogDataSource> {

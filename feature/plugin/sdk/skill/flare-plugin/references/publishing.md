@@ -71,6 +71,13 @@ an error rather than an incomplete “latest version” answer.
 Install, update, and uninstall take effect immediately. Installed plugins are always enabled. There are no plugin lifecycle/migration callbacks. Media
 grants follow the running package; cached media retains plugin ownership and
 rechecks that package's permission. Missing plugins cannot restore their media.
+Uninstall records removal before account cleanup. Once that record is saved,
+account-cleanup or final-index-write failures keep the plugin stopped across
+restart; retry deletion from management to finish. Updating or reinstalling
+cannot bypass incomplete removal. Unused package-file cleanup can be retried
+separately from management after deletion completes.
+Publishing controls follow the current account capabilities after replacement or
+relogin, without requiring the account list to change.
 
 | Change | Author consequence |
 | --- | --- |

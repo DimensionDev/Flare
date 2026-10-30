@@ -28,6 +28,7 @@ public data class InstalledPluginV1(
     val catalogs: Map<String, Map<String, String>> = emptyMap(),
     val runtimeGeneration: Long = 0,
     val iconExtension: String = "png",
+    val removing: Boolean = false,
 )
 
 @Serializable

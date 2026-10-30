@@ -55,10 +55,14 @@ internal class FlareAgentRunner(
         conversationId: String,
         onTrace: suspend (AgentTrace) -> Unit,
     ): AgentRunResult {
+        val confirmedAction = chatHistoryProvider.consumeConfirmation(conversationId)
         val runtime =
             runtimeProvider.createRuntime()
                 ?: throw FlareAgentUnavailableException(runtimeProvider.availability())
-        val toolSet = toolProvider.resolve(request.toolContext)
+        val toolSet =
+            toolProvider.resolve(
+                request.toolContext.copy(confirmedAction = confirmedAction),
+            )
         if (request.retryMode != null) {
             checkNotNull(chatHistoryProvider.consumeRetry(conversationId)) { "This attempt is no longer retryable" }.let { failure ->
                 toolSet.messagePartStore.addPosts(failure.supportingParts.filterIsInstance<AgentMessagePart.PostCard>().map { it.post })

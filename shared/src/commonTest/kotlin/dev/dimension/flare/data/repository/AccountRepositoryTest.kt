@@ -153,7 +153,7 @@ class AccountRepositoryTest : RobolectricTest() {
                     listOf(ownedMedia),
                 ),
             )
-            repeat(2) { repository.deleteAccounts("TestPlugin") { it == "\"owned\"" } }
+            repeat(2) { repository.deleteAccounts("TestPlugin", ownsCredential = { it == "\"owned\"" }, beforeDelete = {}) }
             assertEquals(
                 setOf(foreign.accountKey, builtIn.accountKey),
                 repository.allAccounts

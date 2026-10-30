@@ -175,6 +175,7 @@ internal fun <Content : Any, Context : Any> rememberAgentChatPresenterController
             var submittedInput = userInput
             var retryMode: AgentRetryMode? = null
             var previousFailure: AgentFailure? = null
+            historyProvider.consumeConfirmation(conversationId)
             try {
                 onRoomRuntimeStateChanged(true)
                 if (retry) {
@@ -241,6 +242,8 @@ internal fun <Content : Any, Context : Any> rememberAgentChatPresenterController
                 }
             } finally {
                 if (runtime.runGeneration == generation) {
+                    // Approval expires with this attempt, including failures before runner startup.
+                    historyProvider.consumeConfirmation(conversationId)
                     withContext(NonCancellable) {
                         try {
                             if (!failed) setPersistentError(null)

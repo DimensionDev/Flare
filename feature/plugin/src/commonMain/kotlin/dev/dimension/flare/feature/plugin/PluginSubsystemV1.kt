@@ -102,7 +102,13 @@ public class PluginSubsystemV1 internal constructor(
     private val mutableSourceIssues = MutableStateFlow(stateStore.running.issues)
     public val sourceIssues: StateFlow<List<PluginStateIssueV1>> =
         derivedPluginState(mutableSourceIssues, stateStore.desired) { issues, desired ->
-            issues.filter { it.code != "index.corrupt" || !desired.indexHealthy }
+            issues.filter {
+                when (it.code) {
+                    "index.corrupt" -> !desired.indexHealthy
+                    "uninstall.pending" -> desired.plugins[it.pluginId]?.removing == true
+                    else -> true
+                }
+            }
         }
 
     public val oauth: PluginOAuthLoginCoordinatorV1 =

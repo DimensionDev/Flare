@@ -47,6 +47,27 @@ class PluginWireMapperV1Test {
         )
 
     @Test
+    fun notificationsUseTheirActorsCanonicalProfileTarget() {
+        val actor = author.copy(key = EntityKeyV1("me", "LOCAL.EXAMPLE"))
+        for (accountKey in listOf(MicroBlogKey("me", "local.example"), null)) {
+            val mapper = createMapper(accountKey)
+            val mapped =
+                assertIs<UiTimelineV2.Message>(
+                    mapper.notification(
+                        NotificationV1(
+                            id = "notice",
+                            createdAt = post.createdAt,
+                            kind = NotificationKindV1.Mention,
+                            actor = actor,
+                        ),
+                    ),
+                )
+            assertEquals(MicroBlogKey("me", "local.example"), mapped.user?.key)
+            assertEquals(mapper.profile(actor).clickEvent, mapped.clickEvent)
+        }
+    }
+
+    @Test
     fun postsWithoutAuthorOrVisibilityKeepNavigationActionsAndPlatformIcon() {
         val icon = IconType.Url("file:///plugins/platform-logo.png")
         listOf(MicroBlogKey("me", "local.example"), null).forEach { accountKey ->

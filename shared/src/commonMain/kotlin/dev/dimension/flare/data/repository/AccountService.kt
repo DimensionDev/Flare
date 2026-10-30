@@ -15,9 +15,11 @@ import kotlin.native.HiddenFromObjC
 public interface AccountService {
     public suspend fun invalidatePlatform(platformId: String) {}
 
+    /** Validate all matching credentials, then invoke beforeDelete before changing any account data. */
     public suspend fun deleteAccounts(
         platformId: String,
         ownsCredential: (String) -> Boolean,
+        beforeDelete: suspend () -> Unit,
     )
 
     public fun accountServiceFlow(accountType: AccountType): Flow<MicroblogDataSource>
@@ -87,7 +89,8 @@ internal class RepositoryAccountService(
     override suspend fun deleteAccounts(
         platformId: String,
         ownsCredential: (String) -> Boolean,
-    ) = repository.deleteAccounts(platformId, ownsCredential)
+        beforeDelete: suspend () -> Unit,
+    ) = repository.deleteAccounts(platformId, ownsCredential, beforeDelete)
 
     override fun accountServiceFlow(accountType: AccountType): Flow<MicroblogDataSource> =
         accountServiceFlow(

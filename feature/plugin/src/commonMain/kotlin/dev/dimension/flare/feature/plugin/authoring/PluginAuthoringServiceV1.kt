@@ -143,11 +143,17 @@ internal class PluginAuthoringServiceV1(
         }
     }
 
-    override suspend fun delete(pluginId: String): Unit =
+    override suspend fun delete(
+        pluginId: String,
+        expectedRevision: Long?,
+    ): Unit =
         withContext(Dispatchers.Default) {
             val entry = entry(pluginId)
             entry.mutex.withLock {
                 check(entries.value[pluginId] === entry) { "Plugin no longer exists" }
+                check(expectedRevision == null || expectedRevision == entry.record.revision) {
+                    "Plugin changed. Confirm deletion again."
+                }
                 subsystem.mutationMutex.withLock {
                     switcher.uninstall(pluginId, authoredPluginPlatformId(pluginId))
                     entry.application?.cancel()
@@ -209,6 +215,7 @@ internal class PluginAuthoringServiceV1(
             val previous = subsystem.running.value.plugins[id]
             check(previous?.developmentSource == null) { "Stop directory development before updating this plugin" }
             val installed = subsystem.stateStore.desired.value.plugins[id]
+            check(installed?.removing != true) { "Finish deleting this plugin before updating it" }
             if (previous?.installed?.packageHash != candidate.packageHash) {
                 if (previous?.session?.hasWrites == true || subsystem.oauth.hasPending(id)) {
                     entry.progress = entry.progress.copy(phase = PluginAuthoringPhase.WaitingForOperations)

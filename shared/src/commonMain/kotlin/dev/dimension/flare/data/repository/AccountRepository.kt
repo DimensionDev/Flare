@@ -133,14 +133,14 @@ internal class AccountRepository internal constructor(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     internal val allAccountServices: Flow<ImmutableList<AccountMicroblogDataSource>> by lazy {
-        combine(allAccounts, platformRegistry.platforms, dataSourceRevisions) { accounts, _, _ -> accounts }
-            .mapLatest { accounts ->
-                accounts
-                    .filter { it.platformAvailable }
-                    .map { account ->
-                        AccountMicroblogDataSource(account.accountKey, account.platformId, getOrCreateDataSource(account))
-                    }.toImmutableList()
-            }.distinctUntilChanged()
+        combine(allAccounts, platformRegistry.platforms, dataSourceRevisions) { accounts, platforms, _ ->
+            accounts.filter { account -> platforms.any { it.platformId == account.platformId } }
+        }.mapLatest { accounts ->
+            accounts
+                .map { account ->
+                    AccountMicroblogDataSource(account.accountKey, account.platformId, getOrCreateDataSource(account))
+                }.toImmutableList()
+        }.distinctUntilChanged()
     }
 
     private val accountChangeChannel = Channel<AccountChange>(Channel.UNLIMITED)
@@ -298,6 +298,7 @@ internal class AccountRepository internal constructor(
     internal suspend fun deleteAccounts(
         platformId: String,
         ownsCredential: (String) -> Boolean,
+        beforeDelete: suspend () -> Unit,
     ): Unit =
         withAccountChanges {
             val accounts =
@@ -306,6 +307,7 @@ internal class AccountRepository internal constructor(
                     .allAccounts()
                     .first()
                     .filter { it.platformId == platformId && ownsCredential(it.credential_json) }
+            beforeDelete()
             accounts.forEach { proxyRepository.removeAccount(it.account_key) }
             accounts.forEach { deleteAccount(it.account_key) }
         }

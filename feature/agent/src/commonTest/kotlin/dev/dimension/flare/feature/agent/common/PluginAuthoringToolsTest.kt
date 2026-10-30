@@ -108,14 +108,38 @@ internal class PluginAuthoringToolsTest {
         }
 
     @Test
-    fun deletionUsesTheGenericConfirmationRequest() =
+    fun deletionRequiresAHostGrantForTheExactPluginRevisionAndConsumesItOnce() =
         runTest {
             val plugin = authoring.create("unique-request-key")
-            val tool = DeletePluginTool(authoring, AgentToolInputRequestStore())
-            assertTrue(tool.execute(DeletePluginTool.Args(plugin.id)).contains("inputRequestId=plugin-delete:${plugin.id}"))
-            assertEquals(listOf(plugin), authoring.plugins.value)
+            val requests = AgentToolInputRequestStore()
+            val tool = DeletePluginTool(authoring, requests)
             tool.execute(DeletePluginTool.Args(plugin.id, confirmed = true))
+            assertEquals(listOf(plugin), authoring.plugins.value)
+            val key =
+                requests
+                    .snapshot()!!
+                    .options
+                    .single()
+                    .confirmationKey!!
+            val other = DeletePluginTool(authoring, AgentToolInputRequestStore("delete_plugin:other:0"))
+            other.execute(DeletePluginTool.Args(plugin.id, confirmed = true))
+            assertEquals(listOf(plugin), authoring.plugins.value)
+            val approved = DeletePluginTool(authoring, AgentToolInputRequestStore(key))
+            approved.execute(DeletePluginTool.Args(plugin.id, confirmed = true))
             assertTrue(authoring.plugins.value.isEmpty())
+            authoring.create("unique-request-key")
+            approved.execute(DeletePluginTool.Args(plugin.id, confirmed = true))
+            assertEquals(listOf(plugin), authoring.plugins.value)
+        }
+
+    @Test
+    fun staleDeletionApprovalDoesNotDeleteAnUpdatedPlugin() =
+        runTest {
+            val plugin = authoring.create("unique-request-key")
+            val approved = DeletePluginTool(authoring, AgentToolInputRequestStore("delete_plugin:${plugin.id}:0"))
+            authoring.write(plugin.id, 0, emptyMap())
+            approved.execute(DeletePluginTool.Args(plugin.id, confirmed = true))
+            assertEquals(1, authoring.plugins.value.size)
         }
 
     @Test
@@ -180,7 +204,11 @@ internal class TestAuthoring : PluginAuthoring {
         return AuthoredPlugin("plugin-a", "Test").also { plugins.value = listOf(it) }
     }
 
-    override suspend fun delete(pluginId: String) {
+    override suspend fun delete(
+        pluginId: String,
+        expectedRevision: Long?,
+    ) {
+        check(expectedRevision == null || plugins.value.single { it.id == pluginId }.revision == expectedRevision)
         plugins.value = plugins.value.filterNot { it.id == pluginId }
     }
 

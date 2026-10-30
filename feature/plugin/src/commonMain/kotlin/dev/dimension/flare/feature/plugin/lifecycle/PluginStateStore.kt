@@ -42,12 +42,19 @@ public class PluginStateStore private constructor(
     public val desired: StateFlow<PluginDesiredSnapshotV1> = mutableDesired.asStateFlow()
     public val running: PluginRunningSnapshotV1 = captureRunning(initialIndex, initialIssue)
 
+    internal suspend fun beginUninstall(pluginId: String) {
+        mutate { index -> index.copy(plugins = index.plugins.map { if (it.pluginId == pluginId) it.copy(removing = true) else it }) }
+    }
+
     public suspend fun uninstall(pluginId: String) {
         mutate { index -> index.copy(plugins = index.plugins.filterNot { it.pluginId == pluginId }) }
     }
 
     internal suspend fun install(record: InstalledPluginV1) {
         mutate { index ->
+            check(
+                index.plugins.none { it.pluginId == record.pluginId && it.removing },
+            ) { "Finish deleting this plugin before installing it again" }
             val plugins = index.plugins.filterNot { it.pluginId == record.pluginId } + record
             index.copy(plugins = plugins.sortedBy(InstalledPluginV1::pluginId))
         }
@@ -55,6 +62,7 @@ public class PluginStateStore private constructor(
 
     internal fun validateInstall(record: InstalledPluginV1) {
         val current = mutableDesired.value
+        check(current.plugins[record.pluginId]?.removing != true) { "Finish deleting this plugin before installing it again" }
         if (!current.indexHealthy) throw PluginIndexCorruptException("Plugin index is corrupt")
         val plugins = current.plugins.values.filterNot { it.pluginId == record.pluginId } + record
         validateEncodedIndex(PluginStateIndexV1(plugins = plugins.sortedBy(InstalledPluginV1::pluginId)))
@@ -170,6 +178,11 @@ public class PluginStateStore private constructor(
         val issues = mutableListOf<PluginStateIssueV1>()
         val plugins = mutableMapOf<String, RunningPluginV1>()
         index.plugins.forEach { installed ->
+            if (installed.removing) {
+                issues +=
+                    PluginStateIssueV1("uninstall.pending", installed.pluginId, "Plugin removal is incomplete. Retry deleting this plugin.")
+                return@forEach
+            }
             val packagePath = paths.packagePath(installed.packageHash)
             val iconPath = paths.iconPath(installed.packageHash, installed.iconExtension)
             val packageValid = fileSystem.metadataOrNull(packagePath)?.let { it.isRegularFile && it.size == installed.packageSize } == true

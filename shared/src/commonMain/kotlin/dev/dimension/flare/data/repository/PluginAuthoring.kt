@@ -23,7 +23,10 @@ public interface PluginAuthoring {
 
     public suspend fun fetchDocumentation(url: String): String
 
-    public suspend fun delete(pluginId: String)
+    public suspend fun delete(
+        pluginId: String,
+        expectedRevision: Long? = null,
+    )
 
     public suspend fun cancelUpdate(pluginId: String)
 }

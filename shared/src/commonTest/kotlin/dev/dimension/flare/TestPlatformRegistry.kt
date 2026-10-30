@@ -58,6 +58,7 @@ internal fun unavailableAccountService(): AccountService =
         override suspend fun deleteAccounts(
             platformId: String,
             ownsCredential: (String) -> Boolean,
+            beforeDelete: suspend () -> Unit,
         ): Unit = error("Account deletion is not available")
 
         override fun accountServiceFlow(accountType: AccountType): Flow<MicroblogDataSource> =

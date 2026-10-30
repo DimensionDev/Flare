@@ -79,6 +79,10 @@ internal class PluginRuntimeSwitcherV1(
         val registered = registry.all.firstOrNull { it.platformId.equals(platformId, ignoreCase = true) }
         val ownsRegistration = registered?.belongsToPlugin(pluginId) == true
         if (replacement != null) {
+            check(
+                subsystem.stateStore.desired.value.plugins[pluginId]
+                    ?.removing != true,
+            ) { "Finish deleting this plugin before activating it" }
             require(registered == null || ownsRegistration) { "Platform ID is already registered by another plugin or a built-in platform" }
             require(
                 subsystem.stateStore.desired.value.plugins.values.none {
@@ -90,21 +94,33 @@ internal class PluginRuntimeSwitcherV1(
         }
         val spec = replacement?.let(::platform)
         var retired = false
+        var removalStarted =
+            subsystem.stateStore.desired.value.plugins[pluginId]
+                ?.removing == true
         try {
             withContext(NonCancellable) {
                 previous?.let { subsystem.runtimePool.retire(it, protectInteractions = !temporary) }
                 retired = true
                 subsystem.oauth.cancelPlugin(pluginId)
                 if (!temporary && installed == null) {
-                    accounts.deleteAccounts(platformId) { json ->
-                        val snapshot =
-                            try {
-                                PluginJsonV1.decodeFromString<PluginAccountCredentialV1>(json).snapshot
-                            } catch (_: SerializationException) {
-                                error("Cannot verify account ownership. Remove the affected account before deleting this plugin.")
-                            }
-                        snapshot.pluginId == pluginId && snapshot.platformId == platformId
-                    }
+                    accounts.deleteAccounts(
+                        platformId,
+                        ownsCredential = { json ->
+                            val snapshot =
+                                try {
+                                    PluginJsonV1.decodeFromString<PluginAccountCredentialV1>(json).snapshot
+                                } catch (_: SerializationException) {
+                                    error("Cannot verify account ownership. Remove the affected account before deleting this plugin.")
+                                }
+                            snapshot.pluginId == pluginId && snapshot.platformId == platformId
+                        },
+                        beforeDelete = {
+                            subsystem.stateStore.beginUninstall(pluginId)
+                            removalStarted = true
+                            subsystem.replaceRunning(pluginId, null)
+                            if (ownsRegistration) registry.replaceExternal(platformId, null)
+                        },
+                    )
                 } else {
                     accounts.invalidatePlatform(platformId)
                 }
@@ -118,7 +134,7 @@ internal class PluginRuntimeSwitcherV1(
         } catch (error: Throwable) {
             withContext(NonCancellable) {
                 replacement?.session?.retire()
-                if (retired || previous?.session?.isActive == false) {
+                if (!removalStarted && (retired || previous?.session?.isActive == false)) {
                     val generation = maxOf(previous?.generation ?: 0, replacement?.generation ?: 0) + 1
                     val restored =
                         previous

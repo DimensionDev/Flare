@@ -170,7 +170,7 @@ public class PluginManagementPresenterV1(
             withContext(operationDispatcher) {
                 val installed =
                     subsystem.stateStore.desired.value.plugins.values
-                        .filter { it.source is PluginInstallSourceV1.GitHub }
+                        .filter { !it.removing && it.source is PluginInstallSourceV1.GitHub }
                 installed.forEach { plugin ->
                     val source = plugin.source as PluginInstallSourceV1.GitHub
                     val update =
@@ -324,7 +324,7 @@ public class PluginManagementPresenterV1(
                             subsystem.stateStore.paths
                                 .iconPath(installed.packageHash, installed.iconExtension)
                                 .toString(),
-                        availableUpdate = updates[installed.pluginId],
+                        availableUpdate = updates[installed.pluginId].takeUnless { installed.removing },
                     )
                 },
             issues = subsystem.sourceIssues.value,

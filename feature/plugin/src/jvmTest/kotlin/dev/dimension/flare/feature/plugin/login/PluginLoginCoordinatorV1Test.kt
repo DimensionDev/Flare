@@ -646,7 +646,8 @@ private class RecordingAccountService : AccountService {
     override suspend fun deleteAccounts(
         platformId: String,
         ownsCredential: (String) -> Boolean,
-    ) = Unit
+        beforeDelete: suspend () -> Unit,
+    ) = beforeDelete()
 
     val added = mutableListOf<Pair<UiAccount, Any>>()
     var addFailure: Throwable? = null

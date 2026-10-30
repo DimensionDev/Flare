@@ -11,6 +11,10 @@ import dev.dimension.flare.createTestRootPath
 import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.createDatabaseDriver
+import dev.dimension.flare.data.datasource.microblog.ComposeConfig
+import dev.dimension.flare.data.datasource.microblog.ComposeData
+import dev.dimension.flare.data.datasource.microblog.ComposeDataSource
+import dev.dimension.flare.data.datasource.microblog.ComposeType
 import dev.dimension.flare.data.datasource.microblog.DataSourceCapabilityProvider
 import dev.dimension.flare.data.datasource.microblog.DataSourceCapabilitySet
 import dev.dimension.flare.data.datasource.microblog.DirectMessageDataSource
@@ -65,6 +69,7 @@ import dev.dimension.flare.ui.model.uiArticleContentOf
 import dev.dimension.flare.ui.presenter.article.ArticlePresenter
 import dev.dimension.flare.ui.presenter.dm.DMConversationPresenter
 import dev.dimension.flare.ui.presenter.gallery.GalleryDetailPresenter
+import dev.dimension.flare.ui.presenter.home.CanComposePresenter
 import dev.dimension.flare.ui.presenter.home.NotificationBadgePresenter
 import dev.dimension.flare.ui.presenter.profile.ProfilePresenter
 import dev.dimension.flare.ui.presenter.profile.ProfileWithUserNameAndHostPresenter
@@ -100,6 +105,52 @@ class PluginPageReloadTest {
     private val accountKey = MicroBlogKey("alice", "plugin.example")
     private val accountType = AccountType.Specific(accountKey)
     private val contentKey = MicroBlogKey("content", accountKey.host)
+
+    @Test
+    fun composeAvailabilityFollowsPluginCapabilityReplacementAndRemoval() =
+        withFixture {
+            attach(Source("same metadata", canCompose = false))
+            val state = observe(CanComposePresenter())
+            state.await { it.canCompose.takeSuccess() == false }
+
+            attach(Source("same metadata", canCompose = true))
+            state.await { it.canCompose.takeSuccess() == true }
+
+            attach(Source("same metadata", canCompose = false))
+            state.await { it.canCompose.takeSuccess() == false }
+
+            attach(Source("same metadata", canCompose = true))
+            state.await { it.canCompose.takeSuccess() == true }
+            detach()
+            state.await { it.canCompose.takeSuccess() == false }
+            attach(Source("same metadata", canCompose = true))
+            state.await { it.canCompose.takeSuccess() == true }
+        }
+
+    @Test
+    fun composeAvailabilityFollowsReloginWithoutAnAccountOrPlatformChange() =
+        withFixture {
+            var current: MicroblogDataSource = Source("same metadata", canCompose = false)
+            registry.replaceExternal(
+                PLATFORM,
+                object : PlatformSpec by registry.defaultGuest {
+                    override val platformId = PLATFORM
+                    override val isDefaultGuest = false
+
+                    override fun createDataSource(context: PlatformDataSourceContext) = current
+                },
+            )
+            val state = observe(CanComposePresenter())
+            state.await { it.canCompose.takeSuccess() == false }
+
+            current = Source("same metadata", canCompose = true)
+            repository.addAccount(UiAccount(accountKey, PLATFORM), "new negotiated capabilities")
+            state.await { it.canCompose.takeSuccess() == true }
+
+            current = Source("same metadata", canCompose = false)
+            repository.addAccount(UiAccount(accountKey, PLATFORM), "removed compose capability")
+            state.await { it.canCompose.takeSuccess() == false }
+        }
 
     @Test
     fun openArticleAndCommentsRecoverWhenTheCapabilityReturns() =
@@ -329,6 +380,7 @@ class PluginPageReloadTest {
     private inner class Source(
         private val marker: String,
         private val badgeCount: Int = 1,
+        private val canCompose: Boolean = false,
     ) : MicroblogDataSource by UnavailableMicroblogDataSource,
         DataSourceCapabilityProvider {
         val polls = MutableStateFlow(0)
@@ -358,6 +410,21 @@ class PluginPageReloadTest {
             }
         override val capabilitySet =
             DataSourceCapabilitySet(
+                compose =
+                    if (canCompose) {
+                        object : ComposeDataSource, MicroblogDataSource by this {
+                            override val accountKey = this@PluginPageReloadTest.accountKey
+
+                            override fun composeConfig(type: ComposeType) = ComposeConfig()
+
+                            override suspend fun publish(
+                                data: ComposeData,
+                                progress: () -> Unit,
+                            ) = Unit
+                        }
+                    } else {
+                        null
+                    },
                 notification =
                     NotificationCapability(
                         null,

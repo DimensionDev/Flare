@@ -132,6 +132,17 @@ class PluginAuthoringServiceV1Test {
             FileSystem.SYSTEM.deleteRecursively(root)
         }
 
+    @Test
+    fun staleDeletionApprovalCannotRemoveAnUpdatedPlugin() =
+        runBlocking<Unit> {
+            val plugin = service.create(UUID.randomUUID().toString())
+            generate(plugin)
+            val applied = await(plugin.id, PluginAuthoringPhase.Applied)
+            assertFailsWith<IllegalStateException> { service.delete(plugin.id, expectedRevision = applied.revision - 1) }
+            assertEquals(applied, state(plugin.id))
+            assertTrue(plugin.id in subsystem.running.value.plugins)
+        }
+
     @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
     @Test
     fun cleanupFailureCannotReinstallADeletedPluginFromQueuedSource() =
@@ -1096,7 +1107,8 @@ private class AuthoringAccounts : AccountService {
     override suspend fun deleteAccounts(
         platformId: String,
         ownsCredential: (String) -> Boolean,
-    ) = Unit
+        beforeDelete: suspend () -> Unit,
+    ) = beforeDelete()
 
     @Volatile var invalidations = 0
 

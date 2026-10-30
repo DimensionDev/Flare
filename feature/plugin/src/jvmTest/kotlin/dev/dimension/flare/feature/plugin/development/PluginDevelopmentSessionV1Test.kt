@@ -464,7 +464,8 @@ private class TestAccounts : AccountService {
     override suspend fun deleteAccounts(
         platformId: String,
         ownsCredential: (String) -> Boolean,
-    ) = Unit
+        beforeDelete: suspend () -> Unit,
+    ) = beforeDelete()
 
     val invalidated = mutableListOf<String>()
     var failNext = false

@@ -220,8 +220,9 @@ All documentation is in English. The complete Pixelfed adapter is bundled at
 From `feature/plugin/sdk`, run `npm ci` and `npm test` with Node 22 or newer.
 The tests build an npm tarball, check its complete resource set and license,
 install it offline in an empty project, invoke the actual npx initializer,
-type-check a consumer, and install/build/package the generated TS project using
-the tool versions already cached by `npm ci`. Checks compare the built and
+type-check a consumer, and install/build/package the generated TS project. The
+SDK tarball is installed offline; development tools use cached packages where
+available and fetch missing npm metadata or packages. Checks compare the built and
 prebuilt script, exercise local-module bundling, watch errors/recovery and missing
 Node APIs, and verify the package contains only runtime files.
 Initializer tests cover valid unique IDs, empty/nested/Unicode paths, invalid

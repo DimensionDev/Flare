@@ -68,7 +68,7 @@ test("npm tarball preserves the SDK and creates a typed, buildable plugin projec
   for (const tool of ["typescript", "esbuild"]) {
     assert.equal(project.devDependencies[tool], metadata.devDependencies[tool]);
   }
-  npm(["install", "--offline", "--ignore-scripts", "--no-save", "--no-audit", "--no-fund", "--package-lock=false", join(directory, archive.filename)], generated, toolingCache);
+  npm(["install", "--prefer-offline", "--ignore-scripts", "--no-save", "--no-audit", "--no-fund", "--package-lock=false", join(directory, archive.filename)], generated, toolingCache);
   const prebuilt = readFileSync(join(generated, "plugin.js"));
   npm(["run", "check"], generated);
   npm(["run", "build"], generated);
@@ -183,5 +183,5 @@ flare.fetch("https://example.org");
   const direct = join(directory, "direct.fpp");
   execFileSync(process.execPath, [join(sdk, metadata.bin["flare-plugin-pack"]), runtime, direct]);
   assert.deepEqual(readFileSync(generatedPackage), readFileSync(direct));
-  t.diagnostic(`Verified ${archive.files.length} files, offline typed project install, stale-output guard, SDK types, module bundling, watch recovery, and packaging`);
+  t.diagnostic(`Verified ${archive.files.length} files, offline SDK install, typed project build, stale-output guard, SDK types, module bundling, watch recovery, and packaging`);
 });

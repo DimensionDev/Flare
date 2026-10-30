@@ -45,6 +45,37 @@ Flare uses [ktlint](https://github.com/pinterest/ktlint) to check the code style
  - Make sure you have JDK 25 installed.
  - Run `./gradlew run` to build and run the debug version of the desktop app.
 
+### CI and releases
+
+App builds share the [Android CI workflow](.github/workflows/android.yml). Its
+file and name are retained so release build numbers continue using the existing
+Android run counter. Desktop packages now use that same counter.
+
+Run it manually from Actions and choose a target:
+
+| Target | Builds and checks |
+| --- | --- |
+| `all` | All four build jobs |
+| `linux` | Android, Linux Desktop, and Web on one Ubuntu runner |
+| `apple` | iOS simulator tests and native macOS on one Apple runner |
+| `windows` | Windows Desktop |
+| `fdroid` | F-Droid in a separate checkout with Temurin and non-FOSS components removed |
+
+Linux runs the shared JVM/Android tests, Android UI regressions, Desktop tests,
+and Web checks. Windows also runs JVM/Desktop tests for its native dependencies.
+Apple runs the Kotlin iOS/macOS tests and native iOS regressions. Each runner
+reuses its checkout, JDK, and build outputs; Gradle dependencies are cached.
+
+App tag pushes run all targets automatically, publish Android to Google Play's
+internal track, and attach Desktop packages to a GitHub Release. Manual runs on
+tag refs retain signing and publishing behavior; use a branch ref for validation
+only. iOS and Web retain their existing build/test scope.
+
+SDK tags (`plugin-sdk-v*`) use the separate
+[Plugin SDK workflow](.github/workflows/plugin-sdk.yml), whose filename is kept
+for npm Trusted Publishing. PR checks, Dependabot, and Issue restoration remain
+separate automatic workflows.
+
 ### Project structure
 The project is split into theses parts:
  - `shared`: The common code, including bussiness logic.

@@ -1,37 +1,79 @@
+# Keep this workflow's file and name to retain the Android release run counter.
 name: Android CI
 
 on:
   workflow_dispatch:
+    inputs:
+      target:
+        description: Build target (Linux includes Android, Desktop, and Web)
+        type: choice
+        default: all
+        options:
+          - all
+          - linux
+          - apple
+          - windows
+          - fdroid
   push:
     tags:
       - "**"
       - "!plugin-sdk-v*"
+
+permissions:
+  contents: read
+
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ inputs.target || 'all' }}
   cancel-in-progress: true
+
 jobs:
-  build:
+  build-linux:
+    name: Linux (Android, Desktop, Web)
+    if: github.event_name == 'push' || inputs.target == 'all' || inputs.target == 'linux'
     runs-on: [ubuntu-latest]
-    timeout-minutes: 60
-
+    timeout-minutes: 120
+    env: &build-env
+      BUILD_NUMBER: ${{ github.run_number }}
+      BUILD_VERSION: ${{ github.ref_name }}
+      SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+      JAVA_TOOL_OPTIONS: -Djava.awt.headless=true
     steps:
-      - uses: yumis-coconudge/clean-workspace-action@v1
-
-      - uses: actions/checkout@v7
+      - &clean-workspace
+        uses: yumis-coconudge/clean-workspace-action@v1
+      - &checkout
+        uses: actions/checkout@v7
         with:
           submodules: true
-      - name: Set up JDK
+      - &setup-java
+        name: Set up JDK
         uses: actions/setup-java@v6
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           distribution: "jetbrains"
           java-version: 25
-
-      - name: Setup Android SDK
+          cache: gradle
+      - &setup-android
+        name: Setup Android SDK
         uses: android-actions/setup-android@v4
         with:
           packages: platform-tools
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 12.11.2
+
+      - name: Set up Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: web/pnpm-lock.yaml
+
+      - name: Install web dependencies
+        working-directory: web
+        run: pnpm install --frozen-lockfile
 
       - name: Apply Signing
         env:
@@ -42,9 +84,8 @@ jobs:
           GOOGLE_SERVICES: ${{ secrets.GOOGLE_SERVICES }}
         run: ./.github/apply_signing.sh
 
-      # Run tests
-      - name: Run Tests
-        run: ./gradlew allTests -x wasmJsBrowserTest
+      - name: Run shared and desktop tests
+        run: ./gradlew allTests :desktopApp:test -x wasmJsBrowserTest --stacktrace
 
       - name: Enable emulator acceleration
         run: |
@@ -65,12 +106,32 @@ jobs:
             ./gradlew :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=dev.dimension.flare.common.WebViewProxyTest
             ./gradlew :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=dev.dimension.flare.ui.screen.gallery.GalleryDetailScreenTest
 
-      # Build with Gradle
-      - name: Build with Gradle
-        env:
-          BUILD_NUMBER: ${{github.run_number}}
-          BUILD_VERSION: ${{github.ref_name}}
-        run: ./gradlew :app:assembleRelease :app:bundleRelease :app:check :app:lint --stacktrace
+      - name: Run Kotlin wasmJs tests
+        run: ./gradlew :web-shared:wasmJsTest :shared:wasmJsBrowserTest --tests '*ProxyEngineCapabilitiesTest*' --stacktrace
+
+      - name: Run Svelte codegen tests
+        working-directory: web
+        run: pnpm test:codegen
+
+      - name: Check Svelte
+        working-directory: web
+        run: pnpm check
+
+      - name: Build Svelte
+        working-directory: web
+        run: pnpm build
+
+      - name: Build and package Android and Linux
+        run: ./gradlew :app:assembleRelease :app:bundleRelease :app:check :app:lint :desktopApp:check :desktopApp:build :desktopApp:packageReleaseAppImage --stacktrace
+
+      - name: Upload AppImage package
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: actions/upload-artifact@v7
+        with:
+          name: Linux-package
+          path: |
+            desktopApp/build/compose/binaries/main-release/AppImage/*.appimage
+            desktopApp/build/compose/binaries/main-release/AppImage/*.AppImage
 
       - name: Publish to Google Play
         if: startsWith(github.ref, 'refs/tags/')
@@ -82,17 +143,304 @@ jobs:
           track: internal
           mappingFile: app/build/outputs/mapping/release/mapping.txt
 
+  build-apple:
+    name: Apple (iOS, macOS)
+    if: github.event_name == 'push' || inputs.target == 'all' || inputs.target == 'apple'
+    runs-on: [xcode-27]
+    timeout-minutes: 240
+    steps:
+      - *clean-workspace
+      - *checkout
+      - *setup-java
+      - name: Setup Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+      - name: Install iOS
+        run: xcodebuild -downloadPlatform iOS
+      - name: Install XcodeGen
+        run: brew install xcodegen
+      - name: Add Firebase config
+        env:
+          GOOGLE_SERVICE_INFO_PLIST_B64: ${{ secrets.GOOGLE_SERVICE_INFO_PLIST_B64 }}
+        run: |
+          if [ -n "${GOOGLE_SERVICE_INFO_PLIST_B64:-}" ]; then
+            mkdir -p appleApp/Firebase
+            printf '%s' "$GOOGLE_SERVICE_INFO_PLIST_B64" | base64 -D > appleApp/Firebase/GoogleService-Info.plist
+          else
+            echo "GOOGLE_SERVICE_INFO_PLIST_B64 is not set; Firebase config will not be bundled."
+          fi
+      - name: Generate Xcode project
+        run: xcodegen generate --spec appleApp/project.yml
+      - name: Run Apple Kotlin tests
+        timeout-minutes: 120
+        run: ./gradlew iosSimulatorArm64Test macosArm64Test --stacktrace
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: apple-test-reports
+          path: |
+            **/build/test-results/**
+            **/build/reports/tests/**
+          if-no-files-found: ignore
+          retention-days: 7
+      - name: Prepare HTTPS login test simulator
+        run: |
+          simulator=$(xcrun simctl create FlareNativeTests com.apple.CoreSimulator.SimDeviceType.iPhone-17)
+          echo "FLARE_TEST_SIMULATOR=$simulator" >> "$GITHUB_ENV"
+          xcrun simctl bootstatus "$simulator" -b
+          xcrun simctl keychain "$simulator" add-root-cert shared/src/jvmTest/resources/proxy/localhost-cert.pem
+      - name: Build
+        working-directory: ./appleApp
+        env:
+          scheme: iOS
+          platform: ${{ 'iOS Simulator' }}
+        run: |
+          # xcrun xctrace returns via stderr, not the expected stdout (see https://developer.apple.com/forums/thread/663959)
+          device=`xcrun xctrace list devices 2>&1 | grep -oE 'iPhone.*?[^\(]+' | head -1 | awk '{$1=$1;print}' | sed -e "s/ Simulator$//"`
+          if [ "`ls -A | grep -i \\.xcworkspace\$`" ]; then filetype_parameter="workspace" && file_to_build="`ls -A | grep -i \\.xcworkspace\$`"; else filetype_parameter="project" && file_to_build="`ls -A | grep -i \\.xcodeproj\$`"; fi
+          file_to_build=`echo $file_to_build | awk '{$1=$1;print}'`
+          xcodebuild build-for-testing -scheme "$scheme" -"$filetype_parameter" "$file_to_build" -destination "platform=$platform,id=$FLARE_TEST_SIMULATOR" -skipPackagePluginValidation -skipMacroValidation \
+            GRADLE_JVM_ARGS="-Xmx16G -Dfile.encoding=UTF-8"
+      - name: Run native proxy and playback regressions
+        working-directory: ./appleApp
+        run: |
+          xcodebuild test -project Flare.xcodeproj -scheme TimelineControllerTests \
+            -destination "platform=iOS Simulator,id=$FLARE_TEST_SIMULATOR" \
+            -only-testing:TimelineControllerTests/ProxyPlaybackLifecycleTests \
+            -only-testing:TimelineControllerTests/ProxyImageLifecycleTests \
+            -only-testing:TimelineControllerTests/WebViewProxyTests \
+            -only-testing:TimelineControllerTests/LoginCookieSnapshotTests \
+            -only-testing:TimelineControllerTests/UgoiraPlaybackTests \
+            -parallel-testing-enabled NO -collect-test-diagnostics never -skipPackagePluginValidation -skipMacroValidation \
+            GRADLE_JVM_ARGS="-Xmx16G -Dfile.encoding=UTF-8" CODE_SIGNING_ALLOWED=NO
+          xcodebuild test-without-building -project Flare.xcodeproj -scheme iOS \
+            -destination "platform=iOS Simulator,id=$FLARE_TEST_SIMULATOR" \
+            -only-testing:iOSTests/VideoPlaybackSessionTests \
+            -only-testing:iOSTests/MediaPlaybackMemoryTests \
+            -only-testing:iOSTests/TimelinePlaybackCoordinatorTests \
+            -only-testing:iOSTests/MediaTransferCancellationTests \
+            -parallel-testing-enabled NO -collect-test-diagnostics never
+      - name: Remove test simulator
+        if: always() && env.FLARE_TEST_SIMULATOR != ''
+        run: xcrun simctl delete "$FLARE_TEST_SIMULATOR"
+      - name: import certs
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: apple-actions/import-codesign-certs@v7
+        with:
+          p12-file-base64: ${{ secrets.MACOS_CERT_BASE64 }}
+          p12-password: ${{ secrets.MACOS_CERT_PASSWORD }}
+      - name: Install macOS Provision Profile
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
+          echo "$MACOS_EMBEDDED_PROVISION" > "$RUNNER_TEMP/native-macos.provisionprofile.b64"
+          base64 -d -i "$RUNNER_TEMP/native-macos.provisionprofile.b64" > "$RUNNER_TEMP/native-macos.provisionprofile"
+          security cms -D -i "$RUNNER_TEMP/native-macos.provisionprofile" > "$RUNNER_TEMP/native-macos-profile.plist"
+          profile_uuid=$(/usr/libexec/PlistBuddy -c "Print UUID" "$RUNNER_TEMP/native-macos-profile.plist")
+          profile_name=$(/usr/libexec/PlistBuddy -c "Print Name" "$RUNNER_TEMP/native-macos-profile.plist")
+          cp "$RUNNER_TEMP/native-macos.provisionprofile" "$HOME/Library/MobileDevice/Provisioning Profiles/$profile_uuid.provisionprofile"
+          echo "NATIVE_MACOS_PROVISIONING_PROFILE=$profile_uuid" >> "$GITHUB_ENV"
+          echo "NATIVE_MACOS_PROVISIONING_PROFILE_SPECIFIER=$profile_name" >> "$GITHUB_ENV"
+        env:
+          MACOS_EMBEDDED_PROVISION: ${{ secrets.MACOS_EMBEDDED_PROVISION }}
+      - name: Resolve native macOS signing identities
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          set -euo pipefail
+
+          security find-identity -v -p codesigning
+          security find-identity -v -p basic
+
+          app_identity=$(security find-identity -v -p codesigning | sed -n 's/.*"\(3rd Party Mac Developer Application: .* (7LFDZ96332)\)".*/\1/p' | head -n 1)
+          installer_identity=$(security find-identity -v -p basic | sed -n 's/.*"\(3rd Party Mac Developer Installer: .* (7LFDZ96332)\)".*/\1/p' | head -n 1)
+
+          if [ -z "$app_identity" ]; then
+            echo "No 3rd Party Mac Developer Application identity found for team 7LFDZ96332."
+            exit 1
+          fi
+
+          if [ -z "$installer_identity" ]; then
+            echo "No 3rd Party Mac Developer Installer identity found for team 7LFDZ96332."
+            exit 1
+          fi
+
+          echo "NATIVE_MACOS_APP_SIGNING_IDENTITY=$app_identity" >> "$GITHUB_ENV"
+          echo "NATIVE_MACOS_INSTALLER_SIGNING_IDENTITY=$installer_identity" >> "$GITHUB_ENV"
+      - name: Resolve native macOS version
+        run: |
+          marketing_version="$(sed -n 's/^versionName=//p' fdroid.properties | head -n 1)"
+
+          if [[ "$GITHUB_REF_NAME" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            marketing_version="$GITHUB_REF_NAME"
+          fi
+
+          if [ -z "$marketing_version" ]; then
+            echo "Unable to resolve native macOS marketing version"
+            exit 1
+          fi
+
+          echo "NATIVE_MACOS_MARKETING_VERSION=$marketing_version" >> "$GITHUB_ENV"
+          echo "NATIVE_MACOS_BUILD_NUMBER=$GITHUB_RUN_NUMBER" >> "$GITHUB_ENV"
+      - name: Build native macOS app
+        if: ${{ ! startsWith(github.ref, 'refs/tags/') }}
+        working-directory: ./appleApp
+        env:
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+        run: |
+          xcodebuild build \
+            -project Flare.xcodeproj \
+            -scheme macOS \
+            -configuration Release \
+            -destination "generic/platform=macOS" \
+            -derivedDataPath build/DerivedData \
+            -skipPackagePluginValidation \
+            -skipMacroValidation \
+            GRADLE_JVM_ARGS="-Xmx16G -Dfile.encoding=UTF-8" \
+            JAVA_OPTS="-Xmx16G" \
+            MARKETING_VERSION="$NATIVE_MACOS_MARKETING_VERSION" \
+            CURRENT_PROJECT_VERSION="$NATIVE_MACOS_BUILD_NUMBER" \
+            CODE_SIGNING_ALLOWED=NO
+      - name: Archive native macOS app
+        if: startsWith(github.ref, 'refs/tags/')
+        working-directory: ./appleApp
+        env:
+          FIREBASE_CRASHLYTICS_UPLOAD_SYMBOLS: ${{ startsWith(github.ref, 'refs/tags/') && '1' || '0' }}
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+        run: |
+          xcodebuild archive \
+            -project Flare.xcodeproj \
+            -scheme macOS \
+            -configuration Release \
+            -destination "generic/platform=macOS" \
+            -archivePath "$RUNNER_TEMP/Flare-native-macOS.xcarchive" \
+            -derivedDataPath build/DerivedData \
+            -skipPackagePluginValidation \
+            -skipMacroValidation \
+            DEVELOPMENT_TEAM=7LFDZ96332 \
+            CODE_SIGN_STYLE=Manual \
+            CODE_SIGN_IDENTITY="$NATIVE_MACOS_APP_SIGNING_IDENTITY" \
+            NATIVE_MACOS_PROVISIONING_PROFILE_SPECIFIER="$NATIVE_MACOS_PROVISIONING_PROFILE_SPECIFIER" \
+            NATIVE_MACOS_PROVISIONING_PROFILE="$NATIVE_MACOS_PROVISIONING_PROFILE" \
+            GRADLE_JVM_ARGS="-Xmx16G -Dfile.encoding=UTF-8" \
+            JAVA_OPTS="-Xmx16G" \
+            MARKETING_VERSION="$NATIVE_MACOS_MARKETING_VERSION" \
+            CURRENT_PROJECT_VERSION="$NATIVE_MACOS_BUILD_NUMBER"
+      - name: Package native macOS app
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          set -euo pipefail
+
+          app_path="$RUNNER_TEMP/Flare-native-macOS.xcarchive/Products/Applications/Flare.app"
+          if [ ! -d "$app_path" ]; then
+            echo "No archived app found at $app_path"
+            exit 1
+          fi
+
+          mkdir -p appleApp/build/native-macos/pkg
+          safe_ref="${GITHUB_REF_NAME//\//-}"
+          pkg_path="appleApp/build/native-macos/pkg/Flare-native-macOS-$safe_ref.pkg"
+          productbuild --sign "$NATIVE_MACOS_INSTALLER_SIGNING_IDENTITY" --component "$app_path" /Applications "$pkg_path"
+      - name: Upload native macOS package
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: actions/upload-artifact@v7
+        with:
+          name: Native-macOS-package
+          path: appleApp/build/native-macos/pkg/*.pkg
+
+  build-windows:
+    name: Windows
+    if: github.event_name == 'push' || inputs.target == 'all' || inputs.target == 'windows'
+    runs-on: [windows-latest]
+    timeout-minutes: 30
+    env: *build-env
+    steps:
+      - *clean-workspace
+      - *checkout
+      - *setup-java
+      - name: Run Tests
+        run: ./gradlew jvmTest :desktopApp:test
+      - name: Build and package Windows
+        run: ./gradlew :desktopApp:check :desktopApp:build :desktopApp:packageReleaseAppx --stacktrace
+      - name: Build appxbundle with same version as appx
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+
+          $appx = Get-ChildItem "desktopApp/build/compose/binaries/main-release/appx/*.appx" | Select-Object -First 1
+          if (-not $appx) {
+            throw "No .appx file found"
+          }
+
+          $bundlePath = [System.IO.Path]::ChangeExtension($appx.FullName, ".appxbundle")
+          $tempDir = Join-Path $env:RUNNER_TEMP "appx-bundle-work"
+          New-Item -ItemType Directory -Force -Path $tempDir | Out-Null
+
+          Add-Type -AssemblyName System.IO.Compression.FileSystem
+          $zip = [System.IO.Compression.ZipFile]::OpenRead($appx.FullName)
+          try {
+            $manifestEntry = $zip.Entries | Where-Object { $_.FullName -ieq "AppxManifest.xml" } | Select-Object -First 1
+            if (-not $manifestEntry) {
+              throw "AppxManifest.xml not found in $($appx.Name)"
+            }
+
+            $reader = New-Object System.IO.StreamReader($manifestEntry.Open())
+            try {
+              [xml]$xml = $reader.ReadToEnd()
+            } finally {
+              $reader.Dispose()
+            }
+          } finally {
+            $zip.Dispose()
+          }
+
+          $ns = New-Object System.Xml.XmlNamespaceManager($xml.NameTable)
+          $ns.AddNamespace("appx", $xml.DocumentElement.NamespaceURI)
+          $versionNode = $xml.SelectSingleNode("/appx:Package/appx:Identity/@Version", $ns)
+          if (-not $versionNode) {
+            throw "Cannot read Identity Version from AppxManifest.xml"
+          }
+          $appxVersion = $versionNode.Value
+
+          Write-Host "APPX:    $($appx.FullName)"
+          Write-Host "Version: $appxVersion"
+          Write-Host "Bundle:  $bundlePath"
+
+          $mapping = Join-Path $tempDir "bundle.map.txt"
+          @"
+          [Files]
+          "$($appx.FullName)" "$($appx.Name)"
+          "@ | Set-Content -Path $mapping -Encoding ASCII
+
+          $makeAppx = Get-ChildItem "C:\Program Files (x86)\Windows Kits\10\bin\*\x64\makeappx.exe" -ErrorAction SilentlyContinue |
+            Sort-Object FullName -Descending | Select-Object -First 1
+          if (-not $makeAppx) {
+            $alt = "C:\Program Files (x86)\Windows Kits\10\App Certification Kit\makeappx.exe"
+            if (Test-Path $alt) {
+              $makeAppx = Get-Item $alt
+            }
+          }
+          if (-not $makeAppx) {
+            throw "makeappx.exe not found. Please install Windows SDK on the runner."
+          }
+
+          & $makeAppx.FullName bundle /o /bv $appxVersion /f $mapping /p $bundlePath
+      - name: Upload AppxBundle package
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: actions/upload-artifact@v7
+        with:
+          name: Windows-package
+          path: desktopApp/build/compose/binaries/main-release/appx/*.appxbundle
+
   fdroid-build:
+    name: F-Droid
+    if: github.event_name == 'push' || inputs.target == 'all' || inputs.target == 'fdroid'
     runs-on: [ubuntu-latest]
     timeout-minutes: 60
-
     steps:
-      - uses: yumis-coconudge/clean-workspace-action@v1
-
-      - uses: actions/checkout@v7
-        with:
-          submodules: true
-
+      - *clean-workspace
+      - *checkout
       - name: Set up JDK
         uses: actions/setup-java@v6
         env:
@@ -100,12 +448,8 @@ jobs:
         with:
           distribution: "temurin"
           java-version: 25
-
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v4
-        with:
-          packages: platform-tools
-
+          cache: gradle
+      - *setup-android
       - name: F-Droid prebuild
         run: |
           rm -f gradle/gradle-daemon-jvm.properties
@@ -114,3 +458,24 @@ jobs:
 
       - name: Build F-Droid variant
         run: ./gradlew :app:assembleRelease :app:check :app:lint --stacktrace
+
+  upload:
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: [ubuntu-latest]
+    needs: [build-apple, build-windows, build-linux]
+    timeout-minutes: 30
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: "*-package"
+
+      - name: Draft a new release
+        uses: softprops/action-gh-release@v3
+        with:
+          files: |
+            **/*.appxbundle
+            **/*.pkg
+            **/*.AppImage
+            **/*.appimage

@@ -8,6 +8,7 @@ on:
       - develop
     tags:
       - "**"
+      - "!plugin-sdk-v*"
     paths-ignore:
       - "**.md"
       - "**.yml"

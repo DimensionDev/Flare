@@ -31,6 +31,21 @@ Flare is an open-source, privacy-first social client that brings Mastodon, Missk
  - Built in AI Agent: Configure OpenAI-compatible or on-device AI, enable summaries, or ask for post or profile insights, chat with Flare’s agent, and query local cache/history.
  - Privacy-first approach: As a FOSS client, it emphasizes user control with features like anonymous mode, local filtering, local history, and transparent data handling.
 
+## Plugins (Beta)
+
+Connect additional websites with social plugins on Android, Desktop, iOS, and
+native macOS. Use a Flare build that includes Plugins in Settings; plugin support
+is not available in the Web client.
+
+- **Install a plugin:** open Settings → Plugins, add its public GitHub repository
+  URL, and review its source and permissions before confirming. See the
+  [installation and update guide](feature/plugin/sdk/skill/flare-plugin/references/publishing.md).
+- **Create with Flare AI:** ask the configured AI assistant to build an adapter
+  for your website. See [creating plugins in Flare](feature/plugin/AI_AUTHORING.md).
+- **Develop a plugin:** start with the [SDK quick start](feature/plugin/sdk/README.md),
+  then use the [complete developer guide](feature/plugin/sdk/skill/flare-plugin/README.md)
+  for authentication, capabilities, data types, desktop development, and examples.
+
 ## Roadmap
 Here're some features we're planning to implement in the future.
  - [x] Grouped Mixed timeline

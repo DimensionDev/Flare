@@ -19,6 +19,12 @@ enum MediaViewerDismissGesturePolicy {
     static let projectionDuration: CGFloat = 0.499
     static let minimumScale: CGFloat = 0.6
     static let scrollEdgeTolerance: CGFloat = 1
+    /// Movement that is clearly paging, so the dismiss pan can release the scroll view.
+    static let horizontalYieldDistance: CGFloat = 10
+    /// The dismiss pan does not share a drag. A chrome tap may still land with the double-tap zoom.
+    static func allowsSimultaneousRecognition(chromeTap: Bool, otherIsTap: Bool) -> Bool {
+        chromeTap && otherIsTap
+    }
 
     @MainActor
     static func belongsToViewer(_ touchedView: UIView, viewer: UIView) -> Bool {
@@ -39,7 +45,8 @@ enum MediaViewerDismissGesturePolicy {
         }
     }
 
-    static func shouldRestoreTouchedScrollPosition(didDismiss: Bool) -> Bool {
+    /// Keep the zoom view where the finger landed. Writing its offset after the gesture jumps the image.
+    static func shouldHoldTouchedScrollPosition(didDismiss: Bool) -> Bool {
         !didDismiss
     }
 
@@ -47,17 +54,70 @@ enum MediaViewerDismissGesturePolicy {
         velocityX: CGFloat,
         velocityY: CGFloat,
         zoomScale: CGFloat?,
-        minimumZoomScale: CGFloat?
+        minimumZoomScale: CGFloat?,
+        translationX: CGFloat = 0,
+        translationY: CGFloat = 0
     ) -> Bool {
-        guard abs(velocityY) > abs(velocityX) else { return false }
+        let horizontal: CGFloat
+        let vertical: CGFloat
+        if hypot(velocityX, velocityY) >= 1 {
+            horizontal = velocityX
+            vertical = velocityY
+        } else {
+            horizontal = translationX
+            vertical = translationY
+        }
+        guard abs(vertical) > abs(horizontal) else { return false }
         guard let zoomScale, let minimumZoomScale else { return true }
         return zoomScale <= minimumZoomScale + 0.001
+    }
+
+    /// A horizontal drag is paging. Release it before waiting on a velocity sample.
+    static func shouldYieldToHorizontalPan(translationX: CGFloat, translationY: CGFloat) -> Bool {
+        let distance = hypot(translationX, translationY)
+        return distance >= horizontalYieldDistance && abs(translationX) > abs(translationY) * 1.25
+    }
+
+    @MainActor
+    static func delaysPanOutsideViewer(
+        _ gestureRecognizer: UIGestureRecognizer,
+        viewer: UIView
+    ) -> Bool {
+        guard gestureRecognizer is UIPanGestureRecognizer,
+              let view = gestureRecognizer.view else {
+            return false
+        }
+        if let scrollView = view as? UIScrollView,
+           gestureRecognizer === scrollView.panGestureRecognizer {
+            return false
+        }
+        return !view.isDescendant(of: viewer)
+    }
+
+    @MainActor
+    static func touchesPager(_ view: UIView) -> Bool {
+        var candidate: UIView? = view
+        while let current = candidate {
+            if current is UIScrollView { return true }
+            candidate = current.superview
+        }
+        return false
+    }
+
+    static func shouldDiscardAnimatedContentInset(
+        viewClassName: String,
+        inheritedAnimationDuration: TimeInterval,
+        runtimeClassName: String = ""
+    ) -> Bool {
+        guard inheritedAnimationDuration > 0 else { return false }
+        return viewClassName.contains("ZoomableView") || runtimeClassName.contains("ZoomableView")
     }
 
     @MainActor
     static func shouldTakePriority(
         over gestureRecognizer: UIGestureRecognizer,
-        velocityY: CGFloat = 0
+        velocityY: CGFloat = 0,
+        translationY: CGFloat = 0
     ) -> Bool {
         guard let scrollView = gestureRecognizer.view as? UIScrollView else {
             return false
@@ -65,7 +125,11 @@ enum MediaViewerDismissGesturePolicy {
         guard gestureRecognizer === scrollView.panGestureRecognizer else {
             return false
         }
-        return shouldBeginDismissPan(in: scrollView, velocityY: velocityY)
+        return shouldBeginDismissPan(
+            in: scrollView,
+            velocityY: velocityY,
+            translationY: translationY
+        )
     }
 
     @MainActor
@@ -78,18 +142,20 @@ enum MediaViewerDismissGesturePolicy {
     @MainActor
     static func shouldBeginDismissPan(
         in scrollView: UIScrollView?,
-        velocityY: CGFloat
+        velocityY: CGFloat,
+        translationY: CGFloat = 0
     ) -> Bool {
         guard let scrollView,
               hasScrollableVerticalContent(scrollView) else {
             return true
         }
 
+        let vertical = velocityY != 0 ? velocityY : translationY
         let range = verticalScrollRange(for: scrollView)
-        if velocityY > 0 {
+        if vertical > 0 {
             return scrollView.contentOffset.y <= range.minimum + scrollEdgeTolerance
         }
-        if velocityY < 0 {
+        if vertical < 0 {
             return scrollView.contentOffset.y >= range.maximum - scrollEdgeTolerance
         }
         return false

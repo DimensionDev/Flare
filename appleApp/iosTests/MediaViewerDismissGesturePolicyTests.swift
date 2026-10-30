@@ -177,17 +177,157 @@ final class MediaViewerDismissGesturePolicyTests: XCTestCase {
         )
     }
 
-    func testCancelledGestureRestoresTouchedScrollPosition() {
+    func testActiveDismissHoldsTheTouchedScrollPosition() {
         XCTAssertTrue(
-            MediaViewerDismissGesturePolicy.shouldRestoreTouchedScrollPosition(
+            MediaViewerDismissGesturePolicy.shouldHoldTouchedScrollPosition(
                 didDismiss: false
             )
         )
         XCTAssertFalse(
-            MediaViewerDismissGesturePolicy.shouldRestoreTouchedScrollPosition(
+            MediaViewerDismissGesturePolicy.shouldHoldTouchedScrollPosition(
                 didDismiss: true
             )
         )
+    }
+
+    func testDismissUsesTranslationWhenVelocityIsNotReady() {
+        XCTAssertTrue(
+            MediaViewerDismissGesturePolicy.shouldBegin(
+                velocityX: 0,
+                velocityY: 0,
+                zoomScale: 1,
+                minimumZoomScale: 1,
+                translationX: 2,
+                translationY: 14
+            )
+        )
+        XCTAssertFalse(
+            MediaViewerDismissGesturePolicy.shouldBegin(
+                velocityX: 0,
+                velocityY: 0,
+                zoomScale: 1,
+                minimumZoomScale: 1,
+                translationX: 14,
+                translationY: 2
+            )
+        )
+        XCTAssertFalse(
+            MediaViewerDismissGesturePolicy.shouldBegin(
+                velocityX: 0,
+                velocityY: 0,
+                zoomScale: 2,
+                minimumZoomScale: 1,
+                translationX: 1,
+                translationY: 16
+            )
+        )
+    }
+
+    func testHorizontalPanYieldsBeforeAVelocitySample() {
+        XCTAssertTrue(
+            MediaViewerDismissGesturePolicy.shouldYieldToHorizontalPan(
+                translationX: 16,
+                translationY: 4
+            )
+        )
+        XCTAssertFalse(
+            MediaViewerDismissGesturePolicy.shouldYieldToHorizontalPan(
+                translationX: 6,
+                translationY: 2
+            )
+        )
+        XCTAssertFalse(
+            MediaViewerDismissGesturePolicy.shouldYieldToHorizontalPan(
+                translationX: 4,
+                translationY: 16
+            )
+        )
+    }
+
+    func testDismissPanDoesNotShareTheDrag() {
+        XCTAssertFalse(
+            MediaViewerDismissGesturePolicy.allowsSimultaneousRecognition(
+                chromeTap: false,
+                otherIsTap: false
+            )
+        )
+        XCTAssertFalse(
+            MediaViewerDismissGesturePolicy.allowsSimultaneousRecognition(
+                chromeTap: false,
+                otherIsTap: true
+            )
+        )
+        XCTAssertTrue(
+            MediaViewerDismissGesturePolicy.allowsSimultaneousRecognition(
+                chromeTap: true,
+                otherIsTap: true
+            )
+        )
+    }
+
+    func testAnimatedZoomContentInsetIsAppliedImmediately() {
+        XCTAssertTrue(
+            MediaViewerDismissGesturePolicy.shouldDiscardAnimatedContentInset(
+                viewClassName: "ZoomableView<UiMediaImage, Image>",
+                inheritedAnimationDuration: 0.3
+            )
+        )
+        XCTAssertTrue(
+            MediaViewerDismissGesturePolicy.shouldDiscardAnimatedContentInset(
+                viewClassName: "UIScrollView",
+                inheritedAnimationDuration: 0.3,
+                runtimeClassName: "_TtGC9LazyPager12ZoomableView"
+            )
+        )
+        XCTAssertFalse(
+            MediaViewerDismissGesturePolicy.shouldDiscardAnimatedContentInset(
+                viewClassName: "ZoomableView<UiMediaImage, Image>",
+                inheritedAnimationDuration: 0
+            )
+        )
+        XCTAssertFalse(
+            MediaViewerDismissGesturePolicy.shouldDiscardAnimatedContentInset(
+                viewClassName: "UIScrollView",
+                inheritedAnimationDuration: 0.3
+            )
+        )
+    }
+
+    @MainActor
+    func testDismissPanDelaysPansOwnedByTheSheet() {
+        let viewer = UIView()
+        let sheet = UIView()
+        let sheetPan = UIPanGestureRecognizer()
+        sheet.addGestureRecognizer(sheetPan)
+        XCTAssertTrue(
+            MediaViewerDismissGesturePolicy.delaysPanOutsideViewer(sheetPan, viewer: viewer)
+        )
+
+        let controls = UIView()
+        viewer.addSubview(controls)
+        let controlPan = UIPanGestureRecognizer()
+        controls.addGestureRecognizer(controlPan)
+        XCTAssertFalse(
+            MediaViewerDismissGesturePolicy.delaysPanOutsideViewer(controlPan, viewer: viewer)
+        )
+
+        let scrollView = UIScrollView()
+        XCTAssertFalse(
+            MediaViewerDismissGesturePolicy.delaysPanOutsideViewer(
+                scrollView.panGestureRecognizer,
+                viewer: viewer
+            )
+        )
+    }
+
+    @MainActor
+    func testChromeTapTargetsThePager() {
+        let scrollView = UIScrollView()
+        let image = UIView()
+        scrollView.addSubview(image)
+        XCTAssertTrue(MediaViewerDismissGesturePolicy.touchesPager(image))
+        XCTAssertTrue(MediaViewerDismissGesturePolicy.touchesPager(scrollView))
+        XCTAssertFalse(MediaViewerDismissGesturePolicy.touchesPager(UIButton()))
     }
 
     func testDismissGestureBeginsOnlyForUnzoomedVerticalPans() {
@@ -283,6 +423,20 @@ final class MediaViewerDismissGesturePolicyTests: XCTestCase {
                 MediaViewerDismissGesturePolicy.shouldBeginDismissPan(
                     in: scrollView,
                     velocityY: 500
+                )
+            )
+            XCTAssertTrue(
+                MediaViewerDismissGesturePolicy.shouldBeginDismissPan(
+                    in: scrollView,
+                    velocityY: 0,
+                    translationY: 12
+                )
+            )
+            XCTAssertFalse(
+                MediaViewerDismissGesturePolicy.shouldBeginDismissPan(
+                    in: scrollView,
+                    velocityY: 0,
+                    translationY: -12
                 )
             )
             XCTAssertFalse(

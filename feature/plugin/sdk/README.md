@@ -1,6 +1,6 @@
 # Flare Plugin SDK
 
-`@dimensiondev/flare-plugin-sdk` contains editor types, a local package command,
+`flare-plugin-sdk` contains editor types, a local package command,
 templates, examples, and a portable AI authoring skill for Social Plugin API v1.
 Flare provides the plugin runtime. Supported targets are Android, JVM Desktop,
 iOS, and native macOS, not Web. Use a Flare build that includes Plugins in Settings;
@@ -8,13 +8,13 @@ this SDK does not promise a minimum public app release.
 
 ## Install for development
 
-After the first npm preview release:
+Install the npm preview:
 
 ```sh
-npm install --save-dev @dimensiondev/flare-plugin-sdk@next
+npm install --save-dev flare-plugin-sdk@next
 ```
 
-Before publication, build a local tarball from a Flare checkout instead:
+To validate a Flare checkout without publication, build a local tarball instead:
 
 ```sh
 cd feature/plugin/sdk
@@ -24,12 +24,12 @@ npm pack --pack-destination /tmp
 ```
 
 Install the resulting `.tgz` in your plugin project with
-`npm install --save-dev /path/to/dimensiondev-flare-plugin-sdk-VERSION.tgz`.
+`npm install --save-dev /path/to/flare-plugin-sdk-VERSION.tgz`.
 These local checks and packaging commands do not publish anything.
 
 ## Create and develop a plugin
 
-1. Copy the contents of `node_modules/@dimensiondev/flare-plugin-sdk/skill/flare-plugin/assets/github-template/`
+1. Copy the contents of `node_modules/flare-plugin-sdk/skill/flare-plugin/assets/github-template/`
    into your plugin repository. Replace its IDs, icon, and illustrative website
    endpoints using evidence from the real API.
 2. Read the [complete developer guide](https://github.com/DimensionDev/Flare/tree/feature/plugin/feature/plugin/sdk/skill/flare-plugin).
@@ -61,7 +61,7 @@ Add the package to your TypeScript project's compiler options:
 ```json
 {
   "compilerOptions": {
-    "types": ["@dimensiondev/flare-plugin-sdk"]
+    "types": ["flare-plugin-sdk"]
   }
 }
 ```
@@ -92,9 +92,10 @@ documented in `skill/flare-plugin/references/testing.md`.
 
 ## Publish this SDK (maintainers)
 
-Publishing requires control of the `@dimensiondev` npm scope. This repository's
-GitHub organization does not grant npm access. The package includes the repository's
-AGPL license; its types, templates, and skill remain the canonical source resources.
+For the first publication, use the npm account that will own this unscoped package.
+Subsequent publication and Trusted Publisher setup require package maintainer access;
+GitHub repository permissions do not grant npm access. The package includes the
+repository's AGPL license; its types, templates, and skill remain the canonical source resources.
 
 For the first publication, an authorized maintainer can use an npm account with
 2FA, run `npm ci` and `npm test` in this directory, then explicitly run:

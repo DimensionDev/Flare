@@ -39,6 +39,7 @@ import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.UiTranslatableText
 import dev.dimension.flare.ui.model.asTimelinePostItem
+import dev.dimension.flare.ui.model.asType
 import dev.dimension.flare.ui.model.bindMediaProxy
 import dev.dimension.flare.ui.model.toUiImage
 import dev.dimension.flare.ui.model.withProxy
@@ -995,7 +996,7 @@ internal fun Account.render(
                     )
                 },
         platformId = MASTODON_PLATFORM_ID,
-        platformIcon = dev.dimension.flare.ui.model.UiIcon.Mastodon,
+        platformIcon = UiIcon.Mastodon.asType(),
         clickEvent =
             ClickEvent.Deeplink(
                 DeeplinkRoute.Profile

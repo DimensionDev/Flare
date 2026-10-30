@@ -13,11 +13,14 @@ import dev.dimension.flare.model.RecommendedInstance
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiInstanceMetadata
 import dev.dimension.flare.ui.model.UiStrings
+import dev.dimension.flare.ui.model.asType
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.test.currentTime
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withTimeout
 import kotlin.test.Test
@@ -144,7 +147,7 @@ class LoginPlatformRegistryTest {
 
             assertEquals("Misskey", detected.platformId)
             assertEquals("Misskey", detected.platformDisplayName)
-            assertEquals(UiIcon.Mastodon, detected.platformIcon)
+            assertEquals(UiIcon.Mastodon.asType(), detected.platformIcon)
             assertEquals(listOf(LoginMethodType.Password), detected.loginMethods.map { it.type })
             assertEquals(false, detected.compatibleMode)
         }
@@ -230,6 +233,24 @@ class LoginPlatformRegistryTest {
         }
 
     @Test
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    fun detectionHasAGlobalDeadline() =
+        runTest {
+            val registry =
+                testRegistry(
+                    testProvider(
+                        platformId = "Stalled",
+                        detectorDelayMillis = 31_000,
+                    ),
+                )
+
+            assertFailsWith<IllegalArgumentException> {
+                registry.detectPlatformId("example.social")
+            }
+            assertEquals(10_000, currentTime)
+        }
+
+    @Test
     fun runtimeDataDerivesProvidersFromPlatformSpecs() {
         val mastodon = testProvider("Mastodon")
         val mastodonSpec = testLoginPlatformSpec(mastodon)
@@ -249,13 +270,14 @@ class LoginPlatformRegistryTest {
         detectedSoftware: String? = null,
         detectorFailure: Throwable? = null,
         detectorBlock: (suspend (String) -> NodeDetection?)? = null,
+        detectorDelayMillis: Long = 0,
     ): LoginPlatformProvider =
         object : LoginPlatformProvider {
             override val platformId: String = platformId
             override val metadata: PlatformMetadata =
                 PlatformMetadata(
                     displayName = platformId,
-                    icon = UiIcon.Mastodon,
+                    icon = UiIcon.Mastodon.asType(),
                 )
             override val detector: PlatformDetector =
                 object : PlatformDetector {
@@ -263,6 +285,7 @@ class LoginPlatformRegistryTest {
 
                     override suspend fun detect(host: String): NodeDetection? {
                         detectorBlock?.let { return it(host) }
+                        delay(detectorDelayMillis)
                         detectorFailure?.let { throw it }
                         return detectedSoftware?.let {
                             NodeDetection(
@@ -331,7 +354,7 @@ class LoginPlatformRegistryTest {
             override val metadata: PlatformMetadata =
                 PlatformMetadata(
                     displayName = platformId,
-                    icon = UiIcon.Mastodon,
+                    icon = UiIcon.Mastodon.asType(),
                 )
             override val timelineSpecs: ImmutableList<TimelineSpec<out TimelineSpec.Data>> = persistentListOf()
 

@@ -16,8 +16,12 @@ import dev.dimension.flare.feature.agent.common.AgentChatHistoryMessage
 import dev.dimension.flare.feature.agent.common.AgentChatHistoryProvider
 import dev.dimension.flare.feature.agent.common.AgentChatRoom
 import dev.dimension.flare.feature.agent.common.AgentConversationEvent
+import dev.dimension.flare.feature.agent.common.AgentFailure
+import dev.dimension.flare.feature.agent.common.AgentFailureKind
 import dev.dimension.flare.feature.agent.common.AgentInputRequest
+import dev.dimension.flare.feature.agent.common.AgentRetryMode
 import dev.dimension.flare.feature.agent.common.AgentTrace
+import dev.dimension.flare.feature.agent.common.toAgentFailure
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -30,6 +34,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -42,12 +47,17 @@ internal data class AgentChatPresenterController<Content : Any, Context : Any>(
     val content: Content?,
     private val setInput: (String) -> Unit,
     private val sendMessage: () -> Unit,
+    private val retry: () -> Unit,
     private val selectInputRequestOption: (AgentInputRequest.Option) -> Unit,
 ) {
     val canSend: Boolean = input.isNotBlank() && !room.isRunning
 
     fun setInput(value: String) {
         setInput.invoke(value)
+    }
+
+    fun retry() {
+        retry.invoke()
     }
 
     fun sendMessage() {
@@ -65,7 +75,7 @@ internal fun <Content : Any, Context : Any> rememberAgentChatPresenterController
     conversationId: String,
     room: AgentChatRoom,
     contextFlow: Flow<Context?>,
-    runAgent: (Context, String?, String) -> Flow<AgentConversationEvent<Content, AgentTrace>>,
+    runAgent: (Context, String?, String, AgentRetryMode?) -> Flow<AgentConversationEvent<Content, AgentTrace>>,
     onUserMessageSubmitted: suspend (String) -> Unit = {},
     onInputRequestOptionSubmitted: suspend (AgentInputRequest.Option) -> Unit = { option ->
         val displayText = option.label.trim()
@@ -146,43 +156,44 @@ internal fun <Content : Any, Context : Any> rememberAgentChatPresenterController
         }
     }
 
-    fun List<AgentChatHistoryMessage>.latestOpenInputRequest(): AgentInputRequest? =
-        asReversed()
-            .firstNotNullOfOrNull { message ->
-                message.parts.latestOpenAgentInputRequest()
-            }
-
     fun List<AgentChatHistoryMessage>.latestOpenInputRequestForOption(option: AgentInputRequest.Option): AgentInputRequest? =
         asReversed()
             .firstNotNullOfOrNull { message ->
                 message.parts.latestOpenAgentInputRequestForOption(option)
             }
 
-    fun runCurrentAgent(userInput: String?) {
-        @Suppress("UNCHECKED_CAST")
-        val contextValue =
-            runtime.context as? Context
-                ?: run {
-                    val throwable = missingContextError()
-                    AgentChatRunRegistry.launchRuntimeTask(conversationId, runtime) {
-                        setRuntimeState(running = false, trace = null)
-                        setPersistentError(throwable.message)
-                    }
-                    return
-                }
-        runtime.runJob?.cancel()
-        val generation = runtime.runGeneration + 1
-        runtime.runGeneration = generation
+    fun runCurrentAgent(
+        userInput: String?,
+        retry: Boolean = false,
+        onSubmitted: suspend () -> Unit = {},
+    ): Boolean {
+        if (!runtime.tryStart()) return false
+        val generation = ++runtime.runGeneration
         AgentChatRunRegistry.launchRun(conversationId, runtime) {
-            setRuntimeState(running = true, trace = null)
-            setPersistentError(null)
             var failed = false
             var cancelled = false
+            var submittedInput = userInput
+            var retryMode: AgentRetryMode? = null
+            var previousFailure: AgentFailure? = null
+            historyProvider.consumeConfirmation(conversationId)
             try {
-                runAgent(contextValue, userInput, conversationId).collect { event ->
+                onRoomRuntimeStateChanged(true)
+                if (retry) {
+                    val failure = historyProvider.observeRoom(conversationId).first()?.error
+                    retryMode = failure?.retryMode ?: return@launchRun
+                    previousFailure = failure
+                    submittedInput = failure.userInput
+                }
+                onSubmitted()
+                if (!retry) setPersistentError(AgentFailure(AgentFailureKind.Interrupted, "").encode())
+                @Suppress("UNCHECKED_CAST")
+                val contextValue = runtime.context as? Context ?: throw missingContextError()
+                runAgent(contextValue, submittedInput, conversationId, retryMode).collect { event ->
                     when (event) {
                         is AgentConversationEvent.ContentLoaded -> {
-                            if (userInput == null && !runtime.initialContentMessageStored) {
+                            if (submittedInput == null && !runtime.initialContentMessageStored &&
+                                historyProvider.observeMessages(conversationId).first().none { it.isUser }
+                            ) {
                                 runtime.initialContentMessageStored = true
                                 onInitialContentLoaded(event.content)
                             }
@@ -207,23 +218,44 @@ internal fun <Content : Any, Context : Any> rememberAgentChatPresenterController
                     cancelled = true
                 } else if (runtime.runGeneration == generation) {
                     failed = true
-                    setRuntimeState(running = false, trace = null)
-                    setPersistentError(throwable.message)
+                    val failure = throwable.toAgentFailure(submittedInput)
+                    setPersistentError(
+                        (
+                            if (previousFailure != null && failure.canRetry) {
+                                failure.copy(
+                                    retryMode =
+                                        if (failure.kind == AgentFailureKind.Configuration) {
+                                            previousFailure.retryMode
+                                        } else {
+                                            failure.retryMode
+                                        },
+                                    supportingParts =
+                                        (failure.supportingParts + previousFailure.supportingParts)
+                                            .distinctAgentMessageParts(),
+                                    inputRequest = failure.inputRequest ?: previousFailure.inputRequest,
+                                )
+                            } else {
+                                failure
+                            }
+                        ).encode(),
+                    )
                 }
             } finally {
                 if (runtime.runGeneration == generation) {
-                    if (!failed) {
-                        withContext(NonCancellable) {
+                    // Approval expires with this attempt, including failures before runner startup.
+                    historyProvider.consumeConfirmation(conversationId)
+                    withContext(NonCancellable) {
+                        try {
+                            if (!failed) setPersistentError(null)
+                        } finally {
                             setRuntimeState(running = false, trace = null)
-                            setPersistentError(null)
-                        }
-                        if (!cancelled) {
-                            scheduleAgentRunCompleted()
                         }
                     }
+                    if (!failed && !cancelled) scheduleAgentRunCompleted()
                 }
             }
         }
+        return true
     }
 
     LaunchedEffect(key, conversationId) {
@@ -238,16 +270,15 @@ internal fun <Content : Any, Context : Any> rememberAgentChatPresenterController
             if (!wasInitialized) {
                 input = ""
             }
-            if (contextValue != null && (!wasInitialized || previousContext == null)) {
-                setPersistentError(null)
+            if (historyProvider.observeRoom(conversationId).first()?.error != null) {
+                runtime.initialUserInputConsumed = true
+                runtime.autoRunOnContextConsumed = true
+                return@collectLatest
             }
             val initialText = initialUserInput?.trim()?.takeIf { it.isNotEmpty() }
             if (!runtime.initialUserInputConsumed && initialText != null && contextValue != null) {
                 runtime.initialUserInputConsumed = true
-                AgentChatRunRegistry.launchRuntimeTask(conversationId, runtime) {
-                    onUserMessageSubmitted(initialText)
-                    runCurrentAgent(userInput = initialText)
-                }
+                runCurrentAgent(userInput = initialText) { onUserMessageSubmitted(initialText) }
             } else if (autoRunOnContext && !runtime.autoRunOnContextConsumed && contextValue != null) {
                 runtime.autoRunOnContextConsumed = true
                 runCurrentAgent(userInput = null)
@@ -272,22 +303,11 @@ internal fun <Content : Any, Context : Any> rememberAgentChatPresenterController
         setInput = {
             input = it
         },
+        retry = { runCurrentAgent(userInput = null, retry = true) },
         sendMessage = {
             val text = input.trim()
             if (text.isNotEmpty() && !runtime.state.value.isRunning) {
-                if (runtime.context == null) {
-                    val throwable = missingContextError()
-                    AgentChatRunRegistry.launchRuntimeTask(conversationId, runtime) {
-                        setRuntimeState(running = false, trace = null)
-                        setPersistentError(throwable.message)
-                    }
-                } else {
-                    input = ""
-                    AgentChatRunRegistry.launchRuntimeTask(conversationId, runtime) {
-                        onUserMessageSubmitted(text)
-                        runCurrentAgent(userInput = text)
-                    }
-                }
+                if (runCurrentAgent(userInput = text) { onUserMessageSubmitted(text) }) input = ""
             }
         },
         selectInputRequestOption = { option ->
@@ -295,23 +315,13 @@ internal fun <Content : Any, Context : Any> rememberAgentChatPresenterController
             if (!option.submit && !runtime.state.value.isRunning) {
                 input = text
             } else if (text.isNotEmpty() && !runtime.state.value.isRunning) {
-                if (runtime.context == null) {
-                    val throwable = missingContextError()
-                    AgentChatRunRegistry.launchRuntimeTask(conversationId, runtime) {
-                        setRuntimeState(running = false, trace = null)
-                        setPersistentError(throwable.message)
-                    }
-                } else {
-                    val currentMessages = messages.snapshotMessages()
-                    val request = currentMessages.latestOpenInputRequestForOption(option)
-                    input = ""
-                    AgentChatRunRegistry.launchRuntimeTask(conversationId, runtime) {
-                        request?.let { selectedRequest ->
-                            onInputRequestSelected(selectedRequest.requestId, option.id)
-                        }
+                val request = messages.snapshotMessages().latestOpenInputRequestForOption(option)
+                if (runCurrentAgent(userInput = text) {
+                        request?.let { onInputRequestSelected(it.requestId, option.id) }
                         onInputRequestOptionSubmitted(option)
-                        runCurrentAgent(userInput = text)
                     }
+                ) {
+                    input = ""
                 }
             }
         },
@@ -353,6 +363,11 @@ internal class AgentChatPresenterRuntime {
     var initialUserInputConsumed: Boolean = false
     var initialContentMessageStored: Boolean = false
     var autoRunOnContextConsumed: Boolean = false
+
+    fun tryStart(): Boolean {
+        val previous = state.value
+        return !previous.isRunning && state.compareAndSet(previous, previous.copy(isRunning = true, currentTrace = null))
+    }
 }
 
 internal object AgentChatRunRegistry {

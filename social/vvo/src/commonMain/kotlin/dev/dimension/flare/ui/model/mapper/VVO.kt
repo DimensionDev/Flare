@@ -24,6 +24,7 @@ import dev.dimension.flare.ui.model.UiNumber
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.UiTranslatableText
+import dev.dimension.flare.ui.model.asType
 import dev.dimension.flare.ui.model.bindMediaProxy
 import dev.dimension.flare.ui.model.contentPostOrNull
 import dev.dimension.flare.ui.model.toUiImage
@@ -550,7 +551,7 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile {
                     )
                 },
         platformId = VVO_PLATFORM_ID,
-        platformIcon = dev.dimension.flare.ui.model.UiIcon.Weibo,
+        platformIcon = UiIcon.Weibo.asType(),
         clickEvent =
             ClickEvent.Deeplink(
                 DeeplinkRoute.Profile.User(

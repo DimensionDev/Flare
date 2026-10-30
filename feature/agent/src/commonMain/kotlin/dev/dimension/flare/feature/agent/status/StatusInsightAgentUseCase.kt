@@ -7,23 +7,23 @@ import androidx.paging.LoadState
 import dev.dimension.flare.common.CacheState
 import dev.dimension.flare.common.Locale
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
+import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.PostDataSource
 import dev.dimension.flare.data.datasource.microblog.handler.PostTranslationDisplay
 import dev.dimension.flare.data.repository.AccountMicroblogDataSource
 import dev.dimension.flare.feature.agent.common.AgentChatHistoryProvider
 import dev.dimension.flare.feature.agent.common.AgentConversationEvent
 import dev.dimension.flare.feature.agent.common.AgentPhase
+import dev.dimension.flare.feature.agent.common.AgentRetryMode
+import dev.dimension.flare.feature.agent.common.AgentRetryableException
 import dev.dimension.flare.feature.agent.common.AgentRunResult
 import dev.dimension.flare.feature.agent.common.AgentToolContext
 import dev.dimension.flare.feature.agent.common.AgentTrace
 import dev.dimension.flare.feature.agent.common.FlareAgentRequest
 import dev.dimension.flare.feature.agent.common.FlareAgentRunner
-import dev.dimension.flare.feature.agent.common.FlareAgentUnavailableException
 import dev.dimension.flare.feature.agent.common.resolveAgentVisibleResult
 import dev.dimension.flare.feature.agent.presenter.AgentMessagePart
 import dev.dimension.flare.feature.agent.presenter.distinctAgentMessageParts
-import dev.dimension.flare.feature.agent.runtime.AgentAvailability
-import dev.dimension.flare.feature.agent.runtime.supportsAgentImageFallback
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiTimelineV2
@@ -48,30 +48,41 @@ internal class StatusInsightAgentUseCase(
         postDataSource: PostDataSource,
         statusKey: MicroBlogKey,
         searchDataSources: List<AccountMicroblogDataSource>,
+        microblogDataSource: MicroblogDataSource? = postDataSource as? MicroblogDataSource,
         userInput: String? = null,
         conversationId: String = statusKey.statusInsightConversationId(),
+        retryMode: AgentRetryMode? = null,
     ): Flow<AgentConversationEvent<UiTimelineV2.Post, AgentTrace>> =
         channelFlow {
-            run(postDataSource, statusKey, searchDataSources, userInput, conversationId)
+            run(postDataSource, statusKey, searchDataSources, microblogDataSource, userInput, conversationId, retryMode)
         }
 
     private suspend fun SendChannel<AgentConversationEvent<UiTimelineV2.Post, AgentTrace>>.run(
         postDataSource: PostDataSource,
         statusKey: MicroBlogKey,
         searchDataSources: List<AccountMicroblogDataSource>,
+        microblogDataSource: MicroblogDataSource?,
         userInput: String?,
         conversationId: String,
+        retryMode: AgentRetryMode?,
     ) {
         val userInputValue = userInput?.trim().orEmpty()
-        if (userInputValue.isBlank() && chatHistoryProvider.hasAssistantMessage(conversationId)) {
+        if (retryMode == null && userInputValue.isBlank() && chatHistoryProvider.hasAssistantMessage(conversationId)) {
             return
         }
-        if (userInputValue.isBlank()) {
+        if (retryMode == null && userInputValue.isBlank()) {
             agentRunner.clearConversation(conversationId)
         }
         send(AgentTrace(AgentPhase.LoadingPostContext).toConversationEvent())
-        val post = postDataSource.loadPost(statusKey)
-        if (userInputValue.isBlank()) {
+        val post =
+            try {
+                postDataSource.loadPost(statusKey)
+            } catch (exception: CancellationException) {
+                throw exception
+            } catch (exception: Throwable) {
+                throw AgentRetryableException(exception, retryMode ?: AgentRetryMode.Restart)
+            }
+        if (retryMode == null && userInputValue.isBlank()) {
             chatHistoryProvider.ensureConversationTitle(conversationId, post.insightConversationTitle())
         }
         send(AgentConversationEvent.ContentLoaded(post))
@@ -88,46 +99,17 @@ internal class StatusInsightAgentUseCase(
                         statusKey = statusKey,
                         currentPlatformId = post.platformId,
                         currentPost = post,
+                        microblogDataSource = microblogDataSource,
                     ),
                 searchDataSources = searchDataSources,
             )
         val result =
-            try {
-                val prompt =
-                    post.toInsightPrompt(
-                        targetLanguage = Locale.language,
-                        userInput = userInputValue,
-                        includeImages = true,
-                    )
-                agentRunner.runStatusInsightAgent(
-                    prompt = prompt,
-                    toolContext = toolContext,
-                    conversationId = conversationId,
-                ) { event ->
-                    send(event.toConversationEvent())
-                }
-            } catch (throwable: Throwable) {
-                if (throwable is CancellationException) {
-                    throw throwable
-                }
-                if (supportsAgentImageFallback || imageAttachments.isEmpty() || !throwable.isImageContentUnsupported()) {
-                    throw throwable
-                }
-                send(AgentTrace(AgentPhase.ImagesUnsupportedFallback).toConversationEvent())
-                val prompt =
-                    post.toInsightPrompt(
-                        targetLanguage = Locale.language,
-                        userInput = userInputValue,
-                        includeImages = false,
-                    )
-                agentRunner.runStatusInsightAgent(
-                    prompt = prompt,
-                    toolContext = toolContext,
-                    conversationId = conversationId,
-                ) { event ->
-                    send(event.toConversationEvent())
-                }
-            }
+            agentRunner.runStatusInsightAgent(
+                prompt = post.toInsightPrompt(Locale.language, userInputValue),
+                toolContext = toolContext,
+                conversationId = conversationId,
+                retryMode = retryMode,
+            ) { event -> send(event.toConversationEvent()) }
 
         val supportingParts =
             (listOf(AgentMessagePart.PostCard(post)) + result.parts).distinctAgentMessageParts()
@@ -155,37 +137,33 @@ internal class StatusInsightAgentUseCase(
         prompt: Prompt,
         toolContext: AgentToolContext,
         conversationId: String,
+        retryMode: AgentRetryMode?,
         onEvent: suspend (AgentTrace) -> Unit,
     ): AgentRunResult =
-        try {
-            run(
-                request =
-                    FlareAgentRequest(
-                        prompt = prompt,
-                        systemPrompt = STATUS_INSIGHT_SYSTEM_PROMPT,
-                        agentId = "flare-status-insight",
-                        strategyName = "status_insight_multimodal",
-                        analyzeNodeName = "analyze_post",
-                        executeToolsNodeName = "execute_status_insight_tools",
-                        sendToolResultsNodeName = "send_status_insight_tool_results",
-                        toolContext = toolContext,
-                        temperature = 0.2,
-                        maxIterations = MAX_AGENT_ITERATIONS,
-                        finishAfterToolResults = true,
-                        chatMemoryWindowSize = CHAT_MEMORY_WINDOW_SIZE,
-                        supportingParts = listOfNotNull(toolContext.status?.currentPost?.let { AgentMessagePart.PostCard(it) }),
-                        images =
-                            toolContext.status
-                                ?.currentPost
-                                ?.aiImageAttachments()
-                                .orEmpty(),
-                    ),
-                conversationId = conversationId,
-                onTrace = onEvent,
-            )
-        } catch (throwable: FlareAgentUnavailableException) {
-            throw StatusInsightAgentUnavailableException(throwable.availability)
-        }
+        run(
+            request =
+                FlareAgentRequest(
+                    retryMode = retryMode,
+                    prompt = prompt,
+                    systemPrompt = STATUS_INSIGHT_SYSTEM_PROMPT,
+                    agentId = "flare-status-insight",
+                    strategyName = "status_insight_multimodal",
+                    analyzeNodeName = "analyze_post",
+                    executeToolsNodeName = "execute_status_insight_tools",
+                    sendToolResultsNodeName = "send_status_insight_tool_results",
+                    toolContext = toolContext,
+                    temperature = 0.2,
+                    finishAfterToolResults = true,
+                    supportingParts = listOfNotNull(toolContext.status?.currentPost?.let { AgentMessagePart.PostCard(it) }),
+                    images =
+                        toolContext.status
+                            ?.currentPost
+                            ?.aiImageAttachments()
+                            .orEmpty(),
+                ),
+            conversationId = conversationId,
+            onTrace = onEvent,
+        )
 
     private suspend fun PostDataSource.loadPost(statusKey: MicroBlogKey): UiTimelineV2.Post =
         coroutineScope {
@@ -215,7 +193,6 @@ internal class StatusInsightAgentUseCase(
     private fun UiTimelineV2.Post.toInsightPrompt(
         targetLanguage: String,
         userInput: String,
-        includeImages: Boolean,
     ): Prompt =
         Prompt.build("status-insight") {
             user {
@@ -226,16 +203,9 @@ internal class StatusInsightAgentUseCase(
                         toInsightChatPromptInput(targetLanguage, userInput)
                     },
                 )
-                if (includeImages) {
-                    aiImageAttachments().forEachIndexed { index, image ->
-                        text("Image ${index + 1}: ${image.description.orEmpty()}")
-                        image(image.toAttachmentSource())
-                    }
-                } else if (aiImageAttachments().isNotEmpty()) {
-                    text(
-                        "Image uploads were not accepted by this AI endpoint. " +
-                            "Use only the image URLs and descriptions from the text context.",
-                    )
+                aiImageAttachments().forEachIndexed { index, image ->
+                    text("Image ${index + 1}: ${image.description.orEmpty()}")
+                    image(image.toAttachmentSource())
                 }
             }
         }
@@ -411,21 +381,6 @@ internal class StatusInsightAgentUseCase(
             }
         }
 
-    private fun Throwable.isImageContentUnsupported(): Boolean {
-        val message =
-            generateSequence(this) { it.cause }
-                .mapNotNull { it.message }
-                .joinToString("\n")
-                .lowercase()
-        return "image_url" in message &&
-            (
-                "unknown variant" in message ||
-                    "expected `text`" in message ||
-                    "expected 'text'" in message ||
-                    "invalid_request_error" in message
-            )
-    }
-
     private fun AgentTrace.toConversationEvent(): AgentConversationEvent.Trace<AgentTrace> = AgentConversationEvent.Trace(this)
 
     private companion object {
@@ -433,8 +388,6 @@ internal class StatusInsightAgentUseCase(
         const val MAX_RELATED_TEXT_LENGTH = 500
         const val MAX_IMAGE_ATTACHMENTS = 4
         val SUPPORTED_IMAGE_FORMATS = setOf("jpg", "jpeg", "png", "webp", "gif")
-        const val MAX_AGENT_ITERATIONS = 32
-        const val CHAT_MEMORY_WINDOW_SIZE = 20
 
         const val STATUS_INSIGHT_SYSTEM_PROMPT =
             """
@@ -500,7 +453,3 @@ internal class StatusInsightAgentUseCase(
 }
 
 private fun MicroBlogKey.statusInsightConversationId(): String = "status-insight:$host:$id"
-
-public class StatusInsightAgentUnavailableException public constructor(
-    public val availability: AgentAvailability,
-) : IllegalStateException("Status insight agent is unavailable: $availability")

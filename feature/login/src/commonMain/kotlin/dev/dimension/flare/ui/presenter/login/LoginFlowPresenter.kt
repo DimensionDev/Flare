@@ -29,6 +29,8 @@ public class LoginFlowPresenter(
 
         public fun canResume(value: String): Boolean
 
+        public suspend fun checkCookies(snapshot: LoginCookieSnapshot): Boolean
+
         public fun onExternalAuthenticationDismissed(error: String?)
 
         public fun clear()
@@ -67,6 +69,8 @@ public class LoginFlowPresenter(
             }
 
             override fun canResume(value: String): Boolean = handler.canResume(value)
+
+            override suspend fun checkCookies(snapshot: LoginCookieSnapshot): Boolean = handler.checkCookies(snapshot)
 
             override fun onExternalAuthenticationDismissed(error: String?) {
                 handler.onExternalAuthenticationDismissed(error)

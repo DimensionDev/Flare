@@ -1,8 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <network-security-config>
-    <!-- Local HTTP fixtures for WebView instrumentation tests; release policy is unchanged. -->
+    <!-- Local WebView instrumentation fixtures; release policy is unchanged. -->
     <domain-config cleartextTrafficPermitted="true">
         <domain>127.0.0.1</domain>
         <domain>webview-proxy.invalid</domain>
+    </domain-config>
+    <domain-config>
+        <domain>localhost</domain>
+        <trust-anchors>
+            <certificates src="@raw/webview_test_cert" />
+        </trust-anchors>
     </domain-config>
 </network-security-config>

@@ -133,8 +133,7 @@ public struct ProxySettingsView: View {
                     UserCompatView(data: profile)
                 } else {
                     HStack(spacing: 8) {
-                        Image(fontAwesome: account.platformIcon.fontAwesomeIcon)
-                            .frame(width: 44, height: 44)
+                        TabIcon(icon: account.platformIcon, size: 44)
                         VStack(alignment: .leading) {
                             Text(verbatim: account.platformDisplayName)
                             Text(verbatim: account.accountKey.description())

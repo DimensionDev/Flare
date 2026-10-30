@@ -50,6 +50,7 @@ import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiRssSource
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.UiTranslatableText
+import dev.dimension.flare.ui.model.asType
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus
 import dev.dimension.flare.ui.render.toUi
 import dev.dimension.flare.ui.render.toUiPlainText
@@ -79,6 +80,25 @@ internal class AgentToolsTest {
                 extraTimelineSpecs = emptyList(),
             ),
         )
+
+    @Test
+    fun pluginToolsAreAvailableAlongsideOrdinaryToolsWithoutAChatContext() {
+        val authoring = TestAuthoring()
+        val tools =
+            AgentToolProvider(FakeLocalCacheRepository(), platformRegistry, authoring)
+                .resolve(AgentToolContext.Empty)
+        val names =
+            tools.toolRegistry.tools
+                .map { it.name }
+                .toSet()
+        assertTrue("create_plugin" in names)
+        assertTrue("search_posts" in names)
+        assertTrue("compose_post" in names)
+        assertTrue(authoring.plugins.value.isEmpty())
+        val withoutPlugins = AgentToolProvider(FakeLocalCacheRepository(), platformRegistry).resolve(AgentToolContext.Empty)
+        assertFalse(withoutPlugins.toolRegistry.tools.any { it.name == "create_plugin" })
+        assertTrue(withoutPlugins.toolRegistry.tools.any { it.name == "search_posts" })
+    }
 
     @Test
     fun emptyPlatformListSearchesEveryTarget() {
@@ -1262,7 +1282,7 @@ private class AgentTestPlatformSpec(
     aliases: List<String> = emptyList(),
     override val isDefaultGuest: Boolean = false,
 ) : PlatformSpec {
-    override val metadata: PlatformMetadata = PlatformMetadata(platformId, UiIcon.World, aliases)
+    override val metadata: PlatformMetadata = PlatformMetadata(platformId, UiIcon.World.asType(), aliases)
     override val timelineSpecs: ImmutableList<TimelineSpec<out TimelineSpec.Data>> = persistentListOf()
 
     override fun deepLinks(accountKey: MicroBlogKey): ImmutableList<PlatformDeepLink<*>> = persistentListOf()

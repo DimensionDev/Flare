@@ -27,6 +27,7 @@ import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.UiTranslatableText
 import dev.dimension.flare.ui.model.asTimelinePostItem
+import dev.dimension.flare.ui.model.asType
 import dev.dimension.flare.ui.model.bindMediaProxy
 import dev.dimension.flare.ui.model.mapper.nostrLike
 import dev.dimension.flare.ui.model.mapper.nostrRepost
@@ -2706,7 +2707,7 @@ internal class NostrService(
             avatar = metadata?.picture.toUiImage(),
             nameInternal = name.toUiPlainText(),
             platformId = NOSTR_PLATFORM_ID,
-            platformIcon = dev.dimension.flare.ui.model.UiIcon.Nostr,
+            platformIcon = UiIcon.Nostr.asType(),
             clickEvent =
                 ClickEvent.Deeplink(
                     DeeplinkRoute.Profile.User(

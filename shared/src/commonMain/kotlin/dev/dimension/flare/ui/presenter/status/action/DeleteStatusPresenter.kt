@@ -2,7 +2,7 @@ package dev.dimension.flare.ui.presenter.status.action
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
-import dev.dimension.flare.data.datasource.microblog.datasource.PostDataSource
+import dev.dimension.flare.data.datasource.microblog.capabilities
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceFlow
 import dev.dimension.flare.di.koinInject
@@ -31,8 +31,7 @@ public class DeleteStatusPresenter(
                         accountType = accountType,
                         repository = accountRepository,
                     ).map {
-                        require(it is PostDataSource)
-                        it
+                        requireNotNull(it.capabilities.post)
                     }.first()
                         .let {
                             it.postHandler.delete(statusKey)

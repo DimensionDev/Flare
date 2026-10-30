@@ -1,6 +1,358 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+  "agent_error_interrupted": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "This run was interrupted. Check what was completed before sending another message."
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "执行已中断，请确认已完成的操作后再发送新消息。"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "執行已中斷，請確認已完成的操作後再傳送新訊息。"
+        }
+      }
+    }
+  },
+  "agent_error_title": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Unable to continue"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "暂时无法继续"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "暫時無法繼續"
+        }
+      }
+    }
+  },
+  "agent_error_history": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Could not load this conversation. Try loading it again."
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "无法加载会话，请重试。"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "無法載入對話，請重試。"
+        }
+      }
+    }
+  },
+  "agent_error_network": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Could not connect to the AI service. Check your connection and try again."
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "无法连接 AI 服务，请检查网络后重试。"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "無法連線至 AI 服務，請檢查網路後重試。"
+        }
+      }
+    }
+  },
+  "agent_error_rate_limited": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "The AI service is receiving too many requests. Wait a moment and try again."
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "AI 服务请求过于频繁，请稍后重试。"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "AI 服務請求過於頻繁，請稍後重試。"
+        }
+      }
+    }
+  },
+  "agent_error_service": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "The AI service is temporarily unavailable. Try again later."
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "AI 服务暂时不可用，请稍后重试。"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "AI 服務暫時無法使用，請稍後重試。"
+        }
+      }
+    }
+  },
+  "agent_error_configuration": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Complete the AI Agent setup in Settings, then try again."
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "请在设置中完成 AI Agent 配置后重试。"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "請在設定中完成 AI Agent 設定後重試。"
+        }
+      }
+    }
+  },
+  "agent_error_authentication": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "The AI service rejected your API key. Check it in AI settings, then try again."
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "AI 服务拒绝了 API 密钥，请在 AI 设置中检查后重试。"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "AI 服務拒絕了 API 金鑰，請在 AI 設定中檢查後重試。"
+        }
+      }
+    }
+  },
+  "agent_error_access_denied": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Your account cannot access this AI service or model. Check the provider permissions and AI settings."
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "账号无权使用此 AI 服务或模型，请检查服务商权限和 AI 设置。"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "帳號無權使用此 AI 服務或模型，請檢查服務商權限和 AI 設定。"
+        }
+      }
+    }
+  },
+  "agent_error_quota": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "The AI service reports insufficient quota. Check your balance or usage limit with the provider."
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "AI 服务提示额度不足，请检查服务商的余额或用量限制。"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "AI 服務提示額度不足，請檢查服務商的餘額或用量限制。"
+        }
+      }
+    }
+  },
+  "agent_error_unknown": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "The AI service did not return an error description."
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "AI 服务未返回具体错误说明。"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "AI 服務未傳回具體錯誤說明。"
+        }
+      }
+    }
+  },
+  "agent_error_details": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Error details"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "错误详情"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "錯誤詳細資訊"
+        }
+      }
+    }
+  },
+  "agent_error_retry": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Retry"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "重试"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "重試"
+        }
+      }
+    }
+  },
+  "settings_ai_config_context_window": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Context window (tokens)"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "上下文窗口（token）"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "上下文視窗（token）"
+        }
+      }
+    }
+  },
+  "settings_ai_config_context_window_hint": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Leave blank to use the known model limit. Unknown models use an estimated budget of 8192 tokens. Enter at least 1024 tokens to override."
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "留空使用已知模型的上限；未知模型使用 8192 token 的估算预算。手动设置至少为 1024 token。"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "留空使用已知模型的上限；未知模型使用 8192 token 的估算預算。手動設定至少為 1024 token。"
+        }
+      }
+    }
+  },
+  "plugin_add": {
+  "localizations": {
+    "en": {
+      "stringUnit": {
+        "state": "translated",
+        "value": "Add plugin"
+      }
+    },
+    "zh-Hans": {
+      "stringUnit": {
+        "state": "translated",
+        "value": "添加插件"
+      }
+    },
+    "zh-Hant": {
+      "stringUnit": {
+        "state": "translated",
+        "value": "新增外掛"
+      }
+    }
+  }
+},
     "image_translation_use_shared_description" : {"localizations": {"en": {"stringUnit": {"state": "translated", "value": "Share the service URL, API key and model. The service and model must support image output. Turn off to configure image translation separately."}}, "zh-Hans": {"stringUnit": {"state": "translated", "value": "共用服务地址、API 密钥和模型。服务与模型需要支持输出图片；关闭后可单独配置。"}}}},
     "Automatic" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Automatic" } }, "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "自动" } } } },
     "Original file" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Original file" } }, "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "原文件上传" } } } },
@@ -39,6 +391,1090 @@
     "Save" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Save" } }, "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "保存" } } } },
     "Pro" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Pro" } }, "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "Pro" } } } },
     "Lite" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Lite" } }, "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "Lite" } } } },
+  "plugin_ai_delete_message": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Delete %@, its local source, accounts, credentials, and account data from this device? This takes effect immediately."
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "从本机删除 %@、本地源码及其账号、凭据和账号数据？删除后立即生效。"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "從本機刪除 %@、本機原始碼及其帳號、憑證和帳號資料？刪除後立即生效。"
+        }
+      }
+    }
+  },
+
+  "plugin_ai_create": {
+  "localizations": {
+    "en": {
+      "stringUnit": {
+        "state": "translated",
+        "value": "Create with Flare AI"
+      }
+    },
+    "zh-Hans": {
+      "stringUnit": {
+        "state": "translated",
+        "value": "使用 Flare AI 创建"
+      }
+    },
+    "zh-Hant": {
+      "stringUnit": {
+        "state": "translated",
+        "value": "使用 Flare AI 建立"
+      }
+    }
+  }
+},
+  "plugin_ai_untitled": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "New plugin"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "新插件"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "新外掛程式"
+        }
+      }
+    }
+  },
+  "plugin_ai_source_revision": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Local AI-generated plugin · Revision %lld"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "本地 AI 生成 · 修订版 %lld"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "本機 AI 產生 · 修訂版 %lld"
+        }
+      }
+    }
+  },
+  "plugin_ai_stop": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Cancel update"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "取消更新"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "取消更新"
+        }
+      }
+    }
+  },
+
+  "plugin_ai_idle": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Ready to edit"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "可以继续制作"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "可以繼續製作"
+        }
+      }
+    }
+  },
+  "plugin_ai_validating": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Validating"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "正在校验"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "正在驗證"
+        }
+      }
+    }
+  },
+
+  "plugin_ai_waiting": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Waiting for login or writes to finish"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "等待登录或写操作完成"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "等待登入或寫入完成"
+        }
+      }
+    }
+  },
+  "plugin_ai_applied": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Up to date"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "已应用最新版本"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "已套用最新版本"
+        }
+      }
+    }
+  },
+  "plugin_ai_failed": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Changes could not be applied"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "修改未能生效"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "無法套用修改"
+        }
+      }
+    }
+  },
+  "plugin_development": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Plugin development"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "插件开发"
+        }
+      }
+    }
+  },
+  "plugin_development_description": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Choose the build output folder containing manifest.json and plugin.js. Saves are validated automatically; reload applies them to all accounts and pages of this plugin."
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "选择包含 manifest.json 和 plugin.js 的构建输出目录。保存后自动校验，点击重载后应用到该插件的所有账号和页面。"
+        }
+      }
+    }
+  },
+  "plugin_development_open": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Choose folder…"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "选择目录…"
+        }
+      }
+    }
+  },
+  "plugin_development_start": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Start development"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "开始开发"
+        }
+      }
+    }
+  },
+  "plugin_development_reload": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Reload plugin"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "重载插件"
+        }
+      }
+    }
+  },
+  "plugin_development_stop": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Stop development"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "停止开发"
+        }
+      }
+    }
+  },
+  "plugin_development_validating": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Validating files…"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "正在校验文件…"
+        }
+      }
+    }
+  },
+  "plugin_development_ready": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Validated · ready to load"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "校验通过 · 可以加载"
+        }
+      }
+    }
+  },
+  "plugin_development_current": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Running the validated version"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "正在运行已校验版本"
+        }
+      }
+    }
+  },
+  "plugin_development_review": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Only load code you trust. This code temporarily replaces the installed plugin and uses your existing accounts and data. Account changes are real and are not undone when development stops. Restarting the app restores the installed version."
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "请只加载可信代码。开发代码会临时替换已安装插件，并使用现有账号和数据。账号操作真实生效，停止开发不会撤销这些操作。重启应用后恢复已安装版本。"
+        }
+      }
+    }
+  },
+  "plugin_development_schema": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "The credential format changed. Existing accounts may need to sign in again, including after returning to the installed version."
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "凭据格式已变化，现有账号可能需要重新登录，恢复已安装版本后也可能需要重新登录。"
+        }
+      }
+    }
+  },
+  "plugin_development_diagnostics": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Recent calls (no request or response data)"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "最近调用（不记录请求和响应数据）"
+        }
+      }
+    }
+  },
+  "plugin_capabilities": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Functions"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "功能"
+        }
+      }
+    }
+  },
+  "plugin_cleanup": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Clean up unused files"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "清理未使用文件"
+        }
+      }
+    }
+  },
+  "plugin_confirm_install": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Install"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "安装"
+        }
+      }
+    }
+  },
+  "plugin_empty": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "No plugins installed"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "尚未安装插件"
+        }
+      }
+    }
+  },
+  "plugin_inactive": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Inactive in this process"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "当前进程未启用"
+        }
+      }
+    }
+  },
+  "plugin_install_github": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Install from GitHub"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "从 GitHub 安装"
+        }
+      }
+    }
+  },
+  "plugin_github_repository": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "GitHub repository URL"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "GitHub 仓库链接"
+        }
+      }
+    }
+  },
+  "plugin_check_updates": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Check for updates"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "检查更新"
+        }
+      }
+    }
+  },
+  "plugin_update": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Update"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "更新"
+        }
+      }
+    }
+  },
+  "plugin_up_to_date": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "GitHub plugins are up to date"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "GitHub 插件均为最新版本"
+        }
+      }
+    }
+  },
+  "plugin_warning_source_changed": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "This installation changes the plugin source"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "此次安装将更改插件来源"
+        }
+      }
+    }
+  },
+  "plugin_warning_tag_moved": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "This tag now points to a different commit"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "此 tag 现在指向不同的提交"
+        }
+      }
+    }
+  },
+  "plugin_unverified_github_warning": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "This GitHub plugin has not been verified. Only install it if you trust the author."
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "此 GitHub 插件未经验证。请仅在信任作者时安装。"
+        }
+      }
+    }
+  },
+  "plugin_install": {
+  "localizations": {
+    "en": {
+      "stringUnit": {
+        "state": "translated",
+        "value": "From file…"
+      }
+    },
+    "zh-Hans": {
+      "stringUnit": {
+        "state": "translated",
+        "value": "从文件添加…"
+      }
+    },
+    "zh-Hant": {
+      "stringUnit": {
+        "state": "translated",
+        "value": "從檔案加入…"
+      }
+    }
+  }
+},
+  "plugin_issues": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Issues"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "问题"
+        }
+      }
+    }
+  },
+  "plugin_permission_media_network": {
+    "extractionState": "manual",
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Load media from any website, which may receive this plugin’s account data"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "从任意网站加载媒体，这些网站可能收到该插件的账户数据"
+        }
+      }
+    }
+  },
+  "plugin_permissions": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Permissions"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "权限"
+        }
+      }
+    }
+  },
+  "plugin_permission_account_origin": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Network access to the HTTPS instance you choose"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "访问你选择的 HTTPS 实例"
+        }
+      }
+    }
+  },
+  "plugin_permission_account_origin_label": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "the HTTPS instance you choose"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "你选择的 HTTPS 实例"
+        }
+      }
+    }
+  },
+  "plugin_permission_cookie": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Read cookie %2$@ from %1$@"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "从 %1$@ 读取 Cookie %2$@"
+        }
+      }
+    }
+  },
+  "plugin_rebuild_index": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Rebuild plugin index"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "重建插件索引"
+        }
+      }
+    }
+  },
+  "plugin_retry": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Retry"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "重试"
+        }
+      }
+    }
+  },
+  "plugin_running": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Active in this process"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "当前进程已启用"
+        }
+      }
+    }
+  },
+  "plugin_uninstall": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Uninstall"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "卸载"
+        }
+      }
+    }
+  },
+  "plugin_uninstall_confirm_title": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Uninstall plugin?"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "卸载插件？"
+        }
+      }
+    }
+  },
+  "plugin_uninstall_confirm_message": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Delete %@ and its accounts, credentials, and account data from this device? This takes effect immediately."
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "从本机删除 %@ 及其账号、凭据和账号数据？删除后立即生效。"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "從本機刪除 %@ 及其帳號、憑證和帳號資料？刪除後立即生效。"
+        }
+      }
+    }
+  },
+  "plugin_operation_failed": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "The plugin operation failed. Try again or restart Flare."
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "插件操作失败。请重试或重新启动 Flare。"
+        }
+      }
+    }
+  },
+  "plugin_issue_index_corrupt": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "The plugin index is damaged. Rebuild it to recover valid packages."
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "插件索引已损坏。请重建索引以恢复有效的插件包。"
+        }
+      }
+    }
+  },
+  "plugin_issue_files_missing": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Plugin files are missing or have changed."
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "插件文件缺失或已被修改。"
+        }
+      }
+    }
+  },
+  "plugin_issue_platform_conflict": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "This plugin uses a platform ID that is already registered."
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "此插件使用了已注册的平台 ID。"
+        }
+      }
+    }
+  },
+  "plugin_issue_platform_invalid": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "This plugin platform could not be loaded."
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "无法加载此插件平台。"
+        }
+      }
+    }
+  },
+  "plugin_runtime_fatal": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "The plugin runtime stopped after a fatal error."
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "插件运行时因严重错误而停止。"
+        }
+      }
+    }
+  },
+  "plugin_runtime_paused": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "The plugin was paused after repeated fatal errors."
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "插件因连续发生严重错误而暂停。"
+        }
+      }
+    }
+  },
+  "plugin_unverified_warning": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "This local plugin is unverified. It can access the listed accounts and network origins. Install only if you trust its author."
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "此本地插件未经验证，可以访问列出的账号和网络域名。请仅在信任作者时安装。"
+        }
+      }
+    }
+  },
+  "plugin_warning_added_permission": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "This update requests an additional permission"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "此更新申请了新增权限"
+        }
+      }
+    }
+  },
+  "plugin_warning_changed_package": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "This version has different package contents"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "同一版本的插件包内容已变化"
+        }
+      }
+    }
+  },
+  "plugin_warning_compatibility": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Compatibility warning"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "兼容性警告"
+        }
+      }
+    }
+  },
+  "plugin_warning_downgrade": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "This package is older than the installed version"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "此插件包版本低于当前安装版本"
+        }
+      }
+    }
+  },
+  "settings_plugins_subtitle": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Install and manage social platform plugins"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "安装和管理社交平台插件"
+        }
+      }
+    }
+  },
+  "settings_plugins_title": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Plugins (Beta)"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "插件（Beta）"
+        }
+      }
+    }
+  },
+  "plugin_beta_description": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Plugins are still in beta and may be incomplete. If you run into problems, report them on [GitHub Issues](https://github.com/DimensionDev/Flare/issues)."
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "插件仍处于 Beta 阶段，功能尚不完善。遇到问题可前往 [GitHub Issues](https://github.com/DimensionDev/Flare/issues) 提交反馈。"
+        }
+      }
+    }
+  },
     "share_replies_children" : {
       "localizations" : {
         "en" : { "stringUnit" : { "state" : "translated", "value" : "Load replies to this comment" } },

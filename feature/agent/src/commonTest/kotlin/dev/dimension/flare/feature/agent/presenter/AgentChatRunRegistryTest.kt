@@ -15,6 +15,16 @@ internal class AgentChatRunRegistryTest {
     }
 
     @Test
+    fun startingARunImmediatelyBlocksDuplicateRetriesAcrossPresenters() {
+        val first = AgentChatRunRegistry.retainRuntime("shared")
+        val second = AgentChatRunRegistry.retainRuntime("shared")
+        assertTrue(first.tryStart())
+        assertFalse(second.tryStart())
+        AgentChatRunRegistry.updateState(first) { it.copy(isRunning = false) }
+        assertTrue(second.tryStart())
+    }
+
+    @Test
     fun idleRuntimeIsReleasedWhenLastPresenterReleases() {
         val conversationId = "agent-runtime:idle"
         val runtime = AgentChatRunRegistry.retainRuntime(conversationId)

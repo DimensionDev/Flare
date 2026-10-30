@@ -79,6 +79,35 @@ public class PlatformOAuthPendingRepository internal constructor(
                     it.flowId == flowId
             }.map { it.toPending() }
 
+    public suspend fun allByFlowId(flowId: String): List<PlatformOAuthPending> =
+        store.data
+            .first()
+            .entries
+            .filter { it.flowId == flowId }
+            .map { it.toPending() }
+
+    public suspend fun allForPlatform(platformId: String): List<PlatformOAuthPending> =
+        store.data
+            .first()
+            .entries
+            .filter { it.platformId == platformId }
+            .map { it.toPending() }
+
+    /** Removes [pending] only when the persisted value still matches it exactly. */
+    public suspend fun consume(pending: PlatformOAuthPending): Boolean {
+        var consumed = false
+        store.updateData { current ->
+            val index = current.entries.indexOfFirst { it.toPending() == pending }
+            if (index < 0) {
+                current
+            } else {
+                consumed = true
+                current.copy(entries = current.entries.filterIndexed { entryIndex, _ -> entryIndex != index })
+            }
+        }
+        return consumed
+    }
+
     public suspend fun clear(
         platformId: String,
         host: String,

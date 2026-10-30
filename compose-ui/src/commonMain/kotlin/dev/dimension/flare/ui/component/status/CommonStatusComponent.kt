@@ -134,6 +134,7 @@ import dev.dimension.flare.ui.component.FlareDividerDefaults
 import dev.dimension.flare.ui.component.HorizontalDivider
 import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.RichText
+import dev.dimension.flare.ui.component.TabIcon
 import dev.dimension.flare.ui.component.placeholder
 import dev.dimension.flare.ui.component.platform.PlatformCard
 import dev.dimension.flare.ui.component.platform.PlatformCheckbox
@@ -281,17 +282,15 @@ public fun CommonStatusComponent(
                                 )
                             }
                             if (appearanceSettings.showPlatformLogo) {
-                                FAIcon(
-                                    imageVector = item.platformIcon.toImageVector(),
+                                TabIcon(
+                                    icon = item.platformIcon,
                                     contentDescription =
                                         stringResource(
                                             Res.string.status_platform,
                                             item.platformId,
                                         ),
-                                    modifier =
-                                        Modifier
-                                            .size(PlatformTheme.typography.caption.fontSize.value.dp),
-                                    tint = PlatformTheme.colorScheme.caption,
+                                    size = PlatformTheme.typography.caption.fontSize.value.dp,
+                                    color = PlatformTheme.colorScheme.caption,
                                 )
                             }
                             if (!isDetail) {

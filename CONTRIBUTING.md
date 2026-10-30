@@ -45,6 +45,42 @@ Flare uses [ktlint](https://github.com/pinterest/ktlint) to check the code style
  - Make sure you have JDK 25 installed.
  - Run `./gradlew run` to build and run the debug version of the desktop app.
 
+### CI and releases
+
+App builds share the [Android CI workflow](.github/workflows/android.yml). Its
+file and name are retained so release build numbers continue using the existing
+Android run counter. Desktop packages now use that same counter.
+
+Run it manually from Actions and choose a target:
+
+| Target | Builds and checks |
+| --- | --- |
+| `all` | All three build jobs |
+| `linux` | Android, Linux Desktop, Web, and F-Droid on one Ubuntu runner |
+| `apple` | iOS simulator tests and native macOS on one Apple runner |
+| `windows` | Windows Desktop |
+| `fdroid` | Only the F-Droid steps in the Linux job |
+
+Linux runs the shared JVM/Android tests, Android UI regressions, Desktop tests,
+and Web checks. Windows also runs JVM/Desktop tests for its native dependencies.
+Apple runs the Kotlin iOS/macOS tests and native iOS regressions. Each runner
+reuses its checkout, JDK, and build outputs; Gradle dependencies are cached.
+
+The Linux job builds F-Droid in a second clean checkout with Temurin, reusing the
+runner, Android SDK, and Gradle dependency cache. That checkout excludes the
+regular Android signing/Firebase files; F-Droid uses `fdroid.properties` for its
+version. Google Play upload waits for both Android variants to succeed.
+
+App tag pushes run all targets automatically, publish Android to Google Play's
+internal track, and attach Desktop packages to a GitHub Release. Manual runs on
+tag refs retain signing and publishing behavior; use a branch ref for validation
+only. iOS and Web retain their existing build/test scope.
+
+SDK tags (`plugin-sdk-v*`) use the separate
+[Plugin SDK workflow](.github/workflows/plugin-sdk.yml), whose filename is kept
+for npm Trusted Publishing. PR checks, Dependabot, and Issue restoration remain
+separate automatic workflows.
+
 ### Project structure
 The project is split into theses parts:
  - `shared`: The common code, including bussiness logic.

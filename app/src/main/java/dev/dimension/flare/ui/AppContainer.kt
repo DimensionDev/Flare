@@ -11,6 +11,7 @@ import dev.dimension.flare.R
 import dev.dimension.flare.data.datastore.model.AppSettings
 import dev.dimension.flare.data.model.appearance.GlobalAppearance
 import dev.dimension.flare.data.model.appearance.TimelineAppearance
+import dev.dimension.flare.feature.plugin.management.ProvidePluginTextResolverV1
 import dev.dimension.flare.ui.common.AppUriHandler
 import dev.dimension.flare.ui.common.BindAmberSignerLauncher
 import dev.dimension.flare.ui.component.LocalAppSettings
@@ -25,11 +26,13 @@ import moe.tlaster.precompose.molecule.producePresenter
 
 @Composable
 fun AppContainer(afterInit: () -> Unit) {
-    FlareApp {
-        FlareTheme {
-            HomeScreen(
-                afterInit = afterInit,
-            )
+    ProvidePluginTextResolverV1 {
+        FlareApp {
+            FlareTheme {
+                HomeScreen(
+                    afterInit = afterInit,
+                )
+            }
         }
     }
 }

@@ -33,6 +33,7 @@ import dev.dimension.flare.data.model.tab.migrateTabSettingsV1ToV2
 import dev.dimension.flare.data.model.tab.withSystemHomeMixedTimelineEnabled
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.emitAll
@@ -169,6 +170,7 @@ public class SettingsRepository internal constructor(
     public val homeTimelineTabs: Flow<List<UiTimelineTabItem>> by lazy {
         tabSettingsV2
             .distinctUntilChangedBy { it.homeSlots }
+            .combine(timelineResolver.platforms) { settings, _ -> settings }
             .map { settings ->
                 val tabs =
                     settings.homeSlots

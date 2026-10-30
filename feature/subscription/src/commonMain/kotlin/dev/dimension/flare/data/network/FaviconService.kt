@@ -1,6 +1,5 @@
 package dev.dimension.flare.data.network
 
-import com.fleeksoft.ksoup.Ksoup
 import dev.dimension.flare.data.repository.tryRun
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
@@ -44,38 +43,10 @@ internal fun findFaviconUrl(
     pageUrl: String,
     webContent: String,
 ): String? {
-    val parsedUrl = Url(pageUrl)
-    val document = Ksoup.parse(webContent)
-    val iconLink =
-        document
-            .select(
-                """
-                link[rel~=(?i)(?:^|\s)icon(?:\s|$)],
-                link[rel~=(?i)^(?=.*\bshortcut\b)(?=.*\bicon\b).*$]
-                """.trimIndent(),
-            ).largestIcon()
-            ?: document
-                .select(
-                    """
-                    link[rel~=(?i)(?:^|\s)(?:apple-touch-icon(?:-precomposed)?|mask-icon)(?:\s|$)]
-                    """.trimIndent(),
-                ).largestIcon()
-            ?: return null
-    val iconHref = iconLink.attr("href").ifBlank { return null }
-    return when {
-        iconHref.startsWith("http", ignoreCase = true) -> iconHref
-        iconHref.startsWith("//") -> "https:$iconHref"
-        iconHref.startsWith("/") -> "https://${parsedUrl.host}$iconHref"
-        else -> "https://${parsedUrl.host}/$iconHref"
-    }
+    val icons = websiteIcons(pageUrl, webContent)
+    val standard = icons.filter { "icon" in it.rel.split(' ') }
+    return (standard.ifEmpty { icons })
+        .maxByOrNull { icon ->
+            icon.sizes.split(Regex("\\s+")).maxOfOrNull { it.substringBefore('x').toIntOrNull() ?: 0 } ?: 0
+        }?.url
 }
-
-private fun com.fleeksoft.ksoup.select.Elements.largestIcon() =
-    maxByOrNull {
-        it
-            .attribute("sizes")
-            ?.value
-            ?.split('x')
-            ?.firstOrNull()
-            ?.toIntOrNull() ?: 0
-    }

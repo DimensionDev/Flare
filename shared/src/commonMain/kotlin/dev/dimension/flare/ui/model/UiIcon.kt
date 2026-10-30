@@ -125,5 +125,7 @@ public val TabPickerUiIcons: List<UiIcon> =
         UiIcon.UnFavourite,
     )
 
+private val iconTypes = UiIcon.entries.map(IconType::Material)
+
 @HiddenFromObjC
-public fun UiIcon.asType(): IconType = IconType.Material(this)
+public fun UiIcon.asType(): IconType = iconTypes[ordinal]

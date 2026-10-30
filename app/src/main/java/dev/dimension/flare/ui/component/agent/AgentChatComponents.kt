@@ -73,6 +73,7 @@ import dev.dimension.flare.R
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.data.model.PostActionStyle
 import dev.dimension.flare.feature.agent.common.AgentChatHistoryMessage
+import dev.dimension.flare.feature.agent.common.AgentFailure
 import dev.dimension.flare.feature.agent.common.AgentInputRequest
 import dev.dimension.flare.feature.agent.common.AgentInputRequestOptionButtonType
 import dev.dimension.flare.feature.agent.common.AgentPhase
@@ -100,7 +101,8 @@ internal fun AgentChatContent(
     input: String,
     isRunning: Boolean,
     canSend: Boolean,
-    errorMessage: String?,
+    error: AgentFailure?,
+    onRetry: () -> Unit,
     runningTrace: String,
     inputPlaceholder: String,
     sendContentDescription: String,
@@ -117,7 +119,8 @@ internal fun AgentChatContent(
         input = input,
         isRunning = isRunning,
         canSend = canSend,
-        errorMessage = errorMessage,
+        error = error,
+        onRetry = onRetry,
         runningTrace = runningTrace,
         inputPlaceholder = inputPlaceholder,
         sendContentDescription = sendContentDescription,
@@ -150,7 +153,8 @@ internal fun AgentChatScaffold(
     input: String,
     isRunning: Boolean,
     canSend: Boolean,
-    errorMessage: String?,
+    error: AgentFailure?,
+    onRetry: () -> Unit,
     runningTrace: String,
     inputPlaceholder: String,
     sendContentDescription: String,
@@ -221,9 +225,10 @@ internal fun AgentChatScaffold(
                                         .padding(top = 8.dp),
                             )
                         }
-                        errorMessage?.let { text ->
-                            AgentChatError(
-                                text = text,
+                        error?.takeUnless { isRunning }?.let { failure ->
+                            AgentErrorCard(
+                                failure = failure,
+                                onRetry = onRetry.takeIf { failure.canRetry },
                                 modifier =
                                     Modifier
                                         .padding(horizontal = screenHorizontalPadding)
@@ -343,7 +348,11 @@ internal fun AgentChatMessageList(
                 AgentChatMessageSkeleton(isUser = index == 0)
             },
             errorContent = { throwable ->
-                AgentChatError(text = throwable.message ?: throwable.toString())
+                AgentErrorCard(
+                    failure = AgentFailure.fromThrowable(throwable),
+                    onRetry = { (messages as? PagingState.Error)?.onRetry?.invoke() },
+                    historyError = true,
+                )
             },
             itemContent = { _, _, message ->
                 AgentChatMessageBubble(
@@ -760,18 +769,6 @@ private fun List<AgentMessagePart>.isPreviewOnly(): Boolean =
         all { part ->
             part is AgentMessagePart.PostCard || part is AgentMessagePart.UserCard
         }
-
-@Composable
-internal fun AgentChatError(
-    text: String,
-    modifier: Modifier = Modifier,
-) {
-    Text(
-        text = text,
-        modifier = modifier,
-        color = MaterialTheme.colorScheme.error,
-    )
-}
 
 @Composable
 internal fun AgentChatCurrentTrace(

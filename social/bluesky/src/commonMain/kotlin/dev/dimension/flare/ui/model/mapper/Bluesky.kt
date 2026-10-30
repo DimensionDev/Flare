@@ -57,6 +57,7 @@ import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.UiTranslatableText
 import dev.dimension.flare.ui.model.asTimelinePostItem
+import dev.dimension.flare.ui.model.asType
 import dev.dimension.flare.ui.model.bindMediaProxy
 import dev.dimension.flare.ui.model.toUiImage
 import dev.dimension.flare.ui.model.withProxy
@@ -1130,7 +1131,7 @@ internal fun chat.bsky.actor.ProfileViewBasic.render(accountKey: MicroBlogKey): 
         mark = persistentListOf(),
         bottomContent = null,
         platformId = BLUESKY_PLATFORM_ID,
-        platformIcon = dev.dimension.flare.ui.model.UiIcon.Bluesky,
+        platformIcon = UiIcon.Bluesky.asType(),
         clickEvent =
             ClickEvent.Deeplink(
                 DeeplinkRoute.Profile
@@ -1168,7 +1169,7 @@ internal fun ProfileViewBasic.render(accountKey: MicroBlogKey): UiProfile {
         mark = persistentListOf(),
         bottomContent = null,
         platformId = BLUESKY_PLATFORM_ID,
-        platformIcon = dev.dimension.flare.ui.model.UiIcon.Bluesky,
+        platformIcon = UiIcon.Bluesky.asType(),
         clickEvent =
             ClickEvent.Deeplink(
                 DeeplinkRoute.Profile
@@ -1206,7 +1207,7 @@ internal fun ProfileView.render(accountKey: MicroBlogKey): UiProfile {
         mark = persistentListOf(),
         bottomContent = null,
         platformId = BLUESKY_PLATFORM_ID,
-        platformIcon = dev.dimension.flare.ui.model.UiIcon.Bluesky,
+        platformIcon = UiIcon.Bluesky.asType(),
         clickEvent =
             ClickEvent.Deeplink(
                 DeeplinkRoute.Profile
@@ -1244,7 +1245,7 @@ internal fun ProfileViewDetailed.render(accountKey: MicroBlogKey): UiProfile {
         mark = persistentListOf(),
         bottomContent = null,
         platformId = BLUESKY_PLATFORM_ID,
-        platformIcon = dev.dimension.flare.ui.model.UiIcon.Bluesky,
+        platformIcon = UiIcon.Bluesky.asType(),
         clickEvent =
             ClickEvent.Deeplink(
                 DeeplinkRoute.Profile

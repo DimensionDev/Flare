@@ -11,9 +11,13 @@ import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.compose.collectAsLazyPagingItems
 import dev.dimension.flare.common.PagingState
+import dev.dimension.flare.common.emptyFlow
 import dev.dimension.flare.common.toPagingState
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.saveToDatabase
+import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
+import dev.dimension.flare.data.datasource.microblog.accountKeyOrNull
+import dev.dimension.flare.data.datasource.microblog.capabilities
 import dev.dimension.flare.data.datasource.microblog.datasource.ArticleDataSource
 import dev.dimension.flare.data.datasource.microblog.paging.TimelinePagingMapper
 import dev.dimension.flare.data.datasource.microblog.paging.toTimelinePagingSource
@@ -29,7 +33,8 @@ import dev.dimension.flare.ui.model.UiArticle
 import dev.dimension.flare.ui.model.UiArticleAuthor
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimelineV2
-import dev.dimension.flare.ui.model.collectAsUiState
+import dev.dimension.flare.ui.model.flatMapLatestUiState
+import dev.dimension.flare.ui.model.flattenUiState
 import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.model.withProxy
 import dev.dimension.flare.ui.presenter.PresenterBase
@@ -38,6 +43,7 @@ import dev.dimension.flare.ui.route.DeeplinkRoute
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlin.time.Clock
 
@@ -54,17 +60,17 @@ public class ArticlePresenter(
     }
 
     private val articleStateFlow by lazy {
-        serviceFlow.map { service ->
-            val articleDataSource =
-                service as? ArticleDataSource
-                    ?: error("Current service does not support article data source")
-            articleDataSource.article(articleKey).withProxy(ProxyRef.forAccount((service as? dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource)?.accountKey))
+        serviceFlow.flatMapLatestUiState { service ->
+            articleFlow(flowOf(service), articleKey).map { UiState.Success(it) }
         }
     }
 
     private val commentsFlow by lazy {
         articleCommentsFlow(
-            dataSources = serviceFlow,
+            dataSources =
+                serviceFlow.map { service ->
+                    service.capabilities.article
+                },
             articleKey = articleKey,
         )
     }
@@ -78,7 +84,7 @@ public class ArticlePresenter(
     @Composable
     override fun body(): State {
         val scope = rememberCoroutineScope()
-        val articleState by articleStateFlow.collectAsUiState()
+        val articleState by articleStateFlow.flattenUiState()
         val comments =
             remember(commentsFlow, scope) {
                 commentsFlow.cachedIn(scope)
@@ -111,15 +117,31 @@ public class ArticlePresenter(
     }
 }
 
+internal fun articleFlow(
+    dataSources: Flow<MicroblogDataSource>,
+    articleKey: MicroBlogKey,
+): Flow<UiArticle> =
+    dataSources.map { service ->
+        val articleDataSource =
+            service.capabilities.article
+                ?: error("Current service does not support article data source")
+        articleDataSource
+            .article(
+                articleKey,
+            ).withProxy(
+                ProxyRef.forAccount(
+                    service.accountKeyOrNull,
+                ),
+            )
+    }
+
 @OptIn(ExperimentalCoroutinesApi::class)
 internal fun articleCommentsFlow(
-    dataSources: Flow<Any>,
+    dataSources: Flow<ArticleDataSource?>,
     articleKey: MicroBlogKey,
 ): Flow<PagingData<UiTimelineV2>> =
-    dataSources.flatMapLatest { dataSource ->
-        val articleDataSource =
-            dataSource as? ArticleDataSource
-                ?: error("Current service does not support article data source")
+    dataSources.flatMapLatest { articleDataSource ->
+        if (articleDataSource == null) return@flatMapLatest PagingData.emptyFlow(isError = true)
         Pager(config = pagingConfig) {
             articleDataSource.articleComments(articleKey).toTimelinePagingSource()
         }.flow
@@ -131,6 +153,7 @@ private fun UiArticle.toHistoryFeed(
 ): UiTimelineV2.Feed? {
     val url = sourceUrl?.takeIf { it.isNotBlank() } ?: return null
     return UiTimelineV2.Feed(
+        pluginId = pluginId,
         title = title.takeIf { it.isNotBlank() },
         description = content.rawText.takeIf { it.isNotBlank() },
         url = url,

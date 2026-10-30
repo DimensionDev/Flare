@@ -36,6 +36,7 @@ import compose.icons.fontawesomeicons.solid.Language
 import compose.icons.fontawesomeicons.solid.Newspaper
 import compose.icons.fontawesomeicons.solid.Palette
 import compose.icons.fontawesomeicons.solid.PhotoFilm
+import compose.icons.fontawesomeicons.solid.PuzzlePiece
 import compose.icons.fontawesomeicons.solid.Robot
 import compose.icons.fontawesomeicons.solid.Sliders
 import compose.icons.fontawesomeicons.solid.TableList
@@ -84,6 +85,7 @@ internal fun SettingsDetailPlaceholder(modifier: Modifier = Modifier) {
 internal fun SettingsScreen(
     toAccounts: () -> Unit,
     toProxy: () -> Unit,
+    toPlugins: () -> Unit,
     toAppearanceTheme: () -> Unit,
     toAppearanceLayout: () -> Unit,
     toAppearanceDisplay: () -> Unit,
@@ -372,7 +374,7 @@ internal fun SettingsScreen(
                 )
                 SegmentedListItem(
                     onClick = toProxy,
-                    shapes = ListItemDefaults.last(),
+                    shapes = ListItemDefaults.item(),
                     content = { Text(stringResource(R.string.proxy_title)) },
                     supportingContent = { Text(stringResource(R.string.proxy_settings_subtitle)) },
                     leadingContent = {
@@ -382,6 +384,19 @@ internal fun SettingsScreen(
                             color = ThemeIconData.Color.SapphireBlue,
                         )
                     },
+                )
+                SegmentedListItem(
+                    onClick = toPlugins,
+                    shapes = ListItemDefaults.last(),
+                    content = { Text(text = stringResource(id = R.string.settings_plugins_title)) },
+                    leadingContent = {
+                        ThemedIcon(
+                            imageVector = FontAwesomeIcons.Solid.PuzzlePiece,
+                            contentDescription = null,
+                            color = ThemeIconData.Color.ForestGreen,
+                        )
+                    },
+                    supportingContent = { Text(text = stringResource(id = R.string.settings_plugins_subtitle)) },
                 )
             }
             Column(

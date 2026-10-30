@@ -6,6 +6,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import dev.dimension.flare.common.PagingState
+import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
+import dev.dimension.flare.data.datasource.microblog.capabilities
 import dev.dimension.flare.data.datasource.microblog.datasource.PostDataSource
 import dev.dimension.flare.data.repository.AccountMicroblogDataSource
 import dev.dimension.flare.data.repository.AccountService
@@ -42,6 +44,8 @@ public class StatusInsightPresenter(
 
         public fun setInput(value: String)
 
+        public fun retry()
+
         public fun sendMessage()
 
         public fun selectInputRequestOption(option: AgentInputRequest.Option)
@@ -63,8 +67,9 @@ public class StatusInsightPresenter(
                 accountService
                     .accountServiceFlow(accountType)
                     .combine(accountService.allAccountServicesFlow()) { service, availableSearchDataSources ->
-                        (service as? PostDataSource)?.let { postDataSource ->
+                        service.capabilities.post?.let { postDataSource ->
                             StatusInsightContext(
+                                dataSource = service,
                                 postDataSource = postDataSource,
                                 searchDataSources = availableSearchDataSources,
                             )
@@ -77,13 +82,15 @@ public class StatusInsightPresenter(
                 conversationId = conversationId,
                 room = currentRoom,
                 contextFlow = contextFlow,
-                runAgent = { context, userInput, currentConversationId ->
+                runAgent = { context, userInput, currentConversationId, retryMode ->
                     statusInsightAgentUseCase(
                         postDataSource = context.postDataSource,
+                        microblogDataSource = context.dataSource,
                         statusKey = statusKey,
                         searchDataSources = context.searchDataSources,
                         userInput = userInput,
                         conversationId = currentConversationId,
+                        retryMode = retryMode,
                     )
                 },
                 onUserMessageSubmitted = { text ->
@@ -131,6 +138,7 @@ public class StatusInsightPresenter(
             canSend = controller.canSend,
             onSetInput = controller::setInput,
             onSendMessage = controller::sendMessage,
+            onRetry = controller::retry,
             onSelectInputRequestOption = controller::selectInputRequestOption,
         )
     }
@@ -144,10 +152,15 @@ public class StatusInsightPresenter(
         override val canSend: Boolean,
         private val onSetInput: (String) -> Unit,
         private val onSendMessage: () -> Unit,
+        private val onRetry: () -> Unit,
         private val onSelectInputRequestOption: (AgentInputRequest.Option) -> Unit,
     ) : State {
         override fun setInput(value: String) {
             onSetInput.invoke(value)
+        }
+
+        override fun retry() {
+            onRetry()
         }
 
         override fun sendMessage() {
@@ -160,6 +173,7 @@ public class StatusInsightPresenter(
     }
 
     private data class StatusInsightContext(
+        val dataSource: MicroblogDataSource,
         val postDataSource: PostDataSource,
         val searchDataSources: List<AccountMicroblogDataSource>,
     )

@@ -45,7 +45,7 @@ public data object MastodonPlatformSpec :
     public override val metadata: PlatformMetadata =
         PlatformMetadata(
             displayName = "Mastodon",
-            icon = UiIcon.Mastodon,
+            icon = UiIcon.Mastodon.asType(),
             agentAliases = listOf("masto", "fediverse", "长毛象", "联邦宇宙"),
         )
     public override val order: Int = 10

@@ -5,7 +5,6 @@ import ai.koog.agents.core.tools.SimpleTool
 import ai.koog.agents.core.tools.ToolRegistry
 import ai.koog.http.client.ktor.KtorKoogHttpClient
 import ai.koog.prompt.Prompt
-import ai.koog.prompt.executor.clients.LLMClientException
 import ai.koog.prompt.message.Message
 import ai.koog.serialization.typeToken
 import dev.dimension.flare.data.datastore.model.AppSettings
@@ -13,6 +12,7 @@ import dev.dimension.flare.feature.agent.runtime.AiConfigKoogBridge
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
+import io.ktor.http.content.TextContent
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.cancelAndJoin
@@ -61,7 +61,7 @@ class AgentIntermediateMessagesTest {
                 fixture.tool.started.await()
                 fixture.tool.finish.complete(Unit)
 
-                assertFailsWith<LLMClientException> { run.await().getOrThrow() }
+                assertFailsWith<AgentRetryableException> { run.await().getOrThrow() }
                 assertEquals(listOf("I will check that."), fixture.history.assistantText())
             }
         }
@@ -111,6 +111,29 @@ class AgentIntermediateMessagesTest {
             }
         }
 
+    @Test
+    fun retryResumesSavedResultsWithoutRepeatingTheUserMessageOrCompletedTools() =
+        runTest {
+            for ((agentId, finishAfterTools) in listOf(
+                "flare-generic-chat" to false,
+                "flare-status-insight" to true,
+                "flare-profile-insight" to false,
+                "flare-local-history" to false,
+            )) {
+                withAgent(agentId = agentId, finishAfterToolResults = finishAfterTools, failFollowUp = true) { fixture ->
+                    fixture.tool.finish.complete(Unit)
+                    val failure = assertFailsWith<AgentRetryableException> { fixture.run().getOrThrow() }.toAgentFailure("Check that.")
+                    assertEquals(if (finishAfterTools) AgentRetryMode.Finish else AgentRetryMode.Resume, failure.retryMode)
+                    assertEquals("Here is the result.", fixture.run(failure.retryMode).getOrThrow())
+                    assertEquals(1, fixture.tool.calls)
+                    assertEquals(3, fixture.calls)
+                    assertEquals(1, Regex("Check that\\.").findAll(fixture.requests.last()).count())
+                    assertTrue(fixture.requests.last().contains("result"))
+                    if (finishAfterTools) assertFalse(fixture.requests.last().contains("\"tools\""))
+                }
+            }
+        }
+
     private suspend fun withAgent(
         agentId: String = "intermediate-test",
         finishAfterToolResults: Boolean = false,
@@ -137,11 +160,13 @@ class AgentIntermediateMessagesTest {
         val tool = WaitingTool()
         val history = MemoryHistory()
         var calls = 0
+        val requests = mutableListOf<String>()
         private val client =
             HttpClient(
-                MockEngine {
+                MockEngine { request ->
+                    requests += (request.body as TextContent).text
                     calls++
-                    if (calls > 1 && failFollowUp) error("Model request failed")
+                    if (calls == 2 && failFollowUp) error("Model request failed")
                     val message =
                         if (calls == 1) {
                             """{"role":"assistant","content":${firstText?.let(
@@ -177,18 +202,24 @@ class AgentIntermediateMessagesTest {
                 finishAfterToolResults = finishAfterToolResults,
                 toolSet = AgentToolSet.Empty.copy(toolRegistry = ToolRegistry { tool(tool) }),
             )
-        private val agent = runtime.createAgent(request, onTrace = {}, chatHistoryProvider = history)
 
-        suspend fun run(): Result<String> = runCatching { agent.run(request.prompt, "conversation") }
+        suspend fun run(retryMode: AgentRetryMode? = null): Result<String> {
+            val agent = runtime.createAgent(request.copy(retryMode = retryMode), onTrace = {}, chatHistoryProvider = history)
+            return try {
+                runCatching { agent.run(request.prompt, "conversation") }
+            } finally {
+                agent.close()
+            }
+        }
 
         suspend fun close() {
-            agent.close()
             runtime.promptExecutor.close()
             client.close()
         }
     }
 
     private class WaitingTool : SimpleTool<WaitingTool.Args>(typeToken<Args>(), "wait", "Wait for a result") {
+        var calls = 0
         val started = CompletableDeferred<Unit>()
         val finish = CompletableDeferred<Unit>()
 
@@ -196,6 +227,7 @@ class AgentIntermediateMessagesTest {
         class Args
 
         override suspend fun execute(args: Args): String {
+            calls++
             started.complete(Unit)
             finish.await()
             return "result"

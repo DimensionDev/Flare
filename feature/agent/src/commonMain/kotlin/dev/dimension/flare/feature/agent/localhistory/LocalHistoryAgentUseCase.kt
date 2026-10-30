@@ -5,16 +5,14 @@ import dev.dimension.flare.common.Locale
 import dev.dimension.flare.data.repository.AccountMicroblogDataSource
 import dev.dimension.flare.feature.agent.common.AgentChatHistoryProvider
 import dev.dimension.flare.feature.agent.common.AgentConversationEvent
+import dev.dimension.flare.feature.agent.common.AgentRetryMode
 import dev.dimension.flare.feature.agent.common.AgentRunResult
 import dev.dimension.flare.feature.agent.common.AgentToolContext
 import dev.dimension.flare.feature.agent.common.AgentTrace
 import dev.dimension.flare.feature.agent.common.FlareAgentRequest
 import dev.dimension.flare.feature.agent.common.FlareAgentRunner
-import dev.dimension.flare.feature.agent.common.FlareAgentUnavailableException
 import dev.dimension.flare.feature.agent.common.resolveAgentVisibleResult
 import dev.dimension.flare.feature.agent.presenter.distinctAgentMessageParts
-import dev.dimension.flare.feature.agent.runtime.AgentAvailability
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.channelFlow
@@ -49,6 +47,7 @@ internal class LocalHistoryAgentUseCase(
         searchDataSources: List<AccountMicroblogDataSource>,
         userInput: String? = null,
         conversationId: String,
+        retryMode: AgentRetryMode? = null,
     ): Flow<AgentConversationEvent<Unit, AgentTrace>> =
         channelFlow {
             run(
@@ -57,6 +56,7 @@ internal class LocalHistoryAgentUseCase(
                 searchDataSources = searchDataSources,
                 userInput = userInput,
                 conversationId = conversationId,
+                retryMode = retryMode,
             )
         }
 
@@ -66,53 +66,43 @@ internal class LocalHistoryAgentUseCase(
         searchDataSources: List<AccountMicroblogDataSource>,
         userInput: String?,
         conversationId: String,
+        retryMode: AgentRetryMode?,
     ) {
         val normalizedQuery = query?.trim()?.takeIf { it.isNotBlank() }
         val userInputValue = userInput?.trim().orEmpty()
-        if (userInputValue.isBlank() && chatHistoryProvider.hasAssistantMessage(conversationId)) {
+        if (retryMode == null && userInputValue.isBlank() && chatHistoryProvider.hasAssistantMessage(conversationId)) {
             return
         }
-        if (userInputValue.isBlank()) {
+        if (retryMode == null && userInputValue.isBlank()) {
             agentRunner.clearConversation(conversationId)
         }
         val result =
-            try {
-                agentRunner.run(
-                    request =
-                        FlareAgentRequest(
-                            prompt =
-                                toLocalHistoryPrompt(
-                                    query = normalizedQuery,
-                                    target = target,
-                                    userInput = userInputValue,
-                                ),
-                            systemPrompt = LOCAL_HISTORY_SYSTEM_PROMPT,
-                            agentId = "flare-local-history",
-                            strategyName = "local_history_chat",
-                            analyzeNodeName = "answer_local_history_request",
-                            executeToolsNodeName = "execute_local_history_tools",
-                            sendToolResultsNodeName = "send_local_history_tool_results",
-                            toolContext =
-                                AgentToolContext(
-                                    searchDataSources = searchDataSources,
-                                ),
-                            temperature = 0.3,
-                            maxIterations = MAX_AGENT_ITERATIONS,
-                            finishAfterToolResults = false,
-                            chatMemoryWindowSize = CHAT_MEMORY_WINDOW_SIZE,
-                        ),
-                    conversationId = conversationId,
-                ) { trace ->
-                    send(AgentConversationEvent.Trace(trace))
-                }
-            } catch (throwable: Throwable) {
-                if (throwable is CancellationException) {
-                    throw throwable
-                }
-                if (throwable is FlareAgentUnavailableException) {
-                    throw LocalHistoryAgentUnavailableException(throwable.availability)
-                }
-                throw throwable
+            agentRunner.run(
+                request =
+                    FlareAgentRequest(
+                        retryMode = retryMode,
+                        prompt =
+                            toLocalHistoryPrompt(
+                                query = normalizedQuery,
+                                target = target,
+                                userInput = userInputValue,
+                            ),
+                        systemPrompt = LOCAL_HISTORY_SYSTEM_PROMPT,
+                        agentId = "flare-local-history",
+                        strategyName = "local_history_chat",
+                        analyzeNodeName = "answer_local_history_request",
+                        executeToolsNodeName = "execute_local_history_tools",
+                        sendToolResultsNodeName = "send_local_history_tool_results",
+                        toolContext =
+                            AgentToolContext(
+                                searchDataSources = searchDataSources,
+                            ),
+                        temperature = 0.3,
+                        finishAfterToolResults = false,
+                    ),
+                conversationId = conversationId,
+            ) { trace ->
+                send(AgentConversationEvent.Trace(trace))
             }
 
         val supportingParts = result.parts.distinctAgentMessageParts()
@@ -258,9 +248,6 @@ internal class LocalHistoryAgentUseCase(
         }
 
     private companion object {
-        const val MAX_AGENT_ITERATIONS = 32
-        const val CHAT_MEMORY_WINDOW_SIZE = 30
-
         const val LOCAL_HISTORY_SYSTEM_PROMPT =
             """
             You are Flare's local history assistant.
@@ -290,7 +277,3 @@ internal class LocalHistoryAgentUseCase(
             """
     }
 }
-
-public class LocalHistoryAgentUnavailableException public constructor(
-    public val availability: AgentAvailability,
-) : IllegalStateException("Local history agent is unavailable: $availability")

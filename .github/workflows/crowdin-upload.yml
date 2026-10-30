@@ -1,12 +1,7 @@
 name: Crowdin Upload
 
 on:
-  push:
-    branches: [master]
-    paths:
-      - "**/values/strings.xml"
-      - "crowdin.yml"
-      - "appleApp/Shared/FlareAppleResource/Resources/Localizable.xcstrings"
+  workflow_dispatch:
 
 jobs:
   crowdin:

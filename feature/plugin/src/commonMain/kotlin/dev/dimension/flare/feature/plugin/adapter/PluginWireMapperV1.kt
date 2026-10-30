@@ -1,0 +1,787 @@
+package dev.dimension.flare.feature.plugin.adapter
+
+import dev.dimension.flare.data.datasource.microblog.ActionMenu
+import dev.dimension.flare.data.datasource.microblog.PostActionFamily
+import dev.dimension.flare.data.datasource.microblog.PostEvent
+import dev.dimension.flare.data.datasource.microblog.SemanticPostAction
+import dev.dimension.flare.data.datasource.microblog.datasource.GalleryDetail
+import dev.dimension.flare.data.datasource.microblog.datasource.GalleryOrientation
+import dev.dimension.flare.data.datasource.microblog.semanticPostActionMenu
+import dev.dimension.flare.data.model.IconType
+import dev.dimension.flare.data.model.ProxyRef
+import dev.dimension.flare.feature.plugin.abi.PluginAbiV1
+import dev.dimension.flare.feature.plugin.wire.ActionDescriptorV1
+import dev.dimension.flare.feature.plugin.wire.ArticleV1
+import dev.dimension.flare.feature.plugin.wire.DirectMessageRoomV1
+import dev.dimension.flare.feature.plugin.wire.DirectMessageV1
+import dev.dimension.flare.feature.plugin.wire.GalleryOrientationV1
+import dev.dimension.flare.feature.plugin.wire.GalleryV1
+import dev.dimension.flare.feature.plugin.wire.HashtagV1
+import dev.dimension.flare.feature.plugin.wire.MediaTypeV1
+import dev.dimension.flare.feature.plugin.wire.MediaV1
+import dev.dimension.flare.feature.plugin.wire.MessageV1
+import dev.dimension.flare.feature.plugin.wire.NavigationTargetV1
+import dev.dimension.flare.feature.plugin.wire.PostDetailTypeV1
+import dev.dimension.flare.feature.plugin.wire.PostReferenceTypeV1
+import dev.dimension.flare.feature.plugin.wire.PostV1
+import dev.dimension.flare.feature.plugin.wire.ProfileV1
+import dev.dimension.flare.feature.plugin.wire.RelationV1
+import dev.dimension.flare.feature.plugin.wire.RichTextFormatV1
+import dev.dimension.flare.feature.plugin.wire.RichTextV1
+import dev.dimension.flare.feature.plugin.wire.SemanticActionV1
+import dev.dimension.flare.feature.plugin.wire.SocialListV1
+import dev.dimension.flare.feature.plugin.wire.TimelineItemV1
+import dev.dimension.flare.feature.plugin.wire.TimelineUserV1
+import dev.dimension.flare.feature.plugin.wire.VisibilityV1
+import dev.dimension.flare.feature.plugin.wire.requireValid
+import dev.dimension.flare.feature.plugin.wire.validatedHtml
+import dev.dimension.flare.model.AccountType
+import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.ReferenceType
+import dev.dimension.flare.ui.model.ClickEvent
+import dev.dimension.flare.ui.model.UiArticle
+import dev.dimension.flare.ui.model.UiArticleAuthor
+import dev.dimension.flare.ui.model.UiArticleBlock
+import dev.dimension.flare.ui.model.UiCard
+import dev.dimension.flare.ui.model.UiDMItem
+import dev.dimension.flare.ui.model.UiDMRoom
+import dev.dimension.flare.ui.model.UiHandle
+import dev.dimension.flare.ui.model.UiHashtag
+import dev.dimension.flare.ui.model.UiIcon
+import dev.dimension.flare.ui.model.UiMedia
+import dev.dimension.flare.ui.model.UiNumber
+import dev.dimension.flare.ui.model.UiPoll
+import dev.dimension.flare.ui.model.UiProfile
+import dev.dimension.flare.ui.model.UiRelation
+import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.UiTranslatableText
+import dev.dimension.flare.ui.model.asType
+import dev.dimension.flare.ui.model.uiArticleContentOf
+import dev.dimension.flare.ui.model.withProxy
+import dev.dimension.flare.ui.render.RenderContent
+import dev.dimension.flare.ui.render.toUi
+import dev.dimension.flare.ui.render.toUiPlainText
+import dev.dimension.flare.ui.route.DeeplinkRoute
+import io.ktor.http.URLProtocol
+import io.ktor.http.Url
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toPersistentList
+import kotlinx.collections.immutable.toPersistentMap
+import kotlin.time.Instant
+
+internal class PluginWireMapperV1(
+    private val pluginId: String,
+    private val platformId: String,
+    private val accountKey: MicroBlogKey?,
+    private val originHost: String,
+    private val capabilities: PluginSessionCapabilitiesV1,
+    private val mediaNetwork: Boolean = false,
+    private val platformIcon: IconType = UiIcon.World.asType(),
+) {
+    private val accountType: AccountType = accountKey?.let(AccountType::Specific) ?: AccountType.GuestHost(originHost)
+    private val mediaProxy = ProxyRef.forAccountType(accountType)
+
+    fun cachedProfile(value: ProfileV1): UiProfile =
+        profile(
+            if (mediaNetwork) {
+                value
+            } else {
+                value.copy(
+                    avatarUrl = null,
+                    bannerUrl = null,
+                    description = value.description?.withoutMedia(),
+                    fields = value.fields.map { it.copy(value = it.value.withoutMedia()) },
+                )
+            },
+        )
+
+    private fun RichTextV1.withoutMedia(): RichTextV1 =
+        when (format) {
+            RichTextFormatV1.Plain -> this
+            RichTextFormatV1.Html -> RichTextV1(value = validatedHtml("https://$originHost/").text())
+        }
+
+    fun profile(value: ProfileV1): UiProfile {
+        value.requireValid()
+        val key =
+            MicroBlogKey(
+                id = value.key.id,
+                host = if (value.key.host.equals(originHost, ignoreCase = true)) originHost else value.key.host,
+            )
+        val handleHost =
+            value.handle
+                .trim()
+                .removePrefix("@")
+                .substringAfterLast('@', missingDelimiterValue = value.key.host)
+                .takeIf(String::isNotBlank)
+                ?: value.key.host
+        return UiProfile(
+            pluginId = pluginId,
+            key = key,
+            handle = UiHandle(value.handle, handleHost),
+            avatar = value.avatarUrl.toUiImage(),
+            nameInternal = value.displayName.toUiPlainText(),
+            platformId = platformId,
+            platformIcon = platformIcon,
+            clickEvent =
+                if (capabilities.canExpose(PluginAbiV1.Capabilities.PROFILE)) {
+                    ClickEvent.Deeplink(DeeplinkRoute.Profile.User(accountType, key))
+                } else {
+                    ClickEvent.Noop
+                },
+            banner = value.bannerUrl.toUiImage(),
+            description = value.description?.toUi(),
+            matrices =
+                UiProfile.Matrices(
+                    fansCount = value.followersCount ?: 0,
+                    followsCount = value.followingCount ?: 0,
+                    statusesCount = value.postsCount ?: 0,
+                ),
+            mark =
+                buildList {
+                    if (value.locked) add(UiProfile.Mark.Locked)
+                    if (value.bot) add(UiProfile.Mark.Bot)
+                }.toPersistentList(),
+            bottomContent =
+                value.fields
+                    .takeIf { it.isNotEmpty() }
+                    ?.associate { it.name to it.value.toUi() }
+                    ?.toPersistentMap()
+                    ?.let(UiProfile.BottomContent::Fields),
+        )
+    }
+
+    fun post(value: PostV1): UiTimelineV2.TimelinePostItem {
+        value.requireValid()
+        return UiTimelineV2.TimelinePostItem(post = value.toUiPost())
+    }
+
+    fun timelineItem(value: TimelineItemV1): UiTimelineV2 {
+        value.requireValid()
+        return when (value) {
+            is TimelineItemV1.Post -> {
+                timelinePost(value)
+            }
+
+            is TimelineItemV1.Feed -> {
+                value.feed.let { feed ->
+                    requireMediaUrl(feed.source.iconUrl)
+                    val description = feed.description?.toUi()
+                    UiTimelineV2.Feed(
+                        title = feed.title,
+                        description = description?.innerText,
+                        descriptionHtml =
+                            feed.description
+                                ?.takeIf { it.format == RichTextFormatV1.Html }
+                                ?.validatedHtml("https://$originHost/")
+                                ?.html(),
+                        url = feed.url,
+                        sourceLanguages = feed.sourceLanguages.toImmutableList(),
+                        createdAt = Instant.parse(feed.createdAt).toUi(),
+                        source = UiTimelineV2.Feed.Source(feed.source.name, feed.source.iconUrl, mediaProxy),
+                        media = feed.media?.toUi(false) as? UiMedia.Image,
+                        clickEvent = target(feed.target ?: NavigationTargetV1.Link(feed.url)),
+                        accountType = accountType,
+                        pluginId = pluginId,
+                    )
+                }
+            }
+
+            is TimelineItemV1.User -> {
+                user(value.user)
+            }
+
+            is TimelineItemV1.UserList -> {
+                value.userList.let {
+                    UiTimelineV2.UserList(
+                        message = it.message?.let(::message),
+                        users = it.users.map(::profile).toImmutableList(),
+                        createdAt = Instant.parse(it.createdAt).toUi(),
+                        statusKey = rowKey("userList", it.key),
+                        post = it.post?.toUiPost(),
+                        accountType = accountType,
+                    )
+                }
+            }
+
+            is TimelineItemV1.Message -> {
+                message(value.message)
+            }
+        }
+    }
+
+    private fun timelinePost(value: TimelineItemV1.Post): UiTimelineV2.TimelinePostItem =
+        UiTimelineV2.TimelinePostItem(
+            post = value.post.toUiPost(),
+            presentation =
+                value.presentation.let {
+                    UiTimelineV2.PostPresentation(
+                        message = it.message?.let(::message),
+                        inlineParents =
+                            it.inlineParents
+                                .flatMap { parent ->
+                                    val mapped = timelinePost(parent)
+                                    mapped.presentation.inlineParents +
+                                        mapped.copy(presentation = mapped.presentation.copy(inlineParents = persistentListOf()))
+                                }.distinctBy { parent -> parent.statusKey }
+                                .toImmutableList(),
+                        quotes = it.quotes.map { post -> post.toUiPost() }.toImmutableList(),
+                        repost = it.repost?.toUiPost(),
+                        notificationKey = it.notificationKey?.let { key -> rowKey("notification", key) },
+                    )
+                },
+        )
+
+    private fun rowKey(
+        kind: String,
+        key: dev.dimension.flare.feature.plugin.wire.EntityKeyV1,
+    ): MicroBlogKey = MicroBlogKey("plugin:$pluginId:$kind:${key.id}", key.host)
+
+    private fun message(value: MessageV1): UiTimelineV2.Message =
+        UiTimelineV2.Message(
+            user = value.actor?.let(::profile),
+            statusKey = rowKey("message", value.key),
+            icon = value.icon.toUiIcon(),
+            type =
+                when {
+                    value.text != null -> {
+                        UiTimelineV2.Message.Type.Raw(value.text)
+                    }
+
+                    value.kind != null -> {
+                        UiTimelineV2.Message.Type.Localized(
+                            UiTimelineV2.Message.Type.Localized.MessageId
+                                .valueOf(value.kind.name),
+                            value.args.toImmutableList(),
+                        )
+                    }
+
+                    else -> {
+                        UiTimelineV2.Message.Type.Unknown(requireNotNull(value.unknownType))
+                    }
+                },
+            createdAt = Instant.parse(value.createdAt).toUi(),
+            clickEvent = value.target?.let(::target) ?: value.actor?.let(::profile)?.clickEvent ?: ClickEvent.Noop,
+            accountType = accountType,
+        )
+
+    fun user(value: TimelineUserV1): UiTimelineV2.User {
+        val row = rowKey("user", value.key)
+        return UiTimelineV2.User(
+            message = value.message?.let(::message),
+            value = profile(value.profile),
+            createdAt = Instant.parse(value.createdAt).toUi(),
+            statusKey = row,
+            button = userButtons(value.buttons, row, value.profile.key.toMicroBlogKey()),
+            accountType = accountType,
+        )
+    }
+
+    fun userButtons(
+        actions: List<ActionDescriptorV1>,
+        row: MicroBlogKey,
+        profile: MicroBlogKey,
+    ) = actions
+        .map { action ->
+            val enabled = action.enabled && accountKey != null && capabilities.hasOperation(PluginAbiV1.Capabilities.RELATION, "mutate")
+            ActionMenu.Item(
+                icon = action.action.toUiIcon(),
+                text = ActionMenu.Item.Text.Raw(requireNotNull(action.label)),
+                enabled = enabled,
+                count = action.count?.let(::UiNumber),
+                color =
+                    ActionMenu.Item.Color.PrimaryColor
+                        .takeIf { action.active == true },
+                clickEvent =
+                    if (enabled) {
+                        ClickEvent.event(
+                            accountKey,
+                            PostEvent.PluginAction(
+                                postKey = row,
+                                entityKey = profile,
+                                action = action.action.name,
+                                actionToken = action.actionToken,
+                                profileAction = true,
+                            ),
+                        )
+                    } else {
+                        ClickEvent.Noop
+                    },
+            )
+        }.toImmutableList()
+
+    private fun target(value: NavigationTargetV1): ClickEvent {
+        val route =
+            when (value) {
+                is NavigationTargetV1.Link -> {
+                    DeeplinkRoute.OpenLinkDirectly(value.url)
+                }
+
+                is NavigationTargetV1.Post -> {
+                    DeeplinkRoute.Status
+                        .Detail(value.key.toMicroBlogKey(), accountType)
+                        .takeIf { capabilities.canExpose(PluginAbiV1.Capabilities.POST) }
+                }
+
+                is NavigationTargetV1.Profile -> {
+                    DeeplinkRoute.Profile
+                        .User(accountType, value.key.toMicroBlogKey())
+                        .takeIf { capabilities.canExpose(PluginAbiV1.Capabilities.PROFILE) }
+                }
+
+                is NavigationTargetV1.Article -> {
+                    DeeplinkRoute
+                        .Article(accountType, value.key.toMicroBlogKey())
+                        .takeIf { capabilities.canExpose(PluginAbiV1.Capabilities.ARTICLE) }
+                }
+
+                is NavigationTargetV1.Gallery -> {
+                    DeeplinkRoute.Gallery
+                        .Detail(value.key.toMicroBlogKey(), accountType)
+                        .takeIf { capabilities.canExpose(PluginAbiV1.Capabilities.GALLERY) }
+                }
+            }
+        return route?.let { ClickEvent.Deeplink(it) } ?: ClickEvent.Noop
+    }
+
+    fun hashtag(value: HashtagV1): UiHashtag {
+        require(value.name.isNotBlank() && value.name.length <= 1_024) { "Invalid plugin hashtag" }
+        value.url.requireHttpsUrl()
+        return UiHashtag(
+            hashtag = value.name,
+            description = value.url,
+            searchContent = value.name,
+        )
+    }
+
+    fun relation(value: RelationV1): UiRelation =
+        UiRelation(
+            following = value.following,
+            isFans = value.followedBy,
+            blocking = value.blocking,
+            muted = value.muting,
+        )
+
+    fun socialList(value: SocialListV1): dev.dimension.flare.ui.model.UiList.List {
+        require(value.id.isNotBlank() && value.id.length <= 512 && value.title.length <= 4_096) { "Invalid plugin list" }
+        return dev.dimension.flare.ui.model.UiList
+            .List(id = value.id, title = value.title)
+    }
+
+    fun directMessageRoom(value: DirectMessageRoomV1): UiDMRoom {
+        require(value.unreadCount >= 0 && value.participants.size <= 256) { "Invalid plugin direct-message room" }
+        return UiDMRoom(
+            pluginId = pluginId,
+            key = value.key.toMicroBlogKey(),
+            users = value.participants.map(::profile).toImmutableList(),
+            lastMessage = value.lastMessage?.let(::directMessage),
+            unreadCount = value.unreadCount.toLong(),
+        )
+    }
+
+    fun directMessage(value: DirectMessageV1): UiDMItem =
+        UiDMItem(
+            pluginId = pluginId,
+            key = value.key.toMicroBlogKey(),
+            user = profile(value.sender),
+            content = UiDMItem.Message.Text(value.content.toUi()),
+            timestamp = Instant.parse(value.createdAt).toUi(),
+            isFromMe = value.fromCurrentAccount,
+            sendState = null,
+            showSender = true,
+        )
+
+    fun article(value: ArticleV1): UiArticle {
+        value.url.requireHttpsUrl()
+        value.coverUrl.requireHttpsUrl()
+        val richText = value.content.toUi()
+        val blocks =
+            richText.renderRuns.mapIndexed { index, content ->
+                val blockKey = "${value.key.id}:$index"
+                when (content) {
+                    is RenderContent.Text -> UiArticleBlock.Text(key = blockKey, content = content)
+                    is RenderContent.BlockImage -> UiArticleBlock.Image(key = blockKey, media = content.media)
+                }
+            }
+        return UiArticle(
+            pluginId = pluginId,
+            key = value.key.id,
+            title = value.title,
+            content = uiArticleContentOf(blocks, richText.raw),
+            cover = value.coverUrl.toUiImage(),
+            publishDate = value.createdAt?.let(Instant::parse)?.toUi(),
+            author = value.author?.let(::profile)?.let { UiArticleAuthor.Profile(it) },
+            sourceUrl = value.url,
+        )
+    }
+
+    fun gallery(value: GalleryV1): GalleryDetail {
+        value.url.requireHttpsUrl()
+        val images = value.images.map { it.toUi(value.actions.any { action -> action.active == true }) }
+        val bookmark =
+            value.actions.firstOrNull {
+                it.action == SemanticActionV1.Bookmark || it.action == SemanticActionV1.Unbookmark
+            }
+        val key = value.key.toMicroBlogKey()
+        return GalleryDetail(
+            orientation =
+                when (value.orientation) {
+                    GalleryOrientationV1.Horizontal -> GalleryOrientation.Horizontal
+                    GalleryOrientationV1.Vertical -> GalleryOrientation.Vertical
+                },
+            statusKey = key,
+            accountType = accountType,
+            url = value.url,
+            images = images.toImmutableList(),
+            title = value.title,
+            author = value.author?.let(::profile),
+            createdAt = Instant.parse(value.createdAt).toUi(),
+            content = value.content?.toUi(),
+            isBookmarked = bookmark?.active == true || bookmark?.action == SemanticActionV1.Unbookmark,
+            bookmarkAction =
+                accountKey
+                    ?.takeIf { capabilities.hasOperation(PluginAbiV1.Capabilities.POST, "mutate") }
+                    ?.let { account ->
+                        bookmark?.takeIf { it.enabled }?.toSemanticPostAction()?.let { action ->
+                            semanticPostActionMenu(key, action, bookmark.actionToken, bookmark.count ?: 0, account).clickEvent
+                        }
+                    } ?: ClickEvent.Noop,
+            matrix =
+                value.actions
+                    .mapNotNull { action ->
+                        val icon = action.action.toUiIcon() ?: return@mapNotNull null
+                        GalleryDetail.Matrix(icon, action.count ?: 0)
+                    }.toImmutableList(),
+        )
+    }
+
+    private fun PostV1.toUiPost(): UiTimelineV2.Post {
+        val key = key.toMicroBlogKey()
+        val detailRoute =
+            when (detailType) {
+                PostDetailTypeV1.Post -> {
+                    DeeplinkRoute.Status
+                        .Detail(
+                            key,
+                            accountType,
+                        ).takeIf { capabilities.canExpose(PluginAbiV1.Capabilities.POST) }
+                }
+
+                PostDetailTypeV1.Article -> {
+                    DeeplinkRoute
+                        .Article(
+                            accountType,
+                            key,
+                        ).takeIf { capabilities.canExpose(PluginAbiV1.Capabilities.ARTICLE) }
+                }
+
+                PostDetailTypeV1.Gallery -> {
+                    DeeplinkRoute.Gallery.Detail(key, accountType).takeIf {
+                        capabilities.canExpose(PluginAbiV1.Capabilities.GALLERY)
+                    }
+                }
+
+                PostDetailTypeV1.Link -> {
+                    DeeplinkRoute.OpenLinkDirectly(requireNotNull(url))
+                }
+            }
+        val resolvedUrl = url ?: "https://${key.host}/"
+        val directActions = mutableListOf<ActionMenu>()
+        val overflow = mutableListOf<ActionMenu>()
+        actions.forEach { descriptor ->
+            val semantic = descriptor.toSemanticPostAction()
+            if (semantic != null) {
+                val enabled = descriptor.enabled && accountKey != null && capabilities.hasOperation(PluginAbiV1.Capabilities.POST, "mutate")
+                val item = semanticPostActionMenu(key, semantic, descriptor.actionToken, descriptor.count ?: 0, accountKey)
+                directActions += item.copy(enabled = enabled, clickEvent = if (enabled) item.clickEvent else ClickEvent.Noop)
+            } else if (descriptor.action == SemanticActionV1.Reply && capabilities.canExpose(PluginAbiV1.Capabilities.COMPOSE) &&
+                accountKey != null
+            ) {
+                directActions +=
+                    ActionMenu.Item(
+                        icon = UiIcon.Reply,
+                        text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Reply),
+                        enabled = descriptor.enabled,
+                        clickEvent =
+                            if (descriptor.enabled) {
+                                ClickEvent.Deeplink(
+                                    DeeplinkRoute.Compose.Reply(accountKey, key),
+                                )
+                            } else {
+                                ClickEvent.Noop
+                            },
+                        actionFamily = PostActionFamily.Reply,
+                    )
+            } else if (descriptor.action == SemanticActionV1.Delete && accountKey != null &&
+                capabilities.hasOperation(PluginAbiV1.Capabilities.POST, "delete")
+            ) {
+                overflow +=
+                    ActionMenu.Item(
+                        icon = UiIcon.Delete,
+                        text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Delete),
+                        color = ActionMenu.Item.Color.Red,
+                        enabled = descriptor.enabled,
+                        clickEvent =
+                            if (descriptor.enabled) {
+                                ClickEvent.Deeplink(
+                                    DeeplinkRoute.Status.DeleteConfirm(key, accountType),
+                                )
+                            } else {
+                                ClickEvent.Noop
+                            },
+                        actionFamily = PostActionFamily.Delete,
+                    )
+            }
+        }
+        if (url != null) {
+            overflow +=
+                ActionMenu.Item(
+                    icon = UiIcon.Share,
+                    text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Share),
+                    clickEvent = ClickEvent.Deeplink(DeeplinkRoute.Status.ShareSheet(key, accountType, resolvedUrl)),
+                    actionFamily = PostActionFamily.Share,
+                )
+        }
+        if (overflow.isNotEmpty()) {
+            directActions +=
+                ActionMenu.Group(
+                    displayItem =
+                        ActionMenu.Item(
+                            icon = UiIcon.More,
+                            text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.More),
+                        ),
+                    actions = overflow.toPersistentList(),
+                )
+        }
+        return UiTimelineV2.Post(
+            pluginId = pluginId,
+            platformId = platformId,
+            images = media.map { it.toUi(sensitive) }.toPersistentList(),
+            sensitive = sensitive,
+            contentWarning = spoilerText?.takeIf(String::isNotBlank)?.let { UiTranslatableText(it.toUiPlainText()) },
+            user = author?.let(::profile),
+            platformIcon = platformIcon,
+            content = UiTranslatableText(content.toUi()),
+            actions = directActions.toPersistentList(),
+            poll =
+                poll?.let { poll ->
+                    val total = poll.options.sumOf { it.votesCount.toDouble() }
+                    UiPoll(
+                        id = poll.id,
+                        options =
+                            poll.options
+                                .map {
+                                    UiPoll.Option(it.title, it.votesCount, if (total == 0.0) 0f else (it.votesCount / total).toFloat())
+                                }.toImmutableList(),
+                        multiple = poll.multiple,
+                        ownVotes = poll.ownVotes.toImmutableList(),
+                        voteEvent = accountKey?.let { PostEvent.PluginVote(key, it, persistentListOf(), poll.actionToken) },
+                        expiresAt = poll.expiresAt?.let(Instant::parse),
+                        enabled = poll.enabled && accountKey != null && capabilities.hasOperation(PluginAbiV1.Capabilities.POST, "mutate"),
+                    )
+                },
+            statusKey = key,
+            card = card?.let { UiCard(it.title, it.description, it.media?.toUi(sensitive), it.url) },
+            sourceLanguages = sourceLanguages.toImmutableList(),
+            sourceChannel = sourceChannel?.let { UiTimelineV2.Post.SourceChannel(it.id, it.name) },
+            replyToHandle = replyToHandle,
+            emojiReactions =
+                emojiReactions
+                    .map { reaction ->
+                        requireMediaUrl(reaction.url)
+                        UiTimelineV2.Post.EmojiReaction(
+                            name = reaction.name,
+                            url = reaction.url.orEmpty(),
+                            count = UiNumber(reaction.count),
+                            isUnicode = reaction.isUnicode,
+                            me = reaction.me,
+                            proxy = mediaProxy,
+                            clickEvent =
+                                if (reaction.enabled && capabilities.hasOperation(PluginAbiV1.Capabilities.POST, "mutate")) {
+                                    ClickEvent.event(
+                                        accountKey,
+                                        PostEvent.PluginAction(
+                                            key,
+                                            key,
+                                            (if (reaction.me) SemanticActionV1.Unreact else SemanticActionV1.React).name,
+                                            reaction.actionToken,
+                                            mapOf("reaction" to reaction.name),
+                                        ),
+                                    )
+                                } else {
+                                    ClickEvent.Noop
+                                },
+                        )
+                    }.toImmutableList(),
+            createdAt = Instant.parse(createdAt).toUi(),
+            visibility = visibility?.toUiVisibility(),
+            references =
+                (
+                    references.map {
+                        UiTimelineV2.Post.Reference(
+                            it.key.toMicroBlogKey(),
+                            when (it.type) {
+                                PostReferenceTypeV1.Reply -> ReferenceType.Reply
+                                PostReferenceTypeV1.Quote -> ReferenceType.Quote
+                                PostReferenceTypeV1.Repost -> ReferenceType.Retweet
+                            },
+                        )
+                    } + listOfNotNull(replyTo?.let { UiTimelineV2.Post.Reference(it.toMicroBlogKey(), ReferenceType.Reply) })
+                ).distinct()
+                    .toImmutableList(),
+            clickEvent = detailRoute?.let { ClickEvent.Deeplink(it) } ?: ClickEvent.Noop,
+            mediaClickPolicy =
+                if (detailType == PostDetailTypeV1.Post) {
+                    UiTimelineV2.Post.MediaClickPolicy.OpenStatusMedia
+                } else {
+                    UiTimelineV2.Post.MediaClickPolicy.OpenPostClickEvent
+                },
+            accountType = accountType,
+        )
+    }
+
+    private fun RichTextV1.toUi() =
+        when (format) {
+            RichTextFormatV1.Plain -> {
+                value.toUiPlainText()
+            }
+
+            RichTextFormatV1.Html -> {
+                val html = validatedHtml("https://$originHost/")
+                require(mediaNetwork || (html.getElementsByTag("img").isEmpty() && html.getElementsByTag("emoji").isEmpty())) {
+                    "Plugin has no media network permission"
+                }
+                html.toUi().withProxy(mediaProxy)
+            }
+        }
+
+    private fun requireMediaUrl(value: String?) {
+        value.requireHttpsUrl()
+        require(value.isNullOrBlank() || mediaNetwork) { "Plugin has no media network permission" }
+    }
+
+    private fun MediaV1.toUi(sensitive: Boolean): UiMedia {
+        requireMediaUrl(url)
+        requireMediaUrl(previewUrl)
+        requireMediaUrl(downloadUrl)
+        requireMediaUrl(originalFrameUrl)
+        return when (type) {
+            MediaTypeV1.Image -> {
+                UiMedia.Image(
+                    url,
+                    previewUrl ?: url,
+                    description,
+                    height?.toFloat() ?: 0f,
+                    width?.toFloat() ?: 0f,
+                    sensitive,
+                )
+            }
+
+            MediaTypeV1.Video -> {
+                UiMedia.Video(
+                    url,
+                    previewUrl ?: url,
+                    description,
+                    height?.toFloat() ?: 0f,
+                    width?.toFloat() ?: 0f,
+                    downloadUrl = downloadUrl,
+                )
+            }
+
+            MediaTypeV1.Gif -> {
+                UiMedia.Gif(url, previewUrl ?: url, description, height?.toFloat() ?: 0f, width?.toFloat() ?: 0f)
+            }
+
+            MediaTypeV1.Ugoira -> {
+                capabilities.requireOperation(PluginAbiV1.Capabilities.GALLERY, "ugoiraMetadata")
+                UiMedia.Ugoira(
+                    requireNotNull(ugoiraKey).toMicroBlogKey(),
+                    requireNotNull(accountKey) { "Ugoira requires an account" },
+                    requireNotNull(previewUrl),
+                    originalFrameUrl,
+                    description,
+                    height?.toFloat() ?: 0f,
+                    width?.toFloat() ?: 0f,
+                    sensitive,
+                    sourceUrl = url,
+                )
+            }
+
+            MediaTypeV1.Audio -> {
+                UiMedia.Audio(url, description, previewUrl)
+            }
+        }.withProxy(mediaProxy)
+    }
+
+    private fun String?.toUiImage(): UiMedia.Image? {
+        requireMediaUrl(this)
+        return this?.takeIf(String::isNotBlank)?.let { UiMedia.Image(it, it, null, 0f, 0f, false, proxy = mediaProxy) }
+    }
+}
+
+private fun dev.dimension.flare.feature.plugin.wire.EntityKeyV1.toMicroBlogKey(): MicroBlogKey = MicroBlogKey(id, host)
+
+private fun VisibilityV1.toUiVisibility(): UiTimelineV2.Post.Visibility =
+    when (this) {
+        VisibilityV1.Public -> UiTimelineV2.Post.Visibility.Public
+        VisibilityV1.Unlisted -> UiTimelineV2.Post.Visibility.Home
+        VisibilityV1.Followers -> UiTimelineV2.Post.Visibility.Followers
+        VisibilityV1.Direct -> UiTimelineV2.Post.Visibility.Specified
+        VisibilityV1.Channel -> UiTimelineV2.Post.Visibility.Channel
+    }
+
+private fun dev.dimension.flare.feature.plugin.wire.ActionDescriptorV1.toSemanticPostAction(): SemanticPostAction? =
+    when (action) {
+        SemanticActionV1.Favourite -> SemanticPostAction.Favourite
+        SemanticActionV1.Unfavourite -> SemanticPostAction.Unfavourite
+        SemanticActionV1.Repost -> SemanticPostAction.Repost
+        SemanticActionV1.Unrepost -> SemanticPostAction.Unrepost
+        SemanticActionV1.Bookmark -> SemanticPostAction.Bookmark
+        SemanticActionV1.Unbookmark -> SemanticPostAction.Unbookmark
+        else -> null
+    }
+
+private fun SemanticActionV1.toUiIcon(): UiIcon? =
+    when (this) {
+        SemanticActionV1.Favourite,
+        SemanticActionV1.Unfavourite,
+        -> UiIcon.Heart
+
+        SemanticActionV1.Repost,
+        SemanticActionV1.Unrepost,
+        -> UiIcon.Retweet
+
+        SemanticActionV1.Bookmark,
+        SemanticActionV1.Unbookmark,
+        -> UiIcon.Bookmark
+
+        SemanticActionV1.Delete -> UiIcon.Delete
+
+        SemanticActionV1.Reply -> UiIcon.Reply
+
+        SemanticActionV1.Follow,
+        SemanticActionV1.Unfollow,
+        -> UiIcon.Follow
+
+        SemanticActionV1.Block,
+        SemanticActionV1.Unblock,
+        -> UiIcon.Block
+
+        SemanticActionV1.Vote, SemanticActionV1.React, SemanticActionV1.Unreact -> UiIcon.Heart
+
+        SemanticActionV1.AcceptFollowRequest, SemanticActionV1.RejectFollowRequest -> UiIcon.Follow
+
+        SemanticActionV1.Mute,
+        SemanticActionV1.Unmute,
+        -> UiIcon.Mute
+    }
+
+private fun String?.requireHttpsUrl() {
+    if (isNullOrBlank()) return
+    require(length <= 8_192) { "Plugin output URL is too long" }
+    val value = Url(this)
+    require(value.protocol == URLProtocol.HTTPS && value.user == null && value.password == null) {
+        "Plugin output URL must use HTTPS without credentials"
+    }
+}

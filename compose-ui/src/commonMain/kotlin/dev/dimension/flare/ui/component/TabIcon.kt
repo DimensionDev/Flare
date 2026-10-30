@@ -9,6 +9,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -97,6 +98,17 @@ import org.jetbrains.compose.resources.stringResource
 
 private val FavIconShape = RoundedCornerShape(4.dp)
 
+public val LocalExternalTextResolver: androidx.compose.runtime.ProvidableCompositionLocal<(UiText.ExternalRef) -> String> =
+    staticCompositionLocalOf { { text: UiText.ExternalRef -> text.fallbackText() } }
+
+@Composable
+public fun UiText.resolveText(): String =
+    when (this) {
+        is UiText.Localized -> stringResource(string.res)
+        is UiText.Raw -> string
+        is UiText.ExternalRef -> LocalExternalTextResolver.current(this)
+    }
+
 @Composable
 public fun Text(
     text: UiText,
@@ -107,10 +119,7 @@ public fun Text(
 ) {
     PlatformText(
         text =
-            when (text) {
-                is UiText.Localized -> stringResource(text.string.res)
-                is UiText.Raw -> text.string
-            },
+            text.resolveText(),
         modifier = modifier,
         color = color,
         fontSize = fontSize,
@@ -148,11 +157,18 @@ public fun TabIcon(
     color: Color = PlatformContentColor.current,
     size: Dp = 24.dp,
 ) {
-    val text =
-        when (title) {
-            is UiText.Localized -> stringResource(title.string.res)
-            is UiText.Raw -> title.string
-        }
+    TabIcon(icon, title.resolveText(), modifier, iconOnly, color, size)
+}
+
+@Composable
+public fun TabIcon(
+    icon: IconType,
+    contentDescription: String? = null,
+    modifier: Modifier = Modifier,
+    iconOnly: Boolean = false,
+    color: Color = PlatformContentColor.current,
+    size: Dp = 24.dp,
+) {
     when (icon) {
         is IconType.Avatar -> {
             val userState by producePresenter(key = "avatar:${icon.accountKey}") {
@@ -174,7 +190,7 @@ public fun TabIcon(
         is IconType.Material -> {
             FAIcon(
                 imageVector = icon.icon.toImageVector(),
-                contentDescription = text,
+                contentDescription = contentDescription,
                 modifier =
                     modifier
                         .size(size),
@@ -186,7 +202,7 @@ public fun TabIcon(
             if (iconOnly) {
                 FAIcon(
                     imageVector = icon.icon.toImageVector(),
-                    contentDescription = text,
+                    contentDescription = contentDescription,
                     modifier =
                         modifier
                             .size(size),
@@ -216,7 +232,7 @@ public fun TabIcon(
                         }
                     FAIcon(
                         imageVector = icon.icon.toImageVector(),
-                        contentDescription = text,
+                        contentDescription = contentDescription,
                         modifier =
                             Modifier
                                 .size(size / 2)
@@ -230,8 +246,8 @@ public fun TabIcon(
 
         is IconType.Url -> {
             NetworkImage(
-                icon.url.toUiImage(proxy = ProxyRef.Global),
-                contentDescription = text,
+                remember(icon.url) { icon.url.toUiImage(proxy = ProxyRef.Global) },
+                contentDescription = contentDescription,
                 modifier =
                     modifier
                         .size(size)
@@ -241,7 +257,7 @@ public fun TabIcon(
         }
 
         is IconType.FavIcon -> {
-            FavIcon(icon.host, modifier, title, size)
+            FavIcon(icon.host, modifier, contentDescription?.let(UiText::Raw), size)
         }
     }
 }
@@ -264,12 +280,7 @@ public fun FavIcon(
         .onSuccess {
             NetworkImage(
                 it.toUiImage(proxy = ProxyRef.Global),
-                contentDescription =
-                    when (title) {
-                        is UiText.Localized -> stringResource(title.string.res)
-                        is UiText.Raw -> title.string
-                        null -> null
-                    },
+                contentDescription = title?.resolveText(),
                 modifier =
                     modifier
                         .size(size)

@@ -2,7 +2,7 @@ package dev.dimension.flare.ui.presenter.compose
 
 import dev.dimension.flare.data.database.app.model.DraftTargetStatus
 import dev.dimension.flare.data.datasource.microblog.ComposeData
-import dev.dimension.flare.data.datasource.microblog.ComposeDataSource
+import dev.dimension.flare.data.datasource.microblog.capabilities
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.ComposeDraftBundle
 import dev.dimension.flare.data.repository.DraftMediaStore
@@ -35,7 +35,7 @@ internal class SendDraftUseCase(
         findAccount = { accountRepository.find(it) },
         composeDraft = { account, data, progress ->
             val dataSource =
-                accountRepository.getOrCreateDataSource(account) as? ComposeDataSource
+                accountRepository.getOrCreateDataSource(account).capabilities.compose
                     ?: error("Account does not support compose: ${account.accountKey}")
             dataSource.compose(data = data, progress = progress)
         },
@@ -47,7 +47,6 @@ internal class SendDraftUseCase(
         progress: suspend (ComposeProgressState) -> Unit,
     ) {
         withCancellationRecovery(bundle.groupId, bundle.accounts.map { it.accountKey }) { pendingTargets ->
-            val persistedMedia = draftMediaStore.persist(bundle.groupId, bundle.template.medias)
             val savedGroupId =
                 draftRepository.saveDraft(
                     input =
@@ -63,9 +62,8 @@ internal class SendDraftUseCase(
                                         lastAttemptAt = Clock.System.now().toEpochMilliseconds(),
                                     )
                                 },
-                            medias = persistedMedia,
                         ),
-                )
+                ) { draftMediaStore.persist(bundle.groupId, bundle.template.medias) }
             val data =
                 bundle.template.copy(
                     medias =

@@ -27,6 +27,9 @@ internal fun EntryProviderScope<NavKey>.settingsSelectEntryBuilder(
             toAccounts = {
                 navigate(Route.Settings.Accounts)
             },
+            toPlugins = {
+                navigate(Route.Settings.Plugins)
+            },
             toAppearanceTheme = {
                 navigate(Route.Settings.AppearanceTheme)
             },
@@ -85,7 +88,21 @@ internal fun EntryProviderScope<NavKey>.settingsSelectEntryBuilder(
             },
             toNostrRelays = {
                 navigate(Route.Settings.NostrRelays(it))
-            }
+            },
+            toPlugins = {
+                navigate(Route.Settings.Plugins)
+            },
+        )
+    }
+
+    entry<Route.Settings.Plugins>(
+        metadata = ListDetailSceneStrategy.detailPane(sceneKey = "Settings")
+    ) {
+        AndroidPluginManagementScreen(
+            onBack = onBack,
+            onCreateWithAI = {
+                navigate(Route.AgentChat("generic-chat:${Clock.System.now().toEpochMilliseconds()}", null))
+            },
         )
     }
 

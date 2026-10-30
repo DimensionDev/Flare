@@ -70,6 +70,7 @@ import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.UiTranslatableText
 import dev.dimension.flare.ui.model.asTimelinePostItem
+import dev.dimension.flare.ui.model.asType
 import dev.dimension.flare.ui.model.bindMediaProxy
 import dev.dimension.flare.ui.model.toUiImage
 import dev.dimension.flare.ui.model.uiArticleContentOf
@@ -1033,7 +1034,7 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile {
                 null
             },
         platformId = XQT_PLATFORM_ID,
-        platformIcon = dev.dimension.flare.ui.model.UiIcon.X,
+        platformIcon = UiIcon.X.asType(),
         clickEvent =
             ClickEvent.Deeplink(
                 DeeplinkRoute.Profile
@@ -1364,7 +1365,7 @@ private fun Admin.render(accountKey: MicroBlogKey): UiProfile {
                 host = accountKey.host,
             ),
         platformId = XQT_PLATFORM_ID,
-        platformIcon = dev.dimension.flare.ui.model.UiIcon.X,
+        platformIcon = UiIcon.X.asType(),
         clickEvent =
             ClickEvent.Deeplink(
                 DeeplinkRoute.Profile

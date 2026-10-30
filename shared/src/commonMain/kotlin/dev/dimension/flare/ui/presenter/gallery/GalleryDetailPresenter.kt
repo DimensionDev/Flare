@@ -12,7 +12,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.emptyFlow
 import dev.dimension.flare.common.toPagingState
-import dev.dimension.flare.data.datasource.microblog.datasource.GalleryDataSource
+import dev.dimension.flare.data.datasource.microblog.capabilities
 import dev.dimension.flare.data.datasource.microblog.datasource.GalleryDetail
 import dev.dimension.flare.data.datasource.microblog.paging.toTimelinePagingSource
 import dev.dimension.flare.data.datasource.microblog.pagingConfig
@@ -23,6 +23,7 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.flatMapLatestUiState
 import dev.dimension.flare.ui.model.flattenUiState
 import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
@@ -45,9 +46,9 @@ public class GalleryDetailPresenter(
     }
 
     private val detailCacheFlow by lazy {
-        serviceFlow.flatMapLatest { service ->
+        serviceFlow.flatMapLatestUiState { service ->
             val galleryDataSource =
-                service as? GalleryDataSource
+                service.capabilities.gallery
                     ?: error("Current service does not support gallery data source")
             galleryDataSource.galleryDetail(statusKey).toUi()
         }
@@ -57,7 +58,7 @@ public class GalleryDetailPresenter(
         serviceFlow.flatMapLatest { service ->
             runCatching {
                 val galleryDataSource =
-                    service as? GalleryDataSource
+                    service.capabilities.gallery
                         ?: error("Current service does not support gallery data source")
                 Pager(config = pagingConfig) {
                     galleryDataSource.galleryComments(statusKey).toTimelinePagingSource()
@@ -72,7 +73,7 @@ public class GalleryDetailPresenter(
         serviceFlow.flatMapLatest { service ->
             runCatching {
                 val galleryDataSource =
-                    service as? GalleryDataSource
+                    service.capabilities.gallery
                         ?: error("Current service does not support gallery data source")
                 Pager(config = pagingConfig) {
                     galleryDataSource.galleryRecommendations(statusKey).toTimelinePagingSource()

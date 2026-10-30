@@ -277,7 +277,7 @@ public class RelationHandler(
         return currentRelation
     }
 
-    private suspend fun setRelation(
+    public suspend fun setRelation(
         userKey: MicroBlogKey,
         relation: UiRelation,
     ) {

@@ -14,6 +14,7 @@ public data class UiDMRoom public constructor(
     val users: SerializableImmutableList<UiProfile>,
     val lastMessage: UiDMItem?,
     val unreadCount: Long,
+    val pluginId: String? = null,
 ) {
     val lastMessageText: String by lazy {
         when (val message = lastMessage?.content) {
@@ -43,6 +44,7 @@ public data class UiDMItem public constructor(
     val sendState: SendState?,
     val showSender: Boolean,
     val remoteCursor: String? = null,
+    val pluginId: String? = null,
 ) {
     @Serializable
     public sealed interface Message {

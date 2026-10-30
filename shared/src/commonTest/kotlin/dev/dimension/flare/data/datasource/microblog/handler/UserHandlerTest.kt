@@ -47,6 +47,7 @@ import dev.dimension.flare.memoryDatabaseBuilder
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.humanizer.PlatformFormatter
 import dev.dimension.flare.ui.model.ClickEvent
+import dev.dimension.flare.ui.model.PluginMediaPermissions
 import dev.dimension.flare.ui.model.UiHandle
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiState
@@ -138,25 +139,65 @@ class UserHandlerTest : RobolectricTest() {
 
     @AfterTest
     fun tearDown() {
+        PluginMediaPermissions.replace(emptyMap())
         db.close()
         stopKoin()
         deleteTestRootPath(root)
     }
 
     @Test
-    fun sharedUserCacheBindsMediaToEachViewerWithoutPersistingThatViewer() = runTest {
-        val original = createProfile(id = "alice", host = "test.social", handle = "alice")
-        val first = ProxyRef.Account(accountKey)
-        val second = ProxyRef.Account(MicroBlogKey("account-2", accountKey.host))
-        loader.nextById = original.withProxy(first)
-        db.upsertUser(loader.nextById!!.toDbUser())
-        for (proxy in listOf(first, second)) {
-            val viewer = UserHandler(accountKey.host, loader, proxy)
-            val user = viewer.userById("alice").data.filterIsInstance<CacheState.Success<UiProfile>>().first().data
-            assertEquals(proxy, user.avatar?.proxy)
+    fun pluginProfileMutationUpdatesTheCanonicalProfileAndKeepsProxyOwnership() =
+        runTest {
+            PluginMediaPermissions.register("test.plugin", true)
+            val profile = createProfile(id = "alice", host = "test.social", handle = "alice").copy(pluginId = "test.plugin")
+            handler.updateUser(profile)
+            val replacement =
+                profile
+                    .copy(nameInternal = "Updated Alice".toUiPlainText())
+                    .withProxy(ProxyRef.Account(accountKey))
+            handler.updateUser(replacement)
+            val stored =
+                db
+                    .userDao()
+                    .findByKey(profile.key)
+                    .first()!!
+                    .content
+            assertEquals("Updated Alice", stored.name.raw)
+            assertEquals("test.plugin", stored.pluginId)
+            assertEquals(ProxyRef.Unbound, stored.avatar?.proxy)
+            assertEquals(0, loader.byHandleCallCount)
         }
-        assertEquals(ProxyRef.Unbound, db.userDao().findByKey(original.key).first()?.content?.avatar?.proxy)
-    }
+
+    @Test
+    fun sharedUserCacheBindsMediaToEachViewerWithoutPersistingThatViewer() =
+        runTest {
+            val original = createProfile(id = "alice", host = "test.social", handle = "alice")
+            val first = ProxyRef.Account(accountKey)
+            val second = ProxyRef.Account(MicroBlogKey("account-2", accountKey.host))
+            loader.nextById = original.withProxy(first)
+            db.upsertUser(loader.nextById!!.toDbUser())
+            for (proxy in listOf(first, second)) {
+                val viewer = UserHandler(accountKey.host, loader, proxy)
+                val user =
+                    viewer
+                        .userById("alice")
+                        .data
+                        .filterIsInstance<CacheState.Success<UiProfile>>()
+                        .first()
+                        .data
+                assertEquals(proxy, user.avatar?.proxy)
+            }
+            assertEquals(
+                ProxyRef.Unbound,
+                db
+                    .userDao()
+                    .findByKey(original.key)
+                    .first()
+                    ?.content
+                    ?.avatar
+                    ?.proxy,
+            )
+        }
 
     @Test
     fun userByHandleAndHostRefreshStoresAndEmitsUser() =

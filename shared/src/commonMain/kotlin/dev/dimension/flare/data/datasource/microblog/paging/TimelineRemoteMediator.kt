@@ -722,9 +722,12 @@ internal open class TimelineRemoteMediator(
 internal fun List<UiTimelineV2>.collapseReplyChains(): List<UiTimelineV2> {
     fun UiTimelineV2.TimelinePostItem.key(): Pair<AccountType, MicroBlogKey> = accountType to statusKey
 
+    fun UiTimelineV2.collapsiblePost(): UiTimelineV2.TimelinePostItem? =
+        asTimelinePostItem()?.takeIf { it.presentation.notificationKey == null }
+
     val rootPosts =
         asSequence()
-            .mapNotNull { it.asTimelinePostItem() }
+            .mapNotNull { it.collapsiblePost() }
             .associateBy { it.key() }
     if (rootPosts.isEmpty()) {
         return this
@@ -748,7 +751,7 @@ internal fun List<UiTimelineV2>.collapseReplyChains(): List<UiTimelineV2> {
 
     // Resolve links and break cycles before expanding only the posts that remain visible.
     forEach { item ->
-        var current = item.asTimelinePostItem() ?: return@forEach
+        var current = item.collapsiblePost() ?: return@forEach
         val activeKeys = mutableSetOf<Pair<AccountType, MicroBlogKey>>()
         while (current.key() !in visitedPosts) {
             val currentKey = current.key()
@@ -781,7 +784,7 @@ internal fun List<UiTimelineV2>.collapseReplyChains(): List<UiTimelineV2> {
     }
 
     return mapNotNull { item ->
-        val key = item.asTimelinePostItem()?.key() ?: return@mapNotNull item
+        val key = item.collapsiblePost()?.key() ?: return@mapNotNull item
         if (key in ancestorKeys) {
             return@mapNotNull null
         }

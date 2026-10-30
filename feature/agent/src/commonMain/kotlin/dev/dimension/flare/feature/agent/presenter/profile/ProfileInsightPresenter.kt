@@ -6,6 +6,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import dev.dimension.flare.common.PagingState
+import dev.dimension.flare.data.datasource.microblog.capabilities
 import dev.dimension.flare.data.datasource.microblog.datasource.UserDataSource
 import dev.dimension.flare.data.repository.AccountMicroblogDataSource
 import dev.dimension.flare.data.repository.AccountService
@@ -42,6 +43,8 @@ public class ProfileInsightPresenter(
 
         public fun setInput(value: String)
 
+        public fun retry()
+
         public fun sendMessage()
 
         public fun selectInputRequestOption(option: AgentInputRequest.Option)
@@ -63,7 +66,7 @@ public class ProfileInsightPresenter(
                 accountService
                     .accountServiceFlow(accountType)
                     .combine(accountService.allAccountServicesFlow()) { service, availableSearchDataSources ->
-                        (service as? UserDataSource)?.let { userDataSource ->
+                        service.capabilities.profile?.let { userDataSource ->
                             ProfileInsightContext(
                                 userDataSource = userDataSource,
                                 searchDataSources = availableSearchDataSources,
@@ -77,13 +80,14 @@ public class ProfileInsightPresenter(
                 conversationId = conversationId,
                 room = currentRoom,
                 contextFlow = contextFlow,
-                runAgent = { context, userInput, currentConversationId ->
+                runAgent = { context, userInput, currentConversationId, retryMode ->
                     profileInsightAgentUseCase(
                         userDataSource = context.userDataSource,
                         userKey = userKey,
                         searchDataSources = context.searchDataSources,
                         userInput = userInput,
                         conversationId = currentConversationId,
+                        retryMode = retryMode,
                     )
                 },
                 onUserMessageSubmitted = { text ->
@@ -131,6 +135,7 @@ public class ProfileInsightPresenter(
             canSend = controller.canSend,
             onSetInput = controller::setInput,
             onSendMessage = controller::sendMessage,
+            onRetry = controller::retry,
             onSelectInputRequestOption = controller::selectInputRequestOption,
         )
     }
@@ -144,10 +149,15 @@ public class ProfileInsightPresenter(
         override val canSend: Boolean,
         private val onSetInput: (String) -> Unit,
         private val onSendMessage: () -> Unit,
+        private val onRetry: () -> Unit,
         private val onSelectInputRequestOption: (AgentInputRequest.Option) -> Unit,
     ) : State {
         override fun setInput(value: String) {
             onSetInput.invoke(value)
+        }
+
+        override fun retry() {
+            onRetry()
         }
 
         override fun sendMessage() {

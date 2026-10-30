@@ -57,7 +57,23 @@ class ImportedAccountProxyTest {
                     .build()
             val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
             val proxy = ProxyRepository(storage)
-            val accounts = AccountRepository(app, scope, AppDataStore(storage), cache, proxy, testPlatformRegistry())
+            val accounts =
+                AccountRepository(
+                    app,
+                    scope,
+                    AppDataStore(storage),
+                    cache,
+                    proxy,
+                    testPlatformRegistry(),
+                    dev.dimension.flare.data.repository.DraftRepository(
+                        app,
+                        dev.dimension.flare.data.repository
+                            .DraftMediaStore(
+                                dev.dimension.flare.data.io
+                                    .InMemoryFileStorage(),
+                            ),
+                    ),
+                )
             val key = MicroBlogKey("deleted-then-imported", "example.social")
             val row = DbAccount(key, "{}", "Mastodon", 1L)
             startKoin {

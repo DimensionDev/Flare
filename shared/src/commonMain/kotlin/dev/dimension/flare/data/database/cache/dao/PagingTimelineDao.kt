@@ -435,6 +435,16 @@ internal interface PagingTimelineDao {
     suspend fun deletePresentationReferences(pagingKey: String)
 
     @Query(
+        "DELETE FROM timeline_item_presentation_reference " +
+            "WHERE referenceStatusId IN (SELECT id FROM DbStatus WHERE accountType = :accountType) " +
+            "OR EXISTS (SELECT 1 FROM DbPagingTimeline INNER JOIN DbStatus ON DbStatus.id = DbPagingTimeline.statusId " +
+            "WHERE DbStatus.accountType = :accountType " +
+            "AND DbPagingTimeline._id = timeline_item_presentation_reference.timelineId " +
+            "AND DbPagingTimeline.pagingKey = timeline_item_presentation_reference.pagingKey)",
+    )
+    suspend fun deletePresentationReferencesByAccountType(accountType: DbAccountType)
+
+    @Query(
         "SELECT * FROM DbPagingTimeline " +
             "WHERE pagingKey = :pagingKey AND statusId IN (:statusIds)",
     )

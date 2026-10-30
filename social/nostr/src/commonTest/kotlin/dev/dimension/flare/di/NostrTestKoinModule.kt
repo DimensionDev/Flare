@@ -64,6 +64,12 @@ private object TestInAppNotification : InAppNotification {
 }
 
 private object TestAccountService : AccountService {
+    override suspend fun deleteAccounts(
+        platformId: String,
+        ownsCredential: (String) -> Boolean,
+        beforeDelete: suspend () -> Unit,
+    ): Unit = unsupported()
+
     override fun accountServiceFlow(accountType: AccountType): Flow<MicroblogDataSource> = unsupported()
 
     override fun allAccountServicesFlow(): Flow<List<AccountMicroblogDataSource>> {

@@ -107,7 +107,23 @@ class LocalCacheMediaProxyTest {
                         .single()
                         .proxy,
                 )
-                val accounts = AccountRepository(app, scope, AppDataStore(storage), cache, ProxyRepository(storage), testPlatformRegistry())
+                val accounts =
+                    AccountRepository(
+                        app,
+                        scope,
+                        AppDataStore(storage),
+                        cache,
+                        ProxyRepository(storage),
+                        testPlatformRegistry(),
+                        dev.dimension.flare.data.repository.DraftRepository(
+                            app,
+                            dev.dimension.flare.data.repository
+                                .DraftMediaStore(
+                                    dev.dimension.flare.data.io
+                                        .InMemoryFileStorage(),
+                                ),
+                        ),
+                    )
                 startKoin {
                     modules(
                         module {

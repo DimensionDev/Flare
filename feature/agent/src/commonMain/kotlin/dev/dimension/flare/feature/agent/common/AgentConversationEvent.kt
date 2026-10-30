@@ -44,11 +44,13 @@ public data class AgentInputRequest(
         val buttonType: AgentInputRequestOptionButtonType,
         val value: String,
         val submit: Boolean = true,
+        val confirmationKey: String? = null,
         val userPreview: UiProfile? = null,
         val postPreview: UiTimelineV2.Post? = null,
     )
 }
 
+@Serializable
 internal data class AgentPendingInputRequest(
     val requestId: String,
     val options: List<Option>,
@@ -56,10 +58,12 @@ internal data class AgentPendingInputRequest(
     val postPreview: UiTimelineV2.Post? = null,
     val userPreview: UiProfile? = null,
 ) {
+    @Serializable
     data class Option(
         val id: String,
         val value: String,
         val submit: Boolean = true,
+        val confirmationKey: String? = null,
         val userPreview: UiProfile? = null,
         val postPreview: UiTimelineV2.Post? = null,
     )

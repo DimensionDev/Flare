@@ -26,6 +26,7 @@ public data class UiArticle public constructor(
     val publishDate: UiDateTime? = null,
     val author: UiArticleAuthor? = null,
     val sourceUrl: String? = null,
+    val pluginId: String? = null,
 )
 
 @Serializable

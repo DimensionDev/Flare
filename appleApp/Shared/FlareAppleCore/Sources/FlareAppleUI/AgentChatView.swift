@@ -8,7 +8,8 @@ public struct AgentChatView: View {
     let messages: PagingState<AgentChatHistoryMessage>
     let isRunning: Bool
     let canSend: Bool
-    let errorMessage: String?
+    let error: AgentFailure?
+    let onRetry: () -> Void
     let runningTrace: String
     let inputPlaceholder: String
     let onInputChange: (String) -> Void
@@ -25,7 +26,8 @@ public struct AgentChatView: View {
         messages: PagingState<AgentChatHistoryMessage>,
         isRunning: Bool,
         canSend: Bool,
-        errorMessage: String?,
+        error: AgentFailure?,
+        onRetry: @escaping () -> Void,
         runningTrace: String,
         inputPlaceholder: String,
         onInputChange: @escaping (String) -> Void,
@@ -38,7 +40,8 @@ public struct AgentChatView: View {
         self.messages = messages
         self.isRunning = isRunning
         self.canSend = canSend
-        self.errorMessage = errorMessage
+        self.error = error
+        self.onRetry = onRetry
         self.runningTrace = runningTrace
         self.inputPlaceholder = inputPlaceholder
         self.onInputChange = onInputChange
@@ -68,7 +71,7 @@ public struct AgentChatView: View {
                                     EmptyView()
                                 },
                                 errorContent: { error, retry in
-                                    ListErrorView(error: error, onRetry: retry)
+                                    AgentErrorCard(failure: AgentFailure.companion.fromThrowable(throwable: error), onRetry: retry, historyError: true)
                                         .padding()
                                         .frame(maxWidth: .infinity, alignment: .center)
                                 },
@@ -107,9 +110,8 @@ public struct AgentChatView: View {
                     StatusInsightCurrentTrace(trace: runningTrace)
                         .padding(.horizontal)
                 }
-                if let errorMessage {
-                    Text(verbatim: errorMessage)
-                        .foregroundStyle(.red)
+                if let error, !isRunning {
+                    AgentErrorCard(failure: error, onRetry: error.canRetry ? onRetry : nil)
                         .padding(.horizontal)
                 }
 
@@ -132,7 +134,7 @@ public struct AgentChatView: View {
     }
 
     private var isEmptyPlaceholderVisible: Bool {
-        guard showsEmptyPlaceholder, errorMessage == nil else {
+        guard showsEmptyPlaceholder, error == nil else {
             return false
         }
         if case .empty = onEnum(of: messages) {

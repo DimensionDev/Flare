@@ -3,7 +3,7 @@ package dev.dimension.flare.ui.presenter.home
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
-import dev.dimension.flare.data.datasource.microblog.datasource.UserDataSource
+import dev.dimension.flare.data.datasource.microblog.accountProfileFlow
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceFlow
 import dev.dimension.flare.di.koinInject
@@ -11,7 +11,6 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.flattenUiState
-import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flatMapLatest
@@ -38,11 +37,8 @@ public class ActiveAccountPresenter : PresenterBase<UserState>() {
                         accountType = AccountType.Specific(accountKey),
                         repository = accountRepository,
                     ).flatMapLatest { service ->
-                        if (service is UserDataSource) {
-                            service.userHandler.userById(accountKey.id).toUi()
-                        } else {
-                            flowOf(UiState.Error(IllegalStateException("Current account does not support user data")))
-                        }
+                        service.accountProfileFlow()
+                            ?: flowOf(UiState.Error(IllegalStateException("Current account does not support user data")))
                     }
                 }
             }

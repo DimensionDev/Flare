@@ -165,6 +165,9 @@ internal expect fun createPlatformHttpClientEngine(connection: ProxyConnection):
 internal expect val platformEngineCapabilities: Set<HttpClientEngineCapability<*>>
 
 @kotlin.native.HiddenFromObjC
+public fun proxyHttpClientEngine(proxy: ProxyRef): HttpClientEngine = ProxyRoutingEngine(proxy)
+
+@kotlin.native.HiddenFromObjC
 public fun mediaHttpClient(proxy: ProxyRef): io.ktor.client.HttpClient =
     io.ktor.client.HttpClient(ProxyRoutingEngine(proxy)) {
         useDefaultTransformers = false
@@ -177,6 +180,11 @@ public fun mediaHttpClient(proxy: ProxyRef): io.ktor.client.HttpClient =
 internal val requestProxy = io.ktor.util.AttributeKey<ProxyRef>("flare-request-proxy")
 
 private val requestOrigin = io.ktor.util.AttributeKey<io.ktor.http.Url>("flare-request-origin")
+
+@kotlin.native.HiddenFromObjC
+public fun io.ktor.client.request.HttpRequestBuilder.applyProxy(proxy: ProxyRef) {
+    attributes.put(requestProxy, proxy)
+}
 
 @kotlin.native.HiddenFromObjC
 public fun io.ktor.client.request.HttpRequestBuilder.applyMedia(media: dev.dimension.flare.ui.model.UiMedia) {

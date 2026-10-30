@@ -12,6 +12,8 @@ import dev.dimension.flare.ui.common.isLoginCallbackDeepLink
 import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.FlareTopAppBar
+import dev.dimension.flare.ui.presenter.login.LoginCookieSnapshot
+import dev.dimension.flare.ui.presenter.login.LoginEffect
 import dev.dimension.flare.ui.presenter.login.ReloginTarget
 import dev.dimension.flare.ui.screen.login.ReloginScreenContent
 import dev.dimension.flare.ui.screen.login.ServiceSelectionScreenContent
@@ -19,7 +21,10 @@ import dev.dimension.flare.ui.screen.login.ServiceSelectionScreenContent
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 internal fun ServiceSelectScreen(
-    onWebViewLogin: (url: String, cookieCallback: (cookies: String?) -> Boolean) -> Unit,
+    onWebViewLogin: (
+        request: LoginEffect.OpenWebCookieLogin,
+        cookieCallback: suspend (LoginCookieSnapshot) -> Boolean,
+    ) -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -61,7 +66,10 @@ internal fun ServiceSelectScreen(
 @Composable
 internal fun ReloginScreen(
     target: ReloginTarget,
-    onWebViewLogin: (url: String, cookieCallback: (cookies: String?) -> Boolean) -> Unit,
+    onWebViewLogin: (
+        request: LoginEffect.OpenWebCookieLogin,
+        cookieCallback: suspend (LoginCookieSnapshot) -> Boolean,
+    ) -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {

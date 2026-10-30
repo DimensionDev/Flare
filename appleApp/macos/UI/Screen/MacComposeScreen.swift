@@ -186,16 +186,13 @@ struct MacComposeScreen: View {
         .onAppear {
             applyPrefillIfNeeded()
             presenter.state.setText(value: viewModel.text)
-            presenter.state.setMediaSize(value: Int32(mediaItems.count))
+            presenter.state.setMediaMimeTypes(value: mediaMimeTypes)
         }
         .onChange(of: viewModel.enableContentWarning ? viewModel.contentWarning : nil, initial: true) { _, newValue in
             presenter.state.setSpoilerText(value: newValue)
         }
         .onChange(of: viewModel.text) { _, newValue in
             presenter.state.setText(value: newValue)
-        }
-        .onChange(of: mediaItems.count) { _, newValue in
-            presenter.state.setMediaSize(value: Int32(newValue))
         }
         .onChange(of: presenter.state.initialTextState) { _, newValue in
             guard !initialTextApplied else { return }
@@ -215,8 +212,13 @@ struct MacComposeScreen: View {
         .onSuccessOf(of: presenter.state.composeConfig) { config in
             if let media = config.media {
                 mediaItems = Array(mediaItems.prefix(Int(media.maxCount)))
+                syncMediaMimeTypes()
             }
         }
+    }
+
+    private var mediaMimeTypes: [String] {
+        mediaItems.map { $0.mimeType ?? "" }
     }
 
     private static let mediaTransferTypes: [UTType] = [
@@ -356,6 +358,7 @@ struct MacComposeScreen: View {
                 viewModel.togglePoll()
                 if viewModel.pollViewModel.enabled {
                     mediaItems = []
+                    syncMediaMimeTypes()
                 }
             },
             onToggleContentWarning: {
@@ -548,10 +551,12 @@ struct MacComposeScreen: View {
 
         viewModel.pollViewModel.reset()
         mediaItems.append(contentsOf: accepted)
+        syncMediaMimeTypes()
     }
 
     private func removeMedia(_ item: MacComposeMediaItem) {
         mediaItems.removeAll { $0.id == item.id }
+        syncMediaMimeTypes()
     }
 
     private func updateAltText(for id: UUID, value: String) {
@@ -633,7 +638,12 @@ struct MacComposeScreen: View {
         let result = viewModel.applyDraft(draft)
         sensitive = result.sensitive
         mediaItems = draft.medias.compactMap(MacComposeMediaItem.init(draftMedia:))
+        syncMediaMimeTypes()
         setVisibility(result.visibility)
+    }
+
+    private func syncMediaMimeTypes() {
+        presenter.state.setMediaMimeTypes(value: mediaMimeTypes)
     }
 
     private func successProfiles<T>(from state: UiState<T>) -> [UiProfile] {
@@ -733,10 +743,7 @@ private struct MacComposeAccountAvatar: View {
                 .clipShape(Circle())
                 .overlay(Circle().stroke(Color(nsColor: .windowBackgroundColor), lineWidth: 2))
 
-            Image(fontAwesome: user.platformIcon.fontAwesomeIcon)
-                .resizable()
-                .scaledToFit()
-                .frame(width: size * 0.34, height: size * 0.34)
+            TabIcon(icon: user.platformIcon, size: size * 0.34)
                 .padding(max(2, size * 0.08))
                 .background(Color(nsColor: .windowBackgroundColor))
                 .clipShape(Circle())
@@ -851,8 +858,8 @@ private struct MacComposeMediaItem: Identifiable {
             self.data = data
             self.file = nil
         }
-        self.mimeType = contentType?.preferredMIMEType
         self.type = Self.fileType(for: contentType)
+        self.mimeType = contentType?.preferredMIMEType ?? ""
     }
 
     init?(url: URL) {
@@ -869,7 +876,7 @@ private struct MacComposeMediaItem: Identifiable {
         self.fileName = Self.normalizedFileName(fileName ?? url.lastPathComponent, contentType: resolvedType)
         self.data = nil
         self.file = file
-        self.mimeType = resolvedType?.preferredMIMEType
+        self.mimeType = resolvedType?.preferredMIMEType ?? ""
         self.type = Self.fileType(for: resolvedType)
     }
 
@@ -930,8 +937,11 @@ private struct MacComposeMediaItem: Identifiable {
         self.fileName = draftMedia.fileName ?? fileURL.lastPathComponent
         self.data = nil
         self.file = ComposeMediaFile(draftURL: fileURL)
-        self.mimeType = nil
         self.altText = draftMedia.altText ?? ""
+        let contentType = UTType(filenameExtension: URL(fileURLWithPath: self.fileName).pathExtension)
+        self.mimeType =
+            contentType?.preferredMIMEType ??
+            (draftMedia.type == .video ? "video/mp4" : "image/jpeg")
         switch draftMedia.type {
         case .image:
             self.type = .image

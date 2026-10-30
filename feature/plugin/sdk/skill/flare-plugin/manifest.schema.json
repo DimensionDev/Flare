@@ -1,0 +1,1860 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Flare plugin manifest — API v1",
+  "description": "Editor assistance for manifest structure and static rules. Flare remains authoritative for registration, unique IDs, origin approval, locale catalogs, cross-field values and runtime behavior. The Host never fetches the $schema URL.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Optional editor schema URL or local path. Flare treats it as metadata and never fetches it."
+    },
+    "schemaVersion": {
+      "type": "integer",
+      "const": 1,
+      "default": 1,
+      "description": "Manifest format version supported by Flare."
+    },
+    "apiVersion": {
+      "type": "integer",
+      "const": 1,
+      "description": "Plugin Host API version."
+    },
+    "id": {
+      "type": "string",
+      "description": "Stable reverse-domain plugin ID. Keep it unchanged for upgrades.",
+      "pattern": "^(?:[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9-]*)+)(?![\\s\\S])"
+    },
+    "version": {
+      "type": "string",
+      "description": "Plugin SemVer, independent of the npm SDK version. GitHub installation requires a matching stable tag.",
+      "pattern": "^(?:(?:0|[1-9][0-9]*)\\.(?:0|[1-9][0-9]*)\\.(?:0|[1-9][0-9]*)(?:-(?:0|[1-9][0-9]*|[0-9A-Za-z-]*[A-Za-z-][0-9A-Za-z-]*)(?:\\.(?:0|[1-9][0-9]*|[0-9A-Za-z-]*[A-Za-z-][0-9A-Za-z-]*))*)?(?:\\+[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?)(?![\\s\\S])"
+    },
+    "defaultLocale": {
+      "type": "string",
+      "description": "Default locale catalog when localized text is used.",
+      "pattern": "^(?:[A-Za-z]{2,8}(?:-[A-Za-z0-9]{1,8})*)(?![\\s\\S])",
+      "default": "en"
+    },
+    "name": {
+      "$ref": "#/definitions/text"
+    },
+    "description": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/text"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "permissions": {
+      "$ref": "#/definitions/permissions"
+    },
+    "platform": {
+      "$ref": "#/definitions/platform"
+    }
+  },
+  "required": [
+    "apiVersion",
+    "id",
+    "version",
+    "name",
+    "platform"
+  ],
+  "definitions": {
+    "identifier": {
+      "type": "string",
+      "description": "Case-sensitive identifier beginning with a letter.",
+      "pattern": "^(?:[A-Za-z][A-Za-z0-9_.-]{0,127})(?![\\s\\S])"
+    },
+    "text": {
+      "description": "A literal string or a localized key with a fallback. Flare checks referenced keys against locale catalogs.",
+      "oneOf": [
+        {
+          "type": "string",
+          "description": "Non-blank display text; the Host also checks its UTF-16 length.",
+          "pattern": "\\S",
+          "maxLength": 4096
+        },
+        {
+          "$ref": "#/definitions/localizedText"
+        }
+      ]
+    },
+    "localizedText": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "$ref": "#/definitions/identifier"
+        },
+        "fallback": {
+          "type": "string",
+          "description": "Non-blank display text; the Host also checks its UTF-16 length.",
+          "pattern": "\\S",
+          "maxLength": 4096
+        }
+      },
+      "required": [
+        "key",
+        "fallback"
+      ]
+    },
+    "permissions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "authOrigins": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "description": "Exact canonical HTTPS origin; no path, credentials, wildcard, or trailing slash. Flare checks DNS/port normalization.",
+            "pattern": "^(?:https://[a-z0-9.-]+(?::[0-9]{1,5})?)(?![\\s\\S])"
+          },
+          "default": [],
+          "maxItems": 16,
+          "uniqueItems": true
+        },
+        "mediaNetwork": {
+          "type": "boolean",
+          "default": false,
+          "description": "Allow media loading from any website/CDN. Adding this permission requires review."
+        }
+      }
+    },
+    "platform": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Stable platform identity, unique across plugins and built-in platforms.",
+          "pattern": "^(?:[A-Za-z][A-Za-z0-9_.-]{0,63})(?![\\s\\S])"
+        },
+        "name": {
+          "$ref": "#/definitions/text"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/text"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "detector": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/detector"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "loginMethods": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/loginMethod"
+          },
+          "default": [],
+          "description": "At most one method per interaction; method and field IDs must be unique. Flare checks these semantic constraints."
+        },
+        "capabilities": {
+          "$ref": "#/definitions/capabilities"
+        },
+        "timelines": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/timeline"
+          },
+          "default": []
+        },
+        "profileTabs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/profileTab"
+          },
+          "default": []
+        },
+        "deepLinks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/deepLink"
+          },
+          "default": [],
+          "maxItems": 64
+        },
+        "composeDefaults": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/compose"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "guest": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/guest"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "credentialSchemaVersion": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000,
+          "default": 1,
+          "description": "Bump when saved credentials become incompatible; accounts may need to log in again."
+        },
+        "timelineSchemaVersion": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000,
+          "default": 1,
+          "description": "Bump for incompatible timeline identity/parameter changes."
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "type": "object",
+            "required": [
+              "capabilities"
+            ],
+            "properties": {
+              "capabilities": {
+                "type": "object",
+                "properties": {
+                  "flare.datasource.timeline/v1": true
+                },
+                "required": [
+                  "flare.datasource.timeline/v1"
+                ]
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "timelines"
+            ],
+            "properties": {
+              "timelines": {
+                "type": "array",
+                "minItems": 1,
+                "contains": {
+                  "type": "object",
+                  "properties": {
+                    "defaultForNewAccount": {
+                      "const": true
+                    }
+                  },
+                  "required": [
+                    "defaultForNewAccount"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "timelines"
+            ],
+            "properties": {
+              "timelines": {
+                "type": "array",
+                "minItems": 1
+              }
+            }
+          },
+          "then": {
+            "type": "object",
+            "required": [
+              "capabilities"
+            ],
+            "properties": {
+              "capabilities": {
+                "type": "object",
+                "required": [
+                  "flare.datasource.timeline/v1"
+                ],
+                "properties": {
+                  "flare.datasource.timeline/v1": true
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "type": "object",
+            "required": [
+              "capabilities"
+            ],
+            "properties": {
+              "capabilities": {
+                "type": "object",
+                "properties": {
+                  "flare.datasource.tab-catalog/v1": true
+                },
+                "required": [
+                  "flare.datasource.tab-catalog/v1"
+                ]
+              }
+            }
+          },
+          "then": {
+            "type": "object",
+            "required": [
+              "capabilities"
+            ],
+            "properties": {
+              "capabilities": {
+                "type": "object",
+                "required": [
+                  "flare.datasource.timeline/v1"
+                ],
+                "properties": {
+                  "flare.datasource.timeline/v1": true
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "profileTabs"
+            ],
+            "properties": {
+              "profileTabs": {
+                "type": "array",
+                "minItems": 1
+              }
+            }
+          },
+          "then": {
+            "type": "object",
+            "required": [
+              "capabilities"
+            ],
+            "properties": {
+              "capabilities": {
+                "type": "object",
+                "required": [
+                  "flare.datasource.profile/v1"
+                ],
+                "properties": {
+                  "flare.datasource.profile/v1": {
+                    "type": "object",
+                    "properties": {
+                      "operations": {
+                        "type": "object",
+                        "properties": {
+                          "timeline": true
+                        },
+                        "required": [
+                          "timeline"
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "type": "object",
+            "required": [
+              "capabilities"
+            ],
+            "properties": {
+              "capabilities": {
+                "type": "object",
+                "properties": {
+                  "flare.datasource.compose/v1": true
+                },
+                "required": [
+                  "flare.datasource.compose/v1"
+                ]
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "composeDefaults"
+            ],
+            "properties": {
+              "composeDefaults": {
+                "$ref": "#/definitions/compose"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "composeDefaults"
+            ],
+            "properties": {
+              "composeDefaults": {
+                "type": "object"
+              }
+            }
+          },
+          "then": {
+            "type": "object",
+            "required": [
+              "capabilities"
+            ],
+            "properties": {
+              "capabilities": {
+                "type": "object",
+                "required": [
+                  "flare.datasource.compose/v1"
+                ],
+                "properties": {
+                  "flare.datasource.compose/v1": true
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "detector": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "priority": {
+          "type": "integer",
+          "minimum": -10000,
+          "maximum": 10000,
+          "default": 0
+        }
+      }
+    },
+    "guest": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": true
+        }
+      }
+    },
+    "loginInteraction": {
+      "type": "string",
+      "enum": [
+        "OAuth",
+        "Password",
+        "CredentialImport",
+        "WebCookie",
+        "Form"
+      ]
+    },
+    "loginFieldType": {
+      "type": "string",
+      "enum": [
+        "Text",
+        "Username",
+        "Password",
+        "Otp",
+        "Secret"
+      ]
+    },
+    "loginField": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/definitions/identifier"
+        },
+        "type": {
+          "$ref": "#/definitions/loginFieldType"
+        },
+        "label": {
+          "$ref": "#/definitions/text"
+        },
+        "placeholder": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/text"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "required": {
+          "type": "boolean",
+          "default": true
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "label"
+      ]
+    },
+    "loginMethod": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/definitions/identifier"
+        },
+        "interaction": {
+          "$ref": "#/definitions/loginInteraction"
+        },
+        "title": {
+          "$ref": "#/definitions/text"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/text"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "fields": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/loginField"
+          },
+          "default": []
+        },
+        "cookie": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/webCookie"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "id",
+        "interaction",
+        "title"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "interaction": {
+                "enum": [
+                  "OAuth",
+                  "WebCookie"
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "fields": {
+                "type": "array",
+                "maxItems": 0
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "interaction": {
+                "const": "WebCookie"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "cookie"
+            ],
+            "properties": {
+              "cookie": {
+                "$ref": "#/definitions/webCookie"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "cookie": {
+                "type": "null"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "interaction": {
+                "enum": [
+                  "Password",
+                  "CredentialImport",
+                  "Form"
+                ]
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "fields"
+            ],
+            "properties": {
+              "fields": {
+                "type": "array",
+                "minItems": 1
+              }
+            }
+          }
+        }
+      ]
+    },
+    "webCookie": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "startUrl": {
+          "type": "string",
+          "description": "HTTPS start URL on an approved auth origin, or $accountOrigin with an optional path.",
+          "pattern": "^(?:(?:\\$accountOrigin(?:/[^\\s]*)?|https://[A-Za-z0-9.-]+(?::[0-9]{1,5})?(?:/[^\\s]*)?))(?![\\s\\S])"
+        },
+        "probes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/cookieProbe"
+          },
+          "default": [],
+          "minItems": 1,
+          "maxItems": 16
+        }
+      },
+      "required": [
+        "startUrl",
+        "probes"
+      ]
+    },
+    "cookieProbe": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "url": {
+          "type": "string",
+          "description": "Probe URL on an approved HTTPS auth origin or $accountOrigin.",
+          "pattern": "^(?:(?:\\$accountOrigin(?:/[^\\s]*)?|https://[A-Za-z0-9.-]+(?::[0-9]{1,5})?(?:/[^\\s]*)?))(?![\\s\\S])"
+        },
+        "cookies": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/cookieRequirement"
+          },
+          "default": [],
+          "minItems": 1,
+          "maxItems": 32,
+          "description": "Cookie names must be unique ignoring case; checked by Flare."
+        }
+      },
+      "required": [
+        "url",
+        "cookies"
+      ]
+    },
+    "cookieRequirement": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Cookie name.",
+          "pattern": "^(?:[!#$%&'*+.^_`|~0-9A-Za-z-]{1,128})(?![\\s\\S])"
+        },
+        "required": {
+          "type": "boolean",
+          "default": true
+        }
+      },
+      "required": [
+        "name"
+      ]
+    },
+    "pageDirection": {
+      "type": "string",
+      "enum": [
+        "refresh",
+        "older",
+        "newer"
+      ]
+    },
+    "notificationFilter": {
+      "type": "string",
+      "enum": [
+        "all",
+        "mention",
+        "comment",
+        "like"
+      ]
+    },
+    "relationAction": {
+      "type": "string",
+      "enum": [
+        "follow",
+        "block",
+        "mute"
+      ]
+    },
+    "operation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "directions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/pageDirection"
+          },
+          "default": [],
+          "uniqueItems": true,
+          "maxItems": 3
+        }
+      }
+    },
+    "capability": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "operations": {
+          "type": "object",
+          "minProperties": 1,
+          "maxProperties": 32,
+          "additionalProperties": {
+            "$ref": "#/definitions/operation"
+          }
+        },
+        "notificationFilters": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/notificationFilter"
+          },
+          "default": [],
+          "uniqueItems": true
+        },
+        "relationActions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/relationAction"
+          },
+          "default": [],
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "operations"
+      ]
+    },
+    "capability-timeline": {
+      "type": "object",
+      "description": "timeline capability. Implement every declared operation in plugin.js.",
+      "allOf": [
+        {
+          "$ref": "#/definitions/capability"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "operations": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "page": {
+                  "$ref": "#/definitions/operation"
+                }
+              },
+              "required": [
+                "page"
+              ]
+            },
+            "notificationFilters": {
+              "type": "array",
+              "maxItems": 0
+            },
+            "relationActions": {
+              "type": "array",
+              "maxItems": 0
+            }
+          }
+        }
+      ]
+    },
+    "capability-search": {
+      "type": "object",
+      "description": "search capability. Implement every declared operation in plugin.js.",
+      "allOf": [
+        {
+          "$ref": "#/definitions/capability"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "operations": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "posts": {
+                  "$ref": "#/definitions/operation"
+                },
+                "profiles": {
+                  "$ref": "#/definitions/operation"
+                },
+                "discoverPosts": {
+                  "$ref": "#/definitions/operation"
+                },
+                "discoverProfiles": {
+                  "$ref": "#/definitions/operation"
+                },
+                "discoverHashtags": {
+                  "$ref": "#/definitions/operation"
+                }
+              },
+              "required": [
+                "posts",
+                "profiles",
+                "discoverPosts",
+                "discoverProfiles",
+                "discoverHashtags"
+              ]
+            },
+            "notificationFilters": {
+              "type": "array",
+              "maxItems": 0
+            },
+            "relationActions": {
+              "type": "array",
+              "maxItems": 0
+            }
+          }
+        }
+      ]
+    },
+    "capability-profile": {
+      "type": "object",
+      "description": "profile capability. Implement every declared operation in plugin.js.",
+      "allOf": [
+        {
+          "$ref": "#/definitions/capability"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "operations": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "byId": {
+                  "$ref": "#/definitions/operation"
+                },
+                "byHandle": {
+                  "$ref": "#/definitions/operation"
+                },
+                "timeline": {
+                  "$ref": "#/definitions/operation"
+                },
+                "following": {
+                  "$ref": "#/definitions/operation"
+                },
+                "followers": {
+                  "$ref": "#/definitions/operation"
+                }
+              },
+              "required": [
+                "byId",
+                "byHandle"
+              ]
+            },
+            "notificationFilters": {
+              "type": "array",
+              "maxItems": 0
+            },
+            "relationActions": {
+              "type": "array",
+              "maxItems": 0
+            }
+          }
+        }
+      ]
+    },
+    "capability-post": {
+      "type": "object",
+      "description": "post capability. Implement every declared operation in plugin.js.",
+      "allOf": [
+        {
+          "$ref": "#/definitions/capability"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "operations": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "detail": {
+                  "$ref": "#/definitions/operation"
+                },
+                "context": {
+                  "$ref": "#/definitions/operation"
+                },
+                "delete": {
+                  "$ref": "#/definitions/operation"
+                },
+                "mutate": {
+                  "$ref": "#/definitions/operation"
+                }
+              },
+              "required": [
+                "detail"
+              ]
+            },
+            "notificationFilters": {
+              "type": "array",
+              "maxItems": 0
+            },
+            "relationActions": {
+              "type": "array",
+              "maxItems": 0
+            }
+          }
+        }
+      ]
+    },
+    "capability-relation": {
+      "type": "object",
+      "description": "relation capability. Implement every declared operation in plugin.js.",
+      "allOf": [
+        {
+          "$ref": "#/definitions/capability"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "operations": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "state": {
+                  "$ref": "#/definitions/operation"
+                },
+                "mutate": {
+                  "$ref": "#/definitions/operation"
+                }
+              },
+              "required": [
+                "state",
+                "mutate"
+              ]
+            },
+            "notificationFilters": {
+              "type": "array",
+              "maxItems": 0
+            },
+            "relationActions": {
+              "type": "array",
+              "minItems": 1
+            }
+          },
+          "required": [
+            "relationActions"
+          ]
+        }
+      ]
+    },
+    "capability-compose": {
+      "type": "object",
+      "description": "compose capability. Implement every declared operation in plugin.js.",
+      "allOf": [
+        {
+          "$ref": "#/definitions/capability"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "operations": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "publish": {
+                  "$ref": "#/definitions/operation"
+                }
+              },
+              "required": [
+                "publish"
+              ]
+            },
+            "notificationFilters": {
+              "type": "array",
+              "maxItems": 0
+            },
+            "relationActions": {
+              "type": "array",
+              "maxItems": 0
+            }
+          }
+        }
+      ]
+    },
+    "capability-notification": {
+      "type": "object",
+      "description": "notification capability. Implement every declared operation in plugin.js.",
+      "allOf": [
+        {
+          "$ref": "#/definitions/capability"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "operations": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "page": {
+                  "$ref": "#/definitions/operation"
+                },
+                "badge": {
+                  "$ref": "#/definitions/operation"
+                }
+              }
+            },
+            "relationActions": {
+              "type": "array",
+              "maxItems": 0
+            }
+          }
+        },
+        {
+          "if": {
+            "type": "object",
+            "properties": {
+              "operations": {
+                "type": "object",
+                "properties": {
+                  "page": true
+                },
+                "required": [
+                  "page"
+                ]
+              }
+            }
+          },
+          "then": {
+            "type": "object",
+            "required": [
+              "notificationFilters"
+            ],
+            "properties": {
+              "notificationFilters": {
+                "type": "array",
+                "minItems": 1
+              }
+            }
+          }
+        }
+      ]
+    },
+    "capability-list": {
+      "type": "object",
+      "description": "list capability. Implement every declared operation in plugin.js.",
+      "allOf": [
+        {
+          "$ref": "#/definitions/capability"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "operations": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "page": {
+                  "$ref": "#/definitions/operation"
+                },
+                "detail": {
+                  "$ref": "#/definitions/operation"
+                },
+                "create": {
+                  "$ref": "#/definitions/operation"
+                },
+                "update": {
+                  "$ref": "#/definitions/operation"
+                },
+                "delete": {
+                  "$ref": "#/definitions/operation"
+                },
+                "timeline": {
+                  "$ref": "#/definitions/operation"
+                },
+                "members": {
+                  "$ref": "#/definitions/operation"
+                },
+                "memberships": {
+                  "$ref": "#/definitions/operation"
+                },
+                "addMember": {
+                  "$ref": "#/definitions/operation"
+                },
+                "removeMember": {
+                  "$ref": "#/definitions/operation"
+                }
+              },
+              "required": [
+                "page",
+                "detail",
+                "create",
+                "update",
+                "delete",
+                "timeline",
+                "members",
+                "memberships",
+                "addMember",
+                "removeMember"
+              ]
+            },
+            "notificationFilters": {
+              "type": "array",
+              "maxItems": 0
+            },
+            "relationActions": {
+              "type": "array",
+              "maxItems": 0
+            }
+          }
+        }
+      ]
+    },
+    "capability-direct-message": {
+      "type": "object",
+      "description": "direct-message capability. Implement every declared operation in plugin.js.",
+      "allOf": [
+        {
+          "$ref": "#/definitions/capability"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "operations": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "rooms": {
+                  "$ref": "#/definitions/operation"
+                },
+                "room": {
+                  "$ref": "#/definitions/operation"
+                },
+                "messages": {
+                  "$ref": "#/definitions/operation"
+                },
+                "send": {
+                  "$ref": "#/definitions/operation"
+                },
+                "delete": {
+                  "$ref": "#/definitions/operation"
+                },
+                "leave": {
+                  "$ref": "#/definitions/operation"
+                },
+                "create": {
+                  "$ref": "#/definitions/operation"
+                },
+                "badge": {
+                  "$ref": "#/definitions/operation"
+                },
+                "canSend": {
+                  "$ref": "#/definitions/operation"
+                }
+              },
+              "required": [
+                "rooms",
+                "room",
+                "messages",
+                "send",
+                "delete",
+                "leave",
+                "create",
+                "badge",
+                "canSend"
+              ]
+            },
+            "notificationFilters": {
+              "type": "array",
+              "maxItems": 0
+            },
+            "relationActions": {
+              "type": "array",
+              "maxItems": 0
+            }
+          }
+        }
+      ]
+    },
+    "capability-article": {
+      "type": "object",
+      "description": "article capability. Implement every declared operation in plugin.js.",
+      "allOf": [
+        {
+          "$ref": "#/definitions/capability"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "operations": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "detail": {
+                  "$ref": "#/definitions/operation"
+                },
+                "comments": {
+                  "$ref": "#/definitions/operation"
+                }
+              },
+              "required": [
+                "detail",
+                "comments"
+              ]
+            },
+            "notificationFilters": {
+              "type": "array",
+              "maxItems": 0
+            },
+            "relationActions": {
+              "type": "array",
+              "maxItems": 0
+            }
+          }
+        }
+      ]
+    },
+    "capability-gallery": {
+      "type": "object",
+      "description": "gallery capability. Implement every declared operation in plugin.js.",
+      "allOf": [
+        {
+          "$ref": "#/definitions/capability"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "operations": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "detail": {
+                  "$ref": "#/definitions/operation"
+                },
+                "comments": {
+                  "$ref": "#/definitions/operation"
+                },
+                "recommendations": {
+                  "$ref": "#/definitions/operation"
+                },
+                "ugoiraMetadata": {
+                  "$ref": "#/definitions/operation"
+                }
+              },
+              "required": [
+                "detail",
+                "comments",
+                "recommendations"
+              ]
+            },
+            "notificationFilters": {
+              "type": "array",
+              "maxItems": 0
+            },
+            "relationActions": {
+              "type": "array",
+              "maxItems": 0
+            }
+          }
+        }
+      ]
+    },
+    "capability-tab-catalog": {
+      "type": "object",
+      "description": "tab-catalog capability. Implement every declared operation in plugin.js.",
+      "allOf": [
+        {
+          "$ref": "#/definitions/capability"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "operations": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "page": {
+                  "$ref": "#/definitions/operation"
+                }
+              },
+              "required": [
+                "page"
+              ]
+            },
+            "notificationFilters": {
+              "type": "array",
+              "maxItems": 0
+            },
+            "relationActions": {
+              "type": "array",
+              "maxItems": 0
+            }
+          }
+        }
+      ]
+    },
+    "unknownCapability": {
+      "type": "object",
+      "description": "Unknown capability IDs are retained but ignored with a Host warning.",
+      "allOf": [
+        {
+          "$ref": "#/definitions/capability"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "notificationFilters": {
+              "type": "array",
+              "maxItems": 0
+            },
+            "relationActions": {
+              "type": "array",
+              "maxItems": 0
+            }
+          }
+        }
+      ]
+    },
+    "capabilities": {
+      "type": "object",
+      "maxProperties": 32,
+      "default": {},
+      "description": "Declare supported API v1 operations; the Host checks their JavaScript registration.",
+      "propertyNames": {
+        "pattern": "^(?:[a-z0-9.-]+/[a-z0-9.-]+)(?![\\s\\S])"
+      },
+      "properties": {
+        "flare.datasource.timeline/v1": {
+          "$ref": "#/definitions/capability-timeline"
+        },
+        "flare.datasource.search/v1": {
+          "$ref": "#/definitions/capability-search"
+        },
+        "flare.datasource.profile/v1": {
+          "$ref": "#/definitions/capability-profile"
+        },
+        "flare.datasource.post/v1": {
+          "$ref": "#/definitions/capability-post"
+        },
+        "flare.datasource.relation/v1": {
+          "$ref": "#/definitions/capability-relation"
+        },
+        "flare.datasource.compose/v1": {
+          "$ref": "#/definitions/capability-compose"
+        },
+        "flare.datasource.notification/v1": {
+          "$ref": "#/definitions/capability-notification"
+        },
+        "flare.datasource.list/v1": {
+          "$ref": "#/definitions/capability-list"
+        },
+        "flare.datasource.direct-message/v1": {
+          "$ref": "#/definitions/capability-direct-message"
+        },
+        "flare.datasource.article/v1": {
+          "$ref": "#/definitions/capability-article"
+        },
+        "flare.datasource.gallery/v1": {
+          "$ref": "#/definitions/capability-gallery"
+        },
+        "flare.datasource.tab-catalog/v1": {
+          "$ref": "#/definitions/capability-tab-catalog"
+        }
+      },
+      "additionalProperties": {
+        "$ref": "#/definitions/unknownCapability"
+      }
+    },
+    "hostIcon": {
+      "type": "string",
+      "enum": [
+        "Home",
+        "Notification",
+        "Search",
+        "Profile",
+        "Local",
+        "World",
+        "Featured",
+        "Bookmark",
+        "Heart",
+        "List",
+        "Messages",
+        "Channel",
+        "Like",
+        "Repost",
+        "Reply",
+        "Delete",
+        "Follow",
+        "Block",
+        "Mute",
+        "Info"
+      ]
+    },
+    "timelineDisplay": {
+      "type": "string",
+      "enum": [
+        "List",
+        "Grid"
+      ]
+    },
+    "parameters": {
+      "type": "object",
+      "default": {},
+      "maxProperties": 32,
+      "propertyNames": {
+        "pattern": "^(?:[A-Za-z][A-Za-z0-9_.-]{0,127})(?![\\s\\S])"
+      },
+      "additionalProperties": {
+        "type": "string",
+        "maxLength": 4096
+      }
+    },
+    "timeline": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/definitions/identifier"
+        },
+        "title": {
+          "$ref": "#/definitions/text"
+        },
+        "icon": {
+          "allOf": [{ "$ref": "#/definitions/hostIcon" }],
+          "default": "Home"
+        },
+        "display": {
+          "allOf": [{ "$ref": "#/definitions/timelineDisplay" }],
+          "default": "List"
+        },
+        "parameters": {
+          "$ref": "#/definitions/parameters"
+        },
+        "defaultForNewAccount": {
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "required": [
+        "id",
+        "title"
+      ]
+    },
+    "profileTab": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/definitions/identifier"
+        },
+        "title": {
+          "$ref": "#/definitions/text"
+        },
+        "icon": {
+          "allOf": [{ "$ref": "#/definitions/hostIcon" }],
+          "default": "Profile"
+        },
+        "display": {
+          "allOf": [{ "$ref": "#/definitions/timelineDisplay" }],
+          "default": "List"
+        },
+        "parameters": {
+          "$ref": "#/definitions/parameters"
+        }
+      },
+      "required": [
+        "id",
+        "title"
+      ]
+    },
+    "deepLinkSegment": {
+      "oneOf": [
+        {
+          "$ref": "#/definitions/literalSegment"
+        },
+        {
+          "$ref": "#/definitions/captureSegment"
+        }
+      ]
+    },
+    "literalSegment": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "literal"
+        },
+        "value": {
+          "type": "string",
+          "description": "One literal URL path segment.",
+          "pattern": "^(?:[^/\\s?#]{1,256})(?![\\s\\S])"
+        }
+      },
+      "required": [
+        "type",
+        "value"
+      ]
+    },
+    "captureSegment": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "capture"
+        },
+        "name": {
+          "$ref": "#/definitions/identifier"
+        }
+      },
+      "required": [
+        "type",
+        "name"
+      ]
+    },
+    "deepLinkTargetType": {
+      "type": "string",
+      "enum": [
+        "Profile",
+        "Post",
+        "Timeline",
+        "Browser"
+      ]
+    },
+    "deepLinkTarget": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "$ref": "#/definitions/deepLinkTargetType"
+        },
+        "value": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": null,
+          "description": "Captured placeholders for Profile/Post, a declared timeline ID for Timeline, absent/null for Browser."
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "Browser"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "type": "null"
+              }
+            }
+          },
+          "else": {
+            "required": [
+              "value"
+            ],
+            "properties": {
+              "value": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "enum": [
+                  "Profile",
+                  "Post"
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "type": "string",
+                "pattern": "^(?:(?:\\{[A-Za-z][A-Za-z0-9_.-]{0,127}\\})+)(?![\\s\\S])"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "deepLink": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "origin": {
+          "type": "string",
+          "description": "Approved exact auth origin or $accountOrigin; Flare checks permission membership.",
+          "default": "$accountOrigin",
+          "pattern": "^(?:(?:\\$accountOrigin|https://[a-z0-9.-]+(?::[0-9]{1,5})?))(?![\\s\\S])"
+        },
+        "path": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/deepLinkSegment"
+          },
+          "default": [],
+          "minItems": 1,
+          "maxItems": 32
+        },
+        "target": {
+          "$ref": "#/definitions/deepLinkTarget"
+        }
+      },
+      "required": [
+        "path",
+        "target"
+      ]
+    },
+    "visibility": {
+      "type": "string",
+      "enum": [
+        "public",
+        "unlisted",
+        "followers",
+        "direct",
+        "channel"
+      ]
+    },
+    "composeText": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "maxLength": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        }
+      },
+      "required": [
+        "maxLength"
+      ]
+    },
+    "composeMedia": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "minCountForNew": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 0,
+          "description": "Must not exceed maxCount; checked by Flare."
+        },
+        "maxCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "maxBytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1073741824
+        },
+        "supportedMimeTypes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "description": "Supported MIME type or subtype wildcard.",
+            "pattern": "^(?:[A-Za-z0-9!#$&^_.+-]+/(?:[A-Za-z0-9!#$&^_.+-]+|\\*))(?![\\s\\S])"
+          },
+          "default": [],
+          "maxItems": 128,
+          "uniqueItems": true
+        },
+        "altTextMaxLength": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000,
+          "default": 1500
+        },
+        "canSensitive": {
+          "type": "boolean",
+          "default": true
+        }
+      },
+      "required": [
+        "maxCount",
+        "maxBytes"
+      ]
+    },
+    "composeVisibility": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "allowed": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/visibility"
+          },
+          "default": [],
+          "minItems": 1,
+          "uniqueItems": true,
+          "description": "The default visibility must be a member; checked by Flare."
+        },
+        "default": {
+          "allOf": [{ "$ref": "#/definitions/visibility" }],
+          "default": "public"
+        }
+      },
+      "required": [
+        "allowed"
+      ]
+    },
+    "composePoll": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "maxOptions": {
+          "type": "integer",
+          "minimum": 2,
+          "maximum": 100
+        }
+      },
+      "required": [
+        "maxOptions"
+      ]
+    },
+    "composeLanguage": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "maxCount": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 32
+        }
+      },
+      "required": [
+        "maxCount"
+      ]
+    },
+    "compose": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "text": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/composeText"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "media": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/composeMedia"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "visibility": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/composeVisibility"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "contentWarning": {
+          "type": "boolean",
+          "default": false
+        },
+        "poll": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/composePoll"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "language": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/composeLanguage"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      }
+    }
+  }
+}

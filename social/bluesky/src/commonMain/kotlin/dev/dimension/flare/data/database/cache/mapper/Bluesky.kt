@@ -10,7 +10,9 @@ import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiDMItem
 import dev.dimension.flare.ui.model.UiDMRoom
 import dev.dimension.flare.ui.model.UiHandle
+import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiProfile
+import dev.dimension.flare.ui.model.asType
 import dev.dimension.flare.ui.model.mapper.render
 import dev.dimension.flare.ui.render.toUi
 import dev.dimension.flare.ui.render.toUiPlainText
@@ -123,7 +125,9 @@ private fun fallbackDirectMessageUser(userKey: MicroBlogKey): UiProfile =
         avatar = null,
         nameInternal = userKey.id.toUiPlainText(),
         platformId = BLUESKY_PLATFORM_ID,
-        platformIcon = dev.dimension.flare.ui.model.UiIcon.Bluesky,
+        platformIcon =
+            UiIcon.Bluesky
+                .asType(),
         clickEvent = ClickEvent.Noop,
         banner = null,
         description = null,

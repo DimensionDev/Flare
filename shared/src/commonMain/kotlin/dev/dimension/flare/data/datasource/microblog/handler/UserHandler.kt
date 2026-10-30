@@ -41,6 +41,10 @@ public class UserHandler(
         TranslationSettingsSupport.displayOptionsFlow(appDataStore)
     }
 
+    public suspend fun updateUser(user: UiProfile) {
+        database.upsertUser(user.toDbUser())
+    }
+
     @OptIn(ExperimentalCoroutinesApi::class)
     public fun userByHandleAndHost(uiHandle: UiHandle): Cacheable<UiProfile> {
         val resolvedKey = MutableStateFlow<MicroBlogKey?>(null)

@@ -10,7 +10,7 @@ import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.isRefreshing
 import dev.dimension.flare.common.refreshSuspend
 import dev.dimension.flare.common.toPagingState
-import dev.dimension.flare.data.datasource.microblog.datasource.ListDataSource
+import dev.dimension.flare.data.datasource.microblog.capabilities
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.di.koinInject
@@ -33,12 +33,12 @@ public class AllListPresenter(
     override fun body(): AllListState {
         val scope = rememberCoroutineScope()
         val serviceState = accountServiceProvider(accountType = accountType, repository = accountRepository)
+        val listState = remember(serviceState) { serviceState.map { requireNotNull(it.capabilities.list) } }
         val items =
-            serviceState
-                .map { service ->
-                    remember(service) {
-                        require(service is ListDataSource)
-                        service.listHandler.data.cachedIn(scope)
+            listState
+                .map { list ->
+                    remember(list) {
+                        list.listHandler.data.cachedIn(scope)
                     }.collectAsLazyPagingItems()
                 }.toPagingState()
         return object : AllListState {

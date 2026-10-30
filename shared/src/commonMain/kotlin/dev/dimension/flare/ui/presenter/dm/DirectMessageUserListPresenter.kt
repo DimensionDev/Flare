@@ -4,8 +4,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import dev.dimension.flare.common.combineLatestFlowLists
-import dev.dimension.flare.data.datasource.microblog.DirectMessageDataSource
-import dev.dimension.flare.data.datasource.microblog.datasource.UserDataSource
+import dev.dimension.flare.data.datasource.microblog.accountKeyOrNull
+import dev.dimension.flare.data.datasource.microblog.accountProfileFlow
+import dev.dimension.flare.data.datasource.microblog.capabilities
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.allAccountServicesFlow
 import dev.dimension.flare.di.koinInject
@@ -34,21 +35,19 @@ public class DirectMessageUserListPresenter : PresenterBase<DirectMessageUserLis
             allAccountServicesFlow(accountRepository)
                 .map { services ->
                     services.mapNotNull { service ->
-                        if (
-                            service is DirectMessageDataSource &&
-                            service is UserDataSource
-                        ) {
+                        val directMessage = service.capabilities.directMessage
+                        val profileFlow = service.accountProfileFlow()
+                        val accountKey = service.accountKeyOrNull
+                        if (directMessage != null && profileFlow != null && accountKey != null) {
                             combine(
-                                service.userHandler
-                                    .userById(service.accountKey.id)
-                                    .toUi()
+                                profileFlow
                                     .distinctUntilChangedBy(::profileIdentity),
-                                service.directMessageBadgeCount
+                                directMessage.directMessageBadgeCount
                                     .toUi(),
                             ) { profile, unreadCount ->
                                 DirectMessageUserListItem(
-                                    accountKey = service.accountKey,
-                                    accountType = AccountType.Specific(service.accountKey),
+                                    accountKey = accountKey,
+                                    accountType = AccountType.Specific(accountKey),
                                     profile = profile,
                                     unreadCount = unreadCount,
                                 )

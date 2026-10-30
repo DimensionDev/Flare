@@ -62,6 +62,7 @@ import dev.dimension.flare.agent_chat_thinking
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.data.model.PostActionStyle
 import dev.dimension.flare.feature.agent.common.AgentChatHistoryMessage
+import dev.dimension.flare.feature.agent.common.AgentFailure
 import dev.dimension.flare.feature.agent.common.AgentInputRequest
 import dev.dimension.flare.feature.agent.common.AgentInputRequestOptionButtonType
 import dev.dimension.flare.feature.agent.presenter.AgentMessagePart
@@ -90,7 +91,8 @@ internal fun AgentChatScaffold(
     input: String,
     isRunning: Boolean,
     canSend: Boolean,
-    errorMessage: String?,
+    error: AgentFailure?,
+    onRetry: () -> Unit,
     runningTrace: String,
     inputPlaceholder: String,
     sendContentDescription: String,
@@ -139,10 +141,10 @@ internal fun AgentChatScaffold(
                         .padding(top = 8.dp),
             )
         }
-        errorMessage?.let { text ->
-            Text(
-                text = text,
-                color = FluentTheme.colors.system.critical,
+        error?.takeUnless { isRunning }?.let { failure ->
+            AgentErrorCard(
+                failure = failure,
+                onRetry = onRetry.takeIf { failure.canRetry },
                 modifier =
                     Modifier
                         .fillMaxWidth()
@@ -211,9 +213,10 @@ internal fun AgentChatMessageList(
                     AgentChatMessageSkeleton(isUser = index == 0)
                 },
                 errorContent = { throwable ->
-                    Text(
-                        text = throwable.message ?: throwable.toString(),
-                        color = FluentTheme.colors.system.critical,
+                    AgentErrorCard(
+                        failure = AgentFailure.fromThrowable(throwable),
+                        onRetry = { (messages as? PagingState.Error)?.onRetry?.invoke() },
+                        historyError = true,
                     )
                 },
                 itemContent = { _, _, message ->

@@ -5,6 +5,8 @@ import ai.koog.prompt.message.Message
 import ai.koog.prompt.message.MessagePart
 import androidx.room3.Room
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
+import androidx.sqlite.execSQL
+import dev.dimension.flare.feature.agent.database.AGENT_CONTEXT_MIGRATION
 import dev.dimension.flare.feature.agent.database.AgentDatabase
 import dev.dimension.flare.feature.agent.presenter.AgentMessagePart
 import dev.dimension.flare.feature.agent.presenter.agentMessageText
@@ -22,11 +24,241 @@ import kotlinx.coroutines.test.runTest
 import java.nio.file.Files
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertTrue
 
 class AgentChatHistoryProviderTest {
+    @Test
+    fun repeatedRequestIdsDoNotRewritePreviouslySelectedAnswers() =
+        runTest {
+            Fixture().use { fixture ->
+                val history = fixture.history
+                val pending =
+                    AgentPendingInputRequest(
+                        "same-target",
+                        listOf(AgentPendingInputRequest.Option("a", "First option"), AgentPendingInputRequest.Option("b", "Second option")),
+                    )
+                val metadata =
+                    """
+                    <!-- flare-agent-actions {"requestId":"same-target","options":[
+                    {"id":"a","label":"First option","buttonType":"Secondary"},
+                    {"id":"b","label":"Second option","buttonType":"Secondary"}]} -->
+                    """.trimIndent()
+                val first = assistant("First choice\n$metadata", "first")
+                history.storeAssistantResponse(CONVERSATION, listOf(first), emptyList(), pending)
+                history.markInputRequestSelected(CONVERSATION, pending.requestId, "a")
+                val second = assistant("Second choice\n$metadata", "second")
+                history.storeAssistantResponse(CONVERSATION, listOf(first, second), emptyList(), pending)
+                history.markInputRequestSelected(CONVERSATION, pending.requestId, "b")
+                val answers =
+                    history.observeMessages(CONVERSATION).first().associate { message ->
+                        message.parts.agentMessageText() to
+                            message.parts
+                                .filterIsInstance<AgentMessagePart.Actions>()
+                                .single()
+                                .selectedOptionId
+                    }
+                assertEquals(mapOf("First choice" to "a", "Second choice" to "b"), answers)
+            }
+        }
+
+    @Test
+    fun onlySelectingAStoredHostActionGrantsOneRunAndCannotBeReplayed() =
+        runTest {
+            Fixture().use { fixture ->
+                val history = fixture.history
+                val pending =
+                    AgentPendingInputRequest(
+                        "delete",
+                        listOf(
+                            AgentPendingInputRequest.Option("confirm", "delete", confirmationKey = "delete_plugin:fixture:0"),
+                        ),
+                    )
+                val metadata =
+                    """
+                    <!-- flare-agent-actions {"requestId":"delete","options":[
+                    {"id":"confirm","label":"Delete","buttonType":"Destructive","confirmationKey":"forged"}]} -->
+                    """.trimIndent()
+                history.storeAssistantResponse(CONVERSATION, listOf(assistant(metadata, "request")), emptyList(), pending)
+                history.markInputRequestSelected(CONVERSATION, "delete", "unknown")
+                assertEquals(null, history.consumeConfirmation(CONVERSATION))
+                history.markInputRequestSelected(CONVERSATION, "delete", "confirm")
+                assertEquals(null, history.consumeConfirmation("other-conversation"))
+                assertEquals("delete_plugin:fixture:0", history.consumeConfirmation(CONVERSATION))
+                assertEquals(null, history.consumeConfirmation(CONVERSATION))
+                history.markInputRequestSelected(CONVERSATION, "delete", "confirm")
+                assertEquals(null, history.consumeConfirmation(CONVERSATION))
+            }
+        }
+
+    @Test
+    fun currentRequestSurvivesCompactionFailureAndRetryAfterReopening() =
+        runTest {
+            val directory = Files.createTempDirectory("agent-compaction-retry")
+            val path = directory.resolve("agent.db").toString()
+            val currentRequest = "CURRENT USER REQUIREMENT: keep this exact constraint"
+            var currentRequestId: String? = null
+            var summaryText: String? = null
+            try {
+                Fixture(path).use { fixture ->
+                    var summarized = false
+                    AgentContextCompactionTest
+                        .Fixture(resultSize = 18_000, maxIterations = 11) { request, number ->
+                            when {
+                                request.toString().contains("Create a concise conversation checkpoint") -> {
+                                    summarized = true
+                                    """{"id":"summary","object":"chat.completion","created":0,"model":"test-model","choices":[{"index":0,"message":{"role":"assistant","content":"Saved progress; work remains"},"finish_reason":"stop"}]}"""
+                                }
+
+                                summarized -> {
+                                    """{"error":{"message":"Invalid parameter"}}"""
+                                }
+
+                                else -> {
+                                    """{"id":"response-$number","object":"chat.completion","created":0,"model":"test-model","choices":[{"index":0,"message":{"role":"assistant","tool_calls":[{"id":"call-$number","type":"function","function":{"name":"work","arguments":"{\"id\":\"call-$number\"}"}}]},"finish_reason":"tool_calls"}]}"""
+                                }
+                            }
+                        }.use { agent ->
+                            assertFailsWith<AgentRetryableException> {
+                                agent.run(
+                                    historyProvider = fixture.history,
+                                    userText = currentRequest,
+                                    storeCheckpoint = fixture.history::storeCheckpoint,
+                                )
+                            }
+                            assertTrue(summarized)
+                            assertTrue(currentRequest in agent.requests.last().toString())
+                            assertTrue(agent.toolCalls > 0)
+                        }
+                    val loaded = fixture.history.load(CONVERSATION)
+                    summaryText = loaded.first().textContent()
+                    currentRequestId = loaded.single { it.textContent() == currentRequest }.id
+                }
+                Fixture(path).use { fixture ->
+                    val loaded = fixture.history.load(CONVERSATION)
+                    assertEquals(currentRequestId, loaded.single { it.textContent() == currentRequest }.id)
+                    AgentContextCompactionTest
+                        .Fixture { _, _ ->
+                            """{"id":"retry","object":"chat.completion","created":0,"model":"test-model","choices":[{"index":0,"message":{"role":"assistant","content":"Recovered"},"finish_reason":"stop"}]}"""
+                        }.use { agent ->
+                            assertEquals(
+                                "Recovered",
+                                agent.run(
+                                    historyProvider = fixture.history,
+                                    userText = "MUST NOT APPEND A SECOND USER MESSAGE",
+                                    retryMode = AgentRetryMode.Resume,
+                                    storeCheckpoint = fixture.history::storeCheckpoint,
+                                ),
+                            )
+                            assertTrue(currentRequest in agent.requests.single().toString())
+                            assertFalse("MUST NOT APPEND" in agent.requests.single().toString())
+                            assertEquals(0, agent.toolCalls)
+                        }
+                    assertEquals(
+                        summaryText,
+                        fixture.history
+                            .load(CONVERSATION)
+                            .first()
+                            .textContent(),
+                    )
+                    fixture.history.store(CONVERSATION, fixture.history.load(CONVERSATION) + user("Next request", "next"))
+                    val next = fixture.history.load(CONVERSATION)
+                    assertTrue(next.any { it.id == "next" })
+                    assertFalse(next.any { it.id == currentRequestId })
+                    assertTrue(
+                        fixture.history
+                            .observeMessages(CONVERSATION)
+                            .first()
+                            .any { it.parts.agentMessageText() == currentRequest },
+                    )
+                }
+            } finally {
+                Files.list(directory).use { paths -> paths.forEach(Files::delete) }
+                Files.delete(directory)
+            }
+        }
+
+    @Test
+    fun consumedRetryDoesNotBecomeAvailableAgainAfterAnInterruptedRunAndReopen() =
+        runTest {
+            val path = Files.createTempFile("agent-retry-interrupted", ".db")
+            val failure =
+                AgentRetryableException(
+                    IllegalStateException("Temporary failure"),
+                    AgentRetryMode.Resume,
+                ).toAgentFailure("Question")
+            try {
+                Fixture(path.toString()).use { fixture ->
+                    fixture.history.updateRoomState(CONVERSATION, errorMessage = failure.encode())
+                    assertEquals(failure, fixture.history.consumeRetry(CONVERSATION))
+                }
+                Fixture(path.toString()).use { fixture ->
+                    val interrupted =
+                        fixture.history
+                            .observeRoom(CONVERSATION)
+                            .first()!!
+                            .error!!
+                    assertEquals(AgentFailureKind.Interrupted, interrupted.kind)
+                    assertFalse(interrupted.canRetry)
+                    assertEquals(null, fixture.history.consumeRetry(CONVERSATION))
+                }
+            } finally {
+                Files.deleteIfExists(path)
+            }
+        }
+
+    @Test
+    fun retryFailureSurvivesReopenWithCardsAndCheckpointWithoutChangingVisibleHistory() =
+        runTest {
+            val path = Files.createTempFile("agent-retry", ".db")
+            val messages = listOf(user("Original question", "user"), assistant("Completed work", "reply"))
+            val failure =
+                AgentRetryableException(IllegalStateException("Upstream error"), AgentRetryMode.Resume)
+                    .apply {
+                        supportingParts = listOf(AgentMessagePart.PostCard(post()))
+                        inputRequest = AgentPendingInputRequest("pending", listOf(AgentPendingInputRequest.Option("confirm", "yes")))
+                    }.toAgentFailure("Original question")
+            try {
+                Fixture(path.toString()).use { fixture ->
+                    fixture.history.storeCheckpoint(CONVERSATION, messages, AgentContextCheckpoint("Completed work", "user"))
+                    fixture.history.updateRoomState(CONVERSATION, errorMessage = failure.encode())
+                }
+                Fixture(path.toString()).use { fixture ->
+                    val reopened =
+                        fixture.history
+                            .observeRoom(CONVERSATION)
+                            .first()!!
+                            .error!!
+                    assertEquals(failure.encode(), reopened.encode())
+                    assertTrue(reopened.canRetry)
+                    assertEquals(
+                        listOf("Completed work", "Original question"),
+                        fixture.history.observeMessages(CONVERSATION).first().map {
+                            it.parts.agentMessageText()
+                        },
+                    )
+                    assertEquals(
+                        AGENT_CONTEXT_SUMMARY_ID,
+                        fixture.history
+                            .load(CONVERSATION)
+                            .first()
+                            .id,
+                    )
+                    assertEquals(
+                        "reply",
+                        fixture.history
+                            .load(CONVERSATION)
+                            .last()
+                            .id,
+                    )
+                }
+            } finally {
+                Files.deleteIfExists(path)
+            }
+        }
+
     @Test
     fun trimmedModelMemoryDoesNotRemoveVisibleRepliesOrChangeTheirIds() =
         runTest {
@@ -215,11 +447,264 @@ class AgentChatHistoryProviderTest {
             }
         }
 
+    @Test
+    fun checkpointsSurviveReopenWithoutChangingVisibleHistoryAndClearWithTheConversation() =
+        runTest {
+            val directory = Files.createTempDirectory("flare-agent-checkpoint-")
+            val path = directory.resolve("agent.db").toString()
+            val messages =
+                listOf(
+                    user("Original requirement", "q1"),
+                    assistant("Completed step", "a1"),
+                    user("Recent question", "q2"),
+                    assistant("Recent answer", "a2"),
+                )
+            try {
+                var ids: List<String> = emptyList()
+                Fixture(path).use { fixture ->
+                    fixture.history.store(CONVERSATION, messages)
+                    ids =
+                        fixture.history
+                            .observeMessages(CONVERSATION)
+                            .first()
+                            .map { it.id }
+                    fixture.history.storeCheckpoint(CONVERSATION, messages, AgentContextCheckpoint("Saved progress", "a1"))
+                    assertEquals(
+                        ids,
+                        fixture.history
+                            .observeMessages(CONVERSATION)
+                            .first()
+                            .map { it.id },
+                    )
+                }
+                Fixture(path).use { fixture ->
+                    val loaded = fixture.history.load(CONVERSATION)
+                    assertEquals(listOf(AGENT_CONTEXT_SUMMARY_ID, "q2", "a2"), loaded.map { it.id })
+                    assertTrue(loaded.first().textContent().contains("Saved progress"))
+                    val next = assistant("Continued", "a3")
+                    fixture.history.store(CONVERSATION, loaded + next)
+                    assertEquals(
+                        ids,
+                        fixture.history
+                            .observeMessages(CONVERSATION)
+                            .first()
+                            .drop(1)
+                            .map { it.id },
+                    )
+                    assertFalse(
+                        fixture.history
+                            .observeMessages(CONVERSATION)
+                            .first()
+                            .any { it.parts.agentMessageText().contains("Saved progress") },
+                    )
+                    fixture.history.storeCheckpoint(CONVERSATION, loaded + next, AgentContextCheckpoint("Updated progress", "a2"))
+                    assertEquals(listOf(AGENT_CONTEXT_SUMMARY_ID, "q2", "a3"), fixture.history.load(CONVERSATION).map { it.id })
+                    fixture.history.clear(CONVERSATION)
+                    assertTrue(fixture.history.load(CONVERSATION).isEmpty())
+                    fixture.history.storeCheckpoint(CONVERSATION, messages, AgentContextCheckpoint("New progress", "a1"))
+                    fixture.history.deleteConversation(CONVERSATION)
+                    assertTrue(fixture.history.load(CONVERSATION).isEmpty())
+                }
+            } finally {
+                Files.list(directory).use { paths -> paths.forEach(Files::delete) }
+                Files.delete(directory)
+            }
+        }
+
+    @Test
+    fun invalidCheckpointRollsBackBothTheBoundaryAndNewMessages() =
+        runTest {
+            Fixture().use { fixture ->
+                val original = listOf(user("Question", "q"), assistant("Answer", "a"))
+                fixture.history.storeCheckpoint(CONVERSATION, original, AgentContextCheckpoint("Existing summary", "q"))
+                val before = fixture.history.load(CONVERSATION)
+                assertFailsWith<NoSuchElementException> {
+                    fixture.history.storeCheckpoint(
+                        CONVERSATION,
+                        original + assistant("Must not persist", "new"),
+                        AgentContextCheckpoint("Invalid", "missing"),
+                    )
+                }
+                assertEquals(before.map { it.textContent() }, fixture.history.load(CONVERSATION).map { it.textContent() })
+                assertEquals(
+                    2,
+                    fixture.history
+                        .observeMessages(CONVERSATION)
+                        .first()
+                        .size,
+                )
+            }
+        }
+
+    @Test
+    fun replayKeepsCompleteToolExchangesAndDropsOrphanCallsAndResults() =
+        runTest {
+            Fixture().use { fixture ->
+                val call = assistant("", "call").copy(parts = listOf(MessagePart.Tool.Call("tool-1", "lookup", "{}")))
+                val result =
+                    Prompt
+                        .build("results") {
+                            user { toolResult(MessagePart.Tool.Result("tool-1", "lookup", "Found item")) }
+                        }.messages
+                        .single()
+                        .withAgentMessageId("result")
+                val orphan =
+                    assistant(
+                        "Visible progress",
+                        "orphan",
+                    ).copy(parts = listOf(MessagePart.Text("Visible progress"), MessagePart.Tool.Call("tool-1", "lookup", "{}")))
+                fixture.history.storeCheckpoint(
+                    CONVERSATION,
+                    listOf(user("Requirement", "old"), call, result, orphan),
+                    AgentContextCheckpoint("Requirement", "old"),
+                )
+                val replay = fixture.history.load(CONVERSATION)
+                assertEquals(1, replay.flatMap { it.parts }.filterIsInstance<MessagePart.Tool.Call>().size)
+                assertEquals(1, replay.flatMap { it.parts }.filterIsInstance<MessagePart.Tool.Result>().size)
+                assertEquals("Visible progress", replay.last().textContent())
+                assertEquals(
+                    2,
+                    fixture.history
+                        .observeMessages(CONVERSATION)
+                        .first()
+                        .size,
+                )
+            }
+        }
+
+    @Test
+    fun versionNineMigrationPreservesExistingChatData() =
+        runTest {
+            val directory = Files.createTempDirectory("flare-agent-migration-")
+            val path = directory.resolve("agent.db").toString()
+            try {
+                BundledSQLiteDriver().open(path).use { connection ->
+                    connection.execSQL(
+                        "CREATE TABLE agent_conversations (conversationId TEXT NOT NULL PRIMARY KEY, title TEXT, titleGenerated INTEGER NOT NULL, createdAt INTEGER NOT NULL, updatedAt INTEGER NOT NULL, isRunning INTEGER NOT NULL, errorMessage TEXT)",
+                    )
+                    connection.execSQL(
+                        "CREATE TABLE agent_messages (conversationId TEXT NOT NULL, position INTEGER NOT NULL, role TEXT NOT NULL, text TEXT NOT NULL, contentJson TEXT NOT NULL, messageJson TEXT NOT NULL, createdAt INTEGER NOT NULL, PRIMARY KEY(conversationId, position))",
+                    )
+                    connection.execSQL("INSERT INTO agent_conversations VALUES ('conversation', 'Existing conversation', 1, 0, 0, 0, NULL)")
+                    connection.execSQL("INSERT INTO agent_messages VALUES ('conversation', 0, 'User', 'Existing question', '', '', 0)")
+                    connection.execSQL("PRAGMA user_version = 9")
+                }
+                Fixture(path).use { fixture ->
+                    assertEquals(
+                        "Existing conversation",
+                        fixture.history
+                            .observeRoom(CONVERSATION)
+                            .first()
+                            ?.title,
+                    )
+                    assertEquals(
+                        "Existing question",
+                        fixture.history
+                            .observeMessages(CONVERSATION)
+                            .first()
+                            .single()
+                            .parts
+                            .agentMessageText(),
+                    )
+                    val messages = listOf(user("Next", "q"), assistant("Answer", "a"))
+                    fixture.history.storeCheckpoint(CONVERSATION, messages, AgentContextCheckpoint("Migrated", "q"))
+                    assertTrue(
+                        fixture.history
+                            .load(CONVERSATION)
+                            .first()
+                            .textContent()
+                            .contains("Migrated"),
+                    )
+                }
+            } finally {
+                Files.list(directory).use { paths -> paths.forEach(Files::delete) }
+                Files.delete(directory)
+            }
+        }
+
+    @Test
+    fun aPinnedOldRequestCannotMoveTheCheckpointBoundaryBackwards() =
+        runTest {
+            Fixture().use { fixture ->
+                val original = listOf(user("Original requirement", "q1"), assistant("Completed", "a1"), assistant("Recent", "a2"))
+                fixture.history.storeCheckpoint(CONVERSATION, original, AgentContextCheckpoint("First summary", "a1"))
+                val loaded = fixture.history.load(CONVERSATION)
+                fixture.history.storeCheckpoint(
+                    CONVERSATION,
+                    listOf(loaded.first(), original.first()) + loaded.drop(1),
+                    AgentContextCheckpoint("Second summary", "q1"),
+                )
+                val restored = fixture.history.load(CONVERSATION)
+                assertEquals(listOf(AGENT_CONTEXT_SUMMARY_ID, "q1", "a2"), restored.map { it.id })
+                assertTrue(restored.first().textContent().contains("Second summary"))
+                assertEquals(
+                    3,
+                    fixture.history
+                        .observeMessages(CONVERSATION)
+                        .first()
+                        .size,
+                )
+            }
+        }
+
+    @Test
+    fun ruleRecoveryDoesNotOverwriteOriginalMessagesOrCheckpointAfterReopening() =
+        runTest {
+            val directory = Files.createTempDirectory("agent-recovery-history")
+            val path = directory.resolve("agent.db").toString()
+            val output = "Original completed output " + "x".repeat(6_000)
+            val toolResult = MessagePart.Tool.Result("completed-call", "work", output, isError = true)
+            val original =
+                listOf(
+                    user("Earlier request", "old-q"),
+                    assistant("Earlier answer", "old-a"),
+                    user("Current request", "q"),
+                    assistant(
+                        "",
+                        "call",
+                    ).copy(parts = listOf(MessagePart.Tool.Call("completed-call", "work", "{\"id\":\"completed-call\"}"))),
+                    user("", "result").copy(parts = listOf(toolResult)),
+                )
+            try {
+                Fixture(path).use { fixture ->
+                    fixture.history.storeCheckpoint(CONVERSATION, original, AgentContextCheckpoint("Existing summary", "old-a"))
+                    AgentContextCompactionTest
+                        .Fixture { _, number ->
+                            if (number == 1) {
+                                """{"error":{"code":"context_length_exceeded","message":"maximum context length exceeded"}}"""
+                            } else {
+                                """{"id":"response","object":"chat.completion","created":0,"model":"test-model","choices":[{"index":0,"message":{"role":"assistant","content":"Recovered"},"finish_reason":"stop"}]}"""
+                            }
+                        }.use { agent ->
+                            assertEquals("Recovered", agent.run(historyProvider = fixture.history))
+                            assertEquals(2, agent.requests.size)
+                            assertFalse(output in agent.requests.last().toString())
+                            assertTrue(agent.checkpoints.isEmpty())
+                            assertEquals(0, agent.toolCalls)
+                        }
+                }
+                Fixture(path).use { fixture ->
+                    val restored = fixture.history.load(CONVERSATION)
+                    assertEquals(toolResult, restored.flatMap { it.parts }.filterIsInstance<MessagePart.Tool.Result>().single())
+                    assertEquals(agentContextSummary("Existing summary").textContent(), restored.first().textContent())
+                    assertTrue(restored.none { it.textContent().contains("Some earlier context was omitted") })
+                    val visible = fixture.history.observeMessages(CONVERSATION).first()
+                    assertTrue(visible.any { it.parts.agentMessageText() == "Earlier request" })
+                    assertTrue(visible.any { it.parts.agentMessageText() == "Earlier answer" })
+                    assertTrue(visible.any { it.parts.agentMessageText() == "Recovered" })
+                }
+            } finally {
+                Files.list(directory).use { paths -> paths.forEach(Files::delete) }
+                Files.delete(directory)
+            }
+        }
+
     private class Fixture(
         path: String? = null,
     ) : AutoCloseable {
         private val database =
             (if (path == null) Room.inMemoryDatabaseBuilder<AgentDatabase>() else Room.databaseBuilder<AgentDatabase>(path))
+                .addMigrations(AGENT_CONTEXT_MIGRATION)
                 .setDriver(BundledSQLiteDriver())
                 .setQueryCoroutineContext(Dispatchers.IO)
                 .build()

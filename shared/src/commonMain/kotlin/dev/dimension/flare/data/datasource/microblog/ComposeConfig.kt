@@ -85,6 +85,8 @@ public data class ComposeConfig public constructor(
     public data class Language public constructor(
         val maxCount: Int,
     ) {
+        internal fun merge(other: Language): Language = Language(maxCount = minOf(maxCount, other.maxCount))
+
         private val popularCodes =
             listOf(
                 "en",
@@ -304,14 +306,32 @@ public data class ComposeConfig public constructor(
         val canSensitive: Boolean,
         val altTextMaxLength: Int,
         val allowMediaOnly: Boolean,
+        val minCountForNew: Int = 0,
+        val supportedMimeTypes: Set<String>? = null,
         val compression: Compression = Compression(),
     ) {
+        public fun supportsMimeType(mimeType: String?): Boolean {
+            val constraints = supportedMimeTypes ?: return true
+            val actual =
+                mimeType
+                    ?.substringBefore(';')
+                    ?.trim()
+                    ?.lowercase()
+                    ?.takeIf(String::isNotEmpty) ?: return false
+            return constraints.any { constraint ->
+                val normalized = constraint.substringBefore(';').trim().lowercase()
+                normalized == actual || (normalized.endsWith("/*") && actual.startsWith(normalized.removeSuffix("*")))
+            }
+        }
+
         internal fun merge(other: Media): Media =
             Media(
                 maxCount = minOf(maxCount, other.maxCount),
                 canSensitive = canSensitive && other.canSensitive,
                 altTextMaxLength = minOf(altTextMaxLength, other.altTextMaxLength),
                 allowMediaOnly = allowMediaOnly && other.allowMediaOnly,
+                minCountForNew = maxOf(minCountForNew, other.minCountForNew),
+                supportedMimeTypes = intersectMimeTypeConstraints(supportedMimeTypes, other.supportedMimeTypes),
                 compression = compression.merge(other.compression),
             )
 
@@ -438,6 +458,12 @@ public data class ComposeConfig public constructor(
             } else {
                 null
             }
+        val language =
+            if (language != null && other.language != null) {
+                language.merge(other.language)
+            } else {
+                null
+            }
         return ComposeConfig(
             text = text,
             media = media,
@@ -445,6 +471,28 @@ public data class ComposeConfig public constructor(
             emoji = emoji,
             contentWarning = contentWarning,
             visibility = visibility,
+            language = language,
         )
+    }
+}
+
+/** Null is unrestricted; an empty intersection permits no media. */
+public fun intersectMimeTypeConstraints(
+    first: Set<String>?,
+    second: Set<String>?,
+): Set<String>? {
+    fun Set<String>.normalized() = mapTo(linkedSetOf()) { it.substringBefore(';').trim().lowercase() }
+    if (first == null) return second?.normalized()
+    if (second == null) return first.normalized()
+    val normalizedSecond = second.normalized()
+    return first.normalized().flatMapTo(linkedSetOf()) { left ->
+        normalizedSecond.mapNotNull { right ->
+            when {
+                left == right -> left
+                left.endsWith("/*") && right.startsWith(left.removeSuffix("*")) -> right
+                right.endsWith("/*") && left.startsWith(right.removeSuffix("*")) -> left
+                else -> null
+            }
+        }
     }
 }

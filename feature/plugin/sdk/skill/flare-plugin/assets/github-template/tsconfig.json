@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "noEmit": true,
+    "target": "ES2020",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "moduleDetection": "force",
+    "lib": ["ES2020"],
+    "types": ["flare-plugin-sdk"],
+    "isolatedModules": true
+  },
+  "include": ["src/**/*.ts"]
+}

@@ -1,0 +1,39 @@
+{
+  "name": "flare-plugin-sdk",
+  "version": "0.1.0-beta.10",
+  "description": "Types, tooling, templates and authoring references for Flare plugins",
+  "license": "SEE LICENSE IN LICENSE",
+  "homepage": "https://github.com/DimensionDev/Flare#plugins-beta",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DimensionDev/Flare.git",
+    "directory": "feature/plugin/sdk"
+  },
+  "bugs": {
+    "url": "https://github.com/DimensionDev/Flare/issues"
+  },
+  "bin": {
+    "flare-plugin-sdk": "bin/cli.mjs",
+    "flare-plugin-pack": "skill/flare-plugin/pack.mjs"
+  },
+  "types": "skill/flare-plugin/flare-plugin.d.ts",
+  "files": [
+    "bin/",
+    "skill/flare-plugin/"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "scripts": {
+    "test": "node --test scripts/*.test.mjs"
+  },
+  "devDependencies": {
+    "ajv": "8.20.0",
+    "esbuild": "0.28.2",
+    "typescript": "6.0.3"
+  }
+}

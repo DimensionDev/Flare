@@ -2070,6 +2070,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
                         .toDb(post, pagingKey = "home")
                         .status.status.data
 
+                db.statusDao().insertAll(listOf(status))
                 service.enqueueStatuses(listOf(status))
 
                 val platformTranslation =
@@ -2091,6 +2092,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
                         translateConfig = it.translateConfig.copy(preferPlatformTranslation = false),
                     )
                 }
+                db.statusDao().insertAll(listOf(status))
                 service.enqueueStatuses(listOf(status))
 
                 val providerTranslation =
@@ -2165,6 +2167,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
                         .toDb(post, pagingKey = "home")
                         .status.status.data
 
+                db.statusDao().insertAll(listOf(status))
                 service.enqueueStatuses(listOf(status))
 
                 val translation =
@@ -2297,11 +2300,13 @@ class MixedRemoteMediatorTest : RobolectricTest() {
                             pagingKey = "home",
                         ).status.status.data
 
+                db.statusDao().insertAll(listOf(firstStatus))
                 preTranslationService.enqueueStatuses(listOf(firstStatus), allowLongText = false)
                 withTimeout(5_000) {
                     started.await()
                 }
 
+                db.statusDao().insertAll(listOf(secondStatus))
                 preTranslationService.enqueueStatuses(listOf(secondStatus), allowLongText = false)
 
                 val pendingTranslation =
@@ -2400,6 +2405,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
                             pagingKey = "home",
                         ).status.status.data
 
+                db.statusDao().insertAll(listOf(firstStatus))
                 preTranslationService.enqueueStatuses(listOf(firstStatus), allowLongText = false)
                 withTimeout(5_000) {
                     started.await()
@@ -2423,6 +2429,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
                         ).first { it == null }
                 }
 
+                db.statusDao().insertAll(listOf(secondStatus))
                 preTranslationService.enqueueStatuses(listOf(secondStatus), allowLongText = false)
 
                 val secondTranslation =

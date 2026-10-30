@@ -28,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.feature.agent.common.AgentChatHistoryMessage
+import dev.dimension.flare.feature.agent.common.AgentFailure
 import dev.dimension.flare.feature.agent.common.AgentInputRequest
 import dev.dimension.flare.ui.common.itemsIndexed
 import dev.dimension.flare.ui.model.UiProfile
@@ -42,7 +43,8 @@ internal fun AgentChatSheetScaffold(
     input: String,
     isRunning: Boolean,
     canSend: Boolean,
-    errorMessage: String?,
+    error: AgentFailure?,
+    onRetry: () -> Unit,
     runningTrace: String,
     inputPlaceholder: String,
     sendContentDescription: String,
@@ -99,7 +101,11 @@ internal fun AgentChatSheetScaffold(
                     AgentChatSheetMessageSkeleton(isUser = index == 0)
                 },
                 errorContent = { throwable ->
-                    AgentChatError(text = throwable.message ?: throwable.toString())
+                    AgentErrorCard(
+                        failure = AgentFailure.fromThrowable(throwable),
+                        onRetry = { (messages as? PagingState.Error)?.onRetry?.invoke() },
+                        historyError = true,
+                    )
                 },
                 itemContent = { _, _, message ->
                     AgentChatMessageBubble(
@@ -121,9 +127,10 @@ internal fun AgentChatSheetScaffold(
                         .padding(top = 8.dp),
             )
         }
-        errorMessage?.let { text ->
-            AgentChatError(
-                text = text,
+        error?.takeUnless { isRunning }?.let { failure ->
+            AgentErrorCard(
+                failure = failure,
+                onRetry = onRetry.takeIf { failure.canRetry },
                 modifier =
                     Modifier
                         .padding(horizontal = screenHorizontalPadding)

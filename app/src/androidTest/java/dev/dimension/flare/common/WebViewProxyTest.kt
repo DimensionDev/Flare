@@ -1,11 +1,15 @@
 package dev.dimension.flare.common
 
 import android.security.NetworkSecurityPolicy
+import android.webkit.CookieManager
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.ComposeUiFlags
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.test.junit4.v2.createComposeRule
@@ -13,6 +17,7 @@ import androidx.compose.ui.test.onAllNodesWithText
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.webkit.WebViewFeature
+import dev.dimension.flare.R
 import dev.dimension.flare.data.model.ProxyMode
 import dev.dimension.flare.data.model.ProxyPolicy
 import dev.dimension.flare.data.model.ProxyProfile
@@ -23,6 +28,7 @@ import dev.dimension.flare.data.repository.ProxyRepository
 import dev.dimension.flare.di.koinGet
 import dev.dimension.flare.ui.component.LocalGlobalAppearance
 import dev.dimension.flare.ui.component.LocalTimelineAppearance
+import dev.dimension.flare.ui.presenter.login.LoginEffect
 import dev.dimension.flare.ui.screen.serviceselect.WebCookieLoginScreen
 import dev.dimension.flare.ui.theme.FlareTheme
 import kotlinx.coroutines.Dispatchers
@@ -42,6 +48,11 @@ import java.io.DataInputStream
 import java.net.InetAddress
 import java.net.ServerSocket
 import java.net.Socket
+import java.security.KeyFactory
+import java.security.KeyStore
+import java.security.cert.CertificateFactory
+import java.security.spec.PKCS8EncodedKeySpec
+import java.util.Base64
 import java.util.Collections
 import java.util.UUID
 import java.util.concurrent.CopyOnWriteArrayList
@@ -50,6 +61,8 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
+import javax.net.ssl.KeyManagerFactory
+import javax.net.ssl.SSLContext
 import kotlin.concurrent.thread
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -145,7 +158,7 @@ class WebViewProxyTest {
             val requests = CopyOnWriteArrayList<String>()
             val pendingClosed = AtomicBoolean(false)
             val target =
-                server { socket ->
+                tlsServer { socket ->
                     val headers = readHeaders(socket)
                     requests.add(headers)
                     if (headers.startsWith("GET /pending")) {
@@ -160,16 +173,24 @@ class WebViewProxyTest {
                 }
             repository.selectGlobal(ProxyPolicy(ProxyMode.SYSTEM))
             val cookies = AtomicReference<String?>()
+            val loginUrl = "https://localhost:${target.port}/login"
+            var showsLogin by mutableStateOf(true)
             compose.setContent {
                 CompositionLocalProvider(
                     LocalGlobalAppearance provides GlobalAppearance(),
                     LocalTimelineAppearance provides TimelineAppearance(),
                 ) {
                     FlareTheme(darkTheme = false, dynamicColor = false) {
-                        WebCookieLoginScreen("http://127.0.0.1:${target.port}/login", callback = {
-                            cookies.set(it)
-                            false
-                        }, onBack = {})
+                        if (showsLogin) {
+                            WebCookieLoginScreen(
+                                LoginEffect.OpenWebCookieLogin(loginUrl),
+                                callback = {
+                                    cookies.set(it.rawHeader)
+                                    false
+                                },
+                                onBack = {},
+                            )
+                        }
                     }
                 }
             }
@@ -190,6 +211,8 @@ class WebViewProxyTest {
             repository.selectGlobal(ProxyPolicy(ProxyMode.DIRECT))
             compose.waitUntil(20_000) { requests.count { it.startsWith("GET /login") } == 3 }
             assertTrue(requests.last { it.startsWith("GET /login") }.contains("Cookie: session=keep", ignoreCase = true))
+            compose.runOnIdle { showsLogin = false }
+            compose.waitUntil(20_000) { CookieManager.getInstance().getCookie(loginUrl).isNullOrEmpty() }
         }
 
     private val destinations = Collections.synchronizedList(mutableListOf<String>())
@@ -262,10 +285,36 @@ class WebViewProxyTest {
 
     private fun server(handle: (Socket) -> Unit): Server = Server(handle).also { servers.add(it) }
 
+    private fun tlsServer(handle: (Socket) -> Unit): Server {
+        val instrumentation = InstrumentationRegistry.getInstrumentation()
+        val cert =
+            instrumentation.targetContext.resources.openRawResource(R.raw.webview_test_cert).use {
+                CertificateFactory.getInstance("X.509").generateCertificate(it)
+            }
+        val key =
+            instrumentation.context.assets
+                .open("webview_test_key.pem")
+                .bufferedReader()
+                .use { it.readText() }
+                .lineSequence()
+                .filterNot { it.startsWith("---") }
+                .joinToString("")
+        val privateKey = KeyFactory.getInstance("RSA").generatePrivate(PKCS8EncodedKeySpec(Base64.getDecoder().decode(key)))
+        val store =
+            KeyStore.getInstance(KeyStore.getDefaultType()).apply {
+                load(null)
+                setKeyEntry("test", privateKey, charArrayOf(), arrayOf(cert))
+            }
+        val keys = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm()).apply { init(store, charArrayOf()) }
+        val context = SSLContext.getInstance("TLS").apply { init(keys.keyManagers, null, null) }
+        val socket = context.serverSocketFactory.createServerSocket(0, 10, InetAddress.getByName("127.0.0.1"))
+        return Server(handle, socket).also { servers.add(it) }
+    }
+
     private class Server(
         handle: (Socket) -> Unit,
+        private val socket: ServerSocket = ServerSocket(0, 10, InetAddress.getByName("127.0.0.1")),
     ) : AutoCloseable {
-        private val socket = ServerSocket(0, 10, InetAddress.getByName("127.0.0.1"))
         private val clients = Collections.synchronizedList(mutableListOf<Socket>())
         val accepted = AtomicInteger()
         val port get() = socket.localPort

@@ -48,6 +48,7 @@ import compose.icons.fontawesomeicons.solid.Language
 import compose.icons.fontawesomeicons.solid.List
 import compose.icons.fontawesomeicons.solid.Lock
 import compose.icons.fontawesomeicons.solid.Plus
+import compose.icons.fontawesomeicons.solid.PuzzlePiece
 import compose.icons.fontawesomeicons.solid.Robot
 import compose.icons.fontawesomeicons.solid.Trash
 import dev.dimension.flare.BuildConfig
@@ -103,6 +104,8 @@ import dev.dimension.flare.settings_ai_config_agent_title
 import dev.dimension.flare.settings_ai_config_api_key
 import dev.dimension.flare.settings_ai_config_api_key_hint
 import dev.dimension.flare.settings_ai_config_basic_title
+import dev.dimension.flare.settings_ai_config_context_window
+import dev.dimension.flare.settings_ai_config_context_window_hint
 import dev.dimension.flare.settings_ai_config_description
 import dev.dimension.flare.settings_ai_config_enable_agent
 import dev.dimension.flare.settings_ai_config_enable_pre_translation
@@ -244,6 +247,8 @@ import dev.dimension.flare.settings_mxga_never_refreshed
 import dev.dimension.flare.settings_mxga_refresh_title
 import dev.dimension.flare.settings_mxga_refreshing
 import dev.dimension.flare.settings_nostr_relays_manage
+import dev.dimension.flare.settings_plugins_subtitle
+import dev.dimension.flare.settings_plugins_title
 import dev.dimension.flare.settings_post_action_fixed_width
 import dev.dimension.flare.settings_post_action_fixed_width_description
 import dev.dimension.flare.settings_privacy_policy
@@ -360,6 +365,7 @@ import kotlin.time.Instant
 @OptIn(ExperimentalFluentApi::class)
 @Composable
 internal fun SettingsScreen(
+    toPlugins: () -> Unit,
     toLogin: () -> Unit,
     toRelogin: (ReloginTarget) -> Unit,
     toDraftBox: () -> Unit,
@@ -478,6 +484,8 @@ internal fun SettingsScreen(
                                         },
                                         toLogin = toLogin,
                                         toRelogin = toRelogin,
+                                        unavailableAccount = account.account.takeUnless { it.platformAvailable },
+                                        toPlugins = toPlugins,
                                         trailingContent = { user ->
                                             Row(
                                                 verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
@@ -1751,6 +1759,8 @@ internal fun SettingsScreen(
                     val serverRequirementHint = stringResource(Res.string.settings_ai_config_server_url_requirement)
                     val apiKeyTitle = stringResource(Res.string.settings_ai_config_api_key)
                     val apiKeyHint = stringResource(Res.string.settings_ai_config_api_key_hint)
+                    val contextWindowTitle = stringResource(Res.string.settings_ai_config_context_window)
+                    val contextWindowHint = stringResource(Res.string.settings_ai_config_context_window_hint)
                     val extraBodyTitle = stringResource(Res.string.settings_ai_config_extra_body)
                     val modelTitle = stringResource(Res.string.settings_ai_config_model)
                     val modelPlaceholder = stringResource(Res.string.settings_ai_config_model_select)
@@ -1939,6 +1949,33 @@ internal fun SettingsScreen(
                                                     },
                                                 )
                                             }
+                                        }
+                                    },
+                                )
+                                ExpanderItemSeparator()
+                                ExpanderItem(
+                                    heading = { Text(contextWindowTitle) },
+                                    caption = {
+                                        if (aiConfigState.openAIContextWindow.isNotBlank()) {
+                                            Text(aiConfigState.openAIContextWindow)
+                                        }
+                                    },
+                                    trailing = {
+                                        Button(
+                                            onClick = {
+                                                aiConfigState.setTextEditDialog(
+                                                    TextEditDialogState(
+                                                        title = contextWindowTitle,
+                                                        placeholder = "",
+                                                        value = aiConfigState.openAIContextWindow,
+                                                        hint = contextWindowHint,
+                                                        isValid = aiConfigState::isValidOpenAIContextWindow,
+                                                        onConfirm = aiConfigState::setOpenAIContextWindow,
+                                                    ),
+                                                )
+                                            },
+                                        ) {
+                                            Text(stringResource(Res.string.edit))
                                         }
                                     },
                                 )
@@ -2379,6 +2416,13 @@ internal fun SettingsScreen(
             ) {
                 ProxySettingsContent()
             }
+
+            CardExpanderItem(
+                heading = { Text(stringResource(Res.string.settings_plugins_title)) },
+                caption = { Text(stringResource(Res.string.settings_plugins_subtitle)) },
+                icon = { FAIcon(FontAwesomeIcons.Solid.PuzzlePiece, contentDescription = null) },
+                onClick = toPlugins,
+            )
 
             Header(stringResource(Res.string.settings_about_title))
             Expander(
@@ -2939,6 +2983,7 @@ internal fun SettingsTextEditDialog(
         onButtonClick = {
             when (it) {
                 ContentDialogButton.Primary -> {
+                    if (!dialog.isValid(textState.text.toString())) return@ContentDialog
                     dialog.onConfirm(textState.text.toString())
                     onDismiss()
                 }
@@ -2952,6 +2997,7 @@ internal fun SettingsTextEditDialog(
 }
 
 internal data class TextEditDialogState(
+    val isValid: (String) -> Boolean = { true },
     val title: String,
     val placeholder: String,
     val value: String,

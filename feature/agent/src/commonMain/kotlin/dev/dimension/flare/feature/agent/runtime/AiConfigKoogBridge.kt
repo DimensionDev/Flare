@@ -3,6 +3,7 @@ package dev.dimension.flare.feature.agent.runtime
 import ai.koog.http.client.KoogHttpClient
 import ai.koog.prompt.executor.clients.openai.OpenAIClientSettings
 import ai.koog.prompt.executor.clients.openai.OpenAILLMClient
+import ai.koog.prompt.executor.clients.openai.OpenAIModels
 import ai.koog.prompt.executor.llms.MultiLLMPromptExecutor
 import ai.koog.prompt.llm.LLMCapability
 import ai.koog.prompt.llm.LLMProvider
@@ -51,13 +52,15 @@ internal class AiConfigKoogBridge {
         }
 
         val openAIConfig = aiConfig.effectiveAgentType as? AppSettings.AiConfig.Type.OpenAI ?: return null
+        val contextWindow =
+            openAIConfig.contextWindow?.also { require(it >= 1_024) { "Context window must be at least 1024 tokens" } }?.toLong()
+                ?: OpenAIModels.models.firstOrNull { it.id == openAIConfig.model }?.contextLength
+        val extraBody = openAIConfig.extraBody.takeIf { it.isNotBlank() }?.let { JSON.parseToJsonElement(it).jsonObject }
         val params =
             LLMParams(
                 additionalProperties =
                     buildJsonObject {
-                        openAIConfig.extraBody
-                            .takeIf { it.isNotBlank() }
-                            ?.let { JSON.parseToJsonElement(it).jsonObject }
+                        extraBody
                             ?.filterKeys { it !in AGENT_REQUEST_FIELDS }
                             ?.forEach { (key, value) -> put(key, value) }
                         openAIConfig.reasoningEffort
@@ -92,7 +95,7 @@ internal class AiConfigKoogBridge {
                         LLMCapability.ToolChoice,
                         LLMCapability.Vision.Image,
                     ),
-                contextLength = DEFAULT_CONTEXT_LENGTH,
+                contextLength = contextWindow,
             )
 
         return FlareAgentRuntime(
@@ -103,8 +106,6 @@ internal class AiConfigKoogBridge {
     }
 
     private companion object {
-        const val DEFAULT_CONTEXT_LENGTH = 128_000L
-
         // The agent owns conversation history, tool selection and response transport.
         val AGENT_REQUEST_FIELDS = setOf("model", "messages", "tools", "tool_choice", "stream", "stream_options", "n")
     }

@@ -4,9 +4,9 @@ import FlareAppleCore
 import FlareAppleUI
 import PhotosUI
 import CoreTransferable
-import UniformTypeIdentifiers
 import SwiftUIIntrospect
 import SwiftUIBackports
+import UniformTypeIdentifiers
 
 final class ComposePrefill: Hashable {
     let id = UUID()
@@ -198,8 +198,8 @@ struct ComposeScreen: View {
                 applyCursorIfPossible()
             }
         }
-        .onChange(of: mediaViewModel.items.count) { _, newValue in
-            presenter.state.setMediaSize(value: Int32(newValue))
+        .onChange(of: mediaViewModel.items.map { $0.mimeType ?? "" }) { _, mimeTypes in
+            presenter.state.setMediaMimeTypes(value: mimeTypes)
         }
         .sheet(isPresented: $showDraftSheet) {
             draftSheet
@@ -457,10 +457,7 @@ struct ComposeScreen: View {
                 .frame(width: size, height: size)
                 .clipShape(Circle())
                 .overlay(Circle().stroke(Color(.systemBackground), lineWidth: 2))
-            Image(fontAwesome: user.platformIcon.fontAwesomeIcon)
-                .resizable()
-                .scaledToFit()
-                .frame(width: size * 0.34, height: size * 0.34)
+            TabIcon(icon: user.platformIcon, size: size * 0.34)
                 .padding(3)
                 .background(Color(.systemBackground))
                 .clipShape(Circle())
@@ -507,7 +504,7 @@ struct ComposeScreen: View {
             fileName: prefill.fileName
         )
         presenter.state.setText(value: prefill.text)
-        presenter.state.setMediaSize(value: Int32(mediaViewModel.items.count))
+        presenter.state.setMediaMimeTypes(value: mediaViewModel.items.map { $0.mimeType ?? "" })
         pendingCursor = prefill.cursorPosition
         requestComposerFocus()
         applyCursorIfPossible()

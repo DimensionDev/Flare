@@ -6,6 +6,8 @@ import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.UiTranslatableText
+import dev.dimension.flare.ui.model.createSampleStatus
+import dev.dimension.flare.ui.model.createSampleUser
 import dev.dimension.flare.ui.render.toUi
 import dev.dimension.flare.ui.render.toUiPlainText
 import dev.dimension.flare.ui.route.DeeplinkRoute
@@ -16,6 +18,20 @@ import kotlin.test.assertIs
 import kotlin.time.Instant
 
 class MediaClickPolicyTest {
+    @Test
+    fun linkPreviewMediaOpensThePostBrowserTarget() {
+        val target = DeeplinkRoute.OpenLinkDirectly("https://example.com/post/1?source=plugin#content")
+        val post =
+            createSampleStatus(createSampleUser()).copy(
+                images = persistentListOf(UiMedia.Image("https://example.com/cover.jpg", "preview", null, 100f, 100f, false)),
+                clickEvent = ClickEvent.Deeplink(target),
+                mediaClickPolicy = UiTimelineV2.Post.MediaClickPolicy.OpenPostClickEvent,
+            )
+        var opened: DeeplinkRoute? = null
+        post.openMedia(index = 0, launcher = { opened = DeeplinkRoute.parse(it) })
+        assertEquals(target, opened)
+    }
+
     @Test
     fun openingTheSecondIdenticalImageKeepsItsIndex() {
         val image = UiMedia.Image("image", "preview", null, 100f, 100f, false)

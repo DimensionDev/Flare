@@ -279,6 +279,8 @@ targets:
     platform: iOS
     sources:
       - path: iosControllerTests
+        excludes:
+          - "**/*.md"
     dependencies:
       - target: iOS
       - target: FlareAppleCore

@@ -136,6 +136,14 @@ struct SettingsScreen: View {
                         Image(fontAwesome: .globe)
                     }
                 }
+                NavigationLink(value: Route.pluginManagement) {
+                    Label {
+                        Text("settings_plugins_title")
+                        Text("settings_plugins_subtitle")
+                    } icon: {
+                        Image(fontAwesome: .puzzlePiece)
+                    }
+                }
             }
 
             Section {

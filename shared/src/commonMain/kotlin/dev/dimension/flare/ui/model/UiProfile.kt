@@ -3,6 +3,7 @@ package dev.dimension.flare.ui.model
 import androidx.compose.runtime.Immutable
 import dev.dimension.flare.common.SerializableImmutableList
 import dev.dimension.flare.common.SerializableImmutableMap
+import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.humanizer.Formatter.humanize
 import dev.dimension.flare.ui.render.UiRichText
@@ -23,7 +24,7 @@ public data class UiProfile public constructor(
     internal val nameInternal: UiRichText,
     @SerialName("platformType")
     val platformId: String,
-    val platformIcon: UiIcon = UiIcon.World,
+    val platformIcon: IconType = UiIcon.World.asType(),
     public val clickEvent: ClickEvent,
     public val banner: UiMedia.Image?,
     public val description: UiRichText?,
@@ -33,6 +34,7 @@ public data class UiProfile public constructor(
     public val matrices: Matrices,
     public val mark: SerializableImmutableList<Mark>,
     public val bottomContent: BottomContent?,
+    public val pluginId: String? = null,
 ) {
     public constructor(
         key: MicroBlogKey,
@@ -40,7 +42,7 @@ public data class UiProfile public constructor(
         avatar: String,
         nameInternal: UiRichText,
         platformId: String,
-        platformIcon: UiIcon = UiIcon.World,
+        platformIcon: IconType = UiIcon.World.asType(),
         clickEvent: ClickEvent,
         banner: String?,
         description: UiRichText?,
@@ -80,6 +82,7 @@ public data class UiProfile public constructor(
     }
 
     internal fun mergeWith(existing: UiProfile): UiProfile {
+        if (pluginId != existing.pluginId) return this
         val keepExistingHandle = handle.raw.isBlank()
         val keepExistingName = nameInternal.raw.isBlank()
         return UiProfile(
@@ -96,6 +99,7 @@ public data class UiProfile public constructor(
             matrices = matrices.mergeWith(existing.matrices),
             mark = (existing.mark + mark).distinct().toPersistentList(),
             bottomContent = bottomContent.mergeWith(existing.bottomContent),
+            pluginId = pluginId,
         )
     }
 

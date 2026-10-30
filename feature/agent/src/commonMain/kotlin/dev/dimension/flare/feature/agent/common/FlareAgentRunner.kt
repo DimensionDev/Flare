@@ -3,20 +3,22 @@ package dev.dimension.flare.feature.agent.common
 import ai.koog.agents.chatMemory.feature.ChatHistoryProvider
 import ai.koog.agents.chatMemory.feature.ChatMemory
 import ai.koog.agents.core.agent.AIAgent
+import ai.koog.agents.core.agent.context.AIAgentGraphContextBase
 import ai.koog.agents.core.dsl.builder.node
 import ai.koog.agents.core.dsl.builder.strategy
+import ai.koog.agents.core.dsl.extension.ReceivedToolResults
 import ai.koog.agents.core.dsl.extension.nodeExecuteTools
-import ai.koog.agents.core.dsl.extension.nodeLLMSendToolResults
-import ai.koog.agents.core.dsl.extension.nodeLLMSendToolResultsWithoutTools
 import ai.koog.agents.core.dsl.extension.onTextMessage
 import ai.koog.agents.core.dsl.extension.onToolCalls
 import ai.koog.agents.core.tools.ToolRegistry
 import ai.koog.agents.core.utils.ConfigureAction
 import ai.koog.agents.features.eventHandler.feature.EventHandler
 import ai.koog.prompt.Prompt
+import ai.koog.prompt.dsl.PromptBuilder
 import ai.koog.prompt.message.AttachmentContent
 import ai.koog.prompt.message.AttachmentSource
 import ai.koog.prompt.message.Message
+import ai.koog.prompt.message.MessagePart
 import dev.dimension.flare.common.MimeTypes
 import dev.dimension.flare.data.network.ai.AiImagePreparer
 import dev.dimension.flare.feature.agent.presenter.AgentMessagePart
@@ -28,7 +30,11 @@ import dev.dimension.flare.feature.agent.runtime.FlareAgentRuntimeProvider
 import dev.dimension.flare.feature.agent.runtime.supportsAgentImageFallback
 import dev.dimension.flare.shared.image.ImageCompressor
 import dev.dimension.flare.ui.model.UiMedia
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
 import org.koin.core.annotation.Single
 import kotlin.uuid.Uuid
@@ -49,10 +55,21 @@ internal class FlareAgentRunner(
         conversationId: String,
         onTrace: suspend (AgentTrace) -> Unit,
     ): AgentRunResult {
+        val confirmedAction = chatHistoryProvider.consumeConfirmation(conversationId)
         val runtime =
             runtimeProvider.createRuntime()
                 ?: throw FlareAgentUnavailableException(runtimeProvider.availability())
-        val toolSet = toolProvider.resolve(request.toolContext)
+        val toolSet =
+            toolProvider.resolve(
+                request.toolContext.copy(confirmedAction = confirmedAction),
+            )
+        if (request.retryMode != null) {
+            checkNotNull(chatHistoryProvider.consumeRetry(conversationId)) { "This attempt is no longer retryable" }.let { failure ->
+                toolSet.messagePartStore.addPosts(failure.supportingParts.filterIsInstance<AgentMessagePart.PostCard>().map { it.post })
+                toolSet.messagePartStore.addUsers(failure.supportingParts.filterIsInstance<AgentMessagePart.UserCard>().map { it.user })
+                failure.inputRequest?.let { toolSet.inputRequestStore.set(it) }
+            }
+        }
         val resolvedRequest = request.withToolSet(toolSet)
         val agent =
             runtime.createAgent(
@@ -74,6 +91,7 @@ internal class FlareAgentRunner(
                     } else {
                         null
                     },
+                storeCheckpoint = chatHistoryProvider::storeCheckpoint,
                 storeMessages = { id, messages ->
                     chatHistoryProvider.storeAssistantResponse(
                         conversationId = id,
@@ -89,6 +107,12 @@ internal class FlareAgentRunner(
                 parts = toolSet.messagePartStore.snapshot(),
                 inputRequest = toolSet.inputRequestStore.snapshot(),
             )
+        } catch (exception: Throwable) {
+            generateSequence(exception) { it.cause }.filterIsInstance<AgentRetryableException>().firstOrNull()?.let { failure ->
+                failure.supportingParts = toolSet.messagePartStore.snapshot()
+                failure.inputRequest = toolSet.inputRequestStore.snapshot()
+            }
+            throw exception
         } finally {
             withContext(NonCancellable) {
                 try {
@@ -107,11 +131,13 @@ internal fun FlareAgentRuntime.createAgent(
     chatHistoryProvider: ChatHistoryProvider,
     prepareImage: (suspend (UiMedia.Image, Int) -> AttachmentSource.Image)? = null,
     storeMessages: suspend (String, List<Message>) -> Unit = chatHistoryProvider::store,
-): AIAgent<Prompt, String> =
-    AIAgent
+    storeCheckpoint: suspend (String, List<Message>, AgentContextCheckpoint) -> Unit = { _, _, _ -> },
+): AIAgent<Prompt, String> {
+    val compaction = AgentContextCompaction()
+    return AIAgent
         .builder()
         .promptExecutor(
-            if (prepareImage == null) promptExecutor else AgentImageFallback(promptExecutor, request.images, prepareImage, onTrace),
+            AgentImageFallback(promptExecutor, request.images, prepareImage, onTrace),
         ).llmModel(model)
         .toolRegistry(request.toolRegistry)
         .id(request.agentId)
@@ -123,21 +149,37 @@ internal fun FlareAgentRuntime.createAgent(
         .maxIterations(request.maxIterations)
         .graphStrategy(
             strategy<Prompt, String>(request.strategyName) {
-                val nodeAnalyze by node<Prompt, Message.Assistant>(request.analyzeNodeName) { prompt ->
+                val nodeAnalyze by node<Prompt, Message.Assistant>(request.analyzeNodeName) { inputPrompt ->
                     llm.writeSession {
-                        appendPrompt {
-                            messages(prompt.messages)
+                        prompt =
+                            prompt.withMessages { messages ->
+                                config.prompt.messages.filterIsInstance<Message.System>() + messages.filterNot { it is Message.System }
+                            }
+                    }
+                    requestAgentResponse(
+                        compaction,
+                        chatHistoryProvider,
+                        storeCheckpoint,
+                        finishAfterToolResults = request.retryMode == AgentRetryMode.Finish,
+                    ) {
+                        if (request.retryMode == null || request.retryMode == AgentRetryMode.Restart) {
+                            messages(inputPrompt.messages)
                         }
-                        requestLLM()
                     }
                 }
                 val nodeExecuteTools by nodeExecuteTools(request.executeToolsNodeName)
-                val nodeSendToolResults by
-                    if (request.finishAfterToolResults) {
-                        nodeLLMSendToolResultsWithoutTools(request.sendToolResultsNodeName)
-                    } else {
-                        nodeLLMSendToolResults(request.sendToolResultsNodeName)
+                val nodeSendToolResults by node<ReceivedToolResults, Message.Assistant>(request.sendToolResultsNodeName) { results ->
+                    requestAgentResponse(
+                        compaction,
+                        chatHistoryProvider,
+                        storeCheckpoint,
+                        finishAfterToolResults = request.finishAfterToolResults,
+                    ) {
+                        user {
+                            results.toolResults.forEach { toolResult -> toolResult(toolResult.toMessagePart()) }
+                        }
                     }
+                }
 
                 edge(nodeStart forwardTo nodeAnalyze)
                 edge(nodeAnalyze forwardTo nodeExecuteTools onToolCalls { true })
@@ -152,7 +194,6 @@ internal fun FlareAgentRuntime.createAgent(
             ChatMemory,
             ConfigureAction { config ->
                 config.chatHistoryProvider = chatHistoryProvider
-                config.windowSize(request.chatMemoryWindowSize)
             },
         ).install(
             EventHandler,
@@ -239,6 +280,80 @@ internal fun FlareAgentRuntime.createAgent(
                 }
             },
         ).build()
+}
+
+private suspend fun AIAgentGraphContextBase.requestAgentResponse(
+    compaction: AgentContextCompaction,
+    chatHistoryProvider: ChatHistoryProvider,
+    storeCheckpoint: suspend (String, List<Message>, AgentContextCheckpoint) -> Unit,
+    finishAfterToolResults: Boolean = false,
+    input: PromptBuilder.() -> Unit,
+): Message.Assistant {
+    // Another tool round needs three more nodes: tools, model, and finish.
+    val summarize = !finishAfterToolResults && stateManager.withStateLock { it.iterations > config.maxAgentIterations - 3 }
+    return llm.writeSession {
+        appendPrompt(input)
+        prompt =
+            prompt.withMessages { messages ->
+                messages.map { if (it.id == null) it.withAgentMessageId(Uuid.random().toString()) else it }
+            }
+        // Retry only from a persisted model boundary, after the whole tool batch has completed.
+        chatHistoryProvider.store(runId, prompt.messages)
+        try {
+            compaction.request(this, { messages, checkpoint -> storeCheckpoint(runId, messages, checkpoint) }) {
+                when {
+                    summarize -> {
+                        val originalPrompt = prompt
+                        val response =
+                            try {
+                                appendPrompt {
+                                    system(
+                                        """
+                                        This run is reaching its step limit. Tools are disabled for this response.
+                                        Summarize completed work, remaining work, and next steps in the user's language.
+                                        Explain that the user can ask you to continue. Do not claim unfinished work is complete.
+                                        """.trimIndent(),
+                                    )
+                                }
+                                requestLLMWithoutTools()
+                            } finally {
+                                // The limit instruction must not constrain the next user turn.
+                                prompt = originalPrompt
+                            }
+                        check(
+                            response.parts.none { it is MessagePart.Tool.Call },
+                        ) { "Tools are disabled while summarizing at the step limit" }
+                        appendPrompt { message(response) }
+                        response
+                    }
+
+                    finishAfterToolResults -> {
+                        requestLLMWithoutTools()
+                    }
+
+                    else -> {
+                        requestLLM()
+                    }
+                }
+            }
+        } catch (exception: Throwable) {
+            if (exception is CancellationException) {
+                currentCoroutineContext().ensureActive()
+                if (exception !is TimeoutCancellationException) throw exception
+            }
+            throw AgentRetryableException(
+                exception,
+                if (summarize ||
+                    finishAfterToolResults
+                ) {
+                    AgentRetryMode.Finish
+                } else {
+                    AgentRetryMode.Resume
+                },
+            )
+        }
+    }
+}
 
 internal data class AgentRunResult(
     val text: String,
@@ -256,11 +371,11 @@ internal data class FlareAgentRequest(
     val sendToolResultsNodeName: String,
     val toolContext: AgentToolContext = AgentToolContext.Empty,
     val temperature: Double = 0.2,
-    val maxIterations: Int = 16,
+    val maxIterations: Int = 256,
     val finishAfterToolResults: Boolean = false,
-    val chatMemoryWindowSize: Int = 20,
     val images: List<UiMedia.Image> = emptyList(),
     val supportingParts: List<AgentMessagePart> = emptyList(),
+    val retryMode: AgentRetryMode? = null,
     private val toolSet: AgentToolSet = AgentToolSet.Empty,
 ) {
     val toolRegistry: ToolRegistry = toolSet.toolRegistry
@@ -282,8 +397,8 @@ internal data class FlareAgentRequest(
         )
 }
 
-internal class FlareAgentUnavailableException(
-    val availability: AgentAvailability,
+public class FlareAgentUnavailableException(
+    public val availability: AgentAvailability,
 ) : IllegalStateException("Flare agent is unavailable: $availability")
 
 private fun String.withToolGuidance(guidance: String): String =

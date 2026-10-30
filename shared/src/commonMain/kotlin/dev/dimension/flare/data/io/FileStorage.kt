@@ -9,6 +9,7 @@ import okio.Path
 import okio.Path.Companion.toPath
 import okio.buffer
 import okio.use
+import kotlin.native.HiddenFromObjC
 import kotlin.uuid.Uuid
 
 internal interface FileStorage {
@@ -42,12 +43,26 @@ internal interface FileStorage {
     fun list(path: Path): List<Path>
 }
 
+/** A narrow, plugin-agnostic way for feature modules to allocate app-owned files. */
+@HiddenFromObjC
+public interface AppFileStore {
+    public val fileSystem: FileSystem
+
+    public fun directory(name: String): Path
+}
+
 internal open class OkioFileStorage(
-    val fileSystem: FileSystem,
+    override val fileSystem: FileSystem,
     private val root: Path,
     private val cacheRoot: Path = root.resolve("cache"),
-) : FileStorage {
+) : FileStorage,
+    AppFileStore {
     override fun cacheDirectory(): Path = cacheRoot
+
+    override fun directory(name: String): Path {
+        require(name.matches(Regex("[a-z0-9][a-z0-9._-]{0,63}"))) { "Invalid app data directory name" }
+        return root.resolve(name)
+    }
 
     override fun dataStoreFile(fileName: String): Path = root.resolve(fileName)
 

@@ -127,6 +127,7 @@ import dev.dimension.flare.ui.component.EmojiPicker
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.NetworkImage
+import dev.dimension.flare.ui.component.TabIcon
 import dev.dimension.flare.ui.component.status.CommonStatusComponent
 import dev.dimension.flare.ui.component.status.StatusVisibilityComponent
 import dev.dimension.flare.ui.component.toImageVector
@@ -1083,10 +1084,10 @@ private fun ComposeAccountAvatar(
                     .padding(2.dp),
             contentAlignment = Alignment.Center,
         ) {
-            FAIcon(
-                imageVector = user.platformIcon.toImageVector(),
+            TabIcon(
+                icon = user.platformIcon,
                 contentDescription = null,
-                modifier = Modifier.size(size * 0.24f),
+                size = size * 0.24f,
             )
         }
     }
@@ -1175,8 +1176,9 @@ private fun composePresenter(
             }
 
     mediaState.onSuccess {
-        LaunchedEffect(it.medias.size) {
-            state.setMediaSize(it.medias.size)
+        val mimeTypes = it.medias.map { media -> FileItem(media.file).mimeType.orEmpty() }
+        LaunchedEffect(mimeTypes) {
+            state.setMediaMimeTypes(mimeTypes)
         }
     }
 

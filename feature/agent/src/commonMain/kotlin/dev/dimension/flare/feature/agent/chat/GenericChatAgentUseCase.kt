@@ -5,14 +5,12 @@ import dev.dimension.flare.common.Locale
 import dev.dimension.flare.data.repository.AccountMicroblogDataSource
 import dev.dimension.flare.feature.agent.common.AgentChatHistoryProvider
 import dev.dimension.flare.feature.agent.common.AgentConversationEvent
+import dev.dimension.flare.feature.agent.common.AgentRetryMode
 import dev.dimension.flare.feature.agent.common.AgentToolContext
 import dev.dimension.flare.feature.agent.common.AgentTrace
 import dev.dimension.flare.feature.agent.common.FlareAgentRequest
 import dev.dimension.flare.feature.agent.common.FlareAgentRunner
-import dev.dimension.flare.feature.agent.common.FlareAgentUnavailableException
 import dev.dimension.flare.feature.agent.common.resolveAgentVisibleResult
-import dev.dimension.flare.feature.agent.runtime.AgentAvailability
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.channelFlow
@@ -27,12 +25,14 @@ internal class GenericChatAgentUseCase(
         userInput: String,
         searchDataSources: List<AccountMicroblogDataSource>,
         conversationId: String,
+        retryMode: AgentRetryMode? = null,
     ): Flow<AgentConversationEvent<Unit, AgentTrace>> =
         channelFlow {
             run(
                 userInput = userInput,
                 searchDataSources = searchDataSources,
                 conversationId = conversationId,
+                retryMode = retryMode,
             )
         }
 
@@ -44,16 +44,18 @@ internal class GenericChatAgentUseCase(
         userInput: String,
         searchDataSources: List<AccountMicroblogDataSource>,
         conversationId: String,
+        retryMode: AgentRetryMode?,
     ) {
         val userInputValue = userInput.trim()
-        if (userInputValue.isBlank()) {
+        if (retryMode == null && userInputValue.isBlank()) {
             return
         }
         val result =
-            try {
-                agentRunner.run(
+            agentRunner
+                .run(
                     request =
                         FlareAgentRequest(
+                            retryMode = retryMode,
                             prompt = userInputValue.toGenericChatPrompt(),
                             systemPrompt = GENERIC_CHAT_SYSTEM_PROMPT,
                             agentId = "flare-generic-chat",
@@ -66,23 +68,12 @@ internal class GenericChatAgentUseCase(
                                     searchDataSources = searchDataSources,
                                 ),
                             temperature = 0.5,
-                            maxIterations = MAX_AGENT_ITERATIONS,
                             finishAfterToolResults = false,
-                            chatMemoryWindowSize = CHAT_MEMORY_WINDOW_SIZE,
                         ),
                     conversationId = conversationId,
                 ) { trace ->
                     send(AgentConversationEvent.Trace(trace))
                 }
-            } catch (throwable: Throwable) {
-                if (throwable is CancellationException) {
-                    throw throwable
-                }
-                if (throwable is FlareAgentUnavailableException) {
-                    throw GenericChatAgentUnavailableException(throwable.availability)
-                }
-                throw throwable
-            }
 
         val visibleResult = resolveAgentVisibleResult(result.text, result.inputRequest)
         val parts =
@@ -120,9 +111,6 @@ internal class GenericChatAgentUseCase(
         }
 
     private companion object {
-        const val MAX_AGENT_ITERATIONS = 32
-        const val CHAT_MEMORY_WINDOW_SIZE = 30
-
         const val GENERIC_CHAT_SYSTEM_PROMPT =
             """
             You are Flare's general-purpose chat assistant.
@@ -149,7 +137,3 @@ internal class GenericChatAgentUseCase(
             """
     }
 }
-
-public class GenericChatAgentUnavailableException public constructor(
-    public val availability: AgentAvailability,
-) : IllegalStateException("Generic chat agent is unavailable: $availability")

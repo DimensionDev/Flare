@@ -2,6 +2,57 @@ import Foundation
 import KotlinSharedUI
 import SwiftUI
 
+public func loginCookieSnapshot(
+    cookies: [HTTPCookie],
+    probes: [LoginCookieProbe],
+    fallbackUrl: String
+) -> LoginCookieSnapshot {
+    let fallbackURL = URL(string: fallbackUrl)
+    let rawHeader =
+        cookies
+            .filter { $0.matchesLogin(url: fallbackURL) }
+            .map { "\($0.name)=\($0.value)" }
+            .joined(separator: "; ")
+    let preferredCookies = cookies.sorted {
+        if $0.path.count != $1.path.count { return $0.path.count > $1.path.count }
+        let domains = [$0.domain, $1.domain].map { $0.trimmingCharacters(in: CharacterSet(charactersIn: ".")) }
+        if domains[0].count != domains[1].count { return domains[0].count > domains[1].count }
+        return !$0.domain.hasPrefix(".") && $1.domain.hasPrefix(".")
+    }
+    let values = probes.flatMap { probe -> [LoginCookieValue] in
+        let url = URL(string: probe.url)
+        var names = Set(probe.names)
+        return preferredCookies.compactMap { cookie in
+            guard cookie.matchesLogin(url: url), names.remove(cookie.name) != nil else { return nil }
+            return LoginCookieValue(sourceUrl: probe.url, name: cookie.name, value: cookie.value)
+        }
+    }
+    var capturedNames: [String: Set<String>] = [:]
+    let uniqueValues = values.filter { capturedNames[$0.sourceUrl, default: []].insert($0.name).inserted }
+    return LoginCookieSnapshot(values: uniqueValues, rawHeader: rawHeader.isEmpty ? nil : rawHeader)
+}
+
+private extension HTTPCookie {
+    func matchesLogin(url: URL?) -> Bool {
+        guard let url, let host = url.host?.lowercased() else { return false }
+        if isSecure && url.scheme?.lowercased() != "https" { return false }
+
+        let rawDomain = domain.lowercased()
+        let cookieDomain = rawDomain.trimmingCharacters(in: CharacterSet(charactersIn: "."))
+        let domainMatches =
+            rawDomain.hasPrefix(".")
+                ? host == cookieDomain || host.hasSuffix(".\(cookieDomain)")
+                : host == cookieDomain
+        let requestPath = url.path.isEmpty ? "/" : url.path
+        let cookiePath = path.isEmpty ? "/" : path
+        let pathMatches =
+            requestPath == cookiePath ||
+            (requestPath.hasPrefix(cookiePath) &&
+                (cookiePath.hasSuffix("/") || requestPath.dropFirst(cookiePath.count).first == "/"))
+        return domainMatches && pathMatches
+    }
+}
+
 public func localizedPresentationString(
     _ key: String,
     fallback: String,
@@ -49,6 +100,8 @@ public extension UiText {
             localized.string.text
         case .raw(let raw):
             raw.string
+        case .externalRef(let external):
+            PluginTextResolverV1.shared.resolve(text: external)
         }
     }
 }

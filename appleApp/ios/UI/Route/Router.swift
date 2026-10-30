@@ -1,5 +1,5 @@
 import SwiftUI
-import KotlinSharedUI
+@preconcurrency import KotlinSharedUI
 import LazyPager
 import Combine
 import FlareAppleCore
@@ -12,6 +12,7 @@ struct Router<Root: View>: View {
     @State private var alertRoute: Route? = nil
     @State private var deepLinkPresenter: KotlinPresenter<DeepLinkPresenterState>
     @State private var deepLinkHandler: DeepLinkHandler
+    private let pluginOAuthCallbacks = PluginOAuthCallbackFacadeV1()
     
     init(@ViewBuilder root: @escaping (@escaping (Route) -> Void) -> Root) {
         self.root = root
@@ -83,7 +84,11 @@ struct Router<Root: View>: View {
         })
         .onOpenURL { url in
             let targetURL = url.openInFlareTargetURL ?? url
-            deepLinkPresenter.state.handle(url: targetURL.absoluteString)
+            if pluginOAuthCallbacks.canHandle(url: targetURL.absoluteString) {
+                Task { try? await pluginOAuthCallbacks.handle(url: targetURL.absoluteString) }
+            } else {
+                deepLinkPresenter.state.handle(url: targetURL.absoluteString)
+            }
         }
         .onAppear {
             deepLinkHandler.onRoute = { route in

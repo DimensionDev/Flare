@@ -72,7 +72,23 @@ class ExportAppDatabasePresenterTest : RobolectricTest() {
                 ).setQueryCoroutineContext(Dispatchers.Unconfined)
                 .build()
         scope = CoroutineScope(SupervisorJob() + Dispatchers.Unconfined)
-        val accounts = AccountRepository(db, scope, AppDataStore(storage), cache, proxy, testPlatformRegistry())
+        val accounts =
+            AccountRepository(
+                db,
+                scope,
+                AppDataStore(storage),
+                cache,
+                proxy,
+                testPlatformRegistry(),
+                dev.dimension.flare.data.repository.DraftRepository(
+                    db,
+                    dev.dimension.flare.data.repository
+                        .DraftMediaStore(
+                            dev.dimension.flare.data.io
+                                .InMemoryFileStorage(),
+                        ),
+                ),
+            )
 
         startKoin {
             modules(

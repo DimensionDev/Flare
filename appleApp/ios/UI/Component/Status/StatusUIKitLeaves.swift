@@ -1,4 +1,5 @@
 import UIKit
+import Kingfisher
 import FlareAppleUI
 import KotlinSharedUI
 import FlareAppleCore
@@ -488,9 +489,35 @@ final class StatusTopEndView: UIView, ManualLayoutMeasurable, TimelineHeightProv
     private let visibility = StatusVisibilityImageView()
     private let translation = TranslateStatusStateView()
     private let platformLogo = UIImageView()
+    private var platformIcon: IconType?
     private let time = DateTimeUILabel()
     private let insightButton = UIButton(type: .system)
     private var onInsightTapped: (() -> Void)?
+
+    private func setPlatformIcon(_ icon: IconType?) {
+        guard platformIcon != icon else { return }
+        if platformIcon is IconType.Url { platformLogo.cancelMediaLoad() }
+        platformIcon = icon
+        guard let icon else {
+            platformLogo.image = nil
+            return
+        }
+        switch onEnum(of: icon) {
+        case .material(let material):
+            platformLogo.image = UIImage(fontAwesome: material.icon.fontAwesomeIcon)
+        case .url(let url):
+            let scale = traitCollection.displayScale
+            platformLogo.setMedia(
+                UiMediaImage(url: url.url, proxy: ProxyRef.Global.shared),
+                options: [
+                    .processor(ImageDownsamplingProcessor(pixelSize: CGSize(width: 14 * scale, height: 14 * scale), fillsBounds: false)),
+                    .scaleFactor(scale), .backgroundDecode, .asyncCacheTypeCheck,
+                ]
+            )
+        default:
+            platformLogo.image = nil
+        }
+    }
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -599,13 +626,14 @@ final class StatusTopEndView: UIView, ManualLayoutMeasurable, TimelineHeightProv
 
         if showPlatformLogo {
             platformLogo.isHidden = false
-            platformLogo.image = UIImage(fontAwesome: post.platformIcon.fontAwesomeIcon)
+            setPlatformIcon(post.platformIcon)
             platformLogo.isAccessibilityElement = true
             platformLogo.accessibilityLabel = String(
                 format: String(localized: "status_platform", defaultValue: "Platform: %@"),
                 post.platformId
             )
         } else {
+            setPlatformIcon(nil)
             platformLogo.isHidden = true
             platformLogo.isAccessibilityElement = false
             platformLogo.accessibilityLabel = nil

@@ -322,6 +322,40 @@ class AgentImageFallbackTest {
             }
         }
 
+    @Test
+    fun unavailableImagePreparationFallsBackWithinTheRequestAndPreservesOriginalHistory() =
+        runTest {
+            Fixture(listOf(400 to DOWNLOAD_ERROR, 200 to SUCCESS)).use { fixture ->
+                val history = MemoryHistory()
+                val request =
+                    FlareAgentRequest(
+                        prompt = prompt(),
+                        systemPrompt = "Analyze the post",
+                        agentId = "web-image-test",
+                        strategyName = "web-image-test",
+                        analyzeNodeName = "analyze",
+                        executeToolsNodeName = "tools",
+                        sendToolResultsNodeName = "results",
+                    )
+                val agent = fixture.runtime.createAgent(request, {}, history, prepareImage = null)
+                try {
+                    assertEquals("done", agent.run(request.prompt, "conversation"))
+                    assertEquals(2, fixture.requests.size)
+                    assertTrue(
+                        fixture.requests
+                            .last()
+                            .imageUrls()
+                            .isEmpty(),
+                    )
+                    assertEquals(0, fixture.downloads)
+                    assertTrue(Json.encodeToString(history.messages).contains(URL))
+                    assertEquals(1, history.messages.filterIsInstance<Message.User>().size)
+                } finally {
+                    agent.close()
+                }
+            }
+        }
+
     private class Fixture(
         responses: List<Pair<Int, String>>,
         images: List<UiMedia.Image> = listOf(image),

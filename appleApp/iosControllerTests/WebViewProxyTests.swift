@@ -5,6 +5,7 @@ import FlareAppleUI
 import WebKit
 @preconcurrency import Network
 import CryptoKit
+import Security
 import KotlinSharedUI
 @testable import FlareAppleCore
 @testable import Flare
@@ -155,7 +156,7 @@ final class WebViewProxyTests: XCTestCase {
     }
 
     func testLoginScreensLoadOnceAndKeepCookiesOnGlobalChange() async throws {
-        let target = try await server(.http)
+        let target = try await server(.https)
         for modern in [false, true] {
             try await select(ProxyPolicy(mode: .direct, proxyId: nil))
             let path = modern ? "/modern-login" : "/legacy-login"
@@ -298,7 +299,8 @@ private final class NavigationResult: NSObject, WKNavigationDelegate {
 
 @MainActor
 private final class WebServer {
-    enum Kind { case http, socks, tlsFailure }
+    enum Kind { case http, https, socks, tlsFailure }
+    private let kind: Kind
     let listener: NWListener
     var requests: [String] = []
     var addresses: [String] = []
@@ -308,10 +310,24 @@ private final class WebServer {
     var webSockets = 0
     var closedSockets = 0
     private var connections: [NWConnection] = []
-    var url: URL { URL(string: "http://127.0.0.1:\(listener.port!.rawValue)")! }
+    var url: URL { URL(string: "\(kind == .https ? "https://localhost" : "http://127.0.0.1"):\(listener.port!.rawValue)")! }
 
     init(_ kind: Kind) throws {
-        let parameters = NWParameters.tcp
+        self.kind = kind
+        let parameters: NWParameters
+        if kind == .https {
+            let url = try XCTUnwrap(Bundle(for: WebViewProxyTests.self).url(forResource: "localhost", withExtension: "p12"))
+            let data = try Data(contentsOf: url)
+            var items: CFArray?
+            let status = SecPKCS12Import(data as CFData, [kSecImportExportPassphrase as String: "flare-test"] as CFDictionary, &items)
+            guard status == errSecSuccess else { throw NSError(domain: NSOSStatusErrorDomain, code: Int(status)) }
+            let identity = try XCTUnwrap((items as? [[String: Any]])?.first?[kSecImportItemIdentity as String]) as! SecIdentity
+            let tls = NWProtocolTLS.Options()
+            sec_protocol_options_set_local_identity(tls.securityProtocolOptions, try XCTUnwrap(sec_identity_create(identity)))
+            parameters = NWParameters(tls: tls, tcp: NWProtocolTCP.Options())
+        } else {
+            parameters = .tcp
+        }
         parameters.requiredLocalEndpoint = .hostPort(host: "127.0.0.1", port: .any)
         listener = try NWListener(using: parameters)
         listener.newConnectionHandler = { [weak self] connection in
@@ -321,7 +337,7 @@ private final class WebServer {
                 self.accepted += 1
                 connection.start(queue: .main)
                 switch kind {
-                case .http: self.readHTTP(connection)
+                case .http, .https: self.readHTTP(connection)
                 case .tlsFailure:
                     self.read(1, from: connection) { bytes in self.firstByte = bytes.first; connection.cancel() }
                 case .socks: self.negotiate(connection)

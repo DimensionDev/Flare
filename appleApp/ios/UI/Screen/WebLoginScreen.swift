@@ -8,10 +8,10 @@ import FlareAppleCore
 struct WebLoginScreen: View {
     @Environment(\.dismiss) var dismiss
     @State private var viewModel: WebLoginViewModel?
-    private let onCookie: (String) -> Void
+    private let onCookie: ([HTTPCookie]) -> Void
     let url: String
     init(
-        onCookie: @escaping (String) -> Void,
+        onCookie: @escaping ([HTTPCookie]) -> Void,
         url: String
     ) {
         self.url = url
@@ -28,6 +28,7 @@ struct WebLoginScreen: View {
                                     viewModel.page.load(requestURL)
                                 }
                             }
+                            .task { await viewModel.pollCookies() }
                             .task {
                                 do { for try await _ in viewModel.page.navigations {} }
                                 catch { route.report(error) }
@@ -42,42 +43,38 @@ struct WebLoginScreen: View {
                 }
             }
             .toolbar {
+                ToolbarItem(placement: .principal) {
+                    WebLoginOriginLabel(current: webLoginHTTPSOrigin(viewModel?.page.url) ?? webLoginHTTPSOrigin(URL(string: url)) ?? "", initial: webLoginHTTPSOrigin(URL(string: url)))
+                }
                 ToolbarItem(placement: .cancellationAction) {
                     Button { dismiss() } label: { Label("Cancel", systemImage: "xmark") }
                 }
             }
         }
+        .onDisappear { viewModel?.clearCookie() }
     }
 }
 
 @available(iOS 26.0, *)
 struct NavigationDecider: WebPage.NavigationDeciding {
-    let onCookie: (String) -> Void
+    let onCookie: ([HTTPCookie]) -> Void
     let route: WebViewProxyRoute
     let url: URL?
     func decidePolicy(for action: WebPage.NavigationAction, preferences: inout WebPage.NavigationPreferences) async -> WKNavigationActionPolicy {
-        route.isValid ? .allow : .cancel
+        guard route.isValid else { return .cancel }
+        guard action.target?.isMainFrame != false else { return .allow }
+        return webLoginHTTPSOrigin(action.request.url) == nil ? .cancel : .allow
     }
     func decidePolicy(for response: WebPage.NavigationResponse) async -> WKNavigationResponsePolicy {
         guard route.isValid else { return .cancel }
         getCookies()
-        return .allow
+        return webLoginHTTPSOrigin(response.response.url) == nil ? .cancel : .allow
     }
     func getCookies() {
         route.dataStore.httpCookieStore.getAllCookies { (cookies) in
             guard route.isValid else { return }
-            let cookieString = cookieHeaderString(from: cookies, for: url)
-            self.onCookie(cookieString)
+            self.onCookie(cookies)
         }
-    }
-    private func cookieHeaderString(from cookies: [HTTPCookie], for url: URL?) -> String {
-        let host = url?.host?.lowercased()
-        let filtered = cookies.filter { cookie in
-            guard let host = host else { return true }
-            let domain = cookie.domain.lowercased()
-            return domain == host || (domain.hasPrefix(".") && (domain.hasSuffix(host) || host.hasSuffix(domain)))
-        }
-        return filtered.map { "\($0.name)=\($0.value)" }.joined(separator: "; ")
     }
 }
 
@@ -87,9 +84,9 @@ final class WebLoginViewModel {
     let route: WebViewProxyRoute
     var page: WebPage
     let decider: NavigationDecider
-    let onCookie: (String) -> Void
+    let onCookie: ([HTTPCookie]) -> Void
     init(
-        onCookie: @escaping (String) -> Void,
+        onCookie: @escaping ([HTTPCookie]) -> Void,
         url: String,
         route: WebViewProxyRoute
     ) {
@@ -105,5 +102,47 @@ final class WebLoginViewModel {
             page?.stopLoading()
             page?.load(html: "")
         }
+    }
+    func pollCookies() async {
+        while !Task.isCancelled && route.isValid {
+            try? await Task.sleep(for: .seconds(2))
+            guard !Task.isCancelled && route.isValid else { return }
+            decider.getCookies()
+        }
+    }
+
+    func clearCookie() {
+        clearWebLoginDataStore(dataStore: route.dataStore)
+    }
+}
+
+struct WebLoginOriginLabel: View {
+    let current: String
+    let initial: String?
+
+    var body: some View {
+        Text(current)
+            .lineLimit(1)
+            .foregroundStyle(current.isEmpty || current == initial ? Color.secondary : Color.red)
+    }
+}
+
+func webLoginHTTPSOrigin(_ url: URL?) -> String? {
+    guard let url, url.scheme?.lowercased() == "https", let host = url.host, !host.isEmpty, url.user == nil, url.password == nil else {
+        return nil
+    }
+    if let port = url.port, port != 443 {
+        return "https://\(host):\(port)"
+    }
+    return "https://\(host)"
+}
+
+func clearWebLoginDataStore(dataStore: WKWebsiteDataStore, completion: @escaping @Sendable () -> Void = {}) {
+    dataStore.fetchDataRecords(ofTypes: WKWebsiteDataStore.allWebsiteDataTypes()) { records in
+        dataStore.removeData(
+            ofTypes: WKWebsiteDataStore.allWebsiteDataTypes(),
+            for: records,
+            completionHandler: completion
+        )
     }
 }

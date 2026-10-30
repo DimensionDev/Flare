@@ -16,8 +16,9 @@ import dev.dimension.flare.common.combineLatestFlowLists
 import dev.dimension.flare.common.emptyFlow
 import dev.dimension.flare.common.refreshSuspend
 import dev.dimension.flare.common.toPagingState
-import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
-import dev.dimension.flare.data.datasource.microblog.datasource.UserDataSource
+import dev.dimension.flare.data.datasource.microblog.accountKeyOrNull
+import dev.dimension.flare.data.datasource.microblog.accountProfileFlow
+import dev.dimension.flare.data.datasource.microblog.capabilities
 import dev.dimension.flare.data.datasource.microblog.paging.toPagingSource
 import dev.dimension.flare.data.datasource.microblog.pagingConfig
 import dev.dimension.flare.data.datastore.AppDataStore
@@ -33,7 +34,6 @@ import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.takeSuccess
-import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.web.shared.WebIgnore
 import dev.dimension.flare.web.shared.WebPresenter
@@ -64,9 +64,8 @@ public class DiscoverPresenter : PresenterBase<DiscoverState>() {
         allAccountServicesFlow(accountRepository)
             .map { sources ->
                 sources
-                    .filterIsInstance<AuthenticatedMicroblogDataSource>()
-                    .filter { it is UserDataSource }
-                    .map { it.accountKey }
+                    .filter { it.capabilities.search != null && it.accountProfileFlow() != null }
+                    .mapNotNull { it.accountKeyOrNull }
             }.distinctUntilChanged()
     }
 
@@ -74,15 +73,11 @@ public class DiscoverPresenter : PresenterBase<DiscoverState>() {
         allAccountServicesFlow(accountRepository)
             .map {
                 it
-                    .filterIsInstance<UserDataSource>()
-                    .filterIsInstance<AuthenticatedMicroblogDataSource>()
-                    .toImmutableList()
-            }.map {
-                it.map { dataSource ->
-                    val authenticated = dataSource as UserDataSource
-                    val accountKey = dataSource.accountKey
-                    authenticated.userHandler.userById(accountKey.id).toUi()
-                }
+                    .mapNotNull { dataSource ->
+                        val capabilities = dataSource.capabilities
+                        if (capabilities.search == null) return@mapNotNull null
+                        dataSource.accountProfileFlow()
+                    }.toImmutableList()
             }.combineLatestFlowLists()
             .map {
                 it
@@ -101,8 +96,9 @@ public class DiscoverPresenter : PresenterBase<DiscoverState>() {
             accountServiceFlow(accountType = accountType, repository = accountRepository)
                 .flatMapLatest { dataSource ->
                     runCatching {
+                        val search = requireNotNull(dataSource.capabilities.search)
                         Pager(config = pagingConfig) {
-                            dataSource.discoverUsers().toPagingSource()
+                            search.discoverUsers().toPagingSource()
                         }.flow
                     }.getOrElse { PagingData.emptyFlow(isError = true) }
                 }
@@ -114,8 +110,9 @@ public class DiscoverPresenter : PresenterBase<DiscoverState>() {
             accountServiceFlow(accountType = accountType, repository = accountRepository)
                 .flatMapLatest { dataSource ->
                     runCatching {
+                        val search = requireNotNull(dataSource.capabilities.search)
                         Pager(config = pagingConfig) {
-                            dataSource.discoverHashtags().toPagingSource()
+                            search.discoverHashtags().toPagingSource()
                         }.flow
                     }.getOrElse { PagingData.emptyFlow(isError = true) }
                 }

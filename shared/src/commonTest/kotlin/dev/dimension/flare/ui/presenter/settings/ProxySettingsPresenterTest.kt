@@ -86,7 +86,23 @@ class ProxySettingsPresenterTest : RobolectricTest() {
                         }
                     },
                 )
-            val accounts = AccountRepository(app, scope, AppDataStore(storage), cache, proxy, testPlatformRegistry())
+            val accounts =
+                AccountRepository(
+                    app,
+                    scope,
+                    AppDataStore(storage),
+                    cache,
+                    proxy,
+                    testPlatformRegistry(),
+                    dev.dimension.flare.data.repository.DraftRepository(
+                        app,
+                        dev.dimension.flare.data.repository
+                            .DraftMediaStore(
+                                dev.dimension.flare.data.io
+                                    .InMemoryFileStorage(),
+                            ),
+                    ),
+                )
             startKoin {
                 modules(
                     module {

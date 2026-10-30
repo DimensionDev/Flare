@@ -393,7 +393,7 @@ internal data class FlareAgentRequest(
         )
 }
 
-public open class FlareAgentUnavailableException(
+public class FlareAgentUnavailableException(
     public val availability: AgentAvailability,
 ) : IllegalStateException("Flare agent is unavailable: $availability")
 

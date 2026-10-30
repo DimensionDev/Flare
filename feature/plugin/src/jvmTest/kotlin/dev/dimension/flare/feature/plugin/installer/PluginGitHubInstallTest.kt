@@ -56,7 +56,7 @@ class PluginGitHubInstallTest {
                 store.desired.value.plugins
                     .isEmpty(),
             )
-            val installed = installer.commit(preview, confirmed = true)
+            val installed = installer.commit(preview, confirmed = true, activate = store::install)
             assertEquals(source, installed.source)
             assertTrue(store.running.plugins.isEmpty())
 
@@ -125,7 +125,7 @@ class PluginGitHubInstallTest {
                 stored = true,
             )
             val first = installer.inspect(firstPath, source())
-            installer.commit(first, true)
+            installer.commit(first, true, activate = store::install)
             val changedSource = source(sha = "b".repeat(40))
             val second = installer.inspect(secondPath, changedSource)
 
@@ -147,7 +147,7 @@ class PluginGitHubInstallTest {
         runTest {
             val archive = root / "source.zip"
             TestFppFactory.write(archive, TestFppFactory.validEntries().map { (name, bytes) -> "repo-root/$name" to bytes })
-            val installed = installer.commit(installer.inspect(archive, source()), true)
+            val installed = installer.commit(installer.inspect(archive, source()), true, activate = store::install)
             assertFails { installer.inspect(archive, source(tag = "v2.0.0")) }
             assertFails { installer.inspect(archive, source(), expectedPluginId = "different.plugin") }
             assertEquals(
@@ -198,19 +198,19 @@ class PluginGitHubInstallTest {
         runTest {
             val local = root / "local.fpp"
             TestFppFactory.write(local)
-            val installed = installer.commit(installer.inspect(local), true)
+            val installed = installer.commit(installer.inspect(local), true, activate = store::install)
             val archive = root / "source.zip"
             TestFppFactory.write(archive, TestFppFactory.validEntries().map { (name, bytes) -> "repo-root/$name" to bytes })
             assertFails { installer.inspect(archive, source(), expectedPluginId = installed.pluginId) }
             val preview = installer.inspect(archive, source())
             assertTrue(preview.warnings.any { it.type == PluginInstallWarningTypeV1.SourceChanged })
-            assertFails { installer.commit(preview, confirmed = false) }
+            assertFails { installer.commit(preview, confirmed = false, activate = store::install) }
             assertEquals(
                 installed,
                 store.desired.value.plugins.values
                     .single(),
             )
-            installer.commit(preview, confirmed = true)
+            installer.commit(preview, confirmed = true, activate = store::install)
             assertEquals(
                 source(),
                 store.desired.value.plugins.values

@@ -50,7 +50,6 @@ class PluginManagementMenuTest {
                             platformId = "Example",
                             nameText = UiText.Raw("Example"),
                             version = "1.0.0",
-                            running = true,
                             iconPath = "",
                             sourceUrl = repository.url,
                             availableUpdate = null,

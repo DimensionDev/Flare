@@ -118,7 +118,7 @@ internal class PluginAuthoringServiceV1(
                 entry.record = updated
                 entry.candidate = null
                 // Accepted sources belong to the plugin, even when the caller stops waiting.
-                schedule(entry, revalidate = true)
+                schedule(entry)
                 plugins.value.single { it.id == pluginId }
             }
         }
@@ -159,26 +159,19 @@ internal class PluginAuthoringServiceV1(
             }
         }
 
-    private fun schedule(
-        entry: Entry,
-        revalidate: Boolean = false,
-    ) {
+    private fun schedule(entry: Entry) {
         entry.application?.cancel()
         val record = entry.record
-        if (revalidate) {
-            entry.progress = Progress(phase = PluginAuthoringPhase.Validating)
-            publish(entry)
-        }
+        entry.progress = Progress(phase = PluginAuthoringPhase.Validating)
+        publish(entry)
         entry.application =
             scope.launch {
                 try {
-                    if (revalidate) {
-                        val candidate = prepare(record)
-                        entry.mutex.withLock {
-                            currentCoroutineContext().ensureActive()
-                            if (entries.value[record.id] !== entry || entry.record.revision != record.revision) return@launch
-                            accept(entry, candidate)
-                        }
+                    val candidate = prepare(record)
+                    entry.mutex.withLock {
+                        currentCoroutineContext().ensureActive()
+                        if (entries.value[record.id] !== entry || entry.record.revision != record.revision) return@launch
+                        accept(entry, candidate)
                     }
                     while (true) {
                         val complete =

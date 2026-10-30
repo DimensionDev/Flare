@@ -32,6 +32,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -62,7 +63,6 @@ public data class PluginManagementStateV1(
                             platformId = authoring.platformId,
                             nameText = UiText.Raw(authoring.name),
                             version = "",
-                            running = authoring.running,
                             iconPath = "",
                             sourceUrl = null,
                             availableUpdate = null,
@@ -79,7 +79,6 @@ public data class PluginManagementItemV1(
     val platformId: String,
     val nameText: UiText,
     val version: String,
-    val running: Boolean,
     val iconPath: String,
     val sourceUrl: String?,
     val availableUpdate: GitHubPluginVersionV1?,
@@ -91,7 +90,6 @@ public data class PluginInstallReviewV1(
     val platformId: String,
     val name: String,
     val version: String,
-    val existingVersion: String?,
     val capabilities: List<String>,
     val permissions: List<PluginPermission>,
     val warnings: List<PluginInstallWarningV1>,
@@ -116,15 +114,15 @@ public class PluginManagementPresenterV1(
 
     private val actionMutex = Mutex()
     private val updateMutex = Mutex()
+    private val closed = MutableStateFlow(false)
 
     private val observation: Job =
         combine(
             subsystem.stateStore.desired,
             subsystem.sourceIssues,
             subsystem.runtimePool.issues,
-            subsystem.running,
             subsystem.developmentState,
-        ) { _, _, _, _, _ -> Unit }
+        ) { _, _, _, _ -> Unit }
             .combine(subsystem.authoring.plugins) { _, _ -> Unit }
             .onEach {
                 mutableState.update { current ->
@@ -133,7 +131,21 @@ public class PluginManagementPresenterV1(
             }.launchIn(scope)
 
     public fun close() {
+        if (!closed.compareAndSet(expect = false, update = true)) return
         observation.cancel()
+        scope.launch {
+            observation.join()
+            actionMutex.withLock {
+                if (preview != null) {
+                    try {
+                        withContext(operationDispatcher) { clearPreview() }
+                    } catch (error: Exception) {
+                        if (error is CancellationException) throw error
+                        error.printStackTrace()
+                    }
+                }
+            }
+        }
     }
 
     public suspend fun inspectGitHub(url: String) {
@@ -300,12 +312,10 @@ public class PluginManagementPresenterV1(
 
     private fun snapshot(): PluginManagementStateV1 {
         val desired = subsystem.stateStore.desired.value
-        val running = subsystem.running.value.plugins
         return PluginManagementStateV1(
             plugins =
                 desired.plugins.values.sortedBy(InstalledPluginV1::pluginId).map { installed ->
                     installed.toItem(
-                        running = running[installed.pluginId]?.installed,
                         iconPath =
                             subsystem.stateStore.paths
                                 .iconPath(installed.packageHash, installed.iconExtension)
@@ -354,6 +364,7 @@ public class PluginManagementPresenterV1(
 
     private suspend fun <T> runAction(block: suspend () -> T): T =
         actionMutex.withLock {
+            check(!closed.value) { "Plugin management is closed" }
             mutableState.value = mutableState.value.copy(busy = true, error = null)
             try {
                 withContext(operationDispatcher) { block() }
@@ -368,7 +379,6 @@ public class PluginManagementPresenterV1(
 }
 
 private fun InstalledPluginV1.toItem(
-    running: InstalledPluginV1?,
     iconPath: String,
     availableUpdate: GitHubPluginVersionV1?,
 ): PluginManagementItemV1 =
@@ -377,7 +387,6 @@ private fun InstalledPluginV1.toItem(
         platformId = manifest.platform.id,
         nameText = manifest.name.toUiText(pluginId),
         version = version,
-        running = running != null,
         iconPath = iconPath,
         sourceUrl = (source as? PluginInstallSourceV1.GitHub)?.repository?.url,
         availableUpdate = availableUpdate,
@@ -389,7 +398,6 @@ private fun PreparedPluginInstallV1.toReview(): PluginInstallReviewV1 =
         platformId = platformId,
         name = nameFallback,
         version = version,
-        existingVersion = existingVersion,
         capabilities =
             capabilities.entries
                 .sortedBy { it.key }

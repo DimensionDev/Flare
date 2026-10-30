@@ -39,7 +39,6 @@ class GitHubInstallDialogTest {
             platformId = "Example",
             name = "Example",
             version = "1.2.0",
-            existingVersion = null,
             capabilities = emptyList(),
             warnings = emptyList(),
             sourceUrl = url,

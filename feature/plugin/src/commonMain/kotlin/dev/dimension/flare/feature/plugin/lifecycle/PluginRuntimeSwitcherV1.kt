@@ -143,7 +143,7 @@ internal class PluginRuntimeSwitcherV1(
 
     private fun platform(plugin: RunningPluginV1) =
         PluginPlatformSpecSourceV1(
-            running = PluginRunningSnapshotV1(mapOf(plugin.installed.pluginId to plugin), emptyList(), true),
+            running = PluginRunningSnapshotV1(mapOf(plugin.installed.pluginId to plugin), emptyList()),
             runtimePool = subsystem.runtimePool,
             oauth = subsystem.oauth,
             form = subsystem.form,

@@ -282,7 +282,6 @@ class PluginAccountV1Test {
                     manifestCapabilities = mapOf(PluginAbiV1.Capabilities.POST to previous),
                     negotiatedCapabilities = mapOf(PluginAbiV1.Capabilities.POST to negotiated),
                     credentialSchemaVersion = plugin.installed.manifest.platform.credentialSchemaVersion,
-                    timelineSchemaVersion = 1,
                 ),
             credential = JsonObject(emptyMap()),
         )

@@ -1,6 +1,8 @@
 package dev.dimension.flare.model
 
+import dev.dimension.flare.data.database.app.model.SubscriptionType
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
+import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.tab.TimelineResolver
@@ -25,6 +27,86 @@ import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
 class PlatformRegistryTest {
+    @Test
+    fun repeatedQueriesReuseIndexesUntilPlatformsChange() {
+        var platformReads = 0
+        var timelineReads = 0
+        var subscriptionReads = 0
+        val builtIn =
+            object : PlatformSpec by spec("Mastodon", isDefaultGuest = true) {
+                override val order: Int get() {
+                    platformReads++
+                    return 0
+                }
+                override val timelineSpecs: ImmutableList<TimelineSpec<out TimelineSpec.Data>> get() {
+                    timelineReads++
+                    return persistentListOf()
+                }
+                override val subscriptionTimelineSpecs: ImmutableList<SubscriptionTimelineSpec> get() {
+                    subscriptionReads++
+                    return persistentListOf()
+                }
+            }
+        val data = PlatformRuntimeData(listOf(builtIn, spec("Other")), emptyList())
+        val registry = PlatformRegistry(data)
+        registry.all
+        registry.subscriptionTimelineSpecs
+        data.timelineSpecs
+        val initialReads = listOf(platformReads, timelineReads, subscriptionReads)
+        repeat(5) {
+            assertSame(builtIn, registry.require("Mastodon"))
+            assertSame(builtIn, registry.defaultGuest)
+            assertFalse(registry.supports("Other", PlatformCapability.RelayManagement))
+            assertTrue(registry.subscriptionTimelineSpecs.isEmpty())
+            assertTrue(data.timelineSpecs.isEmpty())
+        }
+        assertEquals(initialReads, listOf(platformReads, timelineReads, subscriptionReads))
+
+        val replacement = spec("Plugin")
+        registry.replaceExternal("Plugin", replacement)
+        assertSame(replacement, registry.require("Plugin"))
+        assertTrue(timelineReads > initialReads[1])
+        val changedReads = listOf(platformReads, timelineReads, subscriptionReads)
+        repeat(5) { assertSame(replacement, registry.require("Plugin")) }
+        assertEquals(changedReads, listOf(platformReads, timelineReads, subscriptionReads))
+    }
+
+    @Test
+    fun duplicateSubscriptionsCannotReplaceTheCurrentSnapshot() {
+        val subscription =
+            object : SubscriptionTimelineSpec {
+                override val type = SubscriptionType.MASTODON_PUBLIC
+
+                override suspend fun isAvailable(
+                    host: String,
+                    locale: String,
+                ): Boolean = true
+
+                override fun createLoader(
+                    host: String,
+                    locale: String,
+                ): CacheableRemoteLoader<UiTimelineV2> = error("Not used")
+            }
+
+        fun platform(
+            id: String,
+            defaultGuest: Boolean = false,
+        ) = object : PlatformSpec by spec(id, isDefaultGuest = defaultGuest) {
+            override val subscriptionTimelineSpecs = persistentListOf(subscription)
+        }
+        val builtIn = platform("Mastodon", defaultGuest = true)
+        val registry = registry(listOf(builtIn))
+        val original = registry.platforms.value
+        assertSame(subscription, registry.requireSubscriptionTimelineSpec(subscription.type))
+
+        assertFailsWith<IllegalArgumentException> { registry.replaceExternal("Plugin", platform("Plugin")) }
+
+        assertSame(original, registry.platforms.value)
+        assertFalse(registry.isRegistered("Plugin"))
+        assertSame(subscription, registry.requireSubscriptionTimelineSpec(subscription.type))
+        assertSame(builtIn, registry.defaultGuest)
+    }
+
     @Test
     fun anOpenTimelineUsesTheNewSpecAndRecoversAfterReattachment() =
         runTest {
@@ -157,12 +239,10 @@ class PlatformRegistryTest {
     }
 
     @Test
-    fun fallbackAndCapabilitiesAreRegistryDriven() {
+    fun capabilitiesAreRegistryDriven() {
         val relay = spec("RelayNet", isDefaultGuest = true, capabilities = setOf(PlatformCapability.RelayManagement))
         val registry = registry(listOf(relay))
 
-        assertEquals(relay.metadata, registry.metadataOrFallback("RelayNet"))
-        assertEquals(PlatformMetadata("UnknownNet", UiIcon.World.asType()), registry.metadataOrFallback("UnknownNet"))
         assertTrue(registry.supports("RelayNet", PlatformCapability.RelayManagement))
         assertFalse(registry.supports("RelayNet", PlatformCapability.MxgaFiltering))
         assertFalse(registry.supports("UnknownNet", PlatformCapability.RelayManagement))

@@ -891,7 +891,7 @@ class PixelfedSampleTest {
         val namespace = root.resolve("state").toOkioPath()
         val store = PluginStateStore.open(FileSystem.SYSTEM, namespace)
         val installer = PluginInstaller(FileSystem.SYSTEM, store)
-        installer.commit(installer.inspect(packagePath.toOkioPath()), confirmed = true)
+        installer.commit(installer.inspect(packagePath.toOkioPath()), confirmed = true, activate = store::install)
         return PluginStateStore
             .open(FileSystem.SYSTEM, namespace)
             .running.plugins
@@ -1103,7 +1103,6 @@ private fun RunningPluginV1.platformSpec(
         PluginRunningSnapshotV1(
             plugins = mapOf(installed.pluginId to this),
             issues = emptyList(),
-            indexHealthy = true,
         ),
     runtimePool = pool,
     oauth = PluginOAuthLoginCoordinatorV1(pool, MemoryOAuthPendingStore(), { id -> takeIf { installed.pluginId == id } }),

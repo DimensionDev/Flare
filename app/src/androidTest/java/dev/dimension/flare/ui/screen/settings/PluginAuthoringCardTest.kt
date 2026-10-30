@@ -86,7 +86,6 @@ class PluginAuthoringCardTest {
                 platformId = "GitHub",
                 nameText = UiText.Raw("GitHub plugin"),
                 version = "1.0.0",
-                running = true,
                 iconPath = "",
                 sourceUrl = "https://github.com/example/plugin",
                 availableUpdate = GitHubPluginVersionV1("v1.1.0", "1.1.0", "b".repeat(40)),

@@ -57,7 +57,7 @@ class PluginInstallerTest {
             pluginIconFixtures.forEach { (extension, bytes) ->
                 val entries = TestFppFactory.validEntries().filterNot { it.first == FppPaths.ICON } + ("assets/icon.$extension" to bytes)
                 TestFppFactory.write(input, entries)
-                val installed = installer.commit(installer.inspect(input), confirmed = true)
+                val installed = installer.commit(installer.inspect(input), confirmed = true, activate = stateStore::install)
                 assertEquals(extension, installed.iconExtension)
                 assertContentEquals(bytes, fileSystem.read(stateStore.paths.iconPath(installed.packageHash, extension)) { readByteArray() })
                 val restarted = PluginStateStore.open(fileSystem, stateStore.paths.root)
@@ -117,25 +117,56 @@ class PluginInstallerTest {
             assertTrue(importing.isCancelled)
             assertFalse(fileSystem.exists(stateStore.paths.incoming))
             fileSystem.write(stateStore.paths.incoming) { writeUtf8("orphan") }
-            installer.cleanup()
+            installer.cleanup(stateStore.running.plugins.values)
             assertFalse(fileSystem.exists(stateStore.paths.incoming))
             val preview = installer.inspect(input)
-            installer.commit(preview, confirmed = true)
+            installer.commit(preview, confirmed = true, activate = stateStore::install)
             assertEquals(1, stateStore.desired.value.plugins.size)
+        }
+
+    @Test
+    fun discardedPreviewDoesNotBlockCleanupAfterADeletionFailure() =
+        runBlocking<Unit> {
+            TestFppFactory.write(input)
+            var failDeletion = false
+            val failingFileSystem =
+                object : ForwardingFileSystem(fileSystem) {
+                    override fun delete(
+                        path: Path,
+                        mustExist: Boolean,
+                    ) {
+                        if (failDeletion && path == stateStore.paths.incoming) throw IOException("synthetic deletion failure")
+                        super.delete(path, mustExist)
+                    }
+                }
+            val failingInstaller = PluginInstaller(failingFileSystem, stateStore)
+            val preview = failingInstaller.inspect(input)
+            failDeletion = true
+
+            assertFailsWith<IOException> { failingInstaller.discard(preview) }
+            assertTrue(fileSystem.exists(stateStore.paths.incoming))
+            failDeletion = false
+            failingInstaller.cleanup(stateStore.running.plugins.values)
+
+            assertFalse(fileSystem.exists(stateStore.paths.incoming))
+            assertTrue(
+                stateStore.desired.value.plugins
+                    .isEmpty(),
+            )
         }
 
     @Test
     fun commitRechecksIdentityChangedAfterInspection() =
         runBlocking<Unit> {
             TestFppFactory.write(input)
-            val installed = installer.commit(installer.inspect(input), confirmed = true)
+            val installed = installer.commit(installer.inspect(input), confirmed = true, activate = stateStore::install)
             val preview = installer.inspect(input)
             val replacement =
                 installed.copy(
                     manifest = installed.manifest.copy(platform = installed.manifest.platform.copy(id = "ChangedPlatform")),
                 )
             stateStore.install(replacement)
-            assertFailsWith<IllegalArgumentException> { installer.commit(preview, confirmed = true) }
+            assertFailsWith<IllegalArgumentException> { installer.commit(preview, confirmed = true, activate = stateStore::install) }
             assertEquals(replacement, stateStore.desired.value.plugins[installed.pluginId])
             installer.discard(preview)
             assertFalse(fileSystem.exists(stateStore.paths.incoming))
@@ -149,7 +180,7 @@ class PluginInstallerTest {
             TestFppFactory.write(input, entries + ("locales/en.json" to """{"name":"Localized plugin"}""".encodeToByteArray()))
             val preview = installer.inspect(input)
             assertEquals("Test plugin", preview.nameFallback)
-            val installed = installer.commit(preview, confirmed = true)
+            val installed = installer.commit(preview, confirmed = true, activate = stateStore::install)
             val invalidCatalogs =
                 listOf(
                     emptyMap(),
@@ -188,9 +219,9 @@ class PluginInstallerTest {
             val preview = installer.inspect(input)
             assertTrue(preview.requiresConfirmation)
             assertTrue(preview.warnings.any { it.type == PluginInstallWarningTypeV1.UnverifiedLocal })
-            assertFails { installer.commit(preview, confirmed = false) }
+            assertFails { installer.commit(preview, confirmed = false, activate = stateStore::install) }
 
-            val installed = installer.commit(preview, confirmed = true)
+            val installed = installer.commit(preview, confirmed = true, activate = stateStore::install)
             assertEquals(
                 installed,
                 stateStore.desired.value.plugins
@@ -206,11 +237,11 @@ class PluginInstallerTest {
     fun reinstallingIdenticalPackageIsIdempotent() =
         runBlocking<Unit> {
             TestFppFactory.write(input)
-            val first = installer.inspect(input).let { installer.commit(it, confirmed = true) }
+            val first = installer.inspect(input).let { installer.commit(it, confirmed = true, activate = stateStore::install) }
 
             val preview = installer.inspect(input)
             assertFalse(preview.requiresConfirmation)
-            val second = installer.commit(preview, confirmed = false)
+            val second = installer.commit(preview, confirmed = false, activate = stateStore::install)
 
             assertEquals(first, second)
             assertTrue(fileSystem.exists(stateStore.paths.packagePath(first.packageHash)))
@@ -221,7 +252,7 @@ class PluginInstallerTest {
     fun cleanupProtectsExplicitlyActivePackagesUntilTheyAreRetired() =
         runBlocking<Unit> {
             TestFppFactory.write(input)
-            val first = installer.inspect(input).let { installer.commit(it, confirmed = true) }
+            val first = installer.inspect(input).let { installer.commit(it, confirmed = true, activate = stateStore::install) }
 
             val runningStore = PluginStateStore.open(fileSystem, root / "social-plugins-v2")
             val runningInstaller = PluginInstaller(fileSystem, runningStore)
@@ -233,7 +264,11 @@ class PluginInstallerTest {
                     script = TestFppFactory.validScript + "\n// version 2",
                 ),
             )
-            val second = runningInstaller.inspect(input).let { runningInstaller.commit(it, confirmed = true) }
+            val second =
+                runningInstaller
+                    .inspect(
+                        input,
+                    ).let { runningInstaller.commit(it, confirmed = true, activate = runningStore::install) }
 
             assertEquals(
                 first,
@@ -246,7 +281,7 @@ class PluginInstallerTest {
                 runningStore.desired.value.plugins
                     .getValue(first.pluginId),
             )
-            runningStore.cleanup()
+            runningStore.cleanup(emptySet(), runningStore.running.plugins.values)
             assertTrue(fileSystem.exists(runningStore.paths.packagePath(first.packageHash)))
             assertTrue(fileSystem.exists(runningStore.paths.packagePath(second.packageHash)))
 
@@ -257,17 +292,17 @@ class PluginInstallerTest {
                     .getValue(first.pluginId)
                     .installed,
             )
-            updatedStore.cleanup()
+            updatedStore.cleanup(emptySet(), updatedStore.running.plugins.values)
             assertFalse(fileSystem.exists(updatedStore.paths.packagePath(first.packageHash)))
 
             updatedStore.uninstall(first.pluginId)
             assertNotNull(updatedStore.running.plugins[first.pluginId])
-            updatedStore.cleanup()
+            updatedStore.cleanup(emptySet(), updatedStore.running.plugins.values)
             assertTrue(fileSystem.exists(updatedStore.paths.packagePath(second.packageHash)))
 
             val uninstalledStore = PluginStateStore.open(fileSystem, root / "social-plugins-v2")
             assertTrue(uninstalledStore.running.plugins.isEmpty())
-            uninstalledStore.cleanup()
+            uninstalledStore.cleanup(emptySet(), uninstalledStore.running.plugins.values)
             assertFalse(fileSystem.exists(uninstalledStore.paths.packagePath(second.packageHash)))
             assertFalse(fileSystem.exists(uninstalledStore.paths.iconPath(second.packageHash)))
             assertEquals(
@@ -283,7 +318,7 @@ class PluginInstallerTest {
     fun failedIndexCommitKeepsPreviousPluginAndLeavesOnlyCollectableOrphans() =
         runBlocking<Unit> {
             TestFppFactory.write(input)
-            val first = installer.inspect(input).let { installer.commit(it, confirmed = true) }
+            val first = installer.inspect(input).let { installer.commit(it, confirmed = true, activate = stateStore::install) }
             val failingFileSystem =
                 object : ForwardingFileSystem(fileSystem) {
                     override fun atomicMove(
@@ -306,7 +341,7 @@ class PluginInstallerTest {
             )
             val preview = failingInstaller.inspect(input)
 
-            assertFails { failingInstaller.commit(preview, confirmed = true) }
+            assertFails { failingInstaller.commit(preview, confirmed = true, activate = failingStore::install) }
             assertEquals(
                 first,
                 failingStore.desired.value.plugins
@@ -322,7 +357,8 @@ class PluginInstallerTest {
             assertTrue(fileSystem.exists(failingStore.paths.packagePath(first.packageHash)))
             assertTrue(fileSystem.exists(failingStore.paths.packagePath(preview.packageHash)))
 
-            val cleanup = PluginStateStore.open(fileSystem, root / "social-plugins-v2").cleanup()
+            val cleanupStore = PluginStateStore.open(fileSystem, root / "social-plugins-v2")
+            val cleanup = cleanupStore.cleanup(emptySet(), cleanupStore.running.plugins.values)
             assertEquals(1, cleanup.packages)
             assertEquals(1, cleanup.icons)
             assertFalse(fileSystem.exists(failingStore.paths.packagePath(preview.packageHash)))
@@ -365,7 +401,7 @@ class PluginInstallerTest {
             TestFppFactory.write(input)
             val previous = installer.inspect(input)
             assertFalse(previous.permissions.any { it.type == PluginPermissionType.MediaNetwork })
-            installer.commit(previous, confirmed = true)
+            installer.commit(previous, confirmed = true, activate = stateStore::install)
             val changed =
                 TestFppFactory.validManifest.replace(
                     "\"name\": \"Test plugin\",",
@@ -375,14 +411,14 @@ class PluginInstallerTest {
             val preview = installer.inspect(input)
             assertTrue(preview.permissions.any { it.type == PluginPermissionType.MediaNetwork })
             assertTrue(preview.warnings.any { it.type == PluginInstallWarningTypeV1.AddedPermission })
-            assertFailsWith<IllegalArgumentException> { installer.commit(preview, confirmed = false) }
+            assertFailsWith<IllegalArgumentException> { installer.commit(preview, confirmed = false, activate = stateStore::install) }
         }
 
     @Test
     fun updateWarningsIncludePermissionDowngradeAndChangedHash() =
         runBlocking<Unit> {
             TestFppFactory.write(input)
-            installer.inspect(input).also { installer.commit(it, confirmed = true) }
+            installer.inspect(input).also { installer.commit(it, confirmed = true, activate = stateStore::install) }
 
             val changedManifest =
                 TestFppFactory.validManifest
@@ -409,7 +445,7 @@ class PluginInstallerTest {
     fun updateCannotChangePersistedPlatformIdentity() =
         runBlocking<Unit> {
             TestFppFactory.write(input)
-            val installed = installer.inspect(input).let { installer.commit(it, confirmed = true) }
+            val installed = installer.inspect(input).let { installer.commit(it, confirmed = true, activate = stateStore::install) }
             val renamedPlatform =
                 TestFppFactory.validManifest
                     .replace("\"id\": \"TestPlugin\"", "\"id\": \"RenamedPlugin\"")
@@ -442,7 +478,7 @@ class PluginInstallerTest {
     private fun assertCancelledRecoveryPreservesIndex(cancelOnIconWrite: Boolean) =
         runBlocking<Unit> {
             TestFppFactory.write(input)
-            val installed = installer.inspect(input).let { installer.commit(it, confirmed = true) }
+            val installed = installer.inspect(input).let { installer.commit(it, confirmed = true, activate = stateStore::install) }
             fileSystem.write(stateStore.paths.index) { writeUtf8("not-json") }
             val corruptStore = PluginStateStore.open(fileSystem, root / "social-plugins-v2")
             lateinit var recoveryJob: Job
@@ -478,7 +514,7 @@ class PluginInstallerTest {
             assertTrue(recoveryJob.isCancelled)
             assertFalse(corruptStore.desired.value.indexHealthy)
             assertEquals("not-json", fileSystem.read(corruptStore.paths.index) { readUtf8() })
-            assertFailsWith<PluginIndexCorruptException> { recovery.cleanup() }
+            assertFailsWith<PluginIndexCorruptException> { recovery.cleanup(corruptStore.running.plugins.values) }
             assertTrue(fileSystem.exists(corruptStore.paths.packagePath(installed.packageHash)))
             assertTrue(fileSystem.exists(corruptStore.paths.iconPath(installed.packageHash)))
 
@@ -490,7 +526,7 @@ class PluginInstallerTest {
     fun explicitlyRebuildsCorruptIndexFromValidatedPackages() =
         runBlocking<Unit> {
             TestFppFactory.write(input)
-            val installed = installer.inspect(input).let { installer.commit(it, confirmed = true) }
+            val installed = installer.inspect(input).let { installer.commit(it, confirmed = true, activate = stateStore::install) }
             fileSystem.write(stateStore.paths.index) { writeUtf8("not-json") }
 
             val corruptStore = PluginStateStore.open(fileSystem, root / "social-plugins-v2")

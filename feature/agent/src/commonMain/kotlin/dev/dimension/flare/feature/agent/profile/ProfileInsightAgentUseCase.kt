@@ -15,12 +15,10 @@ import dev.dimension.flare.feature.agent.common.AgentToolContext
 import dev.dimension.flare.feature.agent.common.AgentTrace
 import dev.dimension.flare.feature.agent.common.FlareAgentRequest
 import dev.dimension.flare.feature.agent.common.FlareAgentRunner
-import dev.dimension.flare.feature.agent.common.FlareAgentUnavailableException
 import dev.dimension.flare.feature.agent.common.agentAttachmentMarker
 import dev.dimension.flare.feature.agent.common.resolveAgentVisibleResult
 import dev.dimension.flare.feature.agent.presenter.AgentMessagePart
 import dev.dimension.flare.feature.agent.presenter.distinctAgentMessageParts
-import dev.dimension.flare.feature.agent.runtime.AgentAvailability
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiProfile
 import kotlinx.coroutines.CancellationException
@@ -80,31 +78,21 @@ internal class ProfileInsightAgentUseCase(
         send(AgentConversationEvent.ContentLoaded(profile))
 
         val result =
-            try {
-                agentRunner.runProfileInsightAgent(
-                    prompt =
-                        profile.toInsightPrompt(
-                            targetLanguage = Locale.language,
-                            userInput = userInputValue,
-                        ),
-                    toolContext =
-                        AgentToolContext(
-                            searchDataSources = searchDataSources,
-                        ),
-                    conversationId = conversationId,
-                    retryMode = retryMode,
-                    supportingParts = listOf(AgentMessagePart.UserCard(profile)),
-                ) { event ->
-                    send(event.toConversationEvent())
-                }
-            } catch (throwable: Throwable) {
-                if (throwable is CancellationException) {
-                    throw throwable
-                }
-                if (throwable is FlareAgentUnavailableException) {
-                    throw ProfileInsightAgentUnavailableException(throwable.availability)
-                }
-                throw throwable
+            agentRunner.runProfileInsightAgent(
+                prompt =
+                    profile.toInsightPrompt(
+                        targetLanguage = Locale.language,
+                        userInput = userInputValue,
+                    ),
+                toolContext =
+                    AgentToolContext(
+                        searchDataSources = searchDataSources,
+                    ),
+                conversationId = conversationId,
+                retryMode = retryMode,
+                supportingParts = listOf(AgentMessagePart.UserCard(profile)),
+            ) { event ->
+                send(event.toConversationEvent())
             }
 
         val supportingParts =
@@ -310,7 +298,3 @@ internal class ProfileInsightAgentUseCase(
 }
 
 private fun MicroBlogKey.profileInsightConversationId(): String = "profile-insight:$host:$id"
-
-public class ProfileInsightAgentUnavailableException public constructor(
-    availability: AgentAvailability,
-) : FlareAgentUnavailableException(availability)

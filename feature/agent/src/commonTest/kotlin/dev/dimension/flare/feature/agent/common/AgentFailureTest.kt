@@ -1,6 +1,7 @@
 package dev.dimension.flare.feature.agent.common
 
 import ai.koog.http.client.KoogHttpClientException
+import dev.dimension.flare.feature.agent.runtime.AgentAvailability
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.delay
@@ -13,6 +14,19 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class AgentFailureTest {
+    @Test
+    fun sharedUnavailableErrorPreservesConfigurationAndRetryBehavior() {
+        val unavailable = FlareAgentUnavailableException(AgentAvailability.Unavailable(AgentAvailability.Reason.MissingOpenAIModel))
+        listOf(unavailable, IllegalStateException("wrapped", unavailable)).forEach { error ->
+            val failure = error.toAgentFailure("Original question")
+            assertEquals(AgentFailureKind.Configuration, failure.kind)
+            assertEquals(AgentRetryMode.Restart, failure.retryMode)
+            assertTrue(failure.canRetry)
+            assertEquals("Original question", failure.userInput)
+            assertEquals(unavailable.message, failure.message)
+        }
+    }
+
     @Test
     fun requestTimeoutCanRetryButAnUnwrappedCancellationIsNotAnError() =
         runTest {

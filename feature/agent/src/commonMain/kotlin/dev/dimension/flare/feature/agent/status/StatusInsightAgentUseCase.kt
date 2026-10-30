@@ -21,11 +21,9 @@ import dev.dimension.flare.feature.agent.common.AgentToolContext
 import dev.dimension.flare.feature.agent.common.AgentTrace
 import dev.dimension.flare.feature.agent.common.FlareAgentRequest
 import dev.dimension.flare.feature.agent.common.FlareAgentRunner
-import dev.dimension.flare.feature.agent.common.FlareAgentUnavailableException
 import dev.dimension.flare.feature.agent.common.resolveAgentVisibleResult
 import dev.dimension.flare.feature.agent.presenter.AgentMessagePart
 import dev.dimension.flare.feature.agent.presenter.distinctAgentMessageParts
-import dev.dimension.flare.feature.agent.runtime.AgentAvailability
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiTimelineV2
@@ -142,34 +140,30 @@ internal class StatusInsightAgentUseCase(
         retryMode: AgentRetryMode?,
         onEvent: suspend (AgentTrace) -> Unit,
     ): AgentRunResult =
-        try {
-            run(
-                request =
-                    FlareAgentRequest(
-                        retryMode = retryMode,
-                        prompt = prompt,
-                        systemPrompt = STATUS_INSIGHT_SYSTEM_PROMPT,
-                        agentId = "flare-status-insight",
-                        strategyName = "status_insight_multimodal",
-                        analyzeNodeName = "analyze_post",
-                        executeToolsNodeName = "execute_status_insight_tools",
-                        sendToolResultsNodeName = "send_status_insight_tool_results",
-                        toolContext = toolContext,
-                        temperature = 0.2,
-                        finishAfterToolResults = true,
-                        supportingParts = listOfNotNull(toolContext.status?.currentPost?.let { AgentMessagePart.PostCard(it) }),
-                        images =
-                            toolContext.status
-                                ?.currentPost
-                                ?.aiImageAttachments()
-                                .orEmpty(),
-                    ),
-                conversationId = conversationId,
-                onTrace = onEvent,
-            )
-        } catch (throwable: FlareAgentUnavailableException) {
-            throw StatusInsightAgentUnavailableException(throwable.availability)
-        }
+        run(
+            request =
+                FlareAgentRequest(
+                    retryMode = retryMode,
+                    prompt = prompt,
+                    systemPrompt = STATUS_INSIGHT_SYSTEM_PROMPT,
+                    agentId = "flare-status-insight",
+                    strategyName = "status_insight_multimodal",
+                    analyzeNodeName = "analyze_post",
+                    executeToolsNodeName = "execute_status_insight_tools",
+                    sendToolResultsNodeName = "send_status_insight_tool_results",
+                    toolContext = toolContext,
+                    temperature = 0.2,
+                    finishAfterToolResults = true,
+                    supportingParts = listOfNotNull(toolContext.status?.currentPost?.let { AgentMessagePart.PostCard(it) }),
+                    images =
+                        toolContext.status
+                            ?.currentPost
+                            ?.aiImageAttachments()
+                            .orEmpty(),
+                ),
+            conversationId = conversationId,
+            onTrace = onEvent,
+        )
 
     private suspend fun PostDataSource.loadPost(statusKey: MicroBlogKey): UiTimelineV2.Post =
         coroutineScope {
@@ -459,7 +453,3 @@ internal class StatusInsightAgentUseCase(
 }
 
 private fun MicroBlogKey.statusInsightConversationId(): String = "status-insight:$host:$id"
-
-public class StatusInsightAgentUnavailableException public constructor(
-    availability: AgentAvailability,
-) : FlareAgentUnavailableException(availability)

@@ -609,13 +609,7 @@ internal class TimelineResolver(
 
     val platforms get() = data.platforms
 
-    private val specs: Map<String, TimelineSpec<out TimelineSpec.Data>> get() =
-        data.timelineSpecs
-            .groupBy { it.id }
-            .mapNotNull { (id, candidates) ->
-                val first = candidates.first()
-                (id to first).takeIf { candidates.all { candidate -> candidate === first } }
-            }.toMap()
+    private val specs get() = data.snapshots.value.timelinesById
 
     fun toTabItem(slot: TimelineSlot): UiTimelineTabItem =
         when (val content = slot.content) {
@@ -717,8 +711,8 @@ internal class TimelineResolver(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun resolveLoader(source: TimelineSourceRef): Flow<RemoteLoader<UiTimelineV2>> =
-        data.platforms
-            .map { specs[source.specId] }
+        data.snapshots
+            .map { it.timelinesById[source.specId] }
             .distinctUntilChanged { before, after -> before === after }
             .flatMapLatest { spec ->
                 if (spec == null) {
@@ -769,9 +763,6 @@ internal class TimelineResolver(
 
     private fun <T : TimelineSpec.Data> TimelineSpec<T>.createLoader(encodedData: String): Flow<RemoteLoader<UiTimelineV2>> =
         loaderFactory.create(decode(encodedData), loaderContext)
-
-    private fun <T : TimelineSpec.Data> TimelineTarget<T>.createLoader(): Flow<RemoteLoader<UiTimelineV2>> =
-        spec.loaderFactory.create(data, loaderContext)
 }
 
 public object TimelineDeepLinkRouteResolver {

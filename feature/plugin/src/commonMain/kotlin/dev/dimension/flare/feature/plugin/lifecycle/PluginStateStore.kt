@@ -74,8 +74,6 @@ public class PluginStateStore private constructor(
         }
     }
 
-    public suspend fun cleanup(): PluginCleanupResultV1 = cleanup(emptySet(), running.plugins.values)
-
     internal suspend fun cleanup(
         protectedStagingPaths: Set<Path>,
         activePlugins: Collection<RunningPluginV1>,
@@ -167,7 +165,6 @@ public class PluginStateStore private constructor(
             return PluginRunningSnapshotV1(
                 plugins = emptyMap(),
                 issues = listOfNotNull(initialIssue),
-                indexHealthy = false,
             )
         }
         val issues = mutableListOf<PluginStateIssueV1>()
@@ -197,7 +194,6 @@ public class PluginStateStore private constructor(
         return PluginRunningSnapshotV1(
             plugins = plugins,
             issues = issues,
-            indexHealthy = true,
         )
     }
 

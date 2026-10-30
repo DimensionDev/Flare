@@ -634,7 +634,7 @@ class PluginLoginCoordinatorV1Test {
         val namespace = root / "social-plugins-v2"
         val store = PluginStateStore.open(fileSystem, namespace)
         val installer = PluginInstaller(fileSystem, store)
-        installer.inspect(input).also { installer.commit(it, confirmed = true) }
+        installer.inspect(input).also { installer.commit(it, confirmed = true, activate = store::install) }
         return PluginStateStore
             .open(fileSystem, namespace)
             .running.plugins

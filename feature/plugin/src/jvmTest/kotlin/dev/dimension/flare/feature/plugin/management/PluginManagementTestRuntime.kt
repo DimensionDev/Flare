@@ -19,7 +19,9 @@ import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.asType
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.serialization.KSerializer
 
@@ -27,9 +29,12 @@ internal fun testPluginManagementPresenter(
     subsystem: PluginSubsystemV1,
     scope: CoroutineScope,
     github: GitHubPluginClient = subsystem.github,
+    operationDispatcher: CoroutineDispatcher = Dispatchers.Default,
 ): PluginManagementPresenterV1 {
     val registry = testPluginRegistry(subsystem, scope)
-    return PluginManagementPresenterV1(subsystem, scope, github = github, registry = { registry }, accounts = { PluginTestAccounts() })
+    return PluginManagementPresenterV1(subsystem, scope, operationDispatcher, github = github, registry = {
+        registry
+    }, accounts = { PluginTestAccounts() })
 }
 
 internal fun testPluginRegistry(

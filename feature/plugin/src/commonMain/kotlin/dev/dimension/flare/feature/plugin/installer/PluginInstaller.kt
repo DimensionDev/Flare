@@ -127,7 +127,6 @@ public class PluginInstaller(
                         packageSize = packageSize,
                         warnings = buildWarnings(validated.manifest, hash, existing, validated.warnings, installSource),
                         requiresConfirmation = existing?.packageHash != hash || existing.source != installSource,
-                        existingVersion = existing?.version,
                         source = installSource,
                         validated = validated,
                     )
@@ -149,7 +148,7 @@ public class PluginInstaller(
     public suspend fun commit(
         preview: PreparedPluginInstallV1,
         confirmed: Boolean,
-        activate: suspend (InstalledPluginV1) -> Unit = stateStore::install,
+        activate: suspend (InstalledPluginV1) -> Unit,
     ): InstalledPluginV1 =
         mutex.withLock {
             require(activePreview === preview) { "Install preview is no longer active" }
@@ -189,7 +188,7 @@ public class PluginInstaller(
     }
 
     public suspend fun cleanup(
-        activePlugins: Collection<dev.dimension.flare.feature.plugin.lifecycle.RunningPluginV1> = stateStore.running.plugins.values,
+        activePlugins: Collection<dev.dimension.flare.feature.plugin.lifecycle.RunningPluginV1>,
     ): PluginCleanupResultV1 =
         mutex.withLock {
             stateStore.cleanup(setOfNotNull(stateStore.paths.incoming.takeIf { preparing || activePreview != null }), activePlugins)
@@ -326,8 +325,8 @@ public class PluginInstaller(
 
     private fun discardLocked(preview: PreparedPluginInstallV1) {
         if (activePreview === preview) {
-            fileSystem.delete(stateStore.paths.incoming, mustExist = false)
             activePreview = null
+            fileSystem.delete(stateStore.paths.incoming, mustExist = false)
         }
     }
 }
@@ -337,7 +336,6 @@ public class PreparedPluginInstallV1 internal constructor(
     public val packageSize: Long,
     public val warnings: List<PluginInstallWarningV1>,
     public val requiresConfirmation: Boolean,
-    public val existingVersion: String?,
     public val source: PluginInstallSourceV1,
     internal val validated: ValidatedPluginPackage,
 ) {

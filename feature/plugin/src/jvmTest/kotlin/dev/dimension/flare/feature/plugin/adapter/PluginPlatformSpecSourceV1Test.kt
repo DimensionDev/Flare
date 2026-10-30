@@ -95,7 +95,7 @@ class PluginPlatformSpecSourceV1Test {
             TestFppFactory.write(archive, TestFppFactory.validEntries(manifest = manifest, script = script))
             val store = PluginStateStore.open(files, root / "state")
             val installer = PluginInstaller(files, store)
-            installer.commit(installer.inspect(archive), confirmed = true)
+            installer.commit(installer.inspect(archive), confirmed = true, activate = store::install)
             val snapshot = PluginStateStore.open(files, root / "state").running
             val pending =
                 object : PluginOAuthPendingStoreV1 {

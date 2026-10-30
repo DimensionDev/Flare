@@ -84,9 +84,8 @@ class PluginStateStoreTest {
             val store = PluginStateStore.open(fileSystem, namespace)
 
             assertFalse(store.desired.value.indexHealthy)
-            assertFalse(store.running.indexHealthy)
             assertTrue(store.running.issues.any { it.code == "index.corrupt" })
-            assertFails { store.cleanup() }
+            assertFails { store.cleanup(emptySet(), store.running.plugins.values) }
             assertTrue(fileSystem.exists(orphan))
         }
 
@@ -152,7 +151,7 @@ class PluginStateStoreTest {
             fileSystem.write(orphanIcon) { writeUtf8("orphan") }
             fileSystem.write(paths.staging / "old.tmp") { writeUtf8("orphan") }
 
-            val result = store.cleanup()
+            val result = store.cleanup(emptySet(), store.running.plugins.values)
 
             assertEquals(1, result.packages)
             assertEquals(1, result.icons)
@@ -170,6 +169,6 @@ class PluginStateStoreTest {
         val store = PluginStateStore.open(targetFileSystem, namespace)
         val installer = PluginInstaller(targetFileSystem, store)
         val preview = installer.inspect(input)
-        return installer.commit(preview, confirmed = true)
+        return installer.commit(preview, confirmed = true, activate = store::install)
     }
 }

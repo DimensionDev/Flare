@@ -64,10 +64,11 @@ class PluginLifecycleTest {
                 val review = presenter.inspect(input.toString())
                 presenter.confirmInstall()
                 val running = assertNotNull(subsystem.running.value.plugins[review.pluginId])
-                assertTrue(
+                assertEquals(
+                    review.pluginId,
                     presenter.state.value.plugins
                         .single()
-                        .running,
+                        .pluginId,
                 )
                 val owned = account(accounts, "one", review.pluginId, review.platformId)
                 account(accounts, "two", review.pluginId, review.platformId)
@@ -177,7 +178,6 @@ class PluginLifecycleTest {
                     emptyMap(),
                     emptyMap(),
                     credentialSchemaVersion = 1,
-                    timelineSchemaVersion = 1,
                 ),
                 JsonObject(emptyMap()),
             ),

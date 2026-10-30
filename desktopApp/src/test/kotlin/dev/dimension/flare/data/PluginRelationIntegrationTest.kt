@@ -8,17 +8,16 @@ import dev.dimension.flare.data.datasource.microblog.capabilities
 import dev.dimension.flare.data.datasource.microblog.handler.RelationHandler
 import dev.dimension.flare.di.DesktopKoinApplication
 import dev.dimension.flare.feature.plugin.PluginSubsystemV1
-import dev.dimension.flare.feature.plugin.adapter.PluginPlatformSpecSourceV1
 import dev.dimension.flare.feature.plugin.adapter.accountCredential
-import dev.dimension.flare.feature.plugin.installer.PluginInstaller
-import dev.dimension.flare.feature.plugin.lifecycle.PluginStateStore
 import dev.dimension.flare.feature.plugin.lifecycle.RunningPluginV1
+import dev.dimension.flare.feature.plugin.management.PluginManagementPresenterV1
 import dev.dimension.flare.feature.plugin.wire.EntityKeyV1
 import dev.dimension.flare.feature.plugin.wire.LoginSuccessV1
 import dev.dimension.flare.feature.plugin.wire.PluginAccountCredentialV1
 import dev.dimension.flare.feature.plugin.wire.ProfileV1
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformDataSourceContext
+import dev.dimension.flare.model.PlatformRegistry
 import dev.dimension.flare.model.PlatformSpec
 import dev.dimension.flare.ui.model.UiRelation
 import kotlinx.coroutines.CoroutineScope
@@ -35,9 +34,6 @@ import kotlinx.coroutines.withTimeout
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
-import okio.FileSystem
-import okio.Path.Companion.toOkioPath
-import okio.SYSTEM
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -83,21 +79,17 @@ class PluginRelationIntegrationTest {
                     zip.closeEntry()
                 }
             }
-            val pluginRoot = root.resolve("plugins").toOkioPath()
-            val store = PluginStateStore.open(FileSystem.SYSTEM, pluginRoot)
-            val installer = PluginInstaller(FileSystem.SYSTEM, store)
-            installer.commit(installer.inspect(packagePath.toOkioPath()), confirmed = true)
-            val running = PluginStateStore.open(FileSystem.SYSTEM, pluginRoot).running
-            plugin = running.plugins.values.single()
-            platform =
-                PluginPlatformSpecSourceV1(
-                    running,
-                    subsystem.runtimePool,
-                    subsystem.oauth,
-                    subsystem.form,
-                    subsystem.webCookie,
-                    scope,
-                ).load(emptySet()).single()
+            val presenter = PluginManagementPresenterV1(subsystem, scope)
+            try {
+                presenter.inspect(packagePath.toString())
+                presenter.confirmInstall()
+            } finally {
+                presenter.close()
+            }
+            plugin =
+                subsystem.running.value.plugins.values
+                    .single()
+            platform = application.koin.get<PlatformRegistry>().require(plugin.installed.manifest.platform.id)
         }
 
     @After

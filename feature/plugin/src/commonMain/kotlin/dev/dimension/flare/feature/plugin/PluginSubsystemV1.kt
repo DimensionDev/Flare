@@ -95,11 +95,7 @@ public class PluginSubsystemV1 internal constructor(
                 ?.permissions
                 ?.mediaNetwork == true,
         )
-        mutableRunning.value =
-            mutableRunning.value.copy(
-                plugins = plugins,
-                indexHealthy = stateStore.desired.value.indexHealthy,
-            )
+        mutableRunning.value = mutableRunning.value.copy(plugins = plugins)
         mutableSourceIssues.update { issues -> issues.filterNot { it.pluginId == pluginId } }
     }
 

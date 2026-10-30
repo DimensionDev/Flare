@@ -254,7 +254,6 @@ class WireV1Test {
                         manifestCapabilities = mapOf("flare.datasource.timeline/v1" to setOf("page")),
                         negotiatedCapabilities = mapOf("flare.datasource.timeline/v1" to setOf("page")),
                         credentialSchemaVersion = 1,
-                        timelineSchemaVersion = 1,
                     ),
                 credential = kotlinx.serialization.json.JsonObject(emptyMap()),
             )

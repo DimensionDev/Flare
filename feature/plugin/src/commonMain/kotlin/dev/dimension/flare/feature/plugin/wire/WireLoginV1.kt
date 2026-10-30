@@ -131,7 +131,6 @@ public data class AccountPluginSnapshotV1(
     val negotiatedCapabilities: Map<String, Set<String>>,
     val composeConfig: ComposeConfigV1? = null,
     val credentialSchemaVersion: Int,
-    val timelineSchemaVersion: Int,
 )
 
 /** Host-owned credential envelope persisted in Flare's account store. */

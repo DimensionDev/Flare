@@ -59,7 +59,6 @@ public data class RunningPluginV1(
 public data class PluginRunningSnapshotV1(
     val plugins: Map<String, RunningPluginV1>,
     val issues: List<PluginStateIssueV1>,
-    val indexHealthy: Boolean,
 )
 
 public data class PluginDesiredSnapshotV1(

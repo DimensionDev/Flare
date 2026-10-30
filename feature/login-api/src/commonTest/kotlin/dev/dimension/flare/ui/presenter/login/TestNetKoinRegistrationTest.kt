@@ -49,7 +49,7 @@ class TestNetKoinRegistrationTest {
                 assertIs<TestNetPlatformSpec>(registry.require("TestNet"))
                 assertEquals(
                     PlatformMetadata("Test Network", UiIcon.World.asType(), listOf("testnet")),
-                    registry.metadataOrFallback("TestNet"),
+                    registry.require("TestNet").metadata,
                 )
 
                 val detected = loginRegistry.detectPlatformId("testnet.example")

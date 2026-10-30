@@ -407,7 +407,7 @@ class PluginAuthoringServiceV1Test {
                 val plugin = service.create(UUID.randomUUID().toString())
                 generate(plugin)
                 await(plugin.id, PluginAuthoringPhase.Applied)
-                subsystem.installer.cleanup()
+                subsystem.installer.cleanup(subsystem.running.value.plugins.values)
                 assertTrue(fileSystem.exists(subsystem.stateStore.paths.incoming))
                 release.countDown()
                 importing.await()
@@ -481,7 +481,7 @@ class PluginAuthoringServiceV1Test {
             await(a.id, PluginAuthoringPhase.Applied)
             await(b.id, PluginAuthoringPhase.Applied)
             assertEquals(setOf(a.id, b.id), subsystem.running.value.plugins.keys)
-            subsystem.installer.cleanup()
+            subsystem.installer.cleanup(subsystem.running.value.plugins.values)
             val restarted = PluginSubsystemV1(appFiles, pending)
             assertEquals(setOf(a.id, b.id), restarted.running.value.plugins.keys)
             assertEquals(
@@ -583,7 +583,7 @@ class PluginAuthoringServiceV1Test {
             val plugin = service.create(UUID.randomUUID().toString())
             generate(plugin)
             await(plugin.id, PluginAuthoringPhase.Applied)
-            subsystem.installer.commit(preview, true)
+            subsystem.installer.commit(preview, true, activate = subsystem.stateStore::install)
             assertEquals(2, subsystem.stateStore.desired.value.plugins.size)
         }
 

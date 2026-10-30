@@ -73,7 +73,7 @@ class GitHubTemplateTest {
             val source = PluginInstallSourceV1.GitHub(GitHubPluginRepositoryV1(1, "example", "feed"), "v0.1.0", "a".repeat(40))
             val store = PluginStateStore.open(FileSystem.SYSTEM, root / "store")
             val installer = PluginInstaller(FileSystem.SYSTEM, store)
-            installer.commit(installer.inspect(archive, source), confirmed = true)
+            installer.commit(installer.inspect(archive, source), confirmed = true, activate = store::install)
 
             plugin =
                 PluginStateStore

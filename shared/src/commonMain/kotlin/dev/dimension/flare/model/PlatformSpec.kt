@@ -6,14 +6,17 @@ import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoade
 import dev.dimension.flare.data.model.tab.TimelineSpec
 import dev.dimension.flare.ui.model.UiInstance
 import dev.dimension.flare.ui.model.UiTimelineV2
-import dev.dimension.flare.ui.model.asType
 import dev.dimension.flare.ui.route.DeeplinkRoute
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.coroutines.ExperimentalForInheritanceCoroutinesApi
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.serialization.KSerializer
 import org.koin.core.annotation.Provided
@@ -101,15 +104,48 @@ public class PlatformRuntimeData(
     platformSpecSources: List<PlatformSpecSource> = emptyList(),
 ) {
     internal val builtInPlatformIds = platformSpecs.mapTo(mutableSetOf()) { it.platformId.lowercase() }
-    internal val mutablePlatforms = MutableStateFlow(mergePlatformSpecs(platformSpecs, platformSpecSources))
-    public val platforms: StateFlow<List<PlatformSpec>> = mutablePlatforms.asStateFlow()
-    public val platformSpecs: List<PlatformSpec> get() = platforms.value
+    internal val snapshots = MutableStateFlow(PlatformSnapshot(mergePlatformSpecs(platformSpecs, platformSpecSources), extraTimelineSpecs))
 
-    internal val timelineSpecs get() =
-        platformSpecs
-            .sortedWith(compareBy<PlatformSpec> { it.order }.thenBy { it.platformId })
-            .flatMap { it.timelineSpecs }
-            .plus(extraTimelineSpecs)
+    @OptIn(ExperimentalForInheritanceCoroutinesApi::class)
+    public val platforms: StateFlow<List<PlatformSpec>> =
+        object : StateFlow<List<PlatformSpec>> {
+            override val value: List<PlatformSpec> get() = snapshots.value.platforms
+            override val replayCache: List<List<PlatformSpec>> get() = listOf(value)
+
+            override suspend fun collect(collector: FlowCollector<List<PlatformSpec>>): Nothing {
+                snapshots.map { it.platforms }.distinctUntilChanged().collect(collector)
+                awaitCancellation()
+            }
+        }
+    public val platformSpecs: List<PlatformSpec> get() = platforms.value
+    internal val timelineSpecs get() = snapshots.value.timelineSpecs
+}
+
+internal class PlatformSnapshot(
+    values: List<PlatformSpec>,
+    extraTimelineSpecs: List<TimelineSpec<out TimelineSpec.Data>>,
+) {
+    val platforms = values.sortedWith(compareBy<PlatformSpec> { it.order }.thenBy { it.platformId })
+    val byId = platforms.associateBy { it.platformId }
+    val defaultGuest = platforms.singleOrNull { it.isDefaultGuest }
+    val timelineSpecs = platforms.flatMap { it.timelineSpecs } + extraTimelineSpecs
+    val timelinesById =
+        timelineSpecs
+            .groupBy { it.id }
+            .mapNotNull { (id, candidates) ->
+                val first = candidates.first()
+                (id to first).takeIf { candidates.all { candidate -> candidate === first } }
+            }.toMap()
+    val subscriptionTimelineSpecs = platforms.flatMap { it.subscriptionTimelineSpecs }
+    val subscriptionsByType = subscriptionTimelineSpecs.associateBy { it.type }
+
+    init {
+        platforms.forEach { requireValidPlatformId(it.platformId) }
+        val duplicateIds = platforms.groupBy { it.platformId.lowercase() }.filterValues { it.size > 1 }.keys
+        require(duplicateIds.isEmpty()) { "Duplicate platform specs: ${duplicateIds.joinToString()}" }
+        val duplicateTypes = subscriptionTimelineSpecs.groupBy { it.type }.filterValues { it.size > 1 }.keys
+        require(duplicateTypes.isEmpty()) { "Duplicate subscription timeline specs: ${duplicateTypes.joinToString()}" }
+    }
 }
 
 @HiddenFromObjC
@@ -148,10 +184,12 @@ public class PlatformRegistry(
     private val data: PlatformRuntimeData,
 ) {
     public val platforms: StateFlow<List<PlatformSpec>> get() = data.platforms
-    public val all: List<PlatformSpec> get() = validate(data.platformSpecs)
+    public val all: List<PlatformSpec> get() = data.snapshots.value.platforms
 
     init {
-        validate(data.platformSpecs)
+        require(data.snapshots.value.defaultGuest != null) {
+            "Exactly one default guest platform is required: ${all.filter { it.isDefaultGuest }.joinToString { it.platformId }}"
+        }
     }
 
     /** Replaces one external platform without disturbing built-in platforms or other sources. */
@@ -163,71 +201,31 @@ public class PlatformRegistry(
         require(replacement == null || (replacement.platformId == platformId && !replacement.isDefaultGuest)) {
             "Replacement platform identity mismatch"
         }
-        data.mutablePlatforms.update { current ->
-            validate(current.filterNot { it.platformId == platformId } + listOfNotNull(replacement))
+        data.snapshots.update { current ->
+            PlatformSnapshot(
+                current.platforms.filterNot { it.platformId == platformId } + listOfNotNull(replacement),
+                data.extraTimelineSpecs,
+            )
         }
     }
 
-    private fun validate(values: List<PlatformSpec>): List<PlatformSpec> =
-        values
-            .also { specs ->
-                specs.forEach { requireValidPlatformId(it.platformId) }
-                val duplicateIds =
-                    specs
-                        .groupBy { it.platformId.lowercase() }
-                        .filterValues { it.size > 1 }
-                        .keys
-                require(duplicateIds.isEmpty()) {
-                    "Duplicate platform specs: ${duplicateIds.joinToString()}"
-                }
-                val defaultGuests = specs.filter { it.isDefaultGuest }
-                require(defaultGuests.size == 1) {
-                    "Exactly one default guest platform is required: ${defaultGuests.joinToString { it.platformId }}"
-                }
-            }.sortedWith(compareBy<PlatformSpec> { it.order }.thenBy { it.platformId })
+    public val defaultGuest: PlatformSpec get() = requireNotNull(data.snapshots.value.defaultGuest)
 
-    private val byId: Map<String, PlatformSpec> get() = all.associateBy { it.platformId }
+    public val subscriptionTimelineSpecs: List<SubscriptionTimelineSpec> get() = data.snapshots.value.subscriptionTimelineSpecs
 
-    public val defaultGuest: PlatformSpec get() = all.single { it.isDefaultGuest }
-
-    public val subscriptionTimelineSpecs: List<SubscriptionTimelineSpec> get() =
-        all
-            .flatMap { it.subscriptionTimelineSpecs }
-            .also { specs ->
-                val duplicateTypes =
-                    specs
-                        .groupBy { it.type }
-                        .filterValues { it.size > 1 }
-                        .keys
-                require(duplicateTypes.isEmpty()) {
-                    "Duplicate subscription timeline specs: ${duplicateTypes.joinToString()}"
-                }
-            }
-
-    private val subscriptionTimelineSpecsByType: Map<SubscriptionType, SubscriptionTimelineSpec>
-        get() = subscriptionTimelineSpecs.associateBy { it.type }
-
-    public fun get(platformId: String): PlatformSpec? = byId[platformId]
+    public fun get(platformId: String): PlatformSpec? = data.snapshots.value.byId[platformId]
 
     public fun require(platformId: String): PlatformSpec = get(platformId) ?: throw UnsupportedPlatformException(platformId)
 
-    public fun isRegistered(platformId: String): Boolean = platformId in byId
-
-    public fun metadataOrFallback(platformId: String): PlatformMetadata =
-        get(platformId)?.metadata
-            ?: PlatformMetadata(
-                displayName = platformId,
-                icon =
-                    dev.dimension.flare.ui.model.UiIcon.World
-                        .asType(),
-            )
+    public fun isRegistered(platformId: String): Boolean = platformId in data.snapshots.value.byId
 
     public fun supports(
         platformId: String,
         capability: PlatformCapability,
     ): Boolean = capability in get(platformId)?.capabilities.orEmpty()
 
-    public fun getSubscriptionTimelineSpec(type: SubscriptionType): SubscriptionTimelineSpec? = subscriptionTimelineSpecsByType[type]
+    public fun getSubscriptionTimelineSpec(type: SubscriptionType): SubscriptionTimelineSpec? =
+        data.snapshots.value.subscriptionsByType[type]
 
     public fun requireSubscriptionTimelineSpec(type: SubscriptionType): SubscriptionTimelineSpec =
         getSubscriptionTimelineSpec(type) ?: throw UnsupportedSubscriptionTimelineException(type)

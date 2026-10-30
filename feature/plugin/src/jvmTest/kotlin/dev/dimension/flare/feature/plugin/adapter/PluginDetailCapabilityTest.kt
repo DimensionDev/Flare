@@ -602,7 +602,9 @@ class PluginDetailCapabilityTest {
         TestFppFactory.write(input, TestFppFactory.validEntries(manifest = manifest, script = script))
         val namespace = root / "plugin-store"
         val store = PluginStateStore.open(fileSystem, namespace)
-        PluginInstaller(fileSystem, store).let { installer -> installer.inspect(input).also { installer.commit(it, true) } }
+        PluginInstaller(fileSystem, store).let { installer ->
+            installer.inspect(input).also { installer.commit(it, true, activate = store::install) }
+        }
         return PluginStateStore
             .open(fileSystem, namespace)
             .running.plugins

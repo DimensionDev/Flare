@@ -45,7 +45,6 @@ public fun RunningPluginV1.accountCredential(success: LoginSuccessV1): PluginAcc
                 negotiatedCapabilities = success.capabilities,
                 composeConfig = success.composeConfig,
                 credentialSchemaVersion = installed.manifest.platform.credentialSchemaVersion,
-                timelineSchemaVersion = installed.manifest.platform.timelineSchemaVersion,
             ),
         credential = success.credential,
     ).also { it.requireValid(this) }
@@ -104,7 +103,7 @@ internal fun PluginAccountCredentialV1.requireValid(plugin: RunningPluginV1) {
     ) {
         "Plugin account profile identity mismatch"
     }
-    require(snapshot.credentialSchemaVersion > 0 && snapshot.timelineSchemaVersion > 0) { "Invalid plugin account schema" }
+    require(snapshot.credentialSchemaVersion > 0) { "Invalid plugin account schema" }
     require(snapshot.manifestCapabilities.isCapabilitySnapshot() && snapshot.negotiatedCapabilities.isCapabilitySnapshot()) {
         "Invalid plugin account capabilities"
     }

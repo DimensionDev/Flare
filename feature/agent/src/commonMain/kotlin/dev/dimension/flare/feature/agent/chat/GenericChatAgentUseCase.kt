@@ -10,10 +10,7 @@ import dev.dimension.flare.feature.agent.common.AgentToolContext
 import dev.dimension.flare.feature.agent.common.AgentTrace
 import dev.dimension.flare.feature.agent.common.FlareAgentRequest
 import dev.dimension.flare.feature.agent.common.FlareAgentRunner
-import dev.dimension.flare.feature.agent.common.FlareAgentUnavailableException
 import dev.dimension.flare.feature.agent.common.resolveAgentVisibleResult
-import dev.dimension.flare.feature.agent.runtime.AgentAvailability
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.channelFlow
@@ -54,39 +51,29 @@ internal class GenericChatAgentUseCase(
             return
         }
         val result =
-            try {
-                agentRunner
-                    .run(
-                        request =
-                            FlareAgentRequest(
-                                retryMode = retryMode,
-                                prompt = userInputValue.toGenericChatPrompt(),
-                                systemPrompt = GENERIC_CHAT_SYSTEM_PROMPT,
-                                agentId = "flare-generic-chat",
-                                strategyName = "generic_chat",
-                                analyzeNodeName = "answer_user",
-                                executeToolsNodeName = "execute_generic_chat_tools",
-                                sendToolResultsNodeName = "send_generic_chat_tool_results",
-                                toolContext =
-                                    AgentToolContext(
-                                        searchDataSources = searchDataSources,
-                                    ),
-                                temperature = 0.5,
-                                finishAfterToolResults = false,
-                            ),
-                        conversationId = conversationId,
-                    ) { trace ->
-                        send(AgentConversationEvent.Trace(trace))
-                    }
-            } catch (throwable: Throwable) {
-                if (throwable is CancellationException) {
-                    throw throwable
+            agentRunner
+                .run(
+                    request =
+                        FlareAgentRequest(
+                            retryMode = retryMode,
+                            prompt = userInputValue.toGenericChatPrompt(),
+                            systemPrompt = GENERIC_CHAT_SYSTEM_PROMPT,
+                            agentId = "flare-generic-chat",
+                            strategyName = "generic_chat",
+                            analyzeNodeName = "answer_user",
+                            executeToolsNodeName = "execute_generic_chat_tools",
+                            sendToolResultsNodeName = "send_generic_chat_tool_results",
+                            toolContext =
+                                AgentToolContext(
+                                    searchDataSources = searchDataSources,
+                                ),
+                            temperature = 0.5,
+                            finishAfterToolResults = false,
+                        ),
+                    conversationId = conversationId,
+                ) { trace ->
+                    send(AgentConversationEvent.Trace(trace))
                 }
-                if (throwable is FlareAgentUnavailableException) {
-                    throw GenericChatAgentUnavailableException(throwable.availability)
-                }
-                throw throwable
-            }
 
         val visibleResult = resolveAgentVisibleResult(result.text, result.inputRequest)
         val parts =
@@ -150,7 +137,3 @@ internal class GenericChatAgentUseCase(
             """
     }
 }
-
-public class GenericChatAgentUnavailableException public constructor(
-    availability: AgentAvailability,
-) : FlareAgentUnavailableException(availability)

@@ -331,7 +331,7 @@ class PluginDevelopmentSessionV1Test {
                     manifest = TestFppFactory.validManifest.replace(PLATFORM, "OtherPlatform"),
                 ),
             )
-            subsystem.installer.commit(subsystem.installer.inspect(archive), confirmed = true)
+            subsystem.installer.commit(subsystem.installer.inspect(archive), confirmed = true, activate = subsystem.stateStore::install)
 
             assertFailsWith<IllegalStateException> { session.reload(confirmed = true) }
             assertFalse(session.state.value.active)
@@ -391,7 +391,7 @@ class PluginDevelopmentSessionV1Test {
         if (installed) {
             val archive = root / "installed.fpp"
             TestFppFactory.write(archive, TestFppFactory.validEntries(script = script("installed")))
-            subsystem.installer.commit(subsystem.installer.inspect(archive), confirmed = true)
+            subsystem.installer.commit(subsystem.installer.inspect(archive), confirmed = true, activate = subsystem.stateStore::install)
             subsystem.runtimePool.close()
             subsystem = newSubsystem()
         }

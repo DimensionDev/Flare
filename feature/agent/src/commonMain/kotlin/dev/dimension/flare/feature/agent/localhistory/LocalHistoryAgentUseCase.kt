@@ -11,11 +11,8 @@ import dev.dimension.flare.feature.agent.common.AgentToolContext
 import dev.dimension.flare.feature.agent.common.AgentTrace
 import dev.dimension.flare.feature.agent.common.FlareAgentRequest
 import dev.dimension.flare.feature.agent.common.FlareAgentRunner
-import dev.dimension.flare.feature.agent.common.FlareAgentUnavailableException
 import dev.dimension.flare.feature.agent.common.resolveAgentVisibleResult
 import dev.dimension.flare.feature.agent.presenter.distinctAgentMessageParts
-import dev.dimension.flare.feature.agent.runtime.AgentAvailability
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.channelFlow
@@ -80,42 +77,32 @@ internal class LocalHistoryAgentUseCase(
             agentRunner.clearConversation(conversationId)
         }
         val result =
-            try {
-                agentRunner.run(
-                    request =
-                        FlareAgentRequest(
-                            retryMode = retryMode,
-                            prompt =
-                                toLocalHistoryPrompt(
-                                    query = normalizedQuery,
-                                    target = target,
-                                    userInput = userInputValue,
-                                ),
-                            systemPrompt = LOCAL_HISTORY_SYSTEM_PROMPT,
-                            agentId = "flare-local-history",
-                            strategyName = "local_history_chat",
-                            analyzeNodeName = "answer_local_history_request",
-                            executeToolsNodeName = "execute_local_history_tools",
-                            sendToolResultsNodeName = "send_local_history_tool_results",
-                            toolContext =
-                                AgentToolContext(
-                                    searchDataSources = searchDataSources,
-                                ),
-                            temperature = 0.3,
-                            finishAfterToolResults = false,
-                        ),
-                    conversationId = conversationId,
-                ) { trace ->
-                    send(AgentConversationEvent.Trace(trace))
-                }
-            } catch (throwable: Throwable) {
-                if (throwable is CancellationException) {
-                    throw throwable
-                }
-                if (throwable is FlareAgentUnavailableException) {
-                    throw LocalHistoryAgentUnavailableException(throwable.availability)
-                }
-                throw throwable
+            agentRunner.run(
+                request =
+                    FlareAgentRequest(
+                        retryMode = retryMode,
+                        prompt =
+                            toLocalHistoryPrompt(
+                                query = normalizedQuery,
+                                target = target,
+                                userInput = userInputValue,
+                            ),
+                        systemPrompt = LOCAL_HISTORY_SYSTEM_PROMPT,
+                        agentId = "flare-local-history",
+                        strategyName = "local_history_chat",
+                        analyzeNodeName = "answer_local_history_request",
+                        executeToolsNodeName = "execute_local_history_tools",
+                        sendToolResultsNodeName = "send_local_history_tool_results",
+                        toolContext =
+                            AgentToolContext(
+                                searchDataSources = searchDataSources,
+                            ),
+                        temperature = 0.3,
+                        finishAfterToolResults = false,
+                    ),
+                conversationId = conversationId,
+            ) { trace ->
+                send(AgentConversationEvent.Trace(trace))
             }
 
         val supportingParts = result.parts.distinctAgentMessageParts()
@@ -290,7 +277,3 @@ internal class LocalHistoryAgentUseCase(
             """
     }
 }
-
-public class LocalHistoryAgentUnavailableException public constructor(
-    availability: AgentAvailability,
-) : FlareAgentUnavailableException(availability)

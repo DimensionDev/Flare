@@ -8,7 +8,9 @@ import dev.dimension.flare.feature.plugin.login.PluginOAuthPendingStoreV1
 import dev.dimension.flare.feature.plugin.login.PluginOAuthPendingV1
 import dev.dimension.flare.ui.model.UiText
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.collect
@@ -201,7 +203,7 @@ class PluginManagementPresenterV1Test {
                     presenter.state.value.plugins
                         .single()
                 assertTrue(FileSystem.SYSTEM.exists(desired.iconPath.toPath()))
-                assertTrue(desired.running)
+                assertTrue(desired.pluginId in firstSubsystem.running.value.plugins)
             } finally {
                 firstPresenter?.close()
                 firstSubsystem.runtimePool.close()
@@ -215,7 +217,7 @@ class PluginManagementPresenterV1Test {
                 val running =
                     presenter.state.value.plugins
                         .single()
-                assertTrue(running.running)
+                assertTrue(running.pluginId in restartedSubsystem.running.value.plugins)
 
                 presenter.uninstall(running.pluginId)
                 assertTrue(
@@ -282,6 +284,81 @@ class PluginManagementPresenterV1Test {
         }
 
     @Test
+    fun closeDiscardsAnUnconfirmedInstallAndRejectsNewInspections() =
+        runTest {
+            val subsystem = subsystem()
+            val presenter =
+                testPluginManagementPresenter(subsystem, backgroundScope, operationDispatcher = StandardTestDispatcher(testScheduler))
+            try {
+                presenter.inspect(packagePath.toString())
+                assertTrue(FileSystem.SYSTEM.exists(subsystem.stateStore.paths.incoming))
+
+                presenter.close()
+                runCurrent()
+
+                assertNull(presenter.state.value.pendingInstall)
+                assertFalse(FileSystem.SYSTEM.exists(subsystem.stateStore.paths.incoming))
+                assertFails { presenter.inspect(packagePath.toString()) }
+                assertTrue(
+                    subsystem.stateStore.desired.value.plugins
+                        .isEmpty(),
+                )
+            } finally {
+                presenter.close()
+                subsystem.runtimePool.close()
+            }
+        }
+
+    @Test
+    fun closingDuringInspectionDiscardsTheLatePreview() =
+        runTest {
+            val subsystem = subsystem()
+            val presenter =
+                testPluginManagementPresenter(subsystem, backgroundScope, operationDispatcher = StandardTestDispatcher(testScheduler))
+            try {
+                val inspection = async(start = CoroutineStart.UNDISPATCHED) { presenter.inspect(packagePath.toString()) }
+                presenter.close()
+                inspection.await()
+                runCurrent()
+
+                assertNull(presenter.state.value.pendingInstall)
+                assertFalse(FileSystem.SYSTEM.exists(subsystem.stateStore.paths.incoming))
+                assertTrue(
+                    subsystem.stateStore.desired.value.plugins
+                        .isEmpty(),
+                )
+            } finally {
+                presenter.close()
+                subsystem.runtimePool.close()
+            }
+        }
+
+    @Test
+    fun closingAnOlderPresenterDoesNotDiscardAnotherPresentersPreview() =
+        runTest {
+            val subsystem = subsystem()
+            val dispatcher = StandardTestDispatcher(testScheduler)
+            val older = testPluginManagementPresenter(subsystem, backgroundScope, operationDispatcher = dispatcher)
+            val newer = testPluginManagementPresenter(subsystem, backgroundScope, operationDispatcher = dispatcher)
+            try {
+                older.inspect(packagePath.toString())
+                newer.inspect(packagePath.toString())
+                older.close()
+                runCurrent()
+
+                assertNull(older.state.value.pendingInstall)
+                assertNotNull(newer.state.value.pendingInstall)
+                assertTrue(FileSystem.SYSTEM.exists(subsystem.stateStore.paths.incoming))
+                newer.confirmInstall()
+                assertEquals(1, subsystem.running.value.plugins.size)
+            } finally {
+                older.close()
+                newer.close()
+                subsystem.runtimePool.close()
+            }
+        }
+
+    @Test
     fun closeStopsThePresenterFromObservingGlobalPluginState() =
         runTest {
             val subsystem = subsystem()
@@ -292,17 +369,18 @@ class PluginManagementPresenterV1Test {
                 val installed =
                     presenter.state.value.plugins
                         .single()
-                assertTrue(installed.running)
+                assertTrue(installed.pluginId in subsystem.running.value.plugins)
 
                 presenter.close()
                 subsystem.stateStore.uninstall(installed.pluginId)
                 runCurrent()
 
-                assertTrue(
+                assertEquals(
+                    installed,
                     presenter.state.value.plugins
-                        .single()
-                        .running,
+                        .single(),
                 )
+                assertTrue(installed.pluginId in subsystem.running.value.plugins)
             } finally {
                 presenter.close()
                 subsystem.runtimePool.close()

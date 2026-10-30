@@ -1,22 +1,11 @@
 name: Desktop CI
 
 on:
+  workflow_dispatch:
   push:
-    branches:
-      - master
-      - release
-      - develop
     tags:
       - "**"
       - "!plugin-sdk-v*"
-    paths-ignore:
-      - "**.md"
-      - "**.yml"
-  pull_request:
-    branches:
-      - master
-      - release
-      - develop
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true

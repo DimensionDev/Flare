@@ -127,6 +127,6 @@ For subsequent releases:
 3. The workflow validates the tarball first, then publishes prereleases to `next`
    and stable versions to `latest`. Existing app workflows exclude SDK tags.
 
-The **Plugin SDK** workflow runs validation on relevant pull requests. Its manual
-**Run workflow** action also validates only, even when a tag is selected; publishing
-requires a push of a matching `plugin-sdk-v*` tag. Updating a PR never publishes npm.
+Run the **Plugin SDK** workflow manually to validate a branch or tag; this does not
+publish, even when a tag is selected. Publishing requires a push of a matching
+`plugin-sdk-v*` tag. Branch pushes and pull requests do not start this workflow.

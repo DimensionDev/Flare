@@ -41,19 +41,6 @@ class PluginStateStoreTest {
     }
 
     @Test
-    fun legacyDisabledInstallationLoadsAsEnabledWithoutLosingItsRecord() =
-        runBlocking<Unit> {
-            val installed = installValid(fileSystem)
-            val path = PluginStoragePaths(namespace).index
-            val old = fileSystem.read(path) { readUtf8() }.replace("\"runtimeGeneration\":", "\"enabled\":false,\"runtimeGeneration\":")
-            fileSystem.write(path) { writeUtf8(old) }
-            val store = PluginStateStore.open(fileSystem, namespace)
-            assertTrue(store.desired.value.indexHealthy)
-            assertEquals(installed, store.desired.value.plugins[installed.pluginId])
-            assertNotNull(store.running.plugins[installed.pluginId])
-        }
-
-    @Test
     fun atomicIndexFailureKeepsPreviousDesiredState() =
         runBlocking {
             val installed = installValid(fileSystem)

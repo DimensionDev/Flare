@@ -65,7 +65,7 @@ val generatePluginSdk by tasks.registering {
                 val text = file.asFile.readText().replace("\r\n", "\n")
                 // Keep the external SDK intact; only adapt the in-app reference set.
                 when (path) {
-                    "ABI.md" ->
+                    "ABI.md" -> {
                         ("# Flare Social Plugin API v1\n\n" + excerpt(text, "## Registration\n", "## Lifecycle and trust\n"))
                             .replace(
                                 "Installation review explicitly grants\n" +
@@ -74,32 +74,35 @@ val generatePluginSdk by tasks.registering {
                                 "Local AI plugins automatically approve this permission after validation, including updates.\n" +
                                     "Media requests may reach any website, including CDNs and federated servers; these\n" +
                                     "URLs can transmit the plugin account's data.",
-                            ).replace(
-                                "Permission removal, disable, and uninstall take effect after restart, like the\n" +
-                                    "package change itself; absent plugins cannot restore media.",
-                                "Media grants change with the running package; absent plugins cannot restore media.",
                             )
-                    "references/compatibility.md" ->
+                    }
+
+                    "references/compatibility.md" -> {
                         "# Compatibility\n\n## Updates and compatibility\n\n" +
                             excerpt(text, "| Change | Author consequence |", "## Optional local installation\n")
-                    "references/authentication.md" ->
+                    }
+
+                    "references/authentication.md" -> {
                         text.replace(
                             "and [Pixelfed](../examples/pixelfed/plugin.js) for complete OAuth.",
                             "and the [OAuth recipe](#oauth) for that login flow.",
                         )
-                    "references/runtime-http.md" ->
+                    }
+
+                    "references/runtime-http.md" -> {
                         text.replace(
                             "Installation\nreview discloses this broad media access.",
                             "Local AI plugins automatically approve this permission after validation.",
-                        ).replace("running package after restart", "running package")
-                    "references/recipes.md" ->
-                        text.replace("and Pixelfed's complete publish\nimplementation.", "for upload requests.")
-                    "references/troubleshooting.md" ->
-                        text.replace("activation after restart", "activation").replace(
-                            "Restart Flare; Desired State differs from the running package until then",
-                            "Check list_plugins for validation errors or pending activation; see [updating](../README.md#updating)",
                         )
-                    else -> text
+                    }
+
+                    "references/recipes.md" -> {
+                        text.replace("and Pixelfed's complete publish\nimplementation.", "for upload requests.")
+                    }
+
+                    else -> {
+                        text
+                    }
                 }.replace("publishing.md#updates-and-compatibility", "compatibility.md#updates-and-compatibility")
             }
         val output = bundledSdkDirectory.get().file("dev/dimension/flare/feature/plugin/authoring/BundledPluginSdk.kt").asFile

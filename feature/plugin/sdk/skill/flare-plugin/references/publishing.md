@@ -42,7 +42,8 @@ copy that example's contents into a repository you own first.
    **Install**. Flare selects and downloads the latest stable version, then shows
    source and permission review in the same dialog. Only confirmation installs
    the plugin; cancellation discards the download. Errors stay in the dialog for
-   retry. Restart Flare and verify the installed tag/version and running behavior.
+   retry. Successful installs take effect immediately; verify the installed
+   tag/version and running behavior without restarting Flare.
 
 Private repositories, arbitrary branch tracking, prerelease tags, automatic
 installation, and build-on-device are unsupported. A public repo without a stable

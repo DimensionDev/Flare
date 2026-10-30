@@ -16,7 +16,7 @@ logging API; do not invent `flare.log` or assume a developer console is availabl
 | Missing method / incomplete capability | Compare full capability ID, required operation set, registration path, and login negotiation |
 | Host API called during registration / undefined global | Keep top-level work to definitions and synchronous registration; move HTTP/crypto into methods |
 | Platform ID already registered | Choose a distinct stable platform ID; do not impersonate a built-in platform |
-| Installed change has no effect | Restart Flare; Desired State differs from the running package until then |
+| Installed change has no effect | Changes take effect immediately after successful activation; check validation or activation errors and the running version |
 | Login profile identity mismatch | Verify profile.key.id equals accountId, and profile.key.host matches the selected origin |
 | Form login did not complete | Password/CredentialImport/Form begin must return success or throw a typed error |
 | Cookie login pending indefinitely | Declared probe URL/name/path scope, browser HTTPS, actual server login, and check's profile verification |

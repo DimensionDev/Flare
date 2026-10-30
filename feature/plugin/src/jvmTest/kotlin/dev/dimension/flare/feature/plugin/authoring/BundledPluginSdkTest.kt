@@ -92,6 +92,16 @@ class BundledPluginSdkTest {
     }
 
     @Test
+    fun externalAndBundledGuidesDescribeImmediateActivation() {
+        val troubleshooting = sdkText("references/troubleshooting.md")
+        assertEquals(troubleshooting, BundledPluginSdk.read("references/troubleshooting.md"))
+        listOf(troubleshooting, sdkText("references/publishing.md")).forEach {
+            assertTrue(it.contains("take effect immediately"))
+            assertFalse(it.contains("Restart Flare"))
+        }
+    }
+
+    @Test
     fun everyRelativeMarkdownAndTypeReferenceResolvesLocally() {
         BundledPluginSdk.paths.forEach { path ->
             val text = assertNotNull(BundledPluginSdk.read(path))

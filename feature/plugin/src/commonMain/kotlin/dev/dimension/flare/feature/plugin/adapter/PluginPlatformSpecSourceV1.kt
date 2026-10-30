@@ -205,26 +205,7 @@ private class PluginPlatformSpecV1(
             }
 
     override val timelineSpecs: ImmutableList<TimelineSpec<out TimelineSpec.Data>> =
-        buildList {
-            addAll(specs.values)
-            addAll(listOfNotNull(dynamicTimelineSpec))
-
-            val legacyCandidates =
-                buildList<Pair<String, TimelineSpec<out TimelineSpec.Data>>> {
-                    platform.timelines.forEach { timeline ->
-                        add(legacyTimelineSpecId(timeline.id) to specs.getValue(timeline.id))
-                    }
-                    dynamicTimelineSpec?.let { add(legacyTimelineSpecId("catalog") to it) }
-                }
-            legacyCandidates
-                .groupBy { it.first }
-                .values
-                .filter { it.size == 1 }
-                .forEach { candidates ->
-                    val (legacyId, spec) = candidates.single()
-                    add(spec.withId(legacyId))
-                }
-        }.toImmutableList()
+        (specs.values + listOfNotNull(dynamicTimelineSpec)).toImmutableList()
 
     override fun resolveInitialText(context: ComposeInitialTextContext): InitialText? = context.resolveReplyParticipantInitialText()
 
@@ -392,17 +373,6 @@ private class PluginPlatformSpecV1(
 
     private fun canonicalTimelineSpecId(kind: String): String =
         "plugin:${manifest.id}:$platformId:schema${platform.timelineSchemaVersion}:$kind"
-
-    private fun legacyTimelineSpecId(id: String): String =
-        "plugin_${manifest.id.replace('.', '_')}_${platformId}${timelineSchemaSuffix()}_$id"
-
-    private fun TimelineSpec<out TimelineSpec.Data>.withId(id: String): TimelineSpec<out TimelineSpec.Data> = copy(id = id)
-
-    private fun timelineSchemaSuffix(): String =
-        platform.timelineSchemaVersion
-            .takeIf { it != 1 }
-            ?.let { "_schema$it" }
-            .orEmpty()
 
     private fun DeepLinkManifestV1.toPlatformDeepLink(accountKey: MicroBlogKey): PlatformDeepLink<PluginDeepLinkArgumentsV1> {
         val origin =

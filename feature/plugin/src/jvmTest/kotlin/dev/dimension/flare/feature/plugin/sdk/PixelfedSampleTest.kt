@@ -786,8 +786,7 @@ class PixelfedSampleTest {
 
                 assertTrue(originalIds.any { ":schema1:" in it })
                 assertTrue(changedIds.any { ":schema2:" in it })
-                assertTrue(originalIds.any { it.startsWith("plugin_") && "_schema" !in it })
-                assertTrue(changedIds.any { "_schema2_" in it })
+                assertTrue((originalIds + changedIds).all { it.startsWith("plugin:") })
                 assertTrue(originalIds.intersect(changedIds).isEmpty())
             } finally {
                 scope.cancel()
@@ -1103,7 +1102,6 @@ private fun RunningPluginV1.platformSpec(
     running =
         PluginRunningSnapshotV1(
             plugins = mapOf(installed.pluginId to this),
-            referencedPackageHashes = setOf(installed.packageHash),
             issues = emptyList(),
             indexHealthy = true,
         ),

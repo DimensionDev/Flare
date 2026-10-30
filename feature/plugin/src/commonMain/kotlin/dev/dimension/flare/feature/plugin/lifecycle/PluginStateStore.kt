@@ -166,7 +166,6 @@ public class PluginStateStore private constructor(
         if (index == null) {
             return PluginRunningSnapshotV1(
                 plugins = emptyMap(),
-                referencedPackageHashes = emptySet(),
                 issues = listOfNotNull(initialIssue),
                 indexHealthy = false,
             )
@@ -197,7 +196,6 @@ public class PluginStateStore private constructor(
         }
         return PluginRunningSnapshotV1(
             plugins = plugins,
-            referencedPackageHashes = index.plugins.mapTo(mutableSetOf(), InstalledPluginV1::packageHash),
             issues = issues,
             indexHealthy = true,
         )

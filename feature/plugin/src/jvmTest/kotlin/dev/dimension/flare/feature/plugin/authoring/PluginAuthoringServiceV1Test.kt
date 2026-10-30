@@ -132,22 +132,6 @@ class PluginAuthoringServiceV1Test {
             FileSystem.SYSTEM.deleteRecursively(root)
         }
 
-    @Test
-    fun oldDisabledSourceRecordStillHasItsSourceAndRevision() =
-        runBlocking<Unit> {
-            val plugin = service.create(UUID.randomUUID().toString())
-            generate(plugin)
-            await(plugin.id, PluginAuthoringPhase.Applied)
-            val before = service.read(plugin.id)
-            val path = root / "authored-plugins" / "${plugin.id}.json"
-            val old = fileSystem.read(path) { readUtf8() }.replace("\"revision\":", "\"enabled\":false,\"revision\":")
-            fileSystem.write(path) { writeUtf8(old) }
-            val restored = PluginAuthoringServiceV1(subsystem, { registry }, { accounts }, { scope }).read(plugin.id)
-            assertEquals(before.files, restored.files)
-            assertEquals(before.plugin.revision, restored.plugin.revision)
-            assertEquals(PluginAuthoringPhase.Idle, restored.plugin.phase)
-        }
-
     @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
     @Test
     fun cleanupFailureCannotReinstallADeletedPluginFromQueuedSource() =

@@ -10,6 +10,5 @@ verification, and updates. Copy the whole `flare-plugin` directory so its relati
 references, types, templates, and examples travel with it. All documentation is
 in English.
 
-The legacy `ABI.md`, `flare-plugin.d.ts`, and `pack.mjs` paths forward to their
-canonical versions inside the skill. The complete Pixelfed sample is now at
+The complete Pixelfed sample is at
 [skill/flare-plugin/examples/pixelfed](skill/flare-plugin/examples/pixelfed/README.md).

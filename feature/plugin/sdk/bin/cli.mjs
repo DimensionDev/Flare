@@ -39,12 +39,14 @@ async function main() {
   manifest.platform.name = name;
 
   await mkdir(target, { recursive: true });
-  await cp(template, target, {
-    recursive: true,
-    force: false,
-    errorOnExist: true,
-    filter: (source) => source !== manifestPath,
-  });
+  for (const entry of await readdir(template)) {
+    if (entry === "manifest.json") continue;
+    await cp(join(template, entry), join(target, entry), {
+      recursive: true,
+      force: false,
+      errorOnExist: true,
+    });
+  }
   await writeFile(join(target, "manifest.json"), `${JSON.stringify(manifest, null, 2)}\n`, { flag: "wx" });
 
   console.log(`Created ${target}\nPlugin ID: ${manifest.id}\nPlatform ID: ${manifest.platform.id}`);

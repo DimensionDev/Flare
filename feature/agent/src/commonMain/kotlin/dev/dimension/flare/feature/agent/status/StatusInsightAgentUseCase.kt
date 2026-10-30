@@ -67,10 +67,8 @@ internal class StatusInsightAgentUseCase(
         retryMode: AgentRetryMode?,
     ) {
         val userInputValue = userInput?.trim().orEmpty()
-        if (retryMode == null && userInputValue.isBlank() && chatHistoryProvider.hasAssistantMessage(conversationId)) {
-            return
-        }
-        if (retryMode == null && userInputValue.isBlank()) {
+        val reuseResponse = retryMode == null && userInputValue.isBlank() && chatHistoryProvider.hasAssistantMessage(conversationId)
+        if (retryMode == null && userInputValue.isBlank() && !reuseResponse) {
             agentRunner.clearConversation(conversationId)
         }
         send(AgentTrace(AgentPhase.LoadingPostContext).toConversationEvent())
@@ -85,7 +83,9 @@ internal class StatusInsightAgentUseCase(
         if (retryMode == null && userInputValue.isBlank()) {
             chatHistoryProvider.ensureConversationTitle(conversationId, post.insightConversationTitle())
         }
+        chatHistoryProvider.ensureInitialUserUiMessage(conversationId, post.insightConversationTitle(), AgentMessagePart.PostCard(post))
         send(AgentConversationEvent.ContentLoaded(post))
+        if (reuseResponse) return
         send(AgentTrace(AgentPhase.PostContextLoaded).toConversationEvent())
         val imageAttachments = post.aiImageAttachments()
         if (imageAttachments.isNotEmpty()) {

@@ -58,10 +58,8 @@ internal class ProfileInsightAgentUseCase(
         retryMode: AgentRetryMode?,
     ) {
         val userInputValue = userInput?.trim().orEmpty()
-        if (retryMode == null && userInputValue.isBlank() && chatHistoryProvider.hasAssistantMessage(conversationId)) {
-            return
-        }
-        if (retryMode == null && userInputValue.isBlank()) {
+        val reuseResponse = retryMode == null && userInputValue.isBlank() && chatHistoryProvider.hasAssistantMessage(conversationId)
+        if (retryMode == null && userInputValue.isBlank() && !reuseResponse) {
             agentRunner.clearConversation(conversationId)
         }
         val profile =
@@ -75,7 +73,13 @@ internal class ProfileInsightAgentUseCase(
         if (retryMode == null && userInputValue.isBlank()) {
             chatHistoryProvider.ensureConversationTitle(conversationId, profile.insightConversationTitle())
         }
+        chatHistoryProvider.ensureInitialUserUiMessage(
+            conversationId,
+            profile.insightConversationTitle(),
+            AgentMessagePart.UserCard(profile),
+        )
         send(AgentConversationEvent.ContentLoaded(profile))
+        if (reuseResponse) return
 
         val result =
             agentRunner.runProfileInsightAgent(

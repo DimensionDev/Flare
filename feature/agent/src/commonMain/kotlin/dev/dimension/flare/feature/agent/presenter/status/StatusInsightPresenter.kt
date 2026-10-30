@@ -16,7 +16,6 @@ import dev.dimension.flare.feature.agent.common.AgentChatHistoryMessage
 import dev.dimension.flare.feature.agent.common.AgentChatHistoryProvider
 import dev.dimension.flare.feature.agent.common.AgentChatRoom
 import dev.dimension.flare.feature.agent.common.AgentInputRequest
-import dev.dimension.flare.feature.agent.presenter.AgentMessagePart
 import dev.dimension.flare.feature.agent.presenter.rememberAgentChatPresenterController
 import dev.dimension.flare.feature.agent.status.StatusInsightAgentUseCase
 import dev.dimension.flare.model.AccountType
@@ -102,13 +101,6 @@ public class StatusInsightPresenter(
                 onInputRequestSelected = { requestId, optionId ->
                     historyProvider.markInputRequestSelected(conversationId, requestId, optionId)
                 },
-                onInitialContentLoaded = { post ->
-                    historyProvider.storeUserUiMessage(
-                        conversationId = conversationId,
-                        displayText = post.insightUserMessageTitle(),
-                        parts = listOf(AgentMessagePart.PostCard(post)),
-                    )
-                },
                 onAgentRunCompleted = {
                     historyProvider.generateTitleIfNeeded(conversationId)
                 },
@@ -178,27 +170,3 @@ public class StatusInsightPresenter(
         val searchDataSources: List<AccountMicroblogDataSource>,
     )
 }
-
-private fun UiTimelineV2.Post.insightUserMessageTitle(): String =
-    content.original.raw
-        .trim()
-        .ifBlank {
-            contentWarning
-                ?.original
-                ?.raw
-                .orEmpty()
-                .trim()
-        }.ifBlank { card?.title.orEmpty().trim() }
-        .ifBlank {
-            user
-                ?.name
-                ?.raw
-                .orEmpty()
-                .trim()
-        }.ifBlank {
-            user
-                ?.handle
-                ?.raw
-                .orEmpty()
-                .trim()
-        }.ifBlank { statusKey.toString() }

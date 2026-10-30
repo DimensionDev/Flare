@@ -84,7 +84,6 @@ internal fun <Content : Any, Context : Any> rememberAgentChatPresenterController
         }
     },
     onInputRequestSelected: suspend (String, String) -> Unit = { _, _ -> },
-    onInitialContentLoaded: suspend (Content) -> Unit = {},
     onAgentRunCompleted: suspend () -> Unit = {},
     onRoomRuntimeStateChanged: suspend (isRunning: Boolean) -> Unit = {},
     onRoomStateChanged: suspend (errorMessage: String?) -> Unit,
@@ -191,12 +190,6 @@ internal fun <Content : Any, Context : Any> rememberAgentChatPresenterController
                 runAgent(contextValue, submittedInput, conversationId, retryMode).collect { event ->
                     when (event) {
                         is AgentConversationEvent.ContentLoaded -> {
-                            if (submittedInput == null && !runtime.initialContentMessageStored &&
-                                historyProvider.observeMessages(conversationId).first().none { it.isUser }
-                            ) {
-                                runtime.initialContentMessageStored = true
-                                onInitialContentLoaded(event.content)
-                            }
                             AgentChatRunRegistry.updateState(runtime) { state ->
                                 state.copy(
                                     content = event.content,
@@ -361,7 +354,6 @@ internal class AgentChatPresenterRuntime {
     var retainedPresenterCount: Int = 0
     var runGeneration: Int = 0
     var initialUserInputConsumed: Boolean = false
-    var initialContentMessageStored: Boolean = false
     var autoRunOnContextConsumed: Boolean = false
 
     fun tryStart(): Boolean {

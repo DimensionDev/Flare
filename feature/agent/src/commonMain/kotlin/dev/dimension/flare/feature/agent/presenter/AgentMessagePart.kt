@@ -2,6 +2,8 @@ package dev.dimension.flare.feature.agent.presenter
 
 import androidx.compose.runtime.Immutable
 import dev.dimension.flare.feature.agent.common.AgentInputRequest
+import dev.dimension.flare.feature.agent.common.AgentPostSnapshotSerializer
+import dev.dimension.flare.feature.agent.common.AgentProfileSnapshotSerializer
 import dev.dimension.flare.feature.agent.common.agentAttachmentRef
 import dev.dimension.flare.feature.agent.common.agentDisplayPost
 import dev.dimension.flare.model.MicroBlogKey
@@ -24,12 +26,14 @@ public sealed interface AgentMessagePart {
     @Serializable
     @Immutable
     public data class PostCard(
+        @Serializable(with = AgentPostSnapshotSerializer::class)
         val post: UiTimelineV2.Post,
     ) : AgentMessagePart
 
     @Serializable
     @Immutable
     public data class UserCard(
+        @Serializable(with = AgentProfileSnapshotSerializer::class)
         val user: UiProfile,
     ) : AgentMessagePart
 

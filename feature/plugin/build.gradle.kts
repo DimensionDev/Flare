@@ -24,6 +24,7 @@ val generatePluginSdk by tasks.registering {
             listOf(
                 "ABI.md",
                 "flare-plugin.d.ts",
+                "manifest.schema.json",
                 "references/manifest.md",
                 "references/capabilities.md",
                 "references/runtime-http.md",

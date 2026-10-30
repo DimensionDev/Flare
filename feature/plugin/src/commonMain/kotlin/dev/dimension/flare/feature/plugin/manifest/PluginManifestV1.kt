@@ -19,6 +19,9 @@ public data class PluginManifestV1(
     val description: PluginTextV1? = null,
     val permissions: PluginPermissionsV1 = PluginPermissionsV1(),
     val platform: PluginPlatformManifestV1,
+    /** Editor hint only; the Host never resolves this URL. */
+    @SerialName("\$schema")
+    val schema: String? = null,
 )
 
 @Serializable

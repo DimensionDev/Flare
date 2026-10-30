@@ -33,6 +33,11 @@ them. The command uses bundled files only and does not install dependencies,
 initialize Git, contact your website, or publish anything. Run
 `npx flare-plugin-sdk@next --help` for usage.
 
+The generated `manifest.json` includes a `$schema` URL pinned to the SDK version
+used to create it. Open it in VS Code or another JSON Schema editor for property
+completion, descriptions, enum choices, and static validation. The complete schema
+is bundled at `skill/flare-plugin/manifest.schema.json` inside the SDK.
+
 Edit `plugin.js` to use your website's real authentication, endpoints, response
 mapping, and pagination. The starter's `/api/me` and `/api/posts` are illustrative;
 no demonstration server is included. Update the description, login methods and
@@ -141,6 +146,15 @@ registration, permissions, and behavior. File installs have no GitHub update tra
 
 ## Optional: editor types and TypeScript
 
+For JSON Schema use without network access, install the SDK below and set the
+manifest's `$schema` to `./node_modules/flare-plugin-sdk/skill/flare-plugin/manifest.schema.json`.
+Keep these development files outside the optional `.fpp` staging directory.
+Flare treats `$schema` as editor metadata and never downloads it. With an older
+Flare build that rejects this field, remove it and use a VS Code `json.schemas`
+association in workspace settings instead. See the
+[manifest editor guide](https://github.com/DimensionDev/Flare/blob/feature/plugin/feature/plugin/sdk/skill/flare-plugin/references/manifest.md#json-schema-and-editor-support)
+and [VS Code schema settings](https://code.visualstudio.com/docs/languages/json#_json-schemas-and-settings).
+
 Install editor types in your authoring project:
 
 ```sh
@@ -182,6 +196,9 @@ Initializer tests cover valid unique IDs, empty/nested/Unicode paths, invalid
 arguments, and preserving existing directories, files, and symlinks. They do not
 contact a website or publish to npm. Flare's Host and platform acceptance checks are
 documented in `skill/flare-plugin/references/testing.md`.
+The draft-07 schema is compiled with Ajv in strict mode. Shared manifest cases
+exercise both Schema and Host validation; Host tests also compare every field,
+required property, enum, and known capability operation against Kotlin descriptors.
 
 To try the SDK from a checkout before npm publication, run
 `npm pack --pack-destination /tmp` after those checks, then install the resulting `.tgz` in

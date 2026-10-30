@@ -1,6 +1,6 @@
 {
   "name": "flare-plugin-sdk",
-  "version": "0.1.0-beta.5",
+  "version": "0.1.0-beta.6",
   "description": "Types, tooling, templates and authoring references for Flare plugins",
   "license": "SEE LICENSE IN LICENSE",
   "homepage": "https://github.com/DimensionDev/Flare#plugins-beta",
@@ -32,6 +32,7 @@
     "test": "node --test scripts/*.test.mjs"
   },
   "devDependencies": {
+    "ajv": "8.20.0",
     "typescript": "6.0.3"
   }
 }

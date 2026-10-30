@@ -13,6 +13,13 @@ inside `my-plugin` and keep its generated plugin/platform IDs. If you copied the
 template manually, first copy its contents to your repository root and replace
 the example `manifest.id`, `platform.id`, and names. Keep IDs stable for updates.
 
+The generated manifest's `$schema` is pinned to the SDK version that created it.
+Open `manifest.json` in VS Code or another JSON Schema editor for completion,
+field descriptions, enum choices and static errors. Flare treats the URL as
+metadata and never downloads it; actual registration and behavior are checked in
+Flare. See the [manifest editor guide](https://github.com/DimensionDev/Flare/blob/feature/plugin/feature/plugin/sdk/skill/flare-plugin/references/manifest.md#json-schema-and-editor-support)
+for offline use and older Flare builds that reject `$schema`.
+
 1. Update the description, login methods, and declared capabilities in
    `manifest.json`. Replace the one-pixel placeholder PNG with your own icon.
 2. Adapt `plugin.js` using the

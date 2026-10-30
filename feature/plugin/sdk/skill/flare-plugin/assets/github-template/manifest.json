@@ -1,4 +1,5 @@
 {
+  "$schema": "https://unpkg.com/flare-plugin-sdk@next/skill/flare-plugin/manifest.schema.json",
   "schemaVersion": 1,
   "apiVersion": 1,
   "id": "dev.example.flare.feed",

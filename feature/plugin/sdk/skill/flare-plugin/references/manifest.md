@@ -6,10 +6,52 @@ Defaults below apply when a field is omitted; use omission for optional fields
 rather than sending null for non-nullable values. Start from the complete
 [template manifest](../assets/github-template/manifest.json).
 
+## JSON Schema and editor support
+
+The self-contained [manifest.schema.json](../manifest.schema.json) uses JSON Schema
+draft-07. Editors such as VS Code use it for field completion, descriptions, enum
+choices, required properties, ranges and static login/capability combinations.
+`npx flare-plugin-sdk@next init my-plugin` adds a `$schema` URL pinned to that SDK
+version. The source templates use the npm `next` channel.
+
+For an existing project, add this editor hint at the manifest root:
+
+```json
+{
+  "$schema": "https://unpkg.com/flare-plugin-sdk@next/skill/flare-plugin/manifest.schema.json"
+}
+```
+
+Keep the other manifest fields. For reproducible editor behavior, replace `next`
+with your chosen SDK version. For offline authoring, install the SDK as a development
+dependency and use `./node_modules/flare-plugin-sdk/skill/flare-plugin/manifest.schema.json`
+as the `$schema` value; all schema references are local to that file.
+
+Flare accepts `$schema` as optional editor metadata and never fetches or executes
+it. Older Flare builds that reject it can still use editor assistance: remove
+`$schema` from the manifest and associate the schema in VS Code workspace settings
+(`.vscode/settings.json`):
+
+```json
+{
+  "json.schemas": [{
+    "fileMatch": ["/manifest.json"],
+    "url": "https://unpkg.com/flare-plugin-sdk@next/skill/flare-plugin/manifest.schema.json"
+  }]
+}
+```
+
+Schema validation does not fill defaults or replace Host validation. Flare also
+checks unique IDs/interactions, canonical/approved origins, captured Deep Link
+values, referenced timelines, localized catalog keys, relational compose limits,
+actual JavaScript registration and runtime behavior. Some text limits use UTF-16
+length in the Host rather than JSON Schema's Unicode code point count.
+
 ## Root object
 
 | Field | Required / default | Contract |
 | --- | --- | --- |
+| `$schema` | Omitted | Editor schema URL/path only; never loaded by Flare |
 | `schemaVersion` | `1` | Manifest schema, currently exactly 1 |
 | `apiVersion` | Required | Runtime ABI, currently exactly 1 |
 | `id` | Required | Stable reverse-domain plugin ID; `[a-z][a-z0-9]*(?:\.[a-z][a-z0-9-]*)+` |

@@ -32,6 +32,8 @@ async function main() {
   const template = fileURLToPath(new URL("../skill/flare-plugin/assets/github-template/", import.meta.url));
   const manifestPath = join(template, "manifest.json");
   const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
+  const { version } = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8"));
+  manifest.$schema = `https://unpkg.com/flare-plugin-sdk@${version}/skill/flare-plugin/manifest.schema.json`;
   const identity = randomUUID().replaceAll("-", "");
   manifest.id = `local.plugin.p${identity}`;
   manifest.name = name;

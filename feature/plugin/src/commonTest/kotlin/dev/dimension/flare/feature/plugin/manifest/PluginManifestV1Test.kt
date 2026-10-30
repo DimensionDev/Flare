@@ -4,14 +4,42 @@ import dev.dimension.flare.feature.plugin.abi.PluginAbiV1
 import dev.dimension.flare.feature.plugin.abi.PluginJsonV1
 import dev.dimension.flare.ui.model.UiText
 import dev.dimension.flare.ui.model.UiTextArgument
+import kotlinx.serialization.SerializationException
 import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.decodeFromJsonElement
+import kotlinx.serialization.json.jsonObject
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertTrue
 
 class PluginManifestV1Test {
+    @Test
+    fun editorSchemaMetadataDoesNotRelaxOtherManifestFields() {
+        val original = PluginJsonV1.decodeFromString<PluginManifestV1>(VALID_MANIFEST)
+        val json = PluginJsonV1.parseToJsonElement(VALID_MANIFEST).jsonObject
+        val hint = "https://127.0.0.1:1/never-fetch-this.json"
+        val manifest =
+            PluginJsonV1.decodeFromJsonElement<PluginManifestV1>(
+                JsonObject(json + ("\$schema" to JsonPrimitive(hint))),
+            )
+
+        assertEquals(hint, manifest.schema)
+        assertEquals(manifest, PluginJsonV1.decodeFromString<PluginManifestV1>(PluginJsonV1.encodeToString(manifest)))
+        assertEquals(original, manifest.copy(schema = null))
+        assertTrue(manifest.validate(validMethodTable()).isValid)
+        assertFailsWith<SerializationException> {
+            PluginJsonV1.decodeFromJsonElement<PluginManifestV1>(
+                JsonObject(json + ("homepage" to JsonPrimitive("https://example.org"))),
+            )
+        }
+    }
+
     @Test
     fun duplicateLoginInteractionIsRejected() {
         val base = PluginJsonV1.decodeFromString<PluginManifestV1>(VALID_MANIFEST)

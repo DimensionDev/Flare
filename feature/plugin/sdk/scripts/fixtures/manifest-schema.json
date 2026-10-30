@@ -1,0 +1,1235 @@
+{
+  "base": {
+    "apiVersion": 1,
+    "id": "dev.example.schema",
+    "version": "0.1.0",
+    "name": "Schema example",
+    "platform": {
+      "id": "SchemaExample",
+      "name": "Schema example"
+    }
+  },
+  "cases": [
+    {
+      "name": "defaults may be omitted",
+      "patch": {},
+      "schemaValid": true,
+      "hostValid": true
+    },
+    {
+      "name": "editor URL is metadata only",
+      "patch": {
+        "$schema": "https://127.0.0.1:1/never-fetch-this.json"
+      },
+      "schemaValid": true,
+      "hostValid": true
+    },
+    {
+      "name": "local editor schema path",
+      "patch": {
+        "$schema": "./node_modules/flare-plugin-sdk/skill/flare-plugin/manifest.schema.json"
+      },
+      "schemaValid": true,
+      "hostValid": true
+    },
+    {
+      "name": "nullable fields",
+      "patch": {
+        "$schema": null,
+        "description": null,
+        "platform": {
+          "description": null,
+          "detector": null,
+          "guest": null,
+          "composeDefaults": null
+        }
+      },
+      "schemaValid": true,
+      "hostValid": true
+    },
+    {
+      "name": "localized text",
+      "patch": {
+        "name": {
+          "key": "plugin.name",
+          "fallback": "Schema example"
+        }
+      },
+      "schemaValid": true,
+      "hostValid": true
+    },
+    {
+      "name": "unsupported schema version",
+      "patch": {
+        "schemaVersion": 2
+      },
+      "schemaValid": false,
+      "hostValid": false
+    },
+    {
+      "name": "unsupported API version",
+      "patch": {
+        "apiVersion": 2
+      },
+      "schemaValid": false,
+      "hostValid": false
+    },
+    {
+      "name": "unknown root property",
+      "patch": {
+        "homepage": "https://example.org"
+      },
+      "schemaValid": false,
+      "hostValid": false
+    },
+    {
+      "name": "unknown platform property",
+      "patch": {
+        "platform": {
+          "displayName": "Typo"
+        }
+      },
+      "schemaValid": false,
+      "hostValid": false
+    },
+    {
+      "name": "invalid metadata type",
+      "patch": {
+        "$schema": {}
+      },
+      "schemaValid": false,
+      "hostValid": false
+    },
+    {
+      "name": "invalid plugin ID",
+      "patch": {
+        "id": "Example"
+      },
+      "schemaValid": false,
+      "hostValid": false
+    },
+    {
+      "name": "trailing newline in ID",
+      "patch": {
+        "id": "dev.example.schema\n"
+      },
+      "schemaValid": false,
+      "hostValid": false
+    },
+    {
+      "name": "leading zero SemVer",
+      "patch": {
+        "version": "01.0.0"
+      },
+      "schemaValid": false,
+      "hostValid": false
+    },
+    {
+      "name": "prerelease manifest version",
+      "patch": {
+        "version": "1.0.0-beta.1+build.2"
+      },
+      "schemaValid": true,
+      "hostValid": true
+    },
+    {
+      "name": "invalid locale",
+      "patch": {
+        "defaultLocale": "en_US"
+      },
+      "schemaValid": false,
+      "hostValid": false
+    },
+    {
+      "name": "invalid localized key",
+      "patch": {
+        "name": {
+          "key": "bad key",
+          "fallback": "Name"
+        }
+      },
+      "schemaValid": false,
+      "hostValid": false
+    },
+    {
+      "name": "blank fallback",
+      "patch": {
+        "name": {
+          "key": "plugin.name",
+          "fallback": " "
+        }
+      },
+      "schemaValid": false,
+      "hostValid": false
+    },
+    {
+      "name": "invalid platform ID",
+      "patch": {
+        "platform": {
+          "id": "1Invalid"
+        }
+      },
+      "schemaValid": false,
+      "hostValid": false
+    },
+    {
+      "name": "detector boundary",
+      "patch": {
+        "platform": {
+          "detector": {
+            "priority": -10000
+          }
+        }
+      },
+      "schemaValid": true,
+      "hostValid": true
+    },
+    {
+      "name": "detector out of range",
+      "patch": {
+        "platform": {
+          "detector": {
+            "priority": 10001
+          }
+        }
+      },
+      "schemaValid": false,
+      "hostValid": false
+    },
+    {
+      "name": "schema revision zero",
+      "patch": {
+        "platform": {
+          "credentialSchemaVersion": 0
+        }
+      },
+      "schemaValid": false,
+      "hostValid": false
+    },
+    {
+      "name": "invalid auth origin scheme",
+      "patch": {
+        "permissions": {
+          "authOrigins": [
+            "http://example.org"
+          ]
+        }
+      },
+      "schemaValid": false,
+      "hostValid": false
+    },
+    {
+      "name": "OAuth",
+      "patch": {
+        "platform": {
+          "loginMethods": [
+            {
+              "id": "login",
+              "interaction": "OAuth",
+              "title": "Log in"
+            }
+          ]
+        }
+      },
+      "schemaValid": true,
+      "hostValid": true
+    },
+    {
+      "name": "Password",
+      "patch": {
+        "platform": {
+          "loginMethods": [
+            {
+              "id": "login",
+              "interaction": "Password",
+              "title": "Log in",
+              "fields": [
+                {
+                  "id": "token",
+                  "type": "Password",
+                  "label": "Access token"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "schemaValid": true,
+      "hostValid": true
+    },
+    {
+      "name": "CredentialImport",
+      "patch": {
+        "platform": {
+          "loginMethods": [
+            {
+              "id": "login",
+              "interaction": "CredentialImport",
+              "title": "Log in",
+              "fields": [
+                {
+                  "id": "token",
+                  "type": "Secret",
+                  "label": "Access token"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "schemaValid": true,
+      "hostValid": true
+    },
+    {
+      "name": "Form",
+      "patch": {
+        "platform": {
+          "loginMethods": [
+            {
+              "id": "login",
+              "interaction": "Form",
+              "title": "Log in",
+              "fields": [
+                {
+                  "id": "token",
+                  "type": "Text",
+                  "label": "Access token"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "schemaValid": true,
+      "hostValid": true
+    },
+    {
+      "name": "WebCookie",
+      "patch": {
+        "platform": {
+          "loginMethods": [
+            {
+              "id": "login",
+              "interaction": "WebCookie",
+              "title": "Log in",
+              "cookie": {
+                "startUrl": "$accountOrigin/login",
+                "probes": [
+                  {
+                    "url": "$accountOrigin/api/me",
+                    "cookies": [
+                      {
+                        "name": "session"
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "schemaValid": true,
+      "hostValid": true
+    },
+    {
+      "name": "invalid login interaction",
+      "patch": {
+        "platform": {
+          "loginMethods": [
+            {
+              "id": "login",
+              "interaction": "Token",
+              "title": "Log in"
+            }
+          ]
+        }
+      },
+      "schemaValid": false,
+      "hostValid": false
+    },
+    {
+      "name": "invalid field type",
+      "patch": {
+        "platform": {
+          "loginMethods": [
+            {
+              "id": "login",
+              "interaction": "Form",
+              "title": "Log in",
+              "fields": [
+                {
+                  "id": "token",
+                  "type": "secret",
+                  "label": "Access token"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "schemaValid": false,
+      "hostValid": false
+    },
+    {
+      "name": "OAuth with fields",
+      "patch": {
+        "platform": {
+          "loginMethods": [
+            {
+              "id": "login",
+              "interaction": "OAuth",
+              "title": "Log in",
+              "fields": [
+                {
+                  "id": "token",
+                  "type": "Secret",
+                  "label": "Access token"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "schemaValid": false,
+      "hostValid": false
+    },
+    {
+      "name": "Password without fields",
+      "patch": {
+        "platform": {
+          "loginMethods": [
+            {
+              "id": "login",
+              "interaction": "Password",
+              "title": "Log in"
+            }
+          ]
+        }
+      },
+      "schemaValid": false,
+      "hostValid": false
+    },
+    {
+      "name": "WebCookie without probes",
+      "patch": {
+        "platform": {
+          "loginMethods": [
+            {
+              "id": "login",
+              "interaction": "WebCookie",
+              "title": "Log in"
+            }
+          ]
+        }
+      },
+      "schemaValid": false,
+      "hostValid": false
+    },
+    {
+      "name": "non-WebCookie with probes",
+      "patch": {
+        "platform": {
+          "loginMethods": [
+            {
+              "id": "login",
+              "interaction": "CredentialImport",
+              "title": "Log in",
+              "fields": [
+                {
+                  "id": "token",
+                  "type": "Secret",
+                  "label": "Access token"
+                }
+              ],
+              "cookie": {
+                "startUrl": "$accountOrigin",
+                "probes": [
+                  {
+                    "url": "$accountOrigin/me",
+                    "cookies": [
+                      {
+                        "name": "session"
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "schemaValid": false,
+      "hostValid": false
+    },
+    {
+      "name": "Cookie empty probes",
+      "patch": {
+        "platform": {
+          "loginMethods": [
+            {
+              "id": "login",
+              "interaction": "WebCookie",
+              "title": "Log in",
+              "cookie": {
+                "startUrl": "$accountOrigin",
+                "probes": []
+              }
+            }
+          ]
+        }
+      },
+      "schemaValid": false,
+      "hostValid": false
+    },
+    {
+      "name": "Cookie insecure URL",
+      "patch": {
+        "platform": {
+          "loginMethods": [
+            {
+              "id": "login",
+              "interaction": "WebCookie",
+              "title": "Log in",
+              "cookie": {
+                "startUrl": "http://example.org/login",
+                "probes": [
+                  {
+                    "url": "$accountOrigin/me",
+                    "cookies": [
+                      {
+                        "name": "session"
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "schemaValid": false,
+      "hostValid": false
+    },
+    {
+      "name": "Cookie origin still needs Host permission",
+      "patch": {
+        "platform": {
+          "loginMethods": [
+            {
+              "id": "login",
+              "interaction": "WebCookie",
+              "title": "Log in",
+              "cookie": {
+                "startUrl": "https://other.example/login",
+                "probes": [
+                  {
+                    "url": "$accountOrigin/me",
+                    "cookies": [
+                      {
+                        "name": "session"
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "schemaValid": true,
+      "hostValid": false
+    },
+    {
+      "name": "duplicate interaction still needs Host check",
+      "patch": {
+        "platform": {
+          "loginMethods": [
+            {
+              "id": "a",
+              "interaction": "OAuth",
+              "title": "A"
+            },
+            {
+              "id": "b",
+              "interaction": "OAuth",
+              "title": "B"
+            }
+          ]
+        }
+      },
+      "schemaValid": true,
+      "hostValid": false
+    },
+    {
+      "name": "profile capability",
+      "patch": {
+        "platform": {
+          "capabilities": {
+            "flare.datasource.profile/v1": {
+              "operations": {
+                "byId": {},
+                "byHandle": {}
+              }
+            }
+          }
+        }
+      },
+      "schemaValid": true,
+      "hostValid": true
+    },
+    {
+      "name": "incomplete profile capability",
+      "patch": {
+        "platform": {
+          "capabilities": {
+            "flare.datasource.profile/v1": {
+              "operations": {
+                "byId": {}
+              }
+            }
+          }
+        }
+      },
+      "schemaValid": false,
+      "hostValid": false
+    },
+    {
+      "name": "unknown operation",
+      "patch": {
+        "platform": {
+          "capabilities": {
+            "flare.datasource.profile/v1": {
+              "operations": {
+                "byId": {},
+                "byHandle": {},
+                "typo": {}
+              }
+            }
+          }
+        }
+      },
+      "schemaValid": false,
+      "hostValid": false
+    },
+    {
+      "name": "unknown capability retained",
+      "patch": {
+        "platform": {
+          "capabilities": {
+            "vendor.future/v2": {
+              "operations": {
+                "future": {}
+              }
+            }
+          }
+        }
+      },
+      "schemaValid": true,
+      "hostValid": true
+    },
+    {
+      "name": "invalid capability ID",
+      "patch": {
+        "platform": {
+          "capabilities": {
+            "not a capability": {
+              "operations": {
+                "page": {}
+              }
+            }
+          }
+        }
+      },
+      "schemaValid": false,
+      "hostValid": false
+    },
+    {
+      "name": "badge-only notifications",
+      "patch": {
+        "platform": {
+          "capabilities": {
+            "flare.datasource.notification/v1": {
+              "operations": {
+                "badge": {}
+              }
+            }
+          }
+        }
+      },
+      "schemaValid": true,
+      "hostValid": true
+    },
+    {
+      "name": "notification page missing filters",
+      "patch": {
+        "platform": {
+          "capabilities": {
+            "flare.datasource.notification/v1": {
+              "operations": {
+                "page": {}
+              }
+            }
+          }
+        }
+      },
+      "schemaValid": false,
+      "hostValid": false
+    },
+    {
+      "name": "notification page with filter",
+      "patch": {
+        "platform": {
+          "capabilities": {
+            "flare.datasource.notification/v1": {
+              "operations": {
+                "page": {}
+              },
+              "notificationFilters": [
+                "mention"
+              ]
+            }
+          }
+        }
+      },
+      "schemaValid": true,
+      "hostValid": true
+    },
+    {
+      "name": "relation missing actions",
+      "patch": {
+        "platform": {
+          "capabilities": {
+            "flare.datasource.relation/v1": {
+              "operations": {
+                "state": {},
+                "mutate": {}
+              }
+            }
+          }
+        }
+      },
+      "schemaValid": false,
+      "hostValid": false
+    },
+    {
+      "name": "relation action",
+      "patch": {
+        "platform": {
+          "capabilities": {
+            "flare.datasource.relation/v1": {
+              "operations": {
+                "state": {},
+                "mutate": {}
+              },
+              "relationActions": [
+                "follow"
+              ]
+            }
+          }
+        }
+      },
+      "schemaValid": true,
+      "hostValid": true
+    },
+    {
+      "name": "capability-specific fields elsewhere",
+      "patch": {
+        "platform": {
+          "capabilities": {
+            "flare.datasource.profile/v1": {
+              "operations": {
+                "byId": {},
+                "byHandle": {}
+              },
+              "notificationFilters": [
+                "all"
+              ]
+            }
+          }
+        }
+      },
+      "schemaValid": false,
+      "hostValid": false
+    },
+    {
+      "name": "timeline capability without timelines",
+      "patch": {
+        "platform": {
+          "capabilities": {
+            "flare.datasource.timeline/v1": {
+              "operations": {
+                "page": {}
+              }
+            }
+          }
+        }
+      },
+      "schemaValid": false,
+      "hostValid": false
+    },
+    {
+      "name": "timeline with default",
+      "patch": {
+        "platform": {
+          "capabilities": {
+            "flare.datasource.timeline/v1": {
+              "operations": {
+                "page": {}
+              }
+            }
+          },
+          "timelines": [
+            {
+              "id": "home",
+              "title": "Home",
+              "defaultForNewAccount": true
+            }
+          ]
+        }
+      },
+      "schemaValid": true,
+      "hostValid": true
+    },
+    {
+      "name": "timeline without default",
+      "patch": {
+        "platform": {
+          "capabilities": {
+            "flare.datasource.timeline/v1": {
+              "operations": {
+                "page": {}
+              }
+            }
+          },
+          "timelines": [
+            {
+              "id": "home",
+              "title": "Home"
+            }
+          ]
+        }
+      },
+      "schemaValid": false,
+      "hostValid": false
+    },
+    {
+      "name": "invalid icon",
+      "patch": {
+        "platform": {
+          "capabilities": {
+            "flare.datasource.timeline/v1": {
+              "operations": {
+                "page": {}
+              }
+            }
+          },
+          "timelines": [
+            {
+              "id": "home",
+              "title": "Home",
+              "defaultForNewAccount": true,
+              "icon": "home"
+            }
+          ]
+        }
+      },
+      "schemaValid": false,
+      "hostValid": false
+    },
+    {
+      "name": "invalid paging direction",
+      "patch": {
+        "platform": {
+          "capabilities": {
+            "flare.datasource.profile/v1": {
+              "operations": {
+                "byId": {},
+                "byHandle": {},
+                "timeline": {
+                  "directions": [
+                    "previous"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "schemaValid": false,
+      "hostValid": false
+    },
+    {
+      "name": "tab catalog requires timeline",
+      "patch": {
+        "platform": {
+          "capabilities": {
+            "flare.datasource.tab-catalog/v1": {
+              "operations": {
+                "page": {}
+              }
+            }
+          }
+        }
+      },
+      "schemaValid": false,
+      "hostValid": false
+    },
+    {
+      "name": "profile tab needs timeline operation",
+      "patch": {
+        "platform": {
+          "capabilities": {
+            "flare.datasource.profile/v1": {
+              "operations": {
+                "byId": {},
+                "byHandle": {}
+              }
+            }
+          },
+          "profileTabs": [
+            {
+              "id": "posts",
+              "title": "Posts"
+            }
+          ]
+        }
+      },
+      "schemaValid": false,
+      "hostValid": false
+    },
+    {
+      "name": "compose requires defaults",
+      "patch": {
+        "platform": {
+          "capabilities": {
+            "flare.datasource.compose/v1": {
+              "operations": {
+                "publish": {}
+              }
+            }
+          }
+        }
+      },
+      "schemaValid": false,
+      "hostValid": false
+    },
+    {
+      "name": "defaults require compose",
+      "patch": {
+        "platform": {
+          "composeDefaults": {
+            "text": {
+              "maxLength": 500
+            }
+          }
+        }
+      },
+      "schemaValid": false,
+      "hostValid": false
+    },
+    {
+      "name": "empty compose config",
+      "patch": {
+        "platform": {
+          "capabilities": {
+            "flare.datasource.compose/v1": {
+              "operations": {
+                "publish": {}
+              }
+            }
+          },
+          "composeDefaults": {}
+        }
+      },
+      "schemaValid": true,
+      "hostValid": true
+    },
+    {
+      "name": "compose limits",
+      "patch": {
+        "platform": {
+          "capabilities": {
+            "flare.datasource.compose/v1": {
+              "operations": {
+                "publish": {}
+              }
+            }
+          },
+          "composeDefaults": {
+            "text": {
+              "maxLength": 500
+            },
+            "media": {
+              "maxCount": 4,
+              "maxBytes": 100000,
+              "supportedMimeTypes": [
+                "image/*"
+              ]
+            },
+            "visibility": {
+              "allowed": [
+                "public",
+                "followers"
+              ]
+            },
+            "poll": {
+              "maxOptions": 4
+            },
+            "language": {
+              "maxCount": 1
+            }
+          }
+        }
+      },
+      "schemaValid": true,
+      "hostValid": true
+    },
+    {
+      "name": "compose count out of range",
+      "patch": {
+        "platform": {
+          "capabilities": {
+            "flare.datasource.compose/v1": {
+              "operations": {
+                "publish": {}
+              }
+            }
+          },
+          "composeDefaults": {
+            "media": {
+              "maxCount": 101,
+              "maxBytes": 100
+            }
+          }
+        }
+      },
+      "schemaValid": false,
+      "hostValid": false
+    },
+    {
+      "name": "compose MIME invalid",
+      "patch": {
+        "platform": {
+          "capabilities": {
+            "flare.datasource.compose/v1": {
+              "operations": {
+                "publish": {}
+              }
+            }
+          },
+          "composeDefaults": {
+            "media": {
+              "maxCount": 4,
+              "maxBytes": 100,
+              "supportedMimeTypes": [
+                "image"
+              ]
+            }
+          }
+        }
+      },
+      "schemaValid": false,
+      "hostValid": false
+    },
+    {
+      "name": "compose relational limits remain Host checks",
+      "patch": {
+        "platform": {
+          "capabilities": {
+            "flare.datasource.compose/v1": {
+              "operations": {
+                "publish": {}
+              }
+            }
+          },
+          "composeDefaults": {
+            "media": {
+              "minCountForNew": 5,
+              "maxCount": 4,
+              "maxBytes": 100
+            }
+          }
+        }
+      },
+      "schemaValid": true,
+      "hostValid": false
+    },
+    {
+      "name": "visibility default membership remains Host check",
+      "patch": {
+        "platform": {
+          "capabilities": {
+            "flare.datasource.compose/v1": {
+              "operations": {
+                "publish": {}
+              }
+            }
+          },
+          "composeDefaults": {
+            "visibility": {
+              "allowed": [
+                "followers"
+              ]
+            }
+          }
+        }
+      },
+      "schemaValid": true,
+      "hostValid": false
+    },
+    {
+      "name": "captured deep link",
+      "patch": {
+        "platform": {
+          "deepLinks": [
+            {
+              "path": [
+                {
+                  "type": "literal",
+                  "value": "posts"
+                },
+                {
+                  "type": "capture",
+                  "name": "id"
+                }
+              ],
+              "target": {
+                "type": "Post",
+                "value": "{id}"
+              }
+            }
+          ]
+        }
+      },
+      "schemaValid": true,
+      "hostValid": true
+    },
+    {
+      "name": "Browser target",
+      "patch": {
+        "platform": {
+          "deepLinks": [
+            {
+              "path": [
+                {
+                  "type": "literal",
+                  "value": "posts"
+                },
+                {
+                  "type": "capture",
+                  "name": "id"
+                }
+              ],
+              "target": {
+                "type": "Browser"
+              }
+            }
+          ]
+        }
+      },
+      "schemaValid": true,
+      "hostValid": true
+    },
+    {
+      "name": "Browser target value",
+      "patch": {
+        "platform": {
+          "deepLinks": [
+            {
+              "path": [
+                {
+                  "type": "literal",
+                  "value": "posts"
+                },
+                {
+                  "type": "capture",
+                  "name": "id"
+                }
+              ],
+              "target": {
+                "type": "Browser",
+                "value": "{id}"
+              }
+            }
+          ]
+        }
+      },
+      "schemaValid": false,
+      "hostValid": false
+    },
+    {
+      "name": "unknown path segment",
+      "patch": {
+        "platform": {
+          "deepLinks": [
+            {
+              "path": [
+                {
+                  "type": "wildcard",
+                  "value": "*"
+                }
+              ],
+              "target": {
+                "type": "Post",
+                "value": "{id}"
+              }
+            }
+          ]
+        }
+      },
+      "schemaValid": false,
+      "hostValid": false
+    },
+    {
+      "name": "literal slash",
+      "patch": {
+        "platform": {
+          "deepLinks": [
+            {
+              "path": [
+                {
+                  "type": "literal",
+                  "value": "posts/detail"
+                }
+              ],
+              "target": {
+                "type": "Post",
+                "value": "{id}"
+              }
+            }
+          ]
+        }
+      },
+      "schemaValid": false,
+      "hostValid": false
+    },
+    {
+      "name": "uncaptured value remains Host check",
+      "patch": {
+        "platform": {
+          "deepLinks": [
+            {
+              "path": [
+                {
+                  "type": "literal",
+                  "value": "posts"
+                },
+                {
+                  "type": "capture",
+                  "name": "id"
+                }
+              ],
+              "target": {
+                "type": "Post",
+                "value": "{missing}"
+              }
+            }
+          ]
+        }
+      },
+      "schemaValid": true,
+      "hostValid": false
+    }
+  ]
+}

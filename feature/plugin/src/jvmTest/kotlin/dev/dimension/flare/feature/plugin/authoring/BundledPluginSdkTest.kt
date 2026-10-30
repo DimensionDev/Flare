@@ -48,6 +48,7 @@ class BundledPluginSdkTest {
     fun sharedTypesContractsAndTemplatesAreCopiedWithoutDrift() {
         listOf(
             "flare-plugin.d.ts",
+            "manifest.schema.json",
             "references/wire-data.md",
             "assets/github-template/manifest.json",
             "assets/github-template/plugin.js",

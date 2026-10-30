@@ -5,6 +5,7 @@ import { tmpdir } from "node:os";
 import { dirname, join, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import test from "node:test";
+import Ajv from "ajv";
 
 const sdk = fileURLToPath(new URL("../", import.meta.url));
 const metadata = JSON.parse(readFileSync(join(sdk, "package.json"), "utf8"));
@@ -54,6 +55,10 @@ test("npm tarball preserves the complete SDK and works as an offline dependency"
     env: { ...process.env, npm_config_cache: join(directory, "cache"), npm_config_update_notifier: "false" },
   });
   assert.equal(JSON.parse(readFileSync(join(generated, "manifest.json"), "utf8")).name, "my-plugin");
+  const generatedManifest = JSON.parse(readFileSync(join(generated, "manifest.json"), "utf8"));
+  assert.equal(generatedManifest.$schema, `https://unpkg.com/flare-plugin-sdk@${metadata.version}/skill/flare-plugin/manifest.schema.json`);
+  const validate = new Ajv({ strict: true }).compile(JSON.parse(readFileSync(join(installed, "skill/flare-plugin/manifest.schema.json"), "utf8")));
+  assert.equal(validate(generatedManifest), true, JSON.stringify(validate.errors));
   execFileSync(process.execPath, ["--check", join(generated, "plugin.js")]);
   const generatedPackage = join(directory, "generated.fpp");
   npm(["exec", "--offline", "--", "flare-plugin-pack", generated, generatedPackage]);

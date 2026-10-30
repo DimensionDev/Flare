@@ -204,6 +204,7 @@ is not a plugin installation URL. A GitHub Release or `.fpp` upload is unnecessa
 | Boundary contract and registration | [ABI.md](ABI.md) |
 | Exact JavaScript signatures and field comments | [flare-plugin.d.ts](flare-plugin.d.ts) |
 | Manifest fields, defaults, enums, and validation | [Manifest](references/manifest.md) |
+| JSON editor completion and static manifest checks | [JSON Schema](manifest.schema.json), [editor setup](references/manifest.md#json-schema-and-editor-support) |
 | All twelve capabilities, minimum methods, and UI requirements | [Capabilities](references/capabilities.md) |
 | Platform engines, async completion, HTTP, permissions, credentials, and state | [Runtime and HTTP](references/runtime-http.md) |
 | Detection and all five login methods | [Authentication](references/authentication.md) |

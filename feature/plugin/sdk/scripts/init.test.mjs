@@ -9,6 +9,7 @@ import test from "node:test";
 const cli = fileURLToPath(new URL("../bin/cli.mjs", import.meta.url));
 const template = fileURLToPath(new URL("../skill/flare-plugin/assets/github-template/", import.meta.url));
 const original = JSON.parse(readFileSync(join(template, "manifest.json"), "utf8"));
+const { version } = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
 const run = (args, cwd) => spawnSync(process.execPath, [cli, ...args], { cwd, encoding: "utf8" });
 
 function temporary(t) {
@@ -27,6 +28,7 @@ test("init copies the bundled template and creates valid independent identities"
     const project = join(directory, target);
     assert.match(result.stdout, /Created/);
     const manifest = JSON.parse(readFileSync(join(project, "manifest.json"), "utf8"));
+    assert.equal(manifest.$schema, `https://unpkg.com/flare-plugin-sdk@${version}/skill/flare-plugin/manifest.schema.json`);
     assert.match(manifest.id, /^[a-z][a-z0-9]*(?:\.[a-z][a-z0-9-]*)+$/);
     assert.match(manifest.platform.id, /^[A-Za-z][A-Za-z0-9_.-]{0,63}$/);
     assert.notEqual(manifest.id, original.id);
@@ -36,6 +38,7 @@ test("init copies the bundled template and creates valid independent identities"
     assert.deepEqual(
       {
         ...manifest,
+        $schema: original.$schema,
         id: original.id,
         name: original.name,
         platform: { ...manifest.platform, id: original.platform.id, name: original.platform.name },

@@ -26,7 +26,9 @@ copy that example's contents into a repository you own first.
 ## Prepare and publish
 
 1. Adapt the website endpoints and verify the advertised features. Replace the
-   template IDs, name, description, and placeholder icon before publication.
+   name, description, and placeholder icon before publication. For manual template
+   copies, replace the example plugin/platform IDs; keep the unique IDs generated
+   by `npx flare-plugin-sdk@next init my-plugin` stable.
    Keep real tokens, Cookies, passwords, and private fixtures out of Git history.
 2. Put the required files at root and check that a clean checkout contains them.
    Include README instructions for supported website/instances, token acquisition
@@ -44,6 +46,10 @@ copy that example's contents into a repository you own first.
    the plugin; cancellation discards the download. Errors stay in the dialog for
    retry. Successful installs take effect immediately; verify the installed
    tag/version and running behavior without restarting Flare.
+
+For a first release from a generated project, follow the complete Git setup,
+commit/push and tag commands in the [project walkthrough](../assets/github-template/README.md#3-publish-and-install-through-github-recommended).
+Stop development for the same plugin before installation or updating it.
 
 Private repositories, arbitrary branch tracking, prerelease tags, automatic
 installation, and build-on-device are unsupported. A public repo without a stable
@@ -95,17 +101,30 @@ plugin authors do not control it.
 
 ## Optional local installation
 
-For offline development or local transfer, the skill includes Node's standard-
-library-only packer. From this skill directory:
+Use `.fpp` as an alternative for offline transfer or local testing. In your plugin
+project, create a new, empty `dist` directory. Copy only `manifest.json`, `plugin.js`,
+one supported `assets/icon.<extension>`, and optional `locales/*.json` into it,
+preserving those paths. From the project root:
+
+```sh
+npx --package=flare-plugin-sdk@next flare-plugin-pack ./dist ../my-plugin.fpp
+```
+
+The complete skill also includes the standard-library-only packer for use without
+npm. For example, from this skill directory:
 
 ```sh
 node pack.mjs assets/github-template /tmp/example-feed-0.1.0.fpp
 ```
 
-For an adapted plugin repository, create a staging directory containing only
-manifest.json, plugin.js, one supported assets/icon.<extension>, and optional locales/*.json, then pass
-that directory to pack.mjs. The packer ignores only a root README.md; unlike
-GitHub import it rejects other development files, including .git, tests, and type
+The packer ignores only a root README.md; unlike GitHub import it rejects other
+development files, including .git, tests, and type
 declarations. Keep the output outside the input directory. Packaging success is
-not full manifest/registration/behavior validation. Local packages are unverified
-and still require review; installation takes effect immediately and no GitHub source/update tracking is recorded.
+not full manifest/registration/behavior validation.
+
+Stop development for this plugin, then in **Settings → Plugins → Add** choose file
+installation, select the `.fpp`, review its source/permissions, and confirm. Local
+packages are unverified and still require review. Installation takes effect
+immediately; test the account and declared features on the target device. No
+GitHub source/update tracking is recorded, so later file updates require manually
+importing another package.

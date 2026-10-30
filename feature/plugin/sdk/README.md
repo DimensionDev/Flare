@@ -12,6 +12,7 @@ With Node 22 or newer, run:
 
 ```sh
 npx flare-plugin-sdk@next init my-plugin
+cd my-plugin
 ```
 
 This copies the GitHub template bundled with that SDK version into `my-plugin`:
@@ -32,60 +33,119 @@ them. The command uses bundled files only and does not install dependencies,
 initialize Git, contact your website, or publish anything. Run
 `npx flare-plugin-sdk@next --help` for usage.
 
-Adapt the illustrative API endpoints, replace the placeholder icon, and follow
-the generated README. In Desktop or native macOS, select the generated directory
-in Settings → Plugins → Plugin development to validate and reload it.
+Edit `plugin.js` to use your website's real authentication, endpoints, response
+mapping, and pagination. The starter's `/api/me` and `/api/posts` are illustrative;
+no demonstration server is included. Update the description, login methods and
+capabilities in `manifest.json`, and replace the placeholder icon. The plain
+JavaScript starter needs no dependency installation or build step.
 
-## Install for editor types and packaging
+For manual template copies, replace the example IDs and names before use. For
+`npx` projects, keep the generated IDs. Read the
+[complete developer guide](https://github.com/DimensionDev/Flare/tree/feature/plugin/feature/plugin/sdk/skill/flare-plugin)
+for authentication, Host APIs, capabilities, and Wire data mapping.
 
-Install the npm preview:
+## Develop and debug in Flare
+
+1. From `my-plugin`, check the source syntax:
+
+   ```sh
+   node --check plugin.js
+   node -e 'JSON.parse(require("node:fs").readFileSync("manifest.json", "utf8")); console.log("Manifest JSON parses")'
+   ```
+
+   Actual execution and manifest/registration validation happen in Flare, which
+   provides `definePlugin` and `flare`.
+2. In Compose Desktop or native macOS, open **Settings → Plugins → More → Plugin
+   development**. Choose the `my-plugin` directory, click **Start development**,
+   and confirm the access review.
+3. Add an account in Flare. Select your plugin platform explicitly, enter the
+   website's HTTPS API origin, and import a real access token using the starter's
+   login form. Adapt this step if you change the login method. Test login,
+   timeline refresh, older pages, end-of-list behavior, and website link clicks.
+4. Edit and save the files. Flare automatically validates changes; click **Reload
+   plugin** to apply the validated version. Invalid edits keep the last working
+   version running. The development panel shows validation errors and recent-call
+   diagnostics; recent calls contain method names and outcomes, without HTTP
+   request/response payloads.
+5. Click **Stop development** before installing or updating the same plugin.
+   Development temporarily overrides the running version; stopping restores the
+   previous version. App restarts do not automatically mount the directory.
+   Development uses real accounts and data, and remote writes are not rolled back.
+
+Finish active writes before reloading; credential-schema changes may require
+logging in again. For TypeScript, run your own compiler/watch command and
+select its output directory; Flare loads one self-contained classic `plugin.js`.
+See [development and testing details](https://github.com/DimensionDev/Flare/blob/feature/plugin/feature/plugin/sdk/skill/flare-plugin/references/testing.md#develop-locally-in-desktop).
+
+## Publish and install through GitHub (recommended)
+
+1. Create a public GitHub repository. Its tagged root must contain `manifest.json`,
+   the ready-to-run `plugin.js`, exactly one supported `assets/icon.<extension>`,
+   and optional `locales/*.json`. Update the project README with the actual website,
+   login instructions, supported features, and verification results. Flare reads
+   these files directly; commit any compiled output at the root before tagging.
+2. Commit and push the plugin files. For a new project and an empty GitHub
+   repository, replace `OWNER/REPO` and run from `my-plugin`:
+
+   ```sh
+   git init
+   git add manifest.json plugin.js assets README.md
+   # If used, also stage translations with: git add locales
+   git commit -m "Add Flare plugin"
+   git branch -M main
+   git remote add origin https://github.com/OWNER/REPO.git
+   git push -u origin main
+   ```
+
+   Use your existing Git setup if the project is already a repository. Keep real
+   credentials, private fixtures, `node_modules`, and build caches out of Git.
+3. Set a stable `manifest.version` and push a matching tag. The generated version
+   is `0.1.0`, so the first release can use:
+
+   ```sh
+   git tag v0.1.0
+   git push origin refs/tags/v0.1.0
+   ```
+
+   Commit and push any version edit before tagging. npm SDK versions are separate
+   from your plugin's version. Flare ignores prerelease plugin tags; pushing only
+   a branch does not create an installable version. A GitHub Release and `.fpp`
+   upload are unnecessary.
+4. Stop development, then open **Settings → Plugins → Add → Install from GitHub**
+   on any supported Flare platform. Enter `https://github.com/OWNER/REPO`, load the
+   latest stable version, and review its source and permissions before confirming.
+   Installation takes effect immediately. Add/log in to the plugin account and
+   verify its behavior on that device.
+5. For updates, increment `manifest.version`, commit and push, then publish a new
+   matching stable tag. Keep plugin/platform IDs unchanged. In Flare, check for
+   updates and review/confirm the offered version; app restart is unnecessary.
+
+See [GitHub publication and update rules](https://github.com/DimensionDev/Flare/blob/feature/plugin/feature/plugin/sdk/skill/flare-plugin/references/publishing.md).
+
+## Optional: package and install a local file
+
+Use `.fpp` for offline transfer or local testing when GitHub distribution is not
+needed. From your project, create a new, empty `dist` directory and copy only
+`manifest.json`, `plugin.js`, one `assets/icon.<extension>`, and any `locales/*.json`
+into it, preserving those paths. Keep source, `.git`, `package.json`, `node_modules`,
+and previous archives outside `dist`. Then run from the project root:
+
+```sh
+npx --package=flare-plugin-sdk@next flare-plugin-pack ./dist ../my-plugin.fpp
+```
+
+Stop development for this plugin. In **Settings → Plugins → Add**, choose file
+installation, select the `.fpp`, review, and confirm. Installation is immediate.
+Packaging checks archive structure; Flare still validates the manifest,
+registration, permissions, and behavior. File installs have no GitHub update tracking.
+
+## Optional: editor types and TypeScript
+
+Install editor types in your authoring project:
 
 ```sh
 npm install --save-dev flare-plugin-sdk@next
 ```
-
-To validate a Flare checkout without publication, build a local tarball instead:
-
-```sh
-cd feature/plugin/sdk
-npm ci
-npm test
-npm pack --pack-destination /tmp
-```
-
-Install the resulting `.tgz` in your plugin project with
-`npm install --save-dev /path/to/flare-plugin-sdk-VERSION.tgz`.
-These local checks and packaging commands do not publish anything.
-
-## Create and develop a plugin
-
-1. Create a plugin with the initializer above, or manually copy the contents of
-   `node_modules/flare-plugin-sdk/skill/flare-plugin/assets/github-template/` into
-   your repository. Manual copies retain example IDs and names; replace them.
-   Adapt the icon and illustrative website endpoints using evidence from the real API.
-2. Read the [complete developer guide](https://github.com/DimensionDev/Flare/tree/feature/plugin/feature/plugin/sdk/skill/flare-plugin).
-   The same guide is bundled at `skill/flare-plugin/README.md` inside the npm package,
-   with all authentication, capability, runtime, data, testing, and publication references.
-3. Keep your ready-to-run `manifest.json`, classic-script `plugin.js`, one supported
-   `assets/icon.<extension>`, and optional `locales/*.json` in a plugin output directory.
-   For a TypeScript project, configure your bundler to produce that classic script.
-4. In Desktop or native macOS, select the output directory in Settings → Plugins →
-   Plugin development. Start development, then reload after edits or rebuilds.
-5. For local file installation, package that directory from your plugin project:
-
-   ```sh
-   npx --package=flare-plugin-sdk@next flare-plugin-pack ./dist ./plugin.fpp
-   ```
-
-The packer accepts plugin files only, so keep source, `.git`, `package.json`,
-`node_modules`, and the generated `.fpp` outside `dist`. It checks archive structure;
-Flare still validates the manifest, registration, permissions, and runtime behavior.
-For GitHub installation, commit the ready-to-run plugin files at the repository
-root and publish a stable tag matching `manifest.version`. npm SDK versions and
-individual plugin versions are independent; GitHub plugin installation ignores
-prerelease tags even though the npm SDK can use them.
-
-## Editor types
 
 Add the package to your TypeScript project's compiler options:
 
@@ -122,6 +182,11 @@ Initializer tests cover valid unique IDs, empty/nested/Unicode paths, invalid
 arguments, and preserving existing directories, files, and symlinks. They do not
 contact a website or publish to npm. Flare's Host and platform acceptance checks are
 documented in `skill/flare-plugin/references/testing.md`.
+
+To try the SDK from a checkout before npm publication, run
+`npm pack --pack-destination /tmp` after those checks, then install the resulting `.tgz` in
+a separate authoring project with
+`npm install --save-dev /path/to/flare-plugin-sdk-VERSION.tgz`.
 
 ## Publish this SDK (maintainers)
 

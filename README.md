@@ -43,7 +43,8 @@ is not available in the Web client.
 - **Create with Flare AI:** ask the configured AI assistant to build an adapter
   for your website. See [creating plugins in Flare](feature/plugin/AI_AUTHORING.md).
 - **Develop a plugin:** run `npx flare-plugin-sdk@next init my-plugin` and follow
-  the [SDK quick start](feature/plugin/sdk/README.md),
+  the [SDK quick start](feature/plugin/sdk/README.md) through local debugging and
+  recommended GitHub publication (with local `.fpp` packaging as an alternative),
   then use the [complete developer guide](feature/plugin/sdk/skill/flare-plugin/README.md)
   for authentication, capabilities, data types, desktop development, and examples.
 

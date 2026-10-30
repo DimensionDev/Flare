@@ -161,25 +161,39 @@ cases matter. It should identify gaps rather than invent website endpoints.
 
 ## Start a plugin repository
 
-1. Copy the contents of [assets/github-template](assets/github-template/README.md)
-   to a new repository root. Its example website contract needs adaptation; no
-   demonstration server is required or provided.
-2. Choose stable plugin/platform IDs, replace the placeholder icon, and adapt
+1. With Node 22 or newer, create the starter:
+
+   ```sh
+   npx flare-plugin-sdk@next init my-plugin
+   cd my-plugin
+   ```
+
+   It generates unique plugin/platform IDs and needs no dependency installation
+   or build step for plain JavaScript. For manual copies of
+   [assets/github-template](assets/github-template/README.md), replace its example
+   IDs and names first. The example API needs adaptation; no demonstration server
+   is provided.
+2. Keep the generated IDs stable, replace the placeholder icon, and adapt
    authentication and data mapping to your website. See [manifest](references/manifest.md)
    and [authentication](references/authentication.md).
 3. Implement the required capability methods and map the responses into
    [Wire data](references/wire-data.md). The starter uses token import and a
    read-only timeline whose posts open their website URLs.
 4. Use [Desktop plugin development](references/testing.md#develop-locally-in-desktop)
-   to validate and reload a local directory. Follow the other testing checks, then
-   commit the ready-to-run `plugin.js` and publish a public GitHub repository with a stable version tag.
-5. In Flare's plugin management, enter `https://github.com/OWNER/REPO` and click
-   **Install**. Flare downloads the latest stable version and shows its source and
-   permissions in the same dialog. Confirm installation to use the plugin immediately.
-   Follow the plugin's README to select the platform, origin, and login method.
+   to start the local directory, test an account, and apply saved edits with
+   **Reload plugin** after automatic validation. Follow the syntax, behavior and
+   platform checks. Stop development before installing/updating the same plugin.
+5. Prefer GitHub distribution: commit the ready-to-run files at a public repository
+   root, then push a stable tag matching `manifest.version`. In Flare's plugin
+   management, enter `https://github.com/OWNER/REPO` and click **Install**. Review
+   source and permissions, then confirm to use the plugin immediately. Follow the
+   plugin's README to select the platform, origin, and login method.
 
-See [publishing](references/publishing.md) for exact tag rules and updates. Flare
-reads the tagged repository root; a subdirectory in the Flare repository itself
+The generated [project README](assets/github-template/README.md) contains the full
+adaptation, local debugging, Git setup/tagging, GitHub installation and update path.
+See [publishing](references/publishing.md) for exact tag rules, updates, and
+[optional local `.fpp` installation](references/publishing.md#optional-local-installation).
+Flare reads the tagged repository root; a subdirectory in the Flare repository itself
 is not a plugin installation URL. A GitHub Release or `.fpp` upload is unnecessary.
 
 ## Reference and example index

@@ -476,29 +476,32 @@ public struct PluginManagementView: View {
         let busy = presenter.state.gitHubInstall?.busy == true
         return NavigationStack {
             Form {
-                if let review = presenter.state.pendingInstall {
-                    Section {
+                Section {
+                    if let review = presenter.state.pendingInstall {
                         Text(installReviewText(review))
-                    } header: {
+                    } else {
+                        TextField(
+                            "plugin_github_repository",
+                            text: $gitHubURL,
+                            prompt: Text(verbatim: "https://github.com/owner/repository")
+                        )
+                        .autocorrectionDisabled()
+                        #if os(iOS)
+                        .textInputAutocapitalization(.never)
+                        .keyboardType(.URL)
+                        #endif
+                        .onChange(of: gitHubURL) { _, _ in
+                            facade.clearGitHubInstallError()
+                        }
+                    }
+                } header: {
+                    if let review = presenter.state.pendingInstall {
                         Text(verbatim: "\(review.name) \(review.version)")
                     }
-                } else {
-                    TextField(
-                        "plugin_github_repository",
-                        text: $gitHubURL,
-                        prompt: Text(verbatim: "https://github.com/owner/repository")
-                    )
-                    .autocorrectionDisabled()
-                    #if os(iOS)
-                    .textInputAutocapitalization(.never)
-                    .keyboardType(.URL)
-                    #endif
-                    .onChange(of: gitHubURL) { _, _ in
-                        facade.clearGitHubInstallError()
+                } footer: {
+                    if let error = presenter.state.gitHubInstall?.error {
+                        Text(String(error.prefix(512))).foregroundStyle(.red)
                     }
-                }
-                if let error = presenter.state.gitHubInstall?.error {
-                    Text(String(error.prefix(512))).foregroundStyle(.red)
                 }
             }
             .disabled(busy)

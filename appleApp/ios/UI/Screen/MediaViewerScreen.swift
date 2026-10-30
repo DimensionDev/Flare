@@ -44,13 +44,10 @@ struct MediaViewerScreen: View {
     @State private var playbackRate: Float = 1
     @State private var isLandscapeViewing = false
     @State private var postSheetPresented = false
-    @State private var postSummaryHeight: CGFloat = 120
+    @State private var postSummary = MediaViewerPostSummaryState()
     @State private var postDetent: PresentationDetent = .height(120)
-    @State private var hasMeasuredPostSummary = false
     @State private var postSummaryMeasureGeneration = 0
     @State private var postSheetSettleGeneration = 0
-    @State private var acceptPostSummaryHeightChanges = true
-    @State private var deferredPostSummaryHeight: CGFloat?
 
     init(
         medias: [any UiMedia],
@@ -220,12 +217,11 @@ struct MediaViewerScreen: View {
             }
         }
         .onChange(of: shouldShowPostSheet) { _, visible in
-            guard visible else {
-                postSheetPresented = false
-                return
-            }
-            guard hasMeasuredPostSummary else { return }
-            presentPostSheet()
+            guard !visible else { return }
+            postSheetPresented = false
+            postSummary.reset()
+            postSummaryMeasureGeneration = 0
+            postSheetSettleGeneration = 0
         }
         .task(id: postSummaryMeasureGeneration) {
             guard postSummaryMeasureGeneration > 0 else { return }
@@ -237,10 +233,8 @@ struct MediaViewerScreen: View {
             guard postSheetSettleGeneration > 0 else { return }
             try? await Task.sleep(for: .milliseconds(400))
             guard !Task.isCancelled else { return }
-            acceptPostSummaryHeightChanges = true
-            if let deferredPostSummaryHeight {
-                self.deferredPostSummaryHeight = nil
-                applyMeasuredPostSummaryHeight(deferredPostSummaryHeight)
+            if let height = postSummary.finishPresentation() {
+                applyMeasuredPostSummaryHeight(height)
             }
         }
         .background(alignment: .top) {
@@ -429,7 +423,7 @@ struct MediaViewerScreen: View {
 
     private func collapsePost() {
         withAnimation {
-            postDetent = .height(postSummaryHeight)
+            postDetent = .height(postSummary.height)
         }
     }
 
@@ -450,42 +444,23 @@ struct MediaViewerScreen: View {
     }
 
     private func presentPostSheet() {
-        guard hasMeasuredPostSummary, shouldShowPostSheet, !postSheetPresented else { return }
-        if postDetent == .large {
-            commitPostSummaryHeight(postSummaryHeight)
-        }
+        guard postSummary.hasMeasurement, shouldShowPostSheet, !postSheetPresented else { return }
+        postDetent = .height(postSummary.height)
         postSheetPresented = true
-        acceptPostSummaryHeightChanges = false
+        postSummary.beginPresentation()
         postSheetSettleGeneration += 1
     }
 
     private func applyMeasuredPostSummaryHeight(_ height: CGFloat) {
-        let next = ceil(height)
-        guard next > 0 else { return }
-        if !acceptPostSummaryHeightChanges {
-            deferredPostSummaryHeight = next
-            return
-        }
-        let changed = !hasMeasuredPostSummary || abs(next - postSummaryHeight) >= 1
-        if changed {
-            hasMeasuredPostSummary = true
-            commitPostSummaryHeight(next)
-        }
-        guard changed, hasMeasuredPostSummary, shouldShowPostSheet, !postSheetPresented else { return }
-        postSummaryMeasureGeneration += 1
-    }
-
-    private func commitPostSummaryHeight(_ height: CGFloat) {
+        guard shouldShowPostSheet else { return }
         var transaction = Transaction()
         transaction.disablesAnimations = true
         withTransaction(transaction) {
-            postSummaryHeight = height
-            guard postDetent != .large else { return }
-            let detent = PresentationDetent.height(height)
-            if postDetent != detent {
-                postDetent = detent
-            }
+            guard postSummary.measure(height), postDetent != .large else { return }
+            postDetent = .height(postSummary.height)
         }
+        guard postSummary.hasMeasurement, !postSheetPresented else { return }
+        postSummaryMeasureGeneration += 1
     }
 
     @ViewBuilder
@@ -526,7 +501,7 @@ struct MediaViewerScreen: View {
                     content.presentationBackground(postDetent == .large ? .regularMaterial : .ultraThinMaterial)
                 }
             }
-            .presentationDetents([.height(postSummaryHeight), .large], selection: $postDetent)
+            .presentationDetents([.height(postSummary.height), .large], selection: $postDetent)
             .presentationCompactAdaptation(.none)
             .presentationDragIndicator(.visible)
             .presentationContentInteraction(.resizes)

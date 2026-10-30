@@ -21,6 +21,7 @@ import dev.dimension.flare.data.datasource.microblog.datasource.TimelineTabConfi
 import dev.dimension.flare.data.datasource.microblog.datasource.UserDataSource
 import dev.dimension.flare.data.datasource.microblog.handler.PostEventHandler
 import dev.dimension.flare.data.datasource.microblog.handler.PostHandler
+import dev.dimension.flare.data.datasource.microblog.handler.RelationHandler
 import dev.dimension.flare.data.datasource.microblog.handler.UserHandler
 import dev.dimension.flare.data.datasource.microblog.intersectMimeTypeConstraints
 import dev.dimension.flare.data.datasource.microblog.loader.PostLoader
@@ -32,6 +33,7 @@ import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.data.model.tab.TimelineCandidate
 import dev.dimension.flare.data.model.tab.TimelineSpec
 import dev.dimension.flare.feature.plugin.abi.PluginAbiV1
+import dev.dimension.flare.feature.plugin.abi.PluginJsonV1
 import dev.dimension.flare.feature.plugin.host.PluginAsset
 import dev.dimension.flare.feature.plugin.host.PluginCallTimeoutV1
 import dev.dimension.flare.feature.plugin.host.PluginInvocationContextV1
@@ -63,10 +65,14 @@ import dev.dimension.flare.feature.plugin.wire.ProfileV1
 import dev.dimension.flare.feature.plugin.wire.SearchRequestV1
 import dev.dimension.flare.feature.plugin.wire.SemanticActionV1
 import dev.dimension.flare.feature.plugin.wire.TimelineDisplayV1
+import dev.dimension.flare.feature.plugin.wire.TimelineItemV1
 import dev.dimension.flare.feature.plugin.wire.TimelinePageRequestV1
+import dev.dimension.flare.feature.plugin.wire.USER_ACTIONS_V1
 import dev.dimension.flare.feature.plugin.wire.VisibilityV1
+import dev.dimension.flare.feature.plugin.wire.requireActionToken
 import dev.dimension.flare.feature.plugin.wire.requireDeleteResult
 import dev.dimension.flare.feature.plugin.wire.requirePostMutationResult
+import dev.dimension.flare.feature.plugin.wire.requireUserMutationResult
 import dev.dimension.flare.feature.plugin.wire.requireValid
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -81,6 +87,7 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.serialization.encodeToString
 
 /** Lazy proxy: construction reads only the Host-owned credential envelope and never starts a JavaScript engine. */
 internal class PluginDataSourceV1 private constructor(
@@ -127,7 +134,14 @@ internal class PluginDataSourceV1 private constructor(
             timeline = if (capabilities.canExpose(PluginAbiV1.Capabilities.TIMELINE)) TimelineCapability(this) else null,
             search = if (capabilities.canExpose(PluginAbiV1.Capabilities.SEARCH)) SearchCapability(this) else null,
             profile = if (capabilities.canExpose(PluginAbiV1.Capabilities.PROFILE)) ProfileCapability(this, userDataSource) else null,
-            post = if (capabilities.canExpose(PluginAbiV1.Capabilities.POST)) PostCapability(this, postDataSource) else null,
+            post =
+                if (capabilities.canExpose(PluginAbiV1.Capabilities.POST) ||
+                    (accountKey != null && capabilities.hasOperation(PluginAbiV1.Capabilities.RELATION, "mutate"))
+                ) {
+                    PostCapability(this, postDataSource)
+                } else {
+                    null
+                },
             compose = if (capabilities.canExpose(PluginAbiV1.Capabilities.COMPOSE)) ComposeCapabilityAdapter() else null,
             relation = extraCapabilities.relation,
             notification = extraCapabilities.notification,
@@ -197,26 +211,80 @@ internal class PluginDataSourceV1 private constructor(
                 event: PostEvent,
                 updater: dev.dimension.flare.data.datasource.microblog.DatabaseUpdater,
             ) {
-                if (event !is PostEvent.Semantic) return
-                capabilities.requireOperation(PluginAbiV1.Capabilities.POST, "mutate")
+                val profileAction = event is PostEvent.PluginAction && event.profileAction
+                val request =
+                    when (event) {
+                        is PostEvent.Semantic -> {
+                            MutationRequestV1(event.postKey.toWire(), event.action.toWire(), event.actionToken)
+                        }
+
+                        is PostEvent.PluginVote -> {
+                            require(event.accountKey == accountKey) { "Vote account mismatch" }
+                            require(
+                                event.options.isNotEmpty() && event.options.size <= 100 &&
+                                    event.options.distinct().size == event.options.size &&
+                                    event.options.all { it in 0..99 },
+                            ) { "Invalid selected poll options" }
+                            MutationRequestV1(
+                                event.postKey.toWire(),
+                                SemanticActionV1.Vote,
+                                event.actionToken,
+                                mapOf("options" to PluginJsonV1.encodeToString(event.options.toList())),
+                            )
+                        }
+
+                        is PostEvent.PluginAction -> {
+                            val action = SemanticActionV1.valueOf(event.action)
+                            require(
+                                if (profileAction) {
+                                    action in USER_ACTIONS_V1
+                                } else {
+                                    action in
+                                        setOf(SemanticActionV1.React, SemanticActionV1.Unreact)
+                                },
+                            ) {
+                                "Invalid plugin action"
+                            }
+                            require(!profileAction || event.parameters.isEmpty()) { "Unexpected user action parameters" }
+                            require(profileAction || event.entityKey == event.postKey) { "Action entity mismatch" }
+                            if (!profileAction) {
+                                require(
+                                    event.parameters.keys == setOf("reaction") &&
+                                        event.parameters.getValue("reaction").let { it.isNotBlank() && it.length <= 512 },
+                                ) { "Invalid reaction" }
+                            }
+                            MutationRequestV1(event.entityKey.toWire(), action, event.actionToken, event.parameters)
+                        }
+
+                        else -> {
+                            return
+                        }
+                    }
+                request.key.requireValid()
+                request.actionToken.requireActionToken()
+                requireNotNull(accountKey) { "Actions require an account" }
+                val capability = if (profileAction) PluginAbiV1.Capabilities.RELATION else PluginAbiV1.Capabilities.POST
+                capabilities.requireOperation(capability, "mutate")
                 val result =
                     invoker.invoke(
-                        capabilityId = PluginAbiV1.Capabilities.POST,
+                        capabilityId = capability,
                         operation = "mutate",
-                        request =
-                            MutationRequestV1(
-                                key = event.postKey.toWire(),
-                                action = event.action.toWire(),
-                                actionToken = event.actionToken,
-                            ),
+                        request = request,
                         requestSerializer = MutationRequestV1.serializer(),
                         responseSerializer = MutationResultV1.serializer(),
-                        validate = { it.requirePostMutationResult(event.postKey.toWire()) },
+                        validate = {
+                            if (profileAction) {
+                                it.requireUserMutationResult(
+                                    request.key,
+                                )
+                            } else {
+                                it.requirePostMutationResult(request.key)
+                            }
+                        },
                     )
                 when (result) {
                     is MutationResultV1.UpdatedPost -> {
-                        val updated = mapper.post(result.post)
-                        updater.updateCache(event.postKey) { updated }
+                        updater.updateCache(event.postKey) { mapper.post(result.post).post }
                     }
 
                     MutationResultV1.Deleted -> {
@@ -230,13 +298,42 @@ internal class PluginDataSourceV1 private constructor(
                         }
                     }
 
-                    MutationResultV1.NoChange,
-                    is MutationResultV1.UpdatedProfile,
-                    is MutationResultV1.UpdatedRelation,
-                    -> {
+                    is MutationResultV1.UpdatedProfile -> {
+                        val profile = mapper.profile(result.profile)
+                        userDataSource.userHandler.updateUser(profile)
+                        result.relation?.let { extraCapabilities.applyRelation(it) }
+                        updater.updateCache(event.postKey) { current ->
+                            if (current is UiTimelineV2.User) {
+                                current.copy(
+                                    value = profile,
+                                    button = mapper.userButtons(result.profile.actions, current.statusKey, profile.key),
+                                )
+                            } else {
+                                current
+                            }
+                        }
                     }
+
+                    is MutationResultV1.UpdatedRelation -> {
+                        extraCapabilities.applyRelation(result.relation)
+                        updater.updateCache(event.postKey) { current ->
+                            if (current is UiTimelineV2.User) {
+                                current.copy(
+                                    button =
+                                        current.button
+                                            .map {
+                                                it.copy(enabled = false, clickEvent = dev.dimension.flare.ui.model.ClickEvent.Noop)
+                                            }.toImmutableList(),
+                                )
+                            } else {
+                                current
+                            }
+                        }
+                    }
+
+                    MutationResultV1.NoChange -> {}
                 }
-                if (result !is MutationResultV1.Invalidate) extraCapabilities.refreshGallery(event.postKey)
+                if (!profileAction && result !is MutationResultV1.Invalidate) extraCapabilities.refreshGallery(event.postKey)
             }
         }
     }
@@ -256,9 +353,9 @@ internal class PluginDataSourceV1 private constructor(
                                         operation = "detail",
                                         request = EntityRequestV1(statusKey.toWire()),
                                         requestSerializer = EntityRequestV1.serializer(),
-                                        responseSerializer = PostV1.serializer(),
-                                        validate = PostV1::requireValid,
-                                    ).let(mapper::post)
+                                        responseSerializer = TimelineItemV1.Post.serializer(),
+                                        validate = { it.requireValid() },
+                                    ).let(mapper::timelineItem)
                             }
 
                             override suspend fun deleteStatus(statusKey: MicroBlogKey) {
@@ -305,7 +402,7 @@ internal class PluginDataSourceV1 private constructor(
         if (declared == null && !acceptsDynamicTimeline) return notSupported()
         if (!capabilities.hasOperation(PluginAbiV1.Capabilities.TIMELINE, "page")) return notSupported()
         val effectiveParameters = declared?.parameters.orEmpty() + parameters
-        return postPageLoader(
+        return timelinePageLoader(
             PluginAbiV1.Capabilities.TIMELINE,
             "page",
             listOf(timelineId) + effectiveParameters.toPagingIdentity(),
@@ -315,7 +412,7 @@ internal class PluginDataSourceV1 private constructor(
                 operation = "page",
                 request = TimelinePageRequestV1(timelineId, request.toWire(pageSize), effectiveParameters),
                 requestSerializer = TimelinePageRequestV1.serializer(),
-                responseSerializer = PageV1.serializer(PostV1.serializer()),
+                responseSerializer = PageV1.serializer(TimelineItemV1.serializer()),
                 validate = { page -> page.requireValid { it.requireValid() } },
             )
         }
@@ -335,7 +432,7 @@ internal class PluginDataSourceV1 private constructor(
 
     override fun context(statusKey: MicroBlogKey): RemoteLoader<UiTimelineV2> {
         if (!capabilities.hasOperation(PluginAbiV1.Capabilities.POST, "context")) return notSupported()
-        return postPageLoader(PluginAbiV1.Capabilities.POST, "context", listOf(statusKey.id, statusKey.host)) { pageSize, request ->
+        return timelinePageLoader(PluginAbiV1.Capabilities.POST, "context", listOf(statusKey.id, statusKey.host)) { pageSize, request ->
             invoker.invoke(
                 capabilityId = PluginAbiV1.Capabilities.POST,
                 operation = "context",
@@ -347,7 +444,7 @@ internal class PluginDataSourceV1 private constructor(
                 requestSerializer =
                     dev.dimension.flare.feature.plugin.wire.EntityPageRequestV1
                         .serializer(),
-                responseSerializer = PageV1.serializer(PostV1.serializer()),
+                responseSerializer = PageV1.serializer(TimelineItemV1.serializer()),
                 validate = { page -> page.requireValid { it.requireValid() } },
             )
         }
@@ -405,7 +502,7 @@ internal class PluginDataSourceV1 private constructor(
         userKey: MicroBlogKey,
         tab: ProfileTabManifestV1?,
     ): RemoteLoader<UiTimelineV2> =
-        postPageLoader(
+        timelinePageLoader(
             PluginAbiV1.Capabilities.PROFILE,
             "timeline",
             listOf(userKey.id, userKey.host, tab?.id.orEmpty()) + tab?.parameters.orEmpty().toPagingIdentity(),
@@ -421,7 +518,7 @@ internal class PluginDataSourceV1 private constructor(
                         parameters = tab?.parameters.orEmpty(),
                     ),
                 requestSerializer = ProfileTimelineRequestV1.serializer(),
-                responseSerializer = PageV1.serializer(PostV1.serializer()),
+                responseSerializer = PageV1.serializer(TimelineItemV1.serializer()),
                 validate = { page -> page.requireValid { it.requireValid() } },
             )
         }
@@ -458,13 +555,13 @@ internal class PluginDataSourceV1 private constructor(
         query: String,
     ): RemoteLoader<UiTimelineV2> {
         if (!capabilities.hasOperation(PluginAbiV1.Capabilities.SEARCH, operation)) return notSupported()
-        return postPageLoader(PluginAbiV1.Capabilities.SEARCH, operation, listOf(query)) { pageSize, request ->
+        return timelinePageLoader(PluginAbiV1.Capabilities.SEARCH, operation, listOf(query)) { pageSize, request ->
             invoker.invoke(
                 capabilityId = PluginAbiV1.Capabilities.SEARCH,
                 operation = operation,
                 request = SearchRequestV1(query, request.toWire(pageSize)),
                 requestSerializer = SearchRequestV1.serializer(),
-                responseSerializer = PageV1.serializer(PostV1.serializer()),
+                responseSerializer = PageV1.serializer(TimelineItemV1.serializer()),
                 validate = { page -> page.requireValid { it.requireValid() } },
             )
         }
@@ -491,13 +588,20 @@ internal class PluginDataSourceV1 private constructor(
         )
     }
 
-    private fun postPageLoader(
+    private fun timelinePageLoader(
         capabilityId: String,
         operation: String,
         identity: List<String>,
-        load: suspend (pageSize: Int, request: PagingRequest) -> PageV1<PostV1>,
+        load: suspend (pageSize: Int, request: PagingRequest) -> PageV1<TimelineItemV1>,
     ): RemoteLoader<UiTimelineV2> =
-        invoker.timelineLoader(capabilityId, operation, identity, capabilities.directions(capabilityId, operation), load, mapper::post)
+        invoker.timelineLoader(
+            capabilityId,
+            operation,
+            identity,
+            capabilities.directions(capabilityId, operation),
+            load,
+            mapper::timelineItem,
+        )
 
     private inner class ComposeCapabilityAdapter :
         ComposeDataSource,
@@ -775,7 +879,7 @@ private fun UiTimelineV2.Post.Visibility.toWire(): VisibilityV1 =
         UiTimelineV2.Post.Visibility.Home -> VisibilityV1.Unlisted
         UiTimelineV2.Post.Visibility.Followers -> VisibilityV1.Followers
         UiTimelineV2.Post.Visibility.Specified -> VisibilityV1.Direct
-        UiTimelineV2.Post.Visibility.Channel -> VisibilityV1.Public
+        UiTimelineV2.Post.Visibility.Channel -> VisibilityV1.Channel
     }
 
 private fun VisibilityV1.toHost(): UiTimelineV2.Post.Visibility =
@@ -784,6 +888,7 @@ private fun VisibilityV1.toHost(): UiTimelineV2.Post.Visibility =
         VisibilityV1.Unlisted -> UiTimelineV2.Post.Visibility.Home
         VisibilityV1.Followers -> UiTimelineV2.Post.Visibility.Followers
         VisibilityV1.Direct -> UiTimelineV2.Post.Visibility.Specified
+        VisibilityV1.Channel -> UiTimelineV2.Post.Visibility.Channel
     }
 
 private fun ComposeConfigV1?.toHostComposeConfig(): ComposeConfig {

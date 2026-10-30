@@ -42,14 +42,14 @@
           return {
             items: data.items.map((value) => {
               const post = requiredObject(value);
-              return {
+              return { type: "post", post: {
                 key: { id: requiredString(post.id), host: accountHost(context) },
                 author: mapProfile(post.author, context),
                 createdAt: requiredString(post.created_at),
                 content: { format: "plain", value: requiredString(post.text) },
                 detailType: "link",
                 url: requiredString(post.url)
-              };
+              } };
             }),
             olderCursor: cursor ?? void 0,
             endReached: cursor == null

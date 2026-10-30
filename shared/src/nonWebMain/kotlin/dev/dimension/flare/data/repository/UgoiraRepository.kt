@@ -3,6 +3,7 @@ package dev.dimension.flare.data.repository
 import dev.dimension.flare.common.PlatformDispatchers
 import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.common.encodeJson
+import dev.dimension.flare.data.datasource.microblog.capabilities
 import dev.dimension.flare.data.datasource.microblog.datasource.GalleryDataSource
 import dev.dimension.flare.data.io.FileStorage
 import dev.dimension.flare.data.io.OkioFileStorage
@@ -40,8 +41,8 @@ internal fun ugoiraRepository(
     val client = ugoiraHttpClient()
     scope.coroutineContext[Job]?.invokeOnCompletion { client.close() }
     return UgoiraRepository(storage, scope, UgoiraDownloader(storage.fileSystem, client)) { media ->
-        val account = requireNotNull(accountRepository.find(media.accountKey)) { "Pixiv account is unavailable" }
-        val dataSource = accountRepository.getOrCreateDataSource(account) as GalleryDataSource
+        val account = requireNotNull(accountRepository.find(media.accountKey)) { "Media account is unavailable" }
+        val dataSource = requireNotNull(accountRepository.getOrCreateDataSource(account).capabilities.gallery) { "Gallery is unavailable" }
         dataSource.ugoiraMetadata(media.statusKey)
     }
 }

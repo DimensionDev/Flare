@@ -23,6 +23,7 @@ import dev.dimension.flare.feature.plugin.wire.PageV1
 import dev.dimension.flare.feature.plugin.wire.PluginErrorCodeV1
 import dev.dimension.flare.feature.plugin.wire.PostDetailTypeV1
 import dev.dimension.flare.feature.plugin.wire.PostV1
+import dev.dimension.flare.feature.plugin.wire.TimelineItemV1
 import dev.dimension.flare.feature.plugin.wire.TimelinePageRequestV1
 import dev.dimension.flare.feature.plugin.wire.requireValid
 import kotlinx.coroutines.runBlocking
@@ -40,6 +41,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
+import kotlin.test.assertIs
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -177,14 +179,15 @@ class GitHubTemplateTest {
                 "post-1",
                 first.items
                     .single()
+                    .let { assertIs<TimelineItemV1.Post>(it).post }
                     .key.id,
             )
             assertEquals(
                 "feed.example",
-                assertNotNull(first.items.single().author).key.host,
+                assertNotNull(assertIs<TimelineItemV1.Post>(first.items.single()).post.author).key.host,
             )
-            assertEquals(PostDetailTypeV1.Link, first.items.single().detailType)
-            assertEquals("https://example.org/posts/post-1", first.items.single().url)
+            assertEquals(PostDetailTypeV1.Link, assertIs<TimelineItemV1.Post>(first.items.single()).post.detailType)
+            assertEquals("https://example.org/posts/post-1", assertIs<TimelineItemV1.Post>(first.items.single()).post.url)
 
             respond = { response("""{"items":[],"next_cursor":"page-3"}""") }
             val empty = page(credential, PageDirectionV1.Older, first.olderCursor)
@@ -268,7 +271,7 @@ class GitHubTemplateTest {
         credential: PluginCredentialAccess,
         direction: PageDirectionV1 = PageDirectionV1.Refresh,
         cursor: String? = null,
-    ): PageV1<PostV1> =
+    ): PageV1<TimelineItemV1> =
         pool.invoke(
             plugin = plugin,
             key = PluginRuntimeKeyV1.account(PLUGIN_ID, plugin.installed.packageHash, ORIGIN, "alice"),
@@ -285,7 +288,7 @@ class GitHubTemplateTest {
             method = "capabilities.timeline.page",
             request = TimelinePageRequestV1("home", PageRequestV1(direction, 2, cursor)),
             requestSerializer = TimelinePageRequestV1.serializer(),
-            responseSerializer = PageV1.serializer(PostV1.serializer()),
+            responseSerializer = PageV1.serializer(TimelineItemV1.serializer()),
             validate = { it.requireValid { post -> post.requireValid() } },
         )
 }

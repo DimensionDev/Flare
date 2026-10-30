@@ -10,7 +10,7 @@ public fun semanticPostActionMenu(
     action: SemanticPostAction,
     actionToken: String?,
     count: Long,
-    accountKey: MicroBlogKey,
+    accountKey: MicroBlogKey?,
 ): ActionMenu.Item {
     val active =
         action == SemanticPostAction.Unfavourite ||

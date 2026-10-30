@@ -10,7 +10,7 @@ recipes, not seventeen separate installable plugins.
 
 ## Timeline
 
-`timeline.page(TimelinePageRequestV1)` returns `PageV1<PostV1>`. Declare a static
+`timeline.page(TimelinePageRequestV1)` returns `PageV1<TimelineItemV1>`. Declare a static
 default timeline and explicit supported directions. Read `timelineId`,
 `parameters`, and the nested `page`, route to the corresponding website endpoint,
 and map its continuation to olderCursor/newerCursor. The
@@ -30,9 +30,9 @@ All five methods receive `SearchRequestV1 { query, page }`:
 
 | Method | Return |
 | --- | --- |
-| posts | PageV1<PostV1> |
+| posts | PageV1<TimelineItemV1> |
 | profiles | PageV1<ProfileV1> |
-| discoverPosts | PageV1<PostV1> |
+| discoverPosts | PageV1<TimelineItemV1> |
 | discoverProfiles | PageV1<ProfileV1> |
 | discoverHashtags | PageV1<HashtagV1> |
 
@@ -49,7 +49,7 @@ search service for complete examples. Test non-ASCII queries and empty results.
 | --- | --- | --- |
 | byId | key + optional entityToken | ProfileV1 |
 | byHandle | handle, host | ProfileV1 |
-| timeline | profile key, optional tabId, parameters, page | PageV1<PostV1> |
+| timeline | profile key, optional tabId, parameters, page | PageV1<TimelineItemV1> |
 | following / followers | key, optional entityToken, page | PageV1<ProfileV1> |
 
 byId/byHandle are required together; the other operations are optional. Preserve
@@ -64,8 +64,8 @@ profile, and stable keys between login and lookup.
 
 | Method | Input | Return |
 | --- | --- | --- |
-| detail | EntityRequestV1 | PostV1 |
-| context | EntityPageRequestV1 | PageV1<PostV1> |
+| detail | EntityRequestV1 | TimelinePostV1 (`{ post, presentation? }`) |
+| context | EntityPageRequestV1 | PageV1<TimelineItemV1> |
 | delete | EntityRequestV1 | deleted or noChange |
 | mutate | MutationRequestV1 | updatedPost, deleted, invalidate, or noChange |
 
@@ -103,6 +103,9 @@ Host's failure behavior. Do not return updatedProfile from post.mutate. Updated
 post keys must match the requested entity; invalidation keys must be unique.
 Test action/inverse, disabled active state, failure, and views of the same entity.
 
+See [timeline interactions](wire-data.md#timeline-items-and-interactions) for Vote,
+React/Unreact and user-card actions, including their result contracts.
+
 ## Relation
 
 Declare state and mutate, plus static `relationActions`, for example:
@@ -114,8 +117,9 @@ Declare state and mutate, plus static `relationActions`, for example:
 }
 ```
 
-`state(EntityRequestV1)` returns RelationV1; `mutate(MutationRequestV1)` returns
-updatedRelation or noChange. Supported action pairs are Follow/Unfollow,
+`state(EntityRequestV1)` returns RelationV1; profile relation controls call
+`mutate(MutationRequestV1)` and accept updatedRelation or noChange. Timeline user
+buttons also accept updatedProfile/deleted; see [user actions](wire-data.md#timeline-items-and-interactions). Supported action pairs are Follow/Unfollow,
 Block/Unblock, Mute/Unmute. Return the **complete authoritative relation** after
 a mutation, including any server-side side effects (blocking may also unfollow)
 and replacement actionTokens. Missing relation booleans default false, so a
@@ -161,15 +165,15 @@ alt text, reply, visibility, and resulting post navigation.
 
 ## Notification
 
-`notification.page({ filterId?, page })` returns `PageV1<NotificationV1>`;
+`notification.page({ filterId?, page })` returns `PageV1<TimelineItemV1>`;
 `badge({})` returns `{ value: nonnegativeCount }`. Each may be declared separately,
 but page requires a nonempty static notificationFilters list.
 
 Filter IDs are `all`, `mention`, `comment`, `like`. Map them to the site's API.
-Result kinds instead use `Mention`, `Reply`, `Favourite`, `Repost`, `Follow`,
-`Other`. Preserve the notification's ID, actor, timestamp, custom message, and
-post/repost presentation. Two events referencing one post still need distinct
-notification IDs. Test those events together and filters with empty pages.
+Return post items with presentation.message and a stable presentation.notificationKey,
+or standalone message/user/userList items. Message kinds are listed in MessageKindV1.
+Preserve the event actor and timestamp; two events referencing one post need
+distinct notification keys. Test those events together and filters with empty pages.
 
 ## List
 
@@ -181,7 +185,7 @@ The Host requires all list operations:
 | detail | EntityRequestV1 | SocialListV1 |
 | create / update | `{ id?, title?, entityToken? }` | SocialListV1 |
 | delete | Same mutation request | deleted or noChange |
-| timeline | EntityPageRequestV1 | PageV1<PostV1> |
+| timeline | EntityPageRequestV1 | PageV1<TimelineItemV1> |
 | members / memberships | EntityPageRequestV1 | PageV1<ProfileV1> / PageV1<SocialListV1> |
 | addMember | `{ listId, profileKey, entityToken? }` | ProfileV1 |
 | removeMember | Same member request | deleted or noChange |
@@ -224,7 +228,7 @@ polls, history loading, send/delete, and a denied canSend result.
 Declare detail and comments. Return a timeline PostV1 with
 `detailType: "article"` and a key that article.detail understands.
 `article.detail(EntityRequestV1)` returns ArticleV1 with key/title/content;
-`comments(EntityPageRequestV1)` returns PageV1<PostV1>.
+`comments(EntityPageRequestV1)` returns PageV1<TimelineItemV1>.
 
 Map full text to sanitized HTML/plain rich text, keep images in meaningful
 content order, and request mediaNetwork for remote covers/HTML images. A site
@@ -241,9 +245,11 @@ Declare detail, comments, and recommendations; preview posts use
 | Method | Input | Return |
 | --- | --- | --- |
 | detail | EntityRequestV1 | GalleryV1 |
-| comments / recommendations | EntityPageRequestV1 | PageV1<PostV1> |
+| comments / recommendations | EntityPageRequestV1 | PageV1<TimelineItemV1> |
+| ugoiraMetadata (optional) | EntityRequestV1 | UgoiraMetadataV1 |
 
-Gallery detail needs key/title/createdAt/url and 1..100 image media entries.
+Gallery detail needs key/title/createdAt/url and 1..100 MediaV1 entries (including
+Ugoira when its metadata operation is available).
 Orientation is horizontal or vertical (default vertical). Preserve image order,
 dimensions, descriptions, and the gallery's action state. Bookmark behavior
 additionally requires post mutation capability, a matching semantic descriptor,

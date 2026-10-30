@@ -50,6 +50,26 @@ public sealed interface PostEvent {
     }
 
     @Serializable
+    public data class PluginAction(
+        override val postKey: MicroBlogKey,
+        val entityKey: MicroBlogKey,
+        val action: String,
+        val actionToken: String? = null,
+        val parameters: Map<String, String> = emptyMap(),
+        val profileAction: Boolean = false,
+    ) : PostEvent
+
+    @Serializable
+    public data class PluginVote(
+        override val postKey: MicroBlogKey,
+        override val accountKey: MicroBlogKey,
+        override val options: SerializableImmutableList<Int>,
+        val actionToken: String? = null,
+    ) : PollEvent {
+        override fun copyWithOptions(options: List<Int>): PollEvent = copy(options = options.toImmutableList())
+    }
+
+    @Serializable
     public sealed interface PollEvent : PostEvent {
         public val accountKey: MicroBlogKey
         public val options: SerializableImmutableList<Int>

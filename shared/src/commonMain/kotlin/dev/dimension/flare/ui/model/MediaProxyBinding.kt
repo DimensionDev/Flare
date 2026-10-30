@@ -110,6 +110,7 @@ public fun <T : UiTimelineV2> T.bindMediaProxy(): T {
 
         is UiTimelineV2.Feed -> {
             copy(
+                descriptionHtml = descriptionHtml?.takeIf { pluginId == null || PluginMediaPermissions.isAllowed(pluginId) },
                 media = media?.takeIf { it.allowedForPlugin(pluginId) }?.copy(proxy = proxy),
                 source = source.copy(icon = source.icon?.takeIf { UiMedia.Image(it).allowedForPlugin(pluginId) }, proxy = proxy),
             )

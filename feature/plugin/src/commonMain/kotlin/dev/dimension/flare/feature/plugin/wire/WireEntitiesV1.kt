@@ -14,26 +14,6 @@ public data class RelationV1(
 )
 
 @Serializable
-public enum class NotificationKindV1 {
-    Mention,
-    Reply,
-    Favourite,
-    Repost,
-    Follow,
-    Other,
-}
-
-@Serializable
-public data class NotificationV1(
-    val id: String,
-    val createdAt: String,
-    val kind: NotificationKindV1,
-    val actor: ProfileV1? = null,
-    val post: PostV1? = null,
-    val message: RichTextV1? = null,
-)
-
-@Serializable
 public data class SocialListV1(
     val id: String,
     val title: String,

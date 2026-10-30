@@ -170,7 +170,7 @@ registration, permissions, and behavior. File installs have no GitHub update tra
 
 The generated `tsconfig.json` already sets `types: ["flare-plugin-sdk"]`, strict
 checking, and an ES2020 library without browser or Node globals.
-`defineFlareSocialPlugin` contextually types its handlers; `PostV1`, `ProfileV1`,
+`defineFlareSocialPlugin` contextually types its handlers; `TimelineItemV1`, `PostV1`, `ProfileV1`,
 and other SDK types are available directly. The SDK is a development dependency,
 not a runtime import.
 Local TS imports are bundled into `plugin.js`; imported code must also work
@@ -214,7 +214,15 @@ only `SKILL.md` loses its types, references, templates, and examples. Follow the
 [skill installation guide](https://github.com/DimensionDev/Flare/blob/feature/plugin/feature/plugin/sdk/skill/flare-plugin/README.md#install-the-skill)
 for Codex or Claude Code, including project scope, verification, and updates.
 All documentation is in English. The complete Pixelfed adapter is bundled at
-`skill/flare-plugin/examples/pixelfed/`.
+`skill/flare-plugin/examples/pixelfed/`. The offline
+[mixed timeline showcase](skill/flare-plugin/examples/timeline-showcase/README.md)
+covers Post, Feed, User, UserList and Message rows, notifications, voting,
+reactions and follow requests using Flare's existing UI.
+
+Timeline-producing methods now return `PageV1<TimelineItemV1>`; post detail returns
+`{ post, presentation? }`. This preview intentionally removes the old bare-post
+and notification wire shapes. Update plugin sources and use a matching Host/SDK
+build; see the [wire contract](skill/flare-plugin/references/wire-data.md#timeline-items-and-interactions).
 
 ## Validate this SDK
 

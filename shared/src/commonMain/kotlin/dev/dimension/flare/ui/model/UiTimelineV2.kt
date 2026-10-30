@@ -224,6 +224,8 @@ public sealed class UiTimelineV2 {
                 .add(itemKey)
                 .add(title)
                 .add(description)
+                .add(descriptionHtml)
+                .add(clickEvent)
                 .add(url)
                 .add(sourceLanguages)
                 .add(translationDisplayState)
@@ -635,6 +637,7 @@ private fun UiProfile.BottomContent.renderSummaryHash(): Int =
 
 private fun UiPoll.renderSummaryHash(): Int =
     renderHashBuilder()
+        .add(this) // Include the private vote event so replacement action tokens reach the UI.
         .add(id)
         .add(options.renderSummaryHash { it.renderSummaryHash() })
         .add(multiple)
@@ -720,6 +723,7 @@ private fun UiTimelineV2.Post.EmojiReaction.renderSummaryHash(): Int =
         .add(count)
         .add(isUnicode)
         .add(me)
+        .add(clickEvent)
         .build()
 
 private fun UiTimelineV2.Post.Reference.renderSummaryHash(): Int =
@@ -751,6 +755,7 @@ private fun ActionMenu.renderSummaryHash(): Int =
 private fun ActionMenu.Item.renderSummaryHash(): Int =
     renderHashBuilder()
         .add(updateKey)
+        .add(clickEvent)
         .add(icon)
         .add(text.renderSummaryHash())
         .add(count)

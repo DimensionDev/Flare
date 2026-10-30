@@ -39,16 +39,16 @@ defineFlareSocialPlugin({
           fail("InvalidResponse", "Expected a non-empty cursor or null");
         }
         return {
-          items: data.items.map((value: unknown): PostV1 => {
+          items: data.items.map((value: unknown): TimelineItemV1 => {
             const post = requiredObject(value);
-            return {
+            return { type: "post", post: {
               key: { id: requiredString(post.id), host: accountHost(context) },
               author: mapProfile(post.author, context),
               createdAt: requiredString(post.created_at),
               content: { format: "plain", value: requiredString(post.text) },
               detailType: "link",
               url: requiredString(post.url),
-            };
+            } };
           }),
           olderCursor: cursor ?? undefined,
           endReached: cursor == null,

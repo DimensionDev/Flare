@@ -105,7 +105,7 @@ Current method paths are:
 | `flare.datasource.list/v1` | `list.page`, `detail`, `create`, `update`, `delete`, `timeline`, `members`, `memberships`, `addMember`, `removeMember` |
 | `flare.datasource.direct-message/v1` | `directMessage.rooms`, `room`, `messages`, `send`, `delete`, `leave`, `create`, `badge`, `canSend` |
 | `flare.datasource.article/v1` | `article.detail`, `comments` |
-| `flare.datasource.gallery/v1` | `gallery.detail`, `comments`, `recommendations` |
+| `flare.datasource.gallery/v1` | `gallery.detail`, `comments`, `recommendations`, `ugoiraMetadata` (optional) |
 | `flare.datasource.tab-catalog/v1` | `tabCatalog.page` |
 
 The [capability matrix](references/capabilities.md) distinguishes required and
@@ -145,7 +145,7 @@ HTML before rendering.
 `PostV1` requires `key`, `createdAt`, and `content`. Its `author` and `visibility`
 fields default to null and accept explicit null. A provided author must satisfy
 the complete `ProfileV1` contract. The Host does not synthesize an author or infer
-public visibility. These rules also apply to nested reposts and `updatedPost`
+public visibility. These rules also apply to presentation posts and `updatedPost`
 results; an updated post is a complete snapshot, so omitted fields do not retain
 their previous values.
 
@@ -313,6 +313,19 @@ resolve them.
 
 For full field defaults and validation, read the [manifest reference](references/manifest.md).
 All five authentication interactions are covered in [authentication](references/authentication.md).
+
+## Timeline contract
+
+All timeline lists, including notification.page, return PageV1<TimelineItemV1>:
+post, feed, user, userList or message. Post detail returns `{ post, presentation? }`;
+publish/updatedPost continue to use PostV1. Reposts are in presentation.repost.
+There is no bare-post or old-notification fallback. SDK beta.10 changes this preview
+contract; update scripts and the SDK together.
+
+The Host reuses its current timeline UI and cache, supplies viewer identity and
+navigation, and owns pagination gaps. Poll/reaction mutations use post.mutate;
+user-card buttons use relation.mutate. See [wire data](references/wire-data.md#timeline-items-and-interactions)
+for all fields, limits, permission checks and mutation parameters/results.
 
 ## Lifecycle and trust
 

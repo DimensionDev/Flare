@@ -33,7 +33,7 @@ interface PluginDefinitionV1 {
   detector?: { detect(request: DetectorRequestV1, context: PluginInvocationContextV1): MaybePromise<DetectorResultV1> };
   login?: Record<string, LoginServiceV1>;
   capabilities?: {
-    timeline?: { page(request: TimelinePageRequestV1, context: PluginInvocationContextV1): MaybePromise<PageV1<PostV1>> };
+    timeline?: { page(request: TimelinePageRequestV1, context: PluginInvocationContextV1): MaybePromise<PageV1<TimelineItemV1>> };
     search?: Partial<SearchServiceV1>;
     profile?: Partial<ProfileServiceV1>;
     post?: Partial<PostServiceV1>;
@@ -61,9 +61,9 @@ interface LoginServiceV1 {
 }
 
 interface SearchServiceV1 {
-  posts(request: SearchRequestV1, context: PluginInvocationContextV1): MaybePromise<PageV1<PostV1>>;
+  posts(request: SearchRequestV1, context: PluginInvocationContextV1): MaybePromise<PageV1<TimelineItemV1>>;
   profiles(request: SearchRequestV1, context: PluginInvocationContextV1): MaybePromise<PageV1<ProfileV1>>;
-  discoverPosts(request: SearchRequestV1, context: PluginInvocationContextV1): MaybePromise<PageV1<PostV1>>;
+  discoverPosts(request: SearchRequestV1, context: PluginInvocationContextV1): MaybePromise<PageV1<TimelineItemV1>>;
   discoverProfiles(request: SearchRequestV1, context: PluginInvocationContextV1): MaybePromise<PageV1<ProfileV1>>;
   discoverHashtags(request: SearchRequestV1, context: PluginInvocationContextV1): MaybePromise<PageV1<HashtagV1>>;
 }
@@ -71,14 +71,14 @@ interface SearchServiceV1 {
 interface ProfileServiceV1 {
   byId(request: EntityRequestV1, context: PluginInvocationContextV1): MaybePromise<ProfileV1>;
   byHandle(request: HandleRequestV1, context: PluginInvocationContextV1): MaybePromise<ProfileV1>;
-  timeline(request: ProfileTimelineRequestV1, context: PluginInvocationContextV1): MaybePromise<PageV1<PostV1>>;
+  timeline(request: ProfileTimelineRequestV1, context: PluginInvocationContextV1): MaybePromise<PageV1<TimelineItemV1>>;
   following(request: EntityPageRequestV1, context: PluginInvocationContextV1): MaybePromise<PageV1<ProfileV1>>;
   followers(request: EntityPageRequestV1, context: PluginInvocationContextV1): MaybePromise<PageV1<ProfileV1>>;
 }
 
 interface PostServiceV1 {
-  detail(request: EntityRequestV1, context: PluginInvocationContextV1): MaybePromise<PostV1>;
-  context(request: EntityPageRequestV1, context: PluginInvocationContextV1): MaybePromise<PageV1<PostV1>>;
+  detail(request: EntityRequestV1, context: PluginInvocationContextV1): MaybePromise<TimelinePostV1>;
+  context(request: EntityPageRequestV1, context: PluginInvocationContextV1): MaybePromise<PageV1<TimelineItemV1>>;
   delete(request: EntityRequestV1, context: PluginInvocationContextV1): MaybePromise<DeleteResultV1>;
   mutate(request: MutationRequestV1, context: PluginInvocationContextV1): MaybePromise<PostMutationResultV1>;
 }
@@ -88,7 +88,7 @@ interface RelationServiceV1 {
   mutate(request: MutationRequestV1, context: PluginInvocationContextV1): MaybePromise<RelationMutationResultV1>;
 }
 interface NotificationServiceV1 {
-  page(request: NotificationPageRequestV1, context: PluginInvocationContextV1): MaybePromise<PageV1<NotificationV1>>;
+  page(request: NotificationPageRequestV1, context: PluginInvocationContextV1): MaybePromise<PageV1<TimelineItemV1>>;
   badge(request: EmptyRequestV1, context: PluginInvocationContextV1): MaybePromise<CountResultV1>;
 }
 interface ListServiceV1 {
@@ -97,7 +97,7 @@ interface ListServiceV1 {
   create(request: ListMutationRequestV1, context: PluginInvocationContextV1): MaybePromise<SocialListV1>;
   update(request: ListMutationRequestV1, context: PluginInvocationContextV1): MaybePromise<SocialListV1>;
   delete(request: ListMutationRequestV1, context: PluginInvocationContextV1): MaybePromise<DeleteResultV1>;
-  timeline(request: EntityPageRequestV1, context: PluginInvocationContextV1): MaybePromise<PageV1<PostV1>>;
+  timeline(request: EntityPageRequestV1, context: PluginInvocationContextV1): MaybePromise<PageV1<TimelineItemV1>>;
   members(request: EntityPageRequestV1, context: PluginInvocationContextV1): MaybePromise<PageV1<ProfileV1>>;
   memberships(request: EntityPageRequestV1, context: PluginInvocationContextV1): MaybePromise<PageV1<SocialListV1>>;
   addMember(request: ListMemberRequestV1, context: PluginInvocationContextV1): MaybePromise<ProfileV1>;
@@ -116,12 +116,13 @@ interface DirectMessageServiceV1 {
 }
 interface ArticleServiceV1 {
   detail(request: EntityRequestV1, context: PluginInvocationContextV1): MaybePromise<ArticleV1>;
-  comments(request: EntityPageRequestV1, context: PluginInvocationContextV1): MaybePromise<PageV1<PostV1>>;
+  comments(request: EntityPageRequestV1, context: PluginInvocationContextV1): MaybePromise<PageV1<TimelineItemV1>>;
 }
 interface GalleryServiceV1 {
+  ugoiraMetadata(request: EntityRequestV1, context: PluginInvocationContextV1): MaybePromise<UgoiraMetadataV1>;
   detail(request: EntityRequestV1, context: PluginInvocationContextV1): MaybePromise<GalleryV1>;
-  comments(request: EntityPageRequestV1, context: PluginInvocationContextV1): MaybePromise<PageV1<PostV1>>;
-  recommendations(request: EntityPageRequestV1, context: PluginInvocationContextV1): MaybePromise<PageV1<PostV1>>;
+  comments(request: EntityPageRequestV1, context: PluginInvocationContextV1): MaybePromise<PageV1<TimelineItemV1>>;
+  recommendations(request: EntityPageRequestV1, context: PluginInvocationContextV1): MaybePromise<PageV1<TimelineItemV1>>;
 }
 
 interface DetectorRequestV1 { origin: string }
@@ -208,7 +209,7 @@ interface ProfileV1 {
   entityToken?: string;
   actions?: ActionDescriptorV1[];
 }
-type MediaTypeV1 = "image" | "video" | "gif" | "audio";
+type MediaTypeV1 = "image" | "video" | "gif" | "audio" | "ugoira";
 /** HTTPS URLs only; automatic loading requires permissions.mediaNetwork. Preserve alt text. */
 interface MediaV1 {
   id: string;
@@ -219,16 +220,23 @@ interface MediaV1 {
   width?: number;
   height?: number;
   durationMillis?: number;
+  downloadUrl?: string;
+  /** Ugoira requires an authenticated account and gallery.ugoiraMetadata. */
+  ugoiraKey?: EntityKeyV1;
+  originalFrameUrl?: string;
 }
-type VisibilityV1 = "public" | "unlisted" | "followers" | "direct";
+type VisibilityV1 = "public" | "unlisted" | "followers" | "direct" | "channel";
 type SemanticActionV1 =
   | "Favourite" | "Unfavourite" | "Repost" | "Unrepost" | "Bookmark" | "Unbookmark"
-  | "Delete" | "Reply" | "Follow" | "Unfollow" | "Block" | "Unblock" | "Mute" | "Unmute";
+  | "Delete" | "Reply" | "Follow" | "Unfollow" | "Block" | "Unblock" | "Mute" | "Unmute"
+  | "Vote" | "React" | "Unreact" | "AcceptFollowRequest" | "RejectFollowRequest";
 /** Semantic Host control. enabled defaults true; active/count remain meaningful when disabled.
  * actionToken is bounded opaque mutation data, not a page cursor or credential store.
  */
 interface ActionDescriptorV1 {
   action: SemanticActionV1;
+  /** Required for user buttons; localize using context.locale. */
+  label?: string;
   enabled?: boolean;
   active?: boolean;
   count?: number;
@@ -244,7 +252,6 @@ interface PostV1 {
   /** Required for detailType "link"; absolute HTTPS URL without URL credentials. */
   url?: string;
   media?: MediaV1[];
-  repost?: PostV1;
   replyTo?: EntityKeyV1;
   spoilerText?: string;
   sensitive?: boolean;
@@ -257,7 +264,103 @@ interface PostV1 {
   actions?: ActionDescriptorV1[];
   /** Defaults to "post"; internal details use key, while "link" opens url in the browser. */
   detailType?: PostDetailTypeV1;
+  sourceLanguages?: string[];
+  replyToHandle?: string;
+  references?: PostReferenceV1[];
+  sourceChannel?: { id: string; name: string };
+  card?: CardV1;
+  poll?: PollV1;
+  emojiReactions?: EmojiReactionV1[];
 }
+/** All timeline-producing operations use this discriminated union. No bare-post compatibility.
+ * Gap/loading/translation state, account identity and callbacks are owned by the Host.
+ */
+type TimelineItemV1 =
+  | ({ type: "post" } & TimelinePostV1)
+  | { type: "feed"; feed: FeedV1 }
+  | { type: "user"; user: TimelineUserV1 }
+  | { type: "userList"; userList: TimelineUserListV1 }
+  | { type: "message"; message: MessageV1 };
+/** post.detail returns this same body without a type discriminator; do not include type. */
+interface TimelinePostV1 { post: PostV1; presentation?: PostPresentationV1 }
+interface PostPresentationV1 {
+  message?: MessageV1;
+  inlineParents?: TimelinePostV1[];
+  quotes?: PostV1[];
+  repost?: PostV1;
+  /** Stable event identity; distinct notifications about one post must use different keys. */
+  notificationKey?: EntityKeyV1;
+}
+type NavigationTargetV1 =
+  | { type: "post" | "profile" | "article" | "gallery"; key: EntityKeyV1 }
+  | { type: "link"; url: string };
+interface FeedV1 {
+  url: string;
+  createdAt: string;
+  source: { name: string; iconUrl?: string };
+  title?: string;
+  description?: RichTextV1;
+  /** Image only. */
+  media?: MediaV1;
+  sourceLanguages?: string[];
+  /** Defaults to opening url in the browser, never the RSS detail route. */
+  target?: NavigationTargetV1;
+}
+interface TimelineUserV1 {
+  /** Row identity, distinct from profile.key. */
+  key: EntityKeyV1;
+  createdAt: string;
+  profile: ProfileV1;
+  message?: MessageV1;
+  /** Follow/Unfollow/Block/Unblock/Mute/Unmute/AcceptFollowRequest/RejectFollowRequest; labels required. */
+  buttons?: ActionDescriptorV1[];
+}
+interface TimelineUserListV1 {
+  key: EntityKeyV1;
+  createdAt: string;
+  users: ProfileV1[];
+  message?: MessageV1;
+  post?: PostV1;
+}
+/** Supply exactly one of text, kind, unknownType. */
+interface MessageV1 {
+  key: EntityKeyV1;
+  createdAt: string;
+  icon?: HostIconV1;
+  actor?: ProfileV1;
+  text?: string;
+  kind?: MessageKindV1;
+  unknownType?: string;
+  args?: string[];
+  target?: NavigationTargetV1;
+}
+type MessageKindV1 = "Mention" | "NewPost" | "Repost" | "Follow" | "FollowRequest" | "Favourite"
+  | "PollEnded" | "PostUpdated" | "Reply" | "Quote" | "Reaction" | "FollowRequestAccepted"
+  | "ScheduledNotePosted" | "ScheduledNotePostFailed" | "RoleAssigned" | "ChatRoomInvitationReceived"
+  | "AchievementEarned" | "ExportCompleted" | "Test" | "Login" | "CreateToken" | "App" | "StarterpackJoined" | "Pinned" | "Like";
+interface PostReferenceV1 { key: EntityKeyV1; type: "Reply" | "Quote" | "Repost" }
+interface CardV1 { title: string; url: string; description?: string; media?: MediaV1 }
+interface PollV1 {
+  id: string;
+  options: { title: string; votesCount?: number }[];
+  multiple?: boolean;
+  ownVotes?: number[];
+  expiresAt?: string;
+  enabled?: boolean;
+  actionToken?: string;
+}
+interface EmojiReactionV1 {
+  name: string;
+  count?: number;
+  /** Required for image reactions; mediaNetwork must be granted. */
+  url?: string;
+  isUnicode?: boolean;
+  me?: boolean;
+  enabled?: boolean;
+  actionToken?: string;
+}
+interface UgoiraMetadataV1 { zipUrl: string; frames: { file: string; delayMillis: number }[] }
+
 interface HashtagV1 { name: string; url?: string }
 
 type PageDirectionV1 = "refresh" | "older" | "newer";
@@ -301,14 +404,17 @@ interface MutationRequestV1 {
  */
 type MutationResultV1 =
   | { type: "updatedPost"; post: PostV1 }
-  | { type: "updatedProfile"; profile: ProfileV1 }
+  | { type: "updatedProfile"; profile: ProfileV1; relation?: RelationV1 }
   | { type: "updatedRelation"; relation: RelationV1 }
   | { type: "deleted" }
   | { type: "invalidate"; keys: EntityKeyV1[] }
   | { type: "noChange" };
 type DeleteResultV1 = Extract<MutationResultV1, { type: "deleted" | "noChange" }>;
 type PostMutationResultV1 = Extract<MutationResultV1, { type: "updatedPost" | "deleted" | "invalidate" | "noChange" }>;
-type RelationMutationResultV1 = Extract<MutationResultV1, { type: "updatedRelation" | "noChange" }>;
+/** User-card actions may return updatedProfile (including replacement buttons), deleted, or updatedRelation.
+ * Relation controls outside user cards accept only updatedRelation/noChange.
+ */
+type RelationMutationResultV1 = Extract<MutationResultV1, { type: "updatedRelation" | "updatedProfile" | "deleted" | "noChange" }>;
 
 /** Return full authoritative relation state after mutation, including replacement actionTokens.
  * Omitted booleans default false; partial updatedRelation can clear existing state.
@@ -320,16 +426,6 @@ interface RelationV1 {
   blocking?: boolean;
   muting?: boolean;
   actionTokens?: Partial<Record<SemanticActionV1, string>>;
-}
-type NotificationKindV1 = "Mention" | "Reply" | "Favourite" | "Repost" | "Follow" | "Other";
-/** id identifies the event, not its post; multiple events on one post remain distinct. */
-interface NotificationV1 {
-  id: string;
-  createdAt: string;
-  kind: NotificationKindV1;
-  actor?: ProfileV1;
-  post?: PostV1;
-  message?: RichTextV1;
 }
 interface SocialListV1 { id: string; title: string; memberCount?: number; entityToken?: string }
 interface DirectMessageRoomV1 {

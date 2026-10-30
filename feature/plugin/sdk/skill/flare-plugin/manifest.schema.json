@@ -1288,6 +1288,9 @@
                 },
                 "recommendations": {
                   "$ref": "#/definitions/operation"
+                },
+                "ugoiraMetadata": {
+                  "$ref": "#/definitions/operation"
                 }
               },
               "required": [
@@ -1671,7 +1674,8 @@
         "public",
         "unlisted",
         "followers",
-        "direct"
+        "direct",
+        "channel"
       ]
     },
     "composeText": {

@@ -63,6 +63,7 @@ import dev.dimension.flare.feature.plugin.wire.ProfileV1
 import dev.dimension.flare.feature.plugin.wire.SearchRequestV1
 import dev.dimension.flare.feature.plugin.wire.SemanticActionV1
 import dev.dimension.flare.feature.plugin.wire.TimelineDisplayV1
+import dev.dimension.flare.feature.plugin.wire.TimelineItemV1
 import dev.dimension.flare.feature.plugin.wire.TimelinePageRequestV1
 import dev.dimension.flare.feature.plugin.wire.VisibilityV1
 import dev.dimension.flare.model.MicroBlogKey
@@ -334,7 +335,7 @@ class PixelfedSampleTest {
                             method = "capabilities.post.detail",
                             request = EntityRequestV1(EntityKeyV1("missing", "pixelfed.social")),
                             requestSerializer = EntityRequestV1.serializer(),
-                            responseSerializer = PostV1.serializer(),
+                            responseSerializer = TimelineItemV1.Post.serializer(),
                         )
                     }
                 assertEquals(PluginErrorCodeV1.NotFound, notFound.error.code)
@@ -392,7 +393,7 @@ class PixelfedSampleTest {
             val key = PluginRuntimeKeyV1.account(PLUGIN_ID, plugin.installed.packageHash, ORIGIN, "42")
             val context = accountContext(plugin, credential)
             try {
-                val postPageSerializer = PageV1.serializer(PostV1.serializer())
+                val postPageSerializer = PageV1.serializer(TimelineItemV1.serializer())
                 val profilePageSerializer = PageV1.serializer(ProfileV1.serializer())
 
                 listOf("home", "discover", "local", "federated", "bookmarks", "favourites").forEach { timelineId ->
@@ -580,9 +581,9 @@ class PixelfedSampleTest {
                         "capabilities.post.detail",
                         postRequest,
                         EntityRequestV1.serializer(),
-                        PostV1.serializer(),
+                        TimelineItemV1.Post.serializer(),
                     )
-                assertEquals("100", detail.key.id)
+                assertEquals("100", detail.post.key.id)
                 val thread =
                     pool.invokeAccount(
                         plugin,
@@ -660,7 +661,7 @@ class PixelfedSampleTest {
                                 "capabilities.post.detail",
                                 EntityRequestV1(EntityKeyV1(id, "pixelfed.social")),
                                 EntityRequestV1.serializer(),
-                                PostV1.serializer(),
+                                TimelineItemV1.Post.serializer(),
                             )
                         }
                     assertEquals(expected, error.error.code, id)
@@ -835,7 +836,7 @@ class PixelfedSampleTest {
                         method = "capabilities.timeline.page",
                         request = TimelinePageRequestV1("home", PageRequestV1(PageDirectionV1.Refresh, 5), emptyMap()),
                         requestSerializer = TimelinePageRequestV1.serializer(),
-                        responseSerializer = PageV1.serializer(PostV1.serializer()),
+                        responseSerializer = PageV1.serializer(TimelineItemV1.serializer()),
                     )
                 assertTrue(timeline.items.size <= 5)
 
@@ -1169,3 +1170,5 @@ private const val ACCOUNT =
     """{"id":"42","username":"alice","acct":"alice","display_name":"Alice","note":"<p>Photos</p>","avatar":"https://pixelfed.social/avatar.jpg","header":"https://pixelfed.social/header.jpg","url":"https://pixelfed.social/alice","followers_count":3,"following_count":4,"statuses_count":5,"locked":false,"bot":false,"fields":[]}"""
 private const val STATUS =
     """{"id":"100","account":$ACCOUNT,"created_at":"2026-08-14T00:00:00Z","content":"<p>A photo</p>","url":"https://pixelfed.social/p/example","media_attachments":[{"id":"media","type":"image","url":"https://pixelfed.social/media.jpg","preview_url":"https://pixelfed.social/preview.jpg","meta":{"original":{"width":800,"height":600}}}],"sensitive":false,"visibility":"public","favourites_count":1,"reblogs_count":2,"replies_count":0,"favourited":false,"reblogged":false,"bookmarked":false}"""
+
+private val TimelineItemV1.key: EntityKeyV1 get() = assertIs<TimelineItemV1.Post>(this).post.key

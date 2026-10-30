@@ -9,14 +9,14 @@ import dev.dimension.flare.feature.plugin.wire.EntityKeyV1
 import dev.dimension.flare.feature.plugin.wire.GalleryV1
 import dev.dimension.flare.feature.plugin.wire.MediaTypeV1
 import dev.dimension.flare.feature.plugin.wire.MediaV1
-import dev.dimension.flare.feature.plugin.wire.NotificationKindV1
-import dev.dimension.flare.feature.plugin.wire.NotificationV1
 import dev.dimension.flare.feature.plugin.wire.PostDetailTypeV1
+import dev.dimension.flare.feature.plugin.wire.PostPresentationV1
 import dev.dimension.flare.feature.plugin.wire.PostV1
 import dev.dimension.flare.feature.plugin.wire.ProfileV1
 import dev.dimension.flare.feature.plugin.wire.RichTextFormatV1
 import dev.dimension.flare.feature.plugin.wire.RichTextV1
 import dev.dimension.flare.feature.plugin.wire.SemanticActionV1
+import dev.dimension.flare.feature.plugin.wire.TimelineItemV1
 import dev.dimension.flare.feature.plugin.wire.VisibilityV1
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -45,27 +45,6 @@ class PluginWireMapperV1Test {
             createdAt = "2026-10-27T00:00:00Z",
             content = RichTextV1(value = "Preview"),
         )
-
-    @Test
-    fun notificationsUseTheirActorsCanonicalProfileTarget() {
-        val actor = author.copy(key = EntityKeyV1("me", "LOCAL.EXAMPLE"))
-        for (accountKey in listOf(MicroBlogKey("me", "local.example"), null)) {
-            val mapper = createMapper(accountKey)
-            val mapped =
-                assertIs<UiTimelineV2.Message>(
-                    mapper.notification(
-                        NotificationV1(
-                            id = "notice",
-                            createdAt = post.createdAt,
-                            kind = NotificationKindV1.Mention,
-                            actor = actor,
-                        ),
-                    ),
-                )
-            assertEquals(MicroBlogKey("me", "local.example"), mapped.user?.key)
-            assertEquals(mapper.profile(actor).clickEvent, mapped.clickEvent)
-        }
-    }
 
     @Test
     fun postsWithoutAuthorOrVisibilityKeepNavigationActionsAndPlatformIcon() {
@@ -103,26 +82,6 @@ class PluginWireMapperV1Test {
     }
 
     @Test
-    fun notificationsKeepTheirActorWhenPostsAndRepostsHaveNoAuthor() {
-        val value = PostV1(key = post.key, createdAt = post.createdAt, content = post.content)
-        val notification =
-            NotificationV1(
-                id = "notice",
-                createdAt = post.createdAt,
-                kind = NotificationKindV1.Repost,
-                actor = author,
-                post = value.copy(repost = value.copy(key = EntityKeyV1("original", "remote.example"))),
-            )
-        val mapped = assertIs<UiTimelineV2.TimelinePostItem>(mapper.notification(notification))
-
-        assertEquals(mapper.profile(author), mapped.presentation.message?.user)
-        listOf(mapped.post, assertNotNull(mapped.presentation.repost)).forEach {
-            assertNull(it.user)
-            assertNull(it.visibility)
-        }
-    }
-
-    @Test
     fun platformIconIsSharedByPostsProfilesAndNestedAuthors() {
         val icon = IconType.Url("file:///plugins/platform-logo.png")
         val mapper = createMapper(null, platformIcon = icon)
@@ -142,73 +101,20 @@ class PluginWireMapperV1Test {
                 author.copy(url = url),
             ).forEach { profile ->
                 assertFailsWith<IllegalArgumentException>(url) { mapper.profile(profile) }
-                assertFailsWith<IllegalArgumentException>(url) { mapper.post(post.copy(repost = post.copy(author = profile))) }
+                assertFailsWith<IllegalArgumentException>(url) {
+                    mapper.timelineItem(TimelineItemV1.Post(post, PostPresentationV1(repost = post.copy(author = profile))))
+                }
             }
             listOf(
                 post.copy(url = url),
                 post.copy(media = listOf(MediaV1("image", MediaTypeV1.Image, url))),
                 post.copy(media = listOf(MediaV1("image", MediaTypeV1.Image, "https://remote.example/image", previewUrl = url))),
             ).forEach { nested ->
-                assertFailsWith<IllegalArgumentException>(url) { mapper.post(post.copy(repost = nested)) }
+                assertFailsWith<IllegalArgumentException>(
+                    url,
+                ) { mapper.timelineItem(TimelineItemV1.Post(post, PostPresentationV1(repost = nested))) }
             }
         }
-    }
-
-    @Test
-    fun notificationsForTheSamePostKeepTheirIdentityActorAndTime() {
-        val actor = author.copy(key = EntityKeyV1("reactor", "remote.example"))
-        val notification =
-            NotificationV1(
-                id = "notice-1",
-                createdAt = "2026-10-28T00:00:00Z",
-                kind = NotificationKindV1.Favourite,
-                actor = actor,
-                post = post,
-            )
-        val first = assertIs<UiTimelineV2.TimelinePostItem>(mapper.notification(notification))
-        val second = assertIs<UiTimelineV2.TimelinePostItem>(mapper.notification(notification.copy(id = "notice-2")))
-        assertEquals(2, listOf(first, second).distinctBy { it.stableItemKey }.size)
-        assertEquals(MicroBlogKey(notification.id, "local.example"), first.presentation.notificationKey)
-        assertEquals(
-            actor.key.id,
-            first.presentation.message
-                ?.user
-                ?.key
-                ?.id,
-        )
-        assertEquals(Instant.parse(notification.createdAt), first.createdAt.value)
-        assertEquals(UiIcon.Heart, first.presentation.message?.icon)
-        assertEquals(
-            UiTimelineV2.Message.Type.Localized(UiTimelineV2.Message.Type.Localized.MessageId.Favourite),
-            first.presentation.message?.type,
-        )
-        assertEquals(post.key.id, first.post.statusKey.id)
-        assertEquals(mapper.post(post).let { assertIs<UiTimelineV2.TimelinePostItem>(it).post.clickEvent }, first.post.clickEvent)
-    }
-
-    @Test
-    fun notificationKeepsCustomTextRepostsAndStandaloneActors() {
-        val repost = post.copy(key = EntityKeyV1("reposted", "remote.example"))
-        val notification =
-            NotificationV1(
-                id = "notice",
-                createdAt = post.createdAt,
-                kind = NotificationKindV1.Repost,
-                actor = author,
-                post = post.copy(repost = repost),
-                message = RichTextV1(RichTextFormatV1.Html, "<p>Shared your post</p>"),
-            )
-        val item = assertIs<UiTimelineV2.TimelinePostItem>(mapper.notification(notification))
-        assertEquals(
-            repost.key.id,
-            item.presentation.repost
-                ?.statusKey
-                ?.id,
-        )
-        assertEquals(UiTimelineV2.Message.Type.Raw("Shared your post"), item.presentation.message?.type)
-        val standalone = assertIs<UiTimelineV2.Message>(mapper.notification(notification.copy(post = null)))
-        assertEquals(item.presentation.message, standalone)
-        assertEquals(mapper.profile(author).clickEvent, standalone.clickEvent)
     }
 
     @Test
@@ -485,7 +391,8 @@ class PluginWireMapperV1Test {
     fun repostCanOpenALinkWhileTheParentKeepsPostDetail() {
         val url = "https://remote.example/reposted"
         val nested = post.copy(key = EntityKeyV1("linked", "remote.example"), detailType = PostDetailTypeV1.Link, url = url)
-        val mapped = assertIs<UiTimelineV2.TimelinePostItem>(mapper.post(post.copy(repost = nested)))
+        val mapped =
+            assertIs<UiTimelineV2.TimelinePostItem>(mapper.timelineItem(TimelineItemV1.Post(post, PostPresentationV1(repost = nested))))
         assertEquals(
             ClickEvent.Deeplink(
                 DeeplinkRoute.Status.Detail(
@@ -502,7 +409,8 @@ class PluginWireMapperV1Test {
     @Test
     fun repostKeepsItsOwnDetailTarget() {
         val repost = post.copy(key = EntityKeyV1("article-1", "remote.example"), detailType = PostDetailTypeV1.Article)
-        val mapped = assertIs<UiTimelineV2.TimelinePostItem>(mapper.post(post.copy(repost = repost)))
+        val mapped =
+            assertIs<UiTimelineV2.TimelinePostItem>(mapper.timelineItem(TimelineItemV1.Post(post, PostPresentationV1(repost = repost))))
 
         assertEquals(
             ClickEvent.Deeplink(

@@ -101,8 +101,10 @@ requests/responses well below them.
 | Credential / OAuth pending JSON | 64 KiB each |
 | OAuth pending lifetime | 15 minutes |
 | Rich text | 1000000 characters |
-| Post media / gallery images | At most 100; gallery must have at least 1 image |
-| Nested repost depth | 4 recursive levels beyond the initial post |
+| Post media / gallery images | At most 100; gallery must have at least 1 media entry |
+| Inline-parent presentation depth | 4 recursive levels beyond the root item |
+| Inline parents / quotes / user list / reactions | At most 100 each; user lists cannot be empty |
+| Poll options | 2..100, distinct valid ownVotes indices |
 | Crypto randomHex input / sha256 input | 1..1024 random bytes / 1 MiB UTF-8 text |
 
 Multipart calls have at most 64 parts; text parts are at most 256 KiB. Assets have

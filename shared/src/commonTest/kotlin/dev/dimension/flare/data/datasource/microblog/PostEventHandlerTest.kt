@@ -22,6 +22,7 @@ import dev.dimension.flare.ui.model.UiPoll
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.UiTranslatableText
+import dev.dimension.flare.ui.model.postEventOrNull
 import dev.dimension.flare.ui.render.toUi
 import dev.dimension.flare.ui.render.toUiPlainText
 import kotlinx.collections.immutable.persistentListOf
@@ -217,6 +218,58 @@ class PostEventHandlerTest : RobolectricTest() {
             assertEquals(listOf(1), updatedPoll.ownVotes)
             assertEquals(1, updatedPoll.options[0].votesCount)
             assertEquals(3, updatedPoll.options[1].votesCount)
+        }
+
+    @Test
+    fun cachedPluginVoteDispatchesAndRollsBackOnFailure() =
+        runTest {
+            startKoin {
+                modules(
+                    module {
+                        testSingle { db }
+                        testSingle<CoroutineScope> { this@runTest }
+                        testSingle<PlatformFormatter> { TestFormatter() }
+                    },
+                )
+            }
+            val vote = PostEvent.PluginVote(postKey, accountKey, persistentListOf(), "poll-token")
+            val original =
+                createPost(
+                    poll =
+                        UiPoll(
+                            "plugin-poll",
+                            persistentListOf(UiPoll.Option("A", 1, 0.25f), UiPoll.Option("B", 3, 0.75f)),
+                            false,
+                            persistentListOf(),
+                            vote,
+                            null,
+                        ),
+                )
+            insertPost(original)
+            val cached = readPost()!!
+            var clicked: PostEvent? = null
+            cached.poll!!.onVote.invoke(
+                dev.dimension.flare.ui.model.ClickContext(
+                    dev.dimension.flare.ui.model.UriLauncher {
+                        clicked = ClickEvent.Deeplink(it).postEventOrNull()!!.postEvent
+                    },
+                ),
+                persistentListOf(1),
+            )
+            val event = kotlin.test.assertIs<PostEvent.PluginVote>(clicked)
+            assertEquals("poll-token", event.actionToken)
+            fakeRemoteHandler.shouldFail = true
+            handler = PostEventHandler(AccountType.Specific(accountKey), fakeRemoteHandler)
+            handler.handleEvent(event)
+            advanceUntilIdle()
+            assertEquals(original.poll, readPost()!!.poll)
+            assertEquals(1, fakeRemoteHandler.callCount)
+
+            fakeRemoteHandler.shouldFail = false
+            handler.handleEvent(event)
+            advanceUntilIdle()
+            assertEquals(listOf(1), readPost()!!.poll!!.ownVotes)
+            assertEquals(4, readPost()!!.poll!!.options[1].votesCount)
         }
 
     @Test

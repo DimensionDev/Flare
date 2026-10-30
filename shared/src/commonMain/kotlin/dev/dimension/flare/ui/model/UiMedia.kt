@@ -130,8 +130,9 @@ public sealed interface UiMedia {
         val sensitive: Boolean,
         override val customHeaders: SerializableImmutableMap<String, String>? = null,
         @Transient override val proxy: ProxyRef = ProxyRef.forAccount(accountKey),
+        val sourceUrl: String? = null,
     ) : UiMedia {
-        override val url: String get() = "https://www.pixiv.net/artworks/${statusKey.id}"
+        override val url: String get() = sourceUrl ?: "https://www.pixiv.net/artworks/${statusKey.id}"
 
         // Ugoira is a frame sequence. Saving it requires the platform MP4 encoder.
         override val urlForDownload: String get() = error("Ugoira must be exported as MP4")

@@ -74,7 +74,9 @@ Run from the Flare repository root:
 ./gradlew :feature:plugin:jvmTest \
   --tests '*GitHubTemplateTest' \
   --tests '*PixelfedSampleTest' \
-  --tests '*PluginGitHubInstallTest'
+  --tests '*PluginGitHubInstallTest' \
+  --tests '*PluginTimelineV1Test' \
+  --tests '*PluginDetailCapabilityTest'
 ```
 
 `GitHubTemplateTest` constructs a GitHub-style source archive from the **actual
@@ -89,6 +91,15 @@ fixtures; `PluginGitHubInstallTest` covers source archive/version/identity rules
 For a new adapter, replace/adapt the fixtures to its actual API evidence and
 add checks at this seam. Read the generated test XML/results for executed counts,
 failures, and skips; a cached/no-source task is not evidence of new execution.
+
+`PluginTimelineV1Test` covers all timeline item shapes, presentation nesting,
+cache serialization, navigation/capability gating, media permission revocation,
+polls, reactions and replacement action tokens. `PluginDetailCapabilityTest`
+installs the [mixed showcase](../examples/timeline-showcase/README.md), exercises
+real runtime mutation results and checks row/entity identity separation. Shared
+PostEventHandlerTest, UserHandlerTest and NotificationTimelineTest cover SQLite
+hydration, profile updates, and failed optimistic votes. The showcase has no
+remote side effects; it can also be used for manual existing-UI acceptance.
 
 For changes to manifests or wire contracts, relevant existing suites include
 PluginManifestV1Test and WireV1Test. Runtime/HTTP/login suites cover their own Host

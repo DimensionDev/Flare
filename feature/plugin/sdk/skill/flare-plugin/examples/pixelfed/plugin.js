@@ -140,7 +140,7 @@ defineFlareSocialPlugin({
 
     search: {
       async posts(request, context) {
-        return searchPage(context, request, "statuses", mapPost);
+        return searchPage(context, request, "statuses", mapTimelinePost);
       },
       async profiles(request, context) {
         return searchPage(context, request, "accounts", mapProfile);
@@ -200,7 +200,8 @@ defineFlareSocialPlugin({
     post: {
       async detail(request, context) {
         const response = await authenticatedRequest(context, "/api/v1/statuses/" + encodeURIComponent(request.key.id));
-        return mapPost(response.data, context.origin, context.accountId);
+        const item = mapTimelinePost(response.data, context.origin, context.accountId);
+        return { post: item.post, presentation: item.presentation };
       },
       async context(request, context) {
         const id = encodeURIComponent(request.key.id);
@@ -211,7 +212,7 @@ defineFlareSocialPlugin({
         values.push(detail.data);
         for (const status of (thread.data && thread.data.descendants) || []) values.push(status);
         return pageResult(
-          values.filter(Boolean).map((status) => mapPost(status, context.origin, context.accountId)),
+          values.filter(Boolean).map((status) => mapTimelinePost(status, context.origin, context.accountId)),
           null,
           null,
           true,
@@ -297,7 +298,7 @@ async function statusPage(context, path, page, parameters, unwrap) {
   const values = (unwrap || unwrapStatuses)(response.data);
   const cursor = cursorFor(response, path, page, query, values);
   return pageResult(
-    values.map((status) => mapPost(status, context.origin, context.accountId)),
+    values.map((status) => mapTimelinePost(status, context.origin, context.accountId)),
     cursor,
     null,
     cursor == null,
@@ -507,9 +508,16 @@ function mapProfile(account, origin) {
   return profile;
 }
 
-function mapPost(status, origin, accountId, depth) {
+function mapTimelinePost(status, origin, accountId) {
+  return {
+    type: "post",
+    post: mapPost(status, origin, accountId),
+    presentation: status.reblog ? { repost: mapPost(status.reblog, origin, accountId) } : {},
+  };
+}
+
+function mapPost(status, origin, accountId) {
   if (!status || status.id == null || !status.account) invalidResponse("Pixelfed returned an invalid status");
-  const level = depth || 0;
   const host = originHost(origin);
   const post = {
     key: { id: String(status.id), host },
@@ -528,7 +536,6 @@ function mapPost(status, origin, accountId, depth) {
   if (url) post.url = url;
   if (status.in_reply_to_id != null) post.replyTo = { id: String(status.in_reply_to_id), host };
   if (status.spoiler_text) post.spoilerText = String(status.spoiler_text);
-  if (status.reblog && level < 4) post.repost = mapPost(status.reblog, origin, accountId, level + 1);
   return post;
 }
 

@@ -66,6 +66,7 @@ public sealed interface MutationResultV1 {
     @SerialName("updatedProfile")
     public data class UpdatedProfile(
         val profile: ProfileV1,
+        val relation: RelationV1? = null,
     ) : MutationResultV1
 
     @Serializable

@@ -68,7 +68,7 @@ public object PluginAbiV1 {
                     "canSend",
                 ),
             Capabilities.ARTICLE to setOf("detail", "comments"),
-            Capabilities.GALLERY to setOf("detail", "comments", "recommendations"),
+            Capabilities.GALLERY to setOf("detail", "comments", "recommendations", "ugoiraMetadata"),
             Capabilities.TAB_CATALOG to setOf("page"),
         )
 
@@ -79,6 +79,7 @@ public object PluginAbiV1 {
                 Capabilities.PROFILE -> setOf("byId", "byHandle")
                 Capabilities.POST -> setOf("detail")
                 Capabilities.NOTIFICATION -> emptySet()
+                Capabilities.GALLERY -> setOf("detail", "comments", "recommendations")
                 else -> operations
             }
         }

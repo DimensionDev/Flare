@@ -216,10 +216,10 @@ class WireV1Test {
     @Test
     fun rejectsInvalidNotificationAndDirectMessageTimestamps() {
         assertFailsWith<IllegalArgumentException> {
-            NotificationV1(
-                id = "notification-1",
+            MessageV1(
+                key = EntityKeyV1("notification-1", "example.social"),
                 createdAt = "yesterday",
-                kind = NotificationKindV1.Mention,
+                kind = MessageKindV1.Mention,
             ).requireValid()
         }
         assertFailsWith<IllegalArgumentException> {

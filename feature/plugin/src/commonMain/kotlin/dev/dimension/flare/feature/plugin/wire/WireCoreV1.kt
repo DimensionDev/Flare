@@ -62,6 +62,9 @@ public enum class MediaTypeV1 {
 
     @SerialName("audio")
     Audio,
+
+    @SerialName("ugoira")
+    Ugoira,
 }
 
 @Serializable
@@ -74,6 +77,9 @@ public data class MediaV1(
     val width: Int? = null,
     val height: Int? = null,
     val durationMillis: Long? = null,
+    val downloadUrl: String? = null,
+    val ugoiraKey: EntityKeyV1? = null,
+    val originalFrameUrl: String? = null,
 )
 
 @Serializable
@@ -89,6 +95,9 @@ public enum class VisibilityV1 {
 
     @SerialName("direct")
     Direct,
+
+    @SerialName("channel")
+    Channel,
 }
 
 @Serializable
@@ -114,7 +123,6 @@ public data class PostV1(
     val content: RichTextV1,
     val url: String? = null,
     val media: List<MediaV1> = emptyList(),
-    val repost: PostV1? = null,
     val replyTo: EntityKeyV1? = null,
     val spoilerText: String? = null,
     val sensitive: Boolean = false,
@@ -125,6 +133,13 @@ public data class PostV1(
     val entityToken: String? = null,
     val actions: List<ActionDescriptorV1> = emptyList(),
     val detailType: PostDetailTypeV1 = PostDetailTypeV1.Post,
+    val sourceLanguages: List<String> = emptyList(),
+    val replyToHandle: String? = null,
+    val references: List<PostReferenceV1> = emptyList(),
+    val sourceChannel: SourceChannelV1? = null,
+    val card: CardV1? = null,
+    val poll: PollV1? = null,
+    val emojiReactions: List<EmojiReactionV1> = emptyList(),
 )
 
 @Serializable
@@ -149,6 +164,11 @@ public enum class SemanticActionV1 {
     Unblock,
     Mute,
     Unmute,
+    Vote,
+    React,
+    Unreact,
+    AcceptFollowRequest,
+    RejectFollowRequest,
 }
 
 @Serializable
@@ -158,6 +178,7 @@ public data class ActionDescriptorV1(
     val active: Boolean? = null,
     val count: Long? = null,
     val actionToken: String? = null,
+    val label: String? = null,
 )
 
 @Serializable

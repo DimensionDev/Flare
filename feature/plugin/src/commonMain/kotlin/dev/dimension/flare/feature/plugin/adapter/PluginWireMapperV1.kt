@@ -2,6 +2,7 @@ package dev.dimension.flare.feature.plugin.adapter
 
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.PostActionFamily
+import dev.dimension.flare.data.datasource.microblog.PostEvent
 import dev.dimension.flare.data.datasource.microblog.SemanticPostAction
 import dev.dimension.flare.data.datasource.microblog.datasource.GalleryDetail
 import dev.dimension.flare.data.datasource.microblog.datasource.GalleryOrientation
@@ -9,6 +10,7 @@ import dev.dimension.flare.data.datasource.microblog.semanticPostActionMenu
 import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.feature.plugin.abi.PluginAbiV1
+import dev.dimension.flare.feature.plugin.wire.ActionDescriptorV1
 import dev.dimension.flare.feature.plugin.wire.ArticleV1
 import dev.dimension.flare.feature.plugin.wire.DirectMessageRoomV1
 import dev.dimension.flare.feature.plugin.wire.DirectMessageV1
@@ -17,9 +19,10 @@ import dev.dimension.flare.feature.plugin.wire.GalleryV1
 import dev.dimension.flare.feature.plugin.wire.HashtagV1
 import dev.dimension.flare.feature.plugin.wire.MediaTypeV1
 import dev.dimension.flare.feature.plugin.wire.MediaV1
-import dev.dimension.flare.feature.plugin.wire.NotificationKindV1
-import dev.dimension.flare.feature.plugin.wire.NotificationV1
+import dev.dimension.flare.feature.plugin.wire.MessageV1
+import dev.dimension.flare.feature.plugin.wire.NavigationTargetV1
 import dev.dimension.flare.feature.plugin.wire.PostDetailTypeV1
+import dev.dimension.flare.feature.plugin.wire.PostReferenceTypeV1
 import dev.dimension.flare.feature.plugin.wire.PostV1
 import dev.dimension.flare.feature.plugin.wire.ProfileV1
 import dev.dimension.flare.feature.plugin.wire.RelationV1
@@ -27,6 +30,8 @@ import dev.dimension.flare.feature.plugin.wire.RichTextFormatV1
 import dev.dimension.flare.feature.plugin.wire.RichTextV1
 import dev.dimension.flare.feature.plugin.wire.SemanticActionV1
 import dev.dimension.flare.feature.plugin.wire.SocialListV1
+import dev.dimension.flare.feature.plugin.wire.TimelineItemV1
+import dev.dimension.flare.feature.plugin.wire.TimelineUserV1
 import dev.dimension.flare.feature.plugin.wire.VisibilityV1
 import dev.dimension.flare.feature.plugin.wire.requireValid
 import dev.dimension.flare.feature.plugin.wire.validatedHtml
@@ -37,12 +42,15 @@ import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiArticle
 import dev.dimension.flare.ui.model.UiArticleAuthor
 import dev.dimension.flare.ui.model.UiArticleBlock
+import dev.dimension.flare.ui.model.UiCard
 import dev.dimension.flare.ui.model.UiDMItem
 import dev.dimension.flare.ui.model.UiDMRoom
 import dev.dimension.flare.ui.model.UiHandle
 import dev.dimension.flare.ui.model.UiHashtag
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiMedia
+import dev.dimension.flare.ui.model.UiNumber
+import dev.dimension.flare.ui.model.UiPoll
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiTimelineV2
@@ -146,10 +154,188 @@ internal class PluginWireMapperV1(
 
     fun post(value: PostV1): UiTimelineV2.TimelinePostItem {
         value.requireValid()
-        return UiTimelineV2.TimelinePostItem(
-            post = value.toUiPost(),
-            presentation = UiTimelineV2.PostPresentation(repost = value.repost?.toUiPost()),
+        return UiTimelineV2.TimelinePostItem(post = value.toUiPost())
+    }
+
+    fun timelineItem(value: TimelineItemV1): UiTimelineV2 {
+        value.requireValid()
+        return when (value) {
+            is TimelineItemV1.Post -> {
+                timelinePost(value)
+            }
+
+            is TimelineItemV1.Feed -> {
+                value.feed.let { feed ->
+                    requireMediaUrl(feed.source.iconUrl)
+                    val description = feed.description?.toUi()
+                    UiTimelineV2.Feed(
+                        title = feed.title,
+                        description = description?.innerText,
+                        descriptionHtml =
+                            feed.description
+                                ?.takeIf { it.format == RichTextFormatV1.Html }
+                                ?.validatedHtml("https://$originHost/")
+                                ?.html(),
+                        url = feed.url,
+                        sourceLanguages = feed.sourceLanguages.toImmutableList(),
+                        createdAt = Instant.parse(feed.createdAt).toUi(),
+                        source = UiTimelineV2.Feed.Source(feed.source.name, feed.source.iconUrl, mediaProxy),
+                        media = feed.media?.toUi(false) as? UiMedia.Image,
+                        clickEvent = target(feed.target ?: NavigationTargetV1.Link(feed.url)),
+                        accountType = accountType,
+                        pluginId = pluginId,
+                    )
+                }
+            }
+
+            is TimelineItemV1.User -> {
+                user(value.user)
+            }
+
+            is TimelineItemV1.UserList -> {
+                value.userList.let {
+                    UiTimelineV2.UserList(
+                        message = it.message?.let(::message),
+                        users = it.users.map(::profile).toImmutableList(),
+                        createdAt = Instant.parse(it.createdAt).toUi(),
+                        statusKey = rowKey("userList", it.key),
+                        post = it.post?.toUiPost(),
+                        accountType = accountType,
+                    )
+                }
+            }
+
+            is TimelineItemV1.Message -> {
+                message(value.message)
+            }
+        }
+    }
+
+    private fun timelinePost(value: TimelineItemV1.Post): UiTimelineV2.TimelinePostItem =
+        UiTimelineV2.TimelinePostItem(
+            post = value.post.toUiPost(),
+            presentation =
+                value.presentation.let {
+                    UiTimelineV2.PostPresentation(
+                        message = it.message?.let(::message),
+                        inlineParents = it.inlineParents.map(::timelinePost).toImmutableList(),
+                        quotes = it.quotes.map { post -> post.toUiPost() }.toImmutableList(),
+                        repost = it.repost?.toUiPost(),
+                        notificationKey = it.notificationKey?.let { key -> rowKey("notification", key) },
+                    )
+                },
         )
+
+    private fun rowKey(
+        kind: String,
+        key: dev.dimension.flare.feature.plugin.wire.EntityKeyV1,
+    ): MicroBlogKey = MicroBlogKey("plugin:$pluginId:$kind:${key.id}", key.host)
+
+    private fun message(value: MessageV1): UiTimelineV2.Message =
+        UiTimelineV2.Message(
+            user = value.actor?.let(::profile),
+            statusKey = rowKey("message", value.key),
+            icon = value.icon.toUiIcon(),
+            type =
+                when {
+                    value.text != null -> {
+                        UiTimelineV2.Message.Type.Raw(value.text)
+                    }
+
+                    value.kind != null -> {
+                        UiTimelineV2.Message.Type.Localized(
+                            UiTimelineV2.Message.Type.Localized.MessageId
+                                .valueOf(value.kind.name),
+                            value.args.toImmutableList(),
+                        )
+                    }
+
+                    else -> {
+                        UiTimelineV2.Message.Type.Unknown(requireNotNull(value.unknownType))
+                    }
+                },
+            createdAt = Instant.parse(value.createdAt).toUi(),
+            clickEvent = value.target?.let(::target) ?: value.actor?.let(::profile)?.clickEvent ?: ClickEvent.Noop,
+            accountType = accountType,
+        )
+
+    fun user(value: TimelineUserV1): UiTimelineV2.User {
+        val row = rowKey("user", value.key)
+        return UiTimelineV2.User(
+            message = value.message?.let(::message),
+            value = profile(value.profile),
+            createdAt = Instant.parse(value.createdAt).toUi(),
+            statusKey = row,
+            button = userButtons(value.buttons, row, value.profile.key.toMicroBlogKey()),
+            accountType = accountType,
+        )
+    }
+
+    fun userButtons(
+        actions: List<ActionDescriptorV1>,
+        row: MicroBlogKey,
+        profile: MicroBlogKey,
+    ) = actions
+        .map { action ->
+            val enabled = action.enabled && accountKey != null && capabilities.hasOperation(PluginAbiV1.Capabilities.RELATION, "mutate")
+            ActionMenu.Item(
+                icon = action.action.toUiIcon(),
+                text = ActionMenu.Item.Text.Raw(requireNotNull(action.label)),
+                enabled = enabled,
+                count = action.count?.let(::UiNumber),
+                color =
+                    ActionMenu.Item.Color.PrimaryColor
+                        .takeIf { action.active == true },
+                clickEvent =
+                    if (enabled) {
+                        ClickEvent.event(
+                            accountKey,
+                            PostEvent.PluginAction(
+                                postKey = row,
+                                entityKey = profile,
+                                action = action.action.name,
+                                actionToken = action.actionToken,
+                                profileAction = true,
+                            ),
+                        )
+                    } else {
+                        ClickEvent.Noop
+                    },
+            )
+        }.toImmutableList()
+
+    private fun target(value: NavigationTargetV1): ClickEvent {
+        val route =
+            when (value) {
+                is NavigationTargetV1.Link -> {
+                    DeeplinkRoute.OpenLinkDirectly(value.url)
+                }
+
+                is NavigationTargetV1.Post -> {
+                    DeeplinkRoute.Status
+                        .Detail(value.key.toMicroBlogKey(), accountType)
+                        .takeIf { capabilities.canExpose(PluginAbiV1.Capabilities.POST) }
+                }
+
+                is NavigationTargetV1.Profile -> {
+                    DeeplinkRoute.Profile
+                        .User(accountType, value.key.toMicroBlogKey())
+                        .takeIf { capabilities.canExpose(PluginAbiV1.Capabilities.PROFILE) }
+                }
+
+                is NavigationTargetV1.Article -> {
+                    DeeplinkRoute
+                        .Article(accountType, value.key.toMicroBlogKey())
+                        .takeIf { capabilities.canExpose(PluginAbiV1.Capabilities.ARTICLE) }
+                }
+
+                is NavigationTargetV1.Gallery -> {
+                    DeeplinkRoute.Gallery
+                        .Detail(value.key.toMicroBlogKey(), accountType)
+                        .takeIf { capabilities.canExpose(PluginAbiV1.Capabilities.GALLERY) }
+                }
+            }
+        return route?.let { ClickEvent.Deeplink(it) } ?: ClickEvent.Noop
     }
 
     fun hashtag(value: HashtagV1): UiHashtag {
@@ -225,7 +411,7 @@ internal class PluginWireMapperV1(
 
     fun gallery(value: GalleryV1): GalleryDetail {
         value.url.requireHttpsUrl()
-        val images = value.images.mapNotNull { it.toUi(value.actions.any { action -> action.active == true }) as? UiMedia.Image }
+        val images = value.images.map { it.toUi(value.actions.any { action -> action.active == true }) }
         val bookmark =
             value.actions.firstOrNull {
                 it.action == SemanticActionV1.Bookmark || it.action == SemanticActionV1.Unbookmark
@@ -263,27 +449,6 @@ internal class PluginWireMapperV1(
         )
     }
 
-    fun notification(value: NotificationV1): UiTimelineV2 {
-        val key = MicroBlogKey(value.id, originHost)
-        val actor = value.actor?.let(::profile)
-        val message =
-            UiTimelineV2.Message(
-                user = actor,
-                statusKey = key,
-                icon = value.kind.toUiIcon(),
-                type =
-                    value.message?.let { UiTimelineV2.Message.Type.Raw(it.toUi().raw) }
-                        ?: value.kind.toMessageType(),
-                createdAt = Instant.parse(value.createdAt).toUi(),
-                clickEvent = actor?.clickEvent ?: ClickEvent.Noop,
-                accountType = accountType,
-            )
-        return value.post?.let { content ->
-            val item = post(content)
-            item.copy(presentation = item.presentation.copy(message = message, notificationKey = key))
-        } ?: message
-    }
-
     private fun PostV1.toUiPost(): UiTimelineV2.Post {
         val key = key.toMicroBlogKey()
         val detailRoute =
@@ -317,10 +482,12 @@ internal class PluginWireMapperV1(
         val resolvedUrl = url ?: "https://${key.host}/"
         val directActions = mutableListOf<ActionMenu>()
         val overflow = mutableListOf<ActionMenu>()
-        actions.filter { it.enabled }.forEach { descriptor ->
+        actions.forEach { descriptor ->
             val semantic = descriptor.toSemanticPostAction()
-            if (semantic != null && accountKey != null && capabilities.hasOperation(PluginAbiV1.Capabilities.POST, "mutate")) {
-                directActions += semanticPostActionMenu(key, semantic, descriptor.actionToken, descriptor.count ?: 0, accountKey)
+            if (semantic != null) {
+                val enabled = descriptor.enabled && accountKey != null && capabilities.hasOperation(PluginAbiV1.Capabilities.POST, "mutate")
+                val item = semanticPostActionMenu(key, semantic, descriptor.actionToken, descriptor.count ?: 0, accountKey)
+                directActions += item.copy(enabled = enabled, clickEvent = if (enabled) item.clickEvent else ClickEvent.Noop)
             } else if (descriptor.action == SemanticActionV1.Reply && capabilities.canExpose(PluginAbiV1.Capabilities.COMPOSE) &&
                 accountKey != null
             ) {
@@ -328,7 +495,15 @@ internal class PluginWireMapperV1(
                     ActionMenu.Item(
                         icon = UiIcon.Reply,
                         text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Reply),
-                        clickEvent = ClickEvent.Deeplink(DeeplinkRoute.Compose.Reply(accountKey, key)),
+                        enabled = descriptor.enabled,
+                        clickEvent =
+                            if (descriptor.enabled) {
+                                ClickEvent.Deeplink(
+                                    DeeplinkRoute.Compose.Reply(accountKey, key),
+                                )
+                            } else {
+                                ClickEvent.Noop
+                            },
                         actionFamily = PostActionFamily.Reply,
                     )
             } else if (descriptor.action == SemanticActionV1.Delete && accountKey != null &&
@@ -339,7 +514,15 @@ internal class PluginWireMapperV1(
                         icon = UiIcon.Delete,
                         text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Delete),
                         color = ActionMenu.Item.Color.Red,
-                        clickEvent = ClickEvent.Deeplink(DeeplinkRoute.Status.DeleteConfirm(key, accountType)),
+                        enabled = descriptor.enabled,
+                        clickEvent =
+                            if (descriptor.enabled) {
+                                ClickEvent.Deeplink(
+                                    DeeplinkRoute.Status.DeleteConfirm(key, accountType),
+                                )
+                            } else {
+                                ClickEvent.Noop
+                            },
                         actionFamily = PostActionFamily.Delete,
                     )
             }
@@ -374,18 +557,72 @@ internal class PluginWireMapperV1(
             platformIcon = platformIcon,
             content = UiTranslatableText(content.toUi()),
             actions = directActions.toPersistentList(),
-            poll = null,
+            poll =
+                poll?.let { poll ->
+                    val total = poll.options.sumOf { it.votesCount.toDouble() }
+                    UiPoll(
+                        id = poll.id,
+                        options =
+                            poll.options
+                                .map {
+                                    UiPoll.Option(it.title, it.votesCount, if (total == 0.0) 0f else (it.votesCount / total).toFloat())
+                                }.toImmutableList(),
+                        multiple = poll.multiple,
+                        ownVotes = poll.ownVotes.toImmutableList(),
+                        voteEvent = accountKey?.let { PostEvent.PluginVote(key, it, persistentListOf(), poll.actionToken) },
+                        expiresAt = poll.expiresAt?.let(Instant::parse),
+                        enabled = poll.enabled && accountKey != null && capabilities.hasOperation(PluginAbiV1.Capabilities.POST, "mutate"),
+                    )
+                },
             statusKey = key,
-            card = null,
+            card = card?.let { UiCard(it.title, it.description, it.media?.toUi(sensitive), it.url) },
+            sourceLanguages = sourceLanguages.toImmutableList(),
+            sourceChannel = sourceChannel?.let { UiTimelineV2.Post.SourceChannel(it.id, it.name) },
+            replyToHandle = replyToHandle,
+            emojiReactions =
+                emojiReactions
+                    .map { reaction ->
+                        requireMediaUrl(reaction.url)
+                        UiTimelineV2.Post.EmojiReaction(
+                            name = reaction.name,
+                            url = reaction.url.orEmpty(),
+                            count = UiNumber(reaction.count),
+                            isUnicode = reaction.isUnicode,
+                            me = reaction.me,
+                            proxy = mediaProxy,
+                            clickEvent =
+                                if (reaction.enabled && capabilities.hasOperation(PluginAbiV1.Capabilities.POST, "mutate")) {
+                                    ClickEvent.event(
+                                        accountKey,
+                                        PostEvent.PluginAction(
+                                            key,
+                                            key,
+                                            (if (reaction.me) SemanticActionV1.Unreact else SemanticActionV1.React).name,
+                                            reaction.actionToken,
+                                            mapOf("reaction" to reaction.name),
+                                        ),
+                                    )
+                                } else {
+                                    ClickEvent.Noop
+                                },
+                        )
+                    }.toImmutableList(),
             createdAt = Instant.parse(createdAt).toUi(),
             visibility = visibility?.toUiVisibility(),
             references =
-                replyTo
-                    ?.toMicroBlogKey()
-                    ?.let { UiTimelineV2.Post.Reference(it, ReferenceType.Reply) }
-                    ?.let(::listOf)
-                    .orEmpty()
-                    .toPersistentList(),
+                (
+                    references.map {
+                        UiTimelineV2.Post.Reference(
+                            it.key.toMicroBlogKey(),
+                            when (it.type) {
+                                PostReferenceTypeV1.Reply -> ReferenceType.Reply
+                                PostReferenceTypeV1.Quote -> ReferenceType.Quote
+                                PostReferenceTypeV1.Repost -> ReferenceType.Retweet
+                            },
+                        )
+                    } + listOfNotNull(replyTo?.let { UiTimelineV2.Post.Reference(it.toMicroBlogKey(), ReferenceType.Reply) })
+                ).distinct()
+                    .toImmutableList(),
             clickEvent = detailRoute?.let { ClickEvent.Deeplink(it) } ?: ClickEvent.Noop,
             mediaClickPolicy =
                 if (detailType == PostDetailTypeV1.Post) {
@@ -420,6 +657,8 @@ internal class PluginWireMapperV1(
     private fun MediaV1.toUi(sensitive: Boolean): UiMedia {
         requireMediaUrl(url)
         requireMediaUrl(previewUrl)
+        requireMediaUrl(downloadUrl)
+        requireMediaUrl(originalFrameUrl)
         return when (type) {
             MediaTypeV1.Image -> {
                 UiMedia.Image(
@@ -433,11 +672,33 @@ internal class PluginWireMapperV1(
             }
 
             MediaTypeV1.Video -> {
-                UiMedia.Video(url, previewUrl ?: url, description, height?.toFloat() ?: 0f, width?.toFloat() ?: 0f)
+                UiMedia.Video(
+                    url,
+                    previewUrl ?: url,
+                    description,
+                    height?.toFloat() ?: 0f,
+                    width?.toFloat() ?: 0f,
+                    downloadUrl = downloadUrl,
+                )
             }
 
             MediaTypeV1.Gif -> {
                 UiMedia.Gif(url, previewUrl ?: url, description, height?.toFloat() ?: 0f, width?.toFloat() ?: 0f)
+            }
+
+            MediaTypeV1.Ugoira -> {
+                capabilities.requireOperation(PluginAbiV1.Capabilities.GALLERY, "ugoiraMetadata")
+                UiMedia.Ugoira(
+                    requireNotNull(ugoiraKey).toMicroBlogKey(),
+                    requireNotNull(accountKey) { "Ugoira requires an account" },
+                    requireNotNull(previewUrl),
+                    originalFrameUrl,
+                    description,
+                    height?.toFloat() ?: 0f,
+                    width?.toFloat() ?: 0f,
+                    sensitive,
+                    sourceUrl = url,
+                )
             }
 
             MediaTypeV1.Audio -> {
@@ -460,6 +721,7 @@ private fun VisibilityV1.toUiVisibility(): UiTimelineV2.Post.Visibility =
         VisibilityV1.Unlisted -> UiTimelineV2.Post.Visibility.Home
         VisibilityV1.Followers -> UiTimelineV2.Post.Visibility.Followers
         VisibilityV1.Direct -> UiTimelineV2.Post.Visibility.Specified
+        VisibilityV1.Channel -> UiTimelineV2.Post.Visibility.Channel
     }
 
 private fun dev.dimension.flare.feature.plugin.wire.ActionDescriptorV1.toSemanticPostAction(): SemanticPostAction? =
@@ -499,37 +761,13 @@ private fun SemanticActionV1.toUiIcon(): UiIcon? =
         SemanticActionV1.Unblock,
         -> UiIcon.Block
 
+        SemanticActionV1.Vote, SemanticActionV1.React, SemanticActionV1.Unreact -> UiIcon.Heart
+
+        SemanticActionV1.AcceptFollowRequest, SemanticActionV1.RejectFollowRequest -> UiIcon.Follow
+
         SemanticActionV1.Mute,
         SemanticActionV1.Unmute,
         -> UiIcon.Mute
-    }
-
-private fun NotificationKindV1.toMessageType(): UiTimelineV2.Message.Type {
-    val id =
-        when (this) {
-            NotificationKindV1.Mention -> UiTimelineV2.Message.Type.Localized.MessageId.Mention
-            NotificationKindV1.Reply -> UiTimelineV2.Message.Type.Localized.MessageId.Reply
-            NotificationKindV1.Favourite -> UiTimelineV2.Message.Type.Localized.MessageId.Favourite
-            NotificationKindV1.Repost -> UiTimelineV2.Message.Type.Localized.MessageId.Repost
-            NotificationKindV1.Follow -> UiTimelineV2.Message.Type.Localized.MessageId.Follow
-            NotificationKindV1.Other -> return UiTimelineV2.Message.Type.Raw("")
-        }
-    return UiTimelineV2.Message.Type.Localized(id)
-}
-
-private fun NotificationKindV1.toUiIcon(): UiIcon =
-    when (this) {
-        NotificationKindV1.Mention,
-        NotificationKindV1.Reply,
-        -> UiIcon.Reply
-
-        NotificationKindV1.Favourite -> UiIcon.Heart
-
-        NotificationKindV1.Repost -> UiIcon.Retweet
-
-        NotificationKindV1.Follow -> UiIcon.Follow
-
-        NotificationKindV1.Other -> UiIcon.Notification
     }
 
 private fun String?.requireHttpsUrl() {

@@ -130,7 +130,11 @@ internal fun UiTimelineV2.Post.filterPluginMedia(owner: String?): UiTimelineV2.P
                 )
             },
         card = card?.copy(media = card.media?.takeIf { it.allowedForPlugin(owner) }),
-        emojiReactions = emojiReactions.filter { PluginMediaPermissions.isAllowed(owner) && it.url.isSafePluginUrl() }.toImmutableList(),
+        emojiReactions =
+            emojiReactions
+                .filter {
+                    it.isUnicode || (PluginMediaPermissions.isAllowed(owner) && it.url.isSafePluginUrl())
+                }.toImmutableList(),
     )
 }
 

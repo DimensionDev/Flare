@@ -20,7 +20,7 @@ function merge(base, patch) {
 }
 
 test("draft-07 schema validates canonical manifests and every editor regression", (t) => {
-  for (const path of ["assets/github-template/manifest.json", "examples/pixelfed/manifest.json"]) {
+  for (const path of ["assets/github-template/manifest.json", "examples/pixelfed/manifest.json", "examples/timeline-showcase/manifest.json"]) {
     assert.equal(validate(JSON.parse(readFileSync(new URL(path, sdk), "utf8"))), true, JSON.stringify(validate.errors));
   }
   for (const fixture of fixtures.cases) {

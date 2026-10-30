@@ -13,14 +13,19 @@ import dev.dimension.flare.data.database.cache.TimelineRevisionCallback
 import dev.dimension.flare.data.database.cache.mapper.saveToDatabase
 import dev.dimension.flare.data.database.cache.model.TranslationDisplayOptions
 import dev.dimension.flare.data.database.createDatabaseDriver
+import dev.dimension.flare.data.datasource.microblog.ActionMenu
+import dev.dimension.flare.data.datasource.microblog.PostEvent
 import dev.dimension.flare.memoryDatabaseBuilder
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.ReferenceType
 import dev.dimension.flare.ui.model.ClickEvent
+import dev.dimension.flare.ui.model.UiHandle
 import dev.dimension.flare.ui.model.UiIcon
+import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.UiTranslatableText
+import dev.dimension.flare.ui.model.postEventOrNull
 import dev.dimension.flare.ui.render.toUi
 import dev.dimension.flare.ui.render.toUiPlainText
 import kotlinx.collections.immutable.persistentListOf
@@ -56,6 +61,101 @@ class NotificationTimelineTest : RobolectricTest() {
     fun teardown() {
         database.close()
     }
+
+    @Test
+    fun mixedPluginItemsAndInteractiveButtonsSurviveDatabaseHydration() =
+        runTest {
+            val profile =
+                UiProfile(
+                    MicroBlogKey("alice", "example.com"),
+                    UiHandle("alice", "example.com"),
+                    avatar = null,
+                    nameInternal = "Alice".toUiPlainText(),
+                    platformId = "test",
+                    clickEvent = ClickEvent.Noop,
+                    banner = null,
+                    description = null,
+                    matrices = UiProfile.Matrices(0, 0, 0),
+                    mark = persistentListOf(),
+                    bottomContent = null,
+                )
+            val target = post("target")
+            val message = notification("message", target).presentation.message!!
+            val rowKey = MicroBlogKey("plugin:test:user:alice", "example.com")
+            val event = PostEvent.PluginAction(rowKey, profile.key, "Follow", "follow-token", profileAction = true)
+            val button = ActionMenu.Item(text = ActionMenu.Item.Text.Raw("Follow"), clickEvent = ClickEvent.event(profile.key, event))
+            val user = UiTimelineV2.User(message, profile, target.createdAt, rowKey, persistentListOf(button), target.accountType)
+            val feed =
+                UiTimelineV2.Feed(
+                    "Title",
+                    "Description",
+                    "<p>Description</p>",
+                    "https://example.com/feed",
+                    createdAt = target.createdAt,
+                    source = UiTimelineV2.Feed.Source("Source", null),
+                    media = null,
+                    clickEvent = ClickEvent.Noop,
+                    accountType = target.accountType,
+                )
+            val list =
+                UiTimelineV2.UserList(
+                    message,
+                    persistentListOf(profile),
+                    target.createdAt,
+                    MicroBlogKey("plugin:test:userList:alice", "example.com"),
+                    target,
+                    target.accountType,
+                )
+            val items = listOf(notification("first", target), notification("second", target), feed, user, list, message)
+            saveToDatabase(database, TimelinePagingMapper.toDb(items, pagingKey))
+            val dao = database.pagingTimelineDao()
+
+            fun rootType(item: UiTimelineV2) = item::class
+            val restored = dao.getTimelinePage(pagingKey, 0, 20).map { TimelinePagingMapper.toUi(it, pagingKey, options) }
+            assertEquals(items.map(::rootType).toSet(), restored.map(::rootType).toSet())
+            assertEquals(items.size, restored.map { it.stableItemKey }.distinct().size)
+            val restoredUser = restored.filterIsInstance<UiTimelineV2.User>().single()
+            assertEquals(
+                event,
+                restoredUser.button
+                    .single()
+                    .clickEvent
+                    .postEventOrNull()!!
+                    .postEvent,
+            )
+            assertEquals(
+                target.statusKey,
+                restored
+                    .filterIsInstance<UiTimelineV2.UserList>()
+                    .single()
+                    .post!!
+                    .statusKey,
+            )
+            assertEquals("<p>Description</p>", restored.filterIsInstance<UiTimelineV2.Feed>().single().descriptionHtml)
+
+            val updated = target.copy(content = UiTranslatableText("Authoritative update".toUiPlainText()))
+            saveToDatabase(database, listOf(TimelinePagingMapper.toDb(updated, "home")))
+            val refreshed = dao.getTimelinePage(pagingKey, 0, 20).map { TimelinePagingMapper.toUi(it, pagingKey, options) }
+            assertTrue(
+                refreshed.filterIsInstance<UiTimelineV2.TimelinePostItem>().all { it.post.content.original.raw == "Authoritative update" },
+            )
+            assertEquals(
+                2,
+                refreshed
+                    .filterIsInstance<UiTimelineV2.TimelinePostItem>()
+                    .map { it.presentation.notificationKey }
+                    .distinct()
+                    .size,
+            )
+            assertEquals(
+                "Authoritative update",
+                refreshed
+                    .filterIsInstance<UiTimelineV2.UserList>()
+                    .single()
+                    .post!!
+                    .content.original.raw,
+            )
+        }
 
     @Test
     fun repliesKeepApiOrderAndOnlyExplicitParents() =

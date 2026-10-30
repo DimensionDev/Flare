@@ -20,6 +20,12 @@ The manifest explicitly requests `mediaNetwork` so avatars and federated/CDN
 images can load. Installation review discloses that media destinations may
 receive this plugin's account data.
 
+Timeline pages use the `TimelineItemV1` union. Reblogs are post entries with
+`presentation.repost`; detail returns `{ post, presentation? }`. Published posts
+and mutation results remain `PostV1` entities. The
+[offline mixed showcase](../timeline-showcase/README.md) demonstrates non-post
+items and interactive polls, reactions and user rows.
+
 ## Develop locally in Desktop
 
 In Settings > Plugins > Plugin development, select this directory and start

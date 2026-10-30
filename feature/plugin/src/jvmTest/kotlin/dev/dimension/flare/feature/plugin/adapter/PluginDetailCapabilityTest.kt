@@ -21,6 +21,7 @@ import dev.dimension.flare.feature.plugin.lifecycle.PluginStateStore
 import dev.dimension.flare.feature.plugin.lifecycle.RunningPluginV1
 import dev.dimension.flare.feature.plugin.runtime.PluginCallException
 import dev.dimension.flare.feature.plugin.runtime.PluginRuntimePool
+import dev.dimension.flare.feature.plugin.runtime.PluginRuntimeUnavailableException
 import dev.dimension.flare.feature.plugin.wire.EntityKeyV1
 import dev.dimension.flare.feature.plugin.wire.LoginSuccessV1
 import dev.dimension.flare.feature.plugin.wire.PluginAccountCredentialV1
@@ -28,11 +29,14 @@ import dev.dimension.flare.feature.plugin.wire.ProfileV1
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformDataSourceContext
+import dev.dimension.flare.ui.model.ClickContext
 import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiDMItem
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.UriLauncher
 import dev.dimension.flare.ui.model.postEventOrNull
 import dev.dimension.flare.ui.route.DeeplinkRoute
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -54,12 +58,16 @@ import okio.Path
 import okio.Path.Companion.toOkioPath
 import okio.SYSTEM
 import java.nio.file.Files
+import java.nio.file.Paths
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
 import kotlin.test.assertIs
+import kotlin.test.assertNotEquals
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class PluginDetailCapabilityTest {
@@ -82,6 +90,178 @@ class PluginDetailCapabilityTest {
             runtimePool.close()
             fileSystem.deleteRecursively(root, mustExist = false)
         }
+
+    @Test
+    fun showcaseRoundTripsMixedItemsAndRoutesPollAndReactionClicksThroughTheRuntime() =
+        runBlocking {
+            val source = authenticated(installShowcase())
+            val items = source.timeline("home").load(20, PagingRequest.Refresh).data
+            assertEquals(6, items.size)
+            assertIs<UiTimelineV2.Feed>(items[1])
+            assertIs<UiTimelineV2.User>(items[2])
+            assertIs<UiTimelineV2.UserList>(items[3])
+            assertIs<UiTimelineV2.Message>(items[4])
+            val original = assertIs<UiTimelineV2.TimelinePostItem>(items.first())
+            assertEquals(1, original.presentation.inlineParents.size)
+            val notifications =
+                source.capabilitySet.notification!!
+                    .timeline!!
+                    .notification()
+                    .load(20, PagingRequest.Refresh)
+                    .data
+            assertEquals(1, notifications.map { it.statusKey }.distinct().size)
+            assertEquals(2, notifications.map { assertIs<UiTimelineV2.TimelinePostItem>(it).presentation.notificationKey }.distinct().size)
+
+            var click: PostEvent? = null
+            original.post.poll!!.onVote.invoke(
+                ClickContext(
+                    UriLauncher {
+                        click = ClickEvent.Deeplink(it).postEventOrNull()!!.postEvent
+                    },
+                ),
+                persistentListOf(1),
+            )
+            val vote = assertIs<PostEvent.PluginVote>(click)
+            assertEquals("Vote:0", vote.actionToken)
+            val updater = RecordingDatabaseUpdater(original.post)
+            source.postMutationHandler.handle(vote, updater)
+            val voted = assertIs<UiTimelineV2.Post>(updater.current)
+            assertEquals(listOf(1), voted.poll!!.ownVotes)
+            assertEquals(4, voted.poll!!.options[1].votesCount)
+            assertFalse(voted.poll!!.canVote)
+            assertFailsWith<PluginCallException> { source.postMutationHandler.handle(vote, updater) }
+            assertEquals(voted, updater.current)
+            assertEquals(1, updater.updates)
+
+            val react =
+                assertIs<PostEvent.PluginAction>(
+                    voted.emojiReactions
+                        .single()
+                        .clickEvent
+                        .postEventOrNull()!!
+                        .postEvent,
+                )
+            assertEquals("React:1", react.actionToken)
+            source.postMutationHandler.handle(react, updater)
+            val reacted = assertIs<UiTimelineV2.Post>(updater.current)
+            assertTrue(reacted.emojiReactions.single().me)
+            assertNotEquals(voted.renderHash, reacted.renderHash)
+            val unreact =
+                assertIs<PostEvent.PluginAction>(
+                    reacted.emojiReactions
+                        .single()
+                        .clickEvent
+                        .postEventOrNull()!!
+                        .postEvent,
+                )
+            assertEquals("Unreact:2", unreact.actionToken)
+            source.postMutationHandler.handle(unreact, updater)
+            assertFalse(assertIs<UiTimelineV2.Post>(updater.current).emojiReactions.single().me)
+        }
+
+    @Test
+    fun followRequestActionsUseProfileKeysAndRemoveOnlyTheirOwnRowsWithoutPostCapability() =
+        runBlocking {
+            val source = authenticated(installShowcase(), unavailableCapabilities = setOf(PluginAbiV1.Capabilities.POST))
+            assertTrue(source.capabilitySet.post != null)
+            val items = source.timeline("home").load(20, PagingRequest.Refresh).data
+            assertEquals(ClickEvent.Noop, assertIs<UiTimelineV2.TimelinePostItem>(items.first()).post.clickEvent)
+            val row = assertIs<UiTimelineV2.User>(items.last())
+            val accept =
+                assertIs<PostEvent.PluginAction>(
+                    row.button
+                        .first()
+                        .clickEvent
+                        .postEventOrNull()!!
+                        .postEvent,
+                )
+            assertEquals("alice", accept.entityKey.id)
+            assertNotEquals(accept.postKey, accept.entityKey)
+            val updater = RecordingDatabaseUpdater(row)
+            source.postMutationHandler.handle(accept, updater)
+            assertNull(updater.current)
+            assertEquals(listOf(row.statusKey), updater.deleted)
+            assertEquals(
+                5,
+                source
+                    .timeline("home")
+                    .load(20, PagingRequest.Refresh)
+                    .data.size,
+            )
+        }
+
+    @Test
+    fun profileActionsRejectMismatchedResultsBeforeUpdatingTheCache() =
+        runBlocking {
+            val source =
+                authenticated(
+                    installShowcase {
+                        it.replace(
+                            "return { type: \"deleted\" };",
+                            "return { type: \"updatedProfile\", profile: profile(\"unrelated\", context) };",
+                        )
+                    },
+                )
+            val row =
+                assertIs<UiTimelineV2.User>(
+                    source
+                        .timeline("home")
+                        .load(20, PagingRequest.Refresh)
+                        .data
+                        .last(),
+                )
+            val updater = RecordingDatabaseUpdater(row)
+            val action =
+                row.button
+                    .first()
+                    .clickEvent
+                    .postEventOrNull()!!
+                    .postEvent
+            assertFailsWith<PluginRuntimeUnavailableException> { source.postMutationHandler.handle(action, updater) }
+            assertEquals(0, updater.updates)
+            assertEquals(row, updater.current)
+        }
+
+    @Test
+    fun optionalUgoiraMetadataUsesTheGalleryCapabilityAndValidatesFramesAndMediaPermission() =
+        runBlocking<Unit> {
+            val manifest =
+                MANIFEST.replace(
+                    "\"recommendations\": { \"directions\": [\"refresh\"] }",
+                    "\"recommendations\": { \"directions\": [\"refresh\"] }, \"ugoiraMetadata\": {}",
+                )
+            val script =
+                SCRIPT.replace(
+                    "gallery: {",
+                    "gallery: { ugoiraMetadata() { return { zipUrl: 'https://plugin.example/frames.zip', frames: [{ file: '0.jpg', delayMillis: 100 }] }; },",
+                )
+            val key = MicroBlogKey("animation", "plugin.example")
+            val gallery = authenticated(install(manifest, script)).capabilitySet.gallery!!
+            assertEquals(
+                "0.jpg",
+                gallery
+                    .ugoiraMetadata(key)
+                    .frames
+                    .single()
+                    .file,
+            )
+            val invalid = authenticated(install(manifest, script.replace("0.jpg", "../0.jpg"))).capabilitySet.gallery!!
+            assertFailsWith<PluginRuntimeUnavailableException> { invalid.ugoiraMetadata(key) }
+            val denied =
+                authenticated(
+                    install(manifest.replace("\"mediaNetwork\": true", "\"mediaNetwork\": false"), script),
+                ).capabilitySet.gallery!!
+            assertFailsWith<IllegalArgumentException> { denied.ugoiraMetadata(key) }
+        }
+
+    private suspend fun installShowcase(transform: (String) -> String = { it }): RunningPluginV1 {
+        val sample =
+            sequenceOf(
+                Paths.get("sdk/skill/flare-plugin/examples/timeline-showcase"),
+                Paths.get("feature/plugin/sdk/skill/flare-plugin/examples/timeline-showcase"),
+            ).first { Files.exists(it.resolve("manifest.json")) }
+        return install(Files.readString(sample.resolve("manifest.json")), transform(Files.readString(sample.resolve("plugin.js"))))
+    }
 
     @Test
     fun partialCapabilitiesKeepHostEntrypointsAndMappedRoutesConsistent() =
@@ -608,7 +788,8 @@ class PluginDetailCapabilityTest {
         return PluginStateStore
             .open(fileSystem, namespace)
             .running.plugins
-            .getValue(PLUGIN_ID)
+            .values
+            .single()
     }
 }
 
@@ -700,7 +881,7 @@ private const val SCRIPT =
       return value;
     }
     defineFlareSocialPlugin({ capabilities: {
-      post: { detail(request) { return post(request.key.id); } },
+      post: { detail(request) { return { post: post(request.key.id) }; } },
       list: {
         page() { return { items: [] }; },
         $LIST_DETAIL
@@ -747,9 +928,9 @@ private const val SCRIPT =
       timeline: {
         page(request) {
           if (request.timelineId !== "dynamic-feed") throw new Error("bad timeline");
-          if (request.parameters.kind === "details") return { items: [post("default"), post("post", "post"), post("article", "article"), post("gallery", "gallery"), post("link", "link")] };
+          if (request.parameters.kind === "details") return { items: [post("default"), post("post", "post"), post("article", "article"), post("gallery", "gallery"), post("link", "link")].map(post => ({ type: "post", post })) };
           if (request.parameters.kind !== "photos") throw new Error("bad timeline");
-          return { items: [{ key: { id: "post-1", host: "plugin.example" }, author: profile, createdAt: "2026-01-01T00:00:00Z", content: { value: "Dynamic" } }] };
+          return { items: [{ type: "post", post: { key: { id: "post-1", host: "plugin.example" }, author: profile, createdAt: "2026-01-01T00:00:00Z", content: { value: "Dynamic" } } }] };
         },
       },
       tabCatalog: {
@@ -761,17 +942,27 @@ private const val SCRIPT =
 private const val PLUGIN_ID = "dev.dimension.flare.test.detail"
 private const val ORIGIN = "https://plugin.example"
 
-private class RecordingDatabaseUpdater : DatabaseUpdater {
+private class RecordingDatabaseUpdater(
+    var current: UiTimelineV2? = null,
+) : DatabaseUpdater {
     var updates = 0
+    val deleted = mutableListOf<MicroBlogKey>()
 
     override suspend fun updateCache(
         postKey: MicroBlogKey,
         update: suspend (UiTimelineV2) -> UiTimelineV2,
     ) {
+        current?.let {
+            assertEquals(it.statusKey, postKey)
+            current = update(it)
+        }
         updates++
     }
 
     override suspend fun deleteFromCache(postKey: MicroBlogKey) {
+        current?.let { assertEquals(it.statusKey, postKey) }
+        current = null
+        deleted += postKey
         updates++
     }
 

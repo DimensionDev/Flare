@@ -83,8 +83,7 @@ public fun ProfileV1.requireValid() {
     actions.requireValid()
 }
 
-public fun PostV1.requireValid(depth: Int = 0) {
-    require(depth <= 4) { "Post nesting is too deep" }
+public fun PostV1.requireValid() {
     key.requireValid()
     author?.requireValid()
     createdAt.requireTimestamp()
@@ -92,7 +91,6 @@ public fun PostV1.requireValid(depth: Int = 0) {
     url.requireHttpsUrl(required = detailType == PostDetailTypeV1.Link)
     require(media.size <= 100) { "Too many media items" }
     media.forEach(MediaV1::requireValid)
-    repost?.requireValid(depth + 1)
     replyTo?.requireValid()
     require(spoilerText == null || spoilerText.length <= WireLimitsV1.MAX_RICH_TEXT_LENGTH) { "Post spoiler is too long" }
     listOf(favouritesCount, repostsCount, repliesCount).filterNotNull().forEach {
@@ -102,6 +100,26 @@ public fun PostV1.requireValid(depth: Int = 0) {
         "Post entity token is too large"
     }
     actions.requireValid()
+    sourceLanguages.requireLanguages()
+    require(replyToHandle == null || replyToHandle.length <= 512) { "Reply handle is too long" }
+    require(references.size <= 100) { "Too many references" }
+    references.forEach { it.key.requireValid() }
+    sourceChannel?.let {
+        require(it.id.isNotBlank() && it.id.length <= 512 && it.name.length <= 1_024) { "Invalid source channel" }
+    }
+    card?.let {
+        require(it.title.length <= 16_384 && (it.description?.length ?: 0) <= WireLimitsV1.MAX_RICH_TEXT_LENGTH) { "Invalid card" }
+        it.url.requireHttpsUrl(required = true)
+        it.media?.requireValid()
+    }
+    poll?.requireValid()
+    require(emojiReactions.size <= 100) { "Too many reactions" }
+    require(emojiReactions.map { it.name }.distinct().size == emojiReactions.size) { "Duplicate reaction" }
+    emojiReactions.forEach {
+        require(it.name.isNotBlank() && it.name.length <= 512 && it.count >= 0) { "Invalid reaction" }
+        it.url.requireHttpsUrl(required = !it.isUnicode)
+        it.actionToken.requireActionToken()
+    }
 }
 
 public fun HashtagV1.requireValid() {
@@ -113,14 +131,6 @@ public fun RelationV1.requireValid() {
     profileKey.requireValid()
     require(actionTokens.size <= SemanticActionV1.entries.size) { "Too many relation action tokens" }
     require(actionTokens.values.all { it.length <= WireLimitsV1.MAX_ACTION_TOKEN_LENGTH }) { "Relation action token is too large" }
-}
-
-public fun NotificationV1.requireValid() {
-    require(id.isNotBlank() && id.length <= WireLimitsV1.MAX_ID_LENGTH) { "Invalid notification ID" }
-    createdAt.requireTimestamp()
-    actor?.requireValid()
-    post?.requireValid()
-    message?.requireValid()
 }
 
 public fun SocialListV1.requireValid() {
@@ -174,10 +184,7 @@ public fun GalleryV1.requireValid() {
     content?.requireValid()
     url.requireHttpsUrl(required = true)
     require(images.isNotEmpty() && images.size <= 100) { "Invalid gallery image count" }
-    images.forEach { media ->
-        require(media.type == MediaTypeV1.Image) { "Gallery media must be an image" }
-        media.requireValid()
-    }
+    images.forEach(MediaV1::requireValid)
     require(entityToken == null || entityToken.length <= WireLimitsV1.MAX_ENTITY_TOKEN_LENGTH) {
         "Gallery entity token is too large"
     }
@@ -205,6 +212,8 @@ public fun MutationResultV1.requireValid() {
 
         is MutationResultV1.UpdatedProfile -> {
             profile.requireValid()
+            relation?.requireValid()
+            require(relation == null || relation.profileKey == profile.key) { "Profile relation identity mismatch" }
         }
 
         is MutationResultV1.UpdatedRelation -> {
@@ -376,36 +385,45 @@ public fun EntityKeyV1.requireValid() {
     PluginUrlPolicy.requireOrigin("https://$host")
 }
 
-private fun RichTextV1.requireValid() {
+internal fun RichTextV1.requireValid() {
     require(value.length <= WireLimitsV1.MAX_RICH_TEXT_LENGTH) { "Rich text is too large" }
     if (format == RichTextFormatV1.Html) validatedHtml()
 }
 
-private fun MediaV1.requireValid() {
+internal fun MediaV1.requireValid() {
     require(id.isNotBlank() && id.length <= WireLimitsV1.MAX_ID_LENGTH) { "Invalid media ID" }
     url.requireHttpsUrl(required = true)
     previewUrl.requireHttpsUrl()
+    downloadUrl.requireHttpsUrl()
+    originalFrameUrl.requireHttpsUrl()
+    if (type == MediaTypeV1.Ugoira) {
+        requireNotNull(ugoiraKey) { "Ugoira requires an entity key" }.requireValid()
+        previewUrl.requireHttpsUrl(required = true)
+    } else {
+        require(ugoiraKey == null && originalFrameUrl == null) { "Only Ugoira accepts frame metadata" }
+    }
     require(description == null || description.length <= 100_000) { "Media description is too long" }
     require(width == null || width in 1..100_000) { "Invalid media width" }
     require(height == null || height in 1..100_000) { "Invalid media height" }
     require(durationMillis == null || durationMillis in 0..604_800_000) { "Invalid media duration" }
 }
 
-private fun List<ActionDescriptorV1>.requireValid() {
+internal fun List<ActionDescriptorV1>.requireValid() {
     require(size <= SemanticActionV1.entries.size) { "Too many actions" }
     require(map(ActionDescriptorV1::action).distinct().size == size) { "Duplicate action" }
     require(all { it.actionToken == null || it.actionToken.length <= WireLimitsV1.MAX_ACTION_TOKEN_LENGTH }) {
         "Action token is too large"
     }
+    require(all { it.label == null || it.label.length <= 1_024 }) { "Action label is too long" }
     require(all { it.count == null || it.count >= 0 }) { "Invalid action count" }
 }
 
-private fun String.requireTimestamp() {
+internal fun String.requireTimestamp() {
     require(length <= 128) { "Timestamp is too long" }
     Instant.parse(this)
 }
 
-private fun String?.requireHttpsUrl(required: Boolean = false) {
+internal fun String?.requireHttpsUrl(required: Boolean = false) {
     if (isNullOrBlank()) {
         require(!required) { "Required HTTPS URL is missing" }
         return

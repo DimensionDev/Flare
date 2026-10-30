@@ -82,6 +82,10 @@ paged timeline. Their `/api/me` and `/api/posts` endpoints are illustrative. Rep
 the IDs with the tool-assigned identity and adapt endpoints, payloads and response
 mapping to verified website evidence. Read the authentication recipes for other
 login methods; the full Pixelfed example and external SDK tooling are not bundled.
+The [mixed timeline showcase](examples/timeline-showcase/README.md) and its
+manifest/script are also available. Its offline demo state exercises all timeline
+item types, votes, reactions and user buttons; replace demo logic with verified
+website operations before using it for a real adapter.
 
 Report what validation passed and what still needs a website/account/UI check.
 Local package validation cannot prove that the target website integration works.

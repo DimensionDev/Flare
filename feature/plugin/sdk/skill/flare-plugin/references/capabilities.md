@@ -16,7 +16,7 @@ in the manifest and negotiated login result. JavaScript methods live under
 | `list` | `list` | `page`, `detail`, `create`, `update`, `delete`, `timeline`, `members`, `memberships`, `addMember`, `removeMember` | None | List browsing and management |
 | `direct-message` | `directMessage` | `rooms`, `room`, `messages`, `send`, `delete`, `leave`, `create`, `badge`, `canSend` | None | DM rooms, conversation, and related account controls |
 | `article` | `article` | `detail`, `comments` | None | Article detail when a post selects article navigation |
-| `gallery` | `gallery` | `detail`, `comments`, `recommendations` | None | Gallery detail when a post selects gallery navigation |
+| `gallery` | `gallery` | `detail`, `comments`, `recommendations` | `ugoiraMetadata` | Gallery detail when a post selects gallery navigation |
 | `tab-catalog` | `tabCatalog` | `page` | None | Dynamic timeline catalog; also needs timeline.page and a static/default timeline |
 
 These sets come from the Host's `PluginAbiV1` contract, not from TypeScript

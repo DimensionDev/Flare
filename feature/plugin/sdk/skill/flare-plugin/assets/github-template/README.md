@@ -51,7 +51,7 @@ node -e 'JSON.parse(require("node:fs").readFileSync("manifest.json", "utf8")); c
 `npm install` creates a lockfile; commit it and use `npm ci` on later checkouts.
 The private package uses the SDK for ambient types, TypeScript for strict checking,
 and esbuild to bundle local TS modules into one ES2020 IIFE at root. The generated
-SDK dependency is version-pinned. Types such as `PostV1`, `ProfileV1`, and
+SDK dependency is version-pinned. Types such as `TimelineItemV1`, `PostV1`, `ProfileV1`, and
 `PluginErrorCodeV1` are available directly, and `defineFlareSocialPlugin` types its
 handlers.
 The SDK is not imported at runtime; plugin code has no Node or browser globals.

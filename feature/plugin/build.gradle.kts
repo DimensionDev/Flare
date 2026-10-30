@@ -34,6 +34,9 @@ val generatePluginSdk by tasks.registering {
                 "references/troubleshooting.md",
                 "assets/github-template/manifest.json",
                 "assets/github-template/plugin.js",
+                "examples/timeline-showcase/README.md",
+                "examples/timeline-showcase/manifest.json",
+                "examples/timeline-showcase/plugin.js",
             ).associateWith(sdk::file)
     val icon = sdk.file("assets/github-template/assets/icon.png")
     inputs.files(sources.values, icon)

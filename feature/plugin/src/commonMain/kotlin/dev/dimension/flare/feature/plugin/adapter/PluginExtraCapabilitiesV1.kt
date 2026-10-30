@@ -59,20 +59,22 @@ import dev.dimension.flare.feature.plugin.wire.ListMutationRequestV1
 import dev.dimension.flare.feature.plugin.wire.MutationRequestV1
 import dev.dimension.flare.feature.plugin.wire.MutationResultV1
 import dev.dimension.flare.feature.plugin.wire.NotificationPageRequestV1
-import dev.dimension.flare.feature.plugin.wire.NotificationV1
 import dev.dimension.flare.feature.plugin.wire.PageDirectionV1
 import dev.dimension.flare.feature.plugin.wire.PageRequestV1
 import dev.dimension.flare.feature.plugin.wire.PageV1
-import dev.dimension.flare.feature.plugin.wire.PostV1
 import dev.dimension.flare.feature.plugin.wire.ProfileV1
 import dev.dimension.flare.feature.plugin.wire.RelationV1
 import dev.dimension.flare.feature.plugin.wire.SemanticActionV1
 import dev.dimension.flare.feature.plugin.wire.SocialListV1
 import dev.dimension.flare.feature.plugin.wire.TimelineDisplayV1
+import dev.dimension.flare.feature.plugin.wire.TimelineItemV1
 import dev.dimension.flare.feature.plugin.wire.TimelineSectionV1
+import dev.dimension.flare.feature.plugin.wire.UgoiraMetadataV1
 import dev.dimension.flare.feature.plugin.wire.requireDeleteResult
 import dev.dimension.flare.feature.plugin.wire.requireRelationMutationResult
 import dev.dimension.flare.feature.plugin.wire.requireValid
+import dev.dimension.flare.media.UgoiraFrame
+import dev.dimension.flare.media.UgoiraMetadata
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiArticle
@@ -167,6 +169,11 @@ internal class PluginExtraCapabilitiesV1(
         DynamicTabCatalog(account, spec)
     }
 
+    internal suspend fun applyRelation(value: RelationV1) {
+        val adapter = relation as? RelationAdapter ?: return
+        adapter.apply(value)
+    }
+
     private inner class RelationAdapter(
         account: MicroBlogKey,
     ) : RelationDataSource {
@@ -223,6 +230,11 @@ internal class PluginExtraCapabilitiesV1(
                 }
             }
 
+        suspend fun apply(value: RelationV1) {
+            tokens.update { it + (value.profileKey.toKey() to value.actionTokens) }
+            relationHandler.setRelation(value.profileKey.toKey(), mapper.relation(value))
+        }
+
         override val relationHandler: RelationHandler = RelationHandler(AccountType.Specific(account), loader)
         override val supportedRelationTypes: Set<RelationActionType> = loader.supportedTypes
     }
@@ -250,11 +262,11 @@ internal class PluginExtraCapabilitiesV1(
                         operation = "page",
                         request = NotificationPageRequestV1(type.toWire(), request.toWire(pageSize)),
                         requestSerializer = NotificationPageRequestV1.serializer(),
-                        responseSerializer = PageV1.serializer(NotificationV1.serializer()),
-                        validate = { page -> page.requireValid(NotificationV1::requireValid) },
+                        responseSerializer = PageV1.serializer(TimelineItemV1.serializer()),
+                        validate = { page -> page.requireValid { it.requireValid() } },
                     )
                 },
-                map = mapper::notification,
+                map = mapper::timelineItem,
             )
 
         override val notificationHandler: NotificationHandler =
@@ -423,7 +435,7 @@ internal class PluginExtraCapabilitiesV1(
             }
 
         override fun listTimeline(listId: String): RemoteLoader<UiTimelineV2> =
-            entityPostLoader(
+            entityTimelineLoader(
                 PluginAbiV1.Capabilities.LIST,
                 "timeline",
                 MicroBlogKey(listId, account.host),
@@ -649,12 +661,24 @@ internal class PluginExtraCapabilitiesV1(
                 ).let(mapper::article)
 
         override fun articleComments(articleKey: MicroBlogKey): RemoteLoader<UiTimelineV2> =
-            entityPostLoader(PluginAbiV1.Capabilities.ARTICLE, "comments", articleKey)
+            entityTimelineLoader(PluginAbiV1.Capabilities.ARTICLE, "comments", articleKey)
     }
 
     private inner class GalleryAdapter : GalleryDataSource {
-        override suspend fun ugoiraMetadata(statusKey: MicroBlogKey): Nothing =
-            throw UnsupportedOperationException("Plugin API v1 does not support Ugoira")
+        override suspend fun ugoiraMetadata(statusKey: MicroBlogKey): UgoiraMetadata {
+            capabilities.requireOperation(PluginAbiV1.Capabilities.GALLERY, "ugoiraMetadata")
+            require(plugin.installed.manifest.permissions.mediaNetwork) { "Plugin has no media network permission" }
+            val value =
+                invoker.invoke(
+                    capabilityId = PluginAbiV1.Capabilities.GALLERY,
+                    operation = "ugoiraMetadata",
+                    request = EntityRequestV1(statusKey.toWire()),
+                    requestSerializer = EntityRequestV1.serializer(),
+                    responseSerializer = UgoiraMetadataV1.serializer(),
+                    validate = UgoiraMetadataV1::requireValid,
+                )
+            return UgoiraMetadata(value.zipUrl, value.frames.map { UgoiraFrame(it.file, it.delayMillis) })
+        }
 
         override fun galleryDetail(statusKey: MicroBlogKey): Cacheable<GalleryDetail> {
             val cache = MutableStateFlow<GalleryDetail?>(null)
@@ -686,10 +710,10 @@ internal class PluginExtraCapabilitiesV1(
         }
 
         override fun galleryComments(statusKey: MicroBlogKey): RemoteLoader<UiTimelineV2> =
-            entityPostLoader(PluginAbiV1.Capabilities.GALLERY, "comments", statusKey)
+            entityTimelineLoader(PluginAbiV1.Capabilities.GALLERY, "comments", statusKey)
 
         override fun galleryRecommendations(statusKey: MicroBlogKey): RemoteLoader<UiTimelineV2> =
-            entityPostLoader(PluginAbiV1.Capabilities.GALLERY, "recommendations", statusKey)
+            entityTimelineLoader(PluginAbiV1.Capabilities.GALLERY, "recommendations", statusKey)
     }
 
     private inner class DynamicTabCatalog(
@@ -751,7 +775,7 @@ internal class PluginExtraCapabilitiesV1(
             )
     }
 
-    private fun entityPostLoader(
+    private fun entityTimelineLoader(
         capability: String,
         operation: String,
         key: MicroBlogKey,
@@ -768,11 +792,11 @@ internal class PluginExtraCapabilitiesV1(
                     operation = operation,
                     request = EntityPageRequestV1(key.toWire(), request.toWire(pageSize), entityToken),
                     requestSerializer = EntityPageRequestV1.serializer(),
-                    responseSerializer = PageV1.serializer(PostV1.serializer()),
+                    responseSerializer = PageV1.serializer(TimelineItemV1.serializer()),
                     validate = { page -> page.requireValid { it.requireValid() } },
                 )
             },
-            map = mapper::post,
+            map = mapper::timelineItem,
         )
 
     private suspend fun entityProfilePage(

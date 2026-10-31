@@ -85,7 +85,8 @@ internal class VVODataSource(
     private val imageCompressor: ImageCompressor by koinInject()
     private val service by lazy {
         VVOService(
-            proxy = ProxyRef.forAccount(accountKey),            credentialFlow = credentialFlow,
+            proxy = ProxyRef.forAccount(accountKey),
+            credentialFlow = credentialFlow,
             refreshCookieWhenStale = true,
             onCredentialRefreshed = { credential ->
                 updateCredential(credential)

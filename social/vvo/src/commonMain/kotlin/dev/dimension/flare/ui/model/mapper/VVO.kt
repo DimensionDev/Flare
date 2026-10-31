@@ -88,7 +88,7 @@ private fun Status.renderStatusV2(accountKey: MicroBlogKey): UiTimelineV2 {
             val url = it.large?.url ?: it.url
             if (url.isNullOrEmpty()) {
                 null
-            } else if (it.type == "video" && it.videoSrc != null) {
+            } else if ((it.type == "video" || it.type == "livephoto") && !it.videoSrc.isNullOrBlank()) {
                 UiMedia.Video(
                     url = it.videoSrc,
                     thumbnailUrl = it.url ?: url,

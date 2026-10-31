@@ -90,6 +90,7 @@ class ImageTranslationRecoveryTest {
                 ImageTranslationProvider.Tencent,
             )) {
                 for (privateImage in listOf(false, true)) {
+                    val usesUrl = !privateImage && provider != ImageTranslationProvider.Tencent
                     val root = Files.createTempDirectory("image-translation-recovery").toString().toPath()
                     val original = png(5000, 2)
                     val output = png(10, 10).toByteString().base64()
@@ -107,7 +108,7 @@ class ImageTranslationRecoveryTest {
                                 calls++
                                 assertEquals(null, request.headers["Cookie"])
                                 val body = Json.parseToJsonElement((request.body as TextContent).text).jsonObject
-                                if (!privateImage && calls == 1) {
+                                if (usesUrl && calls == 1) {
                                     assertTrue(body.toString().contains(media.url))
                                     respond(
                                         """{"error":{"message":"Failed to download image","code":"invalid_request_error"}}""",
@@ -191,7 +192,7 @@ class ImageTranslationRecoveryTest {
                         val result = repository.translate(media, null, config, "en", session, false)
                         assertNotEquals(media.url, result.url)
                         assertEquals(10f, result.width)
-                        assertEquals(if (privateImage) 1 else 2, calls)
+                        assertEquals(if (usesUrl) 2 else 1, calls)
                         assertEquals(1, downloads)
                     } finally {
                         repository.closeSession(session)

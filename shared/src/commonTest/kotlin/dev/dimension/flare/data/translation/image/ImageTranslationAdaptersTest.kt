@@ -353,7 +353,6 @@ class ImageTranslationAdaptersTest {
             for (provider in listOf(
                 ImageTranslationProvider.OpenAIImages,
                 ImageTranslationProvider.Gemini,
-                ImageTranslationProvider.Tencent,
             )) {
                 for (error in errors) {
                     var calls = 0
@@ -390,16 +389,12 @@ class ImageTranslationAdaptersTest {
                                                 """{"data":[{"b64_json":"cmVzdWx0"}]}"""
                                             }
 
-                                            ImageTranslationProvider.Gemini -> {
+                                            else -> {
                                                 """
                                                 {"steps":[{"type":"model_output","content":[
                                                   {"type":"image","data":"cmVzdWx0"}
                                                 ]}]}
                                                 """.trimIndent()
-                                            }
-
-                                            else -> {
-                                                """{"Response":{"Data":"cmVzdWx0"}}"""
                                             }
                                         },
                                     )
@@ -410,8 +405,7 @@ class ImageTranslationAdaptersTest {
                         val adapter =
                             when (provider) {
                                 ImageTranslationProvider.OpenAIImages -> OpenAIImageTranslationAdapter(client)
-                                ImageTranslationProvider.Gemini -> GeminiImageTranslationAdapter(client)
-                                else -> TencentImageTranslationAdapter(client)
+                                else -> GeminiImageTranslationAdapter(client)
                             }
                         assertEquals(ImageTranslationOutput.Encoded("cmVzdWx0"), adapter.translate(input, config(provider), "en"))
                         assertEquals(2, calls)
@@ -496,29 +490,47 @@ class ImageTranslationAdaptersTest {
         }
 
     @Test
-    fun tencentBodyDownloadFailureUsesSharedRecovery() =
+    fun tencentPublicImagesUsePreparedBytesInBothModes() =
         runTest {
-            var calls = 0
-            val client =
-                HttpClient(
-                    MockEngine { request ->
-                        calls++
-                        if (calls == 1) {
-                            respond("""{"Response":{"Error":{"Code":"FailedOperation.DownloadErr"}}}""")
-                        } else {
-                            assertTrue((request.body as TextContent).text.contains(original.base64()))
+            for (mode in listOf("0", "1")) {
+                var calls = 0
+                var preparations = 0
+                val prepared = "prepared bytes".encodeUtf8()
+                val preparedMedia =
+                    dev.dimension.flare.common.UploadMedia
+                        .fromBytes("prepared.png", prepared.toByteArray(), "image/png")
+                val source = input(public = true)
+                val input =
+                    ImageTranslationInput(source.publicUrl, source.media) {
+                        preparations++
+                        preparedMedia
+                    }
+                val client =
+                    HttpClient(
+                        MockEngine { request ->
+                            calls++
+                            val body = Json.parseToJsonElement((request.body as TextContent).text).jsonObject
+                            assertEquals(prepared.base64(), body["Data"]!!.jsonPrimitive.content)
+                            assertFalse("Url" in body)
+                            assertEquals(mode, body["Mode"]!!.jsonPrimitive.content)
+                            assertEquals("zh", body["Target"]!!.jsonPrimitive.content)
                             respond("""{"Response":{"Data":"cmVzdWx0"}}""")
-                        }
-                    },
-                )
-            try {
-                assertEquals(
-                    ImageTranslationOutput.Encoded("cmVzdWx0"),
-                    TencentImageTranslationAdapter(client).translate(input(public = true), config(ImageTranslationProvider.Tencent), "en"),
-                )
-                assertEquals(2, calls)
-            } finally {
-                client.close()
+                        },
+                    )
+                try {
+                    assertEquals(
+                        ImageTranslationOutput.Encoded("cmVzdWx0"),
+                        TencentImageTranslationAdapter(client).translate(
+                            input,
+                            config(ImageTranslationProvider.Tencent).withValue("mode", mode),
+                            "zh-CN",
+                        ),
+                    )
+                    assertEquals(1, calls)
+                    assertEquals(1, preparations)
+                } finally {
+                    client.close()
+                }
             }
         }
 

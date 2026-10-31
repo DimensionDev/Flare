@@ -342,14 +342,6 @@ struct MediaViewerScreen: View {
                     .accessibilityLabel(Text(verbatim: isLandscapeViewing ? "Exit landscape view" : "Landscape view"))
 
                     if let selectedMedia, case .image = onEnum(of: selectedMedia) {
-                        if imageTranslation.state.item(media: selectedMedia).errorDetails != nil {
-                            topOverlayButton {
-                                imageTranslation.state.setErrorDetailsVisible(media: selectedMedia, visible: true)
-                            } label: {
-                                Image(systemName: "exclamationmark.circle")
-                            }
-                            .accessibilityLabel(Text("View error details", bundle: .main))
-                        }
                         if imageTranslation.state.canToggle(media: selectedMedia) {
                             let translationItem = imageTranslation.state.item(media: selectedMedia)
                             topOverlayButton {

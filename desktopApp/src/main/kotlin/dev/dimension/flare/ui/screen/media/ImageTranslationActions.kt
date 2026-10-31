@@ -63,11 +63,6 @@ internal fun ImageTranslationActions(
                 disabled = item.loading,
             ) { Text(imageTranslationText("Translate again")) }
         }
-        if (item.errorDetails != null && item.error == null && !item.errorDetailsVisible) {
-            SubtleButton(onClick = { translation.setErrorDetailsVisible(media, true) }) {
-                Text(imageTranslationText("View error details"))
-            }
-        }
     }
     if (item.error != null || item.errorDetailsVisible) {
         ContentDialog(

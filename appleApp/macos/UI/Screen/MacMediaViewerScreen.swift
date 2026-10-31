@@ -91,15 +91,6 @@ struct MacMediaViewerScreen: View {
             }
 
             ToolbarItemGroup(placement: .primaryAction) {
-                if let selectedMedia, imageTranslation.state.item(media: selectedMedia).errorDetails != nil {
-                    Button {
-                        imageTranslation.state.setErrorDetailsVisible(media: selectedMedia, visible: true)
-                    } label: {
-                        Image(systemName: "exclamationmark.circle")
-                    }
-                    .accessibilityLabel(Text("View error details", bundle: .main))
-                    .help(Text("View error details", bundle: .main))
-                }
                 if let selectedMedia, imageTranslation.state.canToggle(media: selectedMedia) {
                     let translationItem = imageTranslation.state.item(media: selectedMedia)
                     Button {

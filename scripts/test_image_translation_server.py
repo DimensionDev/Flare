@@ -25,6 +25,7 @@ class Handler(BaseHTTPRequestHandler):
         self.send_response(status)
         self.send_header("Content-Type", "application/json")
         self.send_header("Content-Length", str(len(data)))
+        self.send_header("X-Request-ID", "offline-fixture-request")
         self.end_headers()
         self.wfile.write(data)
 
@@ -44,13 +45,20 @@ class Handler(BaseHTTPRequestHandler):
             size = int(self.headers["Content-Length"])
             assert 0 < size < 1024 * 1024
             body = json.loads(self.rfile.read(size))
-            assert body["model"] == "offline-fixture" and body["n"] == 1
+            assert body["model"] in ("offline-fixture", "offline-fixture-error") and body["n"] == 1
             original = base64.b64decode(body["images"][0]["image_url"].split(",", 1)[1], validate=True)
             assert original.startswith(b"\x89PNG\r\n\x1a\n")
             width, height = struct.unpack(">II", original[16:24])
             assert width in (320, 640, 960) and width * 3 == height * 4
         except (AssertionError, KeyError, ValueError, TypeError):
             self.respond(400, {"error": {"code": "invalid_fixture"}})
+            return
+        if body["model"] == "offline-fixture-error":
+            self.respond(401, {"error": {
+                "code": "invalid_api_key",
+                "message": "Invalid offline-fixture-key for https://private.example/image?signature=private-signature"
+                    + "\nInput: data:image/png;base64," + base64.b64encode(image).decode(),
+            }})
             return
         time.sleep(3)
         self.respond(200, {"data": [{"b64_json": base64.b64encode(image).decode()}]})

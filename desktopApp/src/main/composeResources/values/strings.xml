@@ -801,6 +801,9 @@
     <string name="image_translation_result">Show translation</string>
     <string name="image_translation_regenerate">Translate again</string>
     <string name="image_translation_loading">Translating image</string>
+    <string name="image_translation_error_details">Error details</string>
+    <string name="image_translation_view_error_details">View error details</string>
+    <string name="image_translation_copy_error_details">Copy error details</string>
     <string name="image_translation_not_configured">Configure image translation in Translation settings first.</string>
     <string name="image_translation_unsupported">The provider does not support this image or input format.</string>
     <string name="image_translation_authentication">Check the provider credentials and service access.</string>

@@ -837,6 +837,9 @@
     <string name="image_translation_result">显示译图</string>
     <string name="image_translation_regenerate">重新翻译</string>
     <string name="image_translation_loading">正在翻译图片</string>
+    <string name="image_translation_error_details">错误详情</string>
+    <string name="image_translation_view_error_details">查看错误详情</string>
+    <string name="image_translation_copy_error_details">复制错误详情</string>
     <string name="image_translation_not_configured">请先在翻译设置中配置图片翻译。</string>
     <string name="image_translation_unsupported">提供商不支持此图片或输入格式。</string>
     <string name="image_translation_authentication">请检查提供商凭据及服务开通状态。</string>

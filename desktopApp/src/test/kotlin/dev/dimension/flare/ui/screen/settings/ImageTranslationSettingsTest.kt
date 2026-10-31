@@ -4,11 +4,16 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toAwtImage
+import androidx.compose.ui.platform.ClipEntry
+import androidx.compose.ui.platform.Clipboard
+import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
@@ -37,6 +42,8 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
+import java.awt.datatransfer.DataFlavor
+import java.awt.datatransfer.Transferable
 import java.io.File
 import javax.imageio.ImageIO
 
@@ -87,6 +94,43 @@ class ImageTranslationSettingsTest {
         compose.onNodeWithText("Translate again").assertDoesNotExist()
         compose.runOnIdle {
             assertEquals(2, state.toggles)
+            assertEquals(0, state.regenerations)
+        }
+    }
+
+    @Test
+    @OptIn(ExperimentalComposeUiApi::class)
+    fun viewerCanOpenCopyDismissAndReopenErrorDetailsWithoutTranslating() {
+        val state = TranslationState()
+        val details = "Provider code: invalid_api_key\nDetails: Invalid original-key at https://example.invalid/image?signature=value"
+        var copiedEntry: ClipEntry? = null
+        val clipboard =
+            object : Clipboard {
+                override suspend fun getClipEntry() = copiedEntry
+
+                override suspend fun setClipEntry(clipEntry: ClipEntry?) {
+                    copiedEntry = clipEntry
+                }
+            }
+        state.entry = ImageTranslationItem(error = ImageTranslationError.Authentication, errorDetails = details)
+        compose.setContent {
+            CompositionLocalProvider(LocalClipboard provides clipboard) {
+                FlareTheme(isDarkTheme = false) { ImageTranslationActions(state, media) }
+            }
+        }
+        compose.onNodeWithText(details).assertDoesNotExist()
+        compose.onNodeWithText("View error details").performClick()
+        compose.onNodeWithText(details).assertExists()
+        compose.onNodeWithText("Copy error details").performClick()
+        compose.runOnIdle {
+            assertEquals(details, (copiedEntry?.nativeClipEntry as? Transferable)?.getTransferData(DataFlavor.stringFlavor))
+        }
+        compose.onNodeWithText("OK").performClick()
+        compose.onNodeWithText(details).assertDoesNotExist()
+        compose.onNodeWithText("View error details").performClick()
+        compose.onNodeWithText(details).assertExists()
+        compose.runOnIdle {
+            assertEquals(0, state.toggles)
             assertEquals(0, state.regenerations)
         }
     }
@@ -282,6 +326,13 @@ class ImageTranslationSettingsTest {
 
         override fun clearError(media: UiMedia) {
             entry = entry.copy(error = null)
+        }
+
+        override fun setErrorDetailsVisible(
+            media: UiMedia,
+            visible: Boolean,
+        ) {
+            entry = entry.copy(error = null, errorDetailsVisible = visible)
         }
 
         override fun imageFailed(

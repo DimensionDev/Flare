@@ -111,6 +111,7 @@ jobs:
             ./gradlew :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=dev.dimension.flare.ui.screen.settings.PluginManagementMenuTest
             ./gradlew :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=dev.dimension.flare.common.WebViewProxyTest
             ./gradlew :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=dev.dimension.flare.ui.screen.gallery.GalleryDetailScreenTest
+            ./gradlew :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=dev.dimension.flare.ui.screen.media.ImageTranslationErrorDialogTest
 
       - name: Run Kotlin wasmJs tests
         if: inputs.target != 'fdroid'
@@ -259,6 +260,19 @@ jobs:
             -only-testing:iOSTests/TimelinePlaybackCoordinatorTests \
             -only-testing:iOSTests/MediaTransferCancellationTests \
             -parallel-testing-enabled NO -collect-test-diagnostics never
+      - name: Run image translation error UI regressions
+        working-directory: ./appleApp
+        run: |
+          python3 ../scripts/test_image_translation_server.py > "$RUNNER_TEMP/image-translation-fixture.log" 2>&1 &
+          image_fixture_pid=$!
+          trap 'kill "$image_fixture_pid" 2>/dev/null || true' EXIT
+          curl --retry-connrefused --retry 10 --retry-delay 1 --max-time 5 --fail --silent --show-error http://127.0.0.1:18473/health
+          xcodebuild test -project Flare.xcodeproj -scheme MediaViewerInteractionTests \
+            -destination "platform=iOS Simulator,id=$FLARE_TEST_SIMULATOR" \
+            -only-testing:MediaViewerInteractionTests/MediaViewerInteractionTests/testTranslationErrorDetailsCanBeViewedCopiedAndReopenedWithPost \
+            -only-testing:MediaViewerInteractionTests/MediaViewerInteractionTests/testTranslationErrorDetailsCanBeViewedCopiedAndReopenedWithoutPost \
+            -parallel-testing-enabled NO -collect-test-diagnostics never -skipPackagePluginValidation -skipMacroValidation \
+            GRADLE_JVM_ARGS="-Xmx16G -Dfile.encoding=UTF-8" CODE_SIGNING_ALLOWED=NO
       - name: Remove test simulator
         if: always() && env.FLARE_TEST_SIMULATOR != ''
         run: xcrun simctl delete "$FLARE_TEST_SIMULATOR"

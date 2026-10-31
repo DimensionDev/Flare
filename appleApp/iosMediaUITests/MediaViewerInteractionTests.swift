@@ -3,11 +3,12 @@ import XCTest
 
 final class MediaViewerInteractionTests: XCTestCase {
     @MainActor
-    private func openMedia(video: Bool = false, withoutPost: Bool = false, indicator: Bool = false, hidePostActions: Bool = false, translation: Bool = false) -> XCUIApplication {
+    private func openMedia(video: Bool = false, withoutPost: Bool = false, indicator: Bool = false, hidePostActions: Bool = false, translation: Bool = false, translationError: Bool = false) -> XCUIApplication {
         let app = XCUIApplication()
         app.launchArguments = ["--media-viewer-test", "-AppleLanguages", "(en)", "-AppleLocale", "en_US"]
         if video { app.launchArguments.append("--video") }
         if translation { app.launchArguments.append("--image-translation-fixture") }
+        if translationError { app.launchArguments.append("--image-translation-error-fixture") }
         if withoutPost { app.launchArguments.append("--without-post") }
         if indicator { app.launchArguments.append("--indicator") }
         if hidePostActions { app.launchArguments.append("--hide-post-actions") }
@@ -291,6 +292,65 @@ final class MediaViewerInteractionTests: XCTestCase {
         XCTAssertTrue(original.waitForExistence(timeout: 5))
         app.buttons["Share image"].tap()
         XCTAssertTrue(app.cells["Copy"].waitForExistence(timeout: 5))
+    }
+
+    @MainActor
+    func testTranslationErrorDetailsCanBeViewedCopiedAndReopenedWithoutPost() async throws {
+        try await assertTranslationErrorDetails(withoutPost: true)
+    }
+
+    @MainActor
+    func testTranslationErrorDetailsCanBeViewedCopiedAndReopenedWithPost() async throws {
+        try await assertTranslationErrorDetails(withoutPost: false)
+    }
+
+    @MainActor
+    private func assertTranslationErrorDetails(withoutPost: Bool) async throws {
+        var request = URLRequest(url: URL(string: "http://127.0.0.1:18473/health")!)
+        request.timeoutInterval = 2
+        let (_, response) = try await URLSession.shared.data(for: request)
+        XCTAssertEqual((response as? HTTPURLResponse)?.statusCode, 200, "Start scripts/test_image_translation_server.py for the offline provider test")
+        let app = openMedia(withoutPost: withoutPost, translation: true, translationError: true)
+        defer { app.terminate() }
+        app.buttons["Translate image"].tap()
+        let alert = app.alerts["Image translation"]
+        XCTAssertTrue(alert.waitForExistence(timeout: 15))
+        alert.buttons["View error details"].tap()
+        let details = app.staticTexts["image-translation-error-details"]
+        XCTAssertTrue(details.waitForExistence(timeout: 5))
+        XCTAssertTrue(details.label.contains("HTTP status: 401"))
+        XCTAssertTrue(details.label.contains("Provider code: invalid_api_key"))
+        XCTAssertTrue(details.label.contains("Request ID: offline-fixture-request"))
+        XCTAssertTrue(details.label.contains("offline-fixture-key"))
+        XCTAssertTrue(details.label.contains("https://private.example/image?signature=private-signature"))
+        XCTAssertFalse(details.label.contains("data:image/png;base64"))
+        XCTAssertFalse(details.label.contains("iVBORw0"))
+        XCTAssertTrue(app.navigationBars["Error details"].buttons["Done"].exists)
+        XCTAssertFalse(app.navigationBars["Error details"].buttons["OK"].exists)
+        let screenshot = XCTAttachment(screenshot: app.screenshot())
+        screenshot.name = "image-translation-original-error-details"
+        screenshot.lifetime = .keepAlways
+        add(screenshot)
+        let expectedDetails = details.label
+        app.buttons["image-translation-copy-error-details"].tap()
+        app.navigationBars["Error details"].buttons["Done"].tap()
+        let reopen = app.buttons["View error details"]
+        XCTAssertTrue(reopen.waitForExistence(timeout: 5))
+        reopen.tap()
+        XCTAssertTrue(details.waitForExistence(timeout: 5))
+        app.navigationBars["Error details"].buttons["Done"].tap()
+        app.buttons["Close"].tap()
+        let paste = app.textViews["media-fixture-paste-error-details"]
+        XCTAssertTrue(paste.waitForExistence(timeout: 5))
+        paste.tap()
+        paste.press(forDuration: 1)
+        let pasteAction = app.menuItems["Paste"]
+        if pasteAction.waitForExistence(timeout: 2) {
+            pasteAction.tap()
+        } else {
+            app.buttons["Paste"].tap()
+        }
+        XCTAssertEqual(paste.value as? String, expectedDetails)
     }
 
     @MainActor

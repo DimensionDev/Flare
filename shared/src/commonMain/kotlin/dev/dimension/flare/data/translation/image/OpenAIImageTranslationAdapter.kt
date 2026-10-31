@@ -56,7 +56,7 @@ internal class OpenAIImageTranslationAdapter(
                 },
             ) { bearerAuth(config.value("apiKey")) }
 
-        suspend fun inlineRequest(): kotlinx.serialization.json.JsonObject {
+        suspend fun inlineRequest(): ImageTranslationResponse {
             val input = input.prepared()
             // JSON image_url is limited to 20 MiB of characters; multipart accepts larger original files.
             val maxInlineBytes = (20L * 1024 * 1024 - 64) / 4 * 3
@@ -91,9 +91,13 @@ internal class OpenAIImageTranslationAdapter(
                     multipartRequest()
                 }
             }
-        val image = result["data"]?.jsonArray?.firstOrNull()?.jsonObject ?: throw ImageTranslationException(ImageTranslationError.NoImage)
+        val image =
+            result.body["data"]
+                ?.jsonArray
+                ?.firstOrNull()
+                ?.jsonObject ?: throw result.failure()
         return image.text("b64_json")?.let(ImageTranslationOutput::Encoded)
             ?: image.text("url")?.let(ImageTranslationOutput::Remote)
-            ?: throw ImageTranslationException(ImageTranslationError.NoImage)
+            ?: throw result.failure()
     }
 }

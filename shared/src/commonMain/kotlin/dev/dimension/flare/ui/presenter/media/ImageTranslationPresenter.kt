@@ -16,6 +16,7 @@ import dev.dimension.flare.data.translation.image.ImageTranslationError
 import dev.dimension.flare.data.translation.image.ImageTranslationException
 import dev.dimension.flare.data.translation.image.ImageTranslationRepository
 import dev.dimension.flare.data.translation.image.fingerprint
+import dev.dimension.flare.data.translation.image.imageTranslationDetails
 import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiMedia
@@ -35,6 +36,8 @@ public data class ImageTranslationItem(
     val error: ImageTranslationError? = null,
     val previous: UiMedia.Image? = null,
     val previousWasShown: Boolean = false,
+    val errorDetails: String? = null,
+    val errorDetailsVisible: Boolean = false,
 )
 
 public class ImageTranslationPresenter(
@@ -59,6 +62,11 @@ public class ImageTranslationPresenter(
         public fun regenerate(media: UiMedia)
 
         public fun clearError(media: UiMedia)
+
+        public fun setErrorDetailsVisible(
+            media: UiMedia,
+            visible: Boolean,
+        )
 
         public fun imageFailed(
             media: UiMedia,
@@ -107,14 +115,28 @@ public class ImageTranslationPresenter(
                 if (!regenerate && item.translated != null) {
                     if (entries.compareAndSet(
                             before,
-                            before + (key to item.copy(showingTranslated = !item.showingTranslated, error = null)),
+                            before +
+                                (
+                                    key to
+                                        item.copy(
+                                            showingTranslated = !item.showingTranslated,
+                                            error = null,
+                                            errorDetailsVisible = false,
+                                        )
+                                ),
                         )
                     ) {
                         return
                     }
                 } else {
                     if (!isConfigured) return
-                    if (entries.compareAndSet(before, before + (key to item.copy(loading = true, error = null)))) break
+                    if (entries.compareAndSet(
+                            before,
+                            before + (key to item.copy(loading = true, error = null, errorDetails = null, errorDetailsVisible = false)),
+                        )
+                    ) {
+                        break
+                    }
                 }
             }
             scope.launch {
@@ -151,8 +173,17 @@ public class ImageTranslationPresenter(
                             is TimeoutCancellationException -> ImageTranslationError.Timeout
                             else -> ImageTranslationError.Network
                         }
+                    val details = error.imageTranslationDetails(config, target)
                     entries.update { state ->
-                        state + (key to (state[key] ?: ImageTranslationItem()).copy(loading = false, error = reason))
+                        state + (
+                            key to
+                                (state[key] ?: ImageTranslationItem()).copy(
+                                    loading = false,
+                                    error = reason,
+                                    errorDetails = details,
+                                    errorDetailsVisible = false,
+                                )
+                        )
                     }
                 }
             }
@@ -185,6 +216,9 @@ public class ImageTranslationPresenter(
                                     translated = current.previous,
                                     showingTranslated = current.previousWasShown,
                                     error = ImageTranslationError.InvalidImage,
+                                    errorDetails =
+                                        ImageTranslationException(ImageTranslationError.InvalidImage, stage = "Display translated image")
+                                            .imageTranslationDetails(config, target),
                                 )
                         )
                     }
@@ -193,6 +227,16 @@ public class ImageTranslationPresenter(
 
             override fun clearError(media: UiMedia) {
                 entries.update { state -> state + (key(media) to (state[key(media)] ?: ImageTranslationItem()).copy(error = null)) }
+            }
+
+            override fun setErrorDetailsVisible(
+                media: UiMedia,
+                visible: Boolean,
+            ) {
+                entries.update { state ->
+                    val current = state[key(media)] ?: return@update state
+                    state + (key(media) to current.copy(error = null, errorDetailsVisible = visible && current.errorDetails != null))
+                }
             }
         }
     }

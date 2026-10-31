@@ -26,8 +26,10 @@ import dev.dimension.flare.image_translation_api_key
 import dev.dimension.flare.image_translation_authentication
 import dev.dimension.flare.image_translation_automatic
 import dev.dimension.flare.image_translation_cancel
+import dev.dimension.flare.image_translation_copy_error_details
 import dev.dimension.flare.image_translation_description
 import dev.dimension.flare.image_translation_edit
+import dev.dimension.flare.image_translation_error_details
 import dev.dimension.flare.image_translation_input_format
 import dev.dimension.flare.image_translation_invalid_image
 import dev.dimension.flare.image_translation_lite
@@ -61,6 +63,7 @@ import dev.dimension.flare.image_translation_timeout
 import dev.dimension.flare.image_translation_title
 import dev.dimension.flare.image_translation_unsupported
 import dev.dimension.flare.image_translation_use_shared_description
+import dev.dimension.flare.image_translation_view_error_details
 import dev.dimension.flare.settings_ai_config_model_error
 import dev.dimension.flare.settings_ai_config_model_loading
 import dev.dimension.flare.settings_ai_config_model_no_models
@@ -244,6 +247,9 @@ internal fun imageTranslationText(key: String): String {
             "Show translation" -> Res.string.image_translation_result
             "Translate again" -> Res.string.image_translation_regenerate
             "Translating image" -> Res.string.image_translation_loading
+            "Error details" -> Res.string.image_translation_error_details
+            "View error details" -> Res.string.image_translation_view_error_details
+            "Copy error details" -> Res.string.image_translation_copy_error_details
             "Configure image translation in Translation settings first." -> Res.string.image_translation_not_configured
             "The provider does not support this image or input format." -> Res.string.image_translation_unsupported
             "Check the provider credentials and service access." -> Res.string.image_translation_authentication

@@ -198,6 +198,9 @@ internal fun imageTranslationText(key: String): String {
             "Show translation" -> R.string.image_translation_result
             "Translate again" -> R.string.image_translation_regenerate
             "Translating image" -> R.string.image_translation_loading
+            "Error details" -> R.string.image_translation_error_details
+            "View error details" -> R.string.image_translation_view_error_details
+            "Copy error details" -> R.string.image_translation_copy_error_details
             "Configure image translation in Translation settings first." -> R.string.image_translation_not_configured
             "The provider does not support this image or input format." -> R.string.image_translation_unsupported
             "Check the provider credentials and service access." -> R.string.image_translation_authentication

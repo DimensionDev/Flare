@@ -37,8 +37,11 @@ internal class QwenImageTranslationAdapter(
                     )
                 },
             ) { bearerAuth(config.value("apiKey")) }
-        if (result.text("code") != null) throw ImageTranslationException(ImageTranslationError.Rejected)
-        return result["output"]?.jsonObject?.text("image_url")?.let(ImageTranslationOutput::Remote)
-            ?: throw ImageTranslationException(ImageTranslationError.NoImage)
+        if (result.body.text("code") != null) throw result.failure(ImageTranslationError.Rejected)
+        return result.body["output"]
+            ?.jsonObject
+            ?.text("image_url")
+            ?.let(ImageTranslationOutput::Remote)
+            ?: throw result.failure()
     }
 }

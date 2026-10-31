@@ -31,7 +31,7 @@ internal class TencentImageTranslationAdapter(
         target: String,
     ): ImageTranslationOutput =
         mutex.withLock {
-            suspend fun request(url: String?): kotlinx.serialization.json.JsonObject {
+            suspend fun request(url: String?): ImageTranslationResponse {
                 val input = if (url == null) input.prepared() else input
                 delay((lastRequest + 1000 - Clock.System.now().toEpochMilliseconds()).coerceAtLeast(0))
                 val body =
@@ -49,7 +49,7 @@ internal class TencentImageTranslationAdapter(
                     }
                 val timestamp = Clock.System.now().epochSeconds
                 lastRequest = Clock.System.now().toEpochMilliseconds()
-                val response =
+                val result =
                     client
                         .imagePost("https://tmt.tencentcloudapi.com/", body) {
                             header("X-TC-Action", "ImageTranslateLLM")
@@ -60,8 +60,8 @@ internal class TencentImageTranslationAdapter(
                                 "Authorization",
                                 tencentImageAuthorization(config.value("secretId"), config.value("secretKey"), timestamp, body.toString()),
                             )
-                        }["Response"]
-                        ?.jsonObject ?: throw ImageTranslationException(ImageTranslationError.NoImage)
+                        }
+                val response = result.body["Response"]?.jsonObject ?: throw result.failure()
                 response["Error"]?.let { error ->
                     val code = error.jsonObject.text("Code").orEmpty()
                     throw ImageTranslationException(
@@ -71,13 +71,14 @@ internal class TencentImageTranslationAdapter(
                             else -> ImageTranslationError.Rejected
                         },
                         imageFailure = if (code == "FailedOperation.DownloadErr") AiImageFailure.RetryWithBytes else null,
+                        diagnostics = result.diagnostics,
                     )
                 }
-                return response
+                return result.copy(body = response)
             }
             val response = input.withImageFallback(::request)
-            response.text("Data")?.let(ImageTranslationOutput::Encoded)
-                ?: throw ImageTranslationException(ImageTranslationError.NoImage)
+            response.body.text("Data")?.let(ImageTranslationOutput::Encoded)
+                ?: throw response.failure()
         }
 }
 

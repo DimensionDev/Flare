@@ -12,6 +12,7 @@ struct MediaViewerTestFixture: View {
     @State private var presented = false
     @State private var dismissed = false
     @State private var medias: [any UiMedia] = []
+    @State private var pastedErrorDetails = ""
     private let video = ProcessInfo.processInfo.arguments.contains("--video")
     private let indicator = ProcessInfo.processInfo.arguments.contains("--indicator")
     private let withoutPost = ProcessInfo.processInfo.arguments.contains("--without-post")
@@ -25,6 +26,12 @@ struct MediaViewerTestFixture: View {
                     .accessibilityIdentifier("media-fixture-open")
             }
             if dismissed { Text("Media dismissed") }
+            if ProcessInfo.processInfo.arguments.contains("--image-translation-error-fixture") {
+                TextEditor(text: $pastedErrorDetails)
+                    .frame(height: 120)
+                    .accessibilityLabel("Paste error details")
+                    .accessibilityIdentifier("media-fixture-paste-error-details")
+            }
         }
         .task {
             await configureTranslationFixture()
@@ -120,9 +127,10 @@ struct MediaViewerTestFixture: View {
         state.setField(id: "prompt", value: prompt)
         state.setField(id: "baseUrl", value: "http://127.0.0.1:18473/v1")
         state.setField(id: "apiKey", value: "offline-fixture-key")
-        state.setField(id: "model", value: "offline-fixture")
+        let model = ProcessInfo.processInfo.arguments.contains("--image-translation-error-fixture") ? "offline-fixture-error" : "offline-fixture"
+        state.setField(id: "model", value: model)
         for _ in 0..<250 {
-            if settings.state.config.configured && settings.state.config.value(id: "baseUrl") == "http://127.0.0.1:18473/v1" && settings.state.config.value(id: "prompt") == prompt { return }
+            if settings.state.config.configured && settings.state.config.value(id: "baseUrl") == "http://127.0.0.1:18473/v1" && settings.state.config.value(id: "prompt") == prompt && settings.state.config.value(id: "model") == model { return }
             try? await Task.sleep(for: .milliseconds(20))
         }
         assertionFailure("Could not configure the local image translation fixture")

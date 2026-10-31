@@ -628,8 +628,8 @@ struct MacComposeScreen: View {
     }
 
     private func applyDraft(_ draft: UiDraft) {
-        let result = viewModel.applyDraft(draft)
-        sensitive = result.sensitive
+        viewModel.applyDraft(draft)
+        sensitive = draft.data.sensitive
         mediaItems = draft.medias.compactMap(MacComposeMediaItem.init(draftMedia:))
         syncMediaMimeTypes()
     }

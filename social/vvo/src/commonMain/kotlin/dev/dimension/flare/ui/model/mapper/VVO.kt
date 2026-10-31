@@ -168,7 +168,6 @@ private fun Status.renderStatusV2(accountKey: MicroBlogKey): UiTimelineV2 {
     val isFromMe = user?.key == accountKey
     val displayUser = user
     val statusKey = MicroBlogKey(id = id, host = accountKey.host)
-    // shortcut: Leave the visibility badge unset until non-public response codes are verified against real posts.
     val canReblog = visible?.type == null || visible.type == 0L
     val url =
         buildString {

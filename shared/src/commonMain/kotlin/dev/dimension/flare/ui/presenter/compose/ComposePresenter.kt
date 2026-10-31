@@ -523,9 +523,7 @@ public class ComposePresenter(
                 savedVisibility = savedComposeConfig?.visibility,
             )
         val visibilityState =
-            composeConfig.mapNotNull {
-                selection.takeIf { _ -> it.visibility != null }
-            }
+            composeConfig.mapNotNull { it.visibility }.map { selection }
         val pollMaxOptions =
             composeConfig
                 .takeSuccess()
@@ -566,8 +564,6 @@ public class ComposePresenter(
                 ?.sortedIsoCodes
                 ?.toImmutableList()
                 ?: persistentListOf()
-        val webVisibility = selection.visibility.takeIf { composeConfig.takeSuccess()?.visibility != null }
-        val webVisibilities = selection.allVisibilities
         val webEmojis =
             emojiState
                 .takeSuccess()
@@ -613,8 +609,8 @@ public class ComposePresenter(
             languageCodes = languageCodes,
             emojiAccountType = webEmojiAccountType,
             emojis = webEmojis,
-            visibility = webVisibility,
-            allVisibilities = webVisibilities,
+            visibility = visibilityState.takeSuccess()?.visibility,
+            allVisibilities = visibilityState.takeSuccess()?.allVisibilities ?: persistentListOf(),
         ) {
             override fun setVisibility(value: UiTimelineV2.Post.Visibility) {
                 selection.setVisibility(value)

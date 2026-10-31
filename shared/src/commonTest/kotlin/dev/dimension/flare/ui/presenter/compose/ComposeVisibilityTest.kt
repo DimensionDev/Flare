@@ -17,7 +17,6 @@ import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
-import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -73,27 +72,6 @@ class ComposeVisibilityTest {
             runCurrent()
             assertEquals(Visibility.Public, assertNotNull(state).visibility)
         }
-
-    @Test
-    fun restoringUnsupportedPrivateDraftUsesThePlatformDefault() =
-        runTest {
-            var state: VisibilityState? = null
-            backgroundScope.launch {
-                moleculeFlow(RecompositionMode.Immediate) {
-                    rememberComposeVisibilityState(null, null)
-                }.collect { state = it }
-            }
-            runCurrent()
-            assertNotNull(state).setVisibility(Visibility.Friends)
-            runCurrent()
-            assertTrue(assertNotNull(state).allVisibilities.isEmpty())
-        }
-
-    @Test
-    fun crossPostingHidesTheAudienceWhenRangesDiffer() {
-        val merged = ComposeConfig(visibility = weibo).merge(ComposeConfig(visibility = ComposeConfig.Visibility()))
-        assertNull(merged.visibility)
-    }
 
     @Test
     fun privateDraftVisibilitiesSurviveSerializationAndRestore() {

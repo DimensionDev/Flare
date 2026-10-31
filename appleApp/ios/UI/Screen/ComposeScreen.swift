@@ -582,8 +582,8 @@ struct ComposeScreen: View {
     }
 
     private func applyDraft(_ draft: UiDraft) {
-        let result = viewModel.applyDraft(draft)
-        mediaViewModel.sensitive = result.sensitive
+        viewModel.applyDraft(draft)
+        mediaViewModel.sensitive = draft.data.sensitive
         mediaViewModel.restore(draftMedias: draft.medias)
         requestComposerFocus()
     }

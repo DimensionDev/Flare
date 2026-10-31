@@ -97,6 +97,7 @@
 	const accountProfiles = $derived([...selectedProfiles, ...otherProfiles]);
 	const sending = $derived(compose.directSendState.phase === 'Sending');
 	const composeBusy = $derived(sending || mediaPreparing);
+	const canSubmit = $derived(compose.canSend && !composeBusy);
 	const visiblePollOptions = $derived(pollOptions);
 	const currentVisibility = $derived(compose.visibility);
 	const maxMediaCount = $derived(compose.mediaMaxCount > 0 ? compose.mediaMaxCount : 4);
@@ -115,7 +116,6 @@
 		text.trim().length > 0 || spoilerText.trim().length > 0 || selectedMedia.length > 0 || pollEnabled
 	);
 	const allVisibilities = $derived(compose.allVisibilities);
-	const canSubmit = $derived(compose.canSend && !composeBusy);
 	const emojiEnabled = $derived(compose.emojis.length > 0);
 	const postReference = $derived(referencePost(compose.referencePost));
 

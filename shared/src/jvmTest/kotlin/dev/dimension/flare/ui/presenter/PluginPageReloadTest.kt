@@ -72,10 +72,7 @@ import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.model.uiArticleContentOf
 import dev.dimension.flare.ui.presenter.article.ArticlePresenter
 import dev.dimension.flare.ui.presenter.compose.ComposePresenter
-import dev.dimension.flare.ui.presenter.compose.ComposeUseCase
 import dev.dimension.flare.ui.presenter.compose.RestoreDraftUseCase
-import dev.dimension.flare.ui.presenter.compose.SaveDraftUseCase
-import dev.dimension.flare.ui.presenter.compose.SendDraftUseCase
 import dev.dimension.flare.ui.presenter.compose.toDraftContent
 import dev.dimension.flare.ui.presenter.dm.DMConversationPresenter
 import dev.dimension.flare.ui.presenter.gallery.GalleryDetailPresenter
@@ -410,8 +407,7 @@ class PluginPageReloadTest {
         val cache = Room.memoryDatabaseBuilder<CacheDatabase>().setDriver(createDatabaseDriver()).build()
         val appData = AppDataStore(storage)
         val registry = testPlatformRegistry()
-        val draftMediaStore = DraftMediaStore(storage)
-        val drafts = DraftRepository(app, draftMediaStore)
+        val drafts = DraftRepository(app, DraftMediaStore(storage))
         val repository =
             AccountRepository(
                 app,
@@ -430,19 +426,8 @@ class PluginPageReloadTest {
                         testSingle { cache }
                         testSingle { appData }
                         testSingle { repository }
-                        testSingle { scope }
-                        testSingle { registry }
                         testSingle { drafts }
                         testSingle { RestoreDraftUseCase(drafts, repository) }
-                        testSingle {
-                            ComposeUseCase(
-                                scope,
-                                get(),
-                                appData,
-                                SaveDraftUseCase(drafts, draftMediaStore),
-                                SendDraftUseCase(drafts, repository, draftMediaStore),
-                            )
-                        }
                         testSingle<AccountService> { RepositoryAccountService(repository) }
                         testSingle<PreTranslationService> { NoopPreTranslationService }
                     },

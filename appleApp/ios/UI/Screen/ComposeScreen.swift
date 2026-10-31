@@ -396,7 +396,7 @@ struct ComposeScreen: View {
             }
             .padding(8)
         }
-        .frame(minWidth: 280, maxWidth: 340, maxHeight: 420)
+        .frame(idealWidth: 340, idealHeight: 420)
         .presentationDetents([.medium, .large])
     }
 

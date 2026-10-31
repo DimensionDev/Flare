@@ -37,6 +37,8 @@ public class TranslatePresenter(
     private val targetLanguage: String = Locale.language,
     private val cacheTarget: TranslateCacheTarget? = null,
 ) : PresenterBase<UiState<UiRichText>>() {
+    public constructor(source: UiRichText, targetLanguage: String) : this(source, targetLanguage, cacheTarget = null)
+
     private val aiCompletionService by koinInject<AiCompletionService>()
     private val appDataStore: AppDataStore by koinInject()
     private val database: CacheDatabase by koinInject()

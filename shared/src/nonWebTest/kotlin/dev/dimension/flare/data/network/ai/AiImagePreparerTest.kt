@@ -1,5 +1,6 @@
 package dev.dimension.flare.data.network.ai
 
+import dev.dimension.flare.RobolectricTest
 import dev.dimension.flare.common.UploadMedia
 import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.model.MicroBlogKey
@@ -28,7 +29,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
-class AiImagePreparerTest {
+class AiImagePreparerTest : RobolectricTest() {
     @Test
     fun localFileExceedingReadBudgetIsRejectedWithoutReadingItsContents() =
         runTest {

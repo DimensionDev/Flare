@@ -45,6 +45,12 @@ kotlin {
                 baseName = "KotlinSharedUI"
                 isStatic = true
 
+                if (optimized && providers.environmentVariable("CI").orNull == "true") {
+                    linkTaskProvider.configure {
+                        toolOptions.freeCompilerArgs.add("-Xauto-cache-from=${rootProject.projectDir}")
+                    }
+                }
+
                 if (appleTarget.name.startsWith("macos")) {
                     linkerOpts.add("-lsqlite3")
                 }
@@ -96,13 +102,22 @@ kotlin {
 }
 
 skie {
+    if (providers.environmentVariable("CI").orNull == "true") {
+        // SKIE's compilers bypass Gradle's worker limit.
+        build {
+            enableParallelSwiftCompilation.set(false)
+            enableConcurrentSkieCompilation.set(false)
+            enableParallelSkieCompilation.set(false)
+        }
+    }
     analytics {
         disableUpload.set(true)
         enabled.set(false)
     }
     features {
+        // Explicit presenter constructors keep Swift calls compatible with native library caching.
         group {
-            DefaultArgumentInterop.Enabled(true)
+            DefaultArgumentInterop.Enabled(false)
         }
         enableFlowCombineConvertorPreview = true
     }

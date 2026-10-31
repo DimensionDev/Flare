@@ -1,8 +1,10 @@
 package dev.dimension.flare.ui.component.status
 
 import android.graphics.Bitmap
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.CompositionLocalProvider
@@ -14,9 +16,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.ComposeUiFlags
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.InputMode
 import androidx.compose.ui.input.InputModeManager
 import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalInputModeManager
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.semantics.SemanticsActions
@@ -269,6 +273,62 @@ class StatusShareContentTest {
                 androidx.compose.ui.test
                     .hasText(root.createdAt.full),
             ).assertCountEquals(1)
+    }
+
+    @Test
+    fun screenshotExportKeepsEqualPaddingOnEveryEdge() {
+        val root = post("centered", "Centered post")
+        val captured = AtomicReference<Bitmap?>()
+        val completed = AtomicBoolean(false)
+        val padding = AtomicInteger()
+        composeRule.setContent {
+            CompositionLocalProvider(
+                LocalGlobalAppearance provides GlobalAppearance(),
+                LocalTimelineAppearance provides TimelineAppearance(showTranslateButton = false),
+            ) {
+                FlareTheme(darkTheme = false) {
+                    val view = LocalView.current
+                    val parent = rememberCompositionContext()
+                    val lifecycle = LocalLifecycleOwner.current
+                    val savedState = LocalSavedStateRegistryOwner.current
+                    val viewModelStore = LocalViewModelStoreOwner.current
+                    val density = LocalDensity.current
+                    LaunchedEffect(Unit) {
+                        padding.set(with(density) { 64.dp.roundToPx() })
+                        captured.set(
+                            captureOffscreenShareBitmap(
+                                context = view.context,
+                                view = view,
+                                parentCompositionContext = parent,
+                                lifecycleOwner = lifecycle,
+                                savedStateRegistryOwner = savedState,
+                                viewModelStoreOwner = viewModelStore,
+                                widthPx = with(density) { 488.dp.roundToPx() },
+                            ) {
+                                Box(Modifier.background(Color.Blue).padding(64.dp)) {
+                                    Box(Modifier.width(360.dp).background(Color.Red).padding(16.dp)) {
+                                        StatusShareContent(root, root.statusKey, emptyList())
+                                    }
+                                }
+                            },
+                        )
+                        completed.set(true)
+                    }
+                }
+            }
+        }
+        composeRule.waitUntil(timeoutMillis = 15_000) { completed.get() }
+        val bitmap = requireNotNull(captured.get())
+        try {
+            val columns = (0 until bitmap.width).filter { bitmap.getPixel(it, bitmap.height / 2) == android.graphics.Color.RED }
+            val rows = (0 until bitmap.height).filter { bitmap.getPixel(bitmap.width / 2, it) == android.graphics.Color.RED }
+            assertEquals("Left padding", padding.get(), columns.first())
+            assertEquals("Right padding", padding.get(), bitmap.width - columns.last() - 1)
+            assertEquals("Top padding", padding.get(), rows.first())
+            assertEquals("Bottom padding", padding.get(), bitmap.height - rows.last() - 1)
+        } finally {
+            bitmap.recycle()
+        }
     }
 
     @Test

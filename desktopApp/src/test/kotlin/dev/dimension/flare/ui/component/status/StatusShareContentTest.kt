@@ -1,15 +1,19 @@
 package dev.dimension.flare.ui.component.status
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toAwtImage
 import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsFocused
@@ -20,6 +24,7 @@ import androidx.compose.ui.test.isPopup
 import androidx.compose.ui.test.isToggleable
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
@@ -181,6 +186,33 @@ class StatusShareContentTest {
         composeRule.runOnIdle { assertTrue(confirmed) }
         composeRule.onNodeWithText("Cancel").performClick()
         composeRule.runOnIdle { assertTrue(cancelled) }
+    }
+
+    @Test
+    fun screenshotKeepsEqualPaddingOnEveryEdge() {
+        val root = post("centered", "Centered post")
+        composeRule.setContent {
+            FlareTheme(isDarkTheme = false) {
+                CompositionLocalProvider(
+                    LocalGlobalAppearance provides GlobalAppearance(),
+                    LocalTimelineAppearance provides TimelineAppearance(showTranslateButton = false),
+                ) {
+                    Box(Modifier.testTag("screenshot").background(Color.Blue).padding(64.dp)) {
+                        Box(Modifier.width(360.dp).background(Color.Red).padding(16.dp)) {
+                            StatusShareContent(root, root.statusKey, emptyList())
+                        }
+                    }
+                }
+            }
+        }
+        val bitmap = composeRule.onNodeWithTag("screenshot").captureToImage().toAwtImage()
+        val padding = with(composeRule.density) { 64.dp.roundToPx() }
+        val columns = (0 until bitmap.width).filter { bitmap.getRGB(it, bitmap.height / 2) == java.awt.Color.RED.rgb }
+        val rows = (0 until bitmap.height).filter { bitmap.getRGB(bitmap.width / 2, it) == java.awt.Color.RED.rgb }
+        assertEquals("Left padding", padding, columns.first())
+        assertEquals("Right padding", padding, bitmap.width - columns.last() - 1)
+        assertEquals("Top padding", padding, rows.first())
+        assertEquals("Bottom padding", padding, bitmap.height - rows.last() - 1)
     }
 
     @Test

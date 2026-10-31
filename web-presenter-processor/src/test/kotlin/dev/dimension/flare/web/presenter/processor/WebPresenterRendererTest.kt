@@ -1,6 +1,7 @@
 package dev.dimension.flare.web.presenter.processor
 
 import kotlin.test.Test
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class WebPresenterRendererTest {
@@ -642,6 +643,11 @@ class WebPresenterRendererTest {
                                         webType = null,
                                         enum = counterMode,
                                     ),
+                                    SealedPropertyModel(
+                                        name = "subtitle",
+                                        webType = WebType.String,
+                                        constructorParameter = false,
+                                    ),
                                 ),
                         ),
                     ),
@@ -719,6 +725,8 @@ class WebPresenterRendererTest {
         kotlin.assertContains("is dev.dimension.flare.web.shared.CounterStatus.Stable -> buildJsonObject")
         kotlin.assertContains("""put("type", "Threshold")""")
         kotlin.assertContains("""put("mode", JsonPrimitive(value.mode.name))""")
+        kotlin.assertContains("""put("subtitle", JsonPrimitive(value.subtitle))""")
+        assertFalse("subtitle = " in kotlin, "Computed properties must not be passed to constructors")
         kotlin.assertContains("private fun decodeDevDimensionFlareWebSharedCounterStatusWebSealed")
         kotlin.assertContains(""""Stable" -> dev.dimension.flare.web.shared.CounterStatus.Stable""")
         kotlin.assertContains(""""Threshold" -> dev.dimension.flare.web.shared.CounterStatus.Threshold(""")
@@ -746,7 +754,7 @@ class WebPresenterRendererTest {
             """{ "name": "Stable", "tag": "Stable", "properties": [] }""",
         )
         manifest.assertContains(
-            """{ "name": "Threshold", "tag": "Threshold", "properties": [{ "name": "count", "tsType": "number" }, { "name": "label", "tsType": "string", "nullable": true }, { "name": "mode", "kind": "enum", "tsType": "CounterMode", "values": ["Even", "Odd"] }] }""",
+            """{ "name": "Threshold", "tag": "Threshold", "properties": [{ "name": "count", "tsType": "number" }, { "name": "label", "tsType": "string", "nullable": true }, { "name": "mode", "kind": "enum", "tsType": "CounterMode", "values": ["Even", "Odd"] }, { "name": "subtitle", "tsType": "string" }] }""",
         )
         manifest.assertContains(
             """"return": { "kind": "sealed", "tsType": "CounterStatus"""",

@@ -35,6 +35,7 @@ public fun CommonStatusHeaderComponent(
     avatarModifier: Modifier = Modifier,
     nameModifier: Modifier = Modifier,
     handleModifier: Modifier = Modifier,
+    subtitle: String = data.handle.canonical,
     leadingContent: @Composable (RowScope.() -> Unit)? = {
         Box(avatarModifier, propagateMinConstraints = true) {
             AvatarComponent(
@@ -75,7 +76,7 @@ public fun CommonStatusHeaderComponent(
         },
         supportingContent = {
             PlatformText(
-                text = data.handle.canonical,
+                text = subtitle,
                 style = PlatformTheme.typography.caption,
                 color = PlatformTheme.colorScheme.caption,
                 modifier =

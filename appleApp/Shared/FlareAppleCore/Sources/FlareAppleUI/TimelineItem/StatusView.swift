@@ -202,7 +202,7 @@ public struct StatusView: View {
                         ) {
                             if let user {
                                 if showAsFullWidth {
-                                    UserOnelineView(data: user, showAvatar: false) {
+                                    UserOnelineView(data: user, showAvatar: false, subtitle: data.authorSubtitle) {
                                         topEndContent(
                                             visibility: visibility,
                                             translationDisplayState: translationDisplayState,
@@ -216,7 +216,7 @@ public struct StatusView: View {
                                         user.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
                                     }
                                 } else if isQuote {
-                                    UserOnelineView(data: user, showAvatar: true) {
+                                    UserOnelineView(data: user, showAvatar: true, subtitle: data.authorSubtitle) {
                                         topEndContent(
                                             visibility: visibility,
                                             translationDisplayState: translationDisplayState,
@@ -230,7 +230,7 @@ public struct StatusView: View {
                                         user.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
                                     }
                                 } else {
-                                    UserCompatView(data: user) {
+                                    UserCompatView(data: user, subtitle: data.authorSubtitle) {
                                         topEndContent(
                                             visibility: visibility,
                                             translationDisplayState: translationDisplayState,

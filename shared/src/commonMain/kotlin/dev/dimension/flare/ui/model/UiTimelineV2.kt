@@ -12,6 +12,7 @@ import dev.dimension.flare.ui.model.mapper.fromRss
 import dev.dimension.flare.ui.render.UiDateTime
 import dev.dimension.flare.ui.render.UiRichText
 import dev.dimension.flare.ui.route.DeeplinkRoute
+import dev.dimension.flare.web.shared.WebExport
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -332,7 +333,12 @@ public sealed class UiTimelineV2 {
         @Transient
         override val itemKey: String? = null,
         val pluginId: String? = null,
+        internal val authorSubtitleInternal: String? = null,
     ) : UiTimelineV2() {
+        @WebExport
+        val authorSubtitle: String
+            get() = authorSubtitleInternal ?: user?.handle?.canonical.orEmpty()
+
         @Transient
         override val stableItemKey: String = calculateStableItemKey()
         override val searchText: String =
@@ -360,6 +366,7 @@ public sealed class UiTimelineV2 {
                 .add(itemKey)
                 .add(platformId)
                 .add(platformIcon)
+                .add(authorSubtitle)
                 .add(images.renderSummaryHash { it.renderSummaryHash() })
                 .add(sensitive)
                 .add(contentWarning?.original?.renderSummaryHash())
@@ -563,6 +570,7 @@ private fun UiTimelineV2.Post.renderSummaryHash(): Int =
         .add(platformId)
         .add(platformIcon)
         .add(user?.renderSummaryHash())
+        .add(authorSubtitle)
         .add(contentWarning?.original?.renderSummaryHash())
         .add(contentWarning?.translation?.renderSummaryHash())
         .add(content.original.renderSummaryHash())

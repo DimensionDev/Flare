@@ -759,17 +759,17 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
         if showAsFullWidth {
             let userHeaderFull = resolvedUserHeaderFull()
             userHeaderFull.avatar.avatarShape = appearance.avatarShape
-            userHeaderFull.configure(data: user, trailing: topEndView, onClicked: onClicked)
+            userHeaderFull.configure(data: user, subtitle: data.authorSubtitle, trailing: topEndView, onClicked: onClicked)
             return userHeaderFull
         } else if isQuote {
             let userHeaderQuote = resolvedUserHeaderQuote()
             userHeaderQuote.avatar.avatarShape = appearance.avatarShape
-            userHeaderQuote.configure(data: user, trailing: topEndView, onClicked: onClicked)
+            userHeaderQuote.configure(data: user, subtitle: data.authorSubtitle, trailing: topEndView, onClicked: onClicked)
             return userHeaderQuote
         } else {
             let userHeaderCompat = resolvedUserHeaderCompat()
             userHeaderCompat.avatar.avatarShape = appearance.avatarShape
-            userHeaderCompat.configure(data: user, trailing: topEndView, onClicked: onClicked)
+            userHeaderCompat.configure(data: user, subtitle: data.authorSubtitle, trailing: topEndView, onClicked: onClicked)
             return userHeaderCompat
         }
     }

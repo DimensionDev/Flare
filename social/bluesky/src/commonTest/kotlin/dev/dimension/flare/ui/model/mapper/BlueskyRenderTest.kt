@@ -74,6 +74,30 @@ class BlueskyRenderTest {
     }
 
     @Test
+    fun postAuthorSubtitleUsesFullHandleWithoutAppendingHost() {
+        val cases =
+            listOf(
+                Triple("bsky.app", "bsky.social", "@bsky.app"),
+                Triple("alice.bsky.social", "bsky.social", "@alice.bsky.social"),
+                Triple("alice.example", "pds.example", "@alice.example"),
+            )
+
+        cases.forEach { (handle, host, expected) ->
+            val account = accountKey.copy(host = host)
+            val author = createProfile("author", handle)
+            val rendered =
+                createPostView(
+                    uri = "at://did:plc:author/app.bsky.feed.post/subtitle",
+                    author = author,
+                    text = "content",
+                ).render(account)
+
+            assertEquals(expected, rendered.authorSubtitle)
+            assertEquals(author.render(account), rendered.user)
+        }
+    }
+
+    @Test
     fun videoDownloadUrlsPreservePlaybackForDirectQuotedAndRepostedVideos() {
         val playlist = "https://video.example/playlist.m3u8"
         val download = "https://author.example/xrpc/com.atproto.sync.getBlob?did=author&cid=video"
@@ -292,6 +316,13 @@ class BlueskyRenderTest {
             )
 
         val rendered = timelinePostItemOf(listOf(FeedViewPost(post = mainPost)).render(accountKey).single())
+        assertEquals("@author.bsky.social", rendered.post.authorSubtitle)
+        assertEquals(
+            "@quoted.bsky.social",
+            rendered.presentation.quotes
+                .single()
+                .authorSubtitle,
+        )
         assertEquals(1, rendered.presentation.quotes.size)
         assertEquals(
             "quoted content",
@@ -342,6 +373,13 @@ class BlueskyRenderTest {
 
         val rendered = listOf(feed).render(accountKey)
         val post = timelinePostItemOf(rendered.single())
+        assertEquals("@child.bsky.social", post.post.authorSubtitle)
+        assertEquals(
+            "@parent.bsky.social",
+            post.presentation.inlineParents
+                .single()
+                .post.authorSubtitle,
+        )
         assertEquals(1, post.presentation.inlineParents.size)
         assertEquals(
             "parent quoted content",
@@ -393,6 +431,8 @@ class BlueskyRenderTest {
 
         val type = assertIs<UiTimelineV2.Message.Type.Localized>(message.type)
         assertEquals(UiTimelineV2.Message.Type.Localized.MessageId.Repost, type.data)
+        assertEquals("@reposter.bsky.social", rendered.post.authorSubtitle)
+        assertEquals("@original.bsky.social", repost.authorSubtitle)
         assertEquals("did:plc:reposter", message.user?.key?.id)
         assertEquals(
             "did:plc:reposter",
@@ -449,6 +489,14 @@ class BlueskyRenderTest {
         val type = assertIs<UiTimelineV2.Message.Type.Localized>(message.type)
 
         assertEquals(UiTimelineV2.Message.Type.Localized.MessageId.Repost, type.data)
+        assertEquals("@reposter.bsky.social", rendered.post.authorSubtitle)
+        assertEquals("@original.bsky.social", repost.authorSubtitle)
+        assertEquals(
+            "@quoted.bsky.social",
+            rendered.presentation.quotes
+                .single()
+                .authorSubtitle,
+        )
         assertEquals("", rendered.post.content.original.innerText)
         assertEquals(message.statusKey.id, rendered.statusKey.id)
         assertEquals(1, rendered.presentation.quotes.size)

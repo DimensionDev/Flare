@@ -549,5 +549,10 @@
   "settingsAiUseShared": "使用翻譯與摘要的 AI 設定",
   "settingsAiUseSharedDescription": "關閉後，可為 Agent 單獨設定伺服器、模型和推理參數。",
   "settingsAiAgentEnabled": "啟用 AI Agent",
-  "settingsAiAgentDescription": "設定相容的模型後顯示 AI Agent 入口。"
+  "settingsAiAgentDescription": "設定相容的模型後顯示 AI Agent 入口。",
+  "composeVisibilityFriends": "好友圈可見",
+  "composeVisibilityFriendsDescription": "僅互相關注的好友可以看到此微博",
+  "composeVisibilitySelf": "僅自己可見",
+  "composeVisibilitySelfDescription": "僅你自己可以看到此微博",
+  "composeVisibilityUnsupported": "目前帳號不支援所選範圍，請重新選擇後發送。"
 }

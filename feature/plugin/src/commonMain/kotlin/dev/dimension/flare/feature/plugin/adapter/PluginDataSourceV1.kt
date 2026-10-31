@@ -880,6 +880,7 @@ private fun UiTimelineV2.Post.Visibility.toWire(): VisibilityV1 =
         UiTimelineV2.Post.Visibility.Followers -> VisibilityV1.Followers
         UiTimelineV2.Post.Visibility.Specified -> VisibilityV1.Direct
         UiTimelineV2.Post.Visibility.Channel -> VisibilityV1.Channel
+        UiTimelineV2.Post.Visibility.Friends, UiTimelineV2.Post.Visibility.SelfOnly -> error("Unsupported plugin visibility: $this")
     }
 
 private fun VisibilityV1.toHost(): UiTimelineV2.Post.Visibility =

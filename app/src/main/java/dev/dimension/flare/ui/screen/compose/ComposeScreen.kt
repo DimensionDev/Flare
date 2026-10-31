@@ -852,6 +852,9 @@ internal fun ComposeScreen(
                             },
                             properties = PopupProperties(focusable = false),
                         ) {
+                            if (!visibilityState.isValid) {
+                                Text(text = stringResource(R.string.compose_visibility_unsupported), modifier = Modifier.padding(12.dp))
+                            }
                             visibilityState.allVisibilities.forEach { visibility ->
                                 DropdownMenuItem(
                                     onClick = {
@@ -1293,7 +1296,6 @@ private fun composePresenter(
             media.setMediaSensitive(draft.data.sensitive)
             pollState.takeSuccess()?.setPoll(draft.data.poll)
             contentWarningState.takeSuccess()?.setText(draft.data.spoilerText)
-            state.visibilityState.takeSuccess()?.setVisibility(draft.data.visibility)
             languageState.takeSuccess()?.setSelectedLanguages(draft.data.language)
             state.consumeLoadedDraft()
         }
@@ -1329,9 +1331,7 @@ private fun composePresenter(
                 },
             sensitive = media.isMediaSensitive,
             spoilerText = spoilerText,
-            visibility =
-                state.visibilityState.takeSuccess()?.visibility
-                    ?: UiTimelineV2.Post.Visibility.Public,
+            visibility = state.visibility,
             referenceStatus =
                 state.composeStatus?.let {
                     ComposeData.ReferenceStatus(
@@ -1619,6 +1619,14 @@ internal val UiTimelineV2.Post.Visibility.localName: Int
                 R.string.misskey_visibility_specified
             }
 
+            UiTimelineV2.Post.Visibility.Friends -> {
+                R.string.visibility_friends
+            }
+
+            UiTimelineV2.Post.Visibility.SelfOnly -> {
+                R.string.visibility_self
+            }
+
             UiTimelineV2.Post.Visibility.Channel -> {
                 R.string.misskey_visibility_public
             }
@@ -1641,6 +1649,14 @@ internal val UiTimelineV2.Post.Visibility.localDescription: Int
 
             UiTimelineV2.Post.Visibility.Specified -> {
                 R.string.misskey_visibility_specified_description
+            }
+
+            UiTimelineV2.Post.Visibility.Friends -> {
+                R.string.visibility_friends_description
+            }
+
+            UiTimelineV2.Post.Visibility.SelfOnly -> {
+                R.string.visibility_self_description
             }
 
             UiTimelineV2.Post.Visibility.Channel -> {

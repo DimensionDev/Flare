@@ -147,6 +147,9 @@ public struct ComposeVisibilityMenu: View {
 
     public var body: some View {
         Menu {
+            if !allVisibilities.contains(visibility) {
+                Text("compose_visibility_unsupported", bundle: FlareAppleUILocalization.bundle)
+            }
             ForEach(allVisibilities, id: \.self) { visibility in
                 Button {
                     onSelect(visibility)
@@ -300,6 +303,10 @@ private extension UiTimelineV2.PostVisibility {
             "matrix_followers"
         case .specified:
             "status_visibility_specified"
+        case .friends:
+            "visibility_friends"
+        case .selfOnly:
+            "visibility_self"
         case .channel:
             "status_visibility_public"
         }
@@ -326,6 +333,10 @@ private extension UiTimelineV2.PostVisibility {
             "status_visibility_followers_description"
         case .specified:
             "status_visibility_specified_description"
+        case .friends:
+            "visibility_friends_description"
+        case .selfOnly:
+            "visibility_self_description"
         case .channel:
             "status_visibility_public_description"
         }

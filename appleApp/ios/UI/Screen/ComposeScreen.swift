@@ -585,7 +585,6 @@ struct ComposeScreen: View {
         let result = viewModel.applyDraft(draft)
         mediaViewModel.sensitive = result.sensitive
         mediaViewModel.restore(draftMedias: draft.medias)
-        setVisibility(result.visibility)
         requestComposerFocus()
     }
     
@@ -603,16 +602,11 @@ struct ComposeScreen: View {
         }
     }
     private func getVisibility() -> UiTimelineV2.PostVisibility {
-        switch onEnum(of: presenter.state.visibilityState) {
-            case .success(let success): return success.data.visibility
-            default: return .public
-        }
+        presenter.state.visibility
     }
 
     private func setVisibility(_ visibility: UiTimelineV2.PostVisibility) {
-        if case .success(let visibilityState) = onEnum(of: presenter.state.visibilityState) {
-            visibilityState.data.setVisibility(value: visibility)
-        }
+        presenter.state.setVisibility(value: visibility)
     }
 
     private var composeVisibility: UiTimelineV2.PostVisibility? {

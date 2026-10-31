@@ -499,12 +499,7 @@ struct MacComposeScreen: View {
     }
 
     private var currentVisibility: UiTimelineV2.PostVisibility {
-        switch onEnum(of: presenter.state.visibilityState) {
-        case .success(let success):
-            success.data.visibility
-        default:
-            .public
-        }
+        presenter.state.visibility
     }
 
     private func importFiles(_ result: Result<[URL], Error>) {
@@ -565,9 +560,7 @@ struct MacComposeScreen: View {
     }
 
     private func setVisibility(_ visibility: UiTimelineV2.PostVisibility) {
-        if case .success(let visibilityState) = onEnum(of: presenter.state.visibilityState) {
-            visibilityState.data.setVisibility(value: visibility)
-        }
+        presenter.state.setVisibility(value: visibility)
     }
 
     private var composeVisibility: UiTimelineV2.PostVisibility? {
@@ -639,7 +632,6 @@ struct MacComposeScreen: View {
         sensitive = result.sensitive
         mediaItems = draft.medias.compactMap(MacComposeMediaItem.init(draftMedia:))
         syncMediaMimeTypes()
-        setVisibility(result.visibility)
     }
 
     private func syncMediaMimeTypes() {

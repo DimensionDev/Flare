@@ -438,4 +438,6 @@
 <string name="ugoira_loading">正在載入動圖</string>
     <string name="weibo_friends_circle_title">好友圈</string>
     <string name="weibo_private_following_title">悄悄關注</string>
+    <string name="visibility_friends">好友圈可見</string>
+    <string name="visibility_self">僅自己可見</string>
 </resources>

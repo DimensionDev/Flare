@@ -106,6 +106,7 @@ import dev.dimension.flare.compose_select_accounts_current
 import dev.dimension.flare.compose_send
 import dev.dimension.flare.compose_show_emoji_picker
 import dev.dimension.flare.compose_video_no_alt
+import dev.dimension.flare.compose_visibility_unsupported
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.model.PostActionStyle
@@ -148,6 +149,10 @@ import dev.dimension.flare.ui.presenter.compose.ComposeStatus
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.theme.LocalComposeWindow
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
+import dev.dimension.flare.visibility_friends
+import dev.dimension.flare.visibility_friends_description
+import dev.dimension.flare.visibility_self
+import dev.dimension.flare.visibility_self_description
 import io.github.composefluent.FluentTheme
 import io.github.composefluent.LocalTextStyle
 import io.github.composefluent.component.AccentButton
@@ -860,6 +865,9 @@ fun ComposeDialog(
                         )
                     MenuFlyoutContainer(
                         flyout = {
+                            if (!visibilityState.isValid) {
+                                Text(text = stringResource(Res.string.compose_visibility_unsupported), modifier = Modifier.padding(12.dp))
+                            }
                             visibilityState.allVisibilities.forEach { visibility ->
                                 MenuFlyoutItem(
                                     onClick = {
@@ -1238,7 +1246,6 @@ private fun composePresenter(
             mediaState.takeSuccess()?.setMediaSensitive(draft.data.sensitive)
             pollState.takeSuccess()?.setPoll(draft.data.poll)
             contentWarningState.takeSuccess()?.setText(draft.data.spoilerText)
-            state.visibilityState.takeSuccess()?.setVisibility(draft.data.visibility)
             languageState.takeSuccess()?.setSelectedLanguages(draft.data.language)
             state.consumeLoadedDraft()
         }
@@ -1302,9 +1309,7 @@ private fun composePresenter(
                     },
                 sensitive = mediaState.takeSuccess()?.isMediaSensitive ?: false,
                 spoilerText = spoilerText,
-                visibility =
-                    state.visibilityState.takeSuccess()?.visibility
-                        ?: UiTimelineV2.Post.Visibility.Public,
+                visibility = state.visibility,
                 referenceStatus =
                     state.composeStatus?.let {
                         ComposeData.ReferenceStatus(
@@ -1636,6 +1641,14 @@ internal val UiTimelineV2.Post.Visibility.localName: StringResource
                 Res.string.misskey_visibility_specified
             }
 
+            UiTimelineV2.Post.Visibility.Friends -> {
+                Res.string.visibility_friends
+            }
+
+            UiTimelineV2.Post.Visibility.SelfOnly -> {
+                Res.string.visibility_self
+            }
+
             UiTimelineV2.Post.Visibility.Channel -> {
                 Res.string.misskey_visibility_public
             }
@@ -1658,6 +1671,14 @@ internal val UiTimelineV2.Post.Visibility.localDescription: StringResource
 
             UiTimelineV2.Post.Visibility.Specified -> {
                 Res.string.misskey_visibility_specified_description
+            }
+
+            UiTimelineV2.Post.Visibility.Friends -> {
+                Res.string.visibility_friends_description
+            }
+
+            UiTimelineV2.Post.Visibility.SelfOnly -> {
+                Res.string.visibility_self_description
             }
 
             UiTimelineV2.Post.Visibility.Channel -> {

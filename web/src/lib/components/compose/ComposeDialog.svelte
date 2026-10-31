@@ -58,7 +58,6 @@
 	);
 
 	let text = $state('');
-	let visibilityOverride = $state<UiTimelineV2PostVisibility | null>(null);
 	let contentWarningEnabled = $state(false);
 	let spoilerText = $state('');
 	let selectedMedia = $state<SelectedMedia[]>([]);
@@ -98,9 +97,8 @@
 	const accountProfiles = $derived([...selectedProfiles, ...otherProfiles]);
 	const sending = $derived(compose.directSendState.phase === 'Sending');
 	const composeBusy = $derived(sending || mediaPreparing);
-	const canSubmit = $derived(compose.canSend && !composeBusy);
 	const visiblePollOptions = $derived(pollOptions);
-	const currentVisibility = $derived(visibilityOverride ?? compose.visibility);
+	const currentVisibility = $derived(compose.visibility);
 	const maxMediaCount = $derived(compose.mediaMaxCount > 0 ? compose.mediaMaxCount : 4);
 	const selectedMediaLimit = $derived<MediaCompressionLimit>({
 		maxSize: Number(compose.mediaCompressionMaxSizeBytes),
@@ -119,8 +117,9 @@
 	const allVisibilities = $derived<UiTimelineV2PostVisibility[]>(
 		compose.allVisibilities.length > 0
 			? compose.allVisibilities
-			: ['Public', 'Home', 'Followers', 'Specified']
+			: ['Public']
 	);
+	const canSubmit = $derived(compose.canSend && !composeBusy && allVisibilities.includes(currentVisibility));
 	const emojiEnabled = $derived(compose.emojis.length > 0);
 	const postReference = $derived(referencePost(compose.referencePost));
 
@@ -212,7 +211,7 @@
 	}
 
 	function setVisibility(value: UiTimelineV2PostVisibility): void {
-		visibilityOverride = value;
+		compose.setVisibility(value);
 	}
 
 	function specificAccountType(accountKey: MicroBlogKey): AccountType {
@@ -562,6 +561,10 @@
 				return m.composeVisibilityFollowers();
 			case 'Specified':
 				return m.composeVisibilitySpecified();
+			case 'Friends':
+				return m.composeVisibilityFriends();
+			case 'SelfOnly':
+				return m.composeVisibilitySelf();
 		}
 	}
 
@@ -576,6 +579,10 @@
 				return m.composeVisibilityFollowersDescription();
 			case 'Specified':
 				return m.composeVisibilitySpecifiedDescription();
+			case 'Friends':
+				return m.composeVisibilityFriendsDescription();
+			case 'SelfOnly':
+				return m.composeVisibilitySelfDescription();
 		}
 	}
 
@@ -590,6 +597,10 @@
 				return 'Lock';
 			case 'Specified':
 				return 'Mention';
+			case 'Friends':
+				return 'Heart';
+			case 'SelfOnly':
+				return 'Lock';
 		}
 	}
 
@@ -860,6 +871,9 @@
 					{/key}
 				</button>
 				<ul class="menu dropdown-content z-30 mb-2 w-72 rounded-box bg-base-100 p-2 shadow">
+					{#if !allVisibilities.includes(currentVisibility)}
+						<li><span role="status">{m.composeVisibilityUnsupported()}</span></li>
+					{/if}
 					{#each allVisibilities as item}
 						<li>
 							<button type="button" disabled={composeBusy} onclick={() => setVisibility(item)}>

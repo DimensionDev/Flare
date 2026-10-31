@@ -53,7 +53,7 @@ internal class ComposePostTool(
             "Platform names or aliases to narrow account selection. Leave empty when the user did not choose a platform; the tool will request a structured platform/account selection if needed.",
         )
         val platforms: List<String> = emptyList(),
-        @property:LLMDescription("Visibility for the post: Public, Home, Followers, Specified, or Channel.")
+        @property:LLMDescription("Visibility for the post: Public, Home, Followers, Specified, Channel, Friends, or SelfOnly.")
         val visibility: String = "Public",
         @property:LLMDescription("ISO 639-1 language codes for the post text. Leave empty to use en.")
         val languages: List<String> = emptyList(),

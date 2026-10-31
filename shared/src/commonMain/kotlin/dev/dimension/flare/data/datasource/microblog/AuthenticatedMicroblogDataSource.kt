@@ -32,7 +32,12 @@ public interface ComposeDataSource : AuthenticatedMicroblogDataSource {
                 null -> ComposeType.New
             }
         // ponytail: Use cached/default limits like the editor; add provider expiry if stale limits cause failures.
-        val remaining = composeConfig(type).text?.remainingLength(data.content, data.spoilerText)?.first()
+        val config = composeConfig(type)
+        require(
+            config.visibility?.allVisibilities?.contains(data.visibility)
+                ?: (data.visibility == UiTimelineV2.Post.Visibility.Public),
+        ) { "The selected visibility is not supported by this account for this post." }
+        val remaining = config.text?.remainingLength(data.content, data.spoilerText)?.first()
         require(remaining?.isValid != false) { "Post text exceeds the platform limits." }
         publish(data, progress)
     }

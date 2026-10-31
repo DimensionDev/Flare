@@ -856,4 +856,9 @@
     <string name="agent_error_interrupted">执行已中断，请确认已完成的操作后再发送新消息。</string>
     <string name="weibo_friends_circle_title">好友圈</string>
     <string name="weibo_private_following_title">悄悄关注</string>
+    <string name="visibility_friends">好友圈可见</string>
+    <string name="visibility_friends_description">仅互相关注的好友可以看到此微博</string>
+    <string name="visibility_self">仅自己可见</string>
+    <string name="visibility_self_description">仅你自己可以看到此微博</string>
+    <string name="compose_visibility_unsupported">当前账号不支持所选范围，请重新选择后发送。</string>
 </resources>

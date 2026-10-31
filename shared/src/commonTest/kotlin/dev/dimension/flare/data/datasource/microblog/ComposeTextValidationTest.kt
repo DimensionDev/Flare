@@ -1,6 +1,9 @@
 package dev.dimension.flare.data.datasource.microblog
 
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.presenter.compose.ComposeStatus
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
@@ -10,6 +13,35 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 
 class ComposeTextValidationTest {
+    @Test
+    fun publishingRejectsUnsupportedVisibilityBeforeInvokingPlatform() =
+        runTest {
+            val source = TestComposeSource(ComposeConfig.Text(100))
+            for (visibility in listOf(UiTimelineV2.Post.Visibility.SelfOnly, UiTimelineV2.Post.Visibility.Friends)) {
+                assertFailsWith<IllegalArgumentException> { source.compose(ComposeData("post", visibility = visibility)) {} }
+            }
+            assertEquals(0, source.published)
+        }
+
+    @Test
+    fun publishingValidatesVisibilityForTheActualComposeType() =
+        runTest {
+            val config =
+                ComposeConfig.Visibility(
+                    allVisibilities = persistentListOf(UiTimelineV2.Post.Visibility.Public, UiTimelineV2.Post.Visibility.SelfOnly),
+                )
+            val source = TestComposeSource(ComposeConfig.Text(100), config)
+            val data = ComposeData("post", visibility = UiTimelineV2.Post.Visibility.SelfOnly)
+            source.compose(data) {}
+            assertEquals(1, source.published)
+            assertFailsWith<IllegalArgumentException> {
+                source.compose(
+                    data.copy(referenceStatus = ComposeData.ReferenceStatus(ComposeStatus.Reply(MicroBlogKey("post", "example.com")))),
+                ) {}
+            }
+            assertEquals(1, source.published)
+        }
+
     @Test
     fun publishingChecksFinalInputBeforeInvokingPlatform() =
         runTest {
@@ -45,6 +77,7 @@ class ComposeTextValidationTest {
 
 private class TestComposeSource(
     private val rule: ComposeConfig.Text,
+    private val visibility: ComposeConfig.Visibility? = null,
 ) : ComposeDataSource {
     override val accountKey = MicroBlogKey("test", "example.com")
     var published = 0
@@ -56,7 +89,8 @@ private class TestComposeSource(
         published++
     }
 
-    override fun composeConfig(type: ComposeType) = ComposeConfig(text = rule)
+    override fun composeConfig(type: ComposeType) =
+        ComposeConfig(text = rule, visibility = visibility.takeUnless { type == ComposeType.Reply })
 
     override fun homeTimeline(): Nothing = error("unused")
 

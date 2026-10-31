@@ -716,4 +716,9 @@
     <string name="plugin_uninstall_confirm_message">從本機刪除 %1$s 及其帳號、憑證和帳號資料？刪除後立即生效。</string>
     <string name="weibo_friends_circle_title">好友圈</string>
     <string name="weibo_private_following_title">悄悄關注</string>
+    <string name="visibility_friends">好友圈可見</string>
+    <string name="visibility_friends_description">僅互相關注的好友可以看到此微博</string>
+    <string name="visibility_self">僅自己可見</string>
+    <string name="visibility_self_description">僅你自己可以看到此微博</string>
+    <string name="compose_visibility_unsupported">目前帳號不支援所選範圍，請重新選擇後發送。</string>
 </resources>

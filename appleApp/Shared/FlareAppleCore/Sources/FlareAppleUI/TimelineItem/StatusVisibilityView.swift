@@ -26,6 +26,12 @@ public struct StatusVisibilityView: View {
         case .channel:
             Image(fontAwesome: .tv)
                 .accessibilityLabel(Text("channel_title", bundle: FlareAppleUILocalization.bundle))
+        case .friends:
+            Image(fontAwesome: .heart)
+                .accessibilityLabel(Text("visibility_friends", bundle: FlareAppleUILocalization.bundle))
+        case .selfOnly:
+            Image(fontAwesome: .lock)
+                .accessibilityLabel(Text("visibility_self", bundle: FlareAppleUILocalization.bundle))
         }
     }
 }

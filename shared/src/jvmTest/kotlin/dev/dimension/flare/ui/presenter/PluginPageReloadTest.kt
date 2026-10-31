@@ -40,8 +40,12 @@ import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.io.OkioFileStorage
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.AccountService
+import dev.dimension.flare.data.repository.DraftMediaStore
+import dev.dimension.flare.data.repository.DraftRepository
 import dev.dimension.flare.data.repository.ProxyRepository
 import dev.dimension.flare.data.repository.RepositoryAccountService
+import dev.dimension.flare.data.repository.SaveDraftInput
+import dev.dimension.flare.data.repository.SaveDraftTarget
 import dev.dimension.flare.data.translation.NoopPreTranslationService
 import dev.dimension.flare.data.translation.PreTranslationService
 import dev.dimension.flare.deleteTestRootPath
@@ -67,6 +71,12 @@ import dev.dimension.flare.ui.model.fallbackString
 import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.model.uiArticleContentOf
 import dev.dimension.flare.ui.presenter.article.ArticlePresenter
+import dev.dimension.flare.ui.presenter.compose.ComposePresenter
+import dev.dimension.flare.ui.presenter.compose.ComposeUseCase
+import dev.dimension.flare.ui.presenter.compose.RestoreDraftUseCase
+import dev.dimension.flare.ui.presenter.compose.SaveDraftUseCase
+import dev.dimension.flare.ui.presenter.compose.SendDraftUseCase
+import dev.dimension.flare.ui.presenter.compose.toDraftContent
 import dev.dimension.flare.ui.presenter.dm.DMConversationPresenter
 import dev.dimension.flare.ui.presenter.gallery.GalleryDetailPresenter
 import dev.dimension.flare.ui.presenter.home.CanComposePresenter
@@ -98,6 +108,8 @@ import org.koin.dsl.module
 import java.util.concurrent.Executors
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 import kotlin.time.Instant
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -105,6 +117,41 @@ class PluginPageReloadTest {
     private val accountKey = MicroBlogKey("alice", "plugin.example")
     private val accountType = AccountType.Specific(accountKey)
     private val contentKey = MicroBlogKey("content", accountKey.host)
+
+    @Test
+    fun composerRemainsUsableAfterMissingDraftRestore() =
+        withFixture {
+            attach(Source("compose", canCompose = true))
+            val state = observe(ComposePresenter(accountType))
+            state.await { it.selectedUsers.takeSuccess()?.isNotEmpty() == true }.setText("unsent post")
+            state.await { it.canSend }.loadDraft("missing-draft")
+            val failed = state.await { it.loadedDraftState is UiState.Error }
+            assertTrue(failed.canSend)
+        }
+
+    @Test
+    fun composerRequiresAValidAudienceAfterPrivateDraftRestore() =
+        withFixture {
+            attach(Source("compose", canCompose = true))
+            val groupId =
+                drafts.saveDraft(
+                    SaveDraftInput(
+                        groupId = "private-draft",
+                        content = ComposeData("private draft", visibility = UiTimelineV2.Post.Visibility.SelfOnly).toDraftContent(),
+                        targets = listOf(SaveDraftTarget(accountKey)),
+                    ),
+                )
+            val state = observe(ComposePresenter(accountType))
+            state.await { it.selectedUsers.takeSuccess()?.isNotEmpty() == true }.loadDraft(groupId)
+            val loaded = state.await { it.loadedDraftState is UiState.Success }
+            assertFalse(loaded.canSend)
+            loaded.consumeLoadedDraft()
+            val restored = state.await { it.loadedDraftState == null && it.visibility == UiTimelineV2.Post.Visibility.SelfOnly }
+            assertFalse(restored.canSend)
+            assertEquals(listOf(UiTimelineV2.Post.Visibility.Public), restored.allVisibilities.toList())
+            restored.setVisibility(UiTimelineV2.Post.Visibility.Public)
+            state.await { it.canSend }
+        }
 
     @Test
     fun composeAvailabilityFollowsPluginCapabilityReplacementAndRemoval() =
@@ -316,6 +363,8 @@ class PluginPageReloadTest {
         val cache = Room.memoryDatabaseBuilder<CacheDatabase>().setDriver(createDatabaseDriver()).build()
         val appData = AppDataStore(storage)
         val registry = testPlatformRegistry()
+        val draftMediaStore = DraftMediaStore(storage)
+        val drafts = DraftRepository(app, draftMediaStore)
         val repository =
             AccountRepository(
                 app,
@@ -324,14 +373,7 @@ class PluginPageReloadTest {
                 cache,
                 ProxyRepository(storage),
                 registry,
-                dev.dimension.flare.data.repository.DraftRepository(
-                    app,
-                    dev.dimension.flare.data.repository
-                        .DraftMediaStore(
-                            dev.dimension.flare.data.io
-                                .InMemoryFileStorage(),
-                        ),
-                ),
+                drafts,
             )
 
         init {
@@ -341,6 +383,19 @@ class PluginPageReloadTest {
                         testSingle { cache }
                         testSingle { appData }
                         testSingle { repository }
+                        testSingle { scope }
+                        testSingle { registry }
+                        testSingle { drafts }
+                        testSingle { RestoreDraftUseCase(drafts, repository) }
+                        testSingle {
+                            ComposeUseCase(
+                                scope,
+                                get(),
+                                appData,
+                                SaveDraftUseCase(drafts, draftMediaStore),
+                                SendDraftUseCase(drafts, repository, draftMediaStore),
+                            )
+                        }
                         testSingle<AccountService> { RepositoryAccountService(repository) }
                         testSingle<PreTranslationService> { NoopPreTranslationService }
                     },

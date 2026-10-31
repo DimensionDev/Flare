@@ -448,4 +448,6 @@
 
     <string name="weibo_friends_circle_title">好友圈</string>
     <string name="weibo_private_following_title">悄悄关注</string>
+    <string name="visibility_friends">好友圈可见</string>
+    <string name="visibility_self">仅自己可见</string>
 </resources>

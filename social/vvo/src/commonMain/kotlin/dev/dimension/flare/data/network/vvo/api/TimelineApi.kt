@@ -4,6 +4,7 @@ import de.jensklingenberg.ktorfit.http.GET
 import de.jensklingenberg.ktorfit.http.Query
 import dev.dimension.flare.data.network.vvo.model.Attitude
 import dev.dimension.flare.data.network.vvo.model.Comment
+import dev.dimension.flare.data.network.vvo.model.GroupTimelineData
 import dev.dimension.flare.data.network.vvo.model.HotflowChildData
 import dev.dimension.flare.data.network.vvo.model.HotflowData
 import dev.dimension.flare.data.network.vvo.model.RepostTimeline
@@ -16,6 +17,22 @@ internal interface TimelineApi {
     suspend fun getFriendsTimeline(
         @Query("max_id") maxId: String? = null,
     ): VVOResponse<TimelineData>
+
+    @GET("feed/group")
+    suspend fun getGroupTimeline(
+        @Query("gid") groupId: String,
+        @Query("max_id") maxId: String? = null,
+    ): VVOResponse<GroupTimelineData>
+
+    @GET("feed/circle")
+    suspend fun getCircleTimeline(
+        @Query("max_id") maxId: String? = null,
+    ): VVOResponse<GroupTimelineData>
+
+    @GET("feed/private")
+    suspend fun getPrivateTimeline(
+        @Query("max_id") maxId: String? = null,
+    ): VVOResponse<GroupTimelineData>
 
     @GET("message/mentionsAt")
     suspend fun getMentionsAt(

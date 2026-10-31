@@ -80,6 +80,8 @@ import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.screen.settings.EditTabPresenter
+import dev.dimension.flare.weibo_friends_circle_title
+import dev.dimension.flare.weibo_private_following_title
 import io.github.composefluent.component.ContentDialog
 import io.github.composefluent.component.ContentDialogButton
 import io.github.composefluent.component.Text
@@ -276,6 +278,8 @@ private val UiStrings.desktopStringResource: StringResource
             UiStrings.Reposts -> Res.string.tab_settings_filter_repost
 
             UiStrings.Articles -> Res.string.profile_tab_articles
+            UiStrings.WeiboFriendsCircle -> Res.string.weibo_friends_circle_title
+            UiStrings.WeiboPrivateFollowing -> Res.string.weibo_private_following_title
 
             UiStrings.Media -> Res.string.profile_tab_media
 

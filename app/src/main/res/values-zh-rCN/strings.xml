@@ -927,4 +927,6 @@
     <string name="agent_error_details">错误详情</string>
     <string name="agent_error_retry">重试</string>
     <string name="agent_error_interrupted">执行已中断，请确认已完成的操作后再发送新消息。</string>
+    <string name="weibo_friends_circle_title">好友圈</string>
+    <string name="weibo_private_following_title">悄悄关注</string>
 </resources>

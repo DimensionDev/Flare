@@ -226,6 +226,10 @@ public extension UiStrings {
             localizedPresentationString("vvo_status_reposts", fallback: "Reposts")
         case .articles:
             localizedPresentationString("profile_tab_articles", fallback: "Articles")
+        case .weiboFriendsCircle:
+            localizedPresentationString("weibo_friends_circle_title", fallback: "Friends Circle")
+        case .weiboPrivateFollowing:
+            localizedPresentationString("weibo_private_following_title", fallback: "Private Following")
         case .media:
             localizedPresentationString("appearance_media_group_title", fallback: "Media")
         }

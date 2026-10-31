@@ -65,6 +65,8 @@ public enum class UiStrings {
     Popular,
     Reposts,
     Articles,
+    WeiboFriendsCircle,
+    WeiboPrivateFollowing,
 }
 
 public fun UiStrings.asText(): UiText = UiText.Localized(this)

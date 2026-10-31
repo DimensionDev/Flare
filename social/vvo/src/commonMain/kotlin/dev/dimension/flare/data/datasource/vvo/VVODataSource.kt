@@ -1,6 +1,7 @@
 package dev.dimension.flare.data.datasource.vvo
 
 import androidx.paging.ExperimentalPagingApi
+import androidx.paging.Pager
 import dev.dimension.flare.common.CacheData
 import dev.dimension.flare.common.FileItem
 import dev.dimension.flare.common.MemCacheable
@@ -16,6 +17,8 @@ import dev.dimension.flare.data.datasource.microblog.NotificationTimelineDataSou
 import dev.dimension.flare.data.datasource.microblog.PostEvent
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
 import dev.dimension.flare.data.datasource.microblog.datasource.NotificationDataSource
+import dev.dimension.flare.data.datasource.microblog.datasource.PinnableTimelineTabDataSource
+import dev.dimension.flare.data.datasource.microblog.datasource.PinnableTimelineTabSection
 import dev.dimension.flare.data.datasource.microblog.datasource.PostDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.RelationDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.TimelineTabConfigurationDataSource
@@ -30,6 +33,7 @@ import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.ShareRepliesLoader
+import dev.dimension.flare.data.datasource.microblog.pagingConfig
 import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.data.model.tab.ShortcutSpec
@@ -80,6 +84,7 @@ internal class VVODataSource(
     UserDataSource,
     RelationDataSource,
     TimelineTabConfigurationDataSource,
+    PinnableTimelineTabDataSource,
     PostDataSource,
     PostEventHandler.Handler {
     private val imageCompressor: ImageCompressor by koinInject()
@@ -107,6 +112,22 @@ internal class VVODataSource(
         }
     }
 
+    override val pinnableTimelineTabs: List<PinnableTimelineTabSection> by lazy {
+        listOf(
+            PinnableTimelineTabSection(
+                title = UiStrings.List,
+                data = Pager(config = pagingConfig) { VVOGroupPagingSource(service, accountKey) }.flow,
+            ),
+        )
+    }
+
+    fun groupTimeline(groupId: String): RemoteLoader<UiTimelineV2> =
+        VVOFeedTimelineRemoteMediator(service, accountKey, VVOFeed.Group(groupId))
+
+    fun friendsCircleTimeline(): RemoteLoader<UiTimelineV2> = VVOFeedTimelineRemoteMediator(service, accountKey, VVOFeed.Circle)
+
+    fun privateFollowingTimeline(): RemoteLoader<UiTimelineV2> = VVOFeedTimelineRemoteMediator(service, accountKey, VVOFeed.Private)
+
     override val defaultTabs by lazy {
         persistentListOf(
             CommonTimelineSpecs.home
@@ -130,6 +151,8 @@ internal class VVODataSource(
             ),
             VvoPlatformSpec.favoriteTimelineSpec.candidate(TimelineSpec.AccountBasedData(accountKey)),
             VvoPlatformSpec.likedTimelineSpec.candidate(TimelineSpec.AccountBasedData(accountKey)),
+            VvoPlatformSpec.friendsCircleTimelineSpec.candidate(TimelineSpec.AccountBasedData(accountKey)),
+            VvoPlatformSpec.privateFollowingTimelineSpec.candidate(TimelineSpec.AccountBasedData(accountKey)),
         )
     }
 
@@ -157,6 +180,22 @@ internal class VVODataSource(
                 target =
                     ShortcutSpec.Target.Timeline(
                         VvoPlatformSpec.likedTimelineSpec.candidate(TimelineSpec.AccountBasedData(accountKey)),
+                    ),
+            ),
+            ShortcutSpec(
+                title = UiStrings.WeiboFriendsCircle,
+                icon = UiIcon.Follow,
+                target =
+                    ShortcutSpec.Target.Timeline(
+                        VvoPlatformSpec.friendsCircleTimelineSpec.candidate(TimelineSpec.AccountBasedData(accountKey)),
+                    ),
+            ),
+            ShortcutSpec(
+                title = UiStrings.WeiboPrivateFollowing,
+                icon = UiIcon.Eye,
+                target =
+                    ShortcutSpec.Target.Timeline(
+                        VvoPlatformSpec.privateFollowingTimelineSpec.candidate(TimelineSpec.AccountBasedData(accountKey)),
                     ),
             ),
         )

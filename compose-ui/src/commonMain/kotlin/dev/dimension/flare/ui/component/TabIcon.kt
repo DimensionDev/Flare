@@ -76,6 +76,8 @@ import dev.dimension.flare.compose.ui.settings_title
 import dev.dimension.flare.compose.ui.social_title
 import dev.dimension.flare.compose.ui.tab_settings_default
 import dev.dimension.flare.compose.ui.tab_settings_filter_repost
+import dev.dimension.flare.compose.ui.weibo_friends_circle_title
+import dev.dimension.flare.compose.ui.weibo_private_following_title
 import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.data.model.tab.UiTimelineTabItem
@@ -357,6 +359,8 @@ internal val UiStrings.res: StringResource
             UiStrings.Reposts -> Res.string.tab_settings_filter_repost
 
             UiStrings.Articles -> Res.string.profile_tab_articles
+            UiStrings.WeiboFriendsCircle -> Res.string.weibo_friends_circle_title
+            UiStrings.WeiboPrivateFollowing -> Res.string.weibo_private_following_title
 
             UiStrings.Media -> Res.string.media_title
 

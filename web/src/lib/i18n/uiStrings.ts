@@ -64,6 +64,10 @@ export function localizedUiString(value: UiStrings): string {
 			return m.tabSettingsFilterRepost();
 		case 'Articles':
 			return m.profileTabArticles();
+		case 'WeiboFriendsCircle':
+			return m.weiboFriendsCircleTitle();
+		case 'WeiboPrivateFollowing':
+			return m.weiboPrivateFollowingTitle();
 		case 'Media':
 			return m.profileTabMedia();
 		case 'Channel':

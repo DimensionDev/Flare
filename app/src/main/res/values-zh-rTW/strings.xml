@@ -798,4 +798,6 @@
     <string name="agent_error_retry">重試</string>
     <string name="agent_error_interrupted">執行已中斷，請確認已完成的操作後再傳送新訊息。</string>
     <string name="plugin_uninstall_confirm_message">從本機刪除 %1$s 及其帳號、憑證和帳號資料？刪除後立即生效。</string>
+    <string name="weibo_friends_circle_title">好友圈</string>
+    <string name="weibo_private_following_title">悄悄關注</string>
 </resources>

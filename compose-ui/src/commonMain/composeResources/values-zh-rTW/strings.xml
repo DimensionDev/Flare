@@ -436,4 +436,6 @@
     <string name="fanbox_recommended_creators_title">推薦創作者</string>
 <string name="ugoira_play">播放動圖</string>
 <string name="ugoira_loading">正在載入動圖</string>
+    <string name="weibo_friends_circle_title">好友圈</string>
+    <string name="weibo_private_following_title">悄悄關注</string>
 </resources>

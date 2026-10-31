@@ -1,5 +1,6 @@
 <script lang="ts">
 	import FaIcon from '$lib/components/FaIcon.svelte';
+	import PlatformIcon from '$lib/components/PlatformIcon.svelte';
 	import { useDeepLink } from '$lib/deeplink/deepLink.svelte';
 	import type { TimelineAppearance } from '$lib/environment/environmentSettings.svelte';
 	import type { UiTimelineV2Post } from '@flare/web-presenters/timeline.svelte';
@@ -89,7 +90,7 @@
 			{/if}
 			{#if appearance.showPlatformLogo}
 				<span class="meta-icon" title={post.platformId}>
-					<FaIcon name={post.platformIcon} size={14} />
+					<PlatformIcon icon={post.platformIcon} size={14} />
 				</span>
 			{/if}
 			{#if !detailHeader}

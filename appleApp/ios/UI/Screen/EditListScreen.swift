@@ -163,7 +163,7 @@ struct EditListScreen: View {
                                 listMetaData: .init(
                                     title: self.title,
                                     description: self.desc.isEmpty ? nil : self.desc,
-                                    avatar: .init(name: avatar.itemIdentifier, data: imageByteArray, type: .image)
+                                    avatar: .init(name: avatar.itemIdentifier, data: imageByteArray, type: .image, mimeType: nil)
                                 )
                             )
                         } else {
@@ -171,6 +171,7 @@ struct EditListScreen: View {
                                 listMetaData: .init(
                                     title: self.title,
                                     description: self.desc.isEmpty ? nil : self.desc,
+                                    avatar: nil
                                 )
                             )
                         }

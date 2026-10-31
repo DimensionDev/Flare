@@ -2,6 +2,7 @@
 	import AppBackButton from '$lib/components/AppBackButton.svelte';
 	import AppTopBar from '$lib/components/AppTopBar.svelte';
 	import FaIcon from '$lib/components/FaIcon.svelte';
+	import PlatformIcon from '$lib/components/PlatformIcon.svelte';
 	import UserDisplay from '$lib/components/user/UserDisplay.svelte';
 	import { m } from '$lib/paraglide/messages.js';
 	import {
@@ -77,7 +78,7 @@
 									</div>
 								{:else}
 									<div class="account-avatar bg-base-200 text-base-content">
-										<FaIcon name={item.account.platformIcon} size={18} />
+										<PlatformIcon icon={item.account.platformIcon} size={18} />
 									</div>
 									<div class="account-copy">
 										<span class="account-title">{accountTitle(item)}</span>
@@ -169,7 +170,7 @@
 					{:else}
 						<div class="flex items-center gap-3">
 							<span class="account-avatar bg-base-200 text-base-content">
-								<FaIcon name={pendingRemoval.account.platformIcon} size={18} />
+								<PlatformIcon icon={pendingRemoval.account.platformIcon} size={18} />
 							</span>
 							<span class="account-copy">
 								<span class="account-title">{accountTitle(pendingRemoval)}</span>

@@ -34,7 +34,9 @@ public data class AgentInputRequest(
     val requestId: String,
     val options: List<Option>,
     val allowFreeText: Boolean = true,
+    @Serializable(with = AgentPostSnapshotSerializer::class)
     val postPreview: UiTimelineV2.Post? = null,
+    @Serializable(with = AgentProfileSnapshotSerializer::class)
     val userPreview: UiProfile? = null,
 ) {
     @Serializable
@@ -45,7 +47,9 @@ public data class AgentInputRequest(
         val value: String,
         val submit: Boolean = true,
         val confirmationKey: String? = null,
+        @Serializable(with = AgentProfileSnapshotSerializer::class)
         val userPreview: UiProfile? = null,
+        @Serializable(with = AgentPostSnapshotSerializer::class)
         val postPreview: UiTimelineV2.Post? = null,
     )
 }
@@ -55,7 +59,9 @@ internal data class AgentPendingInputRequest(
     val requestId: String,
     val options: List<Option>,
     val allowFreeText: Boolean = true,
+    @Serializable(with = AgentPostSnapshotSerializer::class)
     val postPreview: UiTimelineV2.Post? = null,
+    @Serializable(with = AgentProfileSnapshotSerializer::class)
     val userPreview: UiProfile? = null,
 ) {
     @Serializable
@@ -64,7 +70,9 @@ internal data class AgentPendingInputRequest(
         val value: String,
         val submit: Boolean = true,
         val confirmationKey: String? = null,
+        @Serializable(with = AgentProfileSnapshotSerializer::class)
         val userPreview: UiProfile? = null,
+        @Serializable(with = AgentPostSnapshotSerializer::class)
         val postPreview: UiTimelineV2.Post? = null,
     )
 }

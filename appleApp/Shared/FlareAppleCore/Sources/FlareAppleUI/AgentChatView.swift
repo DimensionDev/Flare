@@ -2,7 +2,6 @@ import FlareAppleCore
 import KotlinSharedUI
 import SwiftUI
 import SwiftUIBackports
-import Textual
 
 public struct AgentChatView: View {
     let messages: PagingState<AgentChatHistoryMessage>
@@ -20,7 +19,8 @@ public struct AgentChatView: View {
     let showsEmptyPlaceholder: Bool
 
     @State private var draft = ""
-    @State private var scrollPosition: String?
+    // PagingView registers its outer row IDs as AnyHashable.
+    @State private var scrollPosition: AnyHashable?
 
     public init(
         messages: PagingState<AgentChatHistoryMessage>,
@@ -86,7 +86,6 @@ public struct AgentChatView: View {
                                         onPostClick: onPostClick,
                                         onUserClick: onUserClick
                                     )
-                                    .id(message.id)
                                 }
                             )
                         }
@@ -126,9 +125,9 @@ public struct AgentChatView: View {
         }
     }
 
-    private var newestMessageId: String? {
+    private var newestMessageId: AnyHashable? {
         if case .success(let success) = onEnum(of: messages) {
-            return success.peek(index: 0)?.id
+            return success.peek(index: 0).map { AnyHashable($0.id) }
         }
         return nil
     }
@@ -188,16 +187,18 @@ private struct AgentChatMessageSkeletonBubble: View {
             VStack(alignment: .leading, spacing: 8) {
                 RoundedRectangle(cornerRadius: 4)
                     .fill(.quaternary)
-                    .frame(width: 280, height: 14)
+                    .frame(width: isUser ? 280 : nil, height: 14)
                 RoundedRectangle(cornerRadius: 4)
                     .fill(.quaternary)
-                    .frame(width: 180, height: 14)
+                    .frame(width: isUser ? 180 : nil, height: 14)
+                    .padding(.trailing, isUser ? 0 : 80)
             }
-            .padding(12)
-            .background(Color.flareSecondarySystemGroupedBackground, in: RoundedRectangle(cornerRadius: 14))
+            .padding(isUser ? 12 : 0)
+            .padding(.vertical, isUser ? 0 : 4)
+            .background(isUser ? Color.flareSecondarySystemGroupedBackground : .clear, in: RoundedRectangle(cornerRadius: 14))
             .overlay(
                 RoundedRectangle(cornerRadius: 14)
-                    .stroke(Color.flareSeparator.opacity(0.35), lineWidth: 1)
+                    .stroke(isUser ? Color.flareSeparator.opacity(0.35) : .clear, lineWidth: 1)
             )
         }
         .frame(maxWidth: .infinity, alignment: isUser ? .trailing : .leading)
@@ -255,7 +256,13 @@ private struct AgentChatMessageBubble: View {
                 Spacer(minLength: 80)
             }
 
-            if isPreviewOnlyUserMessage {
+            if !isUser {
+                messageContent
+                    .textSelection(.enabled)
+                    .foregroundStyle(.primary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.vertical, 4)
+            } else if isPreviewOnlyUserMessage {
                 messageContent
                     .textSelection(.enabled)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -263,19 +270,11 @@ private struct AgentChatMessageBubble: View {
                 messageContent
                     .textSelection(.enabled)
                     .padding(12)
-                    .foregroundStyle(isUser ? .white : .primary)
+                    .foregroundStyle(.white)
                     .background(
                         RoundedRectangle(cornerRadius: 12, style: .continuous)
-                            .fill(isUser ? Color.accentColor : Color.flareSecondarySystemGroupedBackground)
+                            .fill(Color.accentColor)
                     )
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 12, style: .continuous)
-                            .stroke(isUser ? Color.clear : Color.flareSeparator.opacity(0.45), lineWidth: 1)
-                    )
-            }
-
-            if !isUser {
-                Spacer(minLength: 80)
             }
         }
         .frame(maxWidth: .infinity)
@@ -324,8 +323,7 @@ private struct AgentChatMessageBubble: View {
         if isUser {
             Text(verbatim: value)
         } else {
-            StructuredText(markdown: value)
-                .textual.textSelection(.enabled)
+            AgentMarkdownText(markdown: value)
         }
     }
 

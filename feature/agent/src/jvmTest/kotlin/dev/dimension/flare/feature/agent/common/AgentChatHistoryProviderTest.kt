@@ -1,35 +1,332 @@
 package dev.dimension.flare.feature.agent.common
 
+import ai.koog.http.client.ktor.KtorKoogHttpClient
 import ai.koog.prompt.Prompt
+import ai.koog.prompt.message.AttachmentContent
+import ai.koog.prompt.message.AttachmentSource
 import ai.koog.prompt.message.Message
 import ai.koog.prompt.message.MessagePart
 import androidx.room3.Room
+import androidx.sqlite.SQLiteConnection
+import androidx.sqlite.SQLiteDriver
+import androidx.sqlite.SQLiteStatement
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import androidx.sqlite.execSQL
+import dev.dimension.flare.data.datastore.model.AppSettings
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.feature.agent.database.AGENT_CONTEXT_MIGRATION
 import dev.dimension.flare.feature.agent.database.AgentDatabase
 import dev.dimension.flare.feature.agent.presenter.AgentMessagePart
 import dev.dimension.flare.feature.agent.presenter.agentMessageText
+import dev.dimension.flare.feature.agent.runtime.AiConfigKoogBridge
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.ClickEvent
+import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.UiTranslatableText
+import dev.dimension.flare.ui.model.createSampleUser
+import dev.dimension.flare.ui.model.withProxy
 import dev.dimension.flare.ui.render.toUi
 import dev.dimension.flare.ui.render.toUiPlainText
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.mock.MockEngine
+import io.ktor.client.engine.mock.respond
+import io.ktor.http.HttpStatusCode
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import java.nio.file.Files
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertIs
+import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 class AgentChatHistoryProviderTest {
+    @Test
+    fun deepSeekImageRetryKeepsTheSourceCardBeforeAndAfterTheModelFinishes() =
+        runTest {
+            withContext(Dispatchers.Default) {
+                Fixture().use { fixture ->
+                    val id = "status-insight:image-retry"
+                    val image =
+                        UiMedia.Image(
+                            url = "https://image.example/fixture.png",
+                            previewUrl = "https://image.example/fixture.png",
+                            description = null,
+                            width = 100f,
+                            height = 100f,
+                            sensitive = false,
+                            proxy = ProxyRef.Account(MicroBlogKey("viewer", "example.social")),
+                        )
+                    val source = AgentMessagePart.PostCard(post().copy(images = persistentListOf(image)))
+                    fixture.history.ensureInitialUserUiMessage(id, "fixture", source)
+                    val initial =
+                        fixture.history
+                            .observeMessages(id)
+                            .first()
+                            .single()
+                    val initialId = initial.id
+                    val retryReached = CompletableDeferred<Unit>()
+                    val finish = CompletableDeferred<Unit>()
+                    var calls = 0
+                    var downloads = 0
+                    val client =
+                        HttpClient(
+                            MockEngine {
+                                if (++calls == 1) {
+                                    respond(
+                                        """{"error":{"message":".messages[1].image[0]: Failed to download image from ${image.url}","type":"invalid_request_error"}}""",
+                                        HttpStatusCode.BadRequest,
+                                    )
+                                } else {
+                                    retryReached.complete(Unit)
+                                    finish.await()
+                                    respond(
+                                        """{"id":"response","object":"chat.completion","created":0,"model":"test-model","choices":[{"index":0,"message":{"role":"assistant","content":"Done"},"finish_reason":"stop"}]}""",
+                                    )
+                                }
+                            },
+                        )
+                    val runtime =
+                        assertNotNull(
+                            AiConfigKoogBridge().createRuntime(
+                                AppSettings.AiConfig(
+                                    type = AppSettings.AiConfig.Type.OpenAI("https://agent.example/v1", "fixture", "test-model"),
+                                ),
+                                KtorKoogHttpClient.Factory(baseClient = client),
+                            ),
+                        )
+                    val prompt =
+                        Prompt.build("image-retry") {
+                            user {
+                                text("Analyze this social post for the user.\nPost:\nplatform: Mastodon\ncontent: fixture")
+                                image(image.url)
+                            }
+                        }
+                    val request =
+                        FlareAgentRequest(
+                            prompt,
+                            "Explain the post",
+                            "image-retry",
+                            "image-retry",
+                            "analyze",
+                            "tools",
+                            "results",
+                            supportingParts = listOf(source),
+                            toolSet = AgentToolSet.Empty,
+                            images = listOf(image),
+                        )
+                    val agent =
+                        runtime.createAgent(
+                            request,
+                            {},
+                            fixture.history,
+                            prepareImage = { _, _ ->
+                                downloads++
+                                AttachmentSource.Image(
+                                    AttachmentContent.Binary.Bytes(byteArrayOf(1, 2, 3)),
+                                    "png",
+                                    "image/png",
+                                    "fixture.png",
+                                )
+                            },
+                            storeMessages = {
+                                conversationId,
+                                messages,
+                                ->
+                                fixture.history.storeAssistantResponse(conversationId, messages, listOf(source), null)
+                            },
+                        )
+                    val result = async { agent.run(prompt, id) }
+                    try {
+                        retryReached.await()
+                        val pending =
+                            fixture.history
+                                .observeMessages(id)
+                                .first()
+                                .single { it.isUser }
+                        assertEquals(initialId, pending.id)
+                        assertIs<AgentMessagePart.PostCard>(pending.parts.single())
+                        finish.complete(Unit)
+                        assertEquals("Done", result.await())
+                        val completed =
+                            fixture.history
+                                .observeMessages(id)
+                                .first()
+                                .single { it.isUser }
+                        assertEquals(initialId, completed.id)
+                        assertEquals(initial.parts, completed.parts)
+                        assertEquals(2, calls)
+                        assertEquals(1, downloads)
+                    } finally {
+                        finish.complete(Unit)
+                        result.cancel()
+                        agent.close()
+                        runtime.promptExecutor.close()
+                        client.close()
+                    }
+                }
+            }
+        }
+
+    @Test
+    fun sourceCardSurvivesACompetingModelHistorySave() =
+        runTest {
+            withContext(Dispatchers.Default) {
+                val directory = Files.createTempDirectory("agent-source-card-race")
+                val driver = PausedHistoryDriver()
+                val database =
+                    Room
+                        .databaseBuilder<AgentDatabase>(directory.resolve("agent.db").toString())
+                        .setDriver(driver)
+                        .setQueryCoroutineContext(Dispatchers.IO)
+                        .build()
+                try {
+                    val history = AgentChatHistoryProvider(database) { null }
+                    history.ensureConversationTitle(CONVERSATION, "fixture")
+                    driver.armed.set(true)
+                    val modelSave =
+                        async(Dispatchers.IO) {
+                            val messages =
+                                Prompt
+                                    .build("source-card-race") {
+                                        system("System")
+                                        user("fixture")
+                                        assistant("Done")
+                                    }.messages
+                            history.storeAssistantResponse(CONVERSATION, messages, emptyList(), null)
+                        }
+                    assertTrue(withContext(Dispatchers.IO) { driver.readReached.await(5, TimeUnit.SECONDS) })
+                    val cardSave =
+                        async(Dispatchers.IO) {
+                            history.storeUserUiMessage(CONVERSATION, "fixture", listOf(AgentMessagePart.PostCard(post())))
+                        }
+                    // The old writer allowed this insert after reading an empty, stale snapshot.
+                    withTimeoutOrNull(200) { cardSave.await() }
+                    driver.resume.countDown()
+                    modelSave.await()
+                    cardSave.await()
+                    assertTrue(
+                        history.observeMessages(CONVERSATION).first().any { it.isUser && it.parts.single() is AgentMessagePart.PostCard },
+                    )
+                } finally {
+                    driver.resume.countDown()
+                    database.close()
+                    directory.toFile().deleteRecursively()
+                }
+            }
+        }
+
+    @Test
+    fun initialCardRepairsLegacyTextWithoutChangingModelHistoryOrFollowupQuestions() =
+        runTest {
+            Fixture().use { fixture ->
+                val id = "status-insight:legacy"
+                val source =
+                    user(
+                        "Analyze this social post for the user.\nPost:\nplatform: Mastodon\ncontent: fixture\nLatest user question:\nQuoted source text",
+                        "source",
+                    )
+                val followup =
+                    user(
+                        "Continue the conversation about this social post.\nLatest user question:\nWhy?\n\nCurrent post snapshot:\nAnalyze this social post for the user.",
+                        "question",
+                    )
+                fixture.history.store(id, listOf(source, assistant("Analysis", "answer"), followup))
+                val before = fixture.history.load(id)
+                val sourceId =
+                    fixture.history
+                        .observeMessages(id)
+                        .first()
+                        .last()
+                        .id
+                repeat(2) { fixture.history.ensureInitialUserUiMessage(id, "fixture", AgentMessagePart.PostCard(post())) }
+                val visible = fixture.history.observeMessages(id).first()
+                assertEquals(3, visible.size)
+                assertEquals(sourceId, visible.last().id)
+                assertIs<AgentMessagePart.PostCard>(visible.last().parts.single())
+                assertEquals("Why?", (visible.first().parts.single() as AgentMessagePart.Text).markdown)
+                assertEquals(before, fixture.history.load(id))
+            }
+        }
+
+    @Test
+    fun initialCardIsIdempotentAndExcludedFromModelReplay() =
+        runTest {
+            Fixture().use { fixture ->
+                val id = "status-insight:initial"
+                repeat(2) { fixture.history.ensureInitialUserUiMessage(id, "fixture", AgentMessagePart.PostCard(post())) }
+                val initial =
+                    fixture.history
+                        .observeMessages(id)
+                        .first()
+                        .single()
+                assertTrue(fixture.history.load(id).isEmpty())
+                val prompt = listOf(user("Analyze this social post for the user.\nPost:\nplatform: Mastodon\ncontent: fixture", "source"))
+                fixture.history.store(id, prompt)
+                val stored =
+                    fixture.history
+                        .observeMessages(id)
+                        .first()
+                        .single()
+                assertEquals(initial.id, stored.id)
+                assertIs<AgentMessagePart.PostCard>(stored.parts.single())
+                assertEquals(
+                    prompt.single().id,
+                    fixture.history
+                        .load(id)
+                        .single()
+                        .id,
+                )
+            }
+        }
+
+    @Test
+    fun reopeningLegacyProfileRestoresItsViewerScopeInPlace() =
+        runTest {
+            Fixture().use { fixture ->
+                val id = "profile-insight:legacy"
+                val source = user("Analyze this social profile for the user.\nProfile:\nplatform: Mastodon\ndisplayName: fixture", "source")
+                fixture.history.store(id, listOf(source, assistant("Analysis", "answer")))
+                val before = fixture.history.load(id)
+                val proxy = ProxyRef.Account(MicroBlogKey("viewer", "example.social"))
+                val profile = createSampleUser().withProxy(proxy)
+                repeat(2) { fixture.history.ensureInitialUserUiMessage(id, "fixture", AgentMessagePart.UserCard(profile)) }
+                val visible = fixture.history.observeMessages(id).first()
+                assertEquals(2, visible.size)
+                val restored = assertIs<AgentMessagePart.UserCard>(visible.last().parts.single()).user
+                assertEquals(profile.avatar, restored.avatar)
+                assertEquals(profile.banner, restored.banner)
+                assertEquals(before, fixture.history.load(id))
+            }
+        }
+
+    @Test
+    fun missingInitialCardDoesNotReplaceAnExistingFollowup() =
+        runTest {
+            Fixture().use { fixture ->
+                val id = "profile-insight:followup"
+                fixture.history.storeUserUiMessage(id, "Followup question")
+                repeat(2) { fixture.history.ensureInitialUserUiMessage(id, "fixture", AgentMessagePart.PostCard(post())) }
+                val messages = fixture.history.observeMessages(id).first()
+                assertEquals(2, messages.size)
+                assertEquals("Followup question", (messages.first().parts.single() as AgentMessagePart.Text).markdown)
+                assertIs<AgentMessagePart.PostCard>(messages.last().parts.single())
+            }
+        }
+
     @Test
     fun repeatedRequestIdsDoNotRewritePreviouslySelectedAnswers() =
         runTest {
@@ -749,5 +1046,34 @@ class AgentChatHistoryProviderTest {
 
     private companion object {
         const val CONVERSATION = "conversation"
+    }
+
+    private class PausedHistoryDriver(
+        private val delegate: SQLiteDriver = BundledSQLiteDriver(),
+    ) : SQLiteDriver by delegate {
+        val armed = AtomicBoolean(false)
+        val readReached = CountDownLatch(1)
+        val resume = CountDownLatch(1)
+
+        override fun open(fileName: String): SQLiteConnection {
+            val connection = delegate.open(fileName)
+            return object : SQLiteConnection by connection {
+                override fun prepare(sql: String): SQLiteStatement {
+                    val statement = connection.prepare(sql)
+                    val target = sql.contains("FROM agent_messages") && sql.contains("ORDER BY position ASC")
+                    return object : SQLiteStatement by statement {
+                        override fun step(): Boolean {
+                            val hasRow = statement.step()
+                            if (target && !hasRow && armed.compareAndSet(true, false)) {
+                                statement.reset()
+                                readReached.countDown()
+                                check(resume.await(5, TimeUnit.SECONDS)) { "Competing card write timed out" }
+                            }
+                            return hasRow
+                        }
+                    }
+                }
+            }
+        }
     }
 }

@@ -48,7 +48,6 @@ import androidx.compose.ui.input.key.type
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
-import com.halilibo.richtext.commonmark.Markdown
 import com.halilibo.richtext.ui.BasicRichText
 import com.halilibo.richtext.ui.RichTextThemeProvider
 import compose.icons.FontAwesomeIcons
@@ -70,6 +69,7 @@ import dev.dimension.flare.ui.common.itemsIndexed
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScrollBar
 import dev.dimension.flare.ui.component.LocalTimelineAppearance
+import dev.dimension.flare.ui.component.ProxyMarkdown
 import dev.dimension.flare.ui.component.status.CommonStatusComponent
 import dev.dimension.flare.ui.component.status.UserCompat
 import dev.dimension.flare.ui.model.UiProfile
@@ -248,16 +248,20 @@ private fun AgentChatMessageSkeleton(isUser: Boolean) {
     ) {
         Column(
             modifier =
-                Modifier
-                    .fillMaxWidth(0.72f)
-                    .background(
-                        color = FluentTheme.colors.background.layer.default,
-                        shape = RoundedCornerShape(8.dp),
-                    ).border(
-                        width = 1.dp,
-                        color = FluentTheme.colors.stroke.card.default,
-                        shape = RoundedCornerShape(8.dp),
-                    ).padding(12.dp),
+                if (isUser) {
+                    Modifier
+                        .fillMaxWidth(0.72f)
+                        .background(
+                            color = FluentTheme.colors.background.layer.default,
+                            shape = RoundedCornerShape(8.dp),
+                        ).border(
+                            width = 1.dp,
+                            color = FluentTheme.colors.stroke.card.default,
+                            shape = RoundedCornerShape(8.dp),
+                        ).padding(12.dp)
+                } else {
+                    Modifier.fillMaxWidth().padding(vertical = 4.dp)
+                },
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Box(
@@ -298,7 +302,16 @@ private fun AgentChatMessageBubble(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = if (isUser) Arrangement.End else Arrangement.Start,
     ) {
-        if (previewOnlyUserMessage) {
+        if (!isUser) {
+            AgentChatMessageParts(
+                parts = parts,
+                isUser = false,
+                onPostClick = onPostClick,
+                onUserClick = onUserClick,
+                onInputRequestOptionSelected = onInputRequestOptionSelected,
+                modifier = Modifier.padding(vertical = 4.dp),
+            )
+        } else if (previewOnlyUserMessage) {
             Column(
                 modifier = Modifier.fillMaxWidth(0.82f),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
@@ -317,12 +330,7 @@ private fun AgentChatMessageBubble(
                     Modifier
                         .fillMaxWidth(0.82f)
                         .background(
-                            color =
-                                if (isUser) {
-                                    FluentTheme.colors.fillAccent.default
-                                } else {
-                                    FluentTheme.colors.background.layer.default
-                                },
+                            color = FluentTheme.colors.fillAccent.default,
                             shape = RoundedCornerShape(8.dp),
                         ).padding(12.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
@@ -346,10 +354,11 @@ private fun AgentChatMessageParts(
     onPostClick: (UiTimelineV2.Post) -> Unit,
     onUserClick: (UiProfile) -> Unit,
     onInputRequestOptionSelected: (AgentInputRequest.Option) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(10.dp),
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
     ) {
         parts.forEach { part ->
             when (part) {
@@ -408,7 +417,7 @@ private fun AgentMarkdownText(
     ) {
         SelectionContainer {
             BasicRichText(modifier = modifier) {
-                Markdown(content = markdown)
+                ProxyMarkdown(content = markdown)
             }
         }
     }

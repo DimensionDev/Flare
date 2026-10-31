@@ -1,13 +1,19 @@
 package dev.dimension.flare.ui.component.agent
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotDisplayed
+import androidx.compose.ui.test.captureToImage
+import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -31,6 +37,41 @@ import org.junit.runner.RunWith
 class AgentChatMessageListTest {
     @get:Rule
     val composeRule = createComposeRule()
+
+    @Test
+    fun assistantUsesTheContentWidthWithoutABubbleAndUserKeepsItsBubbleWidth() {
+        val assistantText = "Assistant response ".repeat(12).trim()
+        val userText = "User message ".repeat(12).trim()
+        val messages = MutableStateFlow(listOf(message(assistantText), message(userText).copy(role = AgentChatHistoryMessage.Role.User)))
+        composeRule.setContent {
+            val state by messages.collectPagingState()
+            MaterialTheme {
+                Box(Modifier.size(300.dp, 500.dp).background(Color.Magenta).testTag("chat")) {
+                    AgentChatMessageList(state, {}, contentPadding = PaddingValues(12.dp))
+                }
+            }
+        }
+
+        val chat = composeRule.onNodeWithTag("chat")
+        val chatBounds = chat.getUnclippedBoundsInRoot()
+        val assistant = composeRule.onNodeWithText(assistantText).getUnclippedBoundsInRoot()
+        val user = composeRule.onNodeWithText(userText).getUnclippedBoundsInRoot()
+        val contentWidth = (chatBounds.right - chatBounds.left).value - 24f
+        assertEquals(chatBounds.left.value + 12f, assistant.left.value, 1f)
+        assertEquals(contentWidth, (assistant.right - assistant.left).value, 1f)
+        assertEquals(contentWidth * 0.88f - 24f, (user.right - user.left).value, 1f)
+        assertEquals(chatBounds.right.value - 24f, user.right.value, 1f)
+
+        val pixels = chat.captureToImage().toPixelMap()
+        val scale = pixels.width / (contentWidth + 24f)
+        assertEquals(
+            Color.Magenta,
+            pixels[
+                ((assistant.left.value - chatBounds.left.value + 1f) * scale).toInt(),
+                ((assistant.top.value - chatBounds.top.value - 2f) * scale).toInt(),
+            ],
+        )
+    }
 
     @Test
     fun newReplyIsVisibleWhenReadingTheLatestMessages() {

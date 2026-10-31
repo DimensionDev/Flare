@@ -16,6 +16,8 @@ public class TimelineItemPresenter(
     private val timelineTabItem: UiTimelineTabItem,
     private val isHomeTimeline: Boolean = false,
 ) : PresenterBase<TimelineItemPresenter.State>() {
+    public constructor(timelineTabItem: UiTimelineTabItem) : this(timelineTabItem, isHomeTimeline = false)
+
     private val timelinePresenterFactory by koinInject<TimelinePresenterFactory>()
 
     public interface State {

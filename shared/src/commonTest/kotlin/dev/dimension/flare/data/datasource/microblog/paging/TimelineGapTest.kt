@@ -295,9 +295,10 @@ class TimelineGapTest : RobolectricTest() {
             for (nestedPolicy in listOf(null) + TimelineMergePolicy.entries) {
                 var fresh = false
                 val requests = mutableListOf<Pair<String, PagingRequest>>()
+                val requestsMutex = Mutex()
                 val ordered =
                     source("ordered-$nestedPolicy") { request ->
-                        requests += "ordered" to request
+                        requestsMutex.withLock { requests += "ordered" to request }
                         when (request) {
                             is PagingRequest.Append -> {
                                 if (request.nextKey == "ordered-gap") {
@@ -317,7 +318,7 @@ class TimelineGapTest : RobolectricTest() {
                     }
                 val ranked =
                     source("ranked-$nestedPolicy", ordered = false) { request ->
-                        requests += "ranked" to request
+                        requestsMutex.withLock { requests += "ranked" to request }
                         if (request is PagingRequest.Append) {
                             PagingResult(listOf(datedPost(50)))
                         } else {
@@ -441,9 +442,10 @@ class TimelineGapTest : RobolectricTest() {
                 for ((onlyRecommendations, ended) in listOf(false to false, true to false, true to true)) {
                     var generation = 0
                     val requests = mutableListOf<Pair<String, PagingRequest>>()
+                    val requestsMutex = Mutex()
                     val ranked =
                         source("legacy-ranked-$nestedPolicy-$onlyRecommendations-$ended", ordered = false) { request ->
-                            requests += "ranked" to request
+                            requestsMutex.withLock { requests += "ranked" to request }
                             if (request is PagingRequest.Append) {
                                 PagingResult(listOf(datedPost(50)))
                             } else if (generation == 2 && ended) {
@@ -457,7 +459,7 @@ class TimelineGapTest : RobolectricTest() {
                         }
                     val ordered =
                         source("legacy-ordered-$nestedPolicy-$onlyRecommendations-$ended") { request ->
-                            requests += "ordered" to request
+                            requestsMutex.withLock { requests += "ordered" to request }
                             if (request is PagingRequest.Append) {
                                 if (request.nextKey == "ordered-1") {
                                     PagingResult(listOf(datedPost(150), datedPost(100)), nextKey = "joined")

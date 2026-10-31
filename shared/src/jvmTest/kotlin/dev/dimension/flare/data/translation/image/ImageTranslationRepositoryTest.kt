@@ -55,6 +55,7 @@ import java.nio.file.Files
 import java.util.concurrent.ConcurrentLinkedQueue
 import javax.imageio.ImageIO
 import kotlin.test.Test
+import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
@@ -457,9 +458,40 @@ class ImageTranslationRepositoryTest {
                         store.appSettingsStore.updateData { it.copy(imageTranslationConfig = config) }
                         state = models.first { it.configured }
                         assertEquals(bResult, state.displayed(b))
-                        f.behavior = { throw ImageTranslationException(ImageTranslationError.Rejected) }
+                        f.behavior = {
+                            throw ImageTranslationException(
+                                ImageTranslationError.Rejected,
+                                diagnostics =
+                                    ImageTranslationDiagnostics(
+                                        400,
+                                        "invalid_request",
+                                        "Image request was rejected: key",
+                                        "failure-request",
+                                    ),
+                            )
+                        }
                         state.regenerate(b)
                         state = models.first { it.item(b).error == ImageTranslationError.Rejected }
+                        val details = requireNotNull(state.item(b).errorDetails)
+                        assertContains(details, "Stage: Translate image")
+                        assertContains(details, "Provider code: invalid_request")
+                        assertContains(details, "Request ID: failure-request")
+                        assertContains(details, "Image request was rejected: key")
+                        assertEquals(null, state.item(a).errorDetails)
+                        state.clearError(b)
+                        state = models.first { it.item(b).error == null }
+                        assertEquals(details, state.item(b).errorDetails)
+                        state.setErrorDetailsVisible(b, true)
+                        state = models.first { it.item(b).errorDetailsVisible }
+                        assertEquals(details, state.item(b).errorDetails)
+                        assertEquals(3, f.calls)
+                        state.setErrorDetailsVisible(b, false)
+                        state = models.first { !it.item(b).errorDetailsVisible }
+                        state.toggle(b)
+                        state = models.first { !it.item(b).showingTranslated }
+                        assertEquals(details, state.item(b).errorDetails)
+                        state.toggle(b)
+                        state = models.first { it.item(b).showingTranslated }
                         assertTrue(state.canToggle(b))
                         assertTrue(state.canRegenerate(b))
                         assertEquals(bResult, state.displayed(b))
@@ -467,6 +499,7 @@ class ImageTranslationRepositoryTest {
                         state.regenerate(b)
                         state = models.first { it.item(b).translated != null && it.item(b).translated?.url != bResult.url }
                         val latest = state.item(b).translated!!
+                        assertEquals(null, state.item(b).errorDetails)
                         state.imageFailed(b, "file:///stale-result.png")
                         assertEquals(latest, models.value.displayed(b))
                         state.imageFailed(b, latest.url)
@@ -719,7 +752,11 @@ class ImageTranslationRepositoryTest {
                                 aiConfig = it.aiConfig.copy(type = basic.copy(model = "second-image-model")),
                             )
                         }
-                        state = models.first { it.second.config.value("model") == "second-image-model" }.first
+                        state =
+                            models
+                                .first {
+                                    it.second.config.value("model") == "second-image-model" && !it.first.item(f.media).loading
+                                }.first
                         assertFalse(state.item(f.media).loading)
                         state.toggle(f.media)
                         state = models.first { it.first.item(f.media).translated != null }.first
@@ -731,7 +768,8 @@ class ImageTranslationRepositoryTest {
                                 .first {
                                     it.second.config.value(
                                         "model",
-                                    ) == "first-image-model" && it.first.item(f.media).translated != null
+                                    ) == "first-image-model" && it.first.item(f.media).translated != null &&
+                                        it.first.displayed(f.media) != secondResult
                                 }.first
                         assertTrue(state.displayed(f.media) != secondResult)
                         store.appSettingsStore.updateData {
@@ -739,7 +777,11 @@ class ImageTranslationRepositoryTest {
                                 aiConfig = it.aiConfig.copy(type = basic.copy(model = "second-image-model")),
                             )
                         }
-                        state = models.first { it.second.config.value("model") == "second-image-model" }.first
+                        state =
+                            models
+                                .first {
+                                    it.second.config.value("model") == "second-image-model" && it.first.displayed(f.media) == secondResult
+                                }.first
                         assertEquals(secondResult, state.displayed(f.media))
                         assertEquals(2, f.calls)
                         assertEquals(listOf("first-image-model", "second-image-model"), f.configs.map { it.value("model") })

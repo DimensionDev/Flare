@@ -44,17 +44,19 @@ internal class ImageTranslationInput(
                             }
 
                             is IllegalArgumentException, is IllegalStateException -> {
-                                throw ImageTranslationException(ImageTranslationError.UnsupportedInput).also { it.addSuppressed(error) }
+                                throw ImageTranslationException(ImageTranslationError.UnsupportedInput, stage = "Prepare input image")
+                                    .also { it.addSuppressed(error) }
                             }
 
                             else -> {
+                                error.addSuppressed(ImageTranslationStageException("Prepare input image"))
                                 throw error
                             }
                         }
                     }
                 ImageTranslationInput(null, preparedMedia, prepareImage)
             }
-                ?: throw ImageTranslationException(ImageTranslationError.Timeout)
+                ?: throw ImageTranslationException(ImageTranslationError.Timeout, stage = "Prepare input image")
         ).also { prepared = it }
 
     suspend fun <T> withImageFallback(request: suspend (String?) -> T): T =
@@ -120,6 +122,8 @@ internal class ImageTranslationException(
     val reason: ImageTranslationError,
     val imageFailure: AiImageFailure? = null,
     val retryWithFile: Boolean = false,
+    val diagnostics: ImageTranslationDiagnostics = ImageTranslationDiagnostics(),
+    var stage: String? = null,
 ) : Exception(reason.name)
 
 internal fun ImageTranslationConfig.translationPrompt(target: String): String = value("prompt").replace("{targetLanguage}", target)

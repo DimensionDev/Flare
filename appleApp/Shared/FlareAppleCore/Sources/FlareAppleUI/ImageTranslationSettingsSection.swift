@@ -2,6 +2,11 @@ import FlareAppleCore
 import KotlinSharedUI
 import Observation
 import SwiftUI
+#if os(iOS)
+import UIKit
+#elseif os(macOS)
+import AppKit
+#endif
 
 @Observable
 final class ImageTranslationSettingsState {
@@ -162,15 +167,86 @@ public extension View {
         alert(
             Text("Image translation", bundle: FlareAppleUILocalization.bundle),
             isPresented: Binding(
-                get: { enabled && (media.map { state.item(media: $0).error != nil } ?? false) },
+                get: { enabled && (media.map { state.item(media: $0).error != nil && !state.item(media: $0).errorDetailsVisible } ?? false) },
                 set: { if !$0, let media { state.clearError(media: media) } }
             )
         ) {
             Button("OK") { if let media { state.clearError(media: media) } }
+            if let media, state.item(media: media).errorDetails != nil {
+                Button {
+                    state.setErrorDetailsVisible(media: media, visible: true)
+                } label: {
+                    Text("View error details", bundle: FlareAppleUILocalization.bundle)
+                }
+            }
         } message: {
             if let media, let error = state.item(media: media).error {
                 Text(LocalizedStringKey(error.message), bundle: FlareAppleUILocalization.bundle)
             }
         }
+        .sheet(isPresented: Binding(
+            get: { enabled && (media.map { state.item(media: $0).errorDetailsVisible } ?? false) },
+            set: { if !$0, let media { state.setErrorDetailsVisible(media: media, visible: false) } }
+        )) {
+            if let media, let details = state.item(media: media).errorDetails {
+                ImageTranslationErrorDetailsView(details: details)
+            }
+        }
+    }
+}
+
+struct ImageTranslationErrorDetailsView: View {
+    let details: String
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            VStack(spacing: 0) {
+                ScrollView {
+                    Text(verbatim: details)
+                        .textSelection(.enabled)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding()
+                        .accessibilityIdentifier("image-translation-error-details")
+                }
+                #if os(macOS)
+                Divider()
+                HStack {
+                    copyButton
+                    Spacer()
+                    Button("OK") { dismiss() }
+                        .keyboardShortcut(.defaultAction)
+                }
+                    .padding()
+                #endif
+            }
+            .navigationTitle(Text("Error details", bundle: FlareAppleUILocalization.bundle))
+            .toolbar {
+                #if os(iOS)
+                ToolbarItem(placement: .confirmationAction) {
+                    Button { dismiss() } label: {
+                        Image(fontAwesome: .check)
+                    }
+                    .accessibilityLabel(Text("done", bundle: FlareAppleUILocalization.bundle))
+                }
+                ToolbarItem(placement: .primaryAction) { copyButton }
+                #endif
+            }
+        }
+        .frame(minWidth: 280, minHeight: 200)
+    }
+
+    private var copyButton: some View {
+        Button {
+            #if os(iOS)
+            UIPasteboard.general.string = details
+            #elseif os(macOS)
+            NSPasteboard.general.clearContents()
+            NSPasteboard.general.setString(details, forType: .string)
+            #endif
+        } label: {
+            Text("Copy error details", bundle: FlareAppleUILocalization.bundle)
+        }
+        .accessibilityIdentifier("image-translation-copy-error-details")
     }
 }

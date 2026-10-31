@@ -22,7 +22,7 @@ internal class GeminiImageTranslationAdapter(
     ): ImageTranslationOutput {
         val endpoint = checkedImageServiceUrl(config.value("baseUrl")) + "/interactions"
 
-        suspend fun request(url: String?): kotlinx.serialization.json.JsonObject {
+        suspend fun request(url: String?): ImageTranslationResponse {
             val input = if (url == null) input.prepared() else input
             if (url == null && input.size > 1024 * 1024) {
                 val metadata =
@@ -74,16 +74,16 @@ internal class GeminiImageTranslationAdapter(
         }
         val result = input.withImageFallback(::request)
         val image =
-            result["steps"]
+            result.body["steps"]
                 ?.jsonArray
                 .orEmpty()
                 .map { it.jsonObject }
                 .filter { it.text("type") == "model_output" }
                 .flatMap { it["content"]?.jsonArray.orEmpty() }
                 .map { it.jsonObject }
-                .lastOrNull { it.text("type") == "image" } ?: throw ImageTranslationException(ImageTranslationError.NoImage)
+                .lastOrNull { it.text("type") == "image" } ?: throw result.failure()
         return image.text("data")?.let(ImageTranslationOutput::Encoded)
             ?: image.text("uri")?.let(ImageTranslationOutput::Remote)
-            ?: throw ImageTranslationException(ImageTranslationError.NoImage)
+            ?: throw result.failure()
     }
 }

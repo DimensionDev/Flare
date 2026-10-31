@@ -794,18 +794,7 @@ internal fun MediaViewerScreen(
         }
         val translationCurrent = medias.takeSuccess()?.getOrNull(state.currentPage)
         translationCurrent?.let { current ->
-            translation.item(current).error?.let { error ->
-                androidx.compose.material3.AlertDialog(
-                    onDismissRequest = { translation.clearError(current) },
-                    title = { Text(imageTranslationText("Image translation")) },
-                    text = { Text(imageTranslationText(error.message)) },
-                    confirmButton = {
-                        androidx.compose.material3.TextButton(
-                            onClick = { translation.clearError(current) },
-                        ) { Text(stringResource(android.R.string.ok)) }
-                    },
-                )
-            }
+            ImageTranslationErrorDialog(translation, current)
         }
         if (state.showSheet) {
             ModalBottomSheet(
@@ -885,6 +874,16 @@ internal fun MediaViewerScreen(
 
                     val current = medias.getOrNull(state.currentPage)
                     if (current is UiMedia.Image) {
+                        if (translation.item(current).errorDetails != null) {
+                            ListItem(
+                                modifier =
+                                    Modifier.clickable {
+                                        state.setShowSheet(false)
+                                        translation.setErrorDetailsVisible(current, true)
+                                    },
+                                content = { Text(imageTranslationText("View error details")) },
+                            )
+                        }
                         if (translation.canRegenerate(current)) {
                             ListItem(
                                 modifier =

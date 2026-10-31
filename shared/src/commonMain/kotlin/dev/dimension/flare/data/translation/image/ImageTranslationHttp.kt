@@ -17,9 +17,9 @@ import io.ktor.http.content.TextContent
 import io.ktor.utils.io.ByteWriteChannel
 import io.ktor.utils.io.readAvailable
 import io.ktor.utils.io.writeFully
+import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.JsonPrimitive
 import okio.Buffer
 
 internal fun imageTranslationHttpClient(): HttpClient =
@@ -44,13 +44,21 @@ internal suspend fun HttpClient.imagePost(
     url: String,
     body: JsonObject,
     configure: HttpRequestBuilder.() -> Unit = {},
-): JsonObject = imagePost(url, TextContent(body.toString(), ContentType.Application.Json), configure)
+): ImageTranslationResponse = imagePost(url, TextContent(body.toString(), ContentType.Application.Json), configure)
+
+internal data class ImageTranslationResponse(
+    val body: JsonObject,
+    val diagnostics: ImageTranslationDiagnostics,
+) {
+    fun failure(reason: ImageTranslationError = ImageTranslationError.NoImage): ImageTranslationException =
+        ImageTranslationException(reason, diagnostics = diagnostics)
+}
 
 internal suspend fun HttpClient.imagePost(
     url: String,
     body: OutgoingContent,
     configure: HttpRequestBuilder.() -> Unit = {},
-): JsonObject =
+): ImageTranslationResponse =
     preparePost(url) {
         setBody(body)
         configure()
@@ -61,14 +69,29 @@ internal suspend fun HttpClient.imagePost(
         while (true) {
             val read = channel.readAvailable(buffer)
             if (read < 0) break
-            if (payload.size + read > MAX_IMAGE_JSON_BYTES) throw ImageTranslationException(ImageTranslationError.UnsupportedInput)
+            if (payload.size + read > MAX_IMAGE_JSON_BYTES) {
+                throw ImageTranslationException(
+                    ImageTranslationError.UnsupportedInput,
+                    diagnostics =
+                        ImageTranslationDiagnostics(
+                            httpStatus = response.status.value,
+                            message = "Provider response exceeds the $MAX_IMAGE_JSON_BYTES byte limit.",
+                        ),
+                )
+            }
             payload.write(buffer, 0, read)
         }
         channel.closedCause?.let { throw it }
         val body = payload.readUtf8()
         val parsed = runCatching { JSON.parseToJsonElement(body) as? JsonObject }.getOrNull()
+        val diagnostics =
+            parsed.imageTranslationDiagnostics(
+                response.status.value,
+                response.headers["x-request-id"] ?: response.headers["request-id"] ?: response.headers["x-goog-request-id"],
+                fallbackMessage = if (response.status.value !in 200..299) body else null,
+            )
         if (response.status.value !in 200..299) {
-            val error = parsed?.get("error")?.let { runCatching { it.jsonObject }.getOrNull() }
+            val error = parsed?.get("error") as? JsonObject
             val code = error?.text("code")
             val parameter = error?.text("param").orEmpty()
             throw ImageTranslationException(
@@ -86,9 +109,16 @@ internal suspend fun HttpClient.imagePost(
                                 parameter.startsWith("images") &&
                                 code in setOf("unknown_parameter", "unsupported_parameter", "invalid_type")
                         ),
+                diagnostics = diagnostics,
             )
         }
-        parsed ?: throw ImageTranslationException(ImageTranslationError.NoImage)
+        if (parsed?.get("error")?.takeUnless { it is JsonNull } != null) {
+            throw ImageTranslationException(ImageTranslationError.Rejected, diagnostics = diagnostics)
+        }
+        ImageTranslationResponse(
+            parsed ?: throw ImageTranslationException(ImageTranslationError.NoImage, diagnostics = diagnostics),
+            diagnostics,
+        )
     }
 
 internal fun streamingImageBody(
@@ -112,6 +142,6 @@ internal fun streamingImageBody(
     }
 }
 
-internal fun JsonObject.text(key: String): String? = this[key]?.jsonPrimitive?.content?.takeUnless { it == "null" || it.isBlank() }
+internal fun JsonObject.text(key: String): String? = (this[key] as? JsonPrimitive)?.content?.takeUnless { it == "null" || it.isBlank() }
 
 private const val MAX_IMAGE_JSON_BYTES = 64L * 1024 * 1024

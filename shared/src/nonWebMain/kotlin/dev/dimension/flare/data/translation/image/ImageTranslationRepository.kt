@@ -21,9 +21,11 @@ import io.ktor.http.decodeURLPart
 import io.ktor.http.encodeURLPath
 import io.ktor.utils.io.readAvailable
 import io.ktor.utils.io.writeFully
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
@@ -106,16 +108,23 @@ internal actual class ImageTranslationRepository(
                 active[job] = session to ownerId
             }
             val work = sessions / session / Uuid.random().toString()
+            var stage = "Prepare local files"
             try {
                 val ticket = cache.ticket(ownerId)
                 fs.createDirectories(work)
                 withTimeout(180_000) {
                     permits.withPermit {
                         val original = work / "original"
+                        stage = if (media.isRemote) "Download source image" else "Read source image"
                         if (media.isRemote) {
                             sourceClient(media.proxy).use { source ->
                                 source.prepareGet(media.urlForDownload) { applyMedia(media) }.execute { response ->
-                                    if (response.status.value !in 200..299) throw ImageTranslationException(ImageTranslationError.Network)
+                                    if (response.status.value !in 200..299) {
+                                        throw ImageTranslationException(
+                                            ImageTranslationError.Network,
+                                            diagnostics = ImageTranslationDiagnostics(httpStatus = response.status.value),
+                                        )
+                                    }
                                     download(response.bodyAsChannel(), original)
                                 }
                             }
@@ -126,6 +135,7 @@ internal actual class ImageTranslationRepository(
                                 original,
                             )
                         }
+                        stage = "Validate source image"
                         val info = inspectStaticImage(original)
                         val access =
                             (
@@ -178,8 +188,10 @@ internal actual class ImageTranslationRepository(
                             val adapter =
                                 adapters.firstOrNull { it.provider == config.provider }
                                     ?: throw ImageTranslationException(ImageTranslationError.NotConfigured)
+                            stage = "Translate image"
                             when (val result = adapter.translate(input, config, target)) {
                                 is ImageTranslationOutput.Encoded -> {
+                                    stage = "Decode translated image"
                                     val bytes =
                                         result.data
                                             .removePrefix("data:")
@@ -193,6 +205,7 @@ internal actual class ImageTranslationRepository(
                                 }
 
                                 is ImageTranslationOutput.Remote -> {
+                                    stage = "Download translated image"
                                     val url = runCatching { Url(result.url) }.getOrNull()
                                     if (url == null || url.protocol.name !in listOf("http", "https") || !url.user.isNullOrEmpty() ||
                                         !url.password.isNullOrEmpty()
@@ -203,13 +216,17 @@ internal actual class ImageTranslationRepository(
                                     mediaHttpClient(ProxyRef.Global).use { downloadClient ->
                                         downloadClient.prepareGet(result.url).execute { response ->
                                             if (response.status.value !in 200..299) {
-                                                throw ImageTranslationException(ImageTranslationError.Network)
+                                                throw ImageTranslationException(
+                                                    ImageTranslationError.Network,
+                                                    diagnostics = ImageTranslationDiagnostics(httpStatus = response.status.value),
+                                                )
                                             }
                                             download(response.bodyAsChannel(), output)
                                         }
                                     }
                                 }
                             }
+                            stage = "Validate translated image"
                             resultInfo = inspectStaticImage(output)
                             currentCoroutineContext().ensureActive()
                         }
@@ -226,6 +243,7 @@ internal actual class ImageTranslationRepository(
                                         "." +
                                         finalInfo.extension
                                 )
+                        stage = "Save translated image"
                         fs.atomicMove(output, file)
                         currentCoroutineContext().ensureActive()
                         val fileUrl = imageTranslationFileUrl(file.toString())
@@ -242,6 +260,12 @@ internal actual class ImageTranslationRepository(
                         translated
                     }
                 }
+            } catch (error: Exception) {
+                if (error is CancellationException && error !is TimeoutCancellationException) throw error
+                if (error is ImageTranslationException) throw error.also { if (it.stage == null) it.stage = stage }
+                // Keep the original exception type while retaining the failed stage.
+                error.addSuppressed(ImageTranslationStageException(stage))
+                throw error
             } finally {
                 withContext(NonCancellable) {
                     runCatching { fs.delete(work / "original", mustExist = false) }

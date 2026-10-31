@@ -24,6 +24,16 @@ internal interface TimelineApi {
         @Query("max_id") maxId: String? = null,
     ): VVOResponse<GroupTimelineData>
 
+    @GET("feed/circle")
+    suspend fun getCircleTimeline(
+        @Query("max_id") maxId: String? = null,
+    ): VVOResponse<GroupTimelineData>
+
+    @GET("feed/private")
+    suspend fun getPrivateTimeline(
+        @Query("max_id") maxId: String? = null,
+    ): VVOResponse<GroupTimelineData>
+
     @GET("message/mentionsAt")
     suspend fun getMentionsAt(
         @Query("page") page: Int,

@@ -54,6 +54,7 @@ before(async () => {
 			return { timelineAppearance: () => ({ type: 'Loading' }) };
 		}
 		export function localizedUiString(value) { return value; }
+		export function localizedUiText(value) { return value.string; }
 		export const m = new Proxy({}, { get: (_, key) => () => key });
 	`);
 	({ default: HomePage } = await import(pathToFileURL(path.join(directory, 'HomePage.mjs'))));

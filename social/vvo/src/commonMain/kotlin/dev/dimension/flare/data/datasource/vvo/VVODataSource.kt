@@ -121,7 +121,12 @@ internal class VVODataSource(
         )
     }
 
-    fun groupTimeline(groupId: String): RemoteLoader<UiTimelineV2> = GroupTimelineRemoteMediator(service, accountKey, groupId)
+    fun groupTimeline(groupId: String): RemoteLoader<UiTimelineV2> =
+        VVOFeedTimelineRemoteMediator(service, accountKey, VVOFeed.Group(groupId))
+
+    fun friendsCircleTimeline(): RemoteLoader<UiTimelineV2> = VVOFeedTimelineRemoteMediator(service, accountKey, VVOFeed.Circle)
+
+    fun privateFollowingTimeline(): RemoteLoader<UiTimelineV2> = VVOFeedTimelineRemoteMediator(service, accountKey, VVOFeed.Private)
 
     override val defaultTabs by lazy {
         persistentListOf(
@@ -146,6 +151,8 @@ internal class VVODataSource(
             ),
             VvoPlatformSpec.favoriteTimelineSpec.candidate(TimelineSpec.AccountBasedData(accountKey)),
             VvoPlatformSpec.likedTimelineSpec.candidate(TimelineSpec.AccountBasedData(accountKey)),
+            VvoPlatformSpec.friendsCircleTimelineSpec.candidate(TimelineSpec.AccountBasedData(accountKey)),
+            VvoPlatformSpec.privateFollowingTimelineSpec.candidate(TimelineSpec.AccountBasedData(accountKey)),
         )
     }
 

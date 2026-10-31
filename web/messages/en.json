@@ -271,6 +271,8 @@
   "profileTabLikes": "Likes",
   "profileTabHighlights": "Highlights",
   "profileTabArticles": "Articles",
+  "weiboFriendsCircleTitle": "Friends Circle",
+  "weiboPrivateFollowingTitle": "Private Following",
   "profileTabMedia": "Media",
   "profileTimelinesAriaLabel": "Profile timelines",
   "profileUnableToLoadTabs": "Unable to load profile tabs",

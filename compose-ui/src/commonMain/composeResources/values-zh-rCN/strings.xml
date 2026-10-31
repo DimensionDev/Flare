@@ -446,4 +446,6 @@
     <string name="share_replies_retry">重试</string>
     <string name="share_replies_children">加载这条评论的回复</string>
 
+    <string name="weibo_friends_circle_title">好友圈</string>
+    <string name="weibo_private_following_title">悄悄关注</string>
 </resources>

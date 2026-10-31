@@ -10,6 +10,7 @@ import dev.dimension.flare.data.platform.VVoCredential
 import dev.dimension.flare.data.platform.VvoPlatformSpec
 import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.model.UiText
 import dev.dimension.flare.ui.model.mapper.VvoRenderTestModule
 import io.ktor.client.HttpClient
@@ -122,7 +123,7 @@ class VVOGroupTest {
         runTest {
             val cursors = mutableListOf<String?>()
             val loader =
-                GroupTimelineRemoteMediator(
+                VVOFeedTimelineRemoteMediator(
                     service { request ->
                         assertEquals("/feed/group", request.url.encodedPath)
                         assertEquals("custom/2", request.url.parameters["gid"])
@@ -136,7 +137,7 @@ class VVOGroupTest {
                         }
                     },
                     accountKey,
-                    "custom/2",
+                    VVOFeed.Group("custom/2"),
                 )
 
             val refresh = loader.load(20, PagingRequest.Refresh)
@@ -162,7 +163,7 @@ class VVOGroupTest {
                 """{"statuses":[{"id":"1"}],"max_id":""}""",
                 """{"statuses":[{"id":"1"}]}""",
             ).forEach { data ->
-                val loader = GroupTimelineRemoteMediator(service { """{"ok":1,"data":$data}""" }, accountKey, "group")
+                val loader = VVOFeedTimelineRemoteMediator(service { """{"ok":1,"data":$data}""" }, accountKey, VVOFeed.Group("group"))
 
                 assertNull(loader.load(20, PagingRequest.Append("older")).nextKey)
             }
@@ -172,10 +173,10 @@ class VVOGroupTest {
     fun cardBasedGroupResponseUsesTheExistingStatusRenderer() =
         runTest {
             val loader =
-                GroupTimelineRemoteMediator(
+                VVOFeedTimelineRemoteMediator(
                     service { """{"ok":1,"data":{"cards":[{"card_type":9,"mblog":{"id":"42"}}],"max_id":"next"}}""" },
                     accountKey,
-                    "group",
+                    VVOFeed.Group("group"),
                 )
 
             val result = loader.load(20, PagingRequest.Refresh)
@@ -192,20 +193,21 @@ class VVOGroupTest {
                 """{"ok":1,"data":{}}""",
                 """{"ok":1,"data":{"statuses":[{"not_a_status":true}]}}""",
             ).forEach { body ->
-                val loader = GroupTimelineRemoteMediator(service { body }, accountKey, "group")
+                val loader = VVOFeedTimelineRemoteMediator(service { body }, accountKey, VVOFeed.Group("group"))
 
                 assertFailsWith<IllegalStateException> { loader.load(20, PagingRequest.Refresh) }
             }
-            val expired = GroupTimelineRemoteMediator(service { """{"ok":-100}""" }, accountKey, "group")
+            val expired = VVOFeedTimelineRemoteMediator(service { """{"ok":-100}""" }, accountKey, VVOFeed.Group("group"))
             assertEquals(accountKey, assertFailsWith<LoginExpiredException> { expired.load(20, PagingRequest.Refresh) }.accountKey)
-            val loggedOut = GroupTimelineRemoteMediator(service(loggedIn = false) { error("Must not load") }, accountKey, "group")
+            val loggedOut =
+                VVOFeedTimelineRemoteMediator(service(loggedIn = false) { error("Must not load") }, accountKey, VVOFeed.Group("group"))
             assertFailsWith<LoginExpiredException> { loggedOut.load(20, PagingRequest.Refresh) }
         }
 
     @Test
     fun groupTimelineDoesNotRequestPrepend() =
         runTest {
-            val loader = GroupTimelineRemoteMediator(service { error("Must not request prepend") }, accountKey, "group")
+            val loader = VVOFeedTimelineRemoteMediator(service { error("Must not request prepend") }, accountKey, VVOFeed.Group("group"))
 
             assertTrue(loader.load(20, PagingRequest.Prepend("newer")).data.isEmpty())
         }
@@ -213,7 +215,89 @@ class VVOGroupTest {
     @Test
     fun blankPersistedGroupIdCannotFallBackToAnUnscopedFeed() {
         assertFailsWith<IllegalArgumentException> {
-            GroupTimelineRemoteMediator(service { error("No request expected") }, accountKey, " ")
+            VVOFeedTimelineRemoteMediator(service { error("No request expected") }, accountKey, VVOFeed.Group(" "))
+        }
+    }
+
+    @Test
+    fun nativeFeedsUseDedicatedRoutesAndKeepCustomGroupIdsSeparate() =
+        runTest {
+            listOf(
+                Triple(VVOFeed.Circle, "/feed/circle", null),
+                Triple(VVOFeed.Private, "/feed/private", null),
+                Triple(VVOFeed.Group("circle"), "/feed/group", "circle"),
+                Triple(VVOFeed.Group("private"), "/feed/group", "private"),
+            ).forEach { (feed, path, groupId) ->
+                val cursors = mutableListOf<String?>()
+                val loader =
+                    VVOFeedTimelineRemoteMediator(
+                        service { request ->
+                            assertEquals(path, request.url.encodedPath)
+                            assertEquals(groupId, request.url.parameters["gid"])
+                            val cursor = request.url.parameters["max_id"]
+                            cursors += cursor
+                            if (cursor == null) {
+                                """{"ok":1,"data":{"statuses":[{"id":"30"}],"max_id":"older"}}"""
+                            } else {
+                                """{"ok":1,"data":{"statuses":[{"id":"20"}],"max_id":0}}"""
+                            }
+                        },
+                        accountKey,
+                        feed,
+                    )
+
+                val refresh = loader.load(20, PagingRequest.Refresh)
+                val append = loader.load(20, PagingRequest.Append(requireNotNull(refresh.nextKey)))
+                loader.load(20, PagingRequest.Refresh)
+
+                assertEquals(listOf("30"), refresh.data.map { it.statusKey.id })
+                assertEquals(listOf("20"), append.data.map { it.statusKey.id })
+                assertNull(append.nextKey)
+                assertEquals(listOf(null, "older", null), cursors)
+            }
+        }
+
+    @Test
+    fun nativeFeedFailuresAndEmptyTimelinesRemainDistinct() =
+        runTest {
+            listOf(VVOFeed.Circle, VVOFeed.Private).forEach { feed ->
+                val loggedOut = VVOFeedTimelineRemoteMediator(service(loggedIn = false) { error("Must not load") }, accountKey, feed)
+                assertFailsWith<LoginExpiredException> { loggedOut.load(20, PagingRequest.Refresh) }
+                val expired = VVOFeedTimelineRemoteMediator(service { """{"ok":-100}""" }, accountKey, feed)
+                assertFailsWith<LoginExpiredException> { expired.load(20, PagingRequest.Refresh) }
+
+                listOf("""{"ok":0,"data":{"statuses":[]}}""", """{"ok":1,"data":{}}""").forEach { body ->
+                    val failed = VVOFeedTimelineRemoteMediator(service { body }, accountKey, feed)
+                    assertFailsWith<IllegalStateException> { failed.load(20, PagingRequest.Refresh) }
+                }
+                val empty =
+                    VVOFeedTimelineRemoteMediator(
+                        service { """{"ok":1,"data":{"statuses":[],"max_id":"older"}}""" },
+                        accountKey,
+                        feed,
+                    ).load(20, PagingRequest.Refresh)
+                assertTrue(empty.data.isEmpty())
+                assertNull(empty.nextKey)
+            }
+        }
+
+    @OptIn(ExperimentalSerializationApi::class)
+    @Test
+    fun nativeFeedCandidatesAreAvailableWithoutLoadingTheGroupCatalog() {
+        val dataSource = VVODataSource(accountKey, flowOf(VVoCredential("")))
+        listOf(
+            VvoPlatformSpec.friendsCircleTimelineSpec to UiStrings.WeiboFriendsCircle,
+            VvoPlatformSpec.privateFollowingTimelineSpec to UiStrings.WeiboPrivateFollowing,
+        ).forEach { (spec, title) ->
+            val candidate = dataSource.builtInTimelineTabs.single { it.target.spec.id == spec.id }
+            val data = assertIs<TimelineSpec.AccountBasedData>(candidate.target.data)
+            val restored = ProtoBuf.decodeFromHexString(spec.serializer, ProtoBuf.encodeToHexString(spec.serializer, data))
+
+            assertEquals(accountKey, restored.accountKey)
+            assertEquals(UiText.Localized(title), candidate.title)
+            assertEquals(spec.itemId(data), spec.candidate(restored).id)
+            assertTrue(VvoPlatformSpec.timelineSpecs.any { it.id == spec.id })
+            assertFalse(dataSource.defaultTabs.any { it.target.spec.id == spec.id })
         }
     }
 
@@ -222,12 +306,13 @@ class VVOGroupTest {
         val service = service { error("No network needed") }
         val keys =
             listOf(accountKey, MicroBlogKey("other", "m.weibo.cn")).flatMap { account ->
-                listOf("one", "two").map { group ->
-                    GroupTimelineRemoteMediator(service, account, group).pagingKey
+                listOf(VVOFeed.Group("one"), VVOFeed.Group("two"), VVOFeed.Circle, VVOFeed.Private).map { feed ->
+                    VVOFeedTimelineRemoteMediator(service, account, feed).pagingKey
                 }
             }
 
-        assertEquals(4, keys.toSet().size)
+        assertEquals(8, keys.toSet().size)
+        assertEquals("vvo_group_${accountKey}_one", keys.first())
         assertNotEquals("home_$accountKey", keys.first())
     }
 

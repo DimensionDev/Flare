@@ -26,6 +26,7 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlin.native.HiddenFromObjC
 
 internal const val VVO_PLATFORM_ID: String = "VVo"
+private const val VVO_GROUP_TIMELINE_SPEC_ID: String = "vvo.group"
 
 @HiddenFromObjC
 public data object VvoPlatformSpec :
@@ -77,12 +78,26 @@ public data object VvoPlatformSpec :
                 },
         )
 
+    internal val groupTimelineSpec =
+        TimelineSpec(
+            id = VVO_GROUP_TIMELINE_SPEC_ID,
+            title = UiStrings.List,
+            icon = UiIcon.List.asType(),
+            serializer = TimelineSpec.AccountResourceData.serializer(),
+            targetId = { "${it.accountKey}:${it.resourceId}" },
+            loaderFactory =
+                accountLoader<VVODataSource, TimelineSpec.AccountResourceData> {
+                    groupTimeline(it.resourceId)
+                },
+        )
+
     override val timelineSpecs: ImmutableList<TimelineSpec<out TimelineSpec.Data>> =
         persistentListOf(
             CommonTimelineSpecs.home,
             CommonTimelineSpecs.discover,
             favoriteTimelineSpec,
             likedTimelineSpec,
+            groupTimelineSpec,
         )
 
     override fun createDataSource(context: PlatformDataSourceContext): MicroblogDataSource =

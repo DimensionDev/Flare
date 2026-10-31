@@ -36,7 +36,7 @@ struct GroupConfigScreen: View {
         self.icon = item?.icon ?? IconType.Material(icon: .rss)
         self.enabled = item?.enabled ?? true
         self.mergePolicy = item?.mergePolicy ?? .timePerPage
-        self.filterConfig = item?.filterConfig ?? TimelineFilterConfig()
+        self.filterConfig = item?.filterConfig ?? TimelineFilterConfig(excludedKinds: [], excludedContents: [])
         self.appearancePatch = item?.appearancePatch ?? TimelinePresentationAppearancePatchHelper.shared.empty
         self.tabs = Array((item?.children ?? []).reduce(into: [UiTimelineTabItem]()) { result, tab in
             if !result.contains(where: { $0.id == tab.id }) {

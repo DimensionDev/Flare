@@ -29,7 +29,7 @@ public struct TranslationConfigSettingsSections: View {
 
 @Observable
 private final class TranslationConfigSettingsState {
-    let presenter = KotlinPresenter(presenter: AiConfigPresenter())
+    let presenter = KotlinPresenter(presenter: AiConfigPresenter(agentConfig: false))
     let imageTranslation = ImageTranslationSettingsState()
     let aiTranslationTestPresenter = KotlinPresenter(presenter: AiTranslationTestPresenter())
     var editingField: TranslationConfigEditableField?

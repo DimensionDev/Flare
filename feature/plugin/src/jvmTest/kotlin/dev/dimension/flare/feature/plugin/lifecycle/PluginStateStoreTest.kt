@@ -9,10 +9,12 @@ import okio.FileSystem
 import okio.ForwardingFileSystem
 import okio.Path
 import okio.Path.Companion.toOkioPath
+import okio.Path.Companion.toPath
 import okio.SYSTEM
 import okio.Source
 import java.io.IOException
 import java.nio.file.Files
+import java.nio.file.Paths
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -118,9 +120,10 @@ class PluginStateStoreTest {
             assertEquals(listOf(namespace / "index.json", PluginStoragePaths(namespace).iconPath(installed.packageHash)), opened)
             assertEquals(1, restarted.running.plugins.size)
             val plugin = restarted.running.plugins.getValue(installed.pluginId)
-            assertTrue(plugin.iconPath.contains("/platform-"))
+            val iconPath = plugin.iconPath.toPath()
+            assertTrue(iconPath.name.startsWith("platform-"))
             opened.clear()
-            assertEquals(IconType.Url("file://${plugin.iconPath}"), plugin.platformMetadata().icon)
+            assertEquals(IconType.Url(Paths.get(plugin.iconPath).toUri().toASCIIString()), plugin.platformMetadata().icon)
             assertTrue(opened.isEmpty(), "Platform metadata must use the prepared icon without file I/O")
         }
 

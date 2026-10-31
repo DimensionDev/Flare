@@ -11,11 +11,13 @@ final class GalleryMediaTests: XCTestCase {
         let fixture = try Fixture()
         defer { fixture.close() }
         let preview = try await fixture.cacheImage(.blue)
+        let accountKey = MicroBlogKey(id: "missing-gallery-test-account", host: "pixiv.net")
         let media = UiMediaUgoira(
             statusKey: MicroBlogKey(id: UUID().uuidString, host: "pixiv.net"),
-            accountKey: MicroBlogKey(id: "missing-gallery-test-account", host: "pixiv.net"),
+            accountKey: accountKey,
             previewUrl: preview, originalFrameUrl: nil, description: nil,
-            height: 560, width: 390, sensitive: false, customHeaders: nil)
+            height: 560, width: 390, sensitive: false, customHeaders: nil,
+            proxy: ProxyRef.companion.forAccount(accountKey: accountKey), sourceUrl: nil)
         let generation = MediaPlaybackMemory.shared.generation(for: media.url)
         MediaPlaybackMemory.shared.save(2, for: media.url)
 

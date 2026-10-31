@@ -186,6 +186,14 @@ jobs:
     if: github.event_name == 'push' || inputs.target == 'all' || inputs.target == 'apple'
     runs-on: [xcode-27]
     timeout-minutes: 240
+    env:
+      # The hosted ARM runner has 7 GB RAM, shared with Xcode and the simulator.
+      GRADLE_OPTS: >-
+        -Dorg.gradle.workers.max=1
+        -Dorg.gradle.project.kotlin.native.parallelThreads=1
+        -Dorg.gradle.project.kotlin.compiler.execution.strategy=in-process
+        -Dorg.gradle.project.kotlin.native.binary.enableReleaseBinaryCache=true
+        -Dorg.gradle.project.kotlin.internal.native.enableReleaseBinaryCache=true
     steps:
       - *clean-workspace
       - *checkout
@@ -240,7 +248,7 @@ jobs:
           if [ "`ls -A | grep -i \\.xcworkspace\$`" ]; then filetype_parameter="workspace" && file_to_build="`ls -A | grep -i \\.xcworkspace\$`"; else filetype_parameter="project" && file_to_build="`ls -A | grep -i \\.xcodeproj\$`"; fi
           file_to_build=`echo $file_to_build | awk '{$1=$1;print}'`
           xcodebuild build-for-testing -scheme "$scheme" -"$filetype_parameter" "$file_to_build" -destination "platform=$platform,id=$FLARE_TEST_SIMULATOR" -skipPackagePluginValidation -skipMacroValidation \
-            GRADLE_JVM_ARGS="-Xmx16G -Dfile.encoding=UTF-8"
+            GRADLE_JVM_ARGS="-Xmx4G -Dfile.encoding=UTF-8"
       - name: Run native proxy and playback regressions
         working-directory: ./appleApp
         run: |
@@ -252,7 +260,7 @@ jobs:
             -only-testing:TimelineControllerTests/LoginCookieSnapshotTests \
             -only-testing:TimelineControllerTests/UgoiraPlaybackTests \
             -parallel-testing-enabled NO -collect-test-diagnostics never -skipPackagePluginValidation -skipMacroValidation \
-            GRADLE_JVM_ARGS="-Xmx16G -Dfile.encoding=UTF-8" CODE_SIGNING_ALLOWED=NO
+            GRADLE_JVM_ARGS="-Xmx4G -Dfile.encoding=UTF-8" CODE_SIGNING_ALLOWED=NO
           xcodebuild test-without-building -project Flare.xcodeproj -scheme iOS \
             -destination "platform=iOS Simulator,id=$FLARE_TEST_SIMULATOR" \
             -only-testing:iOSTests/VideoPlaybackSessionTests \
@@ -276,6 +284,11 @@ jobs:
       - name: Remove test simulator
         if: always() && env.FLARE_TEST_SIMULATOR != ''
         run: xcrun simctl delete "$FLARE_TEST_SIMULATOR"
+      - name: Build native macOS Kotlin framework
+        run: |
+          ./gradlew --stop
+          ./gradlew :apple-shared:linkReleaseFrameworkMacosArm64 --no-daemon --stacktrace \
+            "-Dorg.gradle.jvmargs=-Xmx3G -Dfile.encoding=UTF-8"
       - name: import certs
         if: startsWith(github.ref, 'refs/tags/')
         uses: apple-actions/import-codesign-certs@v7
@@ -348,8 +361,7 @@ jobs:
             -derivedDataPath build/DerivedData \
             -skipPackagePluginValidation \
             -skipMacroValidation \
-            GRADLE_JVM_ARGS="-Xmx16G -Dfile.encoding=UTF-8" \
-            JAVA_OPTS="-Xmx16G" \
+            GRADLE_JVM_ARGS="-Xmx4G -Dfile.encoding=UTF-8" \
             MARKETING_VERSION="$NATIVE_MACOS_MARKETING_VERSION" \
             CURRENT_PROJECT_VERSION="$NATIVE_MACOS_BUILD_NUMBER" \
             CODE_SIGNING_ALLOWED=NO
@@ -374,8 +386,7 @@ jobs:
             CODE_SIGN_IDENTITY="$NATIVE_MACOS_APP_SIGNING_IDENTITY" \
             NATIVE_MACOS_PROVISIONING_PROFILE_SPECIFIER="$NATIVE_MACOS_PROVISIONING_PROFILE_SPECIFIER" \
             NATIVE_MACOS_PROVISIONING_PROFILE="$NATIVE_MACOS_PROVISIONING_PROFILE" \
-            GRADLE_JVM_ARGS="-Xmx16G -Dfile.encoding=UTF-8" \
-            JAVA_OPTS="-Xmx16G" \
+            GRADLE_JVM_ARGS="-Xmx4G -Dfile.encoding=UTF-8" \
             MARKETING_VERSION="$NATIVE_MACOS_MARKETING_VERSION" \
             CURRENT_PROJECT_VERSION="$NATIVE_MACOS_BUILD_NUMBER"
       - name: Package native macOS app

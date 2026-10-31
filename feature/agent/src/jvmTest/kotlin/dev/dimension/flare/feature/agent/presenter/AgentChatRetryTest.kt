@@ -88,7 +88,7 @@ class AgentChatRetryTest {
                 val roomFlow = history.observeRoom(conversationId)
                 startKoin { modules(module { single { history } }) }
                 val collection =
-                    backgroundScope.launch(Dispatchers.Default) {
+                    backgroundScope.launch {
                         moleculeFlow(RecompositionMode.Immediate) {
                             val room by roomFlow.collectAsState(null)
                             rememberAgentChatPresenterController<Unit, Unit>(
@@ -178,7 +178,7 @@ class AgentChatRetryTest {
             val roomFlow = history.observeRoom("retry-test")
             startKoin { modules(module { single { history } }) }
             val collection =
-                backgroundScope.launch(Dispatchers.Default) {
+                backgroundScope.launch {
                     moleculeFlow(RecompositionMode.Immediate) {
                         val room by roomFlow.collectAsState(null)
                         rememberAgentChatPresenterController<Unit, Unit>(

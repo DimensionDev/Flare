@@ -184,6 +184,81 @@ class VVORenderTest {
     }
 
     @Test
+    fun livePhotosKeepPlaybackUrlsInMixedMediaAndReposts() {
+        val playbackUrl =
+            "https://video.example.test/media/play?livephoto=https%3A%2F%2Fmedia.example.test%2Fmotion.mov"
+        val signedUrl = "https://media.example.test/clip.mov?Expires=123&ssig=test%2Bsignature&KID=video"
+        val status =
+            JSON.decodeFromString<Status>(
+                """
+                {
+                    "id": "status-live-photos",
+                    "pics": [
+                        {"url": "https://media.example.test/first.jpg"},
+                        {
+                            "type": "livephoto",
+                            "url": "https://media.example.test/live-preview.jpg",
+                            "large": {
+                                "url": "https://media.example.test/live-original.jpg",
+                                "geo": {"width": 600, "height": 800}
+                            },
+                            "videoSrc": "$playbackUrl"
+                        },
+                        {"url": "https://media.example.test/last.jpg"},
+                        {
+                            "type": "livephoto",
+                            "url": "https://media.example.test/direct-preview.jpg",
+                            "videoSrc": "$signedUrl"
+                        }
+                    ],
+                    "live_photo": ["$playbackUrl", "$signedUrl"]
+                }
+                """.trimIndent(),
+            )
+
+        val post = assertIs<UiTimelineV2.Post>(status.render(accountKey))
+        assertEquals(4, post.images.size)
+        assertEquals("https://media.example.test/first.jpg", assertIs<UiMedia.Image>(post.images[0]).url)
+        val livePhoto = assertIs<UiMedia.Video>(post.images[1])
+        assertEquals(playbackUrl, livePhoto.url)
+        assertEquals("https://media.example.test/live-preview.jpg", livePhoto.thumbnailUrl)
+        assertEquals(600f, livePhoto.width)
+        assertEquals(800f, livePhoto.height)
+        assertEquals(ProxyRef.Account(accountKey), livePhoto.proxy)
+        assertEquals("https://media.example.test/last.jpg", assertIs<UiMedia.Image>(post.images[2]).url)
+        assertEquals(signedUrl, assertIs<UiMedia.Video>(post.images[3]).url)
+
+        val repost =
+            createStatus("repost", createUser(1L, "reposter"), "repost", retweetedStatus = status)
+                .render(accountKey)
+        val quote = assertIs<UiTimelineV2.TimelinePostItem>(repost).presentation.quotes.single()
+        assertEquals(post.images, quote.images)
+    }
+
+    @Test
+    fun livePhotosWithoutVideoUrlsRemainImages() {
+        val pics =
+            listOf(null, "", "  ").mapIndexed { index, videoUrl ->
+                StatusPic(
+                    url = "https://media.example.test/still-$index.jpg",
+                    type = "livephoto",
+                    videoSrc = videoUrl,
+                )
+            }
+        val status =
+            Status(
+                id = "status-without-live-videos",
+                pics = JSON.encodeToJsonElement(ListSerializer(StatusPic.serializer()), pics),
+            )
+
+        val post = assertIs<UiTimelineV2.Post>(status.render(accountKey))
+        assertEquals(3, post.images.size)
+        post.images.forEachIndexed { index, media ->
+            assertEquals("https://media.example.test/still-$index.jpg", assertIs<UiMedia.Image>(media).url)
+        }
+    }
+
+    @Test
     fun quoteIsRecognized() {
         val quoted =
             createStatus(

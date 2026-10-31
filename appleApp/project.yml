@@ -183,16 +183,6 @@ targets:
           destination: resources
         destinationFilters: [iOS]
       - target: OpenInFlare
-    preBuildScripts:
-      - name: Compile Kotlin
-        basedOnDependencyAnalysis: false
-        script: |
-          cd "$SRCROOT/.."
-          if [ -n "${GRADLE_JVM_ARGS:-}" ]; then
-            ./gradlew "-Dorg.gradle.jvmargs=$GRADLE_JVM_ARGS" :apple-shared:embedAndSignAppleFrameworkForXcode
-          else
-            ./gradlew :apple-shared:embedAndSignAppleFrameworkForXcode
-          fi
     settings:
       groups:
         - appleApp
@@ -378,16 +368,6 @@ targets:
         copy:
           destination: resources
         destinationFilters: [macOS]
-    preBuildScripts:
-      - name: Compile Kotlin
-        basedOnDependencyAnalysis: false
-        script: |
-          cd "$SRCROOT/.."
-          if [ -n "${GRADLE_JVM_ARGS:-}" ]; then
-            ./gradlew "-Dorg.gradle.jvmargs=$GRADLE_JVM_ARGS" :apple-shared:embedAndSignAppleFrameworkForXcode
-          else
-            ./gradlew :apple-shared:embedAndSignAppleFrameworkForXcode
-          fi
     settings:
       groups:
         - appleApp
@@ -474,16 +454,6 @@ targets:
       - package: Textual
         link: false
       - target: FlareAppleCore
-    preBuildScripts:
-      - name: Compile Kotlin
-        basedOnDependencyAnalysis: false
-        script: |
-          cd "$SRCROOT/.."
-          if [ -n "${GRADLE_JVM_ARGS:-}" ]; then
-            ./gradlew "-Dorg.gradle.jvmargs=$GRADLE_JVM_ARGS" :apple-shared:embedAndSignAppleFrameworkForXcode
-          else
-            ./gradlew :apple-shared:embedAndSignAppleFrameworkForXcode
-          fi
     settings:
       base:
         CLANG_ENABLE_MODULE_VERIFIER: YES
@@ -496,6 +466,18 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: dev.dimension.flare.appleui
 
 schemes:
+  CI-iOS:
+    build:
+      targets:
+        iOS: all
+    test:
+      config: Debug
+      targets:
+        - TimelineControllerTests
+        - iOSTests
+        - iOSInteractionTests
+        - MediaViewerInteractionTests
+
   iOS:
     build:
       targets:

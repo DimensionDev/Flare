@@ -26,16 +26,13 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}-${{ inputs.target || 'all' }}
   cancel-in-progress: true
 
+
 jobs:
-  build-linux:
-    name: Linux (Android, Desktop, Web, F-Droid)
-    if: github.event_name == 'push' || inputs.target == 'all' || inputs.target == 'linux' || inputs.target == 'fdroid'
+  lint:
+    name: Kotlin lint
     runs-on: [ubuntu-latest]
-    timeout-minutes: 180
-    env: &build-env
-      BUILD_NUMBER: ${{ github.run_number }}
-      BUILD_VERSION: ${{ github.ref_name }}
-      SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+    timeout-minutes: 15
+    env:
       JAVA_TOOL_OPTIONS: -Djava.awt.headless=true
     steps:
       - &clean-workspace
@@ -44,41 +41,42 @@ jobs:
         uses: actions/checkout@v7
         with:
           submodules: true
+      - name: Check CI contracts
+        run: ruby .github/scripts/test_ci_workflow.rb
       - &setup-java
         name: Set up JDK
         uses: actions/setup-java@v6
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          distribution: ${{ inputs.target == 'fdroid' && 'temurin' || 'jetbrains' }}
+          distribution: jetbrains
           java-version: 25
           cache: gradle
-      - name: Setup Android SDK
+      - &setup-android
+        name: Setup Android SDK
         uses: android-actions/setup-android@v4
         with:
           packages: platform-tools
+      - name: Check Kotlin formatting
+        run: ./gradlew :app:ktlintCheck :desktopApp:ktlintCheck --stacktrace
 
-      - name: Set up pnpm
-        if: inputs.target != 'fdroid'
-        uses: pnpm/action-setup@v6
-        with:
-          version: 12.11.2
-
-      - name: Set up Node
-        if: inputs.target != 'fdroid'
-        uses: actions/setup-node@v7
-        with:
-          node-version: 24
-          cache: pnpm
-          cache-dependency-path: web/pnpm-lock.yaml
-
-      - name: Install web dependencies
-        if: inputs.target != 'fdroid'
-        working-directory: web
-        run: pnpm install --frozen-lockfile
-
+  build-linux:
+    name: Linux (Android, Desktop)
+    needs: lint
+    if: github.event_name == 'push' || inputs.target == 'all' || inputs.target == 'linux'
+    runs-on: [ubuntu-latest]
+    timeout-minutes: 180
+    env: &build-env
+      BUILD_NUMBER: ${{ github.run_number }}
+      BUILD_VERSION: ${{ github.ref_name }}
+      SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+      JAVA_TOOL_OPTIONS: -Djava.awt.headless=true
+    steps:
+      - *clean-workspace
+      - *checkout
+      - *setup-java
+      - *setup-android
       - name: Apply Signing
-        if: inputs.target != 'fdroid'
         env:
           ALIAS: ${{ secrets.ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
@@ -86,108 +84,123 @@ jobs:
           SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
           GOOGLE_SERVICES: ${{ secrets.GOOGLE_SERVICES }}
         run: ./.github/apply_signing.sh
-
       - name: Run shared and desktop tests
-        if: inputs.target != 'fdroid'
         run: ./gradlew allTests :desktopApp:test -x wasmJsBrowserTest --stacktrace
-
       - name: Enable emulator acceleration
-        if: inputs.target != 'fdroid'
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
-
       - name: Run Android UI regressions
-        if: inputs.target != 'fdroid'
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 36
           target: google_apis
           arch: x86_64
           disable-animations: true
-          script: |
-            ./gradlew :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=dev.dimension.flare.ui.screen.settings.ProxySettingsContentTest
-            ./gradlew :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=dev.dimension.flare.ui.screen.settings.PluginManagementMenuTest
-            ./gradlew :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=dev.dimension.flare.common.WebViewProxyTest
-            ./gradlew :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=dev.dimension.flare.ui.screen.gallery.GalleryDetailScreenTest
-            ./gradlew :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=dev.dimension.flare.ui.screen.media.ImageTranslationErrorDialogTest
-
-      - name: Run Kotlin wasmJs tests
-        if: inputs.target != 'fdroid'
-        run: ./gradlew :web-shared:wasmJsTest :shared:wasmJsBrowserTest --tests '*ProxyEngineCapabilitiesTest*' --stacktrace
-
-      - name: Run Svelte codegen tests
-        if: inputs.target != 'fdroid'
-        working-directory: web
-        run: pnpm test:codegen
-
-      - name: Check Svelte
-        if: inputs.target != 'fdroid'
-        working-directory: web
-        run: pnpm check
-
-      - name: Build Svelte
-        if: inputs.target != 'fdroid'
-        working-directory: web
-        run: pnpm build
-
+          script: >-
+            ./gradlew :app:connectedDebugAndroidTest
+            -Pandroid.testInstrumentationRunnerArguments.class=dev.dimension.flare.ui.screen.settings.ProxySettingsContentTest,dev.dimension.flare.ui.screen.settings.PluginManagementMenuTest,dev.dimension.flare.common.WebViewProxyTest,dev.dimension.flare.ui.screen.gallery.GalleryDetailScreenTest,dev.dimension.flare.ui.screen.media.ImageTranslationErrorDialogTest
       - name: Build and package Android and Linux
-        if: inputs.target != 'fdroid'
-        run: ./gradlew :app:assembleRelease :app:bundleRelease :app:check :app:lint :desktopApp:check :desktopApp:build :desktopApp:packageReleaseAppImage --stacktrace
-
-      - name: Stop Gradle before switching JDK
-        if: inputs.target != 'fdroid'
-        run: ./gradlew --stop
-      - name: Checkout clean F-Droid sources
-        uses: actions/checkout@v7
-        with:
-          submodules: true
-          path: fdroid
-      - name: Switch to Temurin for F-Droid
-        if: inputs.target != 'fdroid'
-        uses: actions/setup-java@v6
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          distribution: "temurin"
-          java-version: 25
-      - name: F-Droid prebuild
-        working-directory: fdroid
-        run: |
-          rm -f gradle/gradle-daemon-jvm.properties
-          sed -i -e '/poolborges/d' settings.gradle.kts
-          sed -i -e '/START Non-FOSS component/,/END Non-FOSS component/d' app/build.gradle.kts
-      - name: Build F-Droid variant
-        working-directory: fdroid
-        run: env -u BUILD_NUMBER -u BUILD_VERSION -u SENTRY_DSN ./gradlew :app:assembleRelease :app:check :app:lint --stacktrace
-
+        run: ./gradlew :app:assembleRelease :app:bundleRelease :app:check :app:lint :desktopApp:check :desktopApp:build :desktopApp:packageReleaseAppImage -x ktlintCheck --stacktrace
       - name: Upload AppImage package
-        if: inputs.target != 'fdroid' && startsWith(github.ref, 'refs/tags/')
+        if: startsWith(github.ref, 'refs/tags/')
         uses: actions/upload-artifact@v7
         with:
           name: Linux-package
           path: |
             desktopApp/build/compose/binaries/main-release/AppImage/*.appimage
             desktopApp/build/compose/binaries/main-release/AppImage/*.AppImage
-
-      - name: Publish to Google Play
-        if: inputs.target != 'fdroid' && startsWith(github.ref, 'refs/tags/')
-        uses: r0adkll/upload-google-play@v1
+      - name: Prepare Android store bundle
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          mkdir -p "$RUNNER_TEMP/android-store"
+          cp app/build/outputs/bundle/release/app-release.aab app/build/outputs/mapping/release/mapping.txt "$RUNNER_TEMP/android-store"
+      - name: Upload Android store bundle
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: actions/upload-artifact@v7
         with:
-          serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
-          packageName: dev.dimension.flare
-          releaseFiles: app/build/outputs/bundle/release/app-release.aab
-          track: internal
-          mappingFile: app/build/outputs/mapping/release/mapping.txt
+          name: Android-store
+          path: ${{ runner.temp }}/android-store
+          if-no-files-found: error
 
-  build-apple:
-    name: Apple (iOS, macOS)
+  build-web:
+    name: Web (Wasm, Svelte)
+    needs: lint
+    if: github.event_name == 'push' || inputs.target == 'all' || inputs.target == 'linux'
+    runs-on: [ubuntu-latest]
+    timeout-minutes: 90
+    env: *build-env
+    steps:
+      - *clean-workspace
+      - *checkout
+      - *setup-java
+      - *setup-android
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 12.11.2
+      - name: Set up Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: web/pnpm-lock.yaml
+      - name: Install web dependencies
+        working-directory: web
+        run: pnpm install --frozen-lockfile
+      - name: Run Kotlin wasmJs tests
+        run: ./gradlew :web-shared:wasmJsTest :shared:wasmJsBrowserTest --tests '*ProxyEngineCapabilitiesTest*' --stacktrace
+      - name: Run Svelte codegen tests
+        working-directory: web
+        run: pnpm test:codegen
+      - name: Check Svelte
+        working-directory: web
+        run: pnpm check
+      - name: Build Svelte
+        working-directory: web
+        run: pnpm build
+
+  build-fdroid:
+    name: F-Droid
+    needs: lint
+    if: github.event_name == 'push' || inputs.target == 'all' || inputs.target == 'linux' || inputs.target == 'fdroid'
+    runs-on: [ubuntu-latest]
+    timeout-minutes: 180
+    env:
+      JAVA_TOOL_OPTIONS: -Djava.awt.headless=true
+    steps:
+      - *clean-workspace
+      - *checkout
+      - name: Set up Temurin
+        uses: actions/setup-java@v6
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          distribution: temurin
+          java-version: 25
+          cache: gradle
+      - *setup-android
+      - name: F-Droid prebuild
+        run: |
+          rm -f gradle/gradle-daemon-jvm.properties
+          sed -i -e '/poolborges/d' settings.gradle.kts
+          sed -i -e '/START Non-FOSS component/,/END Non-FOSS component/d' app/build.gradle.kts
+      - name: Build F-Droid variant
+        run: env -u BUILD_NUMBER -u BUILD_VERSION -u SENTRY_DSN ./gradlew :app:assembleRelease :app:check :app:lint -x ktlintCheck --stacktrace
+
+  build-apple-tests:
+    name: Apple Kotlin (${{ matrix.target }})
+    needs: lint
     if: github.event_name == 'push' || inputs.target == 'all' || inputs.target == 'apple'
     runs-on: [xcode-27]
-    timeout-minutes: 240
-    env:
-      # The hosted ARM runner has 7 GB RAM, shared with Xcode and the simulator.
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [iosSimulatorArm64, macosArm64]
+    env: &apple-env
+      # The hosted ARM runner has 7 GB RAM; keep native links sequential within each job.
       GRADLE_OPTS: >-
         -Dorg.gradle.workers.max=1
         -Dorg.gradle.project.kotlin.native.parallelThreads=1
@@ -196,71 +209,81 @@ jobs:
       - *clean-workspace
       - *checkout
       - *setup-java
-      - name: Setup Xcode
+      - &setup-xcode
+        name: Setup Xcode
         uses: maxim-lobanov/setup-xcode@v1
         with:
           xcode-version: latest-stable
       - name: Install iOS
+        if: matrix.target == 'iosSimulatorArm64'
         run: xcodebuild -downloadPlatform iOS
-      - name: Install XcodeGen
-        run: brew install xcodegen
-      - name: Add Firebase config
-        env:
-          GOOGLE_SERVICE_INFO_PLIST_B64: ${{ secrets.GOOGLE_SERVICE_INFO_PLIST_B64 }}
-        run: |
-          if [ -n "${GOOGLE_SERVICE_INFO_PLIST_B64:-}" ]; then
-            mkdir -p appleApp/Firebase
-            printf '%s' "$GOOGLE_SERVICE_INFO_PLIST_B64" | base64 -D > appleApp/Firebase/GoogleService-Info.plist
-          else
-            echo "GOOGLE_SERVICE_INFO_PLIST_B64 is not set; Firebase config will not be bundled."
-          fi
-      - name: Generate Xcode project
-        run: xcodegen generate --spec appleApp/project.yml
       - name: Run Apple Kotlin tests
-        timeout-minutes: 120
-        run: ./gradlew iosSimulatorArm64Test macosArm64Test --stacktrace
+        run: ./gradlew ${{ matrix.target }}Test --stacktrace
       - name: Upload test reports
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: apple-test-reports
+          name: apple-${{ matrix.target }}-test-reports
           path: |
             **/build/test-results/**
             **/build/reports/tests/**
           if-no-files-found: ignore
           retention-days: 7
+
+  build-ios:
+    name: iOS (build, native and UI regressions)
+    needs: lint
+    if: github.event_name == 'push' || inputs.target == 'all' || inputs.target == 'apple'
+    runs-on: [xcode-27]
+    timeout-minutes: 180
+    env: *apple-env
+    steps:
+      - *clean-workspace
+      - *checkout
+      - *setup-java
+      - *setup-xcode
+      - name: Install iOS
+        run: xcodebuild -downloadPlatform iOS
+      - &install-xcodegen
+        name: Install XcodeGen
+        run: brew install xcodegen
+      - &firebase-config
+        name: Add Firebase config
+        env:
+          GOOGLE_SERVICE_INFO_PLIST_B64: ${{ secrets.GOOGLE_SERVICE_INFO_PLIST_B64 }}
+        run: |
+          if [ -n "$GOOGLE_SERVICE_INFO_PLIST_B64" ]; then
+            mkdir -p appleApp/Firebase
+            printf '%s' "$GOOGLE_SERVICE_INFO_PLIST_B64" | base64 -D > appleApp/Firebase/GoogleService-Info.plist
+          else
+            echo "GOOGLE_SERVICE_INFO_PLIST_B64 is not set; Firebase config will not be bundled."
+          fi
+      - &generate-xcode
+        name: Generate Xcode project
+        run: xcodegen generate --spec appleApp/project.yml
       - name: Prepare HTTPS login test simulator
         run: |
           simulator=$(xcrun simctl create FlareNativeTests com.apple.CoreSimulator.SimDeviceType.iPhone-17)
           echo "FLARE_TEST_SIMULATOR=$simulator" >> "$GITHUB_ENV"
           xcrun simctl bootstatus "$simulator" -b
           xcrun simctl keychain "$simulator" add-root-cert shared/src/jvmTest/resources/proxy/localhost-cert.pem
-      - name: Build
+      - name: Build iOS app and regression targets once
         working-directory: ./appleApp
-        env:
-          scheme: iOS
-          platform: ${{ 'iOS Simulator' }}
         run: |
-          # xcrun xctrace returns via stderr, not the expected stdout (see https://developer.apple.com/forums/thread/663959)
-          device=`xcrun xctrace list devices 2>&1 | grep -oE 'iPhone.*?[^\(]+' | head -1 | awk '{$1=$1;print}' | sed -e "s/ Simulator$//"`
-          if [ "`ls -A | grep -i \\.xcworkspace\$`" ]; then filetype_parameter="workspace" && file_to_build="`ls -A | grep -i \\.xcworkspace\$`"; else filetype_parameter="project" && file_to_build="`ls -A | grep -i \\.xcodeproj\$`"; fi
-          file_to_build=`echo $file_to_build | awk '{$1=$1;print}'`
-          xcodebuild build-for-testing -scheme "$scheme" -"$filetype_parameter" "$file_to_build" -destination "platform=$platform,id=$FLARE_TEST_SIMULATOR" -skipPackagePluginValidation -skipMacroValidation \
-            GRADLE_JVM_ARGS="-Xmx4G -Dfile.encoding=UTF-8"
+          xcodebuild build-for-testing -project Flare.xcodeproj -scheme CI-iOS \
+            -destination "platform=iOS Simulator,id=$FLARE_TEST_SIMULATOR" \
+            -derivedDataPath build/DerivedData -skipPackagePluginValidation -skipMacroValidation \
+            GRADLE_JVM_ARGS="-Xmx4G -Dfile.encoding=UTF-8" CODE_SIGNING_ALLOWED=NO
       - name: Run native proxy and playback regressions
         working-directory: ./appleApp
         run: |
-          xcodebuild test -project Flare.xcodeproj -scheme TimelineControllerTests \
-            -destination "platform=iOS Simulator,id=$FLARE_TEST_SIMULATOR" \
+          xcodebuild test-without-building -project Flare.xcodeproj -scheme CI-iOS \
+            -derivedDataPath build/DerivedData -destination "platform=iOS Simulator,id=$FLARE_TEST_SIMULATOR" \
             -only-testing:TimelineControllerTests/ProxyPlaybackLifecycleTests \
             -only-testing:TimelineControllerTests/ProxyImageLifecycleTests \
             -only-testing:TimelineControllerTests/WebViewProxyTests \
             -only-testing:TimelineControllerTests/LoginCookieSnapshotTests \
             -only-testing:TimelineControllerTests/UgoiraPlaybackTests \
-            -parallel-testing-enabled NO -collect-test-diagnostics never -skipPackagePluginValidation -skipMacroValidation \
-            GRADLE_JVM_ARGS="-Xmx4G -Dfile.encoding=UTF-8" CODE_SIGNING_ALLOWED=NO
-          xcodebuild test-without-building -project Flare.xcodeproj -scheme iOS \
-            -destination "platform=iOS Simulator,id=$FLARE_TEST_SIMULATOR" \
             -only-testing:iOSTests/VideoPlaybackSessionTests \
             -only-testing:iOSTests/MediaPlaybackMemoryTests \
             -only-testing:iOSTests/TimelinePlaybackCoordinatorTests \
@@ -273,18 +296,32 @@ jobs:
           image_fixture_pid=$!
           trap 'kill "$image_fixture_pid" 2>/dev/null || true' EXIT
           curl --retry-connrefused --retry 10 --retry-delay 1 --max-time 5 --fail --silent --show-error http://127.0.0.1:18473/health
-          xcodebuild test -project Flare.xcodeproj -scheme MediaViewerInteractionTests \
-            -destination "platform=iOS Simulator,id=$FLARE_TEST_SIMULATOR" \
+          xcodebuild test-without-building -project Flare.xcodeproj -scheme CI-iOS \
+            -derivedDataPath build/DerivedData -destination "platform=iOS Simulator,id=$FLARE_TEST_SIMULATOR" \
             -only-testing:MediaViewerInteractionTests/MediaViewerInteractionTests/testTranslationErrorDetailsAreOnlyAccessibleFromFailureAlertWithPost \
             -only-testing:MediaViewerInteractionTests/MediaViewerInteractionTests/testTranslationErrorDetailsAreOnlyAccessibleFromFailureAlertWithoutPost \
-            -parallel-testing-enabled NO -collect-test-diagnostics never -skipPackagePluginValidation -skipMacroValidation \
-            GRADLE_JVM_ARGS="-Xmx16G -Dfile.encoding=UTF-8" CODE_SIGNING_ALLOWED=NO
+            -parallel-testing-enabled NO -collect-test-diagnostics never
       - name: Remove test simulator
         if: always() && env.FLARE_TEST_SIMULATOR != ''
         run: xcrun simctl delete "$FLARE_TEST_SIMULATOR"
+
+  build-macos:
+    name: macOS (Release)
+    needs: lint
+    if: github.event_name == 'push' || inputs.target == 'all' || inputs.target == 'apple'
+    runs-on: [xcode-27]
+    timeout-minutes: 180
+    env: *apple-env
+    steps:
+      - *clean-workspace
+      - *checkout
+      - *setup-java
+      - *setup-xcode
+      - *install-xcodegen
+      - *firebase-config
+      - *generate-xcode
       - name: Build native macOS Kotlin framework
         run: |
-          ./gradlew --stop
           ./gradlew :apple-shared:linkReleaseFrameworkMacosArm64 --no-daemon --stacktrace \
             "-Dorg.gradle.jvmargs=-Xmx3G -Dfile.encoding=UTF-8"
       - name: import certs
@@ -412,6 +449,7 @@ jobs:
   build-windows:
     name: Windows
     if: github.event_name == 'push' || inputs.target == 'all' || inputs.target == 'windows'
+    needs: lint
     runs-on: [windows-latest]
     timeout-minutes: 30
     env: *build-env
@@ -422,7 +460,7 @@ jobs:
       - name: Run Tests
         run: ./gradlew jvmTest :desktopApp:test
       - name: Build and package Windows
-        run: ./gradlew :desktopApp:check :desktopApp:build :desktopApp:packageReleaseAppx --stacktrace
+        run: ./gradlew :desktopApp:check :desktopApp:build :desktopApp:packageReleaseAppx -x ktlintCheck --stacktrace
       - name: Build appxbundle with same version as appx
         shell: pwsh
         run: |
@@ -493,10 +531,11 @@ jobs:
           name: Windows-package
           path: desktopApp/build/compose/binaries/main-release/appx/*.appxbundle
 
+
   upload:
     if: startsWith(github.ref, 'refs/tags/')
     runs-on: [ubuntu-latest]
-    needs: [build-apple, build-windows, build-linux]
+    needs: [lint, build-apple-tests, build-ios, build-macos, build-windows, build-linux, build-web, build-fdroid]
     timeout-minutes: 30
     permissions:
       contents: write
@@ -504,7 +543,18 @@ jobs:
       - uses: actions/download-artifact@v8
         with:
           pattern: "*-package"
-
+      - uses: actions/download-artifact@v8
+        with:
+          name: Android-store
+          path: android-store
+      - name: Publish to Google Play
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
+          packageName: dev.dimension.flare
+          releaseFiles: android-store/app-release.aab
+          track: internal
+          mappingFile: android-store/mapping.txt
       - name: Draft a new release
         uses: softprops/action-gh-release@v3
         with:

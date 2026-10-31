@@ -2,7 +2,6 @@ package dev.dimension.flare.data.translation.image
 
 import dev.dimension.flare.data.datastore.model.ImageTranslationConfig
 import dev.dimension.flare.data.datastore.model.ImageTranslationProvider
-import dev.dimension.flare.data.network.ai.AiImageFailure
 import io.ktor.client.HttpClient
 import io.ktor.client.request.header
 import kotlinx.coroutines.delay
@@ -31,54 +30,43 @@ internal class TencentImageTranslationAdapter(
         target: String,
     ): ImageTranslationOutput =
         mutex.withLock {
-            suspend fun request(url: String?): ImageTranslationResponse {
-                val input = if (url == null) input.prepared() else input
-                delay((lastRequest + 1000 - Clock.System.now().toEpochMilliseconds()).coerceAtLeast(0))
-                val body =
-                    buildJsonObject {
-                        put("Target", imageTranslationLanguageCode(target))
-                        put("Mode", config.value("mode").toIntOrNull()?.takeIf { it in 0..1 } ?: 0)
-                        if (url != null) {
-                            put("Data", "")
-                            put("Url", url)
-                        } else {
-                            val encoded = input.readBytes(7L * 1024 * 1024).base64()
-                            if (encoded.length > 9_000_000) throw ImageTranslationException(ImageTranslationError.UnsupportedInput)
-                            put("Data", encoded)
-                        }
-                    }
-                val timestamp = Clock.System.now().epochSeconds
-                lastRequest = Clock.System.now().toEpochMilliseconds()
-                val result =
-                    client
-                        .imagePost("https://tmt.tencentcloudapi.com/", body) {
-                            header("X-TC-Action", "ImageTranslateLLM")
-                            header("X-TC-Version", "2018-03-21")
-                            header("X-TC-Region", config.value("region"))
-                            header("X-TC-Timestamp", timestamp)
-                            header(
-                                "Authorization",
-                                tencentImageAuthorization(config.value("secretId"), config.value("secretKey"), timestamp, body.toString()),
-                            )
-                        }
-                val response = result.body["Response"]?.jsonObject ?: throw result.failure()
-                response["Error"]?.let { error ->
-                    val code = error.jsonObject.text("Code").orEmpty()
-                    throw ImageTranslationException(
-                        when {
-                            code.startsWith("AuthFailure") || code.startsWith("Unauthorized") -> ImageTranslationError.Authentication
-                            code.startsWith("RequestLimit") || code.startsWith("LimitExceeded") -> ImageTranslationError.RateLimited
-                            else -> ImageTranslationError.Rejected
-                        },
-                        imageFailure = if (code == "FailedOperation.DownloadErr") AiImageFailure.RetryWithBytes else null,
-                        diagnostics = result.diagnostics,
-                    )
+            val encoded = input.prepared().readBytes(7L * 1024 * 1024).base64()
+            if (encoded.length > 9_000_000) throw ImageTranslationException(ImageTranslationError.UnsupportedInput)
+            delay((lastRequest + 1000 - Clock.System.now().toEpochMilliseconds()).coerceAtLeast(0))
+            val body =
+                buildJsonObject {
+                    put("Target", imageTranslationLanguageCode(target))
+                    put("Mode", config.value("mode").toIntOrNull()?.takeIf { it in 0..1 } ?: 0)
+                    put("Data", encoded)
                 }
-                return result.copy(body = response)
+            val timestamp = Clock.System.now().epochSeconds
+            lastRequest = Clock.System.now().toEpochMilliseconds()
+            val result =
+                client
+                    .imagePost("https://tmt.tencentcloudapi.com/", body) {
+                        header("X-TC-Action", "ImageTranslateLLM")
+                        header("X-TC-Version", "2018-03-21")
+                        header("X-TC-Region", config.value("region"))
+                        header("X-TC-Timestamp", timestamp)
+                        header(
+                            "Authorization",
+                            tencentImageAuthorization(config.value("secretId"), config.value("secretKey"), timestamp, body.toString()),
+                        )
+                    }
+            val response = result.body["Response"]?.jsonObject ?: throw result.failure()
+            response["Error"]?.let { error ->
+                val code = error.jsonObject.text("Code").orEmpty()
+                throw ImageTranslationException(
+                    when {
+                        code.startsWith("AuthFailure") || code.startsWith("Unauthorized") -> ImageTranslationError.Authentication
+                        code.startsWith("RequestLimit") || code.startsWith("LimitExceeded") -> ImageTranslationError.RateLimited
+                        else -> ImageTranslationError.Rejected
+                    },
+                    diagnostics = result.diagnostics,
+                )
             }
-            val response = input.withImageFallback(::request)
-            response.body.text("Data")?.let(ImageTranslationOutput::Encoded)
-                ?: throw response.failure()
+            response.text("Data")?.let(ImageTranslationOutput::Encoded)
+                ?: throw result.failure()
         }
 }
 

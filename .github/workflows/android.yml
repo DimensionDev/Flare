@@ -192,8 +192,6 @@ jobs:
         -Dorg.gradle.workers.max=1
         -Dorg.gradle.project.kotlin.native.parallelThreads=1
         -Dorg.gradle.project.kotlin.compiler.execution.strategy=in-process
-        -Dorg.gradle.project.kotlin.native.binary.enableReleaseBinaryCache=true
-        -Dorg.gradle.project.kotlin.internal.native.enableReleaseBinaryCache=true
     steps:
       - *clean-workspace
       - *checkout

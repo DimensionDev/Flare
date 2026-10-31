@@ -45,12 +45,6 @@ kotlin {
                 baseName = "KotlinSharedUI"
                 isStatic = true
 
-                if (optimized && providers.environmentVariable("CI").orNull == "true") {
-                    linkTaskProvider.configure {
-                        toolOptions.freeCompilerArgs.add("-Xauto-cache-from=${rootProject.projectDir}")
-                    }
-                }
-
                 if (appleTarget.name.startsWith("macos")) {
                     linkerOpts.add("-lsqlite3")
                 }
@@ -115,7 +109,6 @@ skie {
         enabled.set(false)
     }
     features {
-        // Explicit presenter constructors keep Swift calls compatible with native library caching.
         group {
             DefaultArgumentInterop.Enabled(false)
         }

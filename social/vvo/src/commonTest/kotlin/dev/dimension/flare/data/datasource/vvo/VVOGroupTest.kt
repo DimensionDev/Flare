@@ -3,6 +3,7 @@ package dev.dimension.flare.data.datasource.vvo
 import androidx.paging.PagingSource
 import dev.dimension.flare.data.datasource.microblog.capabilities
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
+import dev.dimension.flare.data.model.tab.ShortcutSpec
 import dev.dimension.flare.data.model.tab.TimelineCandidate
 import dev.dimension.flare.data.model.tab.TimelineSpec
 import dev.dimension.flare.data.network.vvo.VVOService
@@ -283,7 +284,7 @@ class VVOGroupTest {
 
     @OptIn(ExperimentalSerializationApi::class)
     @Test
-    fun nativeFeedCandidatesAreAvailableWithoutLoadingTheGroupCatalog() {
+    fun nativeFeedsAreAvailableInPickerAndSidebarWithoutLoadingTheGroupCatalog() {
         val dataSource = VVODataSource(accountKey, flowOf(VVoCredential("")))
         listOf(
             VvoPlatformSpec.friendsCircleTimelineSpec to UiStrings.WeiboFriendsCircle,
@@ -298,6 +299,11 @@ class VVOGroupTest {
             assertEquals(spec.itemId(data), spec.candidate(restored).id)
             assertTrue(VvoPlatformSpec.timelineSpecs.any { it.id == spec.id })
             assertFalse(dataSource.defaultTabs.any { it.target.spec.id == spec.id })
+
+            val shortcut = dataSource.shortcuts.single { it.title == title }
+            val target = assertIs<ShortcutSpec.Target.Timeline>(shortcut.target).candidate.target
+            assertSame(spec, target.spec)
+            assertEquals(accountKey, assertIs<TimelineSpec.AccountBasedData>(target.data).accountKey)
         }
     }
 

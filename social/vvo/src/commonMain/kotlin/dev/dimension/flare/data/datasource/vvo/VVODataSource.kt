@@ -182,6 +182,22 @@ internal class VVODataSource(
                         VvoPlatformSpec.likedTimelineSpec.candidate(TimelineSpec.AccountBasedData(accountKey)),
                     ),
             ),
+            ShortcutSpec(
+                title = UiStrings.WeiboFriendsCircle,
+                icon = UiIcon.Follow,
+                target =
+                    ShortcutSpec.Target.Timeline(
+                        VvoPlatformSpec.friendsCircleTimelineSpec.candidate(TimelineSpec.AccountBasedData(accountKey)),
+                    ),
+            ),
+            ShortcutSpec(
+                title = UiStrings.WeiboPrivateFollowing,
+                icon = UiIcon.Eye,
+                target =
+                    ShortcutSpec.Target.Timeline(
+                        VvoPlatformSpec.privateFollowingTimelineSpec.candidate(TimelineSpec.AccountBasedData(accountKey)),
+                    ),
+            ),
         )
     }
 

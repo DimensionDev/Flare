@@ -99,7 +99,8 @@ internal open class MastodonDataSource(
     private val imageCompressor: ImageCompressor by koinInject()
     private val service by lazy {
         MastodonService(
-            proxy = ProxyRef.forAccount(accountKey),            baseUrl = "https://$instance/",
+            proxy = ProxyRef.forAccount(accountKey),
+            baseUrl = "https://$instance/",
             accessTokenFlow = credentialFlow.map { it.accessToken },
         )
     }
@@ -321,12 +322,13 @@ internal open class MastodonDataSource(
             PostStatus(
                 status = data.content,
                 visibility =
-                    when (data.visibility) {
+                    when (requireNotNull(data.visibility)) {
                         UiTimelineV2.Post.Visibility.Public -> Visibility.Public
                         UiTimelineV2.Post.Visibility.Home -> Visibility.Unlisted
                         UiTimelineV2.Post.Visibility.Followers -> Visibility.Private
                         UiTimelineV2.Post.Visibility.Specified -> Visibility.Direct
                         UiTimelineV2.Post.Visibility.Channel -> Visibility.Public
+                        UiTimelineV2.Post.Visibility.Friends, UiTimelineV2.Post.Visibility.SelfOnly -> error("Unsupported visibility")
                     },
                 inReplyToID = inReplyToID,
                 mediaIDS = mediaIds.takeIf { it.isNotEmpty() },

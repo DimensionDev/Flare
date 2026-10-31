@@ -45,6 +45,94 @@
         }
       }
     },
+  "visibility_friends": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Friends circle"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "好友圈可见"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "好友圈可見"
+        }
+      }
+    }
+  },
+  "visibility_friends_description": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Only people who follow you and whom you follow can see this post"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "仅互相关注的好友可以看到此微博"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "僅互相關注的好友可以看到此微博"
+        }
+      }
+    }
+  },
+  "visibility_self": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Only me"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "仅自己可见"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "僅自己可見"
+        }
+      }
+    }
+  },
+  "visibility_self_description": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Only you can see this post"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "仅你自己可以看到此微博"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "僅你自己可以看到此微博"
+        }
+      }
+    }
+  },
   "agent_error_interrupted": {
     "localizations": {
       "en": {

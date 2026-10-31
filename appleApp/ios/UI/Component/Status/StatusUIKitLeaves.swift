@@ -126,6 +126,12 @@ final class StatusVisibilityImageView: UIImageView {
         case .channel:
             icon = .tv
             accessibilityLabel = String(localized: "channel_title")
+        case .friends:
+            icon = .heart
+            accessibilityLabel = String(localized: "visibility_friends")
+        case .selfOnly:
+            icon = .lock
+            accessibilityLabel = String(localized: "visibility_self")
         default:
             icon = .globe
             accessibilityLabel = String(localized: "status_visibility_public")

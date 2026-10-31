@@ -72,6 +72,28 @@ private val MEDIA_COMPRESSION =
         maxHeight = 4096,
     )
 
+internal fun ComposeType.vvoVisibility(): ComposeConfig.Visibility? =
+    if (this == ComposeType.New || this == ComposeType.Quote) {
+        ComposeConfig.Visibility(
+            allVisibilities =
+                persistentListOf(
+                    UiTimelineV2.Post.Visibility.Public,
+                    UiTimelineV2.Post.Visibility.Friends,
+                    UiTimelineV2.Post.Visibility.SelfOnly,
+                ),
+        )
+    } else {
+        null
+    }
+
+internal fun UiTimelineV2.Post.Visibility.toVvoVisible(): String? =
+    when (this) {
+        UiTimelineV2.Post.Visibility.Public -> null
+        UiTimelineV2.Post.Visibility.Friends -> "6"
+        UiTimelineV2.Post.Visibility.SelfOnly -> "1"
+        else -> error("Unsupported Weibo visibility: $this")
+    }
+
 @OptIn(ExperimentalPagingApi::class)
 internal class VVODataSource(
     override val accountKey: MicroBlogKey,
@@ -441,6 +463,7 @@ internal class VVODataSource(
         data: ComposeData,
         progress: () -> Unit,
     ) {
+        val visible = requireNotNull(data.visibility).toVvoVisible()
         val st = ensureLogin()
 
         val mediaIds =
@@ -474,12 +497,14 @@ internal class VVODataSource(
                 id = composeStatus.statusKey.id,
                 content = data.content,
                 st = st,
+                visible = visible,
                 picId = mediaId,
             )
         } else {
             service.updateStatus(
                 content = data.content,
                 st = st,
+                visible = visible,
                 picId = mediaId,
             )
         }
@@ -488,6 +513,7 @@ internal class VVODataSource(
     override fun composeConfig(type: ComposeType): ComposeConfig =
         ComposeConfig(
             text = ComposeConfig.Text(2000),
+            visibility = type.vvoVisibility(),
             media =
                 ComposeConfig.Media(
                     if (type == ComposeType.New) 18 else 1,

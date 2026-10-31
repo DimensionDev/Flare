@@ -40,8 +40,12 @@ import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.io.OkioFileStorage
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.AccountService
+import dev.dimension.flare.data.repository.DraftMediaStore
+import dev.dimension.flare.data.repository.DraftRepository
 import dev.dimension.flare.data.repository.ProxyRepository
 import dev.dimension.flare.data.repository.RepositoryAccountService
+import dev.dimension.flare.data.repository.SaveDraftInput
+import dev.dimension.flare.data.repository.SaveDraftTarget
 import dev.dimension.flare.data.translation.NoopPreTranslationService
 import dev.dimension.flare.data.translation.PreTranslationService
 import dev.dimension.flare.deleteTestRootPath
@@ -67,6 +71,9 @@ import dev.dimension.flare.ui.model.fallbackString
 import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.model.uiArticleContentOf
 import dev.dimension.flare.ui.presenter.article.ArticlePresenter
+import dev.dimension.flare.ui.presenter.compose.ComposePresenter
+import dev.dimension.flare.ui.presenter.compose.RestoreDraftUseCase
+import dev.dimension.flare.ui.presenter.compose.toDraftContent
 import dev.dimension.flare.ui.presenter.dm.DMConversationPresenter
 import dev.dimension.flare.ui.presenter.gallery.GalleryDetailPresenter
 import dev.dimension.flare.ui.presenter.home.CanComposePresenter
@@ -98,6 +105,8 @@ import org.koin.dsl.module
 import java.util.concurrent.Executors
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 import kotlin.time.Instant
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -105,6 +114,88 @@ class PluginPageReloadTest {
     private val accountKey = MicroBlogKey("alice", "plugin.example")
     private val accountType = AccountType.Specific(accountKey)
     private val contentKey = MicroBlogKey("content", accountKey.host)
+
+    @Test
+    fun composerRemainsUsableAfterMissingDraftRestore() =
+        withFixture {
+            attach(Source("compose", canCompose = true))
+            val state = observe(ComposePresenter(accountType))
+            state.await { it.selectedUsers.takeSuccess()?.isNotEmpty() == true }.setText("unsent post")
+            state.await { it.canSend }.loadDraft("missing-draft")
+            val failed = state.await { it.loadedDraftState is UiState.Error }
+            assertTrue(failed.canSend)
+        }
+
+    @Test
+    fun composerFallsBackToThePlatformDefaultForUnsupportedDraftVisibility() =
+        withFixture {
+            attach(Source("compose", canCompose = true))
+            val groupId =
+                drafts.saveDraft(
+                    SaveDraftInput(
+                        groupId = "private-draft",
+                        content = ComposeData("private draft", visibility = UiTimelineV2.Post.Visibility.SelfOnly).toDraftContent(),
+                        targets = listOf(SaveDraftTarget(accountKey)),
+                    ),
+                )
+            val state = observe(ComposePresenter(accountType))
+            state.await { it.selectedUsers.takeSuccess()?.isNotEmpty() == true }.loadDraft(groupId)
+            val loaded = state.await { it.loadedDraftState is UiState.Success }
+            assertFalse(loaded.canSend)
+            loaded.consumeLoadedDraft()
+            val restored = state.await { it.loadedDraftState == null && it.canSend }
+            assertEquals(null, restored.visibility)
+            assertTrue(restored.allVisibilities.isEmpty())
+            assertEquals(null, restored.visibilityState.takeSuccess())
+        }
+
+    @Test
+    fun composerHidesVisibilityWhenSelectedAccountRangesDiffer() =
+        withFixture {
+            val otherKey = MicroBlogKey("bob", accountKey.host)
+            val first =
+                Source(
+                    "first",
+                    canCompose = true,
+                    composeVisibility =
+                        ComposeConfig.Visibility(
+                            allVisibilities = persistentListOf(UiTimelineV2.Post.Visibility.Public, UiTimelineV2.Post.Visibility.SelfOnly),
+                        ),
+                )
+            val second =
+                Source(
+                    "second",
+                    canCompose = true,
+                    sourceAccountKey = otherKey,
+                    composeVisibility = ComposeConfig.Visibility(),
+                )
+            registry.replaceExternal(
+                PLATFORM,
+                object : PlatformSpec by registry.defaultGuest {
+                    override val platformId = PLATFORM
+                    override val isDefaultGuest = false
+
+                    override fun createDataSource(context: PlatformDataSourceContext) =
+                        if (context.accountKey ==
+                            accountKey
+                        ) {
+                            first
+                        } else {
+                            second
+                        }
+                },
+            )
+            repository.addAccount(UiAccount(otherKey, PLATFORM), "credential")
+            val state = observe(ComposePresenter(accountType))
+            val initial = state.await { it.allVisibilities.contains(UiTimelineV2.Post.Visibility.SelfOnly) }
+            initial.setText("post")
+            initial.setVisibility(UiTimelineV2.Post.Visibility.SelfOnly)
+            state.await { it.canSend && it.visibility == UiTimelineV2.Post.Visibility.SelfOnly }.selectAccount(otherKey)
+            val mixed = state.await { it.selectedUsers.takeSuccess()?.size == 2 && it.visibility == null }
+            assertTrue(mixed.canSend)
+            assertTrue(mixed.allVisibilities.isEmpty())
+            assertEquals(null, mixed.visibilityState.takeSuccess())
+        }
 
     @Test
     fun composeAvailabilityFollowsPluginCapabilityReplacementAndRemoval() =
@@ -316,6 +407,7 @@ class PluginPageReloadTest {
         val cache = Room.memoryDatabaseBuilder<CacheDatabase>().setDriver(createDatabaseDriver()).build()
         val appData = AppDataStore(storage)
         val registry = testPlatformRegistry()
+        val drafts = DraftRepository(app, DraftMediaStore(storage))
         val repository =
             AccountRepository(
                 app,
@@ -324,14 +416,7 @@ class PluginPageReloadTest {
                 cache,
                 ProxyRepository(storage),
                 registry,
-                dev.dimension.flare.data.repository.DraftRepository(
-                    app,
-                    dev.dimension.flare.data.repository
-                        .DraftMediaStore(
-                            dev.dimension.flare.data.io
-                                .InMemoryFileStorage(),
-                        ),
-                ),
+                drafts,
             )
 
         init {
@@ -341,6 +426,8 @@ class PluginPageReloadTest {
                         testSingle { cache }
                         testSingle { appData }
                         testSingle { repository }
+                        testSingle { drafts }
+                        testSingle { RestoreDraftUseCase(drafts, repository) }
                         testSingle<AccountService> { RepositoryAccountService(repository) }
                         testSingle<PreTranslationService> { NoopPreTranslationService }
                     },
@@ -381,12 +468,14 @@ class PluginPageReloadTest {
         private val marker: String,
         private val badgeCount: Int = 1,
         private val canCompose: Boolean = false,
+        private val composeVisibility: ComposeConfig.Visibility? = null,
+        private val sourceAccountKey: MicroBlogKey = accountKey,
     ) : MicroblogDataSource by UnavailableMicroblogDataSource,
         DataSourceCapabilityProvider {
         val polls = MutableStateFlow(0)
         val badgeFetches = MutableStateFlow(0)
-        override val authenticatedAccountKey = accountKey
-        override val authenticatedProfile = createSampleUser().copy(key = accountKey, nameInternal = marker.toUiPlainText())
+        override val authenticatedAccountKey = sourceAccountKey
+        override val authenticatedProfile = createSampleUser().copy(key = sourceAccountKey, nameInternal = marker.toUiPlainText())
         private val comments =
             object : RemoteLoader<UiTimelineV2> {
                 override suspend fun load(
@@ -413,9 +502,9 @@ class PluginPageReloadTest {
                 compose =
                     if (canCompose) {
                         object : ComposeDataSource, MicroblogDataSource by this {
-                            override val accountKey = this@PluginPageReloadTest.accountKey
+                            override val accountKey = sourceAccountKey
 
-                            override fun composeConfig(type: ComposeType) = ComposeConfig()
+                            override fun composeConfig(type: ComposeType) = ComposeConfig(visibility = composeVisibility)
 
                             override suspend fun publish(
                                 data: ComposeData,

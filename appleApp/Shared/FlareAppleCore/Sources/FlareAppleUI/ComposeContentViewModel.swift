@@ -53,7 +53,7 @@ public final class ComposeContentViewModel {
     }
 
     public func makeComposeData(
-        visibility: UiTimelineV2.PostVisibility,
+        visibility: UiTimelineV2.PostVisibility?,
         medias: [ComposeData.Media],
         sensitive: Bool,
         composeStatus: ComposeStatus?,
@@ -72,7 +72,7 @@ public final class ComposeContentViewModel {
         )
     }
 
-    public func applyDraft(_ draft: UiDraft) -> ComposeDraftRestoreResult {
+    public func applyDraft(_ draft: UiDraft) {
         let data = draft.data
         text = data.content
         contentWarning = data.spoilerText ?? ""
@@ -81,10 +81,6 @@ public final class ComposeContentViewModel {
             languages = data.language
         }
         pollViewModel.apply(poll: data.poll)
-        return ComposeDraftRestoreResult(
-            sensitive: data.sensitive,
-            visibility: data.visibility
-        )
     }
 
     private func referenceStatus(from composeStatus: ComposeStatus?) -> ComposeData.ReferenceStatus? {
@@ -93,18 +89,5 @@ public final class ComposeContentViewModel {
         } else {
             nil
         }
-    }
-}
-
-public struct ComposeDraftRestoreResult {
-    public let sensitive: Bool
-    public let visibility: UiTimelineV2.PostVisibility
-
-    public init(
-        sensitive: Bool,
-        visibility: UiTimelineV2.PostVisibility
-    ) {
-        self.sensitive = sensitive
-        self.visibility = visibility
     }
 }

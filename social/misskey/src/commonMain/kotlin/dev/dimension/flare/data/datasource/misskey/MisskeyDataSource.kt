@@ -504,12 +504,13 @@ internal class MisskeyDataSource(
             NotesCreateRequest(
                 text = data.content.takeIf { it.isNotEmpty() && it.isNotBlank() },
                 visibility =
-                    when (data.visibility) {
+                    when (requireNotNull(data.visibility)) {
                         UiTimelineV2.Post.Visibility.Public -> "public"
                         UiTimelineV2.Post.Visibility.Home -> "home"
                         UiTimelineV2.Post.Visibility.Followers -> "followers"
                         UiTimelineV2.Post.Visibility.Specified -> "specified"
                         UiTimelineV2.Post.Visibility.Channel -> "public"
+                        UiTimelineV2.Post.Visibility.Friends, UiTimelineV2.Post.Visibility.SelfOnly -> error("Unsupported visibility")
                     },
                 renoteId = renoteId,
                 replyId = inReplyToID,

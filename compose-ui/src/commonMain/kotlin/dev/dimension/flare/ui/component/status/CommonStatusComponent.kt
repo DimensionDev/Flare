@@ -60,6 +60,7 @@ import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.At
 import compose.icons.fontawesomeicons.solid.Ellipsis
 import compose.icons.fontawesomeicons.solid.Globe
+import compose.icons.fontawesomeicons.solid.Heart
 import compose.icons.fontawesomeicons.solid.Image
 import compose.icons.fontawesomeicons.solid.Language
 import compose.icons.fontawesomeicons.solid.Lock
@@ -119,6 +120,8 @@ import dev.dimension.flare.compose.ui.user_mute_with_parameter
 import dev.dimension.flare.compose.ui.user_send_message
 import dev.dimension.flare.compose.ui.user_unblock
 import dev.dimension.flare.compose.ui.user_unmute
+import dev.dimension.flare.compose.ui.visibility_friends
+import dev.dimension.flare.compose.ui.visibility_self
 import dev.dimension.flare.compose.ui.vote
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.applyPostActionLayout
@@ -967,6 +970,24 @@ public fun StatusVisibilityComponent(
             FAIcon(
                 imageVector = FontAwesomeIcons.Solid.Tv,
                 contentDescription = stringResource(resource = Res.string.channel_title),
+                modifier = modifier,
+                tint = tint,
+            )
+        }
+
+        UiTimelineV2.Post.Visibility.Friends -> {
+            FAIcon(
+                imageVector = FontAwesomeIcons.Solid.Heart,
+                contentDescription = stringResource(Res.string.visibility_friends),
+                modifier = modifier,
+                tint = tint,
+            )
+        }
+
+        UiTimelineV2.Post.Visibility.SelfOnly -> {
+            FAIcon(
+                imageVector = FontAwesomeIcons.Solid.Lock,
+                contentDescription = stringResource(Res.string.visibility_self),
                 modifier = modifier,
                 tint = tint,
             )

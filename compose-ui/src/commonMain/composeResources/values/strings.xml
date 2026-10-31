@@ -589,4 +589,6 @@
 
     <string name="weibo_friends_circle_title">Friends Circle</string>
     <string name="weibo_private_following_title">Private Following</string>
+    <string name="visibility_friends">Friends circle</string>
+    <string name="visibility_self">Only me</string>
 </resources>

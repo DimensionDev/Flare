@@ -9,6 +9,7 @@ import dev.dimension.flare.data.datasource.microblog.PostActionLayoutHelpers
 import dev.dimension.flare.data.datasource.microblog.PostActionPlacement
 import dev.dimension.flare.data.datasource.microblog.applyPostActionLayout
 import dev.dimension.flare.data.model.ProxyRef
+import dev.dimension.flare.data.network.vvo.model.Comment
 import dev.dimension.flare.data.network.vvo.model.Large
 import dev.dimension.flare.data.network.vvo.model.Status
 import dev.dimension.flare.data.network.vvo.model.StatusPic
@@ -18,6 +19,7 @@ import dev.dimension.flare.model.vvoHostShort
 import dev.dimension.flare.ui.humanizer.PlatformFormatter
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.contentPostOrNull
 import dev.dimension.flare.ui.model.withProxy
 import dev.dimension.flare.ui.render.RenderContent
 import dev.dimension.flare.ui.render.RenderRun
@@ -53,6 +55,76 @@ class VVORenderTest {
     @AfterTest
     fun tearDown() {
         stopKoin()
+    }
+
+    @Test
+    fun statusSubtitlePrefersRegionThenSourceWithoutChangingTheAuthor() {
+        val user = createUser(1L, "author")
+        val status = createStatus("status-region", user, "content")
+        val expectedUser = user.render(accountKey)
+        val cases =
+            listOf(
+                Triple("发布于 北京", "微博网页版", "发布于 北京"),
+                Triple(null, "微博网页版", "微博网页版"),
+                Triple(null, null, expectedUser.handle.canonical),
+                Triple("", "微博网页版", ""),
+            )
+
+        cases.forEach { (region, source, expected) ->
+            val post = assertIs<UiTimelineV2.Post>(status.copy(regionName = region, source = source).render(accountKey))
+            assertEquals(expected, post.authorSubtitle)
+            assertEquals(expectedUser, post.user)
+        }
+    }
+
+    @Test
+    fun commentSubtitleDecodesRegionAndFallsBackToSource() {
+        val user = createUser(1L, "commenter")
+        val expectedUser = user.render(accountKey)
+        val cases =
+            listOf(
+                """{"id":"comment","region_name":"发布于 北京","source":"来自广东"}""" to "发布于 北京",
+                """{"id":"comment","region_name":null,"source":"来自广东"}""" to "来自广东",
+                """{"id":"comment","source":"来自广东"}""" to "来自广东",
+                """{"id":"comment"}""" to expectedUser.handle.canonical,
+                """{"id":"comment","region_name":"","source":"来自广东"}""" to "",
+            )
+
+        cases.forEach { (json, expected) ->
+            val comment = JSON.decodeFromString<Comment>(json).copy(user = user)
+            val post = assertIs<UiTimelineV2.Post>(comment.render(accountKey))
+            assertEquals(expected, post.authorSubtitle)
+            assertEquals(expectedUser, post.user)
+        }
+    }
+
+    @Test
+    fun quotesAndChildCommentsKeepTheirOwnSubtitle() {
+        val user = createUser(1L, "author")
+        val quoted = createStatus("quoted", user, "quoted").copy(regionName = "发布于 上海")
+        val status = createStatus("root", user, "root", retweetedStatus = quoted).copy(regionName = "发布于 北京")
+        val rendered = assertIs<UiTimelineV2.TimelinePostItem>(status.render(accountKey))
+
+        assertEquals("发布于 北京", rendered.post.authorSubtitle)
+        assertEquals(
+            "发布于 上海",
+            rendered.presentation.quotes
+                .single()
+                .authorSubtitle,
+        )
+
+        val comment =
+            JSON.decodeFromString<Comment>(
+                """{"id":"root","region_name":"发布于 北京","comments":[{"id":"child","region_name":"发布于 上海","source":"来自广东"}]}""",
+            )
+        val renderedComment = assertIs<UiTimelineV2.TimelinePostItem>(comment.render(accountKey))
+        assertEquals("发布于 北京", renderedComment.contentPostOrNull()?.authorSubtitle)
+        assertEquals(
+            "发布于 上海",
+            renderedComment.presentation.quotes
+                .single()
+                .authorSubtitle,
+        )
     }
 
     @Test

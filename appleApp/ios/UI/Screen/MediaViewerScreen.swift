@@ -551,7 +551,7 @@ struct MediaViewerScreen: View {
         VStack(spacing: 8) {
             bottomOverlayContent
             if let user = post.user {
-                UserCompatView(data: user, trailing: { EmptyView() }) {
+                UserCompatView(data: user, subtitle: post.authorSubtitle, trailing: { EmptyView() }) {
                     user.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
                 }
             }

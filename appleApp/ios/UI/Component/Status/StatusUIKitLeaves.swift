@@ -309,10 +309,10 @@ final class UserOnelineUIView: UIView, ManualLayoutMeasurable, TimelineHeightPro
                       height: preferredSingleLineHeight(width: width))
     }
 
-    func configure(data: UiProfile, trailing: UIView?, onClicked: (() -> Void)?) {
+    func configure(data: UiProfile, subtitle: String? = nil, trailing: UIView?, onClicked: (() -> Void)?) {
         avatar.set(media: data.avatar)
         name.text = data.name
-        handleLabel.text = data.handle.canonical
+        handleLabel.text = subtitle ?? data.handle.canonical
         if trailingView !== trailing {
             trailingView?.removeFromSuperview()
             trailingView = trailing
@@ -463,10 +463,10 @@ final class UserCompatUIView: UIStackView {
     }
     required init(coder: NSCoder) { fatalError("init(coder:) not supported") }
 
-    func configure(data: UiProfile, trailing: UIView?, onClicked: (() -> Void)?) {
+    func configure(data: UiProfile, subtitle: String? = nil, trailing: UIView?, onClicked: (() -> Void)?) {
         avatar.set(media: data.avatar)
         name.text = data.name
-        handleLabel.text = data.handle.canonical
+        handleLabel.text = subtitle ?? data.handle.canonical
         if let trailing = trailing {
             trailing.setContentHuggingPriority(.required, for: .horizontal)
             trailing.setContentCompressionResistancePriority(.required, for: .horizontal)

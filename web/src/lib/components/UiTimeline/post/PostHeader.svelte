@@ -59,14 +59,14 @@
 					<span class="name-row">
 						<RichText text={post.user.name} className="post-user-name" maxLines={1} />
 					</span>
-					<span class="handle">{post.user.handle.canonical}</span>
+					<span class="handle">{post.authorSubtitle}</span>
 				</button>
 			{:else}
 				<div class="identity-line">
 					<span class="name-row">
 						<RichText text={post.user.name} className="post-user-name" maxLines={1} />
 					</span>
-					<span class="handle">{post.user.handle.canonical}</span>
+					<span class="handle">{post.authorSubtitle}</span>
 				</div>
 			{/if}
 		{/if}

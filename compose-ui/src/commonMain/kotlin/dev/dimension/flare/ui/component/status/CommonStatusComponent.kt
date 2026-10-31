@@ -331,6 +331,7 @@ public fun CommonStatusComponent(
                     if (showAsFullWidth) {
                         UserCompat(
                             user = user,
+                            subtitle = item.authorSubtitle,
                             onUserClick = {
                                 user.onClicked.invoke(
                                     ClickContext(
@@ -347,6 +348,7 @@ public fun CommonStatusComponent(
                     } else if (isQuote) {
                         UserCompat(
                             user,
+                            subtitle = item.authorSubtitle,
                             onUserClick = {
                                 user.onClicked.invoke(
                                     ClickContext(
@@ -362,6 +364,7 @@ public fun CommonStatusComponent(
                     } else {
                         CommonStatusHeaderComponent(
                             data = user,
+                            subtitle = item.authorSubtitle,
                             nameModifier = nameModifier,
                             handleModifier = handleModifier,
                             avatarModifier = avatarModifier,

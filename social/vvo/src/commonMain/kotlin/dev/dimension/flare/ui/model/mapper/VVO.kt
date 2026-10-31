@@ -23,6 +23,10 @@ import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiNumber
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.UiTimelineV2.Message
+import dev.dimension.flare.ui.model.UiTimelineV2.Post
+import dev.dimension.flare.ui.model.UiTimelineV2.TimelinePostItem
+import dev.dimension.flare.ui.model.UiTimelineV2.UserList
 import dev.dimension.flare.ui.model.UiTranslatableText
 import dev.dimension.flare.ui.model.asType
 import dev.dimension.flare.ui.model.bindMediaProxy
@@ -48,9 +52,9 @@ internal fun Comment.render(accountKey: MicroBlogKey): UiTimelineV2 = renderStat
 internal fun Attitude.render(accountKey: MicroBlogKey): UiTimelineV2 {
     val content = status?.renderStatusV2(accountKey)?.contentPostOrNull()
     val user = user?.render(accountKey)
-    return UiTimelineV2.UserList(
+    return UserList(
         message =
-            UiTimelineV2.Message(
+            Message(
                 user = user,
                 statusKey = MicroBlogKey(id.toString(), accountKey.host),
                 icon = UiIcon.Like,
@@ -174,7 +178,7 @@ private fun Status.renderStatusV2(accountKey: MicroBlogKey): UiTimelineV2 {
         }
     val message =
         title?.text?.let {
-            UiTimelineV2.Message(
+            Message(
                 user = displayUser,
                 statusKey = statusKey,
                 icon = UiIcon.Info,
@@ -193,12 +197,13 @@ private fun Status.renderStatusV2(accountKey: MicroBlogKey): UiTimelineV2 {
 
     val quote = retweetedStatus?.renderStatusV2(accountKey)?.contentPostOrNull()
     val post =
-        UiTimelineV2.Post(
+        Post(
             platformId = VVO_PLATFORM_ID,
             images = actualMedia.toImmutableList(),
             sensitive = false,
             contentWarning = null,
             user = displayUser,
+            authorSubtitleInternal = regionName ?: source,
             references =
                 listOfNotNull(
                     quote?.let {
@@ -317,7 +322,7 @@ private fun Status.renderStatusV2(accountKey: MicroBlogKey): UiTimelineV2 {
             accountType = AccountType.Specific(accountKey),
         ).bindMediaProxy()
     return if (message != null || quote != null) {
-        UiTimelineV2.TimelinePostItem(
+        TimelinePostItem(
             post = post,
             presentation =
                 UiTimelineV2.PostPresentation(
@@ -342,7 +347,6 @@ private fun Comment.renderStatusV2(accountKey: MicroBlogKey): UiTimelineV2 {
             ?.get("mid")
     val user = this.user?.render(accountKey)
     val isFromMe = user?.key == accountKey
-    // val displayUser = user?.copy(handle = source ?: user.handle)
     val url =
         buildString {
             append("https://$vvoHostLong/")
@@ -387,12 +391,13 @@ private fun Comment.renderStatusV2(accountKey: MicroBlogKey): UiTimelineV2 {
             ?: listOfNotNull(status?.renderStatusV2(accountKey)?.contentPostOrNull()).toImmutableList()
 
     val post =
-        UiTimelineV2.Post(
+        Post(
             platformId = VVO_PLATFORM_ID,
             images = media.toImmutableList(),
             sensitive = false,
             contentWarning = null,
             user = user,
+            authorSubtitleInternal = regionName ?: source,
             references =
                 quote
                     .map {
@@ -492,7 +497,7 @@ private fun Comment.renderStatusV2(accountKey: MicroBlogKey): UiTimelineV2 {
             accountType = AccountType.Specific(accountKey),
         ).bindMediaProxy()
     return if (quote.isNotEmpty()) {
-        UiTimelineV2.TimelinePostItem(
+        TimelinePostItem(
             post = post,
             presentation =
                 UiTimelineV2.PostPresentation(

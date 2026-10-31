@@ -25,6 +25,7 @@ public fun StatusSummaryComponent(
         item.user?.let { user ->
             UserCompat(
                 user = user,
+                subtitle = item.authorSubtitle,
                 nameModifier = nameModifier,
                 handleModifier = handleModifier,
                 avatarModifier = avatarModifier,

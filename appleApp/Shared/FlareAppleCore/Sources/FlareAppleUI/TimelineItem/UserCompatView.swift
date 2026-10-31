@@ -4,15 +4,18 @@ import FlareAppleCore
 
 public struct UserCompatView<TrailingContent: View>: View {
     private let data: UiProfile
+    private let subtitle: String
     private let trailing: () -> TrailingContent
     private let onClicked: (() -> Void)?
 
     public init(
         data: UiProfile,
+        subtitle: String? = nil,
         @ViewBuilder trailing: @escaping () -> TrailingContent,
         onClicked: (() -> Void)? = nil
     ) {
         self.data = data
+        self.subtitle = subtitle ?? data.handle.canonical
         self.trailing = trailing
         self.onClicked = onClicked
     }
@@ -35,7 +38,7 @@ public struct UserCompatView<TrailingContent: View>: View {
                 spacing: 0
             ) {
                 RichText(text: data.name)
-                Text(data.handle.canonical)
+                Text(subtitle)
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }

@@ -29,6 +29,7 @@ public fun UserCompat(
     avatarModifier: Modifier = Modifier,
     nameModifier: Modifier = Modifier,
     handleModifier: Modifier = Modifier,
+    subtitle: String = user.handle.canonical,
     leading: @Composable (RowScope.() -> Unit)? = {
         Box(avatarModifier, propagateMinConstraints = true) {
             AvatarComponent(
@@ -71,7 +72,7 @@ public fun UserCompat(
                     modifier = Modifier.alignByBaseline().then(nameModifier),
                 )
                 PlatformText(
-                    text = handle.canonical,
+                    text = subtitle,
                     style = PlatformTheme.typography.caption,
                     color = PlatformTheme.colorScheme.caption,
                     maxLines = 1,

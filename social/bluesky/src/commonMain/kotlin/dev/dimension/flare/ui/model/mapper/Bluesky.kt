@@ -820,6 +820,7 @@ private fun FeedViewPost.render(
             renderedPost.copy(
                 statusKey = message?.statusKey ?: renderedPost.statusKey,
                 user = repostUser,
+                authorSubtitleInternal = "@${repostUser.handle.normalizedRaw}",
                 createdAt = feedReason.value.indexedAt.toUi(),
                 images = persistentListOf(),
                 content = UiTranslatableText(original = uiRichTextOf(emptyList())),
@@ -910,6 +911,7 @@ internal fun PostView.render(
     return UiTimelineV2.Post(
         platformId = BLUESKY_PLATFORM_ID,
         user = user,
+        authorSubtitleInternal = "@${user.handle.normalizedRaw}",
         images = findMedias(this, downloadUrls),
         card = findCard(this),
         statusKey = statusKey,
@@ -1500,6 +1502,7 @@ private fun render(
                 }
             UiTimelineV2.Post(
                 user = user,
+                authorSubtitleInternal = "@${user.handle.normalizedRaw}",
                 images =
                     record.value.embeds
                         .orEmpty()

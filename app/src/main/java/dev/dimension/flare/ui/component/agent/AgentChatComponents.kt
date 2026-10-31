@@ -65,7 +65,6 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
-import com.halilibo.richtext.commonmark.Markdown
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.PaperPlane
@@ -87,6 +86,7 @@ import dev.dimension.flare.ui.component.FlareDividerDefaults
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.LocalBottomBarHeight
 import dev.dimension.flare.ui.component.LocalTimelineAppearance
+import dev.dimension.flare.ui.component.ProxyMarkdown
 import dev.dimension.flare.ui.component.status.CommonStatusComponent
 import dev.dimension.flare.ui.component.status.UserCompat
 import dev.dimension.flare.ui.model.UiProfile
@@ -546,7 +546,7 @@ private fun AgentMarkdownText(
     CompositionLocalProvider(LocalContentColor provides color) {
         SelectionContainer {
             ComposeRichText(modifier = modifier) {
-                Markdown(content = markdown)
+                ProxyMarkdown(content = markdown)
             }
         }
     }

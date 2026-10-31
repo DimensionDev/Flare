@@ -48,7 +48,6 @@ import androidx.compose.ui.input.key.type
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
-import com.halilibo.richtext.commonmark.Markdown
 import com.halilibo.richtext.ui.BasicRichText
 import com.halilibo.richtext.ui.RichTextThemeProvider
 import compose.icons.FontAwesomeIcons
@@ -70,6 +69,7 @@ import dev.dimension.flare.ui.common.itemsIndexed
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScrollBar
 import dev.dimension.flare.ui.component.LocalTimelineAppearance
+import dev.dimension.flare.ui.component.ProxyMarkdown
 import dev.dimension.flare.ui.component.status.CommonStatusComponent
 import dev.dimension.flare.ui.component.status.UserCompat
 import dev.dimension.flare.ui.model.UiProfile
@@ -417,7 +417,7 @@ private fun AgentMarkdownText(
     ) {
         SelectionContainer {
             BasicRichText(modifier = modifier) {
-                Markdown(content = markdown)
+                ProxyMarkdown(content = markdown)
             }
         }
     }

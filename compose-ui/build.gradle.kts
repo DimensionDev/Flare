@@ -50,6 +50,8 @@ kotlin {
                 implementation(libs.coil3.compose)
                 implementation(libs.coil3.ktor3)
                 implementation(libs.coil3.network)
+                api(libs.richtext.ui)
+                implementation(libs.richtext.commonmark)
                 implementation(libs.compose.placeholder)
                 implementation(libs.ksoup)
                 implementation(libs.kotlinx.immutable)

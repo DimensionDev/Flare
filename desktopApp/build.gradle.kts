@@ -69,7 +69,6 @@ dependencies {
     implementation(libs.systemColor)
     implementation(libs.sentry)
     implementation(libs.richtext.ui)
-    implementation(libs.richtext.commonmark)
 
     testImplementation(compose("org.jetbrains.compose.ui:ui-test-junit4"))
     testImplementation(libs.junit)

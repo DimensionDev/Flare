@@ -2,7 +2,6 @@ import FlareAppleCore
 import KotlinSharedUI
 import SwiftUI
 import SwiftUIBackports
-import Textual
 
 public struct AgentChatView: View {
     let messages: PagingState<AgentChatHistoryMessage>
@@ -324,8 +323,7 @@ private struct AgentChatMessageBubble: View {
         if isUser {
             Text(verbatim: value)
         } else {
-            StructuredText(markdown: value)
-                .textual.textSelection(.enabled)
+            AgentMarkdownText(markdown: value)
         }
     }
 

@@ -16,8 +16,8 @@ import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -28,7 +28,7 @@ class ComposeVisibilityTest {
         )
 
     @Test
-    fun privateSelectionSurvivesUnsupportedAccountAndCapabilityRemoval() =
+    fun privateSelectionFallsBackWhenCapabilitiesChange() =
         runTest {
             val config = mutableStateOf<ComposeConfig.Visibility?>(weibo)
             var state: VisibilityState? = null
@@ -40,22 +40,19 @@ class ComposeVisibilityTest {
             runCurrent()
             assertNotNull(state).setVisibility(Visibility.SelfOnly)
             runCurrent()
-            assertTrue(assertNotNull(state).isValid)
-            config.value = ComposeConfig.Visibility()
+            config.value = ComposeConfig.Visibility(defaultVisibility = Visibility.Followers)
             runCurrent()
-            assertEquals(Visibility.SelfOnly, assertNotNull(state).visibility)
-            assertFalse(assertNotNull(state).isValid)
+            assertEquals(Visibility.Followers, assertNotNull(state).visibility)
             config.value = null
             runCurrent()
-            assertEquals(Visibility.SelfOnly, assertNotNull(state).visibility)
-            assertFalse(assertNotNull(state).isValid)
-            assertNotNull(state).setVisibility(Visibility.Public)
+            assertTrue(assertNotNull(state).allVisibilities.isEmpty())
+            config.value = weibo
             runCurrent()
-            assertTrue(assertNotNull(state).isValid)
+            assertEquals(Visibility.Public, assertNotNull(state).visibility)
         }
 
     @Test
-    fun rememberedPrivateAudienceIsPreservedWhenAccountsChange() =
+    fun rememberedPrivateAudienceResetsAfterIncompatibleAccounts() =
         runTest {
             val config = mutableStateOf<ComposeConfig.Visibility?>(null)
             var state: VisibilityState? = null
@@ -71,12 +68,14 @@ class ComposeVisibilityTest {
             assertEquals(Visibility.SelfOnly, assertNotNull(state).visibility)
             config.value = null
             runCurrent()
-            assertEquals(Visibility.SelfOnly, assertNotNull(state).visibility)
-            assertFalse(assertNotNull(state).isValid)
+            assertTrue(assertNotNull(state).allVisibilities.isEmpty())
+            config.value = weibo
+            runCurrent()
+            assertEquals(Visibility.Public, assertNotNull(state).visibility)
         }
 
     @Test
-    fun restoringUnsupportedPrivateDraftRequiresAnotherSelection() =
+    fun restoringUnsupportedPrivateDraftUsesThePlatformDefault() =
         runTest {
             var state: VisibilityState? = null
             backgroundScope.launch {
@@ -87,19 +86,18 @@ class ComposeVisibilityTest {
             runCurrent()
             assertNotNull(state).setVisibility(Visibility.Friends)
             runCurrent()
-            assertEquals(Visibility.Friends, assertNotNull(state).visibility)
-            assertFalse(assertNotNull(state).isValid)
+            assertTrue(assertNotNull(state).allVisibilities.isEmpty())
         }
 
     @Test
-    fun crossPostingKeepsOnlyTheCommonAudience() {
+    fun crossPostingHidesTheAudienceWhenRangesDiffer() {
         val merged = ComposeConfig(visibility = weibo).merge(ComposeConfig(visibility = ComposeConfig.Visibility()))
-        assertEquals(persistentListOf(Visibility.Public), merged.visibility?.allVisibilities)
+        assertNull(merged.visibility)
     }
 
     @Test
     fun privateDraftVisibilitiesSurviveSerializationAndRestore() {
-        for (visibility in listOf(Visibility.SelfOnly, Visibility.Friends)) {
+        for (visibility in listOf(Visibility.SelfOnly, Visibility.Friends, null)) {
             val original = ComposeData("private draft", visibility = visibility)
             val restored =
                 original

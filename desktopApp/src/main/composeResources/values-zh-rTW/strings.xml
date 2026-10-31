@@ -720,5 +720,4 @@
     <string name="visibility_friends_description">僅互相關注的好友可以看到此微博</string>
     <string name="visibility_self">僅自己可見</string>
     <string name="visibility_self_description">僅你自己可以看到此微博</string>
-    <string name="compose_visibility_unsupported">目前帳號不支援所選範圍，請重新選擇後發送。</string>
 </resources>

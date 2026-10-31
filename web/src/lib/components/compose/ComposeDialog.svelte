@@ -114,12 +114,8 @@
 	const hasTextContent = $derived(
 		text.trim().length > 0 || spoilerText.trim().length > 0 || selectedMedia.length > 0 || pollEnabled
 	);
-	const allVisibilities = $derived<UiTimelineV2PostVisibility[]>(
-		compose.allVisibilities.length > 0
-			? compose.allVisibilities
-			: ['Public']
-	);
-	const canSubmit = $derived(compose.canSend && !composeBusy && allVisibilities.includes(currentVisibility));
+	const allVisibilities = $derived(compose.allVisibilities);
+	const canSubmit = $derived(compose.canSend && !composeBusy);
 	const emojiEnabled = $derived(compose.emojis.length > 0);
 	const postReference = $derived(referencePost(compose.referencePost));
 
@@ -864,34 +860,33 @@
 					<FaIcon name="Poll" size={16} />
 				</button>
 			{/if}
-			<div class="dropdown dropdown-top">
-				<button class="btn btn-ghost btn-square btn-sm" type="button" disabled={composeBusy} tabindex="0" aria-label={m.composeVisibility()}>
-					{#key currentVisibility}
-						<FaIcon name={visibilityIcon(currentVisibility)} size={16} />
-					{/key}
-				</button>
-				<ul class="menu dropdown-content z-30 mb-2 w-72 rounded-box bg-base-100 p-2 shadow">
-					{#if !allVisibilities.includes(currentVisibility)}
-						<li><span role="status">{m.composeVisibilityUnsupported()}</span></li>
-					{/if}
-					{#each allVisibilities as item}
-						<li>
-							<button type="button" disabled={composeBusy} onclick={() => setVisibility(item)}>
-								<FaIcon name={visibilityIcon(item)} size={16} />
-								<span>
-									<strong>{visibilityTitle(item)}</strong>
-									<small>{visibilityDescription(item)}</small>
-								</span>
-								<span class="visibility-menu-check" aria-hidden="true">
-									{#if currentVisibility === item}
-										<FaIcon name="Check" size={14} />
-									{/if}
-								</span>
-							</button>
-						</li>
-					{/each}
-				</ul>
-			</div>
+			{#if currentVisibility !== null && allVisibilities.length > 0}
+				<div class="dropdown dropdown-top">
+					<button class="btn btn-ghost btn-square btn-sm" type="button" disabled={composeBusy} tabindex="0" aria-label={m.composeVisibility()}>
+						{#key currentVisibility}
+							<FaIcon name={visibilityIcon(currentVisibility)} size={16} />
+						{/key}
+					</button>
+					<ul class="menu dropdown-content z-30 mb-2 w-72 rounded-box bg-base-100 p-2 shadow">
+						{#each allVisibilities as item}
+							<li>
+								<button type="button" disabled={composeBusy} onclick={() => setVisibility(item)}>
+									<FaIcon name={visibilityIcon(item)} size={16} />
+									<span>
+										<strong>{visibilityTitle(item)}</strong>
+										<small>{visibilityDescription(item)}</small>
+									</span>
+									<span class="visibility-menu-check" aria-hidden="true">
+										{#if currentVisibility === item}
+											<FaIcon name="Check" size={14} />
+										{/if}
+									</span>
+								</button>
+							</li>
+						{/each}
+					</ul>
+				</div>
+			{/if}
 			{#if compose.contentWarningEnabled}
 				<button
 					class:btn-active={contentWarningEnabled}

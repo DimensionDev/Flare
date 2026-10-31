@@ -6,8 +6,8 @@ import dev.dimension.flare.ui.presenter.compose.ComposeStatus
 
 public data class ComposeData(
     val content: String,
-    val visibility: UiTimelineV2.Post.Visibility =
-        UiTimelineV2.Post.Visibility.Public,
+    // Null uses the publishing account's default visibility.
+    val visibility: UiTimelineV2.Post.Visibility? = null,
     val language: List<String> = listOf("en"),
     val medias: List<Media> = emptyList(),
     val sensitive: Boolean = false,

@@ -933,5 +933,4 @@
     <string name="visibility_friends_description">仅互相关注的好友可以看到此微博</string>
     <string name="visibility_self">仅自己可见</string>
     <string name="visibility_self_description">仅你自己可以看到此微博</string>
-    <string name="compose_visibility_unsupported">当前账号不支持所选范围，请重新选择后发送。</string>
 </resources>

@@ -631,7 +631,7 @@ internal class PluginDataSourceV1 private constructor(
                     request =
                         ComposeRequestV1(
                             text = data.content,
-                            visibility = data.visibility.toWire(),
+                            visibility = requireNotNull(data.visibility).toWire(),
                             languages = data.language,
                             assets = wireAssets,
                             sensitive = data.sensitive,
@@ -1018,7 +1018,7 @@ private fun validateComposeData(
     if (config == null) return
 
     config.text?.let { require(data.content.length <= it.maxLength) { "Compose text is too long" } }
-    config.visibility?.let { require(data.visibility.toWire() in it.allowed) { "Compose visibility is not allowed" } }
+    config.visibility?.let { require(requireNotNull(data.visibility).toWire() in it.allowed) { "Compose visibility is not allowed" } }
     require(config.contentWarning || (data.spoilerText.isNullOrEmpty())) { "Content warnings are not supported" }
     config.poll?.let { require((poll == null) || (poll.options.size <= it.maxOptions)) { "Too many poll options" } }
     require((config.poll != null) || (poll == null)) { "Polls are not supported" }

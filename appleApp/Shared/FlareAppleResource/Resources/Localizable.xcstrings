@@ -133,28 +133,6 @@
       }
     }
   },
-  "compose_visibility_unsupported": {
-    "localizations": {
-      "en": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "This audience is not supported by the selected accounts. Choose another audience to send."
-        }
-      },
-      "zh-Hans": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "当前账号不支持所选范围，请重新选择后发送。"
-        }
-      },
-      "zh-Hant": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "目前帳號不支援所選範圍，請重新選擇後發送。"
-        }
-      }
-    }
-  },
   "agent_error_interrupted": {
     "localizations": {
       "en": {

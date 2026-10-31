@@ -149,7 +149,7 @@ internal class ComposePostTool(
             reference?.let {
                 appendLine("Target status: ${it.statusKey}")
             }
-            appendLine("Visibility: ${data.visibility.name}")
+            appendLine("Visibility: ${data.visibility?.name ?: "Platform default"}")
         }.trim()
     }
 
@@ -415,7 +415,7 @@ internal class ComposePostTool(
                                     appendLine("targetStatusId=${it.statusKey.id}")
                                     appendLine("targetStatusHost=${it.statusKey.host}")
                                 }
-                                appendLine("visibility=${data.visibility.name}")
+                                appendLine("visibility=${data.visibility?.name ?: "Platform default"}")
                                 if (data.language.isNotEmpty()) {
                                     appendLine("languages=${data.language.joinToString()}")
                                 }
@@ -452,7 +452,7 @@ internal class ComposePostTool(
             appendLine("accountId=${accountKey.id}")
             appendLine("accountHost=${accountKey.host}")
             appendLine("platform=$platformId")
-            appendLine("visibility=${data.visibility.name}")
+            appendLine("visibility=${data.visibility?.name ?: "Platform default"}")
             reference?.let {
                 appendLine("targetStatus=${it.statusKey}")
                 appendLine("targetStatusId=${it.statusKey.id}")

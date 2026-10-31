@@ -553,6 +553,5 @@
   "composeVisibilityFriends": "好友圈可見",
   "composeVisibilityFriendsDescription": "僅互相關注的好友可以看到此微博",
   "composeVisibilitySelf": "僅自己可見",
-  "composeVisibilitySelfDescription": "僅你自己可以看到此微博",
-  "composeVisibilityUnsupported": "目前帳號不支援所選範圍，請重新選擇後發送。"
+  "composeVisibilitySelfDescription": "僅你自己可以看到此微博"
 }

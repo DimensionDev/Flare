@@ -53,7 +53,7 @@ public final class ComposeContentViewModel {
     }
 
     public func makeComposeData(
-        visibility: UiTimelineV2.PostVisibility,
+        visibility: UiTimelineV2.PostVisibility?,
         medias: [ComposeData.Media],
         sensitive: Bool,
         composeStatus: ComposeStatus?,
@@ -98,11 +98,11 @@ public final class ComposeContentViewModel {
 
 public struct ComposeDraftRestoreResult {
     public let sensitive: Bool
-    public let visibility: UiTimelineV2.PostVisibility
+    public let visibility: UiTimelineV2.PostVisibility?
 
     public init(
         sensitive: Bool,
-        visibility: UiTimelineV2.PostVisibility
+        visibility: UiTimelineV2.PostVisibility?
     ) {
         self.sensitive = sensitive
         self.visibility = visibility

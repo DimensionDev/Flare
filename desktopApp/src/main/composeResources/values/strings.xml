@@ -909,5 +909,4 @@
     <string name="visibility_friends_description">Only people who follow you and whom you follow can see this post</string>
     <string name="visibility_self">Only me</string>
     <string name="visibility_self_description">Only you can see this post</string>
-    <string name="compose_visibility_unsupported">This audience is not supported by the selected accounts. Choose another audience to send.</string>
 </resources>

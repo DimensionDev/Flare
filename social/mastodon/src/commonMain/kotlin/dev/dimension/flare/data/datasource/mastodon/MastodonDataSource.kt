@@ -322,7 +322,7 @@ internal open class MastodonDataSource(
             PostStatus(
                 status = data.content,
                 visibility =
-                    when (data.visibility) {
+                    when (requireNotNull(data.visibility)) {
                         UiTimelineV2.Post.Visibility.Public -> Visibility.Public
                         UiTimelineV2.Post.Visibility.Home -> Visibility.Unlisted
                         UiTimelineV2.Post.Visibility.Followers -> Visibility.Private

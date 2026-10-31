@@ -498,7 +498,7 @@ struct MacComposeScreen: View {
         .frame(width: 380, height: 480)
     }
 
-    private var currentVisibility: UiTimelineV2.PostVisibility {
+    private var currentVisibility: UiTimelineV2.PostVisibility? {
         presenter.state.visibility
     }
 

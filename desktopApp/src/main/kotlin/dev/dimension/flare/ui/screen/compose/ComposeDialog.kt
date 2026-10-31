@@ -106,7 +106,6 @@ import dev.dimension.flare.compose_select_accounts_current
 import dev.dimension.flare.compose_send
 import dev.dimension.flare.compose_show_emoji_picker
 import dev.dimension.flare.compose_video_no_alt
-import dev.dimension.flare.compose_visibility_unsupported
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.model.PostActionStyle
@@ -865,9 +864,6 @@ fun ComposeDialog(
                         )
                     MenuFlyoutContainer(
                         flyout = {
-                            if (!visibilityState.isValid) {
-                                Text(text = stringResource(Res.string.compose_visibility_unsupported), modifier = Modifier.padding(12.dp))
-                            }
                             visibilityState.allVisibilities.forEach { visibility ->
                                 MenuFlyoutItem(
                                     onClick = {

@@ -130,7 +130,7 @@ class PluginPageReloadTest {
         }
 
     @Test
-    fun composerRequiresAValidAudienceAfterPrivateDraftRestore() =
+    fun composerFallsBackToThePlatformDefaultForUnsupportedDraftVisibility() =
         withFixture {
             attach(Source("compose", canCompose = true))
             val groupId =
@@ -146,11 +146,58 @@ class PluginPageReloadTest {
             val loaded = state.await { it.loadedDraftState is UiState.Success }
             assertFalse(loaded.canSend)
             loaded.consumeLoadedDraft()
-            val restored = state.await { it.loadedDraftState == null && it.visibility == UiTimelineV2.Post.Visibility.SelfOnly }
-            assertFalse(restored.canSend)
-            assertEquals(listOf(UiTimelineV2.Post.Visibility.Public), restored.allVisibilities.toList())
-            restored.setVisibility(UiTimelineV2.Post.Visibility.Public)
-            state.await { it.canSend }
+            val restored = state.await { it.loadedDraftState == null && it.canSend }
+            assertEquals(null, restored.visibility)
+            assertTrue(restored.allVisibilities.isEmpty())
+            assertEquals(null, restored.visibilityState.takeSuccess())
+        }
+
+    @Test
+    fun composerHidesVisibilityWhenSelectedAccountRangesDiffer() =
+        withFixture {
+            val otherKey = MicroBlogKey("bob", accountKey.host)
+            val first =
+                Source(
+                    "first",
+                    canCompose = true,
+                    composeVisibility =
+                        ComposeConfig.Visibility(
+                            allVisibilities = persistentListOf(UiTimelineV2.Post.Visibility.Public, UiTimelineV2.Post.Visibility.SelfOnly),
+                        ),
+                )
+            val second =
+                Source(
+                    "second",
+                    canCompose = true,
+                    sourceAccountKey = otherKey,
+                    composeVisibility = ComposeConfig.Visibility(),
+                )
+            registry.replaceExternal(
+                PLATFORM,
+                object : PlatformSpec by registry.defaultGuest {
+                    override val platformId = PLATFORM
+                    override val isDefaultGuest = false
+
+                    override fun createDataSource(context: PlatformDataSourceContext) =
+                        if (context.accountKey ==
+                            accountKey
+                        ) {
+                            first
+                        } else {
+                            second
+                        }
+                },
+            )
+            repository.addAccount(UiAccount(otherKey, PLATFORM), "credential")
+            val state = observe(ComposePresenter(accountType))
+            val initial = state.await { it.allVisibilities.contains(UiTimelineV2.Post.Visibility.SelfOnly) }
+            initial.setText("post")
+            initial.setVisibility(UiTimelineV2.Post.Visibility.SelfOnly)
+            state.await { it.canSend && it.visibility == UiTimelineV2.Post.Visibility.SelfOnly }.selectAccount(otherKey)
+            val mixed = state.await { it.selectedUsers.takeSuccess()?.size == 2 && it.visibility == null }
+            assertTrue(mixed.canSend)
+            assertTrue(mixed.allVisibilities.isEmpty())
+            assertEquals(null, mixed.visibilityState.takeSuccess())
         }
 
     @Test
@@ -436,12 +483,14 @@ class PluginPageReloadTest {
         private val marker: String,
         private val badgeCount: Int = 1,
         private val canCompose: Boolean = false,
+        private val composeVisibility: ComposeConfig.Visibility? = null,
+        private val sourceAccountKey: MicroBlogKey = accountKey,
     ) : MicroblogDataSource by UnavailableMicroblogDataSource,
         DataSourceCapabilityProvider {
         val polls = MutableStateFlow(0)
         val badgeFetches = MutableStateFlow(0)
-        override val authenticatedAccountKey = accountKey
-        override val authenticatedProfile = createSampleUser().copy(key = accountKey, nameInternal = marker.toUiPlainText())
+        override val authenticatedAccountKey = sourceAccountKey
+        override val authenticatedProfile = createSampleUser().copy(key = sourceAccountKey, nameInternal = marker.toUiPlainText())
         private val comments =
             object : RemoteLoader<UiTimelineV2> {
                 override suspend fun load(
@@ -468,9 +517,9 @@ class PluginPageReloadTest {
                 compose =
                     if (canCompose) {
                         object : ComposeDataSource, MicroblogDataSource by this {
-                            override val accountKey = this@PluginPageReloadTest.accountKey
+                            override val accountKey = sourceAccountKey
 
-                            override fun composeConfig(type: ComposeType) = ComposeConfig()
+                            override fun composeConfig(type: ComposeType) = ComposeConfig(visibility = composeVisibility)
 
                             override suspend fun publish(
                                 data: ComposeData,

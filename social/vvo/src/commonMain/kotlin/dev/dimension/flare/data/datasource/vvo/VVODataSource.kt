@@ -463,7 +463,7 @@ internal class VVODataSource(
         data: ComposeData,
         progress: () -> Unit,
     ) {
-        val visible = data.visibility.toVvoVisible()
+        val visible = requireNotNull(data.visibility).toVvoVisible()
         val st = ensureLogin()
 
         val mediaIds =

@@ -14,6 +14,23 @@ import kotlin.test.assertFalse
 
 class ComposeTextValidationTest {
     @Test
+    fun publishingResolvesAnUnspecifiedAudienceToThePlatformDefault() =
+        runTest {
+            val config = ComposeConfig.Visibility(defaultVisibility = UiTimelineV2.Post.Visibility.Followers)
+            val source = TestComposeSource(ComposeConfig.Text(100), config)
+            source.compose(ComposeData("post")) {}
+            assertEquals(UiTimelineV2.Post.Visibility.Followers, source.lastPublished?.visibility)
+        }
+
+    @Test
+    fun publishingWithoutAudienceSupportUsesPublic() =
+        runTest {
+            val source = TestComposeSource(ComposeConfig.Text(100))
+            source.compose(ComposeData("post")) {}
+            assertEquals(UiTimelineV2.Post.Visibility.Public, source.lastPublished?.visibility)
+        }
+
+    @Test
     fun publishingRejectsUnsupportedVisibilityBeforeInvokingPlatform() =
         runTest {
             val source = TestComposeSource(ComposeConfig.Text(100))
@@ -81,12 +98,14 @@ private class TestComposeSource(
 ) : ComposeDataSource {
     override val accountKey = MicroBlogKey("test", "example.com")
     var published = 0
+    var lastPublished: ComposeData? = null
 
     override suspend fun publish(
         data: ComposeData,
         progress: () -> Unit,
     ) {
         published++
+        lastPublished = data
     }
 
     override fun composeConfig(type: ComposeType) =

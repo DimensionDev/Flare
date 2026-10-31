@@ -401,23 +401,10 @@ public data class ComposeConfig public constructor(
         }
 
         internal fun merge(other: Visibility): Visibility? {
-            val commonVisibilities =
-                allVisibilities
-                    .filter { it in other.allVisibilities }
-                    .toImmutableList()
-            if (commonVisibilities.isEmpty()) {
+            if (defaultVisibility != other.defaultVisibility || allVisibilities.toSet() != other.allVisibilities.toSet()) {
                 return null
             }
-            val mergedDefault =
-                defaultVisibility
-                    .takeIf { it == other.defaultVisibility && it in commonVisibilities }
-                    ?: UiTimelineV2.Post.Visibility.Public
-                        .takeIf { it in commonVisibilities }
-                    ?: commonVisibilities.first()
-            return Visibility(
-                allVisibilities = commonVisibilities,
-                defaultVisibility = mergedDefault,
-            )
+            return this
         }
     }
 

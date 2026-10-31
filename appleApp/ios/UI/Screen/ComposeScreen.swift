@@ -601,7 +601,7 @@ struct ComposeScreen: View {
             return .init(file: file, altText: item.altText.isEmpty ? nil : item.altText)
         }
     }
-    private func getVisibility() -> UiTimelineV2.PostVisibility {
+    private func getVisibility() -> UiTimelineV2.PostVisibility? {
         presenter.state.visibility
     }
 

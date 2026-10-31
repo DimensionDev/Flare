@@ -852,9 +852,6 @@ internal fun ComposeScreen(
                             },
                             properties = PopupProperties(focusable = false),
                         ) {
-                            if (!visibilityState.isValid) {
-                                Text(text = stringResource(R.string.compose_visibility_unsupported), modifier = Modifier.padding(12.dp))
-                            }
                             visibilityState.allVisibilities.forEach { visibility ->
                                 DropdownMenuItem(
                                     onClick = {

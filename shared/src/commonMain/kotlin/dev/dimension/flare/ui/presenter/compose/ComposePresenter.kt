@@ -524,7 +524,7 @@ public class ComposePresenter(
             )
         val visibilityState =
             composeConfig.mapNotNull {
-                selection.takeIf { _ -> it.visibility != null || selection.visibility != UiTimelineV2.Post.Visibility.Public }
+                selection.takeIf { _ -> it.visibility != null }
             }
         val pollMaxOptions =
             composeConfig
@@ -566,7 +566,7 @@ public class ComposePresenter(
                 ?.sortedIsoCodes
                 ?.toImmutableList()
                 ?: persistentListOf()
-        val webVisibility = selection.visibility
+        val webVisibility = selection.visibility.takeIf { composeConfig.takeSuccess()?.visibility != null }
         val webVisibilities = selection.allVisibilities
         val webEmojis =
             emojiState
@@ -585,7 +585,7 @@ public class ComposePresenter(
         val draftReady = loadedDraftState == null || loadedDraftState is UiState.Error
 
         return object : ComposeState(
-            canSend = canSend && draftReady && composeConfig.takeSuccess() != null && selection.isValid,
+            canSend = canSend && draftReady && composeConfig.takeSuccess() != null,
             visibilityState = visibilityState,
             replyState = replyState,
             referencePost = replyState.takeSuccess(),
@@ -644,7 +644,7 @@ public class ComposePresenter(
             override fun sendDirect(
                 content: String,
                 accountKeys: List<MicroBlogKey>,
-                visibility: UiTimelineV2.Post.Visibility,
+                visibility: UiTimelineV2.Post.Visibility?,
                 language: String,
                 sensitive: Boolean,
                 spoilerText: String?,
@@ -785,7 +785,9 @@ public class ComposePresenter(
             }
 
             override fun consumeLoadedDraft() {
-                loadedDraftStateFlow.value?.takeSuccess()?.let { selection.setVisibility(it.data.visibility) }
+                loadedDraftStateFlow.value?.takeSuccess()?.let {
+                    it.data.visibility?.let(selection::setVisibility) ?: selection.clear()
+                }
                 loadedDraftStateFlow.value = null
             }
 
@@ -966,7 +968,6 @@ public interface VisibilityState {
     public val visibility: UiTimelineV2.Post.Visibility
     public val allVisibilities: ImmutableList<UiTimelineV2.Post.Visibility>
     public val showVisibilityMenu: Boolean
-    public val isValid: Boolean get() = visibility in allVisibilities
 
     public fun showVisibilityMenu()
 
@@ -982,20 +983,19 @@ internal fun rememberComposeVisibilityState(
     config: ComposeConfig.Visibility?,
     savedVisibility: UiTimelineV2.Post.Visibility?,
 ): VisibilityState {
-    val options = config?.allVisibilities ?: persistentListOf(UiTimelineV2.Post.Visibility.Public)
-    val default = config?.defaultVisibility ?: UiTimelineV2.Post.Visibility.Public
+    val options = config?.allVisibilities ?: persistentListOf()
+    val default = config?.defaultVisibility
     var showVisibilityMenu by remember { mutableStateOf(false) }
     var visibility by remember { mutableStateOf(default) }
     var hasExplicitVisibility by remember { mutableStateOf(false) }
     LaunchedEffect(config, savedVisibility) {
-        if (!hasExplicitVisibility) {
-            visibility = savedVisibility?.takeIf { it in options } ?: default
-            if (visibility != UiTimelineV2.Post.Visibility.Public) {
-                hasExplicitVisibility = true
-            }
+        val candidate = if (hasExplicitVisibility) visibility else savedVisibility
+        visibility = candidate?.takeIf { it in options } ?: default
+        if (visibility != null && visibility != UiTimelineV2.Post.Visibility.Public) {
+            hasExplicitVisibility = true
         }
     }
-    val current = visibility
+    val current = visibility?.takeIf { it in options } ?: default ?: UiTimelineV2.Post.Visibility.Public
     return object : VisibilityState {
         override val visibility = current
         override val allVisibilities = options
@@ -1011,7 +1011,7 @@ internal fun rememberComposeVisibilityState(
 
         override fun setVisibility(value: UiTimelineV2.Post.Visibility) {
             hasExplicitVisibility = true
-            visibility = value
+            visibility = value.takeIf { it in options } ?: default
         }
 
         override fun clear() {
@@ -1078,7 +1078,7 @@ public abstract class ComposeState(
     public val languageCodes: ImmutableList<String>,
     public val emojiAccountType: AccountType?,
     public val emojis: ImmutableList<UiEmoji>,
-    public val visibility: UiTimelineV2.Post.Visibility,
+    public val visibility: UiTimelineV2.Post.Visibility?,
     public val allVisibilities: ImmutableList<UiTimelineV2.Post.Visibility>,
 ) {
     public abstract fun setVisibility(value: UiTimelineV2.Post.Visibility)
@@ -1092,7 +1092,7 @@ public abstract class ComposeState(
     public abstract fun sendDirect(
         content: String,
         accountKeys: List<MicroBlogKey>,
-        visibility: UiTimelineV2.Post.Visibility,
+        visibility: UiTimelineV2.Post.Visibility?,
         language: String,
         sensitive: Boolean,
         spoilerText: String?,

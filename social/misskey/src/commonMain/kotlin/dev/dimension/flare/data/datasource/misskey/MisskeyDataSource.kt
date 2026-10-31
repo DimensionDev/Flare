@@ -504,7 +504,7 @@ internal class MisskeyDataSource(
             NotesCreateRequest(
                 text = data.content.takeIf { it.isNotEmpty() && it.isNotBlank() },
                 visibility =
-                    when (data.visibility) {
+                    when (requireNotNull(data.visibility)) {
                         UiTimelineV2.Post.Visibility.Public -> "public"
                         UiTimelineV2.Post.Visibility.Home -> "home"
                         UiTimelineV2.Post.Visibility.Followers -> "followers"

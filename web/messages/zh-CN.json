@@ -561,6 +561,5 @@
   "composeVisibilityFriends": "好友圈可见",
   "composeVisibilityFriendsDescription": "仅互相关注的好友可以看到此微博",
   "composeVisibilitySelf": "仅自己可见",
-  "composeVisibilitySelfDescription": "仅你自己可以看到此微博",
-  "composeVisibilityUnsupported": "当前账号不支持所选范围，请重新选择后发送。"
+  "composeVisibilitySelfDescription": "仅你自己可以看到此微博"
 }

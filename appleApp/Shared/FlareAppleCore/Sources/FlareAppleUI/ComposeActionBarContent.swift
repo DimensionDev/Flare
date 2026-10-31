@@ -147,9 +147,6 @@ public struct ComposeVisibilityMenu: View {
 
     public var body: some View {
         Menu {
-            if !allVisibilities.contains(visibility) {
-                Text("compose_visibility_unsupported", bundle: FlareAppleUILocalization.bundle)
-            }
             ForEach(allVisibilities, id: \.self) { visibility in
                 Button {
                     onSelect(visibility)

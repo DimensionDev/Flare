@@ -561,6 +561,5 @@
   "composeVisibilityFriends": "Friends circle",
   "composeVisibilityFriendsDescription": "Only people who follow you and whom you follow can see this post",
   "composeVisibilitySelf": "Only me",
-  "composeVisibilitySelfDescription": "Only you can see this post",
-  "composeVisibilityUnsupported": "This audience is not supported by the selected accounts. Choose another audience to send."
+  "composeVisibilitySelfDescription": "Only you can see this post"
 }

@@ -21,6 +21,7 @@ import dev.dimension.flare.model.PlatformDataSourceContext
 import dev.dimension.flare.model.PlatformMetadata
 import dev.dimension.flare.ui.model.UiAccount
 import io.ktor.http.Url
+import io.ktor.http.encodeURLPath
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -52,9 +53,11 @@ public fun RunningPluginV1.accountCredential(success: LoginSuccessV1): PluginAcc
 
 internal fun RunningPluginV1.platformMetadata(): PlatformMetadata {
     val platform = installed.manifest.platform
+    val normalized = iconPath.replace('\\', '/')
+    val absolute = if (normalized.startsWith('/')) normalized else "/$normalized"
     return PlatformMetadata(
         displayName = platform.name.fallbackText,
-        icon = IconType.Url("file://$iconPath"),
+        icon = IconType.Url("file://${absolute.encodeURLPath()}"),
         displayNameText = platform.name.toUiText(installed.pluginId),
     )
 }

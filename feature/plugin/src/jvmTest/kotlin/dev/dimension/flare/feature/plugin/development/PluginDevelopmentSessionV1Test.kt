@@ -49,8 +49,9 @@ import kotlinx.serialization.json.jsonPrimitive
 import okio.FileSystem
 import okio.Path
 import okio.Path.Companion.toOkioPath
-import okio.Path.Companion.toPath
+import java.net.URI
 import java.nio.file.Files
+import java.nio.file.Paths
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -110,7 +111,7 @@ class PluginDevelopmentSessionV1Test {
             assertFalse(session.state.value.active)
             session.reload(confirmed = true)
             val first = current
-            val icon = (registry.require(PLATFORM).metadata.icon as IconType.Url).url.removePrefix("file://").toPath()
+            val icon = Paths.get(URI((registry.require(PLATFORM).metadata.icon as IconType.Url).url)).toOkioPath()
             assertNotSame(originalSpec, registry.require(PLATFORM))
             assertEquals("development", page()["marker"]!!.jsonPrimitive.content)
             assertEquals(2, page()["count"]!!.jsonPrimitive.int)

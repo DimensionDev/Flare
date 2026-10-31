@@ -46,7 +46,9 @@ import okio.Path.Companion.toPath
 import okio.SYSTEM
 import java.awt.image.BufferedImage
 import java.io.ByteArrayOutputStream
+import java.net.URI
 import java.nio.file.Files
+import java.nio.file.Paths
 import javax.imageio.ImageIO
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -85,6 +87,21 @@ class PluginLoginCoordinatorV1Test {
         }
 
     @Test
+    fun platformIconUrlsEncodeWindowsAndUnixPaths() {
+        for ((path, expected) in listOf(
+            "C:\\Users\\Plugin User\\platform-50%+#日本語.png" to "/C:/Users/Plugin User/platform-50%+#日本語.png",
+            "/tmp/Plugin User/platform-50%+#日本語.png" to "/tmp/Plugin User/platform-50%+#日本語.png",
+        )) {
+            val icon = assertIs<IconType.Url>(plugin.copy(iconPath = path).platformMetadata().icon)
+            val uri = URI(icon.url)
+            assertEquals("file", uri.scheme)
+            assertNull(uri.authority)
+            assertEquals(expected, uri.path)
+            assertNull(uri.fragment)
+        }
+    }
+
+    @Test
     fun platformIconsAreImmutableSnapshotsAcrossUpdatesAndPackageRemoval() =
         runBlocking {
             val original = plugin.platformMetadata().icon as IconType.Url
@@ -104,9 +121,11 @@ class PluginLoginCoordinatorV1Test {
                 fileSystem.delete(root / "social-plugins-v2" / "icons" / "${it.installed.packageHash}.png")
             }
             assertEquals(original, plugin.platformMetadata().icon)
-            assertTrue(fileSystem.exists(original.url.removePrefix("file://").toPath()))
-            assertTrue(fileSystem.exists(updated.url.removePrefix("file://").toPath()))
-            assertTrue(bytes.contentEquals(fileSystem.read(original.url.removePrefix("file://").toPath()) { readByteArray() }))
+            val originalPath = Paths.get(URI(original.url)).toOkioPath()
+            val updatedPath = Paths.get(URI(updated.url)).toOkioPath()
+            assertTrue(fileSystem.exists(originalPath))
+            assertTrue(fileSystem.exists(updatedPath))
+            assertTrue(bytes.contentEquals(fileSystem.read(originalPath) { readByteArray() }))
         }
 
     @Test
@@ -231,9 +250,10 @@ class PluginLoginCoordinatorV1Test {
                         .single()
                         .first.platformIcon,
                 ).url
-            assertTrue(iconUrl.contains("/platform-"))
+            val iconPath = Paths.get(URI(iconUrl)).toOkioPath()
+            assertTrue(iconPath.name.startsWith("platform-"))
             assertFalse(iconUrl.contains(plugin.installed.packageHash))
-            assertTrue(FileSystem.SYSTEM.exists(iconUrl.removePrefix("file://").toPath()))
+            assertTrue(FileSystem.SYSTEM.exists(iconPath))
         }
 
     @Test

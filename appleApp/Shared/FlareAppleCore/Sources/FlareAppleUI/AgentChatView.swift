@@ -19,7 +19,8 @@ public struct AgentChatView: View {
     let showsEmptyPlaceholder: Bool
 
     @State private var draft = ""
-    @State private var scrollPosition: String?
+    // PagingView registers its outer row IDs as AnyHashable.
+    @State private var scrollPosition: AnyHashable?
 
     public init(
         messages: PagingState<AgentChatHistoryMessage>,
@@ -85,7 +86,6 @@ public struct AgentChatView: View {
                                         onPostClick: onPostClick,
                                         onUserClick: onUserClick
                                     )
-                                    .id(message.id)
                                 }
                             )
                         }
@@ -125,9 +125,9 @@ public struct AgentChatView: View {
         }
     }
 
-    private var newestMessageId: String? {
+    private var newestMessageId: AnyHashable? {
         if case .success(let success) = onEnum(of: messages) {
-            return success.peek(index: 0)?.id
+            return success.peek(index: 0).map { AnyHashable($0.id) }
         }
         return nil
     }

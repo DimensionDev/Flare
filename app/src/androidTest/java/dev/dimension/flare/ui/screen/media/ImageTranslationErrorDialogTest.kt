@@ -24,7 +24,7 @@ class ImageTranslationErrorDialogTest {
     @get:Rule val compose = createComposeRule()
 
     @Test
-    fun detailsCanBeViewedCopiedAndReopenedWithoutStartingARequest() {
+    fun detailsCanBeViewedAndCopiedOnlyFromTheFailureDialog() {
         val details = "HTTP status: 401\nDetails: Invalid original-key at https://example.invalid/image?signature=value"
         val media = UiMedia.Image("https://example.invalid/source.png", "https://example.invalid/source.png", null, 1f, 1f, false)
         val state = State(ImageTranslationItem(error = ImageTranslationError.Authentication, errorDetails = details))
@@ -46,11 +46,10 @@ class ImageTranslationErrorDialogTest {
         }
         compose.onNodeWithText("OK").performClick()
         compose.onNodeWithText(details).assertDoesNotExist()
+        compose.onNodeWithText("View error details").assertDoesNotExist()
         compose.runOnIdle {
             assertEquals(details, state.entry.errorDetails)
-            state.setErrorDetailsVisible(media, true)
         }
-        compose.onNodeWithText(details).assertExists()
     }
 
     private class State(

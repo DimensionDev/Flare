@@ -295,12 +295,12 @@ final class MediaViewerInteractionTests: XCTestCase {
     }
 
     @MainActor
-    func testTranslationErrorDetailsCanBeViewedCopiedAndReopenedWithoutPost() async throws {
+    func testTranslationErrorDetailsAreOnlyAccessibleFromFailureAlertWithoutPost() async throws {
         try await assertTranslationErrorDetails(withoutPost: true)
     }
 
     @MainActor
-    func testTranslationErrorDetailsCanBeViewedCopiedAndReopenedWithPost() async throws {
+    func testTranslationErrorDetailsAreOnlyAccessibleFromFailureAlertWithPost() async throws {
         try await assertTranslationErrorDetails(withoutPost: false)
     }
 
@@ -334,11 +334,8 @@ final class MediaViewerInteractionTests: XCTestCase {
         let expectedDetails = details.label
         app.buttons["image-translation-copy-error-details"].tap()
         app.navigationBars["Error details"].buttons["Done"].tap()
-        let reopen = app.buttons["View error details"]
-        XCTAssertTrue(reopen.waitForExistence(timeout: 5))
-        reopen.tap()
-        XCTAssertTrue(details.waitForExistence(timeout: 5))
-        app.navigationBars["Error details"].buttons["Done"].tap()
+        XCTAssertTrue(details.waitForNonExistence(timeout: 5))
+        XCTAssertFalse(app.buttons["View error details"].exists)
         app.buttons["Close"].tap()
         let paste = app.textViews["media-fixture-paste-error-details"]
         XCTAssertTrue(paste.waitForExistence(timeout: 5))

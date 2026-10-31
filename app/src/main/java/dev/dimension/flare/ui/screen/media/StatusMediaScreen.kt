@@ -874,16 +874,6 @@ internal fun MediaViewerScreen(
 
                     val current = medias.getOrNull(state.currentPage)
                     if (current is UiMedia.Image) {
-                        if (translation.item(current).errorDetails != null) {
-                            ListItem(
-                                modifier =
-                                    Modifier.clickable {
-                                        state.setShowSheet(false)
-                                        translation.setErrorDetailsVisible(current, true)
-                                    },
-                                content = { Text(imageTranslationText("View error details")) },
-                            )
-                        }
                         if (translation.canRegenerate(current)) {
                             ListItem(
                                 modifier =

@@ -100,7 +100,7 @@ class ImageTranslationSettingsTest {
 
     @Test
     @OptIn(ExperimentalComposeUiApi::class)
-    fun viewerCanOpenCopyDismissAndReopenErrorDetailsWithoutTranslating() {
+    fun viewerCanViewAndCopyErrorDetailsOnlyFromTheFailureDialog() {
         val state = TranslationState()
         val details = "Provider code: invalid_api_key\nDetails: Invalid original-key at https://example.invalid/image?signature=value"
         var copiedEntry: ClipEntry? = null
@@ -127,8 +127,7 @@ class ImageTranslationSettingsTest {
         }
         compose.onNodeWithText("OK").performClick()
         compose.onNodeWithText(details).assertDoesNotExist()
-        compose.onNodeWithText("View error details").performClick()
-        compose.onNodeWithText(details).assertExists()
+        compose.onNodeWithText("View error details").assertDoesNotExist()
         compose.runOnIdle {
             assertEquals(0, state.toggles)
             assertEquals(0, state.regenerations)

@@ -961,6 +961,8 @@ private enum MacStatusShareScreenshotRenderer {
         let scale: CGFloat = 2
         let loading = ShareImageLoading()
         let hostingView = NSHostingView(rootView: view.environment(\.shareImageLoading, loading).fixedSize(horizontal: false, vertical: true))
+        // Screenshot padding must not inherit the window's safe area.
+        hostingView.safeAreaRegions = []
         var fittingSize = hostingView.fittingSize
         try ShareImageLoading.checkSize(fittingSize, scale: scale)
         guard fittingSize.width > 0, fittingSize.height > 0 else {

@@ -231,6 +231,8 @@ extension View {
     func snapshot(colorScheme: ColorScheme) async throws -> UIImage {
         let loading = ShareImageLoading()
         let controller = UIHostingController(rootView: self.environment(\.shareImageLoading, loading).fixedSize())
+        // Screenshot padding must not inherit the window's safe area.
+        controller.safeAreaRegions = []
         controller.overrideUserInterfaceStyle = colorScheme == .dark ? .dark : .light
         let view = controller.view!
         var targetSize = view.intrinsicContentSize

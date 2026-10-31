@@ -300,6 +300,10 @@ val compileFoundationModelsBridge = tasks.register<Exec>("compileFoundationModel
     )
 }
 
+tasks.test {
+    testLogging.exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+}
+
 tasks.named<ProcessResources>("processResources") {
     if (isMacOs) {
         dependsOn(compileFoundationModelsBridge)

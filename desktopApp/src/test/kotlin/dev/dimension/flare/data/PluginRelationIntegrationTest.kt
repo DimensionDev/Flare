@@ -21,14 +21,13 @@ import dev.dimension.flare.model.PlatformRegistry
 import dev.dimension.flare.model.PlatformSpec
 import dev.dimension.flare.ui.model.UiRelation
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.job
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import kotlinx.serialization.KSerializer
@@ -62,9 +61,8 @@ class PluginRelationIntegrationTest {
             root = Files.createTempDirectory("flare-plugin-relation-test")
             System.setProperty("user.home", root.toString())
             assertEquals(root.resolve(".flare").toFile(), FileSystemUtilsExt.flareDirectory())
-            scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
             val application = startKoin<DesktopKoinApplication>()
-            application.koin.declare<CoroutineScope>(scope)
+            scope = application.koin.get()
             subsystem = application.koin.get()
 
             val packagePath = root.resolve("plugin.fpp")
@@ -95,7 +93,7 @@ class PluginRelationIntegrationTest {
     @After
     fun tearDown() =
         runBlocking {
-            if (::scope.isInitialized) scope.cancel()
+            if (::scope.isInitialized) scope.coroutineContext.job.cancelAndJoin()
             if (::subsystem.isInitialized) subsystem.runtimePool.close()
             stopKoin()
             System.setProperty("user.home", originalHome)

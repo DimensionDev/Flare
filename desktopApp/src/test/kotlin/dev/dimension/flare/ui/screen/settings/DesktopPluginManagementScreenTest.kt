@@ -43,7 +43,10 @@ import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.model.UiText
 import dev.dimension.flare.ui.theme.FlareTheme
 import dev.dimension.flare.ui.theme.LocalComposeWindow
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.job
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import org.junit.After
@@ -64,6 +67,7 @@ class DesktopPluginManagementScreenTest {
     private lateinit var root: Path
     private lateinit var originalHome: String
     private lateinit var subsystem: PluginSubsystemV1
+    private lateinit var scope: CoroutineScope
     private var visible by mutableStateOf(true)
 
     @Before
@@ -73,12 +77,15 @@ class DesktopPluginManagementScreenTest {
         System.setProperty("user.home", root.toString())
         assertEquals(root.resolve(".flare").toFile(), FileSystemUtilsExt.flareDirectory())
         val application = startKoin<DesktopKoinApplication>()
+        scope = application.koin.get()
         subsystem = application.koin.get()
     }
 
     @After
     fun tearDown() {
-        visible = false
+        compose.runOnIdle { visible = false }
+        compose.waitForIdle()
+        if (::scope.isInitialized) runBlocking { scope.coroutineContext.job.cancelAndJoin() }
         if (::subsystem.isInitialized) {
             runBlocking { subsystem.runtimePool.close() }
             subsystem.github.close()

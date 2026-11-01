@@ -34,6 +34,8 @@ hosted frames to check first binding, state changes, rollback, and reuse, includ
 retained lazy rows and post replacement during icon or digit transitions. Equal
 target counts must still cancel the previous post's transition. Animation layers
 are event driven; scrolling and first binding must not rebuild icons using `.id`.
+Direction cases inspect incoming digits in rendered frames for both increases
+and decreases, covering UIKit's vertical transition coordinate mapping.
 Its Reduce Motion case runs only when the simulator's system setting is enabled; enable it on
 an isolated test simulator, restart that simulator, and run the case explicitly:
 

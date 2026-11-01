@@ -1,4 +1,12 @@
 import KotlinSharedUI
+import SwiftUI
+
+public enum StatusActionAnimationTiming {
+    public static let iconSpring = Spring.snappy(duration: 0.32)
+    public static let iconStartScale = 0.82
+    public static let fadeDuration = 0.15
+    public static let numberDuration = 0.24
+}
 
 public struct StatusActionAnimationState: Equatable {
     public struct Identity: Hashable {

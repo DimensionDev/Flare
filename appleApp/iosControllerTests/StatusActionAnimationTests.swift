@@ -1,5 +1,6 @@
 import XCTest
 import UIKit
+import SwiftUI
 import KotlinSharedUI
 import FlareAppleUI
 @testable import Flare
@@ -64,12 +65,15 @@ final class StatusActionAnimationTests: XCTestCase {
         XCTAssertNil(icon.layer.animationKeys())
         XCTAssertNil(label.layer.animationKeys())
         configure(view, actions: [animatedAction(liked: true, count: 2)])
-        let pop = try XCTUnwrap(icon.layer.animation(forKey: "statusAction.pop") as? CAKeyframeAnimation)
-        XCTAssertEqual(pop.duration, 0.25)
+        let pop = try XCTUnwrap(icon.layer.animation(forKey: "statusAction.pop")?.copy() as? CASpringAnimation)
+        XCTAssertEqual(pop.fromValue as? Double, StatusActionAnimationTiming.iconStartScale)
+        XCTAssertEqual(pop.toValue as? Double, 1)
+        XCTAssertEqual(pop.damping, StatusActionAnimationTiming.iconSpring.damping)
+        XCTAssertEqual(pop.duration, StatusActionAnimationTiming.iconSpring.settlingDuration)
         XCTAssertEqual(label.text, "2")
         XCTAssertEqual((view.subviews.first as? UIButton)?.accessibilityValue, "2")
         let transition = try XCTUnwrap(label.layer.animation(forKey: "transition") as? CATransition)
-        XCTAssertEqual(transition.subtype, .fromBottom)
+        XCTAssertEqual(transition.subtype, .fromTop)
         pop.setValue("original", forKey: "testMarker")
         icon.layer.add(pop, forKey: "statusAction.pop")
         configure(view, actions: [animatedAction(liked: true, count: 2)])
@@ -77,7 +81,7 @@ final class StatusActionAnimationTests: XCTestCase {
         configure(view, actions: [animatedAction()])
         XCTAssertNil(icon.layer.animation(forKey: "statusAction.pop"))
         XCTAssertNotNil(icon.layer.animation(forKey: "transition"))
-        XCTAssertEqual((label.layer.animation(forKey: "transition") as? CATransition)?.subtype, .fromTop)
+        XCTAssertEqual((label.layer.animation(forKey: "transition") as? CATransition)?.subtype, .fromBottom)
     }
 
     func testUIKitReuseReorderingAndRemovalClearRunningAnimations() throws {
@@ -107,6 +111,44 @@ final class StatusActionAnimationTests: XCTestCase {
         view.prepareForPoolRemoval()
         XCTAssertNil(icon.layer.animationKeys())
         XCTAssertNil(label.layer.animationKeys())
+    }
+
+    func testUIKitCountMovesUpWhenIncreasingAndDownWhenDecreasing() throws {
+        for (before, after, increasing) in [(Int64(9), Int64(10), true), (10, 9, false)] {
+            let view = StatusActionsUIView()
+            view.backgroundColor = .white
+            configure(view, actions: [animatedAction(liked: true, count: after)])
+            let window = try show(view)
+            defer { window.isHidden = true; window.rootViewController = nil }
+            window.overrideUserInterfaceStyle = .light
+            settle()
+            view.layoutIfNeeded()
+            let (_, label) = try content(view)
+            let rect = label.convert(label.bounds, to: view)
+            let restingY = try XCTUnwrap(actionNumberInkCenterY(image(view), in: rect))
+            configure(view, actions: [animatedAction(count: before)])
+            settle(milliseconds: 350)
+            configure(view, actions: [animatedAction(liked: true, count: after)])
+            // Freeze the compositor so the assertion checks the entering digit's screen position.
+            for key in label.layer.animationKeys() ?? [] {
+                let animation = try XCTUnwrap(label.layer.animation(forKey: key)?.copy() as? CAAnimation)
+                animation.speed = 0
+                animation.timeOffset = animation.duration * 0.45
+                label.layer.add(animation, forKey: key)
+            }
+            settle()
+            let moving = image(view)
+            let attachment = XCTAttachment(image: moving)
+            attachment.name = increasing ? "uikit-count-increasing" : "uikit-count-decreasing"
+            attachment.lifetime = .keepAlways
+            add(attachment)
+            let enteringY = try XCTUnwrap(actionNumberInkCenterY(moving, in: rect))
+            if increasing {
+                XCTAssertGreaterThan(enteringY, restingY + 0.5, "An increasing count must enter from below and move up")
+            } else {
+                XCTAssertLessThan(enteringY, restingY - 0.5, "A decreasing count must enter from above and move down")
+            }
+        }
     }
 
     func testUIKitGroupUpdatesAndHiddenCountsKeepMenuAndLayout() throws {
@@ -147,6 +189,21 @@ final class StatusActionAnimationTests: XCTestCase {
                 try XCTUnwrap(button.subviews.compactMap { $0 as? UILabel }.first))
     }
 
+    private func settle(milliseconds: Int = 80) {
+        let settled = expectation(description: "Render a frame")
+        DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(milliseconds)) { settled.fulfill() }
+        wait(for: [settled], timeout: 2)
+    }
+
+    private func image(_ view: UIView) -> UIImage {
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = 1
+        format.preferredRange = .standard
+        return UIGraphicsImageRenderer(size: view.bounds.size, format: format).image { _ in
+            view.drawHierarchy(in: view.bounds, afterScreenUpdates: true)
+        }
+    }
+
     private func show(_ view: UIView) throws -> UIWindow {
         let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first)
         let window = UIWindow(windowScene: scene)
@@ -165,4 +222,24 @@ func animatedAction(liked: Bool = false, count: Int64 = 1, key: String = "like",
                     family: PostActionFamily? = .like, enabled: Bool = true) -> ActionMenu.Item {
     ActionMenu.Item(updateKey: key, icon: liked ? .unlike : .like, text: nil, count: UiNumber(value: count),
                     color: liked ? .red : .contentColor, clickEvent: ClickEventNoop.shared, actionFamily: family, enabled: enabled)
+}
+
+func actionNumberInkCenterY(_ image: UIImage, in rect: CGRect) -> Double? {
+    guard let image = image.cgImage, let bytes = image.dataProvider?.data as Data? else { return nil }
+    let stride = image.bitsPerPixel / 8
+    var weight = 0.0
+    var weightedY = 0.0
+    for y in max(0, Int(rect.minY))..<min(image.height, Int(ceil(rect.maxY))) {
+        for x in max(0, Int(rect.minX))..<min(image.width, Int(ceil(rect.maxX))) {
+            let offset = y * image.bytesPerRow + x * stride
+            let channels = bytes[offset..<offset + 3]
+            let lowest = channels.min()!
+            let range = Int(channels.max()!) - Int(lowest)
+            guard lowest < 230, range > 40 else { continue }
+            let ink = Double(255 - lowest)
+            weight += ink
+            weightedY += Double(y) * ink
+        }
+    }
+    return weight > 0 ? weightedY / weight : nil
 }

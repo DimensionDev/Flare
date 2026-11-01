@@ -1,4 +1,5 @@
 import UIKit
+import SwiftUI
 import KotlinSharedUI
 import FlareAppleCore
 import FlareAppleUI
@@ -627,28 +628,37 @@ private final class ActionItemControl: UIButton, ManualLayoutMeasurable, Timelin
         self.animationState = animationState
         if effects?.icon == .pop {
             iconView.layer.removeAnimation(forKey: "transition")
-            let animation = CAKeyframeAnimation(keyPath: "transform.scale")
-            animation.values = [1, 0.9, 1.15, 1]
-            animation.keyTimes = [0, 0.2, 0.52, 1]
-            animation.duration = 0.25
+            let spring = StatusActionAnimationTiming.iconSpring
+            let animation = CASpringAnimation(keyPath: "transform.scale")
+            animation.fromValue = StatusActionAnimationTiming.iconStartScale
+            animation.toValue = 1
+            animation.mass = spring.mass
+            animation.stiffness = spring.stiffness
+            animation.damping = spring.damping
+            animation.duration = spring.settlingDuration
+            animation.timingFunction = CAMediaTimingFunction(name: .linear)
             iconView.layer.add(animation, forKey: "statusAction.pop")
         } else if effects?.icon == .fade {
             iconView.layer.removeAnimation(forKey: "statusAction.pop")
             let animation = CATransition()
             animation.type = .fade
-            animation.duration = 0.15
+            animation.duration = StatusActionAnimationTiming.fadeDuration
+            animation.timingFunction = CAMediaTimingFunction(name: .easeOut)
             iconView.layer.add(animation, forKey: "transition")
         }
         if let direction = effects?.number, direction != .none {
             let animation = CATransition()
             animation.type = .push
-            animation.subtype = direction == .up ? .fromBottom : .fromTop
-            animation.duration = 0.2
+            // CATransition's vertical subtypes run opposite to UIKit's screen coordinates.
+            animation.subtype = direction == .up ? .fromTop : .fromBottom
+            animation.duration = StatusActionAnimationTiming.numberDuration
+            animation.timingFunction = CAMediaTimingFunction(name: .easeOut)
             label.layer.add(animation, forKey: "transition")
             let fade = CABasicAnimation(keyPath: "opacity")
             fade.fromValue = 0.4
             fade.toValue = 1
             fade.duration = animation.duration
+            fade.timingFunction = animation.timingFunction
             label.layer.add(fade, forKey: "statusAction.numberFade")
         }
         self.minimumIconOnlySize = minimumIconOnlySize

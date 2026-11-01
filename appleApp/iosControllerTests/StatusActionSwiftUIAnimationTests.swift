@@ -141,7 +141,28 @@ final class StatusActionSwiftUIAnimationTests: XCTestCase {
         assertPixels(fixture.pixels(), expected)
     }
 
-    func testIconOnlyUpdateBouncesWithoutAChangingCount() async throws {
+    func testCountMovesUpWhenIncreasingAndDownWhenDecreasing() async throws {
+        let countRect = CGRect(x: 268, y: 0, width: 12, height: 44)
+        for (before, after, increasing) in [(Int64(9), Int64(10), true), (10, 9, false)] {
+            let fixture = try Fixture(actions: [animatedAction(liked: true, count: after)])
+            defer { fixture.close() }
+            await fixture.settle(milliseconds: 80)
+            let restingY = try XCTUnwrap(actionNumberInkCenterY(fixture.image(), in: countRect))
+            fixture.update(actions: [animatedAction(count: before)])
+            await fixture.settle(milliseconds: 350)
+            fixture.update(actions: [animatedAction(liked: true, count: after)])
+            await fixture.settle(milliseconds: 110)
+            attach(fixture, name: increasing ? "count-increasing" : "count-decreasing")
+            let enteringY = try XCTUnwrap(actionNumberInkCenterY(fixture.image(), in: countRect))
+            if increasing {
+                XCTAssertGreaterThan(enteringY, restingY + 0.5, "An increasing count must enter from below and move up")
+            } else {
+                XCTAssertLessThan(enteringY, restingY - 0.5, "A decreasing count must enter from above and move down")
+            }
+        }
+    }
+
+    func testIconOnlyUpdateSpringsWithoutAChangingCount() async throws {
         let target: [ActionMenu] = [animatedAction(liked: true, count: 9)]
         let fixture = try Fixture(actions: target)
         defer { fixture.close() }
@@ -151,12 +172,12 @@ final class StatusActionSwiftUIAnimationTests: XCTestCase {
         fixture.update(actions: [animatedAction(count: 9)])
         await fixture.settle(milliseconds: 300)
         fixture.update(actions: target)
-        var widest = 0
-        for delay in [90, 40, 40] {
+        var narrowest = restingWidth
+        for delay in [30, 40, 40] {
             await fixture.settle(milliseconds: delay)
-            widest = max(widest, fixture.iconWidth())
+            narrowest = min(narrowest, fixture.iconWidth())
         }
-        XCTAssertGreaterThan(widest, restingWidth, "The icon must actually scale, independently of the counter")
+        XCTAssertLessThan(narrowest, restingWidth, "The icon must actually scale, independently of the counter")
         await fixture.settle(milliseconds: 300)
         assertPixels(fixture.pixels(), expected)
     }

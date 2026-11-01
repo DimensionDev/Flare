@@ -531,13 +531,11 @@ private struct StatusActionIconMotion: View {
         ZStack {
             if motion.effects.icon == .pop {
                 StatusActionIcon(icon: motion.target.icon)
-                    .keyframeAnimator(initialValue: 1.0, trigger: trigger) { content, scale in
+                    .keyframeAnimator(initialValue: StatusActionAnimationTiming.iconStartScale, trigger: trigger) { content, scale in
                         content.scaleEffect(scale)
                     } keyframes: { _ in
-                        MoveKeyframe(1)
-                        CubicKeyframe(0.9, duration: 0.05)
-                        CubicKeyframe(1.15, duration: 0.08)
-                        CubicKeyframe(1, duration: 0.12)
+                        MoveKeyframe(StatusActionAnimationTiming.iconStartScale)
+                        SpringKeyframe(1, spring: StatusActionAnimationTiming.iconSpring)
                     }
             } else {
                 StatusActionIcon(icon: motion.previous.icon)
@@ -546,14 +544,14 @@ private struct StatusActionIconMotion: View {
                         content.opacity(opacity)
                     } keyframes: { _ in
                         MoveKeyframe(1)
-                        LinearKeyframe(0, duration: 0.15)
+                        LinearKeyframe(0, duration: StatusActionAnimationTiming.fadeDuration, timingCurve: .easeOut)
                     }
                 StatusActionIcon(icon: motion.target.icon)
                     .keyframeAnimator(initialValue: 0.0, trigger: trigger) { content, opacity in
                         content.opacity(opacity)
                     } keyframes: { _ in
                         MoveKeyframe(0)
-                        LinearKeyframe(1, duration: 0.15)
+                        LinearKeyframe(1, duration: StatusActionAnimationTiming.fadeDuration, timingCurve: .easeOut)
                     }
             }
         }
@@ -580,7 +578,7 @@ private struct StatusActionNumberMotion: View {
                         .opacity(1 - progress)
                     } keyframes: { _ in
                         MoveKeyframe(0)
-                        LinearKeyframe(1, duration: 0.2)
+                        LinearKeyframe(1, duration: StatusActionAnimationTiming.numberDuration, timingCurve: .easeOut)
                     }
             }
             if let target = motion.target.text {
@@ -593,7 +591,7 @@ private struct StatusActionNumberMotion: View {
                         .opacity(progress)
                     } keyframes: { _ in
                         MoveKeyframe(0)
-                        LinearKeyframe(1, duration: 0.2)
+                        LinearKeyframe(1, duration: StatusActionAnimationTiming.numberDuration, timingCurve: .easeOut)
                     }
             }
         }

@@ -16,32 +16,53 @@ def commands(job)
 end
 
 linux = %w[build-linux build-web build-fdroid]
-apple = %w[build-apple-tests build-ios build-macos]
+apple = %w[build-ios build-macos]
 builds = linux + apple + %w[build-windows]
 check(jobs.keys.to_set == (builds + %w[lint upload]).to_set, 'CI jobs changed without preserving the validation graph')
 builds.each do |id|
   check(Array(jobs.fetch(id).fetch('needs')) == ['lint'], "#{id} must start after the fast lint gate")
   check(jobs.fetch(id).fetch('if').include?("github.event_name == 'push'"), "Tag builds must include #{id}")
 end
-{
+dispatches = {
   'all' => builds,
   'linux' => linux,
   'apple' => apple,
+  'android-desktop' => %w[build-linux],
+  'ios' => %w[build-ios],
+  'macos' => %w[build-macos],
   'windows' => %w[build-windows],
+  'web' => %w[build-web],
   'fdroid' => %w[build-fdroid],
-}.each do |target, expected|
+}
+triggers = workflow['on'] || workflow[true]
+check(triggers.dig('workflow_dispatch', 'inputs', 'target', 'options').to_set == dispatches.keys.to_set, 'Every supported dispatch target must be selectable')
+dispatches.each do |target, expected|
   selected = builds.select { |id| jobs.fetch(id).fetch('if').scan(/inputs\.target == '([^']+)'/).flatten.include?(target) }
   check(selected.to_set == expected.to_set, "The #{target} dispatch must preserve its platform checks")
 end
+groups = builds.map do |id|
+  concurrency = jobs.fetch(id).fetch('concurrency')
+  group = concurrency.fetch('group')
+  check(group.include?('${{ github.workflow }}-${{ github.ref }}-job-') && !group.include?('github.job'), "#{id} must deduplicate runs of the same platform and ref")
+  check(concurrency.fetch('cancel-in-progress') == "${{ !startsWith(github.ref, 'refs/tags/') }}", "#{id} must cancel obsolete branch builds without canceling release jobs")
+  group
+end
+check(groups.uniq.size == builds.size, 'Independent platforms must not cancel each other')
 check(jobs.fetch('upload').fetch('needs').to_set == (builds + ['lint']).to_set, 'Publishing must wait for every validation job')
 check(jobs.fetch('upload').fetch('if') == "startsWith(github.ref, 'refs/tags/')", 'Publishing must remain tag-only')
 publishers = jobs.select { |_, job| job.fetch('steps').any? { |step| step.fetch('uses', '').start_with?('r0adkll/upload-google-play@') } }
 check(publishers.keys == ['upload'], 'Google Play publishing must wait for all checks')
 
-native = jobs.fetch('build-apple-tests')
-check(native.dig('strategy', 'matrix', 'target').to_set == %w[iosSimulatorArm64 macosArm64].to_set, 'Both native test targets must run')
-check(native.dig('strategy', 'fail-fast') == false, 'Both native test jobs must finish even if one fails')
-check(commands(native).include?('./gradlew ${{ matrix.target }}Test'), 'The native matrix must execute its selected test target')
+{ 'build-ios' => 'iosSimulatorArm64', 'build-macos' => 'macosArm64' }.each do |id, target|
+  steps = jobs.fetch(id).fetch('steps')
+  test = steps.find { |step| step.fetch('run', '').include?("./gradlew #{target}Test ") }
+  check(test && test.fetch('run').include?('--no-daemon'), "#{target} tests must run in the app job with an independent JVM")
+  build = steps.index { |step| step.fetch('run', '').match?(/xcodebuild build-for-testing|:apple-shared:compileKotlinMacosArm64/) }
+  check(build && steps.index(test) < build, "#{target} tests must populate library outputs before the app build")
+  reports = steps.find { |step| step.dig('with', 'name') == "apple-#{target}-test-reports" }
+  check(reports && reports['if'] == 'always()', "#{target} reports must remain available after failures")
+  check(reports.dig('with', 'path').lines.map(&:strip).to_set == %w[**/build/test-results/** **/build/reports/tests/**].to_set, "#{target} reports must retain test results and HTML reports")
+end
 
 macos = jobs.fetch('build-macos').fetch('steps')
 compile = macos.find { |step| step.fetch('run', '').include?(':apple-shared:compileKotlinMacosArm64') }

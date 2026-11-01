@@ -12,7 +12,11 @@ on:
           - all
           - linux
           - apple
+          - android-desktop
+          - ios
+          - macos
           - windows
+          - web
           - fdroid
   push:
     tags:
@@ -63,8 +67,11 @@ jobs:
   build-linux:
     name: Linux (Android, Desktop)
     needs: lint
-    if: github.event_name == 'push' || inputs.target == 'all' || inputs.target == 'linux'
+    if: github.event_name == 'push' || inputs.target == 'all' || inputs.target == 'linux' || inputs.target == 'android-desktop'
     runs-on: [ubuntu-latest]
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}-job-linux
+      cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
     timeout-minutes: 180
     env: &build-env
       BUILD_NUMBER: ${{ github.run_number }}
@@ -127,8 +134,11 @@ jobs:
   build-web:
     name: Web (Wasm, Svelte)
     needs: lint
-    if: github.event_name == 'push' || inputs.target == 'all' || inputs.target == 'linux'
+    if: github.event_name == 'push' || inputs.target == 'all' || inputs.target == 'linux' || inputs.target == 'web'
     runs-on: [ubuntu-latest]
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}-job-web
+      cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
     timeout-minutes: 90
     env: *build-env
     steps:
@@ -166,6 +176,9 @@ jobs:
     needs: lint
     if: github.event_name == 'push' || inputs.target == 'all' || inputs.target == 'linux' || inputs.target == 'fdroid'
     runs-on: [ubuntu-latest]
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}-job-fdroid
+      cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
     timeout-minutes: 180
     env:
       JAVA_TOOL_OPTIONS: -Djava.awt.headless=true
@@ -189,16 +202,15 @@ jobs:
       - name: Build F-Droid variant
         run: env -u BUILD_NUMBER -u BUILD_VERSION -u SENTRY_DSN ./gradlew :app:assembleRelease :app:check :app:lint -x ktlintCheck --stacktrace
 
-  build-apple-tests:
-    name: Apple Kotlin (${{ matrix.target }})
+  build-ios:
+    name: iOS (build, native and UI regressions)
     needs: lint
-    if: github.event_name == 'push' || inputs.target == 'all' || inputs.target == 'apple'
+    if: github.event_name == 'push' || inputs.target == 'all' || inputs.target == 'apple' || inputs.target == 'ios'
     runs-on: [xcode-27]
-    timeout-minutes: 120
-    strategy:
-      fail-fast: false
-      matrix:
-        target: [iosSimulatorArm64, macosArm64]
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}-job-ios
+      cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
+    timeout-minutes: 180
     env: &apple-env
       # The hosted ARM runner has 7 GB RAM; keep native links sequential within each job.
       GRADLE_OPTS: >-
@@ -215,35 +227,21 @@ jobs:
         with:
           xcode-version: latest-stable
       - name: Install iOS
-        if: matrix.target == 'iosSimulatorArm64'
         run: xcodebuild -downloadPlatform iOS
-      - name: Run Apple Kotlin tests
-        run: ./gradlew ${{ matrix.target }}Test --stacktrace
-      - name: Upload test reports
+      - name: Run iOS Kotlin tests
+        run: |
+          ./gradlew iosSimulatorArm64Test --no-daemon --stacktrace \
+            "-Dorg.gradle.jvmargs=-Xmx4G -Dfile.encoding=UTF-8"
+      - name: Upload Kotlin test reports
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: apple-${{ matrix.target }}-test-reports
+          name: apple-iosSimulatorArm64-test-reports
           path: |
             **/build/test-results/**
             **/build/reports/tests/**
           if-no-files-found: ignore
           retention-days: 7
-
-  build-ios:
-    name: iOS (build, native and UI regressions)
-    needs: lint
-    if: github.event_name == 'push' || inputs.target == 'all' || inputs.target == 'apple'
-    runs-on: [xcode-27]
-    timeout-minutes: 180
-    env: *apple-env
-    steps:
-      - *clean-workspace
-      - *checkout
-      - *setup-java
-      - *setup-xcode
-      - name: Install iOS
-        run: xcodebuild -downloadPlatform iOS
       - &install-xcodegen
         name: Install XcodeGen
         run: brew install xcodegen
@@ -308,8 +306,11 @@ jobs:
   build-macos:
     name: macOS (Release)
     needs: lint
-    if: github.event_name == 'push' || inputs.target == 'all' || inputs.target == 'apple'
+    if: github.event_name == 'push' || inputs.target == 'all' || inputs.target == 'apple' || inputs.target == 'macos'
     runs-on: [xcode-27]
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}-job-macos
+      cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
     timeout-minutes: 180
     env: *apple-env
     steps:
@@ -317,6 +318,20 @@ jobs:
       - *checkout
       - *setup-java
       - *setup-xcode
+      - name: Run macOS Kotlin tests
+        run: |
+          ./gradlew macosArm64Test --no-daemon --stacktrace \
+            "-Dorg.gradle.jvmargs=-Xmx4G -Dfile.encoding=UTF-8"
+      - name: Upload Kotlin test reports
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: apple-macosArm64-test-reports
+          path: |
+            **/build/test-results/**
+            **/build/reports/tests/**
+          if-no-files-found: ignore
+          retention-days: 7
       - *install-xcodegen
       - *firebase-config
       - *generate-xcode
@@ -457,6 +472,9 @@ jobs:
     if: github.event_name == 'push' || inputs.target == 'all' || inputs.target == 'windows'
     needs: lint
     runs-on: [windows-latest]
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}-job-windows
+      cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
     timeout-minutes: 30
     env: *build-env
     steps:
@@ -541,7 +559,7 @@ jobs:
   upload:
     if: startsWith(github.ref, 'refs/tags/')
     runs-on: [ubuntu-latest]
-    needs: [lint, build-apple-tests, build-ios, build-macos, build-windows, build-linux, build-web, build-fdroid]
+    needs: [lint, build-ios, build-macos, build-windows, build-linux, build-web, build-fdroid]
     timeout-minutes: 30
     permissions:
       contents: write

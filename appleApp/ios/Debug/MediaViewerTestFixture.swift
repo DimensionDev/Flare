@@ -145,7 +145,7 @@ struct MediaViewerTestFixture: View {
         try? image.pngData()?.write(to: imageURL)
         try? await ImageCache.default.store(image, forKey: imageURL.absoluteString, toDisk: false)
         guard video else {
-            return UiMediaImage(url: imageURL.absoluteString, previewUrl: imageURL.absoluteString, description: "Fixture image", height: 240, width: 320, sensitive: false, customHeaders: nil)
+            return UiMediaImage(url: imageURL.absoluteString, previewUrl: imageURL.absoluteString, description: "Fixture image", height: 240, width: 320, sensitive: false, customHeaders: nil, proxy: ProxyRef.Unbound.shared)
         }
         let videoURL = FileManager.default.temporaryDirectory.appendingPathComponent("media-fixture.mp4")
         try? FileManager.default.removeItem(at: videoURL)
@@ -172,7 +172,7 @@ struct MediaViewerTestFixture: View {
         } catch {
             assertionFailure("Could not create video fixture: \(error)")
         }
-        return UiMediaVideo(url: videoURL.absoluteString, thumbnailUrl: imageURL.absoluteString, description: "Fixture video", height: 240, width: 320, customHeaders: nil, downloadUrl: nil)
+        return UiMediaVideo(url: videoURL.absoluteString, thumbnailUrl: imageURL.absoluteString, description: "Fixture video", height: 240, width: 320, customHeaders: nil, proxy: ProxyRef.Unbound.shared, downloadUrl: nil)
     }
 
     private func richText(_ text: String) -> UiRichText {
@@ -181,7 +181,7 @@ struct MediaViewerTestFixture: View {
     }
 
     private func makePost(medias: [any UiMedia]) -> UiTimelineV2.Post {
-        let profile = UiProfile(key: MicroBlogKey(id: "reader", host: "example.invalid"), handle: UiHandle(raw: "reader", host: "example.invalid"), avatar: nil as UiMediaImage?, nameInternal: richText("Media Test User"), platformId: "mastodon", platformIcon: IconType.Material(icon: .world), clickEvent: ClickEventNoop.shared, banner: nil, description: nil, sourceLanguages: [], translationDisplayState: .hidden, matrices: UiProfile.Matrices(fansCount: 0, followsCount: 0, statusesCount: 0, platformFansCount: nil), mark: [], bottomContent: nil)
+        let profile = UiProfile(key: MicroBlogKey(id: "reader", host: "example.invalid"), handle: UiHandle(raw: "reader", host: "example.invalid"), avatar: nil as UiMediaImage?, nameInternal: richText("Media Test User"), platformId: "mastodon", platformIcon: IconType.Material(icon: .world), clickEvent: ClickEventNoop.shared, banner: nil, description: nil, sourceLanguages: [], translationDisplayState: .hidden, matrices: UiProfile.Matrices(fansCount: 0, followsCount: 0, statusesCount: 0, platformFansCount: nil), mark: [], bottomContent: nil, pluginId: nil)
         let action = ActionMenu.Item(updateKey: "like", icon: .like, text: nil, count: UiNumber(value: 1), color: .contentColor, clickEvent: ClickEventNoop.shared, actionFamily: .like, enabled: true)
         return UiTimelineV2.Post(platformId: "mastodon", images: medias, sensitive: false, contentWarning: nil, user: profile, platformIcon: IconType.Material(icon: .world), sourceLanguages: [], translationDisplayState: .hidden, content: UiTranslatableText(original: richText(String(repeating: "Post details for the native media sheet. ", count: 40)), translation: nil), actions: [action], poll: nil, statusKey: MicroBlogKey(id: "media-fixture", host: "example.invalid"), card: nil, createdAt: KotlinInstant.companion.fromEpochMilliseconds(epochMilliseconds: 0).toUi(), emojiReactions: [], sourceChannel: nil, visibility: nil, replyToHandle: nil, references: [], clickEvent: ClickEventNoop.shared, mediaClickPolicy: .openStatusMedia, accountType: AccountType.Guest.shared, itemKey: "media-fixture", pluginId: nil, authorSubtitleInternal: nil)
     }

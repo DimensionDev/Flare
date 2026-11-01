@@ -96,13 +96,21 @@ kotlin {
 }
 
 skie {
+    if (providers.environmentVariable("CI").orNull == "true") {
+        // SKIE's compilers bypass Gradle's worker limit.
+        build {
+            enableParallelSwiftCompilation.set(false)
+            enableConcurrentSkieCompilation.set(false)
+            enableParallelSkieCompilation.set(false)
+        }
+    }
     analytics {
         disableUpload.set(true)
         enabled.set(false)
     }
     features {
         group {
-            DefaultArgumentInterop.Enabled(true)
+            DefaultArgumentInterop.Enabled(false)
         }
         enableFlowCombineConvertorPreview = true
     }

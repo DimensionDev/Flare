@@ -41,7 +41,7 @@ class ImageTranslationLoadingTest {
             dispose()
         }
         ImageIO.write(bitmap, "png", file)
-        val uri = file.toURI().toString()
+        val uri = file.toPath().toUri().toString()
         val media = UiMedia.Image(uri, uri, "Image fixture", 64f, 64f, false)
         var translating by mutableStateOf(false)
         try {

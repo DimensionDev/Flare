@@ -9,11 +9,13 @@ import XCTest
 final class UgoiraPlaybackTests: XCTestCase {
     @MainActor
     func testPresenterInitialStateCanBeObservedFromSwift() async throws {
+        let accountKey = MicroBlogKey(id: "ugoira-test-reader", host: "pixiv.net")
         let media = UiMediaUgoira(
             statusKey: MicroBlogKey(id: "ugoira-test", host: "pixiv.net"),
-            accountKey: MicroBlogKey(id: "ugoira-test-reader", host: "pixiv.net"),
+            accountKey: accountKey,
             previewUrl: "https://i.pximg.net/ugoira-test.jpg", originalFrameUrl: nil,
-            description: nil, height: 100, width: 100, sensitive: false, customHeaders: nil)
+            description: nil, height: 100, width: 100, sensitive: false, customHeaders: nil,
+            proxy: ProxyRef.companion.forAccount(accountKey: accountKey), sourceUrl: nil)
         let presenter = KotlinPresenter(presenter: UgoiraPresenter(media: media))
         XCTAssertNil(presenter.state.animation)
         XCTAssertEqual(presenter.state.progress, 0)

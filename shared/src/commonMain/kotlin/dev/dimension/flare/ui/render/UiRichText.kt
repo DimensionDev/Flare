@@ -97,7 +97,9 @@ public data class RenderBlockStyle(
     val isListItem: Boolean = false,
     val isBlockQuote: Boolean = false,
     val isFigCaption: Boolean = false,
-)
+) {
+    public constructor() : this(headingLevel = null)
+}
 
 @Serializable
 public enum class RenderTextAlignment {
@@ -115,12 +117,13 @@ public data class UiRichText(
     public val imageUrls: SerializableImmutableList<String>,
 ) {
     public val imageMedias: List<UiMedia.Image>
-        get() = renderRuns.flatMap { content ->
-            when (content) {
-                is RenderContent.BlockImage -> listOf(content.media)
-                is RenderContent.Text -> content.runs.filterIsInstance<RenderRun.Image>().map { it.media }
+        get() =
+            renderRuns.flatMap { content ->
+                when (content) {
+                    is RenderContent.BlockImage -> listOf(content.media)
+                    is RenderContent.Text -> content.runs.filterIsInstance<RenderRun.Image>().map { it.media }
+                }
             }
-        }
 
     public val isEmpty: Boolean =
         renderRuns.all { content ->

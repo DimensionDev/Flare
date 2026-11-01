@@ -20,7 +20,7 @@ private enum FlareEnvironmentDefaults {
     static let globalAppearance = GlobalAppearance.companion.Default
     static let timelineAppearance = TimelineAppearance.companion.Default
     static let aiConfig = AppSettings.AiConfig.companion.default
-    static let translateConfig = AppSettings.TranslateConfig()
+    static let translateConfig = AppSettings.companion.default.translateConfig
     static let appSettings = AppSettings.companion.default
 }
 

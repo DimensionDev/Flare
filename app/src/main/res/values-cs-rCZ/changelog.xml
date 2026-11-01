@@ -5,11 +5,11 @@
     <string name="changelog_current"><![CDATA[
             <span>Verze %1$s:</span>
             <ul>
-                <li>Přidána možnost zapamatovat si pozici čtení na domovské časové ose při obnovení a opětovném otevření aplikace, včetně poslední vybrané karty.</li>
-                <li>Při psaní příspěvků lze nyní vkládat a přetahovat obrázky.</li>
-                <li>Vylepšeno čtení RSS doporučením režimu otevření a zobrazením obsahu kanálu při selhání načítání webové stránky.</li>
-                <li>Vylepšeny animace prediktivního návratu a rohy stránek v režimu rozdělené obrazovky a oken.</li>
-                <li>Opraveno počítání znaků příspěvků, ukládání médií a pády seznamů reakcí; vylepšen výkon.</li>
+                <li>Přidán překlad obrázků. Po nastavení překladové služby můžete přepínat mezi originálem a překladem a výsledek uložit nebo sdílet.</li>
+                <li>Při sdílení příspěvku jako obrázku můžete vybrat odpovědi i vnořené odpovědi. Podporovány jsou i dlouhé obrázky.</li>
+                <li>Přidány časové osy skupin, okruhu přátel a soukromého sledování na Weibo, nastavení viditelnosti příspěvků a přehrávání Live Photo. Obnoveno zobrazení polohy podle IP.</li>
+                <li>Přidáno globální nastavení proxy i samostatné nastavení pro jednotlivé účty s podporou HTTPS a SOCKS5.</li>
+                <li>Opraveny některé chyby načítání obrázků, přidávání záložek v galerii a otevírání odkazů FANBOX. Vylepšeny smíšené časové osy, zobrazení překladů a zapamatování vybraného účtu.</li>
             </ul>
         ]]></string>
 </resources>

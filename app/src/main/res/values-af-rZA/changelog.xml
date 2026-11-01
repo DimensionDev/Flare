@@ -3,11 +3,11 @@
     <string name="changelog_current"><![CDATA[
             <span>Weergawe %1$s:</span>
             <ul>
-                <li>’n Opsie is bygevoeg om jou leesposisie op die tuistydlyn te onthou wanneer jy verfris of die toepassing heropen, saam met jou laaste gekose oortjie.</li>
-                <li>Prente kan nou geplak en gesleep en laat val word wanneer jy plasings skryf.</li>
-                <li>RSS-lees is verbeter met aanbevelings vir die oopmaakmodus en voerinhoud as terugval wanneer ’n webblad nie laai nie.</li>
-                <li>Voorspellende terug-animasies en bladsyhoeke in verdeelskerm- en venstermodusse is verbeter.</li>
-                <li>Karaktertellings vir plasings, mediastoor en ineenstortings in reaksielyste is reggestel, met werkverrigtingverbeterings.</li>
+                <li>Prentvertaling is bygevoeg. Stel ’n vertaaldiens op om tussen die oorspronklike en vertaalde prent te wissel en die resultaat te stoor of te deel.</li>
+                <li>Kies antwoorde en subantwoorde om in te sluit wanneer jy ’n plasing as ’n prent deel, met ondersteuning vir lang prente.</li>
+                <li>Weibo het nou tydlyne vir groepe, vriendekringe en private volglyste, instellings vir plasingsigbaarheid en Live Photo-afspeel. IP-liggingetikette is herstel.</li>
+                <li>Globale instellings en instellings per rekening vir HTTPS- en SOCKS5-instaanbedieners is bygevoeg.</li>
+                <li>Sekere prentlaaifoute, galeryboekmerkaksies en FANBOX-skakelnavigasie is reggestel. Gemengde tydlyne, vertaalvertoning en die onthou van rekeningkeuses is verbeter.</li>
             </ul>
         ]]></string>
     <string name="changelog_title">Welkom terug!</string>

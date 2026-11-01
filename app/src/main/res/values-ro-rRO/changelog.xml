@@ -5,11 +5,11 @@
     <string name="changelog_current"><![CDATA[
             <span>Versiunea %1$s:</span>
             <ul>
-                <li>Adăugată o opțiune pentru memorarea poziției de citire din cronologia principală la actualizare și redeschiderea aplicației, inclusiv ultima filă selectată.</li>
-                <li>Adăugate lipirea și glisarea și fixarea imaginilor la scrierea postărilor.</li>
-                <li>Îmbunătățită citirea RSS cu recomandări pentru modul de deschidere și conținutul fluxului când pagina web nu se încarcă.</li>
-                <li>Îmbunătățite animațiile de revenire predictivă și colțurile paginilor în modurile ecran divizat și fereastră.</li>
-                <li>Corectate numărarea caracterelor, salvarea fișierelor media și blocările listelor de reacții; îmbunătățită performanța.</li>
+                <li>Am adăugat traducerea imaginilor. După configurarea unui serviciu de traducere, poți comuta între original și traducere și poți salva sau distribui rezultatul.</li>
+                <li>Poți selecta răspunsuri și răspunsuri secundare când distribui o postare ca imagine, inclusiv imagini lungi.</li>
+                <li>Am adăugat fluxuri Weibo pentru grupuri, cercul de prieteni și conturi urmărite în privat, setări de vizibilitate a postărilor și redare Live Photo. Am restabilit afișarea locației pe baza IP-ului.</li>
+                <li>Am adăugat setări proxy globale și pentru fiecare cont, cu suport pentru HTTPS și SOCKS5.</li>
+                <li>Am remediat unele erori de încărcare a imaginilor, acțiunile de marcare din galerie și deschiderea linkurilor FANBOX. Am îmbunătățit fluxurile mixte, afișarea traducerilor și memorarea contului selectat.</li>
             </ul>
         ]]></string>
 </resources>

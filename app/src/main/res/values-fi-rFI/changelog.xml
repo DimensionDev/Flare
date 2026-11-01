@@ -5,11 +5,11 @@
     <string name="changelog_current"><![CDATA[
             <span>Versio %1$s:</span>
             <ul>
-                <li>Lisätty asetus kotiaikajanan lukukohdan muistamiseen päivityksen ja sovelluksen uudelleen avaamisen yhteydessä, mukaan lukien viimeksi valittu välilehti.</li>
-                <li>Julkaisuja kirjoitettaessa voi nyt liittää ja vetää ja pudottaa kuvia.</li>
-                <li>Parannettu RSS-lukemista avaamistavan suosituksilla ja näyttämällä syötteen sisältö, jos verkkosivun lataus epäonnistuu.</li>
-                <li>Parannettu ennakoivan paluueleen animaatioita ja sivujen kulmia jaetussa näytössä ja ikkunatilassa.</li>
-                <li>Korjattu julkaisujen merkkilaskenta, median tallennus ja reaktiolistojen kaatumiset sekä parannettu suorituskykyä.</li>
+                <li>Lisätty kuvien kääntäminen. Kun käännöspalvelu on määritetty, voit vaihtaa alkuperäisen ja käännetyn kuvan välillä sekä tallentaa tai jakaa tuloksen.</li>
+                <li>Voit valita vastaukset ja niiden alavastaukset jakaessasi julkaisun kuvana. Myös pitkät kuvat ovat tuettuja.</li>
+                <li>Lisätty Weibon ryhmien, ystäväpiirin ja yksityisesti seurattujen tilien aikajanat, julkaisujen näkyvyysasetukset ja Live Photo -toisto. IP-sijainnin näyttö on palautettu.</li>
+                <li>Lisätty yleiset ja tilikohtaiset välityspalvelinasetukset sekä HTTPS- ja SOCKS5-tuki.</li>
+                <li>Korjattu joitakin kuvien latausvirheitä, gallerian kirjanmerkkitoimintoja ja FANBOX-linkkien avaamista. Parannettu yhdistettyjä aikajanoja, käännösten näyttöä ja tilivalinnan muistamista.</li>
             </ul>
         ]]></string>
 </resources>

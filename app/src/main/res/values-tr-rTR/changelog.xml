@@ -3,11 +3,11 @@
     <string name="changelog_current"><![CDATA[
             <span>Sürüm %1$s:</span>
             <ul>
-                <li>Yenileme ve uygulamayı yeniden açma sırasında ana zaman akışındaki okuma konumunu ve son seçilen sekmeyi hatırlama seçeneği eklendi.</li>
-                <li>Gönderi yazarken resim yapıştırma ve sürükleyip bırakma desteği eklendi.</li>
-                <li>RSS okuma, açılış modu önerileri ve web sayfası yüklenemediğinde akış içeriğini gösterme ile iyileştirildi.</li>
-                <li>Öngörülü geri animasyonları ve bölünmüş ekran ile pencere modlarındaki sayfa köşeleri iyileştirildi.</li>
-                <li>Gönderi karakter sayımı, medya kaydetme ve tepki listesi çökmeleri düzeltildi; performans iyileştirildi.</li>
+                <li>Görsel çevirisi eklendi. Bir çeviri hizmeti yapılandırdıktan sonra özgün görsel ile çevirisi arasında geçiş yapabilir, sonucu kaydedebilir veya paylaşabilirsiniz.</li>
+                <li>Bir gönderiyi görsel olarak paylaşırken yanıtları ve alt yanıtları seçebilirsiniz. Uzun görseller oluşturma da desteklenir.</li>
+                <li>Weibo grup, arkadaş çevresi ve gizli takip zaman akışları, gönderi görünürlüğü ayarları ve Live Photo oynatma eklendi. IP konumu gösterimi geri getirildi.</li>
+                <li>HTTPS ve SOCKS5 desteğiyle genel ve hesaba özel vekil sunucu ayarları eklendi.</li>
+                <li>Bazı görsel yükleme hataları, galerideki yer imi işlemleri ve FANBOX bağlantılarının açılması düzeltildi. Karma zaman akışları, çeviri gösterimi ve hesap seçiminin hatırlanması iyileştirildi.</li>
             </ul>
         ]]></string>
     <string name="changelog_title">Tekrar hoş geldiniz!</string>

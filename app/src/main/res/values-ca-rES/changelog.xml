@@ -3,11 +3,11 @@
     <string name="changelog_current"><![CDATA[
             <span>Versió %1$s:</span>
             <ul>
-                <li>S’ha afegit una opció per recordar la posició de lectura del fil d’inici en actualitzar i tornar a obrir l’aplicació, inclosa l’última pestanya seleccionada.</li>
-                <li>Ara podeu enganxar i arrossegar i deixar anar imatges en escriure publicacions.</li>
-                <li>S’ha millorat la lectura RSS amb recomanacions de mode d’obertura i contingut del canal quan no es pot carregar la pàgina web.</li>
-                <li>S’han millorat les animacions de retorn predictiu i les cantonades de les pàgines en pantalla dividida i mode finestra.</li>
-                <li>S’han corregit el recompte de caràcters, el desament de contingut multimèdia i els bloquejos de les llistes de reaccions, i s’ha millorat el rendiment.</li>
+                <li>S’ha afegit la traducció d’imatges. Després de configurar un servei de traducció, podeu alternar entre l’original i la traducció i desar o compartir el resultat.</li>
+                <li>Podeu triar respostes i respostes imbricades en compartir una publicació com a imatge, amb compatibilitat amb imatges llargues.</li>
+                <li>S’han afegit fils de grups, cercle d’amics i seguiments privats de Weibo, opcions de visibilitat de publicacions i reproducció de Live Photo. S’ha recuperat la ubicació segons l’adreça IP.</li>
+                <li>S’han afegit opcions de servidor intermediari globals i per compte, amb compatibilitat amb HTTPS i SOCKS5.</li>
+                <li>S’han corregit errors de càrrega d’imatges, accions de marcadors a la galeria i navegació d’enllaços de FANBOX. S’han millorat els fils mixtos, la visualització de traduccions i el recordatori del compte seleccionat.</li>
             </ul>
         ]]></string>
     <string name="changelog_title">Et donem la benvinguda de nou!</string>

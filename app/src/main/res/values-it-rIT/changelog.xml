@@ -3,11 +3,11 @@
     <string name="changelog_current"><![CDATA[
             <span>Versione %1$s:</span>
             <ul>
-                <li>Aggiunta un’opzione per ricordare la posizione di lettura nella timeline principale durante gli aggiornamenti e alla riapertura dell’app, inclusa l’ultima scheda selezionata.</li>
-                <li>Aggiunti l’incolla e il trascinamento delle immagini durante la scrittura dei post.</li>
-                <li>Migliorata la lettura RSS con suggerimenti sulla modalità di apertura e il contenuto del feed quando la pagina web non si carica.</li>
-                <li>Migliorate le animazioni del gesto Indietro predittivo e gli angoli delle pagine nelle modalità schermo diviso e finestra.</li>
-                <li>Corretti il conteggio dei caratteri, il salvataggio dei media e gli arresti delle liste di reazioni, con miglioramenti delle prestazioni.</li>
+                <li>Aggiunta la traduzione delle immagini. Dopo aver configurato un servizio di traduzione, puoi passare dall’originale alla traduzione e salvare o condividere il risultato.</li>
+                <li>Puoi scegliere risposte e risposte secondarie da includere quando condividi un post come immagine, con supporto per immagini lunghe.</li>
+                <li>Aggiunte le cronologie Weibo di gruppi, cerchia di amici e account seguiti privatamente, le impostazioni di visibilità dei post e la riproduzione delle Live Photo. Ripristinata la posizione basata sull’IP.</li>
+                <li>Aggiunte impostazioni proxy globali e per account, con supporto per HTTPS e SOCKS5.</li>
+                <li>Corretti alcuni errori di caricamento delle immagini, le azioni dei segnalibri nella galleria e l’apertura dei link FANBOX. Migliorate le cronologie miste, la visualizzazione delle traduzioni e la memorizzazione dell’account selezionato.</li>
             </ul>
         ]]></string>
     <string name="changelog_title">Bentornato!</string>

@@ -5,11 +5,11 @@
     <string name="changelog_current"><![CDATA[
             <span>Wersja %1$s:</span>
             <ul>
-                <li>Dodano opcję zapamiętywania pozycji czytania na głównej osi czasu podczas odświeżania i ponownego otwierania aplikacji, wraz z ostatnio wybraną kartą.</li>
-                <li>Dodano wklejanie i przeciąganie obrazów podczas pisania wpisów.</li>
-                <li>Ulepszono czytanie RSS dzięki rekomendacjom sposobu otwierania i wyświetlaniu treści kanału, gdy strona internetowa się nie ładuje.</li>
-                <li>Ulepszono animacje przewidywania gestu Wstecz i narożniki stron w trybach podzielonego ekranu i okien.</li>
-                <li>Naprawiono liczenie znaków, zapisywanie multimediów i awarie list reakcji oraz poprawiono wydajność.</li>
+                <li>Dodano tłumaczenie obrazów. Po skonfigurowaniu usługi tłumaczenia można przełączać się między oryginałem a tłumaczeniem oraz zapisywać lub udostępniać wynik.</li>
+                <li>Podczas udostępniania wpisu jako obrazu można wybrać odpowiedzi i zagnieżdżone odpowiedzi. Obsługiwane są także długie obrazy.</li>
+                <li>Dodano osie czasu grup, kręgu znajomych i prywatnie obserwowanych kont Weibo, ustawienia widoczności wpisów oraz odtwarzanie Live Photo. Przywrócono wyświetlanie lokalizacji według IP.</li>
+                <li>Dodano globalne ustawienia proxy i osobne ustawienia dla każdego konta z obsługą HTTPS i SOCKS5.</li>
+                <li>Naprawiono niektóre błędy wczytywania obrazów, działania zakładek w galerii i otwieranie odnośników FANBOX. Ulepszono mieszane osie czasu, wyświetlanie tłumaczeń i zapamiętywanie wybranego konta.</li>
             </ul>
         ]]></string>
 </resources>

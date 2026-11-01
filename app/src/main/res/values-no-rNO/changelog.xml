@@ -5,11 +5,11 @@
     <string name="changelog_current"><![CDATA[
             <span>Versjon %1$s:</span>
             <ul>
-                <li>Lagt til en innstilling for å huske leseposisjonen på hjemmetidslinjen ved oppdatering og gjenåpning av appen, inkludert den sist valgte fanen.</li>
-                <li>Bilder kan nå limes inn og dras og slippes når du skriver innlegg.</li>
-                <li>Forbedret RSS-lesing med anbefalinger for åpningsmåte og visning av feedinnhold når nettsiden ikke kan lastes.</li>
-                <li>Forbedret animasjoner for prediktiv tilbakebevegelse og sidehjørner i delt skjerm og vindusmodus.</li>
-                <li>Rettet tegntelling i innlegg, lagring av medier og krasj i reaksjonslister, med ytelsesforbedringer.</li>
+                <li>Lagt til bildeoversettelse. Når en oversettelsestjeneste er konfigurert, kan du bytte mellom originalen og oversettelsen og lagre eller dele resultatet.</li>
+                <li>Velg svar og undersvar som skal tas med når du deler et innlegg som bilde, med støtte for lange bilder.</li>
+                <li>Lagt til tidslinjer for Weibo-grupper, vennekrets og privat fulgte kontoer, innstillinger for innleggsynlighet og avspilling av Live Photo. Visning av IP-posisjon er gjenopprettet.</li>
+                <li>Lagt til globale proxyinnstillinger og egne innstillinger per konto, med støtte for HTTPS og SOCKS5.</li>
+                <li>Rettet enkelte feil ved bildelasting, bokmerkehandlinger i galleriet og åpning av FANBOX-lenker. Forbedret blandede tidslinjer, visning av oversettelser og lagring av kontovalget.</li>
             </ul>
         ]]></string>
 </resources>

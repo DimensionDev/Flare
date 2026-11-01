@@ -320,9 +320,14 @@ jobs:
       - *install-xcodegen
       - *firebase-config
       - *generate-xcode
+      - name: Compile native macOS Kotlin libraries
+        run: |
+          ./gradlew :apple-shared:compileKotlinMacosArm64 --no-daemon --stacktrace \
+            "-Dorg.gradle.jvmargs=-Xmx4G -Dfile.encoding=UTF-8"
       - name: Build native macOS Kotlin framework
         run: |
           sysctl hw.memsize vm.swapusage
+          # Keep dependency compiler state out of the uncached Release linker process.
           ./gradlew :apple-shared:linkReleaseFrameworkMacosArm64 --no-daemon --stacktrace \
             "-Dorg.gradle.jvmargs=-Xmx5G -Dfile.encoding=UTF-8"
       - name: import certs

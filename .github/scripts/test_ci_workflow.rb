@@ -43,6 +43,12 @@ check(native.dig('strategy', 'matrix', 'target').to_set == %w[iosSimulatorArm64 
 check(native.dig('strategy', 'fail-fast') == false, 'Both native test jobs must finish even if one fails')
 check(commands(native).include?('./gradlew ${{ matrix.target }}Test'), 'The native matrix must execute its selected test target')
 
+macos = jobs.fetch('build-macos').fetch('steps')
+compile = macos.find { |step| step.fetch('run', '').include?(':apple-shared:compileKotlinMacosArm64') }
+link = macos.find { |step| step.fetch('run', '').include?(':apple-shared:linkReleaseFrameworkMacosArm64') }
+check(compile && link && macos.index(compile) < macos.index(link), 'Compile native libraries before linking in a separate step')
+check([compile, link].all? { |step| step.fetch('run').include?('--no-daemon') }, 'Native library compilation and Release linking must use fresh JVMs')
+
 android = commands(jobs.fetch('build-linux'))
 classes = android.match(/-Pandroid\.testInstrumentationRunnerArguments\.class=([^\s]+)/)[1].split(',')
 expected_classes = %w[

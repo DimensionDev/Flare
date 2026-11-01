@@ -202,6 +202,7 @@ struct HomeTimelineScreen: View {
                                                 }
                                             }
                                         }
+                                        .padding(.top, 6)
                                         .padding(.horizontal)
                                         .animation(.spring(response: 0.25, dampingFraction: 0.85), value: selectedTabId)
                                     }

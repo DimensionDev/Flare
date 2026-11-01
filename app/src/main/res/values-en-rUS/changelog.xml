@@ -3,11 +3,11 @@
     <string name="changelog_current"><![CDATA[
             <span>Version %1$s:</span>
             <ul>
-                <li>Added an option to remember your Home reading position across refreshes and app launches, including your last selected tab.</li>
-                <li>Added image paste and drag-and-drop when composing posts.</li>
-                <li>Improved RSS reading with opening-mode recommendations and feed-content fallback when webpage loading fails.</li>
-                <li>Improved predictive-back animations and page corners in split-screen and windowed modes.</li>
-                <li>Fixed post character counts, media saving, and reaction-list crashes, with performance improvements.</li>
+                <li>Added image translation. After configuring a translation service, switch between the original and translated image, then save or share the result.</li>
+                <li>Choose replies and nested replies to include when sharing a post as an image, with support for long images.</li>
+                <li>Added Weibo group, Friends Circle, and Private Following timelines, post visibility settings, and Live Photo playback. Restored IP location labels.</li>
+                <li>Added global and per-account proxy settings, with HTTPS and SOCKS5 support.</li>
+                <li>Fixed some image-loading failures, gallery bookmark actions, and FANBOX link navigation. Improved mixed timelines, translation display, and remembering account selections.</li>
             </ul>
         ]]></string>
     <string name="changelog_title">Welcome back!</string>

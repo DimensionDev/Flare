@@ -3,11 +3,11 @@
     <string name="changelog_current"><![CDATA[
             <span>Version %1$s :</span>
             <ul>
-                <li>Ajout d’une option pour mémoriser la position de lecture du fil d’accueil lors des actualisations et des réouvertures de l’application, ainsi que le dernier onglet sélectionné.</li>
-                <li>Ajout du collage et du glisser-déposer d’images lors de la rédaction de posts.</li>
-                <li>Amélioration de la lecture RSS avec des recommandations de mode d’ouverture et l’affichage du contenu du flux si la page web ne se charge pas.</li>
-                <li>Amélioration des animations de retour prédictif et des coins des pages en écran partagé et en mode fenêtré.</li>
-                <li>Correction du comptage des caractères, de l’enregistrement des médias et des plantages des listes de réactions, avec des améliorations des performances.</li>
+                <li>Ajout de la traduction d’images. Après avoir configuré un service de traduction, alternez entre l’original et sa traduction, puis enregistrez ou partagez le résultat.</li>
+                <li>Choisissez les réponses et sous-réponses à inclure lorsque vous partagez une publication sous forme d’image, avec prise en charge des images longues.</li>
+                <li>Ajout des fils Weibo de groupes, du cercle d’amis et des abonnements privés, des réglages de visibilité des publications et de la lecture des Live Photos. Rétablissement de la localisation par IP.</li>
+                <li>Ajout de réglages de proxy globaux et par compte, avec prise en charge de HTTPS et SOCKS5.</li>
+                <li>Correction de certains échecs de chargement d’images, des actions de favoris dans la galerie et de l’ouverture des liens FANBOX. Amélioration des fils mixtes, de l’affichage des traductions et de la mémorisation du compte sélectionné.</li>
             </ul>
         ]]></string>
     <string name="changelog_title">Bon retour !</string>

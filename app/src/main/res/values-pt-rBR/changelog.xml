@@ -5,11 +5,11 @@
     <string name="changelog_current"><![CDATA[
             <span>Versão %1$s:</span>
             <ul>
-                <li>Adicionada uma opção para lembrar a posição de leitura na timeline inicial ao atualizar e reabrir o aplicativo, incluindo a última aba selecionada.</li>
-                <li>Agora é possível colar e arrastar e soltar imagens ao escrever posts.</li>
-                <li>Melhorada a leitura RSS com recomendações do modo de abertura e conteúdo do feed quando a página da web não carrega.</li>
-                <li>Melhoradas as animações de volta preditiva e os cantos das páginas nos modos de tela dividida e janela.</li>
-                <li>Corrigidas a contagem de caracteres, o salvamento de mídia e as falhas nas listas de reações, com melhorias de desempenho.</li>
+                <li>Adicionada a tradução de imagens. Após configurar um serviço de tradução, você pode alternar entre o original e a tradução e salvar ou compartilhar o resultado.</li>
+                <li>Você pode escolher respostas e respostas aninhadas ao compartilhar uma publicação como imagem, com suporte a imagens longas.</li>
+                <li>Adicionadas linhas do tempo de grupos, círculo de amigos e contas seguidas em particular do Weibo, configurações de visibilidade das publicações e reprodução de Live Photo. Restaurada a localização por IP.</li>
+                <li>Adicionadas configurações de proxy globais e por conta, com suporte a HTTPS e SOCKS5.</li>
+                <li>Corrigidas algumas falhas no carregamento de imagens, ações de favoritos na galeria e abertura de links do FANBOX. Melhoradas as linhas do tempo mistas, a exibição de traduções e a memorização da conta selecionada.</li>
             </ul>
         ]]></string>
 </resources>

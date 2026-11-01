@@ -5,11 +5,11 @@
     <string name="changelog_current"><![CDATA[
             <span>Version %1$s:</span>
             <ul>
-                <li>Neue Option zum Merken der Leseposition in der Start-Timeline beim Aktualisieren und erneuten Öffnen der App, einschließlich des zuletzt gewählten Tabs.</li>
-                <li>Bilder können beim Schreiben von Beiträgen jetzt eingefügt und per Drag-and-drop hinzugefügt werden.</li>
-                <li>RSS-Lesen mit Empfehlungen zum Öffnungsmodus und Anzeige des Feed-Inhalts verbessert, wenn die Webseite nicht geladen werden kann.</li>
-                <li>Animationen für die vorausschauende Zurück-Geste und Seitenecken im geteilten Bildschirm und Fenstermodus verbessert.</li>
-                <li>Zeichenzählung, Medienspeicherung und Abstürze in Reaktionslisten behoben sowie die Leistung verbessert.</li>
+                <li>Bildübersetzung hinzugefügt. Nach dem Einrichten eines Übersetzungsdienstes kannst du zwischen Original und Übersetzung wechseln und das Ergebnis speichern oder teilen.</li>
+                <li>Beim Teilen eines Beitrags als Bild kannst du Antworten und Unterantworten auswählen. Auch lange Bilder werden unterstützt.</li>
+                <li>Weibo bietet jetzt Timelines für Gruppen, den Freundeskreis und privat gefolgte Konten sowie Sichtbarkeitseinstellungen für Beiträge und Live-Photo-Wiedergabe. Die IP-Standortanzeige wurde wiederhergestellt.</li>
+                <li>Globale Proxy-Einstellungen und separate Einstellungen pro Konto mit Unterstützung für HTTPS und SOCKS5 hinzugefügt.</li>
+                <li>Einige Fehler beim Laden von Bildern, bei Lesezeichenaktionen in der Galerie und beim Öffnen von FANBOX-Links behoben. Gemischte Timelines, die Übersetzungsanzeige und das Merken der Kontoauswahl verbessert.</li>
             </ul>
         ]]></string>
 </resources>

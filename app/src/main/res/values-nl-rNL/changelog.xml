@@ -5,11 +5,11 @@
     <string name="changelog_current"><![CDATA[
             <span>Versie %1$s:</span>
             <ul>
-                <li>Een optie toegevoegd om je leespositie op de starttijdlijn te onthouden bij vernieuwen en heropenen van de app, inclusief het laatst gekozen tabblad.</li>
-                <li>Afbeeldingen kunnen nu worden geplakt en versleept tijdens het schrijven van berichten.</li>
-                <li>RSS-lezen verbeterd met aanbevelingen voor de openingsmodus en feedinhoud als terugval wanneer de webpagina niet kan worden geladen.</li>
-                <li>Voorspellende teruganimaties en paginahoeken in gesplitst scherm en venstermodus verbeterd.</li>
-                <li>Tekentelling, het opslaan van media en crashes in reactielijsten verholpen, met prestatieverbeteringen.</li>
+                <li>Afbeeldingsvertaling toegevoegd. Stel een vertaaldienst in om tussen het origineel en de vertaling te wisselen en het resultaat op te slaan of te delen.</li>
+                <li>Kies antwoorden en geneste antwoorden om op te nemen wanneer je een bericht als afbeelding deelt, met ondersteuning voor lange afbeeldingen.</li>
+                <li>Weibo-tijdlijnen toegevoegd voor groepen, de vriendenkring en privé gevolgde accounts, met zichtbaarheidsinstellingen voor berichten en Live Photo-weergave. IP-locatielabels zijn hersteld.</li>
+                <li>Algemene proxyinstellingen en afzonderlijke instellingen per account toegevoegd, met ondersteuning voor HTTPS en SOCKS5.</li>
+                <li>Enkele fouten bij het laden van afbeeldingen, bladwijzeracties in de galerij en het openen van FANBOX-links verholpen. Gemengde tijdlijnen, vertaalweergave en het onthouden van de accountkeuze verbeterd.</li>
             </ul>
         ]]></string>
 </resources>

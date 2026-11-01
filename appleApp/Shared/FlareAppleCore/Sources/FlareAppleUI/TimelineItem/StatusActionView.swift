@@ -31,19 +31,22 @@ public struct StatusActionsView: View {
     private let allowSpacer: Bool
     private let applyPostActionLayout: Bool
     private let topPadding: CGFloat
+    private let postKey: String?
 
     public init(
         data: [ActionMenu],
         useText: Bool,
         allowSpacer: Bool = true,
         applyPostActionLayout: Bool = true,
-        topPadding: CGFloat = 0
+        topPadding: CGFloat = 0,
+        postKey: String? = nil
     ) {
         self.data = data
         self.useText = useText
         self.allowSpacer = allowSpacer
         self.applyPostActionLayout = applyPostActionLayout
         self.topPadding = topPadding
+        self.postKey = postKey
     }
 
     public var body: some View {
@@ -86,7 +89,8 @@ public struct StatusActionsView: View {
                         fontSize: fontSize,
                         showNumbers: showNumbers,
                         openURL: openURL,
-                        isStretched: isStretched
+                        isStretched: isStretched,
+                        animationIdentity: animationIdentity(for: item, position: index)
                     )
                 }
             }
@@ -101,6 +105,14 @@ public struct StatusActionsView: View {
         case .item(let item): return item.count != nil
         case .group(let group): return group.displayItem.count != nil
         case .divider: return false
+        }
+    }
+
+    private func animationIdentity(for action: ActionMenu, position: Int) -> StatusActionAnimationState.Identity? {
+        switch onEnum(of: action) {
+        case .item(let item): return .init(postKey: postKey, item: item, position: position)
+        case .group(let group): return .init(postKey: postKey, item: group.displayItem, position: position)
+        case .divider: return nil
         }
     }
 
@@ -126,6 +138,7 @@ public struct StatusActionView: View {
     private let showNumbers: Bool
     private let openURL: OpenURLAction
     private let isStretched: Bool
+    private let animationIdentity: StatusActionAnimationState.Identity?
 
     public init(
         data: ActionMenu,
@@ -134,7 +147,8 @@ public struct StatusActionView: View {
         fontSize: CGFloat,
         showNumbers: Bool,
         openURL: OpenURLAction,
-        isStretched: Bool = false
+        isStretched: Bool = false,
+        animationIdentity: StatusActionAnimationState.Identity? = nil
     ) {
         self.data = data
         self.useText = useText
@@ -143,6 +157,7 @@ public struct StatusActionView: View {
         self.showNumbers = showNumbers
         self.openURL = openURL
         self.isStretched = isStretched
+        self.animationIdentity = animationIdentity
     }
 
     public var body: some View {
@@ -155,7 +170,8 @@ public struct StatusActionView: View {
                 fontSize: fontSize,
                 showNumbers: showNumbers,
                 openURL: openURL,
-                isStretched: isStretched
+                isStretched: isStretched,
+                animationIdentity: animationIdentity
             )
         case .group(let group):
             if useText {
@@ -184,6 +200,16 @@ public struct StatusActionView: View {
                         )
                     }
                 } label: {
+                    #if os(iOS)
+                    StatusActionAnimatedLabel(
+                        state: StatusActionAnimationState(identity: animationIdentity, item: group.displayItem, showNumbers: showNumbers),
+                        fontSize: fontSize,
+                        isFixedWidth: isFixedWidth,
+                        isStretched: isStretched,
+                        minimumIconOnlySize: StatusActionHitArea.labelContentHeight(fontSize: fontSize)
+                    )
+                    .statusActionContentPadding(isExpanded: true, fontSize: fontSize)
+                    #else
                     Group {
                         if isStretched {
                             StatusActionStretchedLabel(
@@ -206,8 +232,9 @@ public struct StatusActionView: View {
                         }
                     }
                     .statusActionContentPadding(isExpanded: true, fontSize: fontSize)
+                    .optionalForegroundStyle(group.displayItem.color?.swiftColor)
+                    #endif
                 }
-                .optionalForegroundStyle(group.displayItem.color?.swiftColor)
                 .buttonStyle(.plain)
                 .accessibilityLabel(
                     Text(
@@ -245,6 +272,7 @@ public struct StatusActionItemView: View {
     private let showNumbers: Bool
     private let openURL: OpenURLAction
     private let isStretched: Bool
+    private let animationIdentity: StatusActionAnimationState.Identity?
 
     public init(
         data: ActionMenu.Item,
@@ -253,7 +281,8 @@ public struct StatusActionItemView: View {
         fontSize: CGFloat,
         showNumbers: Bool,
         openURL: OpenURLAction,
-        isStretched: Bool = false
+        isStretched: Bool = false,
+        animationIdentity: StatusActionAnimationState.Identity? = nil
     ) {
         self.data = data
         self.useText = useText
@@ -262,6 +291,7 @@ public struct StatusActionItemView: View {
         self.showNumbers = showNumbers
         self.openURL = openURL
         self.isStretched = isStretched
+        self.animationIdentity = animationIdentity
     }
 
     private var resolvedText: Text? {
@@ -283,7 +313,6 @@ public struct StatusActionItemView: View {
 
     public var body: some View {
         actionControl
-            .optionalForegroundStyle(data.color?.swiftColor)
             .buttonStyle(.plain)
             .accessibilityLabel(
                 Text(
@@ -339,6 +368,25 @@ public struct StatusActionItemView: View {
 
     @ViewBuilder
     private var actionLabel: some View {
+        #if os(iOS)
+        if !useText {
+            StatusActionAnimatedLabel(
+                state: StatusActionAnimationState(identity: animationIdentity, item: data, showNumbers: showNumbers),
+                fontSize: fontSize,
+                isFixedWidth: isFixedWidth,
+                isStretched: isStretched
+            )
+            .statusActionContentPadding(isExpanded: true, fontSize: fontSize)
+        } else {
+            staticActionLabel
+        }
+        #else
+        staticActionLabel
+        #endif
+    }
+
+    @ViewBuilder
+    private var staticActionLabel: some View {
         Group {
             if isStretched, !useText {
                 StatusActionStretchedLabel(icon: data.icon, text: resolvedText, fontSize: fontSize)
@@ -353,6 +401,7 @@ public struct StatusActionItemView: View {
             }
         }
         .statusActionContentPadding(isExpanded: !useText, fontSize: fontSize)
+        .optionalForegroundStyle(data.color?.swiftColor)
     }
 
     #if os(macOS)
@@ -381,6 +430,198 @@ public struct StatusActionItemView: View {
 }
 
 // MARK: - Helpers
+
+#if os(iOS)
+private struct StatusActionAnimatedLabel: View {
+    let state: StatusActionAnimationState
+    let fontSize: CGFloat
+    let isFixedWidth: Bool
+    let isStretched: Bool
+    let minimumIconOnlySize: CGFloat?
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var isVisible = false
+    @State private var motion: StatusActionMotion?
+
+    init(state: StatusActionAnimationState, fontSize: CGFloat, isFixedWidth: Bool,
+         isStretched: Bool, minimumIconOnlySize: CGFloat? = nil) {
+        self.state = state
+        self.fontSize = fontSize
+        self.isFixedWidth = isFixedWidth
+        self.isStretched = isStretched
+        self.minimumIconOnlySize = minimumIconOnlySize
+    }
+
+    var body: some View {
+        let activeMotion = motion?.target == state ? motion : nil
+        let animateIcon = activeMotion.map { $0.effects.icon != .none } ?? false
+        let animateNumber = activeMotion.map { $0.effects.number != .none } ?? false
+        HStack(spacing: 2) {
+            StatusActionIcon(icon: state.icon)
+                .optionalForegroundStyle(state.color?.swiftColor)
+                .opacity(animateIcon ? 0 : 1)
+                .transaction { $0.animation = nil; $0.disablesAnimations = true }
+                .overlay {
+                    if let activeMotion, animateIcon {
+                        StatusActionIconMotion(motion: activeMotion)
+                            .transition(.identity)
+                            .accessibilityHidden(true)
+                            .allowsHitTesting(false)
+                    }
+                }
+                .frame(width: isStretched ? StatusActionHitArea.iconWidth(fontSize: fontSize) : nil)
+                .frame(minWidth: state.text == nil && !isStretched ? minimumIconOnlySize : nil)
+            if let text = state.text {
+                Text(text)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+                    .optionalForegroundStyle(state.color?.swiftColor)
+                    .opacity(animateNumber ? 0 : 1)
+                    .transaction { $0.animation = nil; $0.disablesAnimations = true }
+                    .overlay(alignment: .leading) {
+                        if let activeMotion, animateNumber {
+                            StatusActionNumberMotion(motion: activeMotion)
+                                .transition(.identity)
+                                .accessibilityHidden(true)
+                                .allowsHitTesting(false)
+                        }
+                    }
+                    .frame(minWidth: isFixedWidth && !isStretched ? fontSize * 2.5 : nil, alignment: .leading)
+            }
+        }
+        .frame(maxWidth: isStretched ? .infinity : nil, alignment: .leading)
+        .onAppear {
+            resetAnimations()
+            isVisible = true
+        }
+        .onDisappear {
+            isVisible = false
+            resetAnimations()
+        }
+        .onChange(of: reduceMotion) { _, reduced in
+            if reduced { resetAnimations() }
+        }
+        .onChange(of: state) { previous, newState in
+            let effects = newState.effects(from: previous, isVisible: isVisible, reduceMotion: reduceMotion)
+            if effects.icon == .none && effects.number == .none {
+                resetAnimations()
+            } else {
+                // Only real state changes create animation layers; static rows keep their identity.
+                motion = StatusActionMotion(previous: previous, target: newState, effects: effects)
+            }
+        }
+    }
+
+    private func resetAnimations() {
+        if motion != nil { motion = nil }
+    }
+}
+
+private struct StatusActionMotion {
+    let eventID = UUID()
+    let previous: StatusActionAnimationState
+    let target: StatusActionAnimationState
+    let effects: StatusActionAnimationState.Effects
+}
+
+private struct StatusActionIconMotion: View {
+    let motion: StatusActionMotion
+    @State private var trigger = 0
+
+    var body: some View {
+        let enteringScale = motion.effects.icon == .pop ? StatusActionAnimationTiming.iconStartScale : 1
+        ZStack {
+            StatusActionIcon(icon: motion.previous.icon)
+                .optionalForegroundStyle(motion.previous.color?.swiftColor)
+                .keyframeAnimator(initialValue: StatusActionMotionValues(progress: 1, opacity: 1), trigger: trigger) { content, value in
+                    content.scaleEffect(value.progress).opacity(value.opacity)
+                } keyframes: { _ in
+                    KeyframeTrack(\.progress) {
+                        MoveKeyframe(1)
+                        SpringKeyframe(motion.effects.icon == .pop ? 0 : 1, spring: StatusActionAnimationTiming.fadeSpring)
+                    }
+                    KeyframeTrack(\.opacity) {
+                        MoveKeyframe(1)
+                        SpringKeyframe(0, spring: StatusActionAnimationTiming.fadeSpring)
+                    }
+                }
+            StatusActionIcon(icon: motion.target.icon)
+                .optionalForegroundStyle(motion.target.color?.swiftColor)
+                .keyframeAnimator(initialValue: StatusActionMotionValues(progress: enteringScale, opacity: 0), trigger: trigger) { content, value in
+                    content.scaleEffect(value.progress).opacity(value.opacity)
+                } keyframes: { _ in
+                    KeyframeTrack(\.progress) {
+                        MoveKeyframe(enteringScale)
+                        SpringKeyframe(1, spring: StatusActionAnimationTiming.iconSpring)
+                    }
+                    KeyframeTrack(\.opacity) {
+                        MoveKeyframe(0)
+                        SpringKeyframe(1, spring: StatusActionAnimationTiming.fadeSpring)
+                    }
+                }
+        }
+        .onAppear { trigger += 1 }
+        .onChange(of: motion.eventID) { _, _ in trigger += 1 }
+    }
+}
+
+private struct StatusActionMotionValues {
+    var progress: Double
+    var opacity: Double
+}
+
+private struct StatusActionNumberMotion: View {
+    let motion: StatusActionMotion
+    @State private var trigger = 0
+
+    var body: some View {
+        let direction: CGFloat = motion.effects.number == .up ? -1 : 1
+        ZStack(alignment: .leading) {
+            if let previous = motion.previous.text {
+                Text(previous)
+                    .lineLimit(1)
+                    .optionalForegroundStyle(motion.previous.color?.swiftColor)
+                    .keyframeAnimator(initialValue: StatusActionMotionValues(progress: 0, opacity: 1), trigger: trigger) { content, value in
+                        content.visualEffect { effect, geometry in
+                            effect.offset(y: geometry.size.height * direction * CGFloat(value.progress))
+                        }
+                        .opacity(value.opacity)
+                    } keyframes: { _ in
+                        KeyframeTrack(\.progress) {
+                            MoveKeyframe(0)
+                            SpringKeyframe(1, spring: StatusActionAnimationTiming.numberSpring)
+                        }
+                        KeyframeTrack(\.opacity) {
+                            MoveKeyframe(1)
+                            SpringKeyframe(0, spring: StatusActionAnimationTiming.fadeSpring)
+                        }
+                    }
+            }
+            if let target = motion.target.text {
+                Text(target)
+                    .lineLimit(1)
+                    .optionalForegroundStyle(motion.target.color?.swiftColor)
+                    .keyframeAnimator(initialValue: StatusActionMotionValues(progress: 0, opacity: 0), trigger: trigger) { content, value in
+                        content.visualEffect { effect, geometry in
+                            effect.offset(y: -geometry.size.height * direction * CGFloat(1 - value.progress))
+                        }
+                        .opacity(value.opacity)
+                    } keyframes: { _ in
+                        KeyframeTrack(\.progress) {
+                            MoveKeyframe(0)
+                            SpringKeyframe(1, spring: StatusActionAnimationTiming.numberSpring)
+                        }
+                        KeyframeTrack(\.opacity) {
+                            MoveKeyframe(0)
+                            SpringKeyframe(1, spring: StatusActionAnimationTiming.fadeSpring)
+                        }
+                    }
+            }
+        }
+        .onAppear { trigger += 1 }
+        .onChange(of: motion.eventID) { _, _ in trigger += 1 }
+    }
+}
+#endif
 
 private nonisolated enum StatusActionHitArea {
     static let horizontalInset: CGFloat = 4
@@ -478,13 +719,9 @@ private extension View {
         self.backport.flareLabelIconToTitleSpacing(spacing)
     }
 
-    @ViewBuilder
     func optionalForegroundStyle(_ color: Color?) -> some View {
-        if let color {
-            self.foregroundStyle(color)
-        } else {
-            self
-        }
+        // Keep the label's identity when an action gains or loses its tint.
+        foregroundStyle(color.map { AnyShapeStyle($0) } ?? AnyShapeStyle(ForegroundStyle()))
     }
 
     @ViewBuilder

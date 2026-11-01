@@ -1,6 +1,8 @@
 import UIKit
+import SwiftUI
 import KotlinSharedUI
 import FlareAppleCore
+import FlareAppleUI
 
 // MARK: - StatusActionsUIView
 // Mirrors StatusActionsView/StatusActionView/StatusActionItemView in
@@ -16,6 +18,7 @@ final class StatusActionsUIView: UIView, ManualLayoutMeasurable, TimelineHeightP
 
     // Inputs
     private var data: [ActionMenu] = []
+    private var postKey: String?
     private var useText: Bool = false
     private var allowSpacer: Bool = true
     private var postActionStyle: PostActionStyle = .leftAligned
@@ -49,12 +52,14 @@ final class StatusActionsUIView: UIView, ManualLayoutMeasurable, TimelineHeightP
         postActionFixedWidth: Bool = true,
         applyPostActionLayout: Bool = true,
         showNumbers: Bool,
-        isDetail: Bool
+        isDetail: Bool,
+        postKey: String? = nil
     ) {
         self.data = applyPostActionLayout
             ? castActionMenus(PostActionLayoutHelpers.shared.apply(actions: data, config: postActionLayout))
             : data
         self.useText = useText
+        self.postKey = postKey
         self.allowSpacer = allowSpacer
         self.postActionStyle = postActionStyle
         self.postActionLayout = postActionLayout
@@ -83,8 +88,8 @@ final class StatusActionsUIView: UIView, ManualLayoutMeasurable, TimelineHeightP
         var desired: [UIView] = []
 
         if useText {
-            for item in data {
-                if let v = makeActionView(for: item, isFixedWidth: false) {
+            for (index, item) in data.enumerated() {
+                if let v = makeActionView(for: item, position: index, isFixedWidth: false) {
                     desired.append(v)
                 }
             }
@@ -97,7 +102,7 @@ final class StatusActionsUIView: UIView, ManualLayoutMeasurable, TimelineHeightP
         if postActionStyle == .stretch, allowSpacer {
             isStretch = true
             for (index, item) in data.enumerated() {
-                if let v = makeActionView(for: item, isFixedWidth: postActionFixedWidth && index != data.count - 1) {
+                if let v = makeActionView(for: item, position: index, isFixedWidth: postActionFixedWidth && index != data.count - 1) {
                     desired.append(v)
                 }
             }
@@ -116,7 +121,7 @@ final class StatusActionsUIView: UIView, ManualLayoutMeasurable, TimelineHeightP
                 spacerIndex = desired.count
             }
 
-            if let v = makeActionView(for: item, isFixedWidth: postActionFixedWidth && index != data.count - 1) {
+            if let v = makeActionView(for: item, position: index, isFixedWidth: postActionFixedWidth && index != data.count - 1) {
                 desired.append(v)
             }
         }
@@ -232,6 +237,7 @@ final class StatusActionsUIView: UIView, ManualLayoutMeasurable, TimelineHeightP
     func prepareForPoolRemoval() {
         syncManagedSubviews(parent: self, current: &managedChildren, desired: [])
         data = []
+        postKey = nil
         itemButtonCursor = 0
         groupButtonCursor = 0
         textGroupCursor = 0
@@ -261,15 +267,15 @@ final class StatusActionsUIView: UIView, ManualLayoutMeasurable, TimelineHeightP
 
     // MARK: - Action view factory (matches the switch in StatusActionView)
 
-    private func makeActionView(for action: ActionMenu, isFixedWidth: Bool) -> UIView? {
+    private func makeActionView(for action: ActionMenu, position: Int, isFixedWidth: Bool) -> UIView? {
         switch onEnum(of: action) {
         case .item(let item):
-            return makeItemButton(item: item, isFixedWidth: isFixedWidth)
+            return makeItemButton(item: item, position: position, isFixedWidth: isFixedWidth)
         case .group(let group):
             if useText {
                 return textGroupView(group: group)
             } else {
-                return makeGroupButton(group: group, isFixedWidth: isFixedWidth)
+                return makeGroupButton(group: group, position: position, isFixedWidth: isFixedWidth)
             }
         case .divider:
             return divider()
@@ -287,7 +293,7 @@ final class StatusActionsUIView: UIView, ManualLayoutMeasurable, TimelineHeightP
         return view
     }
 
-    private func makeItemButton(item: ActionMenu.Item, isFixedWidth: Bool) -> UIView {
+    private func makeItemButton(item: ActionMenu.Item, position: Int, isFixedWidth: Bool) -> UIView {
         let title: String?
         if useText, let text = item.text?.resolvedString {
             title = text
@@ -313,7 +319,12 @@ final class StatusActionsUIView: UIView, ManualLayoutMeasurable, TimelineHeightP
             usesExpandedHitArea: !useText,
             accessibilityLabel: item.text?.resolvedString
                 ?? String(localized: "more", defaultValue: "More"),
-            accessibilityValue: showNumbers ? item.count?.humanized : nil
+            accessibilityValue: showNumbers ? item.count?.humanized : nil,
+            animationState: useText ? nil : StatusActionAnimationState(
+                identity: .init(postKey: postKey, item: item, position: position),
+                item: item,
+                showNumbers: showNumbers
+            )
         ) { [weak self] in
             guard let self = self else { return }
             let gen = UIImpactFeedbackGenerator(style: .medium)
@@ -323,7 +334,7 @@ final class StatusActionsUIView: UIView, ManualLayoutMeasurable, TimelineHeightP
         return control
     }
 
-    private func makeGroupButton(group: ActionMenu.Group, isFixedWidth: Bool) -> UIView {
+    private func makeGroupButton(group: ActionMenu.Group, position: Int, isFixedWidth: Bool) -> UIView {
         let title: String?
         if let text = group.displayItem.count?.humanized, showNumbers, !text.isEmpty {
             title = text
@@ -347,7 +358,12 @@ final class StatusActionsUIView: UIView, ManualLayoutMeasurable, TimelineHeightP
             usesExpandedHitArea: !useText,
             accessibilityLabel: group.displayItem.text?.resolvedString
                 ?? String(localized: "more", defaultValue: "More"),
-            accessibilityValue: showNumbers ? group.displayItem.count?.humanized : nil
+            accessibilityValue: showNumbers ? group.displayItem.count?.humanized : nil,
+            animationState: StatusActionAnimationState(
+                identity: .init(postKey: postKey, item: group.displayItem, position: position),
+                item: group.displayItem,
+                showNumbers: showNumbers
+            )
         )
         control.showsMenuAsPrimaryAction = true
         control.menu = UIMenu(children: [
@@ -533,6 +549,9 @@ private final class ActionItemControl: UIButton, ManualLayoutMeasurable, Timelin
     private var horizontalInset: CGFloat = 0
     private var verticalInset: CGFloat = 0
     private var onTap: (() -> Void)?
+    private var animationState: StatusActionAnimationState?
+    private var outgoingIconView: UIImageView?
+    private var outgoingLabel: UILabel?
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -596,8 +615,41 @@ private final class ActionItemControl: UIButton, ManualLayoutMeasurable, Timelin
         usesExpandedHitArea: Bool,
         accessibilityLabel: String? = nil,
         accessibilityValue: String? = nil,
+        animationState: StatusActionAnimationState? = nil,
         onTap: (() -> Void)? = nil
     ) {
+        let reduceMotion = UIAccessibility.isReduceMotionEnabled
+        let effects = animationState?.effects(from: self.animationState, isVisible: window != nil, reduceMotion: reduceMotion)
+        let iconEffect = effects?.icon ?? .none
+        let numberEffect = effects?.number ?? .none
+        if animationState?.identity == nil || animationState?.identity != self.animationState?.identity || window == nil || reduceMotion || !isEnabled {
+            removeContentAnimations()
+        } else {
+            if image == nil || (iconEffect == .none && animationState?.icon != self.animationState?.icon) {
+                removeIconAnimations()
+            }
+            if title == nil || (numberEffect == .none && label.text != title) {
+                removeNumberAnimations()
+            }
+        }
+        if iconEffect != .none {
+            removeIconAnimations()
+            if let previousImage = iconView.image {
+                let outgoing = resolvedOutgoingIconView()
+                outgoing.image = previousImage
+                outgoing.tintColor = iconView.tintColor
+                outgoing.preferredSymbolConfiguration = iconView.preferredSymbolConfiguration
+            }
+        }
+        if numberEffect != .none {
+            removeNumberAnimations()
+            let outgoing = resolvedOutgoingLabel()
+            outgoing.text = label.text
+            outgoing.font = label.font
+            outgoing.textColor = label.textColor
+            outgoing.textAlignment = label.textAlignment
+        }
+        self.animationState = animationState
         self.minimumIconOnlySize = minimumIconOnlySize
         self.minimumTextWidth = minimumTextWidth
         self.iconSize = iconSize
@@ -624,9 +676,41 @@ private final class ActionItemControl: UIButton, ManualLayoutMeasurable, Timelin
 
         invalidateIntrinsicContentSize()
         setNeedsLayout()
+        if iconEffect != .none || numberEffect != .none {
+            layoutIfNeeded()
+        }
+        if iconEffect != .none {
+            if let outgoing = outgoingIconView, outgoing.image != nil {
+                if iconEffect == .pop {
+                    addSpring(to: outgoing.layer, keyPath: "transform.scale", from: 1, to: 0,
+                              spring: StatusActionAnimationTiming.fadeSpring, key: "statusAction.pop")
+                }
+                addSpring(to: outgoing.layer, keyPath: "opacity", from: 1, to: 0,
+                          spring: StatusActionAnimationTiming.fadeSpring, key: "statusAction.iconFade")
+            }
+            if iconEffect == .pop {
+                addSpring(to: iconView.layer, keyPath: "transform.scale", from: StatusActionAnimationTiming.iconStartScale, to: 1,
+                          spring: StatusActionAnimationTiming.iconSpring, key: "statusAction.pop")
+            }
+            addSpring(to: iconView.layer, keyPath: "opacity", from: 0, to: 1,
+                      spring: StatusActionAnimationTiming.fadeSpring, key: "statusAction.iconFade")
+        }
+        if numberEffect != .none, let outgoing = outgoingLabel {
+            let offset = Double(label.bounds.height) * (numberEffect == .up ? 1 : -1)
+            addSpring(to: label.layer, keyPath: "transform.translation.y", from: offset, to: 0,
+                      spring: StatusActionAnimationTiming.numberSpring, key: "statusAction.numberSlide")
+            addSpring(to: outgoing.layer, keyPath: "transform.translation.y", from: 0, to: -offset,
+                      spring: StatusActionAnimationTiming.numberSpring, key: "statusAction.numberSlide")
+            addSpring(to: label.layer, keyPath: "opacity", from: 0, to: 1,
+                      spring: StatusActionAnimationTiming.fadeSpring, key: "statusAction.numberFade")
+            addSpring(to: outgoing.layer, keyPath: "opacity", from: 1, to: 0,
+                      spring: StatusActionAnimationTiming.fadeSpring, key: "statusAction.numberFade")
+        }
     }
 
     func prepareForPoolRemoval() {
+        animationState = nil
+        removeContentAnimations()
         onTap = nil
         menu = nil
         showsMenuAsPrimaryAction = false
@@ -638,6 +722,73 @@ private final class ActionItemControl: UIButton, ManualLayoutMeasurable, Timelin
         verticalInset = 0
         accessibilityLabel = nil
         accessibilityValue = nil
+    }
+
+    override func didMoveToWindow() {
+        super.didMoveToWindow()
+        if window == nil {
+            animationState = nil
+            removeContentAnimations()
+        }
+    }
+
+    private func removeContentAnimations() {
+        removeIconAnimations()
+        removeNumberAnimations()
+    }
+
+    private func removeIconAnimations() {
+        iconView.layer.removeAnimation(forKey: "statusAction.pop")
+        iconView.layer.removeAnimation(forKey: "statusAction.iconFade")
+        outgoingIconView?.layer.removeAnimation(forKey: "statusAction.pop")
+        outgoingIconView?.layer.removeAnimation(forKey: "statusAction.iconFade")
+        outgoingIconView?.image = nil
+    }
+
+    private func removeNumberAnimations() {
+        label.layer.removeAnimation(forKey: "statusAction.numberSlide")
+        label.layer.removeAnimation(forKey: "statusAction.numberFade")
+        outgoingLabel?.layer.removeAnimation(forKey: "statusAction.numberSlide")
+        outgoingLabel?.layer.removeAnimation(forKey: "statusAction.numberFade")
+        outgoingLabel?.text = nil
+    }
+
+    private func resolvedOutgoingIconView() -> UIImageView {
+        if let outgoingIconView { return outgoingIconView }
+        let view = UIImageView()
+        view.contentMode = .center
+        view.alpha = 0
+        view.isUserInteractionEnabled = false
+        view.accessibilityElementsHidden = true
+        insertSubview(view, belowSubview: iconView)
+        outgoingIconView = view
+        return view
+    }
+
+    private func resolvedOutgoingLabel() -> UILabel {
+        if let outgoingLabel { return outgoingLabel }
+        let view = UILabel()
+        view.numberOfLines = 1
+        view.lineBreakMode = label.lineBreakMode
+        view.alpha = 0
+        view.isUserInteractionEnabled = false
+        view.accessibilityElementsHidden = true
+        insertSubview(view, belowSubview: label)
+        outgoingLabel = view
+        return view
+    }
+
+    private func addSpring(to layer: CALayer, keyPath: String, from: Double, to: Double, spring: Spring, key: String) {
+        let animation = CASpringAnimation(keyPath: keyPath)
+        animation.fromValue = from
+        animation.toValue = to
+        animation.mass = spring.mass
+        animation.stiffness = spring.stiffness
+        animation.damping = spring.damping
+        animation.duration = spring.settlingDuration
+        // The spring supplies the easing; its clock must remain linear.
+        animation.timingFunction = CAMediaTimingFunction(name: .linear)
+        layer.add(animation, forKey: key)
     }
 
     @objc private func onTapped() {
@@ -667,6 +818,12 @@ private final class ActionItemControl: UIButton, ManualLayoutMeasurable, Timelin
                 width: labelW,
                 height: labelSize.height
             )
+        }
+        outgoingIconView?.frame = iconView.frame
+        if let outgoingLabel {
+            var frame = label.frame
+            frame.size.width = max(frame.width, outgoingLabel.intrinsicContentSize.width)
+            outgoingLabel.frame = frame
         }
     }
 

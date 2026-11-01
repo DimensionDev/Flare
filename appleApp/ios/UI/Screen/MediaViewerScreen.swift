@@ -556,7 +556,7 @@ struct MediaViewerScreen: View {
                 }
             }
             if postActionStyle != .hidden {
-                StatusActionsView(data: Array(post.actions), useText: false)
+                StatusActionsView(data: Array(post.actions), useText: false, postKey: String(describing: post.statusKey))
             }
         }
         .padding(.horizontal)

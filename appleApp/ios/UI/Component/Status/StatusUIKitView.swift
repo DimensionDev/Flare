@@ -1016,7 +1016,8 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
                 postActionLayout: appearance.postActionLayout,
                 postActionFixedWidth: appearance.postActionFixedWidth,
                 showNumbers: appearance.showNumbers,
-                isDetail: isDetail
+                isDetail: isDetail,
+                postKey: String(describing: data.statusKey)
             )
             if actionsView.hasVisibleActions {
                 let actionsContainer = resolvedActionsContainer()

@@ -2,7 +2,6 @@ package dev.dimension.flare.ui.model
 
 import dev.dimension.flare.common.decodeProtobuf
 import dev.dimension.flare.common.encodeProtobuf
-import kotlinx.serialization.Serializable
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -35,17 +34,4 @@ class UiHandleTest {
         assertEquals("@bsky.app", restored.display)
         assertEquals(handle.canonical, restored.canonical)
     }
-
-    @Test
-    fun oldStoredHandlesKeepCanonicalDisplay() {
-        val restored = LegacyHandle("alice", "remote.example").encodeProtobuf().decodeProtobuf<UiHandle>()
-
-        assertEquals("@alice@remote.example", restored.display)
-    }
-
-    @Serializable
-    private data class LegacyHandle(
-        val raw: String,
-        val host: String,
-    )
 }

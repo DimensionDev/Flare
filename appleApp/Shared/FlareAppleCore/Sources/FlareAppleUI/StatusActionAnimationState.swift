@@ -1,11 +1,22 @@
 import KotlinSharedUI
 import SwiftUI
+import QuartzCore
 
 public enum StatusActionAnimationTiming {
     public static let iconSpring = Spring.snappy(duration: 0.32)
     public static let iconStartScale = 0.82
     public static let fadeDuration = 0.15
-    public static let numberDuration = 0.24
+    public static let numberDuration = 0.32
+    private static let numberStartControlPoint = UnitPoint(x: 0.22, y: 1)
+    private static let numberEndControlPoint = UnitPoint(x: 0.36, y: 1)
+    public static let numberCurve = UnitCurve.bezier(
+        startControlPoint: numberStartControlPoint,
+        endControlPoint: numberEndControlPoint
+    )
+    public static let numberTimingFunction = CAMediaTimingFunction(
+        controlPoints: Float(numberStartControlPoint.x), Float(numberStartControlPoint.y),
+        Float(numberEndControlPoint.x), Float(numberEndControlPoint.y)
+    )
 }
 
 public struct StatusActionAnimationState: Equatable {

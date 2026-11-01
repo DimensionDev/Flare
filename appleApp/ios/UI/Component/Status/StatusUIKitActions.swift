@@ -652,7 +652,7 @@ private final class ActionItemControl: UIButton, ManualLayoutMeasurable, Timelin
             // CATransition's vertical subtypes run opposite to UIKit's screen coordinates.
             animation.subtype = direction == .up ? .fromTop : .fromBottom
             animation.duration = StatusActionAnimationTiming.numberDuration
-            animation.timingFunction = CAMediaTimingFunction(name: .easeOut)
+            animation.timingFunction = StatusActionAnimationTiming.numberTimingFunction
             label.layer.add(animation, forKey: "transition")
             let fade = CABasicAnimation(keyPath: "opacity")
             fade.fromValue = 0.4

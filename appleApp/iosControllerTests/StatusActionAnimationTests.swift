@@ -113,6 +113,32 @@ final class StatusActionAnimationTests: XCTestCase {
         XCTAssertNil(label.layer.animationKeys())
     }
 
+    func testNumberDecelerationMatchesBothRenderers() throws {
+        let view = StatusActionsUIView()
+        configure(view, actions: [animatedAction()])
+        let window = try show(view)
+        defer { window.isHidden = true; window.rootViewController = nil }
+        configure(view, actions: [animatedAction(count: 2)])
+        let (_, label) = try content(view)
+        let animation = try XCTUnwrap(label.layer.animation(forKey: "transition"))
+        let timing = try XCTUnwrap(animation.timingFunction)
+        var start = [Float](repeating: 0, count: 2)
+        var end = [Float](repeating: 0, count: 2)
+        timing.getControlPoint(at: 1, values: &start)
+        timing.getControlPoint(at: 2, values: &end)
+        let appliedCurve = UnitCurve.bezier(
+            startControlPoint: UnitPoint(x: Double(start[0]), y: Double(start[1])),
+            endControlPoint: UnitPoint(x: Double(end[0]), y: Double(end[1]))
+        )
+        XCTAssertGreaterThan(appliedCurve.value(at: 0.25), 0.7)
+        XCTAssertGreaterThan(appliedCurve.value(at: 0.5), 0.9)
+        for progress in [0.25, 0.5, 0.75] {
+            XCTAssertEqual(appliedCurve.value(at: progress),
+                           StatusActionAnimationTiming.numberCurve.value(at: progress), accuracy: 0.00001)
+        }
+        XCTAssertEqual(label.layer.animation(forKey: "statusAction.numberFade")?.timingFunction, timing)
+    }
+
     func testUIKitCountMovesUpWhenIncreasingAndDownWhenDecreasing() throws {
         for (before, after, increasing) in [(Int64(9), Int64(10), true), (10, 9, false)] {
             let view = StatusActionsUIView()
@@ -129,11 +155,11 @@ final class StatusActionAnimationTests: XCTestCase {
             configure(view, actions: [animatedAction(count: before)])
             settle(milliseconds: 350)
             configure(view, actions: [animatedAction(liked: true, count: after)])
-            // Freeze the compositor so the assertion checks the entering digit's screen position.
+            // Inspect early travel as well as direction, so a weak or linear curve fails.
             for key in label.layer.animationKeys() ?? [] {
                 let animation = try XCTUnwrap(label.layer.animation(forKey: key)?.copy() as? CAAnimation)
                 animation.speed = 0
-                animation.timeOffset = animation.duration * 0.45
+                animation.timeOffset = animation.duration * 0.25
                 label.layer.add(animation, forKey: key)
             }
             settle()
@@ -143,6 +169,8 @@ final class StatusActionAnimationTests: XCTestCase {
             attachment.lifetime = .keepAlways
             add(attachment)
             let enteringY = try XCTUnwrap(actionNumberInkCenterY(moving, in: rect))
+            XCTAssertLessThan(abs(enteringY - restingY), Double(rect.height) * 0.25,
+                              "By one quarter of the duration, the count should be close to its final position")
             if increasing {
                 XCTAssertGreaterThan(enteringY, restingY + 0.5, "An increasing count must enter from below and move up")
             } else {

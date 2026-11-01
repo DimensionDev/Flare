@@ -469,7 +469,7 @@ struct ComposeScreen: View {
     private func accountPickerRow(user: UiProfile) -> some View {
         Label {
             VStack(alignment: .leading, spacing: 2) {
-                Text(user.handle.canonical)
+                Text(user.handle.display)
                 Text(user.key.host)
                     .font(.caption)
                     .foregroundStyle(.secondary)

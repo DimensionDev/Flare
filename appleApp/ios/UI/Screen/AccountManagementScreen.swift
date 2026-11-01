@@ -16,7 +16,7 @@ struct AccountManagementScreen: View {
             }
             ForEach(tabItems, id: \.account.accountKey) { account in
                 StateView(state: account.profile) { user in
-                    accountActions(for: account.account, accountName: user.handle.canonical) {
+                    accountActions(for: account.account, accountName: user.handle.display) {
                         UserCompatView(data: user) {
                             HStack {
                                 Image(systemName: activeAccountKey == user.key ? "checkmark.circle.fill" : "circle")

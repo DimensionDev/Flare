@@ -154,11 +154,11 @@
 	}
 
 	function displayName(profile: UiProfile): string {
-		return profile.name.innerText || profile.handle.canonical || profile.handle.raw;
+		return profile.name.innerText || profile.handle.display || profile.handle.raw;
 	}
 
 	function handleText(profile: UiProfile): string {
-		return profile.handle.canonical || profile.handle.raw;
+		return profile.handle.display || profile.handle.raw;
 	}
 
 	function initials(profile: UiProfile): string {

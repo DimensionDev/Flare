@@ -1,6 +1,8 @@
 package dev.dimension.flare.ui.model.mapper
 
+import app.bsky.actor.ProfileView
 import app.bsky.actor.ProfileViewBasic
+import app.bsky.actor.ProfileViewDetailed
 import app.bsky.embed.AspectRatio
 import app.bsky.embed.GalleryView
 import app.bsky.embed.GalleryViewImage
@@ -71,6 +73,30 @@ class BlueskyRenderTest {
 
         assertEquals("alice", profile.name.raw)
         assertEquals("alice.bsky.social", profile.handle.raw)
+        assertEquals("@alice.bsky.social", profile.handle.display)
+    }
+
+    @Test
+    fun allProfileVariantsUseDisplayOverrideAndPreserveCanonicalIdentity() {
+        val account = accountKey.copy(host = "pds.example")
+        val did = Did("did:plc:alice")
+        val handle = Handle("bsky.app")
+        val profiles =
+            listOf(
+                ProfileViewBasic(did = did, handle = handle).render(account),
+                ProfileView(did = did, handle = handle).render(account),
+                ProfileViewDetailed(did = did, handle = handle).render(account),
+                chat.bsky.actor
+                    .ProfileViewBasic(did = did, handle = handle)
+                    .render(account),
+            )
+
+        profiles.forEach { profile ->
+            assertEquals("@bsky.app", profile.handle.display)
+            assertEquals("@bsky.app@pds.example", profile.handle.canonical)
+            assertEquals("bsky.app", profile.handle.raw)
+            assertEquals("did:plc:alice", profile.key.id)
+        }
     }
 
     @Test

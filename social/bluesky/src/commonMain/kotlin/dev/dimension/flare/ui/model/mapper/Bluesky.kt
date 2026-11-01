@@ -820,7 +820,6 @@ private fun FeedViewPost.render(
             renderedPost.copy(
                 statusKey = message?.statusKey ?: renderedPost.statusKey,
                 user = repostUser,
-                authorSubtitleInternal = "@${repostUser.handle.normalizedRaw}",
                 createdAt = feedReason.value.indexedAt.toUi(),
                 images = persistentListOf(),
                 content = UiTranslatableText(original = uiRichTextOf(emptyList())),
@@ -911,7 +910,6 @@ internal fun PostView.render(
     return UiTimelineV2.Post(
         platformId = BLUESKY_PLATFORM_ID,
         user = user,
-        authorSubtitleInternal = "@${user.handle.normalizedRaw}",
         images = findMedias(this, downloadUrls),
         card = findCard(this),
         statusKey = statusKey,
@@ -1057,7 +1055,7 @@ internal fun PostView.render(
                                     userActionsMenu(
                                         accountKey = accountKey,
                                         userKey = user.key,
-                                        handle = user.handle.canonical,
+                                        handle = user.handle.display,
                                     ),
                                 )
                                 add(ActionMenu.Divider)
@@ -1120,6 +1118,7 @@ internal fun chat.bsky.actor.ProfileViewBasic.render(accountKey: MicroBlogKey): 
             UiHandle(
                 raw = handle.handle,
                 host = accountKey.host,
+                displayOverride = "@${handle.handle}",
             ),
         key = userKey,
         banner = null,
@@ -1158,6 +1157,7 @@ internal fun ProfileViewBasic.render(accountKey: MicroBlogKey): UiProfile {
             UiHandle(
                 raw = handle.handle,
                 host = accountKey.host,
+                displayOverride = "@${handle.handle}",
             ),
         key = userKey,
         banner = null,
@@ -1196,6 +1196,7 @@ internal fun ProfileView.render(accountKey: MicroBlogKey): UiProfile {
             UiHandle(
                 raw = handle.handle,
                 host = accountKey.host,
+                displayOverride = "@${handle.handle}",
             ),
         key = userKey,
         banner = null,
@@ -1234,6 +1235,7 @@ internal fun ProfileViewDetailed.render(accountKey: MicroBlogKey): UiProfile {
             UiHandle(
                 raw = handle.handle,
                 host = accountKey.host,
+                displayOverride = "@${handle.handle}",
             ),
         key = userKey,
         banner = banner?.uri.toUiImage(),
@@ -1502,7 +1504,6 @@ private fun render(
                 }
             UiTimelineV2.Post(
                 user = user,
-                authorSubtitleInternal = "@${user.handle.normalizedRaw}",
                 images =
                     record.value.embeds
                         .orEmpty()

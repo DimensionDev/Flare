@@ -114,7 +114,7 @@ public interface ProxySettingsState {
     public fun retry()
 
     public fun accountLabel(account: UiAccount): String =
-        accountProfiles[account.accountKey]?.let { "${it.name.innerText}, ${it.handle.canonical}" }
+        accountProfiles[account.accountKey]?.let { "${it.name.innerText}, ${it.handle.display}" }
             ?: "${account.platformDisplayName}, ${account.accountKey}"
 
     public fun select(

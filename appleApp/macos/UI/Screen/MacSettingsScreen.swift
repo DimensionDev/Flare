@@ -438,7 +438,7 @@ private struct MacAccountManagementSettingsPane: View {
                 presenter.state.setActiveAccount(accountKey: user.key)
             }
             .contextMenu {
-                accountMenu(item: item, accountName: user.handle.canonical)
+                accountMenu(item: item, accountName: user.handle.display)
             }
         } errorContent: { error in
             Group {

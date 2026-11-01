@@ -169,7 +169,7 @@ internal fun TabAddBottomSheet(
                                         overflow = TextOverflow.Ellipsis,
                                     )
                                     Text(
-                                        text = tab.profile.handle.canonical,
+                                        text = tab.profile.handle.display,
                                         style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.outline,
                                         maxLines = 1,

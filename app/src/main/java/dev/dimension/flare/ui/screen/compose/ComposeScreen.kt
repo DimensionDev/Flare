@@ -353,7 +353,7 @@ internal fun ComposeScreen(
                                 } else {
                                     stringResource(
                                         R.string.compose_select_accounts_current,
-                                        selectedProfiles.joinToString { it.handle.canonical },
+                                        selectedProfiles.joinToString { it.handle.display },
                                     )
                                 }
                             Box {
@@ -385,7 +385,7 @@ internal fun ComposeScreen(
                                         DropdownMenuItem(
                                             text = {
                                                 Column {
-                                                    Text(text = user.handle.canonical)
+                                                    Text(text = user.handle.display)
                                                     Text(
                                                         text = user.key.host,
                                                         style = MaterialTheme.typography.bodySmall,

@@ -275,7 +275,7 @@ struct MacComposeScreen: View {
                 .contentShape(Capsule())
             }
             .buttonStyle(.plain)
-            .help(selected.isEmpty ? String(localized: "deep_link_account_picker_title") : selected.map { $0.handle.canonical }.joined(separator: ", "))
+            .help(selected.isEmpty ? String(localized: "deep_link_account_picker_title") : selected.map { $0.handle.display }.joined(separator: ", "))
             .accessibilityLabel(
                 Text(
                     String(
@@ -284,7 +284,7 @@ struct MacComposeScreen: View {
                     )
                 )
             )
-            .accessibilityValue(Text(selected.map { $0.handle.canonical }.joined(separator: ", ")))
+            .accessibilityValue(Text(selected.map { $0.handle.display }.joined(separator: ", ")))
             .popover(isPresented: $showAccountPopover, arrowEdge: .top) {
                 MacComposeAccountPopover(
                     accounts: accounts,
@@ -690,7 +690,7 @@ private struct MacComposeAccountRow: View {
                 MacComposeAccountAvatar(user: account, size: 28)
 
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(account.handle.canonical)
+                    Text(account.handle.display)
                         .lineLimit(1)
                     Text(account.key.host)
                         .font(.caption)

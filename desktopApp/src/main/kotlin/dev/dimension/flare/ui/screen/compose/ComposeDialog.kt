@@ -348,7 +348,7 @@ fun ComposeDialog(
                                 } else {
                                     stringResource(
                                         Res.string.compose_select_accounts_current,
-                                        selectedProfiles.joinToString { it.handle.canonical },
+                                        selectedProfiles.joinToString { it.handle.display },
                                     )
                                 }
                             MenuFlyoutContainer(
@@ -362,7 +362,7 @@ fun ComposeDialog(
                                                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                                                 ) {
                                                     Column(modifier = Modifier.weight(1f)) {
-                                                        Text(text = data.handle.canonical)
+                                                        Text(text = data.handle.display)
                                                         Text(
                                                             text = data.key.host,
                                                             style = FluentTheme.typography.caption,

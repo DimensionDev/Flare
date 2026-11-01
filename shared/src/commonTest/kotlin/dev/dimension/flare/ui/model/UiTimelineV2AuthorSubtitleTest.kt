@@ -10,6 +10,41 @@ import kotlin.test.assertNotEquals
 
 class UiTimelineV2AuthorSubtitleTest {
     @Test
+    fun subtitleUsesAuthorDisplayAndRetainsPostOverrides() {
+        val user = createSampleUser().copy(handle = UiHandle("bsky.app", "bsky.social", displayOverride = "@bsky.app"))
+        val post = createSampleStatus(user)
+        val restored = assertIs<UiTimelineV2.Post>(post.encodeProtobuf<UiTimelineV2>().decodeProtobuf<UiTimelineV2>())
+
+        assertEquals("@bsky.app", restored.authorSubtitle)
+        assertEquals("@bsky.app", restored.user?.handle?.display)
+        assertEquals("@bsky.app@bsky.social", restored.user?.handle?.canonical)
+        assertEquals("发布于 北京", post.copy(authorSubtitleInternal = "发布于 北京").authorSubtitle)
+    }
+
+    @Test
+    fun displayChangesInvalidateUserRowsAndQuotedAuthors() {
+        val user = createSampleUser()
+        val post = createSampleStatus(user)
+        val updatedUser = user.copy(handle = user.handle.copy(displayOverride = "@display"))
+        val item = UiTimelineV2.TimelinePostItem(post)
+        val row =
+            UiTimelineV2.User(
+                value = user,
+                createdAt = post.createdAt,
+                statusKey = post.statusKey,
+                accountType = post.accountType,
+            )
+        val quote = item.copy(presentation = UiTimelineV2.PostPresentation(quotes = persistentListOf(post)))
+
+        assertNotEquals(row.renderHash, row.copy(value = updatedUser).renderHash)
+        assertNotEquals(item.renderHash, item.copy(post = post.copy(user = updatedUser)).renderHash)
+        assertNotEquals(
+            quote.renderHash,
+            quote.copy(presentation = quote.presentation.copy(quotes = persistentListOf(post.copy(user = updatedUser)))).renderHash,
+        )
+    }
+
+    @Test
     fun subtitleFallsBackToTheCurrentAuthorHandle() {
         val user = createSampleUser()
         val post = createSampleStatus(user)

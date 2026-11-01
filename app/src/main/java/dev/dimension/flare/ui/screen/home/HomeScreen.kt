@@ -369,7 +369,7 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                                             item.user.onSuccess {
                                                 RichText(it.name)
                                                 Text(
-                                                    it.handle.canonical,
+                                                    it.handle.display,
                                                     style = MaterialTheme.typography.bodySmall,
                                                 )
                                             }

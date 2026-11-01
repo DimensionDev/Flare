@@ -219,7 +219,7 @@ private fun UiListCard(
                             text =
                                 stringResource(
                                     Res.string.feeds_discover_feeds_created_by,
-                                    item.creator?.handle?.canonical ?: "Unknown",
+                                    item.creator?.handle?.display ?: "Unknown",
                                 ),
                             style = PlatformTheme.typography.caption,
                             color = PlatformTheme.colorScheme.caption,

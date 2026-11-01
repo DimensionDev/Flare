@@ -28,7 +28,7 @@ struct DMListScreen: View {
                                         RichText(text: user.name)
                                             .lineLimit(1)
                                         if (item.users.count == 1) {
-                                            Text(user.handle.canonical)
+                                            Text(user.handle.display)
                                                 .lineLimit(1)
                                                 .font(.caption)
                                                 .foregroundStyle(.secondary)

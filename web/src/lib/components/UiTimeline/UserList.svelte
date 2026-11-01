@@ -26,7 +26,7 @@
 			{#each userList.users as user (user.key.id)}
 				<section
 					class="user-list-card rounded-box border border-base-300"
-					aria-label={user.name.innerText || user.handle.canonical}
+					aria-label={user.name.innerText || user.handle.display}
 				>
 					<UserDisplay {user} variant="compact" />
 				</section>

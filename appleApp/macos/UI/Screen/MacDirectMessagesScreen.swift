@@ -212,7 +212,7 @@ private struct MacDMUserRow: View {
                 VStack(alignment: .leading, spacing: 2) {
                     RichText(text: user.name)
                         .lineLimit(1)
-                    Text(user.handle.canonical)
+                    Text(user.handle.display)
                         .font(.caption)
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
@@ -559,7 +559,7 @@ private struct MacDMConversationColumn: View {
         case .success(let success):
             let users = success.data.cast(UiProfile.self)
             if users.count == 1, let user = users.first {
-                return user.name.raw.isEmpty ? user.handle.canonical : user.name.raw
+                return user.name.raw.isEmpty ? user.handle.display : user.name.raw
             }
             return String(localized: "dm_conversation", bundle: .main)
         case .loading, .error:
@@ -871,7 +871,7 @@ private extension UiDMRoom {
     var dmTitle: String {
         if users.count == 1, let user = users.first {
             let name = user.name.raw
-            return name.isEmpty ? user.handle.canonical : name
+            return name.isEmpty ? user.handle.display : name
         }
         return String(localized: "direct_messages_title", bundle: .main)
     }

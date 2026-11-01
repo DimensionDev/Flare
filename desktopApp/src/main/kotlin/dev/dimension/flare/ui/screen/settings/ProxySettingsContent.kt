@@ -236,7 +236,7 @@ private fun ProxyPolicyRow(
             if (profile != null) RichText(profile.name, maxLines = 1) else Text(account?.platformDisplayName ?: title)
         },
         caption = {
-            if (account != null) Text(profile?.handle?.canonical ?: account.accountKey.toString(), maxLines = 1)
+            if (account != null) Text(profile?.handle?.display ?: account.accountKey.toString(), maxLines = 1)
         },
         trailing = {
             ComboBox(

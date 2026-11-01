@@ -120,7 +120,7 @@ internal fun DiscoverScreen(
                                                 contentDescription =
                                                     stringResource(
                                                         R.string.select_account_current,
-                                                        account.handle.canonical,
+                                                        account.handle.display,
                                                     ),
                                             )
                                         } else {
@@ -136,7 +136,7 @@ internal fun DiscoverScreen(
                                     ) {
                                         accounts.forEach { profile ->
                                             DropdownMenuItem(
-                                                text = { Text(profile.handle.canonical) },
+                                                text = { Text(profile.handle.display) },
                                                 leadingIcon = { AvatarComponent(data = profile.avatar, size = 18.dp) },
                                                 onClick = {
                                                     state.setAccount(profile)
@@ -212,7 +212,7 @@ internal fun DiscoverScreen(
                                                     state.setAccount(profile)
                                                 },
                                                 label = {
-                                                    Text(profile.handle.canonical)
+                                                    Text(profile.handle.display)
                                                 },
                                                 leadingIcon = {
                                                     AvatarComponent(

@@ -318,7 +318,7 @@ final class UserOnelineUIView: UIView, ManualLayoutMeasurable, TimelineHeightPro
     func configure(data: UiProfile, subtitle: String? = nil, trailing: UIView?, onClicked: (() -> Void)?) {
         avatar.set(media: data.avatar)
         name.text = data.name
-        handleLabel.text = subtitle ?? data.handle.canonical
+        handleLabel.text = subtitle ?? data.handle.display
         if trailingView !== trailing {
             trailingView?.removeFromSuperview()
             trailingView = trailing
@@ -332,7 +332,7 @@ final class UserOnelineUIView: UIView, ManualLayoutMeasurable, TimelineHeightPro
         }
         onTapped = onClicked
         avatar.isAccessibilityElement = showsAvatar && onClicked != nil
-        avatar.accessibilityLabel = openProfileAccessibilityLabel(handle: data.handle.canonical)
+        avatar.accessibilityLabel = openProfileAccessibilityLabel(handle: data.handle.display)
         invalidateIntrinsicContentSize()
         setNeedsLayout()
     }
@@ -472,7 +472,7 @@ final class UserCompatUIView: UIStackView {
     func configure(data: UiProfile, subtitle: String? = nil, trailing: UIView?, onClicked: (() -> Void)?) {
         avatar.set(media: data.avatar)
         name.text = data.name
-        handleLabel.text = subtitle ?? data.handle.canonical
+        handleLabel.text = subtitle ?? data.handle.display
         if let trailing = trailing {
             trailing.setContentHuggingPriority(.required, for: .horizontal)
             trailing.setContentCompressionResistancePriority(.required, for: .horizontal)
@@ -482,7 +482,7 @@ final class UserCompatUIView: UIStackView {
         }
         onTapped = onClicked
         avatar.isAccessibilityElement = onClicked != nil
-        avatar.accessibilityLabel = openProfileAccessibilityLabel(handle: data.handle.canonical)
+        avatar.accessibilityLabel = openProfileAccessibilityLabel(handle: data.handle.display)
     }
 
     @objc private func onTapFired() { onTapped?() }

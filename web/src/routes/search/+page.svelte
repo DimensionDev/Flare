@@ -228,7 +228,7 @@
 					<button
 						class="btn btn-ghost btn-square btn-sm rounded-box"
 						type="button"
-						aria-label={search.selectedAccount.handle.canonical}
+						aria-label={search.selectedAccount.handle.display}
 						onclick={() => {
 							showAccountMenu = !showAccountMenu;
 						}}
@@ -241,7 +241,7 @@
 								<li>
 									<button type="button" onclick={() => selectAccount(account)}>
 										<img class="menu-avatar" src={account.avatar?.url} alt="" />
-										<span>{account.handle.canonical}</span>
+										<span>{account.handle.display}</span>
 									</button>
 								</li>
 							{/each}
@@ -270,7 +270,7 @@
 						onclick={() => selectAccount(account)}
 					>
 						<img class="chip-avatar" src={account.avatar?.url} alt="" />
-						<span>{account.handle.canonical}</span>
+						<span>{account.handle.display}</span>
 					</button>
 				{/each}
 			</div>

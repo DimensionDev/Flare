@@ -361,7 +361,7 @@ private struct LinkOpenDefaultSelectedOptionLabel: View {
     var body: some View {
         if let account = option.account {
             StateView(state: account.profile) { user in
-                Text(user.handle.canonical)
+                Text(user.handle.display)
             } errorContent: { error in
                 Text(error.message ?? "Unknown error")
             } loadingContent: {
@@ -393,7 +393,7 @@ private struct LinkOpenDefaultAccountRow: View {
     var body: some View {
         StateView(state: account.profile) { user in
             Label {
-                Text(user.handle.canonical)
+                Text(user.handle.display)
             } icon: {
                 AvatarView(data: user.avatar)
             }

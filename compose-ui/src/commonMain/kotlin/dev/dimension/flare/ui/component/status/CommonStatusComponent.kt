@@ -237,7 +237,7 @@ public fun CommonStatusComponent(
                     contentDescription =
                         stringResource(
                             Res.string.profile_open_user,
-                            it.handle.canonical,
+                            it.handle.display,
                         ),
                     modifier =
                         Modifier.clickable {

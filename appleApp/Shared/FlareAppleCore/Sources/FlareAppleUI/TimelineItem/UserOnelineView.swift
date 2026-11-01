@@ -18,7 +18,7 @@ public struct UserOnelineView<TrailingContent: View>: View {
     ) {
         self.data = data
         self.showAvatar = showAvatar
-        self.subtitle = subtitle ?? data.handle.canonical
+        self.subtitle = subtitle ?? data.handle.display
         self.trailing = trailing
         self.onClicked = onClicked
     }
@@ -29,7 +29,7 @@ public struct UserOnelineView<TrailingContent: View>: View {
                 AvatarView(data: data.avatar)
                     .frame(width: 20, height: 20)
                     .accessibilityLabel(
-                        Text(verbatim: openProfileAccessibilityLabel(handle: data.handle.canonical))
+                        Text(verbatim: openProfileAccessibilityLabel(handle: data.handle.display))
                     )
                     .onTapGesture {
                         onClicked?()

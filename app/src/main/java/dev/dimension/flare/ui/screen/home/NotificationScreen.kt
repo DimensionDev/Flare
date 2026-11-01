@@ -129,7 +129,7 @@ internal fun NotificationScreen() {
                                     },
                                     text = {
                                         Text(
-                                            text = account.handle.canonical,
+                                            text = account.handle.display,
                                             maxLines = 1,
                                         )
                                     },

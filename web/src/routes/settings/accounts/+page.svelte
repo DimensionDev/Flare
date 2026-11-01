@@ -18,7 +18,7 @@
 	let pendingRemoval = $state<AccountsStateAccountItem | null>(null);
 
 	function profileNameText(user: UiProfile): string {
-		return user.name.innerText || user.handle.canonical || user.handle.raw;
+		return user.name.innerText || user.handle.display || user.handle.raw;
 	}
 
 	function accountTitle(item: AccountsStateAccountItem): string {
@@ -29,7 +29,7 @@
 
 	function accountDescription(item: AccountsStateAccountItem): string {
 		return item.profile.type === 'Success'
-			? item.profile.data.handle.canonical
+			? item.profile.data.handle.display
 			: accountKeyText(item.account.accountKey);
 	}
 

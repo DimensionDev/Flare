@@ -337,7 +337,7 @@ public sealed class UiTimelineV2 {
     ) : UiTimelineV2() {
         @WebExport
         val authorSubtitle: String
-            get() = authorSubtitleInternal ?: user?.handle?.canonical.orEmpty()
+            get() = authorSubtitleInternal ?: user?.handle?.display.orEmpty()
 
         @Transient
         override val stableItemKey: String = calculateStableItemKey()
@@ -607,6 +607,7 @@ private fun UiProfile.renderSummaryHash(): Int =
         .add(key)
         .add(handle.raw)
         .add(handle.host)
+        .add(handle.display)
         .add(avatar?.renderSummaryHash())
         .add(name.raw)
         .add(platformId)

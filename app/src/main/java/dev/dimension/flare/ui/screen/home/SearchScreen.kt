@@ -99,7 +99,7 @@ internal fun SearchScreen(
                                                 contentDescription =
                                                     stringResource(
                                                         R.string.select_account_current,
-                                                        account.handle.canonical,
+                                                        account.handle.display,
                                                     ),
                                             )
                                         }
@@ -110,7 +110,7 @@ internal fun SearchScreen(
                                             accounts.forEach { profile ->
                                                 DropdownMenuItem(
                                                     text = {
-                                                        Text(profile.handle.canonical)
+                                                        Text(profile.handle.display)
                                                     },
                                                     leadingIcon = {
                                                         AvatarComponent(
@@ -192,7 +192,7 @@ internal fun SearchScreen(
                                                     state.searchState.setAccount(profile)
                                                 },
                                                 label = {
-                                                    Text(profile.handle.canonical)
+                                                    Text(profile.handle.display)
                                                 },
                                                 leadingIcon = {
                                                     AvatarComponent(

@@ -163,7 +163,7 @@ public struct DiscoverContentScreen<AskAiOverlay: View>: View {
                                 }
                             })) {
                                 Label {
-                                    Text(account.handle.canonical)
+                                    Text(account.handle.display)
                                 } icon: {
                                     AvatarView(data: account.avatar)
                                 }
@@ -176,7 +176,7 @@ public struct DiscoverContentScreen<AskAiOverlay: View>: View {
                                     data: selectedAccount.avatar
                                 )
                                 .frame(width: 24, height: 24)
-                                Text(selectedAccount.handle.canonical)
+                                Text(selectedAccount.handle.display)
                                 Image(fontAwesome: .chevronDown)
                                     .font(.footnote)
                                     .foregroundStyle(.secondary)
@@ -239,7 +239,7 @@ public struct DiscoverContentScreen<AskAiOverlay: View>: View {
                         }
                     }
                     .buttonStyle(.plain)
-                    .help(presenter.state.selectedAccount?.handle.canonical ?? String(localized: "discover_title", bundle: FlareAppleUILocalization.bundle))
+                    .help(presenter.state.selectedAccount?.handle.display ?? String(localized: "discover_title", bundle: FlareAppleUILocalization.bundle))
                     .popover(isPresented: $isMacAccountPopoverPresented, arrowEdge: .top) {
                         MacDiscoverAccountPopover(
                             accounts: accounts,
@@ -390,7 +390,7 @@ private struct MacDiscoverAccountRow: View {
                 AvatarView(data: account.avatar)
                     .frame(width: 28, height: 28)
 
-                Text(account.handle.canonical)
+                Text(account.handle.display)
                     .lineLimit(1)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }

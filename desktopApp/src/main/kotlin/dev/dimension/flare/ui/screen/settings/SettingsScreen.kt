@@ -460,7 +460,7 @@ internal fun SettingsScreen(
                         caption = {
                             Text(
                                 text =
-                                    activeAccount?.handle?.canonical
+                                    activeAccount?.handle?.display
                                         ?: stringResource(Res.string.add_account),
                             )
                         },
@@ -553,7 +553,7 @@ internal fun SettingsScreen(
                                                                 },
                                                                 onClick = {
                                                                     pendingDeleteAccountKey = user.key
-                                                                    pendingDeleteAccountLabel = user.handle.canonical
+                                                                    pendingDeleteAccountLabel = user.handle.display
                                                                 },
                                                                 icon = {
                                                                     FAIcon(
@@ -3088,7 +3088,7 @@ private fun LinkOpenDefaultAccountOption(account: LinkOpenDefaultsPresenter.Acco
                 AvatarComponent(data = user.avatar, size = 24.dp)
                 Column {
                     RichText(text = user.name, maxLines = 1)
-                    Text(text = user.handle.canonical, maxLines = 1)
+                    Text(text = user.handle.display, maxLines = 1)
                 }
             }
         }.onLoading {

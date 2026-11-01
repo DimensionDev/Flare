@@ -184,7 +184,7 @@ public struct StatusView: View {
                         .frame(width: 44, height: 44)
                         .accessibilityLabel(
                             Text(
-                                verbatim: openProfileAccessibilityLabel(handle: user.handle.canonical)
+                                verbatim: openProfileAccessibilityLabel(handle: user.handle.display)
                             )
                         )
                         .onTapGesture {

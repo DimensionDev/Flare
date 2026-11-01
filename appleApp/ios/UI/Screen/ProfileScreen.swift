@@ -1526,7 +1526,7 @@ private struct ProfileHeaderAccessorySignature: Equatable {
                 "success",
                 String(describing: success.data.key),
                 success.data.name.raw,
-                success.data.handle.canonical,
+                success.data.handle.display,
                 success.data.avatar?.url ?? "",
                 success.data.banner?.url ?? "",
                 success.data.description_?.raw ?? "",

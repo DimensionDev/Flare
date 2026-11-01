@@ -105,7 +105,7 @@ internal fun NotificationScreen() {
                                         },
                                         text = {
                                             Text(
-                                                profile.handle.canonical,
+                                                profile.handle.display,
                                                 maxLines = 1,
                                                 modifier = Modifier.padding(start = 8.dp),
                                             )
@@ -145,7 +145,7 @@ internal fun NotificationScreen() {
                                             },
                                             text = {
                                                 Text(
-                                                    profile.handle.canonical,
+                                                    profile.handle.display,
                                                     maxLines = 1,
                                                     modifier = Modifier.padding(start = 8.dp),
                                                 )
@@ -187,7 +187,7 @@ internal fun NotificationScreen() {
                                         size = AvatarComponentDefaults.compatSize,
                                     )
                                     Text(
-                                        state.selectedAccount?.handle?.canonical
+                                        state.selectedAccount?.handle?.display
                                             ?: "Select Account",
                                         maxLines = 1,
                                         modifier = Modifier.padding(start = 8.dp),

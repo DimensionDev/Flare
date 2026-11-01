@@ -236,7 +236,7 @@ internal class StatusShareSession(
                         post.copy(
                             post =
                                 post.post.copy(
-                                    replyToHandle = post.post.replyToHandle ?: parent.user?.handle?.canonical,
+                                    replyToHandle = post.post.replyToHandle ?: parent.user?.handle?.display,
                                     references =
                                         (
                                             post.post.references +

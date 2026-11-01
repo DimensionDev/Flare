@@ -15,7 +15,7 @@ public struct UserCompatView<TrailingContent: View>: View {
         onClicked: (() -> Void)? = nil
     ) {
         self.data = data
-        self.subtitle = subtitle ?? data.handle.canonical
+        self.subtitle = subtitle ?? data.handle.display
         self.trailing = trailing
         self.onClicked = onClicked
     }
@@ -27,7 +27,7 @@ public struct UserCompatView<TrailingContent: View>: View {
                 .if(onClicked != nil) { view in
                     view
                         .accessibilityLabel(
-                            Text(verbatim: openProfileAccessibilityLabel(handle: data.handle.canonical))
+                            Text(verbatim: openProfileAccessibilityLabel(handle: data.handle.display))
                         )
                         .onTapGesture {
                             onClicked?()
@@ -45,7 +45,7 @@ public struct UserCompatView<TrailingContent: View>: View {
             .if(onClicked != nil) { view in
                 view
                     .accessibilityLabel(
-                        Text(verbatim: openProfileAccessibilityLabel(handle: data.handle.canonical))
+                        Text(verbatim: openProfileAccessibilityLabel(handle: data.handle.display))
                     )
                     .onTapGesture {
                         onClicked?()

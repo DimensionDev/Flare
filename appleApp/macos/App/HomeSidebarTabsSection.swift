@@ -505,7 +505,7 @@ struct HomeSidebarAddTabPopover: View {
                             }
                         } label: {
                             Label {
-                                Text(account.profile.handle.canonical)
+                                Text(account.profile.handle.display)
                             } icon: {
                                 AvatarView(
                                     data: account.profile.avatar

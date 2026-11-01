@@ -122,7 +122,7 @@
 								{/if}
 								<img class="account-avatar" src={account.profile.avatar?.url} alt="" />
 							</span>
-							<span class="account-handle">{account.profile.handle.canonical}</span>
+							<span class="account-handle">{account.profile.handle.display}</span>
 							{#if account.badge > 0}
 								<span class="badge badge-sm">{account.badge}</span>
 							{/if}

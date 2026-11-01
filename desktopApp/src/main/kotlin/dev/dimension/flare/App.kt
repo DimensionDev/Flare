@@ -192,7 +192,7 @@ internal fun WindowScope.FlareApp(backButtonState: NavigationBackButtonState) {
                                                             },
                                                             caption = {
                                                                 Text(
-                                                                    text = user.handle.canonical,
+                                                                    text = user.handle.display,
                                                                     maxLines = 1,
                                                                 )
                                                             },

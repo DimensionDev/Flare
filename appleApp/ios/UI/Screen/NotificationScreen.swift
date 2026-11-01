@@ -270,7 +270,7 @@ struct NotificationAccountsMenu: View {
                         }
                     )) {
                         Label {
-                            Text(item.profile.handle.canonical)
+                            Text(item.profile.handle.display)
                         } icon: {
                             AvatarView(data: item.profile.avatar)
                         }
@@ -286,7 +286,7 @@ struct NotificationAccountsMenu: View {
                         AvatarView(data: selectedAccount.avatar)
                             .frame(width: 24, height: 24)
                         VStack(alignment: .leading, spacing: 2) {
-                            Text(selectedAccount.handle.canonical)
+                            Text(selectedAccount.handle.display)
                                 .lineLimit(1)
                             if let unreadText = unreadText(for: totalUnreadCount) {
                                 Text(unreadText)

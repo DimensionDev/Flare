@@ -201,7 +201,7 @@ internal fun ProxySettingsContent(
                                 },
                                 supportingContent = {
                                     Text(
-                                        profile?.handle?.canonical ?: account.accountKey.toString(),
+                                        profile?.handle?.display ?: account.accountKey.toString(),
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis,
                                     )

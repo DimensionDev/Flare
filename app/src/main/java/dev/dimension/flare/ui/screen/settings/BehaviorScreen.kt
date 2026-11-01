@@ -294,7 +294,7 @@ private fun LinkOpenDefaultAccountOption(account: LinkOpenDefaultsPresenter.Acco
                 AvatarComponent(data = user.avatar, size = 24.dp)
                 Column {
                     RichText(text = user.name, maxLines = 1)
-                    Text(text = user.handle.canonical, maxLines = 1)
+                    Text(text = user.handle.display, maxLines = 1)
                 }
             }
         }.onLoading {

@@ -250,7 +250,7 @@ private struct MacAppCommands: Commands {
                         Button {
                             openMainWindow(route: .accountNotification(item.profile.key))
                         } label: {
-                            Text(verbatim: item.profile.handle.canonical)
+                            Text(verbatim: item.profile.handle.display)
                         }
                     }
                 }
@@ -383,7 +383,7 @@ private struct MacAppCommands: Commands {
 
     private func accountTitle(_ profile: UiProfile) -> String {
         let name = profile.name.raw.trimmingCharacters(in: .whitespacesAndNewlines)
-        return name.isEmpty ? profile.handle.canonical : "\(name) (\(profile.handle.canonical))"
+        return name.isEmpty ? profile.handle.display : "\(name) (\(profile.handle.display))"
     }
 }
 

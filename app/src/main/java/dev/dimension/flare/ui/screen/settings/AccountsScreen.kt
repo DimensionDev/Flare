@@ -174,7 +174,7 @@ internal fun AccountsScreen(
                         pendingDeleteAccountKey = account.accountKey
                         pendingDeleteAccountLabel =
                             when (val profile = data) {
-                                is UiState.Success -> profile.data.handle.canonical
+                                is UiState.Success -> profile.data.handle.display
                                 is UiState.Error, is UiState.Loading -> account.accountKey.toString()
                             }
                         swipeState.snapTo(SwipeToDismissBoxValue.Settled)
@@ -307,7 +307,7 @@ internal fun AccountsScreen(
                                                     pendingDeleteAccountKey = account.accountKey
                                                     pendingDeleteAccountLabel =
                                                         when (val profile = data) {
-                                                            is UiState.Success -> profile.data.handle.canonical
+                                                            is UiState.Success -> profile.data.handle.display
                                                             is UiState.Error, is UiState.Loading -> account.accountKey.toString()
                                                         }
                                                 },
@@ -391,7 +391,7 @@ fun AccountItem(
         RichText(text = it.name, maxLines = 1)
     },
     supportingContent: @Composable (UiProfile) -> Unit = {
-        Text(text = it.handle.canonical, maxLines = 1)
+        Text(text = it.handle.display, maxLines = 1)
     },
     avatarSize: Dp = AvatarComponentDefaults.size,
     colors: ListItemColors = ListItemDefaults.segmentedColors(),

@@ -315,7 +315,7 @@
     });
 
     function profileNameText(user: UiProfile): string {
-        return user.name.innerText || user.handle.canonical;
+        return user.name.innerText || user.handle.display;
     }
 
     function profileStats(user: UiProfile) {
@@ -608,7 +608,7 @@
                             />
                         </div>
                         <div class="profile-handle-row">
-                            <span>{displayProfile.handle.canonical}</span>
+                            <span>{displayProfile.handle.display}</span>
                             {#each displayProfile.mark as mark}
                                 <span
                                     class="profile-mark"

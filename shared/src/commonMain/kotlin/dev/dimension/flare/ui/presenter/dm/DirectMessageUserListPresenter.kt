@@ -90,6 +90,7 @@ public class DirectMessageUserListPresenter : PresenterBase<DirectMessageUserLis
             profile?.name?.raw,
             profile?.handle?.raw,
             profile?.handle?.canonical,
+            profile?.handle?.display,
             profile?.handleWithoutAt,
         ).any { value ->
             value.lowercase().contains(query)
@@ -106,6 +107,8 @@ public class DirectMessageUserListPresenter : PresenterBase<DirectMessageUserLis
                 append(user.avatar)
                 append("-")
                 append(user.handle.raw)
+                append("-")
+                append(user.handle.display)
             }
         }
 }

@@ -30,7 +30,7 @@
 				? timelineAppearanceState.data.avatarShape
 				: 'CIRCLE')
 	);
-	const handleText = $derived(user.handle.canonical || user.handle.raw);
+	const handleText = $derived(user.handle.display || user.handle.raw);
 	const labelText = $derived(user.name.innerText || handleText);
 	const userClickable = $derived(clickable && deepLink.canPerformClickEvent(user.clickEvent));
 

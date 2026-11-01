@@ -550,6 +550,8 @@ private final class ActionItemControl: UIButton, ManualLayoutMeasurable, Timelin
     private var verticalInset: CGFloat = 0
     private var onTap: (() -> Void)?
     private var animationState: StatusActionAnimationState?
+    private var outgoingIconView: UIImageView?
+    private var outgoingLabel: UILabel?
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -618,49 +620,36 @@ private final class ActionItemControl: UIButton, ManualLayoutMeasurable, Timelin
     ) {
         let reduceMotion = UIAccessibility.isReduceMotionEnabled
         let effects = animationState?.effects(from: self.animationState, isVisible: window != nil, reduceMotion: reduceMotion)
+        let iconEffect = effects?.icon ?? .none
+        let numberEffect = effects?.number ?? .none
         if animationState?.identity == nil || animationState?.identity != self.animationState?.identity || window == nil || reduceMotion || !isEnabled {
             removeContentAnimations()
+        } else {
+            if image == nil || (iconEffect == .none && animationState?.icon != self.animationState?.icon) {
+                removeIconAnimations()
+            }
+            if title == nil || (numberEffect == .none && label.text != title) {
+                removeNumberAnimations()
+            }
         }
-        if title == nil {
-            label.layer.removeAnimation(forKey: "transition")
-            label.layer.removeAnimation(forKey: "statusAction.numberFade")
+        if iconEffect != .none {
+            removeIconAnimations()
+            if let previousImage = iconView.image {
+                let outgoing = resolvedOutgoingIconView()
+                outgoing.image = previousImage
+                outgoing.tintColor = iconView.tintColor
+                outgoing.preferredSymbolConfiguration = iconView.preferredSymbolConfiguration
+            }
+        }
+        if numberEffect != .none {
+            removeNumberAnimations()
+            let outgoing = resolvedOutgoingLabel()
+            outgoing.text = label.text
+            outgoing.font = label.font
+            outgoing.textColor = label.textColor
+            outgoing.textAlignment = label.textAlignment
         }
         self.animationState = animationState
-        if effects?.icon == .pop {
-            iconView.layer.removeAnimation(forKey: "transition")
-            let spring = StatusActionAnimationTiming.iconSpring
-            let animation = CASpringAnimation(keyPath: "transform.scale")
-            animation.fromValue = StatusActionAnimationTiming.iconStartScale
-            animation.toValue = 1
-            animation.mass = spring.mass
-            animation.stiffness = spring.stiffness
-            animation.damping = spring.damping
-            animation.duration = spring.settlingDuration
-            animation.timingFunction = CAMediaTimingFunction(name: .linear)
-            iconView.layer.add(animation, forKey: "statusAction.pop")
-        } else if effects?.icon == .fade {
-            iconView.layer.removeAnimation(forKey: "statusAction.pop")
-            let animation = CATransition()
-            animation.type = .fade
-            animation.duration = StatusActionAnimationTiming.fadeDuration
-            animation.timingFunction = CAMediaTimingFunction(name: .easeOut)
-            iconView.layer.add(animation, forKey: "transition")
-        }
-        if let direction = effects?.number, direction != .none {
-            let animation = CATransition()
-            animation.type = .push
-            // CATransition's vertical subtypes run opposite to UIKit's screen coordinates.
-            animation.subtype = direction == .up ? .fromTop : .fromBottom
-            animation.duration = StatusActionAnimationTiming.numberDuration
-            animation.timingFunction = StatusActionAnimationTiming.numberTimingFunction
-            label.layer.add(animation, forKey: "transition")
-            let fade = CABasicAnimation(keyPath: "opacity")
-            fade.fromValue = 0.4
-            fade.toValue = 1
-            fade.duration = animation.duration
-            fade.timingFunction = animation.timingFunction
-            label.layer.add(fade, forKey: "statusAction.numberFade")
-        }
         self.minimumIconOnlySize = minimumIconOnlySize
         self.minimumTextWidth = minimumTextWidth
         self.iconSize = iconSize
@@ -687,6 +676,36 @@ private final class ActionItemControl: UIButton, ManualLayoutMeasurable, Timelin
 
         invalidateIntrinsicContentSize()
         setNeedsLayout()
+        if iconEffect != .none || numberEffect != .none {
+            layoutIfNeeded()
+        }
+        if iconEffect != .none {
+            if let outgoing = outgoingIconView, outgoing.image != nil {
+                if iconEffect == .pop {
+                    addSpring(to: outgoing.layer, keyPath: "transform.scale", from: 1, to: 0,
+                              spring: StatusActionAnimationTiming.fadeSpring, key: "statusAction.pop")
+                }
+                addSpring(to: outgoing.layer, keyPath: "opacity", from: 1, to: 0,
+                          spring: StatusActionAnimationTiming.fadeSpring, key: "statusAction.iconFade")
+            }
+            if iconEffect == .pop {
+                addSpring(to: iconView.layer, keyPath: "transform.scale", from: StatusActionAnimationTiming.iconStartScale, to: 1,
+                          spring: StatusActionAnimationTiming.iconSpring, key: "statusAction.pop")
+            }
+            addSpring(to: iconView.layer, keyPath: "opacity", from: 0, to: 1,
+                      spring: StatusActionAnimationTiming.fadeSpring, key: "statusAction.iconFade")
+        }
+        if numberEffect != .none, let outgoing = outgoingLabel {
+            let offset = Double(label.bounds.height) * (numberEffect == .up ? 1 : -1)
+            addSpring(to: label.layer, keyPath: "transform.translation.y", from: offset, to: 0,
+                      spring: StatusActionAnimationTiming.numberSpring, key: "statusAction.numberSlide")
+            addSpring(to: outgoing.layer, keyPath: "transform.translation.y", from: 0, to: -offset,
+                      spring: StatusActionAnimationTiming.numberSpring, key: "statusAction.numberSlide")
+            addSpring(to: label.layer, keyPath: "opacity", from: 0, to: 1,
+                      spring: StatusActionAnimationTiming.fadeSpring, key: "statusAction.numberFade")
+            addSpring(to: outgoing.layer, keyPath: "opacity", from: 1, to: 0,
+                      spring: StatusActionAnimationTiming.fadeSpring, key: "statusAction.numberFade")
+        }
     }
 
     func prepareForPoolRemoval() {
@@ -714,10 +733,62 @@ private final class ActionItemControl: UIButton, ManualLayoutMeasurable, Timelin
     }
 
     private func removeContentAnimations() {
+        removeIconAnimations()
+        removeNumberAnimations()
+    }
+
+    private func removeIconAnimations() {
         iconView.layer.removeAnimation(forKey: "statusAction.pop")
-        iconView.layer.removeAnimation(forKey: "transition")
-        label.layer.removeAnimation(forKey: "transition")
+        iconView.layer.removeAnimation(forKey: "statusAction.iconFade")
+        outgoingIconView?.layer.removeAnimation(forKey: "statusAction.pop")
+        outgoingIconView?.layer.removeAnimation(forKey: "statusAction.iconFade")
+        outgoingIconView?.image = nil
+    }
+
+    private func removeNumberAnimations() {
+        label.layer.removeAnimation(forKey: "statusAction.numberSlide")
         label.layer.removeAnimation(forKey: "statusAction.numberFade")
+        outgoingLabel?.layer.removeAnimation(forKey: "statusAction.numberSlide")
+        outgoingLabel?.layer.removeAnimation(forKey: "statusAction.numberFade")
+        outgoingLabel?.text = nil
+    }
+
+    private func resolvedOutgoingIconView() -> UIImageView {
+        if let outgoingIconView { return outgoingIconView }
+        let view = UIImageView()
+        view.contentMode = .center
+        view.alpha = 0
+        view.isUserInteractionEnabled = false
+        view.accessibilityElementsHidden = true
+        insertSubview(view, belowSubview: iconView)
+        outgoingIconView = view
+        return view
+    }
+
+    private func resolvedOutgoingLabel() -> UILabel {
+        if let outgoingLabel { return outgoingLabel }
+        let view = UILabel()
+        view.numberOfLines = 1
+        view.lineBreakMode = label.lineBreakMode
+        view.alpha = 0
+        view.isUserInteractionEnabled = false
+        view.accessibilityElementsHidden = true
+        insertSubview(view, belowSubview: label)
+        outgoingLabel = view
+        return view
+    }
+
+    private func addSpring(to layer: CALayer, keyPath: String, from: Double, to: Double, spring: Spring, key: String) {
+        let animation = CASpringAnimation(keyPath: keyPath)
+        animation.fromValue = from
+        animation.toValue = to
+        animation.mass = spring.mass
+        animation.stiffness = spring.stiffness
+        animation.damping = spring.damping
+        animation.duration = spring.settlingDuration
+        // The spring supplies the easing; its clock must remain linear.
+        animation.timingFunction = CAMediaTimingFunction(name: .linear)
+        layer.add(animation, forKey: key)
     }
 
     @objc private func onTapped() {
@@ -747,6 +818,12 @@ private final class ActionItemControl: UIButton, ManualLayoutMeasurable, Timelin
                 width: labelW,
                 height: labelSize.height
             )
+        }
+        outgoingIconView?.frame = iconView.frame
+        if let outgoingLabel {
+            var frame = label.frame
+            frame.size.width = max(frame.width, outgoingLabel.intrinsicContentSize.width)
+            outgoingLabel.frame = frame
         }
     }
 

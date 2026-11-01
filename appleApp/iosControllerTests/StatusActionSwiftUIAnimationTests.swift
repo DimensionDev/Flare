@@ -151,7 +151,7 @@ final class StatusActionSwiftUIAnimationTests: XCTestCase {
             fixture.update(actions: [animatedAction(count: before)])
             await fixture.settle(milliseconds: 350)
             fixture.update(actions: [animatedAction(liked: true, count: after)])
-            await fixture.settle(milliseconds: 110)
+            await fixture.settle(milliseconds: 100)
             attach(fixture, name: increasing ? "count-increasing" : "count-decreasing")
             let enteringY = try XCTUnwrap(actionNumberInkCenterY(fixture.image(), in: countRect))
             if increasing {
@@ -168,18 +168,48 @@ final class StatusActionSwiftUIAnimationTests: XCTestCase {
         defer { fixture.close() }
         await fixture.settle(milliseconds: 80)
         let expected = fixture.pixels()
-        let restingWidth = fixture.iconWidth()
+        let restingWidth = fixture.coloredIconWidth(in: fixture.image())
         fixture.update(actions: [animatedAction(count: 9)])
         await fixture.settle(milliseconds: 300)
         fixture.update(actions: target)
         var narrowest = restingWidth
-        for delay in [30, 40, 40] {
+        var widest = restingWidth
+        for delay in [20, 20, 20, 20, 20, 40, 40, 40, 40] {
             await fixture.settle(milliseconds: delay)
-            narrowest = min(narrowest, fixture.iconWidth())
+            let frame = fixture.image()
+            let enteringWidth = fixture.coloredIconWidth(in: frame)
+            narrowest = min(narrowest, enteringWidth)
+            widest = max(widest, enteringWidth)
         }
-        XCTAssertLessThan(narrowest, restingWidth, "The icon must actually scale, independently of the counter")
-        await fixture.settle(milliseconds: 300)
+        XCTAssertLessThan(Double(narrowest), Double(restingWidth) * 0.75, "The icon must visibly shrink before the Android-style scale-in")
+        XCTAssertGreaterThan(widest, restingWidth, "The selected icon must visibly overshoot, like Android")
+        await fixture.settle(milliseconds: 500)
         assertPixels(fixture.pixels(), expected)
+    }
+
+    func testCountOvershootsThenSettles() async throws {
+        let rect = CGRect(x: 268, y: 0, width: 12, height: 44)
+        for (before, after, increasing) in [(Int64(9), Int64(10), true), (10, 9, false)] {
+            let target: [ActionMenu] = [animatedAction(liked: true, count: after)]
+            let fixture = try Fixture(actions: target)
+            defer { fixture.close() }
+            await fixture.settle(milliseconds: 80)
+            let expected = fixture.pixels()
+            let restingY = try XCTUnwrap(actionNumberInkCenterY(fixture.image(), in: rect))
+            fixture.update(actions: [animatedAction(count: before)])
+            await fixture.settle(milliseconds: 800)
+            fixture.update(actions: target)
+            await fixture.settle(milliseconds: 230)
+            attach(fixture, name: increasing ? "count-up-rebound" : "count-down-rebound")
+            let reboundY = try XCTUnwrap(actionNumberInkCenterY(fixture.image(), in: rect))
+            if increasing {
+                XCTAssertLessThan(reboundY, restingY - 0.8, "An increasing count must overshoot above its resting position")
+            } else {
+                XCTAssertGreaterThan(reboundY, restingY + 0.8, "A decreasing count must overshoot below its resting position")
+            }
+            await fixture.settle(milliseconds: 650)
+            assertPixels(fixture.pixels(), expected, "The spring must settle to the exact count without a lingering offset")
+        }
     }
 
     func testPostReplacementCancelsCountTransitionWithTheSameTargetText() async throws {
@@ -339,8 +369,8 @@ final class StatusActionSwiftUIAnimationTests: XCTestCase {
             }
         }
 
-        func iconWidth() -> Int {
-            let image = image().cgImage!
+        func coloredIconWidth(in frame: UIImage) -> Int {
+            let image = frame.cgImage!
             let data = image.dataProvider!.data! as Data
             let bytesPerPixel = image.bitsPerPixel / 8
             var columns = Set<Int>()
@@ -348,7 +378,11 @@ final class StatusActionSwiftUIAnimationTests: XCTestCase {
             for y in 0..<image.height {
                 for x in 230..<267 {
                     let offset = y * image.bytesPerRow + x * bytesPerPixel
-                    if data[offset..<offset + 3].min()! < 200 { columns.insert(x) }
+                    let channels = data[offset..<offset + 3]
+                    let lowest = channels.min()!
+                    if lowest < 200 && Int(channels.max()!) - Int(lowest) > 12 {
+                        columns.insert(x)
+                    }
                 }
             }
             guard let first = columns.min(), let last = columns.max() else { return 0 }

@@ -1,22 +1,12 @@
 import KotlinSharedUI
 import SwiftUI
-import QuartzCore
 
 public enum StatusActionAnimationTiming {
-    public static let iconSpring = Spring.snappy(duration: 0.32)
-    public static let iconStartScale = 0.82
-    public static let fadeDuration = 0.15
-    public static let numberDuration = 0.32
-    private static let numberStartControlPoint = UnitPoint(x: 0.22, y: 1)
-    private static let numberEndControlPoint = UnitPoint(x: 0.36, y: 1)
-    public static let numberCurve = UnitCurve.bezier(
-        startControlPoint: numberStartControlPoint,
-        endControlPoint: numberEndControlPoint
-    )
-    public static let numberTimingFunction = CAMediaTimingFunction(
-        controlPoints: Float(numberStartControlPoint.x), Float(numberStartControlPoint.y),
-        Float(numberEndControlPoint.x), Float(numberEndControlPoint.y)
-    )
+    // Android uses stiffness 400 and damping ratio 0.5 for scale-in, and critical damping for fade/scale-out.
+    public static let iconSpring = Spring(mass: 1, stiffness: 400, damping: 20)
+    public static let iconStartScale = 0.0
+    public static let numberSpring = iconSpring
+    public static let fadeSpring = Spring(mass: 1, stiffness: 400, damping: 40)
 }
 
 public struct StatusActionAnimationState: Equatable {
@@ -59,7 +49,7 @@ public struct StatusActionAnimationState: Equatable {
     public init(identity: Identity?, item: ActionMenu.Item, showNumbers: Bool) {
         self.identity = identity
         icon = item.icon
-        color = item.color == .contentColor ? nil : item.color
+        color = item.color
         count = showNumbers ? item.count?.value : nil
         let countText = showNumbers ? item.count?.humanized : nil
         text = countText?.isEmpty == false ? countText : nil
@@ -71,7 +61,9 @@ public struct StatusActionAnimationState: Equatable {
               let identity, let previous, identity == previous.identity else {
             return Effects(icon: .none, number: .none)
         }
-        let iconEffect: IconEffect = icon != nil && color != previous.color
+        let color = self.color == .contentColor ? nil : self.color
+        let previousColor = previous.color == .contentColor ? nil : previous.color
+        let iconEffect: IconEffect = icon != nil && color != previousColor
             ? (color == nil ? .fade : .pop) : .none
         let numberEffect: NumberEffect
         if let count, let oldCount = previous.count, text != nil, previous.text != nil,

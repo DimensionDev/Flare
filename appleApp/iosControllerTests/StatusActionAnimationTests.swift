@@ -10,6 +10,12 @@ final class StatusActionAnimationTests: XCTestCase {
     func testOnlyChangesOfTheSameVisibleActionAnimate() {
         let before = state(liked: false, count: 1)
         let after = state(liked: true, count: 2)
+        XCTAssertEqual(before.color, .contentColor, "Snapshots must preserve the outgoing content's rendering color")
+        let implicitItem = ActionMenu.Item(updateKey: "like", icon: .like, text: nil, count: UiNumber(value: 1),
+                                           color: nil, clickEvent: ClickEventNoop.shared, actionFamily: .like, enabled: true)
+        let implicitDefault = StatusActionAnimationState(identity: before.identity, item: implicitItem, showNumbers: true)
+        XCTAssertEqual(before.effects(from: implicitDefault, isVisible: true, reduceMotion: false).icon, .none)
+        XCTAssertEqual(implicitDefault.effects(from: before, isVisible: true, reduceMotion: false).icon, .none)
         let selected = after.effects(from: before, isVisible: true, reduceMotion: false)
         XCTAssertEqual(selected.icon, .pop)
         XCTAssertEqual(selected.number, .up)
@@ -72,16 +78,75 @@ final class StatusActionAnimationTests: XCTestCase {
         XCTAssertEqual(pop.duration, StatusActionAnimationTiming.iconSpring.settlingDuration)
         XCTAssertEqual(label.text, "2")
         XCTAssertEqual((view.subviews.first as? UIButton)?.accessibilityValue, "2")
-        let transition = try XCTUnwrap(label.layer.animation(forKey: "transition") as? CATransition)
-        XCTAssertEqual(transition.subtype, .fromTop)
+        let slide = try XCTUnwrap(label.layer.animation(forKey: "statusAction.numberSlide") as? CASpringAnimation)
+        XCTAssertGreaterThan(try XCTUnwrap(slide.fromValue as? Double), 0)
+        XCTAssertEqual(slide.toValue as? Double, 0)
         pop.setValue("original", forKey: "testMarker")
         icon.layer.add(pop, forKey: "statusAction.pop")
         configure(view, actions: [animatedAction(liked: true, count: 2)])
         XCTAssertEqual(icon.layer.animation(forKey: "statusAction.pop")?.value(forKey: "testMarker") as? String, "original")
         configure(view, actions: [animatedAction()])
         XCTAssertNil(icon.layer.animation(forKey: "statusAction.pop"))
-        XCTAssertNotNil(icon.layer.animation(forKey: "transition"))
-        XCTAssertEqual((label.layer.animation(forKey: "transition") as? CATransition)?.subtype, .fromBottom)
+        XCTAssertNotNil(icon.layer.animation(forKey: "statusAction.iconFade"))
+        let rollback = try XCTUnwrap(label.layer.animation(forKey: "statusAction.numberSlide") as? CASpringAnimation)
+        XCTAssertLessThan(try XCTUnwrap(rollback.fromValue as? Double), 0)
+    }
+
+    func testUIKitIconUsesAndroidEnterAndExitMotion() throws {
+        let view = StatusActionsUIView()
+        configure(view, actions: [animatedAction(count: 9)])
+        let window = try show(view)
+        defer { window.isHidden = true; window.rootViewController = nil }
+        configure(view, actions: [animatedAction(liked: true, count: 9)])
+        let (icon, _) = try content(view)
+        let scale = try XCTUnwrap(icon.layer.animation(forKey: "statusAction.pop") as? CASpringAnimation)
+        XCTAssertEqual(scale.fromValue as? Double, 0)
+        XCTAssertEqual(scale.stiffness, 400, accuracy: 0.0001)
+        XCTAssertEqual(scale.damping, 20, accuracy: 0.0001)
+        let fade = try XCTUnwrap(icon.layer.animation(forKey: "statusAction.iconFade") as? CASpringAnimation)
+        XCTAssertEqual(fade.fromValue as? Double, 0)
+        XCTAssertEqual(fade.toValue as? Double, 1)
+        let images = try XCTUnwrap(view.subviews.first as? UIButton).subviews.compactMap { $0 as? UIImageView }
+        XCTAssertEqual(images.count, 2, "The previous icon must shrink and fade while the new icon enters")
+        let outgoing = try XCTUnwrap(images.first)
+        XCTAssertNotNil(outgoing.layer.animation(forKey: "statusAction.pop"))
+        XCTAssertNotNil(outgoing.layer.animation(forKey: "statusAction.iconFade"))
+    }
+
+    func testUIKitCountOvershootsBeforeSettling() throws {
+        for (before, after, increasing) in [(Int64(9), Int64(10), true), (10, 9, false)] {
+            let view = StatusActionsUIView()
+            view.backgroundColor = .white
+            configure(view, actions: [animatedAction(liked: true, count: after)])
+            let window = try show(view)
+            defer { window.isHidden = true; window.rootViewController = nil }
+            window.overrideUserInterfaceStyle = .light
+            settle()
+            let (_, label) = try content(view)
+            let rect = label.convert(label.bounds, to: view)
+            let restingY = try XCTUnwrap(actionNumberInkCenterY(image(view), in: rect))
+            configure(view, actions: [animatedAction(count: before)])
+            settle(milliseconds: 700)
+            configure(view, actions: [animatedAction(liked: true, count: after)])
+            for key in label.layer.animationKeys() ?? [] {
+                let animation = try XCTUnwrap(label.layer.animation(forKey: key)?.copy() as? CAAnimation)
+                animation.speed = 0
+                animation.timeOffset = 0.18
+                label.layer.add(animation, forKey: key)
+            }
+            settle()
+            let moving = image(view)
+            let attachment = XCTAttachment(image: moving)
+            attachment.name = increasing ? "uikit-count-up-rebound" : "uikit-count-down-rebound"
+            attachment.lifetime = .keepAlways
+            add(attachment)
+            let reboundY = try XCTUnwrap(actionNumberInkCenterY(moving, in: rect))
+            if increasing {
+                XCTAssertLessThan(reboundY, restingY - 0.8, "An increasing count must overshoot above its resting position")
+            } else {
+                XCTAssertGreaterThan(reboundY, restingY + 0.8, "A decreasing count must overshoot below its resting position")
+            }
+        }
     }
 
     func testUIKitReuseReorderingAndRemovalClearRunningAnimations() throws {
@@ -89,54 +154,59 @@ final class StatusActionAnimationTests: XCTestCase {
         configure(view, actions: [animatedAction(), animatedAction(key: "other", family: .bookmark)])
         let window = try show(view)
         defer { window.isHidden = true; window.rootViewController = nil }
+        let button = try XCTUnwrap(view.subviews.first as? UIButton)
+        XCTAssertEqual(button.subviews.compactMap { $0 as? UIImageView }.count, 1)
+        XCTAssertEqual(button.subviews.compactMap { $0 as? UILabel }.count, 1)
         configure(view, actions: [animatedAction(liked: true, count: 2), animatedAction(key: "other", family: .bookmark)])
-        let (icon, label) = try content(view)
+        let (icon, _) = try content(view)
+        let images = button.subviews.compactMap { $0 as? UIImageView }
+        let labels = button.subviews.compactMap { $0 as? UILabel }
+        XCTAssertEqual(images.count, 2)
+        XCTAssertEqual(labels.count, 2)
+        func assertCleared(file: StaticString = #filePath, line: UInt = #line) {
+            for content in button.subviews {
+                XCTAssertNil(content.layer.animationKeys(), file: file, line: line)
+            }
+            XCTAssertNil(images.first?.image, file: file, line: line)
+            XCTAssertNil(labels.first?.text, file: file, line: line)
+        }
         XCTAssertNotNil(icon.layer.animation(forKey: "statusAction.pop"))
         configure(view, actions: [animatedAction(key: "other", family: .bookmark), animatedAction(liked: true, count: 2)])
-        XCTAssertNil(icon.layer.animationKeys())
-        XCTAssertNil(label.layer.animationKeys())
+        assertCleared()
         configure(view, actions: [animatedAction(count: 50)], post: "another")
-        XCTAssertNil(icon.layer.animationKeys())
-        XCTAssertNil(label.layer.animationKeys())
+        assertCleared()
         configure(view, actions: [animatedAction(liked: true, count: 51)], post: "another")
         XCTAssertNotNil(icon.layer.animation(forKey: "statusAction.pop"))
         view.removeFromSuperview()
-        XCTAssertNil(icon.layer.animationKeys())
-        XCTAssertNil(label.layer.animationKeys())
+        assertCleared()
         configure(view, actions: [animatedAction(count: 52)], post: "another")
         XCTAssertNil(icon.layer.animationKeys())
         window.rootViewController?.view.addSubview(view)
         configure(view, actions: [animatedAction(liked: true, count: 53)], post: "another")
         XCTAssertNotNil(icon.layer.animation(forKey: "statusAction.pop"))
+        XCTAssertEqual(button.subviews.compactMap { $0 as? UIImageView }.count, 2)
+        XCTAssertEqual(button.subviews.compactMap { $0 as? UILabel }.count, 2)
         view.prepareForPoolRemoval()
-        XCTAssertNil(icon.layer.animationKeys())
-        XCTAssertNil(label.layer.animationKeys())
+        assertCleared()
     }
 
-    func testNumberDecelerationMatchesBothRenderers() throws {
+    func testNumberSpringOvershootsAndMatchesBothRenderers() throws {
         let view = StatusActionsUIView()
         configure(view, actions: [animatedAction()])
         let window = try show(view)
         defer { window.isHidden = true; window.rootViewController = nil }
         configure(view, actions: [animatedAction(count: 2)])
         let (_, label) = try content(view)
-        let animation = try XCTUnwrap(label.layer.animation(forKey: "transition"))
-        let timing = try XCTUnwrap(animation.timingFunction)
-        var start = [Float](repeating: 0, count: 2)
-        var end = [Float](repeating: 0, count: 2)
-        timing.getControlPoint(at: 1, values: &start)
-        timing.getControlPoint(at: 2, values: &end)
-        let appliedCurve = UnitCurve.bezier(
-            startControlPoint: UnitPoint(x: Double(start[0]), y: Double(start[1])),
-            endControlPoint: UnitPoint(x: Double(end[0]), y: Double(end[1]))
-        )
-        XCTAssertGreaterThan(appliedCurve.value(at: 0.25), 0.7)
-        XCTAssertGreaterThan(appliedCurve.value(at: 0.5), 0.9)
-        for progress in [0.25, 0.5, 0.75] {
-            XCTAssertEqual(appliedCurve.value(at: progress),
-                           StatusActionAnimationTiming.numberCurve.value(at: progress), accuracy: 0.00001)
-        }
-        XCTAssertEqual(label.layer.animation(forKey: "statusAction.numberFade")?.timingFunction, timing)
+        let slide = try XCTUnwrap(label.layer.animation(forKey: "statusAction.numberSlide") as? CASpringAnimation)
+        let spring = StatusActionAnimationTiming.numberSpring
+        XCTAssertEqual(slide.keyPath, "transform.translation.y")
+        XCTAssertEqual(slide.mass, spring.mass)
+        XCTAssertEqual(slide.stiffness, spring.stiffness)
+        XCTAssertEqual(slide.damping, spring.damping)
+        XCTAssertGreaterThan(spring.value(target: 1.0, time: 0.18), 1.1)
+        XCTAssertEqual(spring.value(target: 1.0, time: 0.8), 1, accuracy: 0.01)
+        let fade = try XCTUnwrap(label.layer.animation(forKey: "statusAction.numberFade") as? CASpringAnimation)
+        XCTAssertGreaterThan(fade.damping, slide.damping, "Opacity must settle without bouncing the old text back in")
     }
 
     func testUIKitCountMovesUpWhenIncreasingAndDownWhenDecreasing() throws {
@@ -155,11 +225,11 @@ final class StatusActionAnimationTests: XCTestCase {
             configure(view, actions: [animatedAction(count: before)])
             settle(milliseconds: 350)
             configure(view, actions: [animatedAction(liked: true, count: after)])
-            // Inspect early travel as well as direction, so a weak or linear curve fails.
+            // Sample before the spring reaches its first overshoot.
             for key in label.layer.animationKeys() ?? [] {
                 let animation = try XCTUnwrap(label.layer.animation(forKey: key)?.copy() as? CAAnimation)
                 animation.speed = 0
-                animation.timeOffset = animation.duration * 0.25
+                animation.timeOffset = 0.10
                 label.layer.add(animation, forKey: key)
             }
             settle()
@@ -169,8 +239,6 @@ final class StatusActionAnimationTests: XCTestCase {
             attachment.lifetime = .keepAlways
             add(attachment)
             let enteringY = try XCTUnwrap(actionNumberInkCenterY(moving, in: rect))
-            XCTAssertLessThan(abs(enteringY - restingY), Double(rect.height) * 0.25,
-                              "By one quarter of the duration, the count should be close to its final position")
             if increasing {
                 XCTAssertGreaterThan(enteringY, restingY + 0.5, "An increasing count must enter from below and move up")
             } else {
@@ -191,7 +259,7 @@ final class StatusActionAnimationTests: XCTestCase {
         let height = view.timelineHeight(for: 320)
         configure(view, actions: [group(true, count: 10)])
         XCTAssertNotNil(icon.layer.animation(forKey: "statusAction.pop"))
-        XCTAssertNotNil(label.layer.animation(forKey: "transition"))
+        XCTAssertNotNil(label.layer.animation(forKey: "statusAction.numberSlide"))
         XCTAssertEqual(label.text, "10")
         XCTAssertTrue(try XCTUnwrap(view.subviews.first as? UIButton).showsMenuAsPrimaryAction)
         XCTAssertEqual(view.timelineHeight(for: 320), height)
@@ -213,8 +281,8 @@ final class StatusActionAnimationTests: XCTestCase {
 
     private func content(_ view: StatusActionsUIView) throws -> (UIImageView, UILabel) {
         let button = try XCTUnwrap(view.subviews.first as? UIButton)
-        return (try XCTUnwrap(button.subviews.compactMap { $0 as? UIImageView }.first),
-                try XCTUnwrap(button.subviews.compactMap { $0 as? UILabel }.first))
+        return (try XCTUnwrap(button.subviews.compactMap { $0 as? UIImageView }.last),
+                try XCTUnwrap(button.subviews.compactMap { $0 as? UILabel }.last))
     }
 
     private func settle(milliseconds: Int = 80) {
@@ -263,7 +331,7 @@ func actionNumberInkCenterY(_ image: UIImage, in rect: CGRect) -> Double? {
             let channels = bytes[offset..<offset + 3]
             let lowest = channels.min()!
             let range = Int(channels.max()!) - Int(lowest)
-            guard lowest < 230, range > 40 else { continue }
+            guard lowest < 250, range > 12 else { continue }
             let ink = Double(255 - lowest)
             weight += ink
             weightedY += Double(y) * ink

@@ -232,9 +232,9 @@ public struct StatusActionView: View {
                         }
                     }
                     .statusActionContentPadding(isExpanded: true, fontSize: fontSize)
+                    .optionalForegroundStyle(group.displayItem.color?.swiftColor)
                     #endif
                 }
-                .optionalForegroundStyle(group.displayItem.color?.swiftColor)
                 .buttonStyle(.plain)
                 .accessibilityLabel(
                     Text(
@@ -313,7 +313,6 @@ public struct StatusActionItemView: View {
 
     public var body: some View {
         actionControl
-            .optionalForegroundStyle(data.color?.swiftColor)
             .buttonStyle(.plain)
             .accessibilityLabel(
                 Text(
@@ -402,6 +401,7 @@ public struct StatusActionItemView: View {
             }
         }
         .statusActionContentPadding(isExpanded: !useText, fontSize: fontSize)
+        .optionalForegroundStyle(data.color?.swiftColor)
     }
 
     #if os(macOS)
@@ -457,6 +457,7 @@ private struct StatusActionAnimatedLabel: View {
         let animateNumber = activeMotion.map { $0.effects.number != .none } ?? false
         HStack(spacing: 2) {
             StatusActionIcon(icon: state.icon)
+                .optionalForegroundStyle(state.color?.swiftColor)
                 .opacity(animateIcon ? 0 : 1)
                 .transaction { $0.animation = nil; $0.disablesAnimations = true }
                 .overlay {
@@ -473,6 +474,7 @@ private struct StatusActionAnimatedLabel: View {
                 Text(text)
                     .lineLimit(1)
                     .truncationMode(.tail)
+                    .optionalForegroundStyle(state.color?.swiftColor)
                     .opacity(animateNumber ? 0 : 1)
                     .transaction { $0.animation = nil; $0.disablesAnimations = true }
                     .overlay(alignment: .leading) {
@@ -483,12 +485,10 @@ private struct StatusActionAnimatedLabel: View {
                                 .allowsHitTesting(false)
                         }
                     }
-                    .clipped()
                     .frame(minWidth: isFixedWidth && !isStretched ? fontSize * 2.5 : nil, alignment: .leading)
             }
         }
         .frame(maxWidth: isStretched ? .infinity : nil, alignment: .leading)
-        .optionalForegroundStyle(state.color?.swiftColor)
         .onAppear {
             resetAnimations()
             isVisible = true
@@ -528,36 +528,45 @@ private struct StatusActionIconMotion: View {
     @State private var trigger = 0
 
     var body: some View {
+        let enteringScale = motion.effects.icon == .pop ? StatusActionAnimationTiming.iconStartScale : 1
         ZStack {
-            if motion.effects.icon == .pop {
-                StatusActionIcon(icon: motion.target.icon)
-                    .keyframeAnimator(initialValue: StatusActionAnimationTiming.iconStartScale, trigger: trigger) { content, scale in
-                        content.scaleEffect(scale)
-                    } keyframes: { _ in
-                        MoveKeyframe(StatusActionAnimationTiming.iconStartScale)
+            StatusActionIcon(icon: motion.previous.icon)
+                .optionalForegroundStyle(motion.previous.color?.swiftColor)
+                .keyframeAnimator(initialValue: StatusActionMotionValues(progress: 1, opacity: 1), trigger: trigger) { content, value in
+                    content.scaleEffect(value.progress).opacity(value.opacity)
+                } keyframes: { _ in
+                    KeyframeTrack(\.progress) {
+                        MoveKeyframe(1)
+                        SpringKeyframe(motion.effects.icon == .pop ? 0 : 1, spring: StatusActionAnimationTiming.fadeSpring)
+                    }
+                    KeyframeTrack(\.opacity) {
+                        MoveKeyframe(1)
+                        SpringKeyframe(0, spring: StatusActionAnimationTiming.fadeSpring)
+                    }
+                }
+            StatusActionIcon(icon: motion.target.icon)
+                .optionalForegroundStyle(motion.target.color?.swiftColor)
+                .keyframeAnimator(initialValue: StatusActionMotionValues(progress: enteringScale, opacity: 0), trigger: trigger) { content, value in
+                    content.scaleEffect(value.progress).opacity(value.opacity)
+                } keyframes: { _ in
+                    KeyframeTrack(\.progress) {
+                        MoveKeyframe(enteringScale)
                         SpringKeyframe(1, spring: StatusActionAnimationTiming.iconSpring)
                     }
-            } else {
-                StatusActionIcon(icon: motion.previous.icon)
-                    .optionalForegroundStyle(motion.previous.color?.swiftColor)
-                    .keyframeAnimator(initialValue: 1.0, trigger: trigger) { content, opacity in
-                        content.opacity(opacity)
-                    } keyframes: { _ in
-                        MoveKeyframe(1)
-                        LinearKeyframe(0, duration: StatusActionAnimationTiming.fadeDuration, timingCurve: .easeOut)
-                    }
-                StatusActionIcon(icon: motion.target.icon)
-                    .keyframeAnimator(initialValue: 0.0, trigger: trigger) { content, opacity in
-                        content.opacity(opacity)
-                    } keyframes: { _ in
+                    KeyframeTrack(\.opacity) {
                         MoveKeyframe(0)
-                        LinearKeyframe(1, duration: StatusActionAnimationTiming.fadeDuration, timingCurve: .easeOut)
+                        SpringKeyframe(1, spring: StatusActionAnimationTiming.fadeSpring)
                     }
-            }
+                }
         }
         .onAppear { trigger += 1 }
         .onChange(of: motion.eventID) { _, _ in trigger += 1 }
     }
+}
+
+private struct StatusActionMotionValues {
+    var progress: Double
+    var opacity: Double
 }
 
 private struct StatusActionNumberMotion: View {
@@ -571,27 +580,40 @@ private struct StatusActionNumberMotion: View {
                 Text(previous)
                     .lineLimit(1)
                     .optionalForegroundStyle(motion.previous.color?.swiftColor)
-                    .keyframeAnimator(initialValue: 0.0, trigger: trigger) { content, progress in
+                    .keyframeAnimator(initialValue: StatusActionMotionValues(progress: 0, opacity: 1), trigger: trigger) { content, value in
                         content.visualEffect { effect, geometry in
-                            effect.offset(y: geometry.size.height * direction * CGFloat(progress))
+                            effect.offset(y: geometry.size.height * direction * CGFloat(value.progress))
                         }
-                        .opacity(1 - progress)
+                        .opacity(value.opacity)
                     } keyframes: { _ in
-                        MoveKeyframe(0)
-                        LinearKeyframe(1, duration: StatusActionAnimationTiming.numberDuration, timingCurve: StatusActionAnimationTiming.numberCurve)
+                        KeyframeTrack(\.progress) {
+                            MoveKeyframe(0)
+                            SpringKeyframe(1, spring: StatusActionAnimationTiming.numberSpring)
+                        }
+                        KeyframeTrack(\.opacity) {
+                            MoveKeyframe(1)
+                            SpringKeyframe(0, spring: StatusActionAnimationTiming.fadeSpring)
+                        }
                     }
             }
             if let target = motion.target.text {
                 Text(target)
                     .lineLimit(1)
-                    .keyframeAnimator(initialValue: 0.0, trigger: trigger) { content, progress in
+                    .optionalForegroundStyle(motion.target.color?.swiftColor)
+                    .keyframeAnimator(initialValue: StatusActionMotionValues(progress: 0, opacity: 0), trigger: trigger) { content, value in
                         content.visualEffect { effect, geometry in
-                            effect.offset(y: -geometry.size.height * direction * CGFloat(1 - progress))
+                            effect.offset(y: -geometry.size.height * direction * CGFloat(1 - value.progress))
                         }
-                        .opacity(progress)
+                        .opacity(value.opacity)
                     } keyframes: { _ in
-                        MoveKeyframe(0)
-                        LinearKeyframe(1, duration: StatusActionAnimationTiming.numberDuration, timingCurve: StatusActionAnimationTiming.numberCurve)
+                        KeyframeTrack(\.progress) {
+                            MoveKeyframe(0)
+                            SpringKeyframe(1, spring: StatusActionAnimationTiming.numberSpring)
+                        }
+                        KeyframeTrack(\.opacity) {
+                            MoveKeyframe(0)
+                            SpringKeyframe(1, spring: StatusActionAnimationTiming.fadeSpring)
+                        }
                     }
             }
         }

@@ -88,6 +88,7 @@ kotlin {
             }
         }
         val androidDeviceTest by getting {
+            kotlin.srcDir("src/androidJvmTest/kotlin")
             dependencies {
                 implementation(libs.androidx.test.ext.junit)
                 implementation(libs.ui.test.junit4)

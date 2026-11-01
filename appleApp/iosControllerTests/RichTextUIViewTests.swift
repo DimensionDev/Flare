@@ -6,6 +6,32 @@ import FlareAppleUI
 
 @MainActor
 final class RichTextUIViewTests: XCTestCase {
+    func testMentionLinkKeepsTheViewerAndRemoteDomainInTheNativeProfileRoute() throws {
+        let viewer = AccountType.Specific(accountKey: MicroBlogKey(id: "viewer", host: "home.example"))
+        for host in ["home.example", "remote.example", "alias.example"] {
+            let route = DeeplinkRoute.ProfileUserNameWithHost(accountType: viewer, userName: "bob", host: host)
+            let style = RenderTextStyle(link: route.toUri(), bold: false, italic: false, strikethrough: false,
+                                        monospace: false, code: false, underline: false, small: false, time: false, imageLink: nil)
+            let text = UiRichText(renderRuns: [RenderContent.Text(runs: [RenderRun.Text(text: "@bob", style: style)],
+                                                                block: RenderBlockStyle())],
+                                  isRtl: false, raw: "@bob", innerText: "@bob", imageUrls: [])
+            let view = RichTextUIView()
+            view.configure(text: text, lineLimit: nil, isTextSelectionEnabled: false, onOpenURL: nil)
+            view.prepareForFitting(width: 340)
+            let renderer = try XCTUnwrap(textViews(in: view).first as? UITextView)
+            let link = try XCTUnwrap(renderer.attributedText.attribute(.link, at: 0, effectiveRange: nil) as? URL)
+            let destination = try XCTUnwrap(Route.fromDeepLink(url: link.absoluteString))
+            guard case let .profileUserNameWithHost(accountType, userName, domain) = destination else {
+                return XCTFail("A rendered mention must open the native profile lookup route")
+            }
+            let account = try XCTUnwrap(accountType as? AccountType.Specific)
+            XCTAssertEqual(account.accountKey.id, "viewer")
+            XCTAssertEqual(account.accountKey.host, "home.example")
+            XCTAssertEqual(userName, "bob")
+            XCTAssertEqual(domain, host)
+        }
+    }
+
     func testGrowingAndClippingAPreviewChoosesTheRendererForItsVisibleAttributes() throws {
         let plain = RenderTextStyle(link: nil, bold: false, italic: false, strikethrough: false,
                                     monospace: false, code: false, underline: false, small: false, time: false, imageLink: nil)

@@ -1,18 +1,21 @@
 package dev.dimension.flare.ui.model.mapper
 
-import dev.dimension.flare.common.JSON
+import com.fleeksoft.ksoup.Ksoup
 import dev.dimension.flare.data.datasource.microblog.ComposeType
 import dev.dimension.flare.data.network.mastodon.api.model.Account
 import dev.dimension.flare.data.network.mastodon.api.model.Mention
 import dev.dimension.flare.data.network.mastodon.api.model.Status
 import dev.dimension.flare.data.platform.MastodonPlatformSpec
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.ComposeInitialTextContext
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiHandle
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.UiTranslatableText
+import dev.dimension.flare.ui.render.toUi
+import dev.dimension.flare.ui.route.DeeplinkRoute
+import dev.dimension.flare.ui.route.toUri
 import kotlinx.collections.immutable.persistentListOf
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.jsonObject
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.plugin.module.dsl.modules
@@ -73,8 +76,8 @@ class MastodonReplyInitialTextTest {
     @Test
     fun oldCachedPostWaitsForParticipantMetadataBeforePrefill() {
         val post = render(mentions)
-        val stored = JSON.encodeToJsonElement(UiTimelineV2.Post.serializer(), post).jsonObject
-        val legacy = JSON.decodeFromJsonElement(UiTimelineV2.Post.serializer(), JsonObject(stored - "replyMentions"))
+        val oldLink = DeeplinkRoute.Profile.User(AccountType.Specific(accountKey), MicroBlogKey("200", accountKey.host)).toUri()
+        val legacy = post.copy(content = UiTranslatableText(Ksoup.parse("<p><a href=\"$oldLink\">@bob</a></p>").body().toUi()))
 
         assertNull(MastodonPlatformSpec.resolveInitialText(context(legacy)))
         assertNotNull(MastodonPlatformSpec.resolveInitialText(context(post)))
@@ -88,7 +91,54 @@ class MastodonReplyInitialTextTest {
         assertNull(MastodonPlatformSpec.resolveInitialText(context(post).copy(composeType = ComposeType.Quote)))
     }
 
-    private fun render(mentions: List<Mention>): UiTimelineV2.Post =
+    @Test
+    fun mentionLinksKeepTheViewerAndCanonicalAccountRatherThanTheProfileUrlHost() {
+        val remote = mentions.first().copy(url = "https://social.remote.example/users/bob")
+        val routes = mentionLinks(render(listOf(remote, mentions[1])))
+
+        assertEquals(
+            listOf(
+                DeeplinkRoute.Profile.UserNameWithHost(AccountType.Specific(accountKey), "bob", "remote.example"),
+                DeeplinkRoute.Profile.UserNameWithHost(AccountType.Specific(accountKey), "bob", accountKey.host),
+            ),
+            routes.map(DeeplinkRoute::parse),
+        )
+    }
+
+    @Test
+    fun guestMentionLinksRetainTheOriginInstance() {
+        val route =
+            assertIs<DeeplinkRoute.Profile.UserNameWithHost>(
+                DeeplinkRoute.parse(mentionLinks(render(mentions.take(1), viewer = null)).single()),
+            )
+
+        assertEquals(AccountType.GuestHost(accountKey.host), route.accountType)
+        assertEquals("bob", route.userName)
+        assertEquals("remote.example", route.host)
+    }
+
+    @Test
+    fun mentionWithoutAcctKeepsItsExistingIdBasedProfileLink() {
+        for (acct in listOf(null, "")) {
+            val post = render(listOf(mentions.first().copy(acct = acct)))
+            val route = DeeplinkRoute.parse(mentionLinks(post).single())
+
+            assertEquals(DeeplinkRoute.Profile.User(AccountType.Specific(accountKey), MicroBlogKey("200", accountKey.host)), route)
+        }
+    }
+
+    private fun mentionLinks(post: UiTimelineV2.Post): List<String> =
+        post.content.original.renderRuns
+            .filterIsInstance<dev.dimension.flare.ui.render.RenderContent.Text>()
+            .flatMap { it.runs }
+            .filterIsInstance<dev.dimension.flare.ui.render.RenderRun.Text>()
+            .mapNotNull { it.style.link }
+            .distinct()
+
+    private fun render(
+        mentions: List<Mention>,
+        viewer: MicroBlogKey? = accountKey,
+    ): UiTimelineV2.Post =
         assertIs<UiTimelineV2.Post>(
             Status(
                 id = "1000",
@@ -101,7 +151,7 @@ class MastodonReplyInitialTextTest {
                         } +
                         "</p>",
                 mentions = mentions,
-            ).render(accountKey.host, accountKey),
+            ).render(accountKey.host, viewer),
         )
 
     private fun context(post: UiTimelineV2.Post) =

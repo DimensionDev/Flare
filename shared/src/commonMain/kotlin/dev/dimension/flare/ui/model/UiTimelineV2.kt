@@ -14,11 +14,9 @@ import dev.dimension.flare.ui.render.UiRichText
 import dev.dimension.flare.ui.route.DeeplinkRoute
 import dev.dimension.flare.web.shared.WebExport
 import kotlinx.collections.immutable.persistentListOf
-import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
-import kotlinx.serialization.protobuf.ProtoNumber
 import kotlin.time.Instant
 
 @Serializable
@@ -305,7 +303,6 @@ public sealed class UiTimelineV2 {
         val notificationKey: MicroBlogKey? = null,
     )
 
-    @OptIn(ExperimentalSerializationApi::class)
     @Serializable
     @Immutable
     public data class Post public constructor(
@@ -337,9 +334,6 @@ public sealed class UiTimelineV2 {
         override val itemKey: String? = null,
         val pluginId: String? = null,
         internal val authorSubtitleInternal: String? = null,
-        // Null identifies cached posts that predate reply participant metadata.
-        @ProtoNumber(25)
-        val replyMentions: ReplyMentions? = null,
     ) : UiTimelineV2() {
         @WebExport
         val authorSubtitle: String
@@ -347,9 +341,6 @@ public sealed class UiTimelineV2 {
 
         @Transient
         override val stableItemKey: String = calculateStableItemKey()
-
-        // Preserve the existing cache field number when adding constructor metadata.
-        @ProtoNumber(24)
         override val searchText: String =
             buildString {
                 user?.name?.raw?.let {
@@ -400,13 +391,6 @@ public sealed class UiTimelineV2 {
                 .add(accountType)
                 .build()
         }
-
-        @Serializable
-        @Immutable
-        public data class ReplyMentions(
-            // A nested message preserves known-empty lists when stored as ProtoBuf.
-            val handles: SerializableImmutableList<UiHandle>,
-        )
 
         @Serializable
         @Immutable

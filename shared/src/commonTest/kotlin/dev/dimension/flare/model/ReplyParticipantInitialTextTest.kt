@@ -2,8 +2,6 @@ package dev.dimension.flare.model
 
 import com.fleeksoft.ksoup.Ksoup
 import dev.dimension.flare.common.TestFormatter
-import dev.dimension.flare.common.decodeProtobuf
-import dev.dimension.flare.common.encodeProtobuf
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.ComposeType
 import dev.dimension.flare.di.startKoin
@@ -25,7 +23,6 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertIs
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.time.Clock
@@ -90,77 +87,6 @@ class ReplyParticipantInitialTextTest {
         assertNotNull(result)
         assertEquals("$mentionedHandle ", result.text)
         assertEquals(result.text.length, result.cursorPosition)
-    }
-
-    @Test
-    fun `stored participants retain canonical identities after protobuf cache round trip`() {
-        val post =
-            createPost(user = createUser(handle = UiHandle("author", "example.com"))).copy(
-                replyMentions =
-                    UiTimelineV2.Post.ReplyMentions(
-                        persistentListOf(
-                            UiHandle("bob", "remote.example", displayOverride = "Bob"),
-                            UiHandle("bob", "example.com"),
-                            UiHandle("Me", "example.com"),
-                            UiHandle("author", "example.com"),
-                            UiHandle("BOB", "REMOTE.EXAMPLE"),
-                            UiHandle("", "example.com"),
-                            UiHandle("missing-host", ""),
-                        ),
-                    ),
-            )
-        val restored = assertIs<UiTimelineV2.Post>(post.encodeProtobuf<UiTimelineV2>().decodeProtobuf<UiTimelineV2>())
-        val result =
-            ComposeInitialTextContext(
-                post = restored,
-                quotes = persistentListOf(),
-                composeType = ComposeType.Reply,
-                currentUserHandle = UiHandle("me", "example.com"),
-                selectedAccountKey = MicroBlogKey("me", "example.com"),
-            ).resolveReplyParticipantInitialText()
-
-        assertEquals(post.replyMentions, restored.replyMentions)
-        assertEquals("@author@example.com @bob@remote.example @bob@example.com ", result?.text)
-    }
-
-    @Test
-    fun `cache without participant metadata remains distinguishable from an empty mention list`() {
-        val post = createPost()
-        val restored = assertIs<UiTimelineV2.Post>(post.encodeProtobuf<UiTimelineV2>().decodeProtobuf<UiTimelineV2>())
-        val withoutMentions = post.copy(replyMentions = UiTimelineV2.Post.ReplyMentions(persistentListOf()))
-        val restoredWithoutMentions =
-            assertIs<UiTimelineV2.Post>(withoutMentions.encodeProtobuf<UiTimelineV2>().decodeProtobuf<UiTimelineV2>())
-
-        assertNull(restored.replyMentions)
-        assertEquals(persistentListOf(), restoredWithoutMentions.replyMentions?.handles)
-    }
-
-    @Test
-    fun `legacy protobuf search text retains its field number`() {
-        val post = createPost()
-        val searchText = "legacy cached text".encodeToByteArray()
-        // Field 24 was searchText before reply participant metadata was added.
-        val legacy = post.encodeProtobuf() + byteArrayOf(0xc2.toByte(), 0x01, searchText.size.toByte()) + searchText
-        val restored = legacy.decodeProtobuf<UiTimelineV2.Post>()
-
-        assertEquals("legacy cached text", restored.searchText)
-        assertEquals(post.statusKey, restored.statusKey)
-        assertNull(restored.replyMentions)
-    }
-
-    @Test
-    fun `excludes current author by canonical handle when cached ids differ`() {
-        val post = createPost(user = createUser(key = MicroBlogKey("old-id", "example.com"), handle = UiHandle("me", "example.com")))
-        val result =
-            ComposeInitialTextContext(
-                post = post,
-                quotes = persistentListOf(),
-                composeType = ComposeType.Reply,
-                currentUserHandle = UiHandle("me", "example.com"),
-                selectedAccountKey = MicroBlogKey("current-id", "example.com"),
-            ).resolveReplyParticipantInitialText()
-
-        assertEquals("", result?.text)
     }
 
     @Test

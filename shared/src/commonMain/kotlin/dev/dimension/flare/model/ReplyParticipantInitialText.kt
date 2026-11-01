@@ -12,8 +12,8 @@ public fun ComposeInitialTextContext.resolveReplyParticipantInitialText(): Initi
     if (composeType != ComposeType.Reply) return null
 
     val author = post.user?.takeUnless { it.key == selectedAccountKey }?.handle
-    val mentions =
-        post.replyMentions?.handles ?: post.content.original.renderRuns
+    val routes =
+        post.content.original.renderRuns
             .asSequence()
             .flatMap { content ->
                 when (content) {
@@ -22,9 +22,14 @@ public fun ComposeInitialTextContext.resolveReplyParticipantInitialText(): Initi
                 }
             }.mapNotNull { run ->
                 val href = (run as? RenderRun.Text)?.style?.link ?: return@mapNotNull null
-                val route = DeeplinkRoute.parse(href) as? DeeplinkRoute.Profile.UserNameWithHost ?: return@mapNotNull null
-                UiHandle(route.userName, route.host)
+                DeeplinkRoute.parse(href)
             }.toList()
+    // Legacy Mastodon links retain only an ID; wait for their existing refresh to supply the acct.
+    if (routes.any { it is DeeplinkRoute.Profile.User }) return null
+    val mentions =
+        routes
+            .filterIsInstance<DeeplinkRoute.Profile.UserNameWithHost>()
+            .map { UiHandle(it.userName, it.host) }
     val text =
         buildString {
             (listOfNotNull(author) + mentions)

@@ -465,6 +465,18 @@ private fun Status.renderStatus(
         user = actualUser,
         sourceLanguages = sourceLanguages,
         content = UiTranslatableText(original = parseMastodonContent(this, accountKey, host, sourceLanguages)),
+        replyMentions =
+            UiTimelineV2.Post.ReplyMentions(
+                mentions
+                    .orEmpty()
+                    .mapNotNull { mention ->
+                        val acct = mention.acct?.takeIf { it.isNotBlank() } ?: return@mapNotNull null
+                        UiHandle(
+                            raw = acct.substringBefore('@'),
+                            host = acct.substringAfter('@', host),
+                        )
+                    }.toImmutableList(),
+            ),
         card =
             card?.url?.let { url ->
                 UiCard(

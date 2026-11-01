@@ -51,7 +51,11 @@ public data object MastodonPlatformSpec :
     public override val order: Int = 10
     public override val isDefaultGuest: Boolean = true
 
-    override fun resolveInitialText(context: ComposeInitialTextContext): InitialText? = context.resolveReplyParticipantInitialText()
+    override fun resolveInitialText(context: ComposeInitialTextContext): InitialText? {
+        // Wait for legacy cache entries to refresh before the composer applies its one-time prefill.
+        if (context.post.replyMentions == null) return null
+        return context.resolveReplyParticipantInitialText()
+    }
 
     override fun deepLinks(accountKey: MicroBlogKey): ImmutableList<PlatformDeepLink<*>> =
         persistentListOf(

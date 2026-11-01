@@ -322,8 +322,9 @@ jobs:
       - *generate-xcode
       - name: Build native macOS Kotlin framework
         run: |
+          sysctl hw.memsize vm.swapusage
           ./gradlew :apple-shared:linkReleaseFrameworkMacosArm64 --no-daemon --stacktrace \
-            "-Dorg.gradle.jvmargs=-Xmx3G -Dfile.encoding=UTF-8"
+            "-Dorg.gradle.jvmargs=-Xmx5G -Dfile.encoding=UTF-8"
       - name: import certs
         if: startsWith(github.ref, 'refs/tags/')
         uses: apple-actions/import-codesign-certs@v7
@@ -396,7 +397,7 @@ jobs:
             -derivedDataPath build/DerivedData \
             -skipPackagePluginValidation \
             -skipMacroValidation \
-            GRADLE_JVM_ARGS="-Xmx4G -Dfile.encoding=UTF-8" \
+            GRADLE_JVM_ARGS="-Xmx5G -Dfile.encoding=UTF-8" \
             MARKETING_VERSION="$NATIVE_MACOS_MARKETING_VERSION" \
             CURRENT_PROJECT_VERSION="$NATIVE_MACOS_BUILD_NUMBER" \
             CODE_SIGNING_ALLOWED=NO
@@ -421,7 +422,7 @@ jobs:
             CODE_SIGN_IDENTITY="$NATIVE_MACOS_APP_SIGNING_IDENTITY" \
             NATIVE_MACOS_PROVISIONING_PROFILE_SPECIFIER="$NATIVE_MACOS_PROVISIONING_PROFILE_SPECIFIER" \
             NATIVE_MACOS_PROVISIONING_PROFILE="$NATIVE_MACOS_PROVISIONING_PROFILE" \
-            GRADLE_JVM_ARGS="-Xmx4G -Dfile.encoding=UTF-8" \
+            GRADLE_JVM_ARGS="-Xmx5G -Dfile.encoding=UTF-8" \
             MARKETING_VERSION="$NATIVE_MACOS_MARKETING_VERSION" \
             CURRENT_PROJECT_VERSION="$NATIVE_MACOS_BUILD_NUMBER"
       - name: Package native macOS app

@@ -2,11 +2,11 @@
 <network-security-config>
     <!-- Local WebView instrumentation fixtures; release policy is unchanged. -->
     <domain-config cleartextTrafficPermitted="true">
-        <domain>127.0.0.1</domain>
-        <domain>webview-proxy.invalid</domain>
+        <domain includeSubdomains="false">127.0.0.1</domain>
+        <domain includeSubdomains="false">webview-proxy.invalid</domain>
     </domain-config>
     <domain-config>
-        <domain>localhost</domain>
+        <domain includeSubdomains="false">localhost</domain>
         <trust-anchors>
             <certificates src="@raw/webview_test_cert" />
         </trust-anchors>

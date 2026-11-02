@@ -7,6 +7,34 @@ import FlareAppleUI
 
 @MainActor
 final class TimelineControllerIntegrationTests: XCTestCase {
+    func testViewportHeightChangeResizesSingleMediaAndPreservesReadingPosition() async throws {
+        let fixture = await Fixture(posts: true)
+        fixture.input.items = (0..<40).map { .post(makeRow($0, imageHeight: 1_600, mediaCount: 1)) }
+        await fixture.apply()
+        await fixture.scroll(2_500)
+        let expected = try fixture.position()
+        fixture.controller.view.frame.size.height = 400
+        await fixture.settle()
+        let path = try XCTUnwrap(fixture.collection.readingIndexPath?(expected.id))
+        let frame = try XCTUnwrap(fixture.collection.layoutAttributesForItem(at: path)?.frame)
+        if -expected.offset >= frame.height {
+            // A shorter post must remain visible even when the old offset falls beyond its bottom.
+            XCTAssertEqual(frame.maxY - fixture.collection.contentOffset.y - fixture.collection.adjustedContentInset.top, 1, accuracy: 0.5)
+        } else {
+            try fixture.assertPosition(expected)
+        }
+        let media = fixture.collection.visibleCells.flatMap(descendants)
+            .compactMap { $0 as? StatusMediaUIView }.filter { !$0.isHidden }
+        XCTAssertFalse(media.isEmpty)
+        for view in media {
+            XCTAssertEqual(view.bounds.height, 200, accuracy: 1)
+            XCTAssertEqual(view.bounds.width, 100, accuracy: 1)
+        }
+        fixture.controller.view.frame.size.height = 600
+        await fixture.settle()
+        try fixture.assertPosition(expected)
+    }
+
     func testAppendedTwoColumnRowsHaveFinalPositionsInTheirFirstLayout() async throws {
         let fixture = await Fixture(posts: true, columns: 2)
         let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first)

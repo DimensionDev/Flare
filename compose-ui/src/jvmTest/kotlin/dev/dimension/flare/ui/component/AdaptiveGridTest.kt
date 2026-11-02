@@ -2,9 +2,12 @@ package dev.dimension.flare.ui.component
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
@@ -17,6 +20,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.test.assertHeightIsEqualTo
+import androidx.compose.ui.test.assertWidthIsEqualTo
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.unit.LayoutDirection
@@ -33,6 +38,49 @@ import kotlin.test.assertTrue
 class AdaptiveGridTest {
     @get:Rule
     val composeRule = createComposeRule()
+
+    @Test
+    fun cappedSingleMediaShrinksInsideItsExistingContentColumn() {
+        var maximumHeight by mutableStateOf(400.dp)
+        var expanded by mutableStateOf(true)
+        composeRule.setContent {
+            Box(Modifier.size(width = 412.dp, height = 900.dp)) {
+                Row {
+                    Spacer(Modifier.width(52.dp))
+                    AdaptiveGrid(
+                        itemCount = 1,
+                        itemContent = { Box(Modifier.fillMaxSize().testTag("single-media")) },
+                        modifier = Modifier.testTag("single-grid"),
+                        expandedSize = expanded,
+                        singleMediaAspectRatio = 9f / 16f,
+                        singleMediaMaxHeight = maximumHeight,
+                    )
+                }
+            }
+        }
+        composeRule.onNodeWithTag("single-grid").assertWidthIsEqualTo(225.dp).assertHeightIsEqualTo(400.dp)
+        assertEquals(
+            composeRule.onNodeWithTag("single-grid").fetchSemanticsNode().boundsInRoot,
+            composeRule.onNodeWithTag("single-media").fetchSemanticsNode().boundsInRoot,
+        )
+        val leading =
+            composeRule
+                .onNodeWithTag("single-grid")
+                .fetchSemanticsNode()
+                .boundsInRoot.left
+        assertTrue(leading > 0)
+        composeRule.runOnIdle { maximumHeight = 200.dp }
+        composeRule.onNodeWithTag("single-grid").assertWidthIsEqualTo(112.5.dp).assertHeightIsEqualTo(200.dp)
+        assertEquals(
+            leading,
+            composeRule
+                .onNodeWithTag("single-grid")
+                .fetchSemanticsNode()
+                .boundsInRoot.left,
+        )
+        composeRule.runOnIdle { expanded = false }
+        composeRule.onNodeWithTag("single-grid").assertWidthIsEqualTo(360.dp).assertHeightIsEqualTo(202.5.dp)
+    }
 
     @Test
     fun shrinkingMediaRetainsTheRemainingItem() {

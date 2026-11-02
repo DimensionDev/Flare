@@ -10,6 +10,184 @@ import KotlinSharedUI
 
 @MainActor
 final class TimelineMediaPreviewTests: XCTestCase {
+    func testSinglePostMediaHeightAndScreenshotsOnBothRenderers() async throws {
+        for renderer in ["uikit", "swiftui"] {
+            for tall in [false, true] {
+                let size = CGSize(width: 360, height: tall ? 1_800 : 640)
+                let fixture = try await Fixture(imageSize: size)
+                let media = fixture.media(path: "single-\(renderer)-\(tall).png", width: Float(size.width), height: Float(size.height))
+                let post = singleMediaPost(media)
+                let host: UIViewController
+                var nativeStatus: StatusUIKitView?
+                if renderer == "uikit" {
+                    host = UIViewController()
+                    let view = StatusUIKitView()
+                    var appearance = StatusUIKitAppearance(timeline: TimelineAppearance.companion.Default)
+                    appearance.singleMediaMaxHeight = 400
+                    view.configure(data: post, appearance: appearance)
+                    host.view.addSubview(view)
+                    nativeStatus = view
+                } else {
+                    host = UIHostingController(rootView:
+                        VStack(alignment: .leading) {
+                            StatusView(data: post)
+                            Spacer(minLength: 0)
+                        }
+                        .padding(16)
+                        .environment(\.timelinePlaybackViewport, CGRect(x: 0, y: 0, width: 400, height: 800)))
+                }
+                let window = try fixture.show(host)
+                window.overrideUserInterfaceStyle = .light
+                host.view.backgroundColor = .systemBackground
+                defer { window.isHidden = true; window.rootViewController = nil }
+                if let nativeStatus {
+                    let width = host.view.bounds.width - 32
+                    nativeStatus.prepareForFitting(width: width)
+                    nativeStatus.frame = CGRect(x: 16, y: host.view.safeAreaInsets.top + 16,
+                                                width: width, height: nativeStatus.timelineHeight(for: width) ?? 0)
+                }
+                for _ in 0..<300 {
+                    host.view.layoutIfNeeded()
+                    if fixture.cache.imageSize(for: media.previewUrl) != nil { break }
+                    try await Task.sleep(for: .milliseconds(10))
+                }
+                try await Task.sleep(for: .milliseconds(150))
+                host.view.layoutIfNeeded()
+                let format = UIGraphicsImageRendererFormat()
+                format.scale = 1
+                let screenshot = UIGraphicsImageRenderer(size: window.bounds.size, format: format).image { _ in
+                    window.drawHierarchy(in: window.bounds, afterScreenUpdates: true)
+                }
+                let attachment = XCTAttachment(image: screenshot)
+                attachment.name = "single-media-\(renderer)-\(tall ? "long" : "portrait")"
+                attachment.lifetime = .keepAlways
+                add(attachment)
+                let bounds = try cyanBounds(screenshot)
+                XCTAssertEqual(bounds.width, tall ? 400 * 9 / 21 : 400 * 9 / 16, accuracy: 2)
+                XCTAssertEqual(bounds.height, 400, accuracy: 2)
+                XCTAssertEqual(bounds.minX, 16 + 44 + 8, accuracy: 2, "Keep the existing avatar/content indentation")
+            }
+        }
+    }
+
+    func testSingleMediaLimitRespectsScopeAndKeepsVideoAspectRatio() async throws {
+        let fixture = try await Fixture()
+        let image = fixture.media(width: 360, height: 640)
+        let grid = StatusMediaUIView()
+        func configure(_ items: [UiMedia], expanded: Bool = true) {
+            grid.configure(data: items, sensitive: false, cornerRadius: 16,
+                           singleFollowsImageAspect: expanded, limitMediaGridToNine: true,
+                           mediaLayout: .grid, carouselLeadingPadding: 0, carouselTrailingPadding: 0)
+        }
+        configure([image])
+        XCTAssertEqual(grid.fittingWidth(for: 360), 360, "Profile media does not supply a height limit")
+        grid.singleMediaMaxHeight = 400
+        XCTAssertEqual(grid.fittingWidth(for: 360), 225, accuracy: 0.01)
+        grid.singleMediaMaxHeight = 200
+        XCTAssertEqual(grid.fittingWidth(for: 360), 112.5, accuracy: 0.01)
+        configure([image], expanded: false)
+        XCTAssertEqual(grid.fittingWidth(for: 360), 360)
+        configure([image, image])
+        XCTAssertEqual(grid.fittingWidth(for: 360), 360)
+        let video = UiMediaVideo(url: "https://timeline-preview.invalid/movie.mp4",
+            thumbnailUrl: "https://timeline-preview.invalid/thumbnail.png", description: nil, height: 1_800, width: 360,
+            customHeaders: nil, proxy: ProxyRef.Global.shared, downloadUrl: nil)
+        configure([video])
+        XCTAssertEqual(grid.fittingWidth(for: 360), 40, accuracy: 0.01, "Tall videos retain their original ratio")
+        let audio = UiMediaAudio(url: "https://timeline-preview.invalid/audio.mp3", description: nil,
+                                 previewUrl: nil, customHeaders: nil, proxy: ProxyRef.Global.shared)
+        configure([audio])
+        XCTAssertEqual(grid.fittingWidth(for: 360), 360)
+    }
+
+    func testSinglePostMediaUsesScrollViewportWithoutPlaybackCoordinator() async throws {
+        let fixture = try await Fixture(imageSize: CGSize(width: 360, height: 640))
+        let media = fixture.media(path: "scroll-viewport.png", width: 360, height: 640)
+        let post = singleMediaPost(media)
+        func content(height: CGFloat) -> some View {
+            ScrollView { StatusView(data: post).padding(16) }
+                .frame(height: height)
+                .frame(maxHeight: .infinity, alignment: .top)
+        }
+        let host = UIHostingController(rootView: content(height: 400))
+        let window = try fixture.show(host)
+        defer { window.isHidden = true; window.rootViewController = nil }
+        for height: CGFloat in [400, 600] {
+            host.rootView = content(height: height)
+            for _ in 0..<300 {
+                host.view.layoutIfNeeded()
+                if fixture.cache.imageSize(for: media.previewUrl) != nil { break }
+                try await Task.sleep(for: .milliseconds(10))
+            }
+            try await Task.sleep(for: .milliseconds(150))
+            host.view.layoutIfNeeded()
+            let format = UIGraphicsImageRendererFormat()
+            format.scale = 1
+            let screenshot = UIGraphicsImageRenderer(size: window.bounds.size, format: format).image { _ in
+                window.drawHierarchy(in: window.bounds, afterScreenUpdates: true)
+            }
+            let bounds = try cyanBounds(screenshot)
+            XCTAssertEqual(bounds.height, height * 0.5, accuracy: 2)
+            XCTAssertEqual(bounds.width, height * 0.5 * 9 / 16, accuracy: 2)
+        }
+    }
+
+    func testNarrowVideoBadgeFitsAndRemainsRetryable() async throws {
+        let fixture = try await Fixture()
+        let view = fixture.view
+        let video = UiMediaVideo(url: "https://timeline-preview.invalid/movie.mp4",
+            thumbnailUrl: "https://timeline-preview.invalid/thumbnail.png", description: nil,
+            height: 1_800, width: 360, customHeaders: nil, proxy: ProxyRef.Global.shared, downloadUrl: nil)
+        view.set(media: video, cornerRadius: 12, fitsMedia: true)
+        var retries = 0
+        for width: CGFloat in [40, 16, 180] {
+            view.frame.size = CGSize(width: width, height: 200)
+            for state: VideoAutoplayOverlayState in [.idle, .loading, .playing(remaining: 61), .error] {
+                view.setAutoplayOverlay(state, progress: 0.42, errorMessage: "Retry video") { retries += 1 }
+                view.setNeedsLayout()
+                view.layoutIfNeeded()
+                let badge = try XCTUnwrap(view.subviews.compactMap { $0 as? UIButton }.first)
+                XCTAssertGreaterThan(badge.bounds.width, 0)
+                XCTAssertTrue(view.bounds.insetBy(dx: -0.5, dy: -0.5).contains(badge.frame), "Badge must fit inside a \(width)pt video")
+                if badge.isUserInteractionEnabled {
+                    let before = retries
+                    badge.sendActions(for: .touchUpInside)
+                    XCTAssertEqual(retries, before + 1)
+                    XCTAssertEqual(view.accessibilityCustomActions?.count, 1)
+                }
+            }
+        }
+    }
+
+    private func singleMediaPost(_ media: UiMedia) -> UiTimelineV2.Post {
+        func rich(_ text: String) -> UiRichText {
+            let style = RenderTextStyle(link: nil, bold: false, italic: false, strikethrough: false, monospace: false, code: false, underline: false, small: false, time: false, imageLink: nil)
+            return UiRichText(renderRuns: [RenderContent.Text(runs: [RenderRun.Text(text: text, style: style)], block: RenderBlockStyle())], isRtl: false, raw: text, innerText: text, imageUrls: [])
+        }
+        let profile = UiProfile(key: MicroBlogKey(id: "demo", host: "example.invalid"), handle: UiHandle(raw: "flare", host: "example.invalid", displayOverride: nil), avatar: nil as UiMediaImage?, nameInternal: rich("Flare"), platformId: "mastodon", platformIcon: IconType.Material(icon: .world), clickEvent: ClickEventNoop.shared, banner: nil, description: nil, sourceLanguages: [], translationDisplayState: .hidden, matrices: UiProfile.Matrices(fansCount: 0, followsCount: 0, statusesCount: 0, platformFansCount: nil), mark: [], bottomContent: nil, pluginId: nil)
+        return UiTimelineV2.Post(platformId: "mastodon", images: [media], sensitive: false, contentWarning: nil, user: profile, platformIcon: IconType.Material(icon: .world), sourceLanguages: [], translationDisplayState: .hidden, content: UiTranslatableText(original: rich("Single attachment · expanded media\nAligned with the post content"), translation: nil), actions: [], poll: nil, statusKey: MicroBlogKey(id: "media-layout", host: "example.invalid"), card: nil, createdAt: KotlinInstant.companion.fromEpochMilliseconds(epochMilliseconds: 0).toUi(), emojiReactions: [], sourceChannel: nil, visibility: nil, replyToHandle: nil, references: [], clickEvent: ClickEventNoop.shared, mediaClickPolicy: .openStatusMedia, accountType: AccountType.Guest.shared, itemKey: "media-layout", pluginId: nil, authorSubtitleInternal: nil)
+    }
+
+    private func cyanBounds(_ image: UIImage) throws -> CGRect {
+        let cg = try XCTUnwrap(image.cgImage)
+        var pixels = [UInt8](repeating: 0, count: cg.width * cg.height * 4)
+        let context = try XCTUnwrap(CGContext(data: &pixels, width: cg.width, height: cg.height,
+            bitsPerComponent: 8, bytesPerRow: cg.width * 4, space: CGColorSpaceCreateDeviceRGB(),
+            bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue | CGBitmapInfo.byteOrder32Big.rawValue))
+        context.draw(cg, in: CGRect(x: 0, y: 0, width: cg.width, height: cg.height))
+        var minX = cg.width, minY = cg.height, maxX = -1, maxY = -1
+        for offset in stride(from: 0, to: pixels.count, by: 4) {
+            let r = Int(pixels[offset]), g = Int(pixels[offset + 1]), b = Int(pixels[offset + 2])
+            if g > r + 40 && b > r + 40 {
+                let x = (offset / 4) % cg.width, y = (offset / 4) / cg.width
+                minX = min(minX, x); maxX = max(maxX, x)
+                minY = min(minY, y); maxY = max(maxY, y)
+            }
+        }
+        XCTAssertGreaterThanOrEqual(maxX, minX, "The actual preview must load before capture")
+        return CGRect(x: minX, y: minY, width: maxX - minX + 1, height: maxY - minY + 1)
+    }
+
     func testReactionImagesDecodeAtTheirDisplayHeightOnBothRenderers() async throws {
         for kind in ["uikit", "swiftui"] {
             let fixture = try await Fixture()
@@ -759,12 +937,21 @@ final class TimelineMediaPreviewTests: XCTestCase {
         private var downloaders: [(ImageDownloader, URLSessionConfiguration)] = []
         var imageView: UIImageView { view.subviews.compactMap { $0 as? UIImageView }.first! }
 
-        init(animated: Bool = false, orientation: Int? = nil) async throws {
+        init(animated: Bool = false, orientation: Int? = nil, imageSize: CGSize? = nil) async throws {
             let format = UIGraphicsImageRendererFormat()
             format.scale = 1
             let image = UIGraphicsImageRenderer(
-                size: CGSize(width: 1_024, height: 768), format: format
+                size: imageSize ?? CGSize(width: 1_024, height: 768), format: format
             ).image { context in
+                if let imageSize {
+                    UIColor(red: 0.05, green: 0.65, blue: 0.8, alpha: 1).setFill()
+                    context.fill(CGRect(origin: .zero, size: imageSize))
+                    for y in stride(from: 32, to: Int(imageSize.height), by: 120) {
+                        ("\(y) / \(Int(imageSize.height))" as NSString).draw(at: CGPoint(x: 32, y: y),
+                            withAttributes: [.font: UIFont.monospacedDigitSystemFont(ofSize: 28, weight: .medium), .foregroundColor: UIColor.white])
+                    }
+                    return
+                }
                 UIColor.blue.setFill()
                 context.fill(CGRect(x: 0, y: 0, width: 1_024, height: 768))
             }

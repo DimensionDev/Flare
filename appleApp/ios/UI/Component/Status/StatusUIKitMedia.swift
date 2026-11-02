@@ -1,4 +1,5 @@
 import UIKit
+import AVFoundation
 import KotlinSharedUI
 import SwiftUI
 import FlareAppleUI
@@ -101,6 +102,7 @@ final class MediaUIView: UIView {
         let v = UIButton(type: .custom)
         v.backgroundColor = .black
         v.layer.cornerRadius = 16
+        v.clipsToBounds = true
         v.translatesAutoresizingMaskIntoConstraints = false
         v.isHidden = true
         v.isUserInteractionEnabled = false
@@ -129,10 +131,15 @@ final class MediaUIView: UIView {
     private weak var autoplayPlayerView: UIView?
     private var autoplayPlayerConstraints: [NSLayoutConstraint] = []
     private var onAutoplayRetry: (() -> Void)?
+    private var badgeContent: UIStackView?
+    private var badgeMinimumWidthConstraint: NSLayoutConstraint?
+    private var badgeHeightConstraint: NSLayoutConstraint?
+    private var badgeContentPaddingConstraints: [NSLayoutConstraint] = []
 
     override init(frame: CGRect) {
         super.init(frame: frame)
         clipsToBounds = true
+        insetsLayoutMarginsFromSafeArea = false
         isAccessibilityElement = true
         addSubview(background)
         addSubview(imageView)
@@ -149,12 +156,31 @@ final class MediaUIView: UIView {
     }
     required init?(coder: NSCoder) { fatalError("init(coder:) not supported") }
 
+    override func layoutSubviews() {
+        if isOverlayInstalled {
+            let badgeSize = max(0, min(32, bounds.width, bounds.height))
+            let horizontalInset = min(16, max(0, (bounds.width - badgeSize) / 2))
+            let bottomInset = min(16, max(0, (bounds.height - badgeSize) / 2))
+            let margins = UIEdgeInsets(top: 0, left: horizontalInset, bottom: bottomInset, right: horizontalInset)
+            if layoutMargins != margins { layoutMargins = margins }
+            if badgeMinimumWidthConstraint?.constant != badgeSize { badgeMinimumWidthConstraint?.constant = badgeSize }
+            if badgeHeightConstraint?.constant != badgeSize { badgeHeightConstraint?.constant = badgeSize }
+            let padding = min(8, badgeSize / 4)
+            for constraint in badgeContentPaddingConstraints where constraint.constant != padding { constraint.constant = padding }
+            let spacing: CGFloat = bounds.width < 64 ? 0 : 8
+            if badgeContent?.spacing != spacing { badgeContent?.spacing = spacing }
+            playBadgeBg.layer.cornerRadius = badgeSize / 2
+        }
+        super.layoutSubviews()
+    }
+
     private func installOverlayIfNeeded() {
         guard !isOverlayInstalled else { return }
         isOverlayInstalled = true
         addSubview(playBadgeBg)
         playBadgeBg.addTarget(self, action: #selector(retryAutoplay), for: .touchUpInside)
         let badgeContent = UIStackView(arrangedSubviews: [playBadge, loadingIndicator, countdownLabel])
+        self.badgeContent = badgeContent
         badgeContent.axis = .horizontal
         badgeContent.alignment = .center
         badgeContent.spacing = 8
@@ -166,21 +192,32 @@ final class MediaUIView: UIView {
             width.priority = .init(999)
             width.isActive = true
         }
-        NSLayoutConstraint.activate([
-            playBadgeBg.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
-            playBadgeBg.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -16),
-            playBadgeBg.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -16),
-            playBadgeBg.widthAnchor.constraint(greaterThanOrEqualToConstant: 32),
-            playBadgeBg.heightAnchor.constraint(equalToConstant: 32),
+        let minimumWidth = playBadgeBg.widthAnchor.constraint(greaterThanOrEqualToConstant: 32)
+        let height = playBadgeBg.heightAnchor.constraint(equalToConstant: 32)
+        badgeMinimumWidthConstraint = minimumWidth
+        badgeHeightConstraint = height
+        badgeContentPaddingConstraints = [
             badgeContent.leadingAnchor.constraint(equalTo: playBadgeBg.leadingAnchor, constant: 8),
-            badgeContent.trailingAnchor.constraint(equalTo: playBadgeBg.trailingAnchor, constant: -8),
+            playBadgeBg.trailingAnchor.constraint(equalTo: badgeContent.trailingAnchor, constant: 8),
+        ]
+        NSLayoutConstraint.activate(badgeContentPaddingConstraints + [
+            playBadgeBg.leadingAnchor.constraint(equalTo: layoutMarginsGuide.leadingAnchor),
+            playBadgeBg.trailingAnchor.constraint(lessThanOrEqualTo: layoutMarginsGuide.trailingAnchor),
+            playBadgeBg.bottomAnchor.constraint(equalTo: layoutMarginsGuide.bottomAnchor),
+            minimumWidth,
+            height,
             badgeContent.centerYAnchor.constraint(equalTo: playBadgeBg.centerYAnchor),
             playBadge.heightAnchor.constraint(equalToConstant: 16),
             loadingIndicator.heightAnchor.constraint(equalToConstant: 16),
         ])
     }
 
-    func set(media: UiMedia, cornerRadius: CGFloat) {
+    private var fitsMedia = false
+
+    func set(media: UiMedia, cornerRadius: CGFloat, fitsMedia: Bool = false) {
+        self.fitsMedia = fitsMedia
+        imageView.contentMode = fitsMedia ? .scaleAspectFit : .scaleAspectFill
+        (autoplayPlayerView as? VideoPlaybackSurfaceView)?.playerLayer.videoGravity = fitsMedia ? .resizeAspect : .resizeAspectFill
         videoMedia = media
         accessibilityLabel = media.accessibleDescription
         let signature = MediaItemSignature(media: media)
@@ -232,6 +269,7 @@ final class MediaUIView: UIView {
     func attachAutoplayPlayer(_ playerView: UIView) {
         guard autoplayPlayerView !== playerView || playerView.superview !== self else { return }
         detachAutoplayPlayer()
+        (playerView as? VideoPlaybackSurfaceView)?.playerLayer.videoGravity = fitsMedia ? .resizeAspect : .resizeAspectFill
         playerView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(playerView)
         if isOverlayInstalled { bringSubviewToFront(playBadgeBg) }
@@ -396,6 +434,14 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding, UICollectionView
     private var cornerRadius: CGFloat = 16
     private var isBlurred: Bool = false
     private var singleFollowsImageAspect: Bool = true
+    var singleMediaMaxHeight: CGFloat? {
+        didSet {
+            guard oldValue != singleMediaMaxHeight else { return }
+            updateAspectConstraint()
+            invalidateIntrinsicContentSize()
+            setNeedsLayout()
+        }
+    }
     private var limitMediaGridToNine: Bool = true
     private var mediaLayout: TimelineMediaLayout = .grid
     private var carouselLeadingPadding: CGFloat = 0
@@ -719,7 +765,8 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding, UICollectionView
                 media: item,
                 index: index,
                 showsDownloadAll: items.count > 1,
-                cornerRadius: 0
+                cornerRadius: 0,
+                fitsMedia: limitsSingleMedia && item is UiMediaVideo
             )
         }
         if visibleCount < cellPool.count {
@@ -910,10 +957,28 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding, UICollectionView
         guard singleFollowsImageAspect else {
             return 16.0 / 9.0
         }
+        if limitsSingleMedia, let media = items.first {
+            return CGFloat(TimelineSingleMediaLayout.shared.aspectRatio(
+                sourceAspectRatio: Float(media.carouselLayoutAspectRatio ?? 0),
+                cropTallMedia: !(media is UiMediaVideo)
+            ))
+        }
         if let ratio = items.first?.aspectRatio, ratio > 0 {
             return max(9.0 / 21.0, CGFloat(ratio))
         }
         return 1
+    }
+
+    private var limitsSingleMedia: Bool {
+        singleMediaMaxHeight != nil && singleFollowsImageAspect && items.count == 1 && !(items.first is UiMediaAudio)
+    }
+
+    func fittingWidth(for availableWidth: CGFloat) -> CGFloat {
+        guard limitsSingleMedia, let singleMediaMaxHeight else { return availableWidth }
+        return CGFloat(TimelineSingleMediaLayout.shared.width(
+            availableWidth: Float(availableWidth), aspectRatio: Float(singleAspectRatio()),
+            maximumHeight: Float(singleMediaMaxHeight)
+        ))
     }
 
     private func carouselItemAspectRatio(at index: Int) -> CGFloat {
@@ -1172,13 +1237,13 @@ private final class MediaGridCellView: UIView, UIContextMenuInteractionDelegate,
 
     required init?(coder: NSCoder) { fatalError("init(coder:) not supported") }
 
-    func configure(media: UiMedia, index: Int, showsDownloadAll: Bool, cornerRadius: CGFloat) {
+    func configure(media: UiMedia, index: Int, showsDownloadAll: Bool, cornerRadius: CGFloat, fitsMedia: Bool = false) {
         tag = index
         self.index = index
         self.media = media
         self.showsDownloadAll = showsDownloadAll
         layer.cornerRadius = cornerRadius
-        mediaView.set(media: media, cornerRadius: 0)
+        mediaView.set(media: media, cornerRadius: 0, fitsMedia: fitsMedia)
         if let altText = media.description_, !altText.isEmpty {
             let button: AltTextButton
             if let altButton {
@@ -1369,6 +1434,15 @@ final class StatusMediaContentUIView: UIView, TimelineHeightProviding {
     var onLocalHeightInvalidated: (() -> Void)?
 
     private let grid = StatusMediaUIView()
+    var singleMediaMaxHeight: CGFloat? {
+        get { grid.singleMediaMaxHeight }
+        set { grid.singleMediaMaxHeight = newValue }
+    }
+
+    func fittingWidth(for availableWidth: CGFloat) -> CGFloat {
+        grid.isHidden ? availableWidth : grid.fittingWidth(for: availableWidth)
+    }
+
     private let showButton = UIButton(type: .system)
     private var items: [UiMedia] = []
     private var sensitive: Bool = false

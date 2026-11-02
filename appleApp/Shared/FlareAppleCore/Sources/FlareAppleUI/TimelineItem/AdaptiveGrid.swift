@@ -1,15 +1,18 @@
 import SwiftUI
+import KotlinSharedUI
 
 public struct AdaptiveGrid: Layout {
 
     public let singleFollowsImageAspect: Bool
     public let singleViewAspectRatio: CGFloat?
+    public let singleMediaMaxHeight: CGFloat?
     public let spacing: CGFloat
     public let maxColumns: Int
 
     public init(
         singleFollowsImageAspect: Bool = true,
         singleViewAspectRatio: CGFloat? = nil,
+        singleMediaMaxHeight: CGFloat? = nil,
         spacing: CGFloat = 4,
         maxColumns: Int = 3
     ) {
@@ -17,6 +20,7 @@ public struct AdaptiveGrid: Layout {
         self.spacing = spacing
         self.maxColumns = max(1, maxColumns)
         self.singleViewAspectRatio = singleViewAspectRatio
+        self.singleMediaMaxHeight = singleMediaMaxHeight
     }
 
     public struct Cache {
@@ -43,6 +47,11 @@ public struct AdaptiveGrid: Layout {
         case 1:
             let ratio = aspectForSingle(subviews: subviews, cache: &cache)
             if let height = proposal.height, proposal.width == nil { width = height * ratio }
+            if let singleMediaMaxHeight {
+                let maximumHeight = min(singleMediaMaxHeight, proposal.height ?? singleMediaMaxHeight)
+                width = CGFloat(TimelineSingleMediaLayout.shared.width(
+                    availableWidth: Float(width), aspectRatio: Float(ratio), maximumHeight: Float(maximumHeight)))
+            }
             return CGSize(width: width, height: width / ratio)
 
         case 2, 3, 4:
@@ -89,7 +98,8 @@ public struct AdaptiveGrid: Layout {
 
         switch count {
         case 1:
-            place(0, x: 0, y: 0, width: width, height: width / singleAspectRatio)
+            place(0, x: 0, y: 0, width: width,
+                  height: singleMediaMaxHeight == nil ? width / singleAspectRatio : bounds.height)
 
         case 2:
             let cellW = (width - spacing) / 2
@@ -149,7 +159,7 @@ public struct AdaptiveGrid: Layout {
         let ratio: CGFloat
         if singleFollowsImageAspect {
             if let providedRatio = singleViewAspectRatio {
-                ratio = max(9.0 / 21.0, providedRatio)
+                ratio = singleMediaMaxHeight == nil ? max(9.0 / 21.0, providedRatio) : providedRatio
             } else {
                 let ideal = subviews[0].sizeThatFits(.unspecified)
                 if ideal.width > 0, ideal.height > 0 {
@@ -172,7 +182,7 @@ public struct AdaptiveGrid: Layout {
         }
         if singleFollowsImageAspect {
             if let ratio = singleViewAspectRatio {
-                return max(9.0 / 21.0, ratio)
+                return singleMediaMaxHeight == nil ? max(9.0 / 21.0, ratio) : ratio
             }
             return 1
         }

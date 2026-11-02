@@ -39,7 +39,9 @@ import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.layout
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
@@ -85,6 +87,7 @@ import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.component.platform.PlatformVideoPlayer
 import dev.dimension.flare.ui.humanizer.humanize
 import dev.dimension.flare.ui.model.TimelineCarouselLayout
+import dev.dimension.flare.ui.model.TimelineSingleMediaLayout
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.route.DeeplinkRoute
@@ -109,6 +112,26 @@ internal fun StatusMediaComponent(
     modifier: Modifier = Modifier,
 ) {
     val appearanceSettings = LocalTimelineAppearance.current
+    val singleExpandedMedia =
+        data.singleOrNull()?.takeIf {
+            post.images.size == 1 && appearanceSettings.expandMediaSize && it !is UiMedia.Audio
+        }
+    val singleMediaRatio =
+        singleExpandedMedia?.let {
+            TimelineSingleMediaLayout.aspectRatio(it.carouselAspectRatio, cropTallMedia = it !is UiMedia.Video)
+        } ?: 1f
+    val singleMediaMaxHeight =
+        if (singleExpandedMedia != null) {
+            val viewportHeight =
+                with(LocalDensity.current) {
+                    LocalWindowInfo.current.containerSize.height
+                        .toDp()
+                        .value
+                }
+            TimelineSingleMediaLayout.maximumHeight(viewportHeight).dp
+        } else {
+            null
+        }
     var hideSensitive by remember(appearanceSettings.showSensitiveContent) {
         mutableStateOf(sensitive && !appearanceSettings.showSensitiveContent)
     }
@@ -263,13 +286,17 @@ internal fun StatusMediaComponent(
                             mediaCount = data.size,
                             onMediaClick = { openMedia(index) },
                             hideSensitive = hideSensitive,
-                            keepAspectRatio = data.size == 1 && appearanceSettings.expandMediaSize,
+                            keepAspectRatio = data.size == 1 && appearanceSettings.expandMediaSize && singleExpandedMedia == null,
+                            fillContainer = singleExpandedMedia != null,
+                            contentScale = if (singleExpandedMedia is UiMedia.Video) ContentScale.Fit else ContentScale.Crop,
                         )
                     }
                 },
                 maxItems = if (appearanceSettings.limitMediaGridToNine) 9 else data.size,
                 modifier = mediaContentModifier,
                 expandedSize = appearanceSettings.expandMediaSize,
+                singleMediaAspectRatio = singleMediaRatio,
+                singleMediaMaxHeight = singleMediaMaxHeight,
             )
         }
         if (showSensitiveButton) {
@@ -397,6 +424,7 @@ private fun StatusMediaItem(
     keepAspectRatio: Boolean,
     modifier: Modifier = Modifier,
     fillContainer: Boolean = false,
+    contentScale: ContentScale = ContentScale.Crop,
 ) {
     val uriHandler = LocalUriHandler.current
     val viewAltTextLabel = stringResource(Res.string.media_view_alt_text)
@@ -456,6 +484,7 @@ private fun StatusMediaItem(
                         media = media,
                         modifier = if (fillContainer) Modifier.fillMaxSize() else Modifier,
                         keepAspectRatio = keepAspectRatio,
+                        contentScale = contentScale,
                     )
                 }
             } else {
@@ -466,6 +495,7 @@ private fun StatusMediaItem(
                             onMediaClick()
                         },
                     keepAspectRatio = keepAspectRatio,
+                    contentScale = contentScale,
                 )
             }
         }

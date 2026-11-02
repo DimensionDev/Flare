@@ -503,6 +503,7 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
 
     func prepareForFitting(width: CGFloat) {
         guard width.isFinite, width > 0 else { return }
+        updateSingleMediaHeightLimit()
         let widthKey = Self.fittingWidthKey(width)
         guard lastPreparedFittingWidthKey != widthKey else { return }
         lastPreparedFittingWidthKey = widthKey
@@ -516,7 +517,7 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
         if let mediaViewStorage {
             let mediaWidth = mediaViewStorage.isShowingCarousel
                 ? width + carouselEdgePadding * 2
-                : contentWidth
+                : mediaViewStorage.fittingWidth(for: contentWidth)
             mediaViewStorage.bounds = CGRect(x: 0, y: 0, width: mediaWidth, height: mediaViewStorage.bounds.height)
         }
         if let normalCardViewStorage {
@@ -594,6 +595,7 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
     @discardableResult
     private func performLayout(width: CGFloat, assignFrames: Bool) -> CGFloat {
         guard width > 0 else { return 0 }
+        updateSingleMediaHeightLimit()
         var y: CGFloat = 0
 
         // Parents (vertical, spacing 0)
@@ -637,7 +639,8 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
             if isCarousel, wantsAvatar {
                 innerY = max(innerY, y + Self.avatarSize + 8)
             }
-            let childWidth = isCarousel ? width + carouselEdgePadding * 2 : contentWidth
+            let childWidth = isCarousel ? width + carouselEdgePadding * 2
+                : child === mediaViewStorage ? mediaViewStorage!.fittingWidth(for: contentWidth) : contentWidth
             let childX = isCarousel ? -carouselEdgePadding : contentX
             let h = childHeight(of: child, for: childWidth)
             if assignFrames { child.frame = CGRect(x: childX, y: innerY, width: childWidth, height: h) }
@@ -668,6 +671,17 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
 
     private var carouselEdgePadding: CGFloat {
         isQuote ? 8 : carouselOuterHorizontalPadding
+    }
+
+    private func updateSingleMediaHeightLimit() {
+        guard let mediaViewStorage else { return }
+        let maximumHeight = appearance.singleMediaMaxHeight ?? CGFloat(TimelineSingleMediaLayout.shared.maximumHeight(
+            viewportHeight: Float(window.map { $0.bounds.inset(by: $0.safeAreaInsets).height } ?? 0)
+        ))
+        if mediaViewStorage.singleMediaMaxHeight != maximumHeight {
+            mediaViewStorage.singleMediaMaxHeight = maximumHeight
+            lastPreparedFittingWidthKey = nil
+        }
     }
 
     private func fittingContentColumnWidth(for width: CGFloat) -> CGFloat {
@@ -909,6 +923,7 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
         if !data.images.isEmpty, showMediaInput {
             let corner: CGFloat = isQuote ? 12 : 16
             let mediaView = resolvedMediaView()
+            updateSingleMediaHeightLimit()
             mediaView.configure(
                 data: data.images,
                 sensitive: data.sensitive,

@@ -187,6 +187,9 @@ struct ProfileScreen: View {
                     }
                 }
             }
+            .modifier(TimelineListBackground(
+                columnPolicy: layout.usesCard ? .adaptive : .single
+            ))
             .animation(reduceMotion ? nil : .easeInOut(duration: 0.25), value: division)
         }
     }

@@ -11,7 +11,7 @@ jna = "5.19.1"
 lifecycleViewmodelComposeVersion = "2.11.0"
 minSdk = "26"
 java = "25"
-agp = "9.4.1"
+agp = "9.5.0"
 # shortcut: SKIE supports Kotlin through 2.4.20; upgrade after SKIE adds support for newer versions.
 kotlin = "2.4.20"
 core-ktx = "1.19.1"

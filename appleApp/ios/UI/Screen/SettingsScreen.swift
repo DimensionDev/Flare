@@ -181,9 +181,7 @@ struct BehaviorSettingsScreen: View {
 
 struct LinkOpenDefaultsSettingsScreen: View {
     var body: some View {
-        List {
-            LinkOpenDefaultsSettingsSection()
-        }
-        .navigationTitle("settings_link_open_defaults_title")
+        LinkOpenDefaultsSettingsView()
+            .navigationTitle("settings_link_open_defaults_title")
     }
 }

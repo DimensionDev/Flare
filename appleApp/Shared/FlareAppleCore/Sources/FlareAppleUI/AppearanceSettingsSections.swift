@@ -292,26 +292,30 @@ public extension BehaviorSettingsSection where LinkOpenDefaultsLink == EmptyView
     }
 }
 
-public struct LinkOpenDefaultsSettingsSection: View {
+public struct LinkOpenDefaultsSettingsView: View {
     @State private var presenter = KotlinPresenter(presenter: LinkOpenDefaultsPresenter())
 
     public init() {}
 
     public var body: some View {
-        Section {
-            StateView(state: presenter.state.targets) { data in
-                let targets = data.cast(LinkOpenDefaultsPresenter.Target.self)
-                if targets.isEmpty {
-                    ListEmptyView("link_open_defaults_empty", icon: .globe)
+        List {
+            Section {
+                StateView(state: presenter.state.targets) { data in
+                    let targets = data.cast(LinkOpenDefaultsPresenter.Target.self)
+                    ForEach(targets, id: \.id) { target in
+                        LinkOpenDefaultSettingsMenu(
+                            target: target,
+                            state: presenter.state
+                        )
+                    }
+                } loadingContent: {
+                    EmptyView()
                 }
-                ForEach(targets, id: \.id) { target in
-                    LinkOpenDefaultSettingsMenu(
-                        target: target,
-                        state: presenter.state
-                    )
-                }
-            } loadingContent: {
-                EmptyView()
+            }
+        }
+        .overlay {
+            if case .success(let targets) = onEnum(of: presenter.state.targets), targets.data.count == 0 {
+                ListEmptyView("link_open_defaults_empty", icon: .globe)
             }
         }
     }

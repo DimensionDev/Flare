@@ -37,6 +37,7 @@ public data class PluginPlatformManifestV1(
     val description: PluginTextV1? = null,
     val detector: DetectorManifestV1? = null,
     val loginMethods: List<LoginMethodManifestV1> = emptyList(),
+    @Serializable(with = KnownManifestCapabilitiesV1Serializer::class)
     val capabilities: Map<String, CapabilityManifestV1> = emptyMap(),
     val timelines: List<TimelineManifestV1> = emptyList(),
     val profileTabs: List<ProfileTabManifestV1> = emptyList(),

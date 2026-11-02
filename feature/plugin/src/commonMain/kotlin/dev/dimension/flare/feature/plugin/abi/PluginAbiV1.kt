@@ -10,6 +10,8 @@ public object PluginAbiV1 {
     public const val MANIFEST_PATH: String = "manifest.json"
     public const val ACCOUNT_ORIGIN: String = "\$accountOrigin"
 
+    internal val capabilityIdPattern = Regex("[a-z0-9.-]+/[a-z0-9.-]+")
+
     public object Capabilities {
         public const val TIMELINE: String = "flare.datasource.timeline/v1"
         public const val SEARCH: String = "flare.datasource.search/v1"
@@ -89,6 +91,14 @@ public object PluginAbiV1 {
         operations: Set<String>,
     ): Boolean = requiredCapabilityOperations[capabilityId]?.let(operations::containsAll) == true && operations.isNotEmpty()
 
+    internal fun knownCapabilities(capabilities: Map<String, Set<String>>): Map<String, Set<String>> =
+        capabilities
+            .mapNotNull { (id, operations) ->
+                val known = knownCapabilityOperations[id] ?: return@mapNotNull null
+                val supported = operations.intersect(known)
+                if (operations.isNotEmpty() && supported.isEmpty()) null else id to supported
+            }.toMap()
+
     public fun isDisplayableCapability(
         capabilityId: String,
         operations: Set<String>,
@@ -101,6 +111,7 @@ public object PluginAbiV1 {
         capabilityId: String,
         operation: String,
     ): String? {
+        if (operation !in knownCapabilityOperations[capabilityId].orEmpty()) return null
         val service =
             when (capabilityId) {
                 Capabilities.TIMELINE -> "timeline"

@@ -6,6 +6,8 @@ import dev.dimension.flare.media.UgoiraMetadata
 public fun TimelineItemV1.requireValid(depth: Int = 0) {
     require(depth <= 4) { "Timeline nesting is too deep" }
     when (this) {
+        TimelineItemV1.Unknown -> {}
+
         is TimelineItemV1.Post -> {
             post.requireValid()
             presentation.message?.requireValid()
@@ -72,7 +74,7 @@ public fun FeedV1.requireValid() {
     require(source.name.isNotBlank() && source.name.length <= 1_024) { "Invalid feed source" }
     source.iconUrl.requireHttpsUrl()
     media?.let {
-        require(it.type == MediaTypeV1.Image) { "Feed media must be an image" }
+        require(it.type == MediaTypeV1.Image || it.type == MediaTypeV1.Unknown) { "Feed media must be an image" }
         it.requireValid()
     }
     sourceLanguages.requireLanguages()
@@ -91,11 +93,27 @@ public fun MessageV1.requireValid() {
 
 public fun NavigationTargetV1.requireValid() {
     when (this) {
-        is NavigationTargetV1.Post -> key.requireValid()
-        is NavigationTargetV1.Profile -> key.requireValid()
-        is NavigationTargetV1.Article -> key.requireValid()
-        is NavigationTargetV1.Gallery -> key.requireValid()
-        is NavigationTargetV1.Link -> url.requireHttpsUrl(required = true)
+        NavigationTargetV1.Unknown -> {}
+
+        is NavigationTargetV1.Post -> {
+            key.requireValid()
+        }
+
+        is NavigationTargetV1.Profile -> {
+            key.requireValid()
+        }
+
+        is NavigationTargetV1.Article -> {
+            key.requireValid()
+        }
+
+        is NavigationTargetV1.Gallery -> {
+            key.requireValid()
+        }
+
+        is NavigationTargetV1.Link -> {
+            url.requireHttpsUrl(required = true)
+        }
     }
 }
 

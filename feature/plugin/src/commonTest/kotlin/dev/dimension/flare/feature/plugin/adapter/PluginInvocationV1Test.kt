@@ -9,6 +9,21 @@ import kotlin.test.assertEquals
 
 class PluginInvocationV1Test {
     @Test
+    fun skippedItemsKeepBothCursorsAndDoNotEndPagination() =
+        runTest {
+            val loader =
+                pluginRemoteLoader(
+                    directions = emptySet(),
+                    load = { _, _ -> PageV1(items = listOf("unknown"), olderCursor = "older", newerCursor = "newer") },
+                    map = { value -> value.takeUnless { it == "unknown" } },
+                )
+            val result = loader.load(20, PagingRequest.Refresh)
+            assertEquals(emptyList(), result.data)
+            assertEquals("older", result.nextKey)
+            assertEquals("newer", result.previousKey)
+        }
+
+    @Test
     fun unsupportedPagingDirectionEndsWithoutCallingPlugin() =
         runTest {
             var calls = 0

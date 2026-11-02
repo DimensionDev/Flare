@@ -6,6 +6,10 @@ import kotlinx.serialization.Serializable
 @Serializable
 public sealed interface TimelineItemV1 {
     @Serializable
+    @SerialName("unknown")
+    public data object Unknown : TimelineItemV1
+
+    @Serializable
     @SerialName("post")
     public data class Post(
         val post: PostV1,
@@ -49,6 +53,10 @@ public data class PostPresentationV1(
 @Serializable
 public sealed interface NavigationTargetV1 {
     @Serializable
+    @SerialName("unknown")
+    public data object Unknown : NavigationTargetV1
+
+    @Serializable
     @SerialName("post")
     public data class Post(
         val key: EntityKeyV1,
@@ -86,6 +94,7 @@ public data class FeedV1(
     val source: FeedSourceV1,
     val title: String? = null,
     val description: RichTextV1? = null,
+    @Serializable(with = CompatibleMediaV1Serializer::class)
     val media: MediaV1? = null,
     val sourceLanguages: List<String> = emptyList(),
     val target: NavigationTargetV1? = null,
@@ -103,6 +112,7 @@ public data class TimelineUserV1(
     val createdAt: String,
     val profile: ProfileV1,
     val message: MessageV1? = null,
+    @Serializable(with = KnownActionsV1Serializer::class)
     val buttons: List<ActionDescriptorV1> = emptyList(),
 )
 
@@ -177,6 +187,7 @@ public data class CardV1(
     val title: String,
     val url: String,
     val description: String? = null,
+    @Serializable(with = CompatibleMediaV1Serializer::class)
     val media: MediaV1? = null,
 )
 

@@ -96,6 +96,8 @@ relogin, without requiring the account list to change.
 | Operations newly declared compared with the account's saved manifest | Current Host admits those new operations without re-negotiating login; do not assume a new login will gate them |
 | Previously declared operation was not negotiated for the account | It remains unavailable unless account negotiation changes |
 | Package hash changes | Account adapter invalidates cached content when refreshing its persisted package snapshot |
+| Additive fields, detail types, item/media/action variants, capabilities or operations | Compatible Hosts ignore unsupported extensions; known content keeps its behavior and validation. Unknown detail/navigation types are inert, with no URL fallback |
+| Host predates additive compatibility, or an existing contract changes incompatibly | Require a compatible app release; a plugin update cannot retrofit Host behavior. API/schema version checks remain enforced |
 
 Treat website/credential compatibility deliberately. A version bump alone does
 not convert stored credentials. Document new permissions and user-visible changes.

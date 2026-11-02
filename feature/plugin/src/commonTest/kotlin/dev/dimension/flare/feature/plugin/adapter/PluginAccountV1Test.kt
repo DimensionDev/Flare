@@ -2,8 +2,10 @@ package dev.dimension.flare.feature.plugin.adapter
 
 import dev.dimension.flare.data.repository.RequireReLoginException
 import dev.dimension.flare.feature.plugin.abi.PluginAbiV1
+import dev.dimension.flare.feature.plugin.abi.PluginJsonV1
 import dev.dimension.flare.feature.plugin.lifecycle.InstalledPluginV1
 import dev.dimension.flare.feature.plugin.lifecycle.RunningPluginV1
+import dev.dimension.flare.feature.plugin.login.requireLoginSuccess
 import dev.dimension.flare.feature.plugin.manifest.CapabilityManifestV1
 import dev.dimension.flare.feature.plugin.manifest.CapabilityOperationManifestV1
 import dev.dimension.flare.feature.plugin.manifest.PluginManifestV1
@@ -11,6 +13,7 @@ import dev.dimension.flare.feature.plugin.manifest.PluginPlatformManifestV1
 import dev.dimension.flare.feature.plugin.manifest.PluginTextV1
 import dev.dimension.flare.feature.plugin.wire.AccountPluginSnapshotV1
 import dev.dimension.flare.feature.plugin.wire.ComposeConfigV1
+import dev.dimension.flare.feature.plugin.wire.LoginSuccessV1
 import dev.dimension.flare.feature.plugin.wire.PluginAccountCredentialV1
 import dev.dimension.flare.feature.plugin.wire.VisibilityV1
 import dev.dimension.flare.model.MicroBlogKey
@@ -21,11 +24,88 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.decodeFromJsonElement
+import kotlinx.serialization.json.encodeToJsonElement
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
 class PluginAccountV1Test {
+    @Test
+    fun unknownCapabilitiesAreIgnoredThroughLoginPersistenceAndRestoration() {
+        val base = plugin(setOf("detail", "future"))
+        val manifest = base.installed.manifest
+        val plugin =
+            base.copy(
+                installed =
+                    base.installed.copy(
+                        manifest =
+                            manifest.copy(
+                                platform =
+                                    manifest.platform.copy(
+                                        capabilities =
+                                            manifest.platform.capabilities +
+                                                (
+                                                    "flare.datasource.novel/v1" to
+                                                        CapabilityManifestV1(mapOf("read" to CapabilityOperationManifestV1()))
+                                                ),
+                                    ),
+                            ),
+                    ),
+            )
+        val previous = credential(plugin, previous = setOf("detail", "future"), negotiated = setOf("detail", "future"))
+        val future = mapOf("flare.datasource.novel/v1" to setOf("read"))
+        val success =
+            LoginSuccessV1(
+                accountId = previous.snapshot.accountId,
+                origin = previous.snapshot.origin,
+                profile = previous.snapshot.profile,
+                credential = JsonObject(mapOf("futureCredential" to JsonPrimitive("preserved"))),
+                capabilities = previous.snapshot.negotiatedCapabilities + future,
+            )
+        val expected = mapOf(PluginAbiV1.Capabilities.POST to setOf("detail"))
+        assertEquals(expected, plugin.requireLoginSuccess(success, previous.snapshot.origin, null).capabilities)
+        val created = plugin.accountCredential(success)
+        assertEquals(expected, created.snapshot.manifestCapabilities)
+        assertEquals(expected, created.snapshot.negotiatedCapabilities)
+        assertEquals(success.credential, created.credential)
+
+        val persisted =
+            previous.copy(
+                snapshot =
+                    previous.snapshot.copy(
+                        manifestCapabilities = previous.snapshot.manifestCapabilities + future,
+                        negotiatedCapabilities = previous.snapshot.negotiatedCapabilities + future,
+                    ),
+            )
+        persisted.requireValid(plugin)
+        val restored = PluginJsonV1.decodeFromJsonElement<PluginAccountCredentialV1>(PluginJsonV1.encodeToJsonElement(persisted))
+        restored.requireValid(plugin)
+        assertEquals(expected, restored.snapshot.manifestCapabilities)
+        assertEquals(expected, restored.snapshot.negotiatedCapabilities)
+        assertEquals(expected, restored.effectiveCapabilities(plugin))
+        val session = PluginSessionCapabilitiesV1(manifest.platform.capabilities, success.capabilities, authenticated = true)
+        assertEquals(false, session.hasOperation(PluginAbiV1.Capabilities.POST, "future"))
+        assertEquals(false, session.canExpose("flare.datasource.novel/v1"))
+    }
+
+    @Test
+    fun knownUndeclaredAndIncompleteLoginCapabilitiesRemainInvalid() {
+        val plugin = plugin(setOf("detail"))
+        val account = credential(plugin, previous = setOf("detail"), negotiated = setOf("detail"))
+        listOf(setOf("detail", "mutate"), emptySet()).forEach { operations ->
+            val success =
+                LoginSuccessV1(
+                    accountId = account.snapshot.accountId,
+                    origin = account.snapshot.origin,
+                    profile = account.snapshot.profile,
+                    credential = account.credential,
+                    capabilities = mapOf(PluginAbiV1.Capabilities.POST to operations),
+                )
+            assertFailsWith<IllegalArgumentException> { plugin.requireLoginSuccess(success, account.snapshot.origin, null) }
+        }
+    }
+
     @Test
     fun newManifestOperationIsAvailableWithoutRequiringRelogin() {
         val plugin = plugin(setOf("detail", "context"))

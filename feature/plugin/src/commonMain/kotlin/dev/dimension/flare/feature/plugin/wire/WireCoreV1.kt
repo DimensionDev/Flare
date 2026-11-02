@@ -40,6 +40,7 @@ public data class ProfileV1(
     val bot: Boolean = false,
     val fields: List<ProfileFieldV1> = emptyList(),
     val entityToken: String? = null,
+    @Serializable(with = KnownActionsV1Serializer::class)
     val actions: List<ActionDescriptorV1> = emptyList(),
 )
 
@@ -65,6 +66,9 @@ public enum class MediaTypeV1 {
 
     @SerialName("ugoira")
     Ugoira,
+
+    @SerialName("unknown")
+    Unknown,
 }
 
 @Serializable
@@ -100,7 +104,7 @@ public enum class VisibilityV1 {
     Channel,
 }
 
-@Serializable
+@Serializable(with = PostDetailTypeV1Serializer::class)
 public enum class PostDetailTypeV1 {
     @SerialName("post")
     Post,
@@ -113,6 +117,8 @@ public enum class PostDetailTypeV1 {
 
     @SerialName("link")
     Link,
+
+    Unknown,
 }
 
 @Serializable
@@ -122,6 +128,7 @@ public data class PostV1(
     val createdAt: String,
     val content: RichTextV1,
     val url: String? = null,
+    @Serializable(with = CompatibleMediaListV1Serializer::class)
     val media: List<MediaV1> = emptyList(),
     val replyTo: EntityKeyV1? = null,
     val spoilerText: String? = null,
@@ -131,6 +138,7 @@ public data class PostV1(
     val repostsCount: Long? = null,
     val repliesCount: Long? = null,
     val entityToken: String? = null,
+    @Serializable(with = KnownActionsV1Serializer::class)
     val actions: List<ActionDescriptorV1> = emptyList(),
     val detailType: PostDetailTypeV1 = PostDetailTypeV1.Post,
     val sourceLanguages: List<String> = emptyList(),

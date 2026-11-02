@@ -1,6 +1,9 @@
 /** Flare Social Plugin API v1. Ambient editor types; do not import at runtime.
  * See ABI.md and references/ for validation, defaults, and operation dependencies.
  * Optional service members do not relax a declared capability's required method set.
+ * Compatible Hosts ignore additive fields, unsupported capabilities/operations,
+ * timeline/media/action variants and navigation targets. Known payloads stay validated.
+ * These editor types list this SDK's supported authoring contract; see ABI.md.
  */
 type JsonPrimitive = string | number | boolean | null;
 type JsonValue = JsonPrimitive | JsonValue[] | { [key: string]: JsonValue };
@@ -242,6 +245,7 @@ interface ActionDescriptorV1 {
   count?: number;
   actionToken?: string;
 }
+/** Known authoring values; compatible older Hosts make unfamiliar string values inert. */
 type PostDetailTypeV1 = "post" | "article" | "gallery" | "link";
 interface PostV1 {
   key: EntityKeyV1;
@@ -262,7 +266,7 @@ interface PostV1 {
   repliesCount?: number;
   entityToken?: string;
   actions?: ActionDescriptorV1[];
-  /** Defaults to "post"; internal details use key, while "link" opens url in the browser. */
+  /** Omission defaults to "post"; "link" opens url. Unknown strings disable post/cover/grid navigation without a fallback. */
   detailType?: PostDetailTypeV1;
   sourceLanguages?: string[];
   replyToHandle?: string;

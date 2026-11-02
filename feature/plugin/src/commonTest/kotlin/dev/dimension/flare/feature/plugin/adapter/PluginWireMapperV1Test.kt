@@ -3,12 +3,17 @@ package dev.dimension.flare.feature.plugin.adapter
 import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.feature.plugin.abi.PluginAbiV1
+import dev.dimension.flare.feature.plugin.abi.PluginJsonV1
 import dev.dimension.flare.feature.plugin.wire.ActionDescriptorV1
 import dev.dimension.flare.feature.plugin.wire.ArticleV1
 import dev.dimension.flare.feature.plugin.wire.EntityKeyV1
+import dev.dimension.flare.feature.plugin.wire.FeedSourceV1
+import dev.dimension.flare.feature.plugin.wire.FeedV1
 import dev.dimension.flare.feature.plugin.wire.GalleryV1
 import dev.dimension.flare.feature.plugin.wire.MediaTypeV1
 import dev.dimension.flare.feature.plugin.wire.MediaV1
+import dev.dimension.flare.feature.plugin.wire.MessageV1
+import dev.dimension.flare.feature.plugin.wire.NavigationTargetV1
 import dev.dimension.flare.feature.plugin.wire.PostDetailTypeV1
 import dev.dimension.flare.feature.plugin.wire.PostPresentationV1
 import dev.dimension.flare.feature.plugin.wire.PostV1
@@ -26,6 +31,11 @@ import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.asType
 import dev.dimension.flare.ui.route.DeeplinkRoute
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.decodeFromJsonElement
+import kotlinx.serialization.json.encodeToJsonElement
+import kotlinx.serialization.json.jsonObject
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -45,6 +55,48 @@ class PluginWireMapperV1Test {
             createdAt = "2026-10-27T00:00:00Z",
             content = RichTextV1(value = "Preview"),
         )
+
+    @Test
+    fun unknownDetailsKeepThePreviewButDisableEveryPostClickForAccountsAndGuests() {
+        val payload = PluginJsonV1.encodeToJsonElement(post).jsonObject
+        listOf("manga", "novel").forEach { type ->
+            val value = PluginJsonV1.decodeFromJsonElement<PostV1>(JsonObject(payload + ("detailType" to JsonPrimitive(type))))
+            listOf(MicroBlogKey("me", "local.example"), null).forEach { account ->
+                val mapped = createMapper(account).post(value).post
+                assertEquals(ClickEvent.Noop, mapped.clickEvent)
+                assertEquals(UiTimelineV2.Post.MediaClickPolicy.OpenPostClickEvent, mapped.mediaClickPolicy)
+                assertEquals(mapper.post(post).post.content, mapped.content)
+                assertNotEquals(ClickEvent.Noop, mapped.user?.clickEvent)
+            }
+        }
+    }
+
+    @Test
+    fun unknownNavigationNeverFallsBackToTheFeedUrlOrMessageActor() {
+        val target = PluginJsonV1.decodeFromString<NavigationTargetV1>("""{"type":"novel","url":"https://remote.example/fallback"}""")
+        val feed = FeedV1("https://remote.example/feed", post.createdAt, FeedSourceV1("Feed"), target = target)
+        assertEquals(ClickEvent.Noop, assertIs<UiTimelineV2.Feed>(mapper.timelineItem(TimelineItemV1.Feed(feed))).clickEvent)
+        assertNotEquals(
+            ClickEvent.Noop,
+            assertIs<UiTimelineV2.Feed>(mapper.timelineItem(TimelineItemV1.Feed(feed.copy(target = null)))).clickEvent,
+        )
+        val message = MessageV1(post.key, post.createdAt, actor = author, text = "Message", target = target)
+        assertEquals(ClickEvent.Noop, assertIs<UiTimelineV2.Message>(mapper.timelineItem(TimelineItemV1.Message(message))).clickEvent)
+        assertNotEquals(
+            ClickEvent.Noop,
+            assertIs<UiTimelineV2.Message>(mapper.timelineItem(TimelineItemV1.Message(message.copy(target = null)))).clickEvent,
+        )
+    }
+
+    @Test
+    fun unknownTimelineAndMediaAreSkippedWithoutRequiringMediaPermissions() {
+        val mapper = createMapper(null, mediaNetwork = false)
+        assertNull(mapper.timelineItem(TimelineItemV1.Unknown))
+        val value = post.copy(media = listOf(MediaV1("", MediaTypeV1.Unknown, "")))
+        assertEquals(emptyList(), mapper.post(value).post.images)
+        val feed = FeedV1("https://remote.example/feed", post.createdAt, FeedSourceV1("Feed"), media = value.media.single())
+        assertNull(assertIs<UiTimelineV2.Feed>(mapper.timelineItem(TimelineItemV1.Feed(feed))).media)
+    }
 
     @Test
     fun postsWithoutAuthorOrVisibilityKeepNavigationActionsAndPlatformIcon() {

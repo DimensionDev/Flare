@@ -64,15 +64,16 @@ class PluginHttpHostTest {
     fun pluginWireArgumentsCannotOverrideTheHostProxy() =
         runBlocking {
             val transport = RecordingTransport()
+            val context = context()
             val result =
                 PluginHostGateway(transport).call(
                     "http.request",
                     """{"url":"https://instance.example/api","proxy":{"type":"System"}}""",
-                    context(),
+                    context,
                     30_000,
                 )
-            assertContains(result, "host.invalid-request")
-            assertTrue(transport.requests.isEmpty())
+            assertContains(result, "\"ok\":true")
+            assertEquals(context.proxy, transport.requests.single().proxy)
         }
 
     @Test

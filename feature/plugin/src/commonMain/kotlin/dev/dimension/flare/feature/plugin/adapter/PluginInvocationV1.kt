@@ -39,7 +39,7 @@ internal class PluginAccountInvokerV1(
         identity: List<String>,
         directions: Set<PageDirectionV1>,
         load: suspend (pageSize: Int, request: PagingRequest) -> PageV1<Wire>,
-        map: (Wire) -> UiTimelineV2,
+        map: (Wire) -> UiTimelineV2?,
     ): CacheableRemoteLoader<UiTimelineV2> {
         val loader = pluginRemoteLoader(directions, load, map)
         val key =
@@ -128,7 +128,7 @@ internal fun PageDirectionV1.isSupportedBy(directions: Set<PageDirectionV1>): Bo
 internal fun <Wire : Any, Ui : Any> pluginRemoteLoader(
     directions: Set<PageDirectionV1>,
     load: suspend (pageSize: Int, request: PagingRequest) -> PageV1<Wire>,
-    map: (Wire) -> Ui,
+    map: (Wire) -> Ui?,
 ): RemoteLoader<Ui> =
     object : RemoteLoader<Ui> {
         override suspend fun load(
@@ -144,7 +144,7 @@ internal fun <Wire : Any, Ui : Any> pluginRemoteLoader(
             if (!direction.isSupportedBy(directions)) return PagingResult(endOfPaginationReached = true)
             val page = load(pageSize, request).also { it.requireValid() }
             return PagingResult(
-                data = page.items.map(map),
+                data = page.items.mapNotNull(map),
                 nextKey = page.olderCursor.takeUnless { page.endReached },
                 previousKey = page.newerCursor,
             )

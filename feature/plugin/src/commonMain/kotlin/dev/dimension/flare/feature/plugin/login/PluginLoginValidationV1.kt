@@ -33,17 +33,17 @@ internal fun RunningPluginV1.requireLoginSuccess(
     ) { "Login profile host does not match the selected instance" }
     require(expectedAccountId == null || value.accountId == expectedAccountId) { "Relogin account does not match" }
     val declared = installed.manifest.platform.capabilities
+    val capabilities = PluginAbiV1.knownCapabilities(value.capabilities)
     require(
-        value.capabilities.all { (capability, operations) ->
-            capability in PluginAbiV1.knownCapabilityOperations &&
-                declared[capability]?.operations?.keys?.containsAll(operations) == true &&
+        capabilities.all { (capability, operations) ->
+            declared[capability]?.operations?.keys?.containsAll(operations) == true &&
                 PluginAbiV1.hasRequiredOperations(capability, operations)
         },
     ) { "Login returned undeclared or incomplete capabilities" }
-    require(value.capabilities.any { (capability, operations) -> PluginAbiV1.isDisplayableCapability(capability, operations) }) {
+    require(capabilities.any { (capability, operations) -> PluginAbiV1.isDisplayableCapability(capability, operations) }) {
         "Login did not negotiate a displayable capability"
     }
-    return value.copy(origin = origin)
+    return value.copy(origin = origin, capabilities = capabilities)
 }
 
 internal fun resolveManifestUrl(

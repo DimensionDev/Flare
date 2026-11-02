@@ -55,6 +55,7 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertNotEquals
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -116,7 +117,7 @@ class PluginTimelineV1Test {
         val decoded = PluginJsonV1.decodeFromString<PageV1<TimelineItemV1>>(PluginJsonV1.encodeToString(page))
         decoded.requireValid { it.requireValid() }
         assertEquals(page, decoded)
-        val mapped = decoded.items.map(mapper()::timelineItem)
+        val mapped = decoded.items.mapNotNull(mapper()::timelineItem)
         assertEquals(5, mapped.map { it.stableItemKey }.distinct().size)
         mapped.forEach {
             val restored = PluginJsonV1.decodeFromString<UiTimelineV2>(PluginJsonV1.encodeToString<UiTimelineV2>(it)).bindMediaProxy()
@@ -145,7 +146,7 @@ class PluginTimelineV1Test {
                         (items[0] as TimelineItemV1.Post).presentation.copy(notificationKey = key.copy(id = "second")),
                 ),
             )
-        assertNotEquals(timeline.stableItemKey, another.stableItemKey)
+        assertNotEquals(timeline.stableItemKey, assertNotNull(another).stableItemKey)
         assertEquals(
             ClickEvent.Deeplink(DeeplinkRoute.OpenLinkDirectly("https://example.org/feed")),
             assertIs<UiTimelineV2.Feed>(mapped[1]).clickEvent,
@@ -331,7 +332,7 @@ class PluginTimelineV1Test {
                             ),
                     ),
             )
-        assertNotEquals(row.renderHash, mapper().timelineItem(replacement).renderHash)
+        assertNotEquals(row.renderHash, assertNotNull(mapper().timelineItem(replacement)).renderHash)
         assertFalse(assertIs<UiTimelineV2.User>(mapper(authenticated = false).timelineItem(user)).button.single().enabled)
         val unavailable = mapper(operations = emptyMap())
         val target = message.copy(target = NavigationTargetV1.Post(key))
@@ -372,7 +373,7 @@ class PluginTimelineV1Test {
                     ),
                 ),
             )
-        assertNull(assertIs<UiTimelineV2.Feed>(feed.bindMediaProxy()).descriptionHtml)
+        assertNull(assertIs<UiTimelineV2.Feed>(assertNotNull(feed).bindMediaProxy()).descriptionHtml)
         val linkedFeed =
             mapper().timelineItem(
                 TimelineItemV1.Feed(
@@ -388,9 +389,9 @@ class PluginTimelineV1Test {
     }
 
     @Test
-    fun unknownAndOldShapesInvalidTargetsAndExcessiveNestingAreRejected() {
+    fun unknownItemsAreIgnoredWhileOldShapesInvalidTargetsAndExcessiveNestingAreRejected() {
         assertFails { PluginJsonV1.decodeFromString<TimelineItemV1>(PluginJsonV1.encodeToString(post)) }
-        assertFails { PluginJsonV1.decodeFromString<TimelineItemV1>("""{"type":"gap"}""") }
+        assertEquals(TimelineItemV1.Unknown, PluginJsonV1.decodeFromString<TimelineItemV1>("""{"type":"gap"}"""))
         assertFails { message.copy(text = "both").requireValid() }
         val updated = MutationResultV1.UpdatedProfile(profile, RelationV1(key, following = true))
         updated.requireUserMutationResult(key)

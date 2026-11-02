@@ -68,6 +68,8 @@ class BundledPluginSdkTest {
         assertTrue(abi.contains("## Registration"))
         assertTrue(abi.contains("## Host API"))
         assertTrue(abi.contains("## Login"))
+        assertTrue(abi.contains("## Additive compatibility within API v1"))
+        assertTrue(abi.contains("post, cover, and grid navigation"))
         assertFalse(abi.contains("node pack.mjs"))
         assertFalse(abi.contains("## GitHub installation"))
         assertFalse(abi.contains("effect after restart"))

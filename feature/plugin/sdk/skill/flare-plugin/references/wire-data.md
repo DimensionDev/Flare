@@ -2,8 +2,9 @@
 
 All boundary values are JSON. The exact signatures are in
 [flare-plugin.d.ts](../flare-plugin.d.ts). Build DTOs explicitly: returning an
-entire website response introduces unknown fields, and the Host decoder is
-strict. Non-finite numbers, cycles, BigInt, functions, and undefined return values
+entire website response may expose unrelated or private fields. Hosts with
+additive compatibility ignore unknown JSON properties while validating every
+known field. Non-finite numbers, cycles, BigInt, functions, and undefined return values
 are not valid results. Optional nullable fields may be omitted; defaulted
 non-null fields must not be explicitly null. A missing field with no default is
 an error. Preserve string IDs; parsing a large numeric ID into a JavaScript
@@ -61,6 +62,11 @@ empty and booleans default false. Counts are nonnegative. Do not include unknown
 optional website fields by spreading objects.
 See [navigation](capabilities.md#entry-points-and-actions) before choosing detailType.
 
+Omitting `detailType` means `post`. An unfamiliar string such as `manga` or
+`novel` keeps the preview but disables post, cover, and grid navigation; it does
+not fall back to `post` or `url`. Author and known action clicks remain independent.
+Null and non-string detail types remain invalid.
+
 A minimal post without author or visibility is:
 
 ```json
@@ -100,8 +106,9 @@ website. Presentation nesting is bounded to four levels; see [limits](troublesho
 Every timeline-producing operation returns `PageV1<TimelineItemV1>`, including
 search posts, profile/list timelines, context, comments, recommendations and
 notifications. Each item has a required `type`: `post`, `feed`, `user`, `userList`,
-or `message`. Bare PostV1 and the old notification envelope are rejected. This
-preview intentionally has no old-protocol compatibility.
+or `message`. An unfamiliar string discriminator skips only that item. Missing,
+non-string, or null discriminators and malformed known items remain errors.
+Bare PostV1 and the old notification envelope are rejected.
 
 ```js
 return { items: [{ type: "post", post }], endReached: true };
@@ -132,7 +139,16 @@ translation state, render hashes and callbacks remain Host-owned.
 
 Navigation targets are `{ type: "post" | "profile" | "article" | "gallery", key }`
 or `{ type: "link", url }`. Internal targets require the negotiated capability;
-unavailable targets become inert. Feed defaults to opening its URL in the browser.
+unavailable or unknown target types become inert. Feed defaults to opening its
+URL in the browser only when the target is absent; an unknown target does not
+use that fallback. The same rule prevents a message's unknown target from
+falling back to its actor.
+
+Unknown media types and actions are omitted without decoding their variant
+payloads. Known siblings keep their normal behavior and validation. Unknown
+items still count toward the page/media limits; known actions retain their
+duplicate/count/token checks. Other enums and login/mutation outcomes remain
+strict. See [ABI compatibility](../ABI.md#additive-compatibility-within-api-v1).
 Message defaults to its actor's profile. There is no arbitrary deeplink/callback
 field. Labels on user buttons are required and should use context.locale.
 

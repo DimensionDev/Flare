@@ -391,6 +391,7 @@ internal fun RichTextV1.requireValid() {
 }
 
 internal fun MediaV1.requireValid() {
+    if (type == MediaTypeV1.Unknown) return
     require(id.isNotBlank() && id.length <= WireLimitsV1.MAX_ID_LENGTH) { "Invalid media ID" }
     url.requireHttpsUrl(required = true)
     previewUrl.requireHttpsUrl()

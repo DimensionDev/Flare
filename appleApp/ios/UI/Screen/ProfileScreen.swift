@@ -46,8 +46,12 @@ struct ProfileScreen: View {
         }
         .toolbar {
             if horizontalSizeClass == .compact && !isProfileHeaderVisible && !shouldGateBlockedProfile, case .success(let userState) = onEnum(of: presenter.state.userState) {
-                ToolbarItem(placement: .principal) {
-                    RichText(text: userState.data.name)
+                if #available(iOS 27.1, *) {
+                    ProfileNavigationTitle(text: userState.data.name)
+                } else {
+                    ToolbarItem(placement: .principal) {
+                        RichText(text: userState.data.name)
+                    }
                 }
             }
             
@@ -303,6 +307,21 @@ struct ProfileScreen: View {
 
     private var shouldGateBlockedProfile: Bool {
         isBlockedProfile && !showBlockedProfileContent
+    }
+}
+
+@available(iOS 27.1, *)
+private struct ProfileNavigationTitle: ToolbarContent {
+    @Environment(\.toolbarVerticalEdge) private var toolbarVerticalEdge
+    let text: UiRichText
+
+    var body: some ToolbarContent {
+        // A custom title would add a horizontal bar alongside Duo's vertical controls.
+        if toolbarVerticalEdge == nil {
+            ToolbarItem(placement: .principal) {
+                RichText(text: text)
+            }
+        }
     }
 }
 

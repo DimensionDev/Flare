@@ -14,9 +14,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.junit4.v2.createComposeRule
@@ -182,7 +185,15 @@ class EmptyStatesTest {
         }
         compose.onNodeWithText(label(R.string.empty_media)).assertDoesNotExist()
         compose.runOnIdle { media = UiState.Success(persistentListOf()) }
-        compose.onNodeWithText(label(R.string.empty_media)).assertIsDisplayed()
+        val emptyMessage = compose.onNodeWithText(label(R.string.empty_media))
+        emptyMessage.assertIsDisplayed()
+        val pixels = emptyMessage.captureToImage().toPixelMap()
+        assertTrue(
+            "Empty media text must remain visible on the dark viewer background",
+            (0 until pixels.height).any { y ->
+                (0 until pixels.width).any { x -> pixels[x, y].luminance() > 0.5f }
+            },
+        )
         compose.onNodeWithContentDescription(label(R.string.navigate_back)).performClick()
         compose.runOnIdle { assertTrue(dismissed) }
     }

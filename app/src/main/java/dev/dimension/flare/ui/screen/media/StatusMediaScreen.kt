@@ -53,6 +53,7 @@ import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.LoadingIndicator
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Slider
@@ -397,11 +398,15 @@ internal fun MediaViewerScreen(
                                         .onSuccess { medias ->
                                             val media = medias.getOrNull(index)
                                             if (media == null) {
-                                                ListEmptyView(
-                                                    modifier = Modifier.fillMaxSize(),
-                                                    text = stringResource(R.string.empty_media),
-                                                    icon = FontAwesomeIcons.Solid.Images,
-                                                )
+                                                CompositionLocalProvider(
+                                                    LocalContentColor provides MaterialTheme.colorScheme.onBackground,
+                                                ) {
+                                                    ListEmptyView(
+                                                        modifier = Modifier.fillMaxSize(),
+                                                        text = stringResource(R.string.empty_media),
+                                                        icon = FontAwesomeIcons.Solid.Images,
+                                                    )
+                                                }
                                                 return@onSuccess
                                             }
                                             if (pagerState.currentPage != index || media is UiMedia.Image || media is UiMedia.Gif) {

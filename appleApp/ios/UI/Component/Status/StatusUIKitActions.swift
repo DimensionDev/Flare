@@ -267,7 +267,7 @@ final class StatusActionsUIView: UIView, ManualLayoutMeasurable, TimelineHeightP
         }
         let control = itemButtonPool[itemButtonCursor]
         itemButtonCursor += 1
-        control.isEnabled = item.enabled
+        if control.isEnabled != item.enabled { control.isEnabled = item.enabled }
         control.configure(
             image: (item.icon ?? (useText ? nil : .more)).flatMap { metrics.iconImage($0) },
             title: title,
@@ -304,7 +304,7 @@ final class StatusActionsUIView: UIView, ManualLayoutMeasurable, TimelineHeightP
         }
         let control = groupButtonPool[groupButtonCursor]
         groupButtonCursor += 1
-        control.isEnabled = group.displayItem.enabled
+        if control.isEnabled != group.displayItem.enabled { control.isEnabled = group.displayItem.enabled }
         control.configure(
             image: metrics.iconImage(group.displayItem.icon ?? .more),
             title: title,
@@ -321,7 +321,7 @@ final class StatusActionsUIView: UIView, ManualLayoutMeasurable, TimelineHeightP
                 showNumbers: showNumbers
             )
         )
-        control.showsMenuAsPrimaryAction = true
+        if !control.showsMenuAsPrimaryAction { control.showsMenuAsPrimaryAction = true }
         control.menu = UIMenu(children: [
             UIDeferredMenuElement.uncached { [weak self] completion in
                 guard let self else {
@@ -589,9 +589,6 @@ private final class ActionItemControl: UIButton, ManualLayoutMeasurable, Timelin
         self.horizontalInset = usesExpandedHitArea ? 4 : 0
         self.accessibilityLabel = accessibilityLabel
         self.accessibilityValue = accessibilityValue
-        menu = nil
-        showsMenuAsPrimaryAction = false
-
         iconView.tintColor = tintColor
         iconView.image = image
         iconView.isHidden = image == nil

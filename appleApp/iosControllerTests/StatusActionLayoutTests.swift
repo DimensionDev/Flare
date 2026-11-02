@@ -6,6 +6,40 @@ import FlareAppleUI
 
 @MainActor
 final class StatusActionLayoutTests: XCTestCase {
+    func testMenuReuseKeepsItsInteractionAndUpdatesDisabledState() throws {
+        let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first)
+        let previous = scene.windows.first(where: \.isKeyWindow)
+        let window = UIWindow(windowScene: scene)
+        let root = UIViewController()
+        window.rootViewController = root
+        window.makeKeyAndVisible()
+        defer { window.isHidden = true; previous?.makeKeyAndVisible() }
+        let actions = StatusActionsUIView(frame: CGRect(x: 0, y: 100, width: 362, height: 40))
+        root.view.addSubview(actions)
+        func configure(enabled: Bool) {
+            let item = ActionMenu.Item(updateKey: "menu", icon: .more, text: nil, count: nil,
+                                       color: nil, clickEvent: ClickEventNoop.shared, actionFamily: nil, enabled: enabled)
+            actions.configure(data: [ActionMenu.Group(displayItem: item, actions: [item])], useText: false,
+                              postActionStyle: .leftAligned, applyPostActionLayout: false,
+                              showNumbers: true, isDetail: false)
+            actions.layoutIfNeeded()
+        }
+        configure(enabled: true)
+        let button = try XCTUnwrap(actions.subviews.compactMap { $0 as? UIButton }.first)
+        let interaction = try XCTUnwrap(button.interactions.compactMap { $0 as? UIContextMenuInteraction }.first)
+        let menu = try XCTUnwrap(button.menu)
+        configure(enabled: true)
+        XCTAssertTrue(interaction === button.interactions.compactMap { $0 as? UIContextMenuInteraction }.first)
+        XCTAssertFalse(button.menu === menu, "Reusing the interaction must still replace its menu payload")
+        configure(enabled: false)
+        XCTAssertFalse(button.isEnabled)
+        XCTAssertEqual(button.alpha, 0.4, accuracy: 0.001)
+        configure(enabled: true)
+        XCTAssertTrue(button.isEnabled)
+        XCTAssertTrue(button.showsMenuAsPrimaryAction)
+        XCTAssertEqual(button.alpha, 1)
+    }
+
     func testRightToLeftCountAnimationKeepsTheOutgoingTrailingEdge() async throws {
         if UIAccessibility.isReduceMotionEnabled { throw XCTSkip("Requires count animations") }
         let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first)

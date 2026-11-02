@@ -68,7 +68,7 @@ public nonisolated struct StatusActionLayoutMetrics: Sendable {
         let width = max(titleWidth ?? 0, reservesNumberWidth ? numberWidth : 0)
         return CGSize(
             width: (hasIcon ? Self.iconWidth : 0) + (hasIcon && hasTitle ? Self.labelSpacing : 0) + width + inset * 2,
-            height: max(hasIcon ? iconHeight : 0, hasTitle ? lineHeight : 0) + inset * 2
+            height: ceil(max(hasIcon ? iconHeight : 0, hasTitle ? lineHeight : 0) + inset * 2)
         )
     }
 

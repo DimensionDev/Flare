@@ -144,10 +144,8 @@ struct ServiceSelectionScreen: View {
 
     @ViewBuilder
     private func loginContent(state: ServiceSelectState, node: NodeData) -> some View {
-        let methods = node.loginMethods
-        if let firstMethod = methods.first {
+        if !node.loginMethods.isEmpty {
             let key = "\(node.platformId)-\(node.host)"
-            let selectedMethod = selectedMethods[key] ?? firstMethod.type
             VStack(spacing: 14) {
                 platformHeader(state: state, node: node)
 
@@ -159,40 +157,23 @@ struct ServiceSelectionScreen: View {
                         .transition(ServiceSelectionAnimation.inline)
                 }
 
-                if methods.count > 1 {
-                    Picker("", selection: Binding(
-                        get: { selectedMethod },
-                        set: { method in
-                            withAnimation(ServiceSelectionAnimation.standard) {
-                                selectedMethods[key] = method
-                            }
-                        }
-                    )) {
-                        ForEach(methods.indices, id: \.self) { index in
-                            Text(methods[index].title.text).tag(methods[index].type)
-                        }
-                    }
-                    .pickerStyle(.segmented)
-                    .transition(ServiceSelectionAnimation.inline)
-                }
-
-                LoginFlowView {
+                LoginPanel(
+                    methods: node.loginMethods,
+                    selectedMethod: Binding(
+                        get: { selectedMethods[key] },
+                        set: { selectedMethods[key] = $0 }
+                    ),
+                    flowId: key,
+                    agreementUrl: state.agreementUrl(platformId: node.platformId, host: node.host)
+                ) { method in
                     state.createLoginHandler(
                         platformId: node.platformId,
                         host: node.host,
-                        methodType: selectedMethod,
+                        methodType: method,
                         redirectUri: nil,
                     )
                 }
-                    .id("\(key)-\(selectedMethod)")
-                    .transition(ServiceSelectionAnimation.panel)
-
-                LoginAgreementView(
-                    urlString: state.agreementUrl(platformId: node.platformId, host: node.host)
-                )
-                .transition(ServiceSelectionAnimation.inline)
             }
-            .animation(ServiceSelectionAnimation.standard, value: "\(selectedMethod)")
         }
     }
 
@@ -293,8 +274,14 @@ struct ReloginScreen: View {
             }
 
             Section {
-                loginContent(state: presenter.state)
-                    .id("\(target.accountKey)-\(selectedMethod.map { String(describing: $0) } ?? "default")")
+                LoginPanel(
+                    methods: presenter.state.methods,
+                    selectedMethod: $selectedMethod,
+                    flowId: "\(target.platformId)-\(target.accountKey)",
+                    agreementUrl: presenter.state.agreementUrl()
+                ) { method in
+                    presenter.state.createLoginHandler(methodType: method)
+                }
             }
         }
         .listStyle(.insetGrouped)
@@ -330,19 +317,25 @@ struct ReloginScreen: View {
         }
         .frame(maxWidth: .infinity)
     }
+}
 
-    @ViewBuilder
-    private func loginContent(state: ReloginState) -> some View {
-        let methods = state.methods
+struct LoginPanel: View {
+    let methods: [LoginMethodSpec]
+    @Binding var selectedMethod: LoginMethodType?
+    let flowId: String
+    let agreementUrl: String?
+    let createLoginHandler: (LoginMethodType) -> LoginMethodHandler
+
+    var body: some View {
         if let firstMethod = methods.first {
-            let selectedMethod = selectedMethod ?? firstMethod.type
+            let method = selectedMethod ?? firstMethod.type
             VStack(spacing: 14) {
                 if methods.count > 1 {
                     Picker("", selection: Binding(
-                        get: { selectedMethod },
+                        get: { method },
                         set: { method in
                             withAnimation(ServiceSelectionAnimation.standard) {
-                                self.selectedMethod = method
+                                selectedMethod = method
                             }
                         }
                     )) {
@@ -351,15 +344,19 @@ struct ReloginScreen: View {
                         }
                     }
                     .pickerStyle(.segmented)
+                    .transition(ServiceSelectionAnimation.inline)
                 }
 
                 LoginFlowView {
-                    state.createLoginHandler(methodType: selectedMethod)
+                    createLoginHandler(method)
                 }
-                    .id("\(target.accountKey)-\(selectedMethod)")
+                    .id("\(flowId)-\(method)")
+                    .transition(ServiceSelectionAnimation.panel)
 
-                LoginAgreementView(urlString: state.agreementUrl())
+                LoginAgreementView(urlString: agreementUrl)
+                    .transition(ServiceSelectionAnimation.inline)
             }
+            .animation(ServiceSelectionAnimation.standard, value: "\(method)")
         }
     }
 }

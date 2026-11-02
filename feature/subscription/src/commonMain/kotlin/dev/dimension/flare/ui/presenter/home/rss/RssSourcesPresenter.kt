@@ -30,6 +30,7 @@ public class RssSourcesPresenter : PresenterBase<RssSourcesPresenter.State>() {
     @androidx.compose.runtime.Immutable
     public interface State {
         public val sources: ImmutableList<UiRssSource>
+        public val loading: Boolean
 
         public fun add(
             url: String,
@@ -48,9 +49,10 @@ public class RssSourcesPresenter : PresenterBase<RssSourcesPresenter.State>() {
                 it
                     .toImmutableList()
             }
-        }.collectAsState(persistentListOf())
+        }.collectAsState(initial = null)
         return object : State {
-            override val sources = sources
+            override val sources = sources ?: persistentListOf()
+            override val loading = sources == null
 
             override fun add(
                 url: String,

@@ -36,6 +36,17 @@ public struct DiscoverContentScreen<AskAiOverlay: View>: View {
     public var body: some View {
         scrollingContent
         .modifier(DiscoverListStyle())
+        .overlay {
+            if searchPresenter.state.searching {
+                if searchPresenter.state.users.isEmpty && searchPresenter.state.status.isEmpty {
+                    ListEmptyView("search_empty_title", icon: .magnifyingGlass)
+                        .allowsHitTesting(false)
+                }
+            } else if presenter.state.users.isEmpty && presenter.state.hashtags.isEmpty && presenter.state.status.isEmpty {
+                ListEmptyView("discover_empty_title", icon: .globe)
+                    .allowsHitTesting(false)
+            }
+        }
         .refreshable {
             if searchPresenter.state.searching {
                 try? await searchPresenter.state.refreshSuspend()

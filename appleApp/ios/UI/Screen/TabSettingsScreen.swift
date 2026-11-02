@@ -97,7 +97,12 @@ struct TabSettingsScreen: View {
                 .onMove(perform: move)
             }
         }
-        .onChange(of: presenter.state.homeTimelineTabs) { oldValue, newValue in
+        .overlay {
+            if loadedTabs && tabItems.isEmpty {
+                ListEmptyView("tab_settings_empty", icon: .tableList)
+            }
+        }
+        .onChange(of: presenter.state.homeTimelineTabs, initial: true) { oldValue, newValue in
             if !loadedTabs, case .success(let tabs) = onEnum(of: newValue) {
                 tabItems = tabs.data.cast(UiTimelineTabItem.self)
                 enableMixedTimeline = tabItems.contains { isSystemHomeMixedTimeline($0) }

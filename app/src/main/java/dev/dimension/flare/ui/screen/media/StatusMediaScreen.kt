@@ -117,6 +117,7 @@ import compose.icons.fontawesomeicons.solid.Download
 import compose.icons.fontawesomeicons.solid.Expand
 import compose.icons.fontawesomeicons.solid.Forward
 import compose.icons.fontawesomeicons.solid.GaugeHigh
+import compose.icons.fontawesomeicons.solid.Images
 import compose.icons.fontawesomeicons.solid.Language
 import compose.icons.fontawesomeicons.solid.Pause
 import compose.icons.fontawesomeicons.solid.Play
@@ -142,6 +143,7 @@ import dev.dimension.flare.ui.component.accessibleDescription
 import dev.dimension.flare.ui.component.placeholder
 import dev.dimension.flare.ui.component.rememberMediaImageRequest
 import dev.dimension.flare.ui.component.status.CommonStatusComponent
+import dev.dimension.flare.ui.component.status.ListEmptyView
 import dev.dimension.flare.ui.humanizer.humanize
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiState
@@ -395,12 +397,10 @@ internal fun MediaViewerScreen(
                                         .onSuccess { medias ->
                                             val media = medias.getOrNull(index)
                                             if (media == null) {
-                                                Box(
-                                                    modifier =
-                                                        Modifier
-                                                            .aspectRatio(1f)
-                                                            .fillMaxSize()
-                                                            .placeholder(true),
+                                                ListEmptyView(
+                                                    modifier = Modifier.fillMaxSize(),
+                                                    text = stringResource(R.string.empty_media),
+                                                    icon = FontAwesomeIcons.Solid.Images,
                                                 )
                                                 return@onSuccess
                                             }

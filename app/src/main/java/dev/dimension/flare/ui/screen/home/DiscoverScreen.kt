@@ -36,9 +36,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.solid.MagnifyingGlass
 import compose.icons.fontawesomeicons.solid.Robot
 import compose.icons.fontawesomeicons.solid.User
 import dev.dimension.flare.R
+import dev.dimension.flare.common.isEmpty
 import dev.dimension.flare.common.isLoading
 import dev.dimension.flare.common.isRefreshing
 import dev.dimension.flare.common.isSuccess
@@ -63,6 +65,7 @@ import dev.dimension.flare.ui.component.searchContent
 import dev.dimension.flare.ui.component.status.AdaptiveOutlinedCard
 import dev.dimension.flare.ui.component.status.CommonStatusHeaderComponent
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
+import dev.dimension.flare.ui.component.status.ListEmptyView
 import dev.dimension.flare.ui.component.status.UserPlaceholder
 import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.model.onSuccess
@@ -236,6 +239,15 @@ internal fun DiscoverScreen(
                             },
                         )
                     } else {
+                        if (state.users.isEmpty && state.hashtags.isEmpty && state.status.isEmpty) {
+                            item(span = StaggeredGridItemSpan.FullLine) {
+                                ListEmptyView(
+                                    modifier = Modifier.fillMaxWidth().padding(vertical = 32.dp),
+                                    text = stringResource(R.string.empty_discover),
+                                    icon = FontAwesomeIcons.Solid.MagnifyingGlass,
+                                )
+                            }
+                        }
                         if (state.users.isLoading || state.users.isSuccess()) {
                             item(
                                 span = StaggeredGridItemSpan.FullLine,

@@ -3,6 +3,7 @@ package dev.dimension.flare.ui.screen.settings
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -30,6 +31,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.solid.FileLines
 import compose.icons.fontawesomeicons.solid.FloppyDisk
 import compose.icons.fontawesomeicons.solid.Trash
 import dev.dimension.flare.R
@@ -38,6 +40,7 @@ import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareLargeFlexibleTopAppBar
 import dev.dimension.flare.ui.component.FlareScaffold
+import dev.dimension.flare.ui.component.status.ListEmptyView
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.settings.DevModePresenter
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
@@ -140,6 +143,15 @@ internal fun AppLoggingScreen(onBack: () -> Unit) {
             }
             item {
                 Spacer(modifier = Modifier.height(12.dp))
+            }
+            if (state.messages.isEmpty()) {
+                item {
+                    ListEmptyView(
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 32.dp),
+                        text = stringResource(R.string.empty_logs),
+                        icon = FontAwesomeIcons.Solid.FileLines,
+                    )
+                }
             }
             itemsIndexed(state.messages) { index, it ->
                 SegmentedListItem(

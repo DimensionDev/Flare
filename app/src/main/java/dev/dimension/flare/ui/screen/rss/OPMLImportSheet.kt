@@ -24,7 +24,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import compose.icons.FontAwesomeIcons
+import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.solid.Rss
 import dev.dimension.flare.R
+import dev.dimension.flare.ui.component.status.ListEmptyView
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onError
@@ -70,11 +74,19 @@ internal fun OPMLImportSheet(
                 Text(text = it.message ?: "Unknown error")
             }.onSuccess { state ->
                 Column {
-                    ImportOPMLContent(
-                        state = state,
-                        onGoBack = onBack,
-                        modifier = Modifier.weight(1f),
-                    )
+                    if (!state.importing && state.error == null && state.importedSources.isEmpty()) {
+                        ListEmptyView(
+                            modifier = Modifier.weight(1f).fillMaxWidth(),
+                            text = stringResource(R.string.empty_opml_import),
+                            icon = FontAwesomeIcons.Solid.Rss,
+                        )
+                    } else {
+                        ImportOPMLContent(
+                            state = state,
+                            onGoBack = onBack,
+                            modifier = Modifier.weight(1f),
+                        )
+                    }
                     Button(
                         onClick = {
                             onBack.invoke()

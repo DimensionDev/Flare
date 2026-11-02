@@ -64,6 +64,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.solid.Images
 import compose.icons.fontawesomeicons.solid.Robot
 import dev.dimension.flare.R
 import dev.dimension.flare.common.PagingState
@@ -90,6 +91,7 @@ import dev.dimension.flare.ui.component.platform.adaptiveSideContentSize
 import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.component.status.AdaptiveCard
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
+import dev.dimension.flare.ui.component.status.ListEmptyView
 import dev.dimension.flare.ui.component.status.MediaItem
 import dev.dimension.flare.ui.component.status.StatusPlaceholder
 import dev.dimension.flare.ui.component.status.status
@@ -734,6 +736,13 @@ private fun ProfileMediaTab(
         ) {
             items(
                 mediaState,
+                emptyContent = {
+                    ListEmptyView(
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 32.dp),
+                        text = stringResource(R.string.empty_profile_media),
+                        icon = FontAwesomeIcons.Solid.Images,
+                    )
+                },
                 key = {
                     it.key
                 },

@@ -15,6 +15,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import compose.icons.FontAwesomeIcons
+import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.solid.Users
 import dev.dimension.flare.R
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.isRefreshing
@@ -26,6 +29,7 @@ import dev.dimension.flare.ui.component.FlareLargeFlexibleTopAppBar
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.component.listCard
+import dev.dimension.flare.ui.component.status.ListEmptyView
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.presenter.invoke
@@ -63,6 +67,7 @@ internal fun FollowingScreen(
 
     UserListScreen(
         data = state.listState,
+        emptyMessage = stringResource(R.string.empty_following),
         title = {
             Text(text = stringResource(R.string.following_title))
         },
@@ -99,6 +104,7 @@ internal fun FansScreen(
 
     UserListScreen(
         data = state.listState,
+        emptyMessage = stringResource(R.string.empty_followers),
         title = {
             Text(text = stringResource(R.string.fans_title))
         },
@@ -113,6 +119,7 @@ internal fun FansScreen(
 @Composable
 internal fun UserListScreen(
     data: PagingState<UiProfile>,
+    emptyMessage: String,
     title: @Composable () -> Unit,
     onBack: () -> Unit,
     isRefreshing: Boolean,
@@ -149,6 +156,13 @@ internal fun UserListScreen(
                 ) {
                     itemsIndexed(
                         data,
+                        emptyContent = {
+                            ListEmptyView(
+                                Modifier.fillParentMaxSize(),
+                                text = emptyMessage,
+                                icon = FontAwesomeIcons.Solid.Users,
+                            )
+                        },
                         loadingContent = { index, itemCount ->
                             AccountItem(
                                 modifier =

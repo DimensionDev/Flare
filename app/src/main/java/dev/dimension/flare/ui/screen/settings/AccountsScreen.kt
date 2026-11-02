@@ -4,8 +4,10 @@ import androidx.compose.animation.core.AnimationConstants
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -57,6 +59,7 @@ import compose.icons.fontawesomeicons.solid.FaceSadTear
 import compose.icons.fontawesomeicons.solid.List
 import compose.icons.fontawesomeicons.solid.Plus
 import compose.icons.fontawesomeicons.solid.Trash
+import compose.icons.fontawesomeicons.solid.UserPlus
 import dev.dimension.flare.R
 import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.data.repository.LoginExpiredException
@@ -76,6 +79,7 @@ import dev.dimension.flare.ui.component.ThemeIconData
 import dev.dimension.flare.ui.component.ThemedIcon
 import dev.dimension.flare.ui.component.placeholder
 import dev.dimension.flare.ui.component.resolveText
+import dev.dimension.flare.ui.component.status.ListEmptyView
 import dev.dimension.flare.ui.component.toImageVector
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiIcon
@@ -87,6 +91,7 @@ import dev.dimension.flare.ui.model.isSuccess
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
+import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.model.toUiImage
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.login.ReloginTarget
@@ -159,6 +164,22 @@ internal fun AccountsScreen(
             if (state.removalFailed) {
                 item {
                     Text(stringResource(R.string.settings_accounts_remove_failed), color = MaterialTheme.colorScheme.error)
+                }
+            }
+            if (state.accounts.takeSuccess()?.isEmpty() == true && state.currentItems.isEmpty()) {
+                item {
+                    Column(
+                        Modifier.fillParentMaxSize(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center,
+                    ) {
+                        ListEmptyView(
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 32.dp),
+                            text = stringResource(R.string.empty_accounts),
+                            icon = FontAwesomeIcons.Solid.UserPlus,
+                        )
+                        TextButton(onClick = toLogin) { Text(stringResource(R.string.quick_menu_add_account)) }
+                    }
                 }
             }
             itemsIndexed(state.currentItems, key = { _, item -> item.account.accountKey.toString() }) { index, (account, data) ->

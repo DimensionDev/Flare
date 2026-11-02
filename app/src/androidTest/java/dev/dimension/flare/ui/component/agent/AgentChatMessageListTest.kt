@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toPixelMap
@@ -129,6 +130,32 @@ class AgentChatMessageListTest {
         composeRule.onNodeWithText(message).assertIsDisplayed()
         composeRule.onNodeWithText("Retry").assertIsDisplayed().performClick()
         composeRule.runOnIdle { assertEquals(1, retries) }
+    }
+
+    @Test
+    fun emptyChatGuideDisappearsDuringExecutionAndWhenMessagesArrive() {
+        val messages = MutableStateFlow(emptyList<AgentChatHistoryMessage>())
+        var showEmpty by androidx.compose.runtime.mutableStateOf(true)
+        val context =
+            androidx.test.platform.app.InstrumentationRegistry
+                .getInstrumentation()
+                .targetContext
+        val emptyLabel = context.getString(dev.dimension.flare.R.string.empty_agent_chat)
+        composeRule.setContent {
+            val state by messages.collectPagingState()
+            MaterialTheme {
+                AgentChatMessageList(state, {}, showEmpty = showEmpty)
+            }
+        }
+        composeRule.onNodeWithText(emptyLabel).assertIsDisplayed()
+        composeRule.runOnIdle { showEmpty = false }
+        composeRule.onNodeWithText(emptyLabel).assertDoesNotExist()
+        composeRule.runOnIdle {
+            messages.value = listOf(message("First reply"))
+            showEmpty = true
+        }
+        composeRule.onNodeWithText(emptyLabel).assertDoesNotExist()
+        composeRule.onNodeWithText("First reply").assertIsDisplayed()
     }
 
     private fun showMessages(): MutableStateFlow<List<AgentChatHistoryMessage>> {

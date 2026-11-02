@@ -998,4 +998,24 @@
     <string name="visibility_friends_description">Only people who follow you and whom you follow can see this post</string>
     <string name="visibility_self">Only me</string>
     <string name="visibility_self_description">Only you can see this post</string>
+    <string name="empty_search_results">No search results</string>
+    <string name="empty_discover">No recommendations yet</string>
+    <string name="empty_following">No followed users yet</string>
+    <string name="empty_followers">No followers yet</string>
+    <string name="empty_profile_media">No media yet</string>
+    <string name="empty_user_history">No users found in browsing history</string>
+    <string name="empty_home_tabs">No tabs added yet</string>
+    <string name="empty_accounts">No accounts added yet</string>
+    <string name="empty_link_defaults">No links available to configure</string>
+    <string name="empty_gallery_recommendations">No recommended works yet</string>
+    <string name="empty_conversation">No messages yet. Send a message to start the conversation.</string>
+    <string name="empty_agent_chat">Ask a question to start the conversation.</string>
+    <string name="empty_logs">No logs yet</string>
+    <string name="empty_tab_candidates">No tabs available in this category</string>
+    <string name="empty_opml_import">No importable subscriptions found</string>
+    <string name="empty_emojis">No emoji available</string>
+    <string name="empty_emoji_search">No matching emoji</string>
+    <string name="empty_languages">No matching languages</string>
+    <string name="empty_search_history">Search for posts or users to get started.</string>
+    <string name="empty_media">No media available</string>
 </resources>

@@ -88,6 +88,7 @@ import dev.dimension.flare.ui.component.LocalBottomBarHeight
 import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.ProxyMarkdown
 import dev.dimension.flare.ui.component.status.CommonStatusComponent
+import dev.dimension.flare.ui.component.status.ListEmptyView
 import dev.dimension.flare.ui.component.status.UserCompat
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
@@ -279,6 +280,7 @@ internal fun AgentChatScaffold(
                     .fillMaxSize()
                     .padding(horizontal = screenHorizontalPadding),
             contentPadding = messageListContentPadding,
+            showEmpty = !isRunning && error == null,
         )
     }
 }
@@ -313,6 +315,7 @@ internal fun AgentChatMessageList(
     onPostClick: (UiTimelineV2.Post) -> Unit = {},
     onUserClick: (UiProfile) -> Unit = {},
     contentPadding: PaddingValues = PaddingValues(0.dp),
+    showEmpty: Boolean = true,
 ) {
     val listState = rememberLazyListState()
     val newestMessageId = (messages as? PagingState.Success)?.peek(0)?.id
@@ -336,6 +339,15 @@ internal fun AgentChatMessageList(
     ) {
         itemsIndexed(
             state = messages,
+            emptyContent = {
+                if (showEmpty) {
+                    ListEmptyView(
+                        modifier = Modifier.fillParentMaxSize(),
+                        text = stringResource(R.string.empty_agent_chat),
+                        icon = FontAwesomeIcons.Solid.Robot,
+                    )
+                }
+            },
             key = { message -> "agent-chat-message:${message.id}" },
             contentType = { message ->
                 if (message.isUser) {
